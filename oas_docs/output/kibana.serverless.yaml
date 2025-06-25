@@ -41195,8 +41195,8 @@ paths:
         content:
           application/json:
             examples:
-              completeChatRequestExample:
-                $ref: '#/components/schemas/Observability_AI_Assistant_API_CompleteChatRequestExample'
+              chatCompleteRequestExample:
+                $ref: '#/components/schemas/Observability_AI_Assistant_API_ChatCompleteRequestExample'
             schema:
               type: object
               properties:
@@ -41238,8 +41238,8 @@ paths:
           content:
             application/json:
               examples:
-                completeChatResponseExample:
-                  $ref: '#/components/schemas/Observability_AI_Assistant_API_CompleteChatResponseExample'
+                chatCompleteResponseExample:
+                  $ref: '#/components/schemas/Observability_AI_Assistant_API_ChatCompleteResponseExample'
               schema:
                 type: object
           description: Successful response
@@ -57394,7 +57394,7 @@ components:
           $ref: '#/components/schemas/Machine_learning_APIs_mlSyncResponseSuccess'
       title: Sync API response for trained models
       type: object
-    Observability_AI_Assistant_API_CompleteChatRequestExample:
+    Observability_AI_Assistant_API_ChatCompleteRequestExample:
       summary: Example of completing a chat interaction
       value: |
         {
@@ -57422,7 +57422,7 @@ components:
             "Always respond in German."
           ]
         }
-    Observability_AI_Assistant_API_CompleteChatResponseExample:
+    Observability_AI_Assistant_API_ChatCompleteResponseExample:
       summary: Get a chat completion from the Observability AI Assistant
       value:
         - id: message-id

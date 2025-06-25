@@ -73,8 +73,8 @@ paths:
                 - connectorId
                 - persist
             examples:
-              completeChatRequestExample:
-                $ref: '#/components/schemas/CompleteChatRequestExample'
+              chatCompleteRequestExample:
+                $ref: '#/components/schemas/ChatCompleteRequestExample'
       responses:
         '200':
           description: Successful response
@@ -83,8 +83,8 @@ paths:
               schema:
                 type: object
               examples:
-                completeChatResponseExample:
-                  $ref: '#/components/schemas/CompleteChatResponseExample'
+                chatCompleteResponseExample:
+                  $ref: '#/components/schemas/ChatCompleteResponseExample'
 
 components:
   schemas:
@@ -177,7 +177,7 @@ components:
           required:
             - id
             - text
-    CompleteChatResponseExample:
+    ChatCompleteResponseExample:
       summary: Get a chat completion from the Observability AI Assistant
       value:
         - type: chatCompletionMessage
@@ -200,7 +200,7 @@ components:
             id: 'conversation-id'
             last_updated: '2025-06-16T15:45:46.258Z'
           type: conversationCreate
-    CompleteChatRequestExample:
+    ChatCompleteRequestExample:
       summary: Example of completing a chat interaction
       value: |
         {
