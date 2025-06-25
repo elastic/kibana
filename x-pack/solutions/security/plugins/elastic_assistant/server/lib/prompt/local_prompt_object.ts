@@ -26,6 +26,9 @@ import {
   DEFEND_INSIGHTS,
   ALERT_SUMMARY_500,
   ALERT_SUMMARY_SYSTEM_PROMPT,
+  RULE_ANALYSIS,
+  DATA_QUALITY_ANALYSIS,
+  ALERT_EVALUATION,
 } from './prompts';
 
 export const promptGroupId = {
@@ -38,6 +41,9 @@ export const promptGroupId = {
 };
 
 export const promptDictionary = {
+  alertEvaluation: `alertEvaluation`,
+  dataQualityAnalysis: 'dataQualityAnalysis',
+  ruleAnalysis: 'ruleAnalysis',
   alertSummary: `alertSummary`,
   alertSummarySystemPrompt: `alertSummarySystemPrompt`,
   systemPrompt: `systemPrompt`,
@@ -61,6 +67,7 @@ export const promptDictionary = {
   defendInsightsIncompatibleAntivirusEventsEndpointId:
     'defendInsights-incompatibleAntivirusEventsEndpointId',
   defendInsightsIncompatibleAntivirusEventsValue: 'defendInsights-incompatibleAntivirusEventsValue',
+  // context prompts
 };
 
 export const localPrompts: Prompt[] = [
@@ -257,6 +264,27 @@ export const localPrompts: Prompt[] = [
     promptGroupId: promptGroupId.aiForSoc,
     prompt: {
       default: ALERT_SUMMARY_SYSTEM_PROMPT,
+    },
+  },
+  {
+    promptId: promptDictionary.alertEvaluation,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: {
+      default: ALERT_EVALUATION,
+    },
+  },
+  {
+    promptId: promptDictionary.dataQualityAnalysis,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: {
+      default: DATA_QUALITY_ANALYSIS,
+    },
+  },
+  {
+    promptId: promptDictionary.ruleAnalysis,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: {
+      default: RULE_ANALYSIS,
     },
   },
 ];

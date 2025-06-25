@@ -14,6 +14,7 @@ import { StatefulEventContext } from '../../../../../common/components/events_vi
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { UserDetailsLink } from '../../../../../common/components/links';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
+import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
 
 interface Props {
   contextId: string;
@@ -36,6 +37,8 @@ const UserNameComponent: React.FC<Props> = ({
   const userName = `${value}`;
   const isInTimelineContext = userName && eventContext?.timelineID;
   const { openFlyout } = useExpandableFlyoutApi();
+
+  const isInSecurityApp = useIsInSecurityApp();
 
   const openUserDetailsSidePanel = useCallback(
     (e: React.SyntheticEvent) => {
@@ -73,13 +76,21 @@ const UserNameComponent: React.FC<Props> = ({
         Component={Component}
         userName={userName}
         isButton={isButton}
-        onClick={isInTimelineContext ? openUserDetailsSidePanel : undefined}
+        onClick={isInTimelineContext || !isInSecurityApp ? openUserDetailsSidePanel : undefined}
         title={title}
       >
         <TruncatableText data-test-subj="draggable-truncatable-content">{userName}</TruncatableText>
       </UserDetailsLink>
     ),
-    [userName, isButton, isInTimelineContext, openUserDetailsSidePanel, Component, title]
+    [
+      userName,
+      isButton,
+      isInTimelineContext,
+      openUserDetailsSidePanel,
+      Component,
+      title,
+      isInSecurityApp,
+    ]
   );
 
   return isString(value) && userName.length > 0 ? content : getEmptyTagValue();
