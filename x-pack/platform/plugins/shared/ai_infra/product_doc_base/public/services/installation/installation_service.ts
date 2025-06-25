@@ -22,8 +22,16 @@ export class InstallationService {
     this.http = http;
   }
 
-  async getInstallationStatus(): Promise<InstallationStatusResponse> {
-    return await this.http.get<InstallationStatusResponse>(INSTALLATION_STATUS_API_PATH);
+  async getInstallationStatus(
+    params: { inferenceId?: string } = {}
+  ): Promise<InstallationStatusResponse> {
+    const { inferenceId } = params;
+
+    const response = await this.http.get<InstallationStatusResponse>(INSTALLATION_STATUS_API_PATH, {
+      body: JSON.stringify({ inferenceId }),
+    });
+
+    return response;
   }
 
   async install(params: { inferenceId?: string } = {}): Promise<PerformInstallResponse> {
@@ -41,7 +49,13 @@ export class InstallationService {
     return response;
   }
 
-  async uninstall(): Promise<UninstallResponse> {
-    return await this.http.post<UninstallResponse>(UNINSTALL_ALL_API_PATH);
+  async uninstall(params: { inferenceId?: string } = {}): Promise<UninstallResponse> {
+    const { inferenceId } = params;
+
+    const response = await this.http.post<UninstallResponse>(UNINSTALL_ALL_API_PATH, {
+      body: JSON.stringify({ inferenceId }),
+    });
+
+    return response;
   }
 }

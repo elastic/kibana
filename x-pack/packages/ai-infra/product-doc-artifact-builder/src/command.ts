@@ -81,8 +81,6 @@ function options(y: yargs.Argv) {
 export function runScript() {
   yargs(process.argv.slice(2))
     .command('*', 'Build knowledge base artifacts', options, async (argv) => {
-      // @TODO: remove
-      console.log(`--@@argv`, argv);
       // argv contains additional entries - let's keep our input clear
       const taskConfig: TaskConfig = {
         productNames: argv.productName,

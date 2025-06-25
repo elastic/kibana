@@ -18,5 +18,5 @@ export interface TaskConfig {
   embeddingClusterUrl: string;
   embeddingClusterUsername: string;
   embeddingClusterPassword: string;
-  inferenceId: string;
+  inferenceId?: string;
 }

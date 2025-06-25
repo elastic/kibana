@@ -11,7 +11,7 @@ node scripts/build_product_doc_artifacts.js --stack-version {version} --product-
 Example:
 
 ```
-node scripts/build_product_doc_artifacts.js --product-name=security --stack-version=8.18  --inferenceId=.multilingual-e5-small-elasticsearch
+node scripts/build_product_doc_artifacts.js --product-name=security --stack-version=8.18  --inference-id=.multilingual-e5-small-elasticsearch
 ```
 
 ### parameters
@@ -60,4 +60,4 @@ Defaults to `{REPO_ROOT}/build/temp-kb-artifacts`
 `embeddingClusterPassword` / env.KIBANA_EMBEDDING_CLUSTER_PASSWORD
 
 - params for the inference endpoint:
-inferenceId
+`inferenceId`

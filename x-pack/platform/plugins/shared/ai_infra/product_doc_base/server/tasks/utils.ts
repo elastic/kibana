@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 export const getTaskStatus = async ({
@@ -67,3 +68,7 @@ export const waitUntilTaskCompleted = async ({
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export const isDefaultElserInferenceId = (inferenceId?: string) => {
+  return !inferenceId || inferenceId === defaultInferenceEndpoints.ELSER;
+};

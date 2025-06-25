@@ -137,11 +137,12 @@ export class DocumentationManager implements DocumentationManagerAPI {
   }
 
   async uninstall(options: DocUninstallOptions = {}): Promise<void> {
-    const { request, wait = false } = options;
+    const { request, wait = false, inferenceId } = options;
 
     const taskId = await scheduleUninstallAllTask({
       taskManager: this.taskManager,
       logger: this.logger,
+      inferenceId,
     });
 
     if (request) {
@@ -165,10 +166,12 @@ export class DocumentationManager implements DocumentationManagerAPI {
     }
   }
 
-  async getStatus(): Promise<DocGetStatusResponse> {
+  async getStatus({ inferenceId }: { inferenceId?: string } = {}): Promise<DocGetStatusResponse> {
+    const taskId =
+      inferenceId === defaultInferenceEndpoints.ELSER ? INSTALL_ALL_TASK_ID : INSTALL_ALL_TASK_ID;
     const taskStatus = await getTaskStatus({
       taskManager: this.taskManager,
-      taskId: INSTALL_ALL_TASK_ID,
+      taskId,
     });
     if (taskStatus !== 'not_scheduled') {
       const status = convertTaskStatus(taskStatus);

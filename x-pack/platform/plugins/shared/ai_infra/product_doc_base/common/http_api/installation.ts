@@ -25,3 +25,7 @@ export interface PerformInstallResponse {
 export interface UninstallResponse {
   success: boolean;
 }
+
+export interface ProductDocInstallParams {
+  inferenceId?: string;
+}

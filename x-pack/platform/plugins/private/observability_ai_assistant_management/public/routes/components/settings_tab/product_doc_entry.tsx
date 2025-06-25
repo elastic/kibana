@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKnowledgeBase } from '@kbn/ai-assistant/src/hooks/use_knowledge_base';
+import { useCurrentInferenceId } from '@kbn/ai-assistant/src/hooks/use_current_inference_id';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useGetProductDocStatus } from '../../../hooks/use_get_product_doc_status';
 import { useInstallProductDoc } from '../../../hooks/use_install_product_doc';
@@ -27,6 +28,8 @@ import { useUninstallProductDoc } from '../../../hooks/use_uninstall_product_doc
 export function ProductDocEntry() {
   const { overlays } = useKibana().services;
 
+  const inferenceId = useCurrentInferenceId();
+
   const [isInstalled, setInstalled] = useState<boolean>(true);
   const [isInstalling, setInstalling] = useState<boolean>(false);
 
@@ -34,7 +37,6 @@ export function ProductDocEntry() {
   const { mutateAsync: uninstallProductDoc } = useUninstallProductDoc();
   const { status, isLoading: isStatusLoading } = useGetProductDocStatus();
   const knowledgeBase = useKnowledgeBase();
-  const inferenceId = knowledgeBase.status.value?.currentInferenceId;
 
   useEffect(() => {
     if (status) {
@@ -43,6 +45,9 @@ export function ProductDocEntry() {
   }, [status]);
 
   const onClickInstall = useCallback(() => {
+    if (!inferenceId) {
+      throw new Error('Inference ID is required to install product documentation');
+    }
     setInstalling(true);
     installProductDoc(inferenceId).then(
       () => {
@@ -75,14 +80,14 @@ export function ProductDocEntry() {
         }
       )
       .then((confirmed) => {
-        if (confirmed) {
-          uninstallProductDoc().then(() => {
+        if (confirmed && inferenceId) {
+          uninstallProductDoc(inferenceId).then(() => {
             setInstalling(false);
             setInstalled(false);
           });
         }
       });
-  }, [overlays, uninstallProductDoc]);
+  }, [overlays, uninstallProductDoc, inferenceId]);
 
   const content = useMemo(() => {
     if (isStatusLoading) {

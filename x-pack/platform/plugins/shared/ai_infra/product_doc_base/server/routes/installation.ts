@@ -29,7 +29,11 @@ export const registerInstallationRoutes = ({
   router.get(
     {
       path: INSTALLATION_STATUS_API_PATH,
-      validate: false,
+      validate: {
+        body: schema.object({
+          inferenceId: schema.maybe(schema.string()),
+        }),
+      },
       options: {
         access: 'internal',
       },
@@ -41,8 +45,12 @@ export const registerInstallationRoutes = ({
     },
     async (ctx, req, res) => {
       const { installClient, documentationManager } = getServices();
-      const installStatus = await installClient.getInstallationStatus();
-      const { status: overallStatus } = await documentationManager.getStatus();
+      const installStatus = await installClient.getInstallationStatus({
+        inferenceId: req.body?.inferenceId,
+      });
+      const { status: overallStatus } = await documentationManager.getStatus({
+        inferenceId: req.body?.inferenceId,
+      });
 
       return res.ok<InstallationStatusResponse>({
         body: {
@@ -105,7 +113,11 @@ export const registerInstallationRoutes = ({
   router.post(
     {
       path: UNINSTALL_ALL_API_PATH,
-      validate: false,
+      validate: {
+        body: schema.object({
+          inferenceId: schema.maybe(schema.string()),
+        }),
+      },
       options: {
         access: 'internal',
       },
@@ -121,6 +133,7 @@ export const registerInstallationRoutes = ({
       await documentationManager.uninstall({
         request: req,
         wait: true,
+        inferenceId: req.body?.inferenceId,
       });
 
       return res.ok<UninstallResponse>({

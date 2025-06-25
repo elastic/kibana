@@ -11,10 +11,11 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { InternalServices } from '../types';
-import { isTaskCurrentlyRunningError } from './utils';
+import { isDefaultElserInferenceId, isTaskCurrentlyRunningError } from './utils';
 
 export const ENSURE_DOC_UP_TO_DATE_TASK_TYPE = 'ProductDocBase:EnsureUpToDate';
 export const ENSURE_DOC_UP_TO_DATE_TASK_ID = 'ProductDocBase:EnsureUpToDate';
+export const ENSURE_DOC_UP_TO_DATE_TASK_E5_ID = 'ProductDocBase:EnsureUpToDateMultilingualE5';
 
 export const registerEnsureUpToDateTaskDefinition = ({
   getServices,
@@ -51,23 +52,26 @@ export const scheduleEnsureUpToDateTask = async ({
   logger: Logger;
   inferenceId?: string;
 }) => {
+  const taskId = isDefaultElserInferenceId(inferenceId)
+    ? ENSURE_DOC_UP_TO_DATE_TASK_ID
+    : ENSURE_DOC_UP_TO_DATE_TASK_E5_ID;
   try {
     await taskManager.ensureScheduled({
-      id: ENSURE_DOC_UP_TO_DATE_TASK_ID,
+      id: taskId,
       taskType: ENSURE_DOC_UP_TO_DATE_TASK_TYPE,
       params: { inferenceId },
       state: {},
       scope: ['productDoc'],
     });
 
-    await taskManager.runSoon(ENSURE_DOC_UP_TO_DATE_TASK_ID);
+    await taskManager.runSoon(taskId);
 
-    logger.info(`Task ${ENSURE_DOC_UP_TO_DATE_TASK_ID} scheduled to run soon`);
+    logger.info(`Task ${taskId} scheduled to run soon`);
   } catch (e) {
     if (!isTaskCurrentlyRunningError(e)) {
       throw e;
     }
   }
 
-  return ENSURE_DOC_UP_TO_DATE_TASK_ID;
+  return taskId;
 };

@@ -161,14 +161,15 @@ export class PackageInstaller {
     productVersion: string;
     customInference?: InferenceInferenceEndpointInfo;
   }) {
+    const inferenceId = customInference?.inference_id ?? this.elserInferenceId;
+
     this.log.info(
-      `Starting installing documentation for product [${productName}] and version [${productVersion}]`
+      `Starting installing documentation for product [${productName}] and version [${productVersion}] with inference ID [${inferenceId}]`
     );
 
     productVersion = majorMinor(productVersion);
-    const inferenceId = customInference?.inference_id ?? this.elserInferenceId;
 
-    await this.uninstallPackage({ productName });
+    await this.uninstallPackage({ productName, inferenceId });
 
     let zipArchive: ZipArchive | undefined;
     try {
@@ -177,7 +178,7 @@ export class PackageInstaller {
         productVersion,
       });
 
-      if (customInference || this.elserInferenceId !== defaultInferenceEndpoints.ELSER) {
+      if (customInference && customInference?.inference_id !== this.elserInferenceId) {
         if (customInference?.task_type !== 'text_embedding') {
           throw new Error(
             `Inference [${inferenceId}]'s task type ${customInference?.task_type} is not supported. Please use a model with task type 'text_embedding'.`
@@ -189,7 +190,7 @@ export class PackageInstaller {
         });
       }
 
-      if (this.elserInferenceId === defaultInferenceEndpoints.ELSER) {
+      if (!customInference || customInference?.inference_id === this.elserInferenceId) {
         await ensureDefaultElserDeployed({
           client: this.esClient,
         });
@@ -215,7 +216,7 @@ export class PackageInstaller {
       ]);
 
       const manifestVersion = manifest.formatVersion;
-      const indexName = getProductDocIndexName(productName);
+      const indexName = getProductDocIndexName(productName, customInference?.inference_id);
 
       const modifiedMappings = cloneDeep(mappings);
       overrideInferenceSettings(modifiedMappings, inferenceId!);
@@ -259,8 +260,14 @@ export class PackageInstaller {
     }
   }
 
-  async uninstallPackage({ productName }: { productName: ProductName }) {
-    const indexName = getProductDocIndexName(productName);
+  async uninstallPackage({
+    productName,
+    inferenceId,
+  }: {
+    productName: ProductName;
+    inferenceId?: string;
+  }) {
+    const indexName = getProductDocIndexName(productName, inferenceId);
     await this.esClient.indices.delete(
       {
         index: indexName,
@@ -271,10 +278,11 @@ export class PackageInstaller {
     await this.productDocClient.setUninstalled(productName);
   }
 
-  async uninstallAll() {
+  async uninstallAll(params: { inferenceId?: string } = {}) {
+    const { inferenceId } = params;
     const allProducts = Object.values(DocumentationProduct);
     for (const productName of allProducts) {
-      await this.uninstallPackage({ productName });
+      await this.uninstallPackage({ productName, inferenceId });
     }
   }
 }
