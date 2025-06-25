@@ -123,7 +123,8 @@
     "@kbn/task-manager-plugin",
     "@kbn/core-saved-objects-server",
     "@kbn/esql",
-    "@kbn/elapsed-datetime-formatter"
+    "@kbn/elapsed-datetime-formatter",
+    "@kbn/core-pricing-browser-mocks"
   ],
   "exclude": ["target/**/*"]
 }
