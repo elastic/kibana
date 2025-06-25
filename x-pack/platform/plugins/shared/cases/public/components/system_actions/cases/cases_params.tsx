@@ -19,8 +19,10 @@ import {
   EuiSpacer,
   EuiComboBox,
   EuiCallOut,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import type { ServerlessProjectType } from '../../../../common/constants/types';
 import * as i18n from './translations';
 import type { CasesActionParams } from './types';
@@ -77,6 +79,8 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       }),
     [configurations, owner]
   );
+
+  const isAttackDiscoveryRuleType = ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID;
 
   const { timeWindow, reopenClosedCases, groupingBy, templateId } = useMemo(
     () =>
@@ -173,11 +177,13 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
 
   const selectedOptions = groupingBy.map((field) => ({ value: field, label: field }));
   const selectedTemplate = currentConfiguration.templates.find((t) => t.key === templateId);
-  const defaultTemplate = {
-    key: DEFAULT_EMPTY_TEMPLATE_KEY,
-    name: i18n.DEFAULT_EMPTY_TEMPLATE_NAME,
-    caseFields: null,
-  };
+  const defaultTemplate = useMemo(() => {
+    return {
+      key: DEFAULT_EMPTY_TEMPLATE_KEY,
+      name: i18n.DEFAULT_EMPTY_TEMPLATE_NAME,
+      caseFields: null,
+    };
+  }, []);
 
   const onTemplateChange = useCallback(
     ({ key, caseFields }: Pick<CasesConfigurationUITemplate, 'caseFields' | 'key'>) => {
@@ -186,8 +192,8 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     [editSubActionProperty]
   );
 
-  return (
-    <>
+  const groupByComponent = useMemo(() => {
+    return (
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
           <EuiFormRow fullWidth label={i18n.GROUP_BY_ALERT} labelAppend={OptionalFieldLabel}>
@@ -205,54 +211,71 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        fullWidth
-        id="timeWindow"
-        error={errors.timeWindow as string[]}
-        isInvalid={
-          errors.timeWindow !== undefined &&
-          Number(errors.timeWindow.length) > 0 &&
-          timeWindow !== undefined
-        }
-      >
-        <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
-          <EuiFlexItem grow={4}>
-            <EuiFieldNumber
-              prepend={i18n.TIME_WINDOW}
-              data-test-subj="time-window-size-input"
-              value={timeWindowSize}
-              min={1}
-              step={1}
-              onChange={(e) => {
-                handleTimeWindowChange('timeWindowSize', e.target.value);
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={3}>
-            <EuiSelect
-              fullWidth
-              data-test-subj="time-window-unit-select"
-              value={timeWindowUnit}
-              onChange={(e) => {
-                handleTimeWindowChange('timeWindowUnit', e.target.value);
-              }}
-              options={getTimeUnitOptions(timeWindowSize)}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
-      <EuiSpacer size="s" />
-      {showTimeWindowWarning && (
-        <EuiCallOut
-          data-test-subj="show-time-window-warning"
-          title={i18n.TIME_WINDOW_WARNING}
-          color="warning"
-          iconType="alert"
-          size="s"
-        />
-      )}
-      <EuiSpacer size="m" />
+    );
+  }, [loadingAlertDataViews, onChangeComboBox, options, selectedOptions]);
+
+  const timeWindowComponent = useMemo(() => {
+    return (
+      <>
+        <EuiFormRow
+          fullWidth
+          id="timeWindow"
+          error={errors.timeWindow as string[]}
+          isInvalid={
+            errors.timeWindow !== undefined &&
+            Number(errors.timeWindow.length) > 0 &&
+            timeWindow !== undefined
+          }
+        >
+          <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
+            <EuiFlexItem grow={4}>
+              <EuiFieldNumber
+                prepend={i18n.TIME_WINDOW}
+                data-test-subj="time-window-size-input"
+                value={timeWindowSize}
+                min={1}
+                step={1}
+                onChange={(e) => {
+                  handleTimeWindowChange('timeWindowSize', e.target.value);
+                }}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={3}>
+              <EuiSelect
+                fullWidth
+                data-test-subj="time-window-unit-select"
+                value={timeWindowUnit}
+                onChange={(e) => {
+                  handleTimeWindowChange('timeWindowUnit', e.target.value);
+                }}
+                options={getTimeUnitOptions(timeWindowSize)}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
+        <EuiSpacer size="s" />
+        {showTimeWindowWarning && (
+          <EuiCallOut
+            data-test-subj="show-time-window-warning"
+            title={i18n.TIME_WINDOW_WARNING}
+            color="warning"
+            iconType="alert"
+            size="s"
+          />
+        )}
+      </>
+    );
+  }, [
+    errors.timeWindow,
+    handleTimeWindowChange,
+    showTimeWindowWarning,
+    timeWindow,
+    timeWindowSize,
+    timeWindowUnit,
+  ]);
+
+  const templateSelectorComponent = useMemo(() => {
+    return (
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
           <TemplateSelector
@@ -261,10 +284,23 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
             templates={[defaultTemplate, ...currentConfiguration.templates]}
             onTemplateChange={onTemplateChange}
             initialTemplate={selectedTemplate}
+            isDisabled={isAttackDiscoveryRuleType}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
+    );
+  }, [
+    currentConfiguration.id,
+    currentConfiguration.templates,
+    defaultTemplate,
+    isAttackDiscoveryRuleType,
+    isLoadingCaseConfiguration,
+    onTemplateChange,
+    selectedTemplate,
+  ]);
+
+  const reopenClosedCasesComponent = useMemo(() => {
+    return (
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiCheckbox
@@ -278,6 +314,26 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+    );
+  }, [editSubActionProperty, index, reopenClosedCases]);
+
+  if (isAttackDiscoveryRuleType) {
+    return (
+      <EuiToolTip content={i18n.ATTACK_DISCOVERY_TEMPLATE_TOOLTIP}>
+        {templateSelectorComponent}
+      </EuiToolTip>
+    );
+  }
+
+  return (
+    <>
+      {groupByComponent}
+      <EuiSpacer size="m" />
+      {timeWindowComponent}
+      <EuiSpacer size="m" />
+      {templateSelectorComponent}
+      <EuiSpacer size="m" />
+      {reopenClosedCasesComponent}
     </>
   );
 };

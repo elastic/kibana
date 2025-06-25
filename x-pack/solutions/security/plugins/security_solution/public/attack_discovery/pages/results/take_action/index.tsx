@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type {
-  AttackDiscovery,
-  AttackDiscoveryAlert,
-  Replacements,
+import {
+  getAttackDiscoveryMarkdown,
+  type AttackDiscovery,
+  type AttackDiscoveryAlert,
+  type Replacements,
 } from '@kbn/elastic-assistant-common';
 import {
   EuiButtonEmpty,
@@ -19,15 +20,16 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { getAttackDiscoveryMarkdown } from '../attack_discovery_panel/get_attack_discovery_markdown/get_attack_discovery_markdown';
 import { useAddToNewCase } from './use_add_to_case';
 import { useAddToExistingCase } from './use_add_to_existing_case';
 import { useViewInAiAssistant } from '../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant';
 import { APP_ID } from '../../../../../common';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
+import { UpdateAlertsModal } from './update_alerts_modal';
 import { useAttackDiscoveryBulk } from '../../use_attack_discovery_bulk';
 import { useKibanaFeatureFlags } from '../../use_kibana_feature_flags';
+import { useUpdateAlertsStatus } from './use_update_alerts_status';
 import { isAttackDiscoveryAlert } from '../../utils/is_attack_discovery_alert';
 
 interface Props {
@@ -47,6 +49,10 @@ const TakeActionComponent: React.FC<Props> = ({
   replacements,
   setSelectedAttackDiscoveries,
 }) => {
+  const [pendingAction, setPendingAction] = useState<'open' | 'acknowledged' | 'closed' | null>(
+    null
+  );
+
   const {
     services: { cases },
   } = useKibana();
@@ -101,67 +107,26 @@ const TakeActionComponent: React.FC<Props> = ({
   );
 
   const { mutateAsync: attackDiscoveryBulk } = useAttackDiscoveryBulk();
+  const { mutateAsync: updateAlertStatus } = useUpdateAlertsStatus();
 
   // click handlers for the popover actions:
   const onClickMarkAsAcknowledged = useCallback(async () => {
     closePopover();
 
-    await attackDiscoveryBulk({
-      attackDiscoveryAlertsEnabled,
-      ids: attackDiscoveryIds,
-      kibanaAlertWorkflowStatus: 'acknowledged',
-    });
-
-    setSelectedAttackDiscoveries({});
-    refetchFindAttackDiscoveries?.();
-  }, [
-    attackDiscoveryAlertsEnabled,
-    attackDiscoveryBulk,
-    attackDiscoveryIds,
-    closePopover,
-    refetchFindAttackDiscoveries,
-    setSelectedAttackDiscoveries,
-  ]);
+    setPendingAction('acknowledged');
+  }, [closePopover]);
 
   const onClickMarkAsClosed = useCallback(async () => {
     closePopover();
 
-    await attackDiscoveryBulk({
-      attackDiscoveryAlertsEnabled,
-      ids: attackDiscoveryIds,
-      kibanaAlertWorkflowStatus: 'closed',
-    });
-
-    refetchFindAttackDiscoveries?.();
-    setSelectedAttackDiscoveries({});
-  }, [
-    attackDiscoveryAlertsEnabled,
-    attackDiscoveryBulk,
-    attackDiscoveryIds,
-    closePopover,
-    refetchFindAttackDiscoveries,
-    setSelectedAttackDiscoveries,
-  ]);
+    setPendingAction('closed');
+  }, [closePopover]);
 
   const onClickMarkAsOpen = useCallback(async () => {
     closePopover();
 
-    await attackDiscoveryBulk({
-      attackDiscoveryAlertsEnabled,
-      ids: attackDiscoveryIds,
-      kibanaAlertWorkflowStatus: 'open',
-    });
-
-    setSelectedAttackDiscoveries({});
-    refetchFindAttackDiscoveries?.();
-  }, [
-    attackDiscoveryAlertsEnabled,
-    attackDiscoveryBulk,
-    attackDiscoveryIds,
-    closePopover,
-    refetchFindAttackDiscoveries,
-    setSelectedAttackDiscoveries,
-  ]);
+    setPendingAction('open');
+  }, [closePopover]);
 
   const onClickAddToNewCase = useCallback(async () => {
     closePopover();
@@ -322,18 +287,69 @@ const TakeActionComponent: React.FC<Props> = ({
     onClickMarkAsOpen,
   ]);
 
+  const onConfirm = useCallback(
+    async (updateAlerts: boolean) => {
+      if (pendingAction !== null) {
+        setPendingAction(null);
+
+        await attackDiscoveryBulk({
+          attackDiscoveryAlertsEnabled,
+          ids: attackDiscoveryIds,
+          kibanaAlertWorkflowStatus: pendingAction,
+        });
+
+        if (updateAlerts && alertIds.length > 0) {
+          await updateAlertStatus({
+            ids: alertIds,
+            kibanaAlertWorkflowStatus: pendingAction,
+          });
+        }
+
+        setSelectedAttackDiscoveries({});
+        refetchFindAttackDiscoveries?.();
+      }
+    },
+    [
+      alertIds,
+      attackDiscoveryAlertsEnabled,
+      attackDiscoveryBulk,
+      attackDiscoveryIds,
+      pendingAction,
+      refetchFindAttackDiscoveries,
+      setSelectedAttackDiscoveries,
+      updateAlertStatus,
+    ]
+  );
+
+  const onCloseOrCancel = useCallback(() => {
+    setPendingAction(null);
+  }, []);
+
   return (
-    <EuiPopover
-      anchorPosition="downCenter"
-      button={button}
-      closePopover={closePopover}
-      data-test-subj="takeAction"
-      id={takeActionContextMenuPopoverId}
-      isOpen={isPopoverOpen}
-      panelPaddingSize="none"
-    >
-      <EuiContextMenuPanel size="s" items={allItems} />
-    </EuiPopover>
+    <>
+      <EuiPopover
+        anchorPosition="downCenter"
+        button={button}
+        closePopover={closePopover}
+        data-test-subj="takeAction"
+        id={takeActionContextMenuPopoverId}
+        isOpen={isPopoverOpen}
+        panelPaddingSize="none"
+      >
+        <EuiContextMenuPanel size="s" items={allItems} />
+      </EuiPopover>
+
+      {pendingAction != null && (
+        <UpdateAlertsModal
+          alertsCount={alertIds.length}
+          attackDiscoveriesCount={attackDiscoveryIds.length}
+          onCancel={onCloseOrCancel}
+          onClose={onCloseOrCancel}
+          onConfirm={onConfirm}
+          workflowStatus={pendingAction}
+        />
+      )}
+    </>
   );
 };
 
