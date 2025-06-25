@@ -9004,12 +9004,12 @@
                 "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
               },
               {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/migration-server-mocks/src/kibana_migrator.mock.ts"
-              },
-              {
                 "plugin": "savedSearch",
                 "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/saved-objects/migration-server-mocks/src/kibana_migrator.mock.ts"
               },
               {
                 "plugin": "canvas",
