@@ -154,6 +154,8 @@ export const INPUT_FILE = 'input[type=file]';
 
 export const TOASTER = '[data-test-subj="euiToastHeader"]';
 
+export const TOASTER_MESSAGE = '[data-test-subj="errorToastMessage"]';
+
 export const SUCCESS_TOASTER = '[class*="euiToast-success"] [data-test-subj="euiToastHeader"]';
 
 export const TOASTER_BODY = '[data-test-subj="globalToastList"] [data-test-subj="euiToastBody"]';

@@ -18,6 +18,7 @@ import {
   createRuleAssetSavedObject,
   deleteAllPrebuiltRuleAssets,
   installPrebuiltRules,
+  getCustomQueryRuleParams,
 } from '../../../../utils';
 import { getPrebuiltRuleBaseVersion } from '../../../../utils/rules/prebuilt_rules/get_prebuilt_rule_base_version';
 
@@ -64,7 +65,16 @@ export default ({ getService }: FtrProviderContext): void => {
         const response = await getPrebuiltRuleBaseVersion(supertest, { id: baseVersion.id });
 
         expect(response.base_version).toEqual(baseVersion);
-        expect(response.current_version).toEqual(modifiedCurrentVersion);
+        expect(response.current_version).toEqual({
+          ...baseVersion,
+          description: 'new description',
+          revision: 1, // Rule has been modified once
+          rule_source: {
+            is_customized: true,
+            type: 'external',
+          },
+          updated_at: modifiedCurrentVersion.updated_at,
+        });
         expect(response.diff).toMatchObject({
           num_fields_with_updates: 0,
           num_fields_with_conflicts: 0,
@@ -130,6 +140,25 @@ export default ({ getService }: FtrProviderContext): void => {
             .set('elastic-api-version', '1')
             .set('x-elastic-internal-origin', 'securitySolution')
             .query({ id: prebuiltRule.id })
+            .expect(404);
+
+          expect(body).toEqual({
+            status_code: 404,
+            message: 'Cannot find rule base_version',
+          });
+        });
+
+        it('returns a 404 error if rule is custom', async () => {
+          const { body: customRule } = await securitySolutionApi.createRule({
+            body: getCustomQueryRuleParams({ rule_id: 'rule-1' }),
+          });
+
+          const { body } = await supertest
+            .get(GET_PREBUILT_RULES_BASE_VERSION_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
+            .set('x-elastic-internal-origin', 'securitySolution')
+            .query({ id: customRule.id })
             .expect(404);
 
           expect(body).toEqual({
