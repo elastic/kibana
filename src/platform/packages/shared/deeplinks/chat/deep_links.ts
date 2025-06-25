@@ -13,7 +13,7 @@ export type WorkchatApp = typeof WORKCHAT_APP_ID;
 export type OnechatApp = typeof ONECHAT_APP_ID;
 
 export type WorkchatLinkId = 'agents' | 'integrations';
-export type OnechatLinkId = 'chat' | 'tools';
+export type OnechatLinkId = 'conversation' | 'tools';
 
 export type DeepLinkId =
   | WorkchatApp

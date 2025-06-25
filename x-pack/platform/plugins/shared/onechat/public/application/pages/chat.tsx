@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-export const OnechatChatPage = () => {
-  // TODO: Integrate with Chat UI
-  return <div>OnechatChatPage</div>;
+export const OnechatConversationPage = () => {
+  return <div>OnechatConversationPage</div>;
 };

@@ -31,10 +31,10 @@ export const registerApp = ({
     visibleIn: ['sideNav', 'globalSearch'],
     deepLinks: [
       {
-        id: 'chat',
-        path: '/chat',
-        title: i18n.translate('xpack.onechat.chat.conversationsTitle', {
-          defaultMessage: 'Conversations',
+        id: 'conversation',
+        path: '/conversation',
+        title: i18n.translate('xpack.onechat.chat.conversationTitle', {
+          defaultMessage: 'Conversation',
         }),
       },
       ...(isToolsPageEnabled
