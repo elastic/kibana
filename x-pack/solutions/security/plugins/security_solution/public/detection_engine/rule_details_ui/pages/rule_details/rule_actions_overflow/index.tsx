@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import type { OpenRuleDiffFlyoutParams } from '../../../../rule_management/hooks/use_prebuilt_rules_view_base_diff';
 import { isCustomizedPrebuiltRule } from '../../../../../../common/api/detection_engine';
 import { useScheduleRuleRun } from '../../../../rule_gaps/logic/use_schedule_rule_run';
 import type { TimeRange } from '../../../../rule_gaps/types';
@@ -56,7 +57,7 @@ interface RuleActionsOverflowComponentProps {
   showBulkDuplicateExceptionsConfirmation: () => Promise<string | null>;
   showManualRuleRunConfirmation: () => Promise<TimeRange | null>;
   confirmDeletion: () => Promise<boolean>;
-  openRuleDiffFlyout: (isReverting: boolean) => void;
+  openRuleDiffFlyout: (params: OpenRuleDiffFlyoutParams) => void;
   isRevertBaseVersionDisabled: boolean;
 }
 
@@ -202,7 +203,7 @@ const RuleActionsOverflowComponent = ({
                     data-test-subj="rules-details-revert-rule"
                     onClick={() => {
                       closePopover();
-                      openRuleDiffFlyout(true);
+                      openRuleDiffFlyout({ isReverting: true });
                     }}
                   >
                     {i18nActions.REVERT_RULE}

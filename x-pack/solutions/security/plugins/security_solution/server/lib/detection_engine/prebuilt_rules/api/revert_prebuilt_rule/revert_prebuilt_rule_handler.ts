@@ -23,9 +23,9 @@ import {
 } from '../../../rule_management/api/rules/bulk_actions/bulk_actions_response';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
 import { zipRuleVersions } from '../../logic/rule_versions/zip_rule_versions';
-import { revertPrebuiltRules } from '../../logic/rule_objects/merge_and_update_prebuilt_rules';
+import { revertPrebuiltRules } from '../../logic/rule_objects/revert_prebuilt_rules';
 import { getConcurrencyErrors } from './get_concurrrency_errors';
-import { filterRulesToRevert } from './filter_rules_to_revert';
+import { filterOutNonRevertableRules } from './filter_out_non_revertable_rules';
 import { getRuleById } from '../../../rule_management/logic/detection_rules_client/methods/get_rule_by_id';
 import { createBulkActionError } from '../../../rule_management/utils/utils';
 
@@ -68,10 +68,10 @@ export const revertPrebuiltRuleHandler = async (
       });
     }
 
-    const { rulesToRevert, skipped } = filterRulesToRevert([ruleResponse]);
+    const { rulesToRevert, skipped } = filterOutNonRevertableRules([ruleResponse]);
 
-    const baseRules = await ruleAssetsClient.fetchAssetsByVersion(rulesToRevert);
-    const ruleVersionsMap = zipRuleVersions(rulesToRevert, [], baseRules); // We use base versions as target param as we are reverting rules
+    const prebuiltRuleAssets = await ruleAssetsClient.fetchAssetsByVersion(rulesToRevert);
+    const ruleVersionsMap = zipRuleVersions(rulesToRevert, [], prebuiltRuleAssets); // We use base versions as target param as we are reverting rules
     const revertableRules: RuleTriad[] = [];
 
     rulesToRevert.forEach((rule) => {
@@ -117,12 +117,12 @@ export const revertPrebuiltRuleHandler = async (
       });
     });
 
-    const { results: upgradeResults, errors: updateErrors } = await revertPrebuiltRules(
+    const { results: revertResults, errors: revertErrors } = await revertPrebuiltRules(
       detectionRulesClient,
       revertableRules
     );
 
-    const formattedUpdateErrors = updateErrors.map(({ error, item }) => {
+    const formattedUpdateErrors = revertErrors.map(({ error, item }) => {
       return {
         message: getErrorMessage(error),
         status: getErrorStatusCode(error),
@@ -131,7 +131,7 @@ export const revertPrebuiltRuleHandler = async (
     });
 
     errors.push(...formattedUpdateErrors);
-    updated.push(...upgradeResults.map(({ result }) => result));
+    updated.push(...revertResults.map(({ result }) => result));
 
     return buildRuleReversionResponse(response, {
       updated,

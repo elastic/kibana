@@ -7,11 +7,16 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 
+import { isCustomizedPrebuiltRule } from '../../../../common/api/detection_engine/model/rule_schema/utils';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { PrebuiltRulesBaseVersionFlyout } from '../components/rule_details/base_version_diff/base_version_flyout';
 import { useFetchPrebuiltRuleBaseVersionQuery } from '../api/hooks/prebuilt_rules/use_fetch_prebuilt_rule_base_version_query';
 
 export const PREBUILT_RULE_BASE_VERSION_FLYOUT_ANCHOR = 'baseVersionPrebuiltRulePreview';
+
+export interface OpenRuleDiffFlyoutParams {
+  isReverting?: boolean;
+}
 
 interface UsePrebuiltRulesViewBaseDiffProps {
   rule: RuleResponse | null;
@@ -24,15 +29,21 @@ export const usePrebuiltRulesViewBaseDiff = ({
 }: UsePrebuiltRulesViewBaseDiffProps) => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const [isReverting, setIsReverting] = useState(false);
-  const { data, isLoading, error } = useFetchPrebuiltRuleBaseVersionQuery(rule);
+  const { data, isLoading, error } = useFetchPrebuiltRuleBaseVersionQuery({
+    id: rule?.id,
+    enabled: rule != null && isCustomizedPrebuiltRule(rule),
+  });
 
   // Handle when we receive an error when the base_version doesn't exist
   const doesBaseVersionExist: boolean = useMemo(() => !error && data != null, [data, error]);
 
-  const openFlyout = useCallback((renderRevertFeatures: boolean = false) => {
-    setIsReverting(renderRevertFeatures);
-    setIsFlyoutOpen(true);
-  }, []);
+  const openFlyout = useCallback(
+    ({ isReverting: renderRevertFeatures = false }: OpenRuleDiffFlyoutParams) => {
+      setIsReverting(renderRevertFeatures);
+      setIsFlyoutOpen(true);
+    },
+    []
+  );
 
   const closeFlyout = useCallback(() => setIsFlyoutOpen(false), []);
 

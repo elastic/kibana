@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { EuiButton, EuiCallOut, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import type { PartialRuleDiff, RuleResponse } from '../../../../../../common/api/detection_engine';
 import { PerFieldRuleDiffTab } from '../per_field_rule_diff_tab';
@@ -41,25 +41,34 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
     [currentRule, diff]
   );
 
+  const revertRule = useCallback(async () => {
+    try {
+      await revertPrebuiltRule({
+        id: currentRule.id,
+        version: currentRule.version,
+        revision: currentRule.revision,
+      });
+    } catch {
+      // Error is handled by the mutation's onError callback, so no need to do anything here
+    } finally {
+      closeFlyout();
+      if (onRevert) {
+        onRevert();
+      }
+    }
+  }, [
+    closeFlyout,
+    currentRule.id,
+    currentRule.revision,
+    currentRule.version,
+    onRevert,
+    revertPrebuiltRule,
+  ]);
+
   const ruleActions = useMemo(() => {
     return isReverting ? (
       <EuiButton
-        onClick={async () => {
-          try {
-            await revertPrebuiltRule({
-              id: currentRule.id,
-              version: currentRule.version,
-              revision: currentRule.revision,
-            });
-          } catch {
-            // Error is handled by the mutation's onError callback, so no need to do anything here
-          } finally {
-            closeFlyout();
-            if (onRevert) {
-              onRevert();
-            }
-          }
-        }}
+        onClick={revertRule}
         isDisabled={isLoading}
         fill
         data-test-subj="revertPrebuiltRuleFromFlyoutButton"
@@ -67,16 +76,7 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
         {i18n.REVERT_BUTTON_LABEL}
       </EuiButton>
     ) : null;
-  }, [
-    closeFlyout,
-    currentRule.id,
-    currentRule.revision,
-    currentRule.version,
-    isLoading,
-    isReverting,
-    onRevert,
-    revertPrebuiltRule,
-  ]);
+  }, [isLoading, isReverting, revertRule]);
 
   const extraTabs = useMemo(() => {
     const headerCallout = isReverting ? (

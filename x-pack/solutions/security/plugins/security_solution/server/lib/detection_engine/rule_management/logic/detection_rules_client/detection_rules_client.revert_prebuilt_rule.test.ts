@@ -32,9 +32,6 @@ describe('DetectionRulesClient.revertPrebuiltRule', () => {
   let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
-  let actionsClient = {
-    isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
-  } as unknown as jest.Mocked<ActionsClient>;
 
   const ruleAsset: PrebuiltRuleAsset = {
     ...getCreateEqlRuleSchemaMock(),
@@ -62,16 +59,15 @@ describe('DetectionRulesClient.revertPrebuiltRule', () => {
   ];
 
   beforeEach(() => {
-    actionsClient = {
-      isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
-    } as unknown as jest.Mocked<ActionsClient>;
     rulesClient = rulesClientMock.create();
-    const savedObjectsClient = savedObjectsClientMock.create();
+
     detectionRulesClient = createDetectionRulesClient({
-      actionsClient,
+      actionsClient: {
+        isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
+      } as unknown as jest.Mocked<ActionsClient>,
       rulesClient,
       mlAuthz,
-      savedObjectsClient,
+      savedObjectsClient: savedObjectsClientMock.create(),
       license: licenseMock.createLicenseMock(),
       productFeaturesService: createProductFeaturesServiceMock(),
     });
@@ -135,7 +131,7 @@ describe('DetectionRulesClient.revertPrebuiltRule', () => {
     );
   });
 
-  it('merges exceptions lists for existing rule and new rule asset', async () => {
+  it('merges exceptions lists for existing rule and stock rule asset', async () => {
     rulesClient.update.mockResolvedValue(getRuleMock(getEqlRuleParams()));
     ruleAsset.exceptions_list = [
       {

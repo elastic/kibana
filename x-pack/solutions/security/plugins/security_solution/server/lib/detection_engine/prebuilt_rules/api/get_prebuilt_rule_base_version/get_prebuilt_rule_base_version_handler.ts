@@ -9,6 +9,7 @@ import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { pickBy } from 'lodash';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { FullRuleDiff } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import {
   ThreeWayDiffOutcome,
   type GetPrebuiltRuleBaseVersionRequest,
@@ -18,7 +19,6 @@ import {
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
-import type { CalculateRuleDiffResult } from '../../logic/diff/calculate_rule_diff';
 import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
@@ -54,7 +54,7 @@ export const getPrebuiltRuleBaseVersionHandler = async (
       });
     }
 
-    const ruleDiff = calculateRuleDiff({
+    const { ruleDiff } = calculateRuleDiff({
       current: currentRule,
       base: baseRule,
       target: baseRule, // We're using the base version as the target version as we want to revert the rule
@@ -83,11 +83,11 @@ export const getPrebuiltRuleBaseVersionHandler = async (
 };
 
 const formatDiffResponse = ({
-  ruleDiff: { ruleDiff },
+  ruleDiff,
   baseRule,
   currentRule,
 }: {
-  ruleDiff: CalculateRuleDiffResult;
+  ruleDiff: FullRuleDiff;
   baseRule: PrebuiltRuleAsset;
   currentRule: RuleResponse;
 }): { diff: PartialRuleDiff; baseVersion: RuleResponse; currentVersion: RuleResponse } => {
@@ -106,13 +106,11 @@ const formatDiffResponse = ({
     baseVersion,
     currentVersion: currentRule,
     diff: {
+      ...ruleDiff,
       fields: pickBy<ThreeWayDiff<unknown>>(
         ruleDiff.fields,
         (fieldDiff) => fieldDiff.diff_outcome === ThreeWayDiffOutcome.CustomizedValueNoUpdate
       ),
-      num_fields_with_updates: ruleDiff.num_fields_with_updates,
-      num_fields_with_conflicts: ruleDiff.num_fields_with_conflicts,
-      num_fields_with_non_solvable_conflicts: ruleDiff.num_fields_with_non_solvable_conflicts,
     },
   };
 };

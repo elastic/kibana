@@ -5,30 +5,36 @@
  * 2.0.
  */
 
-import { isNonCustomizedPrebuiltRule } from '../../../../../../common/api/detection_engine/model/rule_schema/utils';
+import {
+  isCustomizedPrebuiltRule,
+  isNonCustomizedPrebuiltRule,
+} from '../../../../../../common/api/detection_engine/model/rule_schema/utils';
 import {
   BulkRevertSkipReasonEnum,
   type BulkActionReversionSkipResult,
   type RuleResponse,
 } from '../../../../../../common/api/detection_engine';
 
-export const filterRulesToRevert = (rules: RuleResponse[]) => {
+export const filterOutNonRevertableRules = (rules: RuleResponse[]) => {
   const skipped: BulkActionReversionSkipResult[] = [];
   const rulesToRevert = rules.filter((rule) => {
-    if (rule.rule_source.type !== 'external') {
-      skipped.push({
-        id: rule.id,
-        skip_reason: BulkRevertSkipReasonEnum.RULE_NOT_PREBUILT,
-      });
-      return false;
-    } else if (isNonCustomizedPrebuiltRule(rule)) {
+    if (isCustomizedPrebuiltRule(rule)) {
+      return true;
+    }
+
+    if (isNonCustomizedPrebuiltRule(rule)) {
       skipped.push({
         id: rule.id,
         skip_reason: BulkRevertSkipReasonEnum.RULE_NOT_CUSTOMIZED,
       });
       return false;
     }
-    return true;
+
+    skipped.push({
+      id: rule.id,
+      skip_reason: BulkRevertSkipReasonEnum.RULE_NOT_PREBUILT,
+    });
+    return false;
   });
 
   return { rulesToRevert, skipped };

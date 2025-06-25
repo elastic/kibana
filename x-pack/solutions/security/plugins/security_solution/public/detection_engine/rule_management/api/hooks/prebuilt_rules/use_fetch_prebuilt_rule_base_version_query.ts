@@ -8,12 +8,8 @@ import { useCallback } from 'react';
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { get } from 'lodash';
-import { isCustomizedPrebuiltRule } from '../../../../../../common/api/detection_engine/model/rule_schema/utils';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import type {
-  GetPrebuiltRuleBaseVersionResponseBody,
-  RuleResponse,
-} from '../../../../../../common/api/detection_engine';
+import type { GetPrebuiltRuleBaseVersionResponseBody } from '../../../../../../common/api/detection_engine';
 import { getPrebuiltRuleBaseVersion } from '../../api';
 import { GET_PREBUILT_RULES_BASE_VERSION_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules/urls';
 import { DEFAULT_QUERY_OPTIONS } from '../constants';
@@ -23,22 +19,28 @@ import * as i18n from '../translations';
 
 export const GET_RULE_BASE_VERSION_QUERY_KEY = ['POST', GET_PREBUILT_RULES_BASE_VERSION_URL];
 
+export interface UseFetchPrebuiltRuleBaseVersionQueryProps {
+  id: string | undefined;
+  enabled: boolean;
+}
+
 export const useFetchPrebuiltRuleBaseVersionQuery = (
-  request: RuleResponse | null,
+  { id, enabled }: UseFetchPrebuiltRuleBaseVersionQueryProps,
   options?: UseQueryOptions<GetPrebuiltRuleBaseVersionResponseBody | null>
 ) => {
   const { addError } = useAppToasts();
   return useQuery<GetPrebuiltRuleBaseVersionResponseBody | null>(
-    [...GET_RULE_BASE_VERSION_QUERY_KEY, request],
+    [...GET_RULE_BASE_VERSION_QUERY_KEY, id],
     async ({ signal }) => {
-      if (request != null && isCustomizedPrebuiltRule(request)) {
-        return getPrebuiltRuleBaseVersion({ signal, request: { id: request.id } });
+      if (id) {
+        return getPrebuiltRuleBaseVersion({ signal, request: { id } });
       }
       return null;
     },
     {
       ...DEFAULT_QUERY_OPTIONS,
       ...options,
+      enabled,
       onError: (error) => {
         const statusCode = get(error, 'response.status');
         // If we cannot find the rule base version, we suppress the error and handle it internally

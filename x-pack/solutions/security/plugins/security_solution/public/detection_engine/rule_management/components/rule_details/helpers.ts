@@ -48,8 +48,8 @@ export const getSectionedFieldDiffs = (fields: FieldsGroupDiff[]) => {
 };
 
 /**
- * Filters out any fields that have a `diff_outcome` of `CustomizedValueNoUpdate`
- * or `CustomizedValueSameUpdate` as they are not supported for display in the
+ * Filters out any fields that have a `diff_outcome` of
+ * `CustomizedValueSameUpdate` as it is not supported for display in the
  * current per-field rule diff flyout
  */
 export const filterUnsupportedDiffOutcomes = (
