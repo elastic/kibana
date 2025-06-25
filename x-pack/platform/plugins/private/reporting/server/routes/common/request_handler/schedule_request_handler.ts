@@ -9,7 +9,7 @@ import moment from 'moment';
 
 import { schema } from '@kbn/config-schema';
 import { isEmpty, omit } from 'lodash';
-import { RruleSchedule, scheduleRruleSchema } from '@kbn/task-manager-plugin/server';
+import { RruleSchedule, scheduleRruleSchemaV2 } from '@kbn/task-manager-plugin/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { IKibanaResponse } from '@kbn/core/server';
 import { RawNotification } from '../../../saved_objects/scheduled_report/schemas/latest';
@@ -34,7 +34,7 @@ const MAX_ALLOWED_EMAILS = 30;
 const validation = {
   params: schema.object({ exportType: schema.string({ minLength: 2 }) }),
   body: schema.object({
-    schedule: scheduleRruleSchema,
+    schedule: scheduleRruleSchemaV2,
     notification: schema.maybe(rawNotificationSchema),
     jobParams: schema.string(),
   }),
@@ -82,6 +82,13 @@ export class ScheduleRequestHandler extends RequestHandler<
       throw res.customError({
         statusCode: 400,
         body: 'A schedule is required to create a scheduled report.',
+      });
+    }
+
+    if (rruleDef.dtstart && !moment(rruleDef.dtstart).isValid()) {
+      throw res.customError({
+        statusCode: 400,
+        body: `Invalid startedAt date: ${rruleDef.dtstart}`,
       });
     }
 
