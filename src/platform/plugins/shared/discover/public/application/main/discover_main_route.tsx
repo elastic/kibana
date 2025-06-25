@@ -42,7 +42,7 @@ export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
   customizationCallbacks?: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
-  onAppLeave: AppMountParameters['onAppLeave'];
+  onAppLeave?: AppMountParameters['onAppLeave'];
 }
 
 type InitializeMainRoute = (
@@ -110,7 +110,7 @@ export const DiscoverMainRoute = ({
   }, [initializeMainRoute, rootProfileState]);
 
   useEffect(() => {
-    onAppLeave((actions) => {
+    onAppLeave?.((actions) => {
       const tabs = runtimeStateManager.tabs.byId;
       const hasAnyUnsavedTab = Object.values(tabs).some((tab) => {
         const stateContainer = tab.stateContainer$.getValue();
