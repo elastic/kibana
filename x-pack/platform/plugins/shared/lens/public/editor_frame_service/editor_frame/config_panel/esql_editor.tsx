@@ -27,10 +27,7 @@ import {
 } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
 import { useESQLVariables } from '../../../app_plugin/shared/edit_on_the_fly/use_esql_variables';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/form_based/esql_layer/utils';
-import {
-  type TypedLensSerializedState,
-  isApiESQLVariablesCompatible,
-} from '../../../react_embeddable/types';
+import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
 import type { LayerPanelProps } from './types';
 import { ESQLDataGridAccordion } from '../../../app_plugin/shared/edit_on_the_fly/esql_data_grid_accordion';
 import { useInitializeChart } from './use_initialize_chart';
@@ -181,27 +178,13 @@ export function ESQLEditor({
     ]
   );
 
-  const initializeSuccessCallback = useCallback(
-    (attrs: TypedLensSerializedState['attributes']) => {
-      setCurrentAttributes?.(attrs);
-      updateSuggestion?.(attrs);
-    },
-    [setCurrentAttributes, updateSuggestion]
-  );
-
   useInitializeChart({
     isTextBasedLanguage,
     query,
     dataGridAttrs,
     isInitialized,
     currentAttributes,
-    data,
-    datasourceMap,
-    visualizationMap,
-    adHocDataViews,
-    setDataGridAttrs,
-    esqlVariables,
-    successCallback: initializeSuccessCallback,
+    runQuery,
     prevQueryRef: prevQuery,
     setErrors,
     setIsInitialized,

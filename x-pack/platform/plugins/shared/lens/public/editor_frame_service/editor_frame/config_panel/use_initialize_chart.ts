@@ -6,14 +6,7 @@
  */
 import { useEffect, useCallback, type MutableRefObject } from 'react';
 import { type AggregateQuery, isOfAggregateQueryType, type Query } from '@kbn/es-query';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { ESQLControlVariable } from '@kbn/esql-types';
-import {
-  type ESQLDataGridAttrs,
-  getSuggestions,
-} from '../../../app_plugin/shared/edit_on_the_fly/helpers';
-import type { DatasourceMap, VisualizationMap } from '../../../types';
+import { type ESQLDataGridAttrs } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
 import { TypedLensSerializedState } from '../../../react_embeddable/types';
 
 type LensAttributes = TypedLensSerializedState['attributes'];
@@ -36,29 +29,9 @@ export interface InitializeChartLogicArgs {
    */
   isInitialized: boolean;
   /**
-   * The data service to be used for fetching data.
-   */
-  data: DataPublicPluginStart;
-  /**
-   * Map of datasources available.
-   */
-  datasourceMap: DatasourceMap;
-  /**
-   * Map of visualizations available.
-   */
-  visualizationMap: VisualizationMap;
-  /**
-   * Ad-hoc data views that can be used for the query.
-   */
-  adHocDataViews: DataViewSpec[];
-  /**
    * Current attributes of the chart.
    */
   currentAttributes: LensAttributes | undefined;
-  /**
-   * Callback to be executed on successful data retrieval.
-   */
-  successCallback: (attrs: LensAttributes) => void;
   /**
    * Reference to the previous query.
    */
@@ -72,13 +45,13 @@ export interface InitializeChartLogicArgs {
    */
   setIsInitialized: (isInitialized: boolean) => void;
   /**
-   * Function to set the data grid attributes.
+   * Function to run the query and update the chart.
    */
-  setDataGridAttrs?: (attrs: ESQLDataGridAttrs) => void;
-  /**
-   * ESQL control variables to be used in the query.
-   */
-  esqlVariables?: ESQLControlVariable[];
+  runQuery: (
+    q: AggregateQuery,
+    abortController?: AbortController,
+    shouldUpdateAttrs?: boolean
+  ) => Promise<void>;
 }
 
 /**
@@ -90,14 +63,8 @@ export const createInitializeChartFunction = ({
   query,
   dataGridAttrs,
   isInitialized,
-  data,
-  datasourceMap,
-  visualizationMap,
-  adHocDataViews,
-  setDataGridAttrs,
-  esqlVariables,
   currentAttributes,
-  successCallback,
+  runQuery,
   prevQueryRef,
   setErrors,
   setIsInitialized,
@@ -108,26 +75,10 @@ export const createInitializeChartFunction = ({
       return;
     }
     if (isTextBasedLanguage && isOfAggregateQueryType(query) && !dataGridAttrs) {
+      console.log('boom');
       try {
         const shouldUpdateAttrs = Boolean(currentAttributes?.state.needsRefresh);
-        const attrs = await getSuggestions(
-          query,
-          data,
-          datasourceMap,
-          visualizationMap,
-          adHocDataViews,
-          setErrors,
-          abortController,
-          setDataGridAttrs,
-          esqlVariables,
-          shouldUpdateAttrs,
-          currentAttributes
-        );
-
-        if (attrs) {
-          successCallback(attrs);
-          setErrors([]);
-        }
+        await runQuery(query, abortController, shouldUpdateAttrs);
       } catch (e) {
         setErrors([e]);
       }
@@ -142,14 +93,8 @@ export function useInitializeChart({
   query,
   dataGridAttrs,
   isInitialized,
-  data,
-  datasourceMap,
-  visualizationMap,
-  adHocDataViews,
-  setDataGridAttrs,
-  esqlVariables,
   currentAttributes,
-  successCallback,
+  runQuery,
   prevQueryRef,
   setErrors,
   setIsInitialized,
@@ -161,17 +106,11 @@ export function useInitializeChart({
         query,
         dataGridAttrs,
         isInitialized,
-        data,
-        datasourceMap,
-        visualizationMap,
-        adHocDataViews,
         currentAttributes,
-        successCallback,
+        runQuery,
         prevQueryRef,
         setErrors,
         setIsInitialized,
-        setDataGridAttrs,
-        esqlVariables,
       });
       func(abortController);
     },
@@ -180,17 +119,11 @@ export function useInitializeChart({
       query,
       dataGridAttrs,
       isInitialized,
-      data,
-      datasourceMap,
-      visualizationMap,
-      adHocDataViews,
       currentAttributes,
-      successCallback,
+      runQuery,
       prevQueryRef,
       setErrors,
       setIsInitialized,
-      setDataGridAttrs,
-      esqlVariables,
     ]
   );
   useEffect(() => {
