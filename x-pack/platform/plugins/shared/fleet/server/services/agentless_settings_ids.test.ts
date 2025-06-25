@@ -61,6 +61,7 @@ describe('correct agentless policy settings', () => {
       'agent_policy_1',
       {
         data_output_id: 'es-default-output',
+        monitoring_output_id: 'es-default-output',
         fleet_server_host_id: 'default-fleet-server',
       },
       {
@@ -73,6 +74,7 @@ describe('correct agentless policy settings', () => {
       'agent_policy_2',
       {
         data_output_id: 'es-default-output',
+        monitoring_output_id: 'es-default-output',
         fleet_server_host_id: 'default-fleet-server',
       },
       {

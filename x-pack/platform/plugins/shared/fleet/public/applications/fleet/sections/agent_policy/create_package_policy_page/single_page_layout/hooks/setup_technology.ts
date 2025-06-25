@@ -208,7 +208,12 @@ export function useSetupTechnology({
         inactivity_timeout: AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
         supports_agentless: true,
         monitoring_enabled: AGENTLESS_AGENT_POLICY_MONITORING,
-        ...(agentlessPolicyOutputId ? { data_output_id: agentlessPolicyOutputId } : {}),
+        ...(agentlessPolicyOutputId
+          ? {
+              data_output_id: agentlessPolicyOutputId,
+              monitoring_output_id: agentlessPolicyOutputId,
+            }
+          : {}),
         ...(agentlessPolicyFleetServerHostId
           ? { fleet_server_host_id: agentlessPolicyFleetServerHostId }
           : {}),
