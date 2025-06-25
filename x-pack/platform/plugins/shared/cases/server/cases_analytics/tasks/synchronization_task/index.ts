@@ -13,10 +13,10 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
+import { ANALYTICS_SYNCHRONIZATION_TASK_TYPE } from '../../../../common/constants';
 import type { CasesServerStartDependencies } from '../../../types';
 import { AnalyticsIndexSynchronizationTaskFactory } from './synchronization_task_factory';
 
-const TASK_TYPE = 'cai:cases_analytics_index_synchronization';
 const SCHEDULE: IntervalSchedule = { interval: '5m' };
 
 export function registerCAISynchronizationTask({
@@ -34,7 +34,7 @@ export function registerCAISynchronizationTask({
   };
 
   taskManager.registerTaskDefinitions({
-    [TASK_TYPE]: {
+    [ANALYTICS_SYNCHRONIZATION_TASK_TYPE]: {
       title: 'Synchronization for the cases analytics index',
       createTaskRunner: (context: RunContext) => {
         return new AnalyticsIndexSynchronizationTaskFactory({ getESClient, logger }).create(
@@ -64,7 +64,7 @@ export async function scheduleCAISynchronizationTask({
   try {
     await taskManager.ensureScheduled({
       id: taskId,
-      taskType: TASK_TYPE,
+      taskType: ANALYTICS_SYNCHRONIZATION_TASK_TYPE,
       params: { sourceIndex, destIndex },
       schedule: SCHEDULE, // every 5 minutes
       state: {},

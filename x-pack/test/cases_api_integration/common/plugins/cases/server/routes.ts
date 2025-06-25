@@ -329,4 +329,30 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
       }
     }
   );
+
+  router.post(
+    {
+      path: '/api/analytics_index/synchronization/run_soon',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        body: schema.object({
+          taskId: schema.string(),
+        }),
+      },
+    },
+    async (context, req, res) => {
+      const { taskId } = req.body;
+      try {
+        const [_, { taskManager }] = await core.getStartServices();
+        return res.ok({ body: await taskManager.runSoon(taskId) });
+      } catch (err) {
+        return res.ok({ body: { id: taskId, error: `${err}` } });
+      }
+    }
+  );
 };
