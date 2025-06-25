@@ -11,6 +11,8 @@ import type { RefreshInterval } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Filter, TimeRange } from '@kbn/es-query';
+import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
+import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverAppState } from '../discover_app_state_container';
@@ -73,6 +75,10 @@ export interface TabState extends TabItem {
   documentsRequest: DocumentsRequest;
   totalHitsRequest: TotalHitsRequest;
   chartRequest: ChartRequest;
+  uiState: {
+    dataGrid?: Partial<UnifiedDataTableRestorableState>;
+    fieldList?: Partial<UnifiedFieldListRestorableState>;
+  };
 }
 
 export interface RecentlyClosedTabState extends TabState {

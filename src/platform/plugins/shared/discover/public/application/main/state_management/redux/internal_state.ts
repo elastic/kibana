@@ -69,6 +69,7 @@ export const defaultTabState: Omit<TabState, keyof TabItem> = {
     loadingStatus: LoadingStatus.Uninitialized,
     result: {},
   },
+  uiState: {},
 };
 
 const initialState: DiscoverInternalState = {
@@ -220,6 +221,22 @@ export const internalStateSlice = createSlice({
         tab.overriddenVisContextAfterInvalidation = undefined;
         state.expandedDoc = undefined;
       }),
+
+    setDataGridUiState: (
+      state,
+      action: TabAction<{ dataGridUiState: Partial<TabState['uiState']['dataGrid']> }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.uiState.dataGrid = action.payload.dataGridUiState;
+      }),
+
+    setFieldListUiState: (
+      state,
+      action: TabAction<{ fieldListUiState: Partial<TabState['uiState']['fieldList']> }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.uiState.fieldList = action.payload.fieldListUiState;
+      }),
   },
   extraReducers: (builder) => {
     builder.addCase(loadDataViewList.fulfilled, (state, action) => {
@@ -282,6 +299,9 @@ export const createInternalStateStore = (options: InternalStateDependencies) => 
         thunk: { extraArgument: options },
         serializableCheck: !IS_JEST_ENVIRONMENT,
       }).prepend(createMiddleware(options).middleware),
+    devTools: {
+      name: 'DiscoverInternalState',
+    },
   });
 };
 
