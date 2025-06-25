@@ -255,6 +255,7 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/elastic-assistant-shared-state",
     "@kbn/elastic-assistant-shared-state-plugin",
-    "@kbn/spaces-utils"
+    "@kbn/spaces-utils",
+    "@kbn/security-solution-plugin"
   ]
 }
