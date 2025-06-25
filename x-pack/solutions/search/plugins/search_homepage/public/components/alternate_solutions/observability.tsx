@@ -24,6 +24,8 @@ export const Observability: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const { http, cloud } = useKibana().services;
 
+  const isServerless: boolean = cloud?.isServerlessEnabled ?? false;
+
   const o11yTrialLink = useMemo(() => {
     if (cloud && cloud.isServerlessEnabled) {
       const baseUrl = cloud?.projectsUrl ?? 'https://cloud.elastic.co/projects/';
