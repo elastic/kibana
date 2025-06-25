@@ -108,7 +108,7 @@ In previous publications,`,
     it('Responds with The "AI Assistant knowledge base" needs to be installed... when no docs and no kb install', async () => {
       getKnowledgeBaseDocumentEntries.mockResolvedValue([]);
       (getIsKnowledgeBaseInstalled as jest.Mock).mockResolvedValue(false);
-      const tool = SECURITY_LABS_KNOWLEDGE_BASE_TOOL.getTool(defaultArgs) as DynamicStructuredTool;
+      const tool = await SECURITY_LABS_KNOWLEDGE_BASE_TOOL.getTool(defaultArgs) as DynamicStructuredTool;
 
       const result = await tool.func({ query: 'What is Kibana Security?', product: 'kibana' });
 
@@ -117,7 +117,7 @@ In previous publications,`,
     it('Responds with empty response when no docs and kb is installed', async () => {
       getKnowledgeBaseDocumentEntries.mockResolvedValue([]);
       (getIsKnowledgeBaseInstalled as jest.Mock).mockResolvedValue(true);
-      const tool = SECURITY_LABS_KNOWLEDGE_BASE_TOOL.getTool(defaultArgs) as DynamicStructuredTool;
+      const tool = await SECURITY_LABS_KNOWLEDGE_BASE_TOOL.getTool(defaultArgs) as DynamicStructuredTool;
 
       const result = await tool.func({ query: 'What is Kibana Security?', product: 'kibana' });
 
