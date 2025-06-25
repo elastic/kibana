@@ -15,13 +15,14 @@ import {
   EuiFlyoutBody,
   EuiSkeletonTitle,
 } from '@elastic/eui';
-import { DataTableRecord, PARENT_ID_FIELD } from '@kbn/discover-utils';
+import { DataTableRecord } from '@kbn/discover-utils';
 import { flattenObject } from '@kbn/object-utils';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { useSpan } from '../hooks/use_span';
 import { SpanFlyoutBody } from './span_flyout_body';
+import { isSpanHit } from '../helpers/is_span';
 
 const flyoutId = 'spanDetailFlyout';
 
@@ -53,7 +54,8 @@ export const SpanFlyout = ({
       flattened: flattenObject(span),
     };
   }, [docId, span]);
-  const isSpan = !!documentAsHit?.flattened[PARENT_ID_FIELD];
+
+  const isSpan = isSpanHit(documentAsHit);
 
   return (
     <EuiFlyout

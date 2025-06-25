@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
-import { UpdateIndexFlyoutStep } from './update_step';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
+import { UpdateIndexModalStep } from './update_step';
 import type { ReindexState } from '../../../use_reindex';
 import type { UpdateIndexState } from '../../../use_update_index';
 
-describe('UpdateIndexFlyoutStep', () => {
+// Helper to wrap components in I18nProvider
+const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
+
+describe('UpdateIndexModalStep', () => {
   const meta: ReindexState['meta'] = {
     indexName: 'some_index',
     aliases: [],
@@ -29,144 +34,92 @@ describe('UpdateIndexFlyoutStep', () => {
   };
 
   it('renders makeReadonly operation', () => {
-    const wrapper = shallow(
-      <UpdateIndexFlyoutStep
+    renderWithI18n(
+      <UpdateIndexModalStep
         action="makeReadonly"
-        closeFlyout={jest.fn()}
         meta={meta}
+        closeModal={jest.fn()}
         retry={jest.fn()}
         updateIndexState={defaultUpdateIndexState}
       />
     );
 
-    expect(wrapper).toMatchInlineSnapshot(`
-      <Fragment>
-        <EuiFlyoutBody>
-          <EuiTitle
-            data-test-subj="updateIndexFlyoutTitle"
-            size="xs"
-          >
-            <h3>
-              <MemoizedFormattedMessage
-                defaultMessage="Upgrade in progress…"
-                id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.updateStep.checklist.title.updateInProgressText"
-              />
-            </h3>
-          </EuiTitle>
-          <EuiSpacer />
-          <StepProgress
-            steps={
-              Array [
-                Object {
-                  "status": "incomplete",
-                  "title": <Memo(MemoizedFormattedMessage)
-                    defaultMessage="Setting {indexName} index to read-only."
-                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.updateStep.checklist.step.readonlyStepText"
-                    values={
-                      Object {
-                        "indexName": <EuiCode>
-                          some_index
-                        </EuiCode>,
-                      }
-                    }
-                  />,
-                },
-              ]
-            }
-          />
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup
-            justifyContent="spaceBetween"
-          >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiButtonEmpty
-                flush="left"
-                iconType="cross"
-                onClick={[MockFunction]}
-              >
-                <MemoizedFormattedMessage
-                  defaultMessage="Close"
-                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.closeButtonLabel"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </Fragment>
-    `);
+    expect(screen.getByTestId('updateIndexModalTitle')).toHaveTextContent(
+      'Setting index to read-only'
+    );
+    expect(screen.getByTestId('updateIndexProgress')).toHaveTextContent('Upgrade in progress');
+    expect(
+      screen.getByText(
+        (content, element) => element?.textContent === 'Setting some_index index to read-only.'
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('closeUpdateStepButton')).toHaveTextContent('Close');
   });
 
   it('renders unfreeze operation', () => {
-    const wrapper = shallow(
-      <UpdateIndexFlyoutStep
+    renderWithI18n(
+      <UpdateIndexModalStep
         action="unfreeze"
-        closeFlyout={jest.fn()}
+        closeModal={jest.fn()}
         meta={meta}
         retry={jest.fn()}
         updateIndexState={defaultUpdateIndexState}
       />
     );
 
-    expect(wrapper).toMatchInlineSnapshot(`
-      <Fragment>
-        <EuiFlyoutBody>
-          <EuiTitle
-            data-test-subj="updateIndexFlyoutTitle"
-            size="xs"
-          >
-            <h3>
-              <MemoizedFormattedMessage
-                defaultMessage="Upgrade in progress…"
-                id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.updateStep.checklist.title.updateInProgressText"
-              />
-            </h3>
-          </EuiTitle>
-          <EuiSpacer />
-          <StepProgress
-            steps={
-              Array [
-                Object {
-                  "status": "incomplete",
-                  "title": <Memo(MemoizedFormattedMessage)
-                    defaultMessage="Unfreezing {indexName} index."
-                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.updateStep.checklist.step.unfreezeStepText"
-                    values={
-                      Object {
-                        "indexName": <EuiCode>
-                          some_index
-                        </EuiCode>,
-                      }
-                    }
-                  />,
-                },
-              ]
-            }
-          />
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup
-            justifyContent="spaceBetween"
-          >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiButtonEmpty
-                flush="left"
-                iconType="cross"
-                onClick={[MockFunction]}
-              >
-                <MemoizedFormattedMessage
-                  defaultMessage="Close"
-                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.closeButtonLabel"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </Fragment>
-    `);
+    expect(screen.getByTestId('updateIndexModalTitle')).toHaveTextContent('Unfreezing index');
+    expect(screen.getByTestId('updateIndexProgress')).toHaveTextContent('Upgrade in progress');
+    expect(
+      screen.getByText(
+        (content, element) => element?.textContent === 'Unfreezing some_index index.'
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('closeUpdateStepButton')).toHaveTextContent('Close');
+  });
+
+  it('calls closeModal when close button is clicked', async () => {
+    const closeModal = jest.fn();
+    renderWithI18n(
+      <UpdateIndexModalStep
+        action="makeReadonly"
+        meta={meta}
+        closeModal={closeModal}
+        retry={jest.fn()}
+        updateIndexState={defaultUpdateIndexState}
+      />
+    );
+    await userEvent.click(screen.getByTestId('closeUpdateStepButton'));
+    expect(closeModal).toHaveBeenCalled();
+  });
+
+  it('shows retry button if failedBefore and not complete', () => {
+    renderWithI18n(
+      <UpdateIndexModalStep
+        action="makeReadonly"
+        meta={meta}
+        closeModal={jest.fn()}
+        retry={jest.fn()}
+        updateIndexState={{ status: 'failed', failedBefore: true, reason: 'Some error' }}
+      />
+    );
+    expect(screen.getByTestId('retryUpdateStepButton')).toBeInTheDocument();
+    expect(screen.getByTestId('retryUpdateStepButton')).toHaveTextContent('Retry');
+    expect(screen.getByText('There was an error')).toBeInTheDocument();
+    expect(screen.getByText('Some error')).toBeInTheDocument();
+  });
+
+  it('calls retry when retry button is clicked', async () => {
+    const retry = jest.fn();
+    renderWithI18n(
+      <UpdateIndexModalStep
+        action="makeReadonly"
+        meta={meta}
+        closeModal={jest.fn()}
+        retry={retry}
+        updateIndexState={{ status: 'failed', failedBefore: true, reason: 'Some error' }}
+      />
+    );
+    await userEvent.click(screen.getByTestId('retryUpdateStepButton'));
+    expect(retry).toHaveBeenCalled();
   });
 });
