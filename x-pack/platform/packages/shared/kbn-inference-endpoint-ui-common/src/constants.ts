@@ -59,7 +59,7 @@ export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
           sensitive: false,
           supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank'],
           type: FieldType.INTEGER,
-          updatable: true,
+          updatable: false,
         },
       },
     ],

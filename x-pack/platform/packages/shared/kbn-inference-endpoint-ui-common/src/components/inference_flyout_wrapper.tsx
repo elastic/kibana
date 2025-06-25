@@ -27,6 +27,33 @@ import type { InferenceEndpoint } from '../types/types';
 import { InferenceServiceFormFields } from './inference_service_form_fields';
 import { useInferenceEndpointMutation } from '../hooks/use_inference_endpoint_mutation';
 
+const formDeserializer = (data: InferenceEndpoint) => {
+  if (
+    data?.config?.providerConfig &&
+    data?.config?.providerConfig['adaptive_allocations.max_number_of_allocations']
+  ) {
+    // remove num_allocations and num_threads from the data as form does not expect it
+    const {
+      num_allocations: numAllocations,
+      num_threads: numThreads,
+      ...restOfProviderConfig
+    } = data.config.providerConfig;
+    return {
+      ...data,
+      config: {
+        ...data.config,
+        providerConfig: {
+          ...restOfProviderConfig,
+          max_number_of_allocations:
+            restOfProviderConfig['adaptive_allocations.max_number_of_allocations'],
+        },
+      },
+    };
+  }
+
+  return data;
+};
+
 interface InferenceFlyoutWrapperProps {
   onFlyoutClose: () => void;
   http: HttpSetup;
@@ -70,6 +97,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
         providerSecrets: {},
       },
     },
+    deserializer: formDeserializer,
   });
   const handleSubmit = useCallback(async () => {
     const { isValid, data } = await form.submit();

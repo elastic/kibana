@@ -48,6 +48,11 @@ interface Props {
   onFormModifiedChange?: (isModified: boolean) => void;
   setResetForm?: (value: ResetForm) => void;
 }
+
+interface ProviderConfig {
+  [key: string]: unknown;
+  adaptive_allocations?: { max_number_of_allocations?: number };
+}
 /**
  * The serializer and deserializer are needed to transform the headers of
  * the webhook connectors. The webhook connector uses the UseArray component
@@ -62,6 +67,27 @@ interface Props {
 
 // TODO: Remove when https://github.com/elastic/kibana/issues/133107 is resolved
 const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
+  if (
+    data.actionTypeId === '.inference' &&
+    // explicit check to see if this field exists
+    (data?.config?.providerConfig as ProviderConfig)?.adaptive_allocations
+      ?.max_number_of_allocations
+  ) {
+    return {
+      ...data,
+      config: {
+        ...data.config,
+        providerConfig: {
+          ...(data.config.providerConfig as ProviderConfig),
+          max_number_of_allocations: (data.config.providerConfig as ProviderConfig)
+            .adaptive_allocations?.max_number_of_allocations,
+          // remove the adaptive_allocations from the data config as form does not expect it
+          adaptive_allocations: undefined,
+        },
+      },
+    };
+  }
+
   if (
     data.actionTypeId !== '.webhook' &&
     data.actionTypeId !== '.cases-webhook' &&
