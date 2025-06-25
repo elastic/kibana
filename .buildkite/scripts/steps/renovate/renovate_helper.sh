@@ -9,3 +9,5 @@ echo --- Deduplicate yarn.lock
 cmd="node scripts/yarn_deduplicate.js && yarn kbn bootstrap && node scripts/yarn_deduplicate.js"
 eval "$cmd"
 check_for_changed_files "$cmd" true
+
+#TODO: add label helper

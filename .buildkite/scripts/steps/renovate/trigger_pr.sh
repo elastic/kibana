@@ -4,6 +4,7 @@ set -euo pipefail
 
 echo --- Triggering Kibana Pull Request Pipeline
 
+# The Github env vars need to be passed along manually
 GITHUB_ENV_VARS=()
 for var in $(env | grep ^GITHUB_ | cut -d= -f1); do
   GITHUB_ENV_VARS+=("$var=${!var}")
