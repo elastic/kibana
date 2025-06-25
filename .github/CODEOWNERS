@@ -1113,7 +1113,7 @@ x-pack/test/security_api_integration/plugins/saml_provider @elastic/kibana-secur
 x-pack/test/security_api_integration/plugins/user_profiles_consumer @elastic/kibana-security
 x-pack/test/security_functional/plugins/test_endpoints @elastic/kibana-security
 x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
-x-pack/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget @elastic/response-ops
+x-pack/platform/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget @elastic/response-ops
 x-pack/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/stack_management_usage_test @elastic/kibana-management
@@ -2130,7 +2130,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/plugin_api_integration/test_suites/task_manager/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/embeddable_alerts_table/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/response-ops
-/x-pack/test/task_manager_claimer_update_by_query/ @elastic/response-ops
+/x-pack/platform/test/task_manager_claimer_update_by_query/ @elastic/response-ops
 /docs/user/alerting/ @elastic/response-ops
 /docs/management/connectors/ @elastic/response-ops
 /x-pack/test/cases_api_integration/ @elastic/response-ops
