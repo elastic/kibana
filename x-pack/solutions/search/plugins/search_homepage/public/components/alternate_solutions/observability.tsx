@@ -38,6 +38,10 @@ export const Observability: React.FC = () => {
     return http.basePath.prepend('/app/management/kibana/spaces/create');
   }, [http]);
 
+  const analyzeLogsIntegration = useMemo(() => {
+    return http.basePath.prepend('/app/integrations/browse/observability');
+  }, [http]);
+
   return (
     <EuiFlexGroup gutterSize="m" data-test-subj="observabilitySection">
       <EuiFlexItem grow={false}>
@@ -87,14 +91,25 @@ export const Observability: React.FC = () => {
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiLink
-                      href={docLinks.analyzeLogs}
-                      data-test-subj="exploreLogstashAndBeatsLink"
-                    >
-                      {i18n.translate('xpack.searchHomepage.observability.exploreLogstashBeats', {
-                        defaultMessage: 'Explore Logstash and Beats',
-                      })}
-                    </EuiLink>
+                    {isServerless ? (
+                      <EuiLink
+                        href={docLinks.analyzeLogs}
+                        data-test-subj="exploreLogstashAndBeatsLink"
+                      >
+                        {i18n.translate('xpack.searchHomepage.observability.exploreLogstashBeats', {
+                          defaultMessage: 'Explore Logstash and Beats',
+                        })}
+                      </EuiLink>
+                    ) : (
+                      <EuiLink
+                        href={analyzeLogsIntegration}
+                        data-test-subj="analyzeLogsBrowseIntegrations"
+                      >
+                        {i18n.translate('xpack.searchHomepage.observability.exploreLogstashBeats', {
+                          defaultMessage: 'Explore Logstash and Beats',
+                        })}
+                      </EuiLink>
+                    )}
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
