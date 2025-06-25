@@ -9,10 +9,10 @@ import { useLicense } from '../../common/hooks/use_license';
 import { useKibana } from '../../common/lib/kibana';
 import { ASSISTANT_FEATURE_ID, SECURITY_FEATURE_ID } from '../../../common/constants';
 
-export interface AssistantAvailability {
+export interface UseAssistantAvailability {
   // True when searchAiLake configurations is available
   hasSearchAILakeConfigurations: boolean;
-  // True when user is Enterprise, or Security Complete PLI for serverless. When false, the Assistant is disabled and unavailable
+  // True when user is Enterprise. When false, the Assistant is disabled and unavailable
   isAssistantEnabled: boolean;
   // When true, the Assistant is hidden and unavailable
   hasAssistantPrivilege: boolean;
@@ -26,7 +26,7 @@ export interface AssistantAvailability {
   hasManageGlobalKnowledgeBase: boolean;
 }
 
-export const useAssistantAvailability = (): AssistantAvailability => {
+export const useAssistantAvailability = (): UseAssistantAvailability => {
   const isEnterprise = useLicense().isEnterprise();
   const capabilities = useKibana().services.application.capabilities;
   const hasAssistantPrivilege = capabilities[ASSISTANT_FEATURE_ID]?.['ai-assistant'] === true;
