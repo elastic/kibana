@@ -27,6 +27,14 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         breadcrumbStatus: 'hidden',
         children: [
           {
+            id: 'home',
+            title: i18n.translate('xpack.serverlessSearch.nav.home', {
+              defaultMessage: 'Home',
+            }),
+            link: 'searchHomepage',
+            spaceBefore: 'm',
+          },
+          {
             id: 'analyze',
             title: i18n.translate('xpack.serverlessSearch.nav.analyze', {
               defaultMessage: 'Analyze',
