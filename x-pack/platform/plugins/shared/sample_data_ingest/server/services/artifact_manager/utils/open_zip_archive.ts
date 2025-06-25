@@ -67,18 +67,18 @@ const getZipEntryContent = async (zipFile: yauzl.ZipFile, entry: yauzl.Entry): P
     zipFile.openReadStream(entry, (err, readStream) => {
       if (err) {
         return reject(err);
-      } else {
-        const chunks: Buffer[] = [];
-        readStream.on('data', (chunk: Buffer) => {
-          chunks.push(chunk);
-        });
-        readStream.on('end', () => {
-          resolve(Buffer.concat(chunks));
-        });
-        readStream.on('error', () => {
-          reject();
-        });
       }
+
+      const chunks: Buffer[] = [];
+      readStream.on('data', (chunk: Buffer) => {
+        chunks.push(chunk);
+      });
+      readStream.on('end', () => {
+        resolve(Buffer.concat(chunks));
+      });
+      readStream.on('error', (error) => {
+        reject(error);
+      });
     });
   });
 };

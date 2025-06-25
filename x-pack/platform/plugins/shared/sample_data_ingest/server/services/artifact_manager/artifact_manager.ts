@@ -56,7 +56,6 @@ export class ArtifactManager {
     const artifactFileName = getArtifactName({ productName, productVersion });
     const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
     const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
-
     this.log.debug(`Downloading artifact from [${artifactUrl}]`);
     await download(artifactUrl, artifactPath);
 

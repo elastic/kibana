@@ -34,20 +34,18 @@ export const fetchArtifactVersions = async ({
   return new Promise((resolve, reject) => {
     parseString(xml, (err, result: ListBucketResponse) => {
       if (err) {
-        reject(err);
+        return reject(err);
       }
 
       // 6 artifacts per minor stack version means we have a few decades before facing this problem
       if (result.ListBucketResult.IsTruncated?.includes('true')) {
-        throw new Error('bucket content is truncated, cannot retrieve all versions');
+        return reject('bucket content is truncated, cannot retrieve all versions');
       }
 
-      const allowedProductNames: ProductName[] = Object.values(DocumentationProduct);
-
-      const record: ArtifactAvailableVersions = {} as ArtifactAvailableVersions;
-      allowedProductNames.forEach((product) => {
-        record[product] = [];
-      });
+      const record: ArtifactAvailableVersions = Object.values(DocumentationProduct).reduce(
+        (res, product) => ({ ...res, [product]: [] }),
+        {}
+      );
 
       result.ListBucketResult.Contents?.forEach((contentEntry) => {
         const artifactName = contentEntry.Key[0];

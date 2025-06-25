@@ -79,7 +79,9 @@ export class SampleDataManager {
       this.log.info(`Sample data installation successful for [${sampleType}]`);
       return indexName;
     } catch (error) {
-      this.log.error(`Sample data installation failed for [${sampleType}]: ${error.message}`);
+      this.log.error(
+        `Sample data installation failed for [${sampleType}]: ${error?.message || error}`
+      );
       throw error;
     }
   }
