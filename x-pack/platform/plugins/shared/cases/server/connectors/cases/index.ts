@@ -16,7 +16,7 @@ import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { CasesConnector } from './cases_connector';
-import { DEFAULT_MAX_OPEN_CASES } from './constants';
+import { ATTACK_DISCOVERY_MAX_OPEN_CASES, DEFAULT_MAX_OPEN_CASES } from './constants';
 import {
   CASES_CONNECTOR_ID,
   CASES_CONNECTOR_TITLE,
@@ -109,10 +109,12 @@ export const getCasesConnectorAdapter = ({
        */
       let internallyManagedAlerts = false;
       let groupedAlerts: CasesGroupedAlerts[] | null = null;
+      let maximumCasesToOpen = DEFAULT_MAX_OPEN_CASES;
       if (rule.ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID) {
         try {
           groupedAlerts = groupAttackDiscoveryAlerts(caseAlerts);
           internallyManagedAlerts = true;
+          maximumCasesToOpen = ATTACK_DISCOVERY_MAX_OPEN_CASES;
         } catch (error) {
           logger.error(
             `Could not setup grouped Attack Discovery alerts, because of error: ${error}`
@@ -134,7 +136,7 @@ export const getCasesConnectorAdapter = ({
         owner,
         reopenClosedCases: params.subActionParams.reopenClosedCases,
         timeWindow: params.subActionParams.timeWindow,
-        maximumCasesToOpen: DEFAULT_MAX_OPEN_CASES,
+        maximumCasesToOpen,
         templateId: params.subActionParams.templateId,
         internallyManagedAlerts,
       };
