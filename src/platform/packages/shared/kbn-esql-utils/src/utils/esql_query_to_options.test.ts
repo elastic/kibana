@@ -15,7 +15,7 @@ import {
 
 const mockGetESQLResults = jest.fn();
 jest.mock('./run_query', () => ({
-  getESQLResults: () => mockGetESQLResults(),
+  getESQLResults: (...args: any[]) => mockGetESQLResults(...args),
 }));
 
 const searchMock = {} as ISearchGeneric;
@@ -86,5 +86,19 @@ describe('esqlQueryToOptions', () => {
         ],
       }
     `);
+  });
+
+  it('passes timeRange successfully', async () => {
+    const timeRange = { from: 'now-10m', to: 'now' };
+    await esqlQueryToOptions({
+      query: 'FROM index | STATS BY column',
+      search: searchMock,
+      timeRange,
+    });
+    expect(mockGetESQLResults).toHaveBeenCalledWith(
+      expect.objectContaining({
+        timeRange,
+      })
+    );
   });
 });
