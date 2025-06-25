@@ -58,7 +58,7 @@ describe('ProductDocumentationTool', () => {
 
   describe('getTool', () => {
     it('should return a tool as expected when all required values are present', async () => {
-      const tool = await PRODUCT_DOCUMENTATION_TOOL.getTool(defaultArgs) as DynamicTool;
+      const tool = (await PRODUCT_DOCUMENTATION_TOOL.getTool(defaultArgs)) as DynamicTool;
       expect(tool.name).toEqual('ProductDocumentationTool');
       expect(tool.tags).toEqual(['product-documentation']);
     });
@@ -86,7 +86,7 @@ describe('ProductDocumentationTool', () => {
       retrieveDocumentation.mockResolvedValue({ documents: [] });
     });
     it('the tool invokes retrieveDocumentation', async () => {
-      const tool = await PRODUCT_DOCUMENTATION_TOOL.getTool(defaultArgs) as DynamicStructuredTool;
+      const tool = (await PRODUCT_DOCUMENTATION_TOOL.getTool(defaultArgs)) as DynamicStructuredTool;
 
       await tool.func({ query: 'What is Kibana Security?', product: 'kibana' });
 
@@ -101,7 +101,7 @@ describe('ProductDocumentationTool', () => {
     });
 
     it('includes citations', async () => {
-      const tool = await PRODUCT_DOCUMENTATION_TOOL.getTool(defaultArgs) as DynamicStructuredTool;
+      const tool = (await PRODUCT_DOCUMENTATION_TOOL.getTool(defaultArgs)) as DynamicStructuredTool;
 
       (retrieveDocumentation as jest.Mock).mockResolvedValue({
         documents: [

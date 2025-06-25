@@ -31,28 +31,21 @@ export const getAnalyzeIndexPatternGraph = async ({
   esClient: ElasticsearchClient;
   createLlmInstance: CreateLlmInstance;
 }) => {
-
   const [
     analyzeCompressedIndexMappingAgent,
     explorePartialIndexMappingAgent,
-    explorePartialIndexMappingResponder
+    explorePartialIndexMappingResponder,
   ] = await Promise.all([
     getAnalyzeCompressedIndexMappingAgent({ createLlmInstance }),
     getExplorePartialIndexMappingAgent({ esClient, createLlmInstance }),
-    getExplorePartialIndexMappingResponder({ createLlmInstance })
+    getExplorePartialIndexMappingResponder({ createLlmInstance }),
   ]);
 
   const graph = new StateGraph(AnalyzeIndexPatternAnnotation)
     .addNode(GET_FIELD_DESCRIPTORS, getFieldDescriptors({ esClient }))
-    .addNode(
-      ANALYZE_COMPRESSED_INDEX_MAPPING_AGENT,
-      analyzeCompressedIndexMappingAgent
-    )
+    .addNode(ANALYZE_COMPRESSED_INDEX_MAPPING_AGENT, analyzeCompressedIndexMappingAgent)
 
-    .addNode(
-      EXPLORE_PARTIAL_INDEX_AGENT,
-      explorePartialIndexMappingAgent
-    )
+    .addNode(EXPLORE_PARTIAL_INDEX_AGENT, explorePartialIndexMappingAgent)
     .addNode(TOOLS, (state: typeof AnalyzeIndexPatternAnnotation.State) => {
       const { input } = state;
       if (input === undefined) {
@@ -66,10 +59,7 @@ export const getAnalyzeIndexPatternGraph = async ({
       const toolNode = new ToolNode(tools);
       return toolNode.invoke(state);
     })
-    .addNode(
-      EXPLORE_PARTIAL_INDEX_RESPONDER,
-      explorePartialIndexMappingResponder
-    )
+    .addNode(EXPLORE_PARTIAL_INDEX_RESPONDER, explorePartialIndexMappingResponder)
 
     .addEdge(START, GET_FIELD_DESCRIPTORS)
     .addConditionalEdges(

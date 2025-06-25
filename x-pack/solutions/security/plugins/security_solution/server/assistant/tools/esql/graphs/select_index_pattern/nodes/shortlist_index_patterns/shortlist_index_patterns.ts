@@ -9,7 +9,7 @@ import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { Command } from '@langchain/langgraph';
 import { z } from '@kbn/zod';
 import type { SelectIndexPatternAnnotation } from '../../state';
-import { CreateLlmInstance } from '../../../../utils/common';
+import type { CreateLlmInstance } from '../../../../utils/common';
 
 const ShortlistedIndexPatterns = z
   .object({

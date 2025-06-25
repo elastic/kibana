@@ -86,13 +86,13 @@ describe('AlertCountsTool', () => {
 
   describe('getTool', () => {
     it('returns a `DynamicTool` with a `func` that calls `esClient.search()` with the expected query', async () => {
-      const tool: DynamicTool = await ALERT_COUNTS_TOOL.getTool({
+      const tool: DynamicTool = (await ALERT_COUNTS_TOOL.getTool({
         alertsIndexPattern,
         esClient,
         replacements,
         request,
         ...rest,
-      }) as DynamicTool;
+      })) as DynamicTool;
 
       await tool.func('');
 
@@ -163,13 +163,13 @@ describe('AlertCountsTool', () => {
     });
 
     it('includes citations', async () => {
-      const tool: DynamicTool = await ALERT_COUNTS_TOOL.getTool({
+      const tool: DynamicTool = (await ALERT_COUNTS_TOOL.getTool({
         alertsIndexPattern,
         esClient,
         replacements,
         request,
         ...rest,
-      }) as DynamicTool;
+      })) as DynamicTool;
 
       (contentReferencesStore.add as jest.Mock).mockImplementation(
         (creator: Parameters<ContentReferencesStore['add']>[0]) => {
@@ -198,14 +198,14 @@ describe('AlertCountsTool', () => {
     });
 
     it('returns a tool instance with the expected tags', async () => {
-      const tool = await ALERT_COUNTS_TOOL.getTool({
+      const tool = (await ALERT_COUNTS_TOOL.getTool({
         alertsIndexPattern,
         esClient,
         replacements,
         request,
 
         ...rest,
-      }) as DynamicTool;
+      })) as DynamicTool;
 
       expect(tool.tags).toEqual(['alerts', 'alerts-count']);
     });

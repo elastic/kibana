@@ -14,7 +14,8 @@ import type { RequiredDefined } from '@kbn/elastic-assistant-plugin/server/types
 import { APP_UI_ID } from '../../../../common';
 import { getPromptSuffixForOssModel } from './utils/common';
 
-export type ESQLToolParams = AssistantToolParams & RequiredDefined<Pick<AssistantToolParams, 'assistantContext'>>
+export type ESQLToolParams = AssistantToolParams &
+  RequiredDefined<Pick<AssistantToolParams, 'assistantContext'>>;
 
 const TOOL_NAME = 'AskAboutEsqlTool';
 

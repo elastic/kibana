@@ -19,7 +19,7 @@ import { getShortlistIndexPatterns } from './nodes/shortlist_index_patterns/shor
 import { getAnalyzeIndexPattern } from './nodes/analyse_index_pattern/analyse_index_pattern';
 import { getSelectIndexPattern } from './nodes/select_index/select_index';
 import { getAnalyzeIndexPatternGraph } from '../analyse_index_pattern/analyse_index_pattern';
-import { CreateLlmInstance } from '../../utils/common';
+import type { CreateLlmInstance } from '../../utils/common';
 
 export const getSelectIndexPatternGraph = async ({
   createLlmInstance,
@@ -28,18 +28,14 @@ export const getSelectIndexPatternGraph = async ({
   createLlmInstance: CreateLlmInstance;
   esClient: ElasticsearchClient;
 }) => {
-
-  const [
-    analyzeIndexPatternGraph,
-    shortlistIndexPatterns
-  ] = await Promise.all([
+  const [analyzeIndexPatternGraph, shortlistIndexPatterns] = await Promise.all([
     getAnalyzeIndexPatternGraph({
       esClient,
       createLlmInstance,
     }),
     getShortlistIndexPatterns({
       createLlmInstance,
-    })
+    }),
   ]);
 
   const graph = new StateGraph(SelectIndexPatternAnnotation)

@@ -16,7 +16,8 @@ import { getPromptSuffixForOssModel } from './utils/common';
 
 // select only some properties of AssistantToolParams
 
-export type ESQLToolParams = AssistantToolParams & RequiredDefined<Pick<AssistantToolParams, 'assistantContext'>>
+export type ESQLToolParams = AssistantToolParams &
+  RequiredDefined<Pick<AssistantToolParams, 'assistantContext'>>;
 
 const TOOL_NAME = 'NaturalLanguageESQLTool';
 
