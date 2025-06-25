@@ -231,14 +231,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const caseToDelete = await createCase(supertest, getPostCaseRequest(), 200, authSpace1);
       await deleteCases({
-        supertest: supertest,
+        supertest,
         caseIDs: [caseToDelete.id],
         auth: authSpace1,
       });
 
       await runActivityBackfillTask(supertest);
 
-      let activityArray: Array<any> = [];
+      let activityArray: any[] = [];
       await retry.try(async () => {
         const activityAnalytics = await esClient.search({
           index: '.internal.cases-activity',
@@ -246,7 +246,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // @ts-ignore
         expect(activityAnalytics.hits.total?.value).to.be(5);
-        activityArray = activityAnalytics.hits.hits as unknown as Array<any>;
+        activityArray = activityAnalytics.hits.hits as unknown as any[];
       });
 
       const tagsActivity = activityArray.filter((activity) => activity._source.type === 'tags');
