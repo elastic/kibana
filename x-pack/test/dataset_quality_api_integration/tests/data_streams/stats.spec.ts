@@ -59,10 +59,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     ]);
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/211517
-  // Failing: See https://github.com/elastic/kibana/issues/213290
-  registry.when.skip('Api Key privileges check', { config: 'basic' }, () => {
-    describe('index privileges', () => {
+  registry.when('Api Key privileges check', { config: 'basic' }, () => {
+    describe('index privileges', function () {
+      // This disables the forward-compatibility test for Kibana 8.19 with ES upgraded to 9.0.
+      // These versions are not expected to work together.
+      // The tests raise "unknown index privilege [read_failure_store]" error in ES 9.0.
+      this.onlyEsVersion('8.19 || >=9.1');
+
       it('returns user authorization as false for noAccessUser', async () => {
         const resp = await callApiAs('noAccessUser');
 
@@ -78,6 +81,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(resp.body.datasetUserPrivileges).to.eql({
           canRead: true,
           canMonitor: true,
+          canReadFailureStore: true,
           canViewIntegrations: true,
         });
       });
@@ -126,7 +130,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when required privileges are set', () => {
+    describe('when required privileges are set', function () {
+      // This disables the forward-compatibility test for Kibana 8.19 with ES upgraded to 9.0.
+      // These versions are not expected to work together.
+      // The tests raise "unknown index privilege [read_failure_store]" error in ES 9.0.
+      this.onlyEsVersion('8.19 || >=9.1');
+
       describe('and categorized datastreams', () => {
         const integration = 'my-custom-integration';
 

@@ -82,6 +82,9 @@ export type PieLayerState = SharedPieLayerState & {
 export interface PieVisualizationState {
   shape: $Values<typeof PieChartTypes>;
   layers: PieLayerState[];
+  /**
+   * @deprecated use `layer.colorMapping` config
+   */
   palette?: PaletteOutput;
 }
 

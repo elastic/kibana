@@ -96,7 +96,7 @@ const getImportRuleBuffer = (connectorId: string) => {
 
   return Buffer.from(ndjson);
 };
-const getImportRuleWithConnectorsBuffer = (connectorId: string) => {
+const getImportRuleWithConnectorsBuffer = (connectorId: string, originId?: string) => {
   const rule1 = getRuleImportWithActions([
     {
       group: 'default',
@@ -109,6 +109,7 @@ const getImportRuleWithConnectorsBuffer = (connectorId: string) => {
   ]);
   const connector = {
     id: connectorId,
+    originId,
     type: 'action',
     updated_at: '2023-01-25T14:35:52.852Z',
     created_at: '2023-01-25T14:35:52.852Z',
@@ -910,6 +911,40 @@ export default ({ getService }: FtrProviderContext): void => {
             action_connectors_errors: [],
           });
         });
+
+        it('should import rules and connectors when connectors include an originId', async () => {
+          const defaultSpaceConnectorId = 'c5548aec-a02f-4d98-8a37-5ed7e1810c0e';
+          const originId = '6f353a28-74c8-4660-8ea5-2485dbe64fbf';
+
+          const buffer = getImportRuleWithConnectorsBuffer(defaultSpaceConnectorId, originId);
+
+          await supertest
+            .post(`${DETECTION_ENGINE_RULES_IMPORT_URL}`)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .attach('file', buffer, 'rules.ndjson')
+            .expect(200);
+
+          const { body } = await supertest
+            .post(
+              `/s/${spaceId}${DETECTION_ENGINE_RULES_IMPORT_URL}?overwrite=true&overwrite_action_connectors=true`
+            )
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .attach('file', buffer, 'rules.ndjson')
+            .expect(200);
+
+          expect(body).toMatchObject({
+            success: true,
+            success_count: 1,
+            rules_count: 1,
+            errors: [],
+            action_connectors_success: true,
+            action_connectors_success_count: 1,
+            action_connectors_warnings: [],
+            action_connectors_errors: [],
+          });
+        });
       });
 
       describe('@skipInServerless migrate pre-8.0 action connector ids', () => {
@@ -1609,99 +1644,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect('Content-Type', 'application/json; charset=utf-8')
           .expect(200);
-      });
-    });
-
-    describe('supporting prebuilt rule customization', () => {
-      describe('compatibility with prebuilt rule fields', () => {
-        it('accepts rules with "immutable: true"', async () => {
-          const rule = getCustomQueryRuleParams({
-            rule_id: 'rule-immutable',
-            // @ts-expect-error the API supports this param, but we only need it in {@link RuleToImport}
-            immutable: true,
-          });
-          const ndjson = combineToNdJson(rule);
-
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-            .expect(200);
-
-          expect(body).toMatchObject({
-            success: true,
-          });
-        });
-
-        it('imports custom rules alongside prebuilt rules', async () => {
-          const ndjson = combineToNdJson(
-            getCustomQueryRuleParams({
-              rule_id: 'rule-immutable',
-              // @ts-expect-error the API supports the 'immutable' param, but we only need it in {@link RuleToImport}
-              immutable: true,
-            }),
-            // @ts-expect-error the API supports the 'immutable' param, but we only need it in {@link RuleToImport}
-            getCustomQueryRuleParams({ rule_id: 'custom-rule', immutable: false })
-          );
-
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-            .expect(200);
-
-          expect(body).toMatchObject({
-            success: true,
-            success_count: 2,
-          });
-        });
-
-        it('allows (but ignores) rules with a value for rule_source', async () => {
-          const rule = getCustomQueryRuleParams({
-            rule_id: 'with-rule-source',
-            // @ts-expect-error the API supports this param, but we only need it in {@link RuleToImport}
-            rule_source: {
-              type: 'ignored',
-            },
-          });
-          const ndjson = combineToNdJson(rule);
-
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-            .expect(200);
-
-          expect(body).toMatchObject({
-            success: true,
-            success_count: 1,
-          });
-
-          const importedRule = await fetchRule(supertest, { ruleId: 'with-rule-source' });
-
-          expect(importedRule.rule_source).toMatchObject({ type: 'internal' });
-        });
-
-        it('rejects rules without a rule_id', async () => {
-          const rule = getCustomQueryRuleParams({});
-          delete rule.rule_id;
-          const ndjson = combineToNdJson(rule);
-
-          const { body } = await supertest
-            .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-            .expect(200);
-
-          expect(body.errors).toHaveLength(1);
-          expect(body.errors[0]).toMatchObject({
-            error: { message: 'rule_id: Required', status_code: 400 },
-          });
-        });
       });
     });
   });

@@ -20,7 +20,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
  * Analyzer preview under Overview, Visualizations. It shows a tree representation of analyzer.
  */
 export const AnalyzerPreviewContainer: React.FC = () => {
-  const { dataAsNestedObject, isPreview, eventId, indexName, scopeId, isPreviewMode } =
+  const { dataAsNestedObject, isRulePreview, eventId, indexName, scopeId, isPreviewMode } =
     useDocumentDetailsContext();
 
   const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
@@ -41,7 +41,7 @@ export const AnalyzerPreviewContainer: React.FC = () => {
 
   const isNavigationEnabled = useMemo(() => {
     // if the analyzer is not enabled or in rule preview mode, the navigation is not enabled
-    if (!isEnabled || isPreview) {
+    if (!isEnabled || isRulePreview) {
       return false;
     }
     // if the new navigation is enabled, the navigation is enabled (flyout or timeline)
@@ -50,7 +50,7 @@ export const AnalyzerPreviewContainer: React.FC = () => {
     }
     // if the new navigation is not enabled, the navigation is enabled if the flyout is not in preview mode
     return !isPreviewMode;
-  }, [isNewNavigationEnabled, isPreviewMode, isEnabled, isPreview]);
+  }, [isNewNavigationEnabled, isPreviewMode, isEnabled, isRulePreview]);
 
   return (
     <ExpandablePanel

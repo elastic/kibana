@@ -31,6 +31,8 @@ export const MicrosoftDefenderEndpointBaseApiResponseSchema = schema.maybe(
   schema.object({}, { unknowns: 'allow' })
 );
 
+export const MicrosoftDefenderEndpointEmptyParamsSchema = schema.object({});
+
 export const TestConnectorParamsSchema = schema.object({});
 
 export const AgentDetailsParamsSchema = schema.object({
@@ -146,6 +148,15 @@ export const ReleaseHostParamsSchema = schema.object({
   comment: schema.string({ minLength: 1 }),
 });
 
+export const RunScriptParamsSchema = schema.object({
+  id: schema.string({ minLength: 1 }),
+  comment: schema.maybe(schema.string({ minLength: 1 })),
+  parameters: schema.object({
+    scriptName: schema.string({ minLength: 1 }),
+    args: schema.maybe(schema.string({ minLength: 1 })),
+  }),
+});
+
 const MachineActionTypeSchema = schema.oneOf([
   schema.literal('RunAntiVirusScan'),
   schema.literal('Offboard'),
@@ -207,6 +218,34 @@ export const GetActionsParamsSchema = schema.object({
   sortDirection: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
 });
 
+export const GetActionResultsParamsSchema = schema.object({
+  id: schema.string({ minLength: 1 }),
+});
+
+export const MSDefenderLibraryFileSchema = schema.object(
+  {
+    fileName: schema.maybe(schema.string()),
+    sha256: schema.maybe(schema.string()),
+    description: schema.maybe(schema.string()),
+    creationTime: schema.maybe(schema.string()),
+    lastUpdatedTime: schema.maybe(schema.string()),
+    createdBy: schema.maybe(schema.string()),
+    hasParameters: schema.maybe(schema.boolean()),
+    parametersDescription: schema.maybe(schema.nullable(schema.string())),
+  },
+  { unknowns: 'allow' }
+);
+
+export const GetLibraryFilesResponse = schema.object(
+  {
+    '@odata.context': schema.maybe(schema.string()),
+    value: schema.maybe(schema.arrayOf(MSDefenderLibraryFileSchema)),
+  },
+  { unknowns: 'allow' }
+);
+
+export const DownloadActionResultsResponseSchema = schema.stream();
+
 // ----------------------------------
 // Connector Sub-Actions
 // ----------------------------------
@@ -225,9 +264,14 @@ const ReleaseHostSchema = schema.object({
   subAction: schema.literal(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RELEASE_HOST),
   subActionParams: ReleaseHostParamsSchema,
 });
+const RunScriptSchema = schema.object({
+  subAction: schema.literal(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RUN_SCRIPT),
+  subActionParams: RunScriptParamsSchema,
+});
 
 export const MicrosoftDefenderEndpointActionParamsSchema = schema.oneOf([
   TestConnectorSchema,
   IsolateHostSchema,
   ReleaseHostSchema,
+  RunScriptSchema,
 ]);

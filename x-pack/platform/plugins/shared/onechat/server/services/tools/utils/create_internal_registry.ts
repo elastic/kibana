@@ -15,6 +15,7 @@ import type {
 import {
   InternalToolRegistry,
   InternalToolProvider,
+  RegisteredToolProviderWithId,
   ScopedPublicToolRegistryFactoryFn,
   PublicToolRegistry,
 } from '../types';
@@ -25,7 +26,7 @@ export const createInternalRegistry = ({
   providers,
   getRunner,
 }: {
-  providers: InternalToolProvider[];
+  providers: RegisteredToolProviderWithId[];
   getRunner: () => Runner;
 }): InternalToolRegistry => {
   const mainProvider = combineToolProviders(...providers);

@@ -30,9 +30,9 @@ import {
   canEditRuleWithActions,
   explainLackOfPermission,
 } from '../../../../common/utils/privileges';
-import { IntegrationsPopover } from '../../../../detections/components/rules/related_integrations/integrations_popover';
-import { RuleStatusBadge } from '../../../../detections/components/rules/rule_execution_status';
-import { RuleSwitch } from '../../../../detections/components/rules/rule_switch';
+import { IntegrationsPopover } from '../../../common/components/related_integrations/integrations_popover';
+import { RuleStatusBadge } from '../../../common/components/rule_execution_status';
+import { RuleSwitch } from '../../../common/components/rule_switch';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 import * as i18n from '../../../common/translations';
 import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
@@ -62,6 +62,8 @@ interface ActionColumnsProps {
   confirmDeletion: () => Promise<boolean>;
 }
 
+const loadingActionsSet = new Set(['disable', 'enable', 'edit', 'delete', 'run', 'fill_gaps']);
+
 export const useEnabledColumn = ({
   hasCRUDPermissions,
   startMlJobs,
@@ -71,10 +73,7 @@ export const useEnabledColumn = ({
   const { loadingRulesAction, loadingRuleIds } = useRulesTableContext().state;
 
   const loadingIds = useMemo(
-    () =>
-      ['disable', 'enable', 'edit', 'delete', 'run'].includes(loadingRulesAction ?? '')
-        ? loadingRuleIds
-        : [],
+    () => (loadingActionsSet.has(loadingRulesAction ?? '') ? loadingRuleIds : []),
     [loadingRuleIds, loadingRulesAction]
   );
 

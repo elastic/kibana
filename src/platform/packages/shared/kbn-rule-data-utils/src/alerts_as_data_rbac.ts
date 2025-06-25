@@ -33,6 +33,7 @@ export const AlertConsumers = {
   DISCOVER: 'discover',
 } as const;
 export type AlertConsumers = (typeof AlertConsumers)[keyof typeof AlertConsumers];
+export const DEPRECATED_ALERTING_CONSUMERS = [AlertConsumers.OBSERVABILITY];
 export type STATUS_VALUES = 'open' | 'acknowledged' | 'closed' | 'in-progress'; // TODO: remove 'in-progress' after migration to 'acknowledged'
 
 export type ValidFeatureId = AlertConsumers;
@@ -101,4 +102,5 @@ export const getEsQueryConfig = (params?: GetEsQueryConfigParamType): EsQueryCon
  * TODO: Remove when checks for specific rule type ids is not needed
  *in the codebase.
  */
-export const isSiemRuleType = (ruleTypeId: string) => ruleTypeId.startsWith('siem.');
+export const isSiemRuleType = (ruleTypeId: string) =>
+  ruleTypeId.startsWith('siem.') || ruleTypeId === 'attack-discovery';

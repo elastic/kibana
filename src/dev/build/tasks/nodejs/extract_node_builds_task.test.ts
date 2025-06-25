@@ -73,7 +73,7 @@ beforeEach(() => {
 it('runs expected fs operations', async () => {
   const { config } = await setup();
 
-  await ExtractNodeBuilds.run(config, log, []);
+  await ExtractNodeBuilds.run(config, log);
 
   const usedMethods = Object.fromEntries(
     Object.entries(Fs)

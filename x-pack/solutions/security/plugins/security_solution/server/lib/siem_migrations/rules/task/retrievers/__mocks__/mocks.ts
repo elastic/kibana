@@ -16,7 +16,7 @@ export const createRuleMigrationsRetrieverMock = () => {
 
   const mockIntegrations = {
     populateIndex: jest.fn().mockResolvedValue(undefined),
-    getIntegrations: jest.fn().mockResolvedValue([]),
+    search: jest.fn().mockResolvedValue([]),
   };
 
   const mockPrebuiltRules = {

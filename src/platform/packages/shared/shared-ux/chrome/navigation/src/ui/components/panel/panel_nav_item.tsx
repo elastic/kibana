@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useCallback } from 'react';
-import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import { EuiListGroupItem } from '@elastic/eui';
 import { Theme, css } from '@emotion/react';
+import React, { FC, useCallback } from 'react';
 
-import { useNavigation } from '../../navigation';
+import { EuiListGroupItem } from '@elastic/eui';
+import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+
 import { useNavigation as useServices } from '../../../services';
+import { isSpecialClick } from '../../../utils';
+import { useNavigation } from '../../navigation';
 import { SubItemTitle } from '../subitem_title';
 import { usePanel } from './context';
 
@@ -55,22 +57,35 @@ const panelNavStyles = ({ euiTheme }: Theme) => css`
 `;
 
 export const PanelNavItem: FC<Props> = ({ item }) => {
-  const { navigateToUrl } = useServices();
+  const { navigateToUrl, eventTracker, basePath } = useServices();
   const { activeNodes } = useNavigation();
   const { close: closePanel } = usePanel();
-  const { id, icon, deepLink, openInNewTab, isExternalLink, renderItem } = item;
+  const { id, path, icon, deepLink, openInNewTab, isExternalLink, renderItem } = item;
 
   const href = deepLink?.url ?? item.href;
 
-  const onClick = useCallback<React.MouseEventHandler>(
+  const onClick = useCallback<React.MouseEventHandler<HTMLButtonElement>>(
     (e) => {
-      if (!!href) {
+      if (href) {
+        eventTracker.clickNavLink({
+          id,
+          path,
+          href: basePath.remove(href),
+          hrefPrev: basePath.remove(window.location.pathname),
+        });
+      }
+
+      if (isSpecialClick(e)) {
+        return;
+      }
+
+      if (href) {
         e.preventDefault();
         navigateToUrl(href);
         closePanel();
       }
     },
-    [closePanel, href, navigateToUrl]
+    [closePanel, id, path, href, navigateToUrl, basePath, eventTracker]
   );
 
   if (renderItem) {
@@ -85,6 +100,7 @@ export const PanelNavItem: FC<Props> = ({ item }) => {
     <EuiListGroupItem
       key={id}
       label={<SubItemTitle item={item} />}
+      aria-label={item.title}
       wrapText
       size="s"
       css={panelNavStyles}

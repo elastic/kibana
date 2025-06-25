@@ -443,6 +443,44 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ]);
       });
 
+      it('should correctly associate nested processors within Elasticsearch ingest pipeline', async () => {
+        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+          processing: [
+            {
+              id: 'draft',
+              manual_ingest_pipeline: {
+                processors: [
+                  {
+                    set: {
+                      field: 'attributes.test',
+                      value: 'test',
+                    },
+                  },
+                  {
+                    fail: {
+                      message: 'Failing',
+                    },
+                  },
+                ],
+                if: { always: {} },
+              },
+            },
+          ],
+          documents: [createTestDocument('test message')],
+        });
+
+        const processorsMetrics = response.body.processors_metrics;
+        const processorMetrics = processorsMetrics.draft;
+
+        expect(processorMetrics.errors).to.eql([
+          {
+            processor_id: 'draft',
+            type: 'generic_processor_failure',
+            message: 'Failing',
+          },
+        ]);
+      });
+
       it('should gracefully return non-additive simulation errors', async () => {
         const response = await simulateProcessingForStream(apiClient, 'logs.test', {
           processing: [

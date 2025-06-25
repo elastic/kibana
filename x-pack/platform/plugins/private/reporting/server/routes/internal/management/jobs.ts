@@ -10,7 +10,7 @@ import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { ROUTE_TAG_CAN_REDIRECT } from '@kbn/security-plugin/server';
 import { ReportingCore } from '../../..';
 import { authorizedUserPreRouting, getCounters } from '../../common';
-import { handleUnavailable } from '../../common/generate';
+import { handleUnavailable } from '../../common/request_handler';
 import {
   commonJobsRouteHandlerFactory,
   jobManagementPreRouting,
@@ -57,7 +57,7 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
         const page = parseInt(queryPage, 10) || 0;
         const size = Math.min(100, parseInt(querySize, 10) || 10);
         const jobIds = queryIds ? queryIds.split(',') : null;
-        const results = await jobsQuery.list(user, page, size, jobIds);
+        const results = await jobsQuery.list(req, user, page, size, jobIds);
 
         counters.usageCounter();
 

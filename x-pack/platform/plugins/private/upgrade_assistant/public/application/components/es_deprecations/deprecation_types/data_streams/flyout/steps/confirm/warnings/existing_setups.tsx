@@ -13,6 +13,7 @@ export const AffectExistingSetupsWarningCheckbox: React.FunctionComponent<Warnin
   isChecked,
   onChange,
   id,
+  meta,
 }) => {
   return (
     <WarningCheckbox
@@ -21,11 +22,27 @@ export const AffectExistingSetupsWarningCheckbox: React.FunctionComponent<Warnin
       warningId={id}
       label={
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.affectExistingSetupsWarningTitle"
-          defaultMessage="Mark as read-only all incompatible data for this data stream"
+          tagName="b"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.affectExistingSetupsWarningLabel"
+          defaultMessage="Set to read-only all incompatible data for this data stream"
         />
       }
-      description={null}
+      dataStreamName={meta?.dataStreamName}
+      description={
+        meta &&
+        typeof meta.indicesRequiringUpgradeCount === 'number' &&
+        meta.indicesRequiringUpgradeCount > 0 && (
+          <FormattedMessage
+            tagName="p"
+            id="xpack.upgradeAssistant.dataStream.modal.confirmStep.readonly.acceptChangesTitle"
+            defaultMessage="{count, plural, =1 {# backing index} other {# backing indices}}, including current write index, will be set to read-only."
+            values={{
+              count: meta.indicesRequiringUpgradeCount,
+            }}
+          />
+        )
+      }
+      data-test-subj="affectExistingSetupsWarningCheckbox"
     />
   );
 };

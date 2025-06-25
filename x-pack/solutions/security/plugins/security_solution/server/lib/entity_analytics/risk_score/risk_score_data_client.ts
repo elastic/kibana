@@ -26,7 +26,7 @@ import {
   riskScoreFieldMap,
   totalFieldsLimit,
 } from './configurations';
-import { createDataStream, updateUnderlyingMapping } from '../utils/create_datastream';
+import { createDataStream, rolloverDataStream } from '../utils/create_datastream';
 import type { RiskEngineDataWriter as Writer } from './risk_engine_data_writer';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
 import {
@@ -46,9 +46,9 @@ import { retryTransientEsErrors } from '../utils/retry_transient_es_errors';
 import { RiskScoreAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 import {
-  createEventIngestedFromTimestamp,
+  createEventIngestedPipeline,
   getIngestPipelineName,
-} from '../utils/create_ingest_pipeline';
+} from '../utils/event_ingested_pipeline';
 
 interface RiskScoringDataClientOpts {
   logger: Logger;
@@ -105,7 +105,8 @@ export class RiskScoreDataClient {
         index: getRiskScoreLatestIndex(this.options.namespace),
         mappings: mappingFromFieldMap(riskScoreFieldMap, false),
         settings: {
-          'index.default_pipeline': getIngestPipelineName(this.options.namespace),
+          // set to null because it was previously set but we now want it to be removed
+          'index.default_pipeline': null,
         },
       },
     });
@@ -162,11 +163,11 @@ export class RiskScoreDataClient {
     });
   };
 
-  public updateRiskScoreTimeSeriesIndexMappings = async () =>
-    updateUnderlyingMapping({
+  public rolloverRiskScoreTimeSeriesIndex = async () =>
+    rolloverDataStream({
       esClient: this.options.esClient,
       logger: this.options.logger,
-      index: getRiskScoreTimeSeriesIndex(this.options.namespace),
+      dataStreamName: getRiskScoreTimeSeriesIndex(this.options.namespace),
     });
 
   public async init() {
@@ -174,7 +175,7 @@ export class RiskScoreDataClient {
     const esClient = this.options.esClient;
 
     try {
-      await createEventIngestedFromTimestamp(esClient, namespace);
+      await createEventIngestedPipeline(esClient, namespace);
 
       await this.createOrUpdateRiskScoreComponentTemplate();
 

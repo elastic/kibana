@@ -193,7 +193,6 @@ components:
       required:
         - actionTypeId
         - id
-        - group
         - params
 
     AttackDiscoveryScheduleExecutionStatus:

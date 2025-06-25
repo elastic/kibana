@@ -8,21 +8,28 @@
 import React, { useMemo } from 'react';
 import dedent from 'dedent';
 import { TryInConsoleButton } from '@kbn/try-in-console';
+import { EuiButtonColor } from '@elastic/eui';
 import { useFetchQueryRuleset } from './use_fetch_query_ruleset';
 import { useKibana } from './use_kibana';
 export interface UseRunQueryRulesetProps {
   rulesetId: string;
   type?: 'link' | 'button' | 'emptyButton' | 'contextMenuItem';
   content?: string;
+  color?: EuiButtonColor;
+  onClick?: () => void;
+  disabled?: boolean;
 }
 
 export const UseRunQueryRuleset = ({
   rulesetId,
   type = 'emptyButton',
   content,
+  color,
+  onClick,
+  disabled = false,
 }: UseRunQueryRulesetProps) => {
   const { application, share, console: consolePlugin } = useKibana().services;
-  const { data: queryRulesetData } = useFetchQueryRuleset(rulesetId);
+  const { data: queryRulesetData } = useFetchQueryRuleset(rulesetId, !disabled);
 
   // Loop through all actions children to gather unique _index values
   const { indices, matchCriteria } = useMemo((): { indices: string; matchCriteria: string } => {
@@ -78,6 +85,10 @@ export const UseRunQueryRuleset = ({
   }, [queryRulesetData]);
   // Example based on https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-rule-query#_example_request_2
   const TEST_QUERY_RULESET_API_SNIPPET = dedent`
+    # Get Query Ruleset
+    GET _query_rules/${rulesetId}
+
+
     # Query Rules Retriever Example
     # https://www.elastic.co/docs/reference/elasticsearch/rest-apis/retrievers#rule-retriever
     GET ${indices}/_search
@@ -91,9 +102,7 @@ export const UseRunQueryRuleset = ({
           "retriever": {
             "standard": {
               "query": {
-                "query_string": {
-                  "query": "pugs"
-                }
+                "match_all": {} // replace with your query
               }
             }
           }
@@ -110,7 +119,9 @@ export const UseRunQueryRuleset = ({
       request={TEST_QUERY_RULESET_API_SNIPPET}
       type={type}
       content={content}
+      color={color}
       showIcon
+      onClick={onClick}
     />
   );
 };

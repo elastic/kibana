@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolSourceType } from '@kbn/onechat-common';
+import { builtinToolProviderId } from '@kbn/onechat-common';
 import type {
   ToolProvider,
   ToolHandlerFn,
@@ -78,12 +78,10 @@ export type MockedExecutableTool = Omit<ExecutableTool, 'execute'> & {
 export const createMockedTool = (parts: Partial<RegisteredToolWithMeta> = {}): MockedTool => {
   return {
     id: 'test-tool',
-    name: 'my test tool',
     description: 'test description',
     schema: z.object({}),
     meta: {
-      sourceType: ToolSourceType.builtIn,
-      sourceId: 'foo',
+      providerId: builtinToolProviderId,
       tags: ['tag-1', 'tag-2'],
     },
     ...parts,
@@ -96,12 +94,10 @@ export const createMockedExecutableTool = (
 ): MockedExecutableTool => {
   return {
     id: 'test-tool',
-    name: 'my test tool',
     description: 'test description',
     schema: z.object({}),
     meta: {
-      sourceType: ToolSourceType.builtIn,
-      sourceId: 'foo',
+      providerId: builtinToolProviderId,
       tags: ['tag-1', 'tag-2'],
     },
     ...parts,

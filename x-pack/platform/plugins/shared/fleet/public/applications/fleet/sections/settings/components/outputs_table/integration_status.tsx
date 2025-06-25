@@ -38,6 +38,8 @@ import { PackageIcon } from '../../../../../../components';
 
 import { sendGetPackageInfoByKeyForRq, useStartServices } from '../../../../hooks';
 
+import { Loading } from '../../../agents/components';
+
 import { IntegrationStatusBadge } from './integration_status_badge';
 import { getIntegrationStatus } from './integration_sync_status';
 
@@ -155,14 +157,18 @@ export const IntegrationStatus: React.FunctionComponent<{
                       />
                     </EuiFlexItem>
                     <EuiFlexItem className="eui-textTruncate">
-                      <EuiTitle
-                        size="xs"
-                        css={css`
-                          color: ${titleTextColor};
-                        `}
-                      >
-                        <p>{packageInfo?.title ?? integration.package_name}</p>
-                      </EuiTitle>
+                      {!packageInfo ? (
+                        <Loading />
+                      ) : (
+                        <EuiTitle
+                          size="xs"
+                          css={css`
+                            color: ${titleTextColor};
+                          `}
+                        >
+                          <p>{packageInfo?.title ?? ''}</p>
+                        </EuiTitle>
+                      )}
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
@@ -196,34 +202,30 @@ export const IntegrationStatus: React.FunctionComponent<{
             </>
           )}
 
-          {integration.sync_status === 'warning' && (
+          {integration.sync_status === 'warning' && integration?.warning && (
             <>
               <EuiCallOut
                 title={
-                  syncUninstalledIntegrations ? (
-                    <FormattedMessage
-                      id="xpack.fleet.integrationSyncStatus.integrationWarningContent"
-                      defaultMessage="Integration was uninstalled, but removal from remote cluster failed."
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.fleet.integrationSyncStatus.integrationErrorTitle"
-                      defaultMessage="Warning"
-                    />
-                  )
+                  <FormattedMessage
+                    id="xpack.fleet.integrationSyncStatus.integrationWarningTitle"
+                    defaultMessage="{Warning}"
+                    values={{
+                      Warning: integration.warning?.title,
+                    }}
+                  />
                 }
                 color="warning"
                 iconType="warning"
                 size="s"
                 data-test-subj="integrationSyncIntegrationWarningCallout"
               >
-                {integration?.warning && (
+                {integration?.warning?.message && (
                   <EuiText size="s">
                     <FormattedMessage
                       id="xpack.fleet.integrationSyncStatus.integrationWarningContent"
                       defaultMessage="{uninstallWarning}"
                       values={{
-                        uninstallWarning: integration?.warning,
+                        uninstallWarning: integration.warning.message,
                       }}
                     />
                   </EuiText>

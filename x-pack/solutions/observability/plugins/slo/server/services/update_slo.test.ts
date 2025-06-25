@@ -70,12 +70,10 @@ describe('UpdateSLO', () => {
     function expectNoCallsToAnyMocks() {
       expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).not.toBeCalled();
 
-      expect(mockTransformManager.stop).not.toBeCalled();
       expect(mockTransformManager.uninstall).not.toBeCalled();
       expect(mockTransformManager.install).not.toBeCalled();
       expect(mockTransformManager.start).not.toBeCalled();
 
-      expect(mockSummaryTransformManager.stop).not.toBeCalled();
       expect(mockSummaryTransformManager.uninstall).not.toBeCalled();
       expect(mockSummaryTransformManager.install).not.toBeCalled();
       expect(mockSummaryTransformManager.start).not.toBeCalled();
@@ -409,12 +407,10 @@ describe('UpdateSLO', () => {
       expect(mockRepository.update).toHaveBeenCalledWith(originalSlo);
       expect(
         mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
-      ).toHaveBeenCalledTimes(1); // for the sli only
-
-      expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
-      expect(mockSummaryTransformManager.uninstall).not.toHaveBeenCalled();
-      expect(mockTransformManager.stop).not.toHaveBeenCalled();
-      expect(mockTransformManager.uninstall).not.toHaveBeenCalled();
+      ).toHaveBeenCalledTimes(2);
+      expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
+      expect(mockTransformManager.uninstall).toHaveBeenCalled();
+      expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalled();
     });
 
     it('restores the previous SLO definition and rollback succeeded operations until the summary transform start operation fails', async () => {
@@ -436,10 +432,7 @@ describe('UpdateSLO', () => {
       expect(mockRepository.update).toHaveBeenCalledWith(originalSlo);
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
       expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline).toHaveBeenCalled();
-      expect(mockTransformManager.stop).toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
-
-      expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
     });
   });
 
@@ -471,6 +464,7 @@ describe('UpdateSLO', () => {
     expect(mockTransformManager.install).toHaveBeenCalled();
     expect(mockTransformManager.start).toHaveBeenCalled();
 
+    // rollup and summary pipelines using wildcard pipeline id
     expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).toHaveBeenCalled();
 
     expect(mockSummaryTransformManager.install).toHaveBeenCalled();
@@ -481,12 +475,15 @@ describe('UpdateSLO', () => {
 
   function expectDeletionOfOriginalSLOResources(originalSlo: SLODefinition) {
     const transformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
-    expect(mockTransformManager.uninstall).toHaveBeenCalledWith(transformId);
-
     const summaryTransformId = getSLOSummaryTransformId(originalSlo.id, originalSlo.revision);
+
+    expect(mockTransformManager.uninstall).toHaveBeenCalledWith(transformId);
     expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledWith(summaryTransformId);
 
-    expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline).toHaveBeenCalled();
+    // rollup and summary pipelines
+    expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline).toHaveBeenCalledTimes(
+      1
+    );
 
     expect(mockScopedClusterClient.asCurrentUser.deleteByQuery).toHaveBeenCalledTimes(2);
     expect(mockScopedClusterClient.asCurrentUser.deleteByQuery).toHaveBeenNthCalledWith(

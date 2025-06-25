@@ -197,10 +197,9 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       return [
         ...additionalControls,
         ...['visBarVerticalStacked', 'heart', 'inspect'].map(
-          (iconType, index): RowControlColumn => ({
+          (iconType): RowControlColumn => ({
             id: `exampleControl_${iconType}`,
-            headerAriaLabel: `Example Row Control ${iconType}`,
-            renderControl: (Control, rowProps) => {
+            render: (Control, rowProps) => {
               return (
                 <Control
                   data-test-subj={`exampleLogsControl_${iconType}`}
