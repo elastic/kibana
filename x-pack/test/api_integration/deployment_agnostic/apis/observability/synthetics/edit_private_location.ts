@@ -175,88 +175,160 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         '[request body.label]: value has length [0] but it must have a minimum length of [1].'
       );
     });
-    let testSpaceMonitorId;
-    let defaultSpaceMonitorId;
 
-    it('add a test private location in multiple spaces', async () => {
-      const apiRes = await testPrivateLocations.addFleetPolicy('Test Fleet Policy 2');
-      testFleetPolicyID = apiRes.body.item.id;
+    describe('Editing Private Locations in Multiple Spaces', () => {
+      let testSpaceMonitorId;
+      let defaultSpaceMonitorId;
 
-      privateLocations = await testPrivateLocations.setTestLocations(
-        [testFleetPolicyID],
-        ['default', SPACE_ID]
-      );
-    });
+      it('add a test private location in multiple spaces', async () => {
+        const apiRes = await testPrivateLocations.addFleetPolicy('Test Fleet Policy 2');
+        testFleetPolicyID = apiRes.body.item.id;
 
-    it('adds a monitor in test and default space using the private location', async () => {
-      const monitorNameTestSpace = `Monitor in Test Space ${uuidv4()}`;
-      const monitor = {
-        ...getFixtureJson('http_monitor'),
-        name: monitorNameTestSpace,
-        locations: [privateLocations[0]],
-        spaces: [],
-      };
+        privateLocations = await testPrivateLocations.setTestLocations(
+          [testFleetPolicyID],
+          ['default', SPACE_ID]
+        );
+      });
 
-      const apiResponse = await supertestWithoutAuth
-        .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
-        .set(editorUser.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send(monitor);
+      it('adds a monitor in test and default space using the private location', async () => {
+        const monitorNameTestSpace = `Monitor in Test Space ${uuidv4()}`;
+        const monitor = {
+          ...getFixtureJson('http_monitor'),
+          name: monitorNameTestSpace,
+          locations: [privateLocations[0]],
+          spaces: [],
+        };
 
-      expect(apiResponse.status).to.eql(200, JSON.stringify(apiResponse.body));
-      expect(apiResponse.body.name).to.eql(monitorNameTestSpace);
-      testSpaceMonitorId = apiResponse.body.id;
+        const apiResponse = await supertestWithoutAuth
+          .post(
+            `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?savedObjectType=synthetics-monitor`
+          )
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send(monitor);
 
-      const apiResp = await supertestWithoutAuth
-        .post(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
-        .set(editorUser.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send({
-          ...monitor,
-          name: `Monitor in Default Space ${uuidv4()}`,
-          spaces: ['default'],
-        });
+        expect(apiResponse.status).to.eql(200, JSON.stringify(apiResponse.body));
+        expect(apiResponse.body.name).to.eql(monitorNameTestSpace);
+        testSpaceMonitorId = apiResponse.body.id;
 
-      expect(apiResp.status).to.eql(200, JSON.stringify(apiResp.body));
-      defaultSpaceMonitorId = apiResp.body.id;
-    });
+        const apiResp = await supertestWithoutAuth
+          .post(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?savedObjectType=synthetics-monitor`)
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({
+            ...monitor,
+            name: `Monitor in Default Space ${uuidv4()}`,
+            spaces: ['default'],
+          });
 
-    it('edits the private location label', async () => {
-      const UPDATED_LABEL = 'Updated Private Location Label';
+        expect(apiResp.status).to.eql(200, JSON.stringify(apiResp.body));
+        defaultSpaceMonitorId = apiResp.body.id;
+      });
 
-      // Edit default space location
-      await supertestEditorWithApiKey
-        .put(`${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}/${privateLocations[0].id}`)
-        .send({ label: UPDATED_LABEL, tags: NEW_TAGS })
-        .expect(200);
+      it('edits the private location label', async () => {
+        const UPDATED_LABEL = 'Updated Private Location Label';
 
-      // Edit test space location
-      await supertestEditorWithApiKey
-        .put(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}/${privateLocations[0].id}`)
-        .send({ label: UPDATED_LABEL, tags: NEW_TAGS })
-        .expect(200);
-    });
+        // Edit test space location
+        await supertestEditorWithApiKey
+          .put(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}/${privateLocations[0].id}`)
+          .send({ label: UPDATED_LABEL, tags: NEW_TAGS })
+          .expect(200);
+      });
 
-    it('verifies that the monitor location label is updated in default space', async () => {
-      const getMonitorResponse = await supertestEditorWithApiKey
-        .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${defaultSpaceMonitorId}`)
-        .expect(200);
+      it('verifies that the monitor location label is updated in default space', async () => {
+        // first use get API
+        const getMonitorResponse = await supertestEditorWithApiKey
+          .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${defaultSpaceMonitorId}`)
+          .expect(200);
 
-      const monitor = getMonitorResponse.body;
-      expect(monitor.locations).to.have.length(1);
-      expect(monitor.locations[0].id).to.be(privateLocations[0].id);
-      expect(monitor.locations[0].label).to.be('Updated Private Location Label');
-    });
+        const monitor = getMonitorResponse.body;
+        expect(monitor.locations).to.have.length(1);
+        expect(monitor.locations[0].id).to.be(privateLocations[0].id);
+        expect(monitor.locations[0].label).to.be('Updated Private Location Label');
+      });
 
-    it('verifies that the monitor location label is updated in test space', async () => {
-      const getMonitorResponse = await supertestEditorWithApiKey
-        .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${testSpaceMonitorId}`)
-        .expect(200);
+      it('verifies that the monitor location label is updated in test space', async () => {
+        const getMonitorResponse = await supertestEditorWithApiKey
+          .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${testSpaceMonitorId}`)
+          .expect(200);
 
-      const monitor = getMonitorResponse.body;
-      expect(monitor.locations).to.have.length(1);
-      expect(monitor.locations[0].id).to.be(privateLocations[0].id);
-      expect(monitor.locations[0].label).to.be('Updated Private Location Label');
+        const monitor = getMonitorResponse.body;
+        expect(monitor.locations).to.have.length(1);
+        expect(monitor.locations[0].id).to.be(privateLocations[0].id);
+        expect(monitor.locations[0].label).to.be('Updated Private Location Label');
+      });
+
+      it('uses find api to verify the monitors existence', async () => {
+        // then use find API
+        const findMonitorResponse = await supertestEditorWithApiKey
+          .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
+          .expect(200);
+        const monitors = findMonitorResponse.body.monitors;
+        const foundMonitor = monitors.find((m) => m.id === defaultSpaceMonitorId);
+        expect(foundMonitor).to.not.be(undefined);
+
+        const findMonitorResponseTestSpace = await supertestEditorWithApiKey
+          .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
+          .expect(200);
+        const monitorsTestSpace = findMonitorResponseTestSpace.body.monitors;
+        const foundMonitorTestSpace = monitorsTestSpace.find((m) => m.id === testSpaceMonitorId);
+        expect(foundMonitorTestSpace).to.not.be(undefined);
+      });
+      // now edit the private location in default space and verify all results
+      it('edits the private location label in default space', async () => {
+        const UPDATED_LABEL = 'Updated Private Location Label Default Space';
+
+        // Edit default space location
+        await supertestEditorWithApiKey
+          .put(`${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}/${privateLocations[0].id}`)
+          .send({ label: UPDATED_LABEL, tags: NEW_TAGS })
+          .expect(200);
+      });
+
+      it('verifies that the monitor location label is updated in default space', async () => {
+        // first use get API
+        const getMonitorResponse = await supertestEditorWithApiKey
+          .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${defaultSpaceMonitorId}`)
+          .expect(200);
+        const monitor = getMonitorResponse.body;
+        expect(monitor.locations).to.have.length(1);
+        expect(monitor.locations[0].id).to.be(privateLocations[0].id);
+        expect(monitor.locations[0].label).to.be('Updated Private Location Label Default Space');
+      });
+
+      it('verifies that the monitor location label is updated in test space', async () => {
+        const getMonitorResponse = await supertestEditorWithApiKey
+          .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${testSpaceMonitorId}`)
+          .expect(200);
+
+        const monitor = getMonitorResponse.body;
+        expect(monitor.locations).to.have.length(1);
+        expect(monitor.locations[0].id).to.be(privateLocations[0].id);
+        expect(monitor.locations[0].label).to.be('Updated Private Location Label Default Space');
+      });
+
+      it('uses find api to verify the monitors existence in default space', async () => {
+        // then use find API
+        const findMonitorResponse = await supertestEditorWithApiKey
+          .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
+          .expect(200);
+        const monitors = findMonitorResponse.body.monitors;
+        const foundMonitor = monitors.find((m) => m.id === defaultSpaceMonitorId);
+        expect(foundMonitor).to.not.be(undefined);
+        expect(foundMonitor.locations[0].label).to.be(
+          'Updated Private Location Label Default Space'
+        );
+
+        const findMonitorResponseTestSpace = await supertestEditorWithApiKey
+          .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
+          .expect(200);
+        const monitorsTestSpace = findMonitorResponseTestSpace.body.monitors;
+        const foundMonitorTestSpace = monitorsTestSpace.find((m) => m.id === testSpaceMonitorId);
+        expect(foundMonitorTestSpace).to.not.be(undefined);
+        expect(foundMonitorTestSpace.locations[0].label).to.be(
+          'Updated Private Location Label Default Space'
+        );
+      });
     });
   });
 }
