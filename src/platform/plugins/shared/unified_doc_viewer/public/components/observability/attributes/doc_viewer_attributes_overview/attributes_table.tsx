@@ -70,7 +70,7 @@ export const AttributesTable = ({
         (field) =>
           new FieldRow({
             name: field.name,
-            displayName: field.displayName,
+            displayNameOverride: field.displayName,
             flattenedValue: flattened[field.name],
             hit,
             dataView,

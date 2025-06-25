@@ -59,7 +59,6 @@ export const AttributesAccordion = ({
             type="questionInCircle"
             color="subdued"
             size="s"
-            position="right"
             content={tooltipMessage}
             iconProps={{
               className: 'eui-alignTop',

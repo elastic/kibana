@@ -117,6 +117,8 @@ export function AttributesOverview({
     return { attributesFields, resourceAttributesFields, scopeAttributesFields };
   }, [allFields, flattened, searchTerm, shouldShowFieldHandler, isEsqlMode, areNullValuesHidden]);
 
+  const { attributesFields, resourceAttributesFields, scopeAttributesFields } = groupedFields;
+
   const containerHeight = containerRef
     ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy ?? DEFAULT_MARGIN_BOTTOM)
     : 0;
@@ -126,7 +128,7 @@ export function AttributesOverview({
       id: 'signal_attributes',
       title: attributesTitle,
       ariaLabel: attributesTitle,
-      fields: groupedFields.attributesFields,
+      fields: attributesFields,
       tooltipMessage: i18n.translate(
         'unifiedDocViewer.docView.attributes.signalAttributesTooltip',
         {
@@ -144,7 +146,7 @@ export function AttributesOverview({
         'unifiedDocViewer.docView.attributes.resourceAttributesTitle.ariaLabel',
         { defaultMessage: 'Resource attributes' }
       ),
-      fields: groupedFields.resourceAttributesFields,
+      fields: resourceAttributesFields,
       tooltipMessage: i18n.translate(
         'unifiedDocViewer.docView.attributes.resourceAttributesTooltip',
         {
@@ -162,7 +164,7 @@ export function AttributesOverview({
         'unifiedDocViewer.docView.attributes.scopeAttributesTitle.ariaLabel',
         { defaultMessage: 'Scope attributes' }
       ),
-      fields: groupedFields.scopeAttributesFields,
+      fields: scopeAttributesFields,
       tooltipMessage: i18n.translate('unifiedDocViewer.docView.attributes.scopeAttributesTooltip', {
         defaultMessage:
           'Metadata associated with the instrumentation scope (i.e., the library/module that produced the telemetry), helping identify its origin and version.',
@@ -178,9 +180,9 @@ export function AttributesOverview({
   );
 
   const noFields =
-    groupedFields.attributesFields.length === 0 &&
-    groupedFields.resourceAttributesFields.length === 0 &&
-    groupedFields.scopeAttributesFields.length === 0;
+    attributesFields.length === 0 &&
+    resourceAttributesFields.length === 0 &&
+    scopeAttributesFields.length === 0;
 
   return (
     <EuiFlexGroup
@@ -219,7 +221,7 @@ export function AttributesOverview({
       <EuiFlexItem grow={false}>
         <EuiFlexGroup
           responsive={false}
-          wrap={true}
+          wrap
           direction="row"
           justifyContent="flexEnd"
           alignItems="center"

@@ -22,7 +22,7 @@ import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 
 export class FieldRow {
   readonly name: string;
-  readonly displayName: string;
+  readonly displayNameOverride: string | undefined;
   readonly flattenedValue: unknown;
   readonly dataViewField: DataViewField | undefined;
   readonly isPinned: boolean;
@@ -42,7 +42,7 @@ export class FieldRow {
 
   constructor({
     name,
-    displayName,
+    displayNameOverride,
     flattenedValue,
     hit,
     dataView,
@@ -51,7 +51,7 @@ export class FieldRow {
     columnsMeta,
   }: {
     name: string;
-    displayName?: string;
+    displayNameOverride?: string;
     flattenedValue: unknown;
     hit: DataTableRecord;
     dataView: DataView;
@@ -66,7 +66,7 @@ export class FieldRow {
     this.#isFormattedAsText = false;
 
     this.name = name;
-    this.displayName = displayName || name; // use name as fallback if displayName is not provided
+    this.displayNameOverride = displayNameOverride;
     this.flattenedValue = flattenedValue;
     this.dataViewField = getDataViewFieldOrCreateFromColumnMeta({
       dataView,
