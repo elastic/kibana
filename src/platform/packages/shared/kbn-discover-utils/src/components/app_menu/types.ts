@@ -22,6 +22,7 @@ export interface TopNavMenuData {
   description?: string;
   href?: string;
   tooltip?: string | (() => string | undefined);
+  disableButton?: boolean | (() => boolean);
 }
 
 export type AppMenuControlProps = TopNavMenuData & {
