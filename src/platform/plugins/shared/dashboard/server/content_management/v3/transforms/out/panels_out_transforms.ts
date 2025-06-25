@@ -11,7 +11,7 @@ import { SavedObjectReference } from '@kbn/core/server';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { SavedDashboardPanel, SavedDashboardSection } from '../../../../dashboard_saved_object';
 import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
-import { getReferencesForPanelId } from '../../../../../common/dashboard_container/persistable_state/dashboard_container_references';
+import { getReferencesForPanelId } from '../../../../../common';
 
 export function transformPanelsOut(
   panelsJSON: string = '{}',
@@ -63,19 +63,27 @@ function transformPanelProperties(
       ? references.find((reference) => reference.name === panelRefName)
       : undefined;
 
+  const storedSavedObjectId = id ?? embeddableConfig.savedObjectId;
+  const savedObjectId = matchingReference ? matchingReference.id : storedSavedObjectId;
+
   const panelType = matchingReference ? matchingReference.type : type;
 
   const transforms = embeddable.getTransforms(panelType);
 
+  const panelConfig = {
+    ...embeddableConfig,
+    // <8.19 savedObjectId and title stored as siblings to embeddableConfig
+    ...(savedObjectId !== undefined && { savedObjectId }),
+    ...(title !== undefined && { title }),
+  }
+
   return {
     gridData: rest,
-    id: matchingReference ? matchingReference.id : id,
     panelConfig: transforms?.transformOut
-      ? transforms.transformOut(embeddableConfig, references)
-      : embeddableConfig,
+      ? transforms.transformOut(panelConfig, references)
+      : panelConfig,
     panelIndex,
     panelRefName,
-    title,
     type: panelType,
     version,
   };

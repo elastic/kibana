@@ -11,14 +11,13 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { SavedObjectReference } from '@kbn/core/server';
-import { isDashboardSection } from '../../../../../common/lib/dashboard_panel_converters';
+import { isDashboardSection, prefixReferencesFromPanel } from '../../../../../common';
 import {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
   SavedDashboardSection,
 } from '../../../../dashboard_saved_object';
 import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
-import { prefixReferencesFromPanel } from '../../../../../common';
 
 export function transformPanelsIn(
   widgets: DashboardAttributes['panels'] | undefined,
