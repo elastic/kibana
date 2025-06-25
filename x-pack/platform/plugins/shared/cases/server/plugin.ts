@@ -181,6 +181,7 @@ export class CasePlugin
       actions: plugins.actions,
       alerting: plugins.alerting,
       core,
+      logger: this.logger,
       getCasesClient,
       getSpaceId,
       isServerlessSecurity,

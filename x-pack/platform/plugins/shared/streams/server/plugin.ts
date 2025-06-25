@@ -32,6 +32,7 @@ import {
 import { ContentService } from './lib/content/content_service';
 import { registerRules } from './lib/rules/register_rules';
 import { AssetService } from './lib/streams/assets/asset_service';
+import { QueryService } from './lib/streams/assets/query/query_service';
 import { StreamsService } from './lib/streams/service';
 import { StreamsTelemetryService } from './lib/telemetry/service';
 import { streamsRouteRepository } from './routes';
@@ -41,7 +42,7 @@ import {
   StreamsPluginStartDependencies,
   StreamsServer,
 } from './types';
-import { QueryService } from './lib/streams/assets/query/query_service';
+import { featureFlagUiSettings } from './feature_flags';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -85,22 +86,19 @@ export class StreamsPlugin
 
     this.telemetryService.setup(core.analytics);
 
-    const isSignificantEventsEnabled = this.config.experimental?.significantEventsEnabled === true;
-    const alertingFeatures = isSignificantEventsEnabled
-      ? STREAMS_RULE_TYPE_IDS.map((ruleTypeId) => ({
-          ruleTypeId,
-          consumers: [STREAMS_CONSUMER],
-        }))
-      : [];
+    const alertingFeatures = STREAMS_RULE_TYPE_IDS.map((ruleTypeId) => ({
+      ruleTypeId,
+      consumers: [STREAMS_CONSUMER],
+    }));
 
-    if (isSignificantEventsEnabled) {
-      registerRules({ plugins, logger: this.logger.get('rules') });
-    }
+    registerRules({ plugins, logger: this.logger.get('rules') });
+
+    core.uiSettings.register(featureFlagUiSettings);
 
     const assetService = new AssetService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
     const contentService = new ContentService(core, this.logger);
-    const queryService = new QueryService(core, this.logger, this.config);
+    const queryService = new QueryService(core, this.logger);
 
     plugins.features.registerKibanaFeature({
       id: STREAMS_FEATURE_ID,

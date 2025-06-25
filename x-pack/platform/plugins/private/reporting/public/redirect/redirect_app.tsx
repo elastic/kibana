@@ -18,7 +18,7 @@ import {
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_REDIRECT_ALLOWED_LOCATOR_TYPES,
 } from '@kbn/reporting-common';
-import { LocatorParams } from '@kbn/reporting-common/types';
+import { LocatorParams, BaseParamsV2 } from '@kbn/reporting-common/types';
 import { ReportingAPIClient } from '@kbn/reporting-public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 
@@ -51,9 +51,15 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
       try {
         let locatorParams: undefined | LocatorParams;
 
-        const { jobId } = parse(window.location.search);
+        const { jobId, scheduledReportId } = parse(window.location.search);
 
-        if (jobId) {
+        if (scheduledReportId) {
+          const scheduledReport = await apiClient.getScheduledReportInfo(
+            scheduledReportId as string
+          );
+
+          locatorParams = (scheduledReport?.payload as BaseParamsV2)?.locatorParams?.[0];
+        } else if (jobId) {
           const result = await apiClient.getInfo(jobId as string);
           locatorParams = result?.locatorParams?.[0];
         } else {

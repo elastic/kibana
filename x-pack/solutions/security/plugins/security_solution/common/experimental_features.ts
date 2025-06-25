@@ -227,7 +227,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables Privilege Monitoring
    */
-  privilegeMonitoringEnabled: false,
+  privilegedUserMonitoringDisabled: false,
 
   /**
    * Disables the siem migrations feature
@@ -268,11 +268,6 @@ export const allowedExperimentalValues = Object.freeze({
 
   /** Enables new Data View Picker */
   newDataViewPickerEnabled: false,
-
-  /**
-   * Automatically installs the security AI prompts package
-   */
-  securityAIPromptsEnabled: false,
 
   /**
    * Enables Microsoft Defender for  Endpoint's RunScript RTR command
