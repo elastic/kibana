@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { groupAttackDiscoveryAlerts } from '.';
-import { attackDiscoveryAlerts } from './index.mock';
+import { groupAttackDiscoveryAlerts } from './group_alerts';
+import { attackDiscoveryAlerts } from './group_alerts.mock';
 
 describe('groupAttackDiscoveryAlerts', () => {
   const getAttackDiscoveryDocument = () => attackDiscoveryAlerts[0];
