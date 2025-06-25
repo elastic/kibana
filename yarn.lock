@@ -76,10 +76,18 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@apidevtools/json-schema-ref-parser@11.7.2", "@apidevtools/json-schema-ref-parser@^11.5.5":
-  version "11.7.2"
-  resolved "https://registry.yarnpkg.com/@apidevtools/json-schema-ref-parser/-/json-schema-ref-parser-11.7.2.tgz#cdf3e0aded21492364a70e193b45b7cf4177f031"
-  integrity sha512-4gY54eEGEstClvEkGnwVkTkrx0sqwemEFG5OSRRn3tD91XH0+Q8XIkYIfo7IwEWPpJZwILb9GUXeShtplRc/eA==
+"@apidevtools/json-schema-ref-parser@14.0.1":
+  version "14.0.1"
+  resolved "https://registry.yarnpkg.com/@apidevtools/json-schema-ref-parser/-/json-schema-ref-parser-14.0.1.tgz#3bc445ed2eddf72bc2f9eb2e295c696bdc5be725"
+  integrity sha512-Oc96zvmxx1fqoSEdUmfmvvb59/KDOnUoJ7s2t7bISyAn0XEz57LCCw8k2Y4Pf3mwKaZLMciESALORLgfe2frCw==
+  dependencies:
+    "@types/json-schema" "^7.0.15"
+    js-yaml "^4.1.0"
+
+"@apidevtools/json-schema-ref-parser@^11.5.5":
+  version "11.9.3"
+  resolved "https://registry.yarnpkg.com/@apidevtools/json-schema-ref-parser/-/json-schema-ref-parser-11.9.3.tgz#0e0c9061fc41cf03737d499a4e6a8299fdd2bfa7"
+  integrity sha512-60vepv88RwcJtSHrD6MjIL6Ta3SOYbgfnkHb+ppAVK+o9mXprRtulx7VlRl3lN3bbvysAfCS7WMVfhUYemB0IQ==
   dependencies:
     "@jsdevtools/ono" "^7.1.3"
     "@types/json-schema" "^7.0.15"
@@ -117,15 +125,14 @@
     call-me-maybe "^1.0.1"
     z-schema "^5.0.1"
 
-"@apidevtools/swagger-parser@^10.1.1":
-  version "10.1.1"
-  resolved "https://registry.yarnpkg.com/@apidevtools/swagger-parser/-/swagger-parser-10.1.1.tgz#e29bf17cf94b487a340e06784e9fbe20cb671c45"
-  integrity sha512-u/kozRnsPO/x8QtKYJOqoGtC4kH6yg1lfYkB9Au0WhYB0FNLpyFusttQtvhlwjtG3rOwiRz4D8DnnXa8iEpIKA==
+"@apidevtools/swagger-parser@^12.0.0":
+  version "12.0.0"
+  resolved "https://registry.yarnpkg.com/@apidevtools/swagger-parser/-/swagger-parser-12.0.0.tgz#02667c728b0c6c1f92109d105b0561828be8c5d8"
+  integrity sha512-WLJIWcfOXrSKlZEM+yhA2Xzatgl488qr1FoOxixYmtWapBzwSC0gVGq4WObr4hHClMIiFFdOBdixNkvWqkWIWA==
   dependencies:
-    "@apidevtools/json-schema-ref-parser" "11.7.2"
+    "@apidevtools/json-schema-ref-parser" "14.0.1"
     "@apidevtools/openapi-schemas" "^2.1.0"
     "@apidevtools/swagger-methods" "^3.0.2"
-    "@jsdevtools/ono" "^7.1.3"
     ajv "^8.17.1"
     ajv-draft-04 "^1.0.0"
     call-me-maybe "^1.0.2"
@@ -5384,19 +5391,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/entities-data-access-plugin@link:x-pack/solutions/observability/plugins/entities_data_access":
-  version "0.0.0"
-  uid ""
-
 "@kbn/entities-schema@link:x-pack/platform/packages/shared/kbn-entities-schema":
   version "0.0.0"
   uid ""
 
 "@kbn/entity-manager-fixture-plugin@link:x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin":
-  version "0.0.0"
-  uid ""
-
-"@kbn/entityManager-app-plugin@link:x-pack/solutions/observability/plugins/entity_manager_app":
   version "0.0.0"
   uid ""
 
@@ -5917,14 +5916,6 @@
   uid ""
 
 "@kbn/interpreter@link:src/platform/packages/shared/kbn-interpreter":
-  version "0.0.0"
-  uid ""
-
-"@kbn/inventory-e2e@link:x-pack/solutions/observability/plugins/inventory/e2e":
-  version "0.0.0"
-  uid ""
-
-"@kbn/inventory-plugin@link:x-pack/solutions/observability/plugins/inventory":
   version "0.0.0"
   uid ""
 
