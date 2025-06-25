@@ -39,12 +39,12 @@ pageLoadAssetSize:
   discover: 25000
   discoverEnhanced: 42730
   discoverShared: 17111
+  elasticAssistant: 279115
+  elasticAssistantSharedState: 19295
   embeddable: 24000
   embeddableAlertsTable: 19615
   embeddableEnhanced: 22107
   enterpriseSearch: 66810
-  entityManager: 17175
-  entityManagerApp: 20378
   esql: 37000
   esqlDataGrid: 24582
   esUiShared: 326654
@@ -71,6 +71,7 @@ pageLoadAssetSize:
   globalSearchProviders: 25554
   graph: 31504
   grokdebugger: 26779
+  guidedOnboarding: 42965
   home: 30182
   imageEmbeddable: 12500
   indexLifecycleManagement: 107090
@@ -82,7 +83,6 @@ pageLoadAssetSize:
   inspector: 18000
   interactiveSetup: 80000
   intercepts: 26158
-  inventory: 27430
   kibanaOverview: 56279
   kibanaReact: 74422
   kibanaUsageCollection: 16463
@@ -143,7 +143,7 @@ pageLoadAssetSize:
   searchQueryRules: 19708
   searchSynonyms: 20262
   security: 81771
-  securitySolution: 98429
+  securitySolution: 159812
   securitySolutionEss: 36000
   securitySolutionServerless: 62488
   serverless: 16573
