@@ -17,6 +17,7 @@ import { TimelineBottomBar } from '../components/bottom_bar';
 import { getTimelineShowStatusByIdSelector } from '../store/selectors';
 import { useTimelineSavePrompt } from '../../common/hooks/timeline/use_timeline_save_prompt';
 import { timelineActions } from '../store';
+import { isTimelineFlyoutOpen } from '../../flyout/document_details/shared/hooks/use_which_flyout';
 
 interface TimelineWrapperProps {
   /**
@@ -49,11 +50,12 @@ export const TimelineWrapper: React.FC<TimelineWrapperProps> = React.memo(
     const onKeyDown = useCallback(
       (ev: KeyboardEvent) => {
         if (ev.key === keys.ESCAPE) {
-          const flyout = document.querySelector('.euiFlyout');
-          if (flyout) {
+          const query = new URLSearchParams(window.location.search);
+          const timelineFlyoutOpen = isTimelineFlyoutOpen(query);
+
+          if (timelineFlyoutOpen) {
             closeFlyout();
-            ev.stopPropagation();
-            return; // close flyout only on ESC press
+            return;
           }
           handleClose();
         }
