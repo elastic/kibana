@@ -328,14 +328,14 @@ describe('Test discover app state container', () => {
       const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ hideChart: true });
       const state = getStateContainer();
-      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
         hideChart: false,
         rowHeight: false,
         breakdownField: false,
       });
       state.initAndSync();
-      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
         hideChart: false,
         rowHeight: true,

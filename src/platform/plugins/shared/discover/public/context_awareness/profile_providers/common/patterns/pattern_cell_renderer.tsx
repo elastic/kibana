@@ -9,13 +9,10 @@
 
 import React, { useMemo } from 'react';
 import type { FC } from 'react';
-import type { UseEuiTheme } from '@elastic/eui';
-import { EuiCode, EuiSpacer, EuiText } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiCode, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { extractCategorizeTokens } from '@kbn/esql-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 interface Props {
   pattern: string;
@@ -24,26 +21,45 @@ interface Props {
 }
 
 export const PatternCellRenderer: FC<Props> = ({ pattern, isDetails, defaultRowHeight }) => {
-  const styles = useMemoCss(componentStyles);
+  const { euiTheme } = useEuiTheme();
 
   const keywords = useMemo(() => extractCategorizeTokens(pattern), [pattern]);
   const containerStyle = useMemo(() => getContainerStyle(defaultRowHeight), [defaultRowHeight]);
+  const keywordStyle = useMemo(
+    () => ({
+      marginRight: euiTheme.size.xs,
+      marginBottom: `calc(${euiTheme.size.m} / 2)`,
+      display: 'inline-block',
+      padding: `${euiTheme.size.xxs} ${euiTheme.size.s}`,
+      backgroundColor: euiTheme.colors.lightestShade,
+      borderRadius: euiTheme.border.radius.small,
+      color: euiTheme.colors.textPrimary,
+      fontSize: euiTheme.size.m,
+    }),
+    [euiTheme]
+  );
+  const detailsStyles = useMemo(
+    () => ({
+      maxWidth: '600px',
+    }),
+    []
+  );
 
   const formattedTokens = useMemo(
     () =>
       keywords.map((keyword, index) => {
         return (
-          <EuiCode key={index} css={styles.keyword}>
+          <EuiCode key={index} css={keywordStyle}>
             {keyword}
           </EuiCode>
         );
       }),
-    [styles, keywords]
+    [keywordStyle, keywords]
   );
 
   if (isDetails) {
     return (
-      <div css={styles.detailsContainer}>
+      <div css={detailsStyles}>
         <EuiText size="s">
           <strong>
             <FormattedMessage
@@ -73,24 +89,6 @@ export const PatternCellRenderer: FC<Props> = ({ pattern, isDetails, defaultRowH
   }
 
   return <div css={containerStyle}>{formattedTokens}</div>;
-};
-
-const componentStyles = {
-  keyword: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      marginRight: euiTheme.size.xs,
-      marginBottom: `calc(${euiTheme.size.m} / 2)`,
-      display: 'inline-block',
-      padding: `${euiTheme.size.xxs} ${euiTheme.size.s}`,
-      backgroundColor: euiTheme.colors.lightestShade,
-      borderRadius: euiTheme.border.radius.small,
-      color: euiTheme.colors.textPrimary,
-      fontSize: euiTheme.size.m,
-    }),
-  detailsContainer: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      maxWidth: '600px',
-    }),
 };
 
 export function getPatternCellRenderer(
