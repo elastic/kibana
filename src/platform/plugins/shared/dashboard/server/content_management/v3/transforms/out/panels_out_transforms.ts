@@ -72,7 +72,6 @@ function transformPanelProperties(
       ...(title !== undefined && { title }),
     },
     panelIndex,
-    panelRefName,
     type: matchingReference ? matchingReference.type : type,
     version,
   };
