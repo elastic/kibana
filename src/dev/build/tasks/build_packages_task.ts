@@ -122,6 +122,8 @@ export const BuildPackages: Task = {
 
     const transformConfig: TransformConfig = {
       disableSourceMaps: true,
+      // include production-specific presets
+      presets: [require.resolve('@kbn/babel-preset/node_prod_preset')],
     };
 
     await withFastAsyncTransform(transformConfig, async (transform) => {
@@ -208,7 +210,8 @@ export const BuildPackages: Task = {
                 case '.tsx':
                 case '.js':
                 case '.mjs':
-                case '.jsx': {
+                case '.jsx':
+                case '.text': {
                   const source = await Fsp.readFile(rec.source.abs, 'utf8');
                   const result = await transform(rec.source.abs, source);
                   return {

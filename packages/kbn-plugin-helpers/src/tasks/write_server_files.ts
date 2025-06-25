@@ -84,7 +84,7 @@ export async function writeServerFiles({
         return;
       }
 
-      if (['.js', '.ts', '.tsx'].includes(file.extname)) {
+      if (['.js', '.ts', '.tsx', '.text'].includes(file.extname)) {
         await transformFileWithBabel(file);
       }
     }),

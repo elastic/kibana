@@ -22,7 +22,7 @@ const cwd = process.cwd();
 function getBabelOptions(path, config = {}) {
   return {
     filename: path,
-    presets: [NODE_PRESET],
+    presets: [...(config.presets ?? []), NODE_PRESET],
     cwd,
     babelrc: false,
     sourceMaps: config.disableSourceMaps ? false : 'both',

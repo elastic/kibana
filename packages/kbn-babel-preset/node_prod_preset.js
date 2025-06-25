@@ -7,23 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface TransformConfig {
-  disableSourceMaps?: boolean;
-  presets?: string[];
-}
-
-export interface WorkerData {
-  config: TransformConfig;
-}
-
-export interface WorkerTask {
-  path: string;
-  source: string;
-}
-
-export interface WorkerResult {
-  code: string;
-  map?: any;
-}
-
-export type Transform = (path: string, source: string) => Promise<WorkerResult>;
+// Production-specific plugins
+module.exports = () => {
+  return {
+    plugins: [[require.resolve('./strip_extensions')]],
+  };
+};
