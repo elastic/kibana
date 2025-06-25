@@ -17,9 +17,9 @@ disabled:
   # Cypress configs, for now these are still run manually
   - x-pack/test/defend_workflows_cypress/cli_config.ts
   - x-pack/test/defend_workflows_cypress/config.ts
-  - x-pack/test/osquery_cypress/cli_config.ts
-  - x-pack/test/osquery_cypress/config.ts
-  - x-pack/test/osquery_cypress/visual_config.ts
+  - x-pack/solutions/security/test/osquery_cypress/cli_config.ts
+  - x-pack/solutions/security/test/osquery_cypress/config.ts
+  - x-pack/solutions/security/test/osquery_cypress/visual_config.ts
   - x-pack/test/security_solution_cypress/cli_config.ts
   - x-pack/test/security_solution_cypress/config.ts
 

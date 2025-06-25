@@ -44,5 +44,9 @@
     "@kbn/security-plugin",
     "@kbn/security-plugin-types-common",
     "@kbn/cases-plugin",
+    "@kbn/es",
+    "@kbn/cypress-test-helper",
+    "@kbn/fleet-plugin",
+    "@kbn/repo-info",
   ]
 }

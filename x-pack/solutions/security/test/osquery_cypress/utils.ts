@@ -9,7 +9,6 @@ import axios from 'axios';
 import semver from 'semver';
 import { map } from 'lodash';
 import { PackagePolicy, CreatePackagePolicyResponse, API_VERSIONS } from '@kbn/fleet-plugin/common';
-// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { kibanaPackageJson } from '@kbn/repo-info';
 import { KbnClient } from '@kbn/test';
 import {
