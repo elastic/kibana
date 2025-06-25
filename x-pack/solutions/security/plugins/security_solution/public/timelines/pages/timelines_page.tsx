@@ -32,8 +32,7 @@ export const TimelinesPage = React.memo(() => {
   const { indicesExist: oldIndicesExist } = useSourcererDataView();
 
   const { dataView } = useDataView(DataViewManagerScopeName.default);
-  // NOTE: there should be a Suspense / some kind of loader here as this value is not settled immediately
-  const experimentalIndicesExist = !!dataView?.matchedIndices?.length;
+  const experimentalIndicesExist = !!dataView.matchedIndices?.length;
 
   const indicesExist = newDataViewPickerEnabled ? experimentalIndicesExist : oldIndicesExist;
 

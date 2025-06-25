@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { type DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { useSelector } from 'react-redux';
 import { useKibana } from '../../common/lib/kibana';
@@ -14,6 +14,12 @@ import { DataViewManagerScopeName } from '../constants';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { sourcererAdapterSelector } from '../redux/selectors';
 import type { SharedDataViewSelectionState } from '../redux/types';
+import { useDefaultDataView } from '../containers/data_view_provider';
+
+export interface UseDataViewValue {
+  dataView: DataView;
+  status: SharedDataViewSelectionState['status'];
+}
 
 /*
  * This hook should be used whenever we need the actual DataView and not just the spec for the
@@ -21,22 +27,28 @@ import type { SharedDataViewSelectionState } from '../redux/types';
  */
 export const useDataView = (
   dataViewManagerScope: DataViewManagerScopeName = DataViewManagerScopeName.default
-): { dataView: DataView | undefined; status: SharedDataViewSelectionState['status'] } => {
+): UseDataViewValue => {
   const {
     services: { dataViews },
     notifications,
   } = useKibana();
+  const defaultDataView = useDefaultDataView();
 
   const { dataViewId, status: internalStatus } = useSelector(
     sourcererAdapterSelector(dataViewManagerScope)
   );
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const [retrievedDataView, setRetrievedDataView] = useState<DataView | undefined>();
+
+  const [retrievedDataView, setRetrievedDataView] = useState<DataView>(defaultDataView);
 
   useEffect(() => {
     (async () => {
+      if (!newDataViewPickerEnabled) {
+        return;
+      }
+
       if (!dataViewId || internalStatus !== 'ready') {
-        return setRetrievedDataView(undefined);
+        return;
       }
 
       try {
@@ -46,7 +58,6 @@ export const useDataView = (
         const currDv = await dataViews?.get(dataViewId);
         setRetrievedDataView(currDv);
       } catch (error) {
-        setRetrievedDataView(undefined);
         // TODO: (remove conditional call when feature flag is on (mocks are broken for some tests))
         notifications?.toasts?.danger({
           title: 'Error retrieving data view',
@@ -54,13 +65,9 @@ export const useDataView = (
         });
       }
     })();
-  }, [dataViews, dataViewId, internalStatus, notifications]);
+  }, [dataViews, dataViewId, internalStatus, notifications, newDataViewPickerEnabled]);
 
   return useMemo(() => {
-    if (!newDataViewPickerEnabled) {
-      return { dataView: undefined, status: internalStatus };
-    }
-
     return { dataView: retrievedDataView, status: retrievedDataView ? internalStatus : 'loading' };
-  }, [newDataViewPickerEnabled, retrievedDataView, internalStatus]);
+  }, [retrievedDataView, internalStatus]);
 };

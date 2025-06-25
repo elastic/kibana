@@ -32,6 +32,7 @@ import { UserPrivilegesProvider } from '../common/components/user_privileges/use
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
 import { DiscoverInTimelineContextProvider } from '../common/components/discover_in_timeline/provider';
 import { AssistantProvider } from '../assistant/provider';
+import { DefaultDataViewProvider } from '../data_view_manager/containers/data_view_provider';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -55,27 +56,29 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
       <ManageGlobalToaster>
         <ReduxStoreProvider store={store}>
           <EuiThemeProvider darkMode={darkMode}>
-            <MlCapabilitiesProvider>
-              <UserPrivilegesProvider kibanaCapabilities={capabilities}>
-                <ManageUserInfo>
-                  <NavigationProvider core={services}>
-                    <ReactQueryClientProvider>
-                      <CellActionsProvider
-                        getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
-                      >
-                        <UpsellingProvider upsellingService={upselling}>
-                          <DiscoverInTimelineContextProvider>
-                            <AssistantProvider>
-                              <PageRouter history={history}>{children}</PageRouter>
-                            </AssistantProvider>
-                          </DiscoverInTimelineContextProvider>
-                        </UpsellingProvider>
-                      </CellActionsProvider>
-                    </ReactQueryClientProvider>
-                  </NavigationProvider>
-                </ManageUserInfo>
-              </UserPrivilegesProvider>
-            </MlCapabilitiesProvider>
+            <DefaultDataViewProvider>
+              <MlCapabilitiesProvider>
+                <UserPrivilegesProvider kibanaCapabilities={capabilities}>
+                  <ManageUserInfo>
+                    <NavigationProvider core={services}>
+                      <ReactQueryClientProvider>
+                        <CellActionsProvider
+                          getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
+                        >
+                          <UpsellingProvider upsellingService={upselling}>
+                            <DiscoverInTimelineContextProvider>
+                              <AssistantProvider>
+                                <PageRouter history={history}>{children}</PageRouter>
+                              </AssistantProvider>
+                            </DiscoverInTimelineContextProvider>
+                          </UpsellingProvider>
+                        </CellActionsProvider>
+                      </ReactQueryClientProvider>
+                    </NavigationProvider>
+                  </ManageUserInfo>
+                </UserPrivilegesProvider>
+              </MlCapabilitiesProvider>
+            </DefaultDataViewProvider>
           </EuiThemeProvider>
           <ErrorToastDispatcher />
           <GlobalToaster />
