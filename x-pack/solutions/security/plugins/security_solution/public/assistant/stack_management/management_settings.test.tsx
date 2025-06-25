@@ -18,6 +18,7 @@ import {
 import { useKibana } from '../../common/lib/kibana';
 import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useSpaceId } from '../../common/hooks/use_space_id';
 
 // Mock the necessary hooks and components
 jest.mock('@kbn/elastic-assistant', () => ({
@@ -35,11 +36,15 @@ jest.mock('@kbn/elastic-assistant/impl/assistant/use_conversation', () => ({
 jest.mock('../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
 }));
+jest.mock('../../common/hooks/use_space_id', () => ({
+  useSpaceId: jest.fn(),
+}));
 
 const useAssistantContextMock = useAssistantContext as jest.Mock;
 const useFetchCurrentUserConversationsMock = useFetchCurrentUserConversations as jest.Mock;
 const useKibanaMock = useKibana as jest.Mock;
 const useConversationMock = useConversation as jest.Mock;
+const useSpaceIdMock = useSpaceId as jest.Mock;
 
 describe('ManagementSettings', () => {
   const queryClient = new QueryClient();
@@ -55,9 +60,11 @@ describe('ManagementSettings', () => {
   const renderComponent = ({
     isAssistantEnabled = true,
     conversations,
+    spaceId,
   }: {
     isAssistantEnabled?: boolean;
     conversations: Record<string, Conversation>;
+    spaceId?: string;
   }) => {
     useAssistantContextMock.mockReturnValue({
       baseConversations,
@@ -101,6 +108,8 @@ describe('ManagementSettings', () => {
       getDefaultConversation,
     });
 
+    useSpaceIdMock.mockReturnValue(spaceId);
+
     return render(
       <MemoryRouter>
         <QueryClientProvider client={queryClient}>
@@ -117,14 +126,23 @@ describe('ManagementSettings', () => {
   it('navigates to home if securityAIAssistant is disabled', () => {
     renderComponent({
       conversations: mockConversations,
+      spaceId: 'default',
     });
     expect(navigateToApp).toHaveBeenCalledWith('home');
   });
 
-  it('renders AssistantSettingsManagement when conversations are available and securityAIAssistant is enabled', () => {
+  it('renders AssistantSettingsManagement when spaceId, conversations are available and securityAIAssistant is enabled', () => {
+    renderComponent({
+      conversations: mockConversations,
+      spaceId: 'default',
+    });
+    expect(screen.getByTestId('AssistantSettingsManagement')).toBeInTheDocument();
+  });
+
+  it('does not render AssistantSettingsManagement when spaceId is not available', () => {
     renderComponent({
       conversations: mockConversations,
     });
-    expect(screen.getByTestId('AssistantSettingsManagement')).toBeInTheDocument();
+    expect(screen.queryByTestId('AssistantSettingsManagement')).not.toBeInTheDocument();
   });
 });
