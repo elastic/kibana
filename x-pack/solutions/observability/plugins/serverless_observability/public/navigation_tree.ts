@@ -10,8 +10,10 @@ import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 
 export const createNavigationTree = ({
   streamsAvailable,
+  overviewAvailable = true,
 }: {
   streamsAvailable?: boolean;
+  overviewAvailable?: boolean;
 }): NavigationTreeDefinition => {
   return {
     body: [
@@ -24,12 +26,16 @@ export const createNavigationTree = ({
         isCollapsible: false,
         breadcrumbStatus: 'hidden',
         children: [
-          {
-            title: i18n.translate('xpack.serverlessObservability.nav.overview', {
-              defaultMessage: 'Overview',
-            }),
-            link: 'observability-overview',
-          },
+          ...(overviewAvailable
+            ? [
+                {
+                  title: i18n.translate('xpack.serverlessObservability.nav.overview', {
+                    defaultMessage: 'Overview',
+                  }),
+                  link: 'observability-overview' as const,
+                },
+              ]
+            : []),
           {
             title: i18n.translate('xpack.serverlessObservability.nav.discover', {
               defaultMessage: 'Discover',

@@ -26,6 +26,7 @@ import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
 import type {
   DataGridDensity,
   UnifiedDataTableProps,
+  UnifiedDataTableRestorableState,
   UseColumnsProps,
 } from '@kbn/unified-data-table';
 import {
@@ -77,6 +78,7 @@ import {
 } from '../../../../context_awareness';
 import {
   internalStateActions,
+  useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
   useInternalStateSelector,
@@ -398,6 +400,14 @@ function DiscoverDocumentsComponent({
     [viewModeToggle, callouts, loadingIndicator]
   );
 
+  const dataGridUiState = useCurrentTabSelector((state) => state.uiState.dataGrid);
+  const setDataGridUiState = useCurrentTabAction(internalStateActions.setDataGridUiState);
+  const onInitialStateChange = useCallback(
+    (newDataGridUiState: Partial<UnifiedDataTableRestorableState>) =>
+      dispatch(setDataGridUiState({ dataGridUiState: newDataGridUiState })),
+    [dispatch, setDataGridUiState]
+  );
+
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       // class is used in tests
@@ -478,6 +488,8 @@ function DiscoverDocumentsComponent({
             cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
             cellActionsMetadata={cellActionsMetadata}
             cellActionsHandling="append"
+            initialState={dataGridUiState}
+            onInitialStateChange={onInitialStateChange}
           />
         </CellActionsProvider>
       </div>

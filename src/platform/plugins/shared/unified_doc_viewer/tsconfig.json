@@ -36,7 +36,6 @@
     "@kbn/router-utils",
     "@kbn/unified-field-list",
     "@kbn/core-lifecycle-browser",
-    "@kbn/management-settings-ids",
     "@kbn/apm-types",
     "@kbn/event-stacktrace",
     "@kbn/elastic-agent-utils",
@@ -46,7 +45,8 @@
     "@kbn/embeddable-plugin",
     "@kbn/apm-types-shared",
     "@kbn/object-utils",
-    "@kbn/es-query"
+    "@kbn/es-query",
+    "@kbn/css-utils",
   ],
   "exclude": ["target/**/*"]
 }
