@@ -14,6 +14,7 @@ import {
   EuiProgress,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
@@ -43,7 +44,26 @@ export const ProcessorOutcomePreview = () => {
     selectPreviewDocuments(snapshot.context)
   );
 
+  const areDataSourcesLoading = useStreamEnrichmentSelector((state) =>
+    state.context.dataSourcesRefs.some((ref) => {
+      const snap = ref.getSnapshot();
+      return (
+        snap.matches({ enabled: 'loadingData' }) || snap.matches({ enabled: 'debouncingChanges' })
+      );
+    })
+  );
+
   if (isEmpty(previewDocuments)) {
+    if (areDataSourcesLoading) {
+      return (
+        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
     return (
       <EuiEmptyPrompt
         color="warning"

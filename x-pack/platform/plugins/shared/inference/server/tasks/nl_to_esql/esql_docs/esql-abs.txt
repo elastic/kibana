@@ -1,6 +1,6 @@
 # ABS
 
-The ABS function returns the absolute value of a given number.
+The `ABS` function returns the absolute value of a numeric expression.
 
 ## Syntax
 
@@ -8,23 +8,23 @@ The ABS function returns the absolute value of a given number.
 
 ### Parameters
 
-#### number
+#### `number`
 
-A numeric expression. If the parameter is `null`, the function will also return `null`.
+A numeric expression. If the value is `null`, the function returns `null`.
 
 ## Examples
-
-In this example, the ABS function is used to calculate the absolute value of -1.0:
 
 ```esql
 ROW number = -1.0
 | EVAL abs_number = ABS(number)
 ```
 
-In the following example, the ABS function is used to calculate the absolute value of the height of employees:
+Calculate the absolute value of a negative number.
 
 ```esql
 FROM employees
 | KEEP first_name, last_name, height
 | EVAL abs_height = ABS(0.0 - height)
 ```
+
+Calculate the absolute value of the difference between `0.0` and the `height` column.
