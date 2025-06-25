@@ -69,7 +69,7 @@ module.exports = {
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
-        test: /\.(js|tsx?)$/,
+        test: /\.(text|js|tsx?)$/,
         exclude: /[\/\\]node_modules[\/\\](?!@kbn)([^\/\\]+)[\/\\]/,
         loader: 'babel-loader',
         options: {

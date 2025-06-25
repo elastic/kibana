@@ -27,11 +27,12 @@ function determineCachePrefix() {
   const json = JSON.stringify({
     babelVersion: babel.version,
     peggyVersion: peggy.version,
-    // get a config for a fake js, ts, and tsx file to make sure we
+    // get a config for a fake js, ts, tsx and text file to make sure we
     // capture conditional config portions based on the file extension
     js: babel.loadOptions(getBabelOptions(Path.resolve('foo.js'))),
     ts: babel.loadOptions(getBabelOptions(Path.resolve('foo.ts'))),
     tsx: babel.loadOptions(getBabelOptions(Path.resolve('foo.tsx'))),
+    text: babel.loadOptions(getBabelOptions(Path.resolve('foo.text'))),
   });
 
   return Crypto.createHash('sha256').update(json).digest('hex').slice(0, 10);

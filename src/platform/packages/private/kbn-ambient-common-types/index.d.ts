@@ -35,3 +35,12 @@ declare module '*.peggy' {
    */
   export function parse(input: string, options?: ParserOptions): any;
 }
+
+/**
+ * .text files are compiled into CommonJS, exporting a string by default
+ */
+declare module '*.text' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}

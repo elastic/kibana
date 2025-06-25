@@ -11,6 +11,7 @@ SOURCE_FILES = glob([
   "node_preset.js",
   "styled_components_files.js",
   "webpack_preset.js",
+  "text_to_cjs.js"
 ])
 
 SRCS = SOURCE_FILES

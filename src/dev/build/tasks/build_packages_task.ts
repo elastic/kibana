@@ -204,6 +204,18 @@ export const BuildPackages: Task = {
                   };
                 }
 
+                case '.text': {
+                  const source = await Fsp.readFile(rec.source.abs, 'utf8');
+                  const result = await transform(rec.source.abs, source);
+                  return {
+                    ...rec,
+                    // Append .js instead of replacing it - this prevents us
+                    // from having to rewrite the import statement
+                    dest: rec.dest.withName(rec.dest.name + '.js'),
+                    content: result.code,
+                  };
+                }
+
                 case '.ts':
                 case '.tsx':
                 case '.js':
