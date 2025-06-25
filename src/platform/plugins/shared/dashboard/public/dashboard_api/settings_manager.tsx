@@ -8,7 +8,9 @@
  */
 
 import {
+  PublishingSubject,
   StateComparators,
+  ViewMode,
   diffComparators,
   initializeTitleManager,
   titleComparators,
@@ -17,9 +19,13 @@ import fastIsEqual from 'fast-deep-equal';
 import { BehaviorSubject, combineLatest, combineLatestWith, debounceTime, map } from 'rxjs';
 import { DashboardSettings, DashboardState } from '../../common';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
+import { coreServices } from '../services/kibana_services';
 
 // SERIALIZED STATE ONLY TODO: This could be simplified by using src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_manager.ts
-export function initializeSettingsManager(initialState?: DashboardState) {
+export function initializeSettingsManager(
+  initialState: DashboardState,
+  viewMode$: PublishingSubject<ViewMode>
+) {
   const syncColors$ = new BehaviorSubject<boolean>(
     initialState?.syncColors ?? DEFAULT_DASHBOARD_STATE.syncColors
   );
@@ -56,12 +62,32 @@ export function initializeSettingsManager(initialState?: DashboardState) {
     if (useMargins !== useMargins$.value) useMargins$.next(useMargins);
   }
 
+  // fetch setting
+  const fetchOnlyVisible$ = new BehaviorSubject<boolean>(
+    initialState?.fetchOnlyVisible ?? DEFAULT_DASHBOARD_STATE.fetchOnlyVisible
+  );
+  function setFetchOnlyVisible(fetchOnlyVisible: boolean) {
+    if (fetchOnlyVisible !== fetchOnlyVisible$.value) fetchOnlyVisible$.next(fetchOnlyVisible);
+  }
+
+  const deferBelowFold = coreServices.uiSettings.get('labs:dashboard:deferBelowFold', false);
+  const fetchSetting$ = fetchOnlyVisible$.pipe(
+    combineLatestWith(viewMode$),
+    map(([onlyVisible, viewMode]) => {
+      if (viewMode === 'print') return 'always';
+      // TODO - when Background searching, load all panels
+      if (deferBelowFold) return 'onlyVisible';
+      return onlyVisible ? 'onlyVisible' : 'always';
+    })
+  );
+
   function getSettings(): DashboardSettings {
     const titleState = titleManager.getLatestState();
     return {
       title: titleState.title ?? '',
       description: titleState.description,
       hidePanelTitles: titleState.hidePanelTitles ?? DEFAULT_DASHBOARD_STATE.hidePanelTitles,
+      fetchOnlyVisible: fetchOnlyVisible$.value,
       syncColors: syncColors$.value,
       syncCursor: syncCursor$.value,
       syncTooltips: syncTooltips$.value,
@@ -72,6 +98,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
   }
 
   function setSettings(settings: DashboardSettings) {
+    setFetchOnlyVisible(settings.fetchOnlyVisible);
     setSyncColors(settings.syncColors);
     setSyncCursor(settings.syncCursor);
     setSyncTooltips(settings.syncTooltips);
@@ -86,6 +113,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
   const comparators: StateComparators<DashboardSettings> = {
     title: titleComparators.title,
     description: titleComparators.description,
+    fetchOnlyVisible: 'referenceEquality',
     hidePanelTitles: 'referenceEquality',
     syncColors: 'referenceEquality',
     syncCursor: 'referenceEquality',
@@ -98,12 +126,14 @@ export function initializeSettingsManager(initialState?: DashboardState) {
   return {
     api: {
       ...titleManager.api,
+      fetchSetting$,
       getSettings,
       settings: {
         syncColors$,
         syncCursor$,
         syncTooltips$,
         useMargins$,
+        fetchOnlyVisible$,
       },
       setSettings,
       setTags,

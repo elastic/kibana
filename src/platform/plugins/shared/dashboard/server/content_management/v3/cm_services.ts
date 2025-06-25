@@ -311,6 +311,13 @@ export const optionsSchema = schema.object({
     defaultValue: DEFAULT_DASHBOARD_OPTIONS.hidePanelTitles,
     meta: { description: 'Hide the panel titles in the dashboard.' },
   }),
+  fetchOnlyVisible: schema.boolean({
+    defaultValue: DEFAULT_DASHBOARD_OPTIONS.fetchOnlyVisible,
+    meta: {
+      description:
+        'Fetch data for only visible panels in the dashboard. This can improve performance.',
+    },
+  }),
   useMargins: schema.boolean({
     defaultValue: DEFAULT_DASHBOARD_OPTIONS.useMargins,
     meta: { description: 'Show margins between panels in the dashboard layout.' },

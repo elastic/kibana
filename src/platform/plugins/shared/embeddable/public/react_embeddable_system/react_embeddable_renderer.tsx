@@ -9,6 +9,7 @@
 
 import { apiIsPresentationContainer, HasSerializedChildState } from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
+import { initializeVisibility } from '@kbn/presentation-publishing';
 import React, { useImperativeHandle, useMemo, useRef } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { v4 as generateId } from 'uuid';
@@ -68,8 +69,10 @@ export const EmbeddableRenderer = <
             apiRegistration: EmbeddableApiRegistration<SerializedState, Api>
           ) => {
             const hasLockedHoverActions$ = new BehaviorSubject(false);
+
             return {
               ...apiRegistration,
+              ...initializeVisibility(parentApi),
               uuid,
               phase$: phaseTracker.current.getPhase$(),
               parentApi,
