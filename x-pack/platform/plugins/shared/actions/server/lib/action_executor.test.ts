@@ -31,8 +31,19 @@ import { PassThrough } from 'stream';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { createTaskRunError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
+import type { ConnectorRateLimiter } from './connector_rate_limiter';
+import { not } from 'joi';
 
-const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
+const mockRateLimiterLog = jest.fn();
+const mockRateLimiterIsRateLimited = jest.fn().mockReturnValue(false);
+
+const connectorRateLimiter = {
+  logsByConnectors: new Map([]),
+  log: mockRateLimiterLog,
+  isRateLimited: mockRateLimiterIsRateLimited,
+} as unknown as ConnectorRateLimiter;
+
+const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true, connectorRateLimiter });
 const services = actionsMock.createServices();
 const unsecuredServices = actionsMock.createUnsecuredServices();
 
@@ -342,6 +353,9 @@ describe('Action Executor', () => {
 
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, execStartDoc);
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, execDoc);
+
+      expect(mockRateLimiterLog).toHaveBeenCalledTimes(1);
+      expect(mockRateLimiterLog).toBeCalledWith('test');
     });
 
     for (const executionSource of [
@@ -859,6 +873,36 @@ describe('Action Executor', () => {
       });
     });
 
+    test(`${label} returns error when the connector is rate limited`, async () => {
+      mockRateLimiterIsRateLimited.mockReturnValueOnce(true);
+      mockGetRequestBodyByte.mockReturnValue(300);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+      const _actionExecutor = new ActionExecutor({
+        isESOCanEncrypt: true,
+        connectorRateLimiter,
+      });
+
+      _actionExecutor.initialize(actionExecutorInitializationParams);
+
+      const result = executeUnsecure
+        ? await _actionExecutor.executeUnsecured(executeUnsecuredParams)
+        : await _actionExecutor.execute(executeParams);
+
+      expect(result).toEqual({
+        actionId: '1',
+        status: 'error',
+        retry: true,
+        message: `Action execution rate limit exceeded for connector: test`,
+        errorSource: TaskErrorSource.USER,
+      });
+
+      expect(mockRateLimiterLog).not.toHaveBeenCalled();
+    });
+
     test(`${label} returns error when connector is invalid`, async () => {
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
         ...connectorSavedObject,
@@ -1033,7 +1077,10 @@ describe('Action Executor', () => {
     });
 
     test(`${label} throws error if isESOCanEncrypt is false`, async () => {
-      const customActionExecutor = new ActionExecutor({ isESOCanEncrypt: false });
+      const customActionExecutor = new ActionExecutor({
+        isESOCanEncrypt: false,
+        connectorRateLimiter,
+      });
       customActionExecutor.initialize({
         ...actionExecutorInitializationParams,
         inMemoryConnectors: [],
@@ -1054,7 +1101,10 @@ describe('Action Executor', () => {
     });
 
     test(`${label} does not throw error if isESOCanEncrypt is false but connector is preconfigured`, async () => {
-      const customActionExecutor = new ActionExecutor({ isESOCanEncrypt: false });
+      const customActionExecutor = new ActionExecutor({
+        isESOCanEncrypt: false,
+        connectorRateLimiter,
+      });
       customActionExecutor.initialize(actionExecutorInitializationParams);
 
       connectorTypeRegistry.get.mockReturnValueOnce({
@@ -1161,7 +1211,10 @@ describe('Action Executor', () => {
 
     test(`${label} does not throw error if isESOCanEncrypt is false but connector is a system action`, async () => {
       if (executeUnsecure) return;
-      const customActionExecutor = new ActionExecutor({ isESOCanEncrypt: false });
+      const customActionExecutor = new ActionExecutor({
+        isESOCanEncrypt: false,
+        connectorRateLimiter,
+      });
       customActionExecutor.initialize(actionExecutorInitializationParams);
 
       connectorTypeRegistry.get.mockReturnValueOnce(systemConnectorType);
