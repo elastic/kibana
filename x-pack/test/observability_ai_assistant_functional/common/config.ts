@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext, Config } from '@kbn/test';
-import { merge } from 'lodash';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { UrlObject } from 'url';
 import {
   KibanaEBTServerProvider,
@@ -52,60 +51,10 @@ export const observabilityAIAssistantFtrConfigs = {
 
 export type ObservabilityAIAssistantFtrConfigName = keyof typeof observabilityAIAssistantFtrConfigs;
 
-export type ObservabilityAIAssistantServices = Awaited<ReturnType<CreateTestConfig>>['services'];
+// export type ObservabilityAIAssistantServices = Awaited<ReturnType<CreateTestConfig>>['services'];
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 export type TestConfig = Awaited<ReturnType<typeof getTestConfig>>;
-
-export function createObservabilityAIAssistantAPIConfig({
-  config,
-  license,
-  name,
-  kibanaConfig,
-}: {
-  config: Config;
-  license: 'basic' | 'trial';
-  name: string;
-  kibanaConfig?: Record<string, any>;
-}) {
-  const services = config.get('services') as InheritedServices;
-  const servers = config.get('servers');
-  const kibanaServer = servers.kibana as UrlObject;
-  const apmSynthtraceKibanaClient = services.apmSynthtraceKibanaClient();
-  const allConfigs = config.getAll() as Record<string, any>;
-
-  const getScopedApiClientForUsername = (username: string) =>
-    getScopedApiClient(kibanaServer, username);
-
-  return {
-    ...allConfigs,
-    servers,
-    services: {
-      ...services,
-      getScopedApiClientForUsername: () => getScopedApiClientForUsername,
-      apmSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
-        getApmSynthtraceEsClient(context, apmSynthtraceKibanaClient),
-    },
-    junit: {
-      reportName: `Observability AI Assistant API Integration tests (${name})`,
-    },
-    esTestCluster: {
-      ...config.get('esTestCluster'),
-      license,
-    },
-    kbnTestServer: {
-      ...config.get('kbnTestServer'),
-      serverArgs: [
-        ...config.get('kbnTestServer.serverArgs'),
-        ...(kibanaConfig
-          ? Object.entries(kibanaConfig).map(([key, value]) =>
-              Array.isArray(value) ? `--${key}=${JSON.stringify(value)}` : `--${key}=${value}`
-            )
-          : []),
-      ],
-    },
-  };
-}
 
 async function getTestConfig({
   license,
@@ -120,24 +69,26 @@ async function getTestConfig({
 }) {
   const testConfig = await readConfigFile(require.resolve('../../functional/config.base.js'));
 
-  const baseConfig = createObservabilityAIAssistantAPIConfig({
-    config: testConfig,
-    license,
-    name,
-    kibanaConfig,
-  });
+  const getScopedApiClientForUsername = (username: string) =>
+    getScopedApiClient(kibanaServer, username);
+  const servers = testConfig.get('servers');
+  const kibanaServer = servers.kibana as UrlObject;
+  const services = testConfig.get('services') as InheritedServices;
+  const apmSynthtraceKibanaClient = services.apmSynthtraceKibanaClient();
+  const allConfigs = testConfig.getAll() as Record<string, any>;
 
-  const kibanaServer = baseConfig.servers.kibana as UrlObject;
-
-  return merge(
-    {
-      services: testConfig.get('services') as InheritedServices,
-    },
-    baseConfig,
-    {
-      testFiles: [require.resolve('../tests')],
-      services: {
-        observabilityAIAssistantUI: (context: InheritedFtrProviderContext) =>
+  return {
+    ...allConfigs,
+    servers,
+    testFiles: [require.resolve('../tests')],
+    services: {
+      ...services,
+      getScopedApiClientForUsername: () => getScopedApiClientForUsername,
+      kibana_ebt_server: KibanaEBTServerProvider,
+      kibana_ebt_ui: KibanaEBTUIProvider,
+      apmSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
+        getApmSynthtraceEsClient(context, apmSynthtraceKibanaClient),
+      observabilityAIAssistantUI: (context: InheritedFtrProviderContext) =>
           ObservabilityAIAssistantUIProvider(context),
         observabilityAIAssistantApi: async () => {
           return {
@@ -146,12 +97,27 @@ async function getTestConfig({
             editor: getScopedApiClient(kibanaServer, editor.username),
             secondaryEditor: getScopedApiClient(kibanaServer, secondaryEditor.username),
           };
-        },
-        kibana_ebt_server: KibanaEBTServerProvider,
-        kibana_ebt_ui: KibanaEBTUIProvider,
-      },
-    }
-  );
+        }
+    },
+    junit: {
+      reportName: `Observability AI Assistant API Integration tests (${name})`,
+    },
+    esTestCluster: {
+      ...testConfig.get('esTestCluster'),
+      license,
+    },
+    kbnTestServer: {
+      ...testConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...testConfig.get('kbnTestServer.serverArgs'),
+        ...(kibanaConfig
+          ? Object.entries(kibanaConfig).map(([key, value]) =>
+              Array.isArray(value) ? `--${key}=${JSON.stringify(value)}` : `--${key}=${value}`
+            )
+          : []),
+      ],
+    },
+  };
 }
 
 export function createTestConfig(config: ObservabilityAIAssistantFtrConfig) {
