@@ -81,4 +81,7 @@ export type {
   SavedObjectsBulkDeleteStatus,
   SavedObjectsBulkDeleteResponse,
 } from './bulk_delete';
-export type { SavedObjectsChangeOwnershipOptions } from './change_ownership';
+export type {
+  SavedObjectsChangeOwnershipOptions,
+  SavedObjectsChangeOwnershipResponse,
+} from './change_ownership';

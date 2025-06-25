@@ -50,6 +50,8 @@ import type {
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteResponse,
+  SavedObjectsChangeOwnershipOptions,
+  SavedObjectChangeOwnershipResponse,
 } from './apis';
 
 /**
@@ -558,4 +560,10 @@ export interface ISavedObjectsRepository {
    * @param namespace Space to which the repository should be scoped to.
    */
   asScopedToNamespace(namespace: string): ISavedObjectsRepository;
+
+  changeOwnership<T = unknown>(
+    type: string,
+    id: string,
+    options?: SavedObjectsChangeOwnershipOptions<T> | undefined
+  ): Promise<SavedObjectChangeOwnershipResponse<T>>;
 }
