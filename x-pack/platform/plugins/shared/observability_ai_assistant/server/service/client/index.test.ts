@@ -25,7 +25,7 @@ import {
 } from '@kbn/inference-common';
 import { InferenceClient } from '@kbn/inference-common';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
-import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
+import { CONTEXT_FUNCTION_NAME } from '../../functions/context/context';
 import { ChatFunctionClient } from '../chat_function_client';
 import type { KnowledgeBaseService } from '../knowledge_base_service';
 import { observableIntoStream } from '../util/observable_into_stream';

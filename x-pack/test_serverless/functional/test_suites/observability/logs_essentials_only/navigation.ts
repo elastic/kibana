@@ -15,7 +15,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   describe('navigation', function () {
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
-      await svlObltNavigation.navigateToLandingPage();
+      await svlObltNavigation.navigateToDiscoverPage();
     });
 
     it('does not show the SLO entry', async () => {
