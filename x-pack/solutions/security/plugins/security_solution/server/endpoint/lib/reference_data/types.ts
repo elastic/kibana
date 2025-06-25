@@ -26,8 +26,7 @@ export interface ReferenceDataSavedObject<Meta extends object = {}> {
 
 export interface ReferenceDataClientInterface {
   get<TMeta extends object = {}>(
-    refDataKey: ReferenceDataItemKey,
-    options?: Partial<{ createIfNotFound: ReferenceDataSavedObject<TMeta> }>
+    refDataKey: ReferenceDataItemKey
   ): Promise<ReferenceDataSavedObject<TMeta>>;
 
   update<TMeta extends object = {}>(

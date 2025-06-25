@@ -12,7 +12,7 @@ import { ALERT_RULE_NAME, ALERT_RULE_UUID, SPACE_IDS } from '@kbn/rule-data-util
 import { createMockEndpointAppContextService } from '../../../endpoint/mocks';
 import { responseActionsClientMock } from '../../../endpoint/services/actions/clients/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-
+import type { Logger } from '@kbn/logging';
 describe('ScheduleNotificationResponseActions', () => {
   const getSignals = () => [
     {
@@ -30,9 +30,13 @@ describe('ScheduleNotificationResponseActions', () => {
   ];
 
   const osqueryActionMock = {
-    create: jest.fn(),
+    create: jest.fn().mockResolvedValue({}),
     stop: jest.fn(),
+    logger: {
+      error: jest.fn(),
+    } as unknown as Logger,
   };
+
   let mockedResponseActionsClient = responseActionsClientMock.create();
   const endpointServiceMock = createMockEndpointAppContextService();
   (endpointServiceMock.getInternalResponseActionsClient as jest.Mock).mockImplementation(() => {
@@ -47,6 +51,11 @@ describe('ScheduleNotificationResponseActions', () => {
   });
 
   describe('Osquery', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      // @ts-expect-error assignment to readonly property
+      endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
+    });
     const simpleQuery = 'select * from uptime';
     const defaultQueryParams = {
       ecsMapping: { testField: { field: 'testField', value: 'testValue' } },
@@ -73,15 +82,115 @@ describe('ScheduleNotificationResponseActions', () => {
     const defaultResultParams = {
       agent_ids: ['agent-id-1', 'agent-id-2'],
       alert_ids: ['alert-id-1', 'alert-id-2'],
-    };
-    const defaultQueryResultParams = {
-      ...defaultResultParams,
       ecs_mapping: { testField: { field: 'testField', value: 'testValue' } },
-      ecsMapping: undefined,
       saved_query_id: 'testSavedQueryId',
-      savedQueryId: undefined,
       queries: [],
     };
+
+    it('should pass correct space id from alert.kibana.space_ids[0] when space awareness is enabled', () => {
+      const signals = getSignals();
+      scheduleNotificationResponseActions({
+        signals,
+        signalsCount: signals.length,
+        responseActions: [
+          {
+            actionTypeId: ResponseActionTypesEnum['.osquery'],
+            params: { ...defaultQueryParams, queries: [{ id: 'query-1', query: simpleQuery }] },
+          } as RuleResponseAction,
+        ],
+      });
+      expect(osqueryActionMock.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          queries: expect.any(Array),
+        }),
+        expect.objectContaining({
+          space: { id: DEFAULT_SPACE_ID },
+        })
+      );
+    });
+
+    it('should use default space id when space awareness is disabled', () => {
+      // @ts-expect-error assignment to readonly property
+      endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = false;
+      const signals = getSignals();
+      scheduleNotificationResponseActions({
+        signals,
+        signalsCount: signals.length,
+        responseActions: [
+          {
+            actionTypeId: ResponseActionTypesEnum['.osquery'],
+            params: { ...defaultQueryParams, queries: [{ id: 'query-1', query: simpleQuery }] },
+          } as RuleResponseAction,
+        ],
+      });
+      expect(osqueryActionMock.create).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({
+          space: { id: DEFAULT_SPACE_ID },
+        })
+      );
+    });
+
+    it('should log error if space awareness is enabled and space id is missing', () => {
+      const signals = [{ ...getSignals()[0], [SPACE_IDS]: undefined }];
+      scheduleNotificationResponseActions({
+        signals,
+        signalsCount: signals.length,
+        responseActions: [
+          {
+            actionTypeId: ResponseActionTypesEnum['.osquery'],
+            params: { ...defaultQueryParams, queries: [{ id: 'query-1', query: simpleQuery }] },
+          } as RuleResponseAction,
+        ],
+      });
+      expect(osqueryActionMock.logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Unable to identify the space ID')
+      );
+      expect(osqueryActionMock.create).not.toHaveBeenCalled();
+    });
+
+    it('should handle errors from osqueryActionMock.create and log them', async () => {
+      const signals = getSignals();
+      const testError = new Error('Simulated create failure');
+      osqueryActionMock.create.mockRejectedValueOnce(testError);
+
+      await scheduleNotificationResponseActions({
+        signals,
+        signalsCount: signals.length,
+        responseActions: [
+          {
+            actionTypeId: ResponseActionTypesEnum['.osquery'],
+            params: { ...defaultQueryParams, queries: [{ id: 'query-1', query: simpleQuery }] },
+          } as RuleResponseAction,
+        ],
+      });
+
+      expect(osqueryActionMock.logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Simulated create failure')
+      );
+    });
+
+    it('should pass alertData when dynamic queries are present', () => {
+      const dynamicQuery = 'select * from uptime where id = {{host.id}}';
+      const signals = getSignals();
+      scheduleNotificationResponseActions({
+        signals,
+        signalsCount: signals.length,
+        responseActions: [
+          {
+            actionTypeId: ResponseActionTypesEnum['.osquery'],
+            params: { ...defaultQueryParams, queries: [{ id: 'query-1', query: dynamicQuery }] },
+          } as RuleResponseAction,
+        ],
+      });
+      expect(osqueryActionMock.create).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({
+          alertData: expect.objectContaining({ _id: signals[0]._id }),
+        })
+      );
+    });
+
     const defaultPackResultParams = {
       ...defaultResultParams,
       query: undefined,
@@ -106,10 +215,19 @@ describe('ScheduleNotificationResponseActions', () => {
       });
 
       expect(response).not.toBeUndefined();
-      expect(osqueryActionMock.create).toHaveBeenCalledWith({
-        ...defaultQueryResultParams,
-        query: simpleQuery,
-      });
+      expect(osqueryActionMock.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          agent_ids: ['agent-id-1', 'agent-id-2'],
+          alert_ids: ['alert-id-1', 'alert-id-2'],
+          ecs_mapping: { testField: { field: 'testField', value: 'testValue' } },
+          queries: [],
+          query: simpleQuery,
+          saved_query_id: 'testSavedQueryId',
+        }),
+        expect.objectContaining({
+          space: { id: DEFAULT_SPACE_ID },
+        })
+      );
     });
 
     it('should handle osquery response actions with packs', async () => {
@@ -138,10 +256,15 @@ describe('ScheduleNotificationResponseActions', () => {
       });
 
       expect(response).not.toBeUndefined();
-      expect(osqueryActionMock.create).toHaveBeenCalledWith({
-        ...defaultPackResultParams,
-        queries: [{ ...defaultQueries, id: 'query-1', query: simpleQuery }],
-      });
+      expect(osqueryActionMock.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ...defaultPackResultParams,
+          queries: [{ ...defaultQueries, id: 'query-1', query: simpleQuery }],
+        }),
+        expect.objectContaining({
+          space: { id: DEFAULT_SPACE_ID },
+        })
+      );
     });
   });
   describe('Endpoint', () => {
