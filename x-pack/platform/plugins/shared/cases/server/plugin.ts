@@ -146,12 +146,10 @@ export class CasePlugin
     const router = core.http.createRouter<CasesRequestHandlerContext>();
     const telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
 
-    const isServerless = plugins.cloud?.isServerlessEnabled;
-
     registerRoutes({
       router,
       routes: [
-        ...getExternalRoutes({ isServerless, docLinks: core.docLinks }),
+        ...getExternalRoutes({ isServerless: this.isServerless, docLinks: core.docLinks }),
         ...getInternalRoutes(this.userProfileService),
       ],
       logger: this.logger,
@@ -175,7 +173,7 @@ export class CasePlugin
       return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     };
 
-    const serverlessProjectType = plugins.cloud?.isServerlessEnabled
+    const serverlessProjectType = this.isServerless
       ? (plugins.cloud?.serverless.projectType as ServerlessProjectType)
       : undefined;
 
