@@ -75,6 +75,14 @@ describe('genericValidator', () => {
     } as Parameters<ValidationFunc>[0]);
     expect(result).toBeUndefined();
   });
+
+  it('should return undefined if the value contains dashes', () => {
+    const result = genericValidator({
+      value: 'valid-value',
+      path: 'generic',
+    } as Parameters<ValidationFunc>[0]);
+    expect(result).toBeUndefined();
+  });
 });
 
 describe('domainValidator', () => {

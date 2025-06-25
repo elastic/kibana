@@ -7,7 +7,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -34,6 +33,7 @@ import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
+import { usePageReady } from '@kbn/ebt-tools';
 import { BetaBadge } from '../../components/experimental_badge';
 import { RelatedAlerts } from './components/related_alerts';
 import { AlertDetailsSource } from './types';
@@ -96,7 +96,6 @@ export function AlertDetails() {
     uiSettings,
     serverless,
   } = useKibana().services;
-  const { onPageReady } = usePerformanceContext();
 
   const { search } = useLocation();
   const history = useHistory();
@@ -183,11 +182,10 @@ export function AlertDetails() {
     setAlertStatus(ALERT_STATUS_UNTRACKED);
   };
 
-  useEffect(() => {
-    if (!isLoading && !!alertDetail && activeTabId === OVERVIEW_TAB_ID) {
-      onPageReady();
-    }
-  }, [onPageReady, alertDetail, isLoading, activeTabId]);
+  usePageReady({
+    isRefreshing: isLoading,
+    isReady: !isLoading && !!alertDetail && activeTabId === 'overview',
+  });
 
   if (isLoading) {
     return <CenterJustifiedSpinner />;

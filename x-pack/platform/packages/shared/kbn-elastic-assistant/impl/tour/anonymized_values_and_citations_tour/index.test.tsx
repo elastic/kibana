@@ -14,8 +14,8 @@ import {
   conversationWithContentReferences,
   welcomeConvo,
 } from '../../mock/conversation';
-import { I18nProvider } from '@kbn/i18n-react';
 import { TourState } from '../knowledge_base';
+import { TestProviders } from '../../mock/test_providers/test_providers';
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn());
 
@@ -32,12 +32,12 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 const Wrapper = ({ children }: { children?: React.ReactNode }) => (
-  <I18nProvider>
+  <TestProviders>
     <div>
       <div id="aiAssistantSettingsMenuContainer" />
       {children}
     </div>
-  </I18nProvider>
+  </TestProviders>
 );
 
 describe('AnonymizedValuesAndCitationsTour', () => {
@@ -117,8 +117,8 @@ describe('AnonymizedValuesAndCitationsTour', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('does not render tour if the knowledge base tour is on step 1', async () => {
-    (useLocalStorage as jest.Mock).mockReturnValue([false, jest.fn()]);
+  it('does not render tour if the knowledge base tour or EIS tour is on step 1', async () => {
+    (useLocalStorage as jest.Mock).mockReturnValueOnce([false, jest.fn()]);
 
     mockGetItem.mockReturnValue(
       JSON.stringify({

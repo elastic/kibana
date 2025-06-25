@@ -9,10 +9,11 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import React from 'react';
 import type { AssistantAvailability } from '@kbn/elastic-assistant';
-import { AssistantProvider } from '@kbn/elastic-assistant';
+import { AssistantProvider, AssistantSpaceIdProvider } from '@kbn/elastic-assistant';
 import type { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
 import { BASE_SECURITY_CONVERSATIONS } from '../../assistant/content/conversations';
 
 interface Props {
@@ -52,11 +53,9 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
       assistantAvailability={assistantAvailability ?? defaultAssistantAvailability}
       augmentMessageCodeBlocks={jest.fn(() => [])}
       basePath={'https://localhost:5601/kbn'}
-      docLinks={{
-        ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-        DOC_LINK_VERSION: 'current',
-      }}
+      docLinks={docLinksServiceMock.createStartContract()}
       getComments={jest.fn(() => [])}
+      getUrlForApp={jest.fn()}
       http={mockHttp}
       navigateToApp={mockNavigateToApp}
       baseConversations={BASE_SECURITY_CONVERSATIONS}
@@ -67,7 +66,7 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
       userProfileService={mockUserProfileService}
       chrome={chrome}
     >
-      {children}
+      <AssistantSpaceIdProvider spaceId="default">{children}</AssistantSpaceIdProvider>
     </AssistantProvider>
   );
 };
