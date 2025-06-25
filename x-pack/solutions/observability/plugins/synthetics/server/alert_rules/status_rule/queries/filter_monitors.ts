@@ -8,6 +8,7 @@
 import { KueryNode, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { SyntheticsEsClient } from '../../../lib';
 import {
   FINAL_SUMMARY_FILTER,
@@ -48,8 +49,8 @@ export async function queryFilterMonitors({
             getRangeFilter({ from: 'now-24h/m', to: 'now/m' }),
             getTimeSpanFilter(),
             {
-              term: {
-                'meta.space_id': spaceId,
+              terms: {
+                'meta.space_id': [spaceId, ALL_SPACES_ID],
               },
             },
             {
