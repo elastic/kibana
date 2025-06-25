@@ -56,10 +56,8 @@
     "@kbn/repo-info",
     "@kbn/tooling-log",
     "@kbn/dev-utils",
-    "@kbn/dev-proc-runner",
     "@kbn/ftr-common-functional-services",
     "@kbn/expect",
-    "@kbn/dev-cli-errors",
     "@kbn/ci-stats-reporter",
     "@kbn/std",
     "@kbn/apm-synthtrace",
@@ -90,7 +88,6 @@
     "@kbn/core-provider-plugin",
     "@kbn/user-profile-components",
     "@kbn/apm-synthtrace-client",
-    "@kbn/journeys",
     "@kbn/stdio-dev-helpers",
     "@kbn/cloud-integration-saml-provider-plugin",
     "@kbn/security-api-integration-helpers",
@@ -135,7 +132,6 @@
     "@kbn/apm-data-view",
     "@kbn/search-types",
     "@kbn/alerting-comparators",
-    "@kbn/alerting-state-types",
     "@kbn/reporting-server",
     "@kbn/data-quality-plugin",
     "@kbn/observability-synthetics-test-data",
@@ -172,5 +168,6 @@
     "@kbn/management-settings-ids",
     "@kbn/apm-sources-access-plugin",
     "@kbn/event-log-plugin",
+    "@kbn/dev-proc-runner",
   ]
 }
