@@ -33,7 +33,6 @@ export const createIndex = async ({
     index: indexName,
     mappings,
     settings: {
-      number_of_shards: 1,
       auto_expand_replicas: '0-1',
       'index.mapping.semantic_text.use_legacy_format': legacySemanticText,
     },

@@ -44,7 +44,7 @@ export const fetchArtifactVersions = async ({
 
       const record: ArtifactAvailableVersions = Object.values(DocumentationProduct).reduce(
         (res, product) => ({ ...res, [product]: [] }),
-        {}
+        {} as ArtifactAvailableVersions
       );
 
       result.ListBucketResult.Contents?.forEach((contentEntry) => {

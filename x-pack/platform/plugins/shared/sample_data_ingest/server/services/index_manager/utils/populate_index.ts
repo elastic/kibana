@@ -77,10 +77,13 @@ const indexContentFile = async ({
       })
     );
 
-  const operations = documents.reduce((ops, document) => {
-    ops!.push(...[{ index: { _index: indexName } }, document]);
-    return ops;
-  }, [] as BulkRequest['operations']);
+  const operations = documents.reduce<NonNullable<BulkRequest<{}, {}>['operations']>>(
+    (ops, document) => {
+      ops.push({ index: { _index: indexName } }, document);
+      return ops;
+    },
+    []
+  );
 
   const response = await esClient.bulk({
     refresh: false,
