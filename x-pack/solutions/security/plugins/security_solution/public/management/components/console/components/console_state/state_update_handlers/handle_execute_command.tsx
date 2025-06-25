@@ -161,7 +161,10 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     input: parsedInput.input,
     inputDisplay: fullInputText,
     args: parsedInput,
-    commandDefinition,
+    commandDefinition: {
+      ...commandDefinition,
+      allowUnknownArguments: commandDefinition.allowUnknownArguments
+    },
   };
   const requiredArgs = getRequiredArguments(commandDefinition.args);
   const exclusiveOrArgs = getExclusiveOrArgs(commandDefinition.args);
@@ -230,7 +233,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     // no unknown arguments allowed
     const unknownInputArgs = getUnknownArguments(parsedInput.args, commandDefinition.args);
 
-    if (unknownInputArgs.length) {
+    if (unknownInputArgs.length && !commandDefinition.allowUnknownArguments) {
       return updateStateWithNewCommandHistoryItem(
         state,
         createCommandHistoryEntry(
@@ -288,21 +291,27 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       const argDefinition = commandDefinition.args?.[argName];
       const argInput = parsedInput.args[argName];
 
+      // todo here
+
       // Unknown argument
       if (!argDefinition) {
-        return updateStateWithNewCommandHistoryItem(
-          state,
-          createCommandHistoryEntry(
-            cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+        if (!commandDefinition.allowUnknownArguments) {
+          return updateStateWithNewCommandHistoryItem(
+            state,
+            createCommandHistoryEntry(
+              cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+              createCommandExecutionState({
+                errorMessage: (
+                  <ConsoleCodeBlock>{executionTranslations.unsupportedArg(argName)}</ConsoleCodeBlock>
+                ),
+              }),
+              false
+            )
+          );
+        }
+        return updateStateWithNewCommandHistoryItem(state, createCommandHistoryEntry(command));
 
-            createCommandExecutionState({
-              errorMessage: (
-                <ConsoleCodeBlock>{executionTranslations.unsupportedArg(argName)}</ConsoleCodeBlock>
-              ),
-            }),
-            false
-          )
-        );
+        // else: allow unknown arguments, do nothing
       }
 
       // does not allow multiple values

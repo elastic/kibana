@@ -49,23 +49,29 @@ export const RunScriptActionResult = memo<
       const args = command.args.args;
 
       if (agentType === 'microsoft_defender_endpoint') {
-        const msDefenderArgs = args as MicrosoftDefenderEndpointRunScriptActionParameters;
+        const { ScriptName, Args, ...restArgs } = args as MicrosoftDefenderEndpointRunScriptActionParameters;
 
         return {
-          scriptName: msDefenderArgs.ScriptName?.[0],
-          args: msDefenderArgs.Args?.[0],
+          scriptName: ScriptName?.[0],
+          args: Args?.[0],
+          ...Object.fromEntries(
+            Object.entries(restArgs).map(([key, value]) => [key, (value as string[])[0]])
+          )
         };
       }
 
       if (agentType === 'crowdstrike') {
-        const csArgs = args as CrowdStrikeRunScriptActionParameters;
+        const { Raw, HostPath, CloudFile, CommandLine, Timeout, ...restArgs } = args as CrowdStrikeRunScriptActionParameters;
 
         return {
-          raw: csArgs.Raw?.[0],
-          hostPath: csArgs.HostPath?.[0],
-          cloudFile: csArgs.CloudFile?.[0],
-          commandLine: csArgs.CommandLine?.[0],
-          timeout: csArgs.Timeout?.[0],
+          raw: Raw?.[0],
+          hostPath: HostPath?.[0],
+          cloudFile: CloudFile?.[0],
+          commandLine: CommandLine?.[0],
+          timeout: Timeout?.[0],
+          ...Object.fromEntries(
+            Object.entries(restArgs).map(([key, value]) => [key, (value as string[])[0]])
+          )
         };
       }
 
