@@ -32,7 +32,6 @@ import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { createTaskRunError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import type { ConnectorRateLimiter } from './connector_rate_limiter';
-import { not } from 'joi';
 
 const mockRateLimiterLog = jest.fn();
 const mockRateLimiterIsRateLimited = jest.fn().mockReturnValue(false);
