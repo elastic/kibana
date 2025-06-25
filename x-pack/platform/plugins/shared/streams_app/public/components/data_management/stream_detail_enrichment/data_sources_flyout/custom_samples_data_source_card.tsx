@@ -57,7 +57,7 @@ export const CustomSamplesDataSourceCard = ({
       title={DATA_SOURCES_I18N.customSamples.defaultName}
       subtitle={DATA_SOURCES_I18N.customSamples.subtitle}
     >
-      <EuiCallOut iconType="iInCircle" size="s" title={DATA_SOURCES_I18N.customSamples.callout} />
+      <EuiCallOut iconType="info" size="s" title={DATA_SOURCES_I18N.customSamples.callout} />
       <EuiSpacer size="m" />
       <NameField
         onChange={(event) => handleChange({ name: event.target.value })}
