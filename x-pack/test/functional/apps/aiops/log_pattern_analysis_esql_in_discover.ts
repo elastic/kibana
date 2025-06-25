@@ -109,12 +109,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Click the view docs in Discover button
       // ensure it opens a new tab and the discover doc count is greater than 0
       // We cannot look for an exact count as the count may vary based on sampling (when that is added)
-      const popover = await testSubjects.find('euiDataGridExpansionPopover');
-      const buttons = await popover.findAllByTagName('button');
-      expect(buttons.length).to.eql(4);
-      // Click the last button which is the "View docs in Discover" button
-      await buttons[3].click();
-
+      await dataGrid.clickCellExpandPopoverAction('patterns-action-view-docs-in-discover');
       await retrySwitchTab(1, 10);
       tabsCount++;
 

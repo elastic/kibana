@@ -9,6 +9,7 @@
 import type { RecommendedQuery } from '@kbn/esql-types';
 import type { SuggestionRawDefinition, GetColumnsByTypeFn } from '../types';
 import { getRecommendedQueries } from './templates';
+import { METADATA_FIELDS } from '../../shared/constants';
 
 export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
   getFieldsByType: GetColumnsByTypeFn,
@@ -125,15 +126,6 @@ export const getRecommendedQueriesTemplatesFromExtensions = (
  */
 
 export function getCategorizationField(fields: string[]): string | undefined {
-  const METADATA_FIELDS = [
-    '_version',
-    '_id',
-    '_index',
-    '_source',
-    '_ignored',
-    '_index_mode',
-    '_score',
-  ];
   const fieldPriority = ['message', 'error.message', 'event.original'];
   const fieldSet = new Set(fields);
   for (const field of fieldPriority) {

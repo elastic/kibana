@@ -24,9 +24,10 @@ interface Props {
 }
 
 export const PatternCellRenderer: FC<Props> = ({ pattern, isDetails, defaultRowHeight }) => {
-  const styles = useMemoCss(componentStyles(defaultRowHeight));
+  const styles = useMemoCss(componentStyles);
 
   const keywords = useMemo(() => extractCategorizeTokens(pattern), [pattern]);
+  const containerStyle = useMemo(() => getContainerStyle(defaultRowHeight), [defaultRowHeight]);
 
   const formattedTokens = useMemo(
     () =>
@@ -71,47 +72,25 @@ export const PatternCellRenderer: FC<Props> = ({ pattern, isDetails, defaultRowH
     );
   }
 
-  return <div css={styles.cellContainer}>{formattedTokens}</div>;
+  return <div css={containerStyle}>{formattedTokens}</div>;
 };
 
-const componentStyles = (defaultRowHeight: number | undefined) => {
-  // the keywords are slightly larger than the default text height,
-  // so they need to be adjusted to fit within the row height while
-  // not truncating the bottom of the text
-  let rowHeight = 2;
-  if (defaultRowHeight === undefined) {
-    rowHeight = 2;
-  } else if (defaultRowHeight < 2) {
-    rowHeight = 1;
-  } else {
-    rowHeight = Math.floor(defaultRowHeight / 1.5);
-  }
-
-  return {
-    cellContainer: ({ euiTheme }: UseEuiTheme) =>
-      css({
-        display: '-webkit-box',
-        WebkitBoxOrient: 'vertical' as const,
-        WebkitLineClamp: rowHeight,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-      }),
-    keyword: ({ euiTheme }: UseEuiTheme) =>
-      css({
-        marginRight: euiTheme.size.xs,
-        marginBottom: `calc(${euiTheme.size.m} / 2)`,
-        display: 'inline-block',
-        padding: `${euiTheme.size.xxs} ${euiTheme.size.s}`,
-        backgroundColor: euiTheme.colors.lightestShade,
-        borderRadius: euiTheme.border.radius.small,
-        color: euiTheme.colors.textPrimary,
-        fontSize: euiTheme.size.m,
-      }),
-    detailsContainer: ({ euiTheme }: UseEuiTheme) =>
-      css({
-        maxWidth: '600px',
-      }),
-  };
+const componentStyles = {
+  keyword: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      marginRight: euiTheme.size.xs,
+      marginBottom: `calc(${euiTheme.size.m} / 2)`,
+      display: 'inline-block',
+      padding: `${euiTheme.size.xxs} ${euiTheme.size.s}`,
+      backgroundColor: euiTheme.colors.lightestShade,
+      borderRadius: euiTheme.border.radius.small,
+      color: euiTheme.colors.textPrimary,
+      fontSize: euiTheme.size.m,
+    }),
+  detailsContainer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      maxWidth: '600px',
+    }),
 };
 
 export function getPatternCellRenderer(
@@ -131,4 +110,26 @@ export function getPatternCellRenderer(
       defaultRowHeight={defaultRowHeight}
     />
   );
+}
+
+function getContainerStyle(defaultRowHeight?: number) {
+  // the keywords are slightly larger than the default text height,
+  // so they need to be adjusted to fit within the row height while
+  // not truncating the bottom of the text
+  let rowHeight = 2;
+  if (defaultRowHeight === undefined) {
+    rowHeight = 2;
+  } else if (defaultRowHeight < 2) {
+    rowHeight = 1;
+  } else {
+    rowHeight = Math.floor(defaultRowHeight / 1.5);
+  }
+
+  return {
+    display: '-webkit-box',
+    WebkitBoxOrient: 'vertical' as const,
+    WebkitLineClamp: rowHeight,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  };
 }
