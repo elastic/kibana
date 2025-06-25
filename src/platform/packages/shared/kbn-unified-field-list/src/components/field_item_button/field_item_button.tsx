@@ -23,7 +23,8 @@ import {
 } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldIcon, getFieldIconProps, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
-import { useMemoizedStyles, removeEuiFocusRing, passDownFocusRing } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { removeEuiFocusRing, passDownFocusRing } from '@kbn/css-utils/public/focus_ring_css';
 import { type FieldListItem, type GetCustomFieldType } from '../../types';
 
 const DRAG_ICON = <EuiIcon type="grabOmnidirectional" size="m" />;
@@ -95,7 +96,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
   onRemoveFieldFromWorkspace,
   ...otherProps
 }: FieldItemButtonProps<T>) {
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
 
   const displayName = field.displayName || field.name;
   const title =
