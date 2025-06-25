@@ -53,7 +53,7 @@ describe(
         .should('deep.equal', [
           'Endpoint List Displays all hosts running Elastic Defend and their relevant integration details.Endpoint List sub-feature privilegeAllReadNone',
           'Automatic Troubleshooting Access to the automatic troubleshooting.Automatic Troubleshooting sub-feature privilegeAllReadNone',
-          'Global Artifact Management (coming soon) Manage global assignment of endpoint artifacts (e.g., Trusted Applications, Event Filters) across all policies. This privilege controls global assignment rights only; privileges for each artifact type are required for full artifact management.Global Artifact Management (coming soon) sub-feature privilegeAllNone',
+          'Global Artifact Management Manage global assignment of endpoint artifacts (e.g., Trusted Applications, Event Filters) across all policies. This privilege controls global assignment rights only; privileges for each artifact type are required for full artifact management.Global Artifact Management sub-feature privilegeAllNone',
           'Trusted Applications Helps mitigate conflicts with other software, usually other antivirus or endpoint security applications.Trusted Applications sub-feature privilegeAllReadNone',
           'Host Isolation Exceptions Add specific IP addresses that isolated hosts are still allowed to communicate with, even when isolated from the rest of the network.Host Isolation Exceptions sub-feature privilegeAllReadNone',
           'Blocklist Extend Elastic Defend’s protection against malicious processes and protect against potentially harmful applications.Blocklist sub-feature privilegeAllReadNone',
