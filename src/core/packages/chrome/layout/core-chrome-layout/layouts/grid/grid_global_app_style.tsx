@@ -11,11 +11,15 @@ import React from 'react';
 import { css, Global } from '@emotion/react';
 import { logicalCSS, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import { CommonGlobalAppStyles } from '../common/global_app_styles';
-import { useSyncPushFlyoutHack, euiPushFlyoutPaddingInlineEnd } from './hack_use_sync_push_flyout';
+import {
+  useHackSyncPushFlyout,
+  hackEuiPushFlyoutPaddingInlineEnd,
+} from './hack_use_sync_push_flyout';
 
 const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   :root {
     // TODO: these variables are legacy and we keep them for backward compatibility
+    // https://github.com/elastic/kibana/issues/225264
 
     // there is no fixed header in the grid layout, so we want to set the offset to 0
     --euiFixedHeadersOffset: 0px;
@@ -63,6 +67,7 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
 `;
 
 // temporary hacks that need to be removed after better flyout and global sidenav customization support in EUI
+// https://github.com/elastic/eui/issues/8820
 const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   // adjust position of the classic navigation overlay
   .kbnBody .euiFlyout.euiCollapsibleNav {
@@ -90,7 +95,7 @@ const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
 
   // push flyout should be pushing the application area, instead of body
   main[class*='LayoutApplication'] {
-    ${logicalCSS('padding-right', `var(${euiPushFlyoutPaddingInlineEnd}, 0px)`)};
+    ${logicalCSS('padding-right', `var(${hackEuiPushFlyoutPaddingInlineEnd}, 0px)`)};
   }
   .kbnBody {
     ${logicalCSS('padding-right', `0px !important`)};
@@ -107,7 +112,7 @@ const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
 
 export const GridLayoutGlobalStyles = () => {
   const { euiTheme } = useEuiTheme();
-  useSyncPushFlyoutHack();
+  useHackSyncPushFlyout();
   return (
     <>
       <Global styles={[globalLayoutStyles(euiTheme), globalTempHackStyles(euiTheme)]} />

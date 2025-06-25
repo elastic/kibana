@@ -555,10 +555,8 @@ export class ChromeService {
     };
 
     return {
-      navControls,
-      navLinks,
-      recentlyAccessed,
-      docTitle,
+      // TODO: this service does too much and doesn't have to compose these headers components.
+      // let's get rid of this in the future https://github.com/elastic/kibana/issues/225264
       getLegacyHeaderComponentForFixedLayout,
       getClassicHeaderComponentForGridLayout,
       getHeaderBanner: () => {
@@ -576,6 +574,12 @@ export class ChromeService {
           </div>
         );
       },
+
+      // chrome APIs
+      navControls,
+      navLinks,
+      recentlyAccessed,
+      docTitle,
 
       getIsVisible$: () => this.isVisible$,
 

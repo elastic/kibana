@@ -20,20 +20,24 @@ export interface HeaderTopBannerProps {
 }
 
 const styles = {
-  rootFixed: css`
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: var(--kbnHeaderBannerHeight);
-    width: 100%;
-  `,
-  rootStatic: css`
-    height: var(--kbnHeaderBannerHeight);
-    width: 100%;
-  `,
+  root: {
+    fixed: css`
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: var(--kbnHeaderBannerHeight);
+      width: 100%;
+    `,
+    static: css`
+      height: var(--kbnHeaderBannerHeight);
+      width: 100%;
+    `,
+  },
   container: css`
-    height: 100%;
-    width: 100%;
+    .header__topBannerContainer {
+      height: 100%;
+      width: 100%;
+    }
   `,
 };
 
@@ -49,15 +53,11 @@ export const HeaderTopBanner: FC<HeaderTopBannerProps> = ({
   return (
     <div
       css={[
-        position === 'static' ? styles.rootStatic : styles.rootFixed,
+        styles.root[position],
+        styles.container,
         ({ euiTheme }) => ({
           zIndex: euiTheme.levels.header,
         }),
-        css`
-          .header__topBannerContainer {
-            ${styles.container};
-          }
-        `,
       ]}
       data-test-subj="headerTopBanner"
     >

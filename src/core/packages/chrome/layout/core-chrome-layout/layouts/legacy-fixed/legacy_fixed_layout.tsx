@@ -31,7 +31,7 @@ export class LegacyFixedLayout implements LayoutService {
     const chromeVisible$ = chrome.getIsVisible$();
 
     return React.memo(() => {
-      // TODO: optimize initial value to avoid unnecessary re-renders
+      // TODO: Get rid of observables https://github.com/elastic/kibana/issues/225265
       const chromeVisible = useObservable(chromeVisible$, false);
 
       return (

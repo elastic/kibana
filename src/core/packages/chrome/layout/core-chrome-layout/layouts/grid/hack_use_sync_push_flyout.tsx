@@ -10,14 +10,15 @@
 import { useEffect } from 'react';
 import { useEuiThemeCSSVariables } from '@elastic/eui';
 
-export const euiPushFlyoutPaddingInlineEnd = '--eui-push-flyout-padding';
+export const hackEuiPushFlyoutPaddingInlineEnd = '--eui-push-flyout-padding';
 
 /**
  * This is definitely a hack for experimental purposes.
  * Currently, EUI push flyouts visually push the content to the right by adding a padding to the body
  * This hook listens to styles changes on the body and updates a CSS variable that is used to push the workspace content
+ * https://github.com/elastic/eui/issues/8820
  */
-export function useSyncPushFlyoutHack() {
+export function useHackSyncPushFlyout() {
   const { setGlobalCSSVariables } = useEuiThemeCSSVariables();
 
   useEffect(() => {
@@ -61,11 +62,11 @@ export function useSyncPushFlyoutHack() {
 
           if (paddingInlineEnd) {
             setGlobalCSSVariables({
-              [euiPushFlyoutPaddingInlineEnd]: paddingInlineEnd,
+              [hackEuiPushFlyoutPaddingInlineEnd]: paddingInlineEnd,
             });
           } else {
             setGlobalCSSVariables({
-              [euiPushFlyoutPaddingInlineEnd]: null,
+              [hackEuiPushFlyoutPaddingInlineEnd]: null,
             });
           }
         }

@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { Global, css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
 import { useLayoutState } from './layout_state_context';
 
 /**
@@ -71,8 +70,6 @@ export const LayoutGlobalCSS = () => {
     sidebarPanelWidth,
   } = useLayoutState();
 
-  const { euiTheme } = useEuiTheme();
-
   const banner = css`
     --kbn-layout--banner-top: 0;
     --kbn-layout--banner-left: 0;
@@ -125,11 +122,11 @@ export const LayoutGlobalCSS = () => {
     --kbn-layout--footer-width: var(--kbn-layout--application-width);
   `;
 
-  // we want to place layout slots eui's flyouts
+  // we want to place layout slots (like sidebar) on top of eui's flyouts (1000),
+  // so that when they are open, they are animating from under the sidebars
+  // this part of EUI flyout workaround and should be gone with https://github.com/elastic/eui/issues/8820
   const common = css`
-    --kbn-layout--slot-zIndex: ${typeof euiTheme.levels.flyout === 'number'
-      ? euiTheme.levels.flyout + 50
-      : euiTheme.levels.flyout};
+    --kbn-layout--aboveFlyoutLevel: 1050;
   `;
 
   const styles = css`

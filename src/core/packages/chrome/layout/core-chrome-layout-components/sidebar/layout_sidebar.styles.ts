@@ -20,7 +20,7 @@ const root = css`
   align-items: center;
   height: 100%;
   width: var(--kbn-layout--sidebar-width);
-  z-index: var(--kbn-layout--slot-zIndex);
+  z-index: var(--kbn-layout--aboveFlyoutLevel);
 `;
 
 export const styles = {

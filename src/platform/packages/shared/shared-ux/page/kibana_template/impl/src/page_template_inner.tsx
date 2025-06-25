@@ -63,6 +63,7 @@ export const KibanaPageTemplateInner: FC<Props> = ({
   if (pageSideBar) {
     const sideBarProps = { ...pageSideBarProps };
     // TODO: instead of using sticky = true here, we reproduce the same behavior to account for both legacy fixed layout and new grid layout.
+    // https://github.com/elastic/eui/issues/8820
     sideBarProps.style = {
       maxHeight: 'var(--kbn-layout--application-height, 100vh)',
       top: 'var(--euiFixedHeadersOffset, 0px)',

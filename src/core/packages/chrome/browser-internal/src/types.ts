@@ -32,6 +32,8 @@ export interface InternalChromeStart extends ChromeStart {
    * LegacyHeader is a fixed layout header component that is used in the legacy fixed layout.
    * Apart from the header, it also includes the navigations, banner and the chromeless header state.
    * It decides which header - classic or project based on the chromeStyle$ observable.
+   *
+   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
   getLegacyHeaderComponentForFixedLayout(): JSX.Element;
 
@@ -43,6 +45,8 @@ export interface InternalChromeStart extends ChromeStart {
    * Header that is used in the grid layout with the "classic" navigation.
    * It includes the header and the overlay classic navigation.
    * It doesn't include the banner or the chromeless header state, which are rendered separately by the layout service.
+   *
+   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
   getClassicHeaderComponentForGridLayout(): JSX.Element;
 
@@ -52,6 +56,8 @@ export interface InternalChromeStart extends ChromeStart {
    *
    * @remarks
    * Can be used by layout service to render a banner separate from the header.
+   *
+   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
   getHeaderBanner(): JSX.Element;
 
@@ -61,6 +67,8 @@ export interface InternalChromeStart extends ChromeStart {
    *
    * @remarks
    * Includes global loading indicator for chromeless state.
+   *
+   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
   getChromelessHeader(): JSX.Element;
 
