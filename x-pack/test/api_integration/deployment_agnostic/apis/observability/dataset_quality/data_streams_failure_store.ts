@@ -27,7 +27,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       .query({ start, end });
   }
 
-  describe('Failure-store flag on data-streams', function() {
+  describe('Failure-store flag on data-streams', function () {
     // This disables the forward-compatibility test for Elasticsearch 8.19 with Kibana and ES 9.0.
     // These versions are not expected to work together. Note: Failure store is not available in ES 9.0,
     // and running these tests will result in an "unknown index privilege [read_failure_store]" error.
