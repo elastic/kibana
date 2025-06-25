@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
