@@ -45,6 +45,8 @@ import type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
+  SavedObjectsChangeOwnershipResponse,
+  SavedObjectsChangeOwnershipOptions,
 } from '@kbn/core-saved-objects-api-server';
 
 /**
@@ -220,5 +222,13 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   /** {@inheritDoc SavedObjectsClientContract.asScopedToNamespace} */
   asScopedToNamespace(namespace: string) {
     return new SavedObjectsClient(this._repository.asScopedToNamespace(namespace));
+  }
+
+  changeOwnership<T = unknown>(
+    type: string,
+    id: string,
+    options?: SavedObjectsChangeOwnershipOptions<T> | undefined
+  ): Promise<SavedObjectsChangeOwnershipResponse<T>> {
+    return this._repository.changeOwnership(type, id, options);
   }
 }

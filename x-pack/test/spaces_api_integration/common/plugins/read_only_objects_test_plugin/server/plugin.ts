@@ -143,6 +143,38 @@ export class ReadOnlyObjectsPlugin implements Plugin<void, void, SetupDeps> {
         }
       }
     );
+    router.put(
+      {
+        path: '/read_only_objects/transfer',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: {
+          body: schema.object({
+            newOwner: schema.string(),
+            objectId: schema.string(),
+          }),
+        },
+      },
+      async (context, request, response) => {
+        const soClient = (await context.core).savedObjects.client;
+        try {
+          const result = await soClient.changeOwnership(READ_ONLY_TYPE, request.body.objectId, {
+            owner: request.body.newOwner,
+          });
+          return response.ok({
+            body: result,
+          });
+        } catch (error) {
+          return response.forbidden({
+            body: error.message,
+          });
+        }
+      }
+    );
   }
   public start() {}
 }

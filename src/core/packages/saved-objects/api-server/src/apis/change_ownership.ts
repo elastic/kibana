@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObject, SavedObjectAccessControl, SavedObjectReference } from '../..';
-import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
+import type { SavedObject, SavedObjectAccessControl } from '../..';
+import type { SavedObjectsBaseOptions } from './base';
 /**
  * Options for the changing ownership of a saved object
  *
@@ -19,4 +19,14 @@ export interface SavedObjectsChangeOwnershipOptions<Attributes = unknown>
   extends SavedObjectsBaseOptions {
   accessMode?: SavedObjectAccessControl['accessMode'];
   owner?: SavedObjectAccessControl['owner'];
+}
+
+/**
+ * Return type of the Saved Objects `changeOwnership()` method.
+ *
+ * @public
+ */
+export interface SavedObjectsChangeOwnershipResponse<T = unknown>
+  extends Omit<SavedObject<T>, 'accessControl'> {
+  accessControl: SavedObjectAccessControl;
 }
