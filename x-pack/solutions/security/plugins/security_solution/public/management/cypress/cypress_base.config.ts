@@ -39,12 +39,11 @@ export const getCypressBaseConfig = (
         openMode: 0,
       },
 
-      screenshotsFolder:
-        '../../../target/kibana-security-solution/public/management/cypress/screenshots',
+      screenshotsFolder: 'cypress_artifacts/public/management/cypress/screenshots',
       trashAssetsBeforeRuns: false,
       video: true,
       videoCompression: 15,
-      videosFolder: '../../../target/kibana-security-solution/public/management/cypress/videos',
+      videosFolder: 'cypress_artifacts/public/management/cypress/videos',
       viewportHeight: 1200,
       viewportWidth: 1920,
       experimentalStudio: true,
