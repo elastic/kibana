@@ -33,6 +33,7 @@ import {
   SEARCH_PRODUCT_NAME,
   SEARCH_INDICES,
   SEARCH_INDICES_START,
+  SEARCH_INDEX_MANAGEMENT,
 } from '../common/constants';
 
 import {
@@ -114,6 +115,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       AI_SEARCH_PLUGIN.ID,
       SEARCH_INDICES,
       SEARCH_INDICES_START,
+      SEARCH_INDEX_MANAGEMENT,
     ];
 
     if (customIntegrations) {

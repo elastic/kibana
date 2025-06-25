@@ -7,8 +7,8 @@
 
 import { useEffect } from 'react';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
-import { i18n } from '@kbn/i18n';
 import { useKibana } from './use_kibana';
+import { PARENT_BREADCRUMB } from '../constants';
 
 export const usePageChrome = (docTitle: string, breadcrumbs: ChromeBreadcrumb[]) => {
   const { chrome, serverless } = useKibana().services;
@@ -19,14 +19,7 @@ export const usePageChrome = (docTitle: string, breadcrumbs: ChromeBreadcrumb[])
     if (serverless) {
       serverless.setBreadcrumbs(breadcrumbs);
     } else {
-      const newBreadcrumbs = [
-        {
-          text: i18n.translate('xpack.searchIndices.breadcrumbs.data.label', {
-            defaultMessage: 'Data',
-          }),
-        },
-        ...breadcrumbs,
-      ];
+      const newBreadcrumbs = [PARENT_BREADCRUMB, ...breadcrumbs];
       chrome.setBreadcrumbs(newBreadcrumbs, { project: { value: newBreadcrumbs, absolute: true } });
     }
     return () => {
