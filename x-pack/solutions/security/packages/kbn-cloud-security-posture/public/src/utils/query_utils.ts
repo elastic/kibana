@@ -20,8 +20,7 @@ type FilterValue = string | number | NegatedValue | string[];
 
 export type NavFilter = Record<string, FilterValue>;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const encodeRison = (v: any): string | undefined => {
+const encodeRison = (v: unknown): string | undefined => {
   try {
     return encode(v);
   } catch (e) {
@@ -40,12 +39,25 @@ const decodeRison = <T extends unknown>(query: string): T | undefined => {
 };
 
 const QUERY_PARAM_KEY = 'cspq';
+const FLYOUT_PARAM_KEY = 'flyout';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const encodeQuery = (query: any): LocationDescriptorObject['search'] => {
+export const encodeQuery = (query: unknown): LocationDescriptorObject['search'] => {
   const risonQuery = encodeRison(query);
   if (!risonQuery) return;
   return `${QUERY_PARAM_KEY}=${risonQuery}`;
+};
+
+export const encodeFlyout = (flyout: unknown): LocationDescriptorObject['search'] => {
+  const risonFlyout = encodeRison(flyout);
+  if (!risonFlyout) return;
+  return `${FLYOUT_PARAM_KEY}=${risonFlyout}`;
+};
+
+// Generic function to encode any parameter with rison
+export const encodeRisonParam = (paramKey: string, value: unknown): LocationDescriptorObject['search'] => {
+  const risonValue = encodeRison(value);
+  if (!risonValue) return;
+  return `${paramKey}=${risonValue}`;
 };
 
 export const decodeQuery = <T extends unknown>(search?: string): Partial<T> | undefined => {
@@ -54,12 +66,60 @@ export const decodeQuery = <T extends unknown>(search?: string): Partial<T> | un
   return decodeRison<T>(risonQuery);
 };
 
+export const decodeFlyout = <T extends unknown>(search?: string): Partial<T> | undefined => {
+  const risonFlyout = new URLSearchParams(search).get(FLYOUT_PARAM_KEY);
+  if (!risonFlyout) return;
+  return decodeRison<T>(risonFlyout);
+};
+
+// Generic function to decode any rison parameter
+export const decodeRisonParam = <T extends unknown>(search: string, paramKey: string): Partial<T> | undefined => {
+  const risonValue = new URLSearchParams(search).get(paramKey);
+  if (!risonValue) return;
+  return decodeRison<T>(risonValue);
+};
+
+// Function to encode multiple rison parameters into a single search string
+export const encodeMultipleRisonParams = (params: Record<string, unknown>): LocationDescriptorObject['search'] => {
+  const searchParams = new URLSearchParams();
+  
+  Object.entries(params).forEach(([key, value]) => {
+    const risonValue = encodeRison(value);
+    if (risonValue) {
+      searchParams.set(key, risonValue);
+    }
+  });
+  
+  const searchString = searchParams.toString();
+  return searchString ? searchString : undefined;
+};
+
+// Function to decode multiple rison parameters from a search string
+export const decodeMultipleRisonParams = <T extends Record<string, unknown>>(
+  search: string, 
+  paramKeys: string[]
+): Partial<T> => {
+  const urlParams = new URLSearchParams(search);
+  const result: Partial<T> = {};
+  
+  paramKeys.forEach((key) => {
+    const risonValue = urlParams.get(key);
+    if (risonValue) {
+      const decoded = decodeRison(risonValue);
+      if (decoded !== undefined) {
+        (result as Record<string, unknown>)[key] = decoded;
+      }
+    }
+  });
+  
+  return result;
+};
+
 export const encodeQueryUrl = (
   servicesStart: DataPublicPluginStart,
   filters: Filter[],
   groupBy?: string[]
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): any => {
+): unknown => {
   return encodeQuery({
     query: servicesStart.query.queryString.getDefaultQuery(),
     filters,
