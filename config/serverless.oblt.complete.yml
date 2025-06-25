@@ -3,7 +3,22 @@
 ## Enabled plugins
 xpack.infra.enabled: true
 xpack.slo.enabled: true
+xpack.uptime.enabled: true
 
 xpack.features.overrides:
-  ### By default, this feature named as `Metrics`, but should be renamed to `Infrastructure`.
   infrastructure.name: 'Infrastructure'
+  ### By default, this feature named as `APM and User Experience`, but should be renamed to `Applications`.
+  apm.name: 'Applications'
+  ### Dashboards feature should be moved from Analytics category to the Observability one.
+  dashboard_v2.category: 'observability'
+  ### Discover feature should be moved from Analytics category to the Observability one and its privileges are
+  ### fine-tuned to grant access to Observability app.
+  discover_v2.category: 'observability'
+  ### Machine Learning feature should be moved from Analytics category to the Observability one and renamed to `AI Ops`.
+  ml:
+    category: 'observability'
+    order: 1200
+  ### Stack alerts is hidden in Role management since it's not needed.
+  stackAlerts.hidden: true
+  ### By default, this feature named as `Synthetics and Uptime`, but should be renamed to `Synthetics` since `Uptime` is not available.
+  uptime.name: 'Synthetics'
