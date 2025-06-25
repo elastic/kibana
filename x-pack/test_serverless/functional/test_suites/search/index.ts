@@ -12,6 +12,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags(['esGate']);
 
     loadTestFile(require.resolve('./navigation'));
+    loadTestFile(require.resolve('./search_homepage'));
     loadTestFile(require.resolve('./elasticsearch_start.ts'));
     loadTestFile(require.resolve('./search_index_detail.ts'));
     loadTestFile(require.resolve('./getting_started'));
@@ -29,6 +30,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./ml'));
     loadTestFile(require.resolve('./custom_role_access'));
     loadTestFile(require.resolve('./inference_management'));
-    loadTestFile(require.resolve('./search_homepage'));
   });
 }
