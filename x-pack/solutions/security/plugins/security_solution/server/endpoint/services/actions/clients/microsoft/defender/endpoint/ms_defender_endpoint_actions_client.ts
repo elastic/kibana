@@ -89,7 +89,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
   /**
    * Returns a list of all indexes for Microsoft Defender data supported for response actions
-   * @private
+   * @internal
    */
   private async fetchIndexNames(): Promise<string[]> {
     const cachedInfo = this.cache.get<string[]>('fetchIndexNames');
@@ -269,7 +269,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
   /**
    * Sends actions to Ms Defender for Endpoint directly (via Connector)
-   * @private
+   * @internal
    */
   private async sendAction<
     TResponse = unknown,
