@@ -130,6 +130,9 @@ export default ({ getService }: FtrProviderContext) => {
         undefined,
         'max_single_ml_node_processors should be present'
       );
+
+      expect(resp.showLicenseInfo).to.eql(true, 'showLicenseInfo should be true');
+      expect(resp.showNodeInfo).to.eql(true, 'showNodeInfo should be true');
     });
   });
 };

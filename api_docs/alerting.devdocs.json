@@ -1220,6 +1220,39 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.shouldCreateAlertsInAllSpaces",
+        "type": "Function",
+        "tags": [],
+        "label": "shouldCreateAlertsInAllSpaces",
+        "description": [],
+        "signature": [
+          "({ ruleTypeId, ruleTypeAlertDef, logger, }: ShouldCreateAlertsInAllSpacesOpts) => boolean"
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/server/alerts_client/lib/should_create_alerts_in_all_spaces.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.shouldCreateAlertsInAllSpaces.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  ruleTypeId,\n  ruleTypeAlertDef,\n  logger,\n}",
+            "description": [],
+            "signature": [
+              "ShouldCreateAlertsInAllSpacesOpts"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/alerts_client/lib/should_create_alerts_in_all_spaces.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -2633,6 +2666,22 @@
             "label": "isSpaceAware",
             "description": [
               "\nOptional flag to indicate that resources should be space-aware. When set to\ntrue, alerts-as-data resources will be created for every space where a rule\nof this type runs."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.IRuleTypeAlerts.dangerouslyCreateAlertsInAllSpaces",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dangerouslyCreateAlertsInAllSpaces",
+            "description": [
+              "\nOptional flag to indicate that these alerts should not be space aware. When set\nto true, alerts for this rule type will be created with the `*` space id."
             ],
             "signature": [
               "boolean | undefined"
@@ -4272,6 +4321,37 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.RuleType.priority",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "priority",
+            "description": [
+              "\nTask priority allowing for tasks to be ran at lower priority (NormalLongRunning vs Normal), defaults to\nnormal priority."
+            ],
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.TaskPriority",
+                "text": "TaskPriority"
+              },
+              ".NormalLongRunning | ",
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.TaskPriority",
+                "text": "TaskPriority"
+              },
+              ".Normal | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.RuleType.internallyManaged",
             "type": "CompoundType",
             "tags": [],
@@ -4986,7 +5066,7 @@
           "BulkFillGapsByRuleIdsOptions",
           ") => Promise<",
           "BulkFillGapsByRuleIdsResult",
-          ">; getRuleIdsWithGaps: (params: Readonly<{ statuses?: string[] | undefined; } & { start: string; end: string; }>) => Promise<Readonly<{} & { ruleIds: string[]; total: number; }>>; getGapsSummaryByRuleIds: (params: Readonly<{} & { start: string; end: string; ruleIds: string[]; }>) => Promise<Readonly<{} & { data: Readonly<{} & { ruleId: string; totalUnfilledDurationMs: number; totalInProgressDurationMs: number; totalFilledDurationMs: number; }>[]; }>>; }"
+          ">; getRuleIdsWithGaps: (params: Readonly<{ statuses?: string[] | undefined; hasUnfilledIntervals?: boolean | undefined; hasInProgressIntervals?: boolean | undefined; hasFilledIntervals?: boolean | undefined; } & { start: string; end: string; }>) => Promise<Readonly<{ latestGapTimestamp?: number | undefined; } & { ruleIds: string[]; total: number; }>>; getGapsSummaryByRuleIds: (params: Readonly<{} & { start: string; end: string; ruleIds: string[]; }>) => Promise<Readonly<{} & { data: Readonly<{} & { ruleId: string; totalUnfilledDurationMs: number; totalInProgressDurationMs: number; totalFilledDurationMs: number; }>[]; }>>; }"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/server/index.ts",
         "deprecated": false,
