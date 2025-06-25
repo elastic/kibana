@@ -9,6 +9,7 @@ x-pack/platform/test/alerting_api_integration/common/plugins/aad @elastic/respon
 x-pack/platform/plugins/shared/actions @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators @elastic/response-ops
 src/platform/packages/shared/kbn-actions-types @elastic/response-ops
+src/platform/packages/shared/kbn-aiops-utils @elastic/ml-ui
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
@@ -1141,6 +1142,7 @@ x-pack/test_serverless/api_integration/test_suites/common/platform_security @ela
 /x-pack/test_serverless/functional/test_suites/common/examples/search_examples @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/unified_field_list_examples @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/management/data_views @elastic/kibana-data-discovery
+src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/patterns @elastic/ml-ui
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/security @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
 # TODO: this deprecation_logs folder should be owned by kibana management team after 9.0
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/deprecation_logs @elastic/kibana-data-discovery @elastic/kibana-core
