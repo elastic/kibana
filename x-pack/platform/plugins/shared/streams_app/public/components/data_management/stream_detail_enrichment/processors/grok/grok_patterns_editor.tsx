@@ -110,7 +110,7 @@ export const GrokPatternsEditor = () => {
           </SortableList>
         </EuiPanel>
       </EuiFormRow>
-      {aiFeatures.enabled ? (
+      {aiFeatures ? (
         <GrokPatternAISuggestions
           aiFeatures={aiFeatures}
           grokCollection={grokCollection}

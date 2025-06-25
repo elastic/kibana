@@ -37,9 +37,7 @@ export function useAIFeatures() {
     !genAiConnectors ||
     genAiConnectors.loading
   ) {
-    return {
-      enabled: false,
-    };
+    return null;
   }
 
   const elasticManagedLlmConnector = getElasticManagedLlmConnector(genAiConnectors.connectors);
