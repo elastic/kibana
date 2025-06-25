@@ -315,8 +315,6 @@ export default function ({ getService }: FtrProviderContext) {
       streams: ['all', 'read', 'minimal_all', 'minimal_read'],
       guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
       aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
-      inventory: ['all', 'read', 'minimal_all', 'minimal_read'],
-      entityManager: ['all', 'read', 'minimal_all', 'minimal_read'],
     },
     reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
   };

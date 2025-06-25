@@ -23,6 +23,7 @@ import type {
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { type BehaviorSubject } from 'rxjs';
+import type { SeverityThreshold } from '../../common/types/anomalies';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../application/app';
 import type { MlCapabilitiesService } from '../application/capabilities/check_capabilities';
@@ -110,7 +111,7 @@ export interface AnomalyChartsEmbeddableRuntimeState {
   jobIds: JobId[];
   maxSeriesToPlot: number;
   // Embeddable inputs which are not included in the default interface
-  severityThreshold?: number;
+  severityThreshold?: SeverityThreshold[];
   selectedEntities?: MlEntityField[];
 }
 export interface AnomalyChartsEmbeddableOverridableState
@@ -120,10 +121,10 @@ export interface AnomalyChartsEmbeddableOverridableState
 export interface AnomalyChartsComponentApi {
   jobIds$: PublishingSubject<JobId[]>;
   maxSeriesToPlot$: PublishingSubject<number>;
-  severityThreshold$: PublishingSubject<number>;
+  severityThreshold$: PublishingSubject<SeverityThreshold[]>;
   selectedEntities$: PublishingSubject<MlEntityField[] | undefined>;
   updateUserInput: (input: AnomalyChartsEmbeddableOverridableState) => void;
-  updateSeverityThreshold: (v?: number) => void;
+  updateSeverityThreshold: (v?: SeverityThreshold[]) => void;
   updateSelectedEntities: (entities?: MlEntityField[] | undefined) => void;
 }
 export interface AnomalyChartsDataLoadingApi {
