@@ -8,16 +8,16 @@
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import React from 'react';
-import type { AssistantAvailability } from '@kbn/elastic-assistant';
 import { AssistantProvider } from '@kbn/elastic-assistant';
 import type { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 import { useAssistantContextValue } from '@kbn/elastic-assistant/impl/assistant_context';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
+import type { UseAssistantAvailability } from '../../assistant/use_assistant_availability';
 
 interface Props {
-  assistantAvailability?: AssistantAvailability;
+  assistantAvailability?: UseAssistantAvailability;
   children: React.ReactNode;
 }
 
@@ -32,7 +32,7 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
   const actionTypeRegistry = actionTypeRegistryMock.create();
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
   const mockNavigateToApp = jest.fn();
-  const defaultAssistantAvailability: AssistantAvailability = {
+  const defaultAssistantAvailability: UseAssistantAvailability = {
     hasSearchAILakeConfigurations: false,
     hasAssistantPrivilege: false,
     hasConnectorsAllPrivilege: true,
