@@ -162,7 +162,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
 
         expect(events[0].properties).to.eql({
           contextLevel: 'rootLevel',
-          profileId: 'observability-root-profile',
+          profileId: 'observability-root-profile-with-attributes-tab',
         });
 
         expect(events[1].properties).to.eql({
