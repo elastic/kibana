@@ -32,7 +32,6 @@ function generateData({
 }) {
   const range = timerange(from, to);
 
-  console.log(range);
   const service = apm
     .service({
       agentVersion: '1.0.0',

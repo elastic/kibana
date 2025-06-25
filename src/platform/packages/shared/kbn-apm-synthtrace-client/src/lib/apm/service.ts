@@ -30,7 +30,7 @@ export function service(
 ): Service;
 
 export function service(
-  options: { name: string; environment: string } & (
+  options: { name: string; environment: string; agentVersion?: string } & (
     | { agentName: string }
     | { agentName: OpenTelemetryAgentName }
   )
