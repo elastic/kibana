@@ -26,16 +26,21 @@ export const KeyInsightsPanel: React.FC<{ spaceId: string; sourcerDataView: Data
   const tileStyles = css`
     border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
     border-radius: ${euiTheme.border.radius.medium};
-    padding: ${euiTheme.size.s};
+    padding: ${euiTheme.size.m};
     height: 100%;
   `;
   return (
-    <EuiFlexGroup wrap gutterSize="m" responsive={false} style={{ width: '100%' }}>
+    <EuiFlexGroup
+      wrap
+      gutterSize="l"
+      responsive={false}
+      style={{ width: '100%', gap: euiTheme.size.base }}
+    >
       <EuiFlexItem
         grow={false}
         style={{
-          minWidth: `calc(33.33% - ${euiTheme.size.s})`,
-          maxWidth: `calc(33.33% - ${euiTheme.size.s})`,
+          minWidth: `calc(33.33% - ${euiTheme.size.m})`,
+          maxWidth: `calc(33.33% - ${euiTheme.size.m})`,
         }}
       >
         <div css={tileStyles}>
@@ -45,8 +50,8 @@ export const KeyInsightsPanel: React.FC<{ spaceId: string; sourcerDataView: Data
       <EuiFlexItem
         grow={false}
         style={{
-          minWidth: `calc(33.33% - ${euiTheme.size.s})`,
-          maxWidth: `calc(33.33% - ${euiTheme.size.s})`,
+          minWidth: `calc(33.33% - ${euiTheme.size.m})`,
+          maxWidth: `calc(33.33% - ${euiTheme.size.m})`,
         }}
       >
         <div css={tileStyles}>
@@ -56,8 +61,8 @@ export const KeyInsightsPanel: React.FC<{ spaceId: string; sourcerDataView: Data
       <EuiFlexItem
         grow={false}
         style={{
-          minWidth: `calc(33.33% - ${euiTheme.size.s})`,
-          maxWidth: `calc(33.33% - ${euiTheme.size.s})`,
+          minWidth: `calc(33.33% - ${euiTheme.size.m})`,
+          maxWidth: `calc(33.33% - ${euiTheme.size.m})`,
         }}
       >
         <div css={tileStyles}>
@@ -67,8 +72,8 @@ export const KeyInsightsPanel: React.FC<{ spaceId: string; sourcerDataView: Data
       <EuiFlexItem
         grow={false}
         style={{
-          minWidth: `calc(33.33% - ${euiTheme.size.s})`,
-          maxWidth: `calc(33.33% - ${euiTheme.size.s})`,
+          minWidth: `calc(33.33% - ${euiTheme.size.m})`,
+          maxWidth: `calc(33.33% - ${euiTheme.size.m})`,
         }}
       >
         <div css={tileStyles}>
@@ -78,8 +83,8 @@ export const KeyInsightsPanel: React.FC<{ spaceId: string; sourcerDataView: Data
       <EuiFlexItem
         grow={false}
         style={{
-          minWidth: `calc(33.33% - ${euiTheme.size.s})`,
-          maxWidth: `calc(33.33% - ${euiTheme.size.s})`,
+          minWidth: `calc(33.33% - ${euiTheme.size.m})`,
+          maxWidth: `calc(33.33% - ${euiTheme.size.m})`,
         }}
       >
         <div css={tileStyles}>
@@ -89,8 +94,8 @@ export const KeyInsightsPanel: React.FC<{ spaceId: string; sourcerDataView: Data
       <EuiFlexItem
         grow={false}
         style={{
-          minWidth: `calc(33.33% - ${euiTheme.size.s})`,
-          maxWidth: `calc(33.33% - ${euiTheme.size.s})`,
+          minWidth: `calc(33.33% - ${euiTheme.size.m})`,
+          maxWidth: `calc(33.33% - ${euiTheme.size.m})`,
         }}
       >
         <div css={tileStyles}>
