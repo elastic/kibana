@@ -2224,9 +2224,9 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@./elastic-eui-104.0.2-second.tgz":
+"@elastic/eui@./elastic-eui-104.0.2-third.tgz":
   version "104.0.2"
-  resolved "./elastic-eui-104.0.2-second.tgz#1332c601c35d79cfbbea2e4576c346164fe50ad4"
+  resolved "./elastic-eui-104.0.2-third.tgz#1f9b4c7c297229794d2725a58c9d88ac2d084d24"
   dependencies:
     "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
@@ -7478,6 +7478,10 @@
   uid ""
 
 "@kbn/shared-ux-file-util@link:src/platform/packages/shared/shared-ux/file/util":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-flyout-group@link:src/platform/packages/shared/shared-ux/flyout/group":
   version "0.0.0"
   uid ""
 
