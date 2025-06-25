@@ -136,7 +136,6 @@
     "@kbn/securitysolution-exceptions-common",
     "@kbn/securitysolution-endpoint-exceptions-common",
     "@kbn/osquery-plugin",
-    "@kbn/cases-api-integration-test-plugin",
     "@kbn/mock-idp-utils",
     "@kbn/saved-objects-management-plugin",
     "@kbn/alerting-types",
