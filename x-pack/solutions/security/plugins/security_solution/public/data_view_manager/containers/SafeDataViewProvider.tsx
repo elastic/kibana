@@ -23,7 +23,14 @@ export interface DataViewContextValue {
 export const DataViewContext = createContext<DataViewContextValue | undefined>(undefined);
 
 export interface SafeDataViewProviderProps {
+  /**
+   * Specify scopes that are required by the wrapped component
+   * Only these scopes will be available through useDataViewSafe.
+   */
   scopes: readonly DataViewManagerScopeName[];
+  /**
+   * Optional fallback component
+   */
   fallback?: ReactNode;
 }
 

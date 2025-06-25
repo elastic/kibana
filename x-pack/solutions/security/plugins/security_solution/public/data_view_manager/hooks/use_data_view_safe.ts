@@ -10,7 +10,7 @@ import { DataViewContext } from '../containers/SafeDataViewProvider';
 import { type DataViewManagerScopeName } from '../constants';
 
 /**
- * Returns data view that is guaranteed to be set,
+ * Returns data view instance that is guaranteed to be set (for the provided scope),
  * allowing you to skip the status check (if its loading or not).
  * The catch is that it can only be used inside the DataViewProvider (you can have many on the page).
  */
@@ -23,7 +23,7 @@ export const useDataViewSafe = (scope: DataViewManagerScopeName) => {
 
   if (!(scope in dataViewsPerScope.results)) {
     throw new Error(
-      'No safeguards exist for requested scope, make sure it is configured where DataViewProvider is called'
+      'No safeguards exist for requested scope, make sure it is included in `scopes` property of the wrapping DataViewProvider'
     );
   }
 
