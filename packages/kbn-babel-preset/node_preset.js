@@ -9,6 +9,13 @@
 
 module.exports = (_, options = {}) => {
   return {
+    overrides: [
+      {
+        // translate .text files to Common JS
+        test: /\.text$/,
+        plugins: [require('./text_to_cjs')],
+      },
+    ],
     presets: [
       [
         require.resolve('@babel/preset-env'),

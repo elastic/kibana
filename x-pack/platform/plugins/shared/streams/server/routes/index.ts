@@ -21,6 +21,8 @@ import { internalCrudRoutes } from './internal/streams/crud/route';
 import { internalManagementRoutes } from './internal/streams/management/route';
 import { significantEventsRoutes } from './streams/significant_events/route';
 import { queryRoutes } from './queries/route';
+import { createServerRoute } from './create_server_route';
+import textFile from './text_file.text';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -41,6 +43,21 @@ export const streamsRouteRepository = {
   ...contentRoutes,
   ...significantEventsRoutes,
   ...queryRoutes,
+  ...createServerRoute({
+    endpoint: 'GET /internal/streams/test_text_file_import',
+    security: {
+      authz: {
+        enabled: false,
+        reason: '',
+      },
+      authc: {
+        enabled: 'optional',
+      },
+    },
+    handler: async () => {
+      return { textFile };
+    },
+  }),
 };
 
 export type StreamsRouteRepository = typeof streamsRouteRepository;

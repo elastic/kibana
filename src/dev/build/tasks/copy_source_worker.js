@@ -31,12 +31,14 @@ module.exports = async ({ source }) => {
     case '.js':
     case '.ts':
     case '.tsx':
+    case '.text':
       const output = transformCode(absoluteSource, undefined, {
         disableSourceMaps: true,
       });
 
       if (output.code) {
         const dest = absoluteDest.substring(0, absoluteDest.lastIndexOf('.')) + '.js';
+
         writeFileSync(dest, output.code);
       }
       break;

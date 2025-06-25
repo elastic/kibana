@@ -9,8 +9,10 @@ SOURCE_FILES = glob([
   "common_preset.js",
   "istanbul_preset.js",
   "node_preset.js",
+  "node_prod_preset.js",
   "styled_components_files.js",
   "webpack_preset.js",
+  "text_to_cjs.js"
 ])
 
 SRCS = SOURCE_FILES
