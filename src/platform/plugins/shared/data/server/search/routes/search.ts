@@ -38,7 +38,7 @@ export function registerSearchRoute(
         },
         authc: {
           enabled: 'minimal', // <-- Enable "minimal" authentication
-          sessionCache: moment.duration(16, 's'), // <-- Enable session cache,
+          // sessionCache: moment.duration(16, 's'), // <-- Enable session cache,
         },
       },
     })
