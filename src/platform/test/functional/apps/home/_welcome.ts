@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'home']);
-  const deployment = getService('deployment');
 
   describe('Welcome interstitial', () => {
     beforeEach(async () => {
