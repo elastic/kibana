@@ -20,6 +20,10 @@ export enum AgentMode {
    */
   normal = 'normal',
   /**
+   * Think more mode
+   */
+  thinkMore = 'think_more',
+  /**
    * Deep-research mode
    */
   researcher = 'researcher',

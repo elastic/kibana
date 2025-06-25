@@ -9,6 +9,7 @@ import { AgentMode, ConversationRound, RoundInput } from '@kbn/onechat-common';
 import type { ExecutableTool, ToolProvider } from '@kbn/onechat-server';
 import { AgentHandlerContext } from '@kbn/onechat-server';
 import { runChatAgent } from './chat';
+import { runPlannerAgent } from './planner';
 import { runResearcherAgent } from './researcher';
 
 export interface RunAgentParams {
@@ -48,6 +49,8 @@ export const runAgent = async (
   switch (mode) {
     case AgentMode.researcher:
       return runResearcherAgent(modeParams, context);
+    case AgentMode.thinkMore:
+      return runPlannerAgent(modeParams, context);
     case AgentMode.normal:
       return runChatAgent(modeParams, context);
   }

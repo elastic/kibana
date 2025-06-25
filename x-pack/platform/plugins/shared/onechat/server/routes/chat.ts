@@ -39,7 +39,11 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
         body: schema.object({
           agentId: schema.string({ defaultValue: OneChatDefaultAgentId }),
           mode: schema.oneOf(
-            [schema.literal(AgentMode.normal), schema.literal(AgentMode.researcher)],
+            [
+              schema.literal(AgentMode.normal),
+              schema.literal(AgentMode.thinkMore),
+              schema.literal(AgentMode.researcher),
+            ],
             { defaultValue: AgentMode.normal }
           ),
           connectorId: schema.maybe(schema.string()),
