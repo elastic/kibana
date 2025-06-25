@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getESQLResults } from '@kbn/esql-utils';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { TimeRange } from '@kbn/es-query';
+import { getESQLResults } from './run_query';
 
 export interface ESQLQueryToOptionsSuccess {
   options: string[];
@@ -20,11 +20,16 @@ export interface ESQLQueryToOptionsFailure {
   errors: Error[];
 }
 
-export const esqlQueryToOptions = async (
-  query: string,
-  search: ISearchGeneric,
-  timeRange?: TimeRange
-): Promise<ESQLQueryToOptionsSuccess | ESQLQueryToOptionsFailure> => {
+interface ESQLQueryToOptionsParams {
+  query: string;
+  search: ISearchGeneric;
+  timeRange?: TimeRange;
+}
+export const esqlQueryToOptions = async ({
+  query,
+  search,
+  timeRange,
+}: ESQLQueryToOptionsParams): Promise<ESQLQueryToOptionsSuccess | ESQLQueryToOptionsFailure> => {
   try {
     const results = await getESQLResults({
       esqlQuery: query,

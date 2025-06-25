@@ -152,7 +152,7 @@ export function ValueControlForm({
     async (query: string) => {
       setValuesQuery(query);
 
-      const result = await esqlQueryToOptions(query, search, timeRange);
+      const result = await esqlQueryToOptions({ query, search, timeRange });
       if (!isMounted()) {
         return;
       }

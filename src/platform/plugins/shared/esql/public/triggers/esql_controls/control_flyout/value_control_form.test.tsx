@@ -14,27 +14,19 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { monaco } from '@kbn/monaco';
 import { coreMock } from '@kbn/core/server/mocks';
 import { ESQLVariableType, EsqlControlType, ESQLControlState } from '@kbn/esql-types';
-import { getESQLResults } from '@kbn/esql-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ESQLControlsFlyout } from '.';
 
+const mockEsqlQueryToOptions = jest.fn().mockResolvedValue({
+  options: [],
+});
+
 jest.mock('@kbn/esql-utils', () => {
+  const esqlQueryToOptions = (...args: any[]) => mockEsqlQueryToOptions(...args);
+  esqlQueryToOptions.isSuccess = jest.fn().mockResolvedValue(true);
   return {
-    getESQLResults: jest.fn().mockResolvedValue({
-      response: {
-        columns: [
-          {
-            name: 'field',
-            id: 'field',
-            meta: {
-              type: 'keyword',
-            },
-          },
-        ],
-        values: [],
-      },
-    }),
+    esqlQueryToOptions,
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
     getLimitFromESQLQuery: jest.fn().mockReturnValue(1000),
     isQueryWrappedByPipes: jest.fn().mockReturnValue(false),
@@ -312,10 +304,8 @@ describe('ValueControlForm', () => {
         );
 
         await waitFor(() => {
-          expect(getESQLResults).toHaveBeenCalledWith(
-            expect.objectContaining({
-              timeRange: mockTimeRange,
-            })
+          expect(mockEsqlQueryToOptions).toHaveBeenCalledWith(
+            expect.objectContaining({ timeRange: mockTimeRange })
           );
         });
       });

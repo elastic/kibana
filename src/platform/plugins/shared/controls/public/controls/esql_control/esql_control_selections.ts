@@ -71,11 +71,11 @@ export function initializeESQLControlSelections(
   async function updateAvailableOptions() {
     const controlType = controlType$.getValue();
     if (controlType !== EsqlControlType.VALUES_FROM_QUERY) return;
-    const result = await esqlQueryToOptions(
-      esqlQuery$.getValue(),
-      dataService.search.search,
-      timeRange$?.getValue()
-    );
+    const result = await esqlQueryToOptions({
+      query: esqlQuery$.getValue(),
+      search: dataService.search.search,
+      timeRange: timeRange$?.getValue(),
+    });
     if (esqlQueryToOptions.isSuccess(result)) {
       availableOptions$.next(result.options);
     }
