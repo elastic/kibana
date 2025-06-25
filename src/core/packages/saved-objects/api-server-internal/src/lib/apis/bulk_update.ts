@@ -306,7 +306,8 @@ export const performBulkUpdate = async <T>(
         ...migrated!,
         id,
         type,
-        ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+        ...(savedObjectNamespace &&
+          savedObjectNamespace !== 'default' && { namespace: savedObjectNamespace }),
         ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
         attributes: updatedAttributes,
         updated_at: time,
