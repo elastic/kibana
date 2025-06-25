@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiLoadingSpinner, transparentize, useEuiTheme } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiProgress, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
-import React, { type FC, PropsWithChildren, useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { PropsWithChildren, useCallback, type FC } from 'react';
+import { useDropzone } from 'react-dropzone';
 import { EmptyPrompt } from './empty_prompt';
 import { FilesPreview } from './file_preview';
 
@@ -45,6 +45,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
     uploadStatus.overallImportStatus === STATUS.NOT_STARTED;
 
   const isUploading = uploadStatus.overallImportStatus === STATUS.STARTED;
+  const overallImportProgress = uploadStatus.overallImportProgress;
 
   const onFilesSelected = useCallback(
     async (files: File[]) => {
@@ -73,26 +74,36 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
 
   const { euiTheme } = useEuiTheme();
 
+  const FRAME = euiTheme.size.s;
+
   const overlayBase = css({
     position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    padding: FRAME,
+    inset: FRAME,
     background: transparentize(euiTheme.colors.backgroundLightText, 0.75),
     zIndex: 1000,
+    border: `${euiTheme.border.width.thin} dashed ${euiTheme.colors.primary}`,
+    borderRadius: euiTheme.border.radius.small,
   });
 
-  const overlayDraggingFile = css({
-    ...overlayBase,
-    zIndex: 1001,
-    borderRadius: euiTheme.border.radius.small,
-    cursor: 'grabbing',
-    border: `${euiTheme.border.width.thin} dashed ${euiTheme.colors.primary}`,
-  });
+  const overlayDraggingFile = css([
+    overlayBase,
+    {
+      cursor: 'grabbing',
+    },
+  ]);
 
   const loadingIndicator = (
-    <div css={{ ...overlayBase, zIndex: 1002 }}>
+    <div css={[overlayBase, { cursor: 'progress' }]}>
+      {overallImportProgress ? (
+        <EuiProgress
+          value={overallImportProgress}
+          max={100}
+          size="s"
+          color="primary"
+          position="absolute"
+        />
+      ) : null}
       <div
         css={{
           position: 'absolute',
@@ -100,6 +111,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
           left: '50%',
           translate: '-50% -50%',
           textAlign: 'center',
+          pointerEvents: 'none',
         }}
       >
         <EuiLoadingSpinner size="xl" />
@@ -134,11 +146,13 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
     content = <FilesPreview />;
   }
 
+  const showLoadingOverlay = isUploading || isAnalyzing;
+
   return (
     <FileSelectorContext.Provider value={{ onFileSelectorClick }}>
-      <div {...getRootProps({ css: { height: '100%' } })}>
+      <div {...getRootProps()}>
         {isDragActive ? <div css={overlayDraggingFile} /> : null}
-        {isUploading || isAnalyzing ? loadingIndicator : null}
+        {showLoadingOverlay ? loadingIndicator : null}
         <input {...getInputProps()} />
         {content}
       </div>
