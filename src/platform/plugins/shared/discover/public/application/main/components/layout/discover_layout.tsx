@@ -375,22 +375,18 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   }, [stateContainer.dataState]);
 
   const dispatch = useInternalStateDispatch();
-  const tabLabel = useCurrentTabSelector((state) => state.label);
   const layoutUiState = useCurrentTabSelector((state) => state.uiState.layout);
   const setLayoutUiState = useCurrentTabAction(internalStateActions.setLayoutUiState);
   const onInitialStateChange = useCallback(
     (newLayoutUiState: Partial<DiscoverLayoutRestorableState>) => {
-      console.log('[DiscoverLayout] onInitialStateChange', tabLabel, newLayoutUiState);
       dispatch(
         setLayoutUiState({
           layoutUiState: newLayoutUiState,
         })
       );
     },
-    [dispatch, setLayoutUiState, tabLabel]
+    [dispatch, setLayoutUiState]
   );
-
-  console.log(tabLabel, layoutUiState, 'layoutUiState');
 
   return (
     <EuiPage
