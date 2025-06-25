@@ -569,11 +569,6 @@ resource "elasticstack_elasticsearch_index" "example" {
   # Structured fields for simple, predictable values
   number_of_shards   = 1
   number_of_replicas = 2
-<<<<<<< HEAD
-
-=======
-
->>>>>>> main
   # JSON strings only for truly complex, variable structures
   mappings = jsonencode({
     properties = {
