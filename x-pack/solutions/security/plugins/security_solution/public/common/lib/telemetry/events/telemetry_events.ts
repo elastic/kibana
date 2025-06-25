@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { assistantTelemetryEvents } from './ai_assistant';
 import { alertsTelemetryEvents } from './alerts_grouping';
 import { appTelemetryEvents } from './app';
 import { dataQualityTelemetryEvents } from './data_quality';
@@ -19,7 +18,6 @@ import { previewRuleTelemetryEvents } from './preview_rule';
 import { siemMigrationsTelemetryEvents } from './siem_migrations';
 
 export const telemetryEvents = [
-  ...assistantTelemetryEvents,
   ...alertsTelemetryEvents,
   ...previewRuleTelemetryEvents,
   ...entityTelemetryEvents,
