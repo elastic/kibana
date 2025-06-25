@@ -112,7 +112,7 @@ export const AlertsFlyout = <AC extends AdditionalContext>({
       : i18n.translate(
           'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.ariaLabelDefault',
           {
-            defaultMessage: '',
+            defaultMessage: 'Alert details',
           }
         );
 
