@@ -158,7 +158,9 @@ export async function deleteKibanaAssets({
   );
 
   const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
-  logger.debug(`Deleting Kibana assets in namespace: ${namespace}`);
+  if (namespace) {
+    logger.debug(`Deleting Kibana assets in namespace: ${namespace}`);
+  }
 
   const minKibana = packageSpecConditions?.kibana?.version
     ? minVersion(packageSpecConditions.kibana.version)
