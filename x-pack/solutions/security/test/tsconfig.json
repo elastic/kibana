@@ -43,5 +43,8 @@
     "@kbn/stack-connectors-plugin",
     "@kbn/security-plugin",
     "@kbn/security-plugin-types-common",
+    "@kbn/es",
+    "@kbn/cypress-test-helper",
+    "@kbn/fleet-plugin",
   ]
 }
