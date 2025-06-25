@@ -42,6 +42,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
     "@kbn/shared-ux-router",
-    "@kbn/shared-ux-link-redirect-app"
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/core-lifecycle-browser"
   ]
 }
