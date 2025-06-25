@@ -7,11 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { OverlayStart } from './src/overlays';
 export type { OverlayBannersStart } from './src/banners';
-export type { OverlayFlyoutStart, OverlayFlyoutOpenOptions } from './src/flyout';
 export type {
-  OverlayModalStart,
-  OverlayModalOpenOptions,
+  FlyoutPropsEnhanced,
+  ManagedFlyoutEntry,
+  OverlayFlyoutOpenOptions,
+  OverlayFlyoutStart,
+  ManagedFlyoutApi,
+} from './src/flyout';
+export type {
   OverlayModalConfirmOptions,
+  OverlayModalOpenOptions,
+  OverlayModalStart,
 } from './src/modal';
+export type { OverlayStart } from './src/overlays';

@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FlyoutService } from './flyout_service';
-export { ManagedFlyoutService } from './managed';
+import { PlatformFlyoutExamplesPlugin } from './plugin';
+
+export const plugin = () => new PlatformFlyoutExamplesPlugin();

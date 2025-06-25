@@ -7,5 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FlyoutService } from './flyout_service';
-export { ManagedFlyoutService } from './managed';
+export const useManagedFlyoutMock = jest.fn(() => ({
+  openFlyout: jest.fn(),
+  closeFlyout: jest.fn(),
+  isFlyoutOpen: jest.fn(() => false),
+  nextFlyout: jest.fn(),
+  goBack: jest.fn(),
+  canGoBack: jest.fn(() => false),
+  openChildFlyout: jest.fn(),
+  closeChildFlyout: jest.fn(),
+  getStateManager: jest.fn(),
+}));

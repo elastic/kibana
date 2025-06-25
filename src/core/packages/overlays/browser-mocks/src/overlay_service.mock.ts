@@ -14,6 +14,7 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { overlayBannersServiceMock } from './banners_service.mock';
 import { overlayFlyoutServiceMock } from './flyout_service.mock';
 import { overlayModalServiceMock } from './modal_service.mock';
+import { useManagedFlyoutMock } from './use_managed_flyout.mock';
 
 const createStartContractMock = () => {
   const overlayStart = overlayModalServiceMock.createStartContract();
@@ -22,6 +23,7 @@ const createStartContractMock = () => {
     openModal: overlayStart.open,
     openConfirm: overlayStart.openConfirm,
     banners: overlayBannersServiceMock.createStartContract(),
+    useManagedFlyout: useManagedFlyoutMock,
   };
   return startContract;
 };

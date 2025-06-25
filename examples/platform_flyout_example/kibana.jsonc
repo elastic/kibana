@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/platform-flyout-examples-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "description": "Example app that shows use cases for the platform flyouts system",
+  "plugin": {
+    "id": "platformFlyoutExamples",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": ["developerExamples"],
+    "requiredBundles": []
+  }
+}
