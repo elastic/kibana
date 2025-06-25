@@ -89,8 +89,8 @@ export class IndexUpdateService {
   public readonly rows$: Observable<DataTableRecord[]> = this._rows$.asObservable();
 
   // Holds runtime field definitions reactively
-  private _runtimeFields$ = new BehaviorSubject<string[]>([]);
-  public readonly runtimeFields$: Observable<any[]> = this._runtimeFields$.asObservable();
+  private _newAddedFields = new BehaviorSubject<string[]>([]);
+  public readonly newAddedFields$: Observable<any[]> = this._newAddedFields.asObservable();
 
   private readonly _subscription = new Subscription();
 
@@ -144,16 +144,22 @@ export class IndexUpdateService {
   public readonly dataView$: Observable<DataView> = combineLatest([
     this._indexName$,
     this._indexCrated$,
-    this.runtimeFields$,
   ]).pipe(
     skipWhile(([indexName, indexCreated]) => {
       return !indexName;
     }),
-    switchMap(async ([indexName, , runtimeFields]) => {
-      const dataView = await this.getDataView(indexName!);
+    switchMap(([indexName]) => {
+      return from(this.getDataView(indexName!));
+    }),
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
 
-      for (const field of runtimeFields) {
-        // HD move to dataTableColumns$
+  public readonly dataTableColumns$: Observable<DatatableColumn[]> = combineLatest([
+    this.dataView$,
+    this.newAddedFields$,
+  ]).pipe(
+    map(([dataView, newAddedFields]) => {
+      for (const field of newAddedFields) {
         dataView.fields.add({
           name: field,
           type: KBN_FIELD_TYPES.UNKNOWN,
@@ -161,13 +167,6 @@ export class IndexUpdateService {
           searchable: true,
         });
       }
-      return dataView;
-    }),
-    shareReplay({ bufferSize: 1, refCount: true })
-  );
-
-  public readonly dataTableColumns$: Observable<DatatableColumn[]> = this.dataView$.pipe(
-    map((dataView) => {
       return (
         dataView.fields
           // Exclude metadata fields. TODO check if this is the right way to do it
@@ -400,8 +399,8 @@ export class IndexUpdateService {
   }
 
   public addRuntimeField(filedName: string) {
-    const current = this._runtimeFields$.getValue();
-    this._runtimeFields$.next([...current, filedName]);
+    const current = this._newAddedFields.getValue();
+    this._newAddedFields.next([...current, filedName]);
   }
 
   public destroy() {
