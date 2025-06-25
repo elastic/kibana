@@ -193,12 +193,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
                     />
                   </h4>
                 </EuiTitle>
-                <EuiText
-                  css={{
-                    fontSize: xsFontSize,
-                    color: euiTheme.colors.textSubdued,
-                  }}
-                >
+                <EuiText color="subdued" size="xs">
                   <FormattedMessage
                     id="xpack.inferenceEndpointUICommon.components.additionalInfo.providerOptionalSettingsHelpLabel"
                     defaultMessage="Configure the inference provider. These settings are optional provider settings."
