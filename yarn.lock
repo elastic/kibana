@@ -4045,7 +4045,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cases-api-integration-test-plugin@link:x-pack/test/cases_api_integration/common/plugins/cases":
+"@kbn/cases-api-integration-test-plugin@link:x-pack/platform/test/cases_api_integration/common/plugins/cases":
   version "0.0.0"
   uid ""
 
@@ -6529,7 +6529,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-fixtures-plugin@link:x-pack/test/cases_api_integration/common/plugins/observability":
+"@kbn/observability-fixtures-plugin@link:x-pack/platform/test/cases_api_integration/common/plugins/observability":
   version "0.0.0"
   uid ""
 
@@ -7225,7 +7225,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-fixtures-plugin@link:x-pack/test/cases_api_integration/common/plugins/security_solution":
+"@kbn/security-solution-fixtures-plugin@link:x-pack/platform/test/cases_api_integration/common/plugins/security_solution":
   version "0.0.0"
   uid ""
 
