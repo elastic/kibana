@@ -141,13 +141,13 @@ export const DashboardSettingsFlyout = ({ onClose }: DashboardSettingsProps) => 
     );
   };
 
-  const renderDeferBelowFold = () => {
+  const renderFetchOnlyVisible = () => {
     const deferBelowFold = coreServices.uiSettings.get('labs:dashboard:deferBelowFold', false);
     return (
       <EuiFormRow>
         <EuiSwitch
           disabled={deferBelowFold}
-          data-test-subj="storeTimeWithDashboard"
+          data-test-subj="fetchOnlyVisibleCheckbox"
           checked={deferBelowFold || localSettings.fetchOnlyVisible}
           onChange={(event) => updateDashboardSetting({ fetchOnlyVisible: event.target.checked })}
           label={
@@ -230,7 +230,7 @@ export const DashboardSettingsFlyout = ({ onClose }: DashboardSettingsProps) => 
           </EuiFormRow>
           {renderTagSelector()}
           <EuiSpacer />
-          {renderDeferBelowFold()}
+          {renderFetchOnlyVisible()}
           <EuiFormRow
             helpText={
               <FormattedMessage

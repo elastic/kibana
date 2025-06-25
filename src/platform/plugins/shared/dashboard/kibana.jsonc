@@ -25,7 +25,6 @@
       "screenshotMode",
       "uiActions",
       "urlForwarding",
-      "presentationUtil",
       "unifiedSearch"
     ],
     "optionalPlugins": [
@@ -41,12 +40,6 @@
       "observabilityAIAssistant",
       "lens"
     ],
-    "requiredBundles": [
-      "kibanaReact",
-      "kibanaUtils",
-      "presentationUtil",
-      "presentationPanel",
-      "savedObjects"
-    ]
+    "requiredBundles": ["kibanaReact", "kibanaUtils", "presentationPanel", "savedObjects"]
   }
 }
