@@ -68,3 +68,17 @@ export const UPDATE_MIGRATION_NAME_FAILURE = i18n.translate(
     defaultMessage: 'Failed to update migration name',
   }
 );
+
+export const DELETE_MIGRATION_SUCCESS = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.deleteMigrationSuccess',
+  {
+    defaultMessage: 'Migration deleted',
+  }
+);
+
+export const DELETE_MIGRATION_FAILURE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.deleteMigrationFailDescription',
+  {
+    defaultMessage: 'Failed to delete migration',
+  }
+);
