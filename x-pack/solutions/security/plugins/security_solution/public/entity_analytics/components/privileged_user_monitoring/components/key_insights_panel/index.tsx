@@ -29,6 +29,11 @@ export const KeyInsightsPanel: React.FC<{ spaceId: string; sourcerDataView: Data
     padding: ${euiTheme.size.m};
     height: 100%;
   `;
+
+  const flexItemStyles = {
+    minWidth: `calc(33.33% - ${euiTheme.size.m})`,
+    maxWidth: `calc(33.33% - ${euiTheme.size.m})`,
+  };
   return (
     <EuiFlexGroup
       wrap
@@ -36,68 +41,32 @@ export const KeyInsightsPanel: React.FC<{ spaceId: string; sourcerDataView: Data
       responsive={false}
       style={{ width: '100%', gap: euiTheme.size.base }}
     >
-      <EuiFlexItem
-        grow={false}
-        style={{
-          minWidth: `calc(33.33% - ${euiTheme.size.m})`,
-          maxWidth: `calc(33.33% - ${euiTheme.size.m})`,
-        }}
-      >
+      <EuiFlexItem grow={false} style={flexItemStyles}>
         <div css={tileStyles}>
           <ActivePrivilegedUsersTile spaceId={spaceId} sourcerDataView={sourcerDataView} />
         </div>
       </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-        style={{
-          minWidth: `calc(33.33% - ${euiTheme.size.m})`,
-          maxWidth: `calc(33.33% - ${euiTheme.size.m})`,
-        }}
-      >
+      <EuiFlexItem grow={false} style={flexItemStyles}>
         <div css={tileStyles}>
           <AlertsTriggeredTile spaceId={spaceId} />
         </div>
       </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-        style={{
-          minWidth: `calc(33.33% - ${euiTheme.size.m})`,
-          maxWidth: `calc(33.33% - ${euiTheme.size.m})`,
-        }}
-      >
+      <EuiFlexItem grow={false} style={flexItemStyles}>
         <div css={tileStyles}>
           <AnomaliesDetectedTile spaceId={spaceId} />
         </div>
       </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-        style={{
-          minWidth: `calc(33.33% - ${euiTheme.size.m})`,
-          maxWidth: `calc(33.33% - ${euiTheme.size.m})`,
-        }}
-      >
+      <EuiFlexItem grow={false} style={flexItemStyles}>
         <div css={tileStyles}>
           <GrantedRightsTile spaceId={spaceId} sourcerDataView={sourcerDataView} />
         </div>
       </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-        style={{
-          minWidth: `calc(33.33% - ${euiTheme.size.m})`,
-          maxWidth: `calc(33.33% - ${euiTheme.size.m})`,
-        }}
-      >
+      <EuiFlexItem grow={false} style={flexItemStyles}>
         <div css={tileStyles}>
           <AccountSwitchesTile spaceId={spaceId} sourcerDataView={sourcerDataView} />
         </div>
       </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-        style={{
-          minWidth: `calc(33.33% - ${euiTheme.size.m})`,
-          maxWidth: `calc(33.33% - ${euiTheme.size.m})`,
-        }}
-      >
+      <EuiFlexItem grow={false} style={flexItemStyles}>
         <div css={tileStyles}>
           <AuthenticationsTile spaceId={spaceId} sourcerDataView={sourcerDataView} />
         </div>
