@@ -8,7 +8,7 @@
 import { OnRefreshChangeProps } from '@elastic/eui';
 import { useSelector } from '@xstate/react';
 import { useCallback, useMemo } from 'react';
-import { KNOWN_TYPES } from '../../common/constants';
+import { DEFAULT_DATASET_TYPE, KNOWN_TYPES } from '../../common/constants';
 import { DataStreamType, QualityIndicators } from '../../common/types';
 import { Integration } from '../../common/data_streams_stats/integration';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
@@ -18,7 +18,7 @@ import { QualityItem } from '../components/dataset_quality/filters/qualities_sel
 import { Item } from '../components/dataset_quality/filters/selector';
 
 export const useDatasetQualityFilters = () => {
-  const { service } = useDatasetQualityContext();
+  const { service, isDatasetQualityAllSignalsAvailable } = useDatasetQualityContext();
 
   const isLoading = useSelector(
     service,
@@ -173,11 +173,15 @@ export const useDatasetQualityFilters = () => {
   );
 
   const typeItems: Item[] = useMemo(() => {
-    return KNOWN_TYPES.map((type) => ({
+    const validTypeItems = isDatasetQualityAllSignalsAvailable
+      ? KNOWN_TYPES
+      : [DEFAULT_DATASET_TYPE];
+
+    return validTypeItems.map((type) => ({
       label: type,
       checked: selectedTypes.includes(type) ? 'on' : undefined,
     }));
-  }, [selectedTypes]);
+  }, [isDatasetQualityAllSignalsAvailable, selectedTypes]);
 
   const onTypesChange = useCallback(
     (newTypeItems: Item[]) => {
@@ -217,5 +221,6 @@ export const useDatasetQualityFilters = () => {
     isLoading,
     selectedQuery,
     onQueryChange,
+    isDatasetQualityAllSignalsAvailable,
   };
 };

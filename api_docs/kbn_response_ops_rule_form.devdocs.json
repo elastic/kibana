@@ -2010,13 +2010,14 @@
           },
           {
             "parentPluginId": "@kbn/response-ops-rule-form",
-            "id": "def-public.RuleFormProps.isServerless",
+            "id": "def-public.RuleFormProps.initialEditStep",
             "type": "CompoundType",
             "tags": [],
-            "label": "isServerless",
+            "label": "initialEditStep",
             "description": [],
             "signature": [
-              "boolean | undefined"
+              "RuleFormStepId",
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
             "deprecated": false,
