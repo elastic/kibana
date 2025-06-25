@@ -221,7 +221,6 @@ API design decisions can create real challenges for Terraform resource implement
 {
   "error": {
     "reason": "Can't update non dynamic settings [[index.codec, index.number_of_shards]] for open indices"
-
 }
 ```
 
@@ -570,7 +569,11 @@ resource "elasticstack_elasticsearch_index" "example" {
   # Structured fields for simple, predictable values
   number_of_shards   = 1
   number_of_replicas = 2
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> main
   # JSON strings only for truly complex, variable structures
   mappings = jsonencode({
     properties = {
