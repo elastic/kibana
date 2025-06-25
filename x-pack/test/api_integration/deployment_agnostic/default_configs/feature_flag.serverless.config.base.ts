@@ -15,7 +15,6 @@ import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { ServerlessProjectType } from '@kbn/es';
 import path from 'path';
 import { DeploymentAgnosticCommonServices, services } from '../services';
-import { LOCAL_PRODUCT_DOC_PATH } from './common_paths';
 import { updateKbnServerArguments } from './helpers';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
