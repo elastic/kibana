@@ -18,6 +18,7 @@ import { FilterBar } from './fiter_bar';
 import { MapsPage } from './maps_page';
 import { RenderablePage } from './renderable_page';
 import { createLazyPageObject } from './utils';
+import { ObservabilityApp } from './observability_app';
 
 export interface PageObjectsFixtures {
   page: ScoutPage;
@@ -33,6 +34,7 @@ export interface PageObjects {
   maps: MapsPage;
   renderable: RenderablePage;
   collapsibleNav: CollapsibleNav;
+  observability: ObservabilityApp;
 }
 
 /**
@@ -50,6 +52,7 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     maps: createLazyPageObject(MapsPage, fixtures.page),
     renderable: createLazyPageObject(RenderablePage, fixtures.page),
     collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
+    observability: createLazyPageObject(ObservabilityApp, fixtures.page),
     // Add new page objects here
   };
 }
