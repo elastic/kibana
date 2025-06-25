@@ -101,5 +101,6 @@
     "@kbn/repo-info",
     "@kbn/dev-cli-errors",
     "@kbn/journeys",
+    "@kbn/lens-plugin",
   ]
 }
