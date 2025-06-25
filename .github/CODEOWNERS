@@ -1816,7 +1816,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/accessibility/ftr_provider_context.ts @elastic/appex-qa
 /src/platform/test/accessibility/config.ts @elastic/appex-qa
 /src/platform/test/accessibility/apps/index.ts @elastic/appex-qa
-/x-pack/test/scalability @elastic/appex-qa
+/x-pack/platform/test/scalability @elastic/appex-qa
 /src/dev/performance @elastic/appex-qa
 /x-pack/test/functional/config.*.* @elastic/appex-qa
 /x-pack/platform/test/functional/config.*.* @elastic/appex-qa
