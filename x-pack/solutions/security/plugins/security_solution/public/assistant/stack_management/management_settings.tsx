@@ -11,12 +11,12 @@ import type { Conversation } from '@kbn/elastic-assistant';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { i18n } from '@kbn/i18n';
 import {
-  AssistantSpaceIdProvider,
   mergeBaseWithPersistedConversations,
   useAssistantContext,
   useFetchCurrentUserConversations,
   WELCOME_CONVERSATION_TITLE,
 } from '@kbn/elastic-assistant';
+import { AssistantSpaceIdProvider } from '@kbn/elastic-assistant/impl/assistant/use_space_aware_context';
 import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
 import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
 import { SECURITY_AI_SETTINGS } from '@kbn/elastic-assistant/impl/assistant/settings/translations';
