@@ -165,8 +165,7 @@ export function fetch$(api: unknown): Observable<FetchContext> {
       timeRange: reloadTimeFetchContext.timeRange,
       timeslice: reloadTimeFetchContext.timeslice,
       searchSessionId: reloadTimeFetchContext.searchSessionId,
-    })),
-    tap(() => console.log('FETCH'))
+    }))
   );
 }
 
