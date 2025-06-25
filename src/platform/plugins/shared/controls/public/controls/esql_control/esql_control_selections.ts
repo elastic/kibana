@@ -16,9 +16,9 @@ import {
 } from '@kbn/esql-types';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { esqlQueryToOptions } from '@kbn/presentation-controls';
+import { TimeRange } from '@kbn/es-query';
 import { dataService } from '../../services/kibana_services';
 import { ControlGroupApi } from '../../control_group/types';
-import { TimeRange } from '@kbn/es-query';
 
 function selectedOptionsComparatorFunction(a?: string[], b?: string[]) {
   return deepEqual(a ?? [], b ?? []);
