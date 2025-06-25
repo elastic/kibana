@@ -279,10 +279,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables advanced mode for Trusted Apps creation and update
    */
   trustedAppsAdvancedMode: false,
-  /**
-   * Enables the starter prompts in the Elastic Assistant
-   */
-  starterPromptsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

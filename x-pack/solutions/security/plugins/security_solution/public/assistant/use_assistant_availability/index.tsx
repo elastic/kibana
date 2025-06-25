@@ -6,7 +6,6 @@
  */
 
 import type { AssistantAvailability } from '@kbn/elastic-assistant';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useLicense } from '../../common/hooks/use_license';
 import { useKibana } from '../../common/lib/kibana';
 import { ASSISTANT_FEATURE_ID, SECURITY_FEATURE_ID } from '../../../common/constants';
@@ -31,17 +30,12 @@ export const useAssistantAvailability = (): AssistantAvailability => {
     capabilities.actions?.delete === true &&
     capabilities.actions?.save === true;
 
-  const starterPromptsEnabled = useIsExperimentalFeatureEnabled('starterPromptsEnabled');
-  // remove once product has signed off on prompt text
-  const isStarterPromptsEnabled = starterPromptsEnabled;
-
   return {
     hasSearchAILakeConfigurations,
     hasAssistantPrivilege,
     hasConnectorsAllPrivilege,
     hasConnectorsReadPrivilege,
     isAssistantEnabled: isEnterprise,
-    isStarterPromptsEnabled,
     hasUpdateAIAssistantAnonymization,
     hasManageGlobalKnowledgeBase,
   };
