@@ -26,6 +26,7 @@ import {
   SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkUpdateResponse,
 } from '@kbn/core-saved-objects-api-server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import {
   type Either,
@@ -307,7 +308,7 @@ export const performBulkUpdate = async <T>(
         id,
         type,
         ...(savedObjectNamespace &&
-          savedObjectNamespace !== 'default' && { namespace: savedObjectNamespace }),
+          savedObjectNamespace !== DEFAULT_SPACE_ID && { namespace: savedObjectNamespace }),
         ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
         attributes: updatedAttributes,
         updated_at: time,
