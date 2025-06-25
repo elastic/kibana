@@ -31,6 +31,5 @@ export const useFetchQueryRulesSets = (page: Page = DEFAULT_PAGE_VALUE) => {
       );
     },
     retry: false,
-    refetchInterval: 2000,
   });
 };

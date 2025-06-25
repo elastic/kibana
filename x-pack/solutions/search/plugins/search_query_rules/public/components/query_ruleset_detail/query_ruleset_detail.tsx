@@ -193,7 +193,9 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
 
   const handleSave = () => {
     setIsFormDirty(false);
-    useTracker?.click(createMode ? AnalyticsEvents.rulesetCreated : AnalyticsEvents.rulesetUpdated);
+    useTracker?.click(
+      createMode ? AnalyticsEvents.rulesetCreateClicked : AnalyticsEvents.rulesetUpdateClicked
+    );
     createRuleset({
       rulesetId,
       forceWrite: true,

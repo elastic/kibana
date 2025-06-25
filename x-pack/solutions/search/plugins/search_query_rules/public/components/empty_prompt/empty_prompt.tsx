@@ -251,9 +251,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                       defaultMessage: 'Create in Console',
                     })}
                     showIcon
-                    onClick={() => {
-                      usageTracker?.click(AnalyticsEvents.createInConsoleClicked);
-                    }}
+                    data-test-subj={AnalyticsEvents.createInConsoleClicked}
                   />
                 </EuiFlexItem>
               </EuiHideFor>

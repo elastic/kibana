@@ -16,9 +16,8 @@ export enum AnalyticsEvents {
   notFoundErrorPromptLoaded = 'not_found_error_prompt_loaded',
   missingPermissionsErrorPromptLoaded = 'missing_permissions_error_prompt_loaded',
 
-  rulesetDeleted = 'ruleset_deleted',
-  rulesetCreated = 'ruleset_created',
-  rulesetUpdated = 'ruleset_updated',
+  rulesetCreateClicked = 'ruleset_create_clicked',
+  rulesetUpdateClicked = 'ruleset_update_clicked',
 
   // ruleset detail page actions
   rulesetDetailPageLoaded = 'ruleset_details_page_loaded',
@@ -30,6 +29,7 @@ export enum AnalyticsEvents {
   backToRulesetListClicked = 'back_to_ruleset_list_clicked',
 
   rulesReordered = 'rules_reordered',
+  ruleFlyoutDocumentsReordered = 'rule_flyout_documents_reordered',
 
   // ruleset list page actions
   editRulesetInlineNameClicked = 'edit_ruleset_inline_name_clicked',

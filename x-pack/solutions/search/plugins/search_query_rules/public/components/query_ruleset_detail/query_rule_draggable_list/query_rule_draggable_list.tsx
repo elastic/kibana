@@ -274,7 +274,7 @@ export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
     <EuiDragDropContext
       onDragEnd={({ source, destination }) => {
         if (source && destination) {
-          useTracker?.load(AnalyticsEvents.rulesReordered);
+          useTracker?.click(AnalyticsEvents.rulesReordered);
           const items = euiDragDropReorder(rules, source.index, destination.index);
           onReorder(items);
         }
