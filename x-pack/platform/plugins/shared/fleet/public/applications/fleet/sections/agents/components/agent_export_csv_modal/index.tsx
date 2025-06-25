@@ -70,7 +70,7 @@ export const AgentExportCSVModal: React.FunctionComponent<Props> = ({
   return (
     <EuiConfirmModal
       data-test-subj="agentExportCSVModal"
-      isConfirmDisabled={selection.length === 0}
+      confirmButtonDisabled={selection.length === 0}
       title={
         <FormattedMessage
           id="xpack.fleet.exportCSV.modalTitle"
