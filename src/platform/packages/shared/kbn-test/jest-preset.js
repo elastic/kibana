@@ -108,7 +108,7 @@ module.exports = {
 
   // A map from regular expressions to paths to transformers
   transform: {
-    '^.+\\.(js|tsx?)$':
+    '^.+\\.(text|js|tsx?)$':
       '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/babel/index.js',
     '^.+\\.(txt|html)?$':
       '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/raw.js',
