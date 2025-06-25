@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { lastValueFrom, toArray, filter } from 'rxjs';
-import { FunctionVisibility } from '../../../common';
+import { lastValueFrom, filter, last } from 'rxjs';
+import { FunctionVisibility, StreamingChatResponseEventType } from '../../../common';
 import { FunctionRegistrationParameters } from '../functions';
 import { MessageRole } from '../../../common';
 import { continueConversation } from '../../service/client/operators/continue_conversation';
@@ -21,20 +21,40 @@ import {
 import { ChatFunctionClient } from '../../service/chat_function_client';
 
 export const EXECUTE_CONNECTOR_AGENT_NAME = 'execute_connector_agent';
-export const EXECUTE_CONNECTOR_AGENT_SYSTEM_MESSAGE = `You are an assistant for Elastic Observability, responsible for executing Kibana connectors based on user prompts.
-**Important:** Before calling the "${EXECUTE_CONNECTOR_FUNCTION_NAME}" function, you MUST first call the "${GET_CONNECTOR_INFO_FUNCTION_NAME}" function.
-This is required to:
-1. Retrieve the list of available connectors.
-2. Obtain the correct schema and required parameters for the connector you want to execute.
-Once you receive the connector information:
-- Select the correct connector by its "id".
-- Construct the "params" object using the schema provided for that connector.
-- Validate the "params" using the "${VALIDATE_CONNECTOR_PARAMS_FUNCTION_NAME}" function to ensure they meet the connector's requirements. **important:** This step is crucial to avoid errors during execution. you must include id and params in the validation function call.
-- if the validation fails, try to correct the parameters based on the error message returned by the validation function. if you cannot correct the parameters, inform the user about the issue and ask for clarification or additional information.
-- if the validation is successful, proceed with the execution.
-- Then, and only then, call the "${EXECUTE_CONNECTOR_FUNCTION_NAME}" function with the appropriate "id" and "params".
+export const EXECUTE_CONNECTOR_AGENT_SYSTEM_MESSAGE = `You are an assistant for Elastic Observability acting as a function-calling agent. Your task is to execute Kibana connectors (e.g., Slack, Email, Jira) based on user prompts.
 
-Skipping this process may result in errors, invalid schema usage, or failed executions.`;
+**Follow this process strictly before calling the "${EXECUTE_CONNECTOR_FUNCTION_NAME}" function:**
+
+1. Call "${GET_CONNECTOR_INFO_FUNCTION_NAME}" to:
+   - Retrieve the list of available connectors.
+   - Get the parameter schema for each connector.
+
+2. Choose the correct connector by its **"id"**.
+   - Use connector name or type from the user prompt to identify it.
+
+3. Build the **"params"** object using the connector's schema.
+
+4. Call "${VALIDATE_CONNECTOR_PARAMS_FUNCTION_NAME}" with:
+   - The connector **"id"**
+   - The constructed **"params"**
+
+  If validation fails:
+   - Try to fix the parameters using the validation error message.
+   - If unable to fix, ask the user for clarification.
+
+5. Once validated, call "${EXECUTE_CONNECTOR_FUNCTION_NAME}" with:
+   - The **connector id**
+   - The **validated params**
+
+---
+
+**Response Format** (after execution):
+- Start with a brief summary of the action performed.
+- Describe each step you took (in bullet points).
+- Include the result of the connector execution in a readable format.
+
+**Important:** Never call "${EXECUTE_CONNECTOR_FUNCTION_NAME}" without prior validation. Do not skip any step.
+`;
 
 export function registerExecuteConnectorAgent({
   functions,
@@ -116,14 +136,16 @@ export function registerExecuteConnectorAgent({
         simulateFunctionCalling: false,
       });
 
-      const events = await lastValueFrom(
+      const lastMessage = await lastValueFrom(
         conversation$.pipe(
-          filter((event) => event.type !== 'chatCompletionChunk'),
-          toArray()
+          filter((event) => event.type === StreamingChatResponseEventType.ChatCompletionMessage),
+          last()
         )
       );
+
       return {
-        content: events,
+        // Return the last message in the conversation
+        content: lastMessage ? lastMessage.message : '',
       };
     }
   );
