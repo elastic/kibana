@@ -1,0 +1,34 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "cypress",
+      "jest",
+      "node",
+    ]
+  },
+  "include": [
+    "cypress.d.ts",
+    "**/*.ts",
+    "src/**/*",
+    // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
+    "src/**/*.json",
+    "../../../../../typings/**/*",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/es",
+    "@kbn/security-plugin",
+    "@kbn/tooling-log",
+    "@kbn/repo-info",
+    "@kbn/test",
+    "@kbn/dev-cli-runner",
+    "@kbn/core-status-common",
+    "@kbn/dev-utils",
+    "@kbn/spaces-plugin",
+    "@kbn/config-schema",
+  ]
+}
