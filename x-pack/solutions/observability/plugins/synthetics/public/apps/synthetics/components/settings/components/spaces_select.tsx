@@ -75,6 +75,14 @@ export const SpaceSelector = <T extends FieldValues>({
               await trigger();
             }}
             options={spacesList}
+            renderOption={(option) => (
+              <span
+                aria-label={`space-option-${option.id}`}
+                aria-labelledby={`space-option-${option.id}`}
+              >
+                {option.label}
+              </span>
+            )}
             selectedOptions={(field.value ?? []).map((id) => {
               const sp = spacesList.find((space) => space.id === id);
               if (!sp) {
