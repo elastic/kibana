@@ -9,22 +9,18 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
-import { asAbsoluteDateTime, TimeUnit } from '../../../../common/utils/formatters/datetime';
+import { asAbsoluteDateTime, TimeUnit } from '../utils/formatters/datetime';
 
 interface Props {
   /**
    * timestamp in milliseconds
    */
   time: number;
-  /**
-   * Threshold in hours to switch from relative to absolute time display
-   * If not provided, it defaults to 2 hours
-   */
   relativeDisplayThreshold?: number;
   timeUnit?: TimeUnit;
 }
 
-export function getRelativeTimeText(duration: moment.Duration) {
+export function getElapsedTimeText(duration: moment.Duration) {
   const [day, hour, minute] = [duration.days(), duration.hours(), duration.minutes()];
   // keeping days for flexibility, but it is not used in the current implementation. If day is detected, it will be displayed without hours or minutes
   if (day > 0) {
@@ -60,7 +56,7 @@ export function getRelativeTimeText(duration: moment.Duration) {
   });
 }
 
-export function RelativeTimestampTooltip({
+export function ElapsedTimeTooltip({
   time,
   relativeDisplayThreshold = 24,
   timeUnit = 'milliseconds',
@@ -71,7 +67,7 @@ export function RelativeTimestampTooltip({
   const timeDisplay =
     duration.asHours() > relativeDisplayThreshold
       ? absoluteTimeLabel
-      : getRelativeTimeText(duration);
+      : getElapsedTimeText(duration);
 
   return (
     <EuiToolTip content={absoluteTimeLabel}>
