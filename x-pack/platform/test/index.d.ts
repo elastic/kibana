@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './group_alerts';
-export * from './types';
+declare module '@kbn/repo-info' {
+  export const REPO_ROOT: string;
+}
