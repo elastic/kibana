@@ -160,16 +160,16 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
-      it('returns 400 when maximumCasesToOpen > 10', async () => {
+      it('returns 400 when maximumCasesToOpen > 20', async () => {
         const res = await executeSystemConnector({
           supertest,
           connectorId,
-          req: getRequest({ maximumCasesToOpen: 11 }),
+          req: getRequest({ maximumCasesToOpen: 21 }),
         });
 
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          'Request validation failed (Error: [maximumCasesToOpen]: Value must be equal to or lower than [10].)'
+          'Request validation failed (Error: [maximumCasesToOpen]: Value must be equal to or lower than [20].)'
         );
       });
 
