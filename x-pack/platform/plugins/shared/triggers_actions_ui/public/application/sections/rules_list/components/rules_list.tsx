@@ -124,6 +124,7 @@ export interface RulesListProps {
   onRefresh?: (refresh: Date) => void;
   setHeaderActions?: (components?: React.ReactNode[]) => void;
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
+  navigateToEditRuleForm?: (ruleId: string) => void;
 }
 
 export const percentileFields = {
@@ -165,6 +166,7 @@ export const RulesList = ({
   onTypeFilterChange,
   onRefresh,
   setHeaderActions,
+  navigateToEditRuleForm,
 }: RulesListProps) => {
   const history = useHistory();
   const kibanaServices = useKibana().services;
@@ -299,6 +301,11 @@ export const RulesList = ({
   });
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
+    if (navigateToEditRuleForm) {
+      navigateToEditRuleForm(ruleItem.id);
+      return;
+    }
+
     navigateToApp('management', {
       path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
       state: {
@@ -655,7 +662,9 @@ export const RulesList = ({
   useEffect(() => {
     setHeaderActions?.([
       ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openRuleTypeModal} />] : []),
-      <RulesSettingsLink />,
+      <RulesSettingsLink
+        alertDeleteCategoryIds={['management', 'observability', 'securitySolution']}
+      />,
       <RulesListDocLink />,
     ]);
   }, [authorizedToCreateAnyRules]);

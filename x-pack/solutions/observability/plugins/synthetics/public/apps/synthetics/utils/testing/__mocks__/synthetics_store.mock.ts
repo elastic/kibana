@@ -116,7 +116,7 @@ export const mockState: SyntheticsAppState = {
     data: null,
   },
   privateLocations: {
-    isCreatePrivateLocationFlyoutVisible: false,
+    isPrivateLocationFlyoutVisible: false,
     loading: false,
     error: null,
     data: [],
@@ -142,6 +142,7 @@ export const mockState: SyntheticsAppState = {
     loading: false,
     status: null,
     error: null,
+    isInitialLoad: true,
   },
   globalParams: {
     addError: null,
@@ -162,6 +163,7 @@ export const mockState: SyntheticsAppState = {
     loading: false,
     error: null,
   },
+  maintenanceWindows: {},
 };
 
 function getBrowserJourneyMockSlice() {

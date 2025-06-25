@@ -91,17 +91,29 @@ And add the following to it:
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 
-export class HelloWorldPlugin implements Plugin {
-  public setup(core: CoreSetup) {
+interface SetupDeps {
+  developerExamples: DeveloperExamplesSetup;
+}
+
+export class HelloWorldPlugin implements Plugin<void, void, SetupDeps> {
+  public setup(core: CoreSetup, deps: SetupDeps) {
     // Register an application into the side navigation menu
     core.application.register({
       id: 'helloWorld',
       title: 'Hello World',
       async mount({ element }: AppMountParameters) {
-        ReactDOM.render(<div>Hello World!</div>, element);
+        ReactDOM.render(<div data-test-subj="helloWorldDiv">Hello World!</div>, element);
         return () => ReactDOM.unmountComponentAtNode(element);
       },
+    });
+
+    // This section is only needed to get this example plugin to show up in our Developer Examples.
+    deps.developerExamples.register({
+      appId: 'helloWorld',
+      title: 'Hello World Application',
+      description: `Build a plugin that registers an application that simply says "Hello World"`,
     });
   }
   public start(core: CoreStart) {

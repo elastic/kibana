@@ -8,18 +8,17 @@
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { toolToDescriptor } from '../services/tools/utils/tool_conversion';
+import type { ListToolsResponse } from '../../common/http_api/tools';
+import { apiPrivileges } from '../../common/features';
 
 export function registerToolsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  router.get(
+  router.post(
     {
-      path: '/api/onechat/tools/list',
+      path: '/internal/onechat/tools',
       security: {
-        authz: {
-          enabled: false,
-          reason: 'Platform feature - RBAC in lower layers',
-        },
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       validate: false,
     },
@@ -27,7 +26,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       const { tools: toolService } = getInternalServices();
       const registry = toolService.registry.asScopedPublicRegistry({ request });
       const tools = await registry.list({});
-      return response.ok({
+      return response.ok<ListToolsResponse>({
         body: {
           tools: tools.map(toolToDescriptor),
         },

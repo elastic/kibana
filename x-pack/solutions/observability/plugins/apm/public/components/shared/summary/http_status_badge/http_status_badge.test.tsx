@@ -6,69 +6,76 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { screen } from '@testing-library/react';
 import { HttpStatusBadge } from '.';
 import { renderHook } from '@testing-library/react';
 import { useEuiTheme } from '@elastic/eui';
+import { renderWithTheme } from '../../../../utils/test_helpers';
 
 describe('HttpStatusBadge', () => {
-  describe('render', () => {
-    describe('with status code 100', () => {
-      it('renders with neutral color', () => {
-        const wrapper = mount(<HttpStatusBadge status={100} />);
-        const { result } = renderHook(() => useEuiTheme());
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          result.current.euiTheme.colors.vis.euiColorVisGrey0
-        );
-      });
-    });
+  it('renders status code 100 with neutral color', () => {
+    renderWithTheme(<HttpStatusBadge status={100} />);
+    const { result } = renderHook(() => useEuiTheme());
 
-    describe('with status code 200', () => {
-      it('renders with success color', () => {
-        const wrapper = mount(<HttpStatusBadge status={200} />);
-        const { result } = renderHook(() => useEuiTheme());
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          result.current.euiTheme.colors.vis.euiColorVisSuccess0
-        );
-      });
+    const badge = screen.getByTestId('httpStatusBadge');
+    expect(badge).toHaveStyle({
+      '--euiBadgeBackgroundColor': result.current.euiTheme.colors.vis.euiColorVisGrey0,
     });
+    expect(badge).toHaveTextContent('100');
+  });
 
-    describe('with status code 301', () => {
-      it('renders with neutral color', () => {
-        const wrapper = mount(<HttpStatusBadge status={301} />);
-        const { result } = renderHook(() => useEuiTheme());
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          result.current.euiTheme.colors.vis.euiColorVisGrey0
-        );
-      });
+  it('renders status code 200 with success color', () => {
+    renderWithTheme(<HttpStatusBadge status={200} />);
+    const { result } = renderHook(() => useEuiTheme());
+
+    const badge = screen.getByTestId('httpStatusBadge');
+    expect(badge).toHaveStyle({
+      '--euiBadgeBackgroundColor': result.current.euiTheme.colors.vis.euiColorVisSuccess0,
     });
+    expect(badge).toHaveTextContent('200');
+  });
 
-    describe('with status code 404', () => {
-      it('renders with warning color', () => {
-        const wrapper = mount(<HttpStatusBadge status={404} />);
-        const { result } = renderHook(() => useEuiTheme());
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          result.current.euiTheme.colors.vis.euiColorVisWarning0
-        );
-      });
+  it('renders status code 301 with neutral color', () => {
+    renderWithTheme(<HttpStatusBadge status={301} />);
+    const { result } = renderHook(() => useEuiTheme());
+
+    const badge = screen.getByTestId('httpStatusBadge');
+    expect(badge).toHaveStyle({
+      '--euiBadgeBackgroundColor': result.current.euiTheme.colors.vis.euiColorVisGrey0,
     });
+    expect(badge).toHaveTextContent('301');
+  });
 
-    describe('with status code 502', () => {
-      it('renders with error color', () => {
-        const wrapper = mount(<HttpStatusBadge status={502} />);
-        const { result } = renderHook(() => useEuiTheme());
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          result.current.euiTheme.colors.vis.euiColorVisDanger0
-        );
-      });
+  it('renders status code 404 with warning color', () => {
+    renderWithTheme(<HttpStatusBadge status={404} />);
+    const { result } = renderHook(() => useEuiTheme());
+
+    const badge = screen.getByTestId('httpStatusBadge');
+    expect(badge).toHaveStyle({
+      '--euiBadgeBackgroundColor': result.current.euiTheme.colors.vis.euiColorVisWarning1,
     });
+    expect(badge).toHaveTextContent('404');
+  });
 
-    describe('with other status code', () => {
-      it('renders with default color', () => {
-        const wrapper = mount(<HttpStatusBadge status={700} />);
+  it('renders status code 502 with error color', () => {
+    renderWithTheme(<HttpStatusBadge status={502} />);
+    const { result } = renderHook(() => useEuiTheme());
 
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual('default');
-      });
+    const badge = screen.getByTestId('httpStatusBadge');
+    expect(badge).toHaveStyle({
+      '--euiBadgeBackgroundColor': result.current.euiTheme.colors.vis.euiColorVisDanger0,
     });
+    expect(badge).toHaveTextContent('502');
+  });
+
+  it('renders other status codes with default color', () => {
+    renderWithTheme(<HttpStatusBadge status={700} />);
+
+    const badge = screen.getByTestId('httpStatusBadge');
+    expect(badge).not.toHaveStyle({
+      '--euiBadgeBackgroundColor': expect.any(String),
+    });
+    expect(badge.className).toContain('default');
+    expect(badge).toHaveTextContent('700');
   });
 });

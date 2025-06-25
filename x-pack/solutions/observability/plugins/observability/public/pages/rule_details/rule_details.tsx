@@ -22,7 +22,7 @@ import {
   OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
   observabilityAlertFeatureIds,
 } from '../../../common/constants';
-import { paths } from '../../../common/locators/paths';
+import { paths, relativePaths } from '../../../common/locators/paths';
 import type { AlertStatus } from '../../../common/typings';
 import { RuleDetailsLocatorParams } from '../../locators/rule_details';
 import { getControlIndex } from '../../utils/alert_controls/get_control_index';
@@ -60,7 +60,7 @@ interface RuleDetailsPathParams {
 export function RuleDetailsPage() {
   const { services } = useKibana();
   const {
-    application: { capabilities, navigateToUrl },
+    application: { capabilities, navigateToUrl, navigateToApp },
     http: { basePath },
     share: {
       url: { locators },
@@ -175,7 +175,15 @@ export function RuleDetailsPage() {
   };
 
   const handleEditRule = () => {
-    setEditRuleFlyoutVisible(true);
+    if (rule) {
+      navigateToApp('observability', {
+        path: relativePaths.observability.editRule(rule.id),
+        state: {
+          returnApp: 'observability',
+          returnPath: relativePaths.observability.ruleDetails(rule.id),
+        },
+      });
+    }
   };
 
   const handleCloseRuleFlyout = () => {
@@ -234,7 +242,7 @@ export function RuleDetailsPage() {
       }}
     >
       <HeaderMenu />
-      <EuiFlexGroup wrap gutterSize="m">
+      <EuiFlexGroup wrap gutterSize="m" data-test-subj={`ruleType_${rule.ruleTypeId}`}>
         <EuiFlexItem css={{ minWidth: 350 }}>
           <RuleStatusPanel
             rule={rule}
@@ -263,6 +271,7 @@ export function RuleDetailsPage() {
           actionTypeRegistry={actionTypeRegistry}
           rule={rule}
           ruleTypeRegistry={ruleTypeRegistry}
+          navigateToEditRuleForm={handleEditRule}
           onEditRule={async () => {
             refetch();
           }}

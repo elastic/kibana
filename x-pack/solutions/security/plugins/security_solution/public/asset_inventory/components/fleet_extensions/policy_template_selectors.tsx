@@ -54,6 +54,7 @@ export const PolicyTemplateVarsForm = ({
             newPolicy={newPolicy}
             setupTechnology={setupTechnology}
             updatePolicy={updatePolicy}
+            isEditPage={isEditPage}
             packageInfo={packageInfo}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
             input={input}

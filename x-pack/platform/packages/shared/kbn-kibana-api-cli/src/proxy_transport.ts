@@ -15,6 +15,7 @@ import {
   TransportResult,
   errors,
 } from '@elastic/elasticsearch';
+import { get } from 'lodash';
 
 export function createProxyTransport({
   pathname,
@@ -77,7 +78,11 @@ export function createProxyTransport({
           throw error;
         })
         .then((response) => {
-          if (response.statusCode >= 400) {
+          const statusCode = Number(
+            get(response, 'headers.x-console-proxy-status-code', response.statusCode)
+          );
+
+          if (statusCode >= 400) {
             throw new errors.ResponseError({
               statusCode: response.statusCode,
               body: response.body,

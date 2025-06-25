@@ -12,6 +12,7 @@ import {
   ESQLAstQueryExpression,
   ESQLFunction,
   ESQLSingleAstItem,
+  ESQLSource,
   isESQLNamedParamLiteral,
 } from '@kbn/esql-ast/src/types';
 import {
@@ -43,10 +44,17 @@ const ACCEPTABLE_TYPES_HOVER = i18n.translate('monaco.esql.hover.acceptableTypes
   defaultMessage: 'Acceptable types',
 });
 
+export type HoverMonacoModel = Pick<monaco.editor.ITextModel, 'getValue'>;
+
+/**
+ * @todo Monaco dependencies are not necesasry here: (1) replace {@link HoverMonacoModel}
+ * by some generic `getText(): string` method; (2) replace {@link monaco.Position} by
+ * `offset: number`.
+ */
 export async function getHoverItem(
-  model: monaco.editor.ITextModel,
+  model: HoverMonacoModel,
   position: monaco.Position,
-  resourceRetriever?: ESQLCallbacks
+  callbacks?: ESQLCallbacks
 ) {
   const fullText = model.getValue();
   const offset = monacoPositionToOffset(fullText, position);
@@ -68,6 +76,12 @@ export async function getHoverItem(
           containingFunction = fn as ESQLFunction<'variadic-call'>;
       }
     },
+    visitSource: (source, parent, walker) => {
+      if (within(offset, source.location)) {
+        node = source;
+        walker.abort();
+      }
+    },
     visitSingleAstItem: (_node) => {
       // ignore identifiers because we don't want to choose them as the node type
       // instead of the function node (functions can have an "operator" child which is
@@ -86,7 +100,7 @@ export async function getHoverItem(
     return hoverContent;
   }
 
-  const variables = resourceRetriever?.getVariables?.();
+  const variables = callbacks?.getVariables?.();
   const variablesContent = getVariablesHoverContent(node, variables);
 
   if (variablesContent.length) {
@@ -99,7 +113,7 @@ export async function getHoverItem(
       root,
       fullText,
       offset,
-      resourceRetriever
+      callbacks
     );
     hoverContent.contents.push(...argHints);
   }
@@ -118,7 +132,8 @@ export async function getHoverItem(
   }
 
   if (node.type === 'source' && node.sourceType === 'policy') {
-    const { getPolicyMetadata } = getPolicyHelper(resourceRetriever);
+    const source = node as ESQLSource;
+    const { getPolicyMetadata } = getPolicyHelper(callbacks);
     const policyMetadata = await getPolicyMetadata(node.name);
     if (policyMetadata) {
       hoverContent.contents.push(
@@ -141,18 +156,22 @@ export async function getHoverItem(
         ]
       );
     }
-  }
 
-  if (node.type === 'mode') {
-    const mode = ENRICH_MODES.find(({ name }) => name === node!.name)!;
-    hoverContent.contents.push(
-      ...[
-        { value: modeDescription },
-        {
-          value: `**${mode.name}**: ${mode.description}`,
-        },
-      ]
-    );
+    if (!!source.prefix) {
+      const mode = ENRICH_MODES.find(
+        ({ name }) => '_' + name === source.prefix!.valueUnquoted.toLowerCase()
+      )!;
+      if (mode) {
+        hoverContent.contents.push(
+          ...[
+            { value: modeDescription },
+            {
+              value: `**${mode.name}**: ${mode.description}`,
+            },
+          ]
+        );
+      }
+    }
   }
 
   return hoverContent;

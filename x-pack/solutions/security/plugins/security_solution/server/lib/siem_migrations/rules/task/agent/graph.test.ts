@@ -219,7 +219,7 @@ describe('getRuleMigrationAgent', () => {
     it('integration found and full translation results', async () => {
       mockEsqlKnowledgeBase.translate.mockResolvedValue(mockFullNlToEsqlResponse);
       mockRetriever.prebuiltRules.search.mockResolvedValue([mockPrebuiltRule]);
-      mockRetriever.integrations.getIntegrations.mockResolvedValue([mockIntegrationResult]);
+      mockRetriever.integrations.search.mockResolvedValue([mockIntegrationResult]);
       const graph = await setupAgent([
         {
           nodeId: 'createSemanticQuery',

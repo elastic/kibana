@@ -82,7 +82,6 @@ export const tableDefaults: SubsetDataTableModel = {
     },
   ],
   selectAll: false,
-  graphEventId: '',
   columns: defaultHeaders,
   queryFields: [],
   title: '',
@@ -104,5 +103,4 @@ export const getDataTableManageDefaults = (id: string) => ({
   queryFields: [],
   title: '',
   unit: (n: number) => i18n.UNIT(n),
-  graphEventId: '',
 });

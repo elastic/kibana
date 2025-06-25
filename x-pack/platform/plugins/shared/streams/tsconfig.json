@@ -6,11 +6,14 @@
   "include": [
     "../../../../../typings/**/*",
     "common/**/*",
+    "scripts/**/*",
     "server/**/*",
     "public/**/*",
     "types/**/*"
   ],
-  "exclude": ["target/**/*"],
+  "exclude": [
+    "target/**/*"
+  ],
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core",
@@ -49,6 +52,10 @@
     "@kbn/features-plugin",
     "@kbn/i18n",
     "@kbn/zod-helpers",
-    "@kbn/inference-common"
+    "@kbn/core-http-server-utils",
+    "@kbn/inference-common",
+    "@kbn/lock-manager",
+    "@kbn/core-ui-settings-common",
+    "@kbn/management-settings-ids"
   ]
 }

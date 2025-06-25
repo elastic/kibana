@@ -16,9 +16,7 @@ import {
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
   apmServiceGroupMaxNumberOfServices,
-  apmLabsButton,
   apmEnableTableSearchBar,
-  entityCentricExperience,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
   syntheticsThrottlingEnabled,
@@ -46,12 +44,10 @@ const technicalPreviewLabel = i18n.translate(
   { defaultMessage: 'technical preview' }
 );
 
-type UiSettings = UiSettingsParams<boolean | number | string | object> & { showInLabs?: boolean };
-
 /**
  * uiSettings definitions for Observability.
  */
-export const uiSettings: Record<string, UiSettings> = {
+export const uiSettings: Record<string, UiSettingsParams<boolean | number | string | object>> = {
   [enableInspectEsQueries]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableInspectEsQueriesExperimentName', {
@@ -154,7 +150,6 @@ export const uiSettings: Record<string, UiSettings> = {
         }
       ),
     },
-    showInLabs: true,
     solution: 'oblt',
   },
   [apmServiceGroupMaxNumberOfServices]: {
@@ -167,21 +162,6 @@ export const uiSettings: Record<string, UiSettings> = {
       defaultMessage: 'Limit the number of services in a given service group',
     }),
     schema: schema.number({ min: 1 }),
-    solution: 'oblt',
-  },
-  [apmLabsButton]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmLabs', {
-      defaultMessage: 'Enable labs button in APM',
-    }),
-    description: i18n.translate('xpack.observability.apmLabsDescription', {
-      defaultMessage:
-        'This flag determines if the viewer has access to the Labs button, a quick way to enable and disable technical preview features in APM.',
-    }),
-    schema: schema.boolean(),
-    value: false,
-    requiresPageReload: true,
-    type: 'boolean',
     solution: 'oblt',
   },
   [apmEnableTableSearchBar]: {
@@ -198,23 +178,6 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.boolean(),
     value: true,
-    requiresPageReload: true,
-    type: 'boolean',
-    solution: 'oblt',
-  },
-  [entityCentricExperience]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.entityCentricExperience', {
-      defaultMessage: 'Entity-centric experience',
-    }),
-    description: i18n.translate('xpack.observability.entityCentricExperienceDescription', {
-      defaultMessage: '{technicalPreviewLabel} Promote entity-centric experience to users.',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-      },
-    }),
-    schema: schema.boolean(),
-    value: false,
     requiresPageReload: true,
     type: 'boolean',
     solution: 'oblt',

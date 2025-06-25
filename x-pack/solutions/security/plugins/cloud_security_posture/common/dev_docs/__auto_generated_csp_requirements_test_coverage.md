@@ -684,7 +684,7 @@ You can also check out the dedicated app view, which enables easier search and f
 | [Should return waiting_for_result when installed cnvm, has no findings and it has been less than 4 hours minutes since the installation](x-pack/test/api_integration/apis/cloud_security_posture/status/status_waiting_for_results.ts) | it |  |  |
 </details>
 
-## Directory: x-pack/test/cloud_security_posture_api
+## Directory: x-pack/solutions/security/test/cloud_security_posture_api
 
 **Total Tests:** 58 | **Skipped:** 2 (3.45%) | **Todo:** 0 (0.00%)
 
@@ -695,67 +695,67 @@ You can also check out the dedicated app view, which enables easier search and f
 
 | Test Label | Type | Skipped | Todo |
 |------------|------|---------|------|
-| [GET /internal/cloud_security_posture/benchmarks](x-pack/test/cloud_security_posture_api/routes/benchmarks.ts) | describe |  |  |
-| [Get Benchmark API](x-pack/test/cloud_security_posture_api/routes/benchmarks.ts) | describe |  |  |
-| [Verify cspm benchmark score is updated when muting rules](x-pack/test/cloud_security_posture_api/routes/benchmarks.ts) | it |  |  |
-| [Verify kspm benchmark score is updated when muting rules](x-pack/test/cloud_security_posture_api/routes/benchmarks.ts) | it |  |  |
-| [Get Benchmark API](x-pack/test/cloud_security_posture_api/routes/benchmarks.ts) | describe |  |  |
-| [Calling Benchmark API as User with no read access to Security](x-pack/test/cloud_security_posture_api/routes/benchmarks.ts) | it |  |  |
-| [Calling Benchmark API as User with read access to Security](x-pack/test/cloud_security_posture_api/routes/benchmarks.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Verify update csp rules states API](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | describe |  |  |
-| [mute benchmark rules successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
-| [unmute rules successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
-| [verify new rules are added and existing rules are set.](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
-| [mute detection rule successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
-| [Expect to mute two benchmark rules and one detection rule](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
-| [Expect to save rules states when requesting to update empty object](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
-| [set wrong action input](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
-| [users without read privileges on cloud security should not be able to mute](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
-| [users with all privileges on cloud security should be able to mute](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
-| [Tests get rules states API](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | describe |  |  |
-| [get rules states successfully](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | it |  |  |
-| [get empty object when rules states not exists](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | it |  |  |
-| [GET rules states API with user with read access](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [GET rules states API API with user without read access](x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | it |  |  |
-| [/internal/cloud_security_posture/detection_engine_rules/alerts/_status](x-pack/test/cloud_security_posture_api/routes/get_detection_engine_alerts_count_by_rule_tags.ts) | describe |  |  |
-| [GET detection_engine_rules API with user that has specific access](x-pack/test/cloud_security_posture_api/routes/get_detection_engine_alerts_count_by_rule_tags.ts) | describe |  |  |
-| [GET detection_engine_rules API with user with read access](x-pack/test/cloud_security_posture_api/routes/get_detection_engine_alerts_count_by_rule_tags.ts) | it |  |  |
-| [GET detection_engine_rules API with user without read access](x-pack/test/cloud_security_posture_api/routes/get_detection_engine_alerts_count_by_rule_tags.ts) | it |  |  |
-| [Cloud Security Posture](x-pack/test/cloud_security_posture_api/routes/index.ts) | describe |  |  |
-| [GET /internal/cloud_security_posture/stats](x-pack/test/cloud_security_posture_api/routes/stats.ts) | describe |  |  |
-| [CSPM Compliance Dashboard Stats API](x-pack/test/cloud_security_posture_api/routes/stats.ts) | describe |  |  |
-| [should return CSPM cluster V1 ](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
-| [should return CSPM benchmarks V2 ](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
-| [KSPM Compliance Dashboard Stats API](x-pack/test/cloud_security_posture_api/routes/stats.ts) | describe |  |  |
-| [should return KSPM clusters V1 ](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
-| [should return KSPM benchmarks V2](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
-| [should return KSPM benchmarks V2](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
-| [Compliance dashboard based on enabled rules](x-pack/test/cloud_security_posture_api/routes/stats.ts) | describe |  |  |
-| [should calculate cspm benchmarks posture score based only on enabled rules](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
-| [should calculate kspm benchmarks posture score based only on enabled rules](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
-| [GET stats API with user that has specific access](x-pack/test/cloud_security_posture_api/routes/stats.ts) | describe |  |  |
-| [GET stats API V1 with user with read access](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
-| [GET stats API V1 with user with read access](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
-| [GET stats API V2 with user with read access](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
-| [GET stats API V2 with user without read access](x-pack/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
-| [GET /internal/cloud_security_posture/status](x-pack/test/cloud_security_posture_api/routes/status.ts) | describe |  |  |
-| [GET status API with user that has specific access](x-pack/test/cloud_security_posture_api/routes/status.ts) | describe |  |  |
-| [GET stats API with user with read access](x-pack/test/cloud_security_posture_api/routes/status.ts) | it |  |  |
-| [GET status API with user without read access](x-pack/test/cloud_security_posture_api/routes/status.ts) | it |  |  |
-| [Vulnerability Dashboard API](x-pack/test/cloud_security_posture_api/routes/vulnerabilities_dashboard.ts) | describe |  |  |
-| [responds with a 200 status code and matching data mock](x-pack/test/cloud_security_posture_api/routes/vulnerabilities_dashboard.ts) | it |  |  |
-| [returns a 400 error when necessary indices are nonexistent](x-pack/test/cloud_security_posture_api/routes/vulnerabilities_dashboard.ts) | it |  |  |
-| [GET vulnerabilities dashboard API with users with read access to cloud security posture](x-pack/test/cloud_security_posture_api/routes/vulnerabilities_dashboard.ts) | it |  |  |
-| [GET vulnerabilities dashboard API with users without read access to cloud security posture](x-pack/test/cloud_security_posture_api/routes/vulnerabilities_dashboard.ts) | it |  |  |
-| [Verify cloud_security_posture telemetry payloads](x-pack/test/cloud_security_posture_api/telemetry/telemetry.ts) | describe |  |  |
-| [includes only KSPM findings](x-pack/test/cloud_security_posture_api/telemetry/telemetry.ts) | it |  |  |
-| [includes only CSPM findings](x-pack/test/cloud_security_posture_api/telemetry/telemetry.ts) | it |  |  |
-| [includes CSPM and KSPM findings](x-pack/test/cloud_security_posture_api/telemetry/telemetry.ts) | it |  |  |
-| [](x-pack/test/cloud_security_posture_api/telemetry/telemetry.ts) | it |  |  |
-| [includes KSPM findings without posture_type and CSPM findings as well](x-pack/test/cloud_security_posture_api/telemetry/telemetry.ts) | it |  |  |
+| [GET /internal/cloud_security_posture/benchmarks](x-pack/solutions/security/test/cloud_security_posture_api/routes/benchmarks.ts) | describe |  |  |
+| [Get Benchmark API](x-pack/solutions/security/test/cloud_security_posture_api/routes/benchmarks.ts) | describe |  |  |
+| [Verify cspm benchmark score is updated when muting rules](x-pack/solutions/security/test/cloud_security_posture_api/routes/benchmarks.ts) | it |  |  |
+| [Verify kspm benchmark score is updated when muting rules](x-pack/solutions/security/test/cloud_security_posture_api/routes/benchmarks.ts) | it |  |  |
+| [Get Benchmark API](x-pack/solutions/security/test/cloud_security_posture_api/routes/benchmarks.ts) | describe |  |  |
+| [Calling Benchmark API as User with no read access to Security](x-pack/solutions/security/test/cloud_security_posture_api/routes/benchmarks.ts) | it |  |  |
+| [Calling Benchmark API as User with read access to Security](x-pack/solutions/security/test/cloud_security_posture_api/routes/benchmarks.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Verify update csp rules states API](x-pack/solutions/security/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | describe |  |  |
+| [mute benchmark rules successfully](x-pack/solutions/security/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [unmute rules successfully](x-pack/solutions/security/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [verify new rules are added and existing rules are set.](x-pack/solutions/security/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [mute detection rule successfully](x-pack/solutions/security/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [Expect to mute two benchmark rules and one detection rule](x-pack/solutions/security/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [Expect to save rules states when requesting to update empty object](x-pack/solutions/security/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [set wrong action input](x-pack/solutions/security/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [users without read privileges on cloud security should not be able to mute](x-pack/solutions/security/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [users with all privileges on cloud security should be able to mute](x-pack/solutions/security/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts) | it |  |  |
+| [Tests get rules states API](x-pack/solutions/security/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | describe |  |  |
+| [get rules states successfully](x-pack/solutions/security/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | it |  |  |
+| [get empty object when rules states not exists](x-pack/solutions/security/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | it |  |  |
+| [GET rules states API with user with read access](x-pack/solutions/security/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [GET rules states API API with user without read access](x-pack/solutions/security/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts) | it |  |  |
+| [/internal/cloud_security_posture/detection_engine_rules/alerts/_status](x-pack/solutions/security/test/cloud_security_posture_api/routes/get_detection_engine_alerts_count_by_rule_tags.ts) | describe |  |  |
+| [GET detection_engine_rules API with user that has specific access](x-pack/solutions/security/test/cloud_security_posture_api/routes/get_detection_engine_alerts_count_by_rule_tags.ts) | describe |  |  |
+| [GET detection_engine_rules API with user with read access](x-pack/solutions/security/test/cloud_security_posture_api/routes/get_detection_engine_alerts_count_by_rule_tags.ts) | it |  |  |
+| [GET detection_engine_rules API with user without read access](x-pack/solutions/security/test/cloud_security_posture_api/routes/get_detection_engine_alerts_count_by_rule_tags.ts) | it |  |  |
+| [Cloud Security Posture](x-pack/solutions/security/test/cloud_security_posture_api/routes/index.ts) | describe |  |  |
+| [GET /internal/cloud_security_posture/stats](x-pack/solutions/security/test/cloud_security_posture_api/routes/stats.ts) | describe |  |  |
+| [CSPM Compliance Dashboard Stats API](x-pack/solutions/security/test/cloud_security_posture_api/routes/stats.ts) | describe |  |  |
+| [should return CSPM cluster V1 ](x-pack/solutions/security/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
+| [should return CSPM benchmarks V2 ](x-pack/solutions/security/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
+| [KSPM Compliance Dashboard Stats API](x-pack/solutions/security/test/cloud_security_posture_api/routes/stats.ts) | describe |  |  |
+| [should return KSPM clusters V1 ](x-pack/solutions/security/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
+| [should return KSPM benchmarks V2](x-pack/solutions/security/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
+| [should return KSPM benchmarks V2](x-pack/solutions/security/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
+| [Compliance dashboard based on enabled rules](x-pack/solutions/security/test/cloud_security_posture_api/routes/stats.ts) | describe |  |  |
+| [should calculate cspm benchmarks posture score based only on enabled rules](x-pack/solutions/security/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
+| [should calculate kspm benchmarks posture score based only on enabled rules](x-pack/solutions/security/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
+| [GET stats API with user that has specific access](x-pack/solutions/security/test/cloud_security_posture_api/routes/stats.ts) | describe |  |  |
+| [GET stats API V1 with user with read access](x-pack/solutions/security/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
+| [GET stats API V1 with user with read access](x-pack/solutions/security/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
+| [GET stats API V2 with user with read access](x-pack/solutions/security/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
+| [GET stats API V2 with user without read access](x-pack/solutions/security/test/cloud_security_posture_api/routes/stats.ts) | it |  |  |
+| [GET /internal/cloud_security_posture/status](x-pack/solutions/security/test/cloud_security_posture_api/routes/status.ts) | describe |  |  |
+| [GET status API with user that has specific access](x-pack/solutions/security/test/cloud_security_posture_api/routes/status.ts) | describe |  |  |
+| [GET stats API with user with read access](x-pack/solutions/security/test/cloud_security_posture_api/routes/status.ts) | it |  |  |
+| [GET status API with user without read access](x-pack/solutions/security/test/cloud_security_posture_api/routes/status.ts) | it |  |  |
+| [Vulnerability Dashboard API](x-pack/solutions/security/test/cloud_security_posture_api/routes/vulnerabilities_dashboard.ts) | describe |  |  |
+| [responds with a 200 status code and matching data mock](x-pack/solutions/security/test/cloud_security_posture_api/routes/vulnerabilities_dashboard.ts) | it |  |  |
+| [returns a 400 error when necessary indices are nonexistent](x-pack/solutions/security/test/cloud_security_posture_api/routes/vulnerabilities_dashboard.ts) | it |  |  |
+| [GET vulnerabilities dashboard API with users with read access to cloud security posture](x-pack/solutions/security/test/cloud_security_posture_api/routes/vulnerabilities_dashboard.ts) | it |  |  |
+| [GET vulnerabilities dashboard API with users without read access to cloud security posture](x-pack/solutions/security/test/cloud_security_posture_api/routes/vulnerabilities_dashboard.ts) | it |  |  |
+| [Verify cloud_security_posture telemetry payloads](x-pack/solutions/security/test/cloud_security_posture_api/telemetry/telemetry.ts) | describe |  |  |
+| [includes only KSPM findings](x-pack/solutions/security/test/cloud_security_posture_api/telemetry/telemetry.ts) | it |  |  |
+| [includes only CSPM findings](x-pack/solutions/security/test/cloud_security_posture_api/telemetry/telemetry.ts) | it |  |  |
+| [includes CSPM and KSPM findings](x-pack/solutions/security/test/cloud_security_posture_api/telemetry/telemetry.ts) | it |  |  |
+| [](x-pack/solutions/security/test/cloud_security_posture_api/telemetry/telemetry.ts) | it |  |  |
+| [includes KSPM findings without posture_type and CSPM findings as well](x-pack/solutions/security/test/cloud_security_posture_api/telemetry/telemetry.ts) | it |  |  |
 </details>
 
-## Directory: x-pack/test/cloud_security_posture_functional
+## Directory: x-pack/solutions/security/test/cloud_security_posture_functional
 
 **Total Tests:** 223 | **Skipped:** 69 (30.94%) | **Todo:** 3 (1.35%)
 
@@ -766,228 +766,228 @@ You can also check out the dedicated app view, which enables easier search and f
 
 | Test Label | Type | Skipped | Todo |
 |------------|------|---------|------|
-| [Agentless cloud](x-pack/test/cloud_security_posture_functional/agentless/create_agent.ts) | describe |  |  |
-| [should create agentless-agent](x-pack/test/cloud_security_posture_functional/agentless/create_agent.ts) | it |  |  |
-| [should create default agent-based agent](x-pack/test/cloud_security_posture_functional/agentless/create_agent.ts) | it |  |  |
-| [Benchmark Page - Sanity Tests](x-pack/test/cloud_security_posture_functional/cloud_tests/benchmark_sanity.ts) | describe |  |  |
-| [Benchmark table exists](x-pack/test/cloud_security_posture_functional/cloud_tests/benchmark_sanity.ts) | it |  |  |
-| [Benchmarks count is more than 0](x-pack/test/cloud_security_posture_functional/cloud_tests/benchmark_sanity.ts) | it |  |  |
-| [For each benchmark, evaluation and complience are not empty](x-pack/test/cloud_security_posture_functional/cloud_tests/benchmark_sanity.ts) | it |  |  |
-| [Cloud Posture Dashboard Page - Sanity Tests](x-pack/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | describe |  |  |
-| [Cloud Dashboard](x-pack/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | describe |  |  |
-| [displays compliance score greater than 40](x-pack/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | it |  |  |
-| [displays all compliance scores](x-pack/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | it |  |  |
-| [displays a number of resources evaluated greater than 1500](x-pack/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | it |  |  |
-| [Compliance By CIS sections have non empty values](x-pack/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | it |  |  |
-| [Navigation to Findings page](x-pack/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | it |  |  |
-| [Kubernetes Dashboard](x-pack/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | describe |  |  |
-| [displays compliance score greater than 80](x-pack/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | it |  |  |
-| [displays a number of resources evaluated greater than 150](x-pack/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | it |  |  |
-| [Compliance By CIS sections have non empty values](x-pack/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | it |  |  |
-| [Navigation to Findings page](x-pack/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | it |  |  |
-| [Findings Page - Sanity Tests](x-pack/test/cloud_security_posture_functional/cloud_tests/findings_sanity.ts) | describe |  |  |
-| [Findings - Querying data](x-pack/test/cloud_security_posture_functional/cloud_tests/findings_sanity.ts) | describe |  |  |
-| [Querying ${provider} provider data](x-pack/test/cloud_security_posture_functional/cloud_tests/findings_sanity.ts) | it |  |  |
-| [Paginating and sorting data](x-pack/test/cloud_security_posture_functional/cloud_tests/findings_sanity.ts) | it |  |  |
-| [Cloud Security Posture](x-pack/test/cloud_security_posture_functional/cloud_tests/index.ts) | describe |  |  |
-| [Data Views](x-pack/test/cloud_security_posture_functional/data_views/data_views.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Verify data view is created once user reach the findings page - default space](x-pack/test/cloud_security_posture_functional/data_views/data_views.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Verify data view is created once user reach the dashboard page - default space](x-pack/test/cloud_security_posture_functional/data_views/data_views.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Verify data view is created once user reach the findings page -  non default space](x-pack/test/cloud_security_posture_functional/data_views/data_views.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Verify data view is created once user reach the dashboard page -  non default space](x-pack/test/cloud_security_posture_functional/data_views/data_views.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Verify data view is created once user with read permissions reach the dashboard page](x-pack/test/cloud_security_posture_functional/data_views/data_views.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Cloud Security Posture](x-pack/test/cloud_security_posture_functional/data_views/index.ts) | describe |  |  |
-| [Access with custom roles](x-pack/test/cloud_security_posture_functional/pages/benchmark.ts) | describe |  |  |
-| [Access with valid user role](x-pack/test/cloud_security_posture_functional/pages/benchmark.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Access with invalid user role](x-pack/test/cloud_security_posture_functional/pages/benchmark.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Access with custom roles - rule page](x-pack/test/cloud_security_posture_functional/pages/benchmark.ts) | describe |  |  |
-| [Access with valid user role](x-pack/test/cloud_security_posture_functional/pages/benchmark.ts) | it |  |  |
-| [Access with invalid user role](x-pack/test/cloud_security_posture_functional/pages/benchmark.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Test adding Cloud Security Posture Integrations CNVM](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cnvm/cis_integration_cnvm.ts) | describe |  |  |
-| [CNVM AWS](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cnvm/cis_integration_cnvm.ts) | describe |  |  |
-| [Hyperlink on PostInstallation Modal should have the correct URL](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cnvm/cis_integration_cnvm.ts) | it |  |  |
-| [On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cnvm/cis_integration_cnvm.ts) | it |  |  |
-| [Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cnvm/cis_integration_cnvm.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Test adding Cloud Security Posture Integrations CSPM AWS](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | describe |  |  |
-| [CIS_AWS Organization Cloud Formation](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | describe |  |  |
-| [Initial form state, AWS Org account, and CloudFormation should be selected by default](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
-| [Hyperlink on PostInstallation Modal should have the correct URL](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
-| [On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
-| [Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
-| [CIS_AWS Organization Manual Assume Role](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [CIS_AWS Organization Manual Assume Role Workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [CIS_AWS Organization Manual Direct Access](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | describe |  |  |
-| [CIS_AWS Organization Manual Direct Access Workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
-| [CIS_AWS Organization Manual Temporary Keys](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | describe |  |  |
-| [CIS_AWS Organization Manual Temporary Keys Workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
-| [CIS_AWS Organization Manual Shared Access](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | describe |  |  |
-| [CIS_AWS Organization Manual Shared Access Workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
-| [CIS_AWS Single Cloud Formation](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | describe |  |  |
-| [CIS_AWS Single Cloud Formation workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
-| [CIS_AWS Single Manual Assume Role](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | describe |  |  |
-| [CIS_AWS Single Manual Assume Role Workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
-| [CIS_AWS Single Manual Direct Access](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | describe |  |  |
-| [CIS_AWS Single Manual Direct Access Workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
-| [CIS_AWS Single Manual Temporary Keys](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | describe |  |  |
-| [CIS_AWS Single Manual Temporary Keys Workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
-| [CIS_AWS Single Manual Shared Access](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | describe |  |  |
-| [CIS_AWS Single Manual Shared Access Workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
-| [Test adding Cloud Security Posture Integrations CSPM AZURE](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | describe |  |  |
-| [Azure Organization ARM Template](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | describe |  |  |
-| [Azure Organization ARM Template Workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | it |  |  |
-| [Azure Organization Manual Managed Identity](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | describe |  |  |
-| [Azure Organization Manual Workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | it |  |  |
-| [Azure Organization Manual Service Principle with Client Secret](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | describe |  |  |
-| [Azure Organization Manual Service Principle with Client Secret Workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | it |  |  |
-| [Azure Organization Manual Service Principle with Client Certificate](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | describe |  |  |
-| [Azure Organization Manual Service Principle with Client Certificate Workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | it |  |  |
-| [Azure Single ARM Template](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | describe |  |  |
-| [Azure Single ARM Template Workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | it |  |  |
-| [Azure Single Manual Managed Identity](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | describe |  |  |
-| [Azure Single Manual Workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | it |  |  |
-| [Azure Single Manual Service Principle with Client Secret](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | describe |  |  |
-| [Azure Single Manual Service Principle with Client Secret Workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | it |  |  |
-| [Azure Single Manual Service Principle with Client Certificate](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | describe |  |  |
-| [Azure Single Manual Service Principle with Client Certificate Workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | it |  |  |
-| [Test adding Cloud Security Posture Integrations CSPM GCP](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | describe |  |  |
-| [CIS_GCP Organization](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Switch between Manual and Google cloud shell](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are no Project ID or Organization ID provided, it should use default value](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are Project ID or Organization ID provided, it should use that value](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Add Agent FLyout - Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are Project ID or Organization ID provided, it should use that value](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Organization ID field on cloud shell command should only be shown if user chose Google Cloud Shell, if user chose Single Account it shouldn not show up](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Hyperlink on PostInstallation Modal should have the correct URL](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Clicking on Launch CloudShell on post intall modal should lead user to CloudShell page](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [CIS_GCP Organization Credentials File](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [CIS_GCP Organization Credentials File workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [CIS_GCP Organization Credentials JSON](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | describe |  |  |
-| [CIS_GCP Organization Credentials JSON workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it |  |  |
-| [CIS_GCP Single](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are no Project ID, it should use default value](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are Project ID, it should use that value](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Add Agent FLyout - Organization ID field on cloud shell command should only be shown if user chose Google Cloud Shell, if user chose Single Account it shouldn not show up](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [On add agent modal, if user chose Google Cloud Shell as their setup access; a google cloud shell modal should show up and clicking on the launch button will redirect user to Google cloud shell page](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Users are able to add CIS_GCP Integration with Manual settings using Credentials File](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Users are able to switch credentials_type from/to Credential JSON fields ](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Users are able to add CIS_GCP Integration with Manual settings using Credentials JSON](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Users are able to switch credentials_type from/to Credential File fields ](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Test adding Cloud Security Posture Integrations KSPM EKS](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_eks.ts) | describe |  |  |
-| [KSPM EKS Assume Role](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_eks.ts) | describe |  |  |
-| [KSPM EKS Assume Role workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_eks.ts) | it |  |  |
-| [KSPM EKS Direct Access](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_eks.ts) | describe |  |  |
-| [KSPM EKS Direct Access Workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_eks.ts) | it |  |  |
-| [KSPM EKS Temporary Keys](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_eks.ts) | describe |  |  |
-| [KSPM EKS Temporary Keys Workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_eks.ts) | it |  |  |
-| [KSPM EKS Shared Credentials](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_eks.ts) | describe |  |  |
-| [KSPM EKS Shared Credentials Workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_eks.ts) | it |  |  |
-| [Test adding Cloud Security Posture Integrations KSPM K8S](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_k8s.ts) | describe |  |  |
-| [KSPM K8S](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_k8s.ts) | describe |  |  |
-| [KSPM K8S Workflow](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_k8s.ts) | it |  |  |
-| [Cloud Posture Dashboard Page](x-pack/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | describe |  |  |
-| [Kubernetes Dashboard](x-pack/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | describe |  |  |
-| [displays accurate summary compliance score](x-pack/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | it |  |  |
-| [TODO - Cloud Dashboard](x-pack/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | describe |  | ![](https://img.shields.io/badge/todo-green) |
-| [todo - displays accurate summary compliance score](x-pack/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | it |  | ![](https://img.shields.io/badge/todo-green) |
-| [Access with custom roles](x-pack/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | describe |  |  |
-| [Access with valid user role](x-pack/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | it |  |  |
-| [todo - Access with invalid user role](x-pack/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) | ![](https://img.shields.io/badge/todo-green) |
-| [Findings Page - Alerts](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Create detection rule](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Creates a detection rule from the Take Action button and navigates to rule page](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Creates a detection rule from the Alerts section and navigates to rule page](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Rule details](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [The rule page contains the expected matching data](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Navigation](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Clicking on count of Rules should navigate to the rules page with benchmark tags as a filter](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Clicking on count of Alerts should navigate to the alerts page](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Findings Page - Grouping](x-pack/test/cloud_security_posture_functional/pages/findings_grouping.ts) | describe |  |  |
-| [Default Grouping](x-pack/test/cloud_security_posture_functional/pages/findings_grouping.ts) | describe |  |  |
-| [groups findings by resource and sort by compliance score desc](x-pack/test/cloud_security_posture_functional/pages/findings_grouping.ts) | it |  |  |
-| [groups findings by rule name and sort by compliance score desc](x-pack/test/cloud_security_posture_functional/pages/findings_grouping.ts) | it |  |  |
-| [groups findings by cloud account and sort by compliance score desc](x-pack/test/cloud_security_posture_functional/pages/findings_grouping.ts) | it |  |  |
-| [groups findings by Kubernetes cluster and sort by compliance score desc](x-pack/test/cloud_security_posture_functional/pages/findings_grouping.ts) | it |  |  |
-| [SearchBar](x-pack/test/cloud_security_posture_functional/pages/findings_grouping.ts) | describe |  |  |
-| [add filter](x-pack/test/cloud_security_posture_functional/pages/findings_grouping.ts) | it |  |  |
-| [remove filter](x-pack/test/cloud_security_posture_functional/pages/findings_grouping.ts) | it |  |  |
-| [set search query](x-pack/test/cloud_security_posture_functional/pages/findings_grouping.ts) | it |  |  |
-| [Group table](x-pack/test/cloud_security_posture_functional/pages/findings_grouping.ts) | describe |  |  |
-| [shows findings table when expanding](x-pack/test/cloud_security_posture_functional/pages/findings_grouping.ts) | it |  |  |
-| [Default Grouping - support muting rules](x-pack/test/cloud_security_posture_functional/pages/findings_grouping.ts) | describe |  |  |
-| [groups findings by resource after muting rule](x-pack/test/cloud_security_posture_functional/pages/findings_grouping.ts) | it |  |  |
-| [Old Data](x-pack/test/cloud_security_posture_functional/pages/findings_old_data.ts) | describe |  |  |
-| [Findings page with old data](x-pack/test/cloud_security_posture_functional/pages/findings_old_data.ts) | describe |  |  |
-| [returns no Findings KSPM](x-pack/test/cloud_security_posture_functional/pages/findings_old_data.ts) | it |  |  |
-| [returns no Findings CSPM](x-pack/test/cloud_security_posture_functional/pages/findings_old_data.ts) | it |  |  |
-| [Findings Page onboarding](x-pack/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | describe |  |  |
-| [clicking on the ](x-pack/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | it |  |  |
-| [clicking on the ](x-pack/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | it |  |  |
-| [clicking on the ](x-pack/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | it |  |  |
-| [Findings Page - DataTable](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
-| [Table Sort](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
-| [sorts by a column, should be case sensitive/insensitive depending on the column](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
-| [Findings - Fields selector](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
-| [Add fields to the Findings DataTable](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
-| [Remove fields from the Findings DataTable](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
-| [Reset fields to default](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
-| [Findings Page - support muting rules](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
-| [verify only enabled rules appears](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
-| [Access with custom roles](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
-| [Access with valid user role](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
-| [Access with invalid user role](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
-| [Cloud Security Posture](x-pack/test/cloud_security_posture_functional/pages/index.ts) | describe |  |  |
-| [Cloud Posture Rules Page](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Rules Page - Rules Counters](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Shows posture score when there are findings](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Clicking the posture score button leads to the dashboard](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Shows integrations count when there are findings](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Clicking the integrations counter button leads to the integration page](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Shows the failed findings counter when there are findings](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Clicking the failed findings button leads to the findings page](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Shows the disabled rules count](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Clicking the disabled rules button shows enables the disabled filter](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Shows empty state when there are no findings](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Rules Page - Bulk Action buttons](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [It should disable Enable option when there are all rules selected are already enabled ](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [It should disable both Enable and Disable options when there are no rules selected](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [It should disable Disable option when there are all rules selected are already Disabled](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Both option should not be disabled if selected rules contains both enabled and disabled rules](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Rules Page - Enable Rules and Disabled Rules Filter Toggle](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Should only display Enabled rules when Enabled Rules filter is ON](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Should only display Disabled rules when Disabled Rules filter is ON](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Rules Page - CIS Section & Rule Number filters](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Table should only show result that has the same section as in the Section filter](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Table should only show result that has the same section as in the Rule number filter](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Table should only show result that passes both Section and Rule number filter](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Rules Page - Flyout](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Users are able to Enable/Disable Rule from Switch on Rule Flyout](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Alerts section of Rules Flyout shows Disabled text when Rules are disabled](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Users are able to Enable/Disable Rule from Take Action on Rule Flyout](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Alerts section of Rules Flyout shows Detection Rule Counter component when Rules are enabled](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Vulnerabilities Page - Grouping](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | describe |  |  |
-| [Default Grouping](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | describe |  |  |
-| [groups vulnerabilities by cloud account and sort by number of vulnerabilities desc](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | it |  |  |
-| [groups vulnerabilities by CVE and sort by number of vulnerabilities desc](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | it |  |  |
-| [groups vulnerabilities by resource and sort by number of vulnerabilities desc](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | it |  |  |
-| [SearchBar](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | describe |  |  |
-| [add filter](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | it |  |  |
-| [remove filter](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | it |  |  |
-| [set search query](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | it |  |  |
-| [Group table](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | describe |  |  |
-| [shows vulnerabilities table when expanding](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | it |  |  |
-| [Vulnerabilities Page - DataTable](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | describe |  |  |
-| [SearchBar](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | describe |  |  |
-| [add filter](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | it |  |  |
-| [remove filter](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | it |  |  |
-| [set search query](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | it |  |  |
-| [Vulnerabilities - Fields selector](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | describe |  |  |
-| [Add fields to the Vulnerabilities DataTable](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | it |  |  |
-| [Remove fields from the Vulnerabilities DataTable](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | it |  |  |
-| [Reset fields to default](x-pack/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | it |  |  |
-| [Vulnerability Dashboard Page](x-pack/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | describe |  |  |
-| [Vulnerability Dashboard](x-pack/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | describe |  |  |
-| [Page Header renders on startup](x-pack/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | it |  |  |
-| [Stats render accurate output](x-pack/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | it |  |  |
-| [should navigate to vulnerability findings page with high severity filter](x-pack/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | it |  |  |
-| [should navigate to vulnerability findings page with critical severity filter and no high severity filter](x-pack/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | it |  |  |
+| [Agentless cloud](x-pack/solutions/security/test/cloud_security_posture_functional/agentless/create_agent.ts) | describe |  |  |
+| [should create agentless-agent](x-pack/solutions/security/test/cloud_security_posture_functional/agentless/create_agent.ts) | it |  |  |
+| [should create default agent-based agent](x-pack/solutions/security/test/cloud_security_posture_functional/agentless/create_agent.ts) | it |  |  |
+| [Benchmark Page - Sanity Tests](x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/benchmark_sanity.ts) | describe |  |  |
+| [Benchmark table exists](x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/benchmark_sanity.ts) | it |  |  |
+| [Benchmarks count is more than 0](x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/benchmark_sanity.ts) | it |  |  |
+| [For each benchmark, evaluation and complience are not empty](x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/benchmark_sanity.ts) | it |  |  |
+| [Cloud Posture Dashboard Page - Sanity Tests](x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | describe |  |  |
+| [Cloud Dashboard](x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | describe |  |  |
+| [displays compliance score greater than 40](x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | it |  |  |
+| [displays all compliance scores](x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | it |  |  |
+| [displays a number of resources evaluated greater than 1500](x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | it |  |  |
+| [Compliance By CIS sections have non empty values](x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | it |  |  |
+| [Navigation to Findings page](x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | it |  |  |
+| [Kubernetes Dashboard](x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | describe |  |  |
+| [displays compliance score greater than 80](x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | it |  |  |
+| [displays a number of resources evaluated greater than 150](x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | it |  |  |
+| [Compliance By CIS sections have non empty values](x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | it |  |  |
+| [Navigation to Findings page](x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts) | it |  |  |
+| [Findings Page - Sanity Tests](x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/findings_sanity.ts) | describe |  |  |
+| [Findings - Querying data](x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/findings_sanity.ts) | describe |  |  |
+| [Querying ${provider} provider data](x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/findings_sanity.ts) | it |  |  |
+| [Paginating and sorting data](x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/findings_sanity.ts) | it |  |  |
+| [Cloud Security Posture](x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/index.ts) | describe |  |  |
+| [Data Views](x-pack/solutions/security/test/cloud_security_posture_functional/data_views/data_views.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Verify data view is created once user reach the findings page - default space](x-pack/solutions/security/test/cloud_security_posture_functional/data_views/data_views.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Verify data view is created once user reach the dashboard page - default space](x-pack/solutions/security/test/cloud_security_posture_functional/data_views/data_views.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Verify data view is created once user reach the findings page -  non default space](x-pack/solutions/security/test/cloud_security_posture_functional/data_views/data_views.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Verify data view is created once user reach the dashboard page -  non default space](x-pack/solutions/security/test/cloud_security_posture_functional/data_views/data_views.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Verify data view is created once user with read permissions reach the dashboard page](x-pack/solutions/security/test/cloud_security_posture_functional/data_views/data_views.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Cloud Security Posture](x-pack/solutions/security/test/cloud_security_posture_functional/data_views/index.ts) | describe |  |  |
+| [Access with custom roles](x-pack/solutions/security/test/cloud_security_posture_functional/pages/benchmark.ts) | describe |  |  |
+| [Access with valid user role](x-pack/solutions/security/test/cloud_security_posture_functional/pages/benchmark.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Access with invalid user role](x-pack/solutions/security/test/cloud_security_posture_functional/pages/benchmark.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Access with custom roles - rule page](x-pack/solutions/security/test/cloud_security_posture_functional/pages/benchmark.ts) | describe |  |  |
+| [Access with valid user role](x-pack/solutions/security/test/cloud_security_posture_functional/pages/benchmark.ts) | it |  |  |
+| [Access with invalid user role](x-pack/solutions/security/test/cloud_security_posture_functional/pages/benchmark.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Test adding Cloud Security Posture Integrations CNVM](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cnvm/cis_integration_cnvm.ts) | describe |  |  |
+| [CNVM AWS](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cnvm/cis_integration_cnvm.ts) | describe |  |  |
+| [Hyperlink on PostInstallation Modal should have the correct URL](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cnvm/cis_integration_cnvm.ts) | it |  |  |
+| [On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cnvm/cis_integration_cnvm.ts) | it |  |  |
+| [Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cnvm/cis_integration_cnvm.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Test adding Cloud Security Posture Integrations CSPM AWS](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | describe |  |  |
+| [CIS_AWS Organization Cloud Formation](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | describe |  |  |
+| [Initial form state, AWS Org account, and CloudFormation should be selected by default](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
+| [Hyperlink on PostInstallation Modal should have the correct URL](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
+| [On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
+| [Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
+| [CIS_AWS Organization Manual Assume Role](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [CIS_AWS Organization Manual Assume Role Workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [CIS_AWS Organization Manual Direct Access](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | describe |  |  |
+| [CIS_AWS Organization Manual Direct Access Workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
+| [CIS_AWS Organization Manual Temporary Keys](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | describe |  |  |
+| [CIS_AWS Organization Manual Temporary Keys Workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
+| [CIS_AWS Organization Manual Shared Access](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | describe |  |  |
+| [CIS_AWS Organization Manual Shared Access Workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
+| [CIS_AWS Single Cloud Formation](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | describe |  |  |
+| [CIS_AWS Single Cloud Formation workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
+| [CIS_AWS Single Manual Assume Role](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | describe |  |  |
+| [CIS_AWS Single Manual Assume Role Workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
+| [CIS_AWS Single Manual Direct Access](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | describe |  |  |
+| [CIS_AWS Single Manual Direct Access Workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
+| [CIS_AWS Single Manual Temporary Keys](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | describe |  |  |
+| [CIS_AWS Single Manual Temporary Keys Workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
+| [CIS_AWS Single Manual Shared Access](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | describe |  |  |
+| [CIS_AWS Single Manual Shared Access Workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts) | it |  |  |
+| [Test adding Cloud Security Posture Integrations CSPM AZURE](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | describe |  |  |
+| [Azure Organization ARM Template](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | describe |  |  |
+| [Azure Organization ARM Template Workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | it |  |  |
+| [Azure Organization Manual Managed Identity](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | describe |  |  |
+| [Azure Organization Manual Workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | it |  |  |
+| [Azure Organization Manual Service Principle with Client Secret](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | describe |  |  |
+| [Azure Organization Manual Service Principle with Client Secret Workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | it |  |  |
+| [Azure Organization Manual Service Principle with Client Certificate](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | describe |  |  |
+| [Azure Organization Manual Service Principle with Client Certificate Workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | it |  |  |
+| [Azure Single ARM Template](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | describe |  |  |
+| [Azure Single ARM Template Workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | it |  |  |
+| [Azure Single Manual Managed Identity](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | describe |  |  |
+| [Azure Single Manual Workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | it |  |  |
+| [Azure Single Manual Service Principle with Client Secret](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | describe |  |  |
+| [Azure Single Manual Service Principle with Client Secret Workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | it |  |  |
+| [Azure Single Manual Service Principle with Client Certificate](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | describe |  |  |
+| [Azure Single Manual Service Principle with Client Certificate Workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts) | it |  |  |
+| [Test adding Cloud Security Posture Integrations CSPM GCP](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | describe |  |  |
+| [CIS_GCP Organization](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Switch between Manual and Google cloud shell](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are no Project ID or Organization ID provided, it should use default value](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are Project ID or Organization ID provided, it should use that value](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Add Agent FLyout - Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are Project ID or Organization ID provided, it should use that value](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Organization ID field on cloud shell command should only be shown if user chose Google Cloud Shell, if user chose Single Account it shouldn not show up](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Hyperlink on PostInstallation Modal should have the correct URL](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Clicking on Launch CloudShell on post intall modal should lead user to CloudShell page](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [CIS_GCP Organization Credentials File](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [CIS_GCP Organization Credentials File workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [CIS_GCP Organization Credentials JSON](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | describe |  |  |
+| [CIS_GCP Organization Credentials JSON workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it |  |  |
+| [CIS_GCP Single](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are no Project ID, it should use default value](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are Project ID, it should use that value](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Add Agent FLyout - Organization ID field on cloud shell command should only be shown if user chose Google Cloud Shell, if user chose Single Account it shouldn not show up](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [On add agent modal, if user chose Google Cloud Shell as their setup access; a google cloud shell modal should show up and clicking on the launch button will redirect user to Google cloud shell page](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Users are able to add CIS_GCP Integration with Manual settings using Credentials File](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Users are able to switch credentials_type from/to Credential JSON fields ](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Users are able to add CIS_GCP Integration with Manual settings using Credentials JSON](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Users are able to switch credentials_type from/to Credential File fields ](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Test adding Cloud Security Posture Integrations KSPM EKS](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_eks.ts) | describe |  |  |
+| [KSPM EKS Assume Role](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_eks.ts) | describe |  |  |
+| [KSPM EKS Assume Role workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_eks.ts) | it |  |  |
+| [KSPM EKS Direct Access](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_eks.ts) | describe |  |  |
+| [KSPM EKS Direct Access Workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_eks.ts) | it |  |  |
+| [KSPM EKS Temporary Keys](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_eks.ts) | describe |  |  |
+| [KSPM EKS Temporary Keys Workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_eks.ts) | it |  |  |
+| [KSPM EKS Shared Credentials](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_eks.ts) | describe |  |  |
+| [KSPM EKS Shared Credentials Workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_eks.ts) | it |  |  |
+| [Test adding Cloud Security Posture Integrations KSPM K8S](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_k8s.ts) | describe |  |  |
+| [KSPM K8S](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_k8s.ts) | describe |  |  |
+| [KSPM K8S Workflow](x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_k8s.ts) | it |  |  |
+| [Cloud Posture Dashboard Page](x-pack/solutions/security/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | describe |  |  |
+| [Kubernetes Dashboard](x-pack/solutions/security/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | describe |  |  |
+| [displays accurate summary compliance score](x-pack/solutions/security/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | it |  |  |
+| [TODO - Cloud Dashboard](x-pack/solutions/security/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | describe |  | ![](https://img.shields.io/badge/todo-green) |
+| [todo - displays accurate summary compliance score](x-pack/solutions/security/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | it |  | ![](https://img.shields.io/badge/todo-green) |
+| [Access with custom roles](x-pack/solutions/security/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | describe |  |  |
+| [Access with valid user role](x-pack/solutions/security/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | it |  |  |
+| [todo - Access with invalid user role](x-pack/solutions/security/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) | ![](https://img.shields.io/badge/todo-green) |
+| [Findings Page - Alerts](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_alerts.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Create detection rule](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_alerts.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Creates a detection rule from the Take Action button and navigates to rule page](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_alerts.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Creates a detection rule from the Alerts section and navigates to rule page](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_alerts.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Rule details](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_alerts.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [The rule page contains the expected matching data](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_alerts.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Navigation](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_alerts.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Clicking on count of Rules should navigate to the rules page with benchmark tags as a filter](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_alerts.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Clicking on count of Alerts should navigate to the alerts page](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_alerts.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Findings Page - Grouping](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_grouping.ts) | describe |  |  |
+| [Default Grouping](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_grouping.ts) | describe |  |  |
+| [groups findings by resource and sort by compliance score desc](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_grouping.ts) | it |  |  |
+| [groups findings by rule name and sort by compliance score desc](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_grouping.ts) | it |  |  |
+| [groups findings by cloud account and sort by compliance score desc](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_grouping.ts) | it |  |  |
+| [groups findings by Kubernetes cluster and sort by compliance score desc](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_grouping.ts) | it |  |  |
+| [SearchBar](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_grouping.ts) | describe |  |  |
+| [add filter](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_grouping.ts) | it |  |  |
+| [remove filter](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_grouping.ts) | it |  |  |
+| [set search query](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_grouping.ts) | it |  |  |
+| [Group table](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_grouping.ts) | describe |  |  |
+| [shows findings table when expanding](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_grouping.ts) | it |  |  |
+| [Default Grouping - support muting rules](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_grouping.ts) | describe |  |  |
+| [groups findings by resource after muting rule](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_grouping.ts) | it |  |  |
+| [Old Data](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_old_data.ts) | describe |  |  |
+| [Findings page with old data](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_old_data.ts) | describe |  |  |
+| [returns no Findings KSPM](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_old_data.ts) | it |  |  |
+| [returns no Findings CSPM](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_old_data.ts) | it |  |  |
+| [Findings Page onboarding](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | describe |  |  |
+| [clicking on the ](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | it |  |  |
+| [clicking on the ](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | it |  |  |
+| [clicking on the ](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_onboarding.ts) | it |  |  |
+| [Findings Page - DataTable](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
+| [Table Sort](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
+| [sorts by a column, should be case sensitive/insensitive depending on the column](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
+| [Findings - Fields selector](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
+| [Add fields to the Findings DataTable](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
+| [Remove fields from the Findings DataTable](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
+| [Reset fields to default](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
+| [Findings Page - support muting rules](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
+| [verify only enabled rules appears](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
+| [Access with custom roles](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
+| [Access with valid user role](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
+| [Access with invalid user role](x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
+| [Cloud Security Posture](x-pack/solutions/security/test/cloud_security_posture_functional/pages/index.ts) | describe |  |  |
+| [Cloud Posture Rules Page](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Rules Page - Rules Counters](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Shows posture score when there are findings](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Clicking the posture score button leads to the dashboard](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Shows integrations count when there are findings](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Clicking the integrations counter button leads to the integration page](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Shows the failed findings counter when there are findings](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Clicking the failed findings button leads to the findings page](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Shows the disabled rules count](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Clicking the disabled rules button shows enables the disabled filter](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Shows empty state when there are no findings](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Rules Page - Bulk Action buttons](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [It should disable Enable option when there are all rules selected are already enabled ](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [It should disable both Enable and Disable options when there are no rules selected](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [It should disable Disable option when there are all rules selected are already Disabled](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Both option should not be disabled if selected rules contains both enabled and disabled rules](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Rules Page - Enable Rules and Disabled Rules Filter Toggle](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Should only display Enabled rules when Enabled Rules filter is ON](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Should only display Disabled rules when Disabled Rules filter is ON](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Rules Page - CIS Section & Rule Number filters](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Table should only show result that has the same section as in the Section filter](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Table should only show result that has the same section as in the Rule number filter](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Table should only show result that passes both Section and Rule number filter](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Rules Page - Flyout](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Users are able to Enable/Disable Rule from Switch on Rule Flyout](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Alerts section of Rules Flyout shows Disabled text when Rules are disabled](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Users are able to Enable/Disable Rule from Take Action on Rule Flyout](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Alerts section of Rules Flyout shows Detection Rule Counter component when Rules are enabled](x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Vulnerabilities Page - Grouping](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | describe |  |  |
+| [Default Grouping](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | describe |  |  |
+| [groups vulnerabilities by cloud account and sort by number of vulnerabilities desc](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | it |  |  |
+| [groups vulnerabilities by CVE and sort by number of vulnerabilities desc](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | it |  |  |
+| [groups vulnerabilities by resource and sort by number of vulnerabilities desc](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | it |  |  |
+| [SearchBar](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | describe |  |  |
+| [add filter](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | it |  |  |
+| [remove filter](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | it |  |  |
+| [set search query](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | it |  |  |
+| [Group table](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | describe |  |  |
+| [shows vulnerabilities table when expanding](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts) | it |  |  |
+| [Vulnerabilities Page - DataTable](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | describe |  |  |
+| [SearchBar](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | describe |  |  |
+| [add filter](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | it |  |  |
+| [remove filter](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | it |  |  |
+| [set search query](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | it |  |  |
+| [Vulnerabilities - Fields selector](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | describe |  |  |
+| [Add fields to the Vulnerabilities DataTable](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | it |  |  |
+| [Remove fields from the Vulnerabilities DataTable](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | it |  |  |
+| [Reset fields to default](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerabilities.ts) | it |  |  |
+| [Vulnerability Dashboard Page](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | describe |  |  |
+| [Vulnerability Dashboard](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | describe |  |  |
+| [Page Header renders on startup](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | it |  |  |
+| [Stats render accurate output](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | it |  |  |
+| [should navigate to vulnerability findings page with high severity filter](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | it |  |  |
+| [should navigate to vulnerability findings page with critical severity filter and no high severity filter](x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts) | it |  |  |
 </details>
 

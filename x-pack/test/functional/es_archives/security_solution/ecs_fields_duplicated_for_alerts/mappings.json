@@ -1,0 +1,47 @@
+{
+  "type": "index",
+  "value": {
+    "index": "ecs_fields_duplicated_for_alerts",
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "data_stream": {
+          "properties": {
+            "dataset": {
+              "type": "constant_keyword",
+              "value": "dataset_name_1"
+            },
+            "namespace": {
+              "type": "constant_keyword",
+              "value": "default"
+            },
+            "type": {
+              "type": "constant_keyword",
+              "value": "logs"
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "category": {
+              "type": "keyword"
+            },
+            "dataset": {
+              "type": "alias",
+              "path": "data_stream.dataset"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

@@ -291,7 +291,7 @@ export class FieldFormatsRegistry {
   /**
    * FieldFormat decorator - provide a one way to add meta-params for all field formatters
    *
-   * @private
+   * @internal
    * @param  {FieldFormatInstanceType} fieldFormat - field format type
    * @return {FieldFormatInstanceType | undefined}
    */

@@ -8,6 +8,7 @@
 import type { CoreSetup } from '@kbn/core/server';
 
 import { promptType } from '@kbn/security-ai-prompts';
+import { referenceDataSavedObjectType } from './endpoint/lib/reference_data';
 import { protectionUpdatesNoteType } from './endpoint/lib/protection_updates_note/saved_object_mappings';
 import { noteType, pinnedEventType, timelineType } from './lib/timeline/saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
@@ -17,7 +18,10 @@ import { type as signalsMigrationType } from './lib/detection_engine/migrations/
 import { manifestType, unifiedManifestType } from './endpoint/lib/artifacts/saved_object_mappings';
 import { riskEngineConfigurationType } from './lib/entity_analytics/risk_engine/saved_object';
 import { entityEngineDescriptorType } from './lib/entity_analytics/entity_store/saved_object';
-import { privilegeMonitoringType } from './lib/entity_analytics/privilege_monitoring/saved_object/privilege_monitoring_type';
+import {
+  privilegeMonitoringType,
+  monitoringEntitySourceType,
+} from './lib/entity_analytics/privilege_monitoring/saved_objects';
 
 const types = [
   noteType,
@@ -31,8 +35,10 @@ const types = [
   riskEngineConfigurationType,
   entityEngineDescriptorType,
   privilegeMonitoringType,
+  monitoringEntitySourceType,
   protectionUpdatesNoteType,
   promptType,
+  referenceDataSavedObjectType,
 ];
 
 export const savedObjectTypes = types.map((type) => type.name);

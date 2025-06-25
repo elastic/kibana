@@ -120,6 +120,8 @@ const RulesTableFiltersComponent = () => {
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <EuiFilterButton
+            isToggle
+            isSelected={showElasticRules}
             hasActiveFilters={showElasticRules}
             onClick={handleElasticRulesClick}
             data-test-subj="showElasticRulesFilterButton"
@@ -129,6 +131,8 @@ const RulesTableFiltersComponent = () => {
             {rulesPrebuiltInstalledCount != null ? ` (${rulesPrebuiltInstalledCount ?? ''})` : ''}
           </EuiFilterButton>
           <EuiFilterButton
+            isToggle
+            isSelected={showCustomRules}
             hasActiveFilters={showCustomRules}
             onClick={handleCustomRulesClick}
             data-test-subj="showCustomRulesFilterButton"
@@ -142,6 +146,8 @@ const RulesTableFiltersComponent = () => {
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <EuiFilterButton
+            isToggle
+            isSelected={enabled === true}
             hasActiveFilters={enabled === true}
             onClick={handleShowEnabledRulesClick}
             data-test-subj="showEnabledRulesFilterButton"
@@ -150,6 +156,8 @@ const RulesTableFiltersComponent = () => {
             {i18n.ENABLED_RULES}
           </EuiFilterButton>
           <EuiFilterButton
+            isToggle
+            isSelected={enabled === false}
             hasActiveFilters={enabled === false}
             onClick={handleShowDisabledRulesClick}
             data-test-subj="showDisabledRulesFilterButton"

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const LEGACY_CUSTOM_INFERENCE_ID = 'obs_ai_assistant_kb_inference';
+
 export const ELSER_ON_ML_NODE_INFERENCE_ID = '.elser-2-elasticsearch';
 export const ELSER_IN_EIS_INFERENCE_ID = '.elser-v2-elastic';
 

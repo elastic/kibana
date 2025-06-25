@@ -24,7 +24,7 @@ export class ExportPageObject extends FtrService {
   }
 
   async isExportPopoverOpen() {
-    return await this.testSubjects.exists('exportPopover');
+    return await this.testSubjects.exists('exportPopoverPanel');
   }
 
   async isPopoverItemEnabled(label: string) {
@@ -35,14 +35,20 @@ export class ExportPageObject extends FtrService {
     return isEnabled;
   }
 
-  async clickPopoverItem(label: string) {
+  async clickPopoverItem(
+    label: string,
+    exportPopoverOpener: () => Promise<void> = this.clickExportTopNavButton.bind(this)
+  ) {
     this.log.debug(`clickPopoverItem label: ${label}`);
 
     await this.retry.waitFor('ascertain that export popover is open', async () => {
-      const isExportPopoverOpen = await this.isExportPopoverOpen();
+      let isExportPopoverOpen = await this.isExportPopoverOpen();
+
       if (!isExportPopoverOpen) {
-        await this.clickExportTopNavButton();
+        await exportPopoverOpener();
+        isExportPopoverOpen = await this.isExportPopoverOpen();
       }
+
       return isExportPopoverOpen;
     });
 
@@ -54,9 +60,14 @@ export class ExportPageObject extends FtrService {
   }
 
   async closeExportFlyout() {
-    if (await this.isExportFlyoutOpen()) {
-      await this.testSubjects.click('exportFlyoutCloseButton');
-    }
+    await this.retry.waitFor('close export flyout', async () => {
+      let isExportFlyoutOpen;
+      if ((isExportFlyoutOpen = await this.isExportFlyoutOpen())) {
+        await this.testSubjects.click('exportFlyoutCloseButton');
+      }
+
+      return !isExportFlyoutOpen;
+    });
   }
 
   async getExportAssetTextButton() {
