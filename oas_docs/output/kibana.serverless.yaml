@@ -41183,13 +41183,13 @@ paths:
           application/json:
             examples:
               completeChatRequestExample:
-                $ref: '#/components/schemas/Observability_AI_Assistant_APIs_completeChatRequestExample'
+                $ref: '#/components/schemas/Observability_AI_Assistant_API_completeChatRequestExample'
             schema:
               type: object
               properties:
                 actions:
                   items:
-                    $ref: '#/components/schemas/Observability_AI_Assistant_APIs_Function'
+                    $ref: '#/components/schemas/Observability_AI_Assistant_API_Function'
                   type: array
                 connectorId:
                   description: A unique identifier for the connector.
@@ -41203,12 +41203,12 @@ paths:
                 instructions:
                   description: An array of instruction objects, which can be either simple strings or detailed objects.
                   items:
-                    $ref: '#/components/schemas/Observability_AI_Assistant_APIs_Instruction'
+                    $ref: '#/components/schemas/Observability_AI_Assistant_API_Instruction'
                   type: array
                 messages:
                   description: An array of message objects containing the conversation history.
                   items:
-                    $ref: '#/components/schemas/Observability_AI_Assistant_APIs_Message'
+                    $ref: '#/components/schemas/Observability_AI_Assistant_API_Message'
                   type: array
                 persist:
                   description: Indicates whether the conversation should be saved to storage. If true, the conversation will be saved and will be available in Kibana.
@@ -41226,7 +41226,7 @@ paths:
             application/json:
               examples:
                 completeChatResponseExample:
-                  $ref: '#/components/schemas/Observability_AI_Assistant_APIs_completeChatResponseExample'
+                  $ref: '#/components/schemas/Observability_AI_Assistant_API_completeChatResponseExample'
               schema:
                 type: object
           description: Successful response
@@ -57381,7 +57381,7 @@ components:
           $ref: '#/components/schemas/Machine_learning_APIs_mlSyncResponseSuccess'
       title: Sync API response for trained models
       type: object
-    Observability_AI_Assistant_APIs_completeChatRequestExample:
+    Observability_AI_Assistant_API_completeChatRequestExample:
       summary: Example of completing a chat interaction
       value: |
         {
@@ -57409,7 +57409,7 @@ components:
             "Always respond in German."
           ]
         }
-    Observability_AI_Assistant_APIs_completeChatResponseExample:
+    Observability_AI_Assistant_API_completeChatResponseExample:
       summary: Get a chat completion from the Observability AI Assistant
       value:
         - id: message-id
@@ -57432,7 +57432,7 @@ components:
             last_updated: '2025-06-16T15:45:46.258Z'
             title: my title
           type: conversationCreate
-    Observability_AI_Assistant_APIs_Function:
+    Observability_AI_Assistant_API_Function:
       type: object
       properties:
         description:
@@ -57444,7 +57444,7 @@ components:
         parameters:
           description: The parameters of the function.
           type: object
-    Observability_AI_Assistant_APIs_FunctionCall:
+    Observability_AI_Assistant_API_FunctionCall:
       description: Details of the function call within the message.
       type: object
       properties:
@@ -57464,7 +57464,7 @@ components:
       required:
         - name
         - trigger
-    Observability_AI_Assistant_APIs_Instruction:
+    Observability_AI_Assistant_API_Instruction:
       oneOf:
         - description: A simple instruction represented as a string.
           type: string
@@ -57480,7 +57480,7 @@ components:
           required:
             - id
             - text
-    Observability_AI_Assistant_APIs_Message:
+    Observability_AI_Assistant_API_Message:
       name: Message
       type: object
       properties:
@@ -57501,18 +57501,18 @@ components:
               description: The event related to the message.
               type: string
             function_call:
-              $ref: '#/components/schemas/Observability_AI_Assistant_APIs_FunctionCall'
+              $ref: '#/components/schemas/Observability_AI_Assistant_API_FunctionCall'
             name:
               description: The name associated with the message.
               type: string
             role:
-              $ref: '#/components/schemas/Observability_AI_Assistant_APIs_MessageRoleEnum'
+              $ref: '#/components/schemas/Observability_AI_Assistant_API_MessageRoleEnum'
           required:
             - role
       required:
         - '@timestamp'
         - message
-    Observability_AI_Assistant_APIs_MessageRoleEnum:
+    Observability_AI_Assistant_API_MessageRoleEnum:
       description: The role of the message sender.
       enum:
         - system

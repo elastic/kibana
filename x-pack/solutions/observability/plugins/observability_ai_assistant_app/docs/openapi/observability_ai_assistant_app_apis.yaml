@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
-  title: Observability AI Assistant APIs
-  description: Kibana APIs for the Observability AI Assistant
+  title: Observability AI Assistant API
+  description: Kibana API for the Observability AI Assistant
   version: '1.0.1'
   license:
     name: Elastic License 2.0
