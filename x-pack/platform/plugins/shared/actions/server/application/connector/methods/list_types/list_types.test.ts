@@ -27,6 +27,8 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ActionsClient } from '../../../../actions_client/actions_client';
 import type { ExecutorType } from '../../../../types';
+import { ConnectorRateLimiter } from '../../../../lib/connector_rate_limiter';
+import moment from 'moment';
 
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
@@ -46,7 +48,12 @@ describe('listTypes()', () => {
       licensing: licensingMock.createSetup(),
       taskManager: taskManagerMock.createSetup(),
       taskRunnerFactory: new TaskRunnerFactory(
-        new ActionExecutor({ isESOCanEncrypt: true }),
+        new ActionExecutor({
+          isESOCanEncrypt: true,
+          connectorRateLimiter: new ConnectorRateLimiter({
+            config: { email: { limit: 100, lookbackWindow: moment.duration(1, 'm') } },
+          }),
+        }),
         inMemoryMetricsMock.create()
       ),
       actionsConfigUtils: actionsConfigMock.create(),

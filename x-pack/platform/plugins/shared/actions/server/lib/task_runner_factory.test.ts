@@ -33,6 +33,8 @@ import {
   isUnrecoverableError,
 } from '@kbn/task-manager-plugin/server/task_running';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { ConnectorRateLimiter } from './connector_rate_limiter';
+import moment from 'moment';
 
 const executeParamsFields = [
   'actionId',
@@ -120,7 +122,12 @@ describe('Task Runner Factory', () => {
 
   test(`throws an error if factory isn't initialized`, () => {
     const factory = new TaskRunnerFactory(
-      new ActionExecutor({ isESOCanEncrypt: true }),
+      new ActionExecutor({
+        isESOCanEncrypt: true,
+        connectorRateLimiter: new ConnectorRateLimiter({
+          config: { email: { limit: 100, lookbackWindow: moment.duration(1, 'm') } },
+        }),
+      }),
       inMemoryMetrics
     );
     expect(() =>
@@ -132,7 +139,12 @@ describe('Task Runner Factory', () => {
 
   test(`throws an error if factory is already initialized`, () => {
     const factory = new TaskRunnerFactory(
-      new ActionExecutor({ isESOCanEncrypt: true }),
+      new ActionExecutor({
+        isESOCanEncrypt: true,
+        connectorRateLimiter: new ConnectorRateLimiter({
+          config: { email: { limit: 100, lookbackWindow: moment.duration(1, 'm') } },
+        }),
+      }),
       inMemoryMetrics
     );
     factory.initialize(taskRunnerFactoryInitializerParams);

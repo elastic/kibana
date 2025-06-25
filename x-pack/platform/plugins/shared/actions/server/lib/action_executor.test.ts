@@ -881,16 +881,9 @@ describe('Action Executor', () => {
       );
       connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
 
-      const _actionExecutor = new ActionExecutor({
-        isESOCanEncrypt: true,
-        connectorRateLimiter,
-      });
-
-      _actionExecutor.initialize(actionExecutorInitializationParams);
-
       const result = executeUnsecure
-        ? await _actionExecutor.executeUnsecured(executeUnsecuredParams)
-        : await _actionExecutor.execute(executeParams);
+        ? await actionExecutor.executeUnsecured(executeUnsecuredParams)
+        : await actionExecutor.execute(executeParams);
 
       expect(result).toEqual({
         actionId: '1',

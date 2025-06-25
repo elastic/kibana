@@ -31,6 +31,8 @@ import type { ActionsAuthorization } from '../authorization/actions_authorizatio
 import { actionsAuthorizationMock } from '../authorization/actions_authorization.mock';
 import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
+import { ConnectorRateLimiter } from '../lib/connector_rate_limiter';
+import moment from 'moment';
 
 jest.mock('uuid', () => ({
   v4: () => ConnectorSavedObject.id,
@@ -116,7 +118,12 @@ beforeEach(() => {
     licensing: licensingMock.createSetup(),
     taskManager: mockTaskManager,
     taskRunnerFactory: new TaskRunnerFactory(
-      new ActionExecutor({ isESOCanEncrypt: true }),
+      new ActionExecutor({
+        isESOCanEncrypt: true,
+        connectorRateLimiter: new ConnectorRateLimiter({
+          config: { email: { limit: 100, lookbackWindow: moment.duration(1, 'm') } },
+        }),
+      }),
       inMemoryMetrics
     ),
     actionsConfigUtils: actionsConfigMock.create(),
