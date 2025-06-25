@@ -1580,8 +1580,8 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /src/platform/test/api_integration/apis/dashboards @elastic/kibana-presentation
 /src/platform/test/interpreter_functional/snapshots @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/54342
 /src/platform/test/functional/services/inspector.ts @elastic/kibana-presentation
-/x-pack/test/functional/services/canvas_element.ts @elastic/kibana-presentation
-/x-pack/test/functional/page_objects/canvas_page.ts @elastic/kibana-presentation
+/x-pack/platform/test/functional/services/canvas_element.ts @elastic/kibana-presentation
+/x-pack/platform/test/functional/page_objects/canvas_page.ts @elastic/kibana-presentation
 /x-pack/test/accessibility/apps/group3/canvas.ts @elastic/kibana-presentation
 /x-pack/test/upgrade/apps/canvas @elastic/kibana-presentation
 /x-pack/test/upgrade/apps/dashboard @elastic/kibana-presentation
