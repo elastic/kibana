@@ -124,13 +124,16 @@ export function ShowShareModal({
     references: unsavedDashboardState.references as DashboardLocatorParams['references'],
   };
 
+  const timeRange = dataService.query.timefilter.timefilter.getTime();
+
   const locatorParams: DashboardLocatorParams = {
     dashboardId: savedObjectId,
     preserveSavedFilters: true,
     refreshInterval: undefined, // We don't share refresh interval externally
     viewMode: 'view', // For share locators we always load the dashboard in view mode
     useHash: false,
-    timeRange: dataService.query.timefilter.timefilter.getTime(),
+    timeFrom: timeRange.from,
+    timeTo: timeRange.to,
     ...unsavedDashboardStateForLocator,
   };
 
