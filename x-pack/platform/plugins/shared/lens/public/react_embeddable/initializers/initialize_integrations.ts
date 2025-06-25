@@ -5,25 +5,26 @@
  * 2.0.
  */
 
+import type { Reference } from '@kbn/content-management-utils';
 import {
   getAggregateQueryMode,
   getLanguageDisplayName,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import { omit } from 'lodash';
-import type { HasSerializableState, SerializedPanelState } from '@kbn/presentation-publishing';
-import { SavedObjectReference } from '@kbn/core/types';
+import { SAVED_OBJECT_REF_NAME, type HasSerializableState } from '@kbn/presentation-publishing';
 import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import { isTextBasedLanguage } from '../helper';
 import type { GetStateType, LensEmbeddableStartServices, LensRuntimeState } from '../types';
 import type { IntegrationCallbacks } from '../types';
+import { DOC_TYPE } from '../../../common/constants';
 
 function cleanupSerializedState({
   rawState,
   references,
 }: {
   rawState: LensRuntimeState;
-  references: SavedObjectReference[];
+  references: Reference[];
 }) {
   const cleanedState = omit(rawState, 'searchSessionId');
   return {
@@ -53,7 +54,7 @@ export function initializeIntegrations(
   return {
     api: {
       /**
-       * This API is used by the dashboard to serialize the panel state to save it into its saved object.
+       * This API is used by the parent to serialize the panel state to save it into its saved object.
        * Make sure to remove the attributes when the panel is by reference.
        */
       serializeState: () => {
@@ -63,14 +64,22 @@ export function initializeIntegrations(
         );
         const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
           serializeDynamicActions?.() ?? {};
+          const { savedObjectId, attributes, ...byRefState } = cleanedState.rawState;
         if (cleanedState.rawState.savedObjectId) {
           return {
             rawState: {
-              ...cleanedState.rawState,
+              ...byRefState,
               ...dynamicActionsState,
-              attributes: undefined,
             },
-            references: [...cleanedState.references, ...(dynamicActionsReferences ?? [])],
+            references: [
+              ...cleanedState.references,
+              ...(dynamicActionsReferences ?? []),
+              {
+                name: SAVED_OBJECT_REF_NAME,
+                type: DOC_TYPE,
+                id: savedObjectId,
+              },
+            ],
           };
         }
         return cleanedState;
