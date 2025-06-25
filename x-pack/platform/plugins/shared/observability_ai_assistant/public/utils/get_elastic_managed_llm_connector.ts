@@ -13,13 +13,13 @@ export const getElasticManagedLlmConnector = (
   connectors: UseGenAIConnectorsResult['connectors'] | undefined
 ) => {
   if (!Array.isArray(connectors) || connectors.length === 0) {
-    return false;
+    return undefined;
   }
 
-  return connectors.filter(
+  return connectors.find(
     (connector) =>
       connector.actionTypeId === INFERENCE_CONNECTOR_ACTION_TYPE_ID &&
       connector.isPreconfigured &&
       connector.config?.provider === 'elastic'
-  )[0];
+  );
 };

@@ -115,7 +115,7 @@ export const TableTab = memo(() => {
     browserFields,
     dataFormattedForFieldBrowser,
     scopeId,
-    isPreview,
+    isRulePreview,
     eventId,
     investigationFields,
   } = useDocumentDetailsContext();
@@ -257,16 +257,15 @@ export const TableTab = memo(() => {
         scopeId,
         getLinkValue,
         ruleId,
-        isPreview,
+        isRulePreview,
         onTogglePinned,
       }),
-    [browserFields, eventId, scopeId, getLinkValue, ruleId, isPreview, onTogglePinned]
+    [browserFields, eventId, scopeId, getLinkValue, ruleId, isRulePreview, onTogglePinned]
   );
 
   const search = useMemo(() => {
     return { ...SEARCH_CONFIG, toolsRight: renderToolsRight() };
   }, [renderToolsRight]);
-
   return (
     <>
       <TableTabTour setIsPopoverOpen={setIsPopoverOpen} />

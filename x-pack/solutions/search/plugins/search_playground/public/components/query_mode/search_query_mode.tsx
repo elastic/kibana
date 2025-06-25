@@ -49,12 +49,13 @@ export const SearchQueryMode = ({ pageMode }: { pageMode: PlaygroundPageMode }) 
     name: PlaygroundFormFields.question,
   });
   const {
-    field: { value: userElasticsearchQueryValidations },
-  } = useController<PlaygroundForm, PlaygroundFormFields.userElasticsearchQueryValidations>({
-    name: PlaygroundFormFields.userElasticsearchQueryValidations,
+    field: { value: userElasticsearchQuery },
+    fieldState: { invalid: userElasticsearchQueryInvalid },
+  } = useController<PlaygroundForm, PlaygroundFormFields.userElasticsearchQuery>({
+    name: PlaygroundFormFields.userElasticsearchQuery,
   });
   const executeQueryDisabled = disableExecuteQuery(
-    userElasticsearchQueryValidations,
+    userElasticsearchQuery === null || !userElasticsearchQueryInvalid,
     pageMode === PlaygroundPageMode.chat ? question : searchQuery
   );
   const isLoading = fetchStatus !== 'idle';

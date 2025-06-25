@@ -39,12 +39,14 @@ export type ToolCallbacksOf<TToolOptions extends ToolOptions> = TToolOptions ext
  */
 export type ToolResponsesOf<TTools extends Record<string, ToolDefinition> | undefined> =
   TTools extends Record<string, ToolDefinition>
-    ? Array<
-        ValuesType<{
-          [TName in keyof TTools & string]: ToolCall<TName, ToolResponseOf<TTools[TName]>>;
-        }>
-      >
-    : never[];
+    ? keyof TTools extends never
+      ? []
+      : Array<
+          ValuesType<{
+            [TName in keyof TTools & string]: ToolCall<TName, ToolResponseOf<TTools[TName]>>;
+          }>
+        >
+    : [];
 
 /**
  * Utility type to infer the tool call response shape.
@@ -113,7 +115,7 @@ export type ToolCallsOf<TToolOptions extends ToolOptions> = TToolOptions extends
     : {
         toolCalls: ToolResponsesOf<ToolsOfChoice<TToolOptions>>;
       }
-  : { toolCalls: never };
+  : { toolCalls: [] };
 
 /**
  * Represents a tool call from the LLM before correctly converted to the schema type.

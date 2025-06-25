@@ -39,7 +39,11 @@ export const LOCAL_STORAGE_3P_INTEGRATIONS_CALLOUT_KEY =
 export const LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY = 'cspLatestVulnerabilitiesGrouping';
 export const LOCAL_STORAGE_FINDINGS_GROUPING_KEY = 'cspLatestFindingsGrouping';
 
+export const LOCAL_STORAGE_NAMESPACE_KEY = 'cloudPosture:dashboard:namespace';
+
 export const SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED = 'cloudPosture:fieldsModal:showSelected';
+
+export const DEFAULT_NAMESPACE = 'default';
 
 export type CloudPostureIntegrations = Record<
   CloudSecurityPolicyTemplate,

@@ -19,7 +19,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const testSubjects = getService('testSubjects');
 
-  describe('console onboarding tour', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/224128
+  describe.skip('console onboarding tour', function describeIndexTests() {
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');

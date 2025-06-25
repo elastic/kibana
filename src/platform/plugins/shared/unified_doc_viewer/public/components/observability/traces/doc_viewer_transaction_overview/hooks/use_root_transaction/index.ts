@@ -10,7 +10,14 @@
 import createContainer from 'constate';
 import { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { PARENT_ID_FIELD, TRACE_ID_FIELD, TRANSACTION_DURATION_FIELD } from '@kbn/discover-utils';
+import {
+  PARENT_ID_FIELD,
+  SERVICE_NAME_FIELD,
+  SPAN_ID_FIELD,
+  TRACE_ID_FIELD,
+  TRANSACTION_DURATION_FIELD,
+  TRANSACTION_ID_FIELD,
+} from '@kbn/discover-utils';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
@@ -41,7 +48,12 @@ async function getRootTransaction({
           size: 1,
           body: {
             timeout: '20s',
-            fields: [TRANSACTION_DURATION_FIELD],
+            fields: [
+              TRANSACTION_DURATION_FIELD,
+              SPAN_ID_FIELD,
+              SERVICE_NAME_FIELD,
+              TRANSACTION_ID_FIELD,
+            ],
             query: {
               bool: {
                 should: [
@@ -68,6 +80,9 @@ async function getRootTransaction({
 
 export interface Transaction {
   duration: number;
+  [SPAN_ID_FIELD]: string;
+  [TRANSACTION_ID_FIELD]: string;
+  [SERVICE_NAME_FIELD]: string;
 }
 
 const useRootTransaction = ({ traceId, indexPattern }: UseRootTransactionParams) => {
@@ -92,9 +107,15 @@ const useRootTransaction = ({ traceId, indexPattern }: UseRootTransactionParams)
 
         const fields = result.rawResponse.hits.hits[0]?.fields;
         const transactionDuration = fields?.[TRANSACTION_DURATION_FIELD];
+        const spanId = fields?.[SPAN_ID_FIELD];
+        const transactionId = fields?.[TRANSACTION_ID_FIELD];
+        const serviceName = fields?.[SERVICE_NAME_FIELD];
 
         setTransaction({
-          duration: transactionDuration || null,
+          duration: transactionDuration,
+          [SPAN_ID_FIELD]: spanId,
+          [TRANSACTION_ID_FIELD]: transactionId,
+          [SERVICE_NAME_FIELD]: serviceName,
         });
       } catch (err) {
         if (!signal.aborted) {
@@ -121,7 +142,6 @@ const useRootTransaction = ({ traceId, indexPattern }: UseRootTransactionParams)
       controller.abort();
     };
   }, [data, core.notifications.toasts, traceId, indexPattern]);
-
   return { loading, transaction };
 };
 

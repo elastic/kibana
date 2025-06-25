@@ -8,7 +8,7 @@
 import { findLastIndex, last } from 'lodash';
 import { Message, MessageAddEvent, MessageRole } from '../../../common';
 import { createFunctionRequestMessage } from '../../../common/utils/create_function_request_message';
-import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
+import { CONTEXT_FUNCTION_NAME } from '../../functions/context/context';
 
 export function getContextFunctionRequestIfNeeded(
   messages: Message[]

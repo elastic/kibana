@@ -12,11 +12,6 @@ import { pick } from 'lodash';
 import moment, { Moment } from 'moment';
 
 import type { Reference } from '@kbn/content-management-utils';
-import { extractReferences } from '../../common/dashboard_saved_object/persistable_state/dashboard_saved_object_references';
-import {
-  convertPanelSectionMapsToPanelsArray,
-  generateNewPanelIds,
-} from '../../common/lib/dashboard_panel_converters';
 import type { DashboardAttributes } from '../../server';
 
 import type { DashboardState } from '../../common';
@@ -25,12 +20,9 @@ import {
   convertDashboardVersionToNumber,
   convertNumberToDashboardVersion,
 } from '../services/dashboard_content_management_service/lib/dashboard_versioning';
-import {
-  dataService,
-  embeddableService,
-  savedObjectsTaggingService,
-} from '../services/kibana_services';
+import { dataService, savedObjectsTaggingService } from '../services/kibana_services';
 import { DashboardApi } from './types';
+import { generateNewPanelIds } from './generate_new_panel_ids';
 
 const LATEST_DASHBOARD_CONTAINER_VERSION = convertNumberToDashboardVersion(LATEST_VERSION);
 
@@ -69,7 +61,6 @@ export const getSerializedState = ({
     filters,
     timeRestore,
     description,
-    sections,
 
     // Dashboard options
     useMargins,
@@ -83,10 +74,7 @@ export const getSerializedState = ({
   let { panels } = dashboardState;
   let prefixedPanelReferences = panelReferences;
   if (generateNewIds) {
-    const { panels: newPanels, references: newPanelReferences } = generateNewPanelIds(
-      panels,
-      panelReferences
-    );
+    const { newPanels, newPanelReferences } = generateNewPanelIds(panels, panelReferences);
     panels = newPanels;
     prefixedPanelReferences = newPanelReferences;
     //
@@ -103,7 +91,6 @@ export const getSerializedState = ({
     syncTooltips,
     hidePanelTitles,
   };
-  const savedPanels = convertPanelSectionMapsToPanelsArray(panels, sections, true);
 
   /**
    * Parse global time filter settings
@@ -120,7 +107,7 @@ export const getSerializedState = ({
       ]) as RefreshInterval)
     : undefined;
 
-  const rawDashboardAttributes: DashboardAttributes = {
+  const attributes: DashboardAttributes = {
     version: convertDashboardVersionToNumber(LATEST_DASHBOARD_CONTAINER_VERSION),
     controlGroupInput: controlGroupInput as DashboardAttributes['controlGroupInput'],
     kibanaSavedObjectMeta: { searchSource },
@@ -128,29 +115,18 @@ export const getSerializedState = ({
     refreshInterval,
     timeRestore,
     options,
-    panels: savedPanels,
+    panels,
     timeFrom,
     title,
     timeTo,
   };
 
-  /**
-   * Extract references from raw attributes and tags into the references array.
-   */
-  const { attributes, references: dashboardReferences } = extractReferences(
-    {
-      attributes: rawDashboardAttributes,
-      references: searchSourceReferences ?? [],
-    },
-    { embeddablePersistableStateService: embeddableService }
-  );
-
   // TODO Provide tags as an array of tag names in the attribute. In that case, tag references
   // will be extracted by the server.
   const savedObjectsTaggingApi = savedObjectsTaggingService?.getTaggingApi();
   const references = savedObjectsTaggingApi?.ui.updateTagsReferences
-    ? savedObjectsTaggingApi?.ui.updateTagsReferences(dashboardReferences, tags)
-    : dashboardReferences;
+    ? savedObjectsTaggingApi?.ui.updateTagsReferences(searchSourceReferences ?? [], tags)
+    : searchSourceReferences ?? [];
 
   const allReferences = [
     ...references,

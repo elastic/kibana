@@ -6,7 +6,7 @@
  */
 
 import {
-  BoundChatCompleteOptions,
+  BoundOptions,
   ChatCompleteAPI,
   MessageRole,
   UnboundChatCompleteOptions,
@@ -21,7 +21,7 @@ describe('bindChatComplete', () => {
   });
 
   it('calls chatComplete with both bound and unbound params', async () => {
-    const bound: BoundChatCompleteOptions = {
+    const bound: BoundOptions = {
       connectorId: 'some-id',
       functionCalling: 'native',
     };
@@ -59,7 +59,7 @@ describe('bindChatComplete', () => {
       connectorId: 'some-id',
       functionCalling: 'native',
       foo: 'bar',
-    } as BoundChatCompleteOptions;
+    } as BoundOptions;
 
     const unbound: UnboundChatCompleteOptions = {
       messages: [{ role: MessageRole.User, content: 'hello there' }],
@@ -78,7 +78,7 @@ describe('bindChatComplete', () => {
   });
 
   it('ignores mutations of the bound parameters after binding', async () => {
-    const bound: BoundChatCompleteOptions = {
+    const bound: BoundOptions = {
       connectorId: 'some-id',
       functionCalling: 'native',
     };
@@ -102,7 +102,7 @@ describe('bindChatComplete', () => {
   });
 
   it('does not allow overriding bound parameters with the unbound object', async () => {
-    const bound: BoundChatCompleteOptions = {
+    const bound: BoundOptions = {
       connectorId: 'some-id',
       functionCalling: 'native',
     };
