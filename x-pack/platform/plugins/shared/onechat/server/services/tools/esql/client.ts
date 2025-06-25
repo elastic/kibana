@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { createInternalError, esqlToolProviderId } from '@kbn/onechat-common';
-import { logger } from 'elastic-apm-node';
+import { createInternalError, createToolNotFoundError, esqlToolProviderId } from '@kbn/onechat-common';
 import { EsqlToolDefinition } from '@kbn/onechat-server';
 import {
   EsqlToolCreateRequest,
@@ -41,17 +40,13 @@ class EsqlToolClientImpl {
       const document = await this.storage.getClient().get({ id });
 
       const tool = document._source as EsqlToolDefinition;
-
       return tool;
-    } catch (error) {
-      const message = `Error retrieving ESQL tool with id ${id}: ${error}`;
-      logger.error(message);
-      throw createInternalError(message);
+    } catch (isToolNotFoundError) {
+      throw createToolNotFoundError({ toolId: `tool::${id}`, customMessage: `Tool with id ${id} not found` });
     }
   }
 
   async list(): Promise<EsqlToolDefinition[]> {
-    try {
       const document = await this.storage.getClient().search({
         index: esqlToolIndexName,
         query: {
@@ -62,18 +57,12 @@ class EsqlToolClientImpl {
       });
 
       return document.hits.hits.map((hit) => hit._source as EsqlToolDefinition);
-    } catch (error) {
-      const message = `Error fetching all ESQL tools: ${error}`;
-      logger.error(message);
-      throw createInternalError(message);
-    }
   }
 
   async create(tool: EsqlToolCreateRequest) {
     if ((await this.list()).map((t) => t.id).includes(tool.id)) {
       throw createInternalError(`Tool with id ${tool.id} already exists`);
     }
-    try {
       const document = {
         ...tool,
         meta: {
@@ -88,14 +77,8 @@ class EsqlToolClientImpl {
       });
 
       return document as EsqlToolCreateResponse;
-    } catch (error) {
-      const message = `Error creating ESQL tool with id ${tool.id}: ${error}`;
-      logger.error(message);
-      throw createInternalError(message);
-    }
   }
   async update(id: string, updates: EsqlToolUpdateRequest): Promise<EsqlToolCreateResponse> {
-    try {
       const now = new Date();
       let tool: EsqlToolCreateResponse | null = null;
 
@@ -125,21 +108,12 @@ class EsqlToolClientImpl {
       });
 
       return updatedTool;
-    } catch (error) {
-      const message = `Error updating/creating ESQL tool with id ${id}: ${error}`;
-      logger.error(message);
-      throw createInternalError(message);
-    }
   }
   async delete(id: string): Promise<boolean> {
-    try {
-      await this.storage.getClient().delete({ id });
-
-      return true;
-    } catch (error) {
-      const message = `Error deleting ESQL tool with id ${id}: ${error}`;
-      logger.error(message);
-      throw createInternalError(message);
+    const result = await this.storage.getClient().delete({ id: id });
+    if (result.result === 'not_found') {
+        throw createToolNotFoundError({ toolId: `tool::${id}`, customMessage: `Tool with id ${id} not found` });
     }
+    return true
   }
 }
