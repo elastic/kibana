@@ -57,8 +57,6 @@
           "fleet-preconfiguration-deletion-record": "4c36f199189a367e43541f236141204c",
           "fleet-proxy": "05b7a22977de25ce67a77e44dd8e6c33",
           "graph-workspace": "27a94b2edcb0610c6aea54a7c56d7752",
-          "guided-onboarding-guide-state": "a3db59c45a3fd2730816d4f53c35c7d9",
-          "guided-onboarding-plugin-state": "3d1b76c39bfb2cc8296b024d73854724",
           "index-pattern": "83c02d842fe2a94d14dfa13f7dcd6e87",
           "infrastructure-monitoring-log-view": "c50526fc6040c5355ed027d34d05b35c",
           "infrastructure-ui-source": "3d1b76c39bfb2cc8296b024d73854724",
@@ -1579,21 +1577,6 @@
               "type": "text"
             }
           }
-        },
-        "guided-onboarding-guide-state": {
-          "dynamic": "false",
-          "properties": {
-            "guideId": {
-              "type": "keyword"
-            },
-            "isActive": {
-              "type": "boolean"
-            }
-          }
-        },
-        "guided-onboarding-plugin-state": {
-          "dynamic": "false",
-          "type": "object"
         },
         "index-pattern": {
           "dynamic": "false",

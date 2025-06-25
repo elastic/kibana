@@ -7,8 +7,6 @@
 
 import { waitFor, act, renderHook } from '@testing-library/react';
 import { of } from 'rxjs';
-
-import { siemGuideId } from '../../../../common/guided_onboarding/siem_guide_config';
 import { TourContextProvider, useTourContext } from './tour';
 import { type AlertsCasesTourSteps, SecurityStepId, securityTourConfig } from './tour_config';
 import { useKibana } from '../../lib/kibana';
@@ -29,6 +27,7 @@ jest.mock('react-router-dom', () => {
 
 describe('useTourContext', () => {
   const mockCompleteGuideStep = jest.fn();
+  const siemGuideId = 'siemGuideId';
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {

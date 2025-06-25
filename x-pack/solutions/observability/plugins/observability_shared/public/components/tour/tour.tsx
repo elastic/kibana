@@ -29,9 +29,6 @@ import {
 } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 import { ApplicationStart } from '@kbn/core/public';
-import useObservable from 'react-use/lib/useObservable';
-import { of } from 'rxjs';
-import type { GuidedOnboardingApi } from '@kbn/guided-onboarding-plugin/public/types';
 import { observabilityAppId } from '../../../common';
 import { tourStepsConfig } from './steps_config';
 
@@ -104,6 +101,7 @@ const getSteps = ({
   return tourStepsConfig.map((stepConfig, index) => {
     const step = index + 1;
     const { dataTestSubj, content, offset: stepOffset, imageConfig, ...tourStepProps } = stepConfig;
+    // console.log('stepConfig:', stepConfig);
     return (
       <EuiTourStep
         {...tourStepProps}
@@ -115,11 +113,11 @@ const getSteps = ({
         repositionOnScroll={repositionOnScroll}
         stepsTotal={tourStepsConfig.length}
         isStepOpen={step === activeStep}
-        onFinish={() => endTour()}
         footerAction={activeStep === tourStepsConfig.length ? lastStepFooterAction : footerAction}
         panelProps={{
           'data-test-subj': dataTestSubj,
         }}
+        onFinish={() => {}} // EUI expects this prop but we handle progression with footerAction
         content={
           <>
             <EuiText size="s">
@@ -158,26 +156,21 @@ export function ObservabilityTour({
   isPageDataLoaded,
   showTour,
   prependBasePath,
-  guidedOnboardingApi,
 }: {
   children: ({ isTourVisible }: { isTourVisible: boolean }) => ReactNode;
   navigateToApp: ApplicationStart['navigateToApp'];
   isPageDataLoaded: boolean;
   showTour: boolean;
   prependBasePath?: (imageName: string) => string;
-  guidedOnboardingApi?: GuidedOnboardingApi;
 }) {
   const prevActiveStep = localStorage.getItem(observTourStepStorageKey);
   const initialActiveStep = prevActiveStep === null ? 1 : Number(prevActiveStep);
 
-  const isGuidedOnboardingActive = useObservable(
-    // if guided onboarding is not available, return false
-    guidedOnboardingApi
-      ? guidedOnboardingApi.isGuideStepActive$('kubernetes', 'tour_observability')
-      : of(false)
-  );
-
-  const [isTourActive, setIsTourActive] = useState(false);
+  // Initialize tour state - once started, it should be independent of showTour prop changes
+  const [isTourActive, setIsTourActive] = useState(() => {
+    // Only start tour if showTour is true AND we have a saved step or starting fresh
+    return showTour && (prevActiveStep !== null || showTour);
+  });
   const [activeStep, setActiveStep] = useState(initialActiveStep);
 
   const { pathname: currentPath } = useLocation();
@@ -187,17 +180,19 @@ export function ObservabilityTour({
   const isOverviewPage = currentPath === overviewPath;
 
   const incrementStep = useCallback(() => {
-    setActiveStep((prevState) => prevState + 1);
+    // console.log('incrementStep called');
+    setActiveStep((prevState) => {
+      // console.log('Current step:', prevState, 'Next step:', prevState + 1);
+      return prevState + 1;
+    });
   }, []);
 
-  const endTour = useCallback(async () => {
-    // Mark the onboarding guide step as complete
-    if (guidedOnboardingApi) {
-      await guidedOnboardingApi.completeGuideStep('kubernetes', 'tour_observability');
-    }
+  const endTour = useCallback(() => {
     // Reset EuiTour step state
     setActiveStep(1);
-  }, [guidedOnboardingApi]);
+    setIsTourActive(false);
+    localStorage.removeItem(observTourStepStorageKey);
+  }, []);
 
   /**
    * The tour should only be visible if the following conditions are met:
@@ -215,8 +210,18 @@ export function ObservabilityTour({
   }, [activeStep]);
 
   useEffect(() => {
-    setIsTourActive(Boolean(isGuidedOnboardingActive));
-  }, [isGuidedOnboardingActive]);
+    // Set tour active when showTour prop changes
+    setIsTourActive(showTour);
+  }, [showTour]);
+
+  useEffect(() => {
+    // End tour when all steps are completed
+    if (activeStep > tourStepsConfig.length && isTourActive) {
+      setIsTourActive(false);
+      setActiveStep(1);
+      localStorage.removeItem(observTourStepStorageKey);
+    }
+  }, [activeStep, isTourActive]);
 
   useEffect(() => {
     // The user must be on the overview page to view the data assistant step in the tour

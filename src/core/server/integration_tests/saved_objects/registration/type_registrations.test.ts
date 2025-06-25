@@ -84,8 +84,6 @@ const previouslyRegisteredTypes = [
   'fleet-space-settings',
   'graph-workspace',
   'guided-setup-state',
-  'guided-onboarding-guide-state',
-  'guided-onboarding-plugin-state',
   'index-pattern',
   'intercept_interaction_record',
   'intercept_trigger_record',

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { observTourStepStorageKey } from '@kbn/observability-shared-plugin/public/components/tour/tour';
-import { API_BASE_PATH } from '@kbn/guided-onboarding-plugin/common';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -17,6 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const find = getService('find');
   const supertest = getService('supertest');
   const deployment = getService('deployment');
+  const API_BASE_PATH = '/api/guided_onboarding'; // Add the correct API base path here - not sure if it's correct since I am removing guided onboarding plugin
 
   const setInitialTourState = async (activeStep?: number) => {
     await browser.setLocalStorageItem(observTourStepStorageKey, String(activeStep || 1));

@@ -37,24 +37,24 @@ export const tourStepsConfig: TourStep[] = [
     anchorPosition: 'rightUp',
     dataTestSubj: 'overviewStep',
   },
-  {
-    title: i18n.translate('xpack.observabilityShared.tour.streamStep.tourTitle', {
-      defaultMessage: 'Tail your logs in real time',
-    }),
-    content: i18n.translate('xpack.observabilityShared.tour.streamStep.tourContent', {
-      defaultMessage:
-        'Monitor, filter, and inspect log events flowing in from your applications, servers, virtual machines, and containers.',
-    }),
-    anchor: `[data-nav-id="stream"]`,
-    anchorPosition: 'rightUp',
-    dataTestSubj: 'streamStep',
-    imageConfig: {
-      name: 'onboarding_tour_step_logs.gif',
-      altText: i18n.translate('xpack.observabilityShared.tour.streamStep.imageAltText', {
-        defaultMessage: 'Logs stream demonstration',
-      }),
-    },
-  },
+  // {
+  //   title: i18n.translate('xpack.observabilityShared.tour.streamStep.tourTitle', {
+  //     defaultMessage: 'Tail your logs in real time',
+  //   }),
+  //   content: i18n.translate('xpack.observabilityShared.tour.streamStep.tourContent', {
+  //     defaultMessage:
+  //       'Monitor, filter, and inspect log events flowing in from your applications, servers, virtual machines, and containers.',
+  //   }),
+  //   anchor: `[data-nav-id="stream"]`,
+  //   anchorPosition: 'rightUp',
+  //   dataTestSubj: 'streamStep',
+  //   imageConfig: {
+  //     name: 'onboarding_tour_step_logs.gif',
+  //     altText: i18n.translate('xpack.observabilityShared.tour.streamStep.imageAltText', {
+  //       defaultMessage: 'Logs stream demonstration',
+  //     }),
+  //   },
+  // },
   {
     title: i18n.translate('xpack.observabilityShared.tour.metricsExplorerStep.tourTitle', {
       defaultMessage: 'Monitor your infrastructure health',
@@ -73,24 +73,24 @@ export const tourStepsConfig: TourStep[] = [
       }),
     },
   },
-  {
-    title: i18n.translate('xpack.observabilityShared.tour.servicesStep.tourTitle', {
-      defaultMessage: 'Identify and resolve application issues',
-    }),
-    content: i18n.translate('xpack.observabilityShared.tour.servicesStep.tourContent', {
-      defaultMessage:
-        'Find and fix performance problems quickly by collecting detailed information about your services.',
-    }),
-    anchor: `[data-nav-id="services"]`,
-    anchorPosition: 'rightUp',
-    dataTestSubj: 'servicesStep',
-    imageConfig: {
-      name: 'onboarding_tour_step_services.gif',
-      altText: i18n.translate('xpack.observabilityShared.tour.servicesStep.imageAltText', {
-        defaultMessage: 'Services demonstration',
-      }),
-    },
-  },
+  // {
+  //   title: i18n.translate('xpack.observabilityShared.tour.servicesStep.tourTitle', {
+  //     defaultMessage: 'Identify and resolve application issues',
+  //   }),
+  //   content: i18n.translate('xpack.observabilityShared.tour.servicesStep.tourContent', {
+  //     defaultMessage:
+  //       'Find and fix performance problems quickly by collecting detailed information about your services.',
+  //   }),
+  //   anchor: `[data-nav-id="services"]`,
+  //   anchorPosition: 'rightUp',
+  //   dataTestSubj: 'servicesStep',
+  //   imageConfig: {
+  //     name: 'onboarding_tour_step_services.gif',
+  //     altText: i18n.translate('xpack.observabilityShared.tour.servicesStep.imageAltText', {
+  //       defaultMessage: 'Services demonstration',
+  //     }),
+  //   },
+  // },
   {
     title: i18n.translate('xpack.observabilityShared.tour.alertsStep.tourTitle', {
       defaultMessage: 'Get notified when something changes',

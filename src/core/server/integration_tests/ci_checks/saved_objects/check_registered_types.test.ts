@@ -120,8 +120,6 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "fleet-space-settings": "b8f60506cf5fea1429ad84dfb8644cf261fd7427",
         "fleet-uninstall-tokens": "216be68d8426052f9e7529e2e0569b7950676537",
         "graph-workspace": "565642a208fe7413b487aea979b5b153e4e74abe",
-        "guided-onboarding-guide-state": "3257825ae840309cb676d64b347107db7b76f30a",
-        "guided-onboarding-plugin-state": "2d3ef3069ca8e981cafe8647c0c4a4c20739db10",
         "index-pattern": "cd51191712081278c2af83d16552c3438ef83353",
         "infra-custom-dashboards": "20231f5c1a13633c8c85f4e1257fa0c6156f6714",
         "infrastructure-monitoring-log-view": "8040108f02ef27419cff79077384379709d44bbc",
