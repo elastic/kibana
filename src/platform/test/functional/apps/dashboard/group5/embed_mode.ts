@@ -25,7 +25,7 @@ export default function ({
   const screenshot = getService('screenshots');
   const log = getService('log');
 
-  describe('embed mode', () => {
+  describe.only('embed mode', () => {
     /*
      * Note: The baseline images used in all of the screenshot tests in this test suite were taken directly from the CI environment
      * in order to overcome a known issue with the pixel density of fonts being significantly different when running locally versus
@@ -58,7 +58,7 @@ export default function ({
     });
 
     // Fails in chrome 128+ https://github.com/elastic/kibana-operations/issues/199
-    describe.skip('default URL params', () => {
+    describe('default URL params', () => {
       it('hides the chrome', async () => {
         const globalNavShown = await globalNav.exists();
         expect(globalNavShown).to.be(true);
@@ -93,7 +93,7 @@ export default function ({
     });
 
     // Fails in chrome 128+ https://github.com/elastic/kibana-operations/issues/199
-    describe.skip('non-default URL params', () => {
+    describe('non-default URL params', () => {
       it('shows or hides elements based on URL params', async () => {
         const currentUrl = await browser.getCurrentUrl();
         const newUrl = [currentUrl].concat(urlParamExtensions).join('&');
