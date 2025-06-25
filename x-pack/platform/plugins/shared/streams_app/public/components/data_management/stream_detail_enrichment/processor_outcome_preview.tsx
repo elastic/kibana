@@ -14,6 +14,7 @@ import {
   EuiProgress,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
@@ -43,7 +44,26 @@ export const ProcessorOutcomePreview = () => {
     selectPreviewDocuments(snapshot.context)
   );
 
+  const areDataSourcesLoading = useStreamEnrichmentSelector((state) =>
+    state.context.dataSourcesRefs.some((ref) => {
+      const snap = ref.getSnapshot();
+      return (
+        snap.matches({ enabled: 'loadingData' }) || snap.matches({ enabled: 'debouncingChanges' })
+      );
+    })
+  );
+
   if (isEmpty(previewDocuments)) {
+    if (areDataSourcesLoading) {
+      return (
+        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
     return (
       <EuiEmptyPrompt
         color="warning"
@@ -170,6 +190,9 @@ const OutcomePreviewTable = () => {
   const processors = useSimulatorSelector((state) => state.context.processors);
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
+  const previewColumnsSorting = useSimulatorSelector(
+    (state) => state.context.previewColumnsSorting
+  );
   const explicitlyEnabledPreviewColumns = useSimulatorSelector(
     (state) => state.context.explicitlyEnabledPreviewColumns
   );
@@ -185,6 +208,7 @@ const OutcomePreviewTable = () => {
     setExplicitlyEnabledPreviewColumns,
     setExplicitlyDisabledPreviewColumns,
     setPreviewColumnsOrder,
+    setPreviewColumnsSorting,
   } = useStreamEnrichmentEvents();
 
   const allColumns = useMemo(() => {
@@ -284,6 +308,8 @@ const OutcomePreviewTable = () => {
       rowHeightsOptions={grokMode ? { defaultHeight: 'auto' } : undefined}
       toolbarVisibility
       setVisibleColumns={setVisibleColumns}
+      sorting={previewColumnsSorting}
+      setSorting={setPreviewColumnsSorting}
       columnOrderHint={previewColumnsOrder}
       renderCellValue={
         grokMode

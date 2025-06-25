@@ -581,7 +581,7 @@ export const getEndpointConsoleCommands = ({
   }
 };
 
-/** @private */
+/** @internal */
 const disableCommand = (command: CommandDefinition, agentType: ResponseActionAgentType) => {
   command.helpDisabled = true;
   command.helpHidden = true;
@@ -589,7 +589,7 @@ const disableCommand = (command: CommandDefinition, agentType: ResponseActionAge
     UPGRADE_AGENT_FOR_RESPONDER(agentType, command.name as ConsoleResponseActionCommands);
 };
 
-/** @private */
+/** @internal */
 const adjustCommandsForSentinelOne = ({
   commandList,
   platform,
@@ -659,7 +659,7 @@ const adjustCommandsForSentinelOne = ({
   });
 };
 
-/** @private */
+/** @internal */
 const adjustCommandsForCrowdstrike = ({
   commandList,
   crowdstrikeRunScriptEnabled,

@@ -28,6 +28,7 @@ import {
   EuiTextArea,
   EuiTextAreaProps,
 } from '@elastic/eui';
+import { MonitorSpaces, MonitorSpacesProps } from '../fields/monitor_spaces';
 import {
   MaintenanceWindowsField,
   MaintenanceWindowsFieldProps,
@@ -163,3 +164,7 @@ export const MaintenanceWindowsFieldWrapper = React.forwardRef<
   unknown,
   MaintenanceWindowsFieldProps
 >((props, _ref) => <MaintenanceWindowsField {...props} />);
+
+export const KibanaSpacesWrapper = React.forwardRef<unknown, MonitorSpacesProps>((props, _ref) => (
+  <MonitorSpaces {...props} />
+));
