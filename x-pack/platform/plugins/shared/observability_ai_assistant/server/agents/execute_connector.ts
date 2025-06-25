@@ -6,10 +6,10 @@
  */
 
 import { lastValueFrom, filter, last } from 'rxjs';
-import { FunctionVisibility, StreamingChatResponseEventType } from '../../../common';
+import { FunctionVisibility, StreamingChatResponseEventType } from '../../common';
 import { FunctionRegistrationParameters } from '../functions';
-import { MessageRole } from '../../../common';
-import { continueConversation } from '../../service/client/operators/continue_conversation';
+import { MessageRole } from '../../common';
+import { continueConversation } from '../service/client/operators/continue_conversation';
 import {
   EXECUTE_CONNECTOR_FUNCTION_NAME,
   GET_CONNECTOR_INFO_FUNCTION_NAME,
@@ -18,7 +18,7 @@ import {
   registerGetConnectorInfoFunction,
   registerValidateConnectorParamsFunction,
 } from '../functions/execute_connector';
-import { ChatFunctionClient } from '../../service/chat_function_client';
+import { ChatFunctionClient } from '../service/chat_function_client';
 
 export const EXECUTE_CONNECTOR_AGENT_NAME = 'execute_connector_agent';
 export const EXECUTE_CONNECTOR_AGENT_SYSTEM_MESSAGE = `You are an assistant for Elastic Observability acting as a function-calling agent. Your task is to execute Kibana connectors (e.g., Slack, Email, Jira) based on user prompts.

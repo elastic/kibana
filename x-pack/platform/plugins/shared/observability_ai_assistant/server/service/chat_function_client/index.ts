@@ -20,7 +20,7 @@ import type {
   RegisterFunction,
   RegisterInstruction,
 } from '../types';
-import { registerGetDataOnScreenFunction } from '../../tools/functions/get_data_on_screen';
+import { registerGetDataOnScreenFunction } from '../../functions/get_data_on_screen';
 
 export class FunctionArgsValidationError extends Error {
   constructor(public readonly errors: ErrorObject[]) {

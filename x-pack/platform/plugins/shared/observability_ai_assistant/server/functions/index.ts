@@ -6,10 +6,10 @@
  */
 
 import dedent from 'dedent';
-import { KnowledgeBaseState } from '../../../common';
+import { KnowledgeBaseState } from '../../common';
 import { CONTEXT_FUNCTION_NAME, registerContextFunction } from './context';
 import { registerSummarizationFunction, SUMMARIZE_FUNCTION_NAME } from './summarize';
-import type { RegistrationCallback } from '../../service/types';
+import type { RegistrationCallback } from '../service/types';
 import { registerElasticsearchFunction } from './elasticsearch';
 import { GET_DATASET_INFO_FUNCTION_NAME, registerGetDatasetInfoFunction } from './get_dataset_info';
 import { registerKibanaFunction } from './kibana';

@@ -27,7 +27,7 @@ import {
   ObservabilityAIAssistantPluginSetupDependencies,
   ObservabilityAIAssistantPluginStartDependencies,
 } from './types';
-import { registerFunctions } from './tools/functions';
+import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
 import { aiAssistantCapabilities } from '../common/capabilities';
 import { runStartupMigrations } from './service/startup_migrations/run_startup_migrations';

@@ -9,9 +9,9 @@ import { BEDROCK_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/bedroc
 import { GEMINI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/gemini/constants';
 import { INFERENCE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/inference/constants';
 import { OPENAI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { convertSchemaToOpenApi } from '../../utils/convert_schema_to_open_api';
+import { convertSchemaToOpenApi } from '../utils/convert_schema_to_open_api';
 import { FunctionRegistrationParameters } from '.';
-import { FunctionVisibility } from '../../../common';
+import { FunctionVisibility } from '../../common';
 
 export const EXECUTE_CONNECTOR_FUNCTION_NAME = 'execute_connector';
 
