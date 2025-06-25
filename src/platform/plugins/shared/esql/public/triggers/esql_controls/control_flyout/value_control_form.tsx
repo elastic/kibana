@@ -202,10 +202,7 @@ export function ValueControlForm({
     ) {
       const queryForValues =
         variableName !== ''
-          ? `FROM ${getIndexPatternFromESQLQuery(
-              queryString
-            )}  /* | WHERE @timestamp <=?_tend and @timestamp >?_tstart */
- | STATS BY ${valuesRetrieval}`
+          ? `FROM ${getIndexPatternFromESQLQuery(queryString)} | STATS BY ${valuesRetrieval}`
           : '';
       onValuesQuerySubmit(queryForValues);
     }
