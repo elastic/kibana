@@ -19,7 +19,7 @@ import type { OnechatInternalService } from '../services';
 import { InitialMessageProvider } from './context/initial_message_context';
 import { OnechatStartDependencies } from '../types';
 
-export const renderApp = async ({
+export const mountApp = async ({
   core,
   plugins,
   element,

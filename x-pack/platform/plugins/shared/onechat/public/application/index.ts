@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { renderApp } from './render';
+export { mountApp } from './mount';

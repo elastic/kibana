@@ -6,14 +6,21 @@
  */
 
 import {
-  DEFAULT_APP_CATEGORIES,
   type CoreSetup,
   type CoreStart,
   type Plugin,
   type PluginInitializerContext,
-  AppMountParameters,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
+import { ONECHAT_CHAT_UI_SETTING_ID } from '../common/constants';
+import { registerApp } from './register';
+import {
+  AgentService,
+  ChatService,
+  ConversationsService,
+  OnechatInternalService,
+  ToolsService,
+} from './services';
 import type {
   ConfigSchema,
   OnechatPluginSetup,
@@ -21,15 +28,6 @@ import type {
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
-import {
-  AgentService,
-  ChatService,
-  ConversationsService,
-  ToolsService,
-  OnechatInternalService,
-} from './services';
-import { ONECHAT_APP_ID, ONECHAT_PATH, ONECHAT_TITLE } from '../common/features';
-import { ONECHAT_CHAT_UI_SETTING_ID } from '../common/constants';
 
 export class OnechatPlugin
   implements
@@ -47,44 +45,21 @@ export class OnechatPlugin
     this.logger = context.logger.get();
   }
   setup(
-    coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
-    pluginsSetup: OnechatSetupDependencies
+    core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
+    _pluginsSetup: OnechatSetupDependencies
   ): OnechatPluginSetup {
-    const getServices = () => {
-      if (!this.internalServices) {
-        throw new Error('getServices called before plugin start');
-      }
-      return this.internalServices;
-    };
-
-    const isOnechatEnabled = coreSetup.uiSettings.get<boolean>(ONECHAT_CHAT_UI_SETTING_ID, false);
+    const isOnechatEnabled = core.uiSettings.get<boolean>(ONECHAT_CHAT_UI_SETTING_ID, false);
     if (isOnechatEnabled) {
-      coreSetup.application.register({
-        id: ONECHAT_APP_ID,
-        appRoute: ONECHAT_PATH,
-        category: DEFAULT_APP_CATEGORIES.chat,
-        title: ONECHAT_TITLE,
-        euiIconType: 'logoElasticsearch',
-        visibleIn: ['sideNav', 'globalSearch'],
-        deepLinks: [{ id: 'chat', path: '/conversations', title: 'Chat' }],
-        async mount({ element, history }: AppMountParameters) {
-          const { renderApp } = await import('./application');
-          const [coreStart, startPluginDeps] = await coreSetup.getStartServices();
-
-          coreStart.chrome.docTitle.change(ONECHAT_TITLE);
-          const services = getServices();
-
-          return renderApp({
-            core: coreStart,
-            services,
-            element,
-            history,
-            plugins: startPluginDeps,
-          });
+      registerApp({
+        core,
+        getServices: () => {
+          if (!this.internalServices) {
+            throw new Error('getServices called before plugin start');
+          }
+          return this.internalServices;
         },
       });
     }
-
     return {};
   }
 
