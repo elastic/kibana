@@ -13,11 +13,8 @@ import type {
   SingleEventMetric,
   AlertSuppressionUsage,
   SpacesUsage,
-<<<<<<< HEAD
   FeatureTypeUsage,
-=======
   ResponseActionsUsage,
->>>>>>> cae3861f5d4fe1fea0419eedbf852b460e3033ee
 } from './types';
 
 export const initialAlertSuppression: AlertSuppressionUsage = {

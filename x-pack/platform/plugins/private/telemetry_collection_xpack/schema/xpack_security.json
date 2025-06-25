@@ -721,6 +721,38 @@
                               }
                             }
                           }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled custom query rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled custom query rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within custom query rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within custom query rules"
+                                  }
+                                }
+                              }
+                            }
+                          }
                         }
                       }
                     },
@@ -990,6 +1022,38 @@
                               "type": "long",
                               "_meta": {
                                 "description": "Number of custom threshold rules configured do not suppress alerts with missing fields"
+                              }
+                            }
+                          }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled custom threshold rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled custom threshold rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within custom threshold rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within custom threshold rules"
+                                  }
+                                }
                               }
                             }
                           }
@@ -1265,6 +1329,38 @@
                               }
                             }
                           }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled custom EQL rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled custom EQL rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within custom EQL rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within custom EQL rules"
+                                  }
+                                }
+                              }
+                            }
+                          }
                         }
                       }
                     },
@@ -1391,13 +1487,13 @@
                             "enabled": {
                               "type": "long",
                               "_meta": {
-                                "description": "Number of enabled machine_learning rules configured with response actions"
+                                "description": "Number of enabled ML rules configured with response actions"
                               }
                             },
                             "disabled": {
                               "type": "long",
                               "_meta": {
-                                "description": "Number of disabled machine_learning rules configured with response actions"
+                                "description": "Number of disabled ML rules configured with response actions"
                               }
                             },
                             "response_actions": {
@@ -1405,13 +1501,13 @@
                                 "endpoint": {
                                   "type": "long",
                                   "_meta": {
-                                    "description": "Number of endpoint response actions within machine_learning rules"
+                                    "description": "Number of endpoint response actions within ML rules"
                                   }
                                 },
                                 "osquery": {
                                   "type": "long",
                                   "_meta": {
-                                    "description": "Number of osquery response actions within machine_learning rules"
+                                    "description": "Number of osquery response actions within ML rules"
                                   }
                                 }
                               }
@@ -1534,6 +1630,38 @@
                               "type": "long",
                               "_meta": {
                                 "description": "Number of custom machine_learning rules configured do not suppress alerts with missing fields"
+                              }
+                            }
+                          }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled custom ML rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled custom ML rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within custom ML rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within custom ML rules"
+                                  }
+                                }
                               }
                             }
                           }
@@ -1663,13 +1791,13 @@
                             "enabled": {
                               "type": "long",
                               "_meta": {
-                                "description": "Number of enabled threat_match rules configured with response actions"
+                                "description": "Number of enabled threat match rules configured with response actions"
                               }
                             },
                             "disabled": {
                               "type": "long",
                               "_meta": {
-                                "description": "Number of disabled threat_match rules configured with response actions"
+                                "description": "Number of disabled threat match rules configured with response actions"
                               }
                             },
                             "response_actions": {
@@ -1677,13 +1805,13 @@
                                 "endpoint": {
                                   "type": "long",
                                   "_meta": {
-                                    "description": "Number of endpoint response actions within threat_match rules"
+                                    "description": "Number of endpoint response actions within threat match rules"
                                   }
                                 },
                                 "osquery": {
                                   "type": "long",
                                   "_meta": {
-                                    "description": "Number of osquery response actions within threat_match rules"
+                                    "description": "Number of osquery response actions within threat match rules"
                                   }
                                 }
                               }
@@ -1806,6 +1934,38 @@
                               "type": "long",
                               "_meta": {
                                 "description": "Number of custom threat_match rules configured do not suppress alerts with missing fields"
+                              }
+                            }
+                          }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled custom threat match rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled custom threat match rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within custom threat match rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within custom threat match rules"
+                                  }
+                                }
                               }
                             }
                           }
@@ -1935,13 +2095,13 @@
                             "enabled": {
                               "type": "long",
                               "_meta": {
-                                "description": "Number of enabled new_term rules configured with response actions"
+                                "description": "Number of enabled new terms rules configured with response actions"
                               }
                             },
                             "disabled": {
                               "type": "long",
                               "_meta": {
-                                "description": "Number of disabled new_term rules configured with response actions"
+                                "description": "Number of disabled new terms rules configured with response actions"
                               }
                             },
                             "response_actions": {
@@ -1949,13 +2109,13 @@
                                 "endpoint": {
                                   "type": "long",
                                   "_meta": {
-                                    "description": "Number of endpoint response actions within new_term rules"
+                                    "description": "Number of endpoint response actions within new terms rules"
                                   }
                                 },
                                 "osquery": {
                                   "type": "long",
                                   "_meta": {
-                                    "description": "Number of osquery response actions within new_term rules"
+                                    "description": "Number of osquery response actions within new terms rules"
                                   }
                                 }
                               }
@@ -2078,6 +2238,38 @@
                               "type": "long",
                               "_meta": {
                                 "description": "Number of custom new_terms rules configured do not suppress alerts with missing fields"
+                              }
+                            }
+                          }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled custom new terms rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled custom new terms rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within custom new terms rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within custom new terms rules"
+                                  }
+                                }
                               }
                             }
                           }
@@ -2207,13 +2399,13 @@
                             "enabled": {
                               "type": "long",
                               "_meta": {
-                                "description": "Number of enabled esql rules configured with response actions"
+                                "description": "Number of enabled ES|QL rules configured with response actions"
                               }
                             },
                             "disabled": {
                               "type": "long",
                               "_meta": {
-                                "description": "Number of disabled esql rules configured with response actions"
+                                "description": "Number of disabled ES|QL rules configured with response actions"
                               }
                             },
                             "response_actions": {
@@ -2221,13 +2413,13 @@
                                 "endpoint": {
                                   "type": "long",
                                   "_meta": {
-                                    "description": "Number of endpoint response actions within esql rules"
+                                    "description": "Number of endpoint response actions within ES|QL rules"
                                   }
                                 },
                                 "osquery": {
                                   "type": "long",
                                   "_meta": {
-                                    "description": "Number of osquery response actions within esql rules"
+                                    "description": "Number of osquery response actions within ES|QL rules"
                                   }
                                 }
                               }
@@ -2350,6 +2542,38 @@
                               "type": "long",
                               "_meta": {
                                 "description": "Number of custom esql rules configured do not suppress alerts with missing fields"
+                              }
+                            }
+                          }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled custom ES|QL rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled custom ES|QL rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within custom ES|QL rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within custom ES|QL rules"
+                                  }
+                                }
                               }
                             }
                           }
@@ -2479,13 +2703,13 @@
                             "enabled": {
                               "type": "long",
                               "_meta": {
-                                "description": "Number of enabled elastic rules configured with response actions"
+                                "description": "Number of enabled prebuilt rules configured with response actions"
                               }
                             },
                             "disabled": {
                               "type": "long",
                               "_meta": {
-                                "description": "Number of disabled elastic rules configured with response actions"
+                                "description": "Number of disabled prebuilt rules configured with response actions"
                               }
                             },
                             "response_actions": {
@@ -2493,13 +2717,13 @@
                                 "endpoint": {
                                   "type": "long",
                                   "_meta": {
-                                    "description": "Number of endpoint response actions within elastic rules"
+                                    "description": "Number of endpoint response actions within prebuilt rules"
                                   }
                                 },
                                 "osquery": {
                                   "type": "long",
                                   "_meta": {
-                                    "description": "Number of osquery response actions within elastic rules"
+                                    "description": "Number of osquery response actions within prebuilt rules"
                                   }
                                 }
                               }
