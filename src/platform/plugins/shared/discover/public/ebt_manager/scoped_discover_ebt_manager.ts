@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BehaviorSubject } from 'rxjs';
-import { isEqual } from 'lodash';
-import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { ContextualProfileLevel } from '../context_awareness/profiles_manager';
+import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
 import {
   CONTEXTUAL_PROFILE_ID,
   CONTEXTUAL_PROFILE_LEVEL,
@@ -22,10 +18,17 @@ import {
   FIELD_USAGE_FIELD_NAME,
   FIELD_USAGE_FILTER_OPERATION,
 } from './discover_ebt_manager_registrations';
+import { ContextualProfileLevel } from '../context_awareness';
+import type {
+  ReportEvent,
+  ReportPerformanceEvent,
+  SetAsActiveManager,
+  UpdateProfilesContextWith,
+} from './types';
 
 type FilterOperation = '+' | '-' | '_exists_';
 
-export enum FieldUsageEventName {
+enum FieldUsageEventName {
   dataTableSelection = 'dataTableSelection',
   dataTableRemoval = 'dataTableRemoval',
   filterAddition = 'filterAddition',
@@ -41,90 +44,23 @@ interface ContextualProfileResolvedEventData {
   [CONTEXTUAL_PROFILE_ID]: string;
 }
 
-export interface DiscoverEBTContextProps {
-  discoverProfiles: string[]; // Discover Context Awareness Profiles
-}
-export type DiscoverEBTContext = BehaviorSubject<DiscoverEBTContextProps>;
-
-export class DiscoverEBTManager {
-  private isCustomContextEnabled: boolean = false;
-  private customContext$: DiscoverEBTContext | undefined;
-  private reportEvent: CoreSetup['analytics']['reportEvent'] | undefined;
+export class ScopedDiscoverEBTManager {
   private lastResolvedContextProfiles: {
     [ContextualProfileLevel.rootLevel]: string | undefined;
     [ContextualProfileLevel.dataSourceLevel]: string | undefined;
     [ContextualProfileLevel.documentLevel]: string | undefined;
+  } = {
+    [ContextualProfileLevel.rootLevel]: undefined,
+    [ContextualProfileLevel.dataSourceLevel]: undefined,
+    [ContextualProfileLevel.documentLevel]: undefined,
   };
 
-  constructor() {
-    this.lastResolvedContextProfiles = {
-      [ContextualProfileLevel.rootLevel]: undefined,
-      [ContextualProfileLevel.dataSourceLevel]: undefined,
-      [ContextualProfileLevel.documentLevel]: undefined,
-    };
-  }
-
-  public trackPerformanceEvent(eventName: string) {
-    return { reportEvent: () => {} };
-  }
-
-  // https://docs.elastic.dev/telemetry/collection/event-based-telemetry
-  public initialize({
-    core,
-    discoverEbtContext$,
-  }: {
-    core: CoreSetup;
-    discoverEbtContext$: BehaviorSubject<DiscoverEBTContextProps>;
-  }) {
-    this.customContext$ = discoverEbtContext$;
-    this.reportEvent = core.analytics.reportEvent;
-    this.trackPerformanceEvent = (eventName: string) => {
-      const startTime = window.performance.now();
-      let reported = false;
-
-      return {
-        reportEvent: () => {
-          if (reported) return;
-          reported = true;
-          const duration = window.performance.now() - startTime;
-          reportPerformanceMetricEvent(core.analytics, {
-            eventName,
-            duration,
-          });
-        },
-      };
-    };
-  }
-
-  public onDiscoverAppMounted() {
-    this.isCustomContextEnabled = true;
-  }
-
-  public onDiscoverAppUnmounted() {
-    this.updateProfilesContextWith([]);
-    this.isCustomContextEnabled = false;
-    this.lastResolvedContextProfiles = {
-      [ContextualProfileLevel.rootLevel]: undefined,
-      [ContextualProfileLevel.dataSourceLevel]: undefined,
-      [ContextualProfileLevel.documentLevel]: undefined,
-    };
-  }
-
-  public updateProfilesContextWith(discoverProfiles: DiscoverEBTContextProps['discoverProfiles']) {
-    if (
-      this.isCustomContextEnabled &&
-      this.customContext$ &&
-      !isEqual(this.customContext$.getValue().discoverProfiles, discoverProfiles)
-    ) {
-      this.customContext$.next({
-        discoverProfiles,
-      });
-    }
-  }
-
-  public getProfilesContext() {
-    return this.customContext$?.getValue()?.discoverProfiles;
-  }
+  constructor(
+    private readonly reportEvent: ReportEvent | undefined,
+    private readonly reportPerformanceEvent: ReportPerformanceEvent | undefined,
+    public readonly updateProfilesContextWith: UpdateProfilesContextWith,
+    public readonly setAsActiveManager: SetAsActiveManager
+  ) {}
 
   private async trackFieldUsageEvent({
     eventName,
@@ -234,5 +170,27 @@ export class DiscoverEBTManager {
     };
 
     this.reportEvent(CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE, eventData);
+  }
+
+  public trackPerformanceEvent(eventName: string) {
+    const startTime = window.performance.now();
+    let reported = false;
+
+    return {
+      reportEvent: (eventData?: Omit<PerformanceMetricEvent, 'eventName' | 'duration'>) => {
+        if (reported || !this.reportPerformanceEvent) {
+          return;
+        }
+
+        reported = true;
+        const duration = window.performance.now() - startTime;
+
+        this.reportPerformanceEvent({
+          ...eventData,
+          eventName,
+          duration,
+        });
+      },
+    };
   }
 }
