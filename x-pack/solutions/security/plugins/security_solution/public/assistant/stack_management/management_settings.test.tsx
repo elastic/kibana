@@ -131,7 +131,7 @@ describe('ManagementSettings', () => {
     expect(navigateToApp).toHaveBeenCalledWith('home');
   });
 
-  it('renders AssistantSettingsManagement when conversations are available and securityAIAssistant is enabled', () => {
+  it('renders AssistantSettingsManagement when spaceId, conversations are available and securityAIAssistant is enabled', () => {
     renderComponent({
       conversations: mockConversations,
       spaceId: 'default',
