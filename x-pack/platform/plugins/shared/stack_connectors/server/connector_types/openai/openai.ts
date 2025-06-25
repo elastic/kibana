@@ -87,7 +87,6 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       const defaultHeaders = { ...this.headers };
       let defaultQuery: Record<string, string> | undefined;
 
-
       const isHttps = this.url.toLowerCase().startsWith('https');
       if (
         this.provider === OpenAiProviderType.Other &&
