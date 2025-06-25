@@ -72,6 +72,10 @@ Object {
     ctx._source.action = source[\\"cases-user-actions\\"].action;
     ctx._source.type = source[\\"cases-user-actions\\"].type;
 
+    long milliSinceEpoch = new Date().getTime();
+    Instant instant = Instant.ofEpochMilli(milliSinceEpoch);
+    ctx._source['@timestamp'] = ZonedDateTime.ofInstant(instant, ZoneId.of('Z'));
+
     ZonedDateTime zdt_created =
       ZonedDateTime.parse(source[\\"cases-user-actions\\"].created_at);
     ctx._source.created_at_ms = zdt_created.toInstant().toEpochMilli();
@@ -105,9 +109,11 @@ Object {
       }
     }
 
-    for (item in source.references) {
-      if (item.type == \\"cases\\") {
-        ctx._source.case_id = item.id;
+    if (source.references != null) {
+      for (item in source.references) {
+        if (item.type == \\"cases\\") {
+          ctx._source.case_id = item.id;
+        }
       }
     }
 
@@ -244,11 +250,13 @@ Object {
         ctx._source.payload.file.name = source[\\"cases-comments\\"].externalReferenceMetadata.files[0].name;
     }
 
-    for (item in source.references) {
-        if (item.type == \\"file\\") {
-            ctx._source.payload.file.id = item.id;
-        } else if (item.type == \\"cases\\") {
-            ctx._source.case_id = item.id;
+    if (source.references != null) {
+        for (item in source.references) {
+            if (item.type == \\"file\\") {
+                ctx._source.payload.file.id = item.id;
+            } else if (item.type == \\"cases\\") {
+                ctx._source.case_id = item.id;
+            }
         }
     }
 
@@ -327,7 +335,7 @@ Object {
     },
   },
   "description": Object {
-    "type": "keyword",
+    "type": "text",
   },
   "observables": Object {
     "properties": Object {
@@ -363,16 +371,27 @@ Object {
   "time_to_acknowledge": Object {
     "type": "long",
   },
-  "time_to_investigaste": Object {
+  "time_to_investigate": Object {
     "type": "long",
   },
   "time_to_resolve": Object {
     "type": "long",
   },
   "title": Object {
-    "type": "keyword",
+    "fields": Object {
+      "keyword": Object {
+        "type": "keyword",
+      },
+    },
+    "type": "text",
+  },
+  "total_alerts": Object {
+    "type": "integer",
   },
   "total_assignees": Object {
+    "type": "integer",
+  },
+  "total_comments": Object {
     "type": "integer",
   },
   "updated_at": Object {
@@ -496,38 +515,61 @@ Object {
     }
 
     ctx._source.assignees = [];
-    for (item in source.cases.assignees) {
-      ctx._source.assignees.add(item.uid);
+
+    if (source.cases.assignees != null) {
+      for (item in source.cases.assignees) {
+        ctx._source.assignees.add(item.uid);
+      }
+      ctx._source.total_assignees = source.cases.assignees.size();
     }
-    ctx._source.total_assignees = source.cases.assignees.size();
 
     ctx._source.custom_fields = [];
-    for (item in source.cases.customFields) {
-        Map customField = new HashMap();
+    if (source.cases.customFields != null) {
+      for (item in source.cases.customFields) {
+          Map customField = new HashMap();
 
-        customField.type = item.type;
-        customField.value = item.value;
-        customField.key = item.key;
-        
-        ctx._source.custom_fields.add(customField);
+          customField.type = item.type;
+          customField.value = item.value;
+          customField.key = item.key;
+          
+          ctx._source.custom_fields.add(customField);
+      }
     }
 
     ctx._source.observables = [];
-    for (item in source.cases.observables) {
-        Map observable = new HashMap();
+    if (source.cases.observables != null) {
+      for (item in source.cases.observables) {
+          Map observable = new HashMap();
 
-        observable.label = item.label;
-        observable.type = item.typeKey;
-        observable.value = item.value;
+          observable.label = item.label;
+          observable.type = item.typeKey;
+          observable.value = item.value;
 
-        ctx._source.observables.add(observable);
+          ctx._source.observables.add(observable);
+      }
     }
     
     ctx._source.owner = source.cases.owner;
     ctx._source.space_ids = source.namespaces;
 
-    if (ctx._source.created_at_ms != null && ctx._source.closed_at_ms != null){
-      ctx._source.time_to_resolve = (ctx._source.closed_at_ms - ctx._source.created_at_ms) / 1000;
+    if (source.cases.time_to_acknowledge != null){
+      ctx._source.time_to_acknowledge = source.cases.time_to_acknowledge;
+    }
+
+    if (source.cases.time_to_investigate != null){
+      ctx._source.time_to_investigate = source.cases.time_to_investigate;
+    }
+
+    if (source.cases.time_to_resolve != null){
+      ctx._source.time_to_resolve = source.cases.time_to_resolve;
+    }
+
+    if (source.cases.total_alerts != null && source.cases.total_alerts >= 0){
+      ctx._source.total_alerts = source.cases.total_alerts;
+    }
+
+    if (source.cases.total_comments != null && source.cases.total_comments >= 0){
+      ctx._source.total_comments = source.cases.total_comments;
     }
   ",
 }
@@ -569,6 +611,25 @@ Object {
   "space_ids": Object {
     "type": "keyword",
   },
+  "updated_at": Object {
+    "type": "date",
+  },
+  "updated_by": Object {
+    "properties": Object {
+      "email": Object {
+        "type": "keyword",
+      },
+      "full_name": Object {
+        "type": "keyword",
+      },
+      "profile_uid": Object {
+        "type": "keyword",
+      },
+      "username": Object {
+        "type": "keyword",
+      },
+    },
+  },
 }
 `;
 
@@ -590,9 +651,23 @@ Object {
     ctx._source.owner = source[\\"cases-comments\\"].owner;
     ctx._source.space_ids = source.namespaces;
 
-    for (item in source.references) {
-      if (item.type == \\"cases\\") {
-        ctx._source.case_id = item.id;
+    if ( source[\\"cases-comments\\"].updated_at != null ) {
+      ctx._source.updated_at = source[\\"cases-comments\\"].updated_at;
+    }
+
+    if (source[\\"cases-comments\\"].updated_by != null) {
+        ctx._source.updated_by = new HashMap();
+        ctx._source.updated_by.full_name = source[\\"cases-comments\\"].updated_by.full_name;
+        ctx._source.updated_by.username = source[\\"cases-comments\\"].updated_by.username;
+        ctx._source.updated_by.profile_uid = source[\\"cases-comments\\"].updated_by.profile_uid;
+        ctx._source.updated_by.email = source[\\"cases-comments\\"].updated_by.email;
+    }
+    
+    if (source.references != null) {
+      for (item in source.references) {
+        if (item.type == \\"cases\\") {
+          ctx._source.case_id = item.id;
+        }
       }
     }
   ",

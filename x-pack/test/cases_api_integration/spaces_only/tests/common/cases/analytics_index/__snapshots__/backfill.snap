@@ -54,6 +54,8 @@ Object {
     "defacement",
   ],
   "title": "Super Bad Security Issue",
+  "total_alerts": 0,
   "total_assignees": 1,
+  "total_comments": 0,
 }
 `;
