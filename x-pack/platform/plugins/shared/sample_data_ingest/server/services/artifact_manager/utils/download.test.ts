@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { createReadStream } from 'fs';
+import { createWriteStream } from 'fs';
 import { mkdir } from 'fs/promises';
+import { pipeline } from 'stream/promises';
 import fetch from 'node-fetch';
 import { download } from './download';
 
 jest.mock('fs', () => ({
-  createReadStream: jest.fn().mockReturnValue({
-    on: jest.fn(),
-    pipe: jest.fn(),
-  }),
   createWriteStream: jest.fn(() => ({
     on: jest.fn((event, callback) => {
       if (event === 'finish') {
@@ -31,11 +28,14 @@ jest.mock('fs/promises', () => ({
 
 jest.mock('node-fetch', () => jest.fn());
 
+jest.mock('stream/promises', () => ({
+  pipeline: jest.fn(),
+}));
+
 describe('downloadToDisk', () => {
   const mockFileUrl = 'http://example.com/file.txt';
   const mockFilePath = '/path/to/file.txt';
   const mockDirPath = '/path/to';
-  const mockLocalPath = '/local/path/to/file.txt';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -67,14 +67,8 @@ describe('downloadToDisk', () => {
     await download(mockFileUrl, mockFilePath);
 
     expect(fetch).toHaveBeenCalledWith(mockFileUrl);
-  });
-
-  it('should copy a file from a local file URL', async () => {
-    const mockLocalFileUrl = 'file:///local/path/to/file.txt';
-
-    await download(mockLocalFileUrl, mockFilePath);
-
-    expect(createReadStream).toHaveBeenCalledWith(mockLocalPath);
+    expect(createWriteStream).toHaveBeenCalledWith(mockFilePath);
+    expect(pipeline).toHaveBeenCalledWith(mockResponseBody, expect.anything());
   });
 
   it('should handle errors during the download process', async () => {

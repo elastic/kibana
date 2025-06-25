@@ -5,32 +5,18 @@
  * 2.0.
  */
 
-import { type ReadStream, createReadStream, createWriteStream } from 'fs';
+import { createWriteStream } from 'fs';
 import { mkdir } from 'fs/promises';
+import { pipeline } from 'stream/promises';
 import Path from 'path';
 import fetch from 'node-fetch';
-import { resolveLocalPath } from './resolve_local_path';
 
 export const download = async (fileUrl: string, filePath: string) => {
   const dirPath = Path.dirname(filePath);
   await mkdir(dirPath, { recursive: true });
   const writeStream = createWriteStream(filePath);
-  let readStream: ReadStream | NodeJS.ReadableStream;
 
-  const parsedUrl = new URL(fileUrl);
+  const res = await fetch(fileUrl);
 
-  if (parsedUrl.protocol === 'file:') {
-    const path = resolveLocalPath(parsedUrl);
-    readStream = createReadStream(path);
-  } else {
-    const res = await fetch(fileUrl);
-
-    readStream = res.body;
-  }
-
-  await new Promise((resolve, reject) => {
-    readStream.pipe(writeStream);
-    readStream.on('error', reject);
-    writeStream.on('finish', resolve);
-  });
+  await pipeline(res.body, writeStream);
 };
