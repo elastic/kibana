@@ -11,8 +11,6 @@ import type { ValuesType } from 'utility-types';
 
 const TIMESTAMP = '@timestamp' as const;
 const RELATED_ENTITY = 'related.entity';
-const ACTOR_ENTITY_ID = 'actor.entity.id';
-const TARGET_ENTITY_ID = 'target.entity.id';
 
 // namespaces
 const KIBANA_NAMESPACE = 'kibana' as const;
@@ -147,7 +145,6 @@ const namespaces = {
 };
 
 export const fields = {
-  ACTOR_ENTITY_ID,
   ALERT_ACTION_GROUP,
   ALERT_CASE_IDS,
   ALERT_CONSECUTIVE_MATCHES,
@@ -188,7 +185,6 @@ export const fields = {
   ALERT_WORKFLOW_TAGS,
   RELATED_ENTITY,
   SPACE_IDS,
-  TARGET_ENTITY_ID,
   TIMESTAMP,
   VERSION,
 };
@@ -200,7 +196,6 @@ export {
   KIBANA_NAMESPACE,
 
   // fields
-  ACTOR_ENTITY_ID,
   ALERT_ACTION_GROUP,
   ALERT_CASE_IDS,
   ALERT_CONSECUTIVE_MATCHES,
@@ -241,7 +236,6 @@ export {
   ALERT_WORKFLOW_TAGS,
   RELATED_ENTITY,
   SPACE_IDS,
-  TARGET_ENTITY_ID,
   TIMESTAMP,
   VERSION,
 };

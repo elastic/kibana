@@ -8,7 +8,6 @@
  */
 
 import {
-  ACTOR_ENTITY_ID,
   ALERT_ACTION_GROUP,
   ALERT_CASE_IDS,
   ALERT_CONSECUTIVE_MATCHES,
@@ -53,18 +52,12 @@ import {
   RELATED_ENTITY,
   SPACE_IDS,
   TAGS,
-  TARGET_ENTITY_ID,
   TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
 import type { MultiField } from './types';
 
 export const alertFieldMap = {
-  [ACTOR_ENTITY_ID]: {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
   [ALERT_ACTION_GROUP]: {
     type: 'keyword',
     array: false,
@@ -295,11 +288,6 @@ export const alertFieldMap = {
     required: true,
   },
   [TAGS]: {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  [TARGET_ENTITY_ID]: {
     type: 'keyword',
     array: true,
     required: false,
