@@ -29,13 +29,7 @@ import { selectAgentPolicies } from '../../../state/agent_policies';
 
 export const AGENT_POLICY_FIELD_NAME = 'agentPolicyId';
 
-export const PolicyHostsField = ({
-  privateLocations,
-  isDisabled,
-}: {
-  privateLocations: PrivateLocation[];
-  isDisabled?: boolean;
-}) => {
+export const PolicyHostsField = ({ privateLocations }: { privateLocations: PrivateLocation[] }) => {
   const { data } = useSelector(selectAgentPolicies);
   const { basePath } = useSyntheticsSettingsContext();
 
@@ -59,7 +53,7 @@ export const PolicyHostsField = ({
       inputDisplay: (
         <EuiHealth
           color={item.status === 'active' ? 'success' : 'warning'}
-          css={{ lineHeight: 'inherit' }}
+          style={{ lineHeight: 'inherit' }}
         >
           {item.name}
         </EuiHealth>
@@ -80,7 +74,7 @@ export const PolicyHostsField = ({
           <>
             <EuiHealth
               color={item.status === 'active' ? 'success' : 'warning'}
-              css={{ lineHeight: 'inherit' }}
+              style={{ lineHeight: 'inherit' }}
             >
               <strong>{item.name}</strong>
             </EuiHealth>
@@ -130,7 +124,6 @@ export const PolicyHostsField = ({
           rules={{ required: true }}
           render={({ field }) => (
             <SuperSelect
-              disabled={isDisabled}
               fullWidth
               aria-label={SELECT_POLICY_HOSTS}
               placeholder={SELECT_POLICY_HOSTS}
