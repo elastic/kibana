@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
 import { Role } from '../services/types';
 
 /**
@@ -88,7 +89,7 @@ export const secTimelineAllV2: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
+          [SECURITY_FEATURE_ID]: ['all'],
           securitySolutionTimeline: ['all'],
         },
         spaces: ['*'],
@@ -111,7 +112,7 @@ export const secTimelineReadV2: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['read'],
+          [SECURITY_FEATURE_ID]: ['read'],
           securitySolutionTimeline: ['read'],
         },
         spaces: ['*'],
@@ -134,7 +135,7 @@ export const secTimelineNoneV2: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['read'],
+          [SECURITY_FEATURE_ID]: ['read'],
           securitySolutionTimeline: ['none'],
         },
         spaces: ['*'],
@@ -157,7 +158,7 @@ export const secNotesAllV2: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
+          [SECURITY_FEATURE_ID]: ['all'],
           securitySolutionNotes: ['all'],
         },
         spaces: ['*'],
@@ -180,7 +181,7 @@ export const secNotesReadV2: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['read'],
+          [SECURITY_FEATURE_ID]: ['read'],
           securitySolutionNotes: ['read'],
         },
         spaces: ['*'],
@@ -203,7 +204,7 @@ export const secNotesNoneV2: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['none'],
+          [SECURITY_FEATURE_ID]: ['none'],
           securitySolutionNotes: ['none'],
         },
         spaces: ['*'],
