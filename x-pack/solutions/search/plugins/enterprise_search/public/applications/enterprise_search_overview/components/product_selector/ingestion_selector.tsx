@@ -16,11 +16,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { OPEN_FILE_UPLOAD_LITE_TRIGGER } from '@kbn/file-upload-common';
 import { i18n } from '@kbn/i18n';
 
-import {
-  ENTERPRISE_SEARCH_DATA_PLUGIN,
-  ENTERPRISE_SEARCH_ELASTICSEARCH_URL,
-  CRAWLER,
-} from '../../../../../common/constants';
+import { ENTERPRISE_SEARCH_DATA_PLUGIN, CRAWLER } from '../../../../../common/constants';
 
 import apiLogo from '../../../../assets/images/api_image.png';
 import fileUploadLogo from '../../../../assets/images/file_upload_logo.svg';
@@ -32,6 +28,7 @@ import languageClientsLogo from '../../../../assets/images/search_language_clien
 import { IngestionCard } from '../../../enterprise_search_content/components/shared/ingestion_card/ingestion_card';
 import { NEW_INDEX_SELECT_CONNECTOR_PATH } from '../../../enterprise_search_content/routes';
 
+import { docLinks } from '../../../shared/doc_links';
 import { GithubIcon } from '../../../shared/icons/github_icon';
 import { KibanaLogic } from '../../../shared/kibana';
 
@@ -150,7 +147,7 @@ export const IngestionSelector: React.FC = () => {
                 defaultMessage: 'Browse clients',
               }
             )}
-            href={generatePath(ENTERPRISE_SEARCH_ELASTICSEARCH_URL)}
+            href={docLinks.clientsGuide}
           />
         </EuiFlexItem>
         <EuiFlexItem>
