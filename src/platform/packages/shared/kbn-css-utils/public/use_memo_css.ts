@@ -35,14 +35,19 @@ export type EmotionStyles = Record<
  *   }
  *   const styles = useMemoCss(componentStyles);
  */
-export const useMemoCss = <T extends EmotionStyles>(styleMap: T): { [K in keyof T]: CSSInterpolation } => {
+export const useMemoCss = <T extends EmotionStyles>(
+  styleMap: T
+): { [K in keyof T]: CSSInterpolation } => {
   const euiThemeContext = useEuiTheme();
 
   const outputStyles = useMemo(() => {
-    return Object.entries(styleMap).reduce<{[K in keyof T]: CSSInterpolation}>((acc, [key, value]) => {
-      acc[key as keyof T] = typeof value === 'function' ? value(euiThemeContext) : value;
-      return acc;
-    }, {} as { [K in keyof T]: CSSInterpolation });
+    return Object.entries(styleMap).reduce<{ [K in keyof T]: CSSInterpolation }>(
+      (acc, [key, value]) => {
+        acc[key as keyof T] = typeof value === 'function' ? value(euiThemeContext) : value;
+        return acc;
+      },
+      {} as { [K in keyof T]: CSSInterpolation }
+    );
   }, [euiThemeContext, styleMap]);
 
   return outputStyles;
