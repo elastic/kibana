@@ -75,7 +75,6 @@ export const createInitializeChartFunction = ({
       return;
     }
     if (isTextBasedLanguage && isOfAggregateQueryType(query) && !dataGridAttrs) {
-      console.log('boom');
       try {
         const shouldUpdateAttrs = Boolean(currentAttributes?.state.needsRefresh);
         await runQuery(query, abortController, shouldUpdateAttrs);

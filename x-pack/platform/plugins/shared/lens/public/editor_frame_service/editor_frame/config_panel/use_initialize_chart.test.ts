@@ -125,7 +125,7 @@ describe('createInitializeChartFunction', () => {
   });
 
   it('should set initialized to true even if runQuery is not called due to conditions', async () => {
-    // Test a case where getSuggestions is not called
+    // Test a case where runQuery is not called
     const args = { ...defaultArgs, isTextBasedLanguage: false };
     const initializeChart = createInitializeChartFunction(args);
     await initializeChart(new AbortController());
