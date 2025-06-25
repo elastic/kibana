@@ -15,7 +15,7 @@ export const openZipArchive = async (archivePath: string): Promise<ZipArchive> =
       if (err || !zipFile) {
         return reject(err ?? 'No zip file');
       }
-      zipFile!.on('entry', (entry) => {
+      zipFile.on('entry', (entry) => {
         entries.push(entry);
         zipFile.readEntry();
       });
@@ -69,13 +69,13 @@ const getZipEntryContent = async (zipFile: yauzl.ZipFile, entry: yauzl.Entry): P
         return reject(err);
       } else {
         const chunks: Buffer[] = [];
-        readStream!.on('data', (chunk: Buffer) => {
+        readStream.on('data', (chunk: Buffer) => {
           chunks.push(chunk);
         });
-        readStream!.on('end', () => {
+        readStream.on('end', () => {
           resolve(Buffer.concat(chunks));
         });
-        readStream!.on('error', () => {
+        readStream.on('error', () => {
           reject();
         });
       }

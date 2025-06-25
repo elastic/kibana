@@ -54,7 +54,7 @@ export const fetchArtifactVersions = async ({
         const parsed = parseArtifactName(artifactName);
         if (parsed) {
           const { productName, productVersion } = parsed;
-          record[productName]!.push(productVersion);
+          record[productName]?.push(productVersion);
         }
       });
 

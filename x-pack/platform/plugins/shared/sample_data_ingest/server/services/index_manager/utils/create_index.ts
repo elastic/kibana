@@ -26,11 +26,8 @@ export const createIndex = async ({
   elserInferenceId?: string;
 }) => {
   log.debug(`Creating index ${indexName}`);
-  log.info('creating index');
 
   overrideInferenceId(mappings, elserInferenceId);
-
-  log.info('creating 2');
 
   await esClient.indices.create({
     index: indexName,
@@ -41,8 +38,6 @@ export const createIndex = async ({
       'index.mapping.semantic_text.use_legacy_format': legacySemanticText,
     },
   });
-
-  log.info('creatin 3');
 };
 
 const overrideInferenceId = (mappings: MappingTypeMapping, inferenceId: string) => {

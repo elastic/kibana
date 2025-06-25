@@ -29,10 +29,10 @@ export function useIngestSampleData() {
         throw new Error('sampleDataIngest plugin not installed');
       }
 
-      return sampleDataIngest?.install();
+      return sampleDataIngest.install();
     },
     {
-      onSuccess: ({ indexName }) => {
+      onSuccess: () => {
         toasts?.addSuccess(
           i18n.translate(
             'xpack.searchIndices.shared.createIndex.ingestSampleData.successNotification',
