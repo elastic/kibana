@@ -49,6 +49,7 @@ export interface UsageStats {
   'observability:newLogsOverview': boolean;
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
+  'onechat:chat:enabled': boolean;
   'onechat:mcpServer:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;
