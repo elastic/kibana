@@ -25,12 +25,6 @@ export class InstallationService {
   }
 
   async install(): Promise<InstallResponse> {
-    const response = await this.http.post<InstallResponse>(INSTALL_API_PATH);
-
-    if (response.status !== 'installed') {
-      throw new Error('Installation did not complete successfully');
-    }
-
-    return response;
+    return await this.http.post<InstallResponse>(INSTALL_API_PATH);
   }
 }

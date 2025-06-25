@@ -26,7 +26,11 @@ export function useIngestSampleData() {
     [QueryKeys.IngestSampleData],
     () => {
       if (!sampleDataIngest) {
-        throw new Error('sampleDataIngest plugin not installed');
+        throw new Error(
+          i18n.translate('xpack.searchIndices.shared.createIndex.ingestSampleData.notInstalled', {
+            defaultMessage: 'Sample Data Ingest plugin is not installed',
+          })
+        );
       }
 
       return sampleDataIngest.install();

@@ -70,10 +70,7 @@ export const registerInstallationRoutes = ({
           statusCode: e?.meta && e.meta?.statusCode ? e.meta?.statusCode : 500,
           body: {
             message: i18n.translate('xpack.sampleDataIngest.server.installSample.errorMessage', {
-              defaultMessage: 'Failed to create index due to an exception.\n{errorMessage}',
-              values: {
-                errorMessage: e.message,
-              },
+              defaultMessage: 'Failed to install sample data due to an exception.',
             }),
           },
         });
@@ -115,10 +112,7 @@ export const registerInstallationRoutes = ({
           statusCode: e?.meta && e.meta?.statusCode ? e.meta?.statusCode : 500,
           body: {
             message: i18n.translate('xpack.sampleDataIngest.server.getStatus.errorMessage', {
-              defaultMessage: 'Failed to get status due to an exception.\n{errorMessage}',
-              values: {
-                errorMessage: e.message,
-              },
+              defaultMessage: 'Failed to get status due to an exception.',
             }),
           },
         });
