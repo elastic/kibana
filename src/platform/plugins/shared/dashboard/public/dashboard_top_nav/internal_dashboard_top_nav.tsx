@@ -9,6 +9,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import UseUnmount from 'react-use/lib/useUnmount';
+
 import {
   EuiBadge,
   EuiBreadcrumb,
@@ -55,7 +56,7 @@ import {
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
-import { AddToCaseModal } from '../dashboard_app/top_nav/cases/dashboard_add_to_case_modal';
+
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
   embedSettings?: DashboardEmbedSettings;
@@ -79,7 +80,6 @@ export function InternalDashboardTopNav({
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
-  const [isAddToCaseModalOpen, setIsAddToCaseModalOpen] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
   const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
@@ -266,7 +266,6 @@ export function InternalDashboardTopNav({
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
     isLabsShown,
     setIsLabsShown,
-    setIsAddToCaseModalOpen,
     maybeRedirect,
     showResetChange,
   });
@@ -392,7 +391,6 @@ export function InternalDashboardTopNav({
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
-      <AddToCaseModal isOpen={isAddToCaseModalOpen} />
       {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
       <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>
