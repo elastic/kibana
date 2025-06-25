@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement } from 'react';
+import type { ComponentProps, ReactElement } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiPage,
@@ -61,6 +61,7 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useCurrentDataView, useCurrentTabSelector } from '../../state_management/redux';
 import { TABS_ENABLED } from '../../../../constants';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
+import { withRestorableState } from './discover_layout_restorable_state';
 
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -72,11 +73,11 @@ const TopNavMemoized = React.memo((props: DiscoverTopNavProps) => (
   </QueryClientProvider>
 ));
 
-export interface DiscoverLayoutProps {
+interface InternalDiscoverLayoutProps {
   stateContainer: DiscoverStateContainer;
 }
 
-export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
+function InternalDiscoverLayout({ stateContainer }: InternalDiscoverLayoutProps) {
   const {
     trackUiMetric,
     capabilities,
@@ -509,6 +510,10 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     </EuiPage>
   );
 }
+
+export const DiscoverLayout = withRestorableState(React.memo(InternalDiscoverLayout));
+
+export type DiscoverLayoutProps = ComponentProps<typeof DiscoverLayout>;
 
 const getOperator = (fieldName: string, values: unknown, operation: '+' | '-') => {
   if (fieldName === '_exists_') {
