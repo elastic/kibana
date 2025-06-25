@@ -362,3 +362,55 @@ export const getArgsFromRenameFunction = (
     renamed: renameFunction.args[0] as ESQLColumn,
   };
 };
+
+/**
+ * Extracts the fields used in the CATEGORIZE function from an ESQL query.
+ * @param esql: string - The ESQL query string
+ */
+export const getCategorizeField = (esql: string): string[] => {
+  const { root } = parse(esql);
+  const statsCommand = root.commands.find(({ name }) => name === 'stats');
+  if (!statsCommand) {
+    return [];
+  }
+  const options: ESQLCommandOption[] = [];
+  const columns: string[] = [];
+
+  walk(statsCommand, {
+    visitCommandOption: (node) => options.push(node),
+  });
+
+  const statsByOptions = options.find(({ name }) => name === 'by');
+
+  // categorize is part of the stats by command
+  if (!statsByOptions) {
+    return [];
+  }
+
+  const categorizeOptions = statsByOptions.args.filter((arg) => {
+    return (arg as ESQLFunction).text.toLowerCase().indexOf('categorize') !== -1;
+  }) as ESQLFunction[];
+
+  if (categorizeOptions.length) {
+    categorizeOptions.forEach((arg) => {
+      // ... STATS ... BY CATEGORIZE(field)
+      if (isFunctionExpression(arg) && arg.name === 'categorize') {
+        walk(arg, {
+          visitColumn: (node) => columns.push(node.name),
+        });
+      } else {
+        // ... STATS ... BY pattern = CATEGORIZE(field)
+        walk(arg, {
+          visitFunction: (node) => {
+            if (node.name === 'categorize') {
+              const columnArgs = node.args.filter((a) => isColumn(a));
+              columnArgs.forEach((c) => columns.push((c as ESQLColumn).name));
+            }
+          },
+        });
+      }
+    });
+  }
+
+  return columns;
+};
