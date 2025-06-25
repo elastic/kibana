@@ -29,7 +29,6 @@ import type {
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { parseInterval } from '@kbn/ml-parse-interval';
-import type { AppStateSelectedCells } from '@kbn/ml-shared-components/anomaly_swim_lane/embeddable_types';
 
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
@@ -49,6 +48,7 @@ import {
   isTimeSeriesViewJob,
 } from '@kbn/ml-common-utils/job_utils';
 import type { MlResultsService } from '@kbn/ml-services/results_service_2';
+import type { SwimlaneType } from '@kbn/ml-common-constants/explorer_constants';
 import {
   MAX_CATEGORY_EXAMPLES,
   MAX_INFLUENCER_FIELD_VALUES,
@@ -93,6 +93,14 @@ export interface SwimlaneData {
   laneLabels: string[];
   points: SwimlanePoint[];
   interval: number;
+}
+
+export interface AppStateSelectedCells {
+  type: SwimlaneType;
+  lanes: string[];
+  times: [number, number];
+  showTopFieldValues?: boolean;
+  viewByFieldName?: string;
 }
 
 interface SelectionTimeRange {
