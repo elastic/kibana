@@ -14,7 +14,7 @@ import {
 } from './esql_query_to_options';
 
 const mockGetESQLResults = jest.fn();
-jest.mock('@kbn/esql-utils', () => ({
+jest.mock('../..', () => ({
   getESQLResults: () => mockGetESQLResults(),
 }));
 
