@@ -18,8 +18,8 @@ import {
   EuiTabbedContentTab,
   useEuiTheme,
   EuiFlexGroup,
-  EuiMarkdownFormat,
   EuiNotificationBadge,
+  EuiIcon,
 } from '@elastic/eui';
 import {
   AlertStatus,
@@ -39,6 +39,7 @@ import { usePageReady } from '@kbn/ebt-tools';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import { AlertDetailsSource } from './types';
 import { SourceBar } from './components';
+import { InvestigationGuide } from './components/investigation_guide';
 import { StatusBar } from './components/status_bar';
 import { observabilityFeatureId } from '../../../common';
 import { useKibana } from '../../utils/kibana_react';
@@ -120,13 +121,17 @@ export function AlertDetails() {
   const userCasesPermissions = canUseCases([observabilityFeatureId]);
   const ruleId = alertDetail?.formatted.fields[ALERT_RULE_UUID];
   const { rule, refetch } = useFetchRule({
-    ruleId,
+    ruleId: ruleId || '',
   });
 
   const onSuccessAddSuggestedDashboard = useCallback(async () => {
     await Promise.all([refetchRelatedDashboards(), refetch()]);
   }, [refetch, refetchRelatedDashboards]);
 
+  // used to trigger refetch when rule edit flyout closes
+  const onUpdate = useCallback(() => {
+    refetch();
+  }, [refetch]);
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();
   const [sources, setSources] = useState<AlertDetailsSource[]>();
@@ -330,24 +335,26 @@ export function AlertDetails() {
     {
       id: 'investigation_guide',
       name: (
-        <FormattedMessage
-          id="xpack.observability.alertDetails.tab.investigationGuideLabel"
-          defaultMessage="Investigation guide"
-        />
+        <>
+          <FormattedMessage
+            id="xpack.observability.alertDetails.tab.investigationGuideLabel"
+            defaultMessage="Investigation guide"
+          />
+          {rule?.artifacts?.investigation_guide?.blob && (
+            <EuiNotificationBadge color="success" css={{ marginLeft: '5px' }}>
+              <EuiIcon type="dot" size="s" />
+            </EuiNotificationBadge>
+          )}
+        </>
       ),
       'data-test-subj': 'investigationGuideTab',
-      disabled: !rule?.artifacts?.investigation_guide?.blob,
       content: (
-        <>
-          <EuiSpacer size="m" />
-          <EuiMarkdownFormat
-            css={css`
-              word-wrap: break-word;
-            `}
-          >
-            {rule?.artifacts?.investigation_guide?.blob ?? ''}
-          </EuiMarkdownFormat>
-        </>
+        <InvestigationGuide
+          blob={rule?.artifacts?.investigation_guide?.blob}
+          onUpdate={onUpdate}
+          refetch={refetch}
+          rule={rule}
+        />
       ),
     },
     {
@@ -408,6 +415,9 @@ export function AlertDetails() {
               alertIndex={alertDetail?.raw._index}
               alertStatus={alertStatus}
               onUntrackAlert={onUntrackAlert}
+              onUpdate={onUpdate}
+              rule={rule}
+              refetch={refetch}
             />
           </CasesContext>,
         ],

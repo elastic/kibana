@@ -27,6 +27,7 @@ export interface UseQueryRuleFlyoutStateProps {
   ruleId: string;
   rules: SearchQueryRulesQueryRule[];
   setIsFormDirty?: (isDirty: boolean) => void;
+  isFlyoutDirty?: boolean;
   onSave: (rule: SearchQueryRulesQueryRule) => void;
 }
 
@@ -38,8 +39,8 @@ export const useQueryRuleFlyoutState = ({
   setIsFormDirty,
   onSave,
 }: UseQueryRuleFlyoutStateProps) => {
-  const [isFlyoutDirty, setIsFlyoutDirty] = useState<boolean>(false);
-  const { control, getValues, reset, setValue } = useFormContext<QueryRuleEditorForm>();
+  const { control, getValues, reset, setValue, formState, trigger } =
+    useFormContext<QueryRuleEditorForm>();
   const {
     fields: criteria,
     remove,
@@ -60,6 +61,11 @@ export const useQueryRuleFlyoutState = ({
     name: 'actions.docs',
   });
 
+  const isAlways = useWatch({
+    control,
+    name: 'isAlways',
+  });
+
   const pinType = useWatch({
     control,
     name: 'type',
@@ -69,12 +75,19 @@ export const useQueryRuleFlyoutState = ({
     name: 'actions.ids',
   });
 
+  useEffect(() => {
+    trigger('actions.ids');
+  }, [actionIdsFields, trigger]);
+  useEffect(() => {
+    trigger('actions.docs');
+  }, [actionFields, trigger]);
+  useEffect(() => {
+    trigger('criteria');
+  }, [criteria, trigger]);
+
   const { data: indexNames } = useFetchIndexNames('');
 
   const ruleFromRuleset = rules.find((rule) => rule.rule_id === ruleId);
-  const [isAlways, setIsAlways] = useState<boolean>(
-    (ruleFromRuleset?.criteria && isCriteriaAlways(ruleFromRuleset?.criteria)) ?? false
-  );
   const isDocRule = Boolean(
     !actionIdsFields || actionFields.length > 0 || !!(actionIdsFields?.length === 0)
   );
@@ -88,11 +101,10 @@ export const useQueryRuleFlyoutState = ({
         type: ruleFromRuleset.type,
         actions: ruleFromRuleset.actions,
         mode: 'edit',
+        isAlways:
+          (ruleFromRuleset?.criteria && isCriteriaAlways(ruleFromRuleset?.criteria)) ?? false,
         ruleId,
       });
-      setIsAlways(
-        (ruleFromRuleset?.criteria && isCriteriaAlways(ruleFromRuleset?.criteria)) ?? false
-      );
     }
   }, [ruleFromRuleset, reset, getValues, rulesetId, ruleId]);
 
@@ -117,14 +129,13 @@ export const useQueryRuleFlyoutState = ({
           ids: [],
         },
         mode: 'create',
+        isAlways: false,
         ruleId,
       });
-      setIsAlways(false);
     }
   }, [createMode, reset, ruleId]);
 
   const handleAddCriteria = () => {
-    setIsFlyoutDirty(true);
     append({
       type: 'exact',
       metadata: '',
@@ -133,7 +144,6 @@ export const useQueryRuleFlyoutState = ({
   };
 
   const appendNewAction = () => {
-    setIsFlyoutDirty(true);
     if (isIdRule) {
       setValue('actions.ids', [...(getValues('actions.ids') || []), '']);
     } else {
@@ -233,19 +243,17 @@ export const useQueryRuleFlyoutState = ({
 
   const dragEndHandle: OnDragEndResponder = ({ source, destination }) => {
     if (source && destination && (ruleFromRuleset || createMode)) {
-      setIsFlyoutDirty(true);
       if (isDocRule) {
         const newActions = euiDragDropReorder(actionFields, source.index, destination.index);
         replaceAction(newActions);
       } else if (isIdRule && actionIdsFields) {
         const newActions = euiDragDropReorder(actionIdsFields, source.index, destination.index);
-        setValue('actions.ids', newActions);
+        setValue('actions.ids', [...newActions]);
       }
     }
   };
 
   const onDeleteDocument = (index: number) => {
-    setIsFlyoutDirty(true);
     if (createMode || !isIdRule) {
       removeAction(index);
     } else {
@@ -257,7 +265,6 @@ export const useQueryRuleFlyoutState = ({
   };
 
   const onIndexSelectorChange = (index: number, indexName: string) => {
-    setIsFlyoutDirty(true);
     const updatedActions = actionFields.map((action, i) =>
       i === index ? { ...action, _index: indexName } : action
     );
@@ -265,7 +272,6 @@ export const useQueryRuleFlyoutState = ({
   };
 
   const onIdSelectorChange = (index: number, id: string) => {
-    setIsFlyoutDirty(true);
     if (isIdRule && actionIdsFields) {
       const updatedActions = actionIdsFields.map((value, i) => (i === index ? id : value));
       setValue('actions.ids', updatedActions);
@@ -292,22 +298,21 @@ export const useQueryRuleFlyoutState = ({
     criteriaCount,
     documentCount,
     dragEndHandle,
+    formState,
     getValues,
     handleAddCriteria,
     handleSave,
     indexNames,
     isAlways,
     isDocRule,
-    isFlyoutDirty,
     isIdRule,
+    isFlyoutDirty: formState.isDirty,
     onDeleteDocument,
     onIdSelectorChange,
     onIndexSelectorChange,
     pinType,
     remove,
     setCriteriaCalloutActive,
-    setIsAlways,
-    setIsFlyoutDirty,
     shouldShowCriteriaCallout,
     shouldShowMetadataEditor,
     update,
