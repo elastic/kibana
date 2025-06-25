@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFieldText } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { validateCellValue } from '../validations';
+import { getInputComponentForType } from './value_inputs_factory';
 import { KibanaContextExtra } from '../types';
 
 interface ValueInputProps {
@@ -40,50 +39,44 @@ export const ValueInput = ({
     services: { notifications },
   } = useKibana<KibanaContextExtra>();
   const [editValue, setEditValue] = useState(value);
-  const [error, setError] = useState<string | undefined>(undefined);
+  const [error, setError] = useState<string | null>(null);
 
   const columnType = useMemo(() => {
-    if (!columns || !columnName) return undefined;
+    if (!columns || !columnName) return;
     const col = columns.find((c) => c.name === columnName);
     return col?.meta?.type;
   }, [columns, columnName]);
 
-  const validateValue = (val: string): string | undefined => {
-    if (!columnType) return undefined;
-
-    const validation = validateCellValue(val, columnType);
-
-    if (validation) {
-      notifications.toasts.addDanger({
-        title: validation,
-      });
-    }
-    return validation;
-  };
-
   const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
-      const validationError = validateValue(editValue);
-      setError(validationError);
-      if (!validationError) {
-        onEnter?.(editValue);
+      if (error) {
+        notifications.toasts.addDanger({
+          title: error,
+        });
+        return;
       }
+
+      onEnter?.(editValue);
     }
   };
 
   const onBlurHandler = (event: React.FocusEvent<HTMLInputElement>) => {
-    if (onBlur) {
-      onBlur(event);
+    if (error) {
+      notifications.toasts.addDanger({
+        title: error,
+      });
+      return;
     }
-    const validationError = validateValue(editValue);
-    setError(validationError);
+    onBlur?.(event);
   };
 
+  const InputComponent = useMemo(() => getInputComponentForType(columnType), [columnType]);
+
   return (
-    <EuiFieldText
+    <InputComponent
       autoFocus={autoFocus}
-      compressed
       placeholder={columnName}
+      label={columnName}
       value={editValue}
       aria-label={i18n.translate('indexEditor.cellValueInput.aria', {
         defaultMessage: 'Value for {columnName}',
@@ -91,13 +84,12 @@ export const ValueInput = ({
       })}
       onChange={(e) => {
         setEditValue(e.target.value);
-        setError(undefined);
         onChange?.(e.target.value);
       }}
+      onError={setError}
       onBlur={onBlurHandler}
       onKeyDown={onKeyDown}
       className={className}
-      isInvalid={!!error}
     />
   );
 };

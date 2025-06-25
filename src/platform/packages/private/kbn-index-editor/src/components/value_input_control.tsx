@@ -42,7 +42,7 @@ export const getCellValueRenderer =
       cellValue = pendingSaveValue;
     } else if (row.flattened) {
       // Otherwise, use the value from the row
-      cellValue = row.flattened[columnId];
+      cellValue = row.flattened[columnId]?.toString();
     }
 
     const isEditing = editingCell.row === rowIndex && editingCell.col === columnId;
