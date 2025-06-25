@@ -185,6 +185,6 @@ export type SupportedCaseAttachment =
 export type CaseAttachments = SupportedCaseAttachment[];
 export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;
 export type CaseAttachmentsWithoutOwner = CaseAttachmentWithoutOwner[];
-export type { LensProps } from './components/internal_attachments/visualizations/types';
+export type { LensProps } from './components/visualizations/types';
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;

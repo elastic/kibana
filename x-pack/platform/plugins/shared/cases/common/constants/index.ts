@@ -11,7 +11,6 @@ export * from './owners';
 export * from './files';
 export * from './application';
 export { LENS_ATTACHMENT_TYPE } from './visualizations';
-export { PAGE_ATTACHMENT_TYPE } from './links';
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
