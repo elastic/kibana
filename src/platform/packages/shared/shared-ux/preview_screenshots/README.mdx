@@ -1,0 +1,57 @@
+# @kbn/preview-screenshots
+
+This package is a Horizon proposal, providing in-browser functionality for taking screenshots of DOM elements to be used as previews. It is intended for generating preview images for saved objects like dashboards, visualizations, and maps, so a user can identify them easily in a list view.
+
+The previews are generated using the `html2canvas` library to capture a specified DOM element, which is then resized or cropped, depending on the captured element and the API parameters.
+
+The package exports a React hook, `usePreviewScreenshot`, and a standalone function, `takePreviewScreenshot`, to trigger this process.
+
+## Usage
+
+### `takePreviewScreenshot`
+
+This asynchronous function captures a screenshot of a DOM element and stores it.
+
+```typescript
+import { takePreviewScreenshot } from '@kbn/preview-screenshots';
+
+const handleSave = async () => {
+  // ... save logic
+  await takePreviewScreenshot({ savedObjectId: 'my-saved-object-id' });
+};
+```
+
+### `usePreviewScreenshot`
+
+This React hook provides a function to capture a screenshot. This is useful for triggering a screenshot from within a React component.
+
+```typescript
+import { usePreviewScreenshot } from '@kbn/preview-screenshots';
+
+const MyComponent = ({ savedObjectId }) => {
+  const takePreviewScreenshot = usePreviewScreenshot({ savedObjectId });
+
+  return <button onClick={takePreviewScreenshot}>Save and take preview</button>;
+}
+```
+
+## Notes and caveats
+
+- Success depends on when the functions are invoked. The DOM must be fully rendered and stable before taking a screenshot.
+- The `html2canvas` library is used under the hood, which means that the DOM element must be visible and rendered in the document for the screenshot to be captured correctly.
+  - It also means that visibility of elements depends on the capabilities of `html2canvas`, which may not support all CSS styles or complex layouts.
+- The screenshot is stored in `sessionStorage` by default, but you can provide a custom function to handle the storage.
+- The screenshot is resized to fit within the specified `maxWidth` and `maxHeight`, maintaining the aspect ratio defined by `aspectRatio`.
+
+## API
+
+Both `takePreviewScreenshot` and `usePreviewScreenshot` accept an options object with the following properties:
+
+- `savedObjectId` (string, **required for `takePreviewScreenshot`**): The ID of the saved object for which the preview is being generated.
+- `querySelector` (string): The CSS selector for the DOM element to capture. Defaults to `.kbnAppWrapper`.
+- `scrollX` (number): The horizontal scroll position of the element. Defaults to `0`.
+- `scrollY` (number): The vertical scroll position of the element. Defaults to `0`.
+- `aspectRatio` (number): The desired aspect ratio of the preview image. Defaults to `0.75` (4:3).
+- `maxWidth` (number): The maximum width of the preview image. Defaults to `400`.
+- `maxHeight` (number): The maximum height of the preview image.
+- `storeScreenshot` (function): A function to store the generated screenshot. It receives an object with `savedObjectId` and `dataUrl`. The default implementation stores the screenshot to `sessionStorage`.
