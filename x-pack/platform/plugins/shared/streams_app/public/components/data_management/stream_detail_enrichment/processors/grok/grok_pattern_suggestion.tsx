@@ -27,14 +27,16 @@ import { selectPreviewDocuments } from '../../state_management/simulation_state_
 import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
 import { ProcessorFormState } from '../../types';
 import { GeneratePatternButton, AdditionalChargesCallout } from './generate_pattern_button';
-import { useAIFeatures } from './use_ai_features';
 import { useGrokPatternSuggestion } from './use_grok_pattern_suggestion';
+import { AIFeatures } from './use_ai_features';
 
 export const GrokPatternAISuggestions = ({
+  aiFeatures,
   grokCollection,
   setValue,
   onAddPattern,
 }: {
+  aiFeatures: AIFeatures;
   grokCollection: GrokCollection;
   setValue: UseFormSetValue<FieldValues>;
   onAddPattern: () => void;
@@ -47,7 +49,6 @@ export const GrokPatternAISuggestions = ({
     selectPreviewDocuments(snapshot.context)
   );
 
-  const aiFeatures = useAIFeatures();
   const [suggestionsState, refreshSuggestions] = useGrokPatternSuggestion();
 
   const fieldValue = useWatch<ProcessorFormState, 'field'>({ name: 'field' });
@@ -85,7 +86,7 @@ export const GrokPatternAISuggestions = ({
   return (
     <>
       <EuiFlexGroup gutterSize="l" alignItems="center">
-        {aiFeatures && (
+        {aiFeatures.enabled && (
           <EuiFlexItem grow={false}>
             <GeneratePatternButton
               aiFeatures={aiFeatures}

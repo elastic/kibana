@@ -33,26 +33,24 @@ import { DraftGrokExpression, GrokCollection } from '@kbn/grok-ui';
 import { Expression } from '@kbn/grok-ui';
 import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
-import { STREAMS_TIERED_AI_FEATURE } from '@kbn/streams-plugin/common';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { useKibana } from '../../../../../hooks/use_kibana';
 import { useStreamEnrichmentSelector } from '../../state_management/stream_enrichment_state_machine';
 import { SortableList } from '../../sortable_list';
 import { GrokFormState } from '../../types';
+import { useAIFeatures } from './use_ai_features';
 
 const GrokPatternAISuggestions = dynamic(() =>
   import('./grok_pattern_suggestion').then((mod) => ({ default: mod.GrokPatternAISuggestions }))
 );
 
 export const GrokPatternsEditor = () => {
-  const { core } = useKibana();
   const {
     formState: { errors },
     register,
     setValue,
   } = useFormContext();
 
-  const isAIAvailableForTier = core.pricing.isFeatureAvailable(STREAMS_TIERED_AI_FEATURE.id);
+  const aiFeatures = useAIFeatures();
 
   const grokCollection = useStreamEnrichmentSelector(
     (machineState) => machineState.context.grokCollection
@@ -112,8 +110,9 @@ export const GrokPatternsEditor = () => {
           </SortableList>
         </EuiPanel>
       </EuiFormRow>
-      {isAIAvailableForTier ? (
+      {aiFeatures.enabled ? (
         <GrokPatternAISuggestions
+          aiFeatures={aiFeatures}
           grokCollection={grokCollection}
           setValue={setValue}
           onAddPattern={handleAddPattern}
