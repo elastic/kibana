@@ -42,7 +42,7 @@ import { CellTooltip } from './cell_tooltip';
 import { TimestampTooltip } from './timestamp_tooltip';
 import { GetObservabilityAlertsTableProp } from '../types';
 import AlertActions from '../../alert_actions/alert_actions';
-import { ElapsedTimeTooltip } from '../../../../common';
+import { ElapsedTimestampTooltip } from '../../../../common';
 
 export const getAlertFieldValue = (alert: Alert, fieldName: string) => {
   // can be updated when working on https://github.com/elastic/kibana/issues/140819
@@ -81,6 +81,8 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
     parentAlert,
   } = props;
 
+  const RELATIVE_DISPLAY_THRESHOLD_HOURS = 2;
+
   const cellRenderers: AlertCellRenderers = {
     [ALERT_STATUS]: (value) => {
       if (value !== ALERT_STATUS_ACTIVE && value !== ALERT_STATUS_RECOVERED) {
@@ -94,10 +96,10 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
       <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
     ),
     [ALERT_START]: (value) => (
-      <ElapsedTimeTooltip
+      <ElapsedTimestampTooltip
         time={new Date(value ?? '').getTime()}
         timeUnit="milliseconds"
-        relativeDisplayThreshold={2}
+        relativeDisplayThreshold={RELATIVE_DISPLAY_THRESHOLD_HOURS}
       />
     ),
     [ALERT_RULE_EXECUTION_TIMESTAMP]: (value) => (

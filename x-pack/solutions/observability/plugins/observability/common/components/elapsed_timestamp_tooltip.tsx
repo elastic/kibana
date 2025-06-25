@@ -55,7 +55,7 @@ export function getElapsedTimeText(duration: moment.Duration) {
   });
 }
 
-export function ElapsedTimeTooltip({
+export function ElapsedTimestampTooltip({
   time,
   relativeDisplayThreshold = 24,
   timeUnit = 'milliseconds',
