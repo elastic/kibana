@@ -169,8 +169,11 @@ describe('State', () => {
   it('attempt to rollback by restoring the previous stream states', async () => {
     searchMock.mockImplementationOnce(() => ({
       hits: {
-        hits: [{ _source: { name: 'test_stream', unknown: {} } }],
-        total: { value: 1 },
+        hits: [
+          { _source: { name: 'stream_to_delete', unknown: {} } },
+          { _source: { name: 'stream_to_update', unknown: {} } },
+        ],
+        total: { value: 2 },
       },
     }));
 
@@ -187,8 +190,18 @@ describe('State', () => {
             {
               type: 'upsert',
               definition: {
-                name: 'new_test_stream',
-                description: '',
+                name: 'stream_to_create',
+                description: 'Just created',
+                group: {
+                  members: [],
+                },
+              },
+            },
+            {
+              type: 'upsert',
+              definition: {
+                name: 'stream_to_update',
+                description: 'Something was changed',
                 group: {
                   members: [],
                 },
@@ -196,7 +209,7 @@ describe('State', () => {
             },
             {
               type: 'delete',
-              name: 'test_stream',
+              name: 'stream_to_delete',
             },
           ],
           stateDependenciesMock
@@ -209,15 +222,31 @@ describe('State', () => {
       // Was deleted, becomes re-created during rollback
       {
         changeStatus: 'upserted',
+        changes: {
+          updated: false,
+        },
         definition: {
-          name: 'test_stream',
+          name: 'stream_to_delete',
+        },
+      },
+      // Was updated, is reverted and carries over _changes
+      {
+        changeStatus: 'upserted',
+        changes: {
+          updated: true,
+        },
+        definition: {
+          name: 'stream_to_update',
         },
       },
       // Was created, becomes deleted during rollback
       {
         changeStatus: 'deleted',
+        changes: {
+          updated: false,
+        },
         definition: {
-          name: 'new_test_stream',
+          name: 'stream_to_create',
         },
       },
     ]);
@@ -283,7 +312,7 @@ function streamThatModifiesStartingState(name: string, stateDependenciesMock: an
       return { cascadingChanges: [], changeStatus: 'unchanged' };
     }
 
-    clone(): StreamActiveRecord<Streams.all.Definition> {
+    protected doClone(): StreamActiveRecord<Streams.all.Definition> {
       return new StartingStateModifyingStream(this.definition, this.dependencies);
     }
     protected async doHandleDeleteChange(): Promise<any> {
@@ -338,7 +367,7 @@ function streamThatCascadesTooMuch(stateDependenciesMock: any) {
       };
     }
 
-    clone(): StreamActiveRecord<Streams.all.Definition> {
+    protected doClone(): StreamActiveRecord<Streams.all.Definition> {
       return new CascadingStream(this.definition, this.dependencies);
     }
     protected async doHandleDeleteChange(): Promise<any> {
@@ -371,9 +400,18 @@ function streamThatCascadesTooMuch(stateDependenciesMock: any) {
 
 function rollbackStream(name: string, stateDependenciesMock: any) {
   class SimpleStream extends StreamActiveRecord<any> {
+    protected _changes = {
+      updated: false,
+    };
     protected async doHandleUpsertChange(
       definition: Streams.all.Definition
     ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }> {
+      if (this.definition.name === 'stream_to_update') {
+        this._changes = {
+          updated: true,
+        };
+      }
+
       return {
         cascadingChanges: [],
         changeStatus: definition.name === this.definition.name ? 'upserted' : this.changeStatus,
@@ -409,11 +447,16 @@ function rollbackStream(name: string, stateDependenciesMock: any) {
         },
       ];
     }
-    clone(): StreamActiveRecord<Streams.all.Definition> {
-      return new SimpleStream(this.definition, this.dependencies);
-    }
     protected async doDetermineUpdateActions(): Promise<ElasticsearchAction[]> {
-      throw new Error('Not implemented');
+      return [
+        {
+          type: 'upsert_dot_streams_document',
+          request: this.definition,
+        },
+      ];
+    }
+    protected doClone(): StreamActiveRecord<Streams.all.Definition> {
+      return new SimpleStream(this.definition, this.dependencies);
     }
   }
 
@@ -456,7 +499,7 @@ function flowStream() {
     protected async doDetermineDeleteActions(): Promise<ElasticsearchAction[]> {
       return [];
     }
-    clone(): StreamActiveRecord<Streams.all.Definition> {
+    protected doClone(): StreamActiveRecord<Streams.all.Definition> {
       return new FlowStream(this.definition, this.dependencies);
     }
   }
