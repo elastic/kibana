@@ -2632,7 +2632,7 @@ x-pack/test/security_solution_api_integration/test_suites/investigations @elasti
 /x-pack/solutions/security/plugins/security_solution/public/common/components/threat_match @elastic/security-detection-engine
 
 ## Security Solution sub teams - security-defend-workflows
-/x-pack/test/defend_workflows_cypress @elastic/security-defend-workflows
+/x-pack/solutions/security/test/defend_workflows_cypress @elastic/security-defend-workflows
 /x-pack/platform/test/api_integration/apis/osquery @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/management/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/common/lib/endpoint/ @elastic/security-defend-workflows
