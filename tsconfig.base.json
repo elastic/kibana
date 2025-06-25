@@ -38,6 +38,8 @@
       "@kbn/aiops-plugin/*": ["x-pack/platform/plugins/shared/aiops/*"],
       "@kbn/aiops-test-utils": ["x-pack/platform/packages/private/ml/aiops_test_utils"],
       "@kbn/aiops-test-utils/*": ["x-pack/platform/packages/private/ml/aiops_test_utils/*"],
+      "@kbn/aiops-utils": ["src/platform/packages/shared/kbn-aiops-utils"],
+      "@kbn/aiops-utils/*": ["src/platform/packages/shared/kbn-aiops-utils/*"],
       "@kbn/alerting-api-integration-helpers": ["x-pack/platform/test/alerting_api_integration/packages/helpers"],
       "@kbn/alerting-api-integration-helpers/*": ["x-pack/platform/test/alerting_api_integration/packages/helpers/*"],
       "@kbn/alerting-api-integration-test-plugin": ["x-pack/platform/test/alerting_api_integration/common/plugins/alerts"],

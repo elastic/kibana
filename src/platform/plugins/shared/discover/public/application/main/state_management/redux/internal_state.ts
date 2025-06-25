@@ -37,6 +37,7 @@ const initialState: DiscoverInternalState = {
     columns: false,
     rowHeight: false,
     breakdownField: false,
+    hideChart: false,
   },
 };
 
