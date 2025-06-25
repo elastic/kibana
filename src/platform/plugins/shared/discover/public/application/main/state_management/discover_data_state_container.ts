@@ -354,6 +354,7 @@ export function getDataStateContainer({
                     columns: false,
                     rowHeight: false,
                     breakdownField: false,
+                    hideChart: false,
                   },
                 })
               );

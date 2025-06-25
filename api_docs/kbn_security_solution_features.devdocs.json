@@ -471,7 +471,23 @@
             "section": "def-common.SubFeaturePrivilegeConfig",
             "text": "SubFeaturePrivilegeConfig"
           },
-          ">[] | undefined; }"
+          ">[] | undefined; baseFeatureConfigModifier?: ((baseFeatureConfig: ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.BaseKibanaFeatureConfig",
+            "text": "BaseKibanaFeatureConfig"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.BaseKibanaFeatureConfig",
+            "text": "BaseKibanaFeatureConfig"
+          },
+          ") | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
