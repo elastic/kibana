@@ -20,6 +20,7 @@ import {
 import {
   teardownTinyElserModelAndInferenceEndpoint,
   deployTinyElserAndSetupKb,
+  setupKb,
 } from '../utils/model_and_inference';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -365,6 +366,50 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             },
           });
           expect(status).to.be(403);
+        });
+      });
+    });
+
+    describe('Knowledge base: Import operation', function () {
+      before(async () => {
+        await teardownTinyElserModelAndInferenceEndpoint(getService);
+        await clearKnowledgeBase(es);
+        await setupKb(getService);
+      });
+
+      after(async () => {
+        await clearKnowledgeBase(es);
+      });
+
+      describe('when importing a large number of entries', () => {
+        before(async () => {
+          await clearKnowledgeBase(es);
+        });
+        it('handles a large number of entries gracefully', async () => {
+          const entries = Array.from({ length: 1000 }, (_, i) => ({
+            id: `my_doc_${i}`,
+            title: `My title ${i}`,
+            text: `My content ${i}`,
+          }));
+
+          const { status } = await observabilityAIAssistantAPIClient.editor({
+            endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
+            params: {
+              body: {
+                entries,
+              },
+            },
+          });
+
+          expect(status).to.be(200);
+          const { status } = await observabilityAIAssistantAPIClient.editor({
+            endpoint: 'GET .kibana-observability-ai-assistant-kb-000002/_count',
+            params: {
+              body: {
+                entries,
+              },
+            },
+          });
         });
       });
     });
