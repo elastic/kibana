@@ -16,6 +16,7 @@
     "allowJs": false
   },
   "include": [
+    "index.d.ts",
     "**/*",
     "../../../typings/**/*",
     "../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
@@ -100,5 +101,9 @@
     "@kbn/user-profile-components",
     "@kbn/safer-lodash-set",
     "@kbn/cases-api-integration-test-plugin",
+    "@kbn/dev-proc-runner",
+    "@kbn/repo-info",
+    "@kbn/dev-cli-errors",
+    "@kbn/journeys",
   ]
 }
