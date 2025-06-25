@@ -285,7 +285,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(200);
       });
 
-      it('verifies that the monitor location label is updated in default space', async () => {
+      it('verifies that the monitor location label is updated in default space of multiple spaces', async () => {
         // first use get API
         const getMonitorResponse = await supertestEditorWithApiKey
           .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${defaultSpaceMonitorId}`)
