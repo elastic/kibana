@@ -9,7 +9,6 @@ x-pack/platform/test/alerting_api_integration/common/plugins/aad @elastic/respon
 x-pack/platform/plugins/shared/actions @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators @elastic/response-ops
 src/platform/packages/shared/kbn-actions-types @elastic/response-ops
-src/platform/packages/shared/kbn-aiops-utils @elastic/ml-ui
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
@@ -23,6 +22,7 @@ x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_log_rate_analysis @elastic/ml-ui
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/packages/private/ml/aiops_test_utils @elastic/ml-ui
+src/platform/packages/shared/kbn-aiops-utils @elastic/ml-ui
 x-pack/platform/test/alerting_api_integration/packages/helpers @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/common/plugins/alerts @elastic/response-ops
 x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
