@@ -16,7 +16,7 @@ const storageSettings = {
   schema: {
     properties: {
       id: types.keyword({}),
-      name: types.text({}),
+      name: types.keyword({}),
       description: types.text({}),
       query: types.text({}),
       params: types.object({
