@@ -5,7 +5,7 @@ mapped_pages:
 
 # Advanced settings [advanced-options]
 
-**Advanced Settings** control the behavior of {{kib}}. You can change the settings that apply to a speicfic space only, or to all of {{kib}}. For example, you can change the format used to display dates, specify the default data view, and apply your own branding.
+**Advanced Settings** control the behavior of {{kib}}. You can change the settings that apply to a specific space only, or to all of {{kib}}. For example, you can change the format used to display dates, specify the default data view, and apply your own branding.
 
 ::::{warning}
 Changing a setting can affect {{kib}} performance and cause problems that are difficult to diagnose. Setting a property value to a blank field reverts to the default behavior, which might not be compatible with other configuration settings. Deleting a custom setting permanently removes it from {{kib}}.
