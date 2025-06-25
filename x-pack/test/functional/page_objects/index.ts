@@ -15,7 +15,7 @@ import { RoleMappingsPageProvider } from '@kbn/test-suites-xpack-platform/functi
 import { ApiKeysPageProvider } from './api_keys_page';
 import { AssetDetailsProvider } from './asset_details';
 import { BannersPageObject } from './banners_page';
-import { CanvasPageProvider } from './canvas_page';
+// import { CanvasPageProvider } from './canvas_page';
 import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
 import { EmbeddedConsoleProvider } from './embedded_console';
@@ -69,7 +69,7 @@ export const pageObjects = {
   apiKeys: ApiKeysPageProvider,
   assetDetails: AssetDetailsProvider,
   banners: BannersPageObject,
-  canvas: CanvasPageProvider,
+  // canvas: CanvasPageProvider,
   copySavedObjectsToSpace: CopySavedObjectsToSpacePageProvider,
   crossClusterReplication: CrossClusterReplicationPageProvider,
   detections: DetectionsPageObject,
