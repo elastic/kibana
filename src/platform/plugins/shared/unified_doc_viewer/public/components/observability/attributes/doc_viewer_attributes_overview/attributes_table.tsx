@@ -58,15 +58,9 @@ export const AttributesTable = ({
     };
   }, [onRemoveColumn, onAddColumn, columns]);
 
-  const displayedFields = useMemo(
-    () =>
-      fields.filter((field) => field.displayName.toLowerCase().includes(searchTerm.toLowerCase())),
-    [fields, searchTerm]
-  );
-
   const rows: FieldRow[] = useMemo(
     () =>
-      displayedFields.map(
+      fields.map(
         (field) =>
           new FieldRow({
             name: field.name,
@@ -79,7 +73,7 @@ export const AttributesTable = ({
             columnsMeta,
           })
       ),
-    [displayedFields, flattened, hit, dataView, fieldFormats, columnsMeta]
+    [fields, flattened, hit, dataView, fieldFormats, columnsMeta]
   );
 
   const fieldCellActions = useMemo(

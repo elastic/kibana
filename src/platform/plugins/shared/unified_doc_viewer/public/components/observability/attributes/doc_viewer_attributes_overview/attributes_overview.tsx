@@ -31,9 +31,9 @@ import {
 } from '../../../doc_viewer_source/get_height';
 import { AttributesAccordion } from './attributes_accordion';
 import { getAttributesTitle } from './get_attributes_title';
-import { getAttributeDisplayName } from './get_attribute_display_name';
 import { HIDE_NULL_VALUES } from '../../../doc_viewer_table/table';
 import { AttributesEmptyPrompt } from './attributes_empty_prompt';
+import { groupAttributesFields } from './group_attributes_fields';
 
 export interface AttributeField {
   name: string; // full field name for filtering/actions
@@ -72,50 +72,18 @@ export function AttributesOverview({
 
   const allFields = Object.keys(flattened);
 
-  const groupedFields = useMemo(() => {
-    const attributesFields: AttributeField[] = [];
-    const resourceAttributesFields: AttributeField[] = [];
-    const scopeAttributesFields: AttributeField[] = [];
-    const lowerSearchTerm = searchTerm.toLowerCase();
-
-    allFields.reduce((acc, fieldName) => {
-      const lowerFieldName = fieldName.toLowerCase();
-
-      // it filters out multifields that have a parent, to prevent entries for multifields like this: field, field.keyword, field.whatever
-      if (!shouldShowFieldHandler(fieldName)) {
-        return acc;
-      }
-
-      if (!lowerFieldName.includes(lowerSearchTerm)) {
-        return acc;
-      }
-
-      if (isEsqlMode && areNullValuesHidden && flattened[fieldName] == null) {
-        return acc;
-      }
-
-      if (lowerFieldName.startsWith('resource.attributes.')) {
-        resourceAttributesFields.push({
-          name: fieldName,
-          displayName: getAttributeDisplayName(fieldName),
-        });
-      } else if (lowerFieldName.startsWith('scope.attributes.')) {
-        scopeAttributesFields.push({
-          name: fieldName,
-          displayName: getAttributeDisplayName(fieldName),
-        });
-      } else if (lowerFieldName.startsWith('attributes.')) {
-        attributesFields.push({
-          name: fieldName, // full name for filtering/actions
-          displayName: getAttributeDisplayName(fieldName), // for UI
-        });
-      }
-
-      return acc;
-    }, null);
-
-    return { attributesFields, resourceAttributesFields, scopeAttributesFields };
-  }, [allFields, flattened, searchTerm, shouldShowFieldHandler, isEsqlMode, areNullValuesHidden]);
+  const groupedFields = useMemo(
+    () =>
+      groupAttributesFields({
+        allFields,
+        flattened,
+        searchTerm,
+        shouldShowFieldHandler,
+        isEsqlMode,
+        areNullValuesHidden,
+      }),
+    [allFields, flattened, searchTerm, shouldShowFieldHandler, isEsqlMode, areNullValuesHidden]
+  );
 
   const { attributesFields, resourceAttributesFields, scopeAttributesFields } = groupedFields;
 
@@ -123,12 +91,19 @@ export function AttributesOverview({
     ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy ?? DEFAULT_MARGIN_BOTTOM)
     : 0;
 
+  const filterFieldsBySearchTerm = (fields: AttributeField[]) =>
+    fields.filter(
+      (field) =>
+        field.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        field.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
   const accordionConfigs = [
     {
       id: 'signal_attributes',
       title: attributesTitle,
       ariaLabel: attributesTitle,
-      fields: attributesFields,
+      fields: filterFieldsBySearchTerm(attributesFields),
       tooltipMessage: i18n.translate(
         'unifiedDocViewer.docView.attributes.signalAttributesTooltip',
         {
@@ -146,7 +121,7 @@ export function AttributesOverview({
         'unifiedDocViewer.docView.attributes.resourceAttributesTitle.ariaLabel',
         { defaultMessage: 'Resource attributes' }
       ),
-      fields: resourceAttributesFields,
+      fields: filterFieldsBySearchTerm(resourceAttributesFields),
       tooltipMessage: i18n.translate(
         'unifiedDocViewer.docView.attributes.resourceAttributesTooltip',
         {
@@ -164,7 +139,7 @@ export function AttributesOverview({
         'unifiedDocViewer.docView.attributes.scopeAttributesTitle.ariaLabel',
         { defaultMessage: 'Scope attributes' }
       ),
-      fields: scopeAttributesFields,
+      fields: filterFieldsBySearchTerm(scopeAttributesFields),
       tooltipMessage: i18n.translate('unifiedDocViewer.docView.attributes.scopeAttributesTooltip', {
         defaultMessage:
           'Metadata associated with the instrumentation scope (i.e., the library/module that produced the telemetry), helping identify its origin and version.',
