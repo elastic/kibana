@@ -47,7 +47,7 @@ export const getPolicyTemplateQuery = (
   activeNamespace
     ? {
         'rule.benchmark.posture_type': policyTemplate,
-        'data_stream.namespace': activeNamespace,
+        [`${FINDINGS_GROUPING_OPTIONS.NAMESPACE}`]: activeNamespace,
       }
     : {
         'rule.benchmark.posture_type': policyTemplate,
@@ -116,7 +116,12 @@ export const SummarySection = ({
                 'xpack.csp.dashboard.summarySection.counterCard.accountsEvaluatedDescription',
                 { defaultMessage: 'Accounts Evaluated' }
               ),
-        title: <AccountsEvaluatedWidget benchmarkAssets={complianceData.benchmarks} />,
+        title: (
+          <AccountsEvaluatedWidget
+            activeNamespace={activeNamespace}
+            benchmarkAssets={complianceData.benchmarks}
+          />
+        ),
         button: (
           <EuiButtonEmpty
             iconType="listAdd"

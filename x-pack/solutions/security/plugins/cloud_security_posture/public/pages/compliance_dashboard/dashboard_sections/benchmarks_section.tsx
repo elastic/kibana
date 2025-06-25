@@ -43,7 +43,7 @@ export const getBenchmarkIdQuery = (
     ? {
         'rule.benchmark.id': benchmark.meta.benchmarkId,
         'rule.benchmark.version': benchmark.meta.benchmarkVersion,
-        'data_stream.namespace': activeNamespace,
+        [`${FINDINGS_GROUPING_OPTIONS.NAMESPACE}`]: activeNamespace,
       }
     : {
         'rule.benchmark.id': benchmark.meta.benchmarkId,
@@ -80,7 +80,7 @@ export const BenchmarksSection = ({
     navToFindings(
       {
         ...getPolicyTemplateQuery(dashboardType, activeNamespace),
-        ...getBenchmarkIdQuery(benchmark),
+        ...getBenchmarkIdQuery(benchmark, activeNamespace),
         'result.evaluation': evaluation,
       },
       groupBy
@@ -94,7 +94,7 @@ export const BenchmarksSection = ({
     navToFindings(
       {
         ...getPolicyTemplateQuery(dashboardType, activeNamespace),
-        ...getBenchmarkIdQuery(benchmark),
+        ...getBenchmarkIdQuery(benchmark, activeNamespace),
         'rule.section': ruleSection,
         'result.evaluation': resultEvaluation,
       },
