@@ -42,7 +42,7 @@ export function registerESQLToolsRoutes({
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'ESQL Tool API',
+      summary: 'Get an ES|QL Tool',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
         tags: ['esql'],
@@ -92,7 +92,7 @@ export function registerESQLToolsRoutes({
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'ESQL Tool API',
+      summary: 'List ES|QL Tools',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
         tags: ['esql'],
@@ -134,7 +134,7 @@ export function registerESQLToolsRoutes({
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'ESQL Tool API',
+      summary: 'Create an ES|QL Tool',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
         tags: ['esql'],
@@ -209,7 +209,7 @@ export function registerESQLToolsRoutes({
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'ESQL Tool API',
+      summary: 'Update an ES|QL Tool',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
         tags: ['esql'],
@@ -261,10 +261,10 @@ export function registerESQLToolsRoutes({
 
         const updates: EsqlToolUpdateRequest = {
           id: toolId,
-          name,
-          description,
-          query,
-          params,
+          name: name,
+          description: description,
+          query: query,
+          params: params,
           ...(meta?.tags && {
             meta: {
               tags: meta.tags,
@@ -290,7 +290,7 @@ export function registerESQLToolsRoutes({
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'ESQL Tool API',
+      summary: 'Delete an ES|QL Tool',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
         tags: ['esql'],
@@ -317,14 +317,6 @@ export function registerESQLToolsRoutes({
         const { esql: esqlToolService } = getInternalServices();
         const client = await esqlToolService.getScopedClient({ request });
         const result = await client.delete(request.params.id);
-
-        if (result === null || result === undefined) {
-          return response.notFound({
-            body: {
-              message: `Tool with name "${request.params.id}" not found.`,
-            },
-          });
-        }
 
         return response.ok({
           body: {
