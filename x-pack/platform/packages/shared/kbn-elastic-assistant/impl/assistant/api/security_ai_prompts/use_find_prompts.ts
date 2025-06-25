@@ -69,6 +69,7 @@ export const useFindPrompts = (payload: UseFindPromptsParams) => {
         prompts: [],
       },
       keepPreviousData: true,
+      refetchOnWindowFocus: false,
       enabled: isAssistantEnabled,
     }
   );
