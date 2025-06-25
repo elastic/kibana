@@ -245,10 +245,8 @@ export class IndexUpdateService {
         )
         .subscribe({
           next: ({ updates, response, rows, dataView }) => {
-            // //HD bulk update can be a problem
             // Updates the pending fields to be saved
             const unsavedColumns = this._pendingFieldsToBeSaved.value.filter((pendingField) => {
-              // Remove fields that were saved
               return !updates.some((update) => update.value[pendingField] !== undefined);
             });
 
@@ -256,9 +254,6 @@ export class IndexUpdateService {
 
             // Clear the buffer after successful update
             this.actions$.next({ type: 'saved', payload: response });
-
-            // Clear pending fields after save
-            this._pendingFieldsToBeSaved.next([]);
 
             // TODO do we need to re-fetch docs using _mget, in order to retrieve a full doc update?
 

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
@@ -28,6 +28,8 @@ export const UnsavedChangesModal: React.FC<UnsavedChangesModal> = ({ onClose }) 
     false
   );
 
+  const pendingFieldsToBeSaved = useObservable(indexUpdateService.pendingFieldsToBeSaved$, []);
+
   const closeWithoutSaving = () => {
     indexUpdateService.deleteUnsavedFields();
     onClose();
@@ -44,7 +46,10 @@ export const UnsavedChangesModal: React.FC<UnsavedChangesModal> = ({ onClose }) 
   return (
     <EuiConfirmModal
       title={
-        <FormattedMessage id="indexEditor.warningModal.title" defaultMessage="Unsaved changes" />
+        <FormattedMessage
+          id="indexEditor.warningModal.title"
+          defaultMessage="You have unsaved columns"
+        />
       }
       onCancel={continueEditing}
       onConfirm={closeWithoutSaving}
@@ -52,12 +57,23 @@ export const UnsavedChangesModal: React.FC<UnsavedChangesModal> = ({ onClose }) 
         <FormattedMessage id="indexEditor.warningModal.cancel" defaultMessage="Cancel" />
       }
       confirmButtonText={
-        <FormattedMessage id="indexEditor.warningModal.confirm" defaultMessage="OK" />
+        <FormattedMessage id="indexEditor.warningModal.confirm" defaultMessage="Yes" />
       }
     >
       <FormattedMessage
-        id="indexEditor.warningModal.body"
-        defaultMessage="You have unsaved columns. You need at least one value set on each new column for it to be saved. Are you sure you want to leave?"
+        id="indexEditor.warningModal.body_1"
+        defaultMessage="You need at least one value set on each new column for it to be saved:"
+      />
+      <EuiSpacer size="s" />
+      <ul>
+        {pendingFieldsToBeSaved.map((field) => (
+          <li key={field}>{field}</li>
+        ))}
+      </ul>
+      <EuiSpacer size="s" />
+      <FormattedMessage
+        id="indexEditor.warningModal.body_2"
+        defaultMessage="Are you sure you want to leave?"
       />
     </EuiConfirmModal>
   );
