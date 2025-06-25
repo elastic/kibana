@@ -859,6 +859,7 @@ export function Detail() {
               packageInfo={packageInfo}
               packageMetadata={packageInfoData?.metadata}
               startServices={services}
+              isCustom={shouldAllowEdit}
             />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
