@@ -296,7 +296,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(monitor.locations[0].label).to.be('Updated Private Location Label Default Space');
       });
 
-      it('verifies that the monitor location label is updated in test space', async () => {
+      it('verifies that the monitor location label is updated in test space of multiple spaces', async () => {
         const getMonitorResponse = await supertestEditorWithApiKey
           .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${testSpaceMonitorId}`)
           .expect(200);
