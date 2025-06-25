@@ -37,10 +37,10 @@ const defaultPricingResponse: GetPricingResponse = {
  * @internal
  */
 export class PricingService {
-  private readonly pricingResponse$ = new Subject<GetPricingResponse>();
+  private readonly pricingTiers$ = new Subject<GetPricingResponse['tiers']>();
 
   public setup({ analytics }: SetupDeps): void {
-    registerAnalyticsContextProvider(analytics, this.pricingResponse$);
+    registerAnalyticsContextProvider(analytics, this.pricingTiers$);
   }
 
   public async start({ http }: StartDeps): Promise<PricingServiceStart> {
@@ -49,8 +49,8 @@ export class PricingService {
       ? defaultPricingResponse
       : await http.get<GetPricingResponse>('/internal/core/pricing');
 
-    this.pricingResponse$.next(pricingResponse);
-    this.pricingResponse$.complete(); // complete the subject after fetching the pricing response as we know that we won't refresh it later
+    this.pricingTiers$.next(pricingResponse.tiers);
+    this.pricingTiers$.complete(); // complete the subject after fetching the pricing response as we know that we won't refresh it later
 
     const tiersClient = new PricingTiersClient(
       of(pricingResponse.tiers),

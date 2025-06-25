@@ -9,13 +9,14 @@
 
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
-import { BehaviorSubject, map } from 'rxjs';
+import { BehaviorSubject, type Observable, map } from 'rxjs';
 import type { IConfigService } from '@kbn/config';
 import {
   type PricingProductFeature,
   ProductFeaturesRegistry,
   PricingTiersClient,
   registerAnalyticsContextProvider,
+  TiersConfig,
 } from '@kbn/core-pricing-common';
 import type {
   InternalHttpServicePreboot,
@@ -40,6 +41,7 @@ export class PricingService {
   private readonly logger: Logger;
   private readonly productFeaturesRegistry: ProductFeaturesRegistry;
   private readonly pricingConfig$: BehaviorSubject<PricingConfigType>;
+  private readonly pricingTiers$: Observable<TiersConfig>;
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('pricing-service');
@@ -48,6 +50,7 @@ export class PricingService {
     this.pricingConfig$ = new BehaviorSubject<PricingConfigType>({
       tiers: { enabled: false, products: [] },
     });
+    this.pricingTiers$ = this.pricingConfig$.pipe(map(({ tiers }) => tiers));
   }
 
   public preboot({ http }: PrebootDeps) {
@@ -71,7 +74,7 @@ export class PricingService {
       pricingConfig$: this.pricingConfig$,
       productFeaturesRegistry: this.productFeaturesRegistry,
     });
-    registerAnalyticsContextProvider(analytics, this.pricingConfig$);
+    registerAnalyticsContextProvider(analytics, this.pricingTiers$);
 
     return {
       registerProductFeatures: (features: PricingProductFeature[]) => {
@@ -83,8 +86,7 @@ export class PricingService {
   }
 
   public start() {
-    const tiers$ = this.pricingConfig$.pipe(map(({ tiers }) => tiers));
-    const tiersClient = new PricingTiersClient(tiers$, this.productFeaturesRegistry);
+    const tiersClient = new PricingTiersClient(this.pricingTiers$, this.productFeaturesRegistry);
 
     return {
       isFeatureAvailable: tiersClient.isFeatureAvailable,

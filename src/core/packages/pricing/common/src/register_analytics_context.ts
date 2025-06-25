@@ -10,16 +10,16 @@
 import type { AnalyticsServiceSetup as AnalyticsServiceSetupFromServer } from '@kbn/core-analytics-server';
 import type { AnalyticsServiceSetup as AnalyticsServiceSetupFromBrowser } from '@kbn/core-analytics-browser';
 import { map, type Observable } from 'rxjs';
-import type { PricingConfigType } from '@kbn/core-pricing-server-internal';
+import type { TiersConfig } from './pricing_tiers_config';
 
 export function registerAnalyticsContextProvider(
   analytics: AnalyticsServiceSetupFromServer | AnalyticsServiceSetupFromBrowser,
-  pricingConfig$: Observable<PricingConfigType>
+  pricingTiers$: Observable<TiersConfig>
 ) {
   analytics.registerContextProvider({
     name: 'pricing',
-    context$: pricingConfig$.pipe(
-      map(({ tiers }) => ({
+    context$: pricingTiers$.pipe(
+      map((tiers) => ({
         pricing_tiers: tiers.products?.map(({ name, tier }) => `${name}-${tier}`),
       }))
     ),
