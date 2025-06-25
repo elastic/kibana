@@ -498,7 +498,7 @@ $$$visualization-visualize-heatmapChartslibrary$$$`visualization:visualize:legac
 
 ## Change the global settings [kibana-global-settings-reference]
 
-Change the settings that apply only to all of {{kib}}.
+Change the only settings that apply to all of {{kib}}.
 
 1. Go to the **Advanced settings** page using the navigation menu or the [global search field](docs-content://get-started/the-stack.md#kibana-navigation-search).
 2. Click **Global Settings**.
