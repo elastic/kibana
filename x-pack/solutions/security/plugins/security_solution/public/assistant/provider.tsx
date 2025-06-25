@@ -13,7 +13,7 @@ import {
   bulkUpdatePrompts,
 } from '@kbn/elastic-assistant';
 
-import { once } from 'lodash/fp';
+import { once, isEmpty } from 'lodash/fp';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../common/lib/kibana';
@@ -101,14 +101,15 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       prompt_ids: ['alertEvaluation', 'dataQualityAnalysis', 'ruleAnalysis'],
     },
   });
-
+  const promptContext = useObservable(
+    elasticAssistantSharedState.promptContexts.getPromptContext$(),
+    {}
+  );
   useEffect(() => {
-    const unmountPromptContexts =
+    if (isEmpty(promptContext)) {
       elasticAssistantSharedState.promptContexts.setPromptContext(PROMPT_CONTEXTS);
-    return () => {
-      unmountPromptContexts();
-    };
-  }, [elasticAssistantSharedState.promptContexts, PROMPT_CONTEXTS]);
+    }
+  }, [elasticAssistantSharedState.promptContexts, promptContext, PROMPT_CONTEXTS]);
 
   if (!assistantContextValue) {
     return null;
