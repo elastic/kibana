@@ -72,7 +72,20 @@ export default function ({ getService }: FtrProviderContext) {
             end: '2024-09-02T00:00:00Z',
             esQuery: {
               bool: {
-                filter: [{ match_phrase: { 'actor.entity.id': 'admin@example.com' } }],
+                filter: [
+                  {
+                    match_phrase: {
+                      'actor.entity.id': 'admin@example.com',
+                    },
+                  },
+                ],
+                must_not: [
+                  {
+                    match_phrase: {
+                      'event.action': 'google.iam.admin.v1.UpdateRole',
+                    },
+                  },
+                ],
               },
             },
           },
@@ -88,6 +101,15 @@ export default function ({ getService }: FtrProviderContext) {
             'primary',
             `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
           );
+        });
+
+        response.body.edges.forEach((edge: any) => {
+          expect(edge).to.have.property('color');
+          expect(edge.color).equal(
+            'subdued',
+            `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
+          );
+          expect(edge.type).equal('solid');
         });
       });
     });

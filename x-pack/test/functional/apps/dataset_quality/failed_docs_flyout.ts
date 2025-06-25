@@ -29,7 +29,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const failedDatasetName = datasetNames[1];
   const failedDataStreamName = `${type}-${failedDatasetName}-${defaultNamespace}`;
 
-  describe('Failed docs flyout', () => {
+  describe('Failed docs flyout', function () {
+    // This disables the forward-compatibility test for Elasticsearch 8.19 with Kibana and ES 9.0.
+    // These versions are not expected to work together. Note: Failure store is not available in ES 9.0,
+    // and running these tests will result in an "unknown index privilege [read_failure_store]" error.
+    this.onlyEsVersion('8.19 || >=9.1');
+
     describe('failed docs flyout open-close', () => {
       before(async () => {
         await synthtrace.createCustomPipeline(processors, 'synth.2@pipeline');
