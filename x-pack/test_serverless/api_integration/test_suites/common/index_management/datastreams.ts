@@ -67,6 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
           privileges: {
             delete_index: true,
             manage_data_stream_lifecycle: true,
+            read_failure_store: true,
           },
           timeStampField: { name: '@timestamp' },
           indices: [
@@ -82,6 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
           health: 'green',
           indexTemplateName: testDataStreamName,
           hidden: false,
+          failureStoreEnabled: false,
           indexMode: 'standard',
         });
       });
@@ -103,6 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
           privileges: {
             delete_index: true,
             manage_data_stream_lifecycle: true,
+            read_failure_store: true,
           },
           timeStampField: { name: '@timestamp' },
           indices: [
@@ -124,6 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
           meteringDocsCount: 0,
           meteringStorageSize: '0b',
           meteringStorageSizeBytes: 0,
+          failureStoreEnabled: false,
           indexMode: 'standard',
         });
       });

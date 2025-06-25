@@ -560,7 +560,7 @@ export class ActionsPlugin
         getInternalSavedObjectsRepositoryWithoutAccessToActions,
         core.elasticsearch,
         encryptedSavedObjectsClient,
-        () => core.savedObjects.createInternalRepository(includedHiddenTypes)
+        () => this.getUnsecuredSavedObjectsClientWithFakeRequest(core.savedObjects)
       ),
       encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
@@ -637,6 +637,24 @@ export class ActionsPlugin
       includedHiddenTypes,
     });
 
+  // replace when https://github.com/elastic/kibana/issues/209413 is resolved
+  private getUnsecuredSavedObjectsClientWithFakeRequest = (
+    savedObjects: CoreStart['savedObjects']
+  ) => {
+    const fakeRequest = {
+      headers: {},
+      getBasePath: () => '',
+      path: '/',
+      route: { settings: {} },
+      url: { href: {} },
+      raw: { req: { url: '/' } },
+    } as unknown as KibanaRequest;
+    return savedObjects.getScopedClient(fakeRequest, {
+      excludedExtensions: [SECURITY_EXTENSION_ID],
+      includedHiddenTypes,
+    });
+  };
+
   private instantiateAuthorization = (request: KibanaRequest) => {
     return new ActionsAuthorization({
       request,
@@ -667,7 +685,7 @@ export class ActionsPlugin
     getSavedObjectRepository: () => ISavedObjectsRepository,
     elasticsearch: ElasticsearchServiceStart,
     encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
-    unsecuredSavedObjectsRepository: () => ISavedObjectsRepository
+    unsecuredSavedObjectsRepository: () => SavedObjectsClientContract
   ): () => UnsecuredServices {
     return () => {
       return {

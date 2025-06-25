@@ -26,24 +26,30 @@ import {
 import deepMerge from 'deepmerge';
 import { filter, switchMap, startWith, Subject, BehaviorSubject, pairwise, takeUntil } from 'rxjs';
 import { get } from 'lodash';
+import type { InitialFeatureFlagsGetter } from '@kbn/core-feature-flags-server/src/contracts';
 import { createOpenFeatureLogger } from './create_open_feature_logger';
 import { setProviderWithRetries } from './set_provider_with_retries';
 import { type FeatureFlagsConfig, featureFlagsConfig } from './feature_flags_config';
 
 /**
  * Core-internal contract for the setup lifecycle step.
- * @private
+ * @internal
  */
 export interface InternalFeatureFlagsSetup extends FeatureFlagsSetup {
   /**
    * Used by the rendering service to share the overrides with the service on the browser side.
    */
   getOverrides: () => Record<string, unknown>;
+  /**
+   * Required to bootstrap the browser-side OpenFeature client with a seed of the feature flags for faster load-times
+   * and to work-around air-gapped environments.
+   */
+  getInitialFeatureFlags: () => Promise<Record<string, unknown>>;
 }
 
 /**
  * The server-side Feature Flags Service
- * @private
+ * @internal
  */
 export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
@@ -51,6 +57,7 @@ export class FeatureFlagsService {
   private readonly stop$ = new Subject<void>();
   private readonly overrides$ = new BehaviorSubject<Record<string, unknown>>({});
   private context: MultiContextEvaluationContext = { kind: 'multi' };
+  private initialFeatureFlagsGetter: InitialFeatureFlagsGetter = async () => ({});
 
   /**
    * The core service's constructor
@@ -77,6 +84,10 @@ export class FeatureFlagsService {
 
     return {
       getOverrides: () => this.overrides$.value,
+      getInitialFeatureFlags: () => this.initialFeatureFlagsGetter(),
+      setInitialFeatureFlagsGetter: (getter: InitialFeatureFlagsGetter) => {
+        this.initialFeatureFlagsGetter = getter;
+      },
       setProvider: (provider) => {
         if (OpenFeature.providerMetadata !== NOOP_PROVIDER.metadata) {
           throw new Error('A provider has already been set. This API cannot be called twice.');
@@ -175,7 +186,7 @@ export class FeatureFlagsService {
    * @param evaluationFn The actual evaluation API
    * @param flagName The name of the flag to evaluate
    * @param fallbackValue The fallback value
-   * @private
+   * @internal
    */
   private async evaluateFlag<T extends string | boolean | number>(
     evaluationFn: (flagName: string, fallbackValue: T) => Promise<T>,
@@ -196,7 +207,7 @@ export class FeatureFlagsService {
   /**
    * Formats the provided context to fulfill the expected multi-context structure.
    * @param contextToAppend The {@link EvaluationContext} to append.
-   * @private
+   * @internal
    */
   private appendContext(contextToAppend: EvaluationContext): void {
     // If no kind provided, default to the project|deployment level.

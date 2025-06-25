@@ -48,6 +48,14 @@ export const createEndpointFleetServicesFactoryMock = (
     logger = loggingSystemMock.createLogger(),
   } = dependencies;
 
+  // Fix up the agent service to return the same client for the different types of `as*()`
+  fleetDependencies.agentService.asInternalScopedUser.mockReturnValue(
+    fleetDependencies.agentService.asInternalUser
+  );
+  fleetDependencies.agentService.asScoped.mockReturnValue(
+    fleetDependencies.agentService.asInternalUser
+  );
+
   const serviceFactoryMock = new EndpointFleetServicesFactory(
     fleetDependencies,
     savedObjects,

@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
         });
 
         expect(events[events.length - 1].context.discoverProfiles).to.eql([
-          'observability-root-profile',
+          'observability-root-profile-with-attributes-tab',
           'default-data-source-profile',
         ]);
       });
@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
         });
 
         expect(events[events.length - 1].context.discoverProfiles).to.eql([
-          'observability-root-profile',
+          'observability-root-profile-with-attributes-tab',
           'observability-logs-data-source-profile',
         ]);
 
@@ -162,7 +162,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
 
         expect(events[0].properties).to.eql({
           contextLevel: 'rootLevel',
-          profileId: 'observability-root-profile',
+          profileId: 'observability-root-profile-with-attributes-tab',
         });
 
         expect(events[1].properties).to.eql({
@@ -447,7 +447,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
         });
 
         expect(event3.context.discoverProfiles).to.eql([
-          'observability-root-profile',
+          'observability-root-profile-with-attributes-tab',
           'observability-logs-data-source-profile',
         ]);
       });

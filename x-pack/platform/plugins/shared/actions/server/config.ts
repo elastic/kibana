@@ -142,22 +142,43 @@ export const configSchema = schema.object({
       {
         domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
         services: schema.maybe(
-          schema.object({
-            ses: schema.object({
-              host: schema.maybe(schema.string({ minLength: 1 })),
-              port: schema.maybe(schema.number({ min: 1, max: 65535 })),
-            }),
-          })
+          schema.object(
+            {
+              enabled: schema.maybe(
+                schema.arrayOf(
+                  schema.oneOf([
+                    schema.literal('google-mail'),
+                    schema.literal('microsoft-exchange'),
+                    schema.literal('microsoft-outlook'),
+                    schema.literal('amazon-ses'),
+                    schema.literal('elastic-cloud'),
+                    schema.literal('other'),
+                    schema.literal('*'),
+                  ]),
+                  { minSize: 1 }
+                )
+              ),
+              ses: schema.maybe(
+                schema.object({
+                  host: schema.string({ minLength: 1 }),
+                  port: schema.number({ min: 1, max: 65535 }),
+                })
+              ),
+            },
+            {
+              validate: (obj) => {
+                if (obj && Object.keys(obj).length === 0) {
+                  return 'email.services.enabled or email.services.ses must be defined';
+                }
+              },
+            }
+          )
         ),
       },
       {
         validate: (obj) => {
-          if (!obj.domain_allowlist && !obj.services?.ses.host && !obj.services?.ses.port) {
-            return 'Email configuration requires either domain_allowlist or services.ses to be specified';
-          }
-
-          if (obj.services?.ses && (!obj.services.ses.host || !obj.services.ses.port)) {
-            return 'Email configuration requires both services.ses.host and services.ses.port to be specified';
+          if (obj && Object.keys(obj).length === 0) {
+            return 'email.domain_allowlist or email.services must be defined';
           }
         },
       }
@@ -184,6 +205,15 @@ export const configSchema = schema.object({
       })
     ),
   }),
+  webhook: schema.maybe(
+    schema.object({
+      ssl: schema.object({
+        pfx: schema.object({
+          enabled: schema.boolean({ defaultValue: true }),
+        }),
+      }),
+    })
+  ),
   rateLimiter: schema.maybe(rateLimiterSchema),
 });
 
