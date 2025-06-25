@@ -62,7 +62,7 @@ describe('tlsRuleExecutor', () => {
   const monitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
 
   const commonFilter =
-    'synthetics-monitor.attributes.alert.tls.enabled: true and (synthetics-monitor.attributes.type: http or synthetics-monitor.attributes.type: tcp)';
+    'synthetics-monitor-multi-space.attributes.alert.tls.enabled: true and (synthetics-monitor-multi-space.attributes.type: http or synthetics-monitor-multi-space.attributes.type: tcp)';
 
   const getTLSRuleExecutorParams = (
     ruleParams: TLSRuleParams = {}
@@ -109,8 +109,8 @@ describe('tlsRuleExecutor', () => {
 
       await tlsRule.getMonitors();
 
-      expect(spy).toHaveBeenCalledWith({
-        filter: `${commonFilter} AND synthetics-monitor.attributes.id:(\"${monitorId}\")`,
+      expect(getAllMock).toHaveBeenCalledWith({
+        filter: `${commonFilter} AND synthetics-monitor-multi-space.attributes.id:(\"${monitorId}\")`,
       });
     });
 
@@ -122,8 +122,8 @@ describe('tlsRuleExecutor', () => {
 
       await tlsRule.getMonitors();
 
-      expect(spy).toHaveBeenCalledWith({
-        filter: `${commonFilter} AND synthetics-monitor.attributes.tags:(\"${tag}\")`,
+      expect(getAllMock).toHaveBeenCalledWith({
+        filter: `${commonFilter} AND synthetics-monitor-multi-space.attributes.tags:(\"${tag}\")`,
       });
     });
 
@@ -137,8 +137,8 @@ describe('tlsRuleExecutor', () => {
 
       await tlsRule.getMonitors();
 
-      expect(spy).toHaveBeenCalledWith({
-        filter: `${commonFilter} AND synthetics-monitor.attributes.type:(\"${monitorType}\")`,
+      expect(getAllMock).toHaveBeenCalledWith({
+        filter: `${commonFilter} AND synthetics-monitor-multi-space.attributes.type:(\"${monitorType}\")`,
       });
     });
 

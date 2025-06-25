@@ -95,6 +95,16 @@ export const syncEditedMonitorBulk = async ({
   const { server } = routeContext;
 
   try {
+    const data = monitorsToUpdate.map(({ monitorWithRevision, decryptedPreviousMonitor }) => ({
+      id: decryptedPreviousMonitor.id,
+      attributes: {
+        ...monitorWithRevision,
+        [ConfigKey.CONFIG_ID]: decryptedPreviousMonitor.id,
+        [ConfigKey.MONITOR_QUERY_ID]:
+          monitorWithRevision[ConfigKey.CUSTOM_HEARTBEAT_ID] || decryptedPreviousMonitor.id,
+      } as unknown as MonitorFields,
+      soType: decryptedPreviousMonitor.type,
+    }));
     const [editedMonitorSavedObjects, editSyncResponse] = await Promise.all([
       updateConfigSavedObjects({ monitorsToUpdate, routeContext }),
       syncUpdatedMonitors({ monitorsToUpdate, routeContext, spaceId, privateLocations }),
@@ -150,9 +160,10 @@ export const rollbackCompletely = async ({
       monitorsToUpdate.map(({ decryptedPreviousMonitor }) => ({
         type: syntheticsMonitorType,
         id: decryptedPreviousMonitor.id,
-        attributes: decryptedPreviousMonitor.attributes,
-      }))
-    );
+        attributes: decryptedPreviousMonitor.attributes as unknown as MonitorFields,
+        soType: decryptedPreviousMonitor.type,
+      })),
+    });
   } catch (error) {
     server.logger.error(`Unable to rollback Synthetics monitors edit ${error.message} `, { error });
   }
@@ -196,7 +207,8 @@ export const rollbackFailedUpdates = async ({
       .map(({ decryptedPreviousMonitor }) => ({
         type: syntheticsMonitorType,
         id: decryptedPreviousMonitor.id,
-        attributes: decryptedPreviousMonitor.attributes,
+        attributes: decryptedPreviousMonitor.attributes as unknown as MonitorFields,
+        soType: decryptedPreviousMonitor.type,
       }));
 
     if (monitorsToRevert.length > 0) {

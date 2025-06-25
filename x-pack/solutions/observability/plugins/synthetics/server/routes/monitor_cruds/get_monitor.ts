@@ -7,7 +7,6 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SyntheticsRestApiRouteFactory } from '../types';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -36,8 +35,7 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   handler: async ({
     request,
     response,
-    server: { encryptedSavedObjects, coreStart },
-    savedObjectsClient,
+    server: { coreStart },
     spaceId,
   }): Promise<any> => {
     const { monitorId } = request.params;
@@ -53,24 +51,21 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
       if (Boolean(canSave)) {
         // only user with write permissions can decrypt the monitor
-        const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
-
-        const monitor = await getSyntheticsMonitor({
-          monitorId,
-          encryptedSavedObjectsClient,
+        const monitor = await monitorConfigRepository.getDecrypted(monitorId, spaceId);
+        return {
+          ...mapSavedObjectToMonitor({ monitor: monitor.normalizedMonitor, internal }),
           spaceId,
-        });
-        return { ...mapSavedObjectToMonitor({ monitor, internal }), spaceId };
+          spaces: monitor.decryptedMonitor.namespaces,
+        };
       } else {
+        const monObj = await monitorConfigRepository.get(monitorId);
         return {
           ...mapSavedObjectToMonitor({
-            monitor: await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
-              syntheticsMonitorType,
-              monitorId
-            ),
+            monitor: monObj,
             internal,
           }),
           spaceId,
+          spaces: monObj.namespaces,
         };
       }
     } catch (getErr) {

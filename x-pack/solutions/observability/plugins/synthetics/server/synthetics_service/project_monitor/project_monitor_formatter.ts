@@ -11,11 +11,11 @@ import {
 } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
 import { getSavedObjectKqlFilter } from '../../routes/common';
 import { InvalidLocationError } from './normalizers/common_fields';
 import { SyntheticsServerSetup } from '../../types';
 import { RouteContext } from '../../routes/types';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { getAllLocations } from '../get_all_locations';
 import { syncNewMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
 import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
@@ -107,7 +107,7 @@ export class ProjectMonitorFormatter {
     this.syntheticsMonitorClient = routeContext.syntheticsMonitorClient;
     this.monitors = monitors;
     this.server = routeContext.server;
-    this.projectFilter = `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${this.projectId}"`;
+    this.projectFilter = `${syntheticsMonitorSavedObjectType}.attributes.${ConfigKey.PROJECT_ID}: "${this.projectId}"`;
     this.publicLocations = [];
     this.privateLocations = [];
   }
@@ -232,7 +232,7 @@ export class ProjectMonitorFormatter {
 
       /* Validates that the normalized monitor is a valid monitor saved object type */
       const { valid: isNormalizedMonitorValid, decodedMonitor } = this.validateMonitor({
-        validationResult: validateMonitor(normalizedMonitor as MonitorFields),
+        validationResult: validateMonitor(normalizedMonitor as MonitorFields, this.spaceId),
         monitorId: monitor.id,
       });
 
