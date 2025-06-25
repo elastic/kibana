@@ -73,7 +73,7 @@ export class RelatedDashboardsClient {
     const alert = this.checkAlert();
     const allSuggestedDashboards = new Set<SuggestedDashboard>();
     const relevantDashboardsById = new Map<string, SuggestedDashboard>();
-    const index = await this.getRuleQueryIndex();
+    const index = this.getRuleQueryIndex();
     const allRelevantFields = alert.getAllRelevantFields();
 
     if (index) {
@@ -155,6 +155,7 @@ export class RelatedDashboardsClient {
         relevantDashboards.push({
           id: d.id,
           title: d.attributes.title,
+          description: d.attributes.description,
           matchedBy: { index: [index] },
           relevantPanelCount: matchingPanels.length,
           relevantPanels: matchingPanels.map((p) => ({
@@ -162,7 +163,7 @@ export class RelatedDashboardsClient {
               panelIndex: p.panelIndex || uuidv4(),
               type: p.type,
               panelConfig: p.panelConfig,
-              title: p.title,
+              title: (p.panelConfig as { title?: string }).title,
             },
             matchedBy: { index: [index] },
           })),
@@ -204,6 +205,7 @@ export class RelatedDashboardsClient {
         relevantDashboards.push({
           id: d.id,
           title: d.attributes.title,
+          description: d.attributes.description,
           matchedBy: { fields: Array.from(allMatchingFields) },
           relevantPanelCount: matchingPanels.length,
           relevantPanels: matchingPanels.map((p) => ({
@@ -211,7 +213,7 @@ export class RelatedDashboardsClient {
               panelIndex: p.panel.panelIndex || uuidv4(),
               type: p.panel.type,
               panelConfig: p.panel.panelConfig,
-              title: p.panel.title,
+              title: (p.panel.panelConfig as { title?: string }).title,
             },
             matchedBy: { fields: Array.from(p.matchingFields) },
           })),
@@ -222,7 +224,7 @@ export class RelatedDashboardsClient {
     return { dashboards: relevantDashboards };
   }
 
-  getPanelsByIndex(index: string, panels: DashboardAttributes['panels']): DashboardPanel[] {
+  private getPanelsByIndex(index: string, panels: DashboardAttributes['panels']): DashboardPanel[] {
     const panelsByIndex = panels.filter((p) => {
       if (isDashboardSection(p)) return false; // filter out sections
       const panelIndices = this.getPanelIndices(p);
@@ -231,7 +233,7 @@ export class RelatedDashboardsClient {
     return panelsByIndex;
   }
 
-  getPanelsByField(
+  private getPanelsByField(
     fields: string[],
     panels: DashboardAttributes['panels']
   ): Array<{ matchingFields: Set<string>; panel: DashboardPanel }> {
@@ -247,31 +249,46 @@ export class RelatedDashboardsClient {
     return panelsByField;
   }
 
-  getPanelIndices(panel: DashboardPanel): Set<string> {
-    const indices = new Set<string>();
+  private getPanelIndices(panel: DashboardPanel): Set<string> {
+    const emptyIndicesSet = new Set<string>();
     switch (panel.type) {
       case 'lens':
-        const lensAttr = panel.panelConfig.attributes as unknown as LensAttributes;
-        if (!lensAttr) {
-          return indices;
+        const maybeLensAttr = panel.panelConfig.attributes;
+        if (this.isLensVizAttributes(maybeLensAttr)) {
+          const lensIndices = this.getLensVizIndices(maybeLensAttr);
+          return lensIndices;
         }
-        const lensIndices = this.getLensVizIndices(lensAttr);
-        return lensIndices;
+        return emptyIndicesSet;
       default:
-        return indices;
+        return emptyIndicesSet;
     }
   }
 
-  getPanelFields(panel: DashboardPanel): Set<string> {
-    const fields = new Set<string>();
+  private getPanelFields(panel: DashboardPanel): Set<string> {
+    const emptyFieldsSet = new Set<string>();
     switch (panel.type) {
       case 'lens':
-        const lensAttr = panel.panelConfig.attributes as unknown as LensAttributes;
-        const lensFields = this.getLensVizFields(lensAttr);
-        return lensFields;
+        const maybeLensAttr = panel.panelConfig.attributes;
+        if (this.isLensVizAttributes(maybeLensAttr)) {
+          const lensFields = this.getLensVizFields(maybeLensAttr);
+          return lensFields;
+        }
+        return emptyFieldsSet;
       default:
-        return fields;
+        return emptyFieldsSet;
     }
+  }
+
+  private isLensVizAttributes(attributes: unknown): attributes is LensAttributes {
+    if (!attributes) {
+      return false;
+    }
+    return (
+      Boolean(attributes) &&
+      typeof attributes === 'object' &&
+      'type' in attributes &&
+      attributes.type === 'lens'
+    );
   }
 
   private getRuleQueryIndex(): string | null {
@@ -329,15 +346,30 @@ export class RelatedDashboardsClient {
   }
 
   private async getLinkedDashboardsByIds(ids: string[]): Promise<RelatedDashboard[]> {
-    const dashboardsResponse = await Promise.all(ids.map((id) => this.dashboardClient.get(id)));
-    const linkedDashboards: Dashboard[] = dashboardsResponse.map((d) => {
-      return d.result.item;
-    });
-    return linkedDashboards.map((d) => ({
-      id: d.id,
-      title: d.attributes.title,
-      matchedBy: { linked: true },
-    }));
+    const linkedDashboardsResponse = await Promise.all(
+      ids.map((id) => this.getLinkedDashboardById(id))
+    );
+    return linkedDashboardsResponse.filter((dashboard): dashboard is RelatedDashboard =>
+      Boolean(dashboard)
+    );
+  }
+
+  private async getLinkedDashboardById(id: string): Promise<RelatedDashboard | null> {
+    try {
+      const dashboardResponse = await this.dashboardClient.get(id);
+      return {
+        id: dashboardResponse.result.item.id,
+        title: dashboardResponse.result.item.attributes.title,
+        matchedBy: { linked: true },
+        description: dashboardResponse.result.item.attributes.description,
+      };
+    } catch (error) {
+      if (error.output.statusCode === 404) {
+        this.logger.warn(`Linked dashboard with id ${id} not found. Skipping.`);
+        return null;
+      }
+      throw new Error(`Error fetching dashboard with id ${id}: ${error.message || error}`);
+    }
   }
 
   private getMatchingFields(dashboard: RelatedDashboard): string[] {

@@ -71,7 +71,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
 
   /**
    * Returns a list of all indexes for Crowdstrike data supported for response actions
-   * @private
+   * @internal
    */
   private async fetchIndexNames(): Promise<string[]> {
     const cachedInfo = this.cache.get<string[]>('fetchIndexNames');
@@ -185,7 +185,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    const agentPolicyInfo = await this.fetchFleetInfoForAgents(elasticAgentIds, ['crowdstrike']);
+    const agentPolicyInfo = await this.fetchFleetInfoForAgents(elasticAgentIds);
 
     for (const agentInfo of agentPolicyInfo) {
       agentInfo.agentId = fleetAgentIdToCrowdstrikeAgentIdMap[agentInfo.elasticAgentId];
@@ -225,7 +225,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
 
   /**
    * Sends actions to Crowdstrike directly (via Connector)
-   * @private
+   * @internal
    */
   private async sendAction(
     actionType: SUB_ACTION,
@@ -439,7 +439,9 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   ): Promise<
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   > {
-    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      RunScriptActionRequestBody['parameters']
+    > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
       command: 'runscript',

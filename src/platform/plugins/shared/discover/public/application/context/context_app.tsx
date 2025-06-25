@@ -14,11 +14,12 @@ import {
   EuiPage,
   EuiPageBody,
   EuiSpacer,
-  useEuiPaddingSize,
-  useEuiTheme,
+  euiPaddingSize,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { cloneDeep } from 'lodash';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
@@ -29,7 +30,7 @@ import type { UseColumnsProps } from '@kbn/unified-data-table';
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import { kibanaFullBodyHeightCss } from '@kbn/core/public';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
 import type { AppState, GlobalState } from './services/context_state';
@@ -50,7 +51,8 @@ export interface ContextAppProps {
 }
 
 export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) => {
-  const { euiTheme } = useEuiTheme();
+  const styles = useMemoCss(componentStyles);
+
   const services = useDiscoverServices();
   const {
     analytics,
@@ -246,8 +248,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     };
   };
 
-  const titlePadding = useEuiPaddingSize('m');
-
   return (
     <Fragment>
       {fetchedState.anchorStatus.value === LoadingStatus.FAILED ? (
@@ -272,28 +272,12 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
               css={styles.docsContent}
               panelProps={{ role: 'main' }}
             >
-              <EuiText
-                data-test-subj="contextDocumentSurroundingHeader"
-                css={css`
-                  padding: ${titlePadding} ${titlePadding} 0;
-                  font-weight: ${euiTheme.font.weight.bold};
-                `}
-              >
+              <EuiText data-test-subj="contextDocumentSurroundingHeader" css={styles.title}>
                 <FormattedMessage
                   id="discover.context.contextOfTitle"
                   defaultMessage="Documents surrounding {anchorId}"
                   values={{
-                    anchorId: (
-                      <span
-                        css={css`
-                          background-color: ${euiTheme.colors.backgroundBaseWarning};
-                          color: ${euiTheme.colors.textWarning};
-                          padding: 0 ${euiTheme.size.xs};
-                        `}
-                      >
-                        #{anchorId}
-                      </span>
-                    ),
+                    anchorId: <span css={styles.documentId}>#{anchorId}</span>,
                   }}
                 />
               </EuiText>
@@ -325,11 +309,26 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
   );
 };
 
-const styles = {
+const componentStyles = {
   docsContent: css({
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
   }),
-  docsPage: kibanaFullBodyHeightCss('54px'), // 54px is the action bar height
+  docsPage: kbnFullBodyHeightCss('54px'), // 54px is the action bar height
+  title: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+    const titlePadding = euiPaddingSize(themeContext, 's');
+
+    return css({
+      padding: `${titlePadding} ${titlePadding} 0`,
+      fontWeight: euiTheme.font.weight.bold,
+    });
+  },
+  documentId: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.backgroundBaseWarning,
+      color: euiTheme.colors.textWarning,
+      padding: `0 ${euiTheme.size.xs}`,
+    }),
 };

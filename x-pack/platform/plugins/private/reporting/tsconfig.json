@@ -1,10 +1,11 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
+    "@kbn/actions-plugin",
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/discover-plugin",
@@ -52,9 +53,19 @@
     "@kbn/react-kibana-mount",
     "@kbn/core-security-common",
     "@kbn/core-http-server-utils",
+    "@kbn/core-saved-objects-server",
+    "@kbn/rrule",
     "@kbn/notifications-plugin",
+    "@kbn/spaces-utils",
+    "@kbn/logging-mocks",
+    "@kbn/shared-ux-router",
+    "@kbn/controls-plugin",
+    "@kbn/dashboard-plugin",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-http-browser",
+    "@kbn/response-ops-recurring-schedule-form",
+    "@kbn/core-mount-utils-browser-internal",
+    "@kbn/core-user-profile-browser"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

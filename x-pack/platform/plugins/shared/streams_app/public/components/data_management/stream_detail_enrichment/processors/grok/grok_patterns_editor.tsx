@@ -27,16 +27,17 @@ import {
   EuiIcon,
   EuiButtonIcon,
   EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DraftGrokExpression, GrokCollection } from '@kbn/grok-ui';
 import { Expression } from '@kbn/grok-ui';
 import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
-import { useStreamsEnrichmentSelector } from '../../state_management/stream_enrichment_state_machine';
+import { useStreamEnrichmentSelector } from '../../state_management/stream_enrichment_state_machine';
 import { SortableList } from '../../sortable_list';
 import { GrokPatternSuggestion } from './grok_pattern_suggestion';
-import { GeneratePatternButton } from './generate_pattern_button';
+import { GeneratePatternButton, AdditionalChargesCallout } from './generate_pattern_button';
 import { useGrokPatternSuggestion } from './use_grok_pattern_suggestion';
 import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
 import { selectPreviewDocuments } from '../../state_management/simulation_state_machine/selectors';
@@ -51,7 +52,7 @@ export const GrokPatternsEditor = () => {
     setValue,
   } = useFormContext();
 
-  const grokCollection = useStreamsEnrichmentSelector(
+  const grokCollection = useStreamEnrichmentSelector(
     (machineState) => machineState.context.grokCollection
   );
 
@@ -145,39 +146,49 @@ export const GrokPatternsEditor = () => {
           onDismiss={() => refreshSuggestions(null)}
         />
       ) : (
-        <EuiFlexGroup gutterSize="l" alignItems="center">
-          {aiFeatures && (
+        <>
+          <EuiFlexGroup gutterSize="l" alignItems="center">
+            {aiFeatures && (
+              <EuiFlexItem grow={false}>
+                <GeneratePatternButton
+                  aiFeatures={aiFeatures}
+                  onClick={(connectorId) =>
+                    refreshSuggestions({
+                      connectorId,
+                      streamName: stream.name,
+                      samples: previewDocuments,
+                      fieldName: fieldValue,
+                    })
+                  }
+                  isLoading={suggestionsState.loading}
+                  isDisabled={!isValidField}
+                />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
-              <GeneratePatternButton
-                aiFeatures={aiFeatures}
-                onClick={(connectorId) =>
-                  refreshSuggestions({
-                    connectorId,
-                    streamName: stream.name,
-                    samples: previewDocuments,
-                    fieldName: fieldValue,
-                  })
-                }
-                isLoading={suggestionsState.loading}
-                isDisabled={!isValidField}
-              />
+              <EuiButtonEmpty
+                data-test-subj="streamsAppGrokPatternsEditorAddPatternButton"
+                onClick={handleAddPattern}
+                flush="left"
+                size="s"
+                isDisabled={suggestionsState.loading}
+              >
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditor.addPattern',
+                  { defaultMessage: 'Add pattern' }
+                )}
+              </EuiButtonEmpty>
             </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="streamsAppGrokPatternsEditorAddPatternButton"
-              onClick={handleAddPattern}
-              flush="left"
-              size="s"
-              isDisabled={suggestionsState.loading}
-            >
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditor.addPattern',
-                { defaultMessage: 'Add pattern' }
-              )}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          </EuiFlexGroup>
+          {aiFeatures &&
+            aiFeatures.isManagedAIConnector &&
+            !aiFeatures.hasAcknowledgedAdditionalCharges && (
+              <>
+                <EuiSpacer size="s" />
+                <AdditionalChargesCallout aiFeatures={aiFeatures} />
+              </>
+            )}
+        </>
       )}
     </>
   );

@@ -18,7 +18,7 @@ const spaceContextRegex = /^\/s\/([a-z0-9_\-]+)/;
  * @param serverBasePath The server's base path.
  * @returns the space id.
  *
- * @private
+ * @internal
  */
 export function getSpaceIdFromPath(
   requestBasePath?: string | null,

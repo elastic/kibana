@@ -87,7 +87,7 @@
             "section": "def-public.CreateAlertDeleteScheduleParams",
             "text": "CreateAlertDeleteScheduleParams"
           },
-          ") => Promise<unknown>"
+          ") => Promise<string | undefined>"
         ],
         "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/create_alert_delete_schedule.ts",
         "deprecated": false,
@@ -360,7 +360,7 @@
           },
           ") => ",
           "UseMutationResult",
-          "<unknown, ",
+          "<string | undefined, ",
           "IHttpFetchError",
           "<",
           "ResponseErrorBody",
@@ -697,12 +697,28 @@
             "label": "onSuccess",
             "description": [],
             "signature": [
-              "() => void"
+              "(message?: string | undefined) => void"
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/response-ops-alerts-delete",
+                "id": "def-public.UseAlertDeleteScheduleParams.onSuccess.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
