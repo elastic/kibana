@@ -66,7 +66,7 @@ export class OnechatPlugin
         title: ONECHAT_TITLE,
         euiIconType: 'logoElasticsearch',
         visibleIn: ['sideNav', 'globalSearch'],
-        deepLinks: [{ id: 'chat', path: '/chat', title: 'Chat' }],
+        deepLinks: [{ id: 'chat', path: '/conversations', title: 'Chat' }],
         async mount({ element, history }: AppMountParameters) {
           const { renderApp } = await import('./application');
           const [coreStart, startPluginDeps] = await coreSetup.getStartServices();
