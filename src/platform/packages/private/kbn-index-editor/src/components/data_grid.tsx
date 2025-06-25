@@ -18,10 +18,13 @@ import {
   UnifiedDataTable,
   type SortOrder,
 } from '@kbn/unified-data-table';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { difference, intersection } from 'lodash';
 import { KibanaContextExtra } from '../types';
 import { getCellValueRenderer } from './value_input_control';
+
+const MemoizedUnifiedDataTable = React.memo(UnifiedDataTable);
 
 interface ESQLDataGridProps {
   rows: DataTableRecord[];
@@ -61,6 +64,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const [activeColumns, setActiveColumns] = useState<string[]>(
     (props.initialColumns || props.columns).map((c) => c.name)
   );
+  const [hiddenColumns, setHiddenColumns] = useState<string[]>([]);
   const [rowHeight, setRowHeight] = useState<number>(
     props.initialRowHeight ?? DEFAULT_INITIAL_ROW_HEIGHT
   );
@@ -69,9 +73,33 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   // Track which cell is being edited
   const [editingCell, setEditingCell] = useState({ row: null, col: null });
 
-  const onSetColumns = useCallback((columns: string[]) => {
-    setActiveColumns(columns);
-  }, []);
+  const onSetColumns = useCallback(
+    (columns: string[]) => {
+      setActiveColumns(columns);
+      setHiddenColumns((prevState) => {
+        const columnsDiff = props.columns
+          .map((c) => c.name)
+          .filter((name) => !columns.includes(name));
+        if (columnsDiff.length !== prevState.length) {
+          return columnsDiff;
+        }
+        return prevState;
+      });
+    },
+    [props.columns]
+  );
+
+  // props.columns can change when a new column is added
+  useEffect(() => {
+    setActiveColumns((prevActiveColumns) => {
+      const currentColumnNames = props.columns
+        .map((c) => c.name)
+        .filter((name) => !hiddenColumns.includes(name));
+      const preservedOrder = intersection(prevActiveColumns, currentColumnNames);
+      const newColumns = difference(currentColumnNames, preservedOrder);
+      return [...newColumns, ...preservedOrder];
+    });
+  }, [props.columns, hiddenColumns]);
 
   const columnsMeta = useMemo(() => {
     return props.columns.reduce((acc, column) => {
@@ -128,7 +156,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
 
   return (
     <>
-      <UnifiedDataTable
+      <MemoizedUnifiedDataTable
         columns={activeColumns}
         rows={rows}
         columnsMeta={columnsMeta}

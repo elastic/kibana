@@ -88,6 +88,10 @@ export class IndexUpdateService {
   private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([]);
   public readonly rows$: Observable<DataTableRecord[]> = this._rows$.asObservable();
 
+  // Holds runtime field definitions reactively
+  private _runtimeFields$ = new BehaviorSubject<string[]>([]);
+  public readonly runtimeFields$: Observable<any[]> = this._runtimeFields$.asObservable();
+
   private readonly _subscription = new Subscription();
 
   // Accumulate updates in buffer with undo
@@ -140,12 +144,21 @@ export class IndexUpdateService {
   public readonly dataView$: Observable<DataView> = combineLatest([
     this._indexName$,
     this._indexCrated$,
+    this.runtimeFields$,
   ]).pipe(
     skipWhile(([indexName, indexCreated]) => {
       return indexCreated === false || !indexName;
     }),
-    switchMap(([indexName]) => {
-      return from(this.getDataView(indexName!));
+    switchMap(async ([indexName, , runtimeFields]) => {
+      const dataView = await this.getDataView(indexName!);
+
+      for (const field of runtimeFields) {
+        // HD move to dataTableColumns$
+        dataView.addRuntimeField(field, {
+          type: 'keyword', // Default type, can be adjusted based on field definition
+        });
+      }
+      return dataView;
     }),
     shareReplay({ bufferSize: 1, refCount: true })
   );
@@ -378,6 +391,11 @@ export class IndexUpdateService {
    */
   public undo() {
     this.actions$.next({ type: 'undo' });
+  }
+
+  public addRuntimeField(filedName: string) {
+    const current = this._runtimeFields$.getValue();
+    this._runtimeFields$.next([...current, filedName]);
   }
 
   public destroy() {

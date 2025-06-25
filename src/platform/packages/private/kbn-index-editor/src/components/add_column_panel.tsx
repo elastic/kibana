@@ -35,8 +35,8 @@ export const AddColumnPanel: React.FC<AddColumnPanelProps> = ({ onHide }) => {
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       try {
-        // Is there a max length for column names?
-        // const response = await indexUpdateService.bulkUpdate([{ value: newRow }]);
+        // Is there a max length of column name?
+        indexUpdateService.addRuntimeField(columnName);
       } catch (error) {
         notifications.toasts.addError(error as Error, {
           title: i18n.translate('indexEditor.addCOlumn.ErrorTitle', {
@@ -45,7 +45,7 @@ export const AddColumnPanel: React.FC<AddColumnPanelProps> = ({ onHide }) => {
         });
       }
     },
-    [notifications.toasts]
+    [columnName, indexUpdateService, notifications.toasts]
   );
 
   return (
