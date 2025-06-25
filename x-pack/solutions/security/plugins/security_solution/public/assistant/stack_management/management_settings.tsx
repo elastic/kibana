@@ -132,8 +132,8 @@ export const ManagementSettings = React.memo(() => {
     navigateToApp('home');
   }
 
-  if (conversations && spaceId) {
-    return (
+  if (conversations) {
+    return spaceId ? (
       <AssistantSpaceIdProvider spaceId={spaceId}>
         <AssistantSettingsManagement
           selectedConversation={currentConversation}
@@ -142,7 +142,7 @@ export const ManagementSettings = React.memo(() => {
           currentTab={currentTab}
         />
       </AssistantSpaceIdProvider>
-    );
+    ) : null;
   }
 
   return <></>;
