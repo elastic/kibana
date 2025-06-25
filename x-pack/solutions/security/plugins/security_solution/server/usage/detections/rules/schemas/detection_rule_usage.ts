@@ -102,6 +102,32 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         },
       },
     },
+    response_actions: {
+      enabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of enabled query rules configured with response actions',
+        },
+      },
+      disabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of disabled query rules configured with response actions',
+        },
+      },
+      response_actions: {
+        endpoint: {
+          type: 'long',
+          _meta: {
+            description: 'Number of endpoint response actions within query rules',
+          },
+        },
+        osquery: {
+          type: 'long',
+          _meta: { description: 'Number of osquery response actions within query rules' },
+        },
+      },
+    },
   },
   query_custom: {
     enabled: { type: 'long', _meta: { description: 'Number of custom query rules enabled' } },
@@ -206,6 +232,32 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         },
       },
     },
+    response_actions: {
+      enabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of enabled custom query rules configured with response actions',
+        },
+      },
+      disabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of disabled custom query rules configured with response actions',
+        },
+      },
+      response_actions: {
+        endpoint: {
+          type: 'long',
+          _meta: {
+            description: 'Number of endpoint response actions within custom query rules',
+          },
+        },
+        osquery: {
+          type: 'long',
+          _meta: { description: 'Number of osquery response actions within custom query rules' },
+        },
+      },
+    },
   },
   threshold: {
     enabled: {
@@ -306,6 +358,32 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         _meta: {
           description:
             'Number of threshold rules configured do not suppress alerts with missing fields',
+        },
+      },
+    },
+    response_actions: {
+      enabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of enabled threshold rules configured with response actions',
+        },
+      },
+      disabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of disabled threshold rules configured with response actions',
+        },
+      },
+      response_actions: {
+        endpoint: {
+          type: 'long',
+          _meta: {
+            description: 'Number of endpoint response actions within threshold rules',
+          },
+        },
+        osquery: {
+          type: 'long',
+          _meta: { description: 'Number of osquery response actions within threshold rules' },
         },
       },
     },
@@ -414,6 +492,34 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         },
       },
     },
+    response_actions: {
+      enabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of enabled custom threshold rules configured with response actions',
+        },
+      },
+      disabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of disabled custom threshold rules configured with response actions',
+        },
+      },
+      response_actions: {
+        endpoint: {
+          type: 'long',
+          _meta: {
+            description: 'Number of endpoint response actions within custom threshold rules',
+          },
+        },
+        osquery: {
+          type: 'long',
+          _meta: {
+            description: 'Number of osquery response actions within custom threshold rules',
+          },
+        },
+      },
+    },
   },
   eql: {
     enabled: { type: 'long', _meta: { description: 'Number of eql rules enabled' } },
@@ -504,6 +610,32 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         type: 'long',
         _meta: {
           description: 'Number of eql rules configured do not suppress alerts with missing fields',
+        },
+      },
+    },
+    response_actions: {
+      enabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of enabled eql rules configured with response actions',
+        },
+      },
+      disabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of disabled eql rules configured with response actions',
+        },
+      },
+      response_actions: {
+        endpoint: {
+          type: 'long',
+          _meta: {
+            description: 'Number of endpoint response actions within eql rules',
+          },
+        },
+        osquery: {
+          type: 'long',
+          _meta: { description: 'Number of osquery response actions within eql rules' },
         },
       },
     },
@@ -599,6 +731,32 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         _meta: {
           description:
             'Number of custom eql rules configured do not suppress alerts with missing fields',
+        },
+      },
+    },
+    response_actions: {
+      enabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of enabled custom EQL rules configured with response actions',
+        },
+      },
+      disabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of disabled custom EQL rules configured with response actions',
+        },
+      },
+      response_actions: {
+        endpoint: {
+          type: 'long',
+          _meta: {
+            description: 'Number of endpoint response actions within custom EQL rules',
+          },
+        },
+        osquery: {
+          type: 'long',
+          _meta: { description: 'Number of osquery response actions within custom EQL rules' },
         },
       },
     },
@@ -704,6 +862,32 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         _meta: {
           description:
             'Number of machine_learning rules configured do not suppress alerts with missing fields',
+        },
+      },
+    },
+    response_actions: {
+      enabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of enabled ML rules configured with response actions',
+        },
+      },
+      disabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of disabled ML rules configured with response actions',
+        },
+      },
+      response_actions: {
+        endpoint: {
+          type: 'long',
+          _meta: {
+            description: 'Number of endpoint response actions within ML rules',
+          },
+        },
+        osquery: {
+          type: 'long',
+          _meta: { description: 'Number of osquery response actions within ML rules' },
         },
       },
     },
@@ -817,6 +1001,32 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         },
       },
     },
+    response_actions: {
+      enabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of enabled custom ML rules configured with response actions',
+        },
+      },
+      disabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of disabled custom ML rules configured with response actions',
+        },
+      },
+      response_actions: {
+        endpoint: {
+          type: 'long',
+          _meta: {
+            description: 'Number of endpoint response actions within custom ML rules',
+          },
+        },
+        osquery: {
+          type: 'long',
+          _meta: { description: 'Number of osquery response actions within custom ML rules' },
+        },
+      },
+    },
   },
   threat_match: {
     enabled: {
@@ -918,6 +1128,32 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         _meta: {
           description:
             'Number of threat_match rules configured do not suppress alerts with missing fields',
+        },
+      },
+    },
+    response_actions: {
+      enabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of enabled threat match rules configured with response actions',
+        },
+      },
+      disabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of disabled threat match rules configured with response actions',
+        },
+      },
+      response_actions: {
+        endpoint: {
+          type: 'long',
+          _meta: {
+            description: 'Number of endpoint response actions within threat match rules',
+          },
+        },
+        osquery: {
+          type: 'long',
+          _meta: { description: 'Number of osquery response actions within threat match rules' },
         },
       },
     },
@@ -1029,6 +1265,36 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         },
       },
     },
+    response_actions: {
+      enabled: {
+        type: 'long',
+        _meta: {
+          description:
+            'Number of enabled custom threat match rules configured with response actions',
+        },
+      },
+      disabled: {
+        type: 'long',
+        _meta: {
+          description:
+            'Number of disabled custom threat match rules configured with response actions',
+        },
+      },
+      response_actions: {
+        endpoint: {
+          type: 'long',
+          _meta: {
+            description: 'Number of endpoint response actions within custom threat match rules',
+          },
+        },
+        osquery: {
+          type: 'long',
+          _meta: {
+            description: 'Number of osquery response actions within custom threat match rules',
+          },
+        },
+      },
+    },
   },
   new_terms: {
     enabled: {
@@ -1129,6 +1395,32 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         _meta: {
           description:
             'Number of new_terms rules configured do not suppress alerts with missing fields',
+        },
+      },
+    },
+    response_actions: {
+      enabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of enabled new terms rules configured with response actions',
+        },
+      },
+      disabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of disabled new terms rules configured with response actions',
+        },
+      },
+      response_actions: {
+        endpoint: {
+          type: 'long',
+          _meta: {
+            description: 'Number of endpoint response actions within new terms rules',
+          },
+        },
+        osquery: {
+          type: 'long',
+          _meta: { description: 'Number of osquery response actions within new terms rules' },
         },
       },
     },
@@ -1237,6 +1529,34 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         },
       },
     },
+    response_actions: {
+      enabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of enabled custom new terms rules configured with response actions',
+        },
+      },
+      disabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of disabled custom new terms rules configured with response actions',
+        },
+      },
+      response_actions: {
+        endpoint: {
+          type: 'long',
+          _meta: {
+            description: 'Number of endpoint response actions within custom new terms rules',
+          },
+        },
+        osquery: {
+          type: 'long',
+          _meta: {
+            description: 'Number of osquery response actions within custom new terms rules',
+          },
+        },
+      },
+    },
   },
   esql: {
     enabled: {
@@ -1335,6 +1655,32 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         type: 'long',
         _meta: {
           description: 'Number of esql rules configured do not suppress alerts with missing fields',
+        },
+      },
+    },
+    response_actions: {
+      enabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of enabled ES|QL rules configured with response actions',
+        },
+      },
+      disabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of disabled ES|QL rules configured with response actions',
+        },
+      },
+      response_actions: {
+        endpoint: {
+          type: 'long',
+          _meta: {
+            description: 'Number of endpoint response actions within ES|QL rules',
+          },
+        },
+        osquery: {
+          type: 'long',
+          _meta: { description: 'Number of osquery response actions within ES|QL rules' },
         },
       },
     },
@@ -1441,6 +1787,32 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         },
       },
     },
+    response_actions: {
+      enabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of enabled custom ES|QL rules configured with response actions',
+        },
+      },
+      disabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of disabled custom ES|QL rules configured with response actions',
+        },
+      },
+      response_actions: {
+        endpoint: {
+          type: 'long',
+          _meta: {
+            description: 'Number of endpoint response actions within custom ES|QL rules',
+          },
+        },
+        osquery: {
+          type: 'long',
+          _meta: { description: 'Number of osquery response actions within custom ES|QL rules' },
+        },
+      },
+    },
   },
   elastic_total: {
     enabled: { type: 'long', _meta: { description: 'Number of elastic rules enabled' } },
@@ -1538,6 +1910,32 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         },
       },
     },
+    response_actions: {
+      enabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of enabled prebuilt rules configured with response actions',
+        },
+      },
+      disabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of disabled prebuilt rules configured with response actions',
+        },
+      },
+      response_actions: {
+        endpoint: {
+          type: 'long',
+          _meta: {
+            description: 'Number of endpoint response actions within prebuilt rules',
+          },
+        },
+        osquery: {
+          type: 'long',
+          _meta: { description: 'Number of osquery response actions within prebuilt rules' },
+        },
+      },
+    },
   },
   custom_total: {
     enabled: { type: 'long', _meta: { description: 'Number of custom rules enabled' } },
@@ -1629,6 +2027,32 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         _meta: {
           description:
             'Number of custom rules configured do not suppress alerts with missing fields',
+        },
+      },
+    },
+    response_actions: {
+      enabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of enabled custom rules configured with response actions',
+        },
+      },
+      disabled: {
+        type: 'long',
+        _meta: {
+          description: 'Number of disabled custom rules configured with response actions',
+        },
+      },
+      response_actions: {
+        endpoint: {
+          type: 'long',
+          _meta: {
+            description: 'Number of endpoint response actions within custom rules',
+          },
+        },
+        osquery: {
+          type: 'long',
+          _meta: { description: 'Number of osquery response actions within custom rules' },
         },
       },
     },

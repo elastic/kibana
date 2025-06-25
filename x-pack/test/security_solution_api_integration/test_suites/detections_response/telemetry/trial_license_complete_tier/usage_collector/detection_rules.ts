@@ -1313,6 +1313,14 @@ export default ({ getService }: FtrProviderContext) => {
               suppresses_missing_fields: 0,
               does_not_suppress_missing_fields: 0,
             },
+            response_actions: {
+              enabled: 0,
+              disabled: 0,
+              response_actions: {
+                endpoint: 0,
+                osquery: 0,
+              },
+            },
           });
         });
       });
@@ -1348,6 +1356,9 @@ export default ({ getService }: FtrProviderContext) => {
             has_alert_suppression_per_time_period: false,
             has_alert_suppression_missing_fields_strategy_do_not_suppress: false,
             alert_suppression_fields_count: 0,
+            has_response_actions: false,
+            has_response_actions_endpoint: false,
+            has_response_actions_osquery: false,
           });
         });
       });
@@ -1390,6 +1401,9 @@ export default ({ getService }: FtrProviderContext) => {
             has_alert_suppression_per_time_period: false,
             has_alert_suppression_missing_fields_strategy_do_not_suppress: false,
             alert_suppression_fields_count: 0,
+            has_response_actions: false,
+            has_response_actions_endpoint: false,
+            has_response_actions_osquery: false,
           });
           expect(
             stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled
@@ -1447,6 +1461,9 @@ export default ({ getService }: FtrProviderContext) => {
             has_alert_suppression_per_time_period: false,
             has_alert_suppression_missing_fields_strategy_do_not_suppress: false,
             alert_suppression_fields_count: 0,
+            has_response_actions: false,
+            has_response_actions_endpoint: false,
+            has_response_actions_osquery: false,
           });
           expect(
             stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled
@@ -1504,6 +1521,9 @@ export default ({ getService }: FtrProviderContext) => {
             has_alert_suppression_per_time_period: false,
             has_alert_suppression_missing_fields_strategy_do_not_suppress: false,
             alert_suppression_fields_count: 0,
+            has_response_actions: false,
+            has_response_actions_endpoint: false,
+            has_response_actions_osquery: false,
           });
           expect(
             stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled
@@ -1564,6 +1584,9 @@ export default ({ getService }: FtrProviderContext) => {
             has_alert_suppression_per_time_period: false,
             has_alert_suppression_missing_fields_strategy_do_not_suppress: false,
             alert_suppression_fields_count: 0,
+            has_response_actions: false,
+            has_response_actions_endpoint: false,
+            has_response_actions_osquery: false,
           });
           expect(
             stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled

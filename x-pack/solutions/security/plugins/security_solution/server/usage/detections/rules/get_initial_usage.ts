@@ -13,7 +13,11 @@ import type {
   SingleEventMetric,
   AlertSuppressionUsage,
   SpacesUsage,
+<<<<<<< HEAD
   FeatureTypeUsage,
+=======
+  ResponseActionsUsage,
+>>>>>>> cae3861f5d4fe1fea0419eedbf852b460e3033ee
 } from './types';
 
 export const initialAlertSuppression: AlertSuppressionUsage = {
@@ -28,6 +32,15 @@ export const initialAlertSuppression: AlertSuppressionUsage = {
   },
   suppresses_missing_fields: 0,
   does_not_suppress_missing_fields: 0,
+};
+
+export const initialResponseActionsUsage: ResponseActionsUsage = {
+  enabled: 0,
+  disabled: 0,
+  response_actions: {
+    endpoint: 0,
+    osquery: 0,
+  },
 };
 
 export const getInitialSpacesUsage = (): SpacesUsage => ({
@@ -46,6 +59,7 @@ export const getInitialFeatureTypeUsage = (): FeatureTypeUsage => ({
   notifications_disabled: 0,
   legacy_investigation_fields: 0,
   alert_suppression: initialAlertSuppression,
+  response_actions: initialResponseActionsUsage,
 });
 
 /**
