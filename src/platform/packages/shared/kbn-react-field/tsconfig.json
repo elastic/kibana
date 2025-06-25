@@ -6,6 +6,6 @@
   "include": ["**/*.ts", "**/*.tsx", "../../../../../typings/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
-    "@kbn/core",
+    "@kbn/css-utils",
   ]
 }
