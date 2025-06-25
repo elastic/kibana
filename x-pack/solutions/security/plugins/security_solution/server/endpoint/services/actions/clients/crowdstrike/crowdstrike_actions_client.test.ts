@@ -65,6 +65,11 @@ describe('CrowdstrikeActionsClient class', () => {
 
       return BaseDataGenerator.toEsSearchResponse([]);
     });
+
+    (
+      classConstructorOptions.endpointService.getInternalFleetServices()
+        .ensureInCurrentSpace as jest.Mock
+    ).mockResolvedValue(undefined);
   });
 
   it.each([
@@ -180,7 +185,19 @@ describe('CrowdstrikeActionsClient class', () => {
             input_type: 'crowdstrike',
             type: 'INPUT_ACTION',
           },
-          agent: { id: ['1-2-3'] },
+          agent: {
+            id: ['1-2-3'],
+            policy: [
+              {
+                agentId: '1-2-3',
+                agentPolicyId: expect.any(String),
+                elasticAgentId: 'fleet-agent-id-123',
+                integrationPolicyId: expect.any(String),
+              },
+            ],
+          },
+          originSpaceId: 'default',
+          tags: [],
           meta: {
             hostName: 'Crowdstrike-1460',
           },
@@ -276,7 +293,19 @@ describe('CrowdstrikeActionsClient class', () => {
             input_type: 'crowdstrike',
             type: 'INPUT_ACTION',
           },
-          agent: { id: ['1-2-3'] },
+          agent: {
+            id: ['1-2-3'],
+            policy: [
+              {
+                agentId: '1-2-3',
+                agentPolicyId: expect.any(String),
+                elasticAgentId: 'fleet-agent-id-123',
+                integrationPolicyId: expect.any(String),
+              },
+            ],
+          },
+          originSpaceId: 'default',
+          tags: [],
           meta: {
             hostName: 'Crowdstrike-1460',
           },

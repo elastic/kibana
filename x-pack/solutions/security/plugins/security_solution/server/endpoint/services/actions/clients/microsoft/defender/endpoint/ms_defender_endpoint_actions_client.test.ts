@@ -54,6 +54,23 @@ describe('MS Defender response actions client', () => {
     connectorActionsMock =
       clientConstructorOptionsMock.connectorActions as NormalizedExternalConnectorClientMock;
     msClientMock = new MicrosoftDefenderEndpointActionsClient(clientConstructorOptionsMock);
+
+    getActionDetailsByIdMock.mockImplementation(async (_, __, id: string) => {
+      return new EndpointActionGenerator('seed').generateActionDetails({
+        id,
+      });
+    });
+
+    const fleetServices = clientConstructorOptionsMock.endpointService.getInternalFleetServices();
+    const ensureInCurrentSpaceMock = jest.spyOn(fleetServices, 'ensureInCurrentSpace');
+
+    ensureInCurrentSpaceMock.mockResolvedValue(undefined);
+
+    const getInternalFleetServicesMock = jest.spyOn(
+      clientConstructorOptionsMock.endpointService,
+      'getInternalFleetServices'
+    );
+    getInternalFleetServicesMock.mockReturnValue(fleetServices);
   });
 
   const supportedResponseActionClassMethods: Record<keyof ResponseActionsClient, boolean> = {
@@ -147,7 +164,17 @@ describe('MS Defender response actions client', () => {
             },
             agent: {
               id: ['1-2-3'],
+              policy: [
+                {
+                  agentId: '1-2-3',
+                  agentPolicyId: expect.any(String),
+                  elasticAgentId: '1-2-3',
+                  integrationPolicyId: expect.any(String),
+                },
+              ],
             },
+            originSpaceId: 'default',
+            tags: [],
             meta: {
               machineActionId: '5382f7ea-7557-4ab7-9782-d50480024a4e',
             },
@@ -169,7 +196,7 @@ describe('MS Defender response actions client', () => {
         expect.objectContaining({
           id: expect.any(String),
           command: expect.any(String),
-          isCompleted: false,
+          isCompleted: expect.any(Boolean),
         })
       );
       expect(getActionDetailsByIdMock).toHaveBeenCalled();
@@ -248,7 +275,17 @@ describe('MS Defender response actions client', () => {
             },
             agent: {
               id: ['1-2-3'],
+              policy: [
+                {
+                  agentId: '1-2-3',
+                  agentPolicyId: expect.any(String),
+                  elasticAgentId: '1-2-3',
+                  integrationPolicyId: expect.any(String),
+                },
+              ],
             },
+            originSpaceId: 'default',
+            tags: [],
             meta: {
               machineActionId: '5382f7ea-7557-4ab7-9782-d50480024a4e',
             },
