@@ -435,10 +435,8 @@ x-pack/examples/embedded_lens_example @elastic/kibana-visualizations
 x-pack/platform/plugins/shared/encrypted_saved_objects @elastic/kibana-security
 src/platform/packages/shared/kbn-encrypted-saved-objects-shared @elastic/kibana-security
 x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
-x-pack/solutions/observability/plugins/entities_data_access @elastic/obs-entities
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
 x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
-x-pack/solutions/observability/plugins/entity_manager_app @elastic/obs-entities
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 examples/error_boundary @elastic/appex-sharedux
 src/platform/packages/shared/kbn-es @elastic/kibana-operations
@@ -569,8 +567,6 @@ x-pack/platform/plugins/shared/integration_assistant @elastic/security-scalabili
 src/platform/plugins/private/interactive_setup @elastic/kibana-security
 src/platform/test/interactive_setup_api_integration/plugins/test_endpoints @elastic/kibana-security
 src/platform/packages/shared/kbn-interpreter @elastic/kibana-visualizations
-x-pack/solutions/observability/plugins/inventory/e2e @elastic/obs-ux-infra_services-team
-x-pack/solutions/observability/plugins/inventory @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-io-ts-utils @elastic/obs-knowledge-team
 x-pack/solutions/search/packages/kbn-ipynb @elastic/search-kibana
 src/platform/packages/private/kbn-jest-serializers @elastic/kibana-operations

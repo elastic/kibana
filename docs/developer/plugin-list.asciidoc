@@ -560,16 +560,8 @@ security and spaces filtering.
 |This plugin provides Kibana user interfaces for managing the Enterprise Search solution and its products, App Search and Workplace Search.
 
 
-|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/entities_data_access/README.md[entitiesDataAccess]
-|Exposes services to access entities data.
-
-
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/entity_manager/README.md[entityManager]
 |This plugin provides access to observed entity data, such as information about hosts, pods, containers, services, and more.
-
-
-|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/entity_manager_app/README.md[entityManagerApp]
-|This plugin provides a user interface to interact with the Entity Manager.
 
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/event_log/README.md[eventLog]
@@ -648,10 +640,6 @@ the infrastructure monitoring use-case within Kibana.
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/integration_assistant/README.md[integrationAssistant]
 |Team owner: Security Integrations Scalability
-
-
-|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/inventory/README.md[inventory]
-|Home of the Inventory plugin, which renders the... inventory.
 
 
 |{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/kubernetes_security/README.md[kubernetesSecurity]
