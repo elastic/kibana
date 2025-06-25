@@ -8,6 +8,7 @@
  */
 
 import { isObject } from 'lodash';
+import { mutate, BasicPrettyPrinter, Builder } from '@kbn/esql-ast';
 import { Query, QueryPipeline, QueryRequest, Params } from './types';
 import { formatValue, escapeColumn } from './utils/formatters';
 
@@ -21,8 +22,14 @@ export function createPipeline(source: Query): QueryPipeline {
       return param;
     });
 
+    const { root, commands } = source;
+    const rootCopy = Builder.expression.query([...root.commands]);
+    for (const command of commands) {
+      mutate.generic.commands.append(rootCopy, command);
+    }
+
     return {
-      query: source.commands.map((command) => command.body).join('\n\t| '),
+      query: BasicPrettyPrinter.print(rootCopy, { multiline: true }),
       params,
     };
   };

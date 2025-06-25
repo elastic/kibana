@@ -9,7 +9,7 @@
 
 import { Params, QueryOperator } from '../types';
 import { formatColumn } from '../utils/formatters';
-import { append } from './append';
+import { append } from '../append';
 
 export enum SortOrder {
   Asc = 'ASC',

@@ -19,7 +19,7 @@ describe('stats', () => {
     );
 
     expect(pipeline.asString()).toEqual(
-      'FROM `logs-*`\n\t| STATS avg_duration = AVG(transaction.duration.us) BY service.name'
+      'FROM `logs-*`\n  | STATS avg_duration = AVG(transaction.duration.us) BY service.name'
     );
   });
 
@@ -34,7 +34,7 @@ describe('stats', () => {
     const queryRequest = pipeline.asRequest();
 
     expect(queryRequest.query).toEqual(
-      'FROM `logs-*`\n\t| STATS AVG(??duration), COUNT(??svcName) WHERE agent.name == "java" BY ??env'
+      'FROM `logs-*`\n  | STATS AVG(??duration), COUNT(??svcName) WHERE agent.name == "java" BY ??env'
     );
     expect(queryRequest.params).toEqual([
       {
@@ -48,7 +48,7 @@ describe('stats', () => {
       },
     ]);
     expect(pipeline.asString()).toEqual(
-      'FROM `logs-*`\n\t| STATS AVG(`transaction.duration.us`), COUNT(`service.name`) WHERE agent.name == "java" BY `service.environment`'
+      'FROM `logs-*`\n  | STATS AVG(`transaction.duration.us`), COUNT(`service.name`) WHERE agent.name == "java" BY `service.environment`'
     );
   });
 });

@@ -8,7 +8,7 @@
  */
 
 import { escapeColumn } from '../utils/formatters';
-import { append } from './append';
+import { append } from '../append';
 
 export function drop(...columns: Array<string | string[]>) {
   const command = `DROP ${columns

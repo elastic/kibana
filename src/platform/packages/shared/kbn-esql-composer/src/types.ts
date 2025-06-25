@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ESQLAstQueryExpression, ESQLCommand } from '@kbn/esql-ast';
+
 export interface Command {
   body: string;
 }
@@ -54,7 +56,8 @@ export interface QueryPipeline {
   asString: () => string;
 }
 export interface Query {
-  commands: Command[];
+  root: ESQLAstQueryExpression;
+  commands: Array<ESQLCommand<string>>;
   params: Params[];
 }
 

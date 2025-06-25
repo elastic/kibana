@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { parse } from '@kbn/esql-ast';
 import { createPipeline } from '../create_pipeline';
 import type { QueryPipeline } from '../types';
 import { escapeColumn } from '../utils/formatters';
@@ -14,12 +15,11 @@ import { escapeColumn } from '../utils/formatters';
 export function from(...patterns: Array<string | string[]>): QueryPipeline {
   const allPatterns = patterns.flatMap((pattern) => pattern);
 
+  const { root } = parse(`FROM ${allPatterns.map((pattern) => escapeColumn(pattern)).join(',')}`);
+
   return createPipeline({
-    commands: [
-      {
-        body: `FROM ${allPatterns.map((pattern) => escapeColumn(pattern)).join(',')}`,
-      },
-    ],
+    root,
+    commands: [],
     params: [],
   });
 }
