@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { ResponseActionRequestTag } from '../../constants';
 import { getUnExpiredActionsEsQuery } from '../../utils/fetch_space_ids_with_maybe_pending_actions';
 import { catchAndWrapError } from '../../../../utils';
 import {
@@ -55,6 +56,7 @@ import type {
   CommonResponseActionMethodOptions,
   CustomScriptsResponse,
   GetFileDownloadMethodResponse,
+  OmitUnsupportedAttributes,
   ProcessPendingActionsMethodOptions,
   ResponseActionsClient,
 } from './types';
@@ -70,6 +72,8 @@ import type {
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
   ResponseActionParametersWithProcessData,
+  ResponseActionRunScriptOutputContent,
+  ResponseActionRunScriptParameters,
   ResponseActionScanOutputContent,
   ResponseActionsExecuteParameters,
   ResponseActionScanParameters,
@@ -78,8 +82,6 @@ import type {
   SuspendProcessActionOutputContent,
   UploadedFileInfo,
   WithAllKeys,
-  ResponseActionRunScriptOutputContent,
-  ResponseActionRunScriptParameters,
 } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
@@ -164,6 +166,7 @@ export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
   Pick<LogsEndpointAction<TParameters, TOutputContent, TMeta>, 'meta'> & {
     command: ResponseActionsApiCommandNames;
     actionId?: string;
+    tags?: ResponseActionRequestTag[];
   };
 
 export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
@@ -219,7 +222,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
   /**
    * Ensures that the Action Request Index is setup correctly (ex. has required mappings)
-   * @private
+   * @internal
    */
   private async ensureActionRequestsIndexIsConfigured(): Promise<void> {
     this.log.debug(`checking index [${ENDPOINT_ACTIONS_INDEX}] is configured as expected`);
@@ -614,6 +617,9 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       // Add the `originSpaceId` property to the document if spaces is enabled
       ...(isSpacesEnabled ? { originSpaceId: this.options.spaceId } : {}),
 
+      // Add `tags` property to the document if spaces is enabled
+      ...(isSpacesEnabled ? { tags: actionRequest.tags ?? [] } : {}),
+
       // Need to suppress this TS error around `agent.policy` not supporting `undefined`.
       // It will be removed once we enable the feature and delete the feature flag checks.
       // @ts-expect-error
@@ -1002,7 +1008,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   public async runscript(
-    actionRequest: RunScriptActionRequestBody,
+    actionRequest: OmitUnsupportedAttributes<RunScriptActionRequestBody>,
     options?: CommonResponseActionMethodOptions
   ): Promise<
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
