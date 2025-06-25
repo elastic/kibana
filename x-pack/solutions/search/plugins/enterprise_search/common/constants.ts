@@ -44,7 +44,7 @@ export const ENTERPRISE_SEARCH_HOME_PLUGIN = {
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.home.description', {
     defaultMessage: 'Create search experiences with a refined set of APIs and tools.',
   }),
-  URL: '/app/elasticsearch/overview',
+  URL: '/app/elasticsearch/home',
   LOGO: 'logoElasticsearch',
 };
 
