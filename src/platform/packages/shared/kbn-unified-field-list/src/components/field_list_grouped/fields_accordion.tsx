@@ -19,7 +19,7 @@ import {
   EuiIconTip,
   type UseEuiTheme,
 } from '@elastic/eui';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { type FieldListItem, FieldsGroupNames, type RenderFieldItemParams } from '../../types';
 
@@ -66,7 +66,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
   showExistenceFetchTimeout,
   extraAction,
 }: FieldsAccordionProps<T>) {
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
 
   const renderButton = useMemo(() => {
     return (

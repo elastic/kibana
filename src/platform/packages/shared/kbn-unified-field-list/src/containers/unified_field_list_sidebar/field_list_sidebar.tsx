@@ -25,7 +25,7 @@ import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { DataViewField, type FieldSpec } from '@kbn/data-views-plugin/common';
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query/src/utils';
 import { FIELDS_LIMIT_SETTING } from '@kbn/discover-utils';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FieldList } from '../../components/field_list';
 import { FieldListFilters } from '../../components/field_list_filters';
 import { FieldListGrouped, type FieldListGroupedProps } from '../../components/field_list_grouped';
@@ -173,7 +173,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   additionalFieldGroups,
   additionalFilters,
 }) => {
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
 
   const { dataViews, core } = services;
 

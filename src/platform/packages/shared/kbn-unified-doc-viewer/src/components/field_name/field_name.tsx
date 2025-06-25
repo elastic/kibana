@@ -24,7 +24,7 @@ import { FieldIcon, FieldIconProps } from '@kbn/react-field';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query';
 import { getFieldTypeName } from '@kbn/field-utils';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 interface Props {
   fieldName: string;
@@ -43,7 +43,7 @@ export function FieldName({
   scripted = false,
   highlight = '',
 }: Props) {
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
 
   const typeName = getFieldTypeName(fieldType);
   const displayName =

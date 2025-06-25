@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import React, { ReactNode, HTMLAttributes, ButtonHTMLAttributes } from 'react';
 import { css } from '@emotion/react';
 import { euiFocusRing, euiFontSize, type CommonProps, type UseEuiTheme } from '@elastic/eui';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
   /**
@@ -82,7 +82,7 @@ export function FieldButton({
   buttonProps,
   ...rest
 }: FieldButtonProps) {
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
 
   const classes = classNames(
     'kbnFieldButton',
