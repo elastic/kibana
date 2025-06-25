@@ -55,7 +55,6 @@ const CONTAINER_SIZING_CSS = css({
 });
 
 export interface ImageEditorFlyoutProps {
-  onCancel: () => void;
   onSave: (imageConfig: ImageConfig) => void;
   initialImageConfig?: ImageConfig;
   getCurrentUser?: () => Promise<AuthenticatedUser>;

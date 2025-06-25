@@ -13,28 +13,16 @@ import { tracksOverlays, CanAddNewPanel } from '@kbn/presentation-containers';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
-import { ImageConfig } from '../../image_embeddable/types';
+import { ImageConfig, ImageEmbeddableSerializedState } from '../../image_embeddable/types';
 import { FileImageMetadata, imageEmbeddableFileKind } from '../../imports';
 import { coreServices, filesService } from '../../services/kibana_services';
 import { createValidateUrl } from '../../utils/validate_url';
 import { ImageViewerContext } from '../image_viewer/image_viewer_context';
-import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
-import { withSuspense } from '@kbn/shared-ux-utility';
+import {ImageEditorFlyout} from './image_editor_flyout';
+import { IMAGE_EMBEDDABLE_TYPE } from '../../image_embeddable/constants';
 
-const ConfigEditorFlyout = React.lazy(() => import('./image_editor_flyout'));
 
-const FallbackComponent = (
-  <EuiPanel className="eui-textCenter">
-    <EuiLoadingSpinner size="l" />
-  </EuiPanel>
-);
-
-const ImageEditorFlyout1 = withSuspense(
-  ConfigEditorFlyout,
-  FallbackComponent
-);
-
-export const openImageEditor = async ({
+export const getImageEditor = async ({
   parentApi,
   initialImageConfig,
 }: {
@@ -52,12 +40,6 @@ export const openImageEditor = async ({
   const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
 
   return new Promise((resolve, reject) => {
-    const onSave = (imageConfig: ImageConfig) => {
-      resolve(imageConfig);
-      flyoutSession.close();
-      overlayTracker?.clearOverlays();
-    };
-
     const onCancel = () => {
       reject();
       flyoutSession.close();
@@ -81,7 +63,12 @@ export const openImageEditor = async ({
             <ImageEditorFlyout1
               getCurrentUser={security.authc.getCurrentUser}
               onCancel={onCancel}
-              onSave={onSave}
+              onSave={(imageConfig: ImageConfig) => {
+                console.log('Image config saved:', imageConfig);
+                resolve(imageConfig);
+                flyoutSession.close();
+                overlayTracker?.clearOverlays();
+              }}
               initialImageConfig={initialImageConfig}
             />
           </ImageViewerContext.Provider>
@@ -101,4 +88,49 @@ export const openImageEditor = async ({
 
     overlayTracker?.openOverlay(flyoutSession);
   });
+};
+
+
+export const openImageEditor = async ({ 
+  parentApi,
+  initialImageConfig,
+}: {
+  parentApi: CanAddNewPanel;
+  initialImageConfig?: ImageConfig;
+}) => {
+    const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
+  
+    /**
+     * If available, the parent API will keep track of which flyout is open and close it
+     * if the app changes, disable certain actions when the flyout is open, etc.
+     */
+    const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
+    const onSave = (imageConfig: ImageConfig) => {
+      parentApi.addNewPanel<ImageEmbeddableSerializedState>({
+        panelType: IMAGE_EMBEDDABLE_TYPE,
+        serializedState: { rawState: { imageConfig } },
+      });
+      overlayTracker?.clearOverlays();
+    };
+
+    return <FilesContext client={filesClient}>
+          <ImageViewerContext.Provider
+            value={{
+              getImageDownloadHref: (fileId: string) => {
+                return filesClient.getDownloadHref({
+                  id: fileId,
+                  fileKind: imageEmbeddableFileKind.id,
+                });
+              },
+              validateUrl: createValidateUrl(coreServices.http.externalUrl),
+            }}
+          >
+            <ImageEditorFlyout
+              getCurrentUser={coreServices.security.authc.getCurrentUser}
+              onSave={onSave}
+              initialImageConfig={initialImageConfig}
+            />
+          </ImageViewerContext.Provider>
+        </FilesContext>
+
 };

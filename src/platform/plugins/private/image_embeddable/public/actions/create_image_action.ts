@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CanAddNewPanel } from '@kbn/presentation-containers';
+import { CanAddNewPanel, mountDashboardFlyout } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
@@ -17,7 +17,7 @@ import {
   IMAGE_EMBEDDABLE_TYPE,
 } from '../image_embeddable/constants';
 import { ImageEmbeddableSerializedState } from '../image_embeddable/types';
-import { uiActionsService } from '../services/kibana_services';
+import { coreServices, uiActionsService } from '../services/kibana_services';
 
 const parentApiIsCompatible = async (parentApi: unknown): Promise<CanAddNewPanel | undefined> => {
   const { apiCanAddNewPanel } = await import('@kbn/presentation-containers');
@@ -34,19 +34,32 @@ export const registerCreateImageAction = () => {
       return Boolean(await parentApiIsCompatible(parentApi));
     },
     execute: async ({ embeddable: parentApi }) => {
-      const canAddNewPanelParent = await parentApiIsCompatible(parentApi);
-      if (!canAddNewPanelParent) throw new IncompatibleActionError();
-      const { openImageEditor } = await import('../components/image_editor/open_image_editor');
-      try {
-        const imageConfig = await openImageEditor({ parentApi: canAddNewPanelParent });
+      mountDashboardFlyout({
+        core: coreServices,
+        api: parentApi,
+        getEditFlyout: async () => {
+          const canAddNewPanelParent = await parentApiIsCompatible(parentApi);
+          if (!canAddNewPanelParent) throw new IncompatibleActionError();
+          const { openImageEditor } = await import('../components/image_editor/open_image_editor');
+          try {
+            return await openImageEditor({ parentApi: canAddNewPanelParent });
+           
+          } catch {
+            // swallow the rejection, since this just means the user closed without saving
+          }
+        },
+        flyoutPropsOverrides: {
 
-        canAddNewPanelParent.addNewPanel<ImageEmbeddableSerializedState>({
-          panelType: IMAGE_EMBEDDABLE_TYPE,
-          serializedState: { rawState: { imageConfig } },
-        });
-      } catch {
-        // swallow the rejection, since this just means the user closed without saving
-      }
+          // onClose: onCancel,
+          size: 'm',
+          maxWidth: 500,
+          paddingSize: 'm',
+          ownFocus: true,
+          'data-test-subj': 'createImageEmbeddableFlyout',
+          'aria-labelledby': 'image-editor-flyout-title',
+
+        },
+      });
     },
     grouping: [ADD_PANEL_ANNOTATION_GROUP],
     getDisplayName: () =>
