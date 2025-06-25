@@ -56,7 +56,7 @@ export const getListItemsOverview = async ({
     const { aggregations: aggs, hits } = response as unknown as ListItemsOverviewAggsResponse;
 
     logger.debug(`Returning value list items metrics response: ${JSON.stringify(aggs, null, 2)}`);
-    console.log(`Returning value list items metrics response: ${JSON.stringify(aggs, null, 2)}`);
+
     return {
       total: hits.total.value || 0,
       max_items_per_list: aggs.max_items_per_list.value || 0,
