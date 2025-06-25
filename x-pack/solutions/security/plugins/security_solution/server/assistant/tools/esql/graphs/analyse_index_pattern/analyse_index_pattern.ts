@@ -24,23 +24,34 @@ import { getAnalyzeCompressedIndexMappingAgent } from './nodes/analyze_compresse
 import { getExplorePartialIndexMappingAgent } from './nodes/explore_partial_index_mapping_agent/explore_partial_index_mapping_agent';
 import { getExplorePartialIndexMappingResponder } from './nodes/explore_partial_index_mapping_responder/explore_partial_index_mapping_responder';
 
-export const getAnalyzeIndexPatternGraph = ({
+export const getAnalyzeIndexPatternGraph = async ({
   esClient,
   createLlmInstance,
 }: {
   esClient: ElasticsearchClient;
   createLlmInstance: CreateLlmInstance;
 }) => {
+
+  const [
+    analyzeCompressedIndexMappingAgent,
+    explorePartialIndexMappingAgent,
+    explorePartialIndexMappingResponder
+  ] = await Promise.all([
+    getAnalyzeCompressedIndexMappingAgent({ createLlmInstance }),
+    getExplorePartialIndexMappingAgent({ esClient, createLlmInstance }),
+    getExplorePartialIndexMappingResponder({ createLlmInstance })
+  ]);
+
   const graph = new StateGraph(AnalyzeIndexPatternAnnotation)
     .addNode(GET_FIELD_DESCRIPTORS, getFieldDescriptors({ esClient }))
     .addNode(
       ANALYZE_COMPRESSED_INDEX_MAPPING_AGENT,
-      getAnalyzeCompressedIndexMappingAgent({ createLlmInstance })
+      analyzeCompressedIndexMappingAgent
     )
 
     .addNode(
       EXPLORE_PARTIAL_INDEX_AGENT,
-      getExplorePartialIndexMappingAgent({ esClient, createLlmInstance })
+      explorePartialIndexMappingAgent
     )
     .addNode(TOOLS, (state: typeof AnalyzeIndexPatternAnnotation.State) => {
       const { input } = state;
@@ -57,7 +68,7 @@ export const getAnalyzeIndexPatternGraph = ({
     })
     .addNode(
       EXPLORE_PARTIAL_INDEX_RESPONDER,
-      getExplorePartialIndexMappingResponder({ createLlmInstance })
+      explorePartialIndexMappingResponder
     )
 
     .addEdge(START, GET_FIELD_DESCRIPTORS)

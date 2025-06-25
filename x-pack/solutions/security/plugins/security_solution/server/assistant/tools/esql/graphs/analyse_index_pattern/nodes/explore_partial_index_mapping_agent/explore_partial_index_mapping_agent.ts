@@ -24,6 +24,7 @@ export const getExplorePartialIndexMappingAgent = ({
     esClient,
     indexPattern: 'placeholder',
   });
+
   const llmWithTools = llm.bindTools([tool]);
 
   return async (state: typeof AnalyzeIndexPatternAnnotation.State) => {
