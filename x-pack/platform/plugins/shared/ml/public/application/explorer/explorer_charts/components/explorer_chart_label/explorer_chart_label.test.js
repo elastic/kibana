@@ -7,16 +7,19 @@
 
 import seriesConfig from '../../__mocks__/mock_series_config_filebeat.json';
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
 
 import { ExplorerChartLabel } from './explorer_chart_label';
 
 const DetectorLabel = <React.Fragment>{seriesConfig.detectorLabel}</React.Fragment>;
 
 describe('ExplorerChartLabelBadge', () => {
-  test('Render the chart label in one line.', () => {
-    const wrapper = shallow(
+  const renderWithProvider = (ui) => render(<EuiProvider colorMode="light">{ui}</EuiProvider>);
+
+  test('renders the chart label in one line', () => {
+    const { container } = renderWithProvider(
       <ExplorerChartLabel
         detectorLabel={DetectorLabel}
         entityFields={seriesConfig.entityFields}
@@ -24,18 +27,18 @@ describe('ExplorerChartLabelBadge', () => {
         wrapLabel={false}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
-  test('Render the chart label in two lines.', () => {
-    const wrapper = shallow(
+  test('renders the chart label in two lines', () => {
+    const { container } = renderWithProvider(
       <ExplorerChartLabel
         detectorLabel={DetectorLabel}
         entityFields={seriesConfig.entityFields}
         infoTooltip={seriesConfig.infoTooltip}
-        wrapLabel={true}
+        wrapLabel
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 });
