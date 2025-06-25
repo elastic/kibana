@@ -5,24 +5,27 @@
  * 2.0.
  */
 import {
+  MIGRATION_PANEL_NAME,
   ONBOARDING_RULE_MIGRATIONS_LIST,
   ONBOARDING_TRANSLATIONS_RESULT_TABLE,
   RULE_MIGRATIONS_GROUP_PANEL,
   RULE_MIGRATION_PROGRESS_BAR,
-} from '../../../screens/siem_migrations';
-import { deleteConnectors } from '../../../tasks/api_calls/common';
-import { createBedrockConnector } from '../../../tasks/api_calls/connectors';
-import { cleanMigrationData } from '../../../tasks/api_calls/siem_migrations';
-import { login } from '../../../tasks/login';
-import { visit } from '../../../tasks/navigation';
+} from '../../../../screens/siem_migrations';
+import { deleteConnectors } from '../../../../tasks/api_calls/common';
+import { createBedrockConnector } from '../../../../tasks/api_calls/connectors';
+import { cleanMigrationData } from '../../../../tasks/api_calls/siem_migrations';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import {
   openUploadRulesFlyout,
   selectMigrationConnector,
   startMigrationFromFlyout,
   uploadRules,
   toggleMigrateRulesCard,
-} from '../../../tasks/siem_migrations';
-import { GET_STARTED_URL } from '../../../urls/navigation';
+  saveDefaultMigrationName,
+  renameMigration,
+} from '../../../../tasks/siem_migrations';
+import { GET_STARTED_URL } from '../../../../urls/navigation';
 
 export const SPLUNK_TEST_RULES = [
   {
@@ -106,6 +109,7 @@ describe(
       it('should be able to create migrations', () => {
         selectMigrationConnector();
         openUploadRulesFlyout();
+        saveDefaultMigrationName();
         uploadRules(SPLUNK_TEST_RULES);
         cy.intercept({
           url: '**/start',
@@ -123,9 +127,12 @@ describe(
 
     context('On Successful Translation', () => {
       context('Migration Results', () => {
-        it('should be able to see the result of the completed migration', () => {
+        beforeEach(() => {
           selectMigrationConnector();
           toggleMigrateRulesCard();
+        });
+
+        it('should be able to see the result of the completed migration', () => {
           cy.get(RULE_MIGRATIONS_GROUP_PANEL).within(() => {
             cy.get(ONBOARDING_RULE_MIGRATIONS_LIST).should('have.length', 1);
             cy.get(ONBOARDING_TRANSLATIONS_RESULT_TABLE.TRANSLATION_STATUS_COUNT('Failed')).should(
@@ -139,6 +146,12 @@ describe(
               ONBOARDING_TRANSLATIONS_RESULT_TABLE.TRANSLATION_STATUS_COUNT('Translated')
             ).should('have.text', 1);
           });
+        });
+
+        it('should be able to rename the migration', () => {
+          cy.get(ONBOARDING_RULE_MIGRATIONS_LIST).should('have.length', 1);
+          renameMigration('New Migration Name');
+          cy.get(MIGRATION_PANEL_NAME).should('have.text', 'New Migration Name');
         });
       });
     });
