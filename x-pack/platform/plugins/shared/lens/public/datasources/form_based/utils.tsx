@@ -28,6 +28,7 @@ import { isQueryValid } from '@kbn/visualization-ui-components';
 import { getOriginalId } from '@kbn/transpose-utils';
 import type { DateRange } from '../../../common/types';
 import type {
+  DataType,
   FramePublicAPI,
   IndexPattern,
   StateSetter,
@@ -37,7 +38,7 @@ import type {
 import { renewIDs } from '../../utils';
 import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
-
+import { DataView } from '@kbn/data-views-plugin/public';
 import {
   operationDefinitionMap,
   getReferenceRoot,
@@ -785,7 +786,7 @@ function collectFiltersFromMetrics(layer: FormBasedLayer, columnIds: string[]) {
     const column = layer.columns[colId];
     const operationDefinition = operationDefinitionMap[column?.operationType];
     return (
-      !column?.isBucketed &&
+      column && !getIsBucketedFromOperation(column.operationType) &&
       // global filters for formulas are picked up by referenced columns
       !isColumnOfType<FormulaIndexPatternColumn>('formula', column) &&
       operationDefinition?.filterable
@@ -951,3 +952,44 @@ export const cloneLayer = (
   }
   return layers;
 };
+
+
+export function getDatatypeFromOperation(
+  operationType: string,
+  column: GenericIndexPatternColumn,
+  dataView?: IndexPattern | DataView,
+): DataType {
+  const operation = operationDefinitionMap[operationType];
+  if (operation.dataType) {
+    return operation.dataType as DataType;
+  }
+  const field = 'sourceField' in column ? column.sourceField : undefined;
+  if (field && dataView) {
+    const fieldType = dataView.getFieldByName(field)?.type;
+    if (fieldType) {
+      return fieldType as DataType;
+    }
+  }
+
+  return 'number';
+}
+
+export function getIsBucketedFromOperation(operationType: string): boolean {
+  const operation = operationDefinitionMap[operationType];
+  return operation.isBucketed ?? false;
+}
+
+function getScale(type: string) {
+  return type === 'string' ||
+    type === 'ip' ||
+    type === 'ip_range' ||
+    type === 'date_range' ||
+    type === 'number_range'
+    ? 'ordinal'
+    : 'ratio';
+}
+
+export function getScaleFromOperation(operationType: string): 'ratio' | 'ordinal' | 'interval' {
+  const operation = operationDefinitionMap[operationType];
+  return operation.scale ?? getScale('');
+}

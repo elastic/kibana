@@ -121,6 +121,8 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     displayName,
     description,
     input: 'field',
+    isBucketed: false,
+    scale: 'ratio',
     timeScalingMode: optionalTimeScaling ? 'optional' : undefined,
     getUnsupportedSettings: () => unsupportedSettings,
     getPossibleOperationForField: ({
@@ -156,11 +158,8 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     buildColumn: ({ field, previousColumn }, columnParams) => {
       return {
         label: labelLookup(field.displayName, previousColumn),
-        dataType: supportsDate && field.type === 'date' ? 'date' : 'number',
         operationType: type,
         sourceField: field.name,
-        isBucketed: false,
-        scale: 'ratio',
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
         filter: getFilter(previousColumn, columnParams),
         timeShift: columnParams?.shift || previousColumn?.timeShift,

@@ -40,6 +40,7 @@ import {
   LAST_VALUE_OP_SORT_FIELD_INVALID_TYPE,
   LAST_VALUE_OP_SORT_FIELD_NOT_FOUND,
 } from '../../../../user_messages_ids';
+import { getDatatypeFromOperation } from '../../utils';
 
 function ofName(name: string, timeShift: string | undefined, reducedTimeRange: string | undefined) {
   return adjustTimeScaleLabelSuffix(
@@ -177,6 +178,8 @@ export const lastValueOperation: OperationDefinition<
 > = {
   type: LAST_VALUE_ID,
   displayName: LAST_VALUE_NAME,
+  isBucketed: false,
+  scale: 'ratio',
   getDefaultLabel: (column, columns, indexPattern) =>
     ofName(
       getSafeName(column.sourceField, indexPattern),
@@ -248,10 +251,7 @@ export const lastValueOperation: OperationDefinition<
 
     return {
       label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.reducedTimeRange),
-      dataType: field.type as DataType,
       operationType: LAST_VALUE_ID,
-      isBucketed: false,
-      scale: getScale(field.type),
       sourceField: field.name,
       filter: getFilter(previousColumn, columnParams) || getExistsFilter(field.name),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
@@ -308,7 +308,7 @@ export const lastValueOperation: OperationDefinition<
     const newTimeField = newIndexPattern.getFieldByName(column.params.sortField);
     return Boolean(
       newField &&
-        newField.type === column.dataType &&
+        newField.type === getDatatypeFromOperation(column.operationType, column, newIndexPattern) &&
         !newField.aggregationRestrictions &&
         newTimeField?.type === 'date' &&
         supportedTypes.has(newField.type)

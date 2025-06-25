@@ -22,6 +22,7 @@ import type { DateRange } from '../../../common/types';
 import type { FormBasedLayer, FormBasedPrivateState } from './types';
 import type { FramePublicAPI, IndexPattern, UserMessage } from '../../types';
 import { TIMESHIFT_LT_INTERVAL, TIMESHIFT_NOT_MULTIPLE_INTERVAL } from '../../user_messages_ids';
+import { getIsBucketedFromOperation } from './utils';
 
 export function parseTimeShiftWrapper(timeShiftString: string, dateRange: DateRange) {
   if (isAbsoluteTimeShift(timeShiftString.trim())) {
@@ -200,7 +201,7 @@ export function getStateTimeShiftWarningMessages(
     const timeShiftMap: Record<number, string[]> = {};
     Object.entries(layer.columns).forEach(([columnId, column]) => {
       // TODO: I believe this can be replaced with a similar code like getColumnTimeShiftWarnings
-      if (column.isBucketed) return;
+      if (getIsBucketedFromOperation(column.operationType)) return;
       let duration: number = 0;
       // skip absolute time shifts as underneath it will be converted to be round
       // and avoid this type of issues

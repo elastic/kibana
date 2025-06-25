@@ -40,6 +40,7 @@ import type {
   StateSetter,
   IndexPatternMap,
   DatasourceDataPanelProps,
+  DataType,
 } from '../../types';
 import {
   changeIndexPattern,
@@ -69,6 +70,9 @@ import {
   cloneLayer,
   getNotifiableFeatures,
   getUnsupportedOperationsWarningMessage,
+  getDatatypeFromOperation,
+  getScaleFromOperation,
+  getIsBucketedFromOperation,
 } from './utils';
 import { getUniqueLabelGenerator, isDraggedDataViewField, nonNullable } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
@@ -127,13 +131,13 @@ const getSelectedFieldsFromColumns = memoizeOne(
 );
 
 function getSortingHint(column: GenericIndexPatternColumn, dataView?: IndexPattern | DataView) {
-  if (column.dataType === 'string') {
+  if (getDatatypeFromOperation(column.operationType, column, dataView) === 'string') {
     const fieldTypes =
       'sourceField' in column ? dataView?.getFieldByName(column.sourceField)?.esTypes : undefined;
     return fieldTypes?.[0] || undefined;
   }
   if (isColumnOfType<LastValueIndexPatternColumn>('last_value', column)) {
-    return column.dataType;
+    return getDatatypeFromOperation(column.operationType, column, dataView);
   }
 }
 
@@ -163,13 +167,17 @@ export function columnToOperation(
   uniqueLabel?: string,
   dataView?: IndexPattern | DataView
 ): OperationDescriptor {
-  const { dataType, label, isBucketed, scale, operationType, timeShift, reducedTimeRange } = column;
+  const { label, operationType, timeShift, reducedTimeRange } = column;
+
+  const dataType = getDatatypeFromOperation(operationType, column, dataView);
+  const isBucketed = getIsBucketedFromOperation(operationType);
+  const scale = getScaleFromOperation(operationType);
 
   return {
     dataType: normalizeOperationDataType(dataType),
     isBucketed,
     scale,
-    label: uniqueLabel || label,
+    label: uniqueLabel || label || '',
     isStaticValue: operationType === 'static_value',
     sortingHint: getSortingHint(column, dataView),
     hasTimeShift: Boolean(timeShift),
@@ -507,7 +515,7 @@ export function getFormBasedDatasource({
         }
         Object.entries(layer.columns).forEach(([columnId, column]) => {
           columnLabelMap[columnId] = uniqueLabelGenerator(
-            column.customLabel
+            column.label
               ? column.label
               : operationDefinitionMap[column.operationType].getDefaultLabel(
                   column,
@@ -840,7 +848,7 @@ export function getFormBasedDatasource({
           return (
             Boolean(indexPatterns[layer.indexPatternId]?.timeFieldName) ||
             layer.columnOrder
-              .filter((colId) => layer.columns[colId].isBucketed)
+              .filter((colId) => getIsBucketedFromOperation(layer.columns[colId].operationType))
               .some((colId) => {
                 const column = layer.columns[colId];
                 return (
@@ -896,7 +904,9 @@ export function getFormBasedDatasource({
           const fields = hasField(col) ? getCurrentFieldsForOperation(col) : undefined;
           return {
             id: colId,
-            role: col.isBucketed ? ('split' as const) : ('metric' as const),
+            role: getIsBucketedFromOperation(col.operationType)
+              ? ('split' as const)
+              : ('metric' as const),
             operation: {
               ...columnToOperation(col, undefined, dataView),
               type: col.operationType,
