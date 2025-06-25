@@ -191,17 +191,6 @@ describe('mappingFromFieldMap', () => {
           ignore_malformed: false,
           type: 'date',
         },
-        actor: {
-          properties: {
-            entity: {
-              properties: {
-                id: {
-                  type: 'keyword',
-                },
-              },
-            },
-          },
-        },
         event: {
           properties: {
             action: {
@@ -388,17 +377,6 @@ describe('mappingFromFieldMap', () => {
         },
         tags: {
           type: 'keyword',
-        },
-        target: {
-          properties: {
-            entity: {
-              properties: {
-                id: {
-                  type: 'keyword',
-                },
-              },
-            },
-          },
         },
       },
     });
