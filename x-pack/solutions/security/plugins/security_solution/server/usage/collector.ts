@@ -164,6 +164,32 @@ export const registerCollector: RegisterCollector = ({
                 type: 'long',
                 _meta: { description: 'Number of query rules with exceptions' },
               },
+              response_actions: {
+                enabled: {
+                  type: 'long',
+                  _meta: {
+                    description: 'Number of enabled query rules configured with response actions',
+                  },
+                },
+                disabled: {
+                  type: 'long',
+                  _meta: {
+                    description: 'Number of disabled query rules configured with response actions',
+                  },
+                },
+                response_actions: {
+                  endpoint: {
+                    type: 'long',
+                    _meta: {
+                      description: 'Number of endpoint response actions within query rules',
+                    },
+                  },
+                  osquery: {
+                    type: 'long',
+                    _meta: { description: 'Number of osquery response actions within query rules' },
+                  },
+                },
+              },
             },
             threshold: {
               enabled: {
@@ -276,6 +302,36 @@ export const registerCollector: RegisterCollector = ({
                 type: 'long',
                 _meta: { description: 'Number of threshold rules with exceptions' },
               },
+              response_actions: {
+                enabled: {
+                  type: 'long',
+                  _meta: {
+                    description:
+                      'Number of enabled threshold rules configured with response actions',
+                  },
+                },
+                disabled: {
+                  type: 'long',
+                  _meta: {
+                    description:
+                      'Number of disabled threshold rules configured with response actions',
+                  },
+                },
+                response_actions: {
+                  endpoint: {
+                    type: 'long',
+                    _meta: {
+                      description: 'Number of endpoint response actions within threshold rules',
+                    },
+                  },
+                  osquery: {
+                    type: 'long',
+                    _meta: {
+                      description: 'Number of osquery response actions within threshold rules',
+                    },
+                  },
+                },
+              },
             },
             eql: {
               enabled: { type: 'long', _meta: { description: 'Number of eql rules enabled' } },
@@ -375,6 +431,32 @@ export const registerCollector: RegisterCollector = ({
               has_exceptions: {
                 type: 'long',
                 _meta: { description: 'Number of eql rules with exceptions' },
+              },
+              response_actions: {
+                enabled: {
+                  type: 'long',
+                  _meta: {
+                    description: 'Number of enabled eql rules configured with response actions',
+                  },
+                },
+                disabled: {
+                  type: 'long',
+                  _meta: {
+                    description: 'Number of disabled eql rules configured with response actions',
+                  },
+                },
+                response_actions: {
+                  endpoint: {
+                    type: 'long',
+                    _meta: {
+                      description: 'Number of endpoint response actions within eql rules',
+                    },
+                  },
+                  osquery: {
+                    type: 'long',
+                    _meta: { description: 'Number of osquery response actions within eql rules' },
+                  },
+                },
               },
             },
             machine_learning: {
@@ -490,6 +572,38 @@ export const registerCollector: RegisterCollector = ({
                 type: 'long',
                 _meta: { description: 'Number of machine_learning rules with exceptions' },
               },
+              response_actions: {
+                enabled: {
+                  type: 'long',
+                  _meta: {
+                    description:
+                      'Number of enabled machine_learning rules configured with response actions',
+                  },
+                },
+                disabled: {
+                  type: 'long',
+                  _meta: {
+                    description:
+                      'Number of disabled machine_learning rules configured with response actions',
+                  },
+                },
+                response_actions: {
+                  endpoint: {
+                    type: 'long',
+                    _meta: {
+                      description:
+                        'Number of endpoint response actions within machine_learning rules',
+                    },
+                  },
+                  osquery: {
+                    type: 'long',
+                    _meta: {
+                      description:
+                        'Number of osquery response actions within machine_learning rules',
+                    },
+                  },
+                },
+              },
             },
             threat_match: {
               enabled: {
@@ -603,6 +717,36 @@ export const registerCollector: RegisterCollector = ({
                 type: 'long',
                 _meta: { description: 'Number of threat_match rules with exceptions' },
               },
+              response_actions: {
+                enabled: {
+                  type: 'long',
+                  _meta: {
+                    description:
+                      'Number of enabled threat_match rules configured with response actions',
+                  },
+                },
+                disabled: {
+                  type: 'long',
+                  _meta: {
+                    description:
+                      'Number of disabled threat_match rules configured with response actions',
+                  },
+                },
+                response_actions: {
+                  endpoint: {
+                    type: 'long',
+                    _meta: {
+                      description: 'Number of endpoint response actions within threat_match rules',
+                    },
+                  },
+                  osquery: {
+                    type: 'long',
+                    _meta: {
+                      description: 'Number of osquery response actions within threat_match rules',
+                    },
+                  },
+                },
+              },
             },
             new_terms: {
               enabled: {
@@ -715,6 +859,36 @@ export const registerCollector: RegisterCollector = ({
                 type: 'long',
                 _meta: { description: 'Number of new_terms rules with exceptions' },
               },
+              response_actions: {
+                enabled: {
+                  type: 'long',
+                  _meta: {
+                    description:
+                      'Number of enabled new_term rules configured with response actions',
+                  },
+                },
+                disabled: {
+                  type: 'long',
+                  _meta: {
+                    description:
+                      'Number of disabled new_term rules configured with response actions',
+                  },
+                },
+                response_actions: {
+                  endpoint: {
+                    type: 'long',
+                    _meta: {
+                      description: 'Number of endpoint response actions within new_term rules',
+                    },
+                  },
+                  osquery: {
+                    type: 'long',
+                    _meta: {
+                      description: 'Number of osquery response actions within new_term rules',
+                    },
+                  },
+                },
+              },
             },
             esql: {
               enabled: {
@@ -823,6 +997,32 @@ export const registerCollector: RegisterCollector = ({
                 type: 'long',
                 _meta: { description: 'Number of esql rules with exceptions' },
               },
+              response_actions: {
+                enabled: {
+                  type: 'long',
+                  _meta: {
+                    description: 'Number of enabled esql rules configured with response actions',
+                  },
+                },
+                disabled: {
+                  type: 'long',
+                  _meta: {
+                    description: 'Number of disabled esql rules configured with response actions',
+                  },
+                },
+                response_actions: {
+                  endpoint: {
+                    type: 'long',
+                    _meta: {
+                      description: 'Number of endpoint response actions within esql rules',
+                    },
+                  },
+                  osquery: {
+                    type: 'long',
+                    _meta: { description: 'Number of osquery response actions within esql rules' },
+                  },
+                },
+              },
             },
             elastic_total: {
               enabled: { type: 'long', _meta: { description: 'Number of elastic rules enabled' } },
@@ -928,6 +1128,35 @@ export const registerCollector: RegisterCollector = ({
                 type: 'long',
                 _meta: { description: 'Number of elastic rules with exceptions' },
               },
+              response_actions: {
+                enabled: {
+                  type: 'long',
+                  _meta: {
+                    description: 'Number of enabled elastic rules configured with response actions',
+                  },
+                },
+                disabled: {
+                  type: 'long',
+                  _meta: {
+                    description:
+                      'Number of disabled elastic rules configured with response actions',
+                  },
+                },
+                response_actions: {
+                  endpoint: {
+                    type: 'long',
+                    _meta: {
+                      description: 'Number of endpoint response actions within elastic rules',
+                    },
+                  },
+                  osquery: {
+                    type: 'long',
+                    _meta: {
+                      description: 'Number of osquery response actions within elastic rules',
+                    },
+                  },
+                },
+              },
             },
             custom_total: {
               enabled: { type: 'long', _meta: { description: 'Number of custom rules enabled' } },
@@ -1028,6 +1257,34 @@ export const registerCollector: RegisterCollector = ({
               has_exceptions: {
                 type: 'long',
                 _meta: { description: 'Number of custom rules with exceptions' },
+              },
+              response_actions: {
+                enabled: {
+                  type: 'long',
+                  _meta: {
+                    description: 'Number of enabled custom rules configured with response actions',
+                  },
+                },
+                disabled: {
+                  type: 'long',
+                  _meta: {
+                    description: 'Number of disabled custom rules configured with response actions',
+                  },
+                },
+                response_actions: {
+                  endpoint: {
+                    type: 'long',
+                    _meta: {
+                      description: 'Number of endpoint response actions within custom rules',
+                    },
+                  },
+                  osquery: {
+                    type: 'long',
+                    _meta: {
+                      description: 'Number of osquery response actions within custom rules',
+                    },
+                  },
+                },
               },
             },
           },

@@ -19,6 +19,15 @@ export interface AlertSuppressionUsage {
   does_not_suppress_missing_fields: number;
 }
 
+export interface ResponseActionsUsage {
+  enabled: number;
+  disabled: number;
+  response_actions: {
+    endpoint: number;
+    osquery: number;
+  };
+}
+
 export interface FeatureTypeUsage {
   enabled: number;
   disabled: number;
@@ -31,6 +40,7 @@ export interface FeatureTypeUsage {
   legacy_investigation_fields: number;
   alert_suppression: AlertSuppressionUsage;
   has_exceptions: number;
+  response_actions: ResponseActionsUsage;
 }
 
 export interface RulesTypeUsage {
@@ -76,6 +86,9 @@ export interface RuleMetric {
   has_alert_suppression_missing_fields_strategy_do_not_suppress: boolean;
   alert_suppression_fields_count: number;
   has_exceptions: boolean;
+  has_response_actions: boolean;
+  has_response_actions_endpoint: boolean;
+  has_response_actions_osquery: boolean;
 }
 
 /**
