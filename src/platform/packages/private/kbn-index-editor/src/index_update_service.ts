@@ -84,13 +84,18 @@ export class IndexUpdateService {
   private readonly _isFetching$ = new BehaviorSubject<boolean>(false);
   public readonly isFetching$: Observable<boolean> = this._isSaving$.asObservable();
 
+  private readonly _exitAttemptWithUnsavedFields$ = new BehaviorSubject<boolean>(false);
+  public readonly exitAttemptWithUnsavedFields$ =
+    this._exitAttemptWithUnsavedFields$.asObservable();
+
   /** ES Documents */
   private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([]);
   public readonly rows$: Observable<DataTableRecord[]> = this._rows$.asObservable();
 
   // Holds runtime field definitions reactively
-  private _newAddedFields = new BehaviorSubject<string[]>([]);
-  public readonly newAddedFields$: Observable<any[]> = this._newAddedFields.asObservable();
+  private _pendingFieldsToBeSaved = new BehaviorSubject<string[]>([]);
+  public readonly pendingFieldsToBeSaved$: Observable<any[]> =
+    this._pendingFieldsToBeSaved.asObservable();
 
   private readonly _subscription = new Subscription();
 
@@ -156,10 +161,10 @@ export class IndexUpdateService {
 
   public readonly dataTableColumns$: Observable<DatatableColumn[]> = combineLatest([
     this.dataView$,
-    this.newAddedFields$,
+    this.pendingFieldsToBeSaved$,
   ]).pipe(
-    map(([dataView, newAddedFields]) => {
-      for (const field of newAddedFields) {
+    map(([dataView, pendingFieldsToBeSaved]) => {
+      for (const field of pendingFieldsToBeSaved) {
         dataView.fields.add({
           name: field,
           type: KBN_FIELD_TYPES.UNKNOWN,
@@ -240,8 +245,20 @@ export class IndexUpdateService {
         )
         .subscribe({
           next: ({ updates, response, rows, dataView }) => {
+            // //HD bulk update can be a problem
+            // Updates the pending fields to be saved
+            const unsavedColumns = this._pendingFieldsToBeSaved.value.filter((pendingField) => {
+              // Remove fields that were saved
+              return !updates.some((update) => update.value[pendingField] !== undefined);
+            });
+
+            this._pendingFieldsToBeSaved.next(unsavedColumns);
+
             // Clear the buffer after successful update
             this.actions$.next({ type: 'saved', payload: response });
+
+            // Clear pending fields after save
+            this._pendingFieldsToBeSaved.next([]);
 
             // TODO do we need to re-fetch docs using _mget, in order to retrieve a full doc update?
 
@@ -345,6 +362,10 @@ export class IndexUpdateService {
     return this._indexName$.getValue();
   }
 
+  public getPendingFieldsToBeSaved(): string[] {
+    return this._pendingFieldsToBeSaved.getValue();
+  }
+
   // Add a new index
   public addDoc(doc: Record<string, any>) {
     this.actions$.next({ type: 'add', payload: { value: doc } });
@@ -398,9 +419,17 @@ export class IndexUpdateService {
     this.actions$.next({ type: 'undo' });
   }
 
-  public addRuntimeField(filedName: string) {
-    const current = this._newAddedFields.getValue();
-    this._newAddedFields.next([...current, filedName]);
+  public addNewField(filedName: string) {
+    const current = this._pendingFieldsToBeSaved.getValue();
+    this._pendingFieldsToBeSaved.next([...current, filedName]);
+  }
+
+  public setExitAttemptWithUnsavedFields(value: boolean) {
+    this._exitAttemptWithUnsavedFields$.next(value);
+  }
+
+  public deleteUnsavedFields() {
+    this._pendingFieldsToBeSaved.next([]);
   }
 
   public destroy() {

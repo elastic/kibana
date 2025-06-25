@@ -8,45 +8,61 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiFlexGroup, EuiForm, EuiButtonIcon, EuiFieldText, EuiSuperSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiForm, EuiButtonIcon, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { KibanaContextExtra } from '../types';
 
 interface AddColumnPanelProps {
   onHide: () => void;
+  columns: DatatableColumn[];
 }
 
-export const AddColumnPanel: React.FC<AddColumnPanelProps> = ({ onHide }) => {
+export const AddColumnPanel: React.FC<AddColumnPanelProps> = ({ onHide, columns }) => {
   const {
     services: { indexUpdateService, notifications },
   } = useKibana<KibanaContextExtra>();
 
-  const typeOptions = Object.values(ES_FIELD_TYPES).map((type) => ({
-    value: type,
-    inputDisplay: type,
-  }));
-
   const [columnName, setColumnName] = useState('');
-  const [columnType, setColumnType] = useState<ES_FIELD_TYPES>();
 
   const saveNewColumn = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      try {
-        // Is there a max length of column name? //HD
-        // Validate column name does not exist
-        indexUpdateService.addRuntimeField(columnName);
-      } catch (error) {
-        notifications.toasts.addError(error as Error, {
-          title: i18n.translate('indexEditor.addCOlumn.ErrorTitle', {
-            defaultMessage: 'An error occurred while adding the new column',
+
+      if (!columnName) {
+        notifications.toasts.addWarning({
+          title: i18n.translate('indexEditor.addColumn.emptyName', {
+            defaultMessage: 'Column name cannot be empty',
           }),
         });
+        return;
       }
+
+      if (columns.some((existingColumn) => existingColumn.name === columnName)) {
+        notifications.toasts.addWarning({
+          title: i18n.translate('indexEditor.addColumn.duplicatedName', {
+            defaultMessage: 'Column name {columnName} already exists',
+            values: { columnName },
+          }),
+        });
+        return;
+      }
+
+      indexUpdateService.addNewField(columnName);
+      notifications.toasts.addSuccess({
+        title: i18n.translate('indexEditor.addColumn.success', {
+          defaultMessage: 'Column {columnName} has been partially added',
+          values: { columnName },
+        }),
+        text: i18n.translate('indexEditor.addColumn.successDescription', {
+          defaultMessage: 'You need to add at least one value to this column before it is saved.',
+        }),
+        toastLifeTimeMs: 10000, // 10 seconds
+      });
+      onHide();
     },
-    [columnName, indexUpdateService, notifications.toasts]
+    [columnName, columns, indexUpdateService, notifications.toasts, onHide]
   );
 
   return (
@@ -67,19 +83,6 @@ export const AddColumnPanel: React.FC<AddColumnPanelProps> = ({ onHide }) => {
               setColumnName(e.target.value);
             }}
             type="text"
-          />
-          <EuiSuperSelect
-            compressed
-            options={typeOptions}
-            valueOfSelected={columnType}
-            onChange={setColumnType}
-            placeholder={i18n.translate('indexEditor.addColumn.name.aria', {
-              defaultMessage: 'Column type',
-            })}
-            aria-label={i18n.translate('indexEditor.addColumn.name.aria', {
-              defaultMessage: 'Column type select',
-            })}
-            css={{ minWidth: '230px' }}
           />
         </EuiFlexGroup>
         <EuiButtonIcon

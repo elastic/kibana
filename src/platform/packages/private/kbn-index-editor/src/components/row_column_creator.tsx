@@ -72,7 +72,7 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
           }}
         >
           {activeMode === 'add-row' && <AddRowPanel columns={columns} onHide={hidePanel} />}
-          {activeMode === 'add-column' && <AddColumnPanel onHide={hidePanel} />}
+          {activeMode === 'add-column' && <AddColumnPanel columns={columns} onHide={hidePanel} />}
         </EuiPanel>
       )}
     </>
