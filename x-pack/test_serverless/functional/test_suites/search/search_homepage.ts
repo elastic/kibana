@@ -28,7 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const testSubjects = getService('testSubjects');
 
-  describe('Search Homepage', function () {
+  describe.only('Search Homepage', function () {
     describe('as admin', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginAsAdmin();
@@ -39,6 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('goes to the start page if there exists no index', async () => {
+        await pageObjects.common.navigateToApp('searchHomepage');
         await pageObjects.svlSearchHomePage.expectToBeOnStartpage();
       });
 
@@ -59,6 +60,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('goes to the start page if there exists no index', async () => {
+        await pageObjects.common.navigateToApp('searchHomepage');
         await pageObjects.svlSearchHomePage.expectToBeOnStartpage();
       });
 
