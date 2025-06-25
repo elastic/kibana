@@ -34,5 +34,6 @@
     "@kbn/ml-local-storage",
     "@kbn/rule-data-utils",
     "@kbn/core-http-browser",
+    "@kbn/es-query",
   ]
 }

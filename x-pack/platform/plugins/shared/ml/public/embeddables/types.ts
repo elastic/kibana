@@ -33,7 +33,6 @@ import type {
 } from '@kbn/ml-embeddables/constants';
 import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import type { MlCapabilitiesService } from '@kbn/ml-services/capabilities/check_capabilities';
-import type { SwimlaneType } from '@kbn/ml-common-constants/explorer';
 import type { MlFieldFormatService } from '@kbn/ml-services/field_format_service';
 import type { MlResultsService } from '@kbn/ml-services/results_service_2';
 
@@ -59,26 +58,6 @@ export interface MlEmbeddableBaseApi<StateType extends object = object>
     PublishesTimeRange {}
 
 export type MlEntity = Record<string, MlEntityField['fieldValue']>;
-
-/** Manual input by the user */
-export interface AnomalySwimlaneEmbeddableUserInput {
-  jobIds: JobId[];
-  panelTitle?: string;
-  swimlaneType: SwimlaneType;
-  viewBy?: string;
-}
-
-export interface AnomalySwimlaneEmbeddableCustomInput
-  extends Omit<AnomalySwimlaneEmbeddableUserInput, 'panelTitle'> {
-  id?: string;
-  perPage?: number;
-
-  // Embeddable inputs which are not included in the default interface
-  filters?: Filter[];
-  query?: Query;
-  refreshConfig?: RefreshInterval;
-  timeRange?: TimeRange;
-}
 
 export interface AnomalySwimlaneServices {
   anomalyDetectorService: AnomalyDetectorService;
