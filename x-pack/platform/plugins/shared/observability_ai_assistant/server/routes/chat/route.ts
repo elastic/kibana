@@ -17,7 +17,7 @@ import { flushBuffer } from '../../service/util/flush_buffer';
 import { observableIntoOpenAIStream } from '../../service/util/observable_into_openai_stream';
 import { observableIntoStream } from '../../service/util/observable_into_stream';
 import { withAssistantSpan } from '../../service/util/with_assistant_span';
-import { recallAndScore } from '../../utils/recall/recall_and_score';
+import { recallAndScore } from '../../functions/context/utils/recall_and_score';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { Instruction } from '../../../common/types';
 import {
@@ -203,10 +203,10 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
   },
   params: t.type({
     body: t.type({
-      prompt: t.string,
-      context: t.string,
+      screenDescription: t.string,
       connectorId: t.string,
       scopes: t.array(assistantScopeType),
+      messages: t.array(messageRt),
     }),
   }),
   handler: async (resources): Promise<Readable> => {
@@ -214,7 +214,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
       resources
     );
 
-    const { connectorId, prompt, context } = resources.params.body;
+    const { connectorId, screenDescription, messages } = resources.params.body;
 
     const response$ = from(
       recallAndScore({
@@ -227,10 +227,9 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
             simulateFunctionCalling,
             signal,
           }),
-        context,
+        screenDescription,
         logger: resources.logger,
-        messages: [],
-        userPrompt: prompt,
+        messages,
         recall: client.recall,
         signal,
       })

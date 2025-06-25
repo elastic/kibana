@@ -88,6 +88,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.PARAMS]: t.string,
     [ConfigKey.LABELS]: t.record(t.string, t.string),
     [ConfigKey.MAINTENANCE_WINDOWS]: t.array(t.string),
+    [ConfigKey.KIBANA_SPACES]: t.array(t.string),
     retest_on_failure: t.boolean,
   }),
 ]);
@@ -357,7 +358,7 @@ const HeartbeatFieldsCodec = t.intersection([
     'monitor.id': t.string,
     'monitor.project.id': t.string,
     'monitor.fleet_managed': t.boolean,
-    meta: t.record(t.string, t.string),
+    meta: t.record(t.string, t.union([t.string, t.array(t.string)])),
   }),
 ]);
 
