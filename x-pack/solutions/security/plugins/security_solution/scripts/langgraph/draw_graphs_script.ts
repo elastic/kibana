@@ -23,6 +23,7 @@ import { getRuleMigrationAgent } from '../../server/lib/siem_migrations/rules/ta
 import type { RuleMigrationsRetriever } from '../../server/lib/siem_migrations/rules/task/retrievers';
 import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/rules/task/util/esql_knowledge_base';
 import type { SiemMigrationTelemetryClient } from '../../server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client';
+import { CreateLlmInstance } from '@kbn/security-solution-plugin/server/assistant/tools/esql/utils/common';
 
 interface Drawable {
   drawMermaidPng: () => Promise<Blob>;
@@ -53,17 +54,13 @@ async function getSiemMigrationGraph(logger: Logger): Promise<Drawable> {
 }
 
 async function getGenerateEsqlGraph(logger: Logger): Promise<Drawable> {
-  const graph = getGenerateEsqlAgent({
+  const graph = await getGenerateEsqlAgent({
     esClient: {} as unknown as ElasticsearchClient,
     connectorId: 'test-connector-id',
     inference: {} as unknown as InferenceServerStart,
     logger,
     request: {} as unknown as KibanaRequest,
-    createLlmInstance: () =>
-      ({ bindTools: () => null } as unknown as
-        | ActionsClientChatBedrockConverse
-        | ActionsClientChatVertexAI
-        | ActionsClientChatOpenAI),
+    createLlmInstance: (() =>({ bindTools: () => null })) as unknown as CreateLlmInstance,
   });
   return graph.getGraphAsync({ xray: true });
 }
