@@ -19,10 +19,6 @@ describe('GoToAction', () => {
         actionLabel: 'Go to Discover',
         iconType: 'discoverApp',
       },
-      screenContext: null,
-      snapshot: {
-        imgData: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA...',
-      },
     };
 
     render(<GoToAction state={state} />);
