@@ -22,6 +22,7 @@ x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_log_rate_analysis @elastic/ml-ui
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/packages/private/ml/aiops_test_utils @elastic/ml-ui
+src/platform/packages/shared/kbn-aiops-utils @elastic/ml-ui
 x-pack/platform/test/alerting_api_integration/packages/helpers @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/common/plugins/alerts @elastic/response-ops
 x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
@@ -435,10 +436,8 @@ x-pack/examples/embedded_lens_example @elastic/kibana-visualizations
 x-pack/platform/plugins/shared/encrypted_saved_objects @elastic/kibana-security
 src/platform/packages/shared/kbn-encrypted-saved-objects-shared @elastic/kibana-security
 x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
-x-pack/solutions/observability/plugins/entities_data_access @elastic/obs-entities
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
 x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
-x-pack/solutions/observability/plugins/entity_manager_app @elastic/obs-entities
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 examples/error_boundary @elastic/appex-sharedux
 src/platform/packages/shared/kbn-es @elastic/kibana-operations
@@ -569,8 +568,6 @@ x-pack/platform/plugins/shared/integration_assistant @elastic/security-scalabili
 src/platform/plugins/private/interactive_setup @elastic/kibana-security
 src/platform/test/interactive_setup_api_integration/plugins/test_endpoints @elastic/kibana-security
 src/platform/packages/shared/kbn-interpreter @elastic/kibana-visualizations
-x-pack/solutions/observability/plugins/inventory/e2e @elastic/obs-ux-infra_services-team
-x-pack/solutions/observability/plugins/inventory @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-io-ts-utils @elastic/obs-knowledge-team
 x-pack/solutions/search/packages/kbn-ipynb @elastic/search-kibana
 src/platform/packages/private/kbn-jest-serializers @elastic/kibana-operations
@@ -1141,6 +1138,7 @@ x-pack/test_serverless/api_integration/test_suites/common/platform_security @ela
 /x-pack/test_serverless/functional/test_suites/common/examples/search_examples @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/unified_field_list_examples @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/management/data_views @elastic/kibana-data-discovery
+src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/patterns @elastic/ml-ui
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/security @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
 # TODO: this deprecation_logs folder should be owned by kibana management team after 9.0
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/deprecation_logs @elastic/kibana-data-discovery @elastic/kibana-core
@@ -2588,7 +2586,7 @@ x-pack/test/security_solution_api_integration/test_suites/genai @elastic/securit
 x-pack/platform/test/automatic_import_api_integration @elastic/security-scalability
 
 # Security Defend Workflows - OSQuery Ownership
-/x-pack/test/osquery_cypress @elastic/security-defend-workflows
+/x-pack/solutions/security/test/osquery_cypress @elastic/security-defend-workflows
 /x-pack/plugins/osquery @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/model/rule_response_actions @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_response_actions @elastic/security-defend-workflows

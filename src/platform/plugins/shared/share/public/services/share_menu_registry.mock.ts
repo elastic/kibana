@@ -9,27 +9,33 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
-  ShareMenuRegistry,
+  ShareRegistry,
   ShareMenuRegistrySetup,
   ShareMenuRegistryStart,
 } from './share_menu_registry';
-import { ShareMenuItemV2, ShareContext } from '../types';
+import { ShareContext, ShareConfigs, ShareActionIntents } from '../types';
 
 const createSetupMock = (): jest.Mocked<ShareMenuRegistrySetup> => {
   const setup = {
     register: jest.fn(),
+    registerShareIntegration: jest.fn(),
   };
   return setup;
 };
 
 const createStartMock = (): jest.Mocked<ShareMenuRegistryStart> => {
   const start = {
-    getShareMenuItems: jest.fn((_props: ShareContext) => [] as ShareMenuItemV2[]),
+    availableIntegrations: jest.fn(
+      (_objectType: string, _groupId?: string) => [] as ShareActionIntents[]
+    ),
+    resolveShareItemsForShareContext: jest.fn(
+      (_props: ShareContext & { isServerless: boolean }) => [] as ShareConfigs[]
+    ),
   };
   return start;
 };
 
-const createMock = (): jest.Mocked<PublicMethodsOf<ShareMenuRegistry>> => {
+const createMock = (): jest.Mocked<PublicMethodsOf<ShareRegistry>> => {
   const service = {
     setup: jest.fn(),
     start: jest.fn(),
