@@ -7,7 +7,7 @@
 
 import { prefixedOutputLogger } from '@kbn/security-solution-plugin/scripts/endpoint/common/utils';
 import { createToolingLogger } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
-import { setupStackServicesUsingCypressConfig } from '@kbn/security-solution-plugin/public/management/cypress/support/common';
+import { setupStackServicesUsingCypressConfig } from '@kbn/cypress-test-helper/src/services/common';
 import { maybeCreateDockerNetwork, verifyDockerInstalled } from '@kbn/es';
 import { AgentManager } from './agent';
 import { createAgentPolicy } from './utils';
