@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiConfirmModal,
-} from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { FileUploadContext, useFileUpload } from '@kbn/file-upload';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -23,6 +16,7 @@ import type { FC } from 'react';
 import React, { lazy } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { UnsavedChangesModal } from './unsaved_changes_modal';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
 import { CustomPanel } from './custom_panel';
 import { FileDropzone } from './file_drop_zone';
@@ -47,10 +41,6 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
 
   const rows = useObservable(deps.indexUpdateService.rows$, []);
   const isLoading = useObservable(deps.indexUpdateService.isFetching$, true);
-  const showClosingWarningModal = useObservable(
-    deps.indexUpdateService.exitAttemptWithUnsavedFields$,
-    false
-  );
 
   const fileUploadContextValue = useFileUpload(
     deps.fileManager,
@@ -66,15 +56,6 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
   );
 
   const noResults = !isLoading && rows.length === 0;
-
-  const closeWithoutSaving = () => {
-    deps.indexUpdateService.deleteUnsavedFields();
-    props.onClose();
-  };
-
-  const continueEditing = () => {
-    deps.indexUpdateService.setExitAttemptWithUnsavedFields(false);
-  };
 
   return (
     <KibanaContextProvider
@@ -129,29 +110,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
           </FileUploadContext.Provider>
         ) : null}
       </CellActionsProvider>
-      {showClosingWarningModal && (
-        <EuiConfirmModal
-          title={
-            <FormattedMessage
-              id="indexEditor.warningModal.title"
-              defaultMessage="Unsaved changes"
-            />
-          }
-          onCancel={continueEditing}
-          onConfirm={closeWithoutSaving}
-          cancelButtonText={
-            <FormattedMessage id="indexEditor.warningModal.cancel" defaultMessage="Cancel" />
-          }
-          confirmButtonText={
-            <FormattedMessage id="indexEditor.warningModal.confirm" defaultMessage="OK" />
-          }
-        >
-          <FormattedMessage
-            id="indexEditor.warningModal.body"
-            defaultMessage="You have unsaved columns. You need at least one value set on each new column for it to be saved. Are you sure you want to leave?"
-          />
-        </EuiConfirmModal>
-      )}
+      <UnsavedChangesModal onClose={props.onClose} />
     </KibanaContextProvider>
   );
 };
