@@ -42,7 +42,7 @@
     "@kbn/utility-types",
     "@kbn/search-navigation",
     "@kbn/search-queries",
-    "@kbn/sample-data-ingest"
+    "@kbn/sample-data-ingest",
   ],
   "exclude": [
     "target/**/*",

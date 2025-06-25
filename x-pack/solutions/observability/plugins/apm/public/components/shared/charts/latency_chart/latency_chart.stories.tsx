@@ -88,7 +88,6 @@ const stories: Meta<Args> = {
                         transactionTypes: [],
                         fallbackToTransactions: false,
                         serviceAgentStatus: FETCH_STATUS.SUCCESS,
-                        serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
                       }}
                     >
                       <ChartPointerEventContextProvider>
