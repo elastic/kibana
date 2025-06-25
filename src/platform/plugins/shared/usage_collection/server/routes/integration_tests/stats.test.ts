@@ -9,22 +9,25 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { type MetricsServiceSetup, ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
 import {
+  type MetricsServiceSetup,
+  RequestHandlerContext,
+  ServiceStatus,
+  ServiceStatusLevels,
+} from '@kbn/core/server';
+import {
+  contextServiceMock,
   loggingSystemMock,
   metricsServiceMock,
   executionContextServiceMock,
 } from '@kbn/core/server/mocks';
-import {
-  createHttpService,
-  HttpIntegrationServiceSetupContractMock,
-} from '@kbn/core-http-server-mocks';
+import { createHttpService } from '@kbn/core-http-server-mocks';
 import { registerStatsRoute } from '../stats';
 import supertest from 'supertest';
 import { CollectorSet } from '../../collector';
 
 type HttpService = ReturnType<typeof createHttpService>;
-type HttpSetup = HttpIntegrationServiceSetupContractMock;
+type HttpSetup = Awaited<ReturnType<HttpService['setup']>>;
 
 describe('/api/stats', () => {
   let server: HttpService;
@@ -34,15 +37,18 @@ describe('/api/stats', () => {
 
   beforeEach(async () => {
     server = createHttpService();
-    await server.preboot();
-    httpSetup = await server.setup();
+    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    httpSetup = await server.setup({
+      context: contextServiceMock.createSetupContract(),
+      executionContext: executionContextServiceMock.createInternalSetupContract(),
+    });
     overallStatus$ = new BehaviorSubject<ServiceStatus>({
       level: ServiceStatusLevels.available,
       summary: 'everything is working',
     });
     metrics = metricsServiceMock.createSetupContract();
 
-    const router = httpSetup.createRouter('');
+    const router = httpSetup.createRouter<RequestHandlerContext>('');
     registerStatsRoute({
       router,
       collectorSet: new CollectorSet({

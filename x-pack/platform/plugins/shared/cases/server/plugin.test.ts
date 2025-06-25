@@ -28,7 +28,6 @@ function getConfig(overrides = {}) {
     markdownPlugins: { lens: true },
     files: { maxSize: 1, allowedMimeTypes: ALLOWED_MIME_TYPES },
     stack: { enabled: true },
-    analytics: {},
     ...overrides,
   };
 }
@@ -75,7 +74,6 @@ describe('Cases Plugin', () => {
       security: securityMock.createStart(),
       notifications: notificationsMock.createStart(),
       ruleRegistry: { getRacClientWithRequest: jest.fn(), alerting: alertsMock.createStart() },
-      taskManager: taskManagerMock.createStart(),
     };
   });
 

@@ -14,7 +14,7 @@ jest.mock('../../../../lib/content_stream', () => ({
 }));
 
 import type { estypes } from '@elastic/elasticsearch';
-import { setupServer, SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { ElasticsearchClientMock, coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
@@ -37,13 +37,14 @@ import { EventTracker } from '../../../../usage';
 import { STATUS_CODES } from '../../../common/jobs/constants';
 import { registerJobInfoRoutesInternal as registerJobInfoRoutes } from '../jobs';
 
+type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
+
 describe(`Reporting Job Management Routes: Internal`, () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
   let eventTracker: EventTracker;
   let usageCounter: IUsageCounter;
-  let createRouter: SetupServerReturn['createRouter'];
-  let registerRouteHandlerContext: SetupServerReturn['registerRouteHandlerContext'];
+  let httpSetup: SetupServerReturn['httpSetup'];
   let exportTypesRegistry: ExportTypesRegistry;
   let reportingCore: ReportingCore;
   let mockSetupDeps: ReportingInternalSetup;
@@ -78,8 +79,8 @@ describe(`Reporting Job Management Routes: Internal`, () => {
   const mockConfigSchema = createMockConfigSchema();
 
   beforeEach(async () => {
-    ({ server, createRouter, registerRouteHandlerContext } = await setupServer(reportingSymbol));
-    registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
+    ({ server, httpSetup } = await setupServer(reportingSymbol));
+    httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
       () => reportingMock.createStart()
@@ -89,7 +90,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       security: {
         license: { isEnabled: () => true },
       },
-      router: createRouter(''),
+      router: httpSetup.createRouter(''),
     });
 
     mockStartDeps = await createMockPluginStart(
@@ -159,7 +160,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
 
       await server.start();
 
-      await supertest(server.listener)
+      await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/1`)
         .expect(400)
         .then(({ body }) =>
@@ -185,7 +186,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
 
       await server.start();
 
-      await supertest(server.listener)
+      await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dope`)
         .expect(401)
         .then(({ body }) =>
@@ -199,7 +200,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
 
       await server.start();
 
-      await supertest(server.listener)
+      await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/poo`)
         .expect(404);
     });
@@ -216,7 +217,9 @@ describe(`Reporting Job Management Routes: Internal`, () => {
 
       await server.start();
 
-      await supertest(server.listener).get(`${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/test`).expect(200);
+      await supertest(httpSetup.server.listener)
+        .get(`${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/test`)
+        .expect(200);
     });
 
     it('when a job is incomplete, "internal" API endpoint should return appropriate response', async () => {
@@ -230,7 +233,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       registerJobInfoRoutes(reportingCore);
 
       await server.start();
-      await supertest(server.listener)
+      await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(STATUS_CODES.PENDING.INTERNAL)
         .expect('Content-Type', 'text/plain; charset=utf-8')
@@ -250,7 +253,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       registerJobInfoRoutes(reportingCore);
 
       await server.start();
-      await supertest(server.listener)
+      await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(STATUS_CODES.FAILED.INTERNAL)
         .expect('Content-Type', 'application/json; charset=utf-8')
@@ -264,7 +267,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       registerJobInfoRoutes(reportingCore);
 
       await server.start();
-      await supertest(server.listener)
+      await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(STATUS_CODES.COMPLETED)
         .expect('Content-Type', 'text/csv; charset=utf-8')
@@ -281,7 +284,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
 
       await server.start();
 
-      await supertest(server.listener)
+      await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dope`)
         .expect(STATUS_CODES.COMPLETED)
         .expect('Content-Type', 'text/csv; charset=utf-8')
@@ -297,7 +300,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       registerJobInfoRoutes(reportingCore);
 
       await server.start();
-      await supertest(server.listener)
+      await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(STATUS_CODES.COMPLETED)
         .expect('Content-Type', 'text/csv; charset=utf-8')
@@ -314,7 +317,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       registerJobInfoRoutes(reportingCore);
 
       await server.start();
-      await supertest(server.listener)
+      await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(400)
         .then(({ body }) => {
@@ -336,7 +339,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       registerJobInfoRoutes(reportingCore);
 
       await server.start();
-      await supertest(server.listener)
+      await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/japanese-dashboard`)
         .expect(STATUS_CODES.COMPLETED)
         .expect('Content-Type', 'application/pdf')
@@ -353,7 +356,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       registerJobInfoRoutes(reportingCore);
 
       await server.start();
-      await supertest(server.listener)
+      await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/dank`)
         .expect(200)
         .expect('Content-Type', 'application/json; charset=utf-8');
@@ -370,7 +373,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       registerJobInfoRoutes(reportingCore);
 
       await server.start();
-      await supertest(server.listener)
+      await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(STATUS_CODES.COMPLETED)
         .expect('Content-Type', 'text/csv; charset=utf-8')
@@ -388,7 +391,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       registerJobInfoRoutes(reportingCore);
 
       await server.start();
-      await supertest(server.listener)
+      await supertest(httpSetup.server.listener)
         .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/dank`)
         .expect(200)
         .expect('Content-Type', 'application/json; charset=utf-8');
@@ -405,7 +408,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       registerJobInfoRoutes(reportingCore);
 
       await server.start();
-      await supertest(server.listener)
+      await supertest(httpSetup.server.listener)
         .get(INTERNAL_ROUTES.JOBS.COUNT)
         .expect(200)
         .expect('Content-Type', 'text/plain; charset=utf-8');
@@ -435,7 +438,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       registerJobInfoRoutes(reportingCore);
 
       await server.start();
-      await supertest(server.listener)
+      await supertest(httpSetup.server.listener)
         .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/dank`)
         .expect(500)
         .expect('Content-Type', 'application/json; charset=utf-8');
@@ -448,7 +451,9 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       registerJobInfoRoutes(reportingCore);
 
       await server.start();
-      await supertest(server.listener).get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`);
+      await supertest(httpSetup.server.listener).get(
+        `${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`
+      );
 
       expect(eventTracker.downloadReport).toHaveBeenCalledTimes(1);
     });
@@ -469,7 +474,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       registerJobInfoRoutes(reportingCore);
 
       await server.start();
-      await supertest(server.listener)
+      await supertest(httpSetup.server.listener)
         .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/dank`)
         .expect(200)
         .expect('Content-Type', 'application/json; charset=utf-8');

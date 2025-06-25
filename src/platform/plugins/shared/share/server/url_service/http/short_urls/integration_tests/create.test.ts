@@ -8,7 +8,8 @@
  */
 
 import supertest from 'supertest';
-import { setupServer, SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
+import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { registerCreateRoute } from '../register_create_route';
 import { MockUrlService } from '../../../../../common/mocks';
 import { httpServiceMock } from '@kbn/core/server/mocks';
@@ -17,13 +18,13 @@ const url = new MockUrlService();
 const http = httpServiceMock.createSetupContract();
 
 describe('POST /api/short_url', () => {
-  let server: SetupServerReturn['server'];
-  let createRouter: SetupServerReturn['createRouter'];
+  let server: HttpService;
+  let httpSetup: InternalHttpServiceSetup;
 
   beforeAll(async () => {
     const setup = await setupServer();
     server = setup.server;
-    createRouter = setup.createRouter;
+    httpSetup = setup.httpSetup;
 
     url.locators.get = jest.fn().mockImplementation((locatorId) => {
       if (locatorId === 'LEGACY_SHORT_URL_LOCATOR') {
@@ -33,7 +34,7 @@ describe('POST /api/short_url', () => {
     });
 
     http.basePath.get = jest.fn().mockReturnValue('');
-    registerCreateRoute(createRouter(''), url, http);
+    registerCreateRoute(httpSetup.createRouter(''), url, http);
 
     await server.start();
   });
@@ -56,7 +57,7 @@ describe('POST /api/short_url', () => {
       },
     };
 
-    await supertest(server.listener)
+    await supertest(httpSetup.server.listener)
       .post('/api/short_url')
       .send(payload)
       .expect(200)
@@ -73,7 +74,7 @@ describe('POST /api/short_url', () => {
       },
     };
 
-    await supertest(server.listener)
+    await supertest(httpSetup.server.listener)
       .post('/api/short_url')
       .send(payload)
       .expect(400)
@@ -93,7 +94,7 @@ describe('POST /api/short_url', () => {
     // Override the locator mock for this test
     (url.locators.get as jest.Mock).mockReturnValueOnce(undefined);
 
-    await supertest(server.listener)
+    await supertest(httpSetup.server.listener)
       .post('/api/short_url')
       .send(payload)
       .expect(409)

@@ -25,6 +25,5 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./integration_dashboards'));
     loadTestFile(require.resolve('./integrations'));
     loadTestFile(require.resolve('./update_field_limit'));
-    loadTestFile(require.resolve('./data_streams_failure_store'));
   });
 }

@@ -26,12 +26,10 @@ import {
   registerImportRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
-import {
-  setupServer,
-  createExportableType,
-  SetupServerReturn,
-} from '@kbn/core-test-helpers-test-utils';
+import { setupServer, createExportableType } from '@kbn/core-test-helpers-test-utils';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
+
+type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard'];
 const config = { maxImportPayloadBytes: 26214400, maxImportExportSize: 10000 } as SavedObjectConfig;
@@ -40,7 +38,7 @@ const URL = '/internal/saved_objects/_import';
 
 describe(`POST ${URL}`, () => {
   let server: SetupServerReturn['server'];
-  let createRouter: SetupServerReturn['createRouter'];
+  let httpSetup: SetupServerReturn['httpSetup'];
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let mockLogger: MockedLogger;
@@ -62,7 +60,7 @@ describe(`POST ${URL}`, () => {
   };
 
   beforeEach(async () => {
-    ({ server, createRouter, handlerContext } = await setupServer());
+    ({ server, httpSetup, handlerContext } = await setupServer());
     mockLogger = loggerMock.create();
     handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
       allowedTypes.map(createExportableType)
@@ -87,7 +85,7 @@ describe(`POST ${URL}`, () => {
       .fn()
       .mockImplementation(() => importer as jest.Mocked<SavedObjectsImporter>);
 
-    const router = createRouter<InternalSavedObjectsRequestHandlerContext>(
+    const router = httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>(
       '/internal/saved_objects/'
     );
     coreUsageStatsClient = coreUsageStatsClientMock.create();
@@ -103,7 +101,7 @@ describe(`POST ${URL}`, () => {
   });
 
   it('formats successful response and records usage stats', async () => {
-    const result = await supertest(server.listener)
+    const result = await supertest(httpSetup.server.listener)
       .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=BOUNDARY')
       .send(
@@ -131,7 +129,7 @@ describe(`POST ${URL}`, () => {
   it('defaults migrationVersion to empty object', async () => {
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [mockIndexPattern] });
 
-    const result = await supertest(server.listener)
+    const result = await supertest(httpSetup.server.listener)
       .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
@@ -169,7 +167,7 @@ describe(`POST ${URL}`, () => {
   it('returns the default for managed as part of the successResults', async () => {
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [mockIndexPattern] });
 
-    const result = await supertest(server.listener)
+    const result = await supertest(httpSetup.server.listener)
       .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
@@ -211,7 +209,7 @@ describe(`POST ${URL}`, () => {
       saved_objects: [mockIndexPattern, { ...mockDashboard, managed: false }],
     });
 
-    const result = await supertest(server.listener)
+    const result = await supertest(httpSetup.server.listener)
       .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
@@ -261,7 +259,7 @@ describe(`POST ${URL}`, () => {
       errors: [{ type: mockIndexPattern.type, id: mockIndexPattern.id, error }],
     });
 
-    const result = await supertest(server.listener)
+    const result = await supertest(httpSetup.server.listener)
       .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
@@ -313,7 +311,7 @@ describe(`POST ${URL}`, () => {
       saved_objects: [mockIndexPattern, mockDashboard],
     });
 
-    const result = await supertest(server.listener)
+    const result = await supertest(httpSetup.server.listener)
       .post(`${URL}?overwrite=true`)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
@@ -363,7 +361,7 @@ describe(`POST ${URL}`, () => {
       saved_objects: [{ ...mockIndexPattern, error }],
     });
 
-    const result = await supertest(server.listener)
+    const result = await supertest(httpSetup.server.listener)
       .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
@@ -427,7 +425,7 @@ describe(`POST ${URL}`, () => {
       errors: [{ type: 'visualization', id: 'my-vis', error: error2 }],
     });
 
-    const result = await supertest(server.listener)
+    const result = await supertest(httpSetup.server.listener)
       .post(URL)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
@@ -497,7 +495,7 @@ describe(`POST ${URL}`, () => {
       errors: [{ type: 'visualization', id: 'my-vis', error: error2 }],
     });
 
-    const result = await supertest(server.listener)
+    const result = await supertest(httpSetup.server.listener)
       .post(`${URL}?overwrite=true`)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
@@ -572,7 +570,7 @@ describe(`POST ${URL}`, () => {
       };
       savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [obj1, obj2] });
 
-      const result = await supertest(server.listener)
+      const result = await supertest(httpSetup.server.listener)
         .post(`${URL}?createNewCopies=true`)
         .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
         .send(
@@ -712,7 +710,7 @@ describe(`POST ${URL}`, () => {
         saved_objects: [legacyUrlAliasObj2, legacyUrlAliasObj3],
       });
 
-      const result = await supertest(server.listener)
+      const result = await supertest(httpSetup.server.listener)
         .post(`${URL}?compatibilityMode=true`)
         .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
         .send(
@@ -870,7 +868,7 @@ describe(`POST ${URL}`, () => {
       };
       savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [legacyUrlAliasObj1] });
 
-      const result = await supertest(server.listener)
+      const result = await supertest(httpSetup.server.listener)
         .post(`${URL}?compatibilityMode=true`)
         .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
         .send(
@@ -1003,7 +1001,7 @@ describe(`POST ${URL}`, () => {
         ],
       });
 
-      const result = await supertest(server.listener)
+      const result = await supertest(httpSetup.server.listener)
         .post(`${URL}?compatibilityMode=true`)
         .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
         .send(

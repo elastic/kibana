@@ -68,7 +68,6 @@ export async function getDataStreams(options: {
       canMonitor: dataStreamsPrivileges[dataStream.name].monitor,
       canReadFailureStore: dataStreamsPrivileges[dataStream.name][FAILURE_STORE_PRIVILEGE],
     },
-    hasFailureStore: dataStream.failure_store?.enabled,
   }));
 
   return {

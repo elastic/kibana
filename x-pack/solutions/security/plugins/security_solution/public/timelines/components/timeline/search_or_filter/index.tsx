@@ -14,11 +14,11 @@ import deepEqual from 'fast-deep-equal';
 import type { Filter } from '@kbn/es-query';
 
 import type { FilterManager } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -75,10 +75,17 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       services: { data },
     } = useKibana();
 
-    const { sourcererDataView: dataViewSpec } = useSourcererDataView(SourcererScopeName.timeline);
+    const { sourcererDataView: oldSourcererDataViewSpec } = useSourcererDataView(
+      SourcererScopeName.timeline
+    );
 
-    const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
-    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+    const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.timeline);
+    const { newDataViewPickerEnabled } = useEnableExperimental();
+
+    const dataViewSpec: DataViewSpec = useMemo(
+      () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataViewSpec),
+      [experimentalDataViewSpec, newDataViewPickerEnabled, oldSourcererDataViewSpec]
+    );
 
     const getIsDataProviderVisible = useMemo(
       () => timelineSelectors.dataProviderVisibilitySelector(),
@@ -114,14 +121,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       };
     }, [data.dataViews, filterQuery, addError, dataViewSpec, newDataViewPickerEnabled]);
 
-    // NOTE: re-using data view that is already created and available through data view manager
-    const arrDataView = useMemo(() => {
-      if (newDataViewPickerEnabled) {
-        return experimentalDataView ? [experimentalDataView] : [];
-      }
-
-      return dataView != null ? [dataView] : [];
-    }, [dataView, experimentalDataView, newDataViewPickerEnabled]);
+    const arrDataView = useMemo(() => (dataView != null ? [dataView] : []), [dataView]);
 
     // Keep filter manager in sync with redux filters
     useEffect(() => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setupServer, SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
@@ -19,11 +19,13 @@ import {
 } from '../../../../test_helpers';
 import { registerDeprecationsRoutes } from '../deprecations';
 
+type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
+
 describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
   jest.setTimeout(6000);
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
-  let createRouter: SetupServerReturn['createRouter'];
+  let httpSetup: SetupServerReturn['httpSetup'];
 
   const mockConfig = createMockConfigSchema({
     queue: { indexInterval: 'year', timeout: 10000, pollEnabled: true },
@@ -35,13 +37,13 @@ describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
   }) =>
     createMockReportingCore(
       mockConfig,
-      createMockPluginSetup({ security, router: createRouter('') }),
+      createMockPluginSetup({ security, router: httpSetup.createRouter('') }),
       await createMockPluginStart({ licensing: licensingMock.createStart() }, mockConfig)
     );
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    ({ server, createRouter } = await setupServer(reportingSymbol));
+    ({ server, httpSetup } = await setupServer(reportingSymbol));
   });
 
   afterEach(async () => {
@@ -54,7 +56,7 @@ describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
     registerDeprecationsRoutes(core, loggingSystemMock.createLogger());
     await server.start();
 
-    await supertest(server.listener)
+    await supertest(httpSetup.server.listener)
       .get(INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS)
       .expect(200)
       .then(/* Ignore result */);
@@ -68,7 +70,7 @@ describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
     registerDeprecationsRoutes(core, loggingSystemMock.createLogger());
     await server.start();
 
-    await supertest(server.listener)
+    await supertest(httpSetup.server.listener)
       .get(INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS)
       .expect(200)
       .then(/* Ignore result */);
@@ -86,7 +88,7 @@ describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
       registerDeprecationsRoutes(core, loggingSystemMock.createLogger());
       await server.start();
 
-      await supertest(server.listener)
+      await supertest(httpSetup.server.listener)
         .get(INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS)
         .expect(200)
         .then(/* Ignore result */);

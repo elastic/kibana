@@ -2979,7 +2979,7 @@ const kqlDefinition: FunctionDefinition = {
     defaultMessage:
       'Performs a KQL query. Returns true if the provided KQL query string matches the row.',
   }),
-  preview: false,
+  preview: true,
   alias: undefined,
   signatures: [
     {
@@ -3995,9 +3995,9 @@ const matchDefinition: FunctionDefinition = {
   name: 'match',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.match', {
     defaultMessage:
-      'Use `MATCH` to perform a match query on the specified field.\nUsing `MATCH` is equivalent to using the `match` query in the Elasticsearch Query DSL.',
+      'Use `MATCH` to perform a match query on the specified field.\nUsing `MATCH` is equivalent to using the `match` query in the Elasticsearch Query DSL.\n\nMatch can be used on fields from the text family like text and semantic_text,\nas well as other field types like keyword, boolean, dates, and numeric types.\nWhen Match is used on a semantic_text field, it will perform a semantic query on the field.\n\nMatch can use function named parameters to specify additional options for the match query.\nAll match query parameters are supported.\n\nFor a simplified syntax, you can use the match operator `:` operator instead of `MATCH`.\n\n`MATCH` returns true if the provided query matches the row.',
   }),
-  preview: false,
+  preview: true,
   alias: undefined,
   signatures: [
     {
@@ -4740,9 +4740,9 @@ const matchPhraseDefinition: FunctionDefinition = {
   name: 'match_phrase',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.match_phrase', {
     defaultMessage:
-      'Use `MATCH_PHRASE` to perform a `match_phrase` on the\nspecified field.\nUsing `MATCH_PHRASE` is equivalent to using the `match_phrase` query in the Elasticsearch Query DSL.',
+      'Use `MATCH_PHRASE` to perform a `match_phrase` on the\nspecified field.\nUsing `MATCH_PHRASE` is equivalent to using the `match_phrase` query in the Elasticsearch Query DSL.\n\nMatchPhrase can be used on text fields, as well as other field types like keyword, boolean, or date types.\nMatchPhrase is not supported for semantic_text or numeric types.\n\nMatchPhrase can use function named parameters to specify additional options for the\nmatch_phrase query.\nAll `match_phrase` query parameters are supported.\n\n`MATCH_PHRASE` returns true if the provided query matches the row.',
   }),
-  preview: false,
+  preview: true,
   alias: undefined,
   signatures: [
     {
@@ -8476,7 +8476,7 @@ const qstrDefinition: FunctionDefinition = {
     defaultMessage:
       'Performs a query string query. Returns true if the provided query string matches the row.',
   }),
-  preview: false,
+  preview: true,
   alias: undefined,
   signatures: [
     {
@@ -10294,7 +10294,7 @@ const stEnvelopeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_envelope', {
     defaultMessage: 'Determines the minimum bounding box of the supplied geometry.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -10362,8 +10362,7 @@ const stGeohashDefinition: FunctionDefinition = {
     defaultMessage:
       'Calculates the `geohash` of the supplied geo_point at the specified precision.\nThe result is long encoded. Use ST_GEOHASH_TO_STRING to convert the result to a string.\n\nThese functions are related to the `geo_grid` query\nand the `geohash_grid` aggregation.',
   }),
-  ignoreAsSuggestion: true,
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -10429,8 +10428,7 @@ const stGeohashToLongDefinition: FunctionDefinition = {
         'Converts an input value representing a geohash grid-ID in string format into a long.',
     }
   ),
-  ignoreAsSuggestion: true,
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -10479,8 +10477,7 @@ const stGeohashToStringDefinition: FunctionDefinition = {
         'Converts an input value representing a geohash grid-ID in long format into a string.',
     }
   ),
-  ignoreAsSuggestion: true,
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -10528,8 +10525,7 @@ const stGeohexDefinition: FunctionDefinition = {
     defaultMessage:
       'Calculates the `geohex`, the H3 cell-id, of the supplied geo_point at the specified precision.\nThe result is long encoded. Use ST_GEOHEX_TO_STRING to convert the result to a string.\n\nThese functions are related to the `geo_grid` query\nand the `geohex_grid` aggregation.',
   }),
-  ignoreAsSuggestion: true,
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -10597,8 +10593,7 @@ const stGeohexToLongDefinition: FunctionDefinition = {
         'Converts an input value representing a geohex grid-ID in string format into a long.',
     }
   ),
-  ignoreAsSuggestion: true,
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -10647,8 +10642,7 @@ const stGeohexToStringDefinition: FunctionDefinition = {
         'Converts an input value representing a Geohex grid-ID in long format into a string.',
     }
   ),
-  ignoreAsSuggestion: true,
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -10694,8 +10688,7 @@ const stGeotileDefinition: FunctionDefinition = {
     defaultMessage:
       'Calculates the `geotile` of the supplied geo_point at the specified precision.\nThe result is long encoded. Use ST_GEOTILE_TO_STRING to convert the result to a string.\n\nThese functions are related to the `geo_grid` query\nand the `geotile_grid` aggregation.',
   }),
-  ignoreAsSuggestion: true,
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -10761,8 +10754,7 @@ const stGeotileToLongDefinition: FunctionDefinition = {
         'Converts an input value representing a geotile grid-ID in string format into a long.',
     }
   ),
-  ignoreAsSuggestion: true,
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -10811,8 +10803,7 @@ const stGeotileToStringDefinition: FunctionDefinition = {
         'Converts an input value representing a geotile grid-ID in long format into a string.',
     }
   ),
-  ignoreAsSuggestion: true,
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -11204,7 +11195,7 @@ const stXmaxDefinition: FunctionDefinition = {
     defaultMessage:
       'Extracts the maximum value of the `x` coordinates from the supplied geometry.\nIf the geometry is of type `geo_point` or `geo_shape` this is equivalent to extracting the maximum `longitude` value.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -11272,7 +11263,7 @@ const stXminDefinition: FunctionDefinition = {
     defaultMessage:
       'Extracts the minimum value of the `x` coordinates from the supplied geometry.\nIf the geometry is of type `geo_point` or `geo_shape` this is equivalent to extracting the minimum `longitude` value.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -11388,7 +11379,7 @@ const stYmaxDefinition: FunctionDefinition = {
     defaultMessage:
       'Extracts the maximum value of the `y` coordinates from the supplied geometry.\nIf the geometry is of type `geo_point` or `geo_shape` this is equivalent to extracting the maximum `latitude` value.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -11456,7 +11447,7 @@ const stYminDefinition: FunctionDefinition = {
     defaultMessage:
       'Extracts the minimum value of the `y` coordinates from the supplied geometry.\nIf the geometry is of type `geo_point` or `geo_shape` this is equivalent to extracting the minimum `latitude` value.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -13478,7 +13469,7 @@ const toUnsignedLongDefinition: FunctionDefinition = {
         'Converts an input value to an unsigned long value. If the input parameter is of a date type,\nits value will be interpreted as milliseconds since the Unix epoch, converted to unsigned long.\nBoolean `true` will be converted to unsigned long `1`, `false` to `0`.',
     }
   ),
-  preview: true,
+  preview: false,
   alias: ['to_ul', 'to_ulong'],
   signatures: [
     {

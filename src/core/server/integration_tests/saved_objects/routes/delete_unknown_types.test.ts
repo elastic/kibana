@@ -10,25 +10,27 @@
 import supertest from 'supertest';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
-import { SetupServerReturn, setupServer } from '@kbn/core-test-helpers-test-utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { SavedObjectsType } from '../../..';
 import {
   registerDeleteUnknownTypesRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 
+type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
+
 describe('POST /internal/saved_objects/deprecations/_delete_unknown_types', () => {
   const kibanaVersion = '8.0.0';
   const kibanaIndex = '.kibana';
 
   let server: SetupServerReturn['server'];
-  let createRouter: SetupServerReturn['createRouter'];
+  let httpSetup: SetupServerReturn['httpSetup'];
   let handlerContext: SetupServerReturn['handlerContext'];
   let typeRegistry: ReturnType<typeof typeRegistryMock.create>;
   let elasticsearchClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
 
   beforeEach(async () => {
-    ({ server, createRouter, handlerContext } = await setupServer());
+    ({ server, httpSetup, handlerContext } = await setupServer());
     elasticsearchClient = elasticsearchServiceMock.createScopedClusterClient();
     typeRegistry = typeRegistryMock.create();
 
@@ -39,7 +41,7 @@ describe('POST /internal/saved_objects/deprecations/_delete_unknown_types', () =
     handlerContext.elasticsearch.client.asCurrentUser = elasticsearchClient.asCurrentUser;
     handlerContext.elasticsearch.client.asInternalUser = elasticsearchClient.asInternalUser;
 
-    const router = createRouter<InternalSavedObjectsRequestHandlerContext>(
+    const router = httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>(
       '/internal/saved_objects/'
     );
     registerDeleteUnknownTypesRoute(router, {
@@ -55,7 +57,7 @@ describe('POST /internal/saved_objects/deprecations/_delete_unknown_types', () =
   });
 
   it('formats successful response', async () => {
-    const result = await supertest(server.listener)
+    const result = await supertest(httpSetup.server.listener)
       .post('/internal/saved_objects/deprecations/_delete_unknown_types')
       .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
@@ -64,7 +66,7 @@ describe('POST /internal/saved_objects/deprecations/_delete_unknown_types', () =
   });
 
   it('calls upon esClient.deleteByQuery', async () => {
-    await supertest(server.listener)
+    await supertest(httpSetup.server.listener)
       .post('/internal/saved_objects/deprecations/_delete_unknown_types')
       .set('x-elastic-internal-origin', 'kibana')
       .expect(200);

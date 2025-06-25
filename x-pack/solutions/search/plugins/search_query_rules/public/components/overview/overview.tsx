@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -26,14 +25,12 @@ import { EmptyPrompt } from '../empty_prompt/empty_prompt';
 import { ErrorPrompt } from '../error_prompt/error_prompt';
 import { isPermissionError } from '../../utils/query_rules_utils';
 import queryRulesBackground from '../../assets/query-rule-background.svg';
-import queryRulesBackgroundDark from '../../assets/query-rule-background-dark.svg';
 import { QueryRulesSets } from '../query_rules_sets/query_rules_sets';
 import { CreateRulesetModal } from './create_ruleset_modal';
 
 import { QueryRulesPageTemplate } from '../../layout/query_rules_page_template';
 
 export const QueryRulesOverview = () => {
-  const { colorMode } = useEuiTheme();
   const {
     data: queryRulesData,
     isInitialLoading,
@@ -50,9 +47,7 @@ export const QueryRulesOverview = () => {
   }, [refetch]);
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const backgroundProps = css({
-    backgroundImage: `url(${
-      colorMode === 'DARK' ? queryRulesBackgroundDark : queryRulesBackground
-    })`,
+    backgroundImage: `url(${queryRulesBackground})`,
     backgroundSize: 'contain',
     backgroundRepeat: 'no-repeat',
     height: '100%',

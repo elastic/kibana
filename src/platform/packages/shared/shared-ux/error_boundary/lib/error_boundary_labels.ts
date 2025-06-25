@@ -11,6 +11,6 @@ export const getErrorBoundaryLabels = (
   errorType: 'PageFatalReactError' | 'SectionFatalReactError'
 ) => {
   return {
-    error_type: errorType,
+    errorType,
   };
 };

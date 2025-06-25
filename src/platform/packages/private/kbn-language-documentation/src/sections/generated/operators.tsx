@@ -237,9 +237,13 @@ export const functions = {
             {
               defaultMessage: `
   ### IS NOT NULL
-  Returns \`false\` if the value is \`NULL\`, \`true\` otherwise.
+  Use \`IS NOT NULL\` to filter data based on whether the field exists or not.
 
-  Note: If a field is only in some documents it will be \`NULL\` in the documents that did not contain it.
+  \`\`\`esql
+  FROM employees
+  | WHERE is_rehired IS NOT NULL
+  | STATS COUNT(emp_no)
+  \`\`\`
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -265,9 +269,12 @@ export const functions = {
             {
               defaultMessage: `
   ### IS NULL
-  Returns \`true\` if the value is \`NULL\`, \`false\` otherwise.
+  Use \`IS NULL\` to filter data based on whether the field exists or not.
 
-  Note: If a field is only in some documents it will be \`NULL\` in the documents that did not contain it.
+  \`\`\`esql
+  FROM employees
+  | WHERE birth_date IS NULL
+  \`\`\`
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -379,7 +386,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.match_operator (:)', {
         defaultMessage: 'MATCH_OPERATOR (:)',
       }),
-      preview: false,
+      preview: true,
       description: (
         <Markdown
           openLinksInNewTab

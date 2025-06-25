@@ -10,6 +10,7 @@
 import supertest from 'supertest';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { createHttpService } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
 import { Server } from '@hapi/hapi';
 import { MetricsService } from '@kbn/core-metrics-server-internal';
@@ -18,16 +19,15 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import moment from 'moment';
-import { createInternalHttpService } from '../utilities';
 
 describe('GET /api/_elu_load', () => {
   let logger: ReturnType<typeof loggingSystemMock.create>;
-  let server: ReturnType<typeof createInternalHttpService>;
+  let server: ReturnType<typeof createHttpService>;
   let listener: Server['listener'];
   let service: MetricsService;
   beforeEach(async () => {
     logger = loggingSystemMock.create();
-    server = createInternalHttpService({ logger });
+    server = createHttpService({ logger });
     service = new MetricsService({
       coreId: Symbol('core'),
       env: Env.createDefault(REPO_ROOT, getEnvOptions()),

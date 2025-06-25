@@ -16,16 +16,13 @@ import {
 } from '@kbn/core-usage-data-server-mocks';
 import { savedObjectsExporterMock } from '@kbn/core-saved-objects-import-export-server-mocks';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
-import {
-  setupServer,
-  createExportableType,
-  SetupServerReturn,
-} from '@kbn/core-test-helpers-test-utils';
+import { setupServer, createExportableType } from '@kbn/core-test-helpers-test-utils';
 import {
   registerExportRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 
+type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 const allowedTypes = ['index-pattern', 'search'];
 const config = {
   maxImportPayloadBytes: 26214400,
@@ -35,18 +32,19 @@ let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
 
 describe('POST /api/saved_objects/_export', () => {
   let server: SetupServerReturn['server'];
-  let createRouter: SetupServerReturn['createRouter'];
+  let httpSetup: SetupServerReturn['httpSetup'];
   let handlerContext: SetupServerReturn['handlerContext'];
   let exporter: ReturnType<typeof savedObjectsExporterMock.create>;
 
   beforeEach(async () => {
-    ({ server, createRouter, handlerContext } = await setupServer());
+    ({ server, httpSetup, handlerContext } = await setupServer());
     handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
       allowedTypes.map(createExportableType)
     );
     exporter = handlerContext.savedObjects.getExporter();
 
-    const router = createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
+    const router =
+      httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
     handlerContext.savedObjects.getExporter = jest
       .fn()
       .mockImplementation(() => exporter as ReturnType<typeof savedObjectsExporterMock.create>);
@@ -88,11 +86,13 @@ describe('POST /api/saved_objects/_export', () => {
 
     exporter.exportByTypes.mockResolvedValueOnce(createListStream(sortedObjects));
 
-    const result = await supertest(server.listener).post('/api/saved_objects/_export').send({
-      type: 'search',
-      search: 'my search string',
-      includeReferencesDeep: true,
-    });
+    const result = await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/_export')
+      .send({
+        type: 'search',
+        search: 'my search string',
+        includeReferencesDeep: true,
+      });
 
     expect(result.status).toBe(200);
     expect(result.header).toEqual(

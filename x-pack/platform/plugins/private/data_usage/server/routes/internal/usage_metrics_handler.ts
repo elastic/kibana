@@ -112,12 +112,10 @@ export function transformMetricsData(
       metricType,
       series.map((metricSeries) => ({
         name: metricSeries.name,
-        data: Array.isArray(metricSeries.data)
-          ? (metricSeries.data as Array<[number, number]>).map(([timestamp, value]) => ({
-              x: timestamp,
-              y: value,
-            }))
-          : [],
+        data: (metricSeries.data as Array<[number, number]>).map(([timestamp, value]) => ({
+          x: timestamp,
+          y: value,
+        })),
       })),
     ])
   ) as UsageMetricsResponseSchemaBody;

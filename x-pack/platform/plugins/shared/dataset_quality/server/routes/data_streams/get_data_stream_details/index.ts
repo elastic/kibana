@@ -86,7 +86,6 @@ export async function getDataStreamDetails({
       ...dataStreamSummaryStats,
       failedDocsCount: failedDocs?.count,
       sizeBytes,
-      hasFailureStore: esDataStream?.hasFailureStore,
       lastActivity: esDataStream?.lastActivity,
       userPrivileges: {
         canMonitor: dataStreamPrivileges.monitor,

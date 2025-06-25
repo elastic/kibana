@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { setTimeout as setTimeoutPromise } from 'timers/promises';
+import { contextServiceMock, executionContextServiceMock } from '@kbn/core/server/mocks';
 import { createHttpService } from '@kbn/core-http-server-mocks';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
@@ -36,8 +37,13 @@ describe('APMEventClient', () => {
     });
 
     it('cancels a search when a request is aborted', async () => {
-      await server.preboot();
-      const { server: innerServer, createRouter } = await server.setup();
+      await server.preboot({
+        context: contextServiceMock.createPrebootContract(),
+      });
+      const { server: innerServer, createRouter } = await server.setup({
+        context: contextServiceMock.createSetupContract(),
+        executionContext: executionContextServiceMock.createInternalSetupContract(),
+      });
       const router = createRouter('/');
 
       let abortSignal: AbortSignal | undefined;

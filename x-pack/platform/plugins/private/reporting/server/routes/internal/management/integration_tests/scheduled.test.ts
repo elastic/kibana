@@ -13,7 +13,7 @@ jest.mock('../../../../lib/content_stream', () => ({
   getContentStream: jest.fn(),
 }));
 
-import { setupServer, SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import {
   ElasticsearchClientMock,
   coreMock,
@@ -47,6 +47,8 @@ import {
 } from '@kbn/core/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+
+type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
 const fakeRawRequest = {
   headers: {
@@ -148,7 +150,7 @@ describe(`Reporting Schedule Management Routes: Internal`, () => {
   let server: SetupServerReturn['server'];
   let eventTracker: EventTracker;
   let usageCounter: IUsageCounter;
-  let httpSetup: SetupServerReturn;
+  let httpSetup: SetupServerReturn['httpSetup'];
   let exportTypesRegistry: ExportTypesRegistry;
   let reportingCore: ReportingCore;
   let mockSetupDeps: ReportingInternalSetup;
@@ -167,8 +169,7 @@ describe(`Reporting Schedule Management Routes: Internal`, () => {
   const mockConfigSchema = createMockConfigSchema();
 
   beforeEach(async () => {
-    httpSetup = await setupServer(reportingSymbol);
-    server = httpSetup.server;
+    ({ server, httpSetup } = await setupServer(reportingSymbol));
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',

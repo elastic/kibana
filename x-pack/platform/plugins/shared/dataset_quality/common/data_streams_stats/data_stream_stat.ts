@@ -32,7 +32,6 @@ export class DataStreamStat {
   docsInTimeRange?: number;
   degradedDocs: QualityStat;
   failedDocs: QualityStat;
-  hasFailureStore?: DataStreamStatType['hasFailureStore'];
 
   private constructor(dataStreamStat: DataStreamStat) {
     this.rawName = dataStreamStat.rawName;
@@ -50,7 +49,6 @@ export class DataStreamStat {
     this.docsInTimeRange = dataStreamStat.docsInTimeRange;
     this.degradedDocs = dataStreamStat.degradedDocs;
     this.failedDocs = dataStreamStat.failedDocs;
-    this.hasFailureStore = dataStreamStat.hasFailureStore;
   }
 
   public static create(dataStreamStat: DataStreamStatType) {
@@ -58,7 +56,6 @@ export class DataStreamStat {
 
     const dataStreamStatProps = {
       rawName: dataStreamStat.name,
-      hasFailureStore: dataStreamStat.hasFailureStore,
       type,
       name: dataset,
       title: dataset,
@@ -82,20 +79,17 @@ export class DataStreamStat {
     failedDocStat,
     datasetIntegrationMap,
     totalDocs,
-    hasFailureStore,
   }: {
     datasetName: string;
     degradedDocStat: QualityStat;
     failedDocStat: QualityStat;
     datasetIntegrationMap: Record<string, { integration: Integration; title: string }>;
     totalDocs: number;
-    hasFailureStore?: boolean;
   }) {
     const { type, dataset, namespace } = indexNameToDataStreamParts(datasetName);
 
     const dataStreamStatProps = {
       rawName: datasetName,
-      hasFailureStore,
       type,
       name: dataset,
       title: datasetIntegrationMap[dataset]?.title || dataset,

@@ -60,7 +60,7 @@ const degradedDocsTooltip = (
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: number }) {
-  const { timeRange, updateTimeRange, docsTrendChart, canShowFailureStoreInfo } =
+  const { timeRange, updateTimeRange, docsTrendChart, canUserReadFailureStore } =
     useDatasetQualityDetailsState();
   const {
     dataView,
@@ -81,7 +81,7 @@ export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: num
     [updateTimeRange, timeRange.refresh]
   );
 
-  const accordionTitle = !canShowFailureStoreInfo ? (
+  const accordionTitle = !canUserReadFailureStore ? (
     <EuiFlexItem
       css={css`
         flex-direction: row;
@@ -127,7 +127,7 @@ export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: num
         <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem>
-            {canShowFailureStoreInfo && (
+            {canUserReadFailureStore && (
               <EuiButtonGroup
                 data-test-subj="datasetQualityDetailsChartTypeButtonGroup"
                 legend={i18n.translate('xpack.datasetQuality.details.chartTypeLegend', {

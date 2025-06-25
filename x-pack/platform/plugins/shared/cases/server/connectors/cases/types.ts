@@ -79,5 +79,13 @@ export type BulkUpdateOracleRecordRequest = Array<{
   payload: Pick<OracleRecordAttributes, 'counter'>;
 }>;
 
+export interface BackoffStrategy {
+  nextBackOff: () => number;
+}
+
+export interface BackoffFactory {
+  create: () => BackoffStrategy;
+}
+
 export type CasesConnectorRuleActionParams = TypeOf<typeof CasesConnectorRuleActionParamsSchema>;
 export type CasesConnectorParams = TypeOf<typeof CasesConnectorParamsSchema>;

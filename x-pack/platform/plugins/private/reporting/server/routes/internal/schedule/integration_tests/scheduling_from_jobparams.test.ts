@@ -9,7 +9,7 @@ import rison from '@kbn/rison';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
-import { setupServer, type SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
@@ -29,6 +29,8 @@ import { registerScheduleRoutesInternal } from '../schedule_from_jobparams';
 import { FakeRawRequest, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 
+type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
+
 const fakeRawRequest: FakeRawRequest = {
   headers: {
     authorization: `ApiKey skdjtq4u543yt3rhewrh`,
@@ -38,8 +40,8 @@ const fakeRawRequest: FakeRawRequest = {
 
 describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
   const reportingSymbol = Symbol('reporting');
-  let httpSetup: SetupServerReturn;
   let server: SetupServerReturn['server'];
+  let httpSetup: SetupServerReturn['httpSetup'];
   let mockExportTypesRegistry: ExportTypesRegistry;
   let reportingCore: ReportingCore;
   let soClient: SavedObjectsClientContract;
@@ -59,13 +61,12 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
   );
 
   beforeEach(async () => {
-    httpSetup = await setupServer(reportingSymbol);
+    ({ server, httpSetup } = await setupServer(reportingSymbol));
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
       () => reportingMock.createStart()
     );
-    server = httpSetup.server;
 
     const mockSetupDeps = createMockPluginSetup({
       security: { license: { isEnabled: () => true, getFeature: () => true } },
