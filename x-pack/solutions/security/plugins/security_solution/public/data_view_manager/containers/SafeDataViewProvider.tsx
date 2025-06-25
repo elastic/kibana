@@ -10,10 +10,11 @@ import React, { createContext, type ReactNode, type FC, type PropsWithChildren }
 import { type DataViewManagerScopeName } from '../constants';
 import { useDataView } from '../hooks/use_data_view';
 
-export const DataViewContext = createContext<
-  | { results: Array<ReturnType<typeof useDataView>>; scopes: readonly DataViewManagerScopeName[] }
-  | undefined
->(undefined);
+export interface DataViewContextValue {
+  readonly results: Record<string, ReturnType<typeof useDataView>>;
+}
+
+export const DataViewContext = createContext<DataViewContextValue | undefined>(undefined);
 
 export interface SafeDataViewProviderProps {
   scopes: readonly DataViewManagerScopeName[];
@@ -31,11 +32,20 @@ export const SafeDataViewProvider: FC<PropsWithChildren<SafeDataViewProviderProp
   scopes,
   fallback = fallbackElement,
 }) => {
-  const results = scopes.map(useDataView);
-  const allReady = results.every((result) => result.status === 'ready');
+  const value: DataViewContextValue = {
+    results: {},
+  };
+
+  scopes.forEach((scope) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const result = useDataView(scope);
+    value.results[scope] = result;
+  });
+
+  const allReady = Object.values(value.results).every((result) => result.status === 'ready');
 
   return (
-    <DataViewContext.Provider value={{ results, scopes }}>
+    <DataViewContext.Provider value={value}>
       {allReady ? children : fallback}
     </DataViewContext.Provider>
   );

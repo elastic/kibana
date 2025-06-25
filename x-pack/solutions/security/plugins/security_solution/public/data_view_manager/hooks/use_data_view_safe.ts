@@ -5,30 +5,32 @@
  * 2.0.
  */
 
-import { useContext } from 'react';
+import { useContext, useMemo } from 'react';
 import { DataViewContext } from '../containers/SafeDataViewProvider';
 import { type DataViewManagerScopeName } from '../constants';
 
 /**
  * Returns data view that is guaranteed to be set,
  * allowing you to skip the status check (if its loading or not).
- * The only catch is that it can only be used inside the DataViewProvider (you can have many on the page).
+ * The catch is that it can only be used inside the DataViewProvider (you can have many on the page).
  */
 export const useDataViewSafe = (scope: DataViewManagerScopeName) => {
-  const scopes = useContext(DataViewContext);
+  const dataViewsPerScope = useContext(DataViewContext);
 
-  if (!scopes) {
+  if (!dataViewsPerScope) {
     throw new Error('You can only use useDataViewSafe inside DataViewProvider');
   }
 
-  if (!scopes.scopes.includes(scope)) {
+  if (!(scope in dataViewsPerScope.results)) {
     throw new Error(
       'No safeguards exist for requested scope, make sure it is configured where DataViewProvider is called'
     );
   }
 
-  const dataViewIndex = scopes.scopes.indexOf(scope);
-  const dataView = scopes.results[dataViewIndex].dataView;
+  const dataView = useMemo(
+    () => dataViewsPerScope.results[scope].dataView,
+    [dataViewsPerScope.results, scope]
+  );
 
   if (!dataView) {
     throw new Error(
