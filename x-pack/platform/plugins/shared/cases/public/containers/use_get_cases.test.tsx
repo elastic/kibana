@@ -154,7 +154,9 @@ describe('useGetCases', () => {
     const spyOnGetCases = jest.spyOn(api, 'getCases');
 
     renderHook(() => useGetCases({ filterOptions: { search: '#123' } }), {
-      wrapper: (props) => <TestProviders {...props} />,
+      wrapper: (props) => (
+        <TestProviders {...props} settings={{ displayIncrementalCaseId: true }} />
+      ),
     });
 
     await waitFor(() => {

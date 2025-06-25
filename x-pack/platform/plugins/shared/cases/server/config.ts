@@ -31,7 +31,7 @@ export const ConfigSchema = schema.object({
     /**
      * The interval that the task should be scheduled at
      */
-    taskInterValMinutes: schema.number({
+    taskIntervalMinutes: schema.number({
       defaultValue: 10,
       min: 5,
     }),

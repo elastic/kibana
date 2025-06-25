@@ -125,9 +125,9 @@ export class IncrementalIdTaskManager {
         id: CASES_INCREMENTAL_ID_SYNC_TASK_ID,
         taskType: CASES_INCREMENTAL_ID_SYNC_TASK_TYPE,
         // start delayed to give the system some time to start up properly
-        runAt: new Date(new Date().getTime() + this.config.taskInterValMinutes * 60 * 1000),
+        runAt: new Date(new Date().getTime() + this.config.taskIntervalMinutes * 60 * 1000),
         schedule: {
-          interval: `${this.config.taskInterValMinutes}m`,
+          interval: `${this.config.taskIntervalMinutes}m`,
         },
         params: {},
         state: {},

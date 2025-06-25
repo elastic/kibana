@@ -28,7 +28,7 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     markdownPlugins: { lens: true },
     files: { maxSize: 1, allowedMimeTypes: ALLOWED_MIME_TYPES },
     stack: { enabled: true },
-    incrementalId: { enabled: true, taskInterValMinutes: 10, taskStartDelayMinutes: 10 },
+    incrementalId: { enabled: true, taskIntervalMinutes: 10, taskStartDelayMinutes: 10 },
     analytics: {},
     ...overrides,
   };
