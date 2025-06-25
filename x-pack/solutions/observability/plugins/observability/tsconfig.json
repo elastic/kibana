@@ -123,6 +123,7 @@
     "@kbn/task-manager-plugin",
     "@kbn/core-saved-objects-server",
     "@kbn/observability-navigation-plugin",
+    "@kbn/core-pricing-browser-mocks",
     "@kbn/esql"
   ],
   "exclude": ["target/**/*"]
