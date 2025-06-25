@@ -7,10 +7,8 @@
 
 import type { ExternalReferenceAttachmentTypeRegistry } from '../client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../client/attachment_framework/persistable_state_registry';
-import type { PersistableStateAttachmentType } from '../client/attachment_framework/types';
 import { getFileType } from '../components/files/file_type';
-import { getVisualizationAttachmentType } from '../components/internal_attachments/visualizations/attachment';
-import { getPageAttachmentType } from '../components/internal_attachments/page/attachment';
+import { getVisualizationAttachmentType } from '../components/visualizations/attachment';
 
 export const registerInternalAttachments = (
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry,
@@ -18,5 +16,4 @@ export const registerInternalAttachments = (
 ) => {
   externalRefRegistry.register(getFileType());
   persistableStateRegistry.register(getVisualizationAttachmentType());
-  persistableStateRegistry.register(getPageAttachmentType() as PersistableStateAttachmentType);
 };
