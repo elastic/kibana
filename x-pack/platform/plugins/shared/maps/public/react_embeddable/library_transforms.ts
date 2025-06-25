@@ -74,6 +74,6 @@ export function initializeLibraryTransforms(
           overlays: getCoreOverlays(),
         }
       );
-    }
+    },
   };
 }

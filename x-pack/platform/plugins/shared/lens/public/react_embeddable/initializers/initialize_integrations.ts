@@ -64,7 +64,7 @@ export function initializeIntegrations(
         );
         const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
           serializeDynamicActions?.() ?? {};
-          const { savedObjectId, attributes, ...byRefState } = cleanedState.rawState;
+        const { savedObjectId, attributes, ...byRefState } = cleanedState.rawState;
         if (cleanedState.rawState.savedObjectId) {
           return {
             rawState: {

@@ -96,7 +96,7 @@ export const getLinksEmbeddableFactory = () => {
     type: CONTENT_ID,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const titleManager = initializeTitleManager(initialState.rawState);
-      
+
       const initialRuntimeState = await deserializeState(initialState);
       const savedObjectId = initialRuntimeState.savedObjectId;
       const isByReference = savedObjectId !== undefined;

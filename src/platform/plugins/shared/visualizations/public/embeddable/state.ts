@@ -215,7 +215,7 @@ export const serializeState: (props: {
         ...(timeRange ? { timeRange } : {}),
       } as VisualizeSavedObjectInputState,
       references: [
-        ...references, 
+        ...references,
         ...(dynamicActionsReferences ?? []),
         {
           name: SAVED_OBJECT_REF_NAME,
