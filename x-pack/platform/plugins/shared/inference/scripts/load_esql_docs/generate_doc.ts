@@ -60,8 +60,9 @@ export const generateDoc = async ({
     })
   );
 
-  const pageContentByName = (pageName: string) =>
-    extraction.pages.find((page) => page.name === pageName)!.content;
+  const pageContentByName = (pageName: string) => {
+    return extraction.pages.find((page) => page.name === pageName)?.content;
+  };
 
   const pages: PageGeneration[] = [
     {
@@ -100,6 +101,7 @@ export const generateDoc = async ({
   await Promise.all(
     pages.map(async (page) => {
       return limiter(async () => {
+        if (!page.sourceFile) return;
         const pageContent = await callOutput(
           createDocumentationPagePrompt({
             documentation,
