@@ -53,6 +53,10 @@ __tmp__
 /x-pack/test_serverless/*/screenshots/visual_regression_gallery.html
 /x-pack/test_serverless/functional/apps/*/*/reporting/reports/failure
 
+# Ignore cypress artifacts
+**/cypress/screenshots
+**/cypress/videos
+
 /html_docs
 .eslintcache
 /plugins/

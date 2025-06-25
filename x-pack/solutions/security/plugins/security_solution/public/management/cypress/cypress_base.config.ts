@@ -39,11 +39,11 @@ export const getCypressBaseConfig = (
         openMode: 0,
       },
 
-      screenshotsFolder: 'cypress_artifacts/public/management/cypress/screenshots',
+      screenshotsFolder: 'cypress/screenshots/public/management',
       trashAssetsBeforeRuns: false,
       video: true,
       videoCompression: 15,
-      videosFolder: 'cypress_artifacts/public/management/cypress/videos',
+      videosFolder: 'cypress/videos/public/management',
       viewportHeight: 1200,
       viewportWidth: 1920,
       experimentalStudio: true,

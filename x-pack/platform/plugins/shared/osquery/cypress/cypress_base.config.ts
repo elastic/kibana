@@ -33,10 +33,10 @@ export const getCypressBaseConfig = (
       defaultCommandTimeout: 60000,
       execTimeout: 120000,
       pageLoadTimeout: 12000,
-      screenshotsFolder: '../../../../../target/kibana-osquery/cypress/screenshots',
+      screenshotsFolder: 'cypress/screenshots',
       trashAssetsBeforeRuns: false,
       video: true,
-      videosFolder: '../../../../../target/kibana-osquery/cypress/videos',
+      videosFolder: 'cypress/videos',
 
       retries: {
         runMode: 1,
