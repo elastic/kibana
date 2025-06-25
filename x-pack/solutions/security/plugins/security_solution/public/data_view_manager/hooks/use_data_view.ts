@@ -84,6 +84,7 @@ export const useDataView = <IsSync extends boolean = false>(
 
   return useMemo(() => {
     if (!isSync) {
+      // TODO: remove this with when compatibility flag is no longer needed. This is for compatibility reasons only
       if (!newDataViewPickerEnabled) {
         return {
           dataView: undefined,
@@ -108,6 +109,7 @@ export const useDataView = <IsSync extends boolean = false>(
       throw new Error('You can only use useDataViewSafe inside DataViewProvider');
     }
 
+    // NOTE: check if requested scope is present in the preloaded data views
     if (!(dataViewManagerScope in syncDataViewsContext.results)) {
       throw new Error(
         'No safeguards exist for requested scope, make sure it is included in `scopes` property of the wrapping DataViewProvider'
