@@ -51,6 +51,7 @@ import {
   SEARCH_PRODUCT_NAME,
   VECTOR_SEARCH_PLUGIN,
   SEMANTIC_SEARCH_PLUGIN,
+  SEARCH_HOMEPAGE,
 } from '../common/constants';
 import { registerLocators } from '../common/locators';
 import { ClientConfigType, InitialAppData } from '../common/types';
@@ -212,12 +213,13 @@ export class EnterpriseSearchPlugin implements Plugin {
     const { cloud, share } = plugins;
 
     core.application.register({
+      appRoute: ENTERPRISE_SEARCH_HOME_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       euiIconType: ENTERPRISE_SEARCH_HOME_PLUGIN.LOGO,
       id: ENTERPRISE_SEARCH_HOME_PLUGIN.ID,
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
-        coreStart.application.navigateToApp('searchHomepage');
+        coreStart.application.navigateToApp(SEARCH_HOMEPAGE);
         return () => {};
       },
       order: 0,

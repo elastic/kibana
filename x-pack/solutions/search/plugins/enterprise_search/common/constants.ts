@@ -14,6 +14,7 @@ import {
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
   SEARCH_ELASTICSEARCH,
   SEARCH_VECTOR_SEARCH,
+  SEARCH_HOMEPAGE,
   SEARCH_SEMANTIC_SEARCH,
   SEARCH_AI_SEARCH,
   SEARCH_INDICES,
@@ -33,7 +34,7 @@ export const ENTERPRISE_SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSe
   defaultMessage: 'Enterprise Search',
 });
 
-export { SEARCH_INDICES_START, SEARCH_INDICES, SEARCH_INDEX_MANAGEMENT };
+export { SEARCH_INDICES_START, SEARCH_INDICES, SEARCH_INDEX_MANAGEMENT, SEARCH_HOMEPAGE };
 
 export const ENTERPRISE_SEARCH_HOME_PLUGIN = {
   ID: ENTERPRISE_SEARCH_APP_ID,
@@ -44,7 +45,7 @@ export const ENTERPRISE_SEARCH_HOME_PLUGIN = {
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.home.description', {
     defaultMessage: 'Create search experiences with a refined set of APIs and tools.',
   }),
-  URL: '/app/elasticsearch/home',
+  URL: '/app/elasticsearch/overview',
   LOGO: 'logoElasticsearch',
 };
 
