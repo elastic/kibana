@@ -10,10 +10,8 @@
 import { createRestorableStateProvider } from '@kbn/restorable-state';
 
 export interface DiscoverLayoutRestorableState {
-  topPanelHeight: number;
   sidebarWidth: number;
-  isSidebarOpen: boolean;
 }
 
-export const { withRestorableState, useRestorableRef } =
+export const { withRestorableState, useRestorableState } =
   createRestorableStateProvider<DiscoverLayoutRestorableState>();

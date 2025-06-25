@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentProps, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiPage,
@@ -58,10 +58,16 @@ import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useCurrentDataView, useCurrentTabSelector } from '../../state_management/redux';
+import {
+  internalStateActions,
+  useCurrentDataView,
+  useCurrentTabAction,
+  useCurrentTabSelector,
+  useInternalStateDispatch,
+} from '../../state_management/redux';
 import { TABS_ENABLED } from '../../../../constants';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
-import { withRestorableState } from './discover_layout_restorable_state';
+import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -73,11 +79,11 @@ const TopNavMemoized = React.memo((props: DiscoverTopNavProps) => (
   </QueryClientProvider>
 ));
 
-interface InternalDiscoverLayoutProps {
+export interface DiscoverLayoutProps {
   stateContainer: DiscoverStateContainer;
 }
 
-function InternalDiscoverLayout({ stateContainer }: InternalDiscoverLayoutProps) {
+export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const {
     trackUiMetric,
     capabilities,
@@ -368,6 +374,24 @@ function InternalDiscoverLayout({ stateContainer }: InternalDiscoverLayoutProps)
     sendErrorMsg(stateContainer.dataState.data$.main$);
   }, [stateContainer.dataState]);
 
+  const dispatch = useInternalStateDispatch();
+  const tabLabel = useCurrentTabSelector((state) => state.label);
+  const layoutUiState = useCurrentTabSelector((state) => state.uiState.layout);
+  const setLayoutUiState = useCurrentTabAction(internalStateActions.setLayoutUiState);
+  const onInitialStateChange = useCallback(
+    (newLayoutUiState: Partial<DiscoverLayoutRestorableState>) => {
+      console.log('[DiscoverLayout] onInitialStateChange', tabLabel, newLayoutUiState);
+      dispatch(
+        setLayoutUiState({
+          layoutUiState: newLayoutUiState,
+        })
+      );
+    },
+    [dispatch, setLayoutUiState, tabLabel]
+  );
+
+  console.log(tabLabel, layoutUiState, 'layoutUiState');
+
   return (
     <EuiPage
       className="dscPage" // class is used in tests and other styles
@@ -504,16 +528,14 @@ function InternalDiscoverLayout({ stateContainer }: InternalDiscoverLayoutProps)
                 )}
               </div>
             }
+            initialState={layoutUiState}
+            onInitialStateChange={onInitialStateChange}
           />
         </div>
       </EuiPageBody>
     </EuiPage>
   );
 }
-
-export const DiscoverLayout = withRestorableState(React.memo(InternalDiscoverLayout));
-
-export type DiscoverLayoutProps = ComponentProps<typeof DiscoverLayout>;
 
 const getOperator = (fieldName: string, values: unknown, operation: '+' | '-') => {
   if (fieldName === '_exists_') {

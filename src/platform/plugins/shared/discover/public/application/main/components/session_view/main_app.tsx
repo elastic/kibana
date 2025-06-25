@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { DiscoverLayout } from '../layout';
@@ -17,13 +17,8 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useSavedSearchAliasMatchRedirect } from '../../../../hooks/saved_search_alias_match_redirect';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { useAdHocDataViews } from '../../hooks/use_adhoc_data_views';
-import {
-  internalStateActions,
-  useCurrentTabAction,
-  useCurrentTabSelector,
-  useInternalStateDispatch,
-} from '../../state_management/redux';
-import type { DiscoverLayoutRestorableState } from '../layout/discover_layout_restorable_state';
+
+const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
 export interface DiscoverMainProps {
   /**
@@ -75,27 +70,9 @@ export function DiscoverMainApp({ stateContainer }: DiscoverMainProps) {
   // TODO: Move this higher up in the component tree
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
-  const dispatch = useInternalStateDispatch();
-  const layoutUiState = useCurrentTabSelector((state) => state.uiState.layout);
-  const setLayoutUiState = useCurrentTabAction(internalStateActions.setLayoutUiState);
-  const onInitialStateChange = useCallback(
-    (newLayoutUiState: Partial<DiscoverLayoutRestorableState>) => {
-      dispatch(
-        setLayoutUiState({
-          layoutUiState: newLayoutUiState,
-        })
-      );
-    },
-    [dispatch, setLayoutUiState]
-  );
-
   return (
     <RootDragDropProvider>
-      <DiscoverLayout
-        stateContainer={stateContainer}
-        initialState={layoutUiState}
-        onInitialStateChange={onInitialStateChange}
-      />
+      <DiscoverLayoutMemoized stateContainer={stateContainer} />
     </RootDragDropProvider>
   );
 }
