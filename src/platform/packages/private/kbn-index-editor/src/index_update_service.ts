@@ -83,7 +83,7 @@ export class IndexUpdateService {
   private readonly _isSaving$ = new BehaviorSubject<boolean>(false);
   public readonly isSaving$: Observable<boolean> = this._isSaving$.asObservable();
 
-  private readonly _isFetching$ = new BehaviorSubject<boolean>(true);
+  private readonly _isFetching$ = new BehaviorSubject<boolean>(false);
   public readonly isFetching$: Observable<boolean> = this._isFetching$.asObservable();
 
   /** ES Documents */
