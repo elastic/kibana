@@ -73,6 +73,7 @@ export type AlertCellRenderers = Record<string, (value: string) => ReactNode>;
 // eslint-disable-next-line react/function-component-definition
 export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellValue'> = (props) => {
   const {
+    tableId,
     columnId,
     alert,
     openAlertInFlyout,
@@ -80,8 +81,6 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
     services: { http },
     parentAlert,
   } = props;
-
-  const RELATIVE_DISPLAY_THRESHOLD_HOURS = 2;
 
   const cellRenderers: AlertCellRenderers = {
     [ALERT_STATUS]: (value) => {
@@ -95,13 +94,12 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
     [TIMESTAMP]: (value) => (
       <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
     ),
-    [ALERT_START]: (value) => (
-      <ElapsedTimestampTooltip
-        time={new Date(value ?? '').getTime()}
-        timeUnit="milliseconds"
-        relativeDisplayThreshold={RELATIVE_DISPLAY_THRESHOLD_HOURS}
-      />
-    ),
+    [ALERT_START]: (value) =>
+      tableId === 'xpack.observability.alerts.relatedAlerts' ? (
+        <ElapsedTimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
+      ) : (
+        <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
+      ),
     [ALERT_RULE_EXECUTION_TIMESTAMP]: (value) => (
       <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
     ),

@@ -16,38 +16,17 @@ interface Props {
    * timestamp in milliseconds
    */
   time: number;
-  relativeDisplayThreshold?: number;
   timeUnit?: TimeUnit;
 }
 
+const RELATIVE_DISPLAY_THRESHOLD_HOURS = 2;
+
 export function getElapsedTimeText(duration: moment.Duration) {
-  const [day, hour, minute] = [duration.days(), duration.hours(), duration.minutes()];
-  if (day > 0) {
-    return i18n.translate('xpack.observability.alertsTable.highFidelityDurationWithDays', {
-      defaultMessage: '{day, plural, one {# day} other {# days}} ago',
-      values: { day },
-    });
-  }
-  if (hour > 0 && minute === 0) {
-    return i18n.translate('xpack.observability.alertsTable.highFidelityDurationWithHours', {
-      defaultMessage: '{hour, plural, one {# hour} other {# hours}} ago',
-      values: { hour },
-    });
-  }
-  if (hour > 0) {
-    return i18n.translate(
-      'xpack.observability.alertsTable.highFidelityDurationWithHoursAndMinutes',
-      {
-        defaultMessage:
-          '{hour, plural, one {# hour} other {# hours}}, {minute, plural, one {# minute} other {# minutes}} ago',
-        values: { hour, minute },
-      }
-    );
-  }
-  if (minute > 0) {
+  const minutes = Math.floor(duration.asMinutes());
+  if (minutes > 0) {
     return i18n.translate('xpack.observability.alertsTable.highFidelityDuration', {
-      defaultMessage: '{minute, plural, one {# minute} other {# minutes}} ago',
-      values: { minute },
+      defaultMessage: '{minutes, plural, one {# minute} other {# minutes}} ago',
+      values: { minutes },
     });
   }
   return i18n.translate('xpack.observability.alertsTable.highFidelityDurationRecently', {
@@ -55,16 +34,12 @@ export function getElapsedTimeText(duration: moment.Duration) {
   });
 }
 
-export function ElapsedTimestampTooltip({
-  time,
-  relativeDisplayThreshold = 24,
-  timeUnit = 'milliseconds',
-}: Props) {
+export function ElapsedTimestampTooltip({ time }: Props) {
   const duration = moment.duration(new Date().getTime() - time);
-  const absoluteTimeLabel = asAbsoluteDateTime(time, timeUnit);
+  const absoluteTimeLabel = asAbsoluteDateTime(time, 'milliseconds');
 
   const timeDisplay =
-    duration.asHours() > relativeDisplayThreshold
+    duration.asHours() > RELATIVE_DISPLAY_THRESHOLD_HOURS
       ? absoluteTimeLabel
       : getElapsedTimeText(duration);
 
