@@ -5,10 +5,26 @@
  * 2.0.
  */
 
-import type { AssistantAvailability } from '@kbn/elastic-assistant';
 import { useLicense } from '../../common/hooks/use_license';
 import { useKibana } from '../../common/lib/kibana';
 import { ASSISTANT_FEATURE_ID, SECURITY_FEATURE_ID } from '../../../common/constants';
+
+export interface AssistantAvailability {
+  // True when searchAiLake configurations is available
+  hasSearchAILakeConfigurations: boolean;
+  // True when user is Enterprise, or Security Complete PLI for serverless. When false, the Assistant is disabled and unavailable
+  isAssistantEnabled: boolean;
+  // When true, the Assistant is hidden and unavailable
+  hasAssistantPrivilege: boolean;
+  // When true, user has `All` privilege for `Connectors and Actions` (show/execute/delete/save ui capabilities)
+  hasConnectorsAllPrivilege: boolean;
+  // When true, user has `Read` privilege for `Connectors and Actions` (show/execute ui capabilities)
+  hasConnectorsReadPrivilege: boolean;
+  // When true, user has `Edit` privilege for `AnonymizationFields`
+  hasUpdateAIAssistantAnonymization: boolean;
+  // When true, user has `Edit` privilege for `Global Knowledge Base`
+  hasManageGlobalKnowledgeBase: boolean;
+}
 
 export const useAssistantAvailability = (): AssistantAvailability => {
   const isEnterprise = useLicense().isEnterprise();
