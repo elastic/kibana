@@ -34,6 +34,10 @@ export const Observability: React.FC = () => {
     return http.basePath.prepend('/app/observability/onboarding');
   }, [cloud, http]);
 
+  const o11yCreateSpaceLink = useMemo(() => {
+    return http.basePath.prepend('/app/management/kibana/spaces/create');
+  }, [http]);
+
   return (
     <EuiFlexGroup gutterSize="m" data-test-subj="observabilitySection">
       <EuiFlexItem grow={false}>
@@ -109,11 +113,28 @@ export const Observability: React.FC = () => {
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiLink href={o11yTrialLink} data-test-subj="createObservabilityProjectLink">
-                      {i18n.translate('xpack.searchHomepage.observability.observabilitySpaceLink', {
-                        defaultMessage: 'Create an Observability project',
-                      })}
-                    </EuiLink>
+                    {isServerless ? (
+                      <EuiLink href={o11yTrialLink} data-test-subj="createObservabilityProjectLink">
+                        {i18n.translate(
+                          'xpack.searchHomepage.observability.createObservabilityProjectLink',
+                          {
+                            defaultMessage: 'Create an Observability project',
+                          }
+                        )}
+                      </EuiLink>
+                    ) : (
+                      <EuiLink
+                        href={o11yCreateSpaceLink}
+                        data-test-subj="createObservabilitySpaceLink"
+                      >
+                        {i18n.translate(
+                          'xpack.searchHomepage.observability.createObservabilitySpaceLink',
+                          {
+                            defaultMessage: 'Create an Observability space',
+                          }
+                        )}
+                      </EuiLink>
+                    )}
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
