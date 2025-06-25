@@ -488,10 +488,6 @@
                 "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
               },
               {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.test.ts"
-              },
-              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/plugins/browser-internal/src/plugins_service.test.ts"
               },
