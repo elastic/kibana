@@ -23,7 +23,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import type { CoreStart } from '@kbn/core/public';
 import type { BaseFilesClient } from '@kbn/shared-ux-file-types';
-import type { CasesFeatures, CasesPermissions } from '../../../common/ui/types';
+import type { CasesFeatures, CasesPermissions, CasesSettings } from '../../../common/ui/types';
 import type { ReleasePhase } from '../../components/types';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import type { CasesContextProps } from '../../components/cases_context';
@@ -47,6 +47,7 @@ interface TestProviderProps {
   queryClient?: QueryClient;
   coreStart?: CoreStart;
   filesClient?: BaseFilesClient;
+  settings?: CasesSettings;
 }
 
 window.scrollTo = jest.fn();
@@ -92,6 +93,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   services,
   queryClient,
   filesClient,
+  settings,
 }) => {
   const finalCoreStart = useMemo(() => coreStart ?? coreMock.createStart(), [coreStart]);
   const finalServices = useMemo(
@@ -138,6 +140,9 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
       permissions: permissions ?? defaultPermissions,
       releasePhase: releasePhase ?? 'ga',
       getFilesClient: getFilesClientFinal,
+      settings: settings ?? {
+        displayIncrementalCaseId: false,
+      },
     }),
     [
       defaultExternalReferenceAttachmentTypeRegistry,
@@ -150,6 +155,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
       permissions,
       persistableStateAttachmentTypeRegistry,
       releasePhase,
+      settings,
     ]
   );
 

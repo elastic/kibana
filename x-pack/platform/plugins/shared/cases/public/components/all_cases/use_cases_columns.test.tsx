@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import type { GetCasesColumn } from './use_cases_columns';
@@ -46,6 +45,7 @@ describe('useCasesColumns ', () => {
     userProfiles: userProfilesMap,
     isSelectorView: false,
     selectedColumns: DEFAULT_SELECTED_COLUMNS,
+    settings: { displayIncrementalCaseId: true },
   };
 
   beforeEach(() => {
@@ -630,70 +630,56 @@ describe('useCasesColumns ', () => {
 
   describe('ExternalServiceColumn ', () => {
     it('Not pushed render', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <ExternalServiceColumn
-            theCase={useGetCasesMockState.data.cases[0]}
-            connectors={connectors}
-          />
-        </TestProviders>
+      renderWithTestingProviders(
+        <ExternalServiceColumn
+          theCase={useGetCasesMockState.data.cases[0]}
+          connectors={connectors}
+        />
       );
 
-      expect(
-        wrapper.find(`[data-test-subj="case-table-column-external-notPushed"]`).last().exists()
-      ).toBeTruthy();
+      expect(screen.getByTestId('case-table-column-external-notPushed')).toBeInTheDocument();
     });
 
     it('Up to date', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <ExternalServiceColumn
-            theCase={useGetCasesMockState.data.cases[1]}
-            connectors={connectors}
-          />
-        </TestProviders>
+      renderWithTestingProviders(
+        <ExternalServiceColumn
+          theCase={useGetCasesMockState.data.cases[1]}
+          connectors={connectors}
+        />
       );
 
-      expect(
-        wrapper.find(`[data-test-subj="case-table-column-external-upToDate"]`).last().exists()
-      ).toBeTruthy();
+      expect(screen.getByTestId('case-table-column-external-upToDate')).toBeInTheDocument();
     });
 
     it('Needs update', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <ExternalServiceColumn
-            theCase={useGetCasesMockState.data.cases[2]}
-            connectors={connectors}
-          />
-        </TestProviders>
+      renderWithTestingProviders(
+        <ExternalServiceColumn
+          theCase={useGetCasesMockState.data.cases[2]}
+          connectors={connectors}
+        />
       );
 
-      expect(
-        wrapper.find(`[data-test-subj="case-table-column-external-requiresUpdate"]`).last().exists()
-      ).toBeTruthy();
+      expect(screen.getByTestId('case-table-column-external-requiresUpdate')).toBeInTheDocument();
     });
 
     it('it does not throw when accessing the icon if the connector type is not registered', () => {
       // If the component throws the test will fail
       expect(() =>
-        mount(
-          <TestProviders>
-            <ExternalServiceColumn
-              theCase={useGetCasesMockState.data.cases[2]}
-              connectors={[
-                {
-                  id: 'none',
-                  actionTypeId: '.none',
-                  name: 'None',
-                  config: {},
-                  isPreconfigured: false,
-                  isSystemAction: false,
-                  isDeprecated: false,
-                },
-              ]}
-            />
-          </TestProviders>
+        renderWithTestingProviders(
+          <ExternalServiceColumn
+            theCase={useGetCasesMockState.data.cases[2]}
+            connectors={[
+              {
+                id: 'none',
+                actionTypeId: '.none',
+                name: 'None',
+                config: {},
+                isPreconfigured: false,
+                isSystemAction: false,
+                isDeprecated: false,
+              },
+            ]}
+          />
         )
       ).not.toThrowError();
     });
