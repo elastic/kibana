@@ -44,7 +44,7 @@ class EsqlToolClientImpl {
 
       return tool;
     } catch (error) {
-      const message = `Error retrieving ESQL tool with id ${id}: ${error}`
+      const message = `Error retrieving ESQL tool with id ${id}: ${error}`;
       logger.error(message);
       throw createInternalError(message);
     }
@@ -71,10 +71,9 @@ class EsqlToolClientImpl {
 
   async create(tool: EsqlToolCreateRequest) {
     if ((await this.list()).map((t) => t.id).includes(tool.id)) {
-        throw createInternalError(`Tool with id ${tool.id} already exists`);
+      throw createInternalError(`Tool with id ${tool.id} already exists`);
     }
     try {
-
       const document = {
         ...tool,
         meta: {
@@ -121,7 +120,7 @@ class EsqlToolClientImpl {
       };
 
       await this.storage.getClient().index({
-        id: id,
+        id,
         document: updatedTool,
       });
 
@@ -134,13 +133,13 @@ class EsqlToolClientImpl {
   }
   async delete(id: string): Promise<boolean> {
     try {
-        await this.storage.getClient().delete({ id: id });
-      
-        return true;
+      await this.storage.getClient().delete({ id });
+
+      return true;
     } catch (error) {
-        const message = `Error deleting ESQL tool with id ${id}: ${error}`;
-        logger.error(message);
-        throw createInternalError(message);
+      const message = `Error deleting ESQL tool with id ${id}: ${error}`;
+      logger.error(message);
+      throw createInternalError(message);
     }
   }
 }

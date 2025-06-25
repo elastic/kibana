@@ -64,17 +64,17 @@ describe('EsqlToolRegistry', () => {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
-    
+
       mockElasticsearchClient.search.mockResolvedValueOnce({
         hits: {
           total: { value: 1 },
-          hits: [{ _source: mockTool }]
-        }
+          hits: [{ _source: mockTool }],
+        },
       });
 
-    const exists = await registry.has({ toolId: '123', request: mockRequest });
+      const exists = await registry.has({ toolId: '123', request: mockRequest });
 
-    expect(exists).toBe(true);
+      expect(exists).toBe(true);
     });
   });
 
@@ -102,37 +102,38 @@ describe('EsqlToolRegistry', () => {
       mockElasticsearchClient.search.mockResolvedValueOnce({
         hits: {
           total: { value: 1 },
-          hits: [{ _source: mockTool }]
-        }
+          hits: [{ _source: mockTool }],
+        },
       });
-    
+
       const result = await registry.get({ toolId: '123', request: mockRequest });
-      
-      expect(result).toEqual(expect.objectContaining({
-        id: '123',
-        description: 'A test tool',
-        meta: expect.objectContaining({
-          providerId: 'esql',
-          tags: expect.arrayContaining(['salesforce'])
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: '123',
+          description: 'A test tool',
+          meta: expect.objectContaining({
+            providerId: 'esql',
+            tags: expect.arrayContaining(['salesforce']),
+          }),
         })
-      }));
-      
+      );
+
       expect(result).toHaveProperty('schema');
       expect(result).toHaveProperty('handler');
-      
     });
 
     it('should throw error when tool does not exist', async () => {
       mockElasticsearchClient.search.mockResolvedValueOnce({
         hits: {
           total: { value: 0 },
-          hits: []
-        }
+          hits: [],
+        },
       });
       mockElasticsearchClient.get.mockRejectedValueOnce(
         new Error('ResponseError: resource_not_found_exception')
       );
-    
+
       await expect(
         registry.get({ toolId: 'non-existent-tool', request: mockRequest })
       ).rejects.toThrow('Error retrieving ESQL tool');
@@ -183,12 +184,12 @@ describe('EsqlToolRegistry', () => {
       mockElasticsearchClient.search.mockResolvedValueOnce({
         hits: {
           total: { value: 2 },
-          hits: mockTools.map(tool => ({ _source: tool }))
-        }
+          hits: mockTools.map((tool) => ({ _source: tool })),
+        },
       });
 
       const tools = await registry.list({ request: mockRequest });
-      
+
       expect(tools).toHaveLength(2);
     });
 
@@ -196,8 +197,8 @@ describe('EsqlToolRegistry', () => {
       mockElasticsearchClient.search.mockResolvedValueOnce({
         hits: {
           total: { value: 2 },
-          hits: []
-        }
+          hits: [],
+        },
       });
 
       const tools = await registry.list({ request: mockRequest });
@@ -208,13 +209,13 @@ describe('EsqlToolRegistry', () => {
   describe('getScopedClient', () => {
     it('should return a scoped client', async () => {
       const client = await registry.getScopedClient({ request: mockRequest });
-    
-    expect(client).toBeDefined();
-    expect(typeof client.get).toBe('function');
-    expect(typeof client.list).toBe('function');
-    expect(typeof client.create).toBe('function');
-    expect(typeof client.update).toBe('function');
-    expect(typeof client.delete).toBe('function');
+
+      expect(client).toBeDefined();
+      expect(typeof client.get).toBe('function');
+      expect(typeof client.list).toBe('function');
+      expect(typeof client.create).toBe('function');
+      expect(typeof client.update).toBe('function');
+      expect(typeof client.delete).toBe('function');
     });
   });
 });
@@ -266,15 +267,17 @@ describe('EsqlToolClient', () => {
       mockElasticsearchClient.index.mockResolvedValue({ _id: '123' });
 
       const result = await client.create(mockTool);
-      
-      expect(result).toEqual(expect.objectContaining({
-        id: '123',
-        name: 'test-tool',
-        meta: {
-          providerId: 'esql',
-          tags: ['test'],
-        },
-      }));
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: '123',
+          name: 'test-tool',
+          meta: {
+            providerId: 'esql',
+            tags: ['test'],
+          },
+        })
+      );
     });
 
     it('should throw error when tool name already exists', async () => {
@@ -304,9 +307,7 @@ describe('EsqlToolClient', () => {
         },
       });
 
-      await expect(client.create(mockTool)).rejects.toThrow(
-        'Tool with id 123 already exists'
-      );
+      await expect(client.create(mockTool)).rejects.toThrow('Tool with id 123 already exists');
     });
   });
 
@@ -331,7 +332,7 @@ describe('EsqlToolClient', () => {
       });
 
       const result = await client.get('123');
-      
+
       expect(result).toEqual(mockTool);
       expect(mockElasticsearchClient.get).toHaveBeenCalledWith({ id: '123' });
     });
@@ -370,12 +371,12 @@ describe('EsqlToolClient', () => {
 
       mockElasticsearchClient.search.mockResolvedValue({
         hits: {
-          hits: mockTools.map(tool => ({ _source: tool })),
+          hits: mockTools.map((tool) => ({ _source: tool })),
         },
       });
 
       const result = await client.list();
-      
+
       expect(result).toEqual(mockTools);
       expect(mockElasticsearchClient.search).toHaveBeenCalledWith({
         index: '.kibana_onechat_esql_tools',
@@ -411,15 +412,17 @@ describe('EsqlToolClient', () => {
       mockElasticsearchClient.index.mockResolvedValue({ _id: '123' });
 
       const result = await client.update('123', updates);
-      
-      expect(result).toEqual(expect.objectContaining({
-        id: '123',
-        name: 'existing-tool',
-        description: 'Updated description',
-        query: 'SELECT * FROM updated',
-        created_at: '2024-01-01T00:00:00.000Z',
-      }));
-      
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: '123',
+          name: 'existing-tool',
+          description: 'Updated description',
+          query: 'SELECT * FROM updated',
+          created_at: '2024-01-01T00:00:00.000Z',
+        })
+      );
+
       expect(mockElasticsearchClient.index).toHaveBeenCalledWith({
         id: '123',
         document: expect.objectContaining({
@@ -450,7 +453,7 @@ describe('EsqlToolClient', () => {
       mockElasticsearchClient.delete.mockResolvedValue({ _id: '123' });
 
       const result = await client.delete('123');
-      
+
       expect(result).toBe(true);
     });
 

@@ -261,10 +261,10 @@ export function registerESQLToolsRoutes({
 
         const updates: EsqlToolUpdateRequest = {
           id: toolId,
-          name: name,
-          description: description,
-          query: query,
-          params: params,
+          name,
+          description,
+          query,
+          params,
           ...(meta?.tags && {
             meta: {
               tags: meta.tags,
