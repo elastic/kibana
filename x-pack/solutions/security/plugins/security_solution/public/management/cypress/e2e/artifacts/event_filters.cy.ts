@@ -79,7 +79,7 @@ describe('Event Filters', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'
     it('should show suggestions when filter value is cleared', () => {
       cy.getByTestSubj(CONDITION_VALUE).clear();
       cy.getByTestSubj(CONDITION_VALUE).type('aaaaaaaaaaaaaa as custom input');
-      cy.get('button[role="option"]').should('have.length', 10);
+      cy.get('button[role="option"]').should('have.length', 0);
 
       cy.getByTestSubj(CONDITION_VALUE).find('input').clear();
       cy.get('button[role="option"]').should('have.length.above', 1);
