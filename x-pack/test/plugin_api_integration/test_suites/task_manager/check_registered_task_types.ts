@@ -174,7 +174,6 @@ export default function ({ getService }: FtrProviderContext) {
         'security:telemetry-filterlist-artifact',
         'security:telemetry-lists',
         'security:telemetry-prebuilt-rule-alerts',
-        'security:telemetry-response-actions-rules',
         'security:telemetry-timelines',
         'session_cleanup',
         'task_manager:delete_inactive_background_task_nodes',
