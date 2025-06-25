@@ -12,7 +12,11 @@ import {
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import { omit } from 'lodash';
-import { SAVED_OBJECT_REF_NAME, type HasSerializableState } from '@kbn/presentation-publishing';
+import {
+  SAVED_OBJECT_REF_NAME,
+  type HasSerializableState,
+  type SerializedPanelState,
+} from '@kbn/presentation-publishing';
 import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import { isTextBasedLanguage } from '../helper';
 import type { GetStateType, LensEmbeddableStartServices, LensRuntimeState } from '../types';
