@@ -68,10 +68,6 @@ export class HomePageObject extends FtrService {
     });
   }
 
-  async isGuidedOnboardingLandingDisplayed() {
-    return await this.testSubjects.isDisplayed('guided-onboarding--landing-page');
-  }
-
   async isHomePageDisplayed() {
     return await this.testSubjects.isDisplayed('homeApp');
   }

@@ -11,7 +11,6 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import useObservable from 'react-use/lib/useObservable';
 import { catchError, of, timeout } from 'rxjs';
 import { useLocation } from 'react-router-dom';
-import { siemGuideId } from '../../../../common/guided_onboarding/siem_guide_config';
 import { isTourPath } from '../../../helpers';
 import { useKibana } from '../../lib/kibana';
 import type { AlertsCasesTourSteps } from './tour_config';
@@ -38,7 +37,7 @@ const initialState: TourContextValue = {
 };
 
 const TourContext = createContext<TourContextValue>(initialState);
-
+const siemGuideId = 'siemGuideId';
 export const RealTourContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const { guidedOnboarding } = useKibana().services;
   const [hidden, setHidden] = useState(false);

@@ -73,7 +73,6 @@
       "dataViewFieldEditor",
       "osquery",
       "savedObjectsTaggingOss",
-      "guidedOnboarding",
       "automaticImport",
       "serverless"
     ],

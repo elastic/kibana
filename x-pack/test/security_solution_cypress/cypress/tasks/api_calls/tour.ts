@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { API_BASE_PATH } from '@kbn/guided-onboarding-plugin/common';
-import { siemGuideId } from '@kbn/security-solution-plugin/common/guided_onboarding/siem_guide_config';
-
 const alertsGuideActiveState = {
   isActive: true,
   status: 'in_progress',
@@ -16,7 +13,7 @@ const alertsGuideActiveState = {
     { id: 'rules', status: 'complete' },
     { id: 'alertsCases', status: 'active' },
   ],
-  guideId: siemGuideId,
+  guideId: 'siemGuideId', // hardcoded because i deleted the guided onboarding plugin
 };
 
 export const startAlertsCasesTour = () =>

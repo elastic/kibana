@@ -34,13 +34,5 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.home.isWelcomeInterstitialDisplayed()).to.be(true);
       await PageObjects.common.clickAndValidate('skipWelcomeScreen', 'homeApp');
     });
-
-    it('redirects to guided onboarding landing page when on Cloud', async () => {
-      const isCloud = await deployment.isCloud();
-      if (isCloud) {
-        await PageObjects.common.navigateToUrl('home', '', { disableWelcomePrompt: false });
-        expect(await PageObjects.home.isGuidedOnboardingLandingDisplayed()).to.be(true);
-      }
-    });
   });
 }

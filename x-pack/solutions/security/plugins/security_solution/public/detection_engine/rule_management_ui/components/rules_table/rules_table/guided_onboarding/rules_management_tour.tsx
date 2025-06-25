@@ -10,8 +10,6 @@ import { EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
 import { noop } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { of } from 'rxjs';
-import { siemGuideId } from '../../../../../../../common/guided_onboarding/siem_guide_config';
 import { BulkActionTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFindRulesQuery } from '../../../../../rule_management/api/hooks/use_find_rules_query';
@@ -42,7 +40,7 @@ export enum GuidedOnboardingRulesStatus {
   'enableRules' = 'enableRules',
   'completed' = 'completed',
 }
-
+const siemGuideId = 'siemGuideId'; // This is hardcoded because the guided onboarding plugin is not available in this context
 export const RulesManagementTour = () => {
   const { guidedOnboarding } = useKibana().services;
   const { executeBulkAction } = useExecuteBulkAction();
