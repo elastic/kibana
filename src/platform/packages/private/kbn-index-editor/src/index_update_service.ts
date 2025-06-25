@@ -13,7 +13,7 @@ import type {
   BulkResponseItem,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { HttpStart } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import type { Filter } from '@kbn/es-query';
@@ -154,8 +154,11 @@ export class IndexUpdateService {
 
       for (const field of runtimeFields) {
         // HD move to dataTableColumns$
-        dataView.addRuntimeField(field, {
-          type: 'keyword', // Default type, can be adjusted based on field definition
+        dataView.fields.add({
+          name: field,
+          type: KBN_FIELD_TYPES.UNKNOWN,
+          aggregatable: true,
+          searchable: true,
         });
       }
       return dataView;

@@ -35,7 +35,8 @@ export const AddColumnPanel: React.FC<AddColumnPanelProps> = ({ onHide }) => {
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       try {
-        // Is there a max length of column name?
+        // Is there a max length of column name? //HD
+        // Validate column name does not exist
         indexUpdateService.addRuntimeField(columnName);
       } catch (error) {
         notifications.toasts.addError(error as Error, {
