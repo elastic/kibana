@@ -7,6 +7,7 @@
 
 import { Fragment, default as React, useCallback, useState } from 'react';
 import {
+  CriteriaWithPagination,
   EuiAvatar,
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -24,7 +25,7 @@ import { orderBy } from 'lodash';
 import { stringify } from 'query-string';
 import { REPORTING_REDIRECT_APP, buildKibanaPath } from '@kbn/reporting-common';
 import type { ScheduledReportApiJSON, BaseParamsV2 } from '@kbn/reporting-common/types';
-import { ListingPropsInternal } from '..';
+import { ReportingAPIClient, useKibana } from '@kbn/reporting-public';
 import {
   guessAppIconTypeFromObjectType,
   getDisplayNameFromObjectType,
@@ -40,28 +41,27 @@ import { TruncatedTitle } from './truncated_title';
 import { DisableReportConfirmationModal } from './disable_report_confirmation_modal';
 
 interface QueryParams {
-  index: number;
-  size: number;
+  page: number;
+  perPage: number;
 }
 
-export const ReportSchedulesTable = (props: ListingPropsInternal) => {
-  const { http, toasts } = props;
+export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) => {
+  const { apiClient } = props;
+  const { http } = useKibana().services;
+
   const [selectedReport, setSelectedReport] = useState<ScheduledReportApiJSON | null>(null);
-  const [configFlyOut, setConfigFlyOut] = useState<boolean>(false);
-  const [disableFlyOut, setDisableFlyOut] = useState<boolean>(false);
+  const [isConfigFlyOutOpen, setIsConfigFlyOutOpen] = useState<boolean>(false);
+  const [isDisableModalConfirmationOpen, setIsDisableModalConfirmationOpen] =
+    useState<boolean>(false);
   const [queryParams, setQueryParams] = useState<QueryParams>({
-    index: 1,
-    size: 10,
+    page: 1,
+    perPage: 50,
   });
   const { data: scheduledList, isLoading } = useGetScheduledList({
-    http,
     ...queryParams,
   });
 
-  const { mutateAsync: bulkDisableScheduledReports } = useBulkDisable({
-    http,
-    toasts,
-  });
+  const { mutateAsync: bulkDisableScheduledReports } = useBulkDisable();
 
   const sortedList = orderBy(scheduledList?.data || [], ['created_at'], ['desc']);
 
@@ -72,12 +72,12 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
         defaultMessage: 'Type',
       }),
       width: '5%',
-      render: (_objectType: string) => (
+      render: (objectType: string) => (
         <EuiIconTip
           data-test-subj="reportObjectType"
-          type={guessAppIconTypeFromObjectType(_objectType)}
+          type={guessAppIconTypeFromObjectType(objectType)}
           size="s"
-          content={getDisplayNameFromObjectType(_objectType)}
+          content={getDisplayNameFromObjectType(objectType)}
         />
       ),
     },
@@ -87,15 +87,14 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
         defaultMessage: 'Title',
       }),
       width: '22%',
-      render: (_title: string, item: ScheduledReportApiJSON) => (
+      render: (title: string, item: ScheduledReportApiJSON) => (
         <EuiLink
           data-test-subj={`reportTitle`}
           onClick={() => {
-            setSelectedReport(item);
-            setConfigFlyOut(true);
+            setReportAndOpenConfigFlyout(item);
           }}
         >
-          <TruncatedTitle text={_title} />
+          <TruncatedTitle text={title} />
         </EuiLink>
       ),
       mobileOptions: {
@@ -132,8 +131,8 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
         defaultMessage: 'Schedule',
       }),
       width: '10%',
-      render: (_schedule: ScheduledReportApiJSON['schedule']) => (
-        <ReportScheduleIndicator schedule={_schedule} />
+      render: (schedule: ScheduledReportApiJSON['schedule']) => (
+        <ReportScheduleIndicator schedule={schedule} />
       ),
     },
     {
@@ -142,8 +141,8 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
         defaultMessage: 'Next schedule',
       }),
       width: '20%',
-      render: (_nextRun: string, item) => {
-        return item.enabled ? moment(_nextRun).format('YYYY-MM-DD @ hh:mm A') : '—';
+      render: (nextRun: string, item) => {
+        return item.enabled ? moment(nextRun).format('YYYY-MM-DD @ hh:mm A') : '—';
       },
     },
     {
@@ -152,7 +151,7 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
       name: i18n.translate('xpack.reporting.schedules.tableColumns.fileType', {
         defaultMessage: 'File Type',
       }),
-      render: (_jobtype: string) => prettyPrintJobType(_jobtype),
+      render: (jobtype: string) => prettyPrintJobType(jobtype),
       mobileOptions: {
         show: false,
       },
@@ -163,7 +162,7 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
         defaultMessage: 'Created by',
       }),
       width: '15%',
-      render: (_createdBy: string) => {
+      render: (createdBy: string) => {
         return (
           <EuiFlexGroup
             gutterSize="s"
@@ -172,11 +171,11 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
             responsive={false}
           >
             <EuiFlexItem grow={false}>
-              <EuiAvatar name={_createdBy} size="s" />
+              <EuiAvatar name={createdBy} size="s" />
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="eui-textTruncate">
               <EuiText size="s" className="eui-textTruncate">
-                {_createdBy}
+                {createdBy}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -200,18 +199,22 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
           'data-test-subj': (item) => `reportViewConfig-${item.id}`,
           type: 'icon',
           icon: 'calendar',
-          onClick: (item) => {
-            setConfigFlyOut(true);
-            setSelectedReport(item);
-          },
+          onClick: (item) => setReportAndOpenConfigFlyout(item),
         },
         {
-          name: i18n.translate('xpack.reporting.schedules.table.openDashboard.title', {
-            defaultMessage: 'Open Dashboard',
-          }),
-          description: i18n.translate('xpack.reporting.schedules.table.openDashboard.description', {
-            defaultMessage: 'Open associated dashboard',
-          }),
+          name: (item) =>
+            i18n.translate('xpack.reporting.schedules.table.openDashboard.title', {
+              defaultMessage: 'Open Dashboard',
+            }),
+          description: (item) =>
+            i18n.translate('xpack.reporting.schedules.table.openDashboard.description', {
+              defaultMessage: 'Open associated {objectType}',
+              values: {
+                objectType: item.payload?.objectType
+                  ? getDisplayNameFromObjectType(item.payload?.objectType)
+                  : '',
+              },
+            }),
           'data-test-subj': (item) => `reportOpenDashboard-${item.id}`,
           type: 'icon',
           icon: 'dashboardApp',
@@ -245,35 +248,57 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
           enabled: (item) => item.enabled,
           type: 'icon',
           icon: 'cross',
-          onClick: (item) => {
-            setSelectedReport(item);
-            setDisableFlyOut(true);
-          },
+          onClick: (item) => setReportAndOpenDisableFlyout(item),
         },
       ],
     },
   ];
 
+  const setReportAndOpenConfigFlyout = useCallback(
+    (report: ScheduledReportApiJSON) => {
+      setSelectedReport(report);
+      setIsConfigFlyOutOpen(true);
+    },
+    [setSelectedReport, setIsConfigFlyOutOpen]
+  );
+
+  const unSetReportAndCloseConfigFlyout = useCallback(() => {
+    setSelectedReport(null);
+    setIsConfigFlyOutOpen(false);
+  }, [setSelectedReport, setIsConfigFlyOutOpen]);
+
+  const setReportAndOpenDisableFlyout = useCallback(
+    (report: ScheduledReportApiJSON) => {
+      setSelectedReport(report);
+      setIsDisableModalConfirmationOpen(true);
+    },
+    [setSelectedReport, setIsDisableModalConfirmationOpen]
+  );
+
+  const unSetReportAndCloseDisableFlyout = useCallback(() => {
+    setSelectedReport(null);
+    setIsDisableModalConfirmationOpen(false);
+  }, [setSelectedReport, setIsDisableModalConfirmationOpen]);
+
   const onConfirm = useCallback(() => {
     if (selectedReport) {
       bulkDisableScheduledReports({ ids: [selectedReport.id] });
     }
+    unSetReportAndCloseDisableFlyout();
+  }, [selectedReport, bulkDisableScheduledReports, unSetReportAndCloseDisableFlyout]);
 
-    setSelectedReport(null);
-    setDisableFlyOut(false);
-  }, [bulkDisableScheduledReports, setSelectedReport, selectedReport]);
-
-  const onCancel = useCallback(() => {
-    setSelectedReport(null);
-    setDisableFlyOut(false);
-  }, [setSelectedReport]);
+  const onCancel = useCallback(
+    () => unSetReportAndCloseDisableFlyout(),
+    [unSetReportAndCloseDisableFlyout]
+  );
 
   const tableOnChangeCallback = useCallback(
-    ({ page }: { page: QueryParams }) => {
+    (criteria: CriteriaWithPagination<ScheduledReportApiJSON>) => {
+      const { index: page, size: perPage } = criteria.page;
       setQueryParams((prev) => ({
         ...prev,
-        index: page.index + 1,
-        size: page.size,
+        page: page + 1,
+        perPage,
       }));
     },
     [setQueryParams]
@@ -288,20 +313,19 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
         columns={tableColumns}
         loading={isLoading}
         pagination={{
-          pageIndex: queryParams.index - 1,
-          pageSize: queryParams.size,
+          pageIndex: queryParams.page - 1,
+          pageSize: queryParams.perPage,
           totalItemCount: scheduledList?.total ?? 0,
         }}
         noItemsMessage={NO_CREATED_REPORTS_DESCRIPTION}
         onChange={tableOnChangeCallback}
         rowProps={() => ({ 'data-test-subj': 'scheduledReportRow' })}
       />
-      {selectedReport && configFlyOut && (
+      {selectedReport && isConfigFlyOutOpen && (
         <ScheduledReportFlyout
-          apiClient={props.apiClient}
+          apiClient={apiClient}
           onClose={() => {
-            setSelectedReport(null);
-            setConfigFlyOut(false);
+            unSetReportAndCloseConfigFlyout();
           }}
           scheduledReport={transformScheduledReport(selectedReport)}
           availableReportTypes={[
@@ -312,7 +336,7 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
           ]}
         />
       )}
-      {selectedReport && disableFlyOut ? (
+      {selectedReport && isDisableModalConfirmationOpen ? (
         <DisableReportConfirmationModal
           title={i18n.translate('xpack.reporting.schedules.table.disableSchedule.modalTitle', {
             defaultMessage: 'Disable schedule',

@@ -32,17 +32,9 @@ export const IlmPolicyStatusContextProvider: FC<PropsWithChildren<unknown>> = ({
 
 export type UseIlmPolicyStatusReturn = ReturnType<typeof useIlmPolicyStatus>;
 
-export const useIlmPolicyStatus = (isEnabled: boolean): ContextValue => {
+export const useIlmPolicyStatus = (): ContextValue => {
   const ctx = useContext(IlmPolicyStatusContext);
   if (!ctx) {
-    if (!isEnabled) {
-      return {
-        status: undefined,
-        isLoading: false,
-        recheckStatus: () => {},
-      };
-    }
-
     throw new Error('"useIlmPolicyStatus" can only be used inside of "IlmPolicyStatusContext"');
   }
   return ctx;
