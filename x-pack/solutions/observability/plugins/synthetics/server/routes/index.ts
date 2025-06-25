@@ -55,7 +55,6 @@ import { getDefaultAlertingRoute } from './default_alerts/get_default_alert';
 import { createNetworkEventsRoute } from './network_events';
 import { addPrivateLocationRoute } from './settings/private_locations/add_private_location';
 import { deletePrivateLocationRoute } from './settings/private_locations/delete_private_location';
-import { editPrivateLocationRoute } from './settings/private_locations/edit_private_location';
 import { getPrivateLocationsRoute } from './settings/private_locations/get_private_locations';
 import { getSyntheticsFilters } from './filters/filters';
 import { getAllSyntheticsMonitorRoute } from './monitor_cruds/get_monitors_list';
@@ -113,7 +112,6 @@ export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] =
   deleteSyntheticsParamsRoute,
   addPrivateLocationRoute,
   deletePrivateLocationRoute,
-  editPrivateLocationRoute,
   getPrivateLocationsRoute,
   getAllSyntheticsMonitorRoute,
   getSyntheticsMonitorRoute,

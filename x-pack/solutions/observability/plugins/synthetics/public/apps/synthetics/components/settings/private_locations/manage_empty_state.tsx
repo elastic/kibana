@@ -15,14 +15,14 @@ import { selectAgentPolicies } from '../../../state/agent_policies';
 export const ManageEmptyState: FC<
   PropsWithChildren<{
     privateLocations: PrivateLocation[];
-    setIsFlyoutOpen?: (val: boolean) => void;
+    setIsAddingNew?: (val: boolean) => void;
     showNeedAgentPolicy?: boolean;
     showEmptyLocations?: boolean;
   }>
 > = ({
   children,
   privateLocations,
-  setIsFlyoutOpen,
+  setIsAddingNew,
   showNeedAgentPolicy = true,
   showEmptyLocations = true,
 }) => {
@@ -33,7 +33,7 @@ export const ManageEmptyState: FC<
   }
 
   if (privateLocations.length === 0 && showEmptyLocations) {
-    return <EmptyLocations setIsFlyoutOpen={setIsFlyoutOpen} />;
+    return <EmptyLocations setIsAddingNew={setIsAddingNew} />;
   }
 
   return <>{children}</>;
