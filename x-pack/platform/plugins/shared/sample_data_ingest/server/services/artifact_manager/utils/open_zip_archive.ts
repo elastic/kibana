@@ -11,10 +11,16 @@ import type { ZipArchive } from '../../types';
 export const openZipArchive = async (archivePath: string): Promise<ZipArchive> => {
   return new Promise<ZipArchive>((resolve, reject) => {
     const entries: yauzl.Entry[] = [];
+
     yauzl.open(archivePath, { lazyEntries: true, autoClose: false }, (err, zipFile) => {
       if (err || !zipFile) {
+        if (zipFile) {
+          zipFile.close();
+        }
+
         return reject(err ?? 'No zip file');
       }
+
       zipFile.on('entry', (entry) => {
         entries.push(entry);
         zipFile.readEntry();
@@ -23,6 +29,11 @@ export const openZipArchive = async (archivePath: string): Promise<ZipArchive> =
       zipFile.on('end', () => {
         const archive = new ZipArchiveImpl(entries, zipFile);
         resolve(archive);
+      });
+
+      zipFile.on('error', (error) => {
+        zipFile.close();
+        reject(error);
       });
 
       zipFile.on('close', () => {});

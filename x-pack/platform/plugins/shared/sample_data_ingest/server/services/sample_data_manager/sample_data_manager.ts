@@ -11,6 +11,7 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { DatasetSampleType, type StatusResponse } from '../../../common/types';
 import { ArtifactManager } from '../artifact_manager';
 import { IndexManager } from '../index_manager';
+import type { ZipArchive } from '../types';
 
 interface SampleDataManagerOpts {
   artifactsFolder: string;
@@ -60,12 +61,17 @@ export class SampleDataManager {
   }): Promise<string> {
     this.log.info(`Installing sample data for [${sampleType}]`);
 
+    let archive: ZipArchive | undefined;
+
     try {
       await this.removeSampleData({ sampleType, esClient });
 
-      const { archive, manifest, mappings } = await this.artifactManager.prepareArtifact(
-        sampleType
-      );
+      const {
+        archive: artifactsArchive,
+        manifest,
+        mappings,
+      } = await this.artifactManager.prepareArtifact(sampleType);
+      archive = artifactsArchive;
       const indexName = this.getSampleDataIndexName(sampleType);
 
       await this.indexManager.createAndPopulateIndex({
@@ -83,6 +89,8 @@ export class SampleDataManager {
         `Sample data installation failed for [${sampleType}]: ${error?.message || error}`
       );
       throw error;
+    } finally {
+      archive?.close();
     }
   }
 
