@@ -51,9 +51,7 @@ describe('Dashboard services API', () => {
       });
       const { rawState, references } = api.serializeState();
       // check the same 3 things as above
-      expect(rawState).toEqual(
-        expect.objectContaining({})
-      );
+      expect(rawState).toEqual(expect.objectContaining({}));
       // * references should be at root level
       expect(references).toEqual([
         ...attributes.references,
@@ -61,7 +59,7 @@ describe('Dashboard services API', () => {
           id: '123',
           name: 'savedObjectRef',
           type: 'lens',
-        }
+        },
       ]);
     });
 
