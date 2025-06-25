@@ -46,7 +46,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         controlGroupApi.controlFetch$(uuid),
         apiPublishesTimeRange(controlGroupApi.parentApi)
           ? controlGroupApi.parentApi.timeRange$
-          : null
+          : undefined
       );
 
       const closeOverlay = () => {
