@@ -22,7 +22,7 @@ import { DataViewManagerScopeName } from '../../data_view_manager/constants';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { SafeDataViewProvider } from '../../data_view_manager/containers/SafeDataViewProvider';
-import { useDataViewSafe } from '../../data_view_manager/hooks/use_data_view_safe';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
@@ -32,7 +32,7 @@ const TimelinesPageContent = () => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { indicesExist: oldIndicesExist } = useSourcererDataView();
 
-  const dataView = useDataViewSafe(DataViewManagerScopeName.default);
+  const dataView = useDataView(DataViewManagerScopeName.default, true);
   const experimentalIndicesExist = !!dataView.matchedIndices.length;
 
   const indicesExist = newDataViewPickerEnabled ? experimentalIndicesExist : oldIndicesExist;

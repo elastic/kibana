@@ -14,10 +14,10 @@ import React, {
 } from 'react';
 
 import { type DataViewManagerScopeName } from '../constants';
-import { useDataView } from '../hooks/use_data_view';
+import { useDataView, type UseDataViewAsyncReturnValue } from '../hooks/use_data_view';
 
 export interface DataViewContextValue {
-  readonly results: Record<string, ReturnType<typeof useDataView>>;
+  readonly results: Record<string, UseDataViewAsyncReturnValue>;
 }
 
 export const DataViewContext = createContext<DataViewContextValue | undefined>(undefined);
@@ -45,7 +45,8 @@ export const SafeDataViewProvider: FC<PropsWithChildren<SafeDataViewProviderProp
   scopes,
   fallback = fallbackElement,
 }) => {
-  const results = scopes.map(useDataView);
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const results = scopes.map((scope) => useDataView(scope, false));
   const allReady = Object.values(results).every((result) => result.status === 'ready');
   const dataViews = Object.values(results).map((result) => result.dataView);
 
