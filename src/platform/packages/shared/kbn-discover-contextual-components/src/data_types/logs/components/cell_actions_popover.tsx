@@ -105,6 +105,7 @@ export function CellActionsPopover({
       <EuiFlexGroup
         gutterSize="none"
         responsive={false}
+        justifyContent="spaceBetween"
         data-test-subj="dataTableCellActionPopoverTitle"
       >
         <EuiFlexItem style={{ maxWidth: '200px' }}>
