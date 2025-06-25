@@ -57,7 +57,9 @@ export function service(
     'service.name': serviceName,
     'service.environment': environment,
     'agent.name': agentName,
-    'agent.version': agentVersion ?? undefined,
+    ...(agentVersion && {
+      'agent.version': agentVersion,
+    }),
   });
 }
 
