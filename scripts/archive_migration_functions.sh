@@ -379,7 +379,7 @@ save_kbn() {
   set -x
   node scripts/kbn_archiver.js --config "$test_config" save "$new_archive" --type $standard_list --space "$space"
   set +x
-  #  node scripts/kbn_archiver.js --config x-pack/test/spaces_api_integration/security_and_spaces/config_basic.ts save x-pack/test/functional/fixtures/kbn_archiver/saved_objects/default_space --type search,index-pattern,visualization,dashboard,lens,map,graph-workspace,query,tag,url,canvas-workpad
+  #  node scripts/kbn_archiver.js --config x-pack/platform/test/spaces_api_integration/security_and_spaces/config_basic.ts save x-pack/test/functional/fixtures/kbn_archiver/saved_objects/default_space --type search,index-pattern,visualization,dashboard,lens,map,graph-workspace,query,tag,url,canvas-workpad
 }
 
 load_kbn() {

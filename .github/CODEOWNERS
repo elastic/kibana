@@ -1114,7 +1114,7 @@ x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-secur
 x-pack/test/security_api_integration/plugins/saml_provider @elastic/kibana-security
 x-pack/test/security_api_integration/plugins/user_profiles_consumer @elastic/kibana-security
 x-pack/test/security_functional/plugins/test_endpoints @elastic/kibana-security
-x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
+x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
 x-pack/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/stack_management_usage_test @elastic/kibana-management
@@ -2077,7 +2077,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/functional/apps/spaces/ @elastic/kibana-security
 /x-pack/test/security_api_integration/ @elastic/kibana-security
 /x-pack/test/security_functional/ @elastic/kibana-security
-/x-pack/test/spaces_api_integration/ @elastic/kibana-security
+/x-pack/platform/test/spaces_api_integration/ @elastic/kibana-security
 /x-pack/platform/test/saved_object_api_integration/ @elastic/kibana-security
 /x-pack/test_serverless/**/test_suites/common/platform_security/ @elastic/kibana-security
 /x-pack/test_serverless/**/test_suites/search/platform_security/ @elastic/kibana-security
