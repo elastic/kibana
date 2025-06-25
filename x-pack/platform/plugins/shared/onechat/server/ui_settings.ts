@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
 import { i18n } from '@kbn/i18n';
 import {
-  ONECHAT_CHAT_UI_SETTING_ID,
+  ONECHAT_UI_SETTING_ID,
   ONECHAT_MCP_SERVER_UI_SETTING_ID,
   ONECHAT_TOOLS_UI_SETTING_ID,
 } from '../common/constants';
@@ -28,7 +28,7 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       readonly: true,
       readonlyMode: 'ui',
     },
-    [ONECHAT_CHAT_UI_SETTING_ID]: {
+    [ONECHAT_UI_SETTING_ID]: {
       description: i18n.translate('xpack.onechat.uiSettings.chatUI.description', {
         defaultMessage: 'Enables the OneChat chat UI.',
       }),

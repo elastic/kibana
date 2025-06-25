@@ -27,7 +27,7 @@ import type {
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
-import { ONECHAT_CHAT_UI_SETTING_ID } from '../common/constants';
+import { ONECHAT_UI_SETTING_ID } from '../common/constants';
 
 export class OnechatPlugin
   implements
@@ -45,9 +45,9 @@ export class OnechatPlugin
     this.logger = context.logger.get();
   }
   setup(core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>): OnechatPluginSetup {
-    const isOnechatEnabled = core.uiSettings.get<boolean>(ONECHAT_CHAT_UI_SETTING_ID, false);
+    const isOnechatUiEnabled = core.uiSettings.get<boolean>(ONECHAT_UI_SETTING_ID, false);
 
-    if (isOnechatEnabled) {
+    if (isOnechatUiEnabled) {
       registerApp({
         core,
         getServices: () => {

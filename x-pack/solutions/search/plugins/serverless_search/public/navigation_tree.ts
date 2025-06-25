@@ -45,7 +45,9 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 link: 'discover',
               },
               {
-                title: 'Chat',
+                title: i18n.translate('xpack.serverlessSearch.nav.chat', {
+                  defaultMessage: 'Chat',
+                }),
                 renderAs: 'accordion',
                 children: [
                   {

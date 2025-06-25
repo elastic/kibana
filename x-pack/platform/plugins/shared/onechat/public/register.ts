@@ -8,6 +8,7 @@
 import { CoreSetup } from '@kbn/core-lifecycle-browser';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { AppMountParameters } from '@kbn/core-application-browser';
+import { i18n } from '@kbn/i18n';
 import { OnechatInternalService } from './services';
 import { OnechatPluginStart } from './types';
 import { ONECHAT_APP_ID, ONECHAT_PATH, ONECHAT_TITLE } from '../common/features';
@@ -29,8 +30,22 @@ export const registerApp = ({
     euiIconType: 'logoElasticsearch',
     visibleIn: ['sideNav', 'globalSearch'],
     deepLinks: [
-      { id: 'chat', path: '/chat', title: 'Conversations' },
-      ...(isToolsPageEnabled ? [{ id: 'tools', path: '/tools', title: 'Tools' }] : []),
+      {
+        id: 'chat',
+        path: '/chat',
+        title: i18n.translate('xpack.onechat.chat.conversationsTitle', {
+          defaultMessage: 'Conversations',
+        }),
+      },
+      ...(isToolsPageEnabled
+        ? [
+            {
+              id: 'tools',
+              path: '/tools',
+              title: i18n.translate('xpack.onechat.tools.title', { defaultMessage: 'Tools' }),
+            },
+          ]
+        : []),
     ],
     async mount({ element, history }: AppMountParameters) {
       const { mountApp } = await import('./application');
