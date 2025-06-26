@@ -26,6 +26,7 @@ import {
   STREAMS_API_PRIVILEGES,
   STREAMS_CONSUMER,
   STREAMS_FEATURE_ID,
+  STREAMS_TIERED_FEATURES,
   STREAMS_UI_PRIVILEGES,
 } from '../common/constants';
 import { ContentService } from './lib/content/content_service';
@@ -151,6 +152,8 @@ export class StreamsPlugin
         },
       },
     });
+
+    core.pricing.registerProductFeatures(STREAMS_TIERED_FEATURES);
 
     registerRoutes({
       repository: streamsRouteRepository,
