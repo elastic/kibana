@@ -41246,6 +41246,40 @@ paths:
       summary: Generate a chat completion
       tags:
         - observability_ai_assistant
+      x-codeSamples:
+        - lang: cURL
+          source: |
+            curl --request POST 'localhost:5601/api/observability_ai_assistant/chat/complete' -u <username>:<password> -H 'kbn-xsrf: true' -H "Content-Type: application/json" --data '
+            {
+            "connectorId": "<connectorId>",
+            "disableFunctions": false,
+              "messages": [
+                {
+                  "@timestamp": "2025-06-25T23:45:00.000Z",
+                  "message": {
+                    "role": "user",
+                    "content": "Is my Elasticsearch cluster healthy right now? Include shard stats too."
+                  }
+                }
+              ],
+            "persist": false,
+            "actions": [
+              {
+                "name": "get_cluster_health",
+                "description": "Fetch the current Elasticsearch cluster-health status and key metrics.",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "includeShardStats": {
+                      "type": "boolean",
+                      "default": false
+                    }
+                  }
+                }
+              }
+            ],
+            "instructions": ["When the user asks about Elasticsearch cluster health, do not respond directly. Instead call the get_cluster_health function with includeShardStats=true, then summarise the response in plain English."]
+            }'
       x-state: Technical Preview
   /api/osquery/live_queries:
     get:
@@ -57398,53 +57432,41 @@ components:
       summary: Example of completing a chat interaction
       value: |
         {
-          "connectorId": "connector-id",
-          "conversationId": "uuid",
+          "connectorId": "<connectorId>",
           "disableFunctions": false,
           "messages": [
             {
-              "@timestamp": "2025-06-16T17:15:37.545Z",
+              "@timestamp": "2025-06-25T23:45:00.000Z",
               "message": {
-              "role": "user",
-                "content": "What is the status of the server?"
+                "role": "user",
+                "content": "Is my Elasticsearch cluster healthy right now? Include shard stats too."
               }
             }
           ],
-          "persist": true,
+          "persist": false,
           "actions": [
             {
-              "name": "fetchServerStatus",
-              "description": "Fetches the current server status",
-              "parameters": {}
+              "name": "get_cluster_health",
+              "description": "Fetch the current Elasticsearch cluster-health status and key metrics.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "includeShardStats": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                }
+              }
             }
           ],
-          "instructions": [
-            "Always respond in German."
-          ]
+          "instructions": ["When the user asks about Elasticsearch cluster health, do not respond directly. Instead call the get_cluster_health function with includeShardStats=true, then summarise the response in plain English."]
         }
     Observability_AI_Assistant_API_ChatCompleteResponseExample:
       summary: Get a chat completion from the Observability AI Assistant
-      value:
-        - id: message-id
-          message:
-            content: sample output
-          type: chatCompletionMessage
-        - id: message-id
-          message:
-            '@timestamp': '2025-01-17T15:45:46.255Z'
-            message:
-              content: sample output
-              function_call:
-                arguments: function arguments
-                name: function name
-                trigger: message trigger
-              role: message role
-          type: messageAdd
-        - conversation:
-            id: conversation-id
-            last_updated: '2025-06-16T15:45:46.258Z'
-            title: my title
-          type: conversationCreate
+      value: |
+        data: {"model":"unknown","choices":[{"delta":{"content":"","function_call":{"name":"get_cluster_health","arguments":"{\"includeShardStats\":true}"}},"finish_reason":null,"index":0}],"created":1750936626911,"id":"9c8eff9b-4fd4-4203-a4ab-2e364688deff","object":"chat.completion.chunk"}
+
+        data: [DONE]
     Observability_AI_Assistant_API_Function:
       type: object
       properties:
