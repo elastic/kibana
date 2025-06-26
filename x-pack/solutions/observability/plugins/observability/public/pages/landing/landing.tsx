@@ -37,12 +37,14 @@ function ObservabilityCompleteLandingPage() {
         const { hasData: hasLogsData } = await logsDataAccess.services.logDataService.getStatus();
         const hasApmData = hasDataMap.apm?.hasData;
 
-        if (hasLogsData) {
-          redirectToDiscoverLogs(share);
-        } else if (hasApmData) {
-          redirectToAPM(share);
-        } else {
-          redirectToOnboarding(share);
+        const locators = getLocators(share);
+
+        if (hasLogsData && locators.logs) {
+          locators.logs.navigate({});
+        } else if (hasApmData && locators.apm) {
+          locators.apm.navigate({});
+        } else if (locators.onboarding) {
+          locators.onboarding.navigate({});
         }
       }
     }
@@ -60,10 +62,12 @@ function ObservabilityLogsEssentialsLandingPage() {
     async function redirectToLanding() {
       const { hasData: hasLogsData } = await logsDataAccess.services.logDataService.getStatus();
 
-      if (hasLogsData) {
-        redirectToDiscoverLogs(share);
-      } else {
-        redirectToOnboarding(share);
+      const locators = getLocators(share);
+
+      if (hasLogsData && locators.logs) {
+        locators.logs.navigate({});
+      } else if (locators.onboarding) {
+        locators.onboarding.navigate({});
       }
     }
 
@@ -73,17 +77,8 @@ function ObservabilityLogsEssentialsLandingPage() {
   return <></>;
 }
 
-const redirectToAPM = (share: SharePublicStart) => {
-  const apmLocator = share.url.locators.get(APM_APP_LOCATOR_ID);
-  apmLocator?.navigate({});
-};
-
-const redirectToDiscoverLogs = (share: SharePublicStart) => {
-  const logsLocator = share.url.locators.get(LOGS_LOCATOR_ID);
-  logsLocator?.navigate({});
-};
-
-const redirectToOnboarding = (share: SharePublicStart) => {
-  const onboardingLocator = share.url.locators.get(OBSERVABILITY_ONBOARDING_LOCATOR);
-  onboardingLocator?.navigate({});
-};
+const getLocators = (share: SharePublicStart) => ({
+  apm: share.url.locators.get(APM_APP_LOCATOR_ID),
+  logs: share.url.locators.get(LOGS_LOCATOR_ID),
+  onboarding: share.url.locators.get(OBSERVABILITY_ONBOARDING_LOCATOR),
+});

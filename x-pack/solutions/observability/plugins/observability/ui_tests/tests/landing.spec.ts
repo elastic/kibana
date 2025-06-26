@@ -26,6 +26,29 @@ test.describe('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, () =>
     await logsSynthtraceEsClient.clean();
   });
 
+  test('redirects to page specified in defaultRoute uiSetting', async ({
+    page,
+    kbnClient,
+    kbnUrl,
+  }) => {
+    // Set custom default route
+    const prevDefaultRoute = await kbnClient.uiSettings.get('defaultRoute');
+    await kbnClient.uiSettings.update({
+      defaultRoute: '/app/metrics',
+    });
+
+    // Navigate to observability landing page
+    await page.goto(kbnUrl.get('/'));
+
+    // Wait for redirect and verify we're on the metrics page
+    await expect(page).toHaveURL(/\/app\/metrics/, { timeout: 10000 });
+
+    // Restore default route
+    await kbnClient.uiSettings.update({
+      defaultRoute: prevDefaultRoute,
+    });
+  });
+
   test('redirects to Discover logs when logs data exists', async ({
     page,
     pageObjects,
@@ -90,7 +113,7 @@ async function generateLogsData(
 ) {
   const logsData = timerange(TEST_START_TIME, TEST_END_TIME)
     .interval('1m')
-    .rate(10)
+    .rate(1)
     .generator((timestamp) =>
       log
         .create()
@@ -111,21 +134,17 @@ async function generateLogsData(
  * Generate synthetic APM data for testing
  */
 async function generateApmData(apmSynthtraceEsClient: SynthtraceFixture['apmSynthtraceEsClient']) {
-  const serviceNames = ['test-service-1', 'test-service-2'];
-
   const apmData = timerange(TEST_START_TIME, TEST_END_TIME)
     .interval('1m')
-    .rate(10)
+    .rate(1)
     .generator((timestamp) =>
-      serviceNames.flatMap((serviceName) =>
-        apm
-          .service({ name: serviceName, environment: 'test', agentName: 'nodejs' })
-          .instance('instance-1')
-          .transaction({ transactionName: 'GET /api/test' })
-          .timestamp(timestamp)
-          .duration(100)
-          .success()
-      )
+      apm
+        .service({ name: 'test-service-1', environment: 'test', agentName: 'nodejs' })
+        .instance('instance-1')
+        .transaction({ transactionName: 'GET /api/test' })
+        .timestamp(timestamp)
+        .duration(100)
+        .success()
     );
 
   await apmSynthtraceEsClient.index(apmData);
