@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, Plugin, AppMountParameters, CoreStart } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_TITLE } from '../common';
 import {
   AppPluginSetupDependencies,
@@ -32,6 +33,7 @@ export class SearchSynonymsPlugin
     core.application.register({
       id: PLUGIN_ID,
       appRoute: PLUGIN_ROUTE_ROOT,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       title: PLUGIN_TITLE,
       deepLinks: [
         {
@@ -56,7 +58,8 @@ export class SearchSynonymsPlugin
 
         return renderApp(coreStart, startDeps, element);
       },
-      visibleIn: [],
+      order: 3,
+      visibleIn: ['sideNav'],
     });
 
     return {};
