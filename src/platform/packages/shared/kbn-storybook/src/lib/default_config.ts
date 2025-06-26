@@ -217,7 +217,7 @@ export const defaultConfig: StorybookConfig = {
   <meta name="eui-global" />
   <meta name="emotion" />
   <script>
-    window.__kbnPublicPath__ = { 'kbn-ui-shared-deps-npm': '', 'kbn-ui-shared-deps-src': '' };
+    window.__kbnPublicPath__ = { 'kbn-ui-shared-deps-npm': '', 'kbn-ui-shared-deps-src': '', 'kbn-monaco': 'kbn-monaco/' };
     window.__kbnHardenPrototypes__ = false;
   </script>
   <script src="kbn-ui-shared-deps-npm.dll.js"></script>
@@ -238,6 +238,10 @@ export const defaultConfig: StorybookConfig = {
     {
       from: `${REPO_ROOT}/src/platform/plugins/shared/kibana_react/public/assets`,
       to: 'plugins/kibanaReact/assets',
+    },
+    {
+      from: `${REPO_ROOT}/bazel-bin/src/platform/packages/shared/kbn-monaco/target_workers`,
+      to: 'kbn-monaco',
     },
   ],
 };
