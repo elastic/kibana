@@ -14,9 +14,9 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { OnechatRoutes } from './routes';
-import { OnechatServicesContext } from './context/onechat_services_context';
 import type { OnechatInternalService } from '../services';
 import { OnechatStartDependencies } from '../types';
+import { OnechatServicesContext } from './context/onechat_services_context';
 
 export const mountApp = async ({
   core,
