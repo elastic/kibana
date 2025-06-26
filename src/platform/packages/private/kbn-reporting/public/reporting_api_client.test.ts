@@ -118,6 +118,27 @@ describe('ReportingAPIClient', () => {
     });
   });
 
+  describe('getScheduledReportInfo', () => {
+    beforeEach(() => {
+      httpClient.get.mockResolvedValueOnce({ data: [{ id: '123', title: 'Scheduled Report 1' }] });
+    });
+
+    it('should send a get request', async () => {
+      await apiClient.getScheduledReportInfo('123');
+
+      expect(httpClient.get).toHaveBeenCalledWith(
+        expect.stringContaining('/internal/reporting/scheduled/list')
+      );
+    });
+
+    it('should return a report', async () => {
+      await expect(apiClient.getScheduledReportInfo('123')).resolves.toEqual({
+        id: '123',
+        title: 'Scheduled Report 1',
+      });
+    });
+  });
+
   describe('getError', () => {
     it('should get an error message', async () => {
       httpClient.get.mockResolvedValueOnce({

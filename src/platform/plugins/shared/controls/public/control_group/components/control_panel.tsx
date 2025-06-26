@@ -25,7 +25,7 @@ import {
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import classNames from 'classnames';
 import { FloatingActions } from './floating_actions';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../common';
@@ -104,7 +104,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
   const insertBefore = isOver && (index ?? -1) < (activeIndex ?? -1);
   const insertAfter = isOver && (index ?? -1) > (activeIndex ?? -1);
 
-  const styles = useMemoizedStyles(controlPanelStyles);
+  const styles = useMemoCss(controlPanelStyles);
 
   return (
     <EuiFlexItem
@@ -162,12 +162,9 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
                 ) : isTwoLine ? null : (
                   <EuiToolTip
                     content={panelTitle || defaultPanelTitle}
-                    anchorProps={{ css: styles.tooltipAnchor }}
+                    anchorProps={{ css: styles.tooltipAnchor, className: 'eui-textTruncate' }}
                   >
-                    <EuiFormLabel
-                      css={styles.formLabel}
-                      className="eui-textTruncate controlPanel--label"
-                    >
+                    <EuiFormLabel className="controlPanel--label">
                       {panelTitle || defaultPanelTitle}
                     </EuiFormLabel>
                   </EuiToolTip>
@@ -212,14 +209,6 @@ const controlPanelStyles = {
     }),
   containerHidden: css({
     display: 'none', // Don't unmount, just hide
-  }),
-  formLabel: css({
-    padding: '0 !important',
-    height: '100%',
-    maxWidth: '100%',
-    overflow: 'hidden !important',
-    textOverflow: 'ellipsis !important',
-    whiteSpace: `nowrap !important` as 'nowrap',
   }),
   formControl: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -276,6 +265,11 @@ const controlPanelStyles = {
           backgroundColor: euiTheme.colors.backgroundFilledAccentSecondary,
           right: `calc(-${euiTheme.size.xs} - 1px)`,
         },
+      },
+      '.controlPanel--label': {
+        padding: '0 !important',
+        height: '100%',
+        maxWidth: '100%',
       },
     }),
   tooltipAnchor: css({

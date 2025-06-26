@@ -16,7 +16,7 @@ export const createObservabilityRootProfileProviderWithAttributesTab = (
 ) =>
   extendProfileProvider(observabilityRootProfileProvider, {
     profileId: 'observability-root-profile-with-attributes-tab',
-    isExperimental: true,
+    isExperimental: false,
     profile: {
       getDocViewer,
     },
