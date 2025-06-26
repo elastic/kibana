@@ -256,3 +256,14 @@ Configure Claude Desktop by adding this to its configuration:
   }
 }
 ```
+
+## ES|QL Based Tools
+
+The ES|QL Based Tool API allows users to create custom ES|QL tools for the LLM to run on an index
+
+To enable the API, add the following to your Kibana config 
+
+```yaml
+uiSettings.overrides:
+  onechat:esqlToolApi:enabled: true
+```
