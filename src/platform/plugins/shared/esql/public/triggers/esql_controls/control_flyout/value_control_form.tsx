@@ -10,7 +10,6 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
-import { esqlQueryToOptions } from '@kbn/esql-utils';
 import { isEqual } from 'lodash';
 import {
   EuiComboBox,
@@ -34,6 +33,7 @@ import { getIndexPatternFromESQLQuery, appendStatsByToQuery } from '@kbn/esql-ut
 import { ESQLLangEditor } from '../../../create_editor';
 import { ControlWidth, ControlLabel } from './shared_form_components';
 import { ChooseColumnPopover } from './choose_column_popover';
+import { esqlQueryToOptions } from './esql_query_to_options';
 
 interface ValueControlFormProps {
   search: ISearchGeneric;

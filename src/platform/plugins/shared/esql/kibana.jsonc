@@ -12,7 +12,8 @@
       "indexManagement",
       "fieldsMetadata",
       "usageCollection",
-      "licensing"
+      "licensing",
+      "controls"
     ],
     "requiredPlugins": [
       "data",

@@ -13,6 +13,8 @@ export { ESQLLangEditor } from './create_editor';
 export type { ESQLEditorProps, DataErrorsControl } from '@kbn/esql-editor';
 export type { EsqlPluginStart };
 
+export { esqlQueryToOptions } from './triggers/esql_controls/control_flyout/esql_query_to_options';
+
 export function plugin() {
   return new EsqlPlugin();
 }

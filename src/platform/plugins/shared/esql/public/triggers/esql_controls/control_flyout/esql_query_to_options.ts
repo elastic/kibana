@@ -9,7 +9,7 @@
 
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { TimeRange } from '@kbn/es-query';
-import { getESQLResults } from './run_query';
+import { getESQLResults } from '@kbn/esql-utils';
 
 export interface ESQLQueryToOptionsSuccess {
   options: string[];

@@ -22,11 +22,14 @@ const mockEsqlQueryToOptions = jest.fn().mockResolvedValue({
   options: [],
 });
 
-jest.mock('@kbn/esql-utils', () => {
+jest.mock('@kbn/controls-plugin/public', () => {
   const esqlQueryToOptions = (...args: any[]) => mockEsqlQueryToOptions(...args);
   esqlQueryToOptions.isSuccess = jest.fn().mockResolvedValue(true);
+  return { esqlQueryToOptions };
+});
+
+jest.mock('@kbn/esql-utils', () => {
   return {
-    esqlQueryToOptions,
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
     getLimitFromESQLQuery: jest.fn().mockReturnValue(1000),
     isQueryWrappedByPipes: jest.fn().mockReturnValue(false),
