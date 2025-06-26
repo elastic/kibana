@@ -24,7 +24,4 @@ export {
   esqlToolProviderId,
   unknownToolProviderId,
 } from './tools';
-export { 
-  type FieldTypes,
-  BuiltinToolIds, 
-  BuiltinTags } from './constants';
+export { type FieldTypes, BuiltinToolIds, BuiltinTags } from './constants';

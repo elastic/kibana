@@ -7,6 +7,8 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
 import type { OnechatConfig } from './config';
 import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
@@ -20,8 +22,6 @@ import type {
 } from './types';
 import { ESQL_TOOL_API_UI_SETTING_ID } from '../common/constants';
 import { registerUISettings } from './ui_settings';
-import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
 
 export class OnechatPlugin
   implements
