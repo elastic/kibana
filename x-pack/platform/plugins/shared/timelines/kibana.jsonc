@@ -16,12 +16,12 @@
     ],
     "requiredPlugins": [
       "alerting",
+      "cases",
       "data",
       "kibanaReact",
       "kibanaUtils"
     ],
     "optionalPlugins": [
-      "cases",
       "security"
     ],
     "extraPublicDirs": [
