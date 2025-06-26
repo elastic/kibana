@@ -9,17 +9,14 @@ import seriesConfig from '../../__mocks__/mock_series_config_filebeat.json';
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { EuiProvider } from '@elastic/eui';
 
 import { ExplorerChartLabel } from './explorer_chart_label';
 
 const DetectorLabel = <React.Fragment>{seriesConfig.detectorLabel}</React.Fragment>;
 
 describe('ExplorerChartLabelBadge', () => {
-  const renderWithProvider = (ui) => render(<EuiProvider colorMode="light">{ui}</EuiProvider>);
-
   test('renders the chart label in one line', () => {
-    const { container } = renderWithProvider(
+    const { container } = render(
       <ExplorerChartLabel
         detectorLabel={DetectorLabel}
         entityFields={seriesConfig.entityFields}
@@ -31,7 +28,7 @@ describe('ExplorerChartLabelBadge', () => {
   });
 
   test('renders the chart label in two lines', () => {
-    const { container } = renderWithProvider(
+    const { container } = render(
       <ExplorerChartLabel
         detectorLabel={DetectorLabel}
         entityFields={seriesConfig.entityFields}
