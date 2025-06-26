@@ -43683,7 +43683,7 @@ paths:
                 }
               }
             ],
-            "instructions": ["When the user asks about Elasticsearch cluster health, use the get_cluster_health tool to retrieve cluster health, then summarise the response in plain English."]
+            "instructions": ["When the user asks about Elasticsearch cluster health, use the get_cluster_health tool to retrieve cluster health, then summarize the response in plain English."]
             }'
       x-state: Technical Preview
   /api/osquery/live_queries:
@@ -66808,7 +66808,7 @@ components:
               }
             }
           ],
-          "instructions": ["When the user asks about Elasticsearch cluster health, use the get_cluster_health tool to retrieve cluster health, then summarise the response in plain English."]
+          "instructions": ["When the user asks about Elasticsearch cluster health, use the get_cluster_health tool to retrieve cluster health, then summarize the response in plain English."]
         }
     Observability_AI_Assistant_API_ChatCompleteResponseExample:
       summary: Get a chat completion from the Observability AI Assistant

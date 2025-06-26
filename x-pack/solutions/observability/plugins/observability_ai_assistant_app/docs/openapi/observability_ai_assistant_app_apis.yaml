@@ -61,7 +61,7 @@ paths:
                 }
               }
             ],
-            "instructions": ["When the user asks about Elasticsearch cluster health, use the get_cluster_health tool to retrieve cluster health, then summarise the response in plain English."]
+            "instructions": ["When the user asks about Elasticsearch cluster health, use the get_cluster_health tool to retrieve cluster health, then summarize the response in plain English."]
             }'
       tags:
         - observability_ai_assistant
@@ -248,5 +248,5 @@ components:
               }
             }
           ],
-          "instructions": ["When the user asks about Elasticsearch cluster health, use the get_cluster_health tool to retrieve cluster health, then summarise the response in plain English."]
+          "instructions": ["When the user asks about Elasticsearch cluster health, use the get_cluster_health tool to retrieve cluster health, then summarize the response in plain English."]
         }
