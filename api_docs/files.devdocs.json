@@ -5119,6 +5119,10 @@
               "path": "x-pack/platform/plugins/shared/cases/server/files/index.ts"
             },
             {
+              "plugin": "@kbn/test-suites-xpack-platform",
+              "path": "x-pack/platform/test/cases_api_integration/common/plugins/cases/server/files/index.ts"
+            },
+            {
               "plugin": "cases",
               "path": "x-pack/platform/plugins/shared/cases/server/files/index.test.ts"
             },
