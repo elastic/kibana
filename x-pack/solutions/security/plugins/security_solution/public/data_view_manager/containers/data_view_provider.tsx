@@ -29,7 +29,10 @@ export const useDefaultDataViews = () => {
   const defaultDataViews = useContext(DefaultDataViewContext);
 
   if (!newDataViewPickerEnabled) {
-    return { defaultDataView: fallbackDataView, alertDataView: fallbackDataView };
+    return {
+      defaultDataView: fallbackDataView,
+      alertDataView: fallbackDataView,
+    } as unknown as DefaultDataViewsContextValue;
   }
 
   if (!defaultDataViews) {

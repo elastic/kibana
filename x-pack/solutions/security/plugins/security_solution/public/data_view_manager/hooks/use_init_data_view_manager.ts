@@ -92,7 +92,7 @@ export const useInitDataViewManager = () => {
     // NOTE: init listener contains logic that preloads default security solution data view
     const dataViewsLoadingListener = createInitListener({
       dataViews: services.dataViews,
-      defaultDataView: defaultDataViews.defaultDataView,
+      defaultDataViews,
     });
 
     dispatch(addListener(dataViewsLoadingListener));
