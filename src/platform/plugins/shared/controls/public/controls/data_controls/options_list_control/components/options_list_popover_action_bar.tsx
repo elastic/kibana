@@ -95,13 +95,9 @@ export const OptionsListPopoverActionBar = ({
     componentApi.totalCardinality$,
     componentApi.field$,
     componentApi.fieldName$,
-<<<<<<< a11y/range-slider-control-labels
-    componentApi.parentApi.allowExpensiveQueries$
-=======
     componentApi.parentApi.allowExpensiveQueries$,
     componentApi.availableOptions$,
     componentApi.dataLoading$
->>>>>>> main
   );
 
   const compatibleSearchTechniques = useMemo(() => {
