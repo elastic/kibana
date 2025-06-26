@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { Controller, FieldValues, Path, useFormContext } from 'react-hook-form';
-import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 
 import { ClientPluginsStart } from '../../../../../plugin';
 
@@ -25,9 +24,9 @@ export const SpaceSelector = <T extends FieldValues>({
 }: SpaceSelectorProps) => {
   const NAMESPACES_NAME = 'spaces' as Path<T>;
   const { services } = useKibana<ClientPluginsStart>();
-  const [spacesList, setSpacesList] = React.useState<
-    Array<{ id: string; label: string; 'data-id': string }>
-  >([]);
+  const [spacesList, setSpacesList] = React.useState<Array<{ label: string; 'data-id': string }>>(
+    []
+  );
   const data = services.spaces?.ui.useSpaces();
 
   const {
@@ -45,7 +44,6 @@ export const SpaceSelector = <T extends FieldValues>({
         setSpacesList([
           allSpacesOption,
           ...[...spacesData.spacesMap].map(([spaceId, dataS]) => ({
-            id: spaceId,
             'data-id': spaceId,
             label: dataS.name,
           })),
@@ -79,34 +77,36 @@ export const SpaceSelector = <T extends FieldValues>({
             }}
             options={spacesList}
             selectedOptions={(field.value ?? []).map((id) => {
-              const sp = spacesList.find((space) => space.id === id);
+              const sp = spacesList.find((space) => space['data-id'] === id);
               if (!sp) {
                 return {
-                  id,
+                  'data-id': id,
                   label: id,
                 };
               }
-              return { id: sp.id, label: sp.label };
+              return { 'data-id': sp['data-id'], label: sp.label };
             })}
             isClearable={true}
             onChange={(selected) => {
-              const selectedIds = selected.map((option) => option.id);
+              const selectedIds = selected.map(
+                (option: { label: string; 'data-id'?: string }) => option['data-id']
+              );
 
               // if last value is not all spaces, remove all spaces value
               if (
                 selectedIds.length > 0 &&
-                selectedIds[selectedIds.length - 1] !== allSpacesOption.id
+                selectedIds[selectedIds.length - 1] !== allSpacesOption['data-id']
               ) {
-                field.onChange(selectedIds.filter((id) => id !== allSpacesOption.id));
+                field.onChange(selectedIds.filter((id) => id !== allSpacesOption['data-id']));
                 return;
               }
 
               // if last value is all spaces, remove all other values
               if (
                 selectedIds.length > 0 &&
-                selectedIds[selectedIds.length - 1] === allSpacesOption.id
+                selectedIds[selectedIds.length - 1] === allSpacesOption['data-id']
               ) {
-                field.onChange([allSpacesOption.id]);
+                field.onChange([allSpacesOption['data-id']]);
                 return;
               }
 
@@ -124,9 +124,8 @@ export const ALL_SPACES_LABEL = i18n.translate('xpack.synthetics.spaceList.allSp
 });
 
 const allSpacesOption = {
-  id: ALL_SPACES_ID,
   label: ALL_SPACES_LABEL,
-  'data-id': ALL_SPACES_ID,
+  'data-id': ALL_SPACES_LABEL,
 };
 
 const SPACES_LABEL = i18n.translate('xpack.synthetics.privateLocation.spacesLabel', {
