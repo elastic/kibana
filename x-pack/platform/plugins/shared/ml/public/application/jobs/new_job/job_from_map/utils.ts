@@ -12,7 +12,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { MapApi } from '@kbn/maps-plugin/public';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { MlManagementLocatorInternal } from '../../../../locator/ml_management_locator';
+import { MlManagementLocatorInternal } from '@kbn/ml-locator/ml_management_locator';
 
 export async function redirectToGeoJobWizard(
   embeddable: MapApi,

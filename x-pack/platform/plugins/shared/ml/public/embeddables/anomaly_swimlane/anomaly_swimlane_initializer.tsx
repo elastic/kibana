@@ -29,10 +29,13 @@ import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import type { SwimlaneType } from '@kbn/ml-common-constants/explorer_constants';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '@kbn/ml-common-constants/explorer_constants';
 import { extractInfluencers } from '@kbn/ml-common-utils/job_utils';
+import type {
+  AnomalySwimlaneEmbeddableUserInput,
+  AnomalySwimlaneInitialInput,
+} from '@kbn/ml-common-types/anomaly_swim_lane';
 
 import { useMlLink } from '../../application/contexts/kibana';
 import { JobSelectorControl } from '../../alerting/job_selector';
-import type { AnomalySwimlaneEmbeddableUserInput, AnomalySwimlaneInitialInput } from '../types';
 import { getDefaultSwimlanePanelTitle } from './anomaly_swimlane_embeddable';
 import { getJobSelectionErrors } from '../utils';
 

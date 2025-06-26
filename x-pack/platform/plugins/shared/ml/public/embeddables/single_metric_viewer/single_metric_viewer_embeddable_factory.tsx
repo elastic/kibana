@@ -23,8 +23,9 @@ import {
 } from '@kbn/presentation-publishing/interfaces/titles/title_manager';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
 import { initializeTimeRangeManager } from '@kbn/presentation-publishing/interfaces/fetch/time_range_manager';
+import type { MlPluginStart } from '@kbn/ml-plugin-contracts';
 
-import type { MlPluginStart, MlStartDependencies } from '../../plugin';
+import type { MlStartDependencies } from '../../plugin';
 import { getSingleMetricViewerComponent } from '../../shared_components/single_metric_viewer';
 
 import type { SingleMetricViewerEmbeddableApi } from '../types';

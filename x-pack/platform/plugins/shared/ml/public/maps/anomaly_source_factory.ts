@@ -10,7 +10,8 @@ import { SOURCE_TYPES } from '@kbn/maps-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
-import type { MlPluginStart, MlStartDependencies } from '../plugin';
+import type { MlPluginStart } from '@kbn/ml-plugin-contracts';
+import type { MlStartDependencies } from '../plugin';
 import { AnomalySource } from './anomaly_source';
 
 export class AnomalySourceFactory {

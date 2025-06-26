@@ -69,8 +69,8 @@ import { getMlLocator } from '@kbn/ml-locator/get_ml_locator';
 import type { getMlManagementLocator } from '@kbn/ml-locator/get_ml_management_locator';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin-contracts';
 import { MlManagementLocatorInternal } from '@kbn/ml-locator/ml_management_locator';
-import { AnomalySwimLane } from '@kbn/ml-shared-components';
 
+import { AnomalySwimLane } from './shared_components';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
 import { getElasticModels } from './application/services/get_elastic_models';
 import { renderApp } from './application/render_app';

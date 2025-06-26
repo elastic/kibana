@@ -52,6 +52,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { dispatchRenderComplete, dispatchRenderStart } from '@kbn/kibana-utils-plugin/public';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { HttpService } from '@kbn/ml-services/http_service';
+import type { MlPluginStart } from '@kbn/ml-plugin-contracts';
 
 import type { AnomalySwimlaneEmbeddableServices } from '../types';
 import type { MlDependencies } from '../../application/app';
@@ -61,7 +62,7 @@ import {
   isViewBySwimLaneData,
   SwimlaneContainer,
 } from '../../application/explorer/swimlane_container';
-import type { MlPluginStart, MlStartDependencies } from '../../plugin';
+import type { MlStartDependencies } from '../../plugin';
 import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
 import { buildDataViewPublishingApi } from '../common/build_data_view_publishing_api';
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
