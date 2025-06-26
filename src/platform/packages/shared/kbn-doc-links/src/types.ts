@@ -80,6 +80,12 @@ export interface DocLinks {
     readonly auditdModule: string;
     readonly systemModule: string;
   };
+  readonly searchHomepage: {
+    readonly visitSearchLabs: string;
+    readonly notebooksExamples: string;
+    readonly customerEngineerRequestForm: string;
+    readonly elasticCommunity: string;
+  };
   readonly metricbeat: {
     readonly base: string;
     readonly configure: string;
@@ -280,6 +286,7 @@ export interface DocLinks {
     readonly detectionsReq: string;
     readonly networkMap: string;
     readonly troubleshootGaps: string;
+    readonly gapsTable: string;
     readonly ruleApiOverview: string;
     readonly configureAlertSuppression: string;
   };
@@ -397,6 +404,7 @@ export interface DocLinks {
     tlsCertificate: string;
     uptimeDurationAnomaly: string;
     monitorLogs: string;
+    logsStreams: string;
     analyzeMetrics: string;
     monitorUptimeSynthetics: string;
     userExperience: string;
@@ -650,9 +658,11 @@ export interface DocLinks {
   readonly synonyms: {
     readonly synonymsAPIDocumentation: string;
   };
-
   readonly queryRules: {
     readonly queryRulesAPIDocumentation: string;
+  };
+  readonly datasetQuality: {
+    readonly failureStore: string;
   };
 }
 

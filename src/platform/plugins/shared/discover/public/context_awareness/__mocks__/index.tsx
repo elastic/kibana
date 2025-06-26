@@ -25,8 +25,9 @@ import {
 } from '../profiles';
 import type { ProfileProviderServices } from '../profile_providers/profile_provider_services';
 import { ProfilesManager } from '../profiles_manager';
-import { DiscoverEBTManager } from '../../plugin_imports/discover_ebt_manager';
+import { DiscoverEBTManager } from '../../ebt_manager';
 import {
+  createApmErrorsContextServiceMock,
   createLogsContextServiceMock,
   createTracesContextServiceMock,
 } from '@kbn/discover-utils/src/__mocks__';
@@ -168,12 +169,11 @@ export const createContextAwarenessMocks = ({
     documentProfileServiceMock.registerProvider(documentProfileProviderMock);
   }
 
-  const ebtManagerMock = new DiscoverEBTManager();
+  const scopedEbtManagerMock = new DiscoverEBTManager().createScopedEBTManager();
   const profilesManagerMock = new ProfilesManager(
     rootProfileServiceMock,
     dataSourceProfileServiceMock,
-    documentProfileServiceMock,
-    ebtManagerMock
+    documentProfileServiceMock
   );
 
   const profileProviderServices = createProfileProviderServicesMock();
@@ -189,7 +189,7 @@ export const createContextAwarenessMocks = ({
     contextRecordMock2,
     profilesManagerMock,
     profileProviderServices,
-    ebtManagerMock,
+    scopedEbtManagerMock,
   };
 };
 
@@ -198,6 +198,7 @@ const createProfileProviderServicesMock = () => {
     logsContextService: createLogsContextServiceMock(),
     discoverShared: discoverSharedPluginMock.createStartContract(),
     tracesContextService: createTracesContextServiceMock(),
+    apmErrorsContextService: createApmErrorsContextServiceMock(),
     core: {
       pricing: pricingServiceMock.createStartContract() as ReturnType<
         typeof pricingServiceMock.createStartContract

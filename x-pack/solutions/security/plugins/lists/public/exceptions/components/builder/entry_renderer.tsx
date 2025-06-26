@@ -384,7 +384,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           id="xpack.lists.exceptions.builder.exceptionIsOperator.warningMessage.incorrectWildCardUsage"
           defaultMessage="Change the operator to 'matches' to ensure wildcards run properly."
         />{' '}
-        <EuiIconTip type="iInCircle" content={i18n.WILDCARD_WITH_IS_OPERATOR_TOOLTIP} />
+        <EuiIconTip type="info" content={i18n.WILDCARD_WITH_IS_OPERATOR_TOOLTIP} />
       </EuiText>
     );
   };
@@ -395,7 +395,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
       <p>
         {precedingWarning}{' '}
         <EuiIconTip
-          type="iInCircle"
+          type="info"
           content={
             <FormattedMessage
               id="xpack.lists.exceptions.builder.exceptionMatchesOperator.warningMessage.wildcardInFilepath"
