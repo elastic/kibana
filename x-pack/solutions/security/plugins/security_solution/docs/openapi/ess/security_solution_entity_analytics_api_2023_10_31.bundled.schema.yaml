@@ -606,8 +606,8 @@ paths:
                 maxPageSearchSize:
                   default: 500
                   description: >-
-                    The initial page size to use for the composite
-                    aggregation of each checkpoint.
+                    The initial page size to use for the composite aggregation
+                    of each checkpoint.
                   type: integer
                 timeout:
                   default: 180s
@@ -729,6 +729,7 @@ paths:
                   pattern: '[smdh]$'
                   type: string
                 docsPerSecond:
+                  default: -1
                   description: The number of documents per second to process.
                   type: integer
                 enrichPolicyExecutionInterval:
@@ -756,8 +757,8 @@ paths:
                 maxPageSearchSize:
                   default: 500
                   description: >-
-                    The initial page size to use for the composite
-                    aggregation of each checkpoint.
+                    The initial page size to use for the composite aggregation
+                    of each checkpoint.
                   type: integer
                 timeout:
                   default: 180s
