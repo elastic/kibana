@@ -133,7 +133,3 @@ export type {
   ObservabilityAlertsTableContext,
   ObservabilityAlertsTableProps,
 } from './components/alerts_table/types';
-
-export const config = {
-  schema: {},
-};
