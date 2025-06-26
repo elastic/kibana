@@ -6,7 +6,7 @@
  */
 import { RoleCredentials, SamlAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
+import { syntheticsMonitorSavedObjectType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { EncryptedSyntheticsSavedMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
 import { MonitorInspectResponse } from '@kbn/synthetics-plugin/public/apps/synthetics/state/monitor_management/api';
 import { v4 as uuidv4 } from 'uuid';
@@ -166,7 +166,7 @@ export class SyntheticsMonitorTestService {
       const response = await this.supertest
         .get(`/s/${space}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
         .query({
-          filter: `${syntheticsMonitorType}.attributes.journey_id: "${journeyId}" AND ${syntheticsMonitorType}.attributes.project_id: "${projectId}"`,
+          filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: "${journeyId}" AND ${syntheticsMonitorSavedObjectType}.attributes.project_id: "${projectId}"`,
         })
         .set(user.apiKeyHeader)
         .set(this.samlAuth.getInternalRequestHeader())
