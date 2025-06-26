@@ -33,9 +33,7 @@ export function newSession$(api: unknown) {
     observables.push(
       api.timeRange$.pipe(
         distinctUntilChanged((previous: TimeRange | undefined, current: TimeRange | undefined) => {
-          return (
-            current?.from === previous?.from && current?.to === previous?.to
-          );
+          return current?.from === previous?.from && current?.to === previous?.to;
         })
       )
     );
