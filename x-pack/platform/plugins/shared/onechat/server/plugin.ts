@@ -20,6 +20,8 @@ import type {
 } from './types';
 import { ESQL_TOOL_API_UI_SETTING_ID } from '../common/constants';
 import { registerUISettings } from './ui_settings';
+import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
 
 export class OnechatPlugin
   implements

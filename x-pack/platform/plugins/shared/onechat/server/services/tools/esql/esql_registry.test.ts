@@ -50,7 +50,7 @@ describe('EsqlToolRegistry', () => {
         id: '123',
         name: 'test-tool',
         description: 'A test tool',
-        query: 'SELECT * FROM test',
+        query: 'FROM my_cases | WHERE case_id == ?case_id',
         params: {
           test: {
             type: 'keyword',
@@ -84,7 +84,7 @@ describe('EsqlToolRegistry', () => {
         id: '123',
         name: 'test-tool',
         description: 'A test tool',
-        query: 'SELECT * FROM test',
+        query: 'FROM my_cases | WHERE case_id == ?case_id',
         params: {
           test: {
             type: 'keyword',
@@ -147,7 +147,7 @@ describe('EsqlToolRegistry', () => {
           id: '123',
           name: 'test-tool-1',
           description: 'A test tool',
-          query: 'SELECT * FROM test',
+          query: 'FROM my_cases | WHERE case_id == ?case_id',
           params: {
             test: {
               type: 'keyword',
@@ -165,7 +165,7 @@ describe('EsqlToolRegistry', () => {
           id: '456',
           name: 'test-tool-2',
           description: 'A test tool',
-          query: 'SELECT * FROM test',
+          query: 'FROM my_cases | WHERE case_id == ?case_id',
           params: {
             test: {
               type: 'keyword',
@@ -248,7 +248,7 @@ describe('EsqlToolClient', () => {
         id: '123',
         name: 'test-tool',
         description: 'A test tool',
-        query: 'SELECT * FROM test',
+        query: 'FROM my_cases | WHERE case_id == ?case_id',
         params: {},
         meta: {
           providerId: 'esql',
@@ -285,7 +285,7 @@ describe('EsqlToolClient', () => {
         id: '123',
         name: 'existing-tool',
         description: 'A test tool',
-        query: 'SELECT * FROM test',
+        query: 'FROM my_cases | WHERE case_id == ?case_id',
         params: {},
         meta: {
           providerId: 'esql',
@@ -317,7 +317,7 @@ describe('EsqlToolClient', () => {
         id: '123',
         name: 'test-tool',
         description: 'A test tool',
-        query: 'SELECT * FROM test',
+        query: 'FROM my_cases | WHERE case_id == ?case_id',
         params: {},
         meta: {
           providerId: 'esql',
@@ -353,7 +353,7 @@ describe('EsqlToolClient', () => {
           id: '123',
           name: 'tool-1',
           description: 'Tool 1',
-          query: 'SELECT * FROM test1',
+          query: 'FROM my_cases | WHERE case_id == ?case_id',
           params: {},
           meta: { providerId: 'esql', tags: [] },
           created_at: new Date().toISOString(),
@@ -363,7 +363,7 @@ describe('EsqlToolClient', () => {
           id: '456',
           name: 'tool-2',
           description: 'Tool 2',
-          query: 'SELECT * FROM test2',
+          query: 'FROM my_cases | WHERE case_id == ?case_id',
           params: {},
           meta: { providerId: 'esql', tags: [] },
           created_at: new Date().toISOString(),
@@ -395,7 +395,7 @@ describe('EsqlToolClient', () => {
         id: '123',
         name: 'existing-tool',
         description: 'Original description',
-        query: 'SELECT * FROM original',
+        query: 'FROM my_cases | WHERE case_id == ?case_id',
         params: {},
         meta: { providerId: 'esql', tags: ['original'] },
         created_at: '2024-01-01T00:00:00.000Z',
@@ -404,7 +404,6 @@ describe('EsqlToolClient', () => {
 
       const updates: Partial<EsqlToolCreateRequest> = {
         description: 'Updated description',
-        query: 'SELECT * FROM updated',
       };
 
       mockElasticsearchClient.get.mockResolvedValue({
@@ -420,7 +419,7 @@ describe('EsqlToolClient', () => {
           id: '123',
           name: 'existing-tool',
           description: 'Updated description',
-          query: 'SELECT * FROM updated',
+          query: 'FROM my_cases | WHERE case_id == ?case_id',
           created_at: '2024-01-01T00:00:00.000Z',
         })
       );
@@ -429,7 +428,7 @@ describe('EsqlToolClient', () => {
         id: '123',
         document: expect.objectContaining({
           description: 'Updated description',
-          query: 'SELECT * FROM updated',
+          query: 'FROM my_cases | WHERE case_id == ?case_id',
         }),
       });
     });
@@ -441,7 +440,7 @@ describe('EsqlToolClient', () => {
         id: '123',
         name: 'test-tool',
         description: 'A test tool',
-        query: 'SELECT * FROM test',
+        query: 'FROM my_cases | WHERE case_id == ?case_id',
         params: {},
         meta: { providerId: 'esql', tags: [] },
         created_at: new Date().toISOString(),
