@@ -47,13 +47,14 @@ export const DEFEND_INSIGHTS_TOOL: AssistantTool = Object.freeze({
   description: DEFEND_INSIGHTS_TOOL_DESCRIPTION,
   sourceRegister: APP_UI_ID,
 
+
   isSupported: (params: AssistantToolParams): boolean => {
     const { llm, request } = params;
 
     return requestHasRequiredAnonymizationParams(request) && llm != null;
   },
 
-  getTool(params: AssistantToolParams): DynamicTool | null {
+  async getTool(params: AssistantToolParams): Promise<DynamicTool | null> {
     if (!this.isSupported(params)) return null;
 
     const {
