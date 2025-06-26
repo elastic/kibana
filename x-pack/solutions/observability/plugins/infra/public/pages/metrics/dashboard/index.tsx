@@ -77,7 +77,7 @@ export const Dashboard = () => {
           data-test-subj="infraKubernetesPage"
         >
           <KubernetesTimeRangeMetadataProvider>
-            <PageContent dashboardId={dashboardId} hasMultipleDashboards={entity === 'overview'} />
+            <PageContent dashboardId={dashboardId} />
           </KubernetesTimeRangeMetadataProvider>
         </PageTemplate>
       </EuiErrorBoundary>

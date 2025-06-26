@@ -12,7 +12,6 @@ import { createServerRoute } from '../../../create_server_route';
 
 const KUBERNETES = 'kubernetes';
 const DOCKER = 'docker';
-const METRICBEAT = 'metricbeat';
 
 const infraSideNavRoute = createServerRoute({
   endpoint: 'GET /internal/observability_navigation',
@@ -34,24 +33,6 @@ const infraSideNavRoute = createServerRoute({
     const [fleetStart, core] = await Promise.all([plugins.fleet?.start(), context.core]);
     const packageClient = fleetStart?.packageService.asScoped(request);
 
-    const metricbeatData = await core.elasticsearch.client.asCurrentUser.search({
-      index: 'metrics-kubernetes*',
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      track_total_hits: true,
-      terminate_after: 1,
-      size: 0,
-      query: {
-        bool: {
-          should: [
-            { term: { ['event.module']: KUBERNETES } },
-            { term: { ['agent.type']: METRICBEAT } },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-    });
-
     const otelData = await core.elasticsearch.client.asCurrentUser.search({
       index: 'metrics-*.otel-*',
       ignore_unavailable: true,
@@ -61,14 +42,13 @@ const infraSideNavRoute = createServerRoute({
       size: 0,
       query: {
         bool: {
-          filter: [{ term: { ['data_stream.dataset']: '*.otel' } }],
+          filter: [{ term: { ['data_stream.dataset']: 'k8sclusterreceiver.otel' } }],
         },
       },
     });
 
-    //  TODO Type fick for the response
-    const hasEcsData = metricbeatData?.hits?.total?.value !== 0;
-    const hasOtelData = otelData?.hits?.total?.value !== 0;
+    const totalHits = otelData?.hits?.total;
+    const hasOtelData = typeof totalHits === 'number' ? totalHits !== 0 : totalHits?.value !== 0;
 
     const [installedPackage, ...navigationOverrides] = await Promise.all([
       packageClient?.getInstallation(KUBERNETES),
@@ -82,31 +62,24 @@ const infraSideNavRoute = createServerRoute({
       ),
     ]);
 
-    const packageInstalled = installedPackage ? [installedPackage] : [];
+    const otelPackageInstalled = installedPackage ? [installedPackage] : [];
 
-    // Maybe separate the ecs / otel cases in the future
-    if ((hasEcsData ?? hasOtelData) && !installedPackage) {
-      // System package is always required
-      await packageClient?.ensureInstalledPackage({ pkgName: 'system' });
-      // Kubernetes package is required for both classic kubernetes and otel
-      await packageClient?.ensureInstalledPackage({ pkgName: 'kubernetes' });
-      const installedKubernetes = await packageClient?.getInstallation(KUBERNETES);
-      if (installedKubernetes) packageInstalled.push(installedKubernetes);
-      // Kubernetes otel package is required only for otel
-      if (hasOtelData && !hasEcsData) {
-        await packageClient?.ensureInstalledPackage({ pkgName: 'kubernetes_otel' });
-        const installedOtelKubernetes = await packageClient?.getInstallation('kubernetes_otel');
-        if (installedOtelKubernetes) packageInstalled.push(installedOtelKubernetes);
-      }
+    if (hasOtelData && !installedPackage) {
+      // We will just install the otel package if it is not installed for now
+      await packageClient?.ensureInstalledPackage({ pkgName: 'kubernetes_otel' });
+      const installedOtelKubernetes = await packageClient?.getInstallation('kubernetes_otel');
+      if (installedOtelKubernetes) otelPackageInstalled.push(installedOtelKubernetes);
     }
 
-    if ((!installedPackage || packageInstalled.length === 0) && !navigationOverrides) {
+    if ((!installedPackage || otelPackageInstalled.length === 0) && !navigationOverrides) {
       return [];
     }
 
+    // It will come from the entities definiition later
+    // For now we will just use the entities defined in the semconv
     const k8sEntitiesSemConv = [
       {
-        id: 'entity.k8s.cluster', // -> entityType
+        id: 'entity.k8s.cluster', // -> Use to map to entityType?
         type: 'entity',
         stability: 'development',
         name: 'k8s.cluster',
@@ -133,123 +106,41 @@ const infraSideNavRoute = createServerRoute({
         ],
       },
     ];
-    const otelMenuItems = !hasEcsData
-      ? k8sEntitiesSemConv.map((entity, index) => ({
-          // id: `kubernetes_otel-${entity.id}`,
-          id: `kubernetes_otel-cluster-overview`,
-          entityType: entity.id,
-          sideNavTitle: entity.brief,
-          sideNavOrder: (index || 1) * 100,
-          type: 'dashboard',
-        }))
-      : [];
+    const otelMenuItems = k8sEntitiesSemConv.map((entity, index) => ({
+      // id: `kubernetes_otel-${entity.id}`,
+      id: `kubernetes_otel-cluster-overview`,
+      entityType: entity.id,
+      sideNavTitle: entity.brief,
+      sideNavOrder: (index || 1) * 100,
+      type: 'dashboard',
+    }));
 
     // Mock data simulating the installed package's items returned by installedPackage.installed_kibana
     const mockInstalledPackage =
-      installedPackage && packageInstalled.length > 0
+      installedPackage && otelPackageInstalled.length > 0 && hasOtelData
         ? [
-            ...(hasOtelData && !hasEcsData
-              ? [
-                  {
-                    id: 'kubernetes_otel-cluster-overview',
-                    entityType: 'k8s.overview',
-                    sideNavTitle: 'Overview (Otel)',
-                    sideNavOrder: 100,
-                    type: 'dashboard',
-                  },
-                ]
-              : [
-                  {
-                    id: 'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013',
-                    entityType: 'k8s.cronjob',
-                    sideNavTitle: 'Cron jobs',
-                    sideNavOrder: 900,
-                    type: 'dashboard',
-                  },
-                  {
-                    id: 'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013',
-                    entityType: 'k8s.statefulset',
-                    sideNavTitle: 'Stateful sets',
-                    sideNavOrder: 600,
-                    type: 'dashboard',
-                  },
-                  {
-                    id: 'kubernetes-3912d9a0-bcb2-11ec-b64f-7dd6e8e82013',
-                    entityType: 'k8s.volume',
-                    sideNavTitle: 'Volumes',
-                    sideNavOrder: 500,
-                    type: 'dashboard',
-                  },
-                  {
-                    id: 'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013',
-                    entityType: 'k8s.pod',
-                    sideNavTitle: 'Pods',
-                    sideNavOrder: 300,
-                    type: 'dashboard',
-                  },
-                  {
-                    id: 'kubernetes-5be46210-bcb1-11ec-b64f-7dd6e8e82013',
-                    entityType: 'k8s.deployment',
-                    sideNavTitle: 'Deployments',
-                    sideNavOrder: 400,
-                    type: 'dashboard',
-                  },
-                  {
-                    id: 'kubernetes-85879010-bcb1-11ec-b64f-7dd6e8e82013',
-                    entityType: 'k8s.daemonset',
-                    sideNavTitle: 'Daemon sets',
-                    sideNavOrder: 700,
-                    type: 'dashboard',
-                  },
-                  {
-                    id: 'kubernetes-9bf990a0-bcb1-11ec-b64f-7dd6e8e82013',
-                    entityType: 'k8s.job',
-                    sideNavTitle: 'Jobs',
-                    sideNavOrder: 800,
-                    type: 'dashboard',
-                  },
-                  {
-                    id: 'kubernetes-b945b7b0-bcb1-11ec-b64f-7dd6e8e82013',
-                    entityType: 'k8s.node',
-                    sideNavTitle: 'Nodes',
-                    sideNavOrder: 200,
-                    type: 'dashboard',
-                  },
-                  {
-                    id: 'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
-                    sideNavTitle: 'Overview',
-                    sideNavOrder: 100,
-                    type: 'dashboard',
-                  },
-                  {
-                    id: 'kubernetes-ff1b3850-bcb1-11ec-b64f-7dd6e8e82013',
-                    entityType: 'k8s.service',
-                    sideNavTitle: 'Services',
-                    sideNavOrder: 800,
-                    type: 'dashboard',
-                  },
-                ]),
+            {
+              id: 'kubernetes_otel-cluster-overview',
+              entityType: 'k8s.overview',
+              sideNavTitle: 'Overview (Otel)',
+              sideNavOrder: 100,
+              type: 'dashboard',
+            },
           ]
         : [];
 
-    const integrationSubItems =
-      mockInstalledPackage
+    const otelNavigationItemsSorted =
+      [...otelMenuItems, ...mockInstalledPackage]
         .filter((p) => !!p.sideNavTitle)
         .sort((a, b) => (a.sideNavOrder ?? 0) - (b.sideNavOrder ?? 0)) ?? [];
 
-    integrationSubItems.push(
-      ...(otelMenuItems
-        .filter((p) => !!p.sideNavTitle)
-        .sort((a, b) => (a.sideNavOrder ?? 0) - (b.sideNavOrder ?? 0)) ?? [])
-    );
-
     const integrationNavigation =
-      integrationSubItems.length > 0
+      otelNavigationItemsSorted.length > 0
         ? [
             {
               id: `${KUBERNETES.toLowerCase().replace(/[\.\s]/g, '-')}`,
               title: KUBERNETES,
-              subItems: integrationSubItems.map((item) => {
+              subItems: otelNavigationItemsSorted.map((item) => {
                 return {
                   id: `${item.sideNavTitle.toLowerCase().replace(/[\.\s]/g, '-')}`,
                   title: item.sideNavTitle,
