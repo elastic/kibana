@@ -217,7 +217,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       euiIconType: ENTERPRISE_SEARCH_HOME_PLUGIN.LOGO,
       id: ENTERPRISE_SEARCH_HOME_PLUGIN.ID,
-      mount: async (params: AppMountParameters) => {
+      mount: async () => {
         const [coreStart] = await core.getStartServices();
         coreStart.application.navigateToApp(SEARCH_HOMEPAGE);
         return () => {};

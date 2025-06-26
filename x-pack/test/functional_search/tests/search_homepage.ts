@@ -80,7 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      describe('search home page with index', () => {
+      describe('search home page with existing indices', () => {
         before(async () => {
           await es.indices.create({ index: indexName });
           await pageObjects.searchNavigation.navigateToElasticsearchSearchHomePage(
@@ -131,22 +131,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             expect(await browser.getCurrentUrl()).contain('app/elasticsearch/indices/create');
           });
 
-          it('renders Keyword Search content', async () => {
-            await testSubjects.scrollIntoView('aiSearchCapabilities-item-keyword');
-            await testSubjects.existOrFail('aiSearchCapabilities-item-keyword');
-            await testSubjects.click('aiSearchCapabilities-item-keyword');
-            await testSubjects.existOrFail('createKeywordIndexButton');
-            await testSubjects.click('createKeywordIndexButton');
+          it('renders Vector Search content', async () => {
+            await testSubjects.scrollIntoView('aiSearchCapabilities-item-vector');
+            await testSubjects.existOrFail('aiSearchCapabilities-item-vector');
+            await testSubjects.click('aiSearchCapabilities-item-vector');
+            await testSubjects.existOrFail('createVectorIndexButton');
+            await testSubjects.click('createVectorIndexButton');
             expect(await browser.getCurrentUrl()).contain('app/elasticsearch/indices/create');
           });
         });
 
         describe('Alternate Solutions', function () {
           it('renders Observability content', async () => {
-            await testSubjects.existOrFail('observabilitySection');
-            await testSubjects.existOrFail('exploreLogstashAndBeatsLink');
-            await testSubjects.click('exploreLogstashAndBeatsLink');
-            expect(await browser.getCurrentUrl()).contain('manage-data/ingest');
+            await testSubjects.scrollIntoView('analyzeLogsBrowseIntegrations');
+            await testSubjects.existOrFail('analyzeLogsBrowseIntegrations');
+            await testSubjects.click('analyzeLogsBrowseIntegrations');
+            expect(await browser.getCurrentUrl()).contain('browse/observability');
           });
         });
 
