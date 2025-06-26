@@ -13,7 +13,6 @@ import {
   getConnectorFamily,
   getConnectorProvider,
   type ChatCompleteCompositeResponse,
-  ToolOptions,
   MessageRole,
 } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
@@ -45,18 +44,18 @@ type CreateChatCompleteApiOptionsKey =
   | 'maxRetries';
 
 type ChatCompleteApiWithCallbackInitOptions = Pick<
-  ChatCompleteOptions<ToolOptions, boolean>,
+  ChatCompleteOptions,
   CreateChatCompleteApiOptionsKey
 >;
 
 export type ChatCompleteApiWithCallbackCallback = (
   connector: InferenceExecutor
-) => Omit<ChatCompleteOptions<ToolOptions, boolean>, CreateChatCompleteApiOptionsKey>;
+) => Omit<ChatCompleteOptions, CreateChatCompleteApiOptionsKey>;
 
 export type ChatCompleteApiWithCallback = (
   options: ChatCompleteApiWithCallbackInitOptions,
   callback: ChatCompleteApiWithCallbackCallback
-) => ChatCompleteCompositeResponse<ToolOptions, boolean>;
+) => ChatCompleteCompositeResponse;
 
 export function createChatCompleteCallbackApi(
   options: CreateChatCompleteApiOptions
