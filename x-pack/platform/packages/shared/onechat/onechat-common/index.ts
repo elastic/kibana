@@ -14,6 +14,7 @@ export {
   type StructuredToolIdentifier,
   type ToolIdentifier,
   type ToolProviderId,
+  type FieldTypes,
   isSerializedToolIdentifier,
   isStructuredToolIdentifier,
   isPlainToolIdentifier,

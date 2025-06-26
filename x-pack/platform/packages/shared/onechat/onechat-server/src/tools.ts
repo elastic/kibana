@@ -15,6 +15,7 @@ import type {
   ToolDescriptorMeta,
   ToolIdentifier,
   PlainIdToolIdentifier,
+  FieldTypes,
 } from '@kbn/onechat-common';
 import type { ModelProvider } from './model_provider';
 import type { ScopedRunner, RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
@@ -70,17 +71,7 @@ export interface EsqlToolDefinition extends ToolDescriptor {
       /**
        * The data types of the parameter. Must be one of these
        */
-      type:
-        | 'text'
-        | 'keyword'
-        | 'long'
-        | 'integer'
-        | 'double'
-        | 'float'
-        | 'boolean'
-        | 'date'
-        | 'object'
-        | 'nested';
+      type: FieldTypes;
 
       /**
        * Description of the parameter's purpose or expected values.
@@ -122,7 +113,7 @@ export interface EsqlTool<RunInput extends ZodObject<any> = ZodObject<any>, RunO
       /**
        * The data type of the parameter.
        */
-      type: string;
+      type: FieldTypes;
 
       /**
        * Description of the parameter's purpose or expected values.

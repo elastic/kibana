@@ -7,7 +7,7 @@
 
 import { EsqlToolDefinition } from '@kbn/onechat-server';
 
-export type EsqlToolApiObj = Omit<EsqlToolDefinition, 'id'> & {
+export type EsqlToolApiObj = EsqlToolDefinition & {
   id: string;
   created_at: string;
   updated_at: string;

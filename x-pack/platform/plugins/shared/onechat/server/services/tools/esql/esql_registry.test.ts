@@ -136,7 +136,7 @@ describe('EsqlToolRegistry', () => {
 
       await expect(
         registry.get({ toolId: 'non-existent-tool', request: mockRequest })
-      ).rejects.toThrow('Error retrieving ESQL tool');
+      ).rejects.toThrow('Tool with id non-existent-tool not found');
     });
   });
 
@@ -340,7 +340,7 @@ describe('EsqlToolClient', () => {
     it('should throw error when tool is not found', async () => {
       mockElasticsearchClient.get.mockRejectedValue(new Error('Not found'));
 
-      await expect(client.get('non-existent')).rejects.toThrow('Not found');
+      await expect(client.get('non-existent')).rejects.toThrow('Tool with id non-existent not found');
     });
   });
 
@@ -462,7 +462,7 @@ describe('EsqlToolClient', () => {
         new Error('ResponseError: resource_not_found_exception')
       );
 
-      await expect(client.delete('non-existent')).rejects.toThrow('Error deleting ESQL tool');
+      await expect(client.delete('non-existent')).rejects.toThrow('ResponseError: resource_not_found_exception');
     });
   });
 });
