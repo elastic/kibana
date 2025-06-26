@@ -158,11 +158,11 @@ enabled:
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/security/config.ts
   - x-pack/test/banners_functional/config.ts
-  - x-pack/test/cases_api_integration/security_and_spaces/config_basic.ts
-  - x-pack/test/cases_api_integration/security_and_spaces/config_trial.ts
-  - x-pack/test/cases_api_integration/security_and_spaces/config_trial_common.ts
-  - x-pack/test/cases_api_integration/security_and_spaces/config_no_public_base_url.ts
-  - x-pack/test/cases_api_integration/spaces_only/config.ts
+  - x-pack/platform/test/cases_api_integration/security_and_spaces/config_basic.ts
+  - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial.ts
+  - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_common.ts
+  - x-pack/platform/test/cases_api_integration/security_and_spaces/config_no_public_base_url.ts
+  - x-pack/platform/test/cases_api_integration/spaces_only/config.ts
   - x-pack/test/disable_ems/config.ts
   - x-pack/test/examples/config.ts
   - x-pack/test/fleet_api_integration/config.agent.ts
@@ -378,6 +378,7 @@ enabled:
   - x-pack/platform/test/api_integration/apis/management/config.ts
   - x-pack/platform/test/api_integration/apis/management/index_management/disabled_data_enrichers/config.ts
   - x-pack/platform/test/api_integration/apis/maps/config.ts
+  - x-pack/platform/test/api_integration/apis/lens/config.ts
   - x-pack/platform/test/api_integration/apis/ml/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring_collection/config.ts
