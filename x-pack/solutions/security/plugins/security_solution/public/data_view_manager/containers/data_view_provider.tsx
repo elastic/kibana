@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useKibana } from '../../common/lib/kibana';
@@ -14,57 +14,74 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 
 const fallbackDataView = { id: '', title: '', toSpec: () => ({ id: '', title: '' }) } as DataView;
 
-const DefaultDataViewContext = createContext<DataView | undefined>(undefined);
+export interface DefaultDataViewsContextValue {
+  defaultDataView: DataView;
+  alertDataView: DataViewSpec;
+}
+
+const DefaultDataViewContext = createContext<DefaultDataViewsContextValue | undefined>(undefined);
 
 /**
  * Internal-only hook to fetch default data view in given space, during init
  */
-export const useDefaultDataView = () => {
+export const useDefaultDataViews = () => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const defaultDataView = useContext(DefaultDataViewContext);
+  const defaultDataViews = useContext(DefaultDataViewContext);
 
   if (!newDataViewPickerEnabled) {
-    return fallbackDataView;
+    return { defaultDataView: fallbackDataView, alertDataView: fallbackDataView };
   }
 
-  if (!defaultDataView) {
+  if (!defaultDataViews) {
     throw new Error('Could not fetch default data view');
   }
 
-  return defaultDataView;
+  return defaultDataViews;
 };
 
 export const DefaultDataViewProvider: FC<PropsWithChildren> = ({ children }) => {
   const { dataViews, uiSettings, spaces, application, http } = useKibana().services;
 
-  const [defaultDataView, setDefaultDataView] = useState<DataView>();
+  const [defaultDataViews, setDefaultDataViews] = useState<{
+    defaultDataView: DataView;
+    alertDataView: DataViewSpec;
+  }>();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   useEffect(() => {
     (async () => {
       // NOTE: being defensive
-      if (defaultDataView || !newDataViewPickerEnabled) {
+      if (defaultDataViews || !newDataViewPickerEnabled) {
         return;
       }
 
-      const { defaultDataView: defaultDataViewMetadata } = await createDefaultDataView({
-        dataViewService: dataViews,
-        uiSettings,
-        spaces,
-        application,
-        http,
-      });
+      const { defaultDataView: defaultDataViewMetadata, alertDataView } =
+        await createDefaultDataView({
+          dataViewService: dataViews,
+          uiSettings,
+          spaces,
+          application,
+          http,
+        });
 
       const dataView = await dataViews?.get(defaultDataViewMetadata.id);
 
-      setDefaultDataView(dataView);
+      setDefaultDataViews({ defaultDataView: dataView, alertDataView });
     })();
-  }, [application, dataViews, defaultDataView, http, newDataViewPickerEnabled, spaces, uiSettings]);
+  }, [
+    application,
+    dataViews,
+    defaultDataViews,
+    http,
+    newDataViewPickerEnabled,
+    spaces,
+    uiSettings,
+  ]);
 
   return (
-    <DefaultDataViewContext.Provider value={defaultDataView}>
-      {defaultDataView || !newDataViewPickerEnabled ? children : null}
+    <DefaultDataViewContext.Provider value={defaultDataViews}>
+      {defaultDataViews || !newDataViewPickerEnabled ? children : null}
     </DefaultDataViewContext.Provider>
   );
 };

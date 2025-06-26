@@ -21,7 +21,7 @@ import { type SelectDataViewAsyncPayload } from '../redux/actions';
 import { DataViewManagerScopeName } from '../constants';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useUserInfo } from '../../detections/components/user_info';
-import { useDefaultDataView } from '../containers/data_view_provider';
+import { useDefaultDataViews } from '../containers/data_view_provider';
 
 type OriginalListener = Parameters<typeof originalAddListener>[0];
 
@@ -81,7 +81,7 @@ export const useInitDataViewManager = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signalIndexName]);
 
-  const defaultDataView = useDefaultDataView();
+  const defaultDataViews = useDefaultDataViews();
 
   useEffect(() => {
     // TODO: (new data view picker) remove this in cleanup phase https://github.com/elastic/security-team/issues/12665
@@ -92,7 +92,7 @@ export const useInitDataViewManager = () => {
     // NOTE: init listener contains logic that preloads default security solution data view
     const dataViewsLoadingListener = createInitListener({
       dataViews: services.dataViews,
-      defaultDataView,
+      defaultDataView: defaultDataViews.defaultDataView,
     });
 
     dispatch(addListener(dataViewsLoadingListener));
@@ -122,7 +122,7 @@ export const useInitDataViewManager = () => {
         dispatch(removeListener(dataViewSelectedListener));
       });
     };
-  }, [defaultDataView, dispatch, newDataViewPickerEnabled, services.dataViews]);
+  }, [defaultDataViews, dispatch, newDataViewPickerEnabled, services.dataViews]);
 
   return useCallback(
     (initialSelection: SelectDataViewAsyncPayload[]) => {

@@ -6,11 +6,12 @@
  */
 
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
-import type { DataViewsServicePublic, DataView } from '@kbn/data-views-plugin/public';
+import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { RootState } from '../reducer';
 import { sharedDataViewManagerSlice } from '../slices';
 import { DataViewManagerScopeName } from '../../constants';
 import { selectDataViewAsync } from '../actions';
+import type { DefaultDataViewsContextValue } from '../../containers/data_view_provider';
 
 /**
  * Creates a Redux listener for initializing the Data View Manager state.
@@ -31,7 +32,7 @@ import { selectDataViewAsync } from '../actions';
  */
 export const createInitListener = (dependencies: {
   dataViews: DataViewsServicePublic;
-  defaultDataView: DataView;
+  defaultDataViews: DefaultDataViewsContextValue;
 }) => {
   return {
     actionCreator: sharedDataViewManagerSlice.actions.init,
@@ -46,12 +47,16 @@ export const createInitListener = (dependencies: {
 
         listenerApi.dispatch(sharedDataViewManagerSlice.actions.setDataViews(dataViewSpecs));
 
+        const defaultDataViewId = dependencies.defaultDataViews.defaultDataView.id as string;
+        const alertDataViewId = dependencies.defaultDataViews.alertDataView.id as string;
+
         // NOTE: save default dataview id for the given space in the store.
         // this is used to identify the default selection in pickers across Kibana Space
         listenerApi.dispatch(
-          sharedDataViewManagerSlice.actions.setDefaultDataViewId(
-            dependencies.defaultDataView.id as string
-          )
+          sharedDataViewManagerSlice.actions.setDataViewId({
+            defaultDataViewId,
+            alertDataViewId,
+          })
         );
 
         // Preload the default data view for all the scopes
@@ -67,12 +72,21 @@ export const createInitListener = (dependencies: {
           // NOTE: only init default data view for slices that are not initialized yet
           .filter((scope) => !listenerApi.getState().dataViewManager[scope].dataViewId)
           .forEach((scope) => {
-            listenerApi.dispatch(
-              selectDataViewAsync({
-                id: dependencies.defaultDataView.id,
-                scope,
-              })
-            );
+            if (scope === DataViewManagerScopeName.detections) {
+              listenerApi.dispatch(
+                selectDataViewAsync({
+                  id: alertDataViewId,
+                  scope,
+                })
+              );
+            } else {
+              listenerApi.dispatch(
+                selectDataViewAsync({
+                  id: defaultDataViewId,
+                  scope,
+                })
+              );
+            }
           });
 
         // NOTE: if there is a list of data views to preload other than default one (eg. coming in from the url storage)

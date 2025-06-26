@@ -12,6 +12,7 @@ import type { DataViewsServicePublic, DataView } from '@kbn/data-views-plugin/pu
 import type { RootState } from '../reducer';
 import { sharedDataViewManagerSlice } from '../slices';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../../constants';
+import { DEFAULT_ALERT_DATA_VIEW_ID } from '../../../../common/constants';
 import { selectDataViewAsync } from '../actions';
 
 const mockDataViewsService = {
@@ -61,9 +62,10 @@ describe('createInitListener', () => {
       sharedDataViewManagerSlice.actions.setDataViews([])
     );
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
-      sharedDataViewManagerSlice.actions.setDefaultDataViewId(
-        DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID
-      )
+      sharedDataViewManagerSlice.actions.setDataViewId({
+        defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+        alertDataViewId: DEFAULT_ALERT_DATA_VIEW_ID,
+      })
     );
 
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
@@ -80,14 +82,14 @@ describe('createInitListener', () => {
     );
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       selectDataViewAsync({
-        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+        id: DEFAULT_ALERT_DATA_VIEW_ID,
         scope: DataViewManagerScopeName.detections,
       })
     );
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-        scope: DataViewManagerScopeName.detections,
+        scope: DataViewManagerScopeName.analyzer,
       })
     );
   });

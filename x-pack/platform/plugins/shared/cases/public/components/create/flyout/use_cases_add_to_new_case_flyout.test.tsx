@@ -42,6 +42,7 @@ describe('use cases add to new case flyout hook', () => {
               observables: { enabled: true },
             },
             releasePhase: 'ga',
+            settings: { displayIncrementalCaseId: false },
           }}
         >
           {children}

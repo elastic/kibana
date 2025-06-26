@@ -14,7 +14,7 @@ import { DataViewManagerScopeName } from '../constants';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { sourcererAdapterSelector } from '../redux/selectors';
 import type { SharedDataViewSelectionState } from '../redux/types';
-import { useDefaultDataView } from '../containers/data_view_provider';
+import { useDefaultDataViews } from '../containers/data_view_provider';
 
 export interface UseDataViewValue {
   dataView: DataView;
@@ -32,14 +32,16 @@ export const useDataView = (
     services: { dataViews },
     notifications,
   } = useKibana();
-  const defaultDataView = useDefaultDataView();
+  const defaultDataViews = useDefaultDataViews();
 
   const { dataViewId, status: internalStatus } = useSelector(
     sourcererAdapterSelector(dataViewManagerScope)
   );
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const [retrievedDataView, setRetrievedDataView] = useState<DataView>(defaultDataView);
+  const [retrievedDataView, setRetrievedDataView] = useState<DataView>(
+    defaultDataViews.defaultDataView
+  );
   const [localStatus, setLocalStatus] = useState<SharedDataViewSelectionState['status']>('loading');
 
   useEffect(() => {
