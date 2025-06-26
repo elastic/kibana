@@ -281,6 +281,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(Elasticsearch, kibanaDeps, pluginData);
       },
       title: ELASTICSEARCH_PLUGIN.NAME,
+      visibleIn: [],
     });
 
     core.application.register({
@@ -302,6 +303,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(EnterpriseSearchVectorSearch, kibanaDeps, pluginData);
       },
       title: VECTOR_SEARCH_PLUGIN.NAV_TITLE,
+      visibleIn: [],
     });
 
     core.application.register({
@@ -323,6 +325,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(EnterpriseSearchSemanticSearch, kibanaDeps, pluginData);
       },
       title: SEMANTIC_SEARCH_PLUGIN.NAV_TITLE,
+      visibleIn: [],
     });
 
     core.application.register({

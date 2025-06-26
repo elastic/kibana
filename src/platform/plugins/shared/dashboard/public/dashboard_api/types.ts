@@ -45,37 +45,17 @@ import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/p
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import {
-  DashboardLocatorParams,
-  DashboardPanelMap,
-  DashboardPanelState,
-  DashboardSectionMap,
-  DashboardSettings,
-  DashboardState,
-} from '../../common';
+import { DashboardLocatorParams, DashboardSettings, DashboardState } from '../../common';
 import type { DashboardAttributes, GridData } from '../../server/content_management';
 import {
   LoadDashboardReturn,
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
+import { DashboardLayout } from './layout_manager/types';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
 export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
-
-export type DashboardPanel = Pick<DashboardPanelState, 'gridData'> & HasType;
-export interface DashboardLayout {
-  panels: { [uuid: string]: DashboardPanel }; // partial of DashboardPanelState
-  sections: DashboardSectionMap;
-}
-
-export interface DashboardChildState {
-  [uuid: string]: SerializedPanelState<object>;
-}
-
-export interface DashboardChildren {
-  [uuid: string]: DefaultEmbeddableApi;
-}
 
 export interface DashboardCreationOptions {
   getInitialInput?: () => Partial<DashboardState>;
@@ -177,10 +157,6 @@ export interface DashboardInternalApi {
   layout$: BehaviorSubject<DashboardLayout>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
   setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
-  serializeLayout: () => {
-    references: Reference[];
-    panels: DashboardPanelMap;
-    sections: DashboardSectionMap;
-  };
+  serializeLayout: () => Pick<DashboardState, 'panels' | 'references'>;
   isSectionCollapsed: (sectionId?: string) => boolean;
 }

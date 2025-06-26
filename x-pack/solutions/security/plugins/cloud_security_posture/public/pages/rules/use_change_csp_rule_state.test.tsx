@@ -190,8 +190,8 @@ describe('use_change_csp_rule_state', () => {
 
     await waitFor(() => {
       expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(BENCHMARK_INTEGRATION_QUERY_KEY_V2);
-      expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(CSPM_STATS_QUERY_KEY);
-      expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(KSPM_STATS_QUERY_KEY);
+      expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith([CSPM_STATS_QUERY_KEY]);
+      expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith([KSPM_STATS_QUERY_KEY]);
       expect(mockInvalidateQueriesSpy).toHaveBeenCalledWith(CSP_RULES_STATES_QUERY_KEY);
     });
   });

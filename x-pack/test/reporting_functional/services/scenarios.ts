@@ -114,6 +114,7 @@ export function createScenarios(
 
   const tryDiscoverCsvSuccess = async () => {
     await PageObjects.reporting.openExportPopover();
+    await PageObjects.exports.clickPopoverItem('CSV');
     expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
   };
   const tryGeneratePdfFail = async () => {
