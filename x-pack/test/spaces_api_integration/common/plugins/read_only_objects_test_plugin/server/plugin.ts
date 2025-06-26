@@ -160,6 +160,10 @@ export class ReadOnlyObjectsPlugin implements Plugin<void, void, SetupDeps> {
           body: schema.object({
             newOwner: schema.string(),
             objectId: schema.string(),
+            type: schema.oneOf([
+              schema.literal(READ_ONLY_TYPE),
+              schema.literal(NON_READ_ONLY_TYPE),
+            ]),
           }),
         },
       },
@@ -169,7 +173,7 @@ export class ReadOnlyObjectsPlugin implements Plugin<void, void, SetupDeps> {
           const result = await soClient.changeOwnership(
             [
               {
-                type: READ_ONLY_TYPE,
+                type: request.body.type,
                 id: request.body.objectId,
               },
             ],

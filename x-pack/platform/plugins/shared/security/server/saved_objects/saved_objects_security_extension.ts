@@ -460,27 +460,34 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     }
     const typesArray = [...types];
     const actionsArray = [...actions];
+
+    const typeRegistry = await this.typeRegistryFunc();
+
+    const ownershipActionsMap = new Map(
+      Array.from(params.types.values())
+        .filter((type) => typeRegistry.supportsAccessControl(type))
+        .map((type) => [
+          this.actions.savedObject.get(type, 'manage_ownership'),
+          { type, action: 'manage_ownership' as A },
+        ])
+    );
+
     const privilegeActionsMap = new Map(
       typesArray.flatMap((type) =>
         actionsArray.map((action) => [this.actions.savedObject.get(type, action), { type, action }])
       )
     );
-    const typeRegistry = await this.typeRegistryFunc();
-    const ownershipActions = Array.from(params.types.values())
-      .filter((type) => typeRegistry.supportsAccessControl(type))
-      .map((type) => this.actions.savedObject.get(type, 'manage_ownership'));
+    const combinedPrivilegeMap = new Map([...privilegeActionsMap, ...ownershipActionsMap]);
 
-    const privilegeActions = [
-      ...privilegeActionsMap.keys(),
-      this.actions.login,
-      ...ownershipActions,
-    ]; // Always check login action, we will need it later for redacting namespaces
+    const privilegeActions = [...combinedPrivilegeMap.keys(), this.actions.login]; // Always check login action, we will need it later for redacting namespaces
+
     const { hasAllRequested, privileges } = await this.checkPrivileges(
       privilegeActions,
       getAuthorizableSpaces(spaces, allowGlobalResource)
     );
 
     const missingPrivileges = getMissingPrivileges(privileges);
+
     const typeMap = privileges.kibana.reduce<AuthorizationTypeMap<A>>(
       (acc, { resource, privilege }) => {
         const missingPrivilegesAtResource =
@@ -499,7 +506,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
           objTypes = typesArray;
           action = this.actions.login as A;
         } else {
-          const entry = privilegeActionsMap.get(privilege)!; // always defined
+          const entry = combinedPrivilegeMap.get(privilege)!; // always defined
           objTypes = [entry.type];
           action = entry.action;
         }
@@ -646,27 +653,14 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
     const { authzAction, auditAction } = this.decodeSecurityAction(action);
 
+    const unauthorizedTypes = new Set<string>();
+
     if (auditObjects && auditObjects.length > 0) {
       const filteredObjects = await this.checkAccessControl(auditObjects, action, typesAndSpaces);
-
-      if (filteredObjects.authorizedObjects.length === 0) {
-        const msg = 'Access control denied: No modifiable objects';
-        const error = this.errors.decorateForbiddenError(new Error(msg));
-        if (auditAction && bypass !== 'always' && bypass !== 'on_failure') {
-          this.auditHelper({
-            action: auditAction,
-            objects: auditObjects,
-            useSuccessOutcome,
-            addToSpaces,
-            deleteFromSpaces,
-            error,
-          });
-        }
-        throw error;
-      }
+      filteredObjects.unauthorizedObjects.forEach(({ type }) => {
+        unauthorizedTypes.add(type);
+      });
     }
-
-    const unauthorizedTypes = new Set<string>();
 
     if (authzAction) {
       for (const [type, spaces] of typesAndSpaces) {
@@ -731,6 +725,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       throw new Error('No spaces specified for authorization');
     }
 
+    const currentUser = this.getCurrentUserFunc();
+    this.accessControlService.setUserForOperation(currentUser);
+
     const { authzActions } = this.translateActions(params.actions);
 
     const checkResult: CheckAuthorizationResult<A> = await this.checkAuthorization({
@@ -740,8 +737,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       options: { allowGlobalResource: params.options?.allowGlobalResource === true },
     });
 
-    const currentUser = this.getCurrentUserFunc();
-    this.accessControlService.setUserForOperation(currentUser);
     const typesAndSpaces = params.enforceMap;
     if (typesAndSpaces !== undefined && checkResult) {
       const authorizationPromises = Array.from(params.actions).map((action) =>
@@ -778,6 +773,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         savedObject: this.maybeRedactSavedObject(savedObject),
         ...rest,
       });
+
       this.auditLogger.log(auditEvent);
     }
   }
@@ -1141,7 +1137,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   ): Promise<CheckAuthorizationResult<A>> {
     return await this.internalAuthorizeChangeOwnership({
       namespace: params.namespace,
-      objects: [params.object],
+      objects: params.objects,
     });
   }
 
@@ -1159,7 +1155,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
     const authorizationResult = await this.authorize({
       actions: new Set([action]),
-      types: new Set(enforceMap.keys()),
+      types: new Set(objects.map((obj) => obj.type)),
       spaces: spacesToAuthorize,
       enforceMap,
       auditOptions: { objects },

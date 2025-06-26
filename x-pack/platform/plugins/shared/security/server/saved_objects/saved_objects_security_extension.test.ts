@@ -18,6 +18,7 @@ import type {
   AuthorizeObjectWithExistingSpaces,
   AuthorizeUpdateObject,
   BulkResolveError,
+  ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
 import type {
   CheckPrivilegesResponse,
@@ -51,6 +52,9 @@ const addAuditEventSpy = jest.spyOn(
   'addAuditEvent'
 );
 const getCurrentUser = jest.fn();
+const typeRegistry: Partial<ISavedObjectTypeRegistry> = {
+  supportsAccessControl: jest.fn().mockReturnValue(false),
+} as unknown as jest.Mocked<ISavedObjectTypeRegistry>;
 
 const obj1 = {
   type: 'a',
@@ -115,13 +119,14 @@ function setup({ includeSavedObjectNames = true }: { includeSavedObjectNames?: b
     decorateGeneralError: jest.fn().mockImplementation((err) => err),
   } as unknown as jest.Mocked<SavedObjectsClient['errors']>;
   const checkPrivileges: jest.MockedFunction<CheckSavedObjectsPrivileges> = jest.fn();
+
   const securityExtension = new SavedObjectsSecurityExtension({
     actions,
     auditLogger,
     errors,
     checkPrivileges,
     getCurrentUser,
-    getTypeRegistry: jest.fn(),
+    getTypeRegistry: jest.fn().mockReturnValue(typeRegistry),
   });
   return { actions, auditLogger, errors, checkPrivileges, securityExtension };
 }
@@ -800,7 +805,7 @@ describe('#authorize (unpublished by interface)', () => {
           })
         ).rejects.toThrowError('Unable to bulk_update b,c');
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledTimes(2);
         expect(auditLogger.log).toHaveBeenCalledWith({
           error: {
             code: 'Error',
@@ -850,7 +855,7 @@ describe('#authorize (unpublished by interface)', () => {
           })
         ).rejects.toThrowError('Unable to bulk_update b,c');
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length);
+        expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length * 2);
         for (const obj of auditObjects) {
           expect(auditLogger.log).toHaveBeenCalledWith({
             error: {
@@ -927,7 +932,7 @@ describe('#authorize (unpublished by interface)', () => {
           })
         ).rejects.toThrowError('Unable to bulk_update b,c');
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledTimes(2);
         expect(auditLogger.log).toHaveBeenCalledWith({
           error: {
             code: 'Error',
@@ -972,7 +977,7 @@ describe('#authorize (unpublished by interface)', () => {
           })
         ).rejects.toThrowError('Unable to bulk_update a,b,c');
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledTimes(2);
         expect(auditLogger.log).toHaveBeenCalledWith({
           error: {
             code: 'Error',
@@ -1023,7 +1028,7 @@ describe('#authorize (unpublished by interface)', () => {
           })
         ).rejects.toThrowError('Unable to bulk_update a,b,c');
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length);
+        expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length * 2);
         let i = 1;
         for (const obj of auditObjects) {
           expect(auditLogger.log).toHaveBeenNthCalledWith(i++, {
@@ -1101,7 +1106,7 @@ describe('#authorize (unpublished by interface)', () => {
           })
         ).rejects.toThrowError('Unable to bulk_update a,b,c');
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledTimes(2);
         expect(auditLogger.log).toHaveBeenCalledWith({
           error: {
             code: 'Error',
