@@ -106,5 +106,6 @@
     "@kbn/dev-cli-errors",
     "@kbn/journeys",
     "@kbn/lens-plugin",
+    "@kbn/test-suites-xpack",
   ]
 }
