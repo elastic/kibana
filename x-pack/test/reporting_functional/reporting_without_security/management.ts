@@ -52,7 +52,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return { status, path: body.path };
   };
 
-  describe.only('Polling for jobs', () => {
+  describe('Polling for jobs', () => {
     beforeEach(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(ecommerceSOPath);
