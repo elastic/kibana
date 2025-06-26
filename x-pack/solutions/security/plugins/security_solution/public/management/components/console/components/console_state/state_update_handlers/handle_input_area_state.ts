@@ -249,16 +249,36 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         };
 
         // store a new version of parsed input that contains the updated selector value
-        const updatedParsedInput = parseCommandInput(
-          state.input.leftOfCursorText + state.input.rightOfCursorText
-        );
+        const currentRawInput = state.input.leftOfCursorText + state.input.rightOfCursorText;
+        const updatedParsedInput = parseCommandInput(currentRawInput);
         setArgSelectorValueToParsedArgs(updatedParsedInput, updatedEnteredCommand);
+
+        // Reconstruct the complete input text including the updated selector values
+        let completeInputText = updatedParsedInput.name;
+
+        // Add arguments with their values including updated selector values
+        for (const [parsedInputArgName, argValues] of Object.entries(updatedParsedInput.args)) {
+          for (const value of argValues) {
+            if (typeof value === 'boolean' && value) {
+              completeInputText += ` --${parsedInputArgName}`;
+            } else if (typeof value === 'string') {
+              // Add quotes if the value contains spaces
+              const quotedValue = value.includes(' ') ? `"${value}"` : value;
+              completeInputText += ` --${parsedInputArgName}=${quotedValue}`;
+            }
+          }
+        }
+
+        // Update the raw input text to include selector values
+        const updatedFullParsedInput = parseCommandInput(completeInputText);
 
         return {
           ...state,
           input: {
             ...state.input,
-            parsedInput: updatedParsedInput,
+            leftOfCursorText: completeInputText,
+            rightOfCursorText: '',
+            parsedInput: updatedFullParsedInput,
             enteredCommand: updatedEnteredCommand,
           },
         };

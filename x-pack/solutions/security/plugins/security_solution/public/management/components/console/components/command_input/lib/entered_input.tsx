@@ -132,39 +132,44 @@ export class EnteredInput {
                   (side === 'left' && charAfterArgName !== '') ||
                   side === 'right')
               ) {
-                // Find the full argument pattern including its value to avoid duplication
-                let fullArgLength = argChrLength;
-                let searchIndex = startSearchIndexForNextArg;
-                
-                // Check if there's a value separator (=, space) after the argument name
+                const argState = enteredCommand.argState[argName]?.at(argIndex);
+                const selectorValue = argState?.valueText || argState?.value || '';
+
+                // Smart conditional replacement based on whether typed value matches selector value
+                let replacementLength = argChrLength; // Default: just replace argument name
+
+                // Check if there's a value after the argument name
                 if (charAfterArgName === '=' || charAfterArgName === ' ') {
-                  // Skip the separator
-                  searchIndex++;
-                  fullArgLength++;
-                  
-                  // Check for quoted values
-                  const valueStartChar = input.charAt(searchIndex);
-                  if (valueStartChar === '"' || valueStartChar === "'") {
-                    // Find the closing quote
-                    const closingQuoteIndex = input.indexOf(valueStartChar, searchIndex + 1);
-                    if (closingQuoteIndex > -1) {
-                      fullArgLength = closingQuoteIndex - pos + 1;
+                  const searchIndex = startSearchIndexForNextArg + 1; // Skip separator
+                  const remainingInput = input.substring(searchIndex);
+
+                  // Check if typed value exactly matches selector value (to avoid duplication)
+                  const firstChar = remainingInput.charAt(0);
+
+                  if ((firstChar === '"' || firstChar === "'") && selectorValue) {
+                    // Handle quoted values generically
+                    const closingQuoteIndex = remainingInput.indexOf(firstChar, 1);
+                    if (closingQuoteIndex > 0) {
+                      const quotedContent = remainingInput.substring(1, closingQuoteIndex);
+                      if (quotedContent === selectorValue) {
+                        // Exact match - replace entire quoted pattern
+                        replacementLength = argChrLength + 1 + closingQuoteIndex + 1; // arg + = + "value"
+                      }
                     }
-                  } else {
-                    // Find the end of unquoted value (next space or end of string)
-                    let valueEndIndex = searchIndex;
-                    while (valueEndIndex < input.length && input.charAt(valueEndIndex) !== ' ') {
-                      valueEndIndex++;
-                    }
-                    fullArgLength = valueEndIndex - pos;
+                  } else if (
+                    remainingInput.startsWith(`${selectorValue} `) ||
+                    remainingInput === selectorValue
+                  ) {
+                    // Exact match unquoted - replace entire pattern
+                    replacementLength = argChrLength + 1 + selectorValue.length; // arg + = + value
                   }
+                  // If no exact match, keep default (just replace arg name) - allows typing
                 }
 
                 const replaceValues: InputCharacter[] = Array.from(
-                  { length: fullArgLength },
+                  { length: replacementLength },
                   createInputCharacter
                 );
-                const argState = enteredCommand.argState[argName]?.at(argIndex);
 
                 replaceValues[0] = createInputCharacter({
                   value: argNameMatch,
@@ -181,7 +186,7 @@ export class EnteredInput {
                   argState,
                 });
 
-                items.splice(pos, fullArgLength, ...replaceValues);
+                items.splice(pos, replacementLength, ...replaceValues);
               }
 
               pos = input.indexOf(argNameMatch, startSearchIndexForNextArg);
@@ -197,7 +202,7 @@ export class EnteredInput {
   }
 
   private replaceSelection(selection: string, newValue: string) {
-    const prevFullTextEntered = this.getFullText();
+    const prevFullTextEntered = this.getFullText(false);
     const newValueContent = newValue ? createInputCharacter({ value: newValue }) : undefined;
     let start = prevFullTextEntered.indexOf(selection);
 
@@ -247,19 +252,19 @@ export class EnteredInput {
     }
   }
 
-  getLeftOfCursorText(includeArgSelectorValues: boolean = false): string {
+  getLeftOfCursorText(includeArgSelectorValues: boolean = true): string {
     return this.leftOfCursorContent
       .map(toInputCharacterDisplayString.bind(null, includeArgSelectorValues))
       .join('');
   }
 
-  getRightOfCursorText(includeArgSelectorValues: boolean = false): string {
+  getRightOfCursorText(includeArgSelectorValues: boolean = true): string {
     return this.rightOfCursorContent
       .map(toInputCharacterDisplayString.bind(null, includeArgSelectorValues))
       .join('');
   }
 
-  getFullText(includeArgSelectorValues: boolean = false): string {
+  getFullText(includeArgSelectorValues: boolean = true): string {
     return (
       this.getLeftOfCursorText(includeArgSelectorValues) +
       this.getRightOfCursorText(includeArgSelectorValues)
