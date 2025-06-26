@@ -151,7 +151,6 @@ export interface UsageStats {
   'observability:enableLegacyUptimeApp': boolean;
   'observability:apmProgressiveLoading': string;
   'observability:apmServiceGroupMaxNumberOfServices': number;
-  'observability:entityCentricExperience': boolean;
   'observability:profilingShowErrorFrames': boolean;
   'securitySolution:enableGroupedNav': boolean;
   'securitySolution:showRelatedIntegrations': boolean;
@@ -170,5 +169,7 @@ export interface UsageStats {
   'securitySolution:excludedDataTiersForRuleExecution': string[];
   'securitySolution:maxUnassociatedNotes': number;
   'observability:searchExcludedDataTiers': string[];
+  'cases:incrementalIdDisplay:enabled': boolean;
   'observability:enableStreamsUI': boolean;
+  'observability:streamsEnableSignificantEvents': boolean;
 }
