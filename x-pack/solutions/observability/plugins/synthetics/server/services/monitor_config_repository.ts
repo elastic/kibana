@@ -180,18 +180,21 @@ export class MonitorConfigRepository {
 
   async bulkUpdate({
     monitors,
+    namespace,
   }: {
     monitors: Array<{
       attributes: MonitorFields;
       id: string;
       soType: string;
     }>;
+    namespace?: string;
   }) {
     return this.soClient.bulkUpdate<MonitorFields>(
       monitors.map(({ attributes, id, soType }) => ({
         type: soType,
         id,
         attributes,
+        namespace,
       }))
     );
   }

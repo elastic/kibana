@@ -26,13 +26,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     it('does not allow user that does not have reporting privileges', async () => {
       await reportingFunctional.loginDataAnalyst();
-      await PageObjects.common.navigateToApp('reporting');
+      await PageObjects.common.navigateToApp('reporting', { path: '/exports' });
       await testSubjects.missingOrFail('reportJobListing');
     });
 
     it('does allow user with reporting privileges', async () => {
       await reportingFunctional.loginReportingUser();
-      await PageObjects.common.navigateToApp('reporting');
+      await PageObjects.common.navigateToApp('reporting', { path: '/exports' });
       await testSubjects.existOrFail('reportJobListing');
     });
 
@@ -78,6 +78,32 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         // The "csv" export type, aka CSV V1, was removed and can no longer be created.
         // Downloading a report of this export type does still work
         await testSubjects.existOrFail('reportDownloadLink-krb7arhe164k0763b50bjm31');
+      });
+    });
+
+    it('Allows user to view report details', async () => {
+      await PageObjects.common.navigateToApp('reporting');
+      await (await testSubjects.findAll('euiCollapsedItemActionsButton'))[0].click();
+
+      await (await testSubjects.find('reportViewInfoLink')).click();
+
+      await testSubjects.existOrFail('reportInfoFlyout');
+    });
+
+    describe('Schedules', () => {
+      it('does allow user with reporting privileges o navigate to the Schedules tab', async () => {
+        await reportingFunctional.loginReportingUser();
+
+        await PageObjects.common.navigateToApp('reporting');
+        await (await testSubjects.find('reportingTabs-schedules')).click();
+        await testSubjects.existOrFail('reportSchedulesTable');
+      });
+
+      it('does not allow user to access schedules that does not have reporting privileges', async () => {
+        await reportingFunctional.loginDataAnalyst();
+
+        await PageObjects.common.navigateToApp('reporting');
+        await testSubjects.missingOrFail('reportingTabs-schedules');
       });
     });
   });

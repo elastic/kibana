@@ -33,5 +33,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./synthetics_enablement'));
     loadTestFile(require.resolve('./test_now_monitor'));
     loadTestFile(require.resolve('./get_private_location_monitors'));
+    loadTestFile(require.resolve('./edit_private_location'));
   });
 }
