@@ -51,6 +51,18 @@ export interface InternalChromeStart extends ChromeStart {
   getClassicHeaderComponentForGridLayout(): JSX.Element;
 
   /**
+   * Used only by the rendering service to render the header UI
+   * @internal
+   *
+   * @remarks
+   * Header that is used in the grid layout with the "project" navigation (solution and serverless)
+   * It includes the header.
+   * It doesn't include the banner or the chromeless header state, which are rendered separately by the layout service.
+   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
+   */
+  getProjectHeaderComponentForGridLayout(): JSX.Element;
+
+  /**
    * Used only by the rendering service to render the header banner UI
    * @internal
    *

@@ -24,14 +24,25 @@ import type {
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
 
-const layoutConfig: ChromeLayoutConfig = {
-  headerHeight: 96,
-  bannerHeight: 32,
+const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig } = {
+  classic: {
+    headerHeight: 96,
+    bannerHeight: 32,
 
-  /** for debug for now */
-  sidebarWidth: 48,
-  footerHeight: 48,
-  navigationWidth: 48,
+    /** for debug for now */
+    sidebarWidth: 48,
+    footerHeight: 48,
+    navigationWidth: 48,
+  },
+  project: {
+    headerHeight: 48,
+    bannerHeight: 32,
+
+    /** for debug for now */
+    sidebarWidth: 48,
+    footerHeight: 48,
+    navigationWidth: 48,
+  },
 };
 
 /**
@@ -48,13 +59,16 @@ export class GridLayout implements LayoutService {
    */
   public getComponent(): React.ComponentType {
     const { application, chrome, overlays } = this.deps;
+
     const appComponent = application.getComponent();
     const appBannerComponent = overlays.banners.getComponent();
     const hasHeaderBanner$ = chrome.hasHeaderBanner$();
     const chromeVisible$ = chrome.getIsVisible$();
+    const chromeStyle$ = chrome.getChromeStyle$();
     const debug = this.params.debug ?? false;
 
-    const chromeHeader = chrome.getClassicHeaderComponentForGridLayout();
+    const classicChromeHeader = chrome.getClassicHeaderComponentForGridLayout();
+    const projectChromeHeader = chrome.getProjectHeaderComponentForGridLayout();
     const headerBanner = chrome.getHeaderBanner();
 
     // chromeless header is used when chrome is not visible and responsible for displaying the data-test-subj and fixed loading bar
@@ -64,25 +78,40 @@ export class GridLayout implements LayoutService {
       // TODO: Get rid of observables https://github.com/elastic/kibana/issues/225265
       const chromeVisible = useObservable(chromeVisible$, false);
       const hasHeaderBanner = useObservable(hasHeaderBanner$, false);
+      const headerStyle = useObservable(chromeStyle$, 'classic');
+      const layoutConfig = layoutConfigs[headerStyle];
 
       // Assign main layout parts first
-      const header: ReactNode = chromeVisible && chromeHeader;
-      let banner: ReactNode = hasHeaderBanner ? headerBanner : undefined;
-
-      // not implemented
+      let header: ReactNode;
+      let navigation: ReactNode;
+      let banner: ReactNode;
+      // not implemented, just for debug
       let sidebar: ReactNode;
       let footer: ReactNode;
-      let navigation: ReactNode;
+
+      if (chromeVisible) {
+        if (headerStyle === 'classic') {
+          // If classic style, we use the classic header and no navigation, since it is part of the header
+          header = classicChromeHeader;
+        } else {
+          // If project style, we use the project header and navigation
+          header = projectChromeHeader;
+        }
+      }
+
+      if (hasHeaderBanner) {
+        // If header banner is present, we use it, even if chrome is not visible
+        banner = headerBanner;
+      }
 
       // If debug, override/add debug overlays
       if (debug) {
         if (chromeVisible) {
           if (!sidebar) sidebar = <SimpleDebugOverlay label="Debug Sidebar" />;
           if (!footer) footer = <SimpleDebugOverlay label="Debug Footer" />;
-          if (!navigation)
-            navigation = (
-              <SimpleDebugOverlay label="Debug Nav" style={{ transform: 'rotate(180deg)' }} />
-            );
+          if (!navigation) {
+            navigation = <SimpleDebugOverlay label="Debug Navigation" />;
+          }
         }
         // banner is visible even when chrome is not visible
         if (!banner) {
