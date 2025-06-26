@@ -173,7 +173,7 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
             flush="right"
             href={services.documentation.getCreatePipelineCSVUrl()}
             target="_blank"
-            iconType="help"
+            iconType="question"
             data-test-subj="documentationLink"
           >
             <FormattedMessage
