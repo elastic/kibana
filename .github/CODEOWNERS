@@ -410,6 +410,7 @@ src/platform/packages/shared/home/sample_data_card @elastic/appex-sharedux
 src/platform/packages/shared/home/sample_data_tab @elastic/appex-sharedux
 src/platform/packages/shared/home/sample_data_types @elastic/appex-sharedux
 src/platform/packages/shared/kbn-actions-types @elastic/response-ops
+src/platform/packages/shared/kbn-aiops-utils @elastic/ml-ui
 src/platform/packages/shared/kbn-alerting-types @elastic/response-ops
 src/platform/packages/shared/kbn-alerts-as-data-utils @elastic/response-ops
 src/platform/packages/shared/kbn-alerts-ui-shared @elastic/response-ops
@@ -512,6 +513,7 @@ src/platform/packages/shared/kbn-react-hooks @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-recently-accessed @elastic/appex-sharedux
 src/platform/packages/shared/kbn-repo-info @elastic/kibana-operations
 src/platform/packages/shared/kbn-resizable-layout @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-restorable-state @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-rison @elastic/kibana-operations
 src/platform/packages/shared/kbn-router-to-openapispec @elastic/kibana-core
 src/platform/packages/shared/kbn-router-utils @elastic/obs-ux-logs-team
@@ -844,6 +846,7 @@ x-pack/platform/packages/shared/kbn-content-packs-schema @elastic/streams-progra
 x-pack/platform/packages/shared/kbn-data-forge @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-elastic-assistant @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-elastic-assistant-common @elastic/security-generative-ai
+x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
 x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-inference-cli @elastic/appex-ai-infra
@@ -974,12 +977,17 @@ x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted @
 x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/packages/helpers @elastic/response-ops
 x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
+x-pack/platform/test/cases_api_integration/common/plugins/cases @elastic/response-ops
+x-pack/platform/test/cases_api_integration/common/plugins/observability @elastic/response-ops
+x-pack/platform/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
 x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
 x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/plugins/event_log @elastic/response-ops
 x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-security
 x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin @elastic/response-ops
+x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
 x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin @elastic/kibana-security
+x-pack/platform/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget @elastic/response-ops
 x-pack/solutions/chat/packages/wc-framework-types-browser @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/packages/wc-framework-types-common @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/packages/wc-framework-types-server @elastic/search-kibana @elastic/workchat-eng
@@ -1081,6 +1089,7 @@ x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting-in
 x-pack/solutions/security/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/plugins/elastic_assistant @elastic/security-generative-ai
+x-pack/solutions/security/plugins/elastic_assistant_shared_state @elastic/security-generative-ai
 x-pack/solutions/security/plugins/lists @elastic/security-detection-engine
 x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
@@ -1089,9 +1098,6 @@ x-pack/solutions/security/plugins/session_view @elastic/kibana-cloud-security-po
 x-pack/solutions/security/test
 x-pack/test
 x-pack/test_serverless
-x-pack/test/cases_api_integration/common/plugins/cases @elastic/response-ops
-x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
-x-pack/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
 x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 x-pack/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
 x-pack/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
@@ -1099,7 +1105,6 @@ x-pack/test/functional_execution_context/plugins/alerts @elastic/kibana-core
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 x-pack/test/functional_with_es_ssl/plugins/cases @elastic/response-ops
 x-pack/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
-x-pack/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
 x-pack/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 x-pack/test/security_api_integration/packages/helpers @elastic/kibana-security
@@ -1110,7 +1115,6 @@ x-pack/test/security_api_integration/plugins/saml_provider @elastic/kibana-secur
 x-pack/test/security_api_integration/plugins/user_profiles_consumer @elastic/kibana-security
 x-pack/test/security_functional/plugins/test_endpoints @elastic/kibana-security
 x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
-x-pack/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget @elastic/response-ops
 x-pack/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/stack_management_usage_test @elastic/kibana-management
@@ -1217,6 +1221,7 @@ x-pack/test_serverless/api_integration/test_suites/common/platform_security @ela
 /x-pack/test_serverless/functional/test_suites/common/examples/search_examples @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/unified_field_list_examples @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/management/data_views @elastic/kibana-data-discovery
+src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/patterns @elastic/ml-ui
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/security @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
 # TODO: this deprecation_logs folder should be owned by kibana management team after 9.0
 src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/deprecation_logs @elastic/kibana-data-discovery @elastic/kibana-core
@@ -1257,7 +1262,8 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/functional/page_objects/lens_page.ts @elastic/kibana-visualizations
 /x-pack/test/functional/es_archives/lens @elastic/kibana-visualizations
 /x-pack/test/examples/embedded_lens @elastic/kibana-visualizations
-/x-pack/test/api_integration/fixtures/kbn_archiver/lens/constant_keyword.json @elastic/kibana-visualizations
+/x-pack/test/api_integration/fixtures/kbn_archiver/lens/ @elastic/kibana-visualizations
+/x-pack/platform/test/api_integration/apis/lens @elastic/kibana-visualizations
 /src/platform/test/plugin_functional/test_suites/custom_visualizations @elastic/kibana-visualizations
 /src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations @elastic/kibana-visualizations
 /x-pack/test/functional/fixtures/kbn_archiver/visualize @elastic/kibana-visualizations
@@ -1385,6 +1391,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/api_integration/services/infraops_source_configuration.ts @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team # Assigned per https://github.com/elastic/kibana/pull/34916
 /x-pack/solutions/observability/plugins/observability/public/pages/overview @elastic/obs-ux-infra_services-team # Assigned to this team since it mostly uses infra/APM components
 /src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces @elastic/obs-ux-infra_services-team
+/src/platform/plugins/shared/unified_doc_viewer/public/components/observability/attributes @elastic/obs-ux-infra_services-team
 
 ## Logs UI code exceptions -> @elastic/obs-ux-logs-team
 /x-pack/test/api_integration/deployment_agnostic/apis/observability/data_quality/ @elastic/obs-ux-logs-team
@@ -1472,8 +1479,8 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/functional/es_archives/fleet @elastic/fleet
 /x-pack/test/api_integration/services/fleet_and_agents.ts @elastic/fleet
 /x-pack/test/fleet_api_integration @elastic/fleet
-/x-pack/test/fleet_packages @elastic/fleet
-/x-pack/test/fleet_tasks @elastic/fleet
+/x-pack/platform/test/fleet_packages @elastic/fleet
+/x-pack/platform/test/fleet_tasks @elastic/fleet
 /src/platform/test/api_integration/apis/custom_integration/*.ts @elastic/fleet
 /x-pack/test/fleet_cypress @elastic/fleet
 /x-pack/test/fleet_functional @elastic/fleet
@@ -1691,6 +1698,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 # QA - Appex QA
 .buildkite/scout_ci_config.yml @elastic/appex-qa
 /x-pack/test/.gitignore @elastic/appex-qa
+/x-pack/platform/test/index.d.ts @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/es/roles.yml @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/oblt/roles.yml @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/roles.yml @elastic/appex-qa
@@ -1761,7 +1769,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/api_integration/services @elastic/appex-qa
 /x-pack/platform/test/api_integration/apis/kibana/config.ts @elastic/appex-qa
 /x-pack/test/tsconfig.json @elastic/appex-qa
-/x-pack/test/load @elastic/appex-qa
+/x-pack/platform/test/load @elastic/appex-qa
 /src/platform/test/tsconfig.json @elastic/appex-qa
 /src/platform/test/plugin_functional/services/index.ts @elastic/appex-qa
 /src/platform/test/plugin_functional/README.md @elastic/appex-qa
@@ -1813,7 +1821,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/accessibility/ftr_provider_context.ts @elastic/appex-qa
 /src/platform/test/accessibility/config.ts @elastic/appex-qa
 /src/platform/test/accessibility/apps/index.ts @elastic/appex-qa
-/x-pack/test/scalability @elastic/appex-qa
+/x-pack/platform/test/scalability @elastic/appex-qa
 /src/dev/performance @elastic/appex-qa
 /x-pack/test/functional/config.*.* @elastic/appex-qa
 /x-pack/platform/test/functional/config.*.* @elastic/appex-qa
@@ -1959,11 +1967,12 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts @elastic/kibana-core
 /config/ @elastic/kibana-core
 /config/serverless.yml @elastic/kibana-core @elastic/kibana-security
+/config/serverless.*.yml @elastic/kibana-core @elastic/kibana-security
 /config/serverless.chat.yml @elastic/kibana-core @elastic/kibana-security @elastic/search-kibana
 /config/serverless.es.yml @elastic/kibana-core @elastic/kibana-security @elastic/search-kibana
 /config/serverless.oblt.yml @elastic/kibana-core @elastic/kibana-security @elastic/observability-ui
-/config/serverless.oblt.complete.yml @elastic/kibana-core @elastic/observability-ui
-/config/serverless.oblt.logs_essentials.yml @elastic/kibana-core @elastic/observability-ui
+/config/serverless.oblt.complete.yml @elastic/kibana-core @elastic/kibana-security @elastic/observability-ui
+/config/serverless.oblt.logs_essentials.yml @elastic/kibana-core @elastic/kibana-security @elastic/observability-ui
 /config/serverless.security.yml @elastic/kibana-core @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.search_ai_lake.yml @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.essentials.yml @elastic/security-solution @elastic/kibana-security
@@ -2011,9 +2020,9 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/functional/es_archives/security @elastic/kibana-security
 /x-pack/test/functional/fixtures/kbn_archiver/spaces @elastic/kibana-security
 /x-pack/test/functional/fixtures/kbn_archiver/security @elastic/kibana-security
-/x-pack/test/ftr_apis/common/lib @elastic/kibana-security
-/x-pack/test/ftr_apis/common/fixtures/es_archiver/base_data/space_1.json @elastic/kibana-security # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/ftr_apis/security_and_spaces/apis/test_utils.ts#L33
-/x-pack/test/ftr_apis/common/fixtures/es_archiver/base_data/default_space.json @elastic/kibana-security # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/ftr_apis/security_and_spaces/apis/test_utils.ts#L33
+/x-pack/platform/test/ftr_apis/common/lib @elastic/kibana-security
+/x-pack/platform/test/ftr_apis/common/fixtures/es_archiver/base_data/space_1.json @elastic/kibana-security # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/platform/test/ftr_apis/security_and_spaces/apis/test_utils.ts#L33
+/x-pack/platform/test/ftr_apis/common/fixtures/es_archiver/base_data/default_space.json @elastic/kibana-security # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/platform/test/ftr_apis/security_and_spaces/apis/test_utils.ts#L33
 /x-pack/platform/test/api_integration/apis/cloud @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/198444
 /src/platform/test/plugin_functional/snapshots/baseline/hardening @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/190716
 /src/platform/test/functional/page_objects/login_page.ts @elastic/kibana-security
@@ -2030,7 +2039,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/common/services/spaces.ts @elastic/kibana-security
 /x-pack/test/api_integration/config_security_*.ts @elastic/kibana-security
 /x-pack/test/functional/apps/api_keys @elastic/kibana-security
-/x-pack/test/ftr_apis/security_and_spaces @elastic/kibana-security
+/x-pack/platform/test/ftr_apis/security_and_spaces @elastic/kibana-security
 /src/platform/test/server_integration/services/supertest.js @elastic/kibana-security @elastic/kibana-core
 /src/platform/test/server_integration/http/ssl @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/53810
 /src/platform/test/server_integration/http/ssl_with_p12 @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/199795#discussion_r1846522206
@@ -2090,8 +2099,8 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 # Response Ops team
 /x-pack/test/functional/es_archives/rule_registry @elastic/response-ops
 /x-pack/test/functional/es_archives/event_log_multiple_indicies @elastic/response-ops
-/x-pack/test/functional/es_archives/task_manager* @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/assign-response-ops/x-pack/test/plugin_api_perf/plugins/task_manager_performance/kibana.jsonc#L4
-/x-pack/test/plugin_api_perf @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/assign-response-ops/x-pack/test/plugin_api_perf/plugins/task_manager_performance/kibana.jsonc#L4
+/x-pack/test/functional/es_archives/task_manager* @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/assign-response-ops/x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance/kibana.jsonc#L4
+/x-pack/platform/test/plugin_api_perf @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/assign-response-ops/x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance/kibana.jsonc#L4
 /x-pack/test/functional/page_objects/maintenance_windows_page.ts @elastic/response-ops
 /x-pack/test_serverless/functional/test_suites/observability/screenshot_creation/index.ts @elastic/response-ops
 /x-pack/test_serverless/functional/test_suites/observability/rules/rules_list.ts @elastic/response-ops
@@ -2126,10 +2135,11 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/plugin_api_integration/test_suites/task_manager/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/embeddable_alerts_table/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/response-ops
-/x-pack/test/task_manager_claimer_update_by_query/ @elastic/response-ops
+/x-pack/platform/test/task_manager_claimer_update_by_query/ @elastic/response-ops
 /docs/user/alerting/ @elastic/response-ops
 /docs/management/connectors/ @elastic/response-ops
-/x-pack/test/cases_api_integration/ @elastic/response-ops
+/x-pack/platform/test/cases_api_integration/ @elastic/response-ops
+/x-pack/solutions/security/test/cases_api_integration/ @elastic/response-ops
 /x-pack/test/functional/services/cases/ @elastic/response-ops @elastic/kibana-cases
 /x-pack/test/functional_with_es_ssl/apps/cases/ @elastic/response-ops @elastic/kibana-cases
 /x-pack/test/api_integration/apis/cases/ @elastic/response-ops @elastic/kibana-cases
@@ -2683,7 +2693,7 @@ x-pack/test/security_solution_api_integration/test_suites/genai @elastic/securit
 x-pack/platform/test/automatic_import_api_integration @elastic/security-scalability
 
 # Security Defend Workflows - OSQuery Ownership
-/x-pack/test/osquery_cypress @elastic/security-defend-workflows
+/x-pack/solutions/security/test/osquery_cypress @elastic/security-defend-workflows
 /x-pack/plugins/osquery @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/model/rule_response_actions @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_response_actions @elastic/security-defend-workflows
@@ -2733,7 +2743,6 @@ x-pack/solutions/security/plugins/security_solution/common/security_integrations
 x-pack/solutions/security/plugins/security_solution/public/security_integrations @elastic/security-service-integrations
 x-pack/solutions/security/plugins/security_solution/server/security_integrations @elastic/security-service-integrations
 x-pack/solutions/security/plugins/security_solution/server/lib/security_integrations @elastic/security-service-integrations
-
 
 # Kibana design
 # scss overrides should be below this line for specificity
@@ -2832,11 +2841,11 @@ src/platform/testfunctional/page_objects/solution_navigation.ts @elastic/appex-s
 /x-pack/test/api_integration/deployment_agnostic/apis/intercepts/*.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
-oas_docs/linters                              @elastic/core-docs @elastic/experience-docs 
-oas_docs/overlays                             @elastic/core-docs @elastic/experience-docs 
-oas_docs/kibana.info.serverless.yaml          @elastic/core-docs @elastic/experience-docs 
-oas_docs/kibana.info.yaml                     @elastic/core-docs @elastic/experience-docs 
-oas_docs/output                               @elastic/core-docs @elastic/experience-docs 
+oas_docs/linters                              @elastic/core-docs @elastic/experience-docs
+oas_docs/overlays                             @elastic/core-docs @elastic/experience-docs
+oas_docs/kibana.info.serverless.yaml          @elastic/core-docs @elastic/experience-docs
+oas_docs/kibana.info.yaml                     @elastic/core-docs @elastic/experience-docs
+oas_docs/output                               @elastic/core-docs @elastic/experience-docs
 
 # Documentation settings files
 docs/settings-gen                             @elastic/platform-docs @elastic/experience-docs
