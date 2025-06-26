@@ -187,10 +187,14 @@ const componentStyles = {
       '&.kbnFieldButtonIsActive': euiFocusRing(themeContext),
     });
   },
-  fieldButtonWrapperXs: ({ euiTheme }: UseEuiTheme) =>
-    css({
+  fieldButtonWrapperXs: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+    const { fontSize } = euiFontSize(themeContext, 'xs');
+    return css({
+      fontSize,
       marginLeft: euiTheme.size.s,
-    }),
+    });
+  },
   fieldButton: ({ euiTheme }: UseEuiTheme) =>
     css({
       flexGrow: 1,
