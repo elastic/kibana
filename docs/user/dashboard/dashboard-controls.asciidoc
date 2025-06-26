@@ -99,8 +99,9 @@ This enables controls that only apply to specific panels in your dashboards, and
 [NOTE]
 ====
 Only **Options lists** are supported for {esql}-based controls. Options can be:
-- values or fields that can be static or defined by a query
-- functions
+
+* values or fields that can be static or defined by a query
+* functions
 ====
 
 . Use one of the following options to start creating an {esql} control:
