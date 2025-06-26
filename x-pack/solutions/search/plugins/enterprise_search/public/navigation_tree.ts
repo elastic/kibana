@@ -13,8 +13,8 @@ import type {
   NodeDefinition,
   EuiSideNavItemTypeEnhanced,
 } from '@kbn/core-chrome-browser';
-import { i18n } from '@kbn/i18n';
 import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
+import { i18n } from '@kbn/i18n';
 
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 
