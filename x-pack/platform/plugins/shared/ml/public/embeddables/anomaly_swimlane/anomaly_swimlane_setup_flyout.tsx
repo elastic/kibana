@@ -13,8 +13,9 @@ import { tracksOverlays } from '@kbn/presentation-containers';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { HttpService } from '@kbn/ml-services/http_service';
 import { jobsApiProvider } from '@kbn/ml-services/ml_api_service/jobs';
+import type { AnomalySwimlaneEmbeddableUserInput } from '@kbn/ml-common-types/anomaly_swim_lane';
 
-import type { AnomalySwimLaneEmbeddableState, AnomalySwimlaneEmbeddableUserInput } from '../types';
+import type { AnomalySwimLaneEmbeddableState } from '../types';
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
 
 export async function resolveAnomalySwimlaneUserInput(
