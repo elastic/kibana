@@ -24,6 +24,7 @@ export type {
   ActionType,
   InMemoryConnector,
   ActionsApiRequestHandlerContext,
+  SSLSettings,
 } from './types';
 
 export type { ConnectorWithExtraFindData as FindActionResult } from './application/connector/types';

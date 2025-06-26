@@ -796,7 +796,7 @@ src/platform/packages/shared/kbn-safer-lodash-set @elastic/kibana-security
 x-pack/test/security_api_integration/plugins/saml_provider @elastic/kibana-security
 x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-program-team
 x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin @elastic/response-ops
-x-pack/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget @elastic/response-ops
+x-pack/platform/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget @elastic/response-ops
 src/platform/test/plugin_functional/plugins/saved_object_export_transforms @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/saved_object_import_warnings @elastic/kibana-core
 x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin @elastic/kibana-security
@@ -989,7 +989,7 @@ x-pack/solutions/observability/plugins/synthetics @elastic/obs-ux-management-tea
 x-pack/packages/kbn-synthetics-private-location @elastic/obs-ux-management-team
 x-pack/platform/plugins/private/task_manager_dependencies @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
-x-pack/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
+x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 src/platform/packages/shared/kbn-telemetry @elastic/kibana-core @elastic/obs-ai-assistant
 src/platform/plugins/shared/telemetry_collection_manager @elastic/kibana-core
@@ -1392,7 +1392,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/functional/es_archives/fleet @elastic/fleet
 /x-pack/test/api_integration/services/fleet_and_agents.ts @elastic/fleet
 /x-pack/test/fleet_api_integration @elastic/fleet
-/x-pack/test/fleet_packages @elastic/fleet
+/x-pack/platform/test/fleet_packages @elastic/fleet
 ^/src/platform/test/api_integration/apis/custom_integration/*.ts @elastic/fleet
 /x-pack/test/fleet_cypress @elastic/fleet
 /x-pack/test/fleet_functional @elastic/fleet
@@ -1609,6 +1609,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 # QA - Appex QA
 .buildkite/scout_ci_config.yml @elastic/appex-qa
 /x-pack/test/.gitignore @elastic/appex-qa
+/x-pack/platform/test/index.d.ts @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/es/roles.yml @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/oblt/roles.yml @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/roles.yml @elastic/appex-qa
@@ -1676,7 +1677,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/api_integration/services @elastic/appex-qa
 /x-pack/platform/test/api_integration/apis/kibana/config.ts @elastic/appex-qa
 /x-pack/test/tsconfig.json @elastic/appex-qa
-/x-pack/test/load @elastic/appex-qa
+/x-pack/platform/test/load @elastic/appex-qa
 ^/src/platform/test/tsconfig.json @elastic/appex-qa
 ^/src/platform/test/plugin_functional/services/index.ts @elastic/appex-qa
 ^/src/platform/test/plugin_functional/README.md @elastic/appex-qa
@@ -1727,7 +1728,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 ^/src/platform/test/accessibility/ftr_provider_context.ts @elastic/appex-qa
 ^/src/platform/test/accessibility/config.ts @elastic/appex-qa
 ^/src/platform/test/accessibility/apps/index.ts @elastic/appex-qa
-/x-pack/test/scalability @elastic/appex-qa
+/x-pack/platform/test/scalability @elastic/appex-qa
 /src/dev/performance @elastic/appex-qa
 /x-pack/test/functional/config.*.* @elastic/appex-qa
 /x-pack/platform/test/functional/config.*.* @elastic/appex-qa
@@ -1923,9 +1924,9 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/functional/es_archives/security @elastic/kibana-security
 /x-pack/test/functional/fixtures/kbn_archiver/spaces @elastic/kibana-security
 /x-pack/test/functional/fixtures/kbn_archiver/security @elastic/kibana-security
-/x-pack/test/ftr_apis/common/lib @elastic/kibana-security
-/x-pack/test/ftr_apis/common/fixtures/es_archiver/base_data/space_1.json @elastic/kibana-security # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/ftr_apis/security_and_spaces/apis/test_utils.ts#L33
-/x-pack/test/ftr_apis/common/fixtures/es_archiver/base_data/default_space.json @elastic/kibana-security # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/ftr_apis/security_and_spaces/apis/test_utils.ts#L33
+/x-pack/platform/test/ftr_apis/common/lib @elastic/kibana-security
+/x-pack/platform/test/ftr_apis/common/fixtures/es_archiver/base_data/space_1.json @elastic/kibana-security # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/platform/test/ftr_apis/security_and_spaces/apis/test_utils.ts#L33
+/x-pack/platform/test/ftr_apis/common/fixtures/es_archiver/base_data/default_space.json @elastic/kibana-security # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/platform/test/ftr_apis/security_and_spaces/apis/test_utils.ts#L33
 /x-pack/platform/test/api_integration/apis/cloud @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/198444
 ^/src/platform/test/plugin_functional/snapshots/baseline/hardening @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/190716
 ^/src/platform/test/functional/page_objects/login_page.ts @elastic/kibana-security
@@ -1942,7 +1943,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/common/services/spaces.ts @elastic/kibana-security
 /x-pack/test/api_integration/config_security_*.ts @elastic/kibana-security
 /x-pack/test/functional/apps/api_keys @elastic/kibana-security
-/x-pack/test/ftr_apis/security_and_spaces @elastic/kibana-security
+/x-pack/platform//test/ftr_apis/security_and_spaces @elastic/kibana-security
 ^/src/platform/test/server_integration/services/supertest.js @elastic/kibana-security @elastic/kibana-core
 ^/src/platform/test/server_integration/http/ssl @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/53810
 ^/src/platform/test/server_integration/http/ssl_with_p12 @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/199795#discussion_r1846522206
@@ -2000,8 +2001,8 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 # Response Ops team
 /x-pack/test/functional/es_archives/rule_registry @elastic/response-ops
 /x-pack/test/functional/es_archives/event_log_multiple_indicies @elastic/response-ops
-/x-pack/test/functional/es_archives/task_manager* @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/assign-response-ops/x-pack/test/plugin_api_perf/plugins/task_manager_performance/kibana.jsonc#L4
-/x-pack/test/plugin_api_perf @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/assign-response-ops/x-pack/test/plugin_api_perf/plugins/task_manager_performance/kibana.jsonc#L4
+/x-pack/test/functional/es_archives/task_manager* @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/assign-response-ops/x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance/kibana.jsonc#L4
+/x-pack/platform/test/plugin_api_perf @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/assign-response-ops/x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance/kibana.jsonc#L4
 /x-pack/test/functional/page_objects/maintenance_windows_page.ts @elastic/response-ops
 /x-pack/test_serverless/functional/test_suites/observability/screenshot_creation/index.ts @elastic/response-ops
 /x-pack/test_serverless/functional/test_suites/observability/rules/rules_list.ts @elastic/response-ops
@@ -2036,7 +2037,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/plugin_api_integration/test_suites/task_manager/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/embeddable_alerts_table/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/response-ops
-/x-pack/test/task_manager_claimer_update_by_query/ @elastic/response-ops
+/x-pack/platform/test/task_manager_claimer_update_by_query/ @elastic/response-ops
 /docs/user/alerting/ @elastic/response-ops
 /docs/management/connectors/ @elastic/response-ops
 /x-pack/test/cases_api_integration/ @elastic/response-ops

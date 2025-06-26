@@ -16,6 +16,7 @@
     "allowJs": false
   },
   "include": [
+    "index.d.ts",
     "**/*",
     "../../../typings/**/*",
     "../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
@@ -96,5 +97,9 @@
     "@kbn/stack-alerts-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/alerts-as-data-utils",
+    "@kbn/dev-proc-runner",
+    "@kbn/repo-info",
+    "@kbn/dev-cli-errors",
+    "@kbn/journeys",
   ]
 }
