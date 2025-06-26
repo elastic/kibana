@@ -30,7 +30,7 @@ const TableHeaderTooltipCellComponent = ({ title, tooltipContent, customTooltip 
     {customTooltip ?? (
       <EuiIconTip
         content={tooltipContent}
-        type="questionInCircle"
+        type="question"
         color="subdued"
         anchorProps={{
           css: { marginLeft: 4 },
