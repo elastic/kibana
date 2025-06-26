@@ -41,7 +41,6 @@
       "fieldsMetadata"
     ],
     "optionalPlugins": [
-      "cases",
       "cloud",
       "data",
       "fleet",

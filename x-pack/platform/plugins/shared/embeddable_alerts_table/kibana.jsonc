@@ -27,8 +27,6 @@
     "requiredBundles": [
       "kibanaReact"
     ],
-    "optionalPlugins": [
-      "cases"
-    ]
+    "optionalPlugins": []
   }
 }

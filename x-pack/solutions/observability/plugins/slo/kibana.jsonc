@@ -13,6 +13,7 @@
       "aiops",
       "alerting",
       "charts",
+      "cases",
       "dashboard",
       "data",
       "dataViewEditor",
@@ -38,7 +39,6 @@
       "apmSourcesAccess"
     ],
     "optionalPlugins": [
-      "cases",
       "cloud",
       "discover",
       "embeddableEnhanced",

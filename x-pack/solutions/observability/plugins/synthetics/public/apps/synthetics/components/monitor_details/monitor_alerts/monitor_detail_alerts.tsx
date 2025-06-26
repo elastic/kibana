@@ -9,6 +9,8 @@ import React from 'react';
 import { AlertConsumers, SYNTHETICS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { useParams } from 'react-router-dom';
 import { ObservabilityAlertsTable, AlertActions } from '@kbn/observability-plugin/public';
+import { useKibana } from '@kbn/observability-plugin/public/utils/kibana_react';
+import { ClientPluginsStart } from '../../../../../plugin';
 import { useRefreshedRangeFromUrl } from '../../../hooks';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { useSelectedLocation } from '../hooks/use_selected_location';
@@ -17,6 +19,9 @@ export const MONITOR_ALERTS_TABLE_ID = 'xpack.observability.slo.sloDetails.alert
 
 export function MonitorDetailsAlerts() {
   const { monitorId: configId } = useParams<{ monitorId: string }>();
+
+  const { data, http, notifications, fieldFormats, application, licensing, cases, settings } =
+    useKibana<ClientPluginsStart>().services;
 
   const selectedLocation = useSelectedLocation();
   const { from, to } = useRefreshedRangeFromUrl();
@@ -34,6 +39,16 @@ export function MonitorDetailsAlerts() {
         </EuiFlexItem>
         <EuiFlexItem>
           <ObservabilityAlertsTable
+            services={{
+              data,
+              http,
+              notifications,
+              fieldFormats,
+              application,
+              licensing,
+              cases,
+              settings,
+            }}
             id={MONITOR_ALERTS_TABLE_ID}
             ruleTypeIds={SYNTHETICS_RULE_TYPE_IDS}
             consumers={[AlertConsumers.UPTIME, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY]}

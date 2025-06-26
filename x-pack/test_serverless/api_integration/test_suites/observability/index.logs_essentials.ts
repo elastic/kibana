@@ -12,6 +12,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags(['esGate']);
 
     loadTestFile(require.resolve('./logs_essentials_only'));
-    loadTestFile(require.resolve('./cases'));
   });
 }

@@ -25,9 +25,13 @@ export function Cases({ permissions }: CasesProps) {
   const {
     application: { navigateToUrl },
     cases,
-    http: {
-      basePath: { prepend },
-    },
+    data,
+    http,
+    notifications,
+    fieldFormats,
+    application,
+    licensing,
+    settings,
   } = useKibana().services;
 
   const { observabilityRuleTypeRegistry } = usePluginContext();
@@ -65,9 +69,9 @@ export function Cases({ permissions }: CasesProps) {
         owner={[observabilityFeatureId]}
         permissions={permissions}
         ruleDetailsNavigation={{
-          href: (ruleId) => prepend(paths.observability.ruleDetails(ruleId || '')),
+          href: (ruleId) => http.basePath.prepend(paths.observability.ruleDetails(ruleId || '')),
           onClick: (ruleId, ev) => {
-            const ruleLink = prepend(paths.observability.ruleDetails(ruleId || ''));
+            const ruleLink = http.basePath.prepend(paths.observability.ruleDetails(ruleId || ''));
 
             if (ev != null) {
               ev.preventDefault();
@@ -78,7 +82,21 @@ export function Cases({ permissions }: CasesProps) {
         }}
         showAlertDetails={handleShowAlertDetails}
         useFetchAlertData={useFetchAlertData}
-        renderAlertsTable={(props) => <ObservabilityAlertsTable {...props} />}
+        renderAlertsTable={(props) => (
+          <ObservabilityAlertsTable
+            {...props}
+            services={{
+              data,
+              http,
+              notifications,
+              fieldFormats,
+              application,
+              licensing,
+              cases,
+              settings,
+            }}
+          />
+        )}
       />
 
       {alertDetail && selectedAlertId !== '' && !alertLoading ? (

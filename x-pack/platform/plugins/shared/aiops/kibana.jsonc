@@ -26,7 +26,6 @@
       "share"
     ],
     "optionalPlugins": [
-      "cases",
       "observabilityAIAssistant",
       "usageCollection"
     ],
