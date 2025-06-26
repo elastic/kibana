@@ -291,9 +291,8 @@ export interface AssistantToolParams {
  *
  *
  * ```ts
- * export type MyNewTypeWithAssistantContext = AssistantToolParams & RequiredDefined<Pick<AssistantToolParams, 'assistantContext'>>
+ * export type MyNewTypeWithAssistantContext = Require<AssistantToolParams, 'assistantContext'>
  * ```
  */
-export type RequiredDefined<T> = {
-  [K in keyof T]-?: Exclude<T[K], undefined>;
-};
+
+export type Require<T extends object, P extends keyof T> = Omit<T, P> & Required<Pick<T, P>>;

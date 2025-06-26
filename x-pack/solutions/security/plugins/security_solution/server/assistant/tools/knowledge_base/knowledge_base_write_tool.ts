@@ -10,11 +10,10 @@ import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { DocumentEntryType } from '@kbn/elastic-assistant-common';
 import type { KnowledgeBaseEntryCreateProps } from '@kbn/elastic-assistant-common';
-import type { RequiredDefined } from '@kbn/elastic-assistant-plugin/server/types';
+import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
 
-export type KnowledgeBaseWriteToolParams = AssistantToolParams &
-  RequiredDefined<Pick<AssistantToolParams, 'kbDataClient' | 'telemetry'>>;
+export type KnowledgeBaseWriteToolParams = Require<AssistantToolParams, 'kbDataClient' | 'telemetry'>;
 
 const toolDetails = {
   // note: this description is overwritten when `getTool` is called

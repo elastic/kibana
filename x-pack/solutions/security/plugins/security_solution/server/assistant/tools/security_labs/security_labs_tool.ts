@@ -18,12 +18,11 @@ import {
   knowledgeBaseReference,
 } from '@kbn/elastic-assistant-common/impl/content_references/references';
 import { Document } from 'langchain/document';
-import type { RequiredDefined } from '@kbn/elastic-assistant-plugin/server/types';
+import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { getIsKnowledgeBaseInstalled } from '@kbn/elastic-assistant-plugin/server/routes/helpers';
 import { APP_UI_ID } from '../../../../common';
 
-export type SecurityLabsKnowledgeBaseToolParams = AssistantToolParams &
-  RequiredDefined<Pick<AssistantToolParams, 'kbDataClient'>>;
+export type SecurityLabsKnowledgeBaseToolParams = Require<AssistantToolParams, 'kbDataClient'>;
 
 const toolDetails = {
   // note: this description is overwritten when `getTool` is called
