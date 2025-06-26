@@ -10,7 +10,7 @@
 import { transformReferencesOut } from './references_out_transforms';
 
 describe('transformReferencesOut', () => {
-  test('should not transform non-panelRef references', () => {
+  test('should not transform non-legacy saved object references', () => {
     const references = [
       {
         name: 'someRef',
@@ -21,7 +21,7 @@ describe('transformReferencesOut', () => {
     expect(transformReferencesOut(references)).toEqual(references);
   });
 
-  test('should transform legacy panelRef', () => {
+  test('should transform legacy saved object references', () => {
     const references = [
       {
         name: 'panel_4',
@@ -38,7 +38,7 @@ describe('transformReferencesOut', () => {
     ]);
   });
 
-  test('should transform panelRef', () => {
+  test('should transform legacy saved object references prefixed by panel id', () => {
     const references = [
       {
         name: '4:panel_4',

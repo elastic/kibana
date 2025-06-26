@@ -11,18 +11,19 @@ import { SavedObjectReference } from '@kbn/core/server';
 
 export function transformReferencesOut(references: SavedObjectReference[]): SavedObjectReference[] {
   return references.map((ref) => {
-    return isPanelRef(ref) ? transformPanelRef(ref) : ref;
+    return isLegacySavedObjectRef(ref) ? transformLegacySavedObjectRef(ref) : ref;
   });
 }
 
-const PANEL_REF_NAME_PREFIX = 'panel_';
+// < 9.2 legach saved object ref name create with `${panelId}:panel_${panelId}`
+const LEGACY_SAVED_OBJECT_REF_NAME_PREFIX = 'panel_';
 
-function isPanelRef(ref: SavedObjectReference) {
-  return ref.name.includes(PANEL_REF_NAME_PREFIX);
+function isLegacySavedObjectRef(ref: SavedObjectReference) {
+  return ref.name.includes(LEGACY_SAVED_OBJECT_REF_NAME_PREFIX);
 }
 
-function transformPanelRef(ref: SavedObjectReference) {
-  const split = ref.name.split(PANEL_REF_NAME_PREFIX);
+function transformLegacySavedObjectRef(ref: SavedObjectReference) {
+  const split = ref.name.split(LEGACY_SAVED_OBJECT_REF_NAME_PREFIX);
   const panelId = split.length >= 2 ? split[1] : undefined;
   return {
     ...ref,
