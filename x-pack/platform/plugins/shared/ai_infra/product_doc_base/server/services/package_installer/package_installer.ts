@@ -52,7 +52,7 @@ export class PackageInstaller {
   private readonly productDocClient: ProductDocInstallClient;
   private readonly artifactRepositoryUrl: string;
   private readonly currentVersion: string;
-  private readonly elserInferenceId?: string;
+  private readonly elserInferenceId: string;
 
   constructor({
     artifactsFolder,
@@ -173,6 +173,7 @@ export class PackageInstaller {
       await this.productDocClient.setInstallationStarted({
         productName,
         productVersion,
+        inferenceId,
       });
 
       if (customInference && customInference?.inference_id !== this.elserInferenceId) {
@@ -234,7 +235,7 @@ export class PackageInstaller {
         log: this.log,
         inferenceId,
       });
-      await this.productDocClient.setInstallationSuccessful(productName, indexName);
+      await this.productDocClient.setInstallationSuccessful(productName, indexName, inferenceId);
 
       this.log.info(
         `Documentation installation successful for product [${productName}] and version [${productVersion}]`
@@ -250,7 +251,7 @@ export class PackageInstaller {
         `Error during documentation installation of product [${productName}]/[${productVersion}] : ${message}`
       );
 
-      await this.productDocClient.setInstallationFailed(productName, message);
+      await this.productDocClient.setInstallationFailed(productName, message, inferenceId);
       throw e;
     } finally {
       zipArchive?.close();
@@ -272,7 +273,7 @@ export class PackageInstaller {
       { ignore: [404] }
     );
 
-    await this.productDocClient.setUninstalled(productName);
+    await this.productDocClient.setUninstalled(productName, inferenceId);
   }
 
   async uninstallAll(params: { inferenceId?: string } = {}) {

@@ -31,7 +31,7 @@ export const registerInstallationRoutes = ({
     {
       path: INSTALLATION_STATUS_API_PATH,
       validate: {
-        body: schema.object({
+        query: schema.object({
           inferenceId: schema.maybe(schema.string()),
         }),
       },
@@ -46,7 +46,7 @@ export const registerInstallationRoutes = ({
     },
     async (ctx, req, res) => {
       const { installClient, documentationManager } = getServices();
-      const inferenceId = req.body?.inferenceId ?? defaultInferenceEndpoints.ELSER;
+      const inferenceId = req.query?.inferenceId ?? defaultInferenceEndpoints.ELSER;
       const installStatus = await installClient.getInstallationStatus({
         inferenceId,
       });
@@ -56,6 +56,7 @@ export const registerInstallationRoutes = ({
 
       return res.ok<InstallationStatusResponse>({
         body: {
+          inferenceId,
           perProducts: installStatus,
           overall: overallStatus,
         },

@@ -22,6 +22,7 @@ export interface ProductDocInstallStatusAttributes {
   last_installation_date?: number;
   last_installation_failure_reason?: string;
   index_name?: string;
+  inference_id?: string;
 }
 
 export const productDocInstallStatusSavedObjectType: SavedObjectsType<ProductDocInstallStatusAttributes> =
@@ -37,6 +38,7 @@ export const productDocInstallStatusSavedObjectType: SavedObjectsType<ProductDoc
         installation_status: { type: 'keyword' },
         last_installation_date: { type: 'date' },
         index_name: { type: 'keyword' },
+        inference_id: { type: 'keyword' },
       },
     },
     management: {

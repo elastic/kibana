@@ -22,9 +22,11 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useGetProductDocStatus } from '../../../hooks/use_get_product_doc_status';
 import { useInstallProductDoc } from '../../../hooks/use_install_product_doc';
 import { useUninstallProductDoc } from '../../../hooks/use_uninstall_product_doc';
+import { useInferenceId } from './inference_id_context';
 
-export function ProductDocEntry({ selectedInferenceId }: { selectedInferenceId: string }) {
+export function ProductDocEntry() {
   const { overlays } = useKibana().services;
+  const { selectedInferenceId } = useInferenceId();
 
   const [isInstalled, setInstalled] = useState<boolean>(true);
   const [isInstalling, setInstalling] = useState<boolean>(false);
@@ -44,7 +46,7 @@ export function ProductDocEntry({ selectedInferenceId }: { selectedInferenceId: 
       throw new Error('Inference ID is required to install product documentation');
     }
     setInstalling(true);
-    installProductDoc().then(
+    installProductDoc(selectedInferenceId).then(
       () => {
         setInstalling(false);
         setInstalled(true);

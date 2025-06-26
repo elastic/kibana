@@ -20,6 +20,7 @@ export interface ProductDocInstallStatus {
   lastInstallationDate: Date | undefined;
   lastInstallationFailureReason: string | undefined;
   indexName?: string;
+  inferenceId?: string;
 }
 
 export interface ProductInstallState {

@@ -26,17 +26,11 @@ import {
 } from '@kbn/ai-assistant/src/utils/get_model_options_for_inference_endpoints';
 import { useInferenceEndpoints, UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
 import { KnowledgeBaseState, useKibana } from '@kbn/observability-ai-assistant-plugin/public';
+import { useInferenceId } from './inference_id_context';
 
-export function ChangeKbModel({
-  knowledgeBase,
-  selectedInferenceId,
-  onInferenceIdChange,
-}: {
-  knowledgeBase: UseKnowledgeBaseResult;
-  selectedInferenceId: string;
-  onInferenceIdChange: (inferenceId: string) => void;
-}) {
+export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   const { overlays } = useKibana().services;
+  const { selectedInferenceId, setSelectedInferenceId } = useInferenceId();
 
   const [hasLoadedCurrentModel, setHasLoadedCurrentModel] = useState(false);
   const [isUpdatingModel, setIsUpdatingModel] = useState(false);
@@ -63,10 +57,10 @@ export function ChangeKbModel({
   useEffect(() => {
     if (!hasLoadedCurrentModel && modelOptions?.length && knowledgeBase.status?.value) {
       const currentModel = knowledgeBase.status.value.currentInferenceId;
-      onInferenceIdChange(currentModel || modelOptions[0].key);
+      setSelectedInferenceId(currentModel || modelOptions[0].key);
       setHasLoadedCurrentModel(true);
     }
-  }, [hasLoadedCurrentModel, modelOptions, knowledgeBase.status?.value, onInferenceIdChange]);
+  }, [hasLoadedCurrentModel, modelOptions, knowledgeBase.status?.value, setSelectedInferenceId]);
 
   useEffect(() => {
     if (isUpdatingModel && !knowledgeBase.isInstalling && !knowledgeBase.isPolling) {
@@ -234,6 +228,7 @@ export function ChangeKbModel({
     isLoadingEndpoints,
     superSelectOptions,
     selectedInferenceId,
+    setSelectedInferenceId,
     isKnowledgeBaseInLoadingState,
     doesModelNeedRedeployment,
     knowledgeBase.status?.value?.kbState,
