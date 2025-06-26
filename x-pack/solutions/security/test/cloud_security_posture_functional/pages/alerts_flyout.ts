@@ -38,7 +38,10 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       );
 
       await waitForPluginInitialized({ retry, supertest, logger });
+      await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
+    });
 
+    beforeEach(async () => {
       // Setting the timerange to fit the data and open the flyout for a specific alert
       await alertsPage.navigateToAlertsPage(
         `${alertsPage.getAbsoluteTimerangeFilter(
@@ -50,7 +53,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       );
 
       await alertsPage.waitForListToHaveAlerts();
-      await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
     });
 
     after(async () => {
@@ -172,7 +174,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.showEventOrAlertDetails(
-        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(undefined)'
+        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)'
       );
       await alertsPage.flyout.assertEventPreviewPanelIsOpen();
     });
