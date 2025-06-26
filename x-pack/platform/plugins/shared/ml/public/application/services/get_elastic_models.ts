@@ -8,8 +8,7 @@
 import type { HttpStart } from '@kbn/core-http-browser';
 import { HttpService } from '@kbn/ml-services/http_service';
 import { trainedModelsApiProvider } from '@kbn/ml-services/ml_api_service/trained_models';
-
-import { ElasticModels } from './elastic_models_service';
+import { ElasticModels } from '@kbn/ml-services/elastic_models_service';
 
 /**
  * Provides Elastic models services exposed from the plugin start.

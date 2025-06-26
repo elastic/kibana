@@ -6,7 +6,7 @@
  */
 
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
-import type { SeverityThreshold } from '../../../../../common/types/anomalies';
+import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
 
 /**
  * Utility function to resolve severity format from old to new format

@@ -11,11 +11,12 @@ import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { HttpService } from '@kbn/ml-services/http_service';
 import { jobsApiProvider } from '@kbn/ml-services/ml_api_service/jobs';
+import type { AnomalySwimlaneEmbeddableUserInput } from '@kbn/ml-common-types/anomaly_swim_lane';
 
 import type { MlDependencies } from '../../application/app';
 import type { MlStartDependencies } from '../../plugin';
 
-import type { AnomalySwimLaneEmbeddableState, AnomalySwimlaneEmbeddableUserInput } from '../types';
+import type { AnomalySwimLaneEmbeddableState } from '../types';
 
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
 

@@ -7,7 +7,8 @@
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { MlPluginStart, MlStartDependencies } from '../../plugin';
+import type { MlPluginStart } from '@kbn/ml-plugin-contracts';
+import type { MlStartDependencies } from '../../plugin';
 import type { MlDependencies } from '../../application/app';
 import type { SingleMetricViewerEmbeddableServices, SingleMetricViewerServices } from '../types';
 
