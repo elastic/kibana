@@ -6,15 +6,15 @@
  */
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
+import type { HTTPError } from '../../../../../../common/detection_engine/types';
 import type {
-  PerformRuleUpgradeRequestBody,
-  PerformRuleUpgradeResponseBody,
-} from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { PERFORM_RULE_UPGRADE_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules/urls';
-import { performUpgradeRules } from '../../api';
+  RevertPrebuiltRulesResponseBody,
+  RevertPrebuiltRulesRequest,
+} from '../../../../../../common/api/detection_engine';
+import { REVERT_PREBUILT_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules/urls';
+import { revertPrebuiltRule } from '../../api';
 import { useInvalidateFetchCoverageOverviewQuery } from '../use_fetch_coverage_overview_query';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../use_fetch_rule_management_filters_query';
-import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../use_fetch_rules_snooze_settings_query';
 import { useInvalidateFindRulesQuery } from '../use_find_rules_query';
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
 import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './use_fetch_prebuilt_rules_upgrade_review_query';
@@ -22,17 +22,16 @@ import { retryOnRateLimitedError } from './retry_on_rate_limited_error';
 import { cappedExponentialBackoff } from './capped_exponential_backoff';
 import { useInvalidateFetchPrebuiltRuleBaseVersionQuery } from './use_fetch_prebuilt_rule_base_version_query';
 
-export const PERFORM_RULES_UPGRADE_KEY = ['POST', PERFORM_RULE_UPGRADE_URL];
+export const REVERT_PREBUILT_RULE_KEY = ['POST', REVERT_PREBUILT_RULES_URL];
 
-export const usePerformRulesUpgradeMutation = (
+export const useRevertPrebuiltRuleMutation = (
   options?: UseMutationOptions<
-    PerformRuleUpgradeResponseBody,
-    unknown,
-    PerformRuleUpgradeRequestBody
+    RevertPrebuiltRulesResponseBody,
+    HTTPError,
+    RevertPrebuiltRulesRequest
   >
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
-  const invalidateFetchRulesSnoozeSettings = useInvalidateFetchRulesSnoozeSettingsQuery();
   const invalidatePrePackagedRulesStatus = useInvalidateFetchPrebuiltRulesStatusQuery();
   const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
   const invalidateFetchPrebuiltRulesUpgradeReview =
@@ -41,17 +40,16 @@ export const usePerformRulesUpgradeMutation = (
   const invalidateFetchCoverageOverviewQuery = useInvalidateFetchCoverageOverviewQuery();
   const invalidateFetchPrebuiltRuleBaseVerison = useInvalidateFetchPrebuiltRuleBaseVersionQuery();
 
-  return useMutation<PerformRuleUpgradeResponseBody, unknown, PerformRuleUpgradeRequestBody>(
-    (args: PerformRuleUpgradeRequestBody) => {
-      return performUpgradeRules(args);
+  return useMutation<RevertPrebuiltRulesResponseBody, HTTPError, RevertPrebuiltRulesRequest>(
+    (args: RevertPrebuiltRulesRequest) => {
+      return revertPrebuiltRule(args);
     },
     {
       ...options,
-      mutationKey: PERFORM_RULES_UPGRADE_KEY,
+      mutationKey: REVERT_PREBUILT_RULE_KEY,
       onSettled: (...args) => {
         invalidatePrePackagedRulesStatus();
         invalidateFindRulesQuery();
-        invalidateFetchRulesSnoozeSettings();
         invalidateFetchRuleManagementFilters();
 
         invalidateFetchPrebuiltRulesUpgradeReview();
