@@ -295,7 +295,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               {shouldShowCriteriaCallout && (
                 <>
                   <EuiCallOut
-                    iconType="iInCircle"
+                    iconType="info"
                     size="s"
                     onDismiss={() => {
                       setCriteriaCalloutActive(false);
@@ -335,7 +335,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   ) : (
                     <>
                       <EuiCallOut
-                        iconType="iInCircle"
+                        iconType="info"
                         size="s"
                         color="warning"
                         title={
