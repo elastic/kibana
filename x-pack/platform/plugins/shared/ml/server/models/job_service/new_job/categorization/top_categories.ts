@@ -7,8 +7,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 
-import type { CategoryId, Category } from '../../../../../common/types/categories';
-import type { MlClient } from '../../../../lib/ml_client';
+import type { CategoryId, Category } from '@kbn/ml-common-types/categories';
+import type { MlClient } from '@kbn/ml-client';
 
 export function topCategoriesProvider(mlClient: MlClient) {
   async function getTotalCategories(jobId: string): Promise<number> {

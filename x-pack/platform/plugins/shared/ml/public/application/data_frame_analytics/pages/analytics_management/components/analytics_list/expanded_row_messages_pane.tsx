@@ -10,10 +10,10 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { useMlApi } from '../../../../../contexts/kibana';
+import type { JobMessage } from '@kbn/ml-common-types/audit_message';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 import { useRefreshAnalyticsList } from '../../../../common';
 import { JobMessages } from '../../../../../components/job_messages';
-import type { JobMessage } from '../../../../../../../common/types/audit_message';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 
 interface Props {

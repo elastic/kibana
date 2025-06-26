@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { Moment } from 'moment-timezone';
 import moment from 'moment-timezone';
 
-import type { MlCalendar, MlCalendarEvent } from '../../../../common/types/calendars';
+import type { MlCalendar, MlCalendarEvent } from '@kbn/ml-common-types/calendars';
 import { generateTempId } from './edit/utils';
 
 const YEARS_OF_DST_EVENTS = 20;

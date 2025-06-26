@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from 'react';
 
-import { useMlKibana } from '../../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 export const useHasRequiredIndicesPermissions = (
   indexName: string,

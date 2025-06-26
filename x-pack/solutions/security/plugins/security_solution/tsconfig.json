@@ -15,7 +15,8 @@
     "scripts/**/*.json",
     "public/**/*.json",
     "../../../../../typings/**/*",
-    "emotion.d.ts" ],
+    "emotion.d.ts"
+  ],
   "exclude": [
     "target/**/*",
     "**/cypress/**",
@@ -255,6 +256,7 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/elastic-assistant-shared-state",
     "@kbn/elastic-assistant-shared-state-plugin",
-    "@kbn/spaces-utils"
+    "@kbn/spaces-utils",
+    "@kbn/ml-common-types",
   ]
 }

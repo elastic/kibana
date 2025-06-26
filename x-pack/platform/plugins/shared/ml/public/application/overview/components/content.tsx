@@ -6,15 +6,18 @@
  */
 
 import React, { useEffect, useState, type FC } from 'react';
+
 import { EuiSpacer } from '@elastic/eui';
+
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { AnomalyDetectionPanel } from './anomaly_detection_panel';
-import { AnalyticsPanel } from './analytics_panel';
+import { mlResultsServiceProvider } from '@kbn/ml-services/results_service_2';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import { AnomalyTimelineService } from '../../services/anomaly_timeline_service';
-import { mlResultsServiceProvider } from '../../services/results_service';
-import { useMlKibana } from '../../contexts/kibana';
 import { useEnabledFeatures } from '../../contexts/ml';
 
+import { AnomalyDetectionPanel } from './anomaly_detection_panel';
+import { AnalyticsPanel } from './analytics_panel';
 interface Props {
   createAnomalyDetectionJobDisabled: boolean;
   setAdLazyJobCount: React.Dispatch<React.SetStateAction<number>>;

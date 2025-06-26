@@ -118,7 +118,10 @@
     "@kbn/object-utils",
     "@kbn/coloring",
     "@kbn/saved-search-component",
-    "@kbn/core-saved-objects-server"
+    "@kbn/core-saved-objects-server",
+    "@kbn/ml-common-types",
+    "@kbn/ml-common-constants",
+    "@kbn/ml-embeddables"
   ],
   "exclude": ["target/**/*"]
 }

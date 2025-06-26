@@ -9,14 +9,15 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+
+import { getDefaultDatafeedQuery, getRisonValue } from '../utils/new_job_utils';
+
 import {
   type CategorizationType,
   QuickCategorizationJobCreator,
   CATEGORIZATION_TYPE,
 } from './quick_create_job';
-import type { MlApi } from '../../../services/ml_api_service';
-
-import { getDefaultDatafeedQuery, getRisonValue } from '../utils/new_job_utils';
 
 interface Dependencies {
   kibanaConfig: IUiSettingsClient;

@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { countBy } from 'lodash';
 import useMount from 'react-use/lib/useMount';
-import { useMlApi } from '../../contexts/kibana';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useEnabledFeatures } from '../../contexts/ml';
 

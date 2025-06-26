@@ -26,14 +26,15 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { VALIDATION_STATUS } from '@kbn/ml-validators';
-
-import { parseMessages } from '../../../../common/constants/messages';
-import { Callout, statusToEuiIconType } from '../callout';
-import { getMostSevereMessageStatus } from '../../../../common/util/validation_utils';
-import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
+import { parseMessages } from '@kbn/ml-common-constants/messages';
+import { getMostSevereMessageStatus } from '@kbn/ml-common-utils/validation_utils';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 
-const defaultIconType = 'question';
+import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
+import { Callout, statusToEuiIconType } from '../callout';
+
+const defaultIconType = 'questionInCircle';
+
 const getDefaultState = () => ({
   ui: {
     iconType: defaultIconType,
@@ -80,7 +81,7 @@ const LoadingSpinner = () => (
 );
 
 const Modal = ({ close, title, children }) => (
-  <EuiModal onClose={close} style={{ width: '800px' }}>
+  <EuiModal onClose={close} css={{ width: '800px' }}>
     <EuiModalHeader>
       <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
     </EuiModalHeader>

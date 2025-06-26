@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { checkPermission } from '../../../../capabilities/check_capabilities';
+import { checkPermission } from '@kbn/ml-services/capabilities/check_capabilities';
+import { JOB_ACTION } from '@kbn/ml-common-constants/job_actions';
+
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
-import { JOB_ACTION } from '../../../../../../common/constants/job_actions';
 
 import {
   stopDatafeeds,

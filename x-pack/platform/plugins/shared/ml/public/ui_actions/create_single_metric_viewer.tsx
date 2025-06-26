@@ -9,11 +9,10 @@ import { i18n } from '@kbn/i18n';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { HttpService } from '../application/services/http_service';
-import type { MlApi } from '../application/services/ml_api_service';
-import { ML_APP_NAME, PLUGIN_ICON, PLUGIN_ID } from '../../common/constants/app';
-import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../embeddables';
+import { ML_APP_NAME, PLUGIN_ICON, PLUGIN_ID } from '@kbn/ml-common-constants/app';
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
+import { HttpService } from '@kbn/ml-services/http_service';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import type { SingleMetricViewerEmbeddableApi } from '../embeddables/types';
 import type { MlCoreSetup } from '../plugin';
 
@@ -57,6 +56,8 @@ export function createAddSingleMetricViewerPanelAction(
       return Boolean(await parentApiIsCompatible(context.embeddable));
     },
     async execute(context) {
+      const { IncompatibleActionError } = await import('@kbn/ui-actions-plugin/public');
+
       const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
@@ -66,7 +67,7 @@ export function createAddSingleMetricViewerPanelAction(
         const { resolveEmbeddableSingleMetricViewerUserInput } = await import(
           '../embeddables/single_metric_viewer/single_metric_viewer_setup_flyout'
         );
-        const { mlApiProvider } = await import('../application/services/ml_api_service');
+        const { mlApiProvider } = await import('@kbn/ml-services/ml_api_service');
         const httpService = new HttpService(coreStart.http);
         const mlApi: MlApi = mlApiProvider(httpService);
 

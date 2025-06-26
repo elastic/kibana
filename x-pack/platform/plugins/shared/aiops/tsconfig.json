@@ -78,6 +78,8 @@
     "@kbn/ml-field-stats-flyout",
     "@kbn/config-schema",
     "@kbn/aiops-utils",
+    "@kbn/shared-ux-router",
+    "@kbn/ml-common-types",
   ],
   "exclude": [
     "target/**/*",
