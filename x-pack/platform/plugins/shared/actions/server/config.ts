@@ -178,7 +178,7 @@ export const configSchema = schema.object({
     })
   ),
   usage: schema.object({
-    url: schema.string(),
+    url: schema.maybe(schema.string()),
     enabled: schema.maybe(schema.boolean({ defaultValue: true })),
     ca: schema.maybe(
       schema.object({

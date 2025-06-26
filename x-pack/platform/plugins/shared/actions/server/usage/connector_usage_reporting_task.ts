@@ -34,7 +34,7 @@ export class ConnectorUsageReportingTask {
   private readonly eventLogIndex: string;
   private readonly projectId: string | undefined;
   private readonly caCertificate: string | undefined;
-  private readonly usageApiUrl: string;
+  private readonly usageApiUrl: string | undefined;
   private readonly enabled: boolean;
 
   constructor({
@@ -114,10 +114,6 @@ export class ConnectorUsageReportingTask {
 
   private runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
     const { state } = taskInstance;
-
-    this.logger.info(`usage-api config url: ${JSON.stringify(this.usageApiUrl)}`);
-    this.logger.info(`usage-api config ca: ${JSON.stringify(this.caCertificate)}`);
-    this.logger.info(`usage-api config enabled: ${JSON.stringify(this.enabled)}`);
 
     if (!this.enabled) {
       this.logger.warn(
@@ -199,7 +195,7 @@ export class ConnectorUsageReportingTask {
 
     try {
       attempts = attempts + 1;
-      await this.pushUsageRecord(record);
+      await this.pushUsageRecord({ url: this.usageApiUrl, record });
       this.logger.info(
         `Connector usage record has been successfully reported, ${record.creation_timestamp}, usage: ${record.usage.quantity}, period:${record.usage.period_seconds}`
       );
@@ -317,8 +313,14 @@ export class ConnectorUsageReportingTask {
     };
   };
 
-  private pushUsageRecord = async (record: ConnectorUsageReport) => {
-    return axios.post(this.usageApiUrl, [record], {
+  private pushUsageRecord = async ({
+    url,
+    record,
+  }: {
+    url: string;
+    record: ConnectorUsageReport;
+  }) => {
+    return axios.post(url, [record], {
       headers: { 'Content-Type': 'application/json' },
       timeout: CONNECTOR_USAGE_REPORTING_TASK_TIMEOUT,
       httpsAgent: new https.Agent({
