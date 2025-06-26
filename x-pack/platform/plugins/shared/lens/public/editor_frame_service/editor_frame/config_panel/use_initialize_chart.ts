@@ -98,22 +98,10 @@ export function useInitializeChart({
   setErrors,
   setIsInitialized,
 }: InitializeChartLogicArgs) {
-  const initializeChartFunc = useCallback(
-    (abortController: AbortController) => {
-      const func = createInitializeChartFunction({
-        isTextBasedLanguage,
-        query,
-        dataGridAttrs,
-        isInitialized,
-        currentAttributes,
-        runQuery,
-        prevQueryRef,
-        setErrors,
-        setIsInitialized,
-      });
-      func(abortController);
-    },
-    [
+  const initializeChartFunc = useCallback(() => {
+    const abortController = new AbortController();
+
+    const func = createInitializeChartFunction({
       isTextBasedLanguage,
       query,
       dataGridAttrs,
@@ -123,11 +111,20 @@ export function useInitializeChart({
       prevQueryRef,
       setErrors,
       setIsInitialized,
-    ]
-  );
+    });
+    func(abortController);
+  }, [
+    isTextBasedLanguage,
+    query,
+    dataGridAttrs,
+    isInitialized,
+    currentAttributes,
+    runQuery,
+    prevQueryRef,
+    setErrors,
+    setIsInitialized,
+  ]);
   useEffect(() => {
-    const abortController = new AbortController();
-
-    initializeChartFunc(abortController);
+    initializeChartFunc();
   }, [initializeChartFunc]);
 }
