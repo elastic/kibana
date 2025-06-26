@@ -29,7 +29,7 @@ export const relevanceSearch = async ({
   esClient: ElasticsearchClient;
 }): Promise<RelevanceSearchResponse> => {
   let selectedIndex = index;
-  let selectedFields: MappingField[];
+  let selectedFields: MappingField[] = [];
 
   // if no index was specified, we use the index explorer to select the best one
   if (!selectedIndex) {
@@ -50,8 +50,11 @@ export const relevanceSearch = async ({
   });
   const flattenedFields = flattenMappings(mappings[selectedIndex]);
   if (fields.length) {
-    selectedFields = flattenedFields.filter((field) => fields.includes(field.path));
-  } else {
+    selectedFields = flattenedFields
+      .filter((field) => fields.includes(field.path))
+      .filter((field) => field.type === 'text' || field.type === 'semantic_text');
+  }
+  if (selectedFields.length === 0) {
     selectedFields = flattenedFields.filter(
       (field) => field.type === 'text' || field.type === 'semantic_text'
     );
