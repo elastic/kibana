@@ -26,9 +26,32 @@ import {
   ToolIdMapping,
 } from '@kbn/onechat-genai-utils/langchain';
 import type { StateType } from './graph';
-import { lastReflectionResult, firstResearchGoalResult } from './backlog';
+import {
+  lastReflectionResult,
+  firstResearchGoalResult,
+  ResearchGoalResult,
+  ReflectionResult,
+} from './backlog';
 
 export type ResearcherAgentEvents = MessageChunkEvent | MessageCompleteEvent | ReasoningEvent;
+
+const formatResearchGoalReasoning = (researchGoal: ResearchGoalResult): string => {
+  return `${researchGoal.reasoning}\n\nDefining the research goal as: "${researchGoal.researchGoal}"`;
+};
+
+const formatReflectionResult = (reflection: ReflectionResult): string => {
+  let formatted = `${reflection.reasoning}\n\nThe current information are ${
+    reflection.isSufficient ? '*sufficient*' : '*insufficient*'
+  }`;
+
+  if (reflection.nextQuestions.length > 0) {
+    formatted += `\n\nThe following questions should be followed up on: ${reflection.nextQuestions
+      .map((question) => ` - ${question}`)
+      .join(', ')}`;
+  }
+
+  return formatted;
+};
 
 export const convertGraphEvents = ({
   graphName,
@@ -73,7 +96,9 @@ export const convertGraphEvents = ({
           const { backlog } = event.data.output as StateType;
           const researchGoalResult = firstResearchGoalResult(backlog);
 
-          const reasoningEvent = createReasoningEvent(researchGoalResult.reasoning);
+          const reasoningEvent = createReasoningEvent(
+            formatResearchGoalReasoning(researchGoalResult)
+          );
           return of(reasoningEvent);
         }
 
@@ -98,7 +123,7 @@ export const convertGraphEvents = ({
           const { backlog } = event.data.output as StateType;
           const reflectionResult = lastReflectionResult(backlog);
 
-          const reasoningEvent = createReasoningEvent(reflectionResult.reasoning);
+          const reasoningEvent = createReasoningEvent(formatReflectionResult(reflectionResult));
           return of(reasoningEvent);
         }
 

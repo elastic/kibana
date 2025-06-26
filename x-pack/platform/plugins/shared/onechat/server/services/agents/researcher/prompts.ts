@@ -6,16 +6,15 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import { BuiltinToolIds as Tools } from '@kbn/onechat-common';
 import type { ResearchGoal } from './graph';
 import {
-  isActionResult,
+  isSearchResult,
   isReflectionResult,
   isResearchGoalResult,
   BacklogItem,
   ReflectionResult,
   ResearchGoalResult,
-  ActionResult,
+  SearchResult,
 } from './backlog';
 
 export const getIdentifyResearchGoalPrompt = ({
@@ -95,34 +94,21 @@ export const getExecutionPrompt = ({
       `You are a research agent at Elasticsearch with access to external tools.
 
       ### Your task
-      - Based on a research goal, choose the most appropriate tool to help resolve it.
+      - Based on a given goal, choose the most appropriate tools to help resolve it.
       - You will also be provided with a list of past actions and results.
 
       ### Instructions
-      - You must select one tool and invoke it with the most relevant and precise parameters.
-      - Choose the tool that will best help fulfill the current research goal.
-      - Some tools (e.g., search) may require contextual information (such as an index name or prior step result). Retrieve it from the action history if needed.
+      - Read the action history to understand previous steps
+      - Some tools may require contextual information (such as an index name or prior step result). Retrieve it from the action history if needed.
       - Do not repeat a tool invocation that has already been attempted with the same or equivalent parameters.
-      - Think carefully about what the goal requires and which tool best advances it.
-
-      ### Constraints
-      - Tool use is mandatory. You must respond with a tool call.
-      - Do not speculate or summarize. Only act by selecting the best next tool and invoking it.
-
-      ### Tools description
-      Your two main search tools are "${Tools.relevanceSearch}" and "${Tools.naturalLanguageSearch}"
-      - When doing fulltext search, prefer the "${
-        Tools.relevanceSearch
-      }" tool as it performs better for plain fulltext searches.
-      - For more advanced queries (filtering, aggregation, buckets), use the "${
-        Tools.naturalLanguageSearch
-      }" tool.
-
+      - Think carefully about what the goal requires and which tool(s) best advances it.
+      - Do not speculate or summarize. Only act according to your given goal.
 
       ### Output format
-      Respond using the tool-calling schema provided by the system.
+      - Your response will be read by another agent which can understand any format
+      - You can either return plain text, json, or any combination of the two, as you see fit depending on your goal.
 
-      ### Additional information
+      ### Additional information:
       - The current date is ${new Date().toISOString()}.
       `,
     ],
@@ -284,7 +270,7 @@ export const getAnswerPrompt = ({
 
       ### Gathered information
 
-      ${renderBacklog(backlog.filter(isActionResult))}
+      ${renderBacklog(backlog.filter(isSearchResult))}
     `,
     ],
   ];
@@ -295,7 +281,7 @@ const renderBacklog = (backlog: BacklogItem[]): string => {
     if (isResearchGoalResult(item)) {
       return renderResearchGoalResult(item, i);
     }
-    if (isActionResult(item)) {
+    if (isSearchResult(item)) {
       return renderActionResult(item, i);
     }
     if (isReflectionResult(item)) {
@@ -341,23 +327,16 @@ ${nextQuestions.map((question) => `  - ${question}`).join('\n')}`
   `;
 };
 
-const renderActionResult = (actionResult: ActionResult, index: number): string => {
+const renderActionResult = (actionResult: SearchResult, index: number): string => {
   return `### Cycle ${index + 1}
 
-  At cycle "${index + 1}", you performed the following action:
+  At cycle "${index + 1}", you delegated one of the sub-tasks to another agent:
 
-  - Action type: tool execution
+  - Research goal: "${actionResult.researchGoal}"
 
-  - Tool name: ${actionResult.toolName}
-
-  - Tool parameters:
+  - The agent's response:
   \`\`\`json
-  ${JSON.stringify(actionResult.arguments, undefined, 2)}
-  \`\`\`
-
-  - Tool response:
-    \`\`\`json
-  ${JSON.stringify(actionResult.response, undefined, 2)}
+  ${actionResult.output}
   \`\`\`
   `;
 };

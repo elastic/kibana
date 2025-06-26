@@ -9,19 +9,18 @@ import { z } from '@kbn/zod';
 import { StateGraph, Annotation, Send } from '@langchain/langgraph';
 import { BaseMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
-import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { StructuredTool, DynamicStructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/core/server';
 import { InferenceChatModel } from '@kbn/inference-langchain';
 import { extractToolCalls, extractTextContent } from '@kbn/onechat-genai-utils/langchain';
+import { createAgentGraph } from '../chat/graph';
 import {
   getIdentifyResearchGoalPrompt,
   getReflectionPrompt,
   getExecutionPrompt,
   getAnswerPrompt,
 } from './prompts';
-import { extractToolResults } from './utils';
-import { ActionResult, ReflectionResult, BacklogItem, lastReflectionResult } from './backlog';
+import { SearchResult, ReflectionResult, BacklogItem, lastReflectionResult } from './backlog';
 
 const setResearchGoalToolName = 'set_research_goal';
 
@@ -57,7 +56,7 @@ const StateAnnotation = Annotation.Root({
     },
     default: () => [],
   }),
-  pendingActions: Annotation<ActionResult[], ActionResult[] | 'clear'>({
+  pendingActions: Annotation<SearchResult[], SearchResult[] | 'clear'>({
     reducer: (state, actions) => {
       return actions === 'clear' ? [] : [...state, ...actions];
     },
@@ -158,39 +157,32 @@ export const createResearcherAgentGraph = async ({
 
     log.trace(() => `performSearch - nextItem: ${stringify(nextItem)}`);
 
-    const toolNode = new ToolNode<BaseMessage[]>(tools);
-    const executionModel = chatModel.bindTools(tools);
+    const executorAgent = createAgentGraph({
+      chatModel,
+      tools,
+      logger: log,
+      systemPrompt: '',
+    });
 
-    const response = await executionModel.invoke(
-      getExecutionPrompt({
-        currentResearchGoal: nextItem,
-        backlog: state.backlog,
-      })
+    const { addedMessages } = await executorAgent.invoke(
+      {
+        initialMessages: getExecutionPrompt({
+          currentResearchGoal: nextItem,
+          backlog: state.backlog,
+        }),
+      },
+      { tags: ['executor_agent'], metadata: { graphName: 'executor_agent' } }
     );
-    const toolCalls = extractToolCalls(response);
 
-    log.trace(() => `performSearch - toolCalls: ${stringify(toolCalls)}`);
+    const agentResponse = extractTextContent(addedMessages[addedMessages.length - 1]);
 
-    const toolMessages = await toolNode.invoke([response]);
-    const toolResults = extractToolResults(toolMessages);
-
-    const actionResults: ActionResult[] = [];
-    for (let i = 0; i < toolResults.length; i++) {
-      const toolCall = toolCalls[i];
-      const toolResult = toolResults[i];
-      if (toolCall && toolResult) {
-        const actionResult: ActionResult = {
-          researchGoal: nextItem.question,
-          toolName: toolCall.toolName,
-          arguments: toolCall.args,
-          response: toolResult.result,
-        };
-        actionResults.push(actionResult);
-      }
-    }
+    const actionResult: SearchResult = {
+      researchGoal: nextItem.question,
+      output: agentResponse,
+    };
 
     return {
-      pendingActions: [...actionResults],
+      pendingActions: [actionResult],
     };
   };
 

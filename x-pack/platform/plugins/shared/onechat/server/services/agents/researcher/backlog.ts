@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-export interface ActionResult {
+export interface SearchResult {
   researchGoal: string;
-  toolName: string;
-  arguments: any;
-  response: any;
+  output: string;
 }
 
 export interface ReflectionResult {
@@ -23,18 +21,18 @@ export interface ResearchGoalResult {
   reasoning: string;
 }
 
-export type BacklogItem = ActionResult | ReflectionResult | ResearchGoalResult;
+export type BacklogItem = SearchResult | ReflectionResult | ResearchGoalResult;
 
 export const isResearchGoalResult = (item: BacklogItem): item is ResearchGoalResult => {
-  return 'researchGoal' in item;
+  return 'researchGoal' in item && 'reasoning' in item;
 };
 
 export const isReflectionResult = (item: BacklogItem): item is ReflectionResult => {
   return 'isSufficient' in item;
 };
 
-export const isActionResult = (item: BacklogItem): item is ActionResult => {
-  return 'toolName' in item;
+export const isSearchResult = (item: BacklogItem): item is SearchResult => {
+  return 'researchGoal' in item && 'output' in item;
 };
 
 export const lastReflectionResult = (backlog: BacklogItem[]): ReflectionResult => {
