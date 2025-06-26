@@ -62,7 +62,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('shows apm navlink', async () => {
         const navLinks = await appsMenu.readLinks();
         expect(navLinks.map((link) => link.text)).to.eql([
-          'Overview',
+          'Home',
           'Alerts',
           'Applications',
           'User Experience',
@@ -117,7 +117,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('shows apm navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.eql([
-          'Overview',
+          'Home',
           'Alerts',
           'Applications',
           'User Experience',
