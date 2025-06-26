@@ -17,6 +17,6 @@ export class ObservabilityApp {
   }
 
   async gotoLanding() {
-    await this.page.goto('/app/observability/landing');
+    await this.page.gotoApp('observability/landing');
   }
 }
