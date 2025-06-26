@@ -54,10 +54,10 @@ export function createTelemetryFilterListArtifactTaskConfig() {
         filterList.prebuiltRulesAlerts = artifact.prebuilt_rules_alerts;
         await taskMetricsService.end(trace);
         return 0;
-      } catch (err) {
-        log.warn('Failed to set telemetry filterlist artifact', { error: { message: err.message } });
+      } catch (error) {
+        log.warn('Failed to set telemetry filterlist artifact', { error });
         filterList.resetAllToDefault();
-        await taskMetricsService.end(trace, err);
+        await taskMetricsService.end(trace, error);
         return 0;
       }
     },

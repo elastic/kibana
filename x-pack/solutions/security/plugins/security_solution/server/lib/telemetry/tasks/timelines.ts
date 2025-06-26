@@ -78,9 +78,9 @@ export function createTelemetryTimelineTaskConfig() {
         await taskMetricsService.end(trace);
 
         return counter;
-      } catch (err) {
-        logger.error('could not complete task', { error: err });
-        await taskMetricsService.end(trace, err);
+      } catch (error) {
+        logger.error('could not complete task', { error });
+        await taskMetricsService.end(trace, error);
         return 0;
       }
     },

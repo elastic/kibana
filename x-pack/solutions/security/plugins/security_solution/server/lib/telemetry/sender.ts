@@ -283,10 +283,8 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
       }
 
       return false;
-    } catch (e) {
-      this.logger.warn('Error pinging telemetry services', {
-        error: e.message,
-      } as LogMeta);
+    } catch (error) {
+      this.logger.warn('Error pinging telemetry services', { error });
 
       return false;
     }
@@ -497,9 +495,9 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
         incrementBy: events.length,
       });
       this.logger.debug('Events sent!. Response', { status: resp.status } as LogMeta);
-    } catch (err) {
-      this.logger.warn('Error sending events', { error: JSON.stringify(err) } as LogMeta);
-      const errorStatus = err?.response?.status;
+    } catch (error) {
+      this.logger.warn('Error sending events', { error });
+      const errorStatus = error?.response?.status;
       if (errorStatus !== undefined && errorStatus !== null) {
         this.telemetryUsageCounter?.incrementCounter({
           counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),

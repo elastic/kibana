@@ -97,11 +97,9 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
         await taskMetricsService.end(trace);
 
         return documents.length;
-      } catch (err) {
-        log.warn(`Error running endpoint alert telemetry task`, {
-          error: JSON.stringify(err),
-        } as LogMeta);
-        await taskMetricsService.end(trace, err);
+      } catch (error) {
+        log.warn(`Error running endpoint alert telemetry task`, { error });
+        await taskMetricsService.end(trace, error);
         return 0;
       }
     },
@@ -143,10 +141,8 @@ class EndpointMetadataProcessor {
         policies.delete(DefaultEndpointPolicyIdToIgnore);
         return policies;
       })
-      .catch((e) => {
-        this.logger.warn('Error fetching fleet agents, using an empty value', {
-          error: JSON.stringify(e),
-        } as LogMeta);
+      .catch((error) => {
+        this.logger.warn('Error fetching fleet agents, using an empty value', { error });
         return new Map();
       });
     const endpointPolicyById = await this.endpointPolicies(policyIdByFleetAgentId.values());
@@ -162,10 +158,8 @@ class EndpointMetadataProcessor {
         }
         return response;
       })
-      .catch((e) => {
-        this.logger.warn('Error fetching policy responses, using an empty value', {
-          error: JSON.stringify(e),
-        } as LogMeta);
+      .catch((error) => {
+        this.logger.warn('Error fetching policy responses, using an empty value', { error });
         return new Map();
       });
 
@@ -180,10 +174,8 @@ class EndpointMetadataProcessor {
         }
         return response;
       })
-      .catch((e) => {
-        this.logger.warn('Error fetching endpoint metadata, using an empty value', {
-          error: JSON.stringify(e),
-        } as LogMeta);
+      .catch((error) => {
+        this.logger.warn('Error fetching endpoint metadata, using an empty value', { error });
         return new Map();
       });
 
@@ -212,13 +204,13 @@ class EndpointMetadataProcessor {
         );
         telemetryPayloads.push(...payloads);
       }
-    } catch (e) {
+    } catch (error) {
       // something happened in the middle of the pagination, log the error
       // and return what we collect so far instead of aborting the
       // whole execution
       this.logger.warn('Error fetching endpoint metrics by id', {
-        error: JSON.stringify(e),
-      } as LogMeta);
+        error,
+      });
     }
 
     return telemetryPayloads;

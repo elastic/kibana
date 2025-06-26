@@ -110,9 +110,9 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
 
         await taskMetricsService.end(trace);
         return 0;
-      } catch (err) {
-        logger.error('could not complete task', { error: err } as LogMeta);
-        await taskMetricsService.end(trace, err);
+      } catch (error) {
+        logger.error('could not complete task', { error });
+        await taskMetricsService.end(trace, error);
         return 0;
       }
     },

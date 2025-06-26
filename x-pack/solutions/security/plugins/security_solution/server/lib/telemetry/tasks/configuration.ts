@@ -120,14 +120,12 @@ export function createTelemetryConfigurationTaskConfig() {
 
         await taskMetricsService.end(trace);
 
-        log.info('Updated TelemetryConfiguration', {
-          configuration: telemetryConfiguration,
-        } as LogMeta);
+        log.trace('Updated TelemetryConfiguration');
         return 0;
-      } catch (err) {
-        log.warn('Failed to set telemetry configuration', { error: err.message });
+      } catch (error) {
+        log.warn('Failed to set telemetry configuration', { error });
         telemetryConfiguration.resetAllToDefault();
-        await taskMetricsService.end(trace, err);
+        await taskMetricsService.end(trace, error);
         return 0;
       }
     },
