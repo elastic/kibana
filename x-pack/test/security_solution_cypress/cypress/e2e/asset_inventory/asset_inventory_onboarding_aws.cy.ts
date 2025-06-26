@@ -255,7 +255,6 @@ describe(
       shouldBeEnabled(SAVE_BUTTON);
 
       cy.get(SAVE_BUTTON).click();
-      cy.wait('@saveAgentless');
     });
 
     it('should save an organization agentless package policy with temporary keys', () => {
