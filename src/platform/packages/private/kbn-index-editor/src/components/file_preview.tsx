@@ -69,7 +69,11 @@ export const FilesPreview: FC = () => {
       const previewResults = await Promise.allSettled(
         filesStatus.map((fileStatus, index) => {
           if (fileStatus.data) {
-            return previewDocs(fileStatus.data, fileStatus.results?.ingest_pipeline!, 10);
+            return previewDocs(
+              fileStatus.data.slice(1, FILE_PREVIEW_LIMIT + 1),
+              fileStatus.results?.ingest_pipeline!,
+              FILE_PREVIEW_LIMIT
+            );
           }
         })
       );
