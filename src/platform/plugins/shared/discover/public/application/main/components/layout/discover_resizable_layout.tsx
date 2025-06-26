@@ -13,7 +13,7 @@ import {
   ResizableLayoutDirection,
   ResizableLayoutMode,
 } from '@kbn/resizable-layout';
-import React, { useState, type ReactNode, useCallback } from 'react';
+import React, { useState, type ReactNode, useCallback, type ComponentProps } from 'react';
 import { css } from '@emotion/react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import useObservable from 'react-use/lib/useObservable';
@@ -51,7 +51,7 @@ export const InternalDiscoverResizableLayout = ({
   const [sidebarWidth, setSidebarWidth] = useRestorableState(
     'sidebarWidth',
     () => {
-      const widthInLocalStorage = Number(storage.get(SIDEBAR_WIDTH_KEY));
+      const widthInLocalStorage = Number(storage?.get(SIDEBAR_WIDTH_KEY));
       return widthInLocalStorage || defaultSidebarWidth;
     },
     {
@@ -102,6 +102,8 @@ export const InternalDiscoverResizableLayout = ({
 export const DiscoverResizableLayout = withRestorableState(
   React.memo(InternalDiscoverResizableLayout)
 );
+
+export type DiscoverResizableLayoutProps = ComponentProps<typeof DiscoverResizableLayout>;
 
 const dscPageBodyContentsCss = css`
   overflow: hidden;
