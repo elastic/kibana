@@ -32,6 +32,7 @@ export const updateOverwriteExceptionListItem = async ({
   meta,
   user,
   tags,
+  shouldPreserveExistingTags,
   type,
 }: UpdateExceptionListItemOptions): Promise<ExceptionListItemSchema | null> => {
   const savedObjectType = getSavedObjectType({ namespaceType });
@@ -49,6 +50,12 @@ export const updateOverwriteExceptionListItem = async ({
       existingComments: exceptionListItem.comments,
       user,
     });
+
+    let updatedTags = tags ?? [];
+    if (shouldPreserveExistingTags) {
+      updatedTags = Array.from(new Set(...updatedTags, ...exceptionListItem.tags));
+    }
+
     const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(
       savedObjectType,
       {
@@ -65,7 +72,7 @@ export const updateOverwriteExceptionListItem = async ({
         meta,
         name: name ?? exceptionListItem.name,
         os_types: osTypes,
-        tags: tags ?? exceptionListItem.tags,
+        tags: updatedTags,
         tie_breaker_id: exceptionListItem.tie_breaker_id,
         type: type ?? exceptionListItem.type,
         updated_by: user,

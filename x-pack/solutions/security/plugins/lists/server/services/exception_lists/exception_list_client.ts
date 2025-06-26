@@ -376,6 +376,7 @@ export class ExceptionListClient {
       namespaceType: 'agnostic',
       osTypes,
       savedObjectsClient,
+      shouldPreserveExistingTags: !Array.isArray(tags),
       tags,
       type,
       user,
@@ -625,6 +626,8 @@ export class ExceptionListClient {
       type,
     };
 
+    const shouldPreserveExistingTags = !Array.isArray(tags);
+
     if (this.enableServerExtensionPoints) {
       updatedItem = await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreUpdateItem',
@@ -642,6 +645,7 @@ export class ExceptionListClient {
     return updateExceptionListItem({
       ...updatedItem,
       savedObjectsClient,
+      shouldPreserveExistingTags,
       user,
     });
   };
@@ -700,6 +704,8 @@ export class ExceptionListClient {
       type,
     };
 
+    const shouldPreserveExistingTags = !Array.isArray(tags);
+
     if (this.enableServerExtensionPoints) {
       updatedItem = await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreUpdateItem',
@@ -717,6 +723,7 @@ export class ExceptionListClient {
     return updateOverwriteExceptionListItem({
       ...updatedItem,
       savedObjectsClient,
+      shouldPreserveExistingTags,
       user,
     });
   };

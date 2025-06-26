@@ -47,6 +47,7 @@ export interface UpdateExceptionListItemOptions {
   meta: MetaOrUndefined;
   user: string;
   tags: TagsOrUndefined;
+  shouldPreserveExistingTags: boolean;
   tieBreaker?: string;
   type: ExceptionListItemTypeOrUndefined;
 }
@@ -66,6 +67,7 @@ export const updateExceptionListItem = async ({
   meta,
   user,
   tags,
+  shouldPreserveExistingTags,
   type,
 }: UpdateExceptionListItemOptions): Promise<ExceptionListItemSchema | null> => {
   const savedObjectType = getSavedObjectType({ namespaceType });
@@ -83,6 +85,10 @@ export const updateExceptionListItem = async ({
       existingComments: exceptionListItem.comments,
       user,
     });
+    let updatedTags = tags ?? [];
+    if (shouldPreserveExistingTags) {
+      updatedTags = Array.from(new Set(...updatedTags, ...exceptionListItem.tags));
+    }
     const savedObject = await savedObjectsClient.update<ExceptionListSoSchema>(
       savedObjectType,
       exceptionListItem.id,
@@ -94,7 +100,7 @@ export const updateExceptionListItem = async ({
         meta,
         name,
         os_types: osTypes,
-        tags,
+        tags: updatedTags,
         type,
         updated_by: user,
       },
