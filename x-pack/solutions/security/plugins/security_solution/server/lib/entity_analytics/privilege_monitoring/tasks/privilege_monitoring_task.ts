@@ -179,7 +179,7 @@ const runPrivilegeMonitoringTask = async ({
     }
     await dataClient.plainIndexSync();
   } catch (e) {
-    logger.error(`[Privilege Monitoring] Error running privilege monitoring task ${e.message}`);
+    logger.error(`[Privilege Monitoring] Error running privilege monitoring task: ${e.message}`);
   }
   return { state: updatedState };
 };
