@@ -39,7 +39,11 @@ export const LOCAL_STORAGE_3P_INTEGRATIONS_CALLOUT_KEY =
 export const LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY = 'cspLatestVulnerabilitiesGrouping';
 export const LOCAL_STORAGE_FINDINGS_GROUPING_KEY = 'cspLatestFindingsGrouping';
 
+export const LOCAL_STORAGE_NAMESPACE_KEY = 'cloudPosture:dashboard:namespace';
+
 export const SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED = 'cloudPosture:fieldsModal:showSelected';
+
+export const DEFAULT_NAMESPACE = 'default';
 
 export type CloudPostureIntegrations = Record<
   CloudSecurityPolicyTemplate,
@@ -178,6 +182,7 @@ export const FINDINGS_GROUPING_OPTIONS = {
   CLOUD_ACCOUNT_ID: 'cloud.account.id',
   ORCHESTRATOR_CLUSTER_NAME: 'orchestrator.cluster.name',
   ORCHESTRATOR_CLUSTER_ID: 'orchestrator.cluster.id',
+  NAMESPACE: 'data_stream.namespace',
 };
 
 export const VULNERABILITY_FIELDS = {
