@@ -21,6 +21,32 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
+  const defaultNamespace = 'default';
+
+  const namespaceAgnosticObject = {
+    type: 'globaltype',
+    id: 'globaltype-id',
+    attributes: {
+      title: 'Updated title attribute!',
+    },
+  };
+
+  const singleDefaultNamespaceObject = {
+    type: 'isolatedtype',
+    id: 'defaultspace-isolatedtype-id',
+    attributes: {
+      title: 'Updated title attribute!',
+    },
+  };
+
+  const multiDefaultNamespaceObject = {
+    type: 'index-pattern',
+    id: 'defaultspace-index-pattern-id',
+    attributes: {
+      title: 'Updated title attribute!',
+    },
+  };
+
   describe('low-level saved object api integration', () => {
     before(() =>
       esArchiver.load(
@@ -51,20 +77,11 @@ export default function ({ getService }: FtrProviderContext) {
           },
         };
 
-        const namespaceAgnosticObject = {
-          type: 'globaltype',
-          id: 'globaltype-id',
-          attributes: {
-            title: 'Updated title attribute!',
-          },
-        };
-
-        const currentNamespace = 'default';
         const namespace = 'space_1';
 
-        it('handles single namespace objects', async () => {
+        it('handles single namespace objects in an non-default space', async () => {
           const response = await supertest
-            .put(`${getUrlPrefix(currentNamespace)}/api/saved_objects/_bulk_update`)
+            .put(`${getUrlPrefix(defaultNamespace)}/api/saved_objects/_bulk_update`)
             .send([{ ...singleNamespaceObject, namespace }])
             .expect(200);
 
@@ -91,12 +108,47 @@ export default function ({ getService }: FtrProviderContext) {
               namespace, // namespace has not changed
             })
           );
-          expect((result._source as any).namespaces).toBeUndefined();
+          expect(result._source).not.toHaveProperty('namespaces');
         });
 
-        it('handles multi namespace objects', async () => {
+        it('handles single namespace objects in the default space', async () => {
           const response = await supertest
-            .put(`${getUrlPrefix(currentNamespace)}/api/saved_objects/_bulk_update`)
+            .put(`${getUrlPrefix(defaultNamespace)}/api/saved_objects/_bulk_update`)
+            .send([{ ...singleDefaultNamespaceObject, namespace: defaultNamespace }])
+            .expect(200);
+
+          const savedObjects = JSON.parse(response.text);
+          expect(savedObjects).toEqual({
+            saved_objects: [
+              expect.objectContaining({
+                ...singleDefaultNamespaceObject,
+                namespaces: [defaultNamespace],
+              }),
+            ],
+          });
+
+          // Verify the raw document
+          const result = await es.get({
+            index: '.kibana',
+            id: `${singleDefaultNamespaceObject.type}:${singleDefaultNamespaceObject.id}`,
+          });
+
+          expect(result.found).toBeTruthy();
+          expect(result._source).toBeDefined();
+          expect(result._source).toEqual(
+            expect.objectContaining({
+              [singleDefaultNamespaceObject.type]: expect.objectContaining({
+                ...singleDefaultNamespaceObject.attributes,
+              }),
+            })
+          );
+          expect(result._source).not.toHaveProperty('namespace'); // there should be no namespace/namespaces
+          expect(result._source).not.toHaveProperty('namespaces');
+        });
+
+        it('handles multi namespace objects in an non-default space', async () => {
+          const response = await supertest
+            .put(`${getUrlPrefix(defaultNamespace)}/api/saved_objects/_bulk_update`)
             .send([{ ...multiNamespaceObject, namespace }])
             .expect(200);
 
@@ -123,12 +175,47 @@ export default function ({ getService }: FtrProviderContext) {
               namespaces: [namespace], // namespace has not changed
             })
           );
-          expect((result._source as any).namespace).toBeUndefined();
+          expect(result._source).not.toHaveProperty('namespace');
+        });
+
+        it('handles multi namespace objects in the default space', async () => {
+          const response = await supertest
+            .put(`${getUrlPrefix(defaultNamespace)}/api/saved_objects/_bulk_update`)
+            .send([{ ...multiDefaultNamespaceObject, namespace: defaultNamespace }])
+            .expect(200);
+
+          const savedObjects = JSON.parse(response.text);
+          expect(savedObjects).toEqual({
+            saved_objects: [
+              expect.objectContaining({
+                ...multiDefaultNamespaceObject,
+                namespaces: [defaultNamespace],
+              }),
+            ],
+          });
+
+          // Verify the raw document
+          const result = await es.get({
+            index: '.kibana_analytics',
+            id: `${multiDefaultNamespaceObject.type}:${multiDefaultNamespaceObject.id}`,
+          });
+
+          expect(result.found).toBeTruthy();
+          expect(result._source).toBeDefined();
+          expect(result._source).toEqual(
+            expect.objectContaining({
+              [multiDefaultNamespaceObject.type]: expect.objectContaining({
+                ...multiDefaultNamespaceObject.attributes,
+              }),
+              namespaces: [defaultNamespace], // namespace has not changed
+            })
+          );
+          expect(result._source).not.toHaveProperty('namespace');
         });
 
         it('handles namespace agnostic objects', async () => {
           const response = await supertest
-            .put(`${getUrlPrefix(currentNamespace)}/api/saved_objects/_bulk_update`)
+            .put(`${getUrlPrefix(defaultNamespace)}/api/saved_objects/_bulk_update`)
             .send([{ ...namespaceAgnosticObject, namespace }])
             .expect(200);
 
@@ -152,8 +239,8 @@ export default function ({ getService }: FtrProviderContext) {
               }),
             })
           );
-          expect((result._source as any).namespace).toBeUndefined();
-          expect((result._source as any).namespaces).toBeUndefined();
+          expect(result._source).not.toHaveProperty('namespace');
+          expect(result._source).not.toHaveProperty('namespaces');
         });
       });
 
@@ -161,14 +248,6 @@ export default function ({ getService }: FtrProviderContext) {
         const singleNamespaceObject = {
           type: 'isolatedtype',
           id: 'space2-isolatedtype-id',
-          attributes: {
-            title: 'Updated title attribute!',
-          },
-        };
-
-        const singleDefaultNamespaceObject = {
-          type: 'isolatedtype',
-          id: 'defaultspace-isolatedtype-id',
           attributes: {
             title: 'Updated title attribute!',
           },
@@ -182,23 +261,6 @@ export default function ({ getService }: FtrProviderContext) {
           },
         };
 
-        const multiDefaultNamespaceObject = {
-          type: 'index-pattern',
-          id: 'defaultspace-index-pattern-id',
-          attributes: {
-            title: 'Updated title attribute!',
-          },
-        };
-
-        const namespaceAgnosticObject = {
-          type: 'globaltype',
-          id: 'globaltype-id',
-          attributes: {
-            title: 'Updated title attribute!',
-          },
-        };
-
-        const defaultNamespace = 'default';
         const currentNamespace = 'space_1';
         const namespace = 'space_2';
 
@@ -231,7 +293,7 @@ export default function ({ getService }: FtrProviderContext) {
               namespace, // namespace has not changed
             })
           );
-          expect((result._source as any).namespaces).toBeUndefined();
+          expect(result._source).not.toHaveProperty('namespaces');
         });
 
         it('handles single namespace objects in the default space', async () => {
@@ -265,8 +327,8 @@ export default function ({ getService }: FtrProviderContext) {
               }),
             })
           );
-          expect((result._source as any).namespace).toBeUndefined(); // there should be no namespace/namespaces
-          expect((result._source as any).namespaces).toBeUndefined();
+          expect(result._source).not.toHaveProperty('namespace'); // there should be no namespace/namespaces
+          expect(result._source).not.toHaveProperty('namespaces');
         });
 
         it('handles multi namespace objects in another non-default space', async () => {
@@ -298,7 +360,7 @@ export default function ({ getService }: FtrProviderContext) {
               namespaces: [namespace], // namespace has not changed
             })
           );
-          expect((result._source as any).namespace).toBeUndefined();
+          expect(result._source).not.toHaveProperty('namespace');
         });
 
         it('handles multi namespace objects in the default space', async () => {
@@ -333,7 +395,7 @@ export default function ({ getService }: FtrProviderContext) {
               namespaces: [defaultNamespace], // namespace has not changed
             })
           );
-          expect((result._source as any).namespace).toBeUndefined();
+          expect(result._source).not.toHaveProperty('namespace');
         });
 
         it('handles namespace agnostic objects', async () => {
@@ -362,8 +424,8 @@ export default function ({ getService }: FtrProviderContext) {
               }),
             })
           );
-          expect((result._source as any).namespace).toBeUndefined();
-          expect((result._source as any).namespaces).toBeUndefined();
+          expect(result._source).not.toHaveProperty('namespace');
+          expect(result._source).not.toHaveProperty('namespaces');
         });
       });
     });
