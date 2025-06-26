@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { schema, type TypeOf } from '@kbn/config-schema';
-
-export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
-});
-
-export type InferenceConfig = TypeOf<typeof configSchema>;
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-inference-tracing-config'],
+};

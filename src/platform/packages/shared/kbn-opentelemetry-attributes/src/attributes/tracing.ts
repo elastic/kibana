@@ -6,18 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { TracingConfig } from '@kbn/tracing-config';
 
-/**
- * Configuration for OpenTelemetry
- */
-export interface TelemetryConfig {
-  /**
-   * Tracing config. See {@link TracingConfig}.
-   */
-  tracing?: TracingConfig;
-  /**
-   * Whether telemetry collection is enabled.
-   */
-  enabled?: boolean;
-}
+export const ATTR_TRANSACTION_NAME = 'transaction.name';
+export const ATTR_TRANSACTION_TYPE = 'transaction.type';
+export const ATTR_SPAN_TYPE = 'span.type';
+export const ATTR_SPAN_SUBTYPE = 'span.subtype';
+export const ATTR_SPAN_DESTINATION_SERVICE_RESOURCE = 'span.destination.service.resource';

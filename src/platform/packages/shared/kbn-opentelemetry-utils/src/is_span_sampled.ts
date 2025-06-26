@@ -6,18 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { TracingConfig } from '@kbn/tracing-config';
 
-/**
- * Configuration for OpenTelemetry
- */
-export interface TelemetryConfig {
-  /**
-   * Tracing config. See {@link TracingConfig}.
-   */
-  tracing?: TracingConfig;
-  /**
-   * Whether telemetry collection is enabled.
-   */
-  enabled?: boolean;
+import { TraceFlags } from '@opentelemetry/api';
+
+export function isSpanSampled(traceFlags: TraceFlags) {
+  // eslint-disable-next-line no-bitwise
+  return (traceFlags & TraceFlags.SAMPLED) === TraceFlags.SAMPLED;
 }

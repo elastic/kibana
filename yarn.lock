@@ -6001,6 +6001,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/inference-tracing-config@link:x-pack/platform/packages/shared/kbn-inference-tracing-config":
+  version "0.0.0"
+  uid ""
+
 "@kbn/inference-tracing@link:x-pack/platform/packages/shared/kbn-inference-tracing":
   version "0.0.0"
   uid ""
@@ -6610,6 +6614,14 @@
   uid ""
 
 "@kbn/openapi-generator@link:src/platform/packages/shared/kbn-openapi-generator":
+  version "0.0.0"
+  uid ""
+
+"@kbn/opentelemetry-attributes@link:src/platform/packages/shared/kbn-opentelemetry-attributes":
+  version "0.0.0"
+  uid ""
+
+"@kbn/opentelemetry-utils@link:src/platform/packages/shared/kbn-opentelemetry-utils":
   version "0.0.0"
   uid ""
 
@@ -7878,6 +7890,10 @@
   uid ""
 
 "@kbn/traced-es-client@link:src/platform/packages/shared/kbn-traced-es-client":
+  version "0.0.0"
+  uid ""
+
+"@kbn/tracing-config@link:src/platform/packages/shared/kbn-tracing-config":
   version "0.0.0"
   uid ""
 

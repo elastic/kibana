@@ -6,18 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { TracingConfig } from '@kbn/tracing-config';
 
-/**
- * Configuration for OpenTelemetry
- */
-export interface TelemetryConfig {
-  /**
-   * Tracing config. See {@link TracingConfig}.
-   */
-  tracing?: TracingConfig;
-  /**
-   * Whether telemetry collection is enabled.
-   */
-  enabled?: boolean;
-}
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-tracing-config'],
+};
