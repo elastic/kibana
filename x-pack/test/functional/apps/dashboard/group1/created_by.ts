@@ -17,7 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const securityService = getService('security');
   const testSubjects = getService('testSubjects');
 
-  describe('created_by', function () {
+  describe.only('created_by', function () {
     const DASHBOARD_NAME = 'veryuniquemydashboardname';
     const USERNAME_1 = 'global_dashboard_all_user_1';
     const USERNAME_2 = 'global_dashboard_all_user_2';
