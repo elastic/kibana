@@ -41,13 +41,12 @@ import { getPresets } from '../utils/get_presets';
 import { getWeekdayInfo } from '../utils/get_weekday_info';
 import { RecurringSchedule } from '../types';
 import * as i18n from '../translations';
+import { convertStringToMomentOptional, convertMomentToStringOptional } from '../converters/moment';
 
 /**
  * Using EuiForm in `div` mode since this is meant to be integrated in a larger form
  */
 const UseField = getUseField({ component: Field });
-export const toMoment = (value?: string): Moment | undefined => (value ? moment(value) : undefined);
-export const toString = (value?: Moment): string => value?.toISOString() ?? '';
 
 export interface RecurringScheduleFieldsProps {
   startDate?: string;
@@ -211,8 +210,8 @@ export const RecurringScheduleFormFields = memo(
                               },
                             },
                           ],
-                          serializer: toString,
-                          deserializer: toMoment,
+                          serializer: convertMomentToStringOptional,
+                          deserializer: convertStringToMomentOptional,
                         }}
                         componentProps={{
                           'data-test-subj': 'until-field',
