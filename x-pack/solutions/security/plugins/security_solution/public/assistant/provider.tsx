@@ -87,7 +87,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     notifications,
   ]);
 
-  const PROMPT_CONTEXTS = useFindPromptContexts({
+  const promptContexts = useFindPromptContexts({
     context: {
       isAssistantEnabled:
         hasEnterpriseLicence &&
@@ -107,9 +107,9 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
   );
   useEffect(() => {
     if (isEmpty(promptContext)) {
-      elasticAssistantSharedState.promptContexts.setPromptContext(PROMPT_CONTEXTS);
+      elasticAssistantSharedState.promptContexts.setPromptContext(promptContexts);
     }
-  }, [elasticAssistantSharedState.promptContexts, promptContext, PROMPT_CONTEXTS]);
+  }, [elasticAssistantSharedState.promptContexts, promptContext, promptContexts]);
 
   if (!assistantContextValue) {
     return null;
