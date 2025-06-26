@@ -29,10 +29,16 @@ export function extractDashboardState(state?: unknown): Partial<DashboardState> 
 
     dashboardState = {
       ...dashboardState,
-      ...extractPanelsState(stateAsObject),
       ...extractSearchState(stateAsObject),
       ...extractSettings(stateAsObject),
     };
+
+    const { panels, savedObjectReferences } = extractPanelsState(stateAsObject);
+    if (panels?.length) dashboardState.panels = panels;
+    if (savedObjectReferences?.length) {
+      dashboardState.references = [...(dashboardState.references ?? []), ...savedObjectReferences];
+    }
   }
+
   return dashboardState;
 }
