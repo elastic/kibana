@@ -221,7 +221,7 @@ function getFeaturePrivileges({
   const allActions = [...allActionsSet];
   const readActions = [...readActionsSet];
   const allSavedObjectsManageOwnershipActions = typesSupportingAccessControl.map((type) =>
-    actions.savedObject.get(type, 'manageOwnership')
+    actions.savedObject.get(type, 'manage_ownership')
   );
   return {
     features: featurePrivileges,
