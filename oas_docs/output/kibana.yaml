@@ -43663,7 +43663,7 @@ paths:
                   "@timestamp": "2025-06-25T23:45:00.000Z",
                   "message": {
                     "role": "user",
-                    "content": "Is my Elasticsearch cluster healthy right now? Include shard stats too."
+                    "content": "Is my Elasticsearch cluster healthy right now?"
                   }
                 }
               ],
@@ -43683,7 +43683,7 @@ paths:
                 }
               }
             ],
-            "instructions": ["When the user asks about Elasticsearch cluster health, do not respond directly. Instead call the get_cluster_health function with includeShardStats=true, then summarise the response in plain English."]
+            "instructions": ["When the user asks about Elasticsearch cluster health, use the get_cluster_health tool to retrieve cluster health, then summarise the response in plain English."]
             }'
       x-state: Technical Preview
   /api/osquery/live_queries:
@@ -66788,7 +66788,7 @@ components:
               "@timestamp": "2025-06-25T23:45:00.000Z",
               "message": {
                 "role": "user",
-                "content": "Is my Elasticsearch cluster healthy right now? Include shard stats too."
+                "content": "Is my Elasticsearch cluster healthy right now?"
               }
             }
           ],
@@ -66808,7 +66808,7 @@ components:
               }
             }
           ],
-          "instructions": ["When the user asks about Elasticsearch cluster health, do not respond directly. Instead call the get_cluster_health function with includeShardStats=true, then summarise the response in plain English."]
+          "instructions": ["When the user asks about Elasticsearch cluster health, use the get_cluster_health tool to retrieve cluster health, then summarise the response in plain English."]
         }
     Observability_AI_Assistant_API_ChatCompleteResponseExample:
       summary: Get a chat completion from the Observability AI Assistant
