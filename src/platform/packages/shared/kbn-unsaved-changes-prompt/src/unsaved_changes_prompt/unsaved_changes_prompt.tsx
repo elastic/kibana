@@ -87,7 +87,11 @@ export const useUnsavedChangesPrompt = (props: Props) => {
       cancelButtonText = DEFAULT_CANCEL_BUTTON,
     } = props;
 
-    const unblock = history.block((state) => {
+    const unblock = history.block((state, action) => {
+      if (action === 'REPLACE') {
+        return;
+      }
+
       async function confirmAsync() {
         const confirmResponse = await openConfirm(messageText, {
           title: titleText,
