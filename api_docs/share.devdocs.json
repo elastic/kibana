@@ -231,6 +231,94 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "share",
+        "id": "def-public.useShareTypeContext",
+        "type": "Function",
+        "tags": [],
+        "label": "useShareTypeContext",
+        "description": [],
+        "signature": [
+          "<T extends \"link\" | \"embed\" | \"integration\", G extends T extends \"integration\" ? string : never>(shareType: T, groupId?: G | undefined) => { objectTypeMeta: Omit<Partial<{ link: ",
+          "LinkShareUIConfig",
+          "; embed: ",
+          "EmbedShareUIConfig",
+          "; integration: { [key: string]: ShareActionUserInputBase<Record<string, unknown>>; export: ExportShareUIConfig; }; }>, \"config\"> & { config: T extends \"integration\" ? { [key: string]: ShareActionUserInputBase<Record<string, unknown>>; export: ExportShareUIConfig; }[G] | undefined : Partial<{ link: ",
+          "LinkShareUIConfig",
+          "; embed: ",
+          "EmbedShareUIConfig",
+          "; integration: { [key: string]: ShareActionUserInputBase<Record<string, unknown>>; export: ExportShareUIConfig; }; }>[T]; }; shareMenuItems: T extends \"integration\" ? (Extract<",
+          "LinkShareConfig",
+          ", { shareType: T; groupId?: G | undefined; }> | Extract<",
+          "EmbedShareConfig",
+          ", { shareType: T; groupId?: G | undefined; }> | Extract<",
+          "ShareIntegrationConfig",
+          ", { shareType: T; groupId?: G | undefined; }> | Extract<",
+          "ExportShareConfig",
+          ", { shareType: T; groupId?: G | undefined; }> | Extract<",
+          "ExportShareDerivativesConfig",
+          ", { shareType: T; groupId?: G | undefined; }> | Extract<",
+          "LegacyIntegrationConfig",
+          ", { shareType: T; groupId?: G | undefined; }>)[] : Extract<",
+          "LinkShareConfig",
+          ", { shareType: T; }> | Extract<",
+          "EmbedShareConfig",
+          ", { shareType: T; }> | Extract<",
+          "ShareIntegrationConfig",
+          ", { shareType: T; }> | Extract<",
+          "ExportShareConfig",
+          ", { shareType: T; }> | Extract<",
+          "ExportShareDerivativesConfig",
+          ", { shareType: T; }> | Extract<",
+          "LegacyIntegrationConfig",
+          ", { shareType: T; }>; onClose: () => void; objectType: string; objectTypeAlias?: string | undefined; objectId?: string | undefined; shareableUrl?: string | undefined; shareableUrlForSavedObject?: string | undefined; shareableUrlLocatorParams?: { locator: ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<any>; params: any; } | undefined; sharingData: { [key: string]: unknown; }; isDirty: boolean; asExport?: boolean | undefined; anchorElement?: HTMLElement | undefined; allowShortUrl: boolean; publicAPIEnabled?: boolean | undefined; }"
+        ],
+        "path": "src/platform/plugins/shared/share/public/components/context/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "share",
+            "id": "def-public.useShareTypeContext.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "shareType",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/plugins/shared/share/public/components/context/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.useShareTypeContext.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "groupId",
+            "description": [],
+            "signature": [
+              "G | undefined"
+            ],
+            "path": "src/platform/plugins/shared/share/public/components/context/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [

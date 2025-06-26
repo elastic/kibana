@@ -11,7 +11,7 @@ import { WarningCheckbox, WarningCheckboxProps } from './warning_step_checkbox';
 
 export const IncompatibleDataInDataStreamWarningCheckbox: React.FunctionComponent<
   WarningCheckboxProps
-> = ({ isChecked, onChange, id }) => {
+> = ({ isChecked, onChange, id, meta }) => {
   return (
     <WarningCheckbox
       isChecked={isChecked}
@@ -19,11 +19,27 @@ export const IncompatibleDataInDataStreamWarningCheckbox: React.FunctionComponen
       warningId={id}
       label={
         <FormattedMessage
+          tagName="b"
           id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.incompatibleDataWarningTitle"
           defaultMessage="Reindex all incompatible data for this data stream"
         />
       }
-      description={null}
+      dataStreamName={meta?.dataStreamName}
+      description={
+        meta &&
+        typeof meta.indicesRequiringUpgradeCount === 'number' &&
+        meta.indicesRequiringUpgradeCount > 0 && (
+          <FormattedMessage
+            tagName="p"
+            id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.incompatibleDataWarningDescription"
+            defaultMessage="{count, plural, =1 {# backing index} other {# backing indices}}, including current write index, will be re-indexed. Current write index will be rolled over first."
+            values={{
+              count: meta.indicesRequiringUpgradeCount,
+            }}
+          />
+        )
+      }
+      data-test-subj="incompatibleDataWarningCheckbox"
     />
   );
 };
