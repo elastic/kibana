@@ -222,7 +222,7 @@ describe('Assignees', () => {
     });
 
     expect(spyOnBulkGetUserProfiles).toHaveBeenCalledWith({
-      userProfile: expect.anything(),
+      security: expect.anything(),
       uids: [userProfile.uid],
     });
 
