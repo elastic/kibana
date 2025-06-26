@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
+import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type {
   SavedObjectsChangeOwnershipObject,
   SavedObjectsChangeOwnershipOptions,
@@ -15,11 +17,20 @@ import type {
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type {
   ISavedObjectTypeRegistry,
-  ISavedObjectsSerializer,
   ISavedObjectsSecurityExtension,
+  ISavedObjectsSerializer,
   SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
-import { DEFAULT_REFRESH_SETTING } from '../constants';
+import {
+  getBulkOperationError,
+  getExpectedVersionProperties,
+  rawDocExistsInNamespace,
+  type Either,
+  isLeft,
+  isRight,
+  left,
+  right,
+} from './utils';
 import type { ApiExecutionContext } from './types';
 
 export interface PerformChangeOwnershipParams<T = unknown> {
@@ -33,9 +44,9 @@ interface ChangeObjectOwnershipParams<T = unknown> {
   client: ApiExecutionContext['client'];
   serializer: ISavedObjectsSerializer;
   getIndexForType: (type: string) => string;
-  securityExtension?: ISavedObjectsSecurityExtension;
   objects: SavedObjectsChangeOwnershipObject[];
   options: SavedObjectsChangeOwnershipOptions<T> & { namespace?: string };
+  securityExtension?: ISavedObjectsSecurityExtension;
 }
 
 export const performChangeOwnership = async <T>(
@@ -52,9 +63,9 @@ export const performChangeOwnership = async <T>(
     client,
     serializer,
     getIndexForType: commonHelper.getIndexForType.bind(commonHelper),
-    securityExtension,
     objects,
     options: { ...options, namespace },
+    securityExtension,
   });
 };
 
@@ -68,8 +79,8 @@ export const updateObjectOwnership = async <T>(
     client,
     serializer,
     getIndexForType,
-    securityExtension,
     objects,
+    securityExtension,
   } = params;
 
   if (!owner) {
@@ -84,155 +95,174 @@ export const updateObjectOwnership = async <T>(
     );
   }
 
-  // Validate objects and prepare for bulk get
   let bulkGetRequestIndexCounter = 0;
-  const validObjects: Array<{ type: string; id: string; esRequestIndex: number }> = [];
-  const errorResults: Array<{ id: string; type: string; error: any }> = [];
-
-  // First check if all objects are valid types and support access control
-  objects.forEach((object) => {
+  const expectedBulkGetResults: Array<
+    Either<
+      { id: string; type: string; error: any },
+      { type: string; id: string; esRequestIndex: number }
+    >
+  > = objects.map((object) => {
     const { type, id } = object;
 
     if (!allowedTypes.includes(type)) {
-      errorResults.push({
-        id,
-        type,
-        error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload,
-      });
-      return;
+      const error = SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      return left({ id, type, error });
     }
-
     if (!registry.supportsAccessControl(type)) {
-      errorResults.push({
-        id,
-        type,
-        error: SavedObjectsErrorHelpers.createBadRequestError(
-          `${type} doesn't support access control`
-        ).output.payload,
-      });
-      return;
+      const error = SavedObjectsErrorHelpers.createBadRequestError(
+        `The type "${type}" does not support access control.`
+      );
+      return left({ id, type, error });
     }
 
-    validObjects.push({
+    return right({
       type,
       id,
       esRequestIndex: bulkGetRequestIndexCounter++,
     });
   });
 
+  const validObjects = expectedBulkGetResults.filter(isRight);
   if (validObjects.length === 0) {
-    return { objects: errorResults } as unknown as SavedObjectsChangeOwnershipResponse<T>;
+    // We only have error results; return early to avoid potentially trying authZ checks for 0 types which would result in an exception.
+    return {
+      objects: expectedBulkGetResults.filter(isLeft).map(({ value }) => value),
+    } as unknown as SavedObjectsChangeOwnershipResponse<T>;
   }
 
-  const bulkGetDocs = validObjects.map(({ type, id }) => ({
-    _id: serializer.generateRawId(undefined, type, id),
-    _index: getIndexForType(type),
+  const bulkGetDocs = validObjects.map<estypes.MgetOperation>((x) => ({
+    _id: serializer.generateRawId(undefined, x.value.type, x.value.id),
+    _index: getIndexForType(x.value.type),
+    _source: ['type', 'namespaces', 'accessControl'],
   }));
 
-  try {
-    // Get all objects at once
-    const bulkGetResponse = await client.mget<SavedObjectsRawDocSource>(
-      { docs: bulkGetDocs },
-      { ignore: [404] }
-    );
+  const bulkGetResponse = bulkGetDocs.length
+    ? await client.mget<SavedObjectsRawDocSource>(
+        { docs: bulkGetDocs },
+        { ignore: [404], meta: true }
+      )
+    : undefined;
 
-    const time = new Date().toISOString();
-    const bulkOperationParams: any[] = [];
-    const results: Array<{ id: string; type: string; error?: any }> = [];
+  if (
+    bulkGetResponse &&
+    isNotFoundFromUnsupportedServer({
+      statusCode: bulkGetResponse.statusCode,
+      headers: bulkGetResponse.headers,
+    })
+  ) {
+    throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
+  }
+  const authObjects = validObjects.map((element) => {
+    const { type, id, esRequestIndex: index } = element.value;
+    const preflightResult = index !== undefined ? bulkGetResponse?.body.docs[index] : undefined;
+    return {
+      type,
+      id,
+      // @ts-expect-error MultiGetHit._source is optional
+      existingNamespaces: preflightResult?._source?.namespaces ?? [],
+      // @ts-expect-error MultiGetHit._source is optional
+      accessControl: preflightResult?._source?.accessControl ?? {},
+    };
+  });
 
-    // Process each valid object
-    for (let i = 0; i < validObjects.length; i++) {
-      const { type, id, esRequestIndex } = validObjects[i];
-      const doc = bulkGetResponse.docs?.[esRequestIndex];
+  const authorizationResult = await securityExtension?.authorizeChangeOwnership({
+    namespace,
+    objects: authObjects,
+  });
 
-      // Check if document was found
-      if (!doc || !('_source' in doc) || !doc._source) {
-        results.push({
-          id,
-          type,
-          error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload,
-        });
-        continue;
-      }
-
-      const existingSource = doc._source;
-      const existingNamespaces = existingSource.namespaces || [];
-
-      // Check authorization if security extension is available
-      if (securityExtension) {
-        const authorizationResult = await securityExtension.authorizeChangeOwnership({
-          namespace,
-          object: {
-            type,
-            id,
-            accessControl: existingSource.accessControl,
-            existingNamespaces,
-          },
-        });
-
-        if (authorizationResult?.status === 'unauthorized') {
-          results.push({
-            id,
-            type,
-            error: SavedObjectsErrorHelpers.decorateNotAuthorizedError(
-              new Error('Unauthorized to change ownership of this object.')
-            ).output.payload,
-          });
-          continue;
-        }
-      }
-
-      // Prepare document update - change ownership
-      const documentToSave = {
-        updated_at: time,
-        updated_by: owner,
-        accessControl: {
-          ...(existingSource.accessControl || {}),
-          owner,
-        },
-      };
-
-      // Add to bulk update operations
-      const rawId = serializer.generateRawId(undefined, type, id);
-      const index = getIndexForType(type);
-
-      bulkOperationParams.push({ update: { _id: rawId, _index: index } }, { doc: documentToSave });
-
-      // Add to results
-      results.push({ id, type });
+  const time = new Date().toISOString();
+  let bulkOperationRequestIndexCounter = 0;
+  const bulkOperationParams: estypes.BulkOperationContainer[] = [];
+  const expectedBulkOperationResults: Array<
+    Either<
+      { id: string; type: string; error: any },
+      { type: string; id: string; esRequestIndex?: number }
+    >
+  > = expectedBulkGetResults.map((expectedBulkGetResult) => {
+    if (isLeft(expectedBulkGetResult)) {
+      return expectedBulkGetResult;
     }
 
-    if (bulkOperationParams.length > 0) {
-      // Execute bulk update operation
-      const bulkResponse = await client.bulk({
+    const { id, type, esRequestIndex } = expectedBulkGetResult.value;
+    const doc = bulkGetResponse!.body.docs[esRequestIndex];
+    if (
+      isMgetError(doc) ||
+      !doc?.found ||
+      // @ts-expect-error MultiGetHit._source is optional
+      !rawDocExistsInNamespace(registry, doc, namespace)
+    ) {
+      const error = SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      return left({ id, type, error });
+    }
+    if (authorizationResult?.status !== 'fully_authorized') {
+      const error = SavedObjectsErrorHelpers.createBadRequestError(
+        `User is not authorized to change ownership of type "${type}".`
+      );
+      return left({ id, type, error });
+    }
+
+    const currentSource = doc._source;
+    // @ts-expect-error MultiGetHit._source is optional
+    const versionProperties = getExpectedVersionProperties(undefined, doc);
+
+    const expectedResult = {
+      type,
+      id,
+      esRequestIndex: bulkOperationRequestIndexCounter++,
+    };
+
+    const documentMetadata = {
+      _id: serializer.generateRawId(undefined, type, id),
+      _index: getIndexForType(type),
+      ...versionProperties,
+    };
+
+    const documentToSave = {
+      updated_at: time,
+      updated_by: owner,
+      accessControl: {
+        ...(currentSource?.accessControl || {}),
+        owner,
+      },
+    };
+
+    // @ts-expect-error BulkOperation.retry_on_conflict, BulkOperation.routing. BulkOperation.version, and BulkOperation.version_type are optional
+    bulkOperationParams.push({ update: documentMetadata }, { doc: documentToSave });
+
+    return right(expectedResult);
+  });
+
+  const bulkOperationResponse = bulkOperationParams.length
+    ? await client.bulk({
+        refresh: 'wait_for',
         operations: bulkOperationParams,
-        refresh: DEFAULT_REFRESH_SETTING,
-      });
+        require_alias: true,
+      })
+    : undefined;
 
-      // Process results with any errors from the bulk operation
-      if (bulkResponse?.items) {
-        for (let i = 0; i < bulkResponse.items.length; i += 2) {
-          const responseItem = bulkResponse.items[i];
-          const updateResponse = responseItem.update;
+  return {
+    objects: expectedBulkOperationResults.map<{ id: string; type: string; error?: any }>(
+      (expectedResult) => {
+        if (isLeft(expectedResult)) {
+          return expectedResult.value;
+        }
 
-          if (updateResponse?.error) {
-            const resultIndex = i / 2;
-            if (resultIndex < results.length && !results[resultIndex].error) {
-              results[resultIndex].error = {
-                message: updateResponse.error.reason || 'Unknown error during bulk update',
-                statusCode: updateResponse.status || 500,
-              };
-            }
+        const { type, id, esRequestIndex } = expectedResult.value;
+        if (esRequestIndex !== undefined) {
+          const response = bulkOperationResponse?.items[esRequestIndex] ?? {};
+          const rawResponse = Object.values(response)[0] as any;
+          const error = getBulkOperationError(type, id, rawResponse);
+          if (error) {
+            return { id, type, error };
           }
         }
+
+        return { id, type };
       }
-    }
-
-    // Combine results with initial errors
-    const allResults = [...errorResults, ...results];
-
-    return { objects: allResults } as unknown as SavedObjectsChangeOwnershipResponse<T>;
-  } catch (error: any) {
-    throw error;
-  }
+    ),
+  } as unknown as SavedObjectsChangeOwnershipResponse<T>;
 };
+
+function isMgetError(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.MgetMultiGetError {
+  return Boolean(doc && 'error' in doc);
+}

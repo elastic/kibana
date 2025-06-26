@@ -281,7 +281,7 @@ export type AuthorizeOpenPointInTimeParams = AuthorizeFindParams;
  */
 export interface AuthorizeChangeOwnershipParams extends AuthorizeParams {
   /** The object to authorize */
-  object: AuthorizeChangeOwnershipObject;
+  objects: AuthorizeChangeOwnershipObject[];
 }
 /**
  * The AuthorizeAndRedactMultiNamespaceReferencesParams interface extends

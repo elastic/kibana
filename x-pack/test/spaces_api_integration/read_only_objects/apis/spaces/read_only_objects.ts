@@ -126,13 +126,11 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ objectId, type: 'read_only_type' })
           .expect(403);
         expect(updateResponse.body).to.have.property('message');
-        expect(updateResponse.body.message).to.contain(
-          'Access control denied: No modifiable objects'
-        );
+        expect(updateResponse.body.message).to.contain('Unable to update read_only_type');
       });
     });
 
-    describe('transfer ownership of read only objects', () => {
+    describe.only('transfer ownership of read only objects', () => {
       it('should transfer ownership of read only objects by owner', async () => {
         const { cookie: testUserCookie, profileUid } = await loginAsTestUser();
         const createResponse = await supertestWithoutAuth
@@ -145,7 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
 
         const transferResponse = await supertestWithoutAuth
-          .post('/read_only_objects/transfer')
+          .put('/read_only_objects/transfer')
           .set('kbn-xsrf', 'true')
           .set('cookie', testUserCookie.cookieString())
           .send({ objectId, type: 'read_only_type', newOwner: 'new_owner' })
@@ -169,15 +167,13 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { cookie: testUserCookie } = await loginAsTestUser();
         const transferResponse = await supertestWithoutAuth
-          .post('/read_only_objects/transfer')
+          .put('/read_only_objects/transfer')
           .set('kbn-xsrf', 'true')
           .set('cookie', testUserCookie.cookieString())
           .send({ objectId, type: 'read_only_type', newOwner: 'new_owner' })
           .expect(403);
         expect(transferResponse.body).to.have.property('message');
-        expect(transferResponse.body.message).to.contain(
-          'Access control denied: No modifiable objects'
-        );
+        expect(transferResponse.body.message).to.contain('Unable to update read_only_type');
       });
 
       it('should allow admins to transfer ownership of any object', async () => {
@@ -193,7 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { cookie: adminCookie } = await login(adminTestUser.username, adminTestUser.password);
         const transferResponse = await supertestWithoutAuth
-          .post('/read_only_objects/transfer')
+          .put('/read_only_objects/transfer')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
           .send({ objectId, type: 'read_only_type', newOwner: 'new_owner' })

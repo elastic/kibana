@@ -1005,7 +1005,7 @@ describe('#savedObjectToRaw', () => {
       accessMode: 'read_only',
     });
   });
-  
+
   test(`if _source.accessControl is unspecified it doesn't set accessControl`, () => {
     const actual = singleNamespaceSerializer.savedObjectToRaw({
       type: 'foo',
