@@ -32,7 +32,8 @@ import type { TimeRange } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
-import type { MlPluginStart, MlStartDependencies } from '../../plugin';
+import type { MlPluginStart } from '@kbn/ml-plugin-contracts';
+import type { MlStartDependencies } from '../../plugin';
 import type { AnomalyChartsEmbeddableApi, AnomalyChartsEmbeddableState } from '../types';
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import {
