@@ -38,6 +38,7 @@ export async function importModel(
 
   try {
     await ml.api.importTrainedModel(modelId, modelId, config);
+    log.info(`Model "${modelId}" imported successfully.`);
   } catch (error) {
     if (
       error.message.includes('resource_already_exists_exception') ||
