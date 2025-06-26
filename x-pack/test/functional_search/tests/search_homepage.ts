@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { testHasEmbeddedConsole } from './embedded_console';
-import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
