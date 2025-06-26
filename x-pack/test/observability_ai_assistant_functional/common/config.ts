@@ -89,15 +89,15 @@ async function getTestConfig({
       apmSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
         getApmSynthtraceEsClient(context, apmSynthtraceKibanaClient),
       observabilityAIAssistantUI: (context: InheritedFtrProviderContext) =>
-          ObservabilityAIAssistantUIProvider(context),
-        observabilityAIAssistantApi: async () => {
-          return {
-            admin: getScopedApiClient(kibanaServer, 'elastic'),
-            viewer: getScopedApiClient(kibanaServer, viewer.username),
-            editor: getScopedApiClient(kibanaServer, editor.username),
-            secondaryEditor: getScopedApiClient(kibanaServer, secondaryEditor.username),
-          };
-        }
+        ObservabilityAIAssistantUIProvider(context),
+      observabilityAIAssistantApi: async () => {
+        return {
+          admin: getScopedApiClient(kibanaServer, 'elastic'),
+          viewer: getScopedApiClient(kibanaServer, viewer.username),
+          editor: getScopedApiClient(kibanaServer, editor.username),
+          secondaryEditor: getScopedApiClient(kibanaServer, secondaryEditor.username),
+        };
+      },
     },
     junit: {
       reportName: `Observability AI Assistant API Integration tests (${name})`,
