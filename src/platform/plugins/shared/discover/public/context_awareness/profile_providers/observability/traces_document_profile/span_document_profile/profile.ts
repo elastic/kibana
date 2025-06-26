@@ -19,12 +19,19 @@ const OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID = 'observability-traces-span
 
 export const createObservabilityTracesSpanDocumentProfileProvider = ({
   tracesContextService,
+  apmErrorsContextService,
+  logsContextService,
 }: ProfileProviderServices): DocumentProfileProvider => ({
-  isExperimental: true,
   profileId: OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID,
   restrictedToProductFeature: TRACES_PRODUCT_FEATURE_ID,
   profile: {
-    getDocViewer: createGetDocViewer(tracesContextService.getAllTracesIndexPattern()),
+    getDocViewer: createGetDocViewer({
+      apm: {
+        errors: apmErrorsContextService.getErrorsIndexPattern(),
+        traces: tracesContextService.getAllTracesIndexPattern(),
+      },
+      logs: logsContextService.getAllLogsIndexPattern() ?? '',
+    }),
   },
   resolve: ({ record, rootContext }) => {
     const isObservabilitySolutionView = rootContext.solutionType === SolutionType.Observability;
@@ -57,5 +64,9 @@ const getIsSpanRecord = ({ record }: { record: DataTableRecord }) => {
 const isSpanDocument = (record: DataTableRecord) => {
   const dataStreamType = getFieldValue(record, DATASTREAM_TYPE_FIELD);
   const processorEvent = getFieldValue(record, PROCESSOR_EVENT_FIELD);
-  return dataStreamType === 'traces' && processorEvent === 'span';
+
+  const isApmSpan = processorEvent === 'span';
+  const isOtelSpan = processorEvent == null;
+
+  return dataStreamType === 'traces' && (isApmSpan || isOtelSpan);
 };

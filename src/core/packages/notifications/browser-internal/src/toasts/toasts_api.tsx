@@ -49,7 +49,7 @@ const getToastTitleOrText = (toastOrTitle: ToastInput): string => {
 
 const getApmLabels = (errorType: 'ToastError' | 'ToastDanger') => {
   return {
-    errorType,
+    error_type: errorType,
   };
 };
 
@@ -124,7 +124,7 @@ export class ToastsApi implements IToasts {
   public addInfo(toastOrTitle: ToastInput, options?: ToastOptions) {
     return this.add({
       color: 'primary',
-      iconType: 'iInCircle',
+      iconType: 'info',
       ...normalizeToast(toastOrTitle),
       ...options,
     });

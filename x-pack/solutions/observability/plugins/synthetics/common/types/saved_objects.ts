@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-export const syntheticsMonitorType = 'synthetics-monitor';
-export const monitorAttributes = `${syntheticsMonitorType}.attributes`;
+export const legacySyntheticsMonitorTypeSingle = 'synthetics-monitor';
+export const legacyMonitorAttributes = `${legacySyntheticsMonitorTypeSingle}.attributes`;
+
+export const syntheticsMonitorSavedObjectType = 'synthetics-monitor-multi-space';
+export const syntheticsMonitorAttributes = `${syntheticsMonitorSavedObjectType}.attributes`;
 
 export const syntheticsParamType = 'synthetics-param';
+
+export const syntheticsMonitorSOTypes = [
+  syntheticsMonitorSavedObjectType,
+  legacySyntheticsMonitorTypeSingle,
+];
