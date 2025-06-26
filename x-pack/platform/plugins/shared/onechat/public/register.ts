@@ -6,10 +6,13 @@
  */
 
 import { CoreSetup } from '@kbn/core-lifecycle-browser';
-import { AppMountParameters, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import { OnechatPluginStart } from './types';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import { AppMountParameters } from '@kbn/core-application-browser';
+import { i18n } from '@kbn/i18n';
 import { OnechatInternalService } from './services';
+import { OnechatPluginStart } from './types';
 import { ONECHAT_APP_ID, ONECHAT_PATH, ONECHAT_TITLE } from '../common/features';
+import { ONECHAT_TOOLS_UI_SETTING_ID } from '../common/constants';
 
 export const registerApp = ({
   core,
@@ -18,6 +21,7 @@ export const registerApp = ({
   core: CoreSetup<OnechatPluginStart>;
   getServices: () => OnechatInternalService;
 }) => {
+  const isToolsPageEnabled = core.uiSettings.get<boolean>(ONECHAT_TOOLS_UI_SETTING_ID, false);
   core.application.register({
     id: ONECHAT_APP_ID,
     appRoute: ONECHAT_PATH,
@@ -25,7 +29,24 @@ export const registerApp = ({
     title: ONECHAT_TITLE,
     euiIconType: 'logoElasticsearch',
     visibleIn: ['sideNav', 'globalSearch'],
-    deepLinks: [{ id: 'chat', path: '/conversations', title: 'Chat' }],
+    deepLinks: [
+      {
+        id: 'conversations',
+        path: '/conversations',
+        title: i18n.translate('xpack.onechat.chat.conversationsTitle', {
+          defaultMessage: 'Conversations',
+        }),
+      },
+      ...(isToolsPageEnabled
+        ? [
+            {
+              id: 'tools',
+              path: '/tools',
+              title: i18n.translate('xpack.onechat.tools.title', { defaultMessage: 'Tools' }),
+            },
+          ]
+        : []),
+    ],
     async mount({ element, history }: AppMountParameters) {
       const { mountApp } = await import('./application');
       const [coreStart, startPluginDeps] = await core.getStartServices();
@@ -33,13 +54,7 @@ export const registerApp = ({
       coreStart.chrome.docTitle.change(ONECHAT_TITLE);
       const services = getServices();
 
-      return mountApp({
-        core: coreStart,
-        services,
-        element,
-        history,
-        plugins: startPluginDeps,
-      });
+      return mountApp({ core: coreStart, services, element, history, plugins: startPluginDeps });
     },
   });
 };

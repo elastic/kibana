@@ -7,9 +7,13 @@
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 import React from 'react';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { OnechatToolsPage } from './pages/tools';
 import { OnechatChatPage } from './pages/chat';
+import { ONECHAT_TOOLS_UI_SETTING_ID } from '../../common/constants';
 
 export const OnechatRoutes: React.FC<{}> = () => {
+  const isToolsPageEnabled = useUiSetting<boolean>(ONECHAT_TOOLS_UI_SETTING_ID, false);
   return (
     <Routes>
       <Route path="/conversations/:conversationId">
@@ -18,6 +22,11 @@ export const OnechatRoutes: React.FC<{}> = () => {
       <Route path="/">
         <OnechatChatPage />
       </Route>
+      {isToolsPageEnabled && (
+        <Route path="/tools">
+          <OnechatToolsPage />
+        </Route>
+      )}
     </Routes>
   );
 };

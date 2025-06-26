@@ -12,7 +12,6 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import { ONECHAT_CHAT_UI_SETTING_ID } from '../common/constants';
 import { registerApp } from './register';
 import {
   AgentService,
@@ -28,6 +27,7 @@ import type {
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
+import { ONECHAT_UI_SETTING_ID } from '../common/constants';
 
 export class OnechatPlugin
   implements
@@ -44,12 +44,10 @@ export class OnechatPlugin
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
   }
-  setup(
-    core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
-    _pluginsSetup: OnechatSetupDependencies
-  ): OnechatPluginSetup {
-    const isOnechatEnabled = core.uiSettings.get<boolean>(ONECHAT_CHAT_UI_SETTING_ID, false);
-    if (isOnechatEnabled) {
+  setup(core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>): OnechatPluginSetup {
+    const isOnechatUiEnabled = core.uiSettings.get<boolean>(ONECHAT_UI_SETTING_ID, false);
+
+    if (isOnechatUiEnabled) {
       registerApp({
         core,
         getServices: () => {

@@ -17,7 +17,7 @@ import produce from 'immer';
 import { queryKeys } from '../query_keys';
 import { appPaths } from '../utils/app_paths';
 import { useNavigation } from './use_navigation';
-import { useOneChatServices } from './use_onechat_service';
+import { useOnechatServices } from './use_onechat_service';
 
 const createActions = ({
   queryClient,
@@ -108,7 +108,7 @@ const createActions = ({
 };
 
 export const useConversation = ({ conversationId }: { conversationId: string | undefined }) => {
-  const { conversationsService } = useOneChatServices();
+  const { conversationsService } = useOnechatServices();
   const queryClient = useQueryClient();
   const queryKey = queryKeys.conversations.byId(conversationId ?? 'new');
   const { data: conversation, isLoading } = useQuery({

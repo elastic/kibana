@@ -51,6 +51,8 @@ export interface UsageStats {
   'observability:aiAssistantSearchConnectorIndexPattern': string;
   'onechat:chat:enabled': boolean;
   'onechat:mcpServer:enabled': boolean;
+  'onechat:ui:enabled': boolean;
+  'onechat:tools:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;
   'visualization:tileMap:maxPrecision': number;

@@ -7,10 +7,10 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '../query_keys';
-import { useOneChatServices } from './use_onechat_service';
+import { useOnechatServices } from './use_onechat_service';
 
 export const useConversationList = ({ agentId }: { agentId?: string }) => {
-  const { conversationsService } = useOneChatServices();
+  const { conversationsService } = useOnechatServices();
 
   const {
     data: conversations,

@@ -21,7 +21,7 @@ import { createToolCallStep } from '@kbn/onechat-common/chat/conversation';
 import { useCallback, useState } from 'react';
 import { useConversation } from './use_conversation';
 import { useKibana } from './use_kibana';
-import { useOneChatServices } from './use_onechat_service';
+import { useOnechatServices } from './use_onechat_service';
 
 export type ChatStatus = 'ready' | 'loading' | 'error';
 
@@ -33,7 +33,7 @@ interface UseChatProps {
 }
 
 export const useChat = ({ conversationId, agentId, connectorId, onError }: UseChatProps) => {
-  const { chatService } = useOneChatServices();
+  const { chatService } = useOnechatServices();
   const {
     services: { notifications },
   } = useKibana();
