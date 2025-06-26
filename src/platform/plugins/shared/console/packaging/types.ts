@@ -9,8 +9,17 @@
 
 // Standalone type definitions - no imports to avoid compiling dependencies
 
+export interface HttpSetup {
+  get: <T = any>(url: string, options?: { query?: Record<string, any> }) => Promise<T>;
+  post: <T = any>(url: string, body?: any, options?: { query?: Record<string, any> }) => Promise<T>;
+  delete: <T = any>(url: string, options?: { query?: Record<string, any> }) => Promise<T>;
+  put: <T = any>(url: string, body?: any, options?: { query?: Record<string, any> }) => Promise<T>;
+  patch: <T = any>(url: string, body?: any, options?: { query?: Record<string, any> }) => Promise<T>;
+  head: <T = any>(url: string, options?: { query?: Record<string, any> }) => Promise<T>;
+  fetch: <T = any>(url: string, options?: { method?: string; body?: any; query?: Record<string, any> }) => Promise<T>;
+}
+
 export interface OneConsoleProps {
   lang?: 'en' | 'fr-FR' | 'ja-JP' | 'zh-CN';
-  getEsConfig?: () => Promise<any>;
-  getAutocompleteEntities?: () => Promise<any>;
+  http?: Partial<HttpSetup>;
 }

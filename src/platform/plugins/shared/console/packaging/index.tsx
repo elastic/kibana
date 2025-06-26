@@ -10,6 +10,11 @@
 import React from 'react';
 import 'monaco-editor/min/vs/editor/editor.main.css';
 
+(window as any).MonacoEnvironment = {
+  getWorkerUrl: () => '',
+  getWorker: () => new Worker('data:application/javascript;charset=utf-8,'),
+};
+
 // Create a provider factory for packaging environment
 const createPackagingParsedRequestsProvider = () => {
   return (model: any) => {
@@ -143,10 +148,18 @@ const translations = {
   'zh-CN': require('./translations/zh-CN.json'),
 };
 
+// Export server-side utilities for external consumers
+export {
+  ConsoleSpecDefinitionsLoader,
+  createSpecDefinitionsLoader,
+  type FileSystemAdapter,
+  type SpecDefinitionsConfig,
+  type SpecDefinitionsResult,
+} from './server_utils';
+
 export const OneConsole = ({
   lang = 'en',
-  getEsConfig,
-  getAutocompleteEntities,
+  http: customHttp,
 }: OneConsoleProps) => {
   // Get the translations for the selected language, fallback to English
   const selectedTranslations = translations[lang] || translations.en;
@@ -200,21 +213,9 @@ export const OneConsole = ({
     executionContext,
   });
 
-  // Create a mock HTTP service that intercepts specific API calls
   const http = {
     ...originalHttp,
-    get: async (path: string, options?: any) => {
-      if (path === '/api/console/es_config' && getEsConfig) {
-        return await getEsConfig();
-      }
-
-      if (path === '/api/console/autocomplete_entities' && getAutocompleteEntities) {
-        return await getAutocompleteEntities();
-      }
-
-      // For all other requests, use the original HTTP service
-      return originalHttp.get(path, options);
-    },
+    ...customHttp,
   } as HttpSetup;
 
   // await loadActiveApi(http);
