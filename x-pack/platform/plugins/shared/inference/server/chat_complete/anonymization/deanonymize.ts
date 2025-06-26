@@ -11,11 +11,11 @@ import { getAnonymizableMessageParts } from './get_anonymizable_message_parts';
 export function deanonymize<TMessage extends Message>(
   message: TMessage,
   masksLookup: Record<string, AnonymizationEntity>
-): { message: TMessage; unredactions: Deanonymization[] } {
+): { message: TMessage; deanonymizations: Deanonymization[] } {
   const masks = Object.keys(masksLookup);
 
   function replace(content: string) {
-    const unredactions: Deanonymization[] = [];
+    const deanonymizations: Deanonymization[] = [];
     let next = '';
     let outputPos = 0; // Track position in output text
 
@@ -29,7 +29,7 @@ export function deanonymize<TMessage extends Message>(
         const start = outputPos;
         const end = start + entity.value.length;
 
-        unredactions.push({
+        deanonymizations.push({
           start,
           end,
           entity,
@@ -45,7 +45,7 @@ export function deanonymize<TMessage extends Message>(
     }
 
     return {
-      unredactions,
+      deanonymizations,
       output: next,
     };
   }
@@ -64,6 +64,6 @@ export function deanonymize<TMessage extends Message>(
       ...message,
       ...(JSON.parse(unredaction.output) as typeof anonymized),
     },
-    unredactions: contentDeanonymization ? contentDeanonymization.unredactions : [],
+    deanonymizations: contentDeanonymization ? contentDeanonymization.deanonymizations : [],
   };
 }

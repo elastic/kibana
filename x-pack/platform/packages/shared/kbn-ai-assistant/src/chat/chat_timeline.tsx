@@ -193,11 +193,11 @@ export function ChatTimeline({
     let currentGroup: ChatTimelineItem[] | null = null;
 
     for (const item of timelineItems) {
-      const { content, unredactions } = item.message.message;
+      const { content, deanonymizations } = item.message.message;
       if (item.display.hide || !item) continue;
 
-      if (anonymizationEnabled && content && unredactions) {
-        item.anonymizedHighlightedContent = highlightContent(content, unredactions);
+      if (anonymizationEnabled && content && deanonymizations) {
+        item.anonymizedHighlightedContent = highlightContent(content, deanonymizations);
       }
 
       if (item.display.collapsed) {

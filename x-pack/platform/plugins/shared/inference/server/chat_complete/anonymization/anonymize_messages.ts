@@ -219,7 +219,6 @@ export async function anonymizeMessages({
   });
   try {
     const anonymized = JSON.parse(output) as typeof toAnonymize;
-    logger.debug('Successfully parsed JSON output for anonymization');
 
     const anonymizedMessages = messages.map((message, index) => {
       return merge({}, message, anonymized[index]);

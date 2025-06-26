@@ -56,7 +56,7 @@ export function deanonymizeMessage(
 
           const {
             message: { content, toolCalls },
-            unredactions,
+            deanonymizations,
           } = deanonymize(message, anonymizationEntityLookup);
 
           // Create deanonymized input messages metadata
@@ -64,14 +64,14 @@ export function deanonymizeMessage(
             const deanonymization = deanonymize(msg, anonymizationEntityLookup);
             return {
               message: deanonymization.message,
-              deanonymizations: deanonymization.unredactions,
+              deanonymizations: deanonymization.deanonymizations,
             };
           });
 
           // Create deanonymized output metadata
           const deanonymizedOutput = {
             message,
-            deanonymizations: unredactions,
+            deanonymizations,
           };
 
           // Create a new chunk with the complete deanonymized content

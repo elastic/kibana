@@ -140,15 +140,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       // First stored message
       const firstSavedMsg = storedUserMsgs[0];
-      expect(firstSavedMsg.unredactions).to.have.length(1);
-      expect(firstSavedMsg.unredactions[0].entity).to.eql('claudia@example.com');
-      expect(firstSavedMsg.unredactions[0].class_name).to.eql('EMAIL');
+      expect(firstSavedMsg.deanonymizations).to.have.length(1);
+      expect(firstSavedMsg.deanonymizations[0].entity.value).to.eql('claudia@example.com');
+      expect(firstSavedMsg.deanonymizations[0].entity.class_name).to.eql('EMAIL');
 
       // Second stored message
       const secSavedMsg = storedUserMsgs[1];
-      expect(secSavedMsg.unredactions).to.have.length(1);
-      expect(secSavedMsg.unredactions[0].entity).to.eql('http://claudia.is');
-      expect(secSavedMsg.unredactions[0].class_name).to.eql('URL');
+      expect(secSavedMsg.deanonymizations).to.have.length(1);
+      expect(secSavedMsg.deanonymizations[0].entity.value).to.eql('http://claudia.is');
+      expect(secSavedMsg.deanonymizations[0].entity.class_name).to.eql('URL');
     });
   });
 }

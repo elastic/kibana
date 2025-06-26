@@ -15,7 +15,7 @@ import {
   type StarterPrompt,
 } from '../../common/types';
 
-export const unredactionRt = t.type({
+export const deanonymizationRt = t.type({
   start: t.number,
   end: t.number,
   entity: t.type({
@@ -55,7 +55,7 @@ export const messageRt: t.Type<Message> = t.type({
           arguments: t.string,
         }),
       ]),
-      unredactions: t.array(unredactionRt),
+      deanonymizations: t.array(deanonymizationRt),
     }),
   ]),
 });

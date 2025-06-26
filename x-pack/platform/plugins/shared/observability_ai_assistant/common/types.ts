@@ -78,7 +78,7 @@ export interface Message {
   '@timestamp': string;
   message: {
     content?: string;
-    unredactions?: Deanonymization[];
+    deanonymizations?: Deanonymization[];
     name?: string;
     role: MessageRole;
     function_call?: {

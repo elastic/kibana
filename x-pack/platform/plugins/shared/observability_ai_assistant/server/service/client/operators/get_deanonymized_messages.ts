@@ -14,7 +14,7 @@ import {
 } from '../../../../common/conversation_complete';
 
 /**
- * operator to process events with deanonymization data and format messages with unredactions.
+ * operator to process events with deanonymization data and format messages with deanonymizations.
  *
  * @param allMessages The combined messages to use as a fallback if no deanonymization data is found
  * @returns An Observable that emits a single array of messages with deanonymization data added
@@ -38,24 +38,24 @@ export function getDeanonymizedMessages(
         // Extract the initial messages (before the current event's messages)
         const initialMessagesCount = result.length - (event.deanonymized_input?.length || 0) - 1; // -1 for the current message
 
-        // Process messages from deanonymized_input - assign unredactions by order
+        // Process messages from deanonymized_input - assign deanonymizations by order
         if (event.deanonymized_input?.length) {
           event.deanonymized_input.forEach((item, index) => {
             // Calculate the corresponding index in our result array
             const resultIndex = initialMessagesCount + index;
 
-            // If there's a valid message at this index, add the unredactions to it
+            // If there's a valid message at this index, add the deanonymizations to it
             if (resultIndex >= 0 && resultIndex < result.length) {
-              // Add unredactions directly to the message
-              result[resultIndex].message.unredactions = item.deanonymizations;
+              // Add deanonymizations directly to the message
+              result[resultIndex].message.deanonymizations = item.deanonymizations;
             }
           });
         }
 
-        // Add unredactions from deanonymized_output to the last message (current response)
+        // Add deanonymizations from deanonymized_output to the last message (current response)
         if (event.deanonymized_output && result.length > 0) {
           const lastIndex = result.length - 1;
-          result[lastIndex].message.unredactions = event.deanonymized_output.deanonymizations;
+          result[lastIndex].message.deanonymizations = event.deanonymized_output.deanonymizations;
         }
 
         return result;
