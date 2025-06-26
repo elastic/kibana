@@ -26,11 +26,12 @@ import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-publishing';
+import { mountDashboardFlyout } from '@kbn/presentation-containers';
 import { LinksSerializedState } from './types';
 import { APP_ICON, APP_NAME, CONTENT_ID, LATEST_VERSION } from '../common';
 import { LinksCrudTypes } from '../common/content_management';
 import { getLinksClient } from './content_management/links_content_management_client';
-import { setKibanaServices } from './services/kibana_services';
+import { coreServices, setKibanaServices } from './services/kibana_services';
 import { ADD_LINKS_PANEL_ACTION_ID } from './actions/constants';
 
 export interface LinksSetupDependencies {
@@ -110,14 +111,32 @@ export class LinksPlugin
                 title,
                 editor: {
                   onEdit: async (savedObjectId: string) => {
-                    const [{ openEditorFlyout }, { deserializeLinksSavedObject }] =
-                      await Promise.all([
-                        import('./editor/open_editor_flyout'),
-                        import('./lib/deserialize_from_library'),
-                      ]);
-                    const linksSavedObject = await getLinksClient().get(savedObjectId);
-                    const initialState = await deserializeLinksSavedObject(linksSavedObject.item);
-                    await openEditorFlyout({ initialState });
+                    mountDashboardFlyout({
+                      core: coreServices,
+                      getEditFlyout: async () => {
+                        const [{ getEditorFlyout }, { deserializeLinksSavedObject }] =
+                          await Promise.all([
+                            import('./editor/get_editor_flyout'),
+                            import('./lib/deserialize_from_library'),
+                          ]);
+                        const linksSavedObject = await getLinksClient().get(savedObjectId);
+                        const initialState = await deserializeLinksSavedObject(
+                          linksSavedObject.item
+                        );
+
+                        return await getEditorFlyout({
+                          initialState,
+                        });
+                      },
+                      flyoutPropsOverrides: {
+                        maxWidth: 500,
+                        type: 'overlay',
+                        paddingSize: 'm',
+                        ownFocus: true,
+                        outsideClickCloses: false,
+                        'data-test-subj': 'links--panelEditor--flyout',
+                      },
+                    });
                   },
                 },
                 description,

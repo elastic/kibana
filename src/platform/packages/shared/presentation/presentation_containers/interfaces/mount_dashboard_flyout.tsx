@@ -9,12 +9,7 @@
 import React from 'react';
 import type { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import {
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiSkeletonText,
-  EuiSkeletonTitle,
-} from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiSkeletonText, EuiSkeletonTitle } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import useAsync from 'react-use/lib/useAsync';
 import { tracksOverlays } from '..';
@@ -55,7 +50,7 @@ export const mountDashboardFlyout = ({
   flyoutPropsOverrides,
 }: {
   core: CoreStart;
-  api: EmbeddableApiContext['embeddable'];
+  api?: EmbeddableApiContext['embeddable'];
   getEditFlyout: (() => Promise<void | JSX.Element | null>) | undefined;
   flyoutPropsOverrides?: Partial<OverlayFlyoutOpenOptions>;
 }) => {
