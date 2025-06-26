@@ -31,6 +31,9 @@ const observabilityNavigationOverridesItemMapping: SavedObjectsType['mappings'][
   dashboardId: {
     type: 'keyword',
   },
+  order: {
+    type: 'keyword',
+  },
 };
 
 const observabilityNavigationOverridesMapping: SavedObjectsType['mappings'] = {
@@ -83,10 +86,16 @@ export async function createNavigationOverrides(core: CoreSetup) {
             title: 'Kubernetes',
             subItems: [
               {
-                id: 'pod',
-                title: 'Pods',
-                entityType: 'k8s.pod',
-                dashboardId: 'kubernetes_otel-cluster-overview',
+                id: 'volume',
+                title: 'Volumes',
+                order: 500,
+                dashboardId: 'kubernetes-3912d9a0-bcb2-11ec-b64f-7dd6e8e82013',
+              },
+              {
+                id: 'dashboard',
+                title: 'Services',
+                order: 800,
+                dashboardId: 'kubernetes-ff1b3850-bcb1-11ec-b64f-7dd6e8e82013',
               },
             ],
           },
@@ -104,7 +113,6 @@ export async function createNavigationOverrides(core: CoreSetup) {
           {
             id: 'docker',
             title: 'Docker',
-            entityType: 'docker',
             dashboardId: 'kubernetes_otel-cluster-overview',
           },
         ],

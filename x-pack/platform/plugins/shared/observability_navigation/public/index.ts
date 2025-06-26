@@ -8,12 +8,18 @@
 import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { Plugin } from './plugin';
 import { ObservabilityNavigationPluginSetup, ObservabilityNavigationPluginStart } from './types';
-import { ObservabilityDynamicNavigation } from '../common/types';
+import {
+  ObservabilityDynamicNavigation,
+  EnrichedEntityDefinitionsResponse,
+  EntityDefinitionsResponse,
+} from '../common/types';
 
 export type {
   ObservabilityNavigationPluginSetup,
   ObservabilityNavigationPluginStart,
   ObservabilityDynamicNavigation,
+  EnrichedEntityDefinitionsResponse,
+  EntityDefinitionsResponse,
 };
 
 export const plugin: PluginInitializer<

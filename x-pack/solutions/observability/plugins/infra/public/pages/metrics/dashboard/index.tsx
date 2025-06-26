@@ -28,13 +28,13 @@ export const Dashboard = () => {
   } = useKibanaContextForPlugin();
 
   const { search } = useLocation();
-  const { entity, entitySubtype } = useParams<{ entity: string; entitySubtype?: string }>();
+  const { namespace, name } = useParams<{ namespace: string; name?: string }>();
 
-  const { dashboardId } = useMemo(() => {
+  const { dashboardId, entityId } = useMemo(() => {
     const query = new URLSearchParams(search);
     return {
       dashboardId: query.get('dashboardId') ?? '',
-      entityType: query.get('entityType'),
+      entityId: query.get('entityId'),
     };
   }, [search]);
 
@@ -42,12 +42,12 @@ export const Dashboard = () => {
 
   const kubernetesLinkProps = useLinkProps({
     app: 'metrics',
-    pathname: entity,
+    pathname: namespace,
   });
 
   const pageTitle = useMemo(
-    () => (entitySubtype ?? entity).replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase()),
-    [entity, entitySubtype]
+    () => (name ?? namespace).replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase()),
+    [namespace, name]
   );
 
   useMetricsBreadcrumbs([
@@ -77,7 +77,7 @@ export const Dashboard = () => {
           data-test-subj="infraKubernetesPage"
         >
           <KubernetesTimeRangeMetadataProvider>
-            <PageContent dashboardId={dashboardId} />
+            <PageContent dashboardId={dashboardId} enitiyId={entityId} />
           </KubernetesTimeRangeMetadataProvider>
         </PageTemplate>
       </EuiErrorBoundary>

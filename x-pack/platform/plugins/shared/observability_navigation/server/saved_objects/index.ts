@@ -5,3 +5,5 @@
  * 2.0.
  */
 export { navigationOverrides, createNavigationOverrides } from './navigation_overrides';
+export { createEntityDefinitions, observabilityEntityDefinitions } from './entity_definition';
+export { createMetricDefinitions, observabilityMetricDefinitions } from './metric_definition';

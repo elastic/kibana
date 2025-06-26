@@ -130,8 +130,8 @@ export const InfrastructurePage = () => {
                 <Route path="/detail/:type/:node" component={NodeDetail} />
                 <Route path="/hosts" component={HostsPage} />
                 <Route path="/settings" component={MetricsSettingsPage} />
-                <Route path="/entity/:entity/:entitySubtype" component={Dashboard} />
-                <Route path="/entity/:entity" component={Dashboard} />
+                <Route path="/entity/:namespace/:name" component={Dashboard} />
+                <Route path="/entity/:namespace" component={Dashboard} />
 
                 <Route path="/kubernetes" component={Kubernetes} />
 

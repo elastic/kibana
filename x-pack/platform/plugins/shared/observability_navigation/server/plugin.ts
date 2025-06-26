@@ -11,6 +11,7 @@ import type {
   CoreStart,
   Plugin,
   Logger,
+  KibanaRequest,
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { mapValues } from 'lodash';
@@ -21,8 +22,18 @@ import {
   ObservabilityNavigationPluginStartDependencies,
 } from './types';
 import { observabilityNavigationRouteRepository } from './routes';
-import { ObservabilityNavigationRouteHandlerResources } from './routes/types';
-import { navigationOverrides, createNavigationOverrides } from './saved_objects';
+import {
+  ObservabilityNavigationRouteHandlerResources,
+  RouteHandlerScopedClients,
+} from './routes/types';
+import {
+  navigationOverrides,
+  createNavigationOverrides,
+  createEntityDefinitions,
+  createMetricDefinitions,
+  observabilityEntityDefinitions,
+  observabilityMetricDefinitions,
+} from './saved_objects';
 
 export class ObservabilityNavigationPlugin
   implements
@@ -46,8 +57,12 @@ export class ObservabilityNavigationPlugin
     plugins: ObservabilityNavigationPluginSetupDependencies
   ) {
     core.savedObjects.registerType(navigationOverrides);
+    core.savedObjects.registerType(observabilityEntityDefinitions);
+    core.savedObjects.registerType(observabilityMetricDefinitions);
 
     createNavigationOverrides(core);
+    createEntityDefinitions(core);
+    createMetricDefinitions(core);
 
     const routeHandlerPlugins = mapValues(plugins, (value, key) => {
       return {
@@ -78,6 +93,18 @@ export class ObservabilityNavigationPlugin
       repository: observabilityNavigationRouteRepository,
       dependencies: {
         plugins: withCore,
+        getScopedClients: async ({
+          request,
+        }: {
+          request: KibanaRequest;
+        }): Promise<RouteHandlerScopedClients> => {
+          const [coreStart, plugin] = await core.getStartServices();
+          return {
+            scopedClusterClient: coreStart.elasticsearch.client.asScoped(request),
+            soClient: coreStart.savedObjects.getScopedClient(request),
+            packageClient: plugin.fleet?.packageService.asScoped(request),
+          };
+        },
       },
       logger: this.logger,
       runDevModeChecks: this.isDev,

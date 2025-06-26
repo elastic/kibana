@@ -10,7 +10,13 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_timerange_metadata';
 import { RenderDashboard } from '../dashboard/render_dashboard';
 
-export const PageContent = ({ dashboardId }: { dashboardId: string }) => {
+export const PageContent = ({
+  dashboardId,
+  enitiyId,
+}: {
+  dashboardId: string;
+  enitiyId?: string | null;
+}) => {
   const { data, status } = useTimeRangeMetadataContext();
 
   if (status === 'loading') {

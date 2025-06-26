@@ -181,13 +181,13 @@ export class Plugin implements InfraClientPluginClass {
                         path: '/hosts',
                       },
                       ...(navigation?.map((nav) => ({
-                        label: getDynamicNavigationTitle(nav.title),
+                        label: formatDynamicNavigationPath(nav.title),
                         app: 'metrics',
                         path: getDynamicNavigationPath(nav),
                         deepLinks: nav.subItems?.map((subNav) => {
                           return {
                             id: subNav.id,
-                            title: getDynamicNavigationTitle(subNav.title),
+                            title: formatDynamicNavigationPath(subNav.title),
                             path: getDynamicNavigationPath(subNav, nav.title),
                           };
                         }),
@@ -269,12 +269,12 @@ export class Plugin implements InfraClientPluginClass {
         ...(navigation ?? []).map((nav) => {
           return {
             id: `dynamic_${nav.id}`,
-            title: getDynamicNavigationTitle(nav.title),
+            title: formatDynamicNavigationPath(nav.title),
             path: getDynamicNavigationPath(nav),
             deepLinks: (nav.subItems ?? []).map((subNav) => {
               return {
                 id: `dynamic_${subNav.id}`,
-                title: getDynamicNavigationTitle(subNav.title),
+                title: formatDynamicNavigationPath(subNav.title),
                 path: getDynamicNavigationPath(subNav, nav.id),
               };
             }),
@@ -404,11 +404,8 @@ const getLogsExplorerAccessible$ = (application: CoreStart['application']) => {
   );
 };
 
-const getDynamicNavigationTitle = (title: string) => {
-  return title
-    .replace(/-/g, ' ')
-    .toLowerCase()
-    .replace(/^\w/, (c) => c.toUpperCase());
+const formatDynamicNavigationPath = (title: string) => {
+  return title.replace(/\s+/g, '-').toLowerCase();
 };
 const getDynamicNavigationPath = (
   nav: DynamicNavigationItem | ObservabilityDynamicNavigation,
@@ -416,15 +413,15 @@ const getDynamicNavigationPath = (
 ) => {
   const url = new URL(
     `/entity/${
-      parentTitle ? `${getDynamicNavigationTitle(parentTitle)}/` : ''
-    }${getDynamicNavigationTitle(nav.title)}`,
+      parentTitle ? `${formatDynamicNavigationPath(parentTitle)}/` : ''
+    }${formatDynamicNavigationPath(nav.title)}`,
     window.location.origin
   );
   if (nav.dashboardId) {
     url.searchParams.set('dashboardId', nav.dashboardId);
   }
-  if (nav.entityType) {
-    url.searchParams.set('entityType', nav.entityType);
+  if (nav.entityId) {
+    url.searchParams.set('entityId', nav.entityId);
   }
   return `${url.pathname}${url.search}`;
 };
