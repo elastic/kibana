@@ -50,7 +50,6 @@ import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_clien
 import type { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../../common';
 
 import type { estypes } from '@elastic/elasticsearch';
-import { DEFAULT_USAGE_API_URL } from '../config';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -585,7 +584,7 @@ describe('create()', () => {
       microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
       microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
       usage: {
-        url: DEFAULT_USAGE_API_URL,
+        url: 'usage-api',
       },
     });
 
