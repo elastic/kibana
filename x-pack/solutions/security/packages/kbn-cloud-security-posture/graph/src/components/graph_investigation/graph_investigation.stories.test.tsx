@@ -137,7 +137,7 @@ describe('GraphInvestigation Component', () => {
     const { container, getAllByText } = renderStory();
 
     const nodes = container.querySelectorAll('.react-flow__nodes .react-flow__node');
-    expect(nodes).toHaveLength(3);
+    expect(nodes).toHaveLength(6);
     expect(getAllByText('~ an hour ago')).toHaveLength(2);
   });
 
@@ -172,7 +172,7 @@ describe('GraphInvestigation Component', () => {
 
       expandNode(
         container,
-        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)'
+        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.UpdateRole)'
       );
 
       const showDetailsItem = getByTestId(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID);
