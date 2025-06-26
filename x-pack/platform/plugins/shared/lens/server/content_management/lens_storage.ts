@@ -136,6 +136,9 @@ export class LensStorage extends SOContentStorage<LensCrudTypes> {
     // Save data in DB
     const soClient = await savedObjectClientFromRequest(ctx);
 
+    // since we use create below this is to throw if SO id not found
+    await soClient.get(CONTENT_ID, id);
+
     const savedObject = await soClient.create<LensSavedObjectAttributes>(CONTENT_ID, dataToLatest, {
       id,
       overwrite: true,
