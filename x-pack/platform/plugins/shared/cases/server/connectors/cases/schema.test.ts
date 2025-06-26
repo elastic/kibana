@@ -193,13 +193,13 @@ describe('CasesConnectorRunParamsSchema', () => {
       ).toThrow();
     });
 
-    it('does not accept maximumCasesToOpen to be more than 10', () => {
+    it('does not accept maximumCasesToOpen to be more than 20', () => {
       const params = getParams();
 
       expect(() =>
         CasesConnectorRunParamsSchema.validate({
           ...params,
-          maximumCasesToOpen: 11,
+          maximumCasesToOpen: 21,
         })
       ).toThrow();
     });

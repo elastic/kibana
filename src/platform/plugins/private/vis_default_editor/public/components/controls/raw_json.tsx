@@ -47,7 +47,7 @@ function RawJsonParamEditor({
     () => (
       <>
         {jsonEditorLabelText}{' '}
-        <EuiIconTip position="right" content={editorTooltipText} type="questionInCircle" />
+        <EuiIconTip position="right" content={editorTooltipText} type="question" />
       </>
     ),
     [jsonEditorLabelText, editorTooltipText]
