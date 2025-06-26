@@ -2206,10 +2206,11 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload(packetBeatPath);
       });
 
-      it.skip('should handle shard failures and include warning in logs for query that is not aggregating', async () => {
+      it('should handle shard failures and include warning in logs for query that is not aggregating', async () => {
         const doc1 = { agent: { name: 'test-1' } };
         await indexEnhancedDocuments({
           documents: [doc1],
+          interval: ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'],
           id: uuidv4(),
         });
 
