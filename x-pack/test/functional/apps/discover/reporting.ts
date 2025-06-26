@@ -111,7 +111,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await reporting.selectExportItem('CSV');
     await reporting.clickGenerateReportButton();
     await exports.closeExportFlyout();
-    await exports.clickExportTopNavButton();
     await browser.pressKeys(browser.keys.ESCAPE);
 
     const url = await reporting.getReportURL(timeout);
