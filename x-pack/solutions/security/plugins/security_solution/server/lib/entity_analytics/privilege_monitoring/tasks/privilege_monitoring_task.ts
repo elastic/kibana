@@ -88,8 +88,6 @@ export const registerPrivilegeMonitoringTask = ({
 
     const client = apiKey ? apiKeyManager.getClientFromApiKey(apiKey) : undefined;
 
-    logger.info('[Privilege Monitoring] Unable to create client in task. Exiting from the task.');
-
     if (!client) return;
 
     return new PrivilegeMonitoringDataClient({
@@ -181,6 +179,7 @@ const runPrivilegeMonitoringTask = async ({
   } catch (e) {
     logger.error(`[Privilege Monitoring] Error running privilege monitoring task: ${e.message}`);
   }
+  logger.info('[Privilege Monitoring] Finished running privilege monitoring task');
   return { state: updatedState };
 };
 

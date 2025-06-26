@@ -16,6 +16,7 @@ import { SECURITY_EXTENSION_ID, SavedObjectsErrorHelpers } from '@kbn/core-saved
 
 import { PrivilegeMonitoringApiKeyType, getPrivmonEncryptedSavedObjectId } from './saved_object';
 import { privilegeMonitoringRuntimePrivileges } from './privileges';
+import { monitoringEntitySourceType, privilegeMonitoringTypeName } from '../saved_objects';
 
 export interface ApiKeyManager {
   generate: () => Promise<void>;
@@ -50,10 +51,15 @@ const generate = async (deps: ApiKeyManagerDependencies) => {
   } else {
     const apiKey = await generateAPIKey(request, deps);
 
-    const soClient = core.savedObjects.getScopedClient(request, {
+    const soClient = core.savedObjects.createInternalRepository([
+      PrivilegeMonitoringApiKeyType.name,
+      monitoringEntitySourceType.name,
+    ]);
+
+    /* const soClient = core.savedObjects.getScopedClient(request, {
       excludedExtensions: [SECURITY_EXTENSION_ID],
       includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name],
-    });
+    });*/
 
     await soClient.create(PrivilegeMonitoringApiKeyType.name, apiKey, {
       id: getPrivmonEncryptedSavedObjectId(namespace),
@@ -103,7 +109,7 @@ const getClientFromApiKey = (
   });
   const clusterClient = deps.core.elasticsearch.client.asScoped(fakeRequest);
   const soClient = deps.core.savedObjects.getScopedClient(fakeRequest, {
-    includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name],
+    includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, privilegeMonitoringTypeName],
   });
   return {
     clusterClient,
