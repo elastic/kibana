@@ -25,6 +25,7 @@ export const useEntityCellStyles = () => {
       opacity: 0.5,
       width: euiTheme.size.base,
       height: euiTheme.size.base,
+      color: euiTheme.colors.textSubdued,
       transform: 'translateY(-1px)',
       '&:hover': {
         opacity: 1,

@@ -36,11 +36,20 @@ export const healthCheckPrivilegeMonitoringRoute = (
 
       async (context, request, response): Promise<IKibanaResponse<PrivMonHealthResponse>> => {
         const siemResponse = buildSiemResponse(response);
+        const secSol = await context.securitySolution;
 
         try {
-          return response.ok({ body: { ok: true } });
+          const body = await secSol.getPrivilegeMonitoringDataClient().getEngineStatus();
+          return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
+
+          if (error?.statusCode === 404) {
+            return response.ok({
+              body: { status: 'not_found' },
+            });
+          }
+
           logger.error(`Error checking privilege monitoring health: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
