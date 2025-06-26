@@ -41,12 +41,6 @@ const {
 const fsPromises = require('fs/promises');
 
 const isDevOrCI = process.env.NODE_ENV !== 'production' || process.env.CI === 'true';
-const baseSafePaths = [
-  join(REPO_ROOT, 'data'),
-  join(REPO_ROOT, '.es'),
-  join(REPO_ROOT, 'oas_docs'),
-  'docs/openapi',
-];
 
 const tmpPath = tmpdir();
 
@@ -63,6 +57,15 @@ const getRealTmpPath = () => {
 
 const realTmpPath = getRealTmpPath();
 
+const baseSafePaths = [
+  join(REPO_ROOT, 'data'),
+  join(REPO_ROOT, '.es'),
+  join(REPO_ROOT, 'oas_docs'),
+  'docs/openapi',
+  join(tmpdir(), 'synthetics'),
+  join(realTmpPath, 'synthetics'),
+];
+
 const devOrCIPaths = [
   tmpdir(),
   realTmpPath,
@@ -75,6 +78,7 @@ const devOrCIPaths = [
   join(REPO_ROOT, 'target'),
   join(REPO_ROOT, 'x-pack'),
   join(REPO_ROOT, 'scripts'),
+  join(REPO_ROOT, '.vscode'),
 ];
 
 const safePaths = [...baseSafePaths, ...(isDevOrCI ? devOrCIPaths : [])];
