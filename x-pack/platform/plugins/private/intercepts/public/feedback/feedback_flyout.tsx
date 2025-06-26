@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import React, { type ChangeEvent, type PropsWithChildren, useState } from 'react';
+import React, {
+  type ChangeEvent,
+  type PropsWithChildren,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiCheckbox,
-  EuiFilePicker,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -27,6 +32,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { CoreStart } from '@kbn/core/public';
 
 const feedbackTypes = [
   {
@@ -50,15 +56,28 @@ const feedbackTypes = [
 ];
 
 interface Props {
+  core: CoreStart;
   closeFlyout: () => void;
 }
 
-export const FeedbackFlyout = ({ closeFlyout }: Props) => {
+export const FeedbackFlyout = ({ core, closeFlyout }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [feedbackText, setFeedbackText] = useState('');
   const [feedbackType, setFeedbackType] = useState(feedbackTypes[0].value);
-  const [_feedbackFiles, setFeedbackFiles] = useState<File[]>([]);
-  const [isFutureResearchConsentChecked, setIsFutureResearchConsentChecked] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
+
+  const getEmail = useCallback(async () => {
+    try {
+      const user = await core.security.authc.getCurrentUser();
+      setUserEmail(user?.email || '');
+    } catch (_) {
+      setUserEmail('');
+    }
+  }, [core.security.authc]);
+
+  useEffect(() => {
+    getEmail();
+  }, [getEmail]);
 
   const boldTextCss = {
     fontWeight: euiTheme.font.weight.semiBold,
@@ -83,12 +102,8 @@ export const FeedbackFlyout = ({ closeFlyout }: Props) => {
     setFeedbackType(e.target.value);
   };
 
-  const handleUploadFeedbackFiles = (files: FileList | null) => {
-    setFeedbackFiles(files && files.length > 0 ? Array.from(files) : []);
-  };
-
-  const handleChangeIsFutureResearchConstentChecked = (e: ChangeEvent<HTMLInputElement>) => {
-    setIsFutureResearchConsentChecked(e.target.checked);
+  const handleChangeEmail = (e: ChangeEvent<HTMLInputElement>) => {
+    setUserEmail(e.target.value);
   };
 
   const submitFeedback = () => {
@@ -175,38 +190,30 @@ export const FeedbackFlyout = ({ closeFlyout }: Props) => {
               onChange={handleChangeFeedbackText}
             />
           </EuiFormRow>
-          <EuiFormRow>
-            <EuiFilePicker
-              display="large"
-              multiple
-              initialPromptText={
+          <EuiFormRow
+            label={
+              <Label>
                 <FormattedMessage
-                  id="xpack.intercept.feedbackFlyout.form.filePicker.initialPromptText"
-                  defaultMessage="Drag here files you want to attach"
+                  id="xpack.intercept.feedbackFlyout.form.input.label"
+                  defaultMessage="TODO: Waiting for design"
                 />
-              }
-              aria-label={i18n.translate(
-                'xpack.intercept.feedbackFlyout.form.filePicker.ariaLabel',
-                {
-                  defaultMessage: 'Select files to attach',
-                }
-              )}
-              data-test-subj="feedbackFilePicker"
-              onChange={handleUploadFeedbackFiles}
-            />
-          </EuiFormRow>
-          <EuiFormRow>
-            <EuiCheckbox
-              id="futureResearchConsentCheckbox"
-              checked={isFutureResearchConsentChecked}
-              label={
-                <FormattedMessage
-                  id="xpack.intercept.feedbackFlyout.form.futureResearchConsentCheckbox.label"
-                  defaultMessage="I'm ready to participate in a future research to help improve Kibana"
-                />
-              }
-              data-test-subj="futureResearchConsentCheckbox"
-              onChange={handleChangeIsFutureResearchConstentChecked}
+              </Label>
+            }
+            helpText={
+              <FormattedMessage
+                id="xpack.intercept.feedbackFlyout.form.input.helpText"
+                defaultMessage="TODO: Waiting for design"
+              />
+            }
+          >
+            <EuiFieldText
+              value={userEmail}
+              aria-label={i18n.translate('xpack.intercept.feedbackFlyout.form.input.ariaLabel', {
+                defaultMessage: 'Enter your email here',
+              })}
+              data-test-subj="feedbackEmail"
+              type="email"
+              onChange={handleChangeEmail}
             />
           </EuiFormRow>
         </EuiForm>

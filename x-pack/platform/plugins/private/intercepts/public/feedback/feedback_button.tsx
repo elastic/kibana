@@ -32,7 +32,7 @@ export const FeedbackButton = ({ core, isServerless }: Props) => {
     }
 
     flyoutRef = core.overlays.openFlyout(
-      toMountPoint(<FeedbackFlyout closeFlyout={closeFlyout} />, core.rendering),
+      toMountPoint(<FeedbackFlyout core={core} closeFlyout={closeFlyout} />, core.rendering),
       {
         'data-test-subj': 'feedbackFlyout',
         type: 'push',
