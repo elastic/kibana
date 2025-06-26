@@ -415,7 +415,7 @@ class SavedObjectSaveModalComponent extends React.Component<
             css={({ euiTheme }) => ({ marginLeft: `-${euiTheme.size.base}` })}
             grow={false}
           >
-            <EuiIconTip type="iInCircle" content={this.props.mustCopyOnSaveMessage} />
+            <EuiIconTip type="info" content={this.props.mustCopyOnSaveMessage} />
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={true} />
