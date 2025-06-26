@@ -81,6 +81,7 @@ export const getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray = (
   ...baseBody,
   params: {
     ...baseParams,
+    ruleId: 'rule-with-legacy-investigation-fields-empty-array',
     investigationFields: [],
     ...rewrites?.params,
   },
