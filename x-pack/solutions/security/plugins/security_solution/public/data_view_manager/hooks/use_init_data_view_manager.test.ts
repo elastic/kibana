@@ -15,6 +15,10 @@ jest.mock('../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: () => true,
 }));
 
+jest.mock('../containers/data_view_provider', () => ({
+  useDefaultDataView: jest.fn().mockReturnValue({ id: '', title: '' }),
+}));
+
 jest.mock('react-redux', () => {
   const dispatch = jest.fn();
 

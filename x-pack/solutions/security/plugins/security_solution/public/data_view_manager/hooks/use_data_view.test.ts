@@ -14,6 +14,9 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { useSelector } from 'react-redux';
 
 jest.mock('../../common/hooks/use_experimental_features');
+jest.mock('../containers/data_view_provider', () => ({
+  useDefaultDataView: jest.fn().mockReturnValue({ id: '', title: '' }),
+}));
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
@@ -28,24 +31,12 @@ describe('useDataView', () => {
       .mockReturnValue({ dataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, status: 'ready' });
   });
 
-  describe('when data view is available', () => {
-    it('should return DataView instance', async () => {
-      const wrapper = renderHook(() => useDataView(DataViewManagerScopeName.default), {
-        wrapper: TestProviders,
-      });
-
-      await act(async () => wrapper.rerender(DataViewManagerScopeName.default));
-      expect(wrapper.result.current.dataView).toBeTruthy();
+  it('should return DataView instance', async () => {
+    const wrapper = renderHook(() => useDataView(DataViewManagerScopeName.default), {
+      wrapper: TestProviders,
     });
-  });
 
-  describe('when data view fields are not available', () => {
-    it('should return undefined', () => {
-      const wrapper = renderHook(() => useDataView(DataViewManagerScopeName.default), {
-        wrapper: TestProviders,
-      });
-
-      expect(wrapper.result.current.dataView).toBeUndefined();
-    });
+    await act(async () => wrapper.rerender(DataViewManagerScopeName.default));
+    expect(wrapper.result.current.dataView).toBeTruthy();
   });
 });
