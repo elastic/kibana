@@ -47,7 +47,6 @@ export const DEFEND_INSIGHTS_TOOL: AssistantTool = Object.freeze({
   description: DEFEND_INSIGHTS_TOOL_DESCRIPTION,
   sourceRegister: APP_UI_ID,
 
-
   isSupported: (params: AssistantToolParams): boolean => {
     const { llm, request } = params;
 

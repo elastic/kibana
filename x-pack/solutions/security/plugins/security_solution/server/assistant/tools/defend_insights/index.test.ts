@@ -62,7 +62,7 @@ describe('DEFEND_INSIGHTS_TOOL', () => {
   it('should return null if LLM is not provided', async () => {
     (requestHasRequiredAnonymizationParams as jest.Mock).mockReturnValue(true);
     const paramsWithoutLLM = { ...mockParams, llm: undefined };
-    const tool = await DEFEND_INSIGHTS_TOOL.getTool(paramsWithoutLLM) as DynamicTool;
+    const tool = (await DEFEND_INSIGHTS_TOOL.getTool(paramsWithoutLLM)) as DynamicTool;
 
     expect(tool).toBeNull();
   });
