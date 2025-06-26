@@ -23,6 +23,7 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
+  EuiIconTip,
   EuiSelect,
   EuiSpacer,
   EuiText,
@@ -237,6 +238,33 @@ export const FeedbackFlyout = ({ core, closeFlyout }: Props) => {
       </EuiFlyoutBody>
       <EuiFlyoutFooter css={footerBackgroundCss}>
         <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs">
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs">
+                  <FormattedMessage
+                    id="xpack.intercept.feedbackFlyout.form.infoText"
+                    defaultMessage="We'll get the information about your session."
+                  />
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  type="info"
+                  color="subdued"
+                  content={
+                    <FormattedMessage
+                      id="xpack.intercept.feedbackFlyout.form.infoTooltip"
+                      defaultMessage="By sending feedback, you acknowledge that session information is collected along with your input to help us better understand your experience. Please do not include any sensitive, personal, or confidential information in this form."
+                    />
+                  }
+                  iconProps={{
+                    className: 'eui-alignTop',
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
