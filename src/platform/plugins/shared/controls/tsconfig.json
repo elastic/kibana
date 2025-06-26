@@ -41,7 +41,7 @@
     "@kbn/react-hooks",
     "@kbn/esql-types",
     "@kbn/css-utils",
-    "@kbn/esql"
+    "@kbn/esql-utils"
   ],
   "exclude": ["target/**/*"]
 }

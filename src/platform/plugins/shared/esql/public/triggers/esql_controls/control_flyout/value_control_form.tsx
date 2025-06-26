@@ -10,6 +10,7 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
+import { esqlQueryToOptions } from '@kbn/esql-utils';
 import { isEqual } from 'lodash';
 import {
   EuiComboBox,
@@ -31,7 +32,6 @@ import {
 } from '@kbn/esql-types';
 import { getIndexPatternFromESQLQuery, appendStatsByToQuery } from '@kbn/esql-utils';
 import { ESQLLangEditor } from '../../../create_editor';
-import { getESQLSingleColumnValues } from '../utils/get_esql_single_column_values';
 import { ControlWidth, ControlLabel } from './shared_form_components';
 import { ChooseColumnPopover } from './choose_column_popover';
 
@@ -152,11 +152,11 @@ export function ValueControlForm({
     async (query: string) => {
       setValuesQuery(query);
 
-      const result = await getESQLSingleColumnValues({ query, search, timeRange });
+      const result = await esqlQueryToOptions({ query, search, timeRange });
       if (!isMounted()) {
         return;
       }
-      if (getESQLSingleColumnValues.isSuccess(result)) {
+      if (esqlQueryToOptions.isSuccess(result)) {
         const { options } = result;
 
         setEsqlQueryErrors([]);

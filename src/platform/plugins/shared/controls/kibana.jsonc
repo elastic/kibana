@@ -18,7 +18,6 @@
       "data",
       "unifiedSearch",
       "uiActions",
-      "esql"
     ],
     "extraPublicDirs": [
       "common"

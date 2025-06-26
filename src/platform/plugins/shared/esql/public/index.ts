@@ -13,8 +13,6 @@ export { ESQLLangEditor } from './create_editor';
 export type { ESQLEditorProps, DataErrorsControl } from '@kbn/esql-editor';
 export type { EsqlPluginStart };
 
-export { getESQLSingleColumnValues } from './triggers/esql_controls/utils/get_esql_single_column_values';
-
 export function plugin() {
   return new EsqlPlugin();
 }

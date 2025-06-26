@@ -15,8 +15,8 @@ import {
   ESQLVariableType,
 } from '@kbn/esql-types';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import { esqlQueryToOptions } from '@kbn/esql-utils';
 import { TimeRange } from '@kbn/es-query';
-import { getESQLSingleColumnValues } from '@kbn/esql/public';
 import { dataService } from '../../services/kibana_services';
 import { ControlGroupApi } from '../../control_group/types';
 
@@ -71,12 +71,12 @@ export function initializeESQLControlSelections(
   async function updateAvailableOptions() {
     const controlType = controlType$.getValue();
     if (controlType !== EsqlControlType.VALUES_FROM_QUERY) return;
-    const result = await getESQLSingleColumnValues({
+    const result = await esqlQueryToOptions({
       query: esqlQuery$.getValue(),
       search: dataService.search.search,
       timeRange: timeRange$?.getValue(),
     });
-    if (getESQLSingleColumnValues.isSuccess(result)) {
+    if (esqlQueryToOptions.isSuccess(result)) {
       availableOptions$.next(result.options);
     }
   }

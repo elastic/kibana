@@ -8,19 +8,19 @@
  */
 import { ISearchGeneric } from '@kbn/search-types';
 import {
-  getESQLSingleColumnValues,
-  GetESQLSingleColumnValuesSuccess,
-  GetESQLSingleColumnValuesFailure,
-} from './get_esql_single_column_values';
+  esqlQueryToOptions,
+  ESQLQueryToOptionsSuccess,
+  ESQLQueryToOptionsFailure,
+} from './esql_query_to_options';
 
 const mockGetESQLResults = jest.fn();
-jest.mock('@kbn/esql-utils', () => ({
+jest.mock('./run_query', () => ({
   getESQLResults: (...args: any[]) => mockGetESQLResults(...args),
 }));
 
 const searchMock = {} as ISearchGeneric;
 
-describe('getESQLSingleColumnValues', () => {
+describe('esqlQueryToOptions', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -31,11 +31,11 @@ describe('getESQLSingleColumnValues', () => {
         values: [['option1'], ['option2']],
       },
     });
-    const result = (await getESQLSingleColumnValues({
+    const result = (await esqlQueryToOptions({
       query: 'FROM index | STATS BY column',
       search: searchMock,
-    })) as GetESQLSingleColumnValuesSuccess;
-    expect(getESQLSingleColumnValues.isSuccess(result)).toBe(true);
+    })) as ESQLQueryToOptionsSuccess;
+    expect(esqlQueryToOptions.isSuccess(result)).toBe(true);
     expect('columns' in result).toBe(false);
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -53,11 +53,11 @@ describe('getESQLSingleColumnValues', () => {
         values: [['option1'], ['option2']],
       },
     });
-    const result = (await getESQLSingleColumnValues({
+    const result = (await esqlQueryToOptions({
       query: 'FROM index',
       search: searchMock,
-    })) as GetESQLSingleColumnValuesFailure;
-    expect(getESQLSingleColumnValues.isSuccess(result)).toBe(false);
+    })) as ESQLQueryToOptionsFailure;
+    expect(esqlQueryToOptions.isSuccess(result)).toBe(false);
     expect('options' in result).toBe(false);
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -71,11 +71,11 @@ describe('getESQLSingleColumnValues', () => {
   });
   it('returns an error on a failed query', async () => {
     mockGetESQLResults.mockRejectedValueOnce('Invalid ES|QL query');
-    const result = (await getESQLSingleColumnValues({
+    const result = (await esqlQueryToOptions({
       query: 'FROM index | EVAL',
       search: searchMock,
-    })) as GetESQLSingleColumnValuesFailure;
-    expect(getESQLSingleColumnValues.isSuccess(result)).toBe(false);
+    })) as ESQLQueryToOptionsFailure;
+    expect(esqlQueryToOptions.isSuccess(result)).toBe(false);
     expect('options' in result).toBe(false);
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -89,7 +89,7 @@ describe('getESQLSingleColumnValues', () => {
 
   it('passes timeRange successfully', async () => {
     const timeRange = { from: 'now-10m', to: 'now' };
-    await getESQLSingleColumnValues({
+    await esqlQueryToOptions({
       query: 'FROM index | STATS BY column',
       search: searchMock,
       timeRange,
