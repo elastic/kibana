@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { Logger, LogMeta } from '@kbn/core/server';
 import type { ITelemetryEventsSender } from '../sender';
 import { TelemetryChannel, type TelemetryConfiguration } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
@@ -50,9 +50,12 @@ export function createTelemetryConfigurationTaskConfig() {
 
         const configArtifact = manifest.data as unknown as TelemetryConfiguration;
 
-        log.l('Got telemetry configuration artifact', {
-          artifact: configArtifact ?? '<null>',
-        });
+        log.trace<LogMeta & { artifact: TelemetryConfiguration }>(
+          'Got telemetry configuration artifact',
+          {
+            artifact: configArtifact ?? '<null>',
+          }
+        );
 
         telemetryConfiguration.max_detection_alerts_batch =
           configArtifact.max_detection_alerts_batch;
@@ -120,7 +123,10 @@ export function createTelemetryConfigurationTaskConfig() {
 
         await taskMetricsService.end(trace);
 
-        log.l('Updated TelemetryConfiguration', { configuration: telemetryConfiguration });
+        log.trace<LogMeta & { configuration: typeof telemetryConfiguration }>(
+          'Updated TelemetryConfiguration',
+          { configuration: telemetryConfiguration }
+        );
         return 0;
       } catch (err) {
         log.l('Failed to set telemetry configuration', { error: err.message });
