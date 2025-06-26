@@ -15,7 +15,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
 import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
-import { ALL_SAVED_OBJECT_INDICES, MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { ES_CLIENT_HEADERS } from '../client_headers';
 
 import {
@@ -133,11 +133,7 @@ export async function loadAction({
   );
 
   // If we affected saved objects indices, we need to ensure they are migrated...
-  if (
-    Object.keys(result).some((k) =>
-      ALL_SAVED_OBJECT_INDICES.some((soIndexPattern) => k.startsWith(soIndexPattern))
-    )
-  ) {
+  if (Object.keys(result).some((k) => k.startsWith(MAIN_SAVED_OBJECT_INDEX))) {
     await migrateSavedObjectIndices(kbnClient);
     log.debug('[%s] Migrated Kibana index after loading Kibana data', name);
 
