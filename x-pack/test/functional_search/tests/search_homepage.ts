@@ -97,7 +97,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.searchHomePage.expectSearchHomePageIsLoaded();
         });
 
-        describe.only('Elasticsearch endpoint and API Keys', function () {
+        describe('Elasticsearch endpoint and API Keys', function () {
           it('renders Elasticsearch endpoint with copy functionality', async () => {
             await testSubjects.existOrFail('copyEndpointButton');
             await testSubjects.existOrFail('endpointValueField');
