@@ -7,5 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const WORKCHAT_APP_ID = 'workchat';
-export const ONECHAT_APP_ID = 'onechat';
+export function getAttributeDisplayName(fieldName: string): string {
+  return fieldName
+    .replace(/^resource\.attributes\./, '')
+    .replace(/^scope\.attributes\./, '')
+    .replace(/^attributes\./, '');
+}
