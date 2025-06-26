@@ -28,6 +28,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 interface Props {
   fieldName: string;
+  displayNameOverride?: string;
   fieldType?: string;
   fieldMapping?: DataViewField;
   fieldIconProps?: Omit<FieldIconProps, 'type'>;
@@ -40,15 +41,17 @@ export function FieldName({
   fieldMapping,
   fieldType,
   fieldIconProps,
+  displayNameOverride,
   scripted = false,
   highlight = '',
 }: Props) {
   const styles = useMemoCss(componentStyles);
 
   const typeName = getFieldTypeName(fieldType);
-  const displayName =
-    fieldMapping && fieldMapping.displayName ? fieldMapping.displayName : fieldName;
-  const tooltip = displayName !== fieldName ? `${displayName} (${fieldName})` : fieldName;
+  const fieldMappingDisplayName = fieldMapping?.displayName ? fieldMapping.displayName : fieldName;
+  const fieldDisplayName = displayNameOverride ?? fieldMappingDisplayName;
+
+  const tooltip = fieldDisplayName !== fieldName ? `${fieldDisplayName} (${fieldName})` : fieldName;
   const subTypeMulti = fieldMapping && getDataViewFieldSubtypeMulti(fieldMapping.spec);
   const isMultiField = !!subTypeMulti?.multi;
 
@@ -83,7 +86,7 @@ export function FieldName({
               delay="long"
               anchorClassName="eui-textBreakAll"
             >
-              <EuiHighlight search={highlight}>{displayName}</EuiHighlight>
+              <EuiHighlight search={highlight}>{fieldDisplayName}</EuiHighlight>
             </EuiToolTip>
           </EuiFlexItem>
 
