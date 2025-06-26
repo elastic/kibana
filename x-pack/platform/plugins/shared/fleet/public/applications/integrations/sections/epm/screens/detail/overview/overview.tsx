@@ -133,7 +133,7 @@ export const PrereleaseCallout: React.FC<{
             packageTitle,
           },
         })}
-        iconType="iInCircle"
+        iconType="info"
         color="warning"
       >
         {latestGAVersion && (

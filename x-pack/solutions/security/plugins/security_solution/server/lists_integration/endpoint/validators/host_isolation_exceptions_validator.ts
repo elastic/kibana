@@ -79,6 +79,7 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
     await this.validateHasWritePrivilege();
     await this.validateHostIsolationData(item);
     await this.validateByPolicyItem(item);
+    await this.validateCanCreateGlobalArtifacts(item);
     await this.validateCreateOwnerSpaceIds(item);
 
     return item;
