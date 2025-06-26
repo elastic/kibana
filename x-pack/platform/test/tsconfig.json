@@ -16,6 +16,7 @@
     "allowJs": false
   },
   "include": [
+    "index.d.ts",
     "**/*",
     "../../../typings/**/*",
     "../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
@@ -98,5 +99,21 @@
     "@kbn/lens-plugin",
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/reporting-common",
+    "@kbn/cases-plugin",
+    "@kbn/files-plugin",
+    "@kbn/shared-ux-file-types",
+    "@kbn/user-profile-components",
+    "@kbn/safer-lodash-set",
+    "@kbn/cases-api-integration-test-plugin",
+    "@kbn/dev-proc-runner",
+    "@kbn/repo-info",
+    "@kbn/dev-cli-errors",
+    "@kbn/journeys",
+    "@kbn/discover-plugin",
+    "@kbn/reporting-export-types-csv-common",
+    "@kbn/rison",
+    "@kbn/reporting-export-types-pdf-common",
+    "@kbn/reporting-export-types-png-common",
+    "@kbn/reporting-server",
   ]
 }

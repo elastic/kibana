@@ -11,9 +11,9 @@ import { AceEditorProvider } from '@kbn/test-suites-xpack-platform/functional/se
 import { UserMenuProvider } from '@kbn/test-suites-xpack-platform/functional/services/user_menu';
 import { SampleDataServiceProvider } from '@kbn/test-suites-xpack-platform/functional/services/sample_data';
 import { GrokDebuggerProvider } from '@kbn/test-suites-xpack-platform/functional/services/grok_debugger';
+import { ReportingFunctionalProvider } from '@kbn/test-suites-xpack-platform/reporting_functional/services';
 import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
 import { services as commonServices } from '../../common/services';
-import { ReportingFunctionalProvider } from '../../reporting_functional/services';
 
 import {
   MonitoringNoDataProvider,
