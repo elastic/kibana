@@ -1,7 +1,0 @@
-{
-  "indices.exists_template": {
-    "patterns": [
-      "_template/{template}"
-    ]
-  }
-}

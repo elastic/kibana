@@ -1,8 +1,0 @@
-{
-  "transform.get_transform_stats": {
-    "patterns": [
-      "_transform/_stats",
-      "_transform/{transform_id}/_stats"
-    ]
-  }
-}

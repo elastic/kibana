@@ -170,3 +170,6 @@ x-pack/test/security_solution_playwright/.auth/
 x-pack/test/security_solution_playwright/.env
 .codeql
 .dependency-graph-log.json
+
+# Ignore the console definitions directory
+src/platform/plugins/shared/console/packaging/server/console_definitions

@@ -1,5 +1,0 @@
-{
-  "ml.put_trained_model": {
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-df-analytics-apis.html"
-  }
-}
