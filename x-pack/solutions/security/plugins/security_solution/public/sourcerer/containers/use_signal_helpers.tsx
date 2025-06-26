@@ -49,7 +49,7 @@ export const useSignalHelpers = (): {
     ? experimentalSignalIndexName
     : signalIndexNameSourcerer;
 
-  const { dataView: experimentalDefaultDataView } = useDataView(SourcererScopeName.default);
+  const { dataView: experimentalDefaultDataView } = useDataView(SourcererScopeName.detections);
   const dataViewId = newDataViewPickerEnabled
     ? experimentalDefaultDataView?.id ?? null
     : oldDataViewId;
