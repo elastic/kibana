@@ -21,14 +21,14 @@ const profilesToMap = (profiles: UserProfileWithAvatar[]): Map<string, UserProfi
   }, new Map<string, UserProfileWithAvatar>());
 
 export const useBulkGetUserProfiles = ({ uids }: { uids: string[] }) => {
-  const { userProfile } = useKibana().services;
+  const { security } = useKibana().services;
 
   const toasts = useToasts();
 
   return useQuery<UserProfileWithAvatar[], ServerError, Map<string, UserProfileWithAvatar>>(
     casesQueriesKeys.userProfilesList(uids),
     () => {
-      return bulkGetUserProfiles({ userProfile, uids });
+      return bulkGetUserProfiles({ security, uids });
     },
     {
       select: profilesToMap,

@@ -15,14 +15,14 @@ import { casesQueriesKeys } from '../constants';
 import { getCurrentUserProfile } from './api';
 
 export const useGetCurrentUserProfile = () => {
-  const { userProfile } = useKibana().services;
+  const { security } = useKibana().services;
 
   const toasts = useToasts();
 
   return useQuery<UserProfile, ServerError>(
     casesQueriesKeys.currentUser(),
     () => {
-      return getCurrentUserProfile({ userProfile });
+      return getCurrentUserProfile({ security });
     },
     {
       retry: false,

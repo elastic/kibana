@@ -42,7 +42,7 @@ describe('useGetCurrentUserProfile', () => {
     });
 
     expect(spyOnGetCurrentUserProfile).toBeCalledWith({
-      userProfile: expect.anything(),
+      security: expect.anything(),
     });
   });
 
