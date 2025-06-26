@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { createInternalError, createToolNotFoundError, esqlToolProviderId } from '@kbn/onechat-common';
+import {
+  createInternalError,
+  createToolNotFoundError,
+  esqlToolProviderId,
+} from '@kbn/onechat-common';
 import { EsqlToolDefinition } from '@kbn/onechat-server';
 import {
   EsqlToolCreateRequest,
@@ -42,78 +46,84 @@ class EsqlToolClientImpl {
       const tool = document._source as EsqlToolDefinition;
       return tool;
     } catch (isToolNotFoundError) {
-      throw createToolNotFoundError({ toolId: `tool::${id}`, customMessage: `Tool with id ${id} not found` });
+      throw createToolNotFoundError({
+        toolId: `tool::${id}`,
+        customMessage: `Tool with id ${id} not found`,
+      });
     }
   }
 
   async list(): Promise<EsqlToolDefinition[]> {
-      const document = await this.storage.getClient().search({
-        index: esqlToolIndexName,
-        query: {
-          match_all: {},
-        },
-        size: 1000,
-        track_total_hits: true,
-      });
+    const document = await this.storage.getClient().search({
+      index: esqlToolIndexName,
+      query: {
+        match_all: {},
+      },
+      size: 1000,
+      track_total_hits: true,
+    });
 
-      return document.hits.hits.map((hit) => hit._source as EsqlToolDefinition);
+    return document.hits.hits.map((hit) => hit._source as EsqlToolDefinition);
   }
 
   async create(tool: EsqlToolCreateRequest) {
     if ((await this.list()).map((t) => t.id).includes(tool.id)) {
       throw createInternalError(`Tool with id ${tool.id} already exists`);
     }
-      const document = {
-        ...tool,
-        meta: {
-          providerId: esqlToolProviderId,
-          tags: tool.meta?.tags ?? [],
-        },
-      };
+    const document = {
+      ...tool,
+      meta: {
+        providerId: esqlToolProviderId,
+        tags: tool.meta?.tags ?? [],
+      },
+    };
 
-      await this.storage.getClient().index({
-        id: tool.id,
-        document,
-      });
+    await this.storage.getClient().index({
+      id: tool.id,
+      document,
+    });
 
-      return document as EsqlToolCreateResponse;
+    return document as EsqlToolCreateResponse;
   }
   async update(id: string, updates: EsqlToolUpdateRequest): Promise<EsqlToolCreateResponse> {
-      const now = new Date();
-      let tool: EsqlToolCreateResponse | null = null;
+    const now = new Date();
+    let tool: EsqlToolCreateResponse | null = null;
 
-      try {
-        const document = await this.storage.getClient().get({ id });
-        tool = document._source as EsqlToolCreateResponse;
-      } catch (error) {
-        tool = null;
-      }
-      const updatedTool = {
-        id: updates.id ?? tool!.id,
-        name: updates.name ?? (tool?.name || id),
-        description: updates.description ?? tool!.description,
-        query: updates.query ?? tool!.query,
-        params: updates.params ?? tool!.params,
-        meta: {
-          providerId: esqlToolProviderId,
-          tags: tool?.meta?.tags ?? updates.meta?.tags ?? [],
-        },
-        created_at: tool?.created_at ?? now.toISOString(),
-        updated_at: now.toISOString(),
-      };
+    try {
+      const document = await this.storage.getClient().get({ id });
+      tool = document._source as EsqlToolCreateResponse;
+    } catch (error) {
+      tool = null;
+    }
+    const updatedTool = {
+      id: updates.id ?? tool!.id,
+      name: updates.name ?? (tool?.name || id),
+      description: updates.description ?? tool!.description,
+      query: updates.query ?? tool!.query,
+      params: updates.params ?? tool!.params,
+      meta: {
+        providerId: esqlToolProviderId,
+        tags: tool?.meta?.tags ?? updates.meta?.tags ?? [],
+      },
+      created_at: tool?.created_at ?? now.toISOString(),
+      updated_at: now.toISOString(),
+    };
 
-      await this.storage.getClient().index({
-        id,
-        document: updatedTool,
-      });
+    await this.storage.getClient().index({
+      id,
+      document: updatedTool,
+    });
 
-      return updatedTool;
+    return updatedTool;
   }
   async delete(id: string): Promise<boolean> {
-    const result = await this.storage.getClient().delete({ id: id });
+    const result = await this.storage.getClient().delete({ id });
     if (result.result === 'not_found') {
-        throw createToolNotFoundError({ toolId: `tool::${id}`, customMessage: `Tool with id ${id} not found` });
+      throw createToolNotFoundError({
+        toolId: `tool::${id}`,
+        customMessage: `Tool with id ${id} not found`,
+      });
     }
-    return true
+    return true;
   }
 }

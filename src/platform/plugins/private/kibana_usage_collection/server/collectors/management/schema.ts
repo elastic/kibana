@@ -496,8 +496,8 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'onechat:esqlToolApi:enabled': {
-   type: 'boolean',
-   _meta: { description: 'Non-default value of setting.' },
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
   },
   'onechat:ui:enabled': {
     type: 'boolean',

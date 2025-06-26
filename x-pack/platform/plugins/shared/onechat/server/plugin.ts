@@ -18,7 +18,7 @@ import type {
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
-import { ESQL_TOOL_API_UI_SETTING_ID, ONECHAT_MCP_SERVER_UI_SETTING_ID } from '../common/constants';
+import { ESQL_TOOL_API_UI_SETTING_ID } from '../common/constants';
 import { registerUISettings } from './ui_settings';
 
 export class OnechatPlugin

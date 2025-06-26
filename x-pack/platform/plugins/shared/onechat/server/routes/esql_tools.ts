@@ -28,7 +28,7 @@ const paramValueTypeSchema = schema.oneOf([
   schema.literal('nested'),
 ]);
 
-  export function registerESQLToolsRoutes({
+export function registerESQLToolsRoutes({
   router,
   getInternalServices,
   logger,

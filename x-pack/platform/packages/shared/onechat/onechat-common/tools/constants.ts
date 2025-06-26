@@ -33,7 +33,7 @@ export const BuiltinTags = {
 /**
  * Common ES Field Types
  */
-export type FieldTypes = 
+export type FieldTypes =
   | 'text'
   | 'keyword'
   | 'long'

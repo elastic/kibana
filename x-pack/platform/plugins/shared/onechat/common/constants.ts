@@ -23,4 +23,3 @@ export const ONECHAT_UI_SETTING_ID = 'onechat:ui:enabled';
  * UI Setting ID for enabling / disabling the tools UI
  */
 export const ONECHAT_TOOLS_UI_SETTING_ID = 'onechat:tools:enabled';
-
