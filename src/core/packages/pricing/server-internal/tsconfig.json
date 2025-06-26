@@ -21,8 +21,8 @@
     "@kbn/core-base-server-mocks",
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-http-server-mocks",
-    "@kbn/core",
     "@kbn/core-analytics-server",
+    "@kbn/core-analytics-server-mocks",
   ],
   "exclude": [
     "target/**/*",
