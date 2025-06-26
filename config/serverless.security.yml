@@ -134,7 +134,6 @@ uiSettings.overrides.defaultRoute: /app/security/get_started
 telemetry.labels.serverless: security
 
 # Fleet specific configuration
-xpack.fleet.agentless.enabled: true
 xpack.fleet.internal.registry.capabilities: ['security']
 xpack.fleet.internal.registry.excludePackages: [
     # Oblt integrations
