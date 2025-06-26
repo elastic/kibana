@@ -248,8 +248,6 @@ export class ObservabilityAIAssistantClient {
             availableFunctionNames: disableFunctions
               ? []
               : functionClient.getFunctions().map((fn) => fn.definition.name),
-            anonymizationInstruction:
-              this.dependencies.anonymizationService.getAnonymizationInstruction(),
           })
         ),
         shareReplay()
@@ -868,9 +866,5 @@ export class ObservabilityAIAssistantClient {
       this.dependencies.namespace,
       this.dependencies.user
     );
-  };
-
-  getAnonymizationService = () => {
-    return this.dependencies.anonymizationService;
   };
 }
