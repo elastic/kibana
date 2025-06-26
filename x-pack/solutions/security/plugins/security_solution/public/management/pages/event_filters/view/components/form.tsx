@@ -204,9 +204,9 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       (updatedItem?: Partial<ArtifactFormComponentProps['item']>) => {
         const item = updatedItem
           ? {
-              ...exception,
-              ...updatedItem,
-            }
+            ...exception,
+            ...updatedItem,
+          }
           : exception;
         cleanupEntries(item);
         onChange({
@@ -214,10 +214,10 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           isValid: isFormValid && areConditionsValid && hasFormChanged,
           confirmModalLabels: hasWildcardWithWrongOperator
             ? CONFIRM_WARNING_MODAL_LABELS(
-                i18n.translate('xpack.securitySolution.eventFilter.flyoutForm.confirmModal.name', {
-                  defaultMessage: 'event filter',
-                })
-              )
+              i18n.translate('xpack.securitySolution.eventFilter.flyoutForm.confirmModal.name', {
+                defaultMessage: 'event filter',
+              })
+            )
             : undefined,
         });
       },
@@ -538,18 +538,18 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         const updatedItem: Partial<ArtifactFormComponentProps['item']> =
           arg.exceptionItems[0] !== undefined
             ? {
-                ...arg.exceptionItems[0],
-                name: exception?.name ?? '',
-                description: exception?.description ?? '',
-                comments: exception?.comments ?? [],
-                os_types: exception?.os_types ?? [OperatingSystem.WINDOWS],
-                tags: exception?.tags ?? [],
-                meta: exception.meta,
-              }
+              ...arg.exceptionItems[0],
+              name: exception?.name ?? '',
+              description: exception?.description ?? '',
+              comments: exception?.comments ?? [],
+              os_types: exception?.os_types ?? [OperatingSystem.WINDOWS],
+              tags: exception?.tags ?? [],
+              meta: exception.meta,
+            }
             : {
-                ...exception,
-                entries: [{ field: '', operator: 'included', type: 'match', value: '' }],
-              };
+              ...exception,
+              entries: [{ field: '', operator: 'included', type: 'match', value: '' }],
+            };
         const hasValidConditions =
           arg.exceptionItems[0] !== undefined
             ? !(arg.errorExists && !arg.exceptionItems[0]?.entries?.length)

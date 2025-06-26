@@ -320,7 +320,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       undefined,
       ENDPOINT_FIELDS_SEARCH_STRATEGY
     );
-    
+
     const isFormAdvancedMode: boolean = useMemo(() => isAdvancedModeEnabled(item), [item]);
     const { getTagsUpdatedBy } = useGetUpdatedTags(item);
 
@@ -368,10 +368,10 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           isValid: updatedValidationResult.isValid && conditionsState.areValid,
           confirmModalLabels: updatedValidationResult.extraWarning
             ? CONFIRM_WARNING_MODAL_LABELS(
-                i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
-                  defaultMessage: 'trusted application',
-                })
-              )
+              i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
+                defaultMessage: 'trusted application',
+              })
+            )
             : undefined,
         });
       },
@@ -611,18 +611,18 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         const updatedItem: ArtifactFormComponentProps['item'] =
           arg.exceptionItems[0] !== undefined
             ? ({
-                ...arg.exceptionItems[0],
-                name: currentItem?.name ?? '',
-                description: currentItem?.description ?? '',
-                comments: currentItem?.comments ?? [],
-                os_types: currentItem?.os_types ?? [OperatingSystem.WINDOWS],
-                tags: currentItem?.tags ?? [],
-                meta: currentItem.meta,
-              } as ArtifactFormComponentProps['item'])
+              ...arg.exceptionItems[0],
+              name: currentItem?.name ?? '',
+              description: currentItem?.description ?? '',
+              comments: currentItem?.comments ?? [],
+              os_types: currentItem?.os_types ?? [OperatingSystem.WINDOWS],
+              tags: currentItem?.tags ?? [],
+              meta: currentItem.meta,
+            } as ArtifactFormComponentProps['item'])
             : {
-                ...currentItem,
-                entries: [{ field: '', operator: 'included', type: 'match', value: '' }],
-              };
+              ...currentItem,
+              entries: [{ field: '', operator: 'included', type: 'match', value: '' }],
+            };
 
         processChanged(updatedItem);
         if (!hasFormChanged) {
@@ -782,8 +782,11 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
               onVisited={handleConditionBuilderOnVisited}
               data-test-subj={getTestId('conditionsBuilder')}
             />
-          ) : (
-            exceptionBuilderComponentMemo
+          ) : (<>
+            {exceptionBuilderComponentMemo}
+            {conditionsState.hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
+            {conditionsState.hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
+          </>
           )}
         </EuiFormRow>
         {showAssignmentSection ? (
@@ -799,13 +802,6 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             </EuiFormRow>
           </>
         ) : null}
-        <>
-          <EuiSpacer size="l" />
-          <EuiHorizontalRule />
-          <EuiSpacer size="l" />
-          {conditionsState.hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
-          {conditionsState.hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
-        </>
       </EuiForm>
     );
   }

@@ -60,7 +60,7 @@ export function registerEndpointSuggestionsRoutes(
       withEndpointAuthz(
         { any: ['canWriteEventFilters', 'canWriteTrustedApplications'] },
         endpointContext.logFactory.get('endpointSuggestions'),
-        getEndpointSuggestionsRequestHandler(config$, getLogger(endpointContext), endpointContext)
+        getEndpointSuggestionsRequestHandler(config$, endpointContext)
       )
     );
 }
