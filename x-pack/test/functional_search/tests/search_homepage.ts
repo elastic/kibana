@@ -88,13 +88,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           );
         });
 
-        after(async () => {
-          await esDeleteAllIndices(indexName);
+        beforeEach(async () => {
+          await pageObjects.searchNavigation.navigateToElasticsearchSearchHomePage();
         });
 
-        it('load search home page', async () => {
-          await pageObjects.searchNavigation.navigateToElasticsearchSearchHomePage();
-          await pageObjects.searchHomePage.expectSearchHomePageIsLoaded();
+        after(async () => {
+          await esDeleteAllIndices(indexName);
         });
 
         describe('Elasticsearch endpoint and API Keys', function () {
@@ -113,6 +112,78 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await testSubjects.existOrFail('manageApiKeysButton');
             await testSubjects.click('manageApiKeysButton');
             expect(await browser.getCurrentUrl()).contain('/app/management/security/api_keys');
+          });
+        });
+
+        describe('Connect To Elasticsearch Side Panel', function () {
+          it('renders the "Upload a file" card with copy link', async () => {
+            await testSubjects.existOrFail('uploadFileButton');
+            await testSubjects.click('uploadFileButton');
+            expect(await browser.getCurrentUrl()).contain('ml/filedatavisualizer');
+          });
+        });
+
+        describe('AI search capabilities', function () {
+          it('renders Semantic Search content', async () => {
+            await testSubjects.existOrFail('aiSearchCapabilities-item-semantic');
+            await testSubjects.existOrFail('createSemanticOptimizedIndexButton');
+            await testSubjects.click('createSemanticOptimizedIndexButton');
+            expect(await browser.getCurrentUrl()).contain('app/elasticsearch/indices/create');
+          });
+
+          it('renders Keyword Search content', async () => {
+            await testSubjects.scrollIntoView('aiSearchCapabilities-item-keyword');
+            await testSubjects.existOrFail('aiSearchCapabilities-item-keyword');
+            await testSubjects.click('aiSearchCapabilities-item-keyword');
+            await testSubjects.existOrFail('createKeywordIndexButton');
+            await testSubjects.click('createKeywordIndexButton');
+            expect(await browser.getCurrentUrl()).contain('app/elasticsearch/indices/create');
+          });
+        });
+
+        describe('Alternate Solutions', function () {
+          it('renders Observability content', async () => {
+            await testSubjects.existOrFail('observabilitySection');
+            await testSubjects.existOrFail('exploreLogstashAndBeatsLink');
+            await testSubjects.click('exploreLogstashAndBeatsLink');
+            expect(await browser.getCurrentUrl()).contain('manage-data/ingest');
+          });
+        });
+
+        describe('Dive deeper with Elasticsearch', function () {
+          it('renders Search labs content', async () => {
+            await testSubjects.existOrFail('searchLabsSection');
+            await testSubjects.existOrFail('searchLabsButton');
+            await testSubjects.click('searchLabsButton');
+            expect(await browser.getCurrentUrl()).contain('search-labs');
+          });
+
+          it('renders Open Notebooks content', async () => {
+            await testSubjects.existOrFail('pythonNotebooksSection');
+            await testSubjects.existOrFail('openNotebooksButton');
+            await testSubjects.click('openNotebooksButton');
+            expect(await browser.getCurrentUrl()).contain('search-labs/tutorials/examples');
+          });
+
+          it('renders Elasticsearch Documentation content', async () => {
+            await testSubjects.existOrFail('elasticsearchDocumentationSection');
+            await testSubjects.existOrFail('viewDocumentationButton');
+            await testSubjects.click('viewDocumentationButton');
+            expect(await browser.getCurrentUrl()).contain('docs/solutions/search/get-started');
+          });
+        });
+
+        describe('Footer content', function () {
+          it('displays the community link', async () => {
+            await testSubjects.existOrFail('elasticCommunityLink');
+            await testSubjects.click('elasticCommunityLink');
+            expect(await browser.getCurrentUrl()).contain('community/');
+          });
+
+          it('displays the feedbacks link', async () => {
+            await testSubjects.existOrFail('giveFeedbackLink');
+            await testSubjects.click('giveFeedbackLink');
+            expect(await browser.getCurrentUrl()).contain('kibana/feedback');
           });
         });
       });
