@@ -92,7 +92,13 @@ describe('createPromptApi', () => {
   });
 
   it('initializes createChatCompleteCallbackApi with correct options', () => {
-    expect(mockCreateChatCompleteCallbackApi).toHaveBeenCalledWith({ request, actions, logger });
+    expect(mockCreateChatCompleteCallbackApi).toHaveBeenCalledWith({
+      request,
+      actions,
+      logger,
+      anonymizationRulesPromise: Promise.resolve([]),
+      esClient: mockEsClient,
+    });
   });
 
   it('calls the callback API with correct initial options', async () => {

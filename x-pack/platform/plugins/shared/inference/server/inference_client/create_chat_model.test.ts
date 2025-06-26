@@ -68,6 +68,8 @@ describe('createChatModel', () => {
       actions,
       request,
       logger,
+      anonymizationRulesPromise: Promise.resolve([]),
+      esClient: mockEsClient,
     });
   });
 

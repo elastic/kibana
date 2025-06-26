@@ -58,6 +58,8 @@ describe('createClient', () => {
         request,
         actions,
         logger: logger.get('client'),
+        anonymizationRulesPromise: Promise.resolve([]),
+        esClient: mockEsClient,
       });
 
       expect(bindClientMock).not.toHaveBeenCalled();
@@ -110,6 +112,8 @@ describe('createClient', () => {
         request,
         actions,
         logger: logger.get('client'),
+        anonymizationRulesPromise: Promise.resolve([]),
+        esClient: mockEsClient,
       });
 
       expect(bindClientMock).toHaveBeenCalledTimes(1);
