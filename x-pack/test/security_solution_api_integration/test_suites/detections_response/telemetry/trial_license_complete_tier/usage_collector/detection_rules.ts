@@ -172,6 +172,11 @@ export default ({ getService }: FtrProviderContext) => {
               notifications_disabled: 1,
               disabled: 1,
             },
+            query_custom: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
+              notifications_disabled: 1,
+              disabled: 1,
+            },
             custom_total: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
               notifications_disabled: 1,
