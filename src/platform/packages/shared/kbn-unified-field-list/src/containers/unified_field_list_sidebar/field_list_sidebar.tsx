@@ -330,7 +330,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     css: [
       styles.sidebar,
       isSidebarCollapsed && styles.sidebarCollapsed,
-      fullWidth ? styles.sidebarFullWidth : styles.sidebarFixedWidth,
+      fullWidth ? styles.sidebarListFullWidth : styles.sidebarFixedWidth,
     ],
   };
 
