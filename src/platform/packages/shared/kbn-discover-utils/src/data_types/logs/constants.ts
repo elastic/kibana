@@ -89,7 +89,14 @@ export const RESOURCE_FIELDS = [
   fieldConstants.ORCHESTRATOR_CLUSTER_ID_FIELD,
   fieldConstants.CONTAINER_ID_FIELD,
   fieldConstants.AGENT_NAME_FIELD,
+  'kubernetes.container.name',
 ] as const;
+export const METRIC_FIELDS = [
+  'kubernetes.container.name',
+  'k8s.container.name',
+  'kubernetes.pod.name',
+  'k8s.pod.name',
+];
 export const TRACE_FIELDS = [
   fieldConstants.SERVICE_NAME_FIELD,
   fieldConstants.EVENT_OUTCOME_FIELD,

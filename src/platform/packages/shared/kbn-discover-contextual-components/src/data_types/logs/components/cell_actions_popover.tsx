@@ -58,6 +58,13 @@ interface CellActionsPopoverProps {
   }) => ReactElement;
 }
 
+const infraRoutes = {
+  overview: {
+    href: 'metrics/entity/Kubernetes/Overview?dashboardId=kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
+    label: 'Kubernetes Overview',
+  },
+};
+
 export function CellActionsPopover({
   onFilter,
   property,
@@ -81,6 +88,11 @@ export function CellActionsPopover({
     'data-test-subj': `dataTableCellActionsPopover_${property}`,
   };
 
+  const infraProps =
+    property in infraRoutes
+      ? infraRoutes[property as keyof typeof infraRoutes]
+      : infraRoutes.overview;
+
   return (
     <EuiPopover
       button={renderPopoverTrigger({ popoverTriggerProps })}
@@ -92,6 +104,7 @@ export function CellActionsPopover({
       <EuiFlexGroup
         gutterSize="none"
         responsive={false}
+        justifyContent="spaceBetween"
         data-test-subj="dataTableCellActionPopoverTitle"
       >
         <EuiFlexItem style={{ maxWidth: '200px' }}>
@@ -147,6 +160,11 @@ export function CellActionsPopover({
           </EuiFlexGroup>
         </EuiPopoverFooter>
       ) : null}
+      <EuiPopoverFooter>
+        <EuiButtonEmpty href={infraProps.href} size="s" iconType="dashboardApp">
+          Go to {infraProps.label} dashboard
+        </EuiButtonEmpty>
+      </EuiPopoverFooter>
       <EuiPopoverFooter>
         <EuiCopy textToCopy={value}>
           {(copy) => (

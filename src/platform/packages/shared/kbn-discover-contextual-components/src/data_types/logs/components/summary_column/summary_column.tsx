@@ -20,6 +20,7 @@ import {
   TRACE_FIELDS,
   getLogDocumentOverview,
   getMessageFieldWithFallbacks,
+  METRIC_FIELDS,
 } from '@kbn/discover-utils';
 import { getAvailableResourceFields, getAvailableTraceFields } from '@kbn/discover-utils/src';
 import { Resource } from './resource';
@@ -42,8 +43,37 @@ export interface SummaryColumnFactoryDeps {
   share?: SharePluginStart;
 }
 
-export type SummaryColumnProps = DataGridCellValueElementProps & { isTracesSummary?: boolean };
+export type SummaryColumnProps = DataGridCellValueElementProps & { isTracesSummary?: boolean } & {
+  isMetricsSummary?: boolean;
+};
 export type AllSummaryColumnProps = SummaryColumnProps & SummaryColumnFactoryDeps;
+
+const getResourceFields = ({
+  isTracesDoc,
+  isMetricsDoc,
+}: {
+  isTracesDoc?: boolean;
+  isMetricsDoc?: boolean;
+}) => {
+  if (isTracesDoc) {
+    return {
+      fields: TRACE_FIELDS,
+      getAvailableFields: getAvailableTraceFields,
+    };
+  }
+
+  if (isMetricsDoc) {
+    return {
+      fields: METRIC_FIELDS,
+      getAvailableFields: getAvailableResourceFields,
+    };
+  }
+
+  return {
+    fields: RESOURCE_FIELDS,
+    getAvailableFields: getAvailableResourceFields,
+  };
+};
 
 export const SummaryColumn = (props: AllSummaryColumnProps) => {
   const { isDetails } = props;
@@ -66,7 +96,8 @@ const SummaryCell = ({
   rowHeight: maybeNullishRowHeight,
   ...props
 }: AllSummaryColumnProps) => {
-  const { dataView, onFilter, row, share, core, isTracesSummary, fieldFormats } = props;
+  const { dataView, onFilter, row, share, core, isTracesSummary, isMetricsSummary, fieldFormats } =
+    props;
 
   const density = maybeNullishDensity ?? DataGridDensity.COMPACT;
   const isCompressed = density === DataGridDensity.COMPACT;
@@ -74,27 +105,21 @@ const SummaryCell = ({
   const rowHeight = maybeNullishRowHeight ?? DEFAULT_ROW_COUNT;
   const isSingleLine = rowHeight === SINGLE_ROW_COUNT;
 
-  const resourceFields = createResourceFields(
-    isTracesSummary && isTraceDocument(row)
-      ? {
-          row,
-          fields: TRACE_FIELDS,
-          getAvailableFields: getAvailableTraceFields,
-          dataView,
-          core,
-          share,
-          fieldFormats,
-        }
-      : {
-          row,
-          fields: RESOURCE_FIELDS,
-          getAvailableFields: getAvailableResourceFields,
-          dataView,
-          core,
-          share,
-          fieldFormats,
-        }
-  );
+  const specificFields = getResourceFields({
+    isTracesDoc: isTracesSummary && isTraceDocument(row),
+    isMetricsDoc: isMetricsSummary,
+  });
+
+  const resourceFields = createResourceFields({
+    row,
+    dataView,
+    core,
+    share,
+    fieldFormats,
+    ...specificFields,
+  });
+
+  console.log('SummaryCell', resourceFields, 'resourceFields');
   const shouldRenderResource = resourceFields.length > 0;
 
   return isSingleLine ? (
@@ -125,32 +150,31 @@ const SummaryCell = ({
 };
 
 export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
-  const { row, dataView, fieldFormats, onFilter, closePopover, share, core, isTracesSummary } =
-    props;
+  const {
+    row,
+    dataView,
+    fieldFormats,
+    onFilter,
+    closePopover,
+    share,
+    core,
+    isTracesSummary,
+    isMetricsSummary,
+  } = props;
 
   const isTraceDoc = isTracesSummary && isTraceDocument(row);
-
-  const resourceFields = createResourceFields(
-    isTraceDoc
-      ? {
-          row,
-          fields: TRACE_FIELDS,
-          getAvailableFields: getAvailableTraceFields,
-          dataView,
-          core,
-          share,
-          fieldFormats,
-        }
-      : {
-          row,
-          fields: RESOURCE_FIELDS,
-          getAvailableFields: getAvailableResourceFields,
-          dataView,
-          core,
-          share,
-          fieldFormats,
-        }
-  );
+  const specificFields = getResourceFields({
+    isTracesDoc: isTraceDoc,
+    isMetricsDoc: isMetricsSummary,
+  });
+  const resourceFields = createResourceFields({
+    row,
+    dataView,
+    core,
+    share,
+    fieldFormats,
+    ...specificFields,
+  });
   const shouldRenderResource = resourceFields.length > 0;
 
   const documentOverview = getLogDocumentOverview(row, { dataView, fieldFormats });
