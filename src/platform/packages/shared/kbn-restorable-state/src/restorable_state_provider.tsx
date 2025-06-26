@@ -206,10 +206,25 @@ export const createRestorableStateProvider = <TState extends object>() => {
     return [value, setValue] as const;
   };
 
-  const useRestorableRef = <TKey extends keyof TState>(key: TKey, initialValue: TState[TKey]) => {
+  const useRestorableRef = <TKey extends keyof TState>(
+    key: TKey,
+    initialValue: TState[TKey],
+    options?: {
+      shouldStoreDefaultValueRightAway?: boolean;
+    }
+  ) => {
+    const { shouldStoreDefaultValueRightAway } = options || {};
     const { initialState$, onInitialStateChange } = useContext(context);
     const initialState = initialState$.getValue();
     const valueRef = useRef(getInitialValue(initialState, key, initialValue));
+
+    useMount(() => {
+      const value = valueRef.current;
+      const restorableState = initialState$.getValue();
+      if (shouldStoreDefaultValueRightAway && value !== restorableState?.[key]) {
+        onInitialStateChange?.({ ...restorableState, [key]: value });
+      }
+    });
 
     useUnmount(() => {
       onInitialStateChange?.({ ...initialState$.getValue(), [key]: valueRef.current });
