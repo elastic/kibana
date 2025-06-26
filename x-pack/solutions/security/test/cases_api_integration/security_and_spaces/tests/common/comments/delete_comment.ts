@@ -35,7 +35,6 @@ import {
   superUserSpace1Auth,
   getCaseSavedObjectsFromES,
   bulkCreateAttachments,
-  resolveCase,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
 import {
   globalRead,
