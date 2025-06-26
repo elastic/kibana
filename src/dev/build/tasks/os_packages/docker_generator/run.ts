@@ -38,7 +38,7 @@ export async function runDockerGenerator(
   }
 ) {
   let baseOSImage = '';
-  if (flags.ubuntu) baseOSImage = 'ubuntu:20.04';
+  if (flags.ubuntu) baseOSImage = 'ubuntu:24.04';
   if (flags.ubi) baseOSImage = 'redhat/ubi9-minimal:latest';
 
   let imageFlavor = '';
