@@ -58,7 +58,7 @@ export const runReasoningAgent: RunChatAgentFn = async (
         graphName: chatAgentGraphName,
         runId,
       },
-      recursionLimit: 10,
+      recursionLimit: 25,
       callbacks: [],
     }
   );

@@ -12,7 +12,7 @@ export enum AgentType {
 }
 
 /**
- * Execution mode for agents
+ * Execution mode for agents.
  */
 export enum AgentMode {
   /**
@@ -20,15 +20,15 @@ export enum AgentMode {
    */
   normal = 'normal',
   /**
-   * Think more mode
+   * "Think more" mode
    */
   reason = 'reason',
   /**
-   * Plan-and-execute mode
+   * "Plan-and-execute" mode
    */
   plan = 'plan',
   /**
-   * Deep-research mode
+   * "Deep-research" mode
    */
   research = 'research',
 }
