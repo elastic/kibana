@@ -32,6 +32,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
 
   describe('Automatic agent upgrades', () => {
     before(async () => {
+      await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
       const { body: agentPolicyResponse } = await supertest
         .post('/api/fleet/agent_policies')
         .set('kbn-xsrf', 'xxxx')

@@ -18,6 +18,7 @@ export const getAllFleetServerAgents = async (
   esClient: ElasticsearchClient
 ) => {
   let packagePolicyData;
+
   try {
     packagePolicyData = await packagePolicyService.list(soClient, {
       perPage: SO_SEARCH_LIMIT,
