@@ -21,7 +21,7 @@ import {
 } from '../__mocks__';
 import { DocumentType } from '../profiles';
 
-const { profilesManagerMock } = createContextAwarenessMocks();
+const { profilesManagerMock, scopedEbtManagerMock } = createContextAwarenessMocks();
 
 const getDataDocumentMsgMock = (): DataDocumentsMsg => {
   return {
@@ -43,7 +43,9 @@ const setup = (attrs: { hookAttrs?: Parameters<typeof useActiveContexts>[0] } = 
   const documents$ =
     attrs.hookAttrs?.dataDocuments$ || new BehaviorSubject(getDataDocumentMsgMock());
 
-  const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager();
+  const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager({
+    scopedEbtManager: scopedEbtManagerMock,
+  });
 
   const renderResults = renderHook(() => useActiveContexts({ dataDocuments$: documents$ }), {
     wrapper: ({ children }) => (
