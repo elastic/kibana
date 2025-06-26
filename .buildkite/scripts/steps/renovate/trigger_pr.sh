@@ -5,8 +5,9 @@ set -euo pipefail
 echo --- Triggering Kibana Pull Request Pipeline
 
 # The Github env vars need to be passed along manually
+# GITHUB_PR_* is used to avoid any sensitive vars being passed along
 GITHUB_ENV_VARS=()
-for var in $(env | grep ^GITHUB_ | cut -d= -f1); do
+for var in $(env | grep ^GITHUB_PR_ | cut -d= -f1); do
   GITHUB_ENV_VARS+=("$var=${!var}")
 done
 
