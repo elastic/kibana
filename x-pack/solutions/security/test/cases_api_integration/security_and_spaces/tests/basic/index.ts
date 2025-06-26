@@ -13,7 +13,9 @@ import {
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/authentication';
 
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
-  describe('cases security and spaces enabled: trial', function () {
+  describe('cases security and spaces enabled: basic', function () {
+    this.tags('skipFIPS');
+
     before(async () => {
       await createSpacesAndUsers(getService);
       // once a user profile is created the only way to remove it is to delete the user and roles, so best to activate
@@ -25,6 +27,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
       await deleteSpacesAndUsers(getService);
     });
 
-    loadTestFile(require.resolve('..'));
+    // Common
+    loadTestFile(require.resolve('../common'));
   });
 };

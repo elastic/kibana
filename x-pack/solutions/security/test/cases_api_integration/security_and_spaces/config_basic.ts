@@ -11,6 +11,6 @@ import { createTestConfig } from '@kbn/test-suites-xpack-platform/cases_api_inte
 export default createTestConfig('security_and_spaces', {
   license: 'trial',
   ssl: true,
-  testFiles: [require.resolve('./tests/common/index_common_trial')],
+  testFiles: [require.resolve('./tests/basic')],
   publicBaseUrl: true,
 });
