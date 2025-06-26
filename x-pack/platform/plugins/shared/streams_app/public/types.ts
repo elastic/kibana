@@ -46,9 +46,9 @@ export interface StreamsAppSetupDependencies {
   dataViews: DataViewsPublicPluginSetup;
   discover: DiscoverStart;
   discoverShared: DiscoverSharedPublicSetup;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
   share: SharePublicSetup;
   unifiedSearch: {};
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
 }
 
 export interface StreamsAppStartDependencies {
@@ -63,11 +63,11 @@ export interface StreamsAppStartDependencies {
   ingestPipelines: IngestPipelinesPluginStart;
   licensing: LicensingPluginStart;
   navigation: NavigationPublicStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;
   share: SharePublicStart;
   streams: StreamsPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
 export interface StreamsAppPublicSetup {}
