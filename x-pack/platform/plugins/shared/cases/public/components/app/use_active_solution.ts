@@ -9,7 +9,8 @@ import { useKibana } from '../../common/lib/kibana';
 
 export const useActiveSolution = () => {
   const { spaces } = useKibana().services;
-  const [activeSolution, setActiveSolution] = useState<string>('classic');
+  const defaultSolution = spaces?.getActiveSpace ? undefined : 'classic'; // can I get this somewhere from a constant?
+  const [activeSolution, setActiveSolution] = useState<string | undefined>(defaultSolution);
 
   useEffect(() => {
     let isMounted = true;
@@ -19,7 +20,7 @@ export const useActiveSolution = () => {
           const space = await spaces.getActiveSpace();
           if (isMounted) setActiveSolution(space?.solution);
         } catch (e) {
-          if (isMounted) setActiveSolution(null);
+          if (isMounted) setActiveSolution(undefined);
         }
       }
     };

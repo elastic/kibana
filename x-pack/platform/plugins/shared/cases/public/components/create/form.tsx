@@ -65,31 +65,38 @@ export const FormFieldsWithFormContext: React.FC<FormFieldsWithFormContextProps>
     selectedOwner,
     onSelectedOwner,
   }) => {
+    const { owner } = useCasesContext();
     const activeSolution = useActiveSolution();
-    // Ideally I would like to use the owner from the cases context, but it doesn't work in the 3rd scenario
-    // 1st scenario is when the user is in the classic view, the owner is not set in the cases context, which works fine
-    // 2nd scenario is when the user is in the security solution, the owner is set to securitySolution, which works fine
-    // 3rd scenario is when the user is in the observability solution, the owner is empty, which causes the owner selector to show up
-    // const { owner } = useCasesContext();
     const availableOwners = useAvailableCasesOwners();
+    let defaultOwnerValue = owner[0] ?? getOwnerDefaultValue(availableOwners);
     const mapActiveSolutionToOwner = (solution: string): string => {
       switch (solution) {
         case 'oblt':
           return 'observability';
         case 'security':
           return 'securitySolution';
+        case 'classic':
+          return 'cases';
         default:
-          return 'cases'; // default to cases if no match, in this case classis view is used
+          return defaultOwnerValue;
       }
     };
-    // Need to check if this works on serverless as well
+
+    // If the activeSolution is defined, we should use it to set the selected owner
+    // On serverlss activeSolution is undefined, so we use the default owner value, which is the first owner in the availableOwners array
+
+    if (activeSolution !== undefined) {
+      defaultOwnerValue = mapActiveSolutionToOwner(activeSolution);
+    }
+
+    // On stateful if the activeSolution is 'classic' and there are more than one available owners, we show the owner selector
+    // On serverless (activeSolution is undefined) there is only one owner, so we don't show the owner selector
     const shouldShowOwnerSelector =
-      mapActiveSolutionToOwner(activeSolution) === 'cases' && availableOwners.length > 1;
+      (activeSolution === undefined || activeSolution === 'classic') && availableOwners.length > 1;
 
     if (!shouldShowOwnerSelector) {
-      onSelectedOwner(mapActiveSolutionToOwner(activeSolution));
-      // do I need to reset the form here?
-      // similar to the onOwnerChange function
+      onSelectedOwner(defaultOwnerValue);
+      // do I need to reset the form here similar to the onOwnerChange function
     }
 
     const { reset } = useFormContext();
