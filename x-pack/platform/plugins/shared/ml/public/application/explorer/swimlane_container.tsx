@@ -451,6 +451,11 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
               overflowX: 'hidden',
             }}
             grow={false}
+            tabIndex={0}
+            role="region"
+            aria-label={i18n.translate('xpack.ml.explorer.swimlane.scrollableRegion.ariaLabel', {
+              defaultMessage: 'Scrollable anomaly swimlane chart',
+            })}
           >
             <>
               <div>
