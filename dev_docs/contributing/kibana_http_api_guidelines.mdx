@@ -155,10 +155,10 @@ GET    /api/resource              # List - retrieve all resources (with paginati
 #### Example: Complete API for a resource
 
 ```typescript
-// Retrieve
+// Retrieve 1 resource
 router.get(
   {
-    path: '/api/resource',
+    path: '/api/resource/{id}',
     validate: false, // `get` should not have bodies
   },
   async (context, request, response) => {
@@ -184,7 +184,7 @@ router.(post|put)(
   }
 );
 
-// Delete (DELETE /api/resource/{id})
+// Delete
 router.delete(
   {
     path: '/api/resource/{id}',
@@ -200,7 +200,7 @@ router.delete(
   }
 );
 
-// List (GET /api/resource)
+// List many resources
 router.get(
   {
     path: '/api/resource',
@@ -275,7 +275,7 @@ router.post(
         actions: schema.arrayOf(schema.object({
           connector_id: schema.string(), // Connector ID reference
           group: schema.string(),
-          params: schema.recordOf(schema.string(), schema.any())
+          // etc.
         }))
       })
     }
@@ -789,7 +789,7 @@ router.post(
           title: schema.string(),
           type: schema.string(),
           space_id: schema.string(),
-          attributes: schema.recordOf(schema.string(), schema.any())
+          // etc.
         })
       )
     }
