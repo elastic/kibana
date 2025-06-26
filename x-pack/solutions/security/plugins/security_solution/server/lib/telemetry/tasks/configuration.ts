@@ -122,7 +122,7 @@ export function createTelemetryConfigurationTaskConfig() {
 
         await taskMetricsService.end(trace);
 
-        log.trace('Updated TelemetryConfiguration');
+        log.debug('Updated TelemetryConfiguration');
         return 0;
       } catch (error) {
         log.warn('Failed to set telemetry configuration', { error });
