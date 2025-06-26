@@ -166,7 +166,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
           <EuiCallOut
             size="m"
             color="warning"
-            iconType="iInCircle"
+            iconType="info"
             title={
               <FormattedMessage
                 id="xpack.snapshotRestore.editRepository.managedRepositoryWarningTitle"
