@@ -20,7 +20,6 @@ import {
   EuiButtonEmpty,
   EuiCopy,
   useEuiTheme,
-  EuiButton,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
@@ -159,11 +158,13 @@ export function CellActionsPopover({
               {filterOutText}
             </EuiButtonEmpty>
           </EuiFlexGroup>
-          <EuiButton href={infraProps.href} size="s" fill>
-            Go to {infraProps.label} dashboard
-          </EuiButton>
         </EuiPopoverFooter>
       ) : null}
+      <EuiPopoverFooter>
+        <EuiButtonEmpty href={infraProps.href} size="s" iconType="dashboardApp">
+          Go to {infraProps.label} dashboard
+        </EuiButtonEmpty>
+      </EuiPopoverFooter>
       <EuiPopoverFooter>
         <EuiCopy textToCopy={value}>
           {(copy) => (
