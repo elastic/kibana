@@ -120,7 +120,7 @@ export const EditField = React.memo(
                       flush="right"
                       href={linkDocumentation}
                       target="_blank"
-                      iconType="help"
+                      iconType="question"
                       data-test-subj="documentationLink"
                     >
                       {i18n.translate('xpack.idxMgmt.mappingsEditor.editField.typeDocumentation', {
@@ -221,7 +221,7 @@ export const EditField = React.memo(
                               }
                             )}
                           </EuiTextColor>
-                          <EuiIcon type="questionInCircle" />
+                          <EuiIcon type="question" />
                         </span>
                       </EuiToolTip>
                     </p>
