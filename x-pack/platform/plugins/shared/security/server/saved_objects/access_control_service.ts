@@ -8,24 +8,15 @@
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type { AuthorizeObject } from '@kbn/core-saved-objects-server/src/extensions/security';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
-import type { CheckSavedObjectsPrivileges } from '@kbn/security-plugin-types-server';
 
 export class AccessControlService {
   private getTypeRegistryFunc: () => Promise<ISavedObjectTypeRegistry>;
   // private isUserAdmin: boolean;
-  private readonly checkPrivilegesFunc: CheckSavedObjectsPrivileges;
   private userForOperation: AuthenticatedUser | null = null;
   private cachedTypeRegistry: ISavedObjectTypeRegistry | null = null;
 
-  constructor({
-    getTypeRegistry,
-    checkPrivilegesFunc,
-  }: {
-    getTypeRegistry: () => Promise<ISavedObjectTypeRegistry>;
-    checkPrivilegesFunc: CheckSavedObjectsPrivileges;
-  }) {
+  constructor({ getTypeRegistry }: { getTypeRegistry: () => Promise<ISavedObjectTypeRegistry> }) {
     this.getTypeRegistryFunc = getTypeRegistry;
-    this.checkPrivilegesFunc = checkPrivilegesFunc;
   }
 
   setUserForOperation(user: AuthenticatedUser | null) {
@@ -36,12 +27,12 @@ export class AccessControlService {
     type,
     object,
     spacesToAuthorize,
+    hasManageOwnershipPrivilege,
   }: {
     type: string;
     object: AuthorizeObject;
     spacesToAuthorize: Set<string>;
-    isChangeOwnership?: boolean;
-    isChangeAccessMode?: boolean;
+    hasManageOwnershipPrivilege?: boolean;
   }): Promise<boolean> {
     if (!this.cachedTypeRegistry) {
       this.cachedTypeRegistry = await this.getTypeRegistryFunc();
@@ -67,11 +58,7 @@ export class AccessControlService {
       return true;
     }
 
-    const { hasAllRequested } = await this.checkPrivilegesFunc(
-      `saved_object/${type}:manageOwnership`, // TODO: use constructor to create a privilege name
-      [...spacesToAuthorize]
-    );
-    if (hasAllRequested) {
+    if (hasManageOwnershipPrivilege) {
       return true;
     }
 

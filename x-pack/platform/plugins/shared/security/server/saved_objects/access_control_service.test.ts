@@ -29,11 +29,9 @@ describe('AccessControlService', () => {
     jest.resetAllMocks();
     getTypeRegistry.mockResolvedValue(mockTypeRegistry);
     mockTypeRegistry.supportsAccessControl.mockReturnValue(true);
-    checkPrivilegesFunc.mockResolvedValue({ hasAllRequested: false });
 
     accessControlService = new AccessControlService({
       getTypeRegistry,
-      checkPrivilegesFunc,
     });
   });
 
@@ -167,7 +165,7 @@ describe('AccessControlService', () => {
       });
 
       expect(result).toBe(true);
-      expect(checkPrivilegesFunc).toHaveBeenCalledWith('saved_object/dashboard:manageOwnership', [
+      expect(checkPrivilegesFunc).toHaveBeenCalledWith('saved_object/dashboard:manage_ownership', [
         'space1',
       ]);
     });
@@ -188,7 +186,7 @@ describe('AccessControlService', () => {
 
       expect(result).toBe(true);
       expect(checkPrivilegesFunc).toHaveBeenCalledWith(
-        'saved_object/visualization:manageOwnership',
+        'saved_object/visualization:manage_ownership',
         expect.arrayContaining(['space1', 'space2', 'space3'])
       );
       // Verify the array has exactly 3 elements
@@ -209,7 +207,7 @@ describe('AccessControlService', () => {
         spacesToAuthorize,
       });
 
-      expect(checkPrivilegesFunc).toHaveBeenCalledWith('saved_object/lens:manageOwnership', [
+      expect(checkPrivilegesFunc).toHaveBeenCalledWith('saved_object/lens:manage_ownership', [
         'space1',
       ]);
     });
@@ -228,7 +226,7 @@ describe('AccessControlService', () => {
       });
 
       expect(result).toBe(false);
-      expect(checkPrivilegesFunc).toHaveBeenCalledWith('saved_object/dashboard:manageOwnership', [
+      expect(checkPrivilegesFunc).toHaveBeenCalledWith('saved_object/dashboard:manage_ownership', [
         'space1',
       ]);
     });

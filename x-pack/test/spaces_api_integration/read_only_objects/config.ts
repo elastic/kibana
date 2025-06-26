@@ -69,10 +69,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           kibana: [
             {
               base: [],
-              spaces: ['*'],
               feature: {
                 savedObjects: ['all'],
+                dev_tools: ['all'],
+                savedObjectsManagement: ['all'],
               },
+              spaces: ['*'],
             },
           ],
           elasticsearch: {
