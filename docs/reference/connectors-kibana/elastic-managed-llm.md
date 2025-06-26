@@ -1,7 +1,7 @@
 ---
 navigation_title: "Elastic Managed LLM"
 applies_to:
-    stack: ga 9.0
+    stack: ga 9.0.3
     serverless: ga
 ---
 
