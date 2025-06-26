@@ -11,7 +11,7 @@ export default async function ({ readConfigFile }) {
   return {
     ...chromeConfig.getAll(),
 
-    testFiles: [require.resolve('./apps/infra'), require.resolve('./apps/watcher')],
+    testFiles: [require.resolve('./apps/infra')],
 
     browser: {
       type: 'firefox',
