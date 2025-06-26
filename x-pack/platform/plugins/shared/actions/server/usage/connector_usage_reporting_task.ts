@@ -58,7 +58,6 @@ export class ConnectorUsageReportingTask {
     this.usageApiUrl = config.url;
     this.enabled = config.enabled ?? true;
     const caCertificatePath = config.ca?.path;
-    logger.warn(`usage-api config: ${JSON.stringify(config)}`);
 
     if (caCertificatePath && caCertificatePath.length > 0) {
       try {
@@ -115,6 +114,10 @@ export class ConnectorUsageReportingTask {
 
   private runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
     const { state } = taskInstance;
+
+    this.logger.info(`usage-api config url: ${JSON.stringify(this.usageApiUrl)}`);
+    this.logger.info(`usage-api config ca: ${JSON.stringify(this.caCertificate)}`);
+    this.logger.info(`usage-api config enabled: ${JSON.stringify(this.enabled)}`);
 
     if (!this.enabled) {
       this.logger.warn(
