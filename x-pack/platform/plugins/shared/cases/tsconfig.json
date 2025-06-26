@@ -89,7 +89,6 @@
     "@kbn/logging",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/core-test-helpers-model-versions",
-    "@kbn/core-user-profile-browser",
     "@kbn/elastic-assistant-common",
     "@kbn/test",
     "@kbn/dev-utils",
