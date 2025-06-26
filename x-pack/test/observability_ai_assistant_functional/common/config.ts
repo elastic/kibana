@@ -98,7 +98,7 @@ async function getTestConfig({
       },
     },
     junit: {
-      reportName: `Observability AI Assistant API Integration tests (${name})`,
+      reportName: `Chrome X-Pack Observability AI Assistant Functional Tests (${name})`,
     },
     esTestCluster: {
       ...testConfig.get('esTestCluster'),
