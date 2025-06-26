@@ -159,7 +159,7 @@ GET    /api/resource              # List - retrieve all resources (with paginati
 router.get(
   {
     path: '/api/resource',
-    validate: false,
+    validate: false, // `get` should not have bodies
   },
   async (context, request, response) => {
     // Implementation...
@@ -168,7 +168,7 @@ router.get(
 );
 
 // Create, update
-router.(get|post|put)(
+router.(post|put)(
   {
     path: '/api/resource',
     validate: {
