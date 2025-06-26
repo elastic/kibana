@@ -133,19 +133,20 @@ async function processFile({
     });
   } else if (basename === '_lookup_join.html') {
     const $element = load(fileContent)('*');
-    output.commands.push({
-      sourceFile: basename,
+    const command: ExtractedCommandOrFunc = {
       name: 'lookup-join',
       markdownContent: await executePrompt(
         convertToMarkdownPrompt({ htmlContent: getSimpleText($element) })
       ),
-    });
+      command: true,
+    };
+    output.commands.push(command);
   } else if (contextArticles.includes(basename)) {
     const $element = load(fileContent)('*');
     output.pages.push({
       sourceFile: basename,
       name: basename === 'esql.html' ? 'overview' : basename.replace('esql-', ''),
-      markdownContent: getSimpleText($element),
+      content: getSimpleText($element),
     });
   } else {
     output.skippedFile.push(basename);

@@ -101,11 +101,12 @@ export const generateDoc = async ({
   await Promise.all(
     pages.map(async (page) => {
       return limiter(async () => {
-        if (!page.sourceFile) return;
+        const content = pageContentByName(page.sourceFile);
+        if (!content) return;
         const pageContent = await callOutput(
           createDocumentationPagePrompt({
             documentation,
-            content: pageContentByName(page.sourceFile),
+            content,
             specificInstructions: page.instructions,
           })
         );
