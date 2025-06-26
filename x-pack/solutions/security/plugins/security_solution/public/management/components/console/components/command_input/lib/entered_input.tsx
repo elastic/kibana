@@ -132,8 +132,36 @@ export class EnteredInput {
                   (side === 'left' && charAfterArgName !== '') ||
                   side === 'right')
               ) {
+                // Find the full argument pattern including its value to avoid duplication
+                let fullArgLength = argChrLength;
+                let searchIndex = startSearchIndexForNextArg;
+                
+                // Check if there's a value separator (=, space) after the argument name
+                if (charAfterArgName === '=' || charAfterArgName === ' ') {
+                  // Skip the separator
+                  searchIndex++;
+                  fullArgLength++;
+                  
+                  // Check for quoted values
+                  const valueStartChar = input.charAt(searchIndex);
+                  if (valueStartChar === '"' || valueStartChar === "'") {
+                    // Find the closing quote
+                    const closingQuoteIndex = input.indexOf(valueStartChar, searchIndex + 1);
+                    if (closingQuoteIndex > -1) {
+                      fullArgLength = closingQuoteIndex - pos + 1;
+                    }
+                  } else {
+                    // Find the end of unquoted value (next space or end of string)
+                    let valueEndIndex = searchIndex;
+                    while (valueEndIndex < input.length && input.charAt(valueEndIndex) !== ' ') {
+                      valueEndIndex++;
+                    }
+                    fullArgLength = valueEndIndex - pos;
+                  }
+                }
+
                 const replaceValues: InputCharacter[] = Array.from(
-                  { length: argChrLength },
+                  { length: fullArgLength },
                   createInputCharacter
                 );
                 const argState = enteredCommand.argState[argName]?.at(argIndex);
@@ -153,7 +181,7 @@ export class EnteredInput {
                   argState,
                 });
 
-                items.splice(pos, argChrLength, ...replaceValues);
+                items.splice(pos, fullArgLength, ...replaceValues);
               }
 
               pos = input.indexOf(argNameMatch, startSearchIndexForNextArg);

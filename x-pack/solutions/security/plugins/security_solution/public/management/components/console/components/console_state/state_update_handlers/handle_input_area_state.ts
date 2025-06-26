@@ -31,8 +31,36 @@ const setArgSelectorValueToParsedArgs = (
     for (const argName of Object.keys(enteredCommand.argsWithValueSelectors)) {
       if (parsedInput.hasArg(argName)) {
         const argumentValues = enteredCommand.argState[argName] ?? [];
-
         parsedInput.args[argName] = argumentValues.map((itemState) => itemState.value);
+      }
+    }
+  }
+};
+
+// Takes values from parsedInput and initializes argState in enteredCommand,
+// but only for args that don't already have state (selector takes priority)
+const initializeArgSelectorStateFromParsedArgs = (
+  parsedInput: ParsedCommandInterface,
+  enteredCommand: EnteredCommand | undefined
+) => {
+  if (enteredCommand?.argsWithValueSelectors) {
+    for (const argName of Object.keys(enteredCommand.argsWithValueSelectors)) {
+      // Only initialize from parsed input if no selector state exists yet
+      if (
+        parsedInput.hasArg(argName) &&
+        (!enteredCommand.argState[argName] || enteredCommand.argState[argName].length === 0)
+      ) {
+        // Get parsed values from input
+        const parsedValues = parsedInput.args[argName];
+        enteredCommand.argState[argName] = [];
+
+        // For each parsed value, create a state entry
+        parsedValues.forEach((parsedValue, index) => {
+          enteredCommand.argState[argName][index] = {
+            value: parsedValue,
+            valueText: String(parsedValue),
+          };
+        });
       }
     }
   }
@@ -77,6 +105,8 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
               id: uuidV4(),
               input: payload.command,
               display: payload.display ?? payload.command,
+              // Save selector state (argState) if present
+              argState: state.input.enteredCommand?.argState,
             },
             ...state.input.history.slice(0, 99),
           ],
@@ -97,6 +127,8 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         leftOfCursorText: newTextEntered,
         rightOfCursorText: newRightOfCursor = '',
         argState: adjustedArgState,
+        // Restore argState from history if present in payload
+        historyArgState,
       } = typeof payload === 'function' ? payload(state.input) : payload;
 
       if (
@@ -112,6 +144,14 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
           enteredCommand = {
             ...enteredCommand,
             argState: adjustedArgState,
+          };
+        }
+
+        // If restoring from history, use the saved argState
+        if (historyArgState && enteredCommand) {
+          enteredCommand = {
+            ...enteredCommand,
+            argState: historyArgState,
           };
         }
 
@@ -139,14 +179,21 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
             }
 
             enteredCommand = {
-              argState: {},
+              argState: historyArgState || {},
               commandDefinition,
               argsWithValueSelectors,
             };
           }
         }
 
-        // Update parsed input with any values that were selected via argument selectors
+        // Initialize argument selectors with values from parsed input
+        // but only if selector state doesn't already exist
+        if (enteredCommand) {
+          initializeArgSelectorStateFromParsedArgs(parsedInput, enteredCommand);
+        }
+
+        // Then always update parsed input with selector values
+        // This ensures selector values always take priority
         setArgSelectorValueToParsedArgs(parsedInput, enteredCommand);
 
         return {

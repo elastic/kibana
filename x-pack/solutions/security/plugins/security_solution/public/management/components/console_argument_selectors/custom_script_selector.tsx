@@ -61,8 +61,8 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
   >(({ value, valueText, onChange, store: _store }) => {
     const dispatch = useConsoleStateDispatch();
     const state = useMemo<CustomScriptSelectorState>(() => {
-      return _store ?? { isPopoverOpen: true };
-    }, [_store]);
+      return _store ?? { isPopoverOpen: !value };
+    }, [_store, value]);
     const setIsPopoverOpen = useCallback(
       (newValue: boolean) => {
         onChange({
