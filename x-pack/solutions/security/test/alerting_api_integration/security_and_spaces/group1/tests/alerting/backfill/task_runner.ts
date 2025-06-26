@@ -182,7 +182,8 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         getService,
         backfillId,
         spaceId,
-        new Map([['execute-backfill', { equal: 4 }]])
+        new Map([['execute-backfill', { equal: 4 }]]),
+        true // collapse by execution UUID
       );
 
       // each execute-backfill event should have these fields
