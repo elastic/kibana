@@ -369,20 +369,15 @@ export const getArgsFromRenameFunction = (
  */
 export const getCategorizeField = (esql: string): string[] => {
   const { root } = parse(esql);
-  const functions: ESQLFunction[] = [];
   const columns: string[] = [];
-  walk(root.commands, {
-    visitFunction: (node) => {
-      if (node.name === 'categorize') {
-        functions.push(node);
-      }
-    },
-  });
+  const functions = Walker.matchAll(root.commands, {
+    type: 'function',
+    name: 'categorize',
+  }) as ESQLFunction[];
 
   if (functions.length) {
     functions.forEach((func) => {
-      const columnArgs = func.args.filter((arg) => isColumn(arg));
-      columnArgs.forEach((c) => columns.push((c as ESQLColumn).name));
+      for (const arg of func.args) if (isColumn(arg)) columns.push(arg.name);
     });
     return columns;
   }
