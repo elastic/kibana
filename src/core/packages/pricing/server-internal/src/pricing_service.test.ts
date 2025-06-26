@@ -18,9 +18,9 @@ import { Observable, of } from 'rxjs';
 import { PricingService } from './pricing_service';
 import type { PricingConfigType } from './pricing_config';
 import type { PricingProductFeature } from '@kbn/core-pricing-common';
-import { analyticsServiceMock } from '@kbn/core/server/mocks';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { AsyncReturnType } from 'type-fest';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 
 describe('PricingService', () => {
   let prebootHttp: InternalHttpServicePrebootMock;
