@@ -31,7 +31,6 @@ export const createDashboardSavedObjectType = ({
   // supportsAccessControl: true, TODO: Revisit this when access control is implemented
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
-  supportsAccessControl: true,
   management: {
     icon: 'dashboardApp',
     defaultSearchField: 'title',
