@@ -14,9 +14,16 @@ export interface HttpSetup {
   post: <T = any>(url: string, body?: any, options?: { query?: Record<string, any> }) => Promise<T>;
   delete: <T = any>(url: string, options?: { query?: Record<string, any> }) => Promise<T>;
   put: <T = any>(url: string, body?: any, options?: { query?: Record<string, any> }) => Promise<T>;
-  patch: <T = any>(url: string, body?: any, options?: { query?: Record<string, any> }) => Promise<T>;
+  patch: <T = any>(
+    url: string,
+    body?: any,
+    options?: { query?: Record<string, any> }
+  ) => Promise<T>;
   head: <T = any>(url: string, options?: { query?: Record<string, any> }) => Promise<T>;
-  fetch: <T = any>(url: string, options?: { method?: string; body?: any; query?: Record<string, any> }) => Promise<T>;
+  fetch: <T = any>(
+    url: string,
+    options?: { method?: string; body?: any; query?: Record<string, any> }
+  ) => Promise<T>;
 }
 
 export interface OneConsoleProps {

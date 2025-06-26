@@ -149,11 +149,7 @@ const translations = {
   'zh-CN': require('./translations/zh-CN.json'),
 };
 
-
-export const OneConsole = ({
-  lang = 'en',
-  http: customHttp,
-}: OneConsoleProps) => {
+export const OneConsole = ({ lang = 'en', http: customHttp }: OneConsoleProps) => {
   // Get the translations for the selected language, fallback to English
   const selectedTranslations = translations[lang] || translations.en;
 
@@ -211,7 +207,6 @@ export const OneConsole = ({
     ...customHttp,
   } as HttpSetup;
 
-
   useEffect(() => {
     const loadApi = async () => {
       await loadActiveApi(http);
@@ -238,10 +233,7 @@ export const OneConsole = ({
   autocompleteInfo.mapping.setup(http, settings);
 
   return (
-    <IntlProvider
-      locale={lang}
-      messages={selectedTranslations.messages}
-    >
+    <IntlProvider locale={lang} messages={selectedTranslations.messages}>
       <ServicesContextProvider
         // @ts-ignore
         value={{

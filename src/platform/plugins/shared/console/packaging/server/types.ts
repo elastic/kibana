@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { EndpointDefinition, EndpointDescription, EndpointsAvailability } from '../../common/types';
+export type {
+  EndpointDefinition,
+  EndpointDescription,
+  EndpointsAvailability,
+} from '../../common/types';
 import { EndpointDescription, EndpointsAvailability } from '../../common/types';
 
 export interface FileSystemAdapter {

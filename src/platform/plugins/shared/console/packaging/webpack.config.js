@@ -37,177 +37,177 @@ module.exports = [
     target: 'web',
     devtool: 'source-map',
     externals: [
-    {
-      '@elastic/eui': 'commonjs @elastic/eui',
-      '@emotion/css': 'commonjs @emotion/css',
-      '@emotion/react': 'commonjs @emotion/react',
-      classnames: 'commonjs classnames',
-      react: 'commonjs react',
-      lodash: 'commonjs lodash',
-      'react-dom': 'commonjs react-dom',
-      'react-markdown': 'commonjs react-markdown',
-      moment: 'commonjs moment',
-      '@elastic/eui': 'commonjs @elastic/eui',
-      rxjs: 'commonjs rxjs',
-      'moment-duration-format': 'commonjs moment-duration-format',
-      'moment-timezone': 'commonjs moment-timezone',
-      '@elastic/datemath': 'commonjs @elastic/datemath',
-    },
-    // Handle react-dom internal imports only
-    function (context, request, callback) {
-      if (/^react-dom\//.test(request)) {
-        return callback(null, 'commonjs ' + request);
-      }
-      callback();
-    },
-  ],
-  module: {
-    rules: [
       {
-        test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
-        type: 'asset',
-        parser: {
-          dataUrlCondition: {
-            maxSize: 8192,
-          },
-        },
+        '@elastic/eui': 'commonjs @elastic/eui',
+        '@emotion/css': 'commonjs @emotion/css',
+        '@emotion/react': 'commonjs @emotion/react',
+        classnames: 'commonjs classnames',
+        react: 'commonjs react',
+        lodash: 'commonjs lodash',
+        'react-dom': 'commonjs react-dom',
+        'react-markdown': 'commonjs react-markdown',
+        moment: 'commonjs moment',
+        '@elastic/eui': 'commonjs @elastic/eui',
+        rxjs: 'commonjs rxjs',
+        'moment-duration-format': 'commonjs moment-duration-format',
+        'moment-timezone': 'commonjs moment-timezone',
+        '@elastic/datemath': 'commonjs @elastic/datemath',
       },
-      {
-        test: /\.(js|tsx?)$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            babelrc: false,
-            envName: 'development',
-            presets: [BABEL_PRESET],
-          },
-        },
-      },
-      {
-        test: /\.html$/,
-        loader: 'html-loader',
-        exclude: /node_modules/,
-      },
-      {
-        test: /\.css$/,
-        exclude: /components/,
-        use: [
-          { loader: 'style-loader' },
-          { loader: 'css-loader' },
-          {
-            loader: 'postcss-loader',
-            options: {
-              postcssOptions: {
-                config: require.resolve('./postcss.config.js'),
-              },
-            },
-          },
-          {
-            loader: 'string-replace-loader',
-            options: {
-              search: '__REPLACE_WITH_PUBLIC_PATH__',
-              replace: '/',
-              flags: 'g',
-            },
-          },
-        ],
-        sideEffects: true,
-      },
-      {
-        test: /\.module\.s(a|c)ss$/,
-        use: [
-          'style-loader',
-          {
-            loader: 'css-loader',
-            options: {
-              modules: {
-                localIdentName: '[name]__[local]___[hash:base64:5]',
-                exportLocalsConvention: 'camelCase',
-              },
-              sourceMap: !isProd,
-            },
-          },
-          {
-            loader: 'postcss-loader',
-            options: {
-              postcssOptions: {
-                config: require.resolve('@kbn/optimizer/postcss.config'),
-              },
-            },
-          },
-          {
-            loader: 'sass-loader',
-            options: {
-              implementation: require('sass-embedded'),
-              sourceMap: !isProd,
-              sassOptions: {
-                quietDeps: true,
-              },
-            },
-          },
-        ],
-      },
-      {
-        test: /\.scss$/,
-        exclude: [/node_modules/, /\.module\.s(a|c)ss$/],
-        use: [
-          {
-            loader: 'style-loader',
-          },
-          {
-            loader: 'css-loader',
-            options: {
-              sourceMap: !isProd,
-            },
-          },
-          {
-            loader: 'postcss-loader',
-            options: {
-              sourceMap: !isProd,
-              postcssOptions: {
-                config: require.resolve('@kbn/optimizer/postcss.config'),
-              },
-            },
-          },
-          {
-            loader: 'sass-loader',
-            options: {
-              additionalData(content, loaderContext) {
-                const req = JSON.stringify(
-                  loaderContext.utils.contextify(
-                    loaderContext.context || loaderContext.rootContext,
-                    path.resolve(
-                      KIBANA_ROOT,
-                      'src/core/public/styles/core_app/_globals_v8light.scss'
-                    )
-                  )
-                );
-                return `@import ${req};\n${content}`;
-              },
-              implementation: require('sass-embedded'),
-              sassOptions: {
-                outputStyle: 'expanded',
-                includePaths: [path.resolve(KIBANA_ROOT, 'node_modules')],
-                quietDeps: true,
-              },
-            },
-          },
-        ],
+      // Handle react-dom internal imports only
+      function (context, request, callback) {
+        if (/^react-dom\//.test(request)) {
+          return callback(null, 'commonjs ' + request);
+        }
+        callback();
       },
     ],
-  },
+    module: {
+      rules: [
+        {
+          test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
+          type: 'asset',
+          parser: {
+            dataUrlCondition: {
+              maxSize: 8192,
+            },
+          },
+        },
+        {
+          test: /\.(js|tsx?)$/,
+          exclude: /node_modules/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              babelrc: false,
+              envName: 'development',
+              presets: [BABEL_PRESET],
+            },
+          },
+        },
+        {
+          test: /\.html$/,
+          loader: 'html-loader',
+          exclude: /node_modules/,
+        },
+        {
+          test: /\.css$/,
+          exclude: /components/,
+          use: [
+            { loader: 'style-loader' },
+            { loader: 'css-loader' },
+            {
+              loader: 'postcss-loader',
+              options: {
+                postcssOptions: {
+                  config: require.resolve('./postcss.config.js'),
+                },
+              },
+            },
+            {
+              loader: 'string-replace-loader',
+              options: {
+                search: '__REPLACE_WITH_PUBLIC_PATH__',
+                replace: '/',
+                flags: 'g',
+              },
+            },
+          ],
+          sideEffects: true,
+        },
+        {
+          test: /\.module\.s(a|c)ss$/,
+          use: [
+            'style-loader',
+            {
+              loader: 'css-loader',
+              options: {
+                modules: {
+                  localIdentName: '[name]__[local]___[hash:base64:5]',
+                  exportLocalsConvention: 'camelCase',
+                },
+                sourceMap: !isProd,
+              },
+            },
+            {
+              loader: 'postcss-loader',
+              options: {
+                postcssOptions: {
+                  config: require.resolve('@kbn/optimizer/postcss.config'),
+                },
+              },
+            },
+            {
+              loader: 'sass-loader',
+              options: {
+                implementation: require('sass-embedded'),
+                sourceMap: !isProd,
+                sassOptions: {
+                  quietDeps: true,
+                },
+              },
+            },
+          ],
+        },
+        {
+          test: /\.scss$/,
+          exclude: [/node_modules/, /\.module\.s(a|c)ss$/],
+          use: [
+            {
+              loader: 'style-loader',
+            },
+            {
+              loader: 'css-loader',
+              options: {
+                sourceMap: !isProd,
+              },
+            },
+            {
+              loader: 'postcss-loader',
+              options: {
+                sourceMap: !isProd,
+                postcssOptions: {
+                  config: require.resolve('@kbn/optimizer/postcss.config'),
+                },
+              },
+            },
+            {
+              loader: 'sass-loader',
+              options: {
+                additionalData(content, loaderContext) {
+                  const req = JSON.stringify(
+                    loaderContext.utils.contextify(
+                      loaderContext.context || loaderContext.rootContext,
+                      path.resolve(
+                        KIBANA_ROOT,
+                        'src/core/public/styles/core_app/_globals_v8light.scss'
+                      )
+                    )
+                  );
+                  return `@import ${req};\n${content}`;
+                },
+                implementation: require('sass-embedded'),
+                sassOptions: {
+                  outputStyle: 'expanded',
+                  includePaths: [path.resolve(KIBANA_ROOT, 'node_modules')],
+                  quietDeps: true,
+                },
+              },
+            },
+          ],
+        },
+      ],
+    },
 
-  resolve: {
-    alias: {},
-    extensions: ['.js', '.ts', '.tsx', '.scss', '.css'],
-  },
+    resolve: {
+      alias: {},
+      extensions: ['.js', '.ts', '.tsx', '.scss', '.css'],
+    },
 
-  optimization: {
-    minimize: false,
-    noEmitOnErrors: true,
-    splitChunks: false,
-  },
+    optimization: {
+      minimize: false,
+      noEmitOnErrors: true,
+      splitChunks: false,
+    },
 
     plugins: [
       new NodeLibsBrowserPlugin(),
@@ -285,5 +285,5 @@ module.exports = [
         ],
       }),
     ],
-  }
+  },
 ];

@@ -14,7 +14,7 @@ import {
   EndpointsAvailability,
   FileSystemAdapter,
   SpecDefinitionsConfig,
-  SpecDefinitionsResult
+  SpecDefinitionsResult,
 } from './types';
 
 /**
@@ -58,10 +58,7 @@ export class ConsoleSpecDefinitionsLoader {
   /**
    * Add endpoint description
    */
-  public addEndpointDescription(
-    endpoint: string,
-    description: EndpointDescription = {}
-  ) {
+  public addEndpointDescription(endpoint: string, description: EndpointDescription = {}) {
     let copiedDescription: EndpointDescription = {};
     if (this.endpoints[endpoint]) {
       copiedDescription = { ...this.endpoints[endpoint] };
@@ -78,7 +75,9 @@ export class ConsoleSpecDefinitionsLoader {
 
     const patterns = Array.isArray(description.patterns)
       ? description.patterns
-      : description.patterns ? [description.patterns] : [];
+      : description.patterns
+      ? [description.patterns]
+      : [];
 
     patterns.forEach((pattern) => {
       if (pattern.indexOf('{index}') >= 0) {
@@ -137,7 +136,9 @@ export class ConsoleSpecDefinitionsLoader {
       const loadedDefinition: EndpointDefinition = JSON.parse(fs.readFileSync(file, 'utf8'));
 
       if (overrideFile) {
-        const overrideDefinition: EndpointDefinition = JSON.parse(fs.readFileSync(overrideFile, 'utf8'));
+        const overrideDefinition: EndpointDefinition = JSON.parse(
+          fs.readFileSync(overrideFile, 'utf8')
+        );
         merge(loadedDefinition, overrideDefinition);
       }
 
