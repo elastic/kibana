@@ -264,14 +264,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
           .expect(200);
         const monitors = findMonitorResponse.body.monitors;
-        const foundMonitor = monitors.find((m) => m.id === defaultSpaceMonitorId);
+        const foundMonitor = monitors.find((m: any) => m.id === defaultSpaceMonitorId);
         expect(foundMonitor).to.not.be(undefined);
 
         const findMonitorResponseTestSpace = await supertestEditorWithApiKey
           .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
           .expect(200);
         const monitorsTestSpace = findMonitorResponseTestSpace.body.monitors;
-        const foundMonitorTestSpace = monitorsTestSpace.find((m) => m.id === testSpaceMonitorId);
+        const foundMonitorTestSpace = monitorsTestSpace.find(
+          (m: any) => m.id === testSpaceMonitorId
+        );
         expect(foundMonitorTestSpace).to.not.be(undefined);
       });
       // now edit the private location in default space and verify all results
@@ -313,7 +315,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
           .expect(200);
         const monitors = findMonitorResponse.body.monitors;
-        const foundMonitor = monitors.find((m) => m.id === defaultSpaceMonitorId);
+        const foundMonitor = monitors.find((m: any) => m.id === defaultSpaceMonitorId);
         expect(foundMonitor).to.not.be(undefined);
         expect(foundMonitor.locations[0].label).to.be(
           'Updated Private Location Label Default Space'
@@ -323,7 +325,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
           .expect(200);
         const monitorsTestSpace = findMonitorResponseTestSpace.body.monitors;
-        const foundMonitorTestSpace = monitorsTestSpace.find((m) => m.id === testSpaceMonitorId);
+        const foundMonitorTestSpace = monitorsTestSpace.find(
+          (m: any) => m.id === testSpaceMonitorId
+        );
         expect(foundMonitorTestSpace).to.not.be(undefined);
         expect(foundMonitorTestSpace.locations[0].label).to.be(
           'Updated Private Location Label Default Space'
