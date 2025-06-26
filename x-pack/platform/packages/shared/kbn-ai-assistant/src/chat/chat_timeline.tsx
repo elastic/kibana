@@ -81,7 +81,7 @@ export function highlightContent(
   detectedEntities: Array<{
     start: number;
     end: number;
-    entity: { class_name: string; value: string; mask: string } | string;
+    entity: { class_name: string; value: string; mask: string };
   }>
 ): React.ReactNode {
   // Sort the entities by start position
@@ -95,20 +95,17 @@ export function highlightContent(
     }
 
     // Currently only highlighting the content that's not inside code blocks
-    if (
-      isInsideInlineCode(content, entity.start_pos) ||
-      isInsideCodeBlock(content, entity.start_pos)
-    ) {
-      parts.push(`${content.substring(entity.start_pos, entity.end_pos)}`);
+    if (isInsideInlineCode(content, entity.start) || isInsideCodeBlock(content, entity.start)) {
+      parts.push(`${content.substring(entity.start, entity.end)}`);
     } else {
       parts.push(
-        `!{anonymized{"entityClass":"${entity.class_name}","content":"${content.substring(
-          entity.start_pos,
-          entity.end_pos
+        `!{anonymized{"entityClass":"${entity.entity.class_name}","content":"${content.substring(
+          entity.start,
+          entity.end
         )}"}}`
       );
     }
-    lastIndex = entity.end_pos;
+    lastIndex = entity.end;
   });
   // Add any remaining text after the last entity
   if (lastIndex < content.length) {
