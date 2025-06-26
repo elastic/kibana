@@ -115,6 +115,7 @@ const StreamsAlertOptional = rt.partial({
   'kibana.alert.workflow_status': schemaString,
   'kibana.alert.workflow_tags': schemaStringArray,
   'kibana.version': schemaString,
+  'related.entity': schemaStringArray,
   tags: schemaStringArray,
 });
 
