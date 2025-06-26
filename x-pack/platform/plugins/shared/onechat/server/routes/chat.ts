@@ -41,8 +41,9 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
           mode: schema.oneOf(
             [
               schema.literal(AgentMode.normal),
-              schema.literal(AgentMode.thinkMore),
-              schema.literal(AgentMode.researcher),
+              schema.literal(AgentMode.reason),
+              schema.literal(AgentMode.plan),
+              schema.literal(AgentMode.research),
             ],
             { defaultValue: AgentMode.normal }
           ),

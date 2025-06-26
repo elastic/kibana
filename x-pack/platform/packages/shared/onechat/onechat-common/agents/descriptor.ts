@@ -22,11 +22,15 @@ export enum AgentMode {
   /**
    * Think more mode
    */
-  thinkMore = 'think_more',
+  reason = 'reason',
+  /**
+   * Plan-and-execute mode
+   */
+  plan = 'plan',
   /**
    * Deep-research mode
    */
-  researcher = 'researcher',
+  research = 'research',
 }
 
 /**
