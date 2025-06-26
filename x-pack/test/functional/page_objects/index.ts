@@ -14,15 +14,17 @@ import { SpaceSelectorPageObject } from '@kbn/test-suites-xpack-platform/functio
 import { RoleMappingsPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/role_mappings_page';
 import { ReportingPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/reporting_page';
 import { WatcherPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/watcher_page';
+import { SearchProfilerPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/search_profiler_page';
+import { CanvasPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/canvas_page';
+import { GisPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/gis_page';
+import { LensPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/lens_page';
 import { ApiKeysPageProvider } from './api_keys_page';
 import { AssetDetailsProvider } from './asset_details';
 import { BannersPageObject } from './banners_page';
-// import { CanvasPageProvider } from './canvas_page';
 import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
 import { EmbeddedConsoleProvider } from './embedded_console';
 import { GeoFileUploadPageObject } from './geo_file_upload';
-// import { GisPageObject } from './gis_page';
 import { GraphPageObject } from './graph_page';
 import { GrokDebuggerPageObject } from './grok_debugger_page';
 import { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
@@ -33,7 +35,6 @@ import { InfraLogsPageProvider } from './infra_logs_page';
 import { InfraMetricsExplorerProvider } from './infra_metrics_explorer';
 import { InfraSavedViewsProvider } from './infra_saved_views';
 import { IngestPipelinesPageProvider } from './ingest_pipelines_page';
-// import { LensPageProvider } from './lens_page';
 import { LicenseManagementPageProvider } from './license_management_page';
 import { LogstashPageObject } from './logstash_page';
 import { MaintenanceWindowsPageProvider } from './maintenance_windows_page';
@@ -52,7 +53,6 @@ import { TagManagementPageObject } from './tag_management_page';
 import { UpgradeAssistantFlyoutObject } from './upgrade_assistant_page';
 import { UptimePageObject } from './uptime_page';
 import { UserProfilePageProvider } from './user_profile_page';
-import { SearchProfilerPageProvider } from './search_profiler_page';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
 import { SearchSynonymsPageProvider } from './search_synonyms_page';
 import { SearchClassicNavigationProvider } from './search_classic_navigation';
@@ -69,7 +69,7 @@ export const pageObjects = {
   apiKeys: ApiKeysPageProvider,
   assetDetails: AssetDetailsProvider,
   banners: BannersPageObject,
-  // canvas: CanvasPageProvider,
+  canvas: CanvasPageProvider,
   copySavedObjectsToSpace: CopySavedObjectsToSpacePageProvider,
   crossClusterReplication: CrossClusterReplicationPageProvider,
   detections: DetectionsPageObject,
@@ -85,11 +85,11 @@ export const pageObjects = {
   infraMetricsExplorer: InfraMetricsExplorerProvider,
   infraSavedViews: InfraSavedViewsProvider,
   ingestPipelines: IngestPipelinesPageProvider,
-  // lens: LensPageProvider,
+  lens: LensPageProvider,
   licenseManagement: LicenseManagementPageProvider,
   logstash: LogstashPageObject,
   maintenanceWindows: MaintenanceWindowsPageProvider,
-  // maps: GisPageObject,
+  maps: GisPageObject,
   monitoring: MonitoringPageObject,
   navigationalSearch: NavigationalSearchPageObject,
   observabilityLogsExplorer: ObservabilityLogsExplorerPageObject,
