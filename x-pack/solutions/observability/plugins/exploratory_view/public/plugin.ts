@@ -58,6 +58,7 @@ export interface ExploratoryViewPublicPluginsStart {
   dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
+
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
