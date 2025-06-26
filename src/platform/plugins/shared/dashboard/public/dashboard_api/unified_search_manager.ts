@@ -153,7 +153,6 @@ export function initializeUnifiedSearchManager(
       }
     )
   );
-  controlGroupSubscriptions.add(controlGroupFilters$.subscribe(() => panelsReload$.next()));
   controlGroupSubscriptions.add(
     controlGroupTimeslice$.subscribe((timeslice) => {
       if (timeslice !== timeslice$.value) timeslice$.next(timeslice);

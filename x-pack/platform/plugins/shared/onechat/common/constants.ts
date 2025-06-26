@@ -9,3 +9,13 @@
  * UI Setting ID for enabling / disabling the MCP server
  */
 export const ONECHAT_MCP_SERVER_UI_SETTING_ID = 'onechat:mcpServer:enabled';
+
+/**
+ * UI Setting ID for enabling / disabling the onechat plugin UI
+ */
+export const ONECHAT_UI_SETTING_ID = 'onechat:ui:enabled';
+
+/**
+ * UI Setting ID for enabling / disabling the tools UI
+ */
+export const ONECHAT_TOOLS_UI_SETTING_ID = 'onechat:tools:enabled';

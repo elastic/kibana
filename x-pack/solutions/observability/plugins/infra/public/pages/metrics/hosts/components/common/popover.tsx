@@ -46,7 +46,7 @@ export const Popover = ({
           onClick={onButtonClick}
           data-test-subj="hostsViewTableColumnPopoverButton"
         >
-          <EuiIcon type="questionInCircle" />
+          <EuiIcon type="question" />
         </button>
       }
       isOpen={isPopoverOpen}

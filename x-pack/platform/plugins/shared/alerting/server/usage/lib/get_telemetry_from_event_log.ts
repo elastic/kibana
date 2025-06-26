@@ -564,7 +564,7 @@ export function parseExecutionCountAggregationResults(results: {
   };
 }
 
-function getProviderAndActionFilterForTimeRange(
+export function getProviderAndActionFilterForTimeRange(
   action: string,
   provider = 'alerting',
   range = '1d'

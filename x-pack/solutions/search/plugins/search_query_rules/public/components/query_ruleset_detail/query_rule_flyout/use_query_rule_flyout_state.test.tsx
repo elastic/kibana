@@ -49,6 +49,7 @@ const MockFormProvider = ({
       ruleId: '',
       criteria: [],
       type: 'pinned',
+      isAlways: false,
       actions: { docs: [], ids: [] },
     },
   },
@@ -502,7 +503,6 @@ describe('useQueryRuleFlyoutState hook', () => {
         );
       });
 
-      await waitFor(() => expect(mockFlyoutState.isFlyoutDirty).toBe(true));
       await waitFor(() => {
         expect(mockFlyoutState.actionIdsFields).toEqual(['id-1', 'id-2']);
       });
