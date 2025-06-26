@@ -13,6 +13,7 @@ import { CopySavedObjectsToSpacePageProvider } from '@kbn/test-suites-xpack-plat
 import { SpaceSelectorPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/space_selector_page';
 import { RoleMappingsPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/role_mappings_page';
 import { ReportingPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/reporting_page';
+import { WatcherPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/watcher_page';
 import { ApiKeysPageProvider } from './api_keys_page';
 import { AssetDetailsProvider } from './asset_details';
 import { BannersPageObject } from './banners_page';
@@ -51,7 +52,6 @@ import { TagManagementPageObject } from './tag_management_page';
 import { UpgradeAssistantFlyoutObject } from './upgrade_assistant_page';
 import { UptimePageObject } from './uptime_page';
 import { UserProfilePageProvider } from './user_profile_page';
-import { WatcherPageObject } from './watcher_page';
 import { SearchProfilerPageProvider } from './search_profiler_page';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
 import { SearchSynonymsPageProvider } from './search_synonyms_page';
