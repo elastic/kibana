@@ -8,6 +8,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { KibanaDataView, SourcererModel } from '../../sourcerer/store/model';
 import { initDataView } from '../../sourcerer/store/model';
 import { createSourcererDataView } from '../../sourcerer/containers/create_sourcerer_data_view';
@@ -38,6 +39,7 @@ export const createDefaultDataView = async ({
   const configPatternList = uiSettings.get(DEFAULT_INDEX_KEY);
   let defaultDataView: SourcererModel['defaultDataView'];
   let kibanaDataViews: SourcererModel['kibanaDataViews'];
+  let siemDataView: DataView | undefined;
 
   let signal: { name: string | null; index_mapping_outdated: null | boolean } = {
     name: null,
@@ -49,6 +51,7 @@ export const createDefaultDataView = async ({
       kibanaDataViews: [],
       defaultDataView: { ...initDataView },
       signal,
+      siemDataView: undefined,
     };
   }
 
@@ -77,10 +80,11 @@ export const createDefaultDataView = async ({
       ...initDataView,
       ...dataView,
     }));
+    siemDataView = sourcererDataView.siemDataView;
   } catch (error) {
     defaultDataView = { ...initDataView, error };
     kibanaDataViews = [];
   }
 
-  return { kibanaDataViews, defaultDataView, signal };
+  return { kibanaDataViews, defaultDataView, signal, siemDataView };
 };

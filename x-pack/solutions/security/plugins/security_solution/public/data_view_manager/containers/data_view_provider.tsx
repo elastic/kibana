@@ -30,7 +30,12 @@ export const DefaultDataViewProvider: FC<PropsWithChildren> = ({ children }) => 
 
   useEffect(() => {
     (async () => {
-      const { defaultDataView: dv } = await createDefaultDataView({
+      // NOTE: being defensive
+      if (defaultDataView) {
+        return;
+      }
+
+      const { defaultDataView: defaultDataViewMetadata } = await createDefaultDataView({
         dataViewService: dataViews,
         uiSettings,
         spaces,
@@ -38,11 +43,11 @@ export const DefaultDataViewProvider: FC<PropsWithChildren> = ({ children }) => 
         http,
       });
 
-      const dataView = await dataViews?.get(dv.id);
+      const dataView = await dataViews?.get(defaultDataViewMetadata.id);
 
       setDefaultDataView(dataView);
     })();
-  }, [application, dataViews, http, spaces, uiSettings]);
+  }, [application, dataViews, defaultDataView, http, spaces, uiSettings]);
 
   return (
     <DefaultDataViewContext.Provider value={defaultDataView}>

@@ -40,6 +40,7 @@ export const useDataView = (
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const [retrievedDataView, setRetrievedDataView] = useState<DataView>(defaultDataView);
+  const [localStatus, setLocalStatus] = useState<SharedDataViewSelectionState['status']>('loading');
 
   useEffect(() => {
     (async () => {
@@ -51,23 +52,27 @@ export const useDataView = (
         return;
       }
 
+      setLocalStatus('loading');
+
       try {
         // TODO: remove conditional .get call when new data view picker is stabilized
         // this is due to the fact that many of our tests mock kibana hook and do not provide proper
         // double for dataViews service
         const currDv = await dataViews?.get(dataViewId);
         setRetrievedDataView(currDv);
+        setLocalStatus('ready');
       } catch (error) {
         // TODO: (remove conditional call when feature flag is on (mocks are broken for some tests))
         notifications?.toasts?.danger({
           title: 'Error retrieving data view',
           body: `Error: ${error?.message ?? 'unknown'}`,
         });
+        setLocalStatus('error');
       }
     })();
   }, [dataViews, dataViewId, internalStatus, notifications, newDataViewPickerEnabled]);
 
   return useMemo(() => {
-    return { dataView: retrievedDataView, status: retrievedDataView ? internalStatus : 'loading' };
-  }, [retrievedDataView, internalStatus]);
+    return { dataView: retrievedDataView, status: localStatus };
+  }, [retrievedDataView, localStatus]);
 };
