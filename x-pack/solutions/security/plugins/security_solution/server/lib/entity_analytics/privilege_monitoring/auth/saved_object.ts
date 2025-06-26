@@ -4,10 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { SavedObjectsType } from '@kbn/core/server';
 import { v5 as uuidv5 } from 'uuid';
 
-const PRIVMON_API_KEY_SO_ID = '19540C97-E35C-485B-8566-FB86EC8455E4';
+const PRIVMON_API_KEY_SO_ID = 'd2ee7992-cb4d-473a-8f1a-44ba187d4ac9';
 
 export const getPrivmonEncryptedSavedObjectId = (space: string) => {
   return uuidv5(space, PRIVMON_API_KEY_SO_ID);
+};
+
+export const SO_PRIVILEGE_MONITORING_API_KEY_TYPE = 'privmon-api-key';
+
+export const PrivilegeMonitoringApiKeyType: SavedObjectsType = {
+  name: SO_PRIVILEGE_MONITORING_API_KEY_TYPE,
+  hidden: true,
+  namespaceType: 'multiple-isolated',
+  mappings: {
+    dynamic: false,
+    properties: {
+      apiKey: { type: 'binary' },
+    },
+  },
+  management: {
+    importableAndExportable: false,
+    displayName: 'Privilege Monitoring API key',
+  },
 };

@@ -12,9 +12,9 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type { SavedObjectsType } from '@kbn/core/server';
-import { getPrivmonEncryptedSavedObjectId } from './saved_object';
+import { SECURITY_EXTENSION_ID, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+
+import { PrivilegeMonitoringApiKeyType, getPrivmonEncryptedSavedObjectId } from './saved_object';
 import { privilegeMonitoringRuntimePrivileges } from './privileges';
 
 export interface ApiKeyManager {
@@ -51,6 +51,7 @@ const generate = async (deps: ApiKeyManagerDependencies) => {
     const apiKey = await generateAPIKey(request, deps);
 
     const soClient = core.savedObjects.getScopedClient(request, {
+      excludedExtensions: [SECURITY_EXTENSION_ID],
       includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name],
     });
 
@@ -114,6 +115,7 @@ export const generateAPIKey = async (
   req: KibanaRequest,
   deps: ApiKeyManagerDependencies
 ): Promise<PrivilegeMonitoringAPIKey | undefined> => {
+  deps.logger.info('Generating Privmon API key');
   const apiKey = await deps.security.authc.apiKeys.grantAsInternalUser(req, {
     name: 'Privilege Monitoring API key',
     role_descriptors: {
@@ -131,24 +133,6 @@ export const generateAPIKey = async (
       apiKey: apiKey.api_key,
     };
   }
-};
-
-export const SO_PRIVILEGE_MONITORING_API_KEY_TYPE = 'privmon-api-key';
-
-export const PrivilegeMonitoringApiKeyType: SavedObjectsType = {
-  name: SO_PRIVILEGE_MONITORING_API_KEY_TYPE,
-  hidden: true,
-  namespaceType: 'multiple-isolated',
-  mappings: {
-    dynamic: false,
-    properties: {
-      apiKey: { type: 'binary' },
-    },
-  },
-  management: {
-    importableAndExportable: false,
-    displayName: 'Privilege Monitoring API key',
-  },
 };
 
 export interface PrivilegeMonitoringAPIKey {

@@ -22,6 +22,7 @@ import {
   privilegeMonitoringType,
   monitoringEntitySourceType,
 } from './lib/entity_analytics/privilege_monitoring/saved_objects';
+import { PrivilegeMonitoringApiKeyType } from './lib/entity_analytics/privilege_monitoring/auth/saved_object';
 
 const types = [
   noteType,
@@ -35,6 +36,7 @@ const types = [
   riskEngineConfigurationType,
   entityEngineDescriptorType,
   privilegeMonitoringType,
+  PrivilegeMonitoringApiKeyType,
   monitoringEntitySourceType,
   protectionUpdatesNoteType,
   promptType,

@@ -39,8 +39,9 @@ import type {
   SecuritySolutionRequestHandlerContext,
 } from './types';
 import { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/privilege_monitoring_data_client';
-import { getApiKeyManager as getApiKeyManagerEntityStore } from './lib/entity_analytics/privilege_monitoring/auth/api_key';
-import { getApiKeyManager as getApiKeyManagerPrivilegedUserMonitoring } from './lib/entity_analytics/entity_store/auth/api_key';
+import { getApiKeyManager as getApiKeyManagerPrivilegedUserMonitoring } from './lib/entity_analytics/privilege_monitoring/auth/api_key';
+import { getApiKeyManager as getApiKeyManagerEntityStore } from './lib/entity_analytics/entity_store/auth/api_key';
+import { PrivilegeMonitoringApiKeyType } from './lib/entity_analytics/privilege_monitoring/auth/saved_object';
 
 export interface IRequestContextFactory {
   create(
@@ -270,11 +271,15 @@ export class RequestContextFactory implements IRequestContextFactory {
           })
       ),
       getPrivilegeMonitoringDataClient: memoize(() => {
+        const soClient = coreContext.savedObjects.getClient({
+          includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name],
+        });
+
         return new PrivilegeMonitoringDataClient({
           logger: options.logger,
           clusterClient: coreContext.elasticsearch.client,
           namespace: getSpaceId(),
-          soClient: coreContext.savedObjects.client,
+          soClient,
           taskManager: startPlugins.taskManager,
           apiKeyManager: getPrivilegedUserMonitoringApiKeyManager(),
           auditLogger: getAuditLogger(),
