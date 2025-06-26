@@ -98,7 +98,6 @@ function InlineEditingContent({
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m" css={style}>
       <EuiFlexGroup
-        className="lnsConfigPanel__overlay"
         css={css`
            block-size: ${visible ? '100%' : 0};
           }
