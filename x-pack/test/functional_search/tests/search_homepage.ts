@@ -80,7 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      describe.only('search home page with index', () => {
+      describe('search home page with index', () => {
         before(async () => {
           await es.indices.create({ index: indexName });
           await pageObjects.searchNavigation.navigateToElasticsearchSearchHomePage(
