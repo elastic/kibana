@@ -224,7 +224,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       },
       order: 0,
       title: ENTERPRISE_SEARCH_HOME_PLUGIN.NAV_TITLE,
-      visibleIn: ['home', 'kibanaOverview', 'globalSearch', 'sideNav'],
+      visibleIn: ['home', 'kibanaOverview'],
     });
 
     core.application.register({
