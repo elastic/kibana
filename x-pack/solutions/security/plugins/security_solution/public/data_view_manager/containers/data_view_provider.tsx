@@ -12,6 +12,8 @@ import { useKibana } from '../../common/lib/kibana';
 import { createDefaultDataView } from '../utils/create_default_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
+const fallbackDataView = { id: '', title: '', toSpec: () => ({ id: '', title: '' }) } as DataView;
+
 const DefaultDataViewContext = createContext<DataView | undefined>(undefined);
 
 /**
@@ -22,7 +24,7 @@ export const useDefaultDataView = () => {
   const defaultDataView = useContext(DefaultDataViewContext);
 
   if (!newDataViewPickerEnabled) {
-    return { id: '', title: '' } as DataView;
+    return fallbackDataView;
   }
 
   if (!defaultDataView) {
