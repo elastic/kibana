@@ -17,6 +17,7 @@ import { LensPageProvider } from './lens_page';
 import { GisPageObject } from './gis_page';
 import { ReportingPageObject } from './reporting_page';
 import { WatcherPageObject } from './watcher_page';
+import { SearchProfilerPageProvider } from './search_profiler_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -33,4 +34,5 @@ export const pageObjects = {
   maps: GisPageObject,
   reporting: ReportingPageObject,
   watcher: WatcherPageObject,
+  searchProfiler: SearchProfilerPageProvider,
 };

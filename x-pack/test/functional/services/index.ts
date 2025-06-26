@@ -10,6 +10,7 @@ import { services as kibanaApiIntegrationServices } from '@kbn/test-suites-src/a
 import { AceEditorProvider } from '@kbn/test-suites-xpack-platform/functional/services/ace_editor';
 import { UserMenuProvider } from '@kbn/test-suites-xpack-platform/functional/services/user_menu';
 import { SampleDataServiceProvider } from '@kbn/test-suites-xpack-platform/functional/services/sample_data';
+import { GrokDebuggerProvider } from '@kbn/test-suites-xpack-platform/functional/services/grok_debugger';
 import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
 import { services as commonServices } from '../../common/services';
 import { ReportingFunctionalProvider } from '../../reporting_functional/services';
@@ -55,7 +56,6 @@ import { RandomProvider } from './random';
 // @ts-ignore not ts yet
 import { CanvasElementProvider } from './canvas_element';
 // @ts-ignore not ts yet
-import { GrokDebuggerProvider } from './grok_debugger';
 // @ts-ignore not ts yet
 import { UptimeProvider } from './uptime';
 import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';

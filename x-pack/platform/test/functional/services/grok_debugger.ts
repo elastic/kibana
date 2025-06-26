@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function GrokDebuggerProvider({ getService }) {
+export function GrokDebuggerProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const monacoEditor = getService('monacoEditor');
