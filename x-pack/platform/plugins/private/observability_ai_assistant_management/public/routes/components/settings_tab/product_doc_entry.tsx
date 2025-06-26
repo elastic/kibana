@@ -18,25 +18,20 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKnowledgeBase } from '@kbn/ai-assistant/src/hooks/use_knowledge_base';
-import { useCurrentInferenceId } from '@kbn/ai-assistant/src/hooks/use_current_inference_id';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useGetProductDocStatus } from '../../../hooks/use_get_product_doc_status';
 import { useInstallProductDoc } from '../../../hooks/use_install_product_doc';
 import { useUninstallProductDoc } from '../../../hooks/use_uninstall_product_doc';
 
-export function ProductDocEntry() {
+export function ProductDocEntry({ selectedInferenceId }: { selectedInferenceId: string }) {
   const { overlays } = useKibana().services;
-
-  const inferenceId = useCurrentInferenceId();
 
   const [isInstalled, setInstalled] = useState<boolean>(true);
   const [isInstalling, setInstalling] = useState<boolean>(false);
 
   const { mutateAsync: installProductDoc } = useInstallProductDoc();
   const { mutateAsync: uninstallProductDoc } = useUninstallProductDoc();
-  const { status, isLoading: isStatusLoading } = useGetProductDocStatus();
-  const knowledgeBase = useKnowledgeBase();
+  const { status, isLoading: isStatusLoading } = useGetProductDocStatus(selectedInferenceId);
 
   useEffect(() => {
     if (status) {
@@ -45,11 +40,11 @@ export function ProductDocEntry() {
   }, [status]);
 
   const onClickInstall = useCallback(() => {
-    if (!inferenceId) {
+    if (!selectedInferenceId) {
       throw new Error('Inference ID is required to install product documentation');
     }
     setInstalling(true);
-    installProductDoc(inferenceId).then(
+    installProductDoc().then(
       () => {
         setInstalling(false);
         setInstalled(true);
@@ -59,7 +54,7 @@ export function ProductDocEntry() {
         setInstalled(false);
       }
     );
-  }, [installProductDoc, inferenceId]);
+  }, [installProductDoc, selectedInferenceId]);
 
   const onClickUninstall = useCallback(() => {
     overlays
@@ -80,14 +75,14 @@ export function ProductDocEntry() {
         }
       )
       .then((confirmed) => {
-        if (confirmed && inferenceId) {
-          uninstallProductDoc(inferenceId).then(() => {
+        if (confirmed && selectedInferenceId) {
+          uninstallProductDoc(selectedInferenceId).then(() => {
             setInstalling(false);
             setInstalled(false);
           });
         }
       });
-  }, [overlays, uninstallProductDoc, inferenceId]);
+  }, [overlays, uninstallProductDoc, selectedInferenceId]);
 
   const content = useMemo(() => {
     if (isStatusLoading) {

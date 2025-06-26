@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useKnowledgeBase } from './use_knowledge_base';
 
-export const useCurrentInferenceId = () => {
+export const useCurrentlyDeployedInferenceId = () => {
   const knowledgeBase = useKnowledgeBase();
-  return (
-    knowledgeBase.status.value?.currentInferenceId ??
-    knowledgeBase.status.value?.endpoint?.inference_id
+  return useMemo(
+    () =>
+      knowledgeBase.status.value?.currentInferenceId ??
+      knowledgeBase.status.value?.endpoint?.inference_id,
+    [knowledgeBase.status.value]
   );
 };

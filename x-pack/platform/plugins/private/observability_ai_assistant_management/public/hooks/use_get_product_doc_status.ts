@@ -6,13 +6,11 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { useCurrentInferenceId } from '@kbn/ai-assistant/src/hooks/use_current_inference_id';
 import { REACT_QUERY_KEYS } from '../constants';
 import { useKibana } from './use_kibana';
 
-export function useGetProductDocStatus() {
+export function useGetProductDocStatus(inferenceId: string) {
   const { productDocBase } = useKibana().services;
-  const inferenceId = useCurrentInferenceId();
 
   const { isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery({
     queryKey: [REACT_QUERY_KEYS.GET_PRODUCT_DOC_STATUS, inferenceId],

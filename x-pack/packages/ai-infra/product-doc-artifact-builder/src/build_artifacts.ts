@@ -14,6 +14,7 @@ import {
 
 import { ToolingLog } from '@kbn/tooling-log';
 import type { ProductName } from '@kbn/product-doc-common';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import {
   // checkConnectivity,
   createTargetIndex,
@@ -85,7 +86,7 @@ export const buildArtifacts = async (config: TaskConfig) => {
       sourceClient,
       embeddingClient,
       log,
-      inferenceId: config.inferenceId,
+      inferenceId: config.inferenceId ?? defaultInferenceEndpoints.ELSER,
     });
   }
 

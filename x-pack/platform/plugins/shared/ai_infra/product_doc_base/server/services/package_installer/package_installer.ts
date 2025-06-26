@@ -72,19 +72,22 @@ export class PackageInstaller {
     this.elserInferenceId = elserInferenceId || defaultInferenceEndpoints.ELSER;
   }
 
+  private async getInferenceInfo(inferenceId?: string) {
+    if (!inferenceId) {
+      return;
+    }
+    const inferenceEndpoints = await this.esClient.inference.get({
+      inference_id: inferenceId,
+    });
+    return inferenceEndpoints.endpoints[0];
+  }
   /**
    * Make sure that the currently installed doc packages are up to date.
    * Will not upgrade products that are not already installed
    */
   async ensureUpToDate(params: { inferenceId?: string } = {}) {
     const { inferenceId } = params;
-    let inferenceInfo;
-    if (inferenceId) {
-      const inferenceEndpoints = await this.esClient.inference.get({
-        inference_id: inferenceId,
-      });
-      inferenceInfo = inferenceEndpoints.endpoints[0];
-    }
+    const inferenceInfo = await this.getInferenceInfo(inferenceId);
     const [repositoryVersions, installStatuses] = await Promise.all([
       fetchArtifactVersions({
         artifactRepositoryUrl: this.artifactRepositoryUrl,
@@ -128,13 +131,7 @@ export class PackageInstaller {
       artifactRepositoryUrl: this.artifactRepositoryUrl,
     });
     const allProducts = Object.values(DocumentationProduct) as ProductName[];
-    let inferenceInfo;
-    if (inferenceId) {
-      const inferenceEndpoints = await this.esClient.inference.get({
-        inference_id: inferenceId,
-      });
-      inferenceInfo = inferenceEndpoints.endpoints[0];
-    }
+    const inferenceInfo = await this.getInferenceInfo(inferenceId);
 
     for (const productName of allProducts) {
       const availableVersions = repositoryVersions[productName];

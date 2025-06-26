@@ -66,8 +66,8 @@ export class DocumentationManager implements DocumentationManagerAPI {
   }
 
   async install(options: DocInstallOptions = {}): Promise<void> {
-    const { request, force = false, wait = false, inferenceId: inferenceIdParam } = options;
-    const inferenceId = inferenceIdParam ?? defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL;
+    const { request, force = false, wait = false } = options;
+    const inferenceId = options.inferenceId ?? defaultInferenceEndpoints.ELSER;
 
     const { status } = await this.getStatus({ inferenceId });
     if (!force && status === 'installed') {
@@ -109,8 +109,8 @@ export class DocumentationManager implements DocumentationManagerAPI {
   }
 
   async update(options: DocUpdateOptions = {}): Promise<void> {
-    const { request, wait = false, inferenceId: inferenceIdParam } = options;
-    const inferenceId = inferenceIdParam ?? defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL;
+    const { request, wait = false } = options;
+    const inferenceId = options.inferenceId ?? defaultInferenceEndpoints.ELSER;
 
     const taskId = await scheduleEnsureUpToDateTask({
       taskManager: this.taskManager,
@@ -142,8 +142,8 @@ export class DocumentationManager implements DocumentationManagerAPI {
   }
 
   async uninstall(options: DocUninstallOptions = {}): Promise<void> {
-    const { request, wait = false, inferenceId: inferenceIdParam } = options;
-    const inferenceId = inferenceIdParam ?? defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL;
+    const { request, wait = false } = options;
+    const inferenceId = options.inferenceId ?? defaultInferenceEndpoints.ELSER;
 
     const taskId = await scheduleUninstallAllTask({
       taskManager: this.taskManager,
@@ -172,7 +172,10 @@ export class DocumentationManager implements DocumentationManagerAPI {
     }
   }
 
-  async getStatus({ inferenceId }: { inferenceId: string }): Promise<DocGetStatusResponse> {
+  /**
+   * @param inferenceId - The inference ID to get the status for. If not provided, the default ELSER inference ID will be used.
+   */
+  async getStatus({ inferenceId }: { inferenceId?: string } = {}): Promise<DocGetStatusResponse> {
     const taskId = isDefaultElserInferenceId(inferenceId)
       ? INSTALL_ALL_TASK_ID
       : INSTALL_ALL_TASK_ID_E5;

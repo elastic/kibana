@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiDescribedFormGroup,
@@ -62,6 +62,8 @@ export function SettingsTab() {
   const connectors = useGenAIConnectors();
 
   const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
+
+  const [selectedInferenceId, setSelectedInferenceId] = useState<string>('');
 
   const getUrlForSpaces = () => {
     return getUrlForApp('management', {
@@ -178,10 +180,14 @@ export function SettingsTab() {
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
-      {productDocBase ? <ProductDocEntry /> : undefined}
+      {productDocBase ? <ProductDocEntry selectedInferenceId={selectedInferenceId} /> : undefined}
 
       {knowledgeBase.status.value?.enabled && connectors.connectors?.length ? (
-        <ChangeKbModel knowledgeBase={knowledgeBase} />
+        <ChangeKbModel
+          knowledgeBase={knowledgeBase}
+          selectedInferenceId={selectedInferenceId}
+          onInferenceIdChange={(inferenceId) => setSelectedInferenceId(inferenceId)}
+        />
       ) : undefined}
 
       <UISettings knowledgeBase={knowledgeBase} />
