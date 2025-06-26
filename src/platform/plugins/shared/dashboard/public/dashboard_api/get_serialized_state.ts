@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RefreshInterval } from '@kbn/data-plugin/public';
+import type { RefreshInterval } from '@kbn/data-service-server';
 import { pick } from 'lodash';
 import moment, { Moment } from 'moment';
 

@@ -8,7 +8,7 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter, TimeRange, Query } from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { RefreshInterval } from '@kbn/data-plugin/public';
+import type { RefreshInterval } from '@kbn/data-service-server';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { LayerDescriptor } from '../../../common/descriptor_types';
 

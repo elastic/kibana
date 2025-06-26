@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/data-plugin/common';
+import type { RefreshInterval } from '@kbn/data-service-server';
 import { isTimeRangeValid, isRefreshIntervalValid } from './validate_time';
 
 describe('discover validate time', () => {

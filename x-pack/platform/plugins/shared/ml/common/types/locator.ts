@@ -7,7 +7,8 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
-import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common/query';
+import type { TimeRange } from '@kbn/data-plugin/common/query';
+import type { RefreshInterval } from '@kbn/data-service-server';
 import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-utils';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';

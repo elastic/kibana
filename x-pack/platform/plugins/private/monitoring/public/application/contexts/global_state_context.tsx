@@ -6,7 +6,7 @@
  */
 import React, { createContext, useState, FC, PropsWithChildren } from 'react';
 import type { TimeRange } from '@kbn/es-query';
-import { RefreshInterval } from '@kbn/data-plugin/public';
+import type { RefreshInterval } from '@kbn/data-service-server';
 import useUnmount from 'react-use/lib/useUnmount';
 import { GlobalState } from '../../url_state';
 import { MonitoringStartPluginDependencies, MonitoringStartServices } from '../../types';

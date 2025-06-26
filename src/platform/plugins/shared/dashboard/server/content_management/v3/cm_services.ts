@@ -9,6 +9,7 @@
 
 import { schema, Type } from '@kbn/config-schema';
 import { createOptionsSchemas, updateOptionsSchema } from '@kbn/content-management-utils';
+import { refreshIntervalSchema } from '@kbn/data-service-server';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
   type ControlGroupChainingSystem,
@@ -358,47 +359,9 @@ export const dashboardAttributesSchema = searchResultsAttributesSchema.extends({
     schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
   ),
   timeTo: schema.maybe(
-    schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
+    schema.string({ meta: { description: 'An ISO string indicating when to restore time to' } })
   ),
-  refreshInterval: schema.maybe(
-    schema.object(
-      {
-        pause: schema.boolean({
-          meta: {
-            description:
-              'Whether the refresh interval is set to be paused while viewing the dashboard.',
-          },
-        }),
-        value: schema.number({
-          meta: {
-            description: 'A numeric value indicating refresh frequency in milliseconds.',
-          },
-        }),
-        display: schema.maybe(
-          schema.string({
-            meta: {
-              description:
-                'A human-readable string indicating the refresh frequency. No longer used.',
-              deprecated: true,
-            },
-          })
-        ),
-        section: schema.maybe(
-          schema.number({
-            meta: {
-              description: 'No longer used.', // TODO what is this legacy property?
-              deprecated: true,
-            },
-          })
-        ),
-      },
-      {
-        meta: {
-          description: 'A container for various refresh interval settings',
-        },
-      }
-    )
-  ),
+  refreshInterval: schema.maybe(refreshIntervalSchema),
 
   // Dashboard Content
   controlGroupInput: schema.maybe(controlGroupInputSchema),

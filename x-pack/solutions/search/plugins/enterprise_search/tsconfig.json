@@ -88,5 +88,6 @@
     "@kbn/file-upload-common",
     "@kbn/search-indices",
     "@kbn/charts-theme",
+    "@kbn/data-service-server",
   ]
 }

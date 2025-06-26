@@ -7,16 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Moment } from 'moment';
+import { TypeOf } from '@kbn/config-schema';
+import { refreshIntervalSchema } from './refresh_interval';
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type TimeRange = {
-  from: string;
-  to: string;
-  mode?: 'absolute' | 'relative';
-};
-
-export interface TimeRangeBounds {
-  min: Moment | undefined;
-  max: Moment | undefined;
-}
+export type RefreshInterval = TypeOf<typeof refreshIntervalSchema>;

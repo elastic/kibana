@@ -23,6 +23,7 @@
     "@kbn/discover-plugin",
     "@kbn/data-views-plugin",
     "@kbn/discover-utils",
+    "@kbn/data-service-server",
   ],
   "exclude": ["target/**/*"]
 }

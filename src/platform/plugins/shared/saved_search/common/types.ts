@@ -9,10 +9,10 @@
 
 import type {
   ISearchSource,
-  RefreshInterval,
   SerializedSearchSourceFields,
   TimeRange,
 } from '@kbn/data-plugin/common';
+import type { RefreshInterval } from '@kbn/data-service-server';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type { SerializableRecord } from '@kbn/utility-types';

@@ -7,16 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Moment } from 'moment';
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type TimeRange = {
-  from: string;
-  to: string;
-  mode?: 'absolute' | 'relative';
-};
-
-export interface TimeRangeBounds {
-  min: Moment | undefined;
-  max: Moment | undefined;
-}
+export { refreshIntervalSchema } from './src/refresh_interval';
+export type { RefreshInterval } from './src/types';

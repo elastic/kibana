@@ -9,7 +9,7 @@
 
 import _ from 'lodash';
 
-import { RefreshInterval } from '../../../../common';
+import type { RefreshInterval } from '@kbn/data-service-server';
 import type { InputTimeRange } from '../types';
 
 const valueOf = function (o: any) {

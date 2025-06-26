@@ -7,7 +7,7 @@
 
 import { LogicMounter } from '../../../../__mocks__/kea_logic';
 
-import { RefreshInterval } from '@kbn/data-plugin/common';
+import type { RefreshInterval } from '@kbn/data-service-server';
 import { TimeRange } from '@kbn/es-query';
 
 import { KibanaLogic } from '../../../../shared/kibana/kibana_logic';

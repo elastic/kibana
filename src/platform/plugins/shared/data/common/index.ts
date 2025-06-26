@@ -524,7 +524,6 @@ export {
   ESQL_TABLE_TYPE,
 } from './search';
 export type {
-  RefreshInterval,
   TimeRangeBounds,
   TimeRange,
   GetConfigFn,

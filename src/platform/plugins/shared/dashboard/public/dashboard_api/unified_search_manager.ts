@@ -12,7 +12,6 @@ import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import {
   GlobalQueryStateFromUrl,
-  RefreshInterval,
   connectToQueryState,
   extractSearchSourceReferences,
   syncGlobalQueryStateWithUrl,
@@ -26,6 +25,7 @@ import {
   compareFilters,
   isFilterPinned,
 } from '@kbn/es-query';
+import type { RefreshInterval } from '@kbn/data-service-server';
 import { ESQLControlVariable } from '@kbn/esql-types';
 import { PublishingSubject, StateComparators, diffComparators } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
