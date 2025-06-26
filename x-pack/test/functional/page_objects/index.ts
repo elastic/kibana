@@ -12,6 +12,7 @@ import { SecurityPageObject } from '@kbn/test-suites-xpack-platform/functional/p
 import { CopySavedObjectsToSpacePageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/copy_saved_objects_to_space_page';
 import { SpaceSelectorPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/space_selector_page';
 import { RoleMappingsPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/role_mappings_page';
+import { ReportingPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/reporting_page';
 import { ApiKeysPageProvider } from './api_keys_page';
 import { AssetDetailsProvider } from './asset_details';
 import { BannersPageObject } from './banners_page';
@@ -41,7 +42,6 @@ import { DatasetQualityPageObject } from './dataset_quality';
 import { ObservabilityPageProvider } from './observability_page';
 import { AlertControlsProvider } from './alert_controls';
 import { RemoteClustersPageProvider } from './remote_clusters_page';
-import { ReportingPageObject } from './reporting_page';
 import { RollupPageObject } from './rollup_page';
 import { SearchSessionsPageProvider } from './search_sessions_management_page';
 import { ShareSavedObjectsToSpacePageProvider } from './share_saved_objects_to_space_page';
