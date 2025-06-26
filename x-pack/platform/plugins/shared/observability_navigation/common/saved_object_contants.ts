@@ -6,3 +6,5 @@
  */
 
 export const OBSERVABILITY_NAVIGATION_OVERRIDES = 'observability-navigation-overrides';
+export const OBSERVABILITY_ENTITY_DEFINITIONS = 'observability-entity-definitions';
+export const OBSERVABILITY_METRIC_DEFINITIONS = 'observability-metric-definitions';

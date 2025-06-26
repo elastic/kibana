@@ -9,9 +9,11 @@ import type {
   CoreSetup,
   CoreStart,
   IScopedClusterClient,
+  KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
+import { PackageClient } from '@kbn/fleet-plugin/server';
 import {
   ObservabilityNavigationPluginSetupDependencies,
   ObservabilityNavigationPluginStartDependencies,
@@ -50,10 +52,24 @@ type PluginContractResolveDependenciesSetup = {
   };
 };
 
-export interface ObservabilityNavigationRouteHandlerResources
-  extends Omit<DefaultRouteHandlerResources, 'context' | 'response'> {
-  context: ObservabilityNavigationRequestHandlerContext;
+type GetScopedClients = ({
+  request,
+}: {
+  request: KibanaRequest;
+}) => Promise<RouteHandlerScopedClients>;
+
+export interface RouteDependencies {
+  getScopedClients: GetScopedClients;
   plugins: PluginContractResolveCore &
     PluginContractResolveDependenciesSetup &
     PluginContractResolveDependenciesStart;
 }
+
+export interface RouteHandlerScopedClients {
+  scopedClusterClient: IScopedClusterClient;
+  soClient: SavedObjectsClientContract;
+  packageClient?: PackageClient;
+}
+
+export type ObservabilityNavigationRouteHandlerResources = RouteDependencies &
+  DefaultRouteHandlerResources;

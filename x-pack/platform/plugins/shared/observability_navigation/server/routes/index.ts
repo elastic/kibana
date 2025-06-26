@@ -6,9 +6,11 @@
  */
 
 import { internalSetupRoutes } from './internal/setup/route';
+import { internalEntityDefinitionRoutes } from './internal/entity_definitions/route';
 
 export const observabilityNavigationRouteRepository = {
   ...internalSetupRoutes,
+  ...internalEntityDefinitionRoutes,
 };
 
 export type ObservabilityNavigationRouteRepository = typeof observabilityNavigationRouteRepository;

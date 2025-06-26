@@ -55,7 +55,7 @@ const createObservabilityNavigationItemsObservable = once(
   ): Observable<ObservabilityDynamicNavigation[]> => {
     return from(
       repositoryClient
-        .fetch('GET /internal/observability_navigation', {
+        .fetch('GET /internal/observability/navigation', {
           signal: new AbortController().signal,
         })
         .then(
