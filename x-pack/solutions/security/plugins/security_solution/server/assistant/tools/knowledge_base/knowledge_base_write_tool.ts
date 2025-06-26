@@ -13,7 +13,10 @@ import type { KnowledgeBaseEntryCreateProps } from '@kbn/elastic-assistant-commo
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
 
-export type KnowledgeBaseWriteToolParams = Require<AssistantToolParams, 'kbDataClient' | 'telemetry'>;
+export type KnowledgeBaseWriteToolParams = Require<
+  AssistantToolParams,
+  'kbDataClient' | 'telemetry'
+>;
 
 const toolDetails = {
   // note: this description is overwritten when `getTool` is called
