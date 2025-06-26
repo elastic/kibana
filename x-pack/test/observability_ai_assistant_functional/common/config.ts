@@ -51,8 +51,6 @@ export const observabilityAIAssistantFtrConfigs = {
 
 export type ObservabilityAIAssistantFtrConfigName = keyof typeof observabilityAIAssistantFtrConfigs;
 
-// export type ObservabilityAIAssistantServices = Awaited<ReturnType<CreateTestConfig>>['services'];
-
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 export type TestConfig = Awaited<ReturnType<typeof getTestConfig>>;
 
