@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import { SynthtraceFixture, expect, test } from '@kbn/scout';
-import { apm, log, timerange } from '@kbn/apm-synthtrace-client';
-
-const TEST_START_TIME = '2024-01-01T00:00:00.000Z';
-const TEST_END_TIME = '2024-01-01T01:00:00.000Z';
+import { test, expect } from '@kbn/scout-oblt';
+import { generateApmData, generateLogsData } from '../fixtures/generators';
 
 test.describe('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(
-    async ({ browserAuth, kbnClient, apmSynthtraceEsClient, logsSynthtraceEsClient }) => {
-      await kbnClient.savedObjects.cleanStandardList();
-      await browserAuth.loginAsAdmin();
-      await apmSynthtraceEsClient.clean();
-      await logsSynthtraceEsClient.clean();
-    }
-  );
+  test.beforeAll(async ({ kbnClient }) => {
+    await kbnClient.savedObjects.cleanStandardList();
+  });
+
+  test.beforeEach(async ({ browserAuth, apmSynthtraceEsClient, logsSynthtraceEsClient }) => {
+    await browserAuth.loginAsAdmin();
+    await apmSynthtraceEsClient.clean();
+    await logsSynthtraceEsClient.clean();
+  });
 
   test.afterAll(async ({ logsSynthtraceEsClient, apmSynthtraceEsClient }) => {
     await apmSynthtraceEsClient.clean();
@@ -58,7 +56,7 @@ test.describe('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, () =>
     await generateLogsData(logsSynthtraceEsClient);
 
     // Navigate to observability landing page
-    await pageObjects.observability.gotoLanding();
+    await pageObjects.observabilityNavigation.gotoLanding();
 
     // Wait for redirect and verify we're on Discover logs page
     await expect(page).toHaveURL(/\/app\/discover/, { timeout: 10000 });
@@ -73,7 +71,7 @@ test.describe('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, () =>
     await generateApmData(apmSynthtraceEsClient);
 
     // Navigate to observability landing page
-    await pageObjects.observability.gotoLanding();
+    await pageObjects.observabilityNavigation.gotoLanding();
 
     // Wait for redirect and verify we're on APM page
     await expect(page).toHaveURL(/\/app\/apm/, { timeout: 10000 });
@@ -90,7 +88,7 @@ test.describe('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, () =>
     await generateApmData(apmSynthtraceEsClient);
 
     // Navigate to observability landing page
-    await pageObjects.observability.gotoLanding();
+    await pageObjects.observabilityNavigation.gotoLanding();
 
     // Wait for redirect and verify we're on Discover logs page (logs takes priority)
     await expect(page).toHaveURL(/\/app\/discover/, { timeout: 10000 });
@@ -98,54 +96,9 @@ test.describe('Observability Landing Page', { tag: ['@ess', '@svlOblt'] }, () =>
 
   test('redirects to onboarding when no data exists', async ({ page, pageObjects }) => {
     // Navigate to observability landing page with no data
-    await pageObjects.observability.gotoLanding();
+    await pageObjects.observabilityNavigation.gotoLanding();
 
     // Wait for redirect and verify we're on onboarding page
     await expect(page).toHaveURL(/\/app\/observabilityOnboarding/, { timeout: 10000 });
   });
 });
-
-/**
- * Generate synthetic logs data for testing
- */
-async function generateLogsData(
-  logsSynthtraceEsClient: SynthtraceFixture['logsSynthtraceEsClient']
-) {
-  const logsData = timerange(TEST_START_TIME, TEST_END_TIME)
-    .interval('1m')
-    .rate(1)
-    .generator((timestamp) =>
-      log
-        .create()
-        .message('Test log message')
-        .timestamp(timestamp)
-        .dataset('synth.test')
-        .namespace('default')
-        .logLevel(Math.random() > 0.5 ? 'info' : 'warn')
-        .defaults({
-          'service.name': 'test-service',
-        })
-    );
-
-  await logsSynthtraceEsClient.index(logsData);
-}
-
-/**
- * Generate synthetic APM data for testing
- */
-async function generateApmData(apmSynthtraceEsClient: SynthtraceFixture['apmSynthtraceEsClient']) {
-  const apmData = timerange(TEST_START_TIME, TEST_END_TIME)
-    .interval('1m')
-    .rate(1)
-    .generator((timestamp) =>
-      apm
-        .service({ name: 'test-service-1', environment: 'test', agentName: 'nodejs' })
-        .instance('instance-1')
-        .transaction({ transactionName: 'GET /api/test' })
-        .timestamp(timestamp)
-        .duration(100)
-        .success()
-    );
-
-  await apmSynthtraceEsClient.index(apmData);
-}
