@@ -112,7 +112,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
         return (
           <EuiHealth
             color={item.enabled ? 'primary' : 'subdued'}
-            data-test-subj={`reprotStatus-${item.enabled ? 'active' : 'disabled'}`}
+            data-test-subj={`reportStatus-${item.enabled ? 'active' : 'disabled'}`}
           >
             {item.enabled
               ? i18n.translate('xpack.reporting.schedules.status.active', {
