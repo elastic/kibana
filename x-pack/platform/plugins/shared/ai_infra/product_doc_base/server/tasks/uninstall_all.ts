@@ -15,7 +15,7 @@ import { isDefaultElserInferenceId, isTaskCurrentlyRunningError } from './utils'
 
 export const UNINSTALL_ALL_TASK_TYPE = 'ProductDocBase:UninstallAll';
 export const UNINSTALL_ALL_TASK_ID = 'ProductDocBase:UninstallAll';
-export const UNINSTALL_ALL_TASK_E5_ID = 'ProductDocBase:UninstallAllSmallE5';
+export const UNINSTALL_ALL_TASK_ID_MULTILINGUAL = 'ProductDocBase:UninstallAllMultilingual';
 
 export const registerUninstallAllTaskDefinition = ({
   getServices,
@@ -57,7 +57,7 @@ export const scheduleUninstallAllTask = async ({
   // we use different task IDs for each inference ID.
   const taskId = isDefaultElserInferenceId(inferenceId)
     ? UNINSTALL_ALL_TASK_ID
-    : UNINSTALL_ALL_TASK_E5_ID;
+    : UNINSTALL_ALL_TASK_ID_MULTILINGUAL;
 
   try {
     await taskManager.ensureScheduled({

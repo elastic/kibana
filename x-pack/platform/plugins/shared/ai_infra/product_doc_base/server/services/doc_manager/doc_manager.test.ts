@@ -91,6 +91,7 @@ describe('DocumentationManager', () => {
       expect(scheduleInstallAllTaskMock).toHaveBeenCalledWith({
         taskManager,
         logger,
+        inferenceId: '.elser-2-elasticsearch',
       });
 
       expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
@@ -163,6 +164,7 @@ describe('DocumentationManager', () => {
       expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
         taskManager,
         logger,
+        inferenceId: '.elser-2-elasticsearch',
       });
 
       expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
@@ -212,6 +214,7 @@ describe('DocumentationManager', () => {
       expect(scheduleUninstallAllTaskMock).toHaveBeenCalledWith({
         taskManager,
         logger,
+        inferenceId: '.elser-2-elasticsearch',
       });
 
       expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();

@@ -28,7 +28,7 @@ import type {
   DocUninstallOptions,
   DocUpdateOptions,
 } from './types';
-import { INSTALL_ALL_TASK_ID_E5 } from '../../tasks/install_all';
+import { INSTALL_ALL_TASK_ID_MULTILINGUAL } from '../../tasks/install_all';
 import { isDefaultElserInferenceId } from '../../tasks/utils';
 
 const TEN_MIN_IN_MS = 10 * 60 * 1000;
@@ -178,7 +178,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
   async getStatus({ inferenceId }: { inferenceId?: string } = {}): Promise<DocGetStatusResponse> {
     const taskId = isDefaultElserInferenceId(inferenceId)
       ? INSTALL_ALL_TASK_ID
-      : INSTALL_ALL_TASK_ID_E5;
+      : INSTALL_ALL_TASK_ID_MULTILINGUAL;
     const taskStatus = await getTaskStatus({
       taskManager: this.taskManager,
       taskId,

@@ -12,6 +12,9 @@ import {
   INSTALL_ALL_API_PATH,
   UNINSTALL_ALL_API_PATH,
 } from '../../../common/http_api/installation';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+
+const inferenceId = defaultInferenceEndpoints.ELSER;
 
 describe('InstallationService', () => {
   let http: ReturnType<typeof httpServiceMock.createSetupContract>;
@@ -26,7 +29,11 @@ describe('InstallationService', () => {
     it('calls the endpoint with the right parameters', async () => {
       await service.getInstallationStatus();
       expect(http.get).toHaveBeenCalledTimes(1);
-      expect(http.get).toHaveBeenCalledWith(INSTALLATION_STATUS_API_PATH);
+      expect(http.get).toHaveBeenCalledWith(INSTALLATION_STATUS_API_PATH, {
+        query: {
+          inferenceId,
+        },
+      });
     });
     it('returns the value from the server', async () => {
       const expected = { stubbed: true };
@@ -44,7 +51,11 @@ describe('InstallationService', () => {
     it('calls the endpoint with the right parameters', async () => {
       await service.install();
       expect(http.post).toHaveBeenCalledTimes(1);
-      expect(http.post).toHaveBeenCalledWith(INSTALL_ALL_API_PATH);
+      expect(http.post).toHaveBeenCalledWith(INSTALL_ALL_API_PATH, {
+        body: {
+          inferenceId,
+        },
+      });
     });
     it('returns the value from the server', async () => {
       const expected = { installed: true };
@@ -57,16 +68,21 @@ describe('InstallationService', () => {
       const expected = { installed: false };
       http.post.mockResolvedValue(expected);
 
-      await expect(service.install()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Installation did not complete successfully"`
-      );
+      await expect(service.install()).rejects.toThrowErrorMatchingInlineSnapshot(`
+        "Installation did not complete successfully.
+        "
+      `);
     });
   });
   describe('#uninstall', () => {
     it('calls the endpoint with the right parameters', async () => {
       await service.uninstall();
       expect(http.post).toHaveBeenCalledTimes(1);
-      expect(http.post).toHaveBeenCalledWith(UNINSTALL_ALL_API_PATH);
+      expect(http.post).toHaveBeenCalledWith(UNINSTALL_ALL_API_PATH, {
+        body: {
+          inferenceId,
+        },
+      });
     });
     it('returns the value from the server', async () => {
       const expected = { stubbed: true };

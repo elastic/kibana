@@ -15,7 +15,8 @@ import { isDefaultElserInferenceId, isTaskCurrentlyRunningError } from './utils'
 
 export const ENSURE_DOC_UP_TO_DATE_TASK_TYPE = 'ProductDocBase:EnsureUpToDate';
 export const ENSURE_DOC_UP_TO_DATE_TASK_ID = 'ProductDocBase:EnsureUpToDate';
-export const ENSURE_DOC_UP_TO_DATE_TASK_E5_ID = 'ProductDocBase:EnsureUpToDateMultilingualE5';
+export const ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL =
+  'ProductDocBase:EnsureUpToDateMultilingual';
 
 export const registerEnsureUpToDateTaskDefinition = ({
   getServices,
@@ -54,7 +55,7 @@ export const scheduleEnsureUpToDateTask = async ({
 }) => {
   const taskId = isDefaultElserInferenceId(inferenceId)
     ? ENSURE_DOC_UP_TO_DATE_TASK_ID
-    : ENSURE_DOC_UP_TO_DATE_TASK_E5_ID;
+    : ENSURE_DOC_UP_TO_DATE_TASK_ID_MULTILINGUAL;
   try {
     await taskManager.ensureScheduled({
       id: taskId,

@@ -11,7 +11,7 @@ import type { ProductDocInstallStatusAttributes as TypeAttributes } from '../../
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { ProductDocInstallClient } from './product_doc_install_service';
 
-const inferenceId = 'inferenceId';
+const inferenceId = '.elser-2-elasticsearch';
 const createObj = (attrs: TypeAttributes): SavedObjectsFindResult<TypeAttributes> => {
   return {
     id: attrs.product_name,

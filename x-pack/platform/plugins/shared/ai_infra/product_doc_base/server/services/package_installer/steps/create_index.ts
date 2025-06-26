@@ -44,7 +44,12 @@ export const overrideInferenceSettings = (
   modelSettingsToOverride?: object
 ) => {
   const recursiveOverride = (current: MappingTypeMapping | MappingProperty) => {
-    if ('type' in current && current.type === 'semantic_text') {
+    if (
+      typeof current === 'object' &&
+      current !== null &&
+      Object.hasOwn(current, 'type') &&
+      current.type === 'semantic_text'
+    ) {
       current.inference_id = inferenceId;
       if (modelSettingsToOverride) {
         // @ts-expect-error - model_settings is not typed, but exists for semantic_text field

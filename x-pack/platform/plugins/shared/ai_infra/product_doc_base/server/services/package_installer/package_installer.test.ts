@@ -226,7 +226,7 @@ describe('PackageInstaller', () => {
 
       jest.spyOn(packageInstaller, 'installPackage');
 
-      await packageInstaller.ensureUpToDate({});
+      await packageInstaller.ensureUpToDate({ inferenceId: defaultInferenceEndpoints.ELSER });
 
       expect(packageInstaller.installPackage).toHaveBeenCalledTimes(1);
       expect(packageInstaller.installPackage).toHaveBeenCalledWith({

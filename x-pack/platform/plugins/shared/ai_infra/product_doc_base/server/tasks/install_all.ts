@@ -15,7 +15,7 @@ import { isDefaultElserInferenceId, isTaskCurrentlyRunningError } from './utils'
 
 export const INSTALL_ALL_TASK_TYPE = 'ProductDocBase:InstallAll';
 export const INSTALL_ALL_TASK_ID = 'ProductDocBase:InstallAll';
-export const INSTALL_ALL_TASK_ID_E5 = 'ProductDocBase:InstallAllMultilingualE5';
+export const INSTALL_ALL_TASK_ID_MULTILINGUAL = 'ProductDocBase:InstallAllMultilingual';
 
 export const registerInstallAllTaskDefinition = ({
   getServices,
@@ -54,7 +54,7 @@ export const scheduleInstallAllTask = async ({
 }) => {
   const taskId = isDefaultElserInferenceId(inferenceId)
     ? INSTALL_ALL_TASK_ID
-    : INSTALL_ALL_TASK_ID_E5;
+    : INSTALL_ALL_TASK_ID_MULTILINGUAL;
   try {
     await taskManager.ensureScheduled({
       id: taskId,
