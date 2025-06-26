@@ -10,7 +10,11 @@
 import type * as types from '../types';
 
 export const isProperNode = (node: unknown): node is types.ESQLProperNode =>
-  !!node && typeof node === 'object' && !Array.isArray(node);
+  !!node &&
+  typeof node === 'object' &&
+  !Array.isArray(node) &&
+  typeof (node as types.ESQLProperNode).type === 'string' &&
+  !!(node as types.ESQLProperNode).type;
 
 export const isFunctionExpression = (node: unknown): node is types.ESQLFunction =>
   isProperNode(node) && node.type === 'function';
