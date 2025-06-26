@@ -11411,7 +11411,7 @@ paths:
                   pattern: '[smdh]$'
                   type: string
                 docsPerSecond:
-                  default: 10000
+                  default: -1
                   description: The number of documents per second to process.
                   type: integer
                 enrichPolicyExecutionInterval:
@@ -11562,7 +11562,7 @@ paths:
                   pattern: '[smdh]$'
                   type: string
                 docsPerSecond:
-                  default: 10000
+                  default: -1
                   description: The number of documents per second to process.
                   type: integer
                 enrichPolicyExecutionInterval:

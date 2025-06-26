@@ -487,7 +487,7 @@ Object {
   "latest": Object {
     "lookbackPeriod": "3h",
     "settings": Object {
-      "docsPerSecond": 10000,
+      "docsPerSecond": -1,
       "frequency": "1m",
       "maxPageSearchSize": 500,
       "syncDelay": "1m",

@@ -75,7 +75,7 @@ export const InitEntityEngineRequestBody = z.object({
   /**
    * The number of documents per second to process.
    */
-  docsPerSecond: z.number().int().optional().default(10000),
+  docsPerSecond: z.number().int().optional().default(-1),
   /**
    * The initial page size to use for the composite aggregation of each checkpoint.
    */
