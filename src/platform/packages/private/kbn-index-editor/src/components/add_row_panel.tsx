@@ -59,7 +59,7 @@ export const AddRowPanel: React.FC<AddRowPanelProps> = ({ columns, onHide }) => 
           return;
         }
 
-        const response = await indexUpdateService.bulkUpdate([{ value: newRow }]);
+        const response = await indexUpdateService.addNewRow(newRow);
 
         if (!response.errors) {
           notifications.toasts.addSuccess({

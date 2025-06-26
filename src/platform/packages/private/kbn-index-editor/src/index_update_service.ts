@@ -390,6 +390,20 @@ export class IndexUpdateService {
     this.actions$.next({ type: 'add', payload: { value: doc } });
   }
 
+  public async addNewRow(newRow: Record<string, any>) {
+    const response = await this.bulkUpdate([{ value: newRow }]);
+
+    if (!response.errors) {
+      // Update the pending fields to be saved if it corresponds
+      const unsavedColumns = this._pendingFieldsToBeSaved$.value.filter((pendingField) => {
+        return !Object.keys(newRow).includes(pendingField);
+      });
+
+      this._pendingFieldsToBeSaved$.next(unsavedColumns);
+    }
+    return response;
+  }
+
   /* Partial doc update */
   public updateDoc(id: string, update: Record<string, unknown>) {
     const parsedUpdate = Object.entries(update).reduce<Record<string, unknown>>(
