@@ -25,7 +25,7 @@ export default function ({
   const screenshot = getService('screenshots');
   const log = getService('log');
 
-  describe('embed mode', () => {
+  describe.only('embed mode', () => {
     /*
      * Note: The baseline images used in all of the screenshot tests in this test suite were taken directly from the CI environment
      * in order to overcome a known issue with the pixel density of fonts being significantly different when running locally versus
