@@ -61,25 +61,6 @@ describe('useUnsavedChangesPrompt', () => {
     expect(addSpy).not.toBeCalledWith('beforeunload', expect.anything());
   });
 
-  it('should not block if only replaced', () => {
-    renderHook(() =>
-      useUnsavedChangesPrompt({
-        hasUnsavedChanges: false,
-        http: coreStart.http,
-        openConfirm: coreStart.overlays.openConfirm,
-        history,
-        navigateToUrl,
-      })
-    );
-
-    act(() => history.replace('/test'));
-
-    expect(history.location.pathname).toBe('/test');
-    expect(history.location.search).toBe('');
-    expect(coreStart.overlays.openConfirm).not.toBeCalled();
-    expect(addSpy).not.toBeCalledWith('beforeunload', expect.anything());
-  });
-
   it('should block if edited', async () => {
     coreStart.overlays.openConfirm.mockResolvedValue(true);
 
@@ -137,5 +118,25 @@ describe('useUnsavedChangesPrompt', () => {
     expect(history.location.pathname).toBe('/test');
 
     expect(blockSpy).not.toBeCalled();
+  });
+
+  it('should not block if replaced when shouldPromptOnReplace is false', () => {
+    renderHook(() =>
+      useUnsavedChangesPrompt({
+        hasUnsavedChanges: false,
+        http: coreStart.http,
+        openConfirm: coreStart.overlays.openConfirm,
+        history,
+        navigateToUrl,
+        shouldPromptOnReplace: false,
+      })
+    );
+
+    act(() => history.replace('/test'));
+
+    expect(history.location.pathname).toBe('/test');
+    expect(history.location.search).toBe('');
+    expect(coreStart.overlays.openConfirm).not.toBeCalled();
+    expect(addSpy).not.toBeCalledWith('beforeunload', expect.anything());
   });
 });
