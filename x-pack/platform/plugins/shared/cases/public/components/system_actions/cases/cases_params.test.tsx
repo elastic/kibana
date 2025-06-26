@@ -422,7 +422,7 @@ describe('CasesParamsFields renders', () => {
       expect(screen.queryByTestId('time-window-unit-select')).not.toBeInTheDocument();
     });
 
-    it('does not render `response case` component', async () => {
+    it('does not render `reopen case` component', async () => {
       const newProps = {
         ...defaultProps,
         ruleTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
