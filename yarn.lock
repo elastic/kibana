@@ -3386,6 +3386,18 @@
     react-redux "^9.2.0"
     redux "^5.0.1"
 
+"@huggingface/hub@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@huggingface/hub/-/hub-2.2.0.tgz#0fbe96d09341e68e927315b860b866aee2b1c85d"
+  integrity sha512-G+VS1eMp80KovIHBlsiEigS6I6qmI4j+VQ1UZ8CaXT+pw2A7tj6e/crfxFdKNE2uOK5oQkRFiCBJykMwrWQ8OA==
+  dependencies:
+    "@huggingface/tasks" "^0.19.11"
+
+"@huggingface/tasks@^0.19.11":
+  version "0.19.16"
+  resolved "https://registry.yarnpkg.com/@huggingface/tasks/-/tasks-0.19.16.tgz#f3a83a04b0c06cdd022718504dae9eceb1c87d3b"
+  integrity sha512-8PfeMpvHqax9biZaw9/u1Ut9xWIJ1qIUAd8jAKkv6bKvIAAyTRCZgnwHJmzPffDE6B0VkLlPl5it6GaSg/kxlw==
+
 "@humanwhocodes/config-array@^0.11.14":
   version "0.11.14"
   resolved "https://registry.yarnpkg.com/@humanwhocodes/config-array/-/config-array-0.11.14.tgz#d78e481a039f7566ecc9660b4ea7fe6b1fec442b"
@@ -3821,6 +3833,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ai-tools-cli@link:x-pack/platform/packages/shared/kbn-ai-tools-cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/aiops-change-point-detection@link:x-pack/platform/packages/private/ml/aiops_change_point_detection":
   version "0.0.0"
   uid ""
@@ -4026,6 +4042,10 @@
   uid ""
 
 "@kbn/bazel-runner@link:packages/kbn-bazel-runner":
+  version "0.0.0"
+  uid ""
+
+"@kbn/cache-cli@link:src/platform/packages/shared/kbn-cache-cli":
   version "0.0.0"
   uid ""
 
@@ -8229,6 +8249,13 @@
   version "0.0.0"
   uid ""
 
+"@keyv/serialize@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@keyv/serialize/-/serialize-1.0.3.tgz#e0fe3710e2a379cb0490cd41e5a5ffa2bab58bf6"
+  integrity sha512-qnEovoOp5Np2JDGonIDL6Ayihw0RhnRh6vxPuHo4RDn1UOzwEo4AeIfpL6UGIrsceWrCMiVPgwRjbHu4vYFc3g==
+  dependencies:
+    buffer "^6.0.3"
+
 "@kwsites/file-exists@^1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@kwsites/file-exists/-/file-exists-1.1.1.tgz#ad1efcac13e1987d8dbaf235ef3be5b0d96faa99"
@@ -11387,6 +11414,18 @@
   version "8.1.2"
   resolved "https://registry.yarnpkg.com/@types/byte-size/-/byte-size-8.1.2.tgz#abb3d70ab62c400d8753bed1ff2aa315ef9ff7f5"
   integrity sha512-jGyVzYu6avI8yuqQCNTZd65tzI8HZrLjKX9sdMqZrGWVlNChu0rf6p368oVEDCYJe5BMx2Ov04tD1wqtgTwGSA==
+
+"@types/cache-manager-fs-hash@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@types/cache-manager-fs-hash/-/cache-manager-fs-hash-0.0.5.tgz#39c2c93b0a6a873dfefbbd4a926b34216cda66c8"
+  integrity sha512-mSqk9YisfK/NkB/R5SzGeuSIVtwHhM5m6MLB0VrrFteTphKiQ2Fyz88IRtiX+SYEX6Nw2H3kB9qtpfnVSE/mSQ==
+  dependencies:
+    "@types/cache-manager" "<4"
+
+"@types/cache-manager@<4":
+  version "3.4.3"
+  resolved "https://registry.yarnpkg.com/@types/cache-manager/-/cache-manager-3.4.3.tgz#eba99bf795b997ad0c309658101398c34d7faecb"
+  integrity sha512-71aBXoFYXZW4TnDHHH8gExw2lS28BZaWeKefgsiJI7QYZeJfUEbMKw6CQtzGjlYQcGIWwB76hcCrkVA3YHSvsw==
 
 "@types/cacheable-request@^6.0.1":
   version "6.0.1"
@@ -14842,6 +14881,20 @@ cache-base@^1.0.1:
     to-object-path "^0.3.0"
     union-value "^1.0.0"
     unset-value "^1.0.0"
+
+cache-manager-fs-hash@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/cache-manager-fs-hash/-/cache-manager-fs-hash-2.0.0.tgz#daa422ffe689ef16d15c8e3fd47932c8afd14171"
+  integrity sha512-w03tp8mvfglRUFtItCdC114rFyzk0umu5LnnRM5spnu2+Mj8/2PrDHCnaoPltto/2fK94fC/Kw2rHqBXqIEgTQ==
+  dependencies:
+    lockfile "^1.0.4"
+
+cache-manager@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/cache-manager/-/cache-manager-7.0.0.tgz#3a591187372bcfa32e9cb479764a411a0a0d6a74"
+  integrity sha512-5HLGorfU4g2GyLTXd+bbq8RhZPwLRlVm7hfS1EssJx4Ujq1FjyQAjHND93sI6ByQTlUlCQ0jrHZqLI0qtBFyHA==
+  dependencies:
+    keyv "^5.3.3"
 
 cacheable-lookup@6:
   version "6.1.0"
@@ -22823,6 +22876,13 @@ keyv@^4.0.0:
   dependencies:
     json-buffer "3.0.1"
 
+keyv@^5.3.3, keyv@^5.3.4:
+  version "5.3.4"
+  resolved "https://registry.yarnpkg.com/keyv/-/keyv-5.3.4.tgz#e0548d9449c51fc332abdd637c2b3bb2d24c9bc9"
+  integrity sha512-ypEvQvInNpUe+u+w8BIcPkQvEqXquyyibWE/1NB5T2BTzIpS5cGEV1LZskDzPSTvNAaT4+5FutvzlvnkxOSKlw==
+  dependencies:
+    "@keyv/serialize" "^1.0.3"
+
 kind-of@^3.0.2, kind-of@^3.0.3, kind-of@^3.2.0:
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/kind-of/-/kind-of-3.2.2.tgz#31ea21a734bab9bbb0f32466d893aea51e4a3c64"
@@ -23210,6 +23270,13 @@ locate-path@^7.1.0:
   integrity sha512-gvVijfZvn7R+2qyPX8mAuKcFGDf6Nc61GdvGafQsHL0sBIxfKzA+usWn4GFC/bk+QdwPUD4kWFJLhElipq+0VA==
   dependencies:
     p-locate "^6.0.0"
+
+lockfile@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/lockfile/-/lockfile-1.0.4.tgz#07f819d25ae48f87e538e6578b6964a4981a5609"
+  integrity sha512-cvbTwETRfsFh4nHsL1eGWapU1XFi5Ot9E85sWAwia7Y7EgB7vfqcZhTKZ+l7hCGxSPoushMv5GKhT5PdLv03WA==
+  dependencies:
+    signal-exit "^3.0.2"
 
 lodash-es@^4.17.21:
   version "4.17.21"
