@@ -24,14 +24,19 @@ export function getFirstRunAt({
 
   if (taskInstance.schedule?.rrule && rruleHasFixedTime(taskInstance.schedule.rrule)) {
     try {
-      const dtstart = taskInstance.schedule.rrule.dtstart
-        ? new Date(taskInstance.schedule.rrule.dtstart)
-        : now;
-      const rrule = new RRule({
-        ...taskInstance.schedule.rrule,
-        bysecond: [0],
-        dtstart,
-      });
+      const rrule = taskInstance.schedule.rrule.dtstart
+        ? new RRule({
+            ...taskInstance.schedule.rrule,
+            // when "dtstart" is provided, we use as-is with no overrides
+            dtstart: new Date(taskInstance.schedule.rrule.dtstart),
+          })
+        : new RRule({
+            ...taskInstance.schedule.rrule,
+            // when "dtstart" is not provided, we use the current time as the start but
+            // override the seconds to 0 to ensure the first run is at the start of the minute
+            dtstart: now,
+            bysecond: [0],
+          });
       return rrule.after(now)?.toISOString() || nowString;
     } catch (e) {
       logger.error(`runAt for the rrule with fixed time could not be calculated: ${e}`);
@@ -45,9 +50,8 @@ export function getFirstRunAt({
 // 'freq', 'interval', and 'tzid'. If it does, it means the rrule has fixed time.
 // The first run of a rule that has a fixed time has to be on the expected time,
 // therefore should be calculated using the rrule library, otherwise it can be `now`.
-// We also filter out the optional 'dtstart' field, as it is not considered a fixed time field.
 function rruleHasFixedTime(schedule: RruleSchedule['rrule']): boolean {
-  const keys = Object.keys(schedule).filter((key) => key !== 'dtstart');
+  const keys = Object.keys(schedule);
   const baseFields = ['freq', 'interval', 'tzid'];
 
   if (keys.length === baseFields.length && keys.every((key) => baseFields.includes(key))) {
