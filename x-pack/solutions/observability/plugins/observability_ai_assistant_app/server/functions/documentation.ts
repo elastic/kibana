@@ -6,7 +6,6 @@
  */
 
 import { DocumentationProduct } from '@kbn/product-doc-common';
-import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
 import type { FunctionRegistrationParameters } from '.';
 
 export const RETRIEVE_DOCUMENTATION_NAME = 'retrieve_elastic_doc';
@@ -31,7 +30,7 @@ export async function registerDocumentationFunction({
   functions.registerFunction(
     {
       name: RETRIEVE_DOCUMENTATION_NAME,
-      visibility: isProductDocAvailable ? FunctionVisibility.All : FunctionVisibility.Internal,
+      isInternal: isProductDocAvailable ? false : true,
       description: `Use this function to retrieve documentation about Elastic products.
       You can retrieve documentation about the Elastic stack, such as Kibana and Elasticsearch,
       or for Elastic solutions, such as Elastic Security, Elastic Observability or Elastic Enterprise Search
