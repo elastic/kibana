@@ -12,7 +12,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -89,8 +88,8 @@ export function MonitorConfiguration({
   const hasViewChanged = initialInput?.view && overviewView !== initialInput.view;
 
   return (
-    <EuiFlyout onClose={onCancel} aria-labelledby={flyoutTitleId}>
-      <EuiFlyoutHeader>
+    <>
+      <EuiFlyoutHeader aria-labelledby={flyoutTitleId}>
         <EuiTitle>
           <h2 id={flyoutTitleId}>{title}</h2>
         </EuiTitle>
@@ -141,7 +140,7 @@ export function MonitorConfiguration({
           </EuiButton>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-    </EuiFlyout>
+    </>
   );
 }
 
