@@ -31,7 +31,13 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       }),
     },
   },
-  handler: async ({ request, response, server: { coreStart }, spaceId }): Promise<any> => {
+  handler: async ({
+    request,
+    response,
+    server: { coreStart },
+    spaceId,
+    monitorConfigRepository,
+  }): Promise<any> => {
     const { monitorId } = request.params;
     try {
       const { internal } = request.query;

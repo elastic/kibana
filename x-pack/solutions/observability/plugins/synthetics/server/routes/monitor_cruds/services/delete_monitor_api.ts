@@ -123,7 +123,7 @@ export class DeleteMonitorAPI {
   }: {
     monitors: Array<SavedObject<SyntheticsMonitor | EncryptedSyntheticsMonitorAttributes>>;
   }) {
-    const { savedObjectsClient, server, spaceId, syntheticsMonitorClient } = this.routeContext;
+    const { server, spaceId, syntheticsMonitorClient } = this.routeContext;
     const { logger, telemetry, stackVersion } = server;
 
     try {
@@ -132,7 +132,6 @@ export class DeleteMonitorAPI {
           ...normalizedMonitor.attributes,
           id: normalizedMonitor.attributes[ConfigKey.MONITOR_QUERY_ID],
         })) as SyntheticsMonitorWithId[],
-        savedObjectsClient,
         spaceId
       );
 
@@ -140,7 +139,7 @@ export class DeleteMonitorAPI {
         monitors.map((monitor) => ({ id: monitor.id, type: monitor.type }))
       );
 
-      const [errors, result] = await Promise.all([deleteSyncPromise, deletePromises]);
+      const [errors, result] = await Promise.all([deleteSyncPromise, deletePromise]);
 
       monitors.forEach((monitor) => {
         sendTelemetryEvents(

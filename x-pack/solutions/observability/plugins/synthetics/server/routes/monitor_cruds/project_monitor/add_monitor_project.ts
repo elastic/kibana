@@ -83,13 +83,10 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
         return response.forbidden({ body: { message: permissionError } });
       }
 
-      const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
-
       const pushMonitorFormatter = new ProjectMonitorFormatter({
         routeContext,
         projectId: decodedProjectName,
         spaceId,
-        encryptedSavedObjectsClient,
         monitors,
       });
 

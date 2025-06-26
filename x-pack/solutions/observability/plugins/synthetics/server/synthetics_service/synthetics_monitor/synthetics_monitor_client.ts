@@ -168,11 +168,7 @@ export class SyntheticsMonitorClient {
 
     return { failedPolicyUpdates, publicSyncErrors };
   }
-  async deleteMonitors(
-    monitors: SyntheticsMonitorWithId[],
-    savedObjectsClient: SavedObjectsClientContract,
-    spaceId: string
-  ) {
+  async deleteMonitors(monitors: SyntheticsMonitorWithId[], spaceId: string) {
     const privateDeletePromise = this.privateLocationAPI.deleteMonitors(monitors, spaceId);
 
     const publicDeletePromise = this.syntheticsService.deleteConfigs(

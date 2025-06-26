@@ -105,7 +105,7 @@ describe('tlsRuleExecutor', () => {
       const monitorId = randomUUID();
       const tlsRule = new TLSRuleExecutor(...getTLSRuleExecutorParams({ monitorIds: [monitorId] }));
       const configRepo = tlsRule.monitorConfigRepository;
-      const spy = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
+      const getAllMock = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
 
       await tlsRule.getMonitors();
 
@@ -118,7 +118,7 @@ describe('tlsRuleExecutor', () => {
       const tag = 'myMonitor';
       const tlsRule = new TLSRuleExecutor(...getTLSRuleExecutorParams({ tags: [tag] }));
       const configRepo = tlsRule.monitorConfigRepository;
-      const spy = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
+      const getAllMock = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
 
       await tlsRule.getMonitors();
 
@@ -133,7 +133,7 @@ describe('tlsRuleExecutor', () => {
         ...getTLSRuleExecutorParams({ monitorTypes: [monitorType] })
       );
       const configRepo = tlsRule.monitorConfigRepository;
-      const spy = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
+      const getAllMock = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
 
       await tlsRule.getMonitors();
 

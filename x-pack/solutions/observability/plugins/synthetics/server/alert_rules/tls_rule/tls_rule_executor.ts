@@ -18,7 +18,6 @@ import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_set
 import { syntheticsMonitorAttributes } from '../../../common/types/saved_objects';
 import { TLSRuleInspect } from '../../../common/runtime_types/alert_rules/common';
 import { MonitorConfigRepository } from '../../services/monitor_config_repository';
-import { TLSRuleInspect } from '../../../common/runtime_types/alert_rules/common';
 import { FINAL_SUMMARY_FILTER } from '../../../common/constants/client_defaults';
 import { formatFilterString } from '../common';
 import { SyntheticsServerSetup } from '../../types';

@@ -257,7 +257,7 @@ export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
   );
 };
 
-function parseMappingKey(key: string | undefined) {
+export function parseMappingKey(key: string | undefined) {
   switch (key) {
     case 'schedule.keyword':
       return 'schedule.number';

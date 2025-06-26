@@ -7,7 +7,6 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
 import {
@@ -19,7 +18,6 @@ import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import { parseMonitorLocations } from './utils';
 import { MonitorValidationError } from '../monitor_validation';
 import { getSavedObjectKqlFilter } from '../../common';
-import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { ConfigKey } from '../../../../common/constants/monitor_management';
 import {
@@ -42,7 +40,6 @@ import { triggerTestNow } from '../../synthetics_service/test_now_monitor';
 import { DefaultAlertService } from '../../default_alerts/default_alert_service';
 import { RouteContext } from '../../types';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
-import { formatSecrets } from '../../../synthetics_service/utils';
 import { formatKibanaNamespace } from '../../../../common/formatters';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 
@@ -70,7 +67,7 @@ export class AddEditMonitorAPI {
     normalizedMonitor: SyntheticsMonitor;
     savedObjectType?: string;
   }) {
-    const { savedObjectsClient, server, syntheticsMonitorClient, spaceId } = this.routeContext;
+    const { server, syntheticsMonitorClient, spaceId } = this.routeContext;
     const newMonitorId = id ?? uuidV4();
 
     let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitorAttributes> | null = null;
@@ -80,10 +77,9 @@ export class AddEditMonitorAPI {
     });
 
     try {
-      const newMonitorPromise = this.createNewSavedObjectMonitor({
+      const newMonitorPromise = this.routeContext.monitorConfigRepository.create({
         normalizedMonitor: monitorWithNamespace,
         id: newMonitorId,
-        savedObjectsClient,
         spaceId,
         savedObjectType,
       });
@@ -132,32 +128,6 @@ export class AddEditMonitorAPI {
 
       throw e;
     }
-  }
-
-  async createNewSavedObjectMonitor({
-    id,
-    savedObjectsClient,
-    normalizedMonitor,
-  }: {
-    id: string;
-    savedObjectsClient: SavedObjectsClientContract;
-    normalizedMonitor: SyntheticsMonitor;
-  }) {
-    return await savedObjectsClient.create<EncryptedSyntheticsMonitorAttributes>(
-      syntheticsMonitorType,
-      formatSecrets({
-        ...normalizedMonitor,
-        [ConfigKey.MONITOR_QUERY_ID]: normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
-        [ConfigKey.CONFIG_ID]: id,
-        revision: 1,
-      }),
-      id
-        ? {
-            id,
-            overwrite: true,
-          }
-        : undefined
-    );
   }
 
   validateMonitorType(monitorFields: MonitorFields, previousMonitor?: MonitorFields) {
@@ -239,11 +209,10 @@ export class AddEditMonitorAPI {
   }
 
   async validateUniqueMonitorName(name: string, id?: string) {
-    const { savedObjectsClient } = this.routeContext;
+    const { monitorConfigRepository } = this.routeContext;
     const kqlFilter = getSavedObjectKqlFilter({ field: 'name.keyword', values: name });
-    const { total } = await savedObjectsClient.find({
+    const { total } = await monitorConfigRepository.find({
       perPage: 0,
-      type: syntheticsMonitorType,
       filter: id
         ? `${kqlFilter} and not (${syntheticsMonitorAttributes}.config_id: ${id})`
         : kqlFilter,
@@ -347,12 +316,9 @@ export class AddEditMonitorAPI {
   }
 
   async revertMonitorIfCreated({ newMonitorId }: { newMonitorId: string }) {
-    const { server, savedObjectsClient } = this.routeContext;
+    const { server, monitorConfigRepository } = this.routeContext;
     try {
-      const encryptedMonitor = await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
-        syntheticsMonitorType,
-        newMonitorId
-      );
+      const encryptedMonitor = await monitorConfigRepository.get(newMonitorId);
       if (encryptedMonitor) {
         await monitorConfigRepository.bulkDelete([
           { id: newMonitorId, type: syntheticsMonitorSavedObjectType },
