@@ -16,6 +16,7 @@ import {
   useFetchCurrentUserConversations,
   WELCOME_CONVERSATION_TITLE,
 } from '@kbn/elastic-assistant';
+import { AssistantSpaceIdProvider } from '@kbn/elastic-assistant/impl/assistant/use_space_aware_context';
 import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
 import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
 import { SECURITY_AI_SETTINGS } from '@kbn/elastic-assistant/impl/assistant/settings/translations';
@@ -23,6 +24,7 @@ import { CONVERSATIONS_TAB } from '@kbn/elastic-assistant/impl/assistant/setting
 import type { SettingsTabs } from '@kbn/elastic-assistant/impl/assistant/settings/types';
 
 import { useKibana } from '../../common/lib/kibana';
+import { useSpaceId } from '../../common/hooks/use_space_id';
 
 const defaultSelectedConversationId = WELCOME_CONVERSATION_TITLE;
 
@@ -32,7 +34,7 @@ export const ManagementSettings = React.memo(() => {
     http,
     assistantAvailability: { isAssistantEnabled },
   } = useAssistantContext();
-
+  const spaceId = useSpaceId();
   const {
     application: {
       navigateToApp,
@@ -131,14 +133,16 @@ export const ManagementSettings = React.memo(() => {
   }
 
   if (conversations) {
-    return (
-      <AssistantSettingsManagement
-        selectedConversation={currentConversation}
-        dataViews={dataViews}
-        onTabChange={handleTabChange}
-        currentTab={currentTab}
-      />
-    );
+    return spaceId ? (
+      <AssistantSpaceIdProvider spaceId={spaceId}>
+        <AssistantSettingsManagement
+          selectedConversation={currentConversation}
+          dataViews={dataViews}
+          onTabChange={handleTabChange}
+          currentTab={currentTab}
+        />
+      </AssistantSpaceIdProvider>
+    ) : null;
   }
 
   return <></>;
