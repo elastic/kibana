@@ -41,10 +41,10 @@ export class Alias implements BaseAlias {
     this.perAliasIndexes = {};
     const perIndexTypes = collaborator.perIndexTypes;
 
-    Object.entries(aliases).forEach(([index, indexAliases]) => {
+    Object.entries(aliases || {}).forEach(([index, indexAliases]) => {
       // verify we have an index defined. useful when mapping loading is disabled
       perIndexTypes[index] = perIndexTypes[index] || {};
-      Object.keys(indexAliases.aliases || {}).forEach((alias) => {
+      Object.keys(indexAliases?.aliases || {}).forEach((alias) => {
         if (alias === index) {
           return;
         } // alias which is identical to index means no index.

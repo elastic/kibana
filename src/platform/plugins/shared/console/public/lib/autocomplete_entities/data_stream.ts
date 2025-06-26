@@ -19,9 +19,9 @@ export class DataStream {
   };
 
   loadDataStreams = (dataStreams: IndicesGetDataStreamResponse) => {
-    this.dataStreams = (dataStreams.data_streams ?? []).map(({ name }) => name).sort();
+    this.dataStreams = (dataStreams?.data_streams ?? []).map(({ name }) => name).sort();
 
-    this.perDataStreamIndices = (dataStreams.data_streams ?? []).reduce(
+    this.perDataStreamIndices = (dataStreams?.data_streams ?? []).reduce(
       (acc, { name, indices }) => {
         acc[name] = indices.map((index) => index.index_name);
         return acc;

@@ -12,6 +12,6 @@ import { BaseTemplate } from './base_template';
 
 export class IndexTemplate extends BaseTemplate<IndicesGetIndexTemplateResponse> {
   loadTemplates = (templates: IndicesGetIndexTemplateResponse) => {
-    this.templates = (templates.index_templates ?? []).map(({ name }) => name).sort();
+    this.templates = (templates?.index_templates ?? []).map(({ name }) => name).sort();
   };
 }

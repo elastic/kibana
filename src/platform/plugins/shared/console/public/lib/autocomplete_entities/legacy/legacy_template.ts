@@ -12,6 +12,6 @@ import { BaseTemplate } from '../base_template';
 
 export class LegacyTemplate extends BaseTemplate<IndicesGetTemplateResponse> {
   loadTemplates = (templates: IndicesGetTemplateResponse) => {
-    this.templates = Object.keys(templates).sort();
+    this.templates = Object.keys(templates || {}).sort();
   };
 }
