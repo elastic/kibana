@@ -74,7 +74,7 @@ describe('Retry for success', () => {
     const block = async () => 42;
     const initialDelay = 1234;
 
-    await retryForSuccess(log, {
+    await retryForSuccessModule.retryForSuccess(log, {
       block,
       timeout: 2000,
       methodName: 'retryForSuccess initialDelay test',
