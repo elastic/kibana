@@ -59,7 +59,7 @@ describe('kb functions', () => {
       await kibanaClient.installKnowledgeBase();
       try {
         await esClient.deleteByQuery({
-          index: KB_INDEX,
+          index: '.kibana-observability-ai-assistant-kb-*',
           ignore_unavailable: true,
           query: { match_all: {} },
           refresh: true,
@@ -82,7 +82,7 @@ describe('kb functions', () => {
       let conversation: Awaited<ReturnType<typeof chatClient.complete>>;
       before(async () => {
         const prompt = 'What DevOps teams does we have and how is the on-call rotation managed?';
-        conversation = await chatClient.complete({ messages: prompt });
+        conversation = await chatClient.complete(prompt);
       });
 
       it('retrieves one entry from the KB', async () => {
@@ -112,7 +112,7 @@ describe('kb functions', () => {
     it('retrieves monitoring thresholds and database infrastructure details', async () => {
       const prompt =
         'What are our standard alert thresholds for services and what database technologies do we use?';
-      const conversation = await chatClient.complete({ messages: prompt });
+      const conversation = await chatClient.complete(prompt);
 
       const result = await chatClient.evaluate(conversation, [
         'Uses context function response to find the correct documents about alert thresholds and database infrastructure',
@@ -126,14 +126,14 @@ describe('kb functions', () => {
 
     after(async () => {
       await esClient.deleteByQuery({
-        index: KB_INDEX,
+        index: '.kibana-observability-ai-assistant-kb-*',
         ignore_unavailable: true,
         query: {
           match: {
             text: 'ACME',
           },
         },
-      },
+      });
     });
   });
 });
