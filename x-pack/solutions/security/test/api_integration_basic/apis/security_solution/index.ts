@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('SecuritySolution Endpoints basic licsense', () => {
+  describe('Security Solution Endpoints basic license', () => {
     loadTestFile(require.resolve('./cases_privileges'));
   });
 }
