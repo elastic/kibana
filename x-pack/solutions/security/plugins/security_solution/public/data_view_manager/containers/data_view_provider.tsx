@@ -10,11 +10,20 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useKibana } from '../../common/lib/kibana';
 import { createDefaultDataView } from '../utils/create_default_data_view';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 const DefaultDataViewContext = createContext<DataView | undefined>(undefined);
 
+/**
+ * Internal-only hook to fetch default data view in given space, during init
+ */
 export const useDefaultDataView = () => {
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const defaultDataView = useContext(DefaultDataViewContext);
+
+  if (!newDataViewPickerEnabled) {
+    return { id: '', title: '' } as DataView;
+  }
 
   if (!defaultDataView) {
     throw new Error('Could not fetch default data view');
@@ -28,10 +37,12 @@ export const DefaultDataViewProvider: FC<PropsWithChildren> = ({ children }) => 
 
   const [defaultDataView, setDefaultDataView] = useState<DataView>();
 
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
   useEffect(() => {
     (async () => {
       // NOTE: being defensive
-      if (defaultDataView) {
+      if (defaultDataView || !newDataViewPickerEnabled) {
         return;
       }
 
@@ -47,11 +58,11 @@ export const DefaultDataViewProvider: FC<PropsWithChildren> = ({ children }) => 
 
       setDefaultDataView(dataView);
     })();
-  }, [application, dataViews, defaultDataView, http, spaces, uiSettings]);
+  }, [application, dataViews, defaultDataView, http, newDataViewPickerEnabled, spaces, uiSettings]);
 
   return (
     <DefaultDataViewContext.Provider value={defaultDataView}>
-      {defaultDataView ? children : null}
+      {defaultDataView || !newDataViewPickerEnabled ? children : null}
     </DefaultDataViewContext.Provider>
   );
 };

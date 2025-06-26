@@ -36,6 +36,9 @@ const addListener = <T extends AnyAction>(listener: Listener<T>) =>
 const removeListener = <T extends AnyAction>(listener: Listener<T>) =>
   originalRemoveListener(listener as unknown as OriginalListener);
 
+// TODO: remove this when old sourcerer code is purged
+/* eslint-disable react-hooks/rules-of-hooks */
+
 /**
  * Should only be used once in the application, on the top level of the rendering tree
  */
@@ -43,6 +46,10 @@ export const useInitDataViewManager = () => {
   const dispatch = useDispatch();
   const services = useKibana().services;
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  if (!newDataViewPickerEnabled) {
+    return;
+  }
 
   const {
     loading: loadingSignalIndex,
