@@ -96,9 +96,9 @@ export class IndexUpdateService {
   public readonly rows$: Observable<DataTableRecord[]> = this._rows$.asObservable();
 
   // Holds runtime field definitions reactively
-  private _pendingFieldsToBeSaved = new BehaviorSubject<string[]>([]);
+  private _pendingFieldsToBeSaved$ = new BehaviorSubject<string[]>([]);
   public readonly pendingFieldsToBeSaved$: Observable<any[]> =
-    this._pendingFieldsToBeSaved.asObservable();
+    this._pendingFieldsToBeSaved$.asObservable();
 
   private readonly _totalHits$ = new BehaviorSubject<number>(0);
   public readonly totalHits$: Observable<number> = this._totalHits$.asObservable();
@@ -173,12 +173,14 @@ export class IndexUpdateService {
   ]).pipe(
     map(([dataView, pendingFieldsToBeSaved]) => {
       for (const field of pendingFieldsToBeSaved) {
-        dataView.fields.add({
-          name: field,
-          type: KBN_FIELD_TYPES.UNKNOWN,
-          aggregatable: true,
-          searchable: true,
-        });
+        if (!dataView.fields.getByName(field)) {
+          dataView.fields.add({
+            name: field,
+            type: KBN_FIELD_TYPES.UNKNOWN,
+            aggregatable: true,
+            searchable: true,
+          });
+        }
       }
       return (
         dataView.fields
@@ -254,11 +256,11 @@ export class IndexUpdateService {
         .subscribe({
           next: ({ updates, response, rows, dataView }) => {
             // Updates the pending fields to be saved
-            const unsavedColumns = this._pendingFieldsToBeSaved.value.filter((pendingField) => {
+            const unsavedColumns = this._pendingFieldsToBeSaved$.value.filter((pendingField) => {
               return !updates.some((update) => update.value[pendingField] !== undefined);
             });
 
-            this._pendingFieldsToBeSaved.next(unsavedColumns);
+            this._pendingFieldsToBeSaved$.next(unsavedColumns);
 
             // Clear the buffer after successful update
             this.actions$.next({ type: 'saved', payload: response });
@@ -380,7 +382,7 @@ export class IndexUpdateService {
   }
 
   public getPendingFieldsToBeSaved(): string[] {
-    return this._pendingFieldsToBeSaved.getValue();
+    return this._pendingFieldsToBeSaved$.getValue();
   }
 
   // Add a new index
@@ -444,8 +446,8 @@ export class IndexUpdateService {
   }
 
   public addNewField(filedName: string) {
-    const current = this._pendingFieldsToBeSaved.getValue();
-    this._pendingFieldsToBeSaved.next([...current, filedName]);
+    const current = this._pendingFieldsToBeSaved$.getValue();
+    this._pendingFieldsToBeSaved$.next([...current, filedName]);
   }
 
   public setExitAttemptWithUnsavedFields(value: boolean) {
@@ -453,7 +455,7 @@ export class IndexUpdateService {
   }
 
   public deleteUnsavedFields() {
-    this._pendingFieldsToBeSaved.next([]);
+    this._pendingFieldsToBeSaved$.next([]);
   }
 
   public destroy() {
