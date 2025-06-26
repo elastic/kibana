@@ -13,7 +13,6 @@
       "fieldsMetadata",
       "usageCollection",
       "licensing",
-      "controls"
     ],
     "requiredPlugins": [
       "data",
