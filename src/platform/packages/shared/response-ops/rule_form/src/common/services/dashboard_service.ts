@@ -28,19 +28,26 @@ export interface DashboardItem {
 
 export type DashboardService = ReturnType<typeof dashboardServiceProvider>;
 export type DashboardItems = Awaited<ReturnType<DashboardService['fetchDashboards']>>;
-
+interface FetchDashboardsParams {
+  query: SearchQuery;
+  spaces?: string[];
+}
 export function dashboardServiceProvider(contentManagementService: ContentManagementPublicStart) {
   return {
     /**
      * Fetch dashboards
      * @param query - The query to search for dashboards
+     * @param spaces - The spaces to search in, defaults to all spaces
      * @returns - The dashboards that match the query
      */
-    async fetchDashboards(query: SearchQuery = {}) {
+    async fetchDashboards({
+      query = {},
+      spaces = ['*'],
+    }: FetchDashboardsParams): Promise<DashboardItem[]> {
       const response = await contentManagementService.client.search({
         contentTypeId: 'dashboard',
         query,
-        options: { spaces: ['*'], fields: ['title', 'description'], includeReferences: ['tag'] },
+        options: { spaces, fields: ['title', 'description'], includeReferences: ['tag'] },
       });
 
       // Assert the type of response to access hits property

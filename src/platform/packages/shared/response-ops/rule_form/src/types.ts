@@ -25,6 +25,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { ActionConnector, ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
   MinimumScheduleInterval,
   Rule,
@@ -73,6 +74,7 @@ export interface RuleFormPlugins {
   actionTypeRegistry: ActionTypeRegistryContract;
   fieldsMetadata: FieldsMetadataPublicStart;
   contentManagement?: ContentManagementPublicStart;
+  spaces?: SpacesPluginStart;
 }
 
 export interface RuleFormState<

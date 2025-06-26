@@ -54,8 +54,16 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     initialMetadata,
     initialEditStep,
   } = props;
-  const { http, notifications, docLinks, ruleTypeRegistry, application, fieldsMetadata, ...deps } =
-    plugins;
+  const {
+    spaces,
+    http,
+    notifications,
+    docLinks,
+    ruleTypeRegistry,
+    application,
+    fieldsMetadata,
+    ...deps
+  } = plugins;
   const { toasts } = notifications;
 
   const { mutate, isLoading: isSaving } = useUpdateRule({

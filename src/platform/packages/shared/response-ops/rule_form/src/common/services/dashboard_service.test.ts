@@ -22,7 +22,7 @@ describe('DashboardService', () => {
     });
 
     // act
-    const resp = await dashboardService.fetchDashboards({ text: 'test*' });
+    const resp = await dashboardService.fetchDashboards({ query: { text: 'test*' } });
 
     // assert
     expect(searchMock).toHaveBeenCalledWith({
@@ -34,6 +34,36 @@ describe('DashboardService', () => {
         fields: ['title', 'description'],
         includeReferences: ['tag'],
         spaces: ['*'],
+      },
+    });
+    expect(resp).toEqual([]);
+
+    searchMock.mockRestore();
+  });
+
+  test('should fetch dashboards from a specific space ', async () => {
+    // arrange
+    const searchMock = jest.spyOn(contentManagement.client, 'search').mockResolvedValue({
+      total: 0,
+      hits: [],
+    });
+
+    // act
+    const resp = await dashboardService.fetchDashboards({
+      query: { text: 'test*' },
+      spaces: ['space1'],
+    });
+
+    // assert
+    expect(searchMock).toHaveBeenCalledWith({
+      contentTypeId: 'dashboard',
+      query: {
+        text: 'test*',
+      },
+      options: {
+        fields: ['title', 'description'],
+        includeReferences: ['tag'],
+        spaces: ['space1'],
       },
     });
     expect(resp).toEqual([]);

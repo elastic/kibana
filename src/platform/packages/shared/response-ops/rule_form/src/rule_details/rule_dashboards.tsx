@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { debounce } from 'lodash';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { dashboardServiceProvider, type DashboardItem } from '../common/services/dashboard_service';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
@@ -30,6 +31,7 @@ import { LabelWithTooltip } from './label_with_tooltip';
 
 export interface Props {
   contentManagement: ContentManagementPublicStart;
+  spaces?: SpacesPluginStart;
 }
 
 interface DashboardOption {
@@ -37,7 +39,7 @@ interface DashboardOption {
   label: string;
 }
 
-export const RuleDashboards = ({ contentManagement }: Props) => {
+export const RuleDashboards = ({ contentManagement, spaces }: Props) => {
   const { formData } = useRuleFormState();
   const dispatch = useRuleFormDispatch();
   const dashboardsFormData = useMemo(
@@ -48,6 +50,7 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
   const [dashboardList, setDashboardList] = useState<DashboardOption[] | undefined>();
   const [searchValue, setSearchValue] = useState<string>('');
   const [isLoading, setLoading] = useState(false);
+  const [activeSpaces, setActiveSpaces] = useState<string[]>(['*']);
 
   const [selectedDashboards, setSelectedDashboards] = useState<
     Array<EuiComboBoxOptionOption<string>> | undefined
@@ -138,11 +141,23 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
     label: dashboard.attributes.title,
   });
 
+  useEffect(() => {
+    if (spaces) {
+      spaces.getActiveSpace().then((activeSpace) => {
+        if (activeSpace) {
+          setActiveSpaces([activeSpace.id]);
+        } else {
+          setActiveSpaces(['*']);
+        }
+      });
+    }
+  }, [spaces]);
+
   const loadDashboards = useCallback(async () => {
     if (contentManagement) {
       setLoading(true);
       const dashboards = await dashboardServiceProvider(contentManagement)
-        .fetchDashboards({ limit: 100, text: `${searchValue}*` })
+        .fetchDashboards({ query: { limit: 100, text: `${searchValue}*` }, spaces: activeSpaces })
         .catch(() => {});
       const dashboardOptions = (dashboards ?? []).map((dashboard: DashboardItem) =>
         getDashboardItem(dashboard)
@@ -150,7 +165,7 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
       setDashboardList(dashboardOptions);
       setLoading(false);
     }
-  }, [contentManagement, searchValue]);
+  }, [activeSpaces, contentManagement, searchValue]);
 
   useEffect(() => {
     if (isComboBoxOpen) {

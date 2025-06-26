@@ -35,7 +35,7 @@ export const RULE_DETAIL_MIN_ROW_WIDTH = 600;
 
 export const RuleDetails = () => {
   const { formData, baseErrors, plugins } = useRuleFormState();
-  const { contentManagement } = plugins;
+  const { contentManagement, spaces } = plugins;
 
   const dispatch = useRuleFormDispatch();
 
@@ -158,7 +158,9 @@ export const RuleDetails = () => {
           value={formData.artifacts?.investigation_guide?.blob ?? ''}
         />
       </EuiFormRow>
-      {contentManagement && <RuleDashboards contentManagement={contentManagement} />}
+      {contentManagement && (
+        <RuleDashboards contentManagement={contentManagement} spaces={spaces} />
+      )}
       <EuiSpacer size="xxl" />
     </>
   );
