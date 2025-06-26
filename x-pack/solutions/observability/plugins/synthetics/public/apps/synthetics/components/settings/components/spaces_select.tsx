@@ -25,7 +25,9 @@ export const SpaceSelector = <T extends FieldValues>({
 }: SpaceSelectorProps) => {
   const NAMESPACES_NAME = 'spaces' as Path<T>;
   const { services } = useKibana<ClientPluginsStart>();
-  const [spacesList, setSpacesList] = React.useState<Array<{ id: string; label: string }>>([]);
+  const [spacesList, setSpacesList] = React.useState<
+    Array<{ id: string; label: string; 'data-id': string }>
+  >([]);
   const data = services.spaces?.ui.useSpaces();
 
   const {
@@ -44,6 +46,7 @@ export const SpaceSelector = <T extends FieldValues>({
           allSpacesOption,
           ...[...spacesData.spacesMap].map(([spaceId, dataS]) => ({
             id: spaceId,
+            'data-id': spaceId,
             label: dataS.name,
           })),
         ]);
@@ -75,14 +78,6 @@ export const SpaceSelector = <T extends FieldValues>({
               await trigger();
             }}
             options={spacesList}
-            renderOption={(option) => (
-              <span
-                aria-label={`space-option-${option.id}`}
-                aria-labelledby={`space-option-${option.id}`}
-              >
-                {option.label}
-              </span>
-            )}
             selectedOptions={(field.value ?? []).map((id) => {
               const sp = spacesList.find((space) => space.id === id);
               if (!sp) {
@@ -131,6 +126,7 @@ export const ALL_SPACES_LABEL = i18n.translate('xpack.synthetics.spaceList.allSp
 const allSpacesOption = {
   id: ALL_SPACES_ID,
   label: ALL_SPACES_LABEL,
+  'data-id': ALL_SPACES_ID,
 };
 
 const SPACES_LABEL = i18n.translate('xpack.synthetics.privateLocation.spacesLabel', {
