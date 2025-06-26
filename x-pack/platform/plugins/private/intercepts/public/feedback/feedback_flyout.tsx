@@ -76,6 +76,7 @@ export const FeedbackFlyout = ({ core, closeFlyout }: Props) => {
   }, [core.security.authc]);
 
   useEffect(() => {
+    // TODO: Check for platinum license
     getEmail();
   }, [getEmail]);
 
@@ -194,23 +195,39 @@ export const FeedbackFlyout = ({ core, closeFlyout }: Props) => {
             label={
               <Label>
                 <FormattedMessage
-                  id="xpack.intercept.feedbackFlyout.form.input.label"
-                  defaultMessage="TODO: Waiting for design"
+                  id="xpack.intercept.feedbackFlyout.form.emailInput.label"
+                  defaultMessage="Your email"
                 />
               </Label>
             }
             helpText={
-              <FormattedMessage
-                id="xpack.intercept.feedbackFlyout.form.input.helpText"
-                defaultMessage="TODO: Waiting for design"
-              />
+              <>
+                <EuiSpacer size="s" />
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.intercept.feedbackFlyout.form.emailInput.helpText"
+                    defaultMessage="We might get in touch with a few follow-up questions about your experience — really appreciate your help!"
+                  />
+                </EuiText>
+              </>
+            }
+            labelAppend={
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  id="xpack.intercept.feedbackFlyout.form.emailInput.optionalText"
+                  defaultMessage="Optional"
+                />
+              </EuiText>
             }
           >
             <EuiFieldText
               value={userEmail}
-              aria-label={i18n.translate('xpack.intercept.feedbackFlyout.form.input.ariaLabel', {
-                defaultMessage: 'Enter your email here',
-              })}
+              aria-label={i18n.translate(
+                'xpack.intercept.feedbackFlyout.form.emailInput.ariaLabel',
+                {
+                  defaultMessage: 'Enter your email here',
+                }
+              )}
               data-test-subj="feedbackEmail"
               type="email"
               onChange={handleChangeEmail}
@@ -223,7 +240,6 @@ export const FeedbackFlyout = ({ core, closeFlyout }: Props) => {
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              iconType="send" // TODO: Get correct icon, this one doesn't exist in EUI
               data-test-subj="sendFeedbackButton"
               disabled={!feedbackText.trim().length}
               onClick={submitFeedback}
