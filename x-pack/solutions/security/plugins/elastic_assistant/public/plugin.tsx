@@ -24,18 +24,19 @@ import { licenseService } from './src/hooks/licence/use_licence';
 import { ReactQueryClientProvider } from './src/context/query_client_context/elastic_assistant_query_client_provider';
 import { AssistantSpaceIdProvider } from './src/context/assistant_space_id/assistant_space_id_provider';
 import { TelemetryService } from './src/common/lib/telemetry/telemetry_service';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
 
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
 export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPublicPlugin['start']>;
 
 export class ElasticAssistantPublicPlugin
   implements
-    Plugin<
-      ElasticAssistantPublicPluginSetup,
-      ElasticAssistantPublicPluginStart,
-      ElasticAssistantPublicPluginSetupDependencies,
-      ElasticAssistantPublicPluginStartDependencies
-    >
+  Plugin<
+    ElasticAssistantPublicPluginSetup,
+    ElasticAssistantPublicPluginStart,
+    ElasticAssistantPublicPluginSetupDependencies,
+    ElasticAssistantPublicPluginStartDependencies
+  >
 {
   private readonly storage = new Storage(localStorage);
   private readonly telemetry: TelemetryService = new TelemetryService();
@@ -93,16 +94,18 @@ export class ElasticAssistantPublicPlugin
           }}
         >
           <KibanaThemeProvider {...coreStart}>
-            <ReactQueryClientProvider>
-              <AssistantSpaceIdProvider>
-                <AssistantProvider>
-                  <Suspense fallback={null}>
-                    <AssistantNavLink />
-                    <AssistantOverlay />
-                  </Suspense>
-                </AssistantProvider>
-              </AssistantSpaceIdProvider>
-            </ReactQueryClientProvider>
+            <NavigationProvider core={services}>
+              <ReactQueryClientProvider>
+                <AssistantSpaceIdProvider>
+                  <AssistantProvider>
+                    <Suspense fallback={null}>
+                      <AssistantNavLink />
+                      <AssistantOverlay />
+                    </Suspense>
+                  </AssistantProvider>
+                </AssistantSpaceIdProvider>
+              </ReactQueryClientProvider>
+            </NavigationProvider>
           </KibanaThemeProvider>
         </KibanaContextProvider>
       </I18nProvider>,
