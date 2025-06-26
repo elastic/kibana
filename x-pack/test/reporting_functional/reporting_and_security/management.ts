@@ -25,7 +25,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     after(async () => {
       await reportingFunctional.teardownEcommerce();
       await reportingApi.deleteAllReports();
-      await PageObjects.security.forceLogout();
     });
 
     it('does not allow user that does not have reporting privileges', async () => {
@@ -71,8 +70,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await testSubjects.existOrFail('reportInfoFlyout');
       await testSubjects.click('euiFlyoutCloseButton');
       await testSubjects.missingOrFail('reportInfoFlyout');
-
-      await PageObjects.security.forceLogout();
     });
 
     describe('Schedules', () => {
@@ -155,7 +152,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await browser.switchToWindow(dashboardWindowHandle);
 
         await PageObjects.dashboard.expectOnDashboard(dashboardTitle);
-        await PageObjects.security.forceLogout();
       });
 
       it('does not allow user to access schedules that does not have reporting privileges', async () => {
