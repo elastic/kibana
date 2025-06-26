@@ -47,6 +47,7 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import type { AuthorizeObject } from '@kbn/core-saved-objects-server/src/extensions/security';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectActions } from '@kbn/security-authorization-core/src/actions/saved_object';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type {
   Actions,
@@ -203,6 +204,8 @@ interface InternalAuthorizeParams {
   };
   /** auditOptions - options for audit logging */
   auditOptions?: AuditOptions;
+
+  accessControlOptions?: AccessControlOptions;
 }
 
 /**
@@ -223,6 +226,8 @@ interface EnforceAuthorizationParams<A extends string> {
   typeMap: AuthorizationTypeMap<A>;
   /** auditOptions - options for audit logging */
   auditOptions?: AuditOptions;
+
+  accessControlOptions?: AccessControlOptions;
 }
 
 /**
@@ -285,6 +290,11 @@ interface AuditOptions {
   deleteFromSpaces?: string[];
 }
 
+interface AccessControlOptions {
+  changeOwnership?: boolean;
+  changeAccessMode?: boolean;
+}
+
 /**
  * The CheckAuthorizationParams interface contains settings for checking
  * authorization via the ISavedObjectsSecurityExtension.
@@ -318,6 +328,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     { authzAction?: string; auditAction?: AuditAction }
   >;
   private readonly accessControlService: AccessControlService;
+  private readonly typeRegistryFunc: () => Promise<ISavedObjectTypeRegistry>;
 
   constructor({
     actions,
@@ -336,6 +347,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       getTypeRegistry,
       checkPrivilegesFunc: checkPrivileges,
     });
+    this.typeRegistryFunc = getTypeRegistry;
 
     // This comment block is a quick reference for the action map, which maps authorization actions
     // and audit actions to a "security action" as used by the authorization methods.
@@ -712,7 +724,13 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       throw new Error('No spaces specified for authorization');
     }
 
+    const typeRegistry = await this.typeRegistryFunc();
+    const savedObjectActions = new SavedObjectActions();
     const { authzActions } = this.translateActions(params.actions);
+
+    Array.from(params.types.values())
+      .filter((type) => typeRegistry.supportsAccessControl(type))
+      .forEach((type) => authzActions.add(savedObjectActions.get(type, 'manageOwnership')));
 
     const checkResult: CheckAuthorizationResult<A> = await this.checkAuthorization({
       types: params.types,
@@ -731,6 +749,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
           action,
           typeMap: checkResult.typeMap,
           auditOptions: params.auditOptions,
+          accessControlOptions: params.accessControlOptions,
         })
       );
 
@@ -1143,6 +1162,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       spaces: spacesToAuthorize,
       enforceMap,
       auditOptions: { objects },
+      accessControlOptions: {
+        changeAccessMode: true,
+      },
     });
 
     return authorizationResult;

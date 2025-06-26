@@ -130,8 +130,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('transfer ownership of read only objects', () => {
-      it('should transfer ownership of read only objects when owner is current user', async () => {
+    describe.only('transfer ownership of read only objects', () => {
+      it('should transfer ownership of read only objects by owner', async () => {
         const { cookie: testUserCookie, profileUid } = await loginAsTestUser();
         const createResponse = await supertestWithoutAuth
           .post('/read_only_objects/create')

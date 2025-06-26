@@ -84,4 +84,5 @@ export type {
 export type {
   SavedObjectsChangeOwnershipOptions,
   SavedObjectsChangeOwnershipResponse,
+  SavedObjectsChangeOwnershipObject,
 } from './change_ownership';

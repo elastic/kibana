@@ -40,6 +40,8 @@ export class AccessControlService {
     type: string;
     object: AuthorizeObject;
     spacesToAuthorize: Set<string>;
+    isChangeOwnership?: boolean;
+    isChangeAccessMode?: boolean;
   }): Promise<boolean> {
     if (!this.cachedTypeRegistry) {
       this.cachedTypeRegistry = await this.getTypeRegistryFunc();
@@ -66,7 +68,7 @@ export class AccessControlService {
     }
 
     const { hasAllRequested } = await this.checkPrivilegesFunc(
-      `saved_object/${type}:manageOwnership`,
+      `saved_object/${type}:manageOwnership`, // TODO: use constructor to create a privilege name
       [...spacesToAuthorize]
     );
     if (hasAllRequested) {

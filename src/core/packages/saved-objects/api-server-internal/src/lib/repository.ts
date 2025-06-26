@@ -54,6 +54,7 @@ import type {
   ISavedObjectsRepository,
   SavedObjectsChangeOwnershipOptions,
   SavedObjectsChangeOwnershipResponse,
+  SavedObjectsChangeOwnershipObject,
 } from '@kbn/core-saved-objects-api-server';
 import type {
   ISavedObjectTypeRegistry,
@@ -582,10 +583,9 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   }
 
   async changeOwnership<T = unknown>(
-    type: string,
-    id: string,
+    objects: SavedObjectsChangeOwnershipObject[],
     options: SavedObjectsChangeOwnershipOptions<T> = {}
   ): Promise<SavedObjectsChangeOwnershipResponse<T>> {
-    return await performChangeOwnership({ type, id, options }, this.apiExecutionContext);
+    return await performChangeOwnership({ objects, options }, this.apiExecutionContext);
   }
 }
