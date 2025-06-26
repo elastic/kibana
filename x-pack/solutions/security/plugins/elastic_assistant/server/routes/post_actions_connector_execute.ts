@@ -190,7 +190,7 @@ export const postActionsConnectorExecuteRoute = (
             connectorId,
             contentReferencesStore,
             isOssModel,
-              inferenceChatModelEnabled,
+            inferenceChatModelEnabled,
             conversationId,
             context: ctx,
             logger,
