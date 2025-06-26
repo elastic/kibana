@@ -13,8 +13,6 @@ export { getMergedAccessor } from './composable_profile';
 export {
   ProfilesManager,
   ScopedProfilesManager,
-  ScopedProfilesManagerProvider,
-  useScopedProfilesManager,
   ContextualProfileLevel,
   type GetProfilesOptions,
 } from './profiles_manager';

@@ -62,6 +62,7 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useCurrentDataView, useCurrentTabSelector } from '../../state_management/redux';
 import { TABS_ENABLED } from '../../../../constants';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
+import { useScopedServices } from '../../../../components/scoped_services_provider';
 
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -89,9 +90,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     spaces,
     observabilityAIAssistant,
     dataVisualizer: dataVisualizerService,
-    ebtManager,
     fieldsMetadata,
   } = useDiscoverServices();
+  const { scopedEBTManager } = useScopedServices();
   const styles = useMemoCss(componentStyles);
 
   const globalQueryState = data.query.getState();
@@ -162,17 +163,17 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const onAddColumnWithTracking = useCallback(
     (columnName: string) => {
       onAddColumn(columnName);
-      void ebtManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
     },
-    [onAddColumn, ebtManager, fieldsMetadata]
+    [onAddColumn, scopedEBTManager, fieldsMetadata]
   );
 
   const onRemoveColumnWithTracking = useCallback(
     (columnName: string) => {
       onRemoveColumn(columnName);
-      void ebtManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
     },
-    [onRemoveColumn, ebtManager, fieldsMetadata]
+    [onRemoveColumn, scopedEBTManager, fieldsMetadata]
   );
 
   // The assistant is getting the state from the url correctly
@@ -196,14 +197,22 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
       }
-      void ebtManager.trackFilterAddition({
+      void scopedEBTManager.trackFilterAddition({
         fieldName: fieldName === '_exists_' ? String(values) : fieldName,
         filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
         fieldsMetadata,
       });
       return filterManager.addFilters(newFilters);
     },
-    [filterManager, dataView, dataViews, trackUiMetric, capabilities, ebtManager, fieldsMetadata]
+    [
+      dataView,
+      dataViews,
+      capabilities,
+      filterManager,
+      trackUiMetric,
+      scopedEBTManager,
+      fieldsMetadata,
+    ]
   );
 
   const onPopulateWhereClause = useCallback<DocViewFilterFn>(
@@ -233,13 +242,13 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, 'esql_filter_added');
       }
-      void ebtManager.trackFilterAddition({
+      void scopedEBTManager.trackFilterAddition({
         fieldName: fieldName === '_exists_' ? String(values) : fieldName,
         filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
         fieldsMetadata,
       });
     },
-    [data.query.queryString, query, trackUiMetric, ebtManager, fieldsMetadata]
+    [query, data.query.queryString, trackUiMetric, scopedEBTManager, fieldsMetadata]
   );
 
   const onFilter = isEsqlMode ? onPopulateWhereClause : onAddFilter;
