@@ -242,9 +242,12 @@ export function initializeUnifiedSearchManager(
           return;
         }
 
-        const lastSavedTimeRange = getLastSavedState()?.timeRange;
-        if (timeRestore$.value && lastSavedTimeRange) {
-          setAndSyncTimeRange(lastSavedTimeRange);
+        const lastSavedState = getLastSavedState();
+        if (timeRestore$.value && lastSavedState?.timeFrom && lastSavedState?.timeTo) {
+          setAndSyncTimeRange({
+            from: lastSavedState.timeFrom,
+            to: lastSavedState.timeTo,
+          });
           return;
         }
 
@@ -295,15 +298,16 @@ export function initializeUnifiedSearchManager(
     query: 'deepEquality',
     refreshInterval: (a: RefreshInterval | undefined, b: RefreshInterval | undefined) =>
       timeRestore$.value ? fastIsEqual(a, b) : true,
-    timeRange: (a: TimeRange | undefined, b: TimeRange | undefined) => {
+    timeFrom: (a: string | Moment | undefined, b: string | Moment | undefined) => {
       if (!timeRestore$.value) return true; // if time restore is set to false, time range doesn't count as a change.
-      if (!areTimesEqual(a?.from, b?.from) || !areTimesEqual(a?.to, b?.to)) {
-        return false;
-      }
-      return true;
+      return areTimesEqual(a, b);
+    },
+    timeTo: (a: string | Moment | undefined, b: string | Moment | undefined) => {
+      if (!timeRestore$.value) return true; // if time restore is set to false, time range doesn't count as a change.
+      return areTimesEqual(a, b);
     },
   } as StateComparators<
-    Pick<DashboardState, 'filters' | 'query' | 'refreshInterval' | 'timeRange'>
+    Pick<DashboardState, 'filters' | 'query' | 'refreshInterval' | 'timeFrom' | 'timeTo'>
   >;
 
   const getState = (): {
@@ -385,7 +389,14 @@ export function initializeUnifiedSearchManager(
         setQuery(lastSavedState.query);
         if (lastSavedState.timeRestore) {
           setAndSyncRefreshInterval(lastSavedState.refreshInterval);
-          setAndSyncTimeRange(lastSavedState.timeRange);
+          setAndSyncTimeRange(
+            lastSavedState.timeFrom && lastSavedState.timeTo
+              ? {
+                  from: lastSavedState.timeFrom,
+                  to: lastSavedState.timeTo,
+                }
+              : undefined
+          );
         }
       },
       getState,

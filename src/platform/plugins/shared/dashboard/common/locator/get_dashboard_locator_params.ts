@@ -28,7 +28,8 @@ export const getDashboardLocatorParamsFromEmbeddable = (
   // for brush event this time range would be overwritten
   const timeRange = api.timeRange$?.value ?? api.parentApi?.timeRange$?.value;
   if (timeRange && options.useCurrentDateRange) {
-    params.timeRange = timeRange;
+    params.timeFrom = timeRange.from;
+    params.timeTo = timeRange.to;
   }
 
   // if useCurrentDashboardFilters enabled, then preserve all the filters (pinned, unpinned, and from controls)

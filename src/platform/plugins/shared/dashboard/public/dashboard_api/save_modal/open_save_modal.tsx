@@ -85,15 +85,20 @@ export async function openSaveModal({
             return {};
           }
 
+          const timeRange = dataService.query.timefilter.timefilter.getTime();
+
           const dashboardStateToSave: DashboardState = {
             ...dashboardState,
             title: newTitle,
             tags: savedObjectsTaggingService && newTags ? newTags : ([] as string[]),
             description: newDescription,
             timeRestore: newTimeRestore,
-            timeRange: newTimeRestore
-              ? dataService.query.timefilter.timefilter.getTime()
-              : undefined,
+            ...(newTimeRestore
+              ? {
+                  timeFrom: timeRange.from,
+                  timeTo: timeRange.to,
+                }
+              : {}),
             refreshInterval: newTimeRestore
               ? dataService.query.timefilter.timefilter.getRefreshInterval()
               : undefined,
