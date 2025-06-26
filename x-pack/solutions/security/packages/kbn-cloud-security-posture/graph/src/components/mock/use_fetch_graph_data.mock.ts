@@ -34,7 +34,7 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
             label: 'projects/your-project-id/roles/customRole',
             color: 'primary',
             shape: 'hexagon',
-            icon: 'questionInCircle',
+            icon: 'question',
             documentsData: [
               {
                 id: '1',
