@@ -13,8 +13,8 @@ import {
   type PersistableStateAttachmentViewProps,
   type AttachmentViewObject,
   type AttachmentAction,
+  AttachmentActionType,
 } from '@kbn/cases-plugin/public/client/attachment_framework/types';
-import { AttachmentActionType } from '@kbn/cases-plugin/public';
 import * as i18n from './translations';
 
 const AttachmentChildrenLazy = React.lazy(() => import('./attachment_children'));
