@@ -13,7 +13,6 @@
     "requiredPlugins": [
       "aiops",
       "alerting",
-      "cases",
       "charts",
       "data",
       "dataViews",
@@ -41,6 +40,7 @@
       "fieldsMetadata"
     ],
     "optionalPlugins": [
+      "cases",
       "spaces",
       "ml",
       "home",

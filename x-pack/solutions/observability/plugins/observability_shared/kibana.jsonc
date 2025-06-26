@@ -15,15 +15,16 @@
       "observability_shared"
     ],
     "requiredPlugins": [
-      "cases",
       "uiActions",
       "embeddable",
       "share"
     ],
     "optionalPlugins": [
+      "cases",
       "guidedOnboarding"
     ],
     "requiredBundles": [
+      "cases",
       "data",
       "inspector",
       "kibanaReact",

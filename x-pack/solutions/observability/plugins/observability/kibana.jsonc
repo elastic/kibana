@@ -15,9 +15,7 @@
       "observability"
     ],
     "requiredPlugins": [
-      "aiops",
       "alerting",
-      "cases",
       "charts",
       "contentManagement",
       "controls",
@@ -49,6 +47,8 @@
       "esql"
     ],
     "optionalPlugins": [
+      "aiops",
+      "cases",
       "discover",
       "home",
       "usageCollection",
@@ -61,6 +61,8 @@
       "streams"
     ],
     "requiredBundles": [
+      "aiops",
+      "cases",
       "data",
       "discover",
       "kibanaReact",

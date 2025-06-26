@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { CasesPermissions } from '@kbn/cases-plugin/common';
 import AlertsFlyout from '../../../components/alerts_flyout/alerts_flyout';
 import { observabilityFeatureId } from '../../../../common';
@@ -23,9 +24,7 @@ export interface CasesProps {
 export function Cases({ permissions }: CasesProps) {
   const {
     application: { navigateToUrl },
-    cases: {
-      ui: { getCases: CasesList },
-    },
+    cases,
     http: {
       basePath: { prepend },
     },
@@ -42,6 +41,18 @@ export function Cases({ permissions }: CasesProps) {
   const handleShowAlertDetails = (alertId: string) => {
     setSelectedAlertId(alertId);
   };
+  if (!cases) {
+    return (
+      <>
+        {i18n.translate('xpack.observability.cases.casesPluginIsNotLabel', {
+          defaultMessage:
+            'Cases plugin is not available. Please ensure it is installed and enabled.',
+        })}
+      </>
+    );
+  }
+
+  const CasesList = cases.ui.getCases;
 
   return (
     <>

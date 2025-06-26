@@ -17,7 +17,6 @@
     "requiredPlugins": [
       "actions",
       "alerting",
-      "cases",
       "cloud",
       "cloudSecurityPosture",
       "contentManagement",
@@ -59,9 +58,10 @@
       "discoverShared",
       "productDocBase",
       "telemetry",
-      "elasticAssistantSharedState",
+      "elasticAssistantSharedState"
     ],
     "optionalPlugins": [
+      "cases",
       "encryptedSavedObjects",
       "fleet",
       "ml",
@@ -79,6 +79,7 @@
       "serverless"
     ],
     "requiredBundles": [
+      "cases",
       "esUiShared",
       "fleet",
       "kibanaUtils",

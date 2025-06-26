@@ -135,7 +135,7 @@ export interface ObservabilityPublicPluginsSetup {
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
-  cases: CasesPublicStart;
+  cases?: CasesPublicStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
   dashboard: DashboardStart;
@@ -409,7 +409,7 @@ export class Plugin
                 }));
 
               const casesLink: NavigationEntry[] = otherLinks
-                .filter((link) => link.id === 'cases')
+                .filter((link) => link.id === 'cases' && pluginsStart.cases)
                 .map((link) => ({
                   app: observabilityAppId,
                   label: link.title,

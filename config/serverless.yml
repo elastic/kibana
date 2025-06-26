@@ -222,7 +222,7 @@ input_control_vis.readOnly: true
 xpack.graph.enabled: false
 
 # Disable cases in stack management
-xpack.cases.stack.enabled: false
+#xpack.cases.stack.enabled: false
 
 # Alerting and action circuit breakers
 xpack.alerting.rules.run.actions.max: 3000

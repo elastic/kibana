@@ -83,6 +83,13 @@ export const completeRoutes = {
     params: {},
     exact: true,
   },
+  [CASES_PATH]: {
+    handler: () => {
+      return <CasesPage />;
+    },
+    params: {},
+    exact: false,
+  },
 };
 
 export const routes = {
@@ -97,13 +104,7 @@ export const routes = {
     params: {},
     exact: true,
   },
-  [CASES_PATH]: {
-    handler: () => {
-      return <CasesPage />;
-    },
-    params: {},
-    exact: false,
-  },
+
   [ALERTS_PATH]: {
     handler: () => {
       return <AlertsPage />;

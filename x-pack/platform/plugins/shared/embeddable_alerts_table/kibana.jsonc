@@ -22,12 +22,13 @@
       "data",
       "fieldFormats",
       "licensing",
-      "cases",
-      "security",
+      "security"
     ],
     "requiredBundles": [
       "kibanaReact"
     ],
-    "optionalPlugins": []
+    "optionalPlugins": [
+      "cases"
+    ]
   }
 }
