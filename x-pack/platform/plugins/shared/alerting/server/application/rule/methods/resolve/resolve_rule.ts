@@ -5,8 +5,9 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import { withSpan } from '@kbn/apm-utils';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { withActiveSpan } from '@kbn/tracing';
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { resolveRuleSavedObject } from '../../../../rules_client/lib';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -35,8 +36,9 @@ Promise<ResolvedSanitizedRule<Params>> {
   } catch (error) {
     throw Boom.badRequest(`Error validating resolve params - ${error.message}`);
   }
-  const { saved_object: result, ...resolveResponse } = await withSpan(
-    { name: 'resolveRuleSavedObject', type: 'rules' },
+  const { saved_object: result, ...resolveResponse } = await withActiveSpan(
+    'resolveRuleSavedObject',
+    { attributes: { [ATTR_SPAN_TYPE]: 'rules' } },
     () =>
       resolveRuleSavedObject(context, {
         ruleId: id,

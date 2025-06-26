@@ -10,4 +10,5 @@ default values.
 
 `@kbn/config` is the recommended way to load and read the kibana configuration file,
 however in the specific case of APM, we want to only need the minimal dependencies
-before loading `elastic-apm-node` to avoid losing instrumentation on the already loaded modules.
+before initializing OpenTelemetry tracing to avoid losing instrumentation on the already
+loaded modules.

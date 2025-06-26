@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const captureErrorMock = jest.fn();
+import { createMockedTracingApi } from '@kbn/tracing-test-utils';
+import { TracingApi, tracingApi } from '@kbn/tracing';
 
-jest.doMock('elastic-apm-node', () => {
-  const real = jest.requireActual('elastic-apm-node');
+jest.doMock('@kbn/tracing', () => {
   return {
-    ...real,
-    captureError: captureErrorMock,
+    tracingApi: createMockedTracingApi(),
   };
 });
+
+export const captureErrorMock = tracingApi?.legacy.captureError as jest.MockedFn<
+  TracingApi['legacy']['captureError']
+>;

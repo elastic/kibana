@@ -26,6 +26,7 @@
     "@kbn/picomatcher",
     "@kbn/repo-packages",
     "@kbn/dev-utils",
+    "@kbn/tracing",
   ],
   "exclude": [
     "target/**/*",

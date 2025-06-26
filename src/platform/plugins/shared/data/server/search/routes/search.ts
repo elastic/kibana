@@ -14,7 +14,7 @@ import { IncomingMessage } from 'http';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { Logger } from '@kbn/logging';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-server';
-import apm from 'elastic-apm-node';
+import { tracingApi } from '@kbn/tracing';
 import { reportSearchError } from '../report_search_error';
 import { getRequestAbortedSignal } from '../../lib';
 import type { DataPluginRouter } from '../types';
@@ -86,7 +86,7 @@ export function registerSearchRoute(
         }
 
         return executionContextSetup.withContext(executionContext, async () => {
-          apm.addLabels(executionContextSetup.getAsLabels());
+          tracingApi?.legacy.addLabels(executionContextSetup.getAsLabels());
           try {
             const search = await context.search;
             const response = await search

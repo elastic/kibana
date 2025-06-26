@@ -7,8 +7,8 @@
 
 import pMap from 'p-map';
 import { chunk, flatten, omit } from 'lodash';
-import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
+import { tracingApi } from '@kbn/tracing';
 import type { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
 import type {
@@ -87,10 +87,7 @@ export class TaskScheduling {
       taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
     });
 
-    const traceparent =
-      agent.currentTransaction && agent.currentTransaction.type !== 'request'
-        ? agent.currentTraceparent
-        : '';
+    const traceparent = tracingApi?.legacy.currentTraceparent;
 
     return await this.store.schedule(
       {
@@ -116,10 +113,8 @@ export class TaskScheduling {
     taskInstances: TaskInstanceWithDeprecatedFields[],
     options?: ScheduleOptions
   ): Promise<ConcreteTaskInstance[]> {
-    const traceparent =
-      agent.currentTransaction && agent.currentTransaction.type !== 'request'
-        ? agent.currentTraceparent
-        : '';
+    const traceparent = tracingApi?.legacy.currentTraceparent;
+
     const modifiedTasks = await Promise.all(
       taskInstances.map(async (taskInstance) => {
         const { taskInstance: modifiedTask } = await this.middleware.beforeSave({

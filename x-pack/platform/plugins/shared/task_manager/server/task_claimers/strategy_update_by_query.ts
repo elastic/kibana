@@ -8,10 +8,11 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
-import apm from 'elastic-apm-node';
 import type { Subject } from 'rxjs';
 import { groupBy, pick } from 'lodash';
 
+import { tracingApi } from '@kbn/tracing';
+import { SpanStatusCode } from '@opentelemetry/api';
 import { asOk } from '../lib/result_type';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import type { TaskClaimerOpts, ClaimOwnershipResult } from '.';
@@ -157,7 +158,7 @@ async function markAvailableTasksAsClaimed({
     taskMaxAttempts: pick(taskMaxAttempts, taskTypesToClaim),
   });
 
-  const apmTrans = apm.startTransaction(
+  const apmTrans = tracingApi?.legacy.startTransaction(
     TASK_MANAGER_MARK_AS_CLAIMED,
     TASK_MANAGER_TRANSACTION_TYPE
   );
@@ -173,10 +174,13 @@ async function markAvailableTasksAsClaimed({
         max_docs: size,
       }
     );
-    apmTrans.end('success');
+    apmTrans?.span.setStatus({ code: SpanStatusCode.OK });
+    apmTrans?.span.end();
     return result;
   } catch (err) {
-    apmTrans.end('failure');
+    apmTrans?.span.recordException(err);
+    apmTrans?.span.setStatus({ code: SpanStatusCode.ERROR });
+    apmTrans?.span.end();
     throw err;
   }
 }

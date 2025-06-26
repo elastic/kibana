@@ -24,6 +24,7 @@
     "@kbn/std",
     "@kbn/get-repo-files",
     "@kbn/repo-packages",
-    "@kbn/apm-config-loader",
+    "@kbn/telemetry",
+    "@kbn/tracing",
   ]
 }

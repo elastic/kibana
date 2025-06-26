@@ -8,12 +8,12 @@
 import https from 'https';
 
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
-import apm from 'elastic-apm-node';
 
 import { Logger } from '@kbn/logging';
 import type { AxiosError, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import { LogMeta } from '@kbn/core/server';
+import { tracingApi } from '@kbn/tracing';
 import { momentDateParser } from '../../common/utils';
 import {
   UsageMetricsAutoOpsResponseSchema,
@@ -36,7 +36,7 @@ export class AutoOpsAPIService {
     this.logger = logger;
   }
   public async autoOpsUsageMetricsAPI(requestBody: UsageMetricsRequestBody) {
-    const traceId = apm.currentTransaction?.traceparent;
+    const traceId = tracingApi?.legacy.currentTraceIds['trace.id'];
     const withRequestIdMessage = (message: string) => `${message} [Request Id: ${traceId}]`;
 
     const errorMetadata: LogMeta = {

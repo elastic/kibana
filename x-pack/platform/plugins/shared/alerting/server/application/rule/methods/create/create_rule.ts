@@ -8,7 +8,8 @@ import Semver from 'semver';
 import Boom from '@hapi/boom';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
-import { withSpan } from '@kbn/apm-utils';
+import { withActiveSpan } from '@kbn/tracing';
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
@@ -112,13 +113,16 @@ export async function createRule<Params extends RuleParams = never>(
   }
 
   try {
-    await withSpan({ name: 'authorization.ensureAuthorized', type: 'rules' }, async () =>
-      context.authorization.ensureAuthorized({
-        ruleTypeId: data.alertTypeId,
-        consumer: data.consumer,
-        operation: WriteOperations.Create,
-        entity: AlertingAuthorizationEntity.Rule,
-      })
+    await withActiveSpan(
+      'authorization.ensureAuthorized',
+      { attributes: { type: 'rules' } },
+      async () =>
+        context.authorization.ensureAuthorized({
+          ruleTypeId: data.alertTypeId,
+          consumer: data.consumer,
+          operation: WriteOperations.Create,
+          entity: AlertingAuthorizationEntity.Rule,
+        })
     );
   } catch (error) {
     context.auditLogger?.log(
@@ -147,10 +151,12 @@ export async function createRule<Params extends RuleParams = never>(
     createdAPIKey = data.enabled
       ? isAuthTypeApiKey
         ? context.getAuthenticationAPIKey(`${name}-user-created`)
-        : await withSpan(
+        : await withActiveSpan(
+            'createAPIKey',
             {
-              name: 'createAPIKey',
-              type: 'rules',
+              attributes: {
+                [ATTR_SPAN_TYPE]: 'rules',
+              },
             },
             () => context.createAPIKey(name)
           )
@@ -159,18 +165,21 @@ export async function createRule<Params extends RuleParams = never>(
     throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
   }
 
-  await withSpan({ name: 'validateActions', type: 'rules' }, () =>
+  await withActiveSpan('validateActions', { attributes: { [ATTR_SPAN_TYPE]: 'rules' } }, () =>
     validateActions(context, ruleType, data, allowMissingConnectorSecrets)
   );
 
-  await withSpan({ name: 'validateAndAuthorizeSystemActions', type: 'rules' }, () =>
-    validateAndAuthorizeSystemActions({
-      actionsClient,
-      actionsAuthorization: context.actionsAuthorization,
-      connectorAdapterRegistry: context.connectorAdapterRegistry,
-      systemActions: data.systemActions,
-      rule: { consumer: data.consumer, producer: ruleType.producer },
-    })
+  await withActiveSpan(
+    'validateAndAuthorizeSystemActions',
+    { attributes: { [ATTR_SPAN_TYPE]: 'rules' } },
+    () =>
+      validateAndAuthorizeSystemActions({
+        actionsClient,
+        actionsAuthorization: context.actionsAuthorization,
+        connectorAdapterRegistry: context.connectorAdapterRegistry,
+        systemActions: data.systemActions,
+        rule: { consumer: data.consumer, producer: ruleType.producer },
+      })
   );
 
   // Throw error if schedule interval is less than the minimum and we are enforcing it
@@ -198,7 +207,7 @@ export async function createRule<Params extends RuleParams = never>(
     params: updatedParams,
     actions: actionsWithRefs,
     artifacts: artifactsWithRefs,
-  } = await withSpan({ name: 'extractReferences', type: 'rules' }, () =>
+  } = await withActiveSpan('extractReferences', { attributes: { type: 'rules' } }, () =>
     extractReferences(context, ruleType, allActions, validatedRuleTypeParams, artifacts)
   );
 
@@ -239,8 +248,9 @@ export async function createRule<Params extends RuleParams = never>(
     },
   });
 
-  const createdRuleSavedObject: SavedObject<RawRule> = await withSpan(
-    { name: 'createRuleSavedObject', type: 'rules' },
+  const createdRuleSavedObject: SavedObject<RawRule> = await withActiveSpan(
+    'createRuleSavedObject',
+    { attributes: { type: 'rules' } },
     () =>
       createRuleSavedObject(context, {
         intervalInMs,

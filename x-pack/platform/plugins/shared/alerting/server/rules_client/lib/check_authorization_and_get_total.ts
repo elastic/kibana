@@ -8,7 +8,8 @@
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
-import { withSpan } from '@kbn/apm-utils';
+import { withActiveSpan } from '@kbn/tracing';
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
 import type { RawRule } from '../../types';
 import { ReadOperations } from '../../authorization';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
@@ -53,8 +54,9 @@ export const checkAuthorizationAndGetTotal = async (
     },
   };
 
-  const { aggregations, total } = await withSpan(
-    { name: 'unsecuredSavedObjectsClient.find', type: 'rules' },
+  const { aggregations, total } = await withActiveSpan(
+    'unsecuredSavedObjectsClient.find',
+    { attributes: { [ATTR_SPAN_TYPE]: 'rules' } },
     () =>
       context.unsecuredSavedObjectsClient.find<RawRule, RuleBulkOperationAggregation>({
         filter,
@@ -86,30 +88,33 @@ export const checkAuthorizationAndGetTotal = async (
     throw Boom.badRequest(`No rules found for bulk ${action.toLocaleLowerCase()}`);
   }
 
-  await withSpan({ name: 'authorization.ensureAuthorized', type: 'rules' }, () =>
-    pMap(
-      buckets,
-      async ({ key: [ruleType, consumer] }) => {
-        context.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
-        try {
-          await context.authorization.ensureAuthorized({
-            ruleTypeId: ruleType,
-            consumer,
-            operation: actionToConstantsMapping[action].WriteOperation,
-            entity: AlertingAuthorizationEntity.Rule,
-          });
-        } catch (error) {
-          context.auditLogger?.log(
-            ruleAuditEvent({
-              action: actionToConstantsMapping[action].RuleAuditAction,
-              error,
-            })
-          );
-          throw error;
-        }
-      },
-      { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
-    )
+  await withActiveSpan(
+    'authorization.ensureAuthorized',
+    { attributes: { [ATTR_SPAN_TYPE]: 'rules' } },
+    () =>
+      pMap(
+        buckets,
+        async ({ key: [ruleType, consumer] }) => {
+          context.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
+          try {
+            await context.authorization.ensureAuthorized({
+              ruleTypeId: ruleType,
+              consumer,
+              operation: actionToConstantsMapping[action].WriteOperation,
+              entity: AlertingAuthorizationEntity.Rule,
+            });
+          } catch (error) {
+            context.auditLogger?.log(
+              ruleAuditEvent({
+                action: actionToConstantsMapping[action].RuleAuditAction,
+                error,
+              })
+            );
+            throw error;
+          }
+        },
+        { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
+      )
   );
   return { total };
 };

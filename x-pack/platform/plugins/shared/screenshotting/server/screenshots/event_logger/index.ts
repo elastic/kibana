@@ -7,8 +7,9 @@
 
 import { Logger, LogMeta } from '@kbn/core/server';
 import { ConfigType } from '@kbn/screenshotting-server';
-import apm from 'elastic-apm-node';
 import { v4 as uuidv4 } from 'uuid';
+import { ElasticTransactionApi, tracingApi } from '@kbn/tracing';
+import { Span } from '@opentelemetry/api';
 import { CaptureResult } from '..';
 import { PLUGIN_ID } from '../../../common';
 import { ElementPosition } from '../get_element_position_data';
@@ -140,10 +141,10 @@ function logAdapter(logger: Logger, sessionId: string) {
  * A class to use internal state properties to log timing between actions in the screenshotting pipeline
  */
 export class EventLogger {
-  private spans = new Map<Actions, apm.Span | null | undefined>();
-  private transactions: Record<Transactions, null | apm.Transaction> = {
-    'screenshot-pipeline': null,
-    'generate-pdf': null,
+  private spans = new Map<Actions, Span | null | undefined>();
+  private transactions: Record<Transactions, ElasticTransactionApi | undefined> = {
+    'screenshot-pipeline': undefined,
+    'generate-pdf': undefined,
   };
 
   private sessionId: string; // identifier to track all logs from one screenshotting flow
@@ -174,7 +175,7 @@ export class EventLogger {
   public startTransaction(
     action: Transactions.SCREENSHOTTING | Transactions.PDF
   ): TransactionEndFn {
-    const transaction = apm.startTransaction(action, PLUGIN_ID);
+    const transaction = tracingApi?.legacy.startTransaction(action, PLUGIN_ID);
     this.transactions[action] = transaction;
 
     this.startTiming(action);
@@ -184,10 +185,12 @@ export class EventLogger {
       Object.entries(labels).forEach(([label]) => {
         const labelField = label as keyof SimpleEvent;
         const labelValue = labels[labelField];
-        transaction.setLabel(label, labelValue, false);
+        if (labelValue !== undefined) {
+          transaction?.span.setAttribute(`labels.${label}`, labelValue);
+        }
       });
 
-      transaction.end();
+      transaction?.span.end();
 
       this.logEvent(action, 'complete', { ...labels, action }, this.timings[action]);
     };
@@ -311,6 +314,8 @@ export class EventLogger {
     };
 
     this.logger.get('events').debug(message, errorData);
-    apm.captureError(error as Error | string);
+    tracingApi?.legacy.captureError(
+      typeof error === 'string' ? new Error(error) : (error as Error)
+    );
   }
 }

@@ -9,9 +9,9 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import { GetViewInAppRelativeUrlFnOpts, AlertsClientError } from '@kbn/alerting-plugin/server';
 import { observabilityFeatureId, observabilityPaths } from '@kbn/observability-plugin/common';
-import apm from 'elastic-apm-node';
 import { SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils';
 import { syntheticsMonitorStatusRuleParamsSchema } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import { tracingApi } from '@kbn/tracing';
 import { SyntheticsEsClient } from '../../lib';
 import { AlertOverviewStatus } from '../../../common/runtime_types/alert_rules/common';
 import { StatusRuleExecutorOptions } from './types';
@@ -55,7 +55,7 @@ export const registerSyntheticsStatusCheckRule = (
     minimumLicenseRequired: 'basic',
     doesSetRecoveryContext: true,
     executor: async (options: StatusRuleExecutorOptions) => {
-      apm.setTransactionName('Synthetics Status Rule Executor');
+      tracingApi?.legacy.setTransactionName('Synthetics Status Rule Executor');
       const { state: ruleState, params, services, spaceId } = options;
       const { alertsClient, uiSettingsClient, scopedClusterClient, savedObjectsClient } = services;
       if (!alertsClient) {

@@ -7,7 +7,7 @@
 
 import { mapValues } from 'lodash';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
-import { withSpan } from '@kbn/apm-utils';
+import { withActiveSpan } from '@kbn/tracing';
 import type { SanitizedRule, RawAlertInstance as RawAlert, RawRule } from '../../types';
 import { taskInstanceToAlertTaskInstance } from '../../task_runner/alert_task_instance';
 import { Alert } from '../../alert';
@@ -21,7 +21,7 @@ export const untrackRuleAlerts = async (
   id: string,
   attributes: RawRule
 ) => {
-  return withSpan({ name: 'untrackRuleAlerts', type: 'rules' }, async () => {
+  return withActiveSpan('untrackRuleAlerts', { attributes: { type: 'rules' } }, async () => {
     if (!context.eventLogger || !attributes.scheduledTaskId) return;
 
     try {

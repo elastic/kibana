@@ -14,11 +14,12 @@ import type {
   SavedObjectsBulkUpdateObject,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
-import { withSpan } from '@kbn/apm-utils';
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
+import { withActiveSpan } from '@kbn/tracing';
+import { ATTR_SPAN_SUBTYPE, ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
 import { bulkCreateRulesSo } from '../../../../data/rule';
 import type { RawRule } from '../../../../types';
 import type { RuleDomain, RuleParams } from '../../types';
@@ -59,18 +60,22 @@ const getShouldScheduleTask = async (
   if (!scheduledTaskId) return true;
   try {
     // make sure scheduledTaskId exist
-    return await withSpan({ name: 'getShouldScheduleTask', type: 'rules' }, async () => {
-      const task = await context.taskManager.get(scheduledTaskId);
+    return await withActiveSpan(
+      'getShouldScheduleTask',
+      { attributes: { [ATTR_SPAN_TYPE]: 'rules' } },
+      async () => {
+        const task = await context.taskManager.get(scheduledTaskId);
 
-      // Check whether task status is unrecognized. If so, we want to delete
-      // this task and create a fresh one
-      if (task.status === TaskStatus.Unrecognized) {
-        await context.taskManager.removeIfExists(scheduledTaskId);
-        return true;
+        // Check whether task status is unrecognized. If so, we want to delete
+        // this task and create a fresh one
+        if (task.status === TaskStatus.Unrecognized) {
+          await context.taskManager.removeIfExists(scheduledTaskId);
+          return true;
+        }
+
+        return false;
       }
-
-      return false;
-    });
+    );
   } catch (err) {
     return true;
   }
@@ -155,10 +160,12 @@ const bulkEnableRulesWithOCC = async (
   context: RulesClientContext,
   { filter }: { filter: KueryNode | null }
 ) => {
-  const rulesFinder = await withSpan(
+  const rulesFinder = await withActiveSpan(
+    'encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser',
     {
-      name: 'encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser',
-      type: 'rules',
+      attributes: {
+        [ATTR_SPAN_SUBTYPE]: 'rules',
+      },
     },
     async () =>
       await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
@@ -179,8 +186,9 @@ const bulkEnableRulesWithOCC = async (
   const username = await context.getUserName();
   let scheduleValidationError = '';
 
-  await withSpan(
-    { name: 'Get rules, collect them and their attributes', type: 'rules' },
+  await withActiveSpan(
+    'Get rules, collect them and their attributes',
+    { attributes: { [ATTR_SPAN_TYPE]: 'rules' } },
     async () => {
       for await (const response of rulesFinder.find()) {
         rulesFinderRules.push(...response.saved_objects);
@@ -317,13 +325,20 @@ const bulkEnableRulesWithOCC = async (
   );
 
   if (tasksToSchedule.length > 0) {
-    await withSpan({ name: 'taskManager.bulkSchedule', type: 'tasks' }, () =>
-      context.taskManager.bulkSchedule(tasksToSchedule)
+    await withActiveSpan(
+      'taskManager.bulkSchedule',
+      { attributes: { [ATTR_SPAN_TYPE]: 'tasks' } },
+      () => context.taskManager.bulkSchedule(tasksToSchedule)
     );
   }
 
-  const result = await withSpan(
-    { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
+  const result = await withActiveSpan(
+    'unsecuredSavedObjectsClient.bulkCreate',
+    {
+      attributes: {
+        [ATTR_SPAN_TYPE]: 'rules',
+      },
+    },
     () =>
       // TODO (http-versioning): for whatever reasoning we are using SavedObjectsBulkUpdateObject
       // everywhere when it should be SavedObjectsBulkCreateObject. We need to fix it in
@@ -378,8 +393,9 @@ export const tryToEnableTasks = async ({
 
   if (taskIdsToEnable.length > 0) {
     try {
-      const resultFromEnablingTasks = await withSpan(
-        { name: 'taskManager.bulkEnable', type: 'rules' },
+      const resultFromEnablingTasks = await withActiveSpan(
+        'taskManager.bulkEnable',
+        { attributes: { [ATTR_SPAN_TYPE]: 'rules' } },
         async () => taskManager.bulkEnable(taskIdsToEnable)
       );
       resultFromEnablingTasks?.errors?.forEach((error) => {

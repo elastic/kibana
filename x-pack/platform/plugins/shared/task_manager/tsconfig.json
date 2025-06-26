@@ -17,7 +17,6 @@
     "@kbn/utility-types",
     "@kbn/safer-lodash-set",
     "@kbn/es-types",
-    "@kbn/apm-utils",
     "@kbn/core-saved-objects-common",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/core-test-helpers-kbn-server",
@@ -38,6 +37,9 @@
     "@kbn/rrule",
     "@kbn/logging-mocks",
     "@kbn/spaces-utils",
+    "@kbn/tracing",
+    "@kbn/tracing-test-utils",
+    "@kbn/opentelemetry-attributes",
   ],
   "exclude": ["target/**/*"]
 }

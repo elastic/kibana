@@ -10,7 +10,7 @@
 import v8, { HeapInfo } from 'v8';
 import { mockEventLoopDelayMonitor, mockEventLoopUtilizationMonitor } from './process.test.mocks';
 import { ProcessMetricsCollector } from './process';
-import apm from 'elastic-apm-node';
+import { metricsApi } from '@kbn/metrics';
 
 describe('ProcessMetricsCollector', () => {
   let collector: ProcessMetricsCollector;
@@ -107,7 +107,7 @@ describe('ProcessMetricsCollector', () => {
 
   describe('register metrics in apm', () => {
     it('calls registerMetric in the constructor', () => {
-      const apmSpy = jest.spyOn(apm, 'registerMetric');
+      const apmSpy = jest.spyOn(metricsApi?.legacy!, 'registerMetric');
 
       collector.registerMetrics();
 

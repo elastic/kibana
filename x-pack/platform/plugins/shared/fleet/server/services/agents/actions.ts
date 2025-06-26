@@ -7,10 +7,11 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import apm from 'elastic-apm-node';
 import pMap from 'p-map';
 
 import { partition, uniq } from 'lodash';
+
+import { tracingApi } from '@kbn/tracing';
 
 import { appContextService } from '../app_context';
 import type {
@@ -66,7 +67,7 @@ export async function createAgentAction(
     minimum_execution_duration: newAgentAction.minimum_execution_duration,
     rollout_duration_seconds: newAgentAction.rollout_duration_seconds,
     total: newAgentAction.total,
-    traceparent: apm.currentTraceparent,
+    traceparent: tracingApi?.legacy.currentTraceparent,
     is_automatic: newAgentAction.is_automatic,
     policyId: newAgentAction.policyId,
   };
@@ -129,7 +130,7 @@ export async function bulkCreateAgentActions(
         action_id: action.id,
         data: action.data,
         type: action.type,
-        traceparent: apm.currentTraceparent,
+        traceparent: tracingApi?.legacy.currentTraceparent,
       };
 
       if (SIGNED_ACTIONS.has(action.type) && messageSigningService) {

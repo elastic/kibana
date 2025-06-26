@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
+import { tracingApi } from '@kbn/tracing';
 import type { Alert } from '../alert';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import type { AlertInstanceContext, AlertInstanceState } from '../types';
@@ -50,8 +50,8 @@ export function logAlerts<
   const activeAlertIds = Object.keys(activeAlerts);
   const recoveredAlertIds = Object.keys(recoveredAlerts);
 
-  if (apm.currentTransaction) {
-    apm.currentTransaction.addLabels({
+  if (tracingApi?.legacy.currentTransaction) {
+    tracingApi?.legacy.currentTransaction.setAttributes({
       alerting_new_alerts: newAlertIds.length,
       alerting_active_alerts: activeAlertIds.length,
       alerting_recovered_alerts: recoveredAlertIds.length,

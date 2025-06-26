@@ -30,7 +30,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
-import { withSpan } from '@kbn/apm-utils';
+import { withActiveSpan } from '@kbn/tracing';
 
 import { catchAndSetErrorStackTrace } from '../errors/utils';
 
@@ -1063,7 +1063,7 @@ class AgentPolicyService {
       skipValidation?: boolean;
     }
   ): Promise<void> {
-    return withSpan('bump_agent_policy_revision', async () => {
+    return withActiveSpan('bump_agent_policy_revision', async () => {
       await this._update(soClient, esClient, id, {}, options?.user, {
         bumpRevision: true,
         removeProtection: options?.removeProtection ?? false,

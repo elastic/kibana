@@ -12,7 +12,6 @@ import type {
   RequestHandler,
   KibanaResponseFactory,
 } from '@kbn/core/server';
-import { withSpan } from '@kbn/apm-utils';
 import type { Logger } from '@kbn/logging';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -24,6 +23,8 @@ import type {
 import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
 import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 
+import { withActiveSpan } from '@kbn/tracing';
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
 import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';
 import type { AiopsLicense } from '../../types';
 
@@ -82,8 +83,9 @@ export function routeHandlerFactory<T extends ApiVersion>(
           responseStream.pushPingWithTimeout();
 
           // Step 1: Index Info: Field candidates and zero docs fallback flag
-          const indexInfo = await withSpan(
-            { name: 'fetch_index_info', type: 'aiops-log-rate-analysis' },
+          const indexInfo = await withActiveSpan(
+            'fetch_index_info',
+            { attributes: { [ATTR_SPAN_TYPE]: 'aiops-log-rate-analysis' } },
             () => analysis.indexInfoHandler()
           );
 
@@ -93,11 +95,14 @@ export function routeHandlerFactory<T extends ApiVersion>(
 
           // Step 2: Significant categories and terms
           const significantItemsObj = indexInfo.zeroDocsFallback
-            ? await withSpan({ name: 'fetch_top_items', type: 'aiops-log-rate-analysis' }, () =>
-                analysis.topItemsHandler(indexInfo)
+            ? await withActiveSpan(
+                'fetch_top_items',
+                { attributes: { [ATTR_SPAN_TYPE]: 'aiops-log-rate-analysis' } },
+                () => analysis.topItemsHandler(indexInfo)
               )
-            : await withSpan(
-                { name: 'fetch_significant_items', type: 'aiops-log-rate-analysis' },
+            : await withActiveSpan(
+                'fetch_significant_items',
+                { attributes: { [ATTR_SPAN_TYPE]: 'aiops-log-rate-analysis' } },
                 () => analysis.significantItemsHandler(indexInfo)
               );
 
@@ -109,14 +114,16 @@ export function routeHandlerFactory<T extends ApiVersion>(
             significantItemsObj;
 
           // Step 3: Fetch overall histogram
-          const overallTimeSeries = await withSpan(
-            { name: 'fetch_overall_timeseries', type: 'aiops-log-rate-analysis' },
+          const overallTimeSeries = await withActiveSpan(
+            'fetch_overall_timeseries',
+            { attributes: { [ATTR_SPAN_TYPE]: 'aiops-log-rate-analysis' } },
             () => analysis.overallHistogramHandler()
           );
 
           // Step 4: Histograms
-          await withSpan(
-            { name: 'significant-item-histograms', type: 'aiops-log-rate-analysis' },
+          await withActiveSpan(
+            'significant-item-histograms',
+            { attributes: { [ATTR_SPAN_TYPE]: 'aiops-log-rate-analysis' } },
             () =>
               analysis.histogramHandler(
                 fieldValuePairsCount,
@@ -128,8 +135,9 @@ export function routeHandlerFactory<T extends ApiVersion>(
 
           // Step 5: Smart grouping
           if (stateHandler.groupingEnabled()) {
-            await withSpan(
-              { name: 'grouping-with-histograms', type: 'aiops-log-rate-analysis' },
+            await withActiveSpan(
+              'grouping-with-histograms',
+              { attributes: { [ATTR_SPAN_TYPE]: 'aiops-log-rate-analysis' } },
               () =>
                 analysis.groupingHandler(significantCategories, significantTerms, overallTimeSeries)
             );

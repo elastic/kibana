@@ -7,11 +7,14 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { withSpan } from '@kbn/apm-utils';
 
 import { isResponseError } from '@kbn/es-errors';
 
 import moment from 'moment';
+
+import { withActiveSpan } from '@kbn/tracing';
+
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
 
 import type { Agent } from '../../types';
 import { appContextService } from '..';
@@ -107,7 +110,7 @@ export abstract class ActionRunner {
     // create task to check result with some delay, this runs in case of kibana crash too
     this.checkTaskId = await this.createCheckResultTask();
 
-    await withSpan({ name: this.getActionType(), type: 'action' }, () =>
+    await withActiveSpan(this.getActionType(), { attributes: { [ATTR_SPAN_TYPE]: 'action' } }, () =>
       this.processAgentsInBatches()
         .then(async () => {
           if (this.checkTaskId) {

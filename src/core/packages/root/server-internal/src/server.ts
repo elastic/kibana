@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import apm from 'elastic-apm-node';
 import { firstValueFrom } from 'rxjs';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { NodeRoles } from '@kbn/core-node-server';
@@ -57,6 +56,7 @@ import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
 import { PricingService } from '@kbn/core-pricing-server-internal';
+import { tracingApi } from '@kbn/tracing';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { coreConfig, type CoreConfigType } from './core_config';
@@ -169,7 +169,10 @@ export class Server {
     }
 
     const prebootStartUptime = performance.now();
-    const prebootTransaction = apm.startTransaction('server-preboot', 'kibana-platform');
+    const prebootTransaction = tracingApi?.legacy.startTransaction(
+      'server-preboot',
+      'kibana-platform'
+    );
 
     // service required for plugin discovery
     const analyticsPreboot = this.analytics.preboot();
@@ -250,7 +253,7 @@ export class Server {
       this.coreApp.preboot(corePreboot, uiPlugins);
     }
 
-    prebootTransaction.end();
+    prebootTransaction?.span.end();
     this.uptimePerStep.preboot = { start: prebootStartUptime, end: performance.now() };
 
     return corePreboot;
@@ -259,7 +262,7 @@ export class Server {
   public async setup() {
     this.log.debug('setting up server');
     const setupStartUptime = performance.now();
-    const setupTransaction = apm.startTransaction('server-setup', 'kibana-platform');
+    const setupTransaction = tracingApi?.legacy.startTransaction('server-setup', 'kibana-platform');
 
     const analyticsSetup = this.analytics.setup();
 
@@ -399,7 +402,7 @@ export class Server {
     this.registerCoreContext(coreSetup);
     await this.coreApp.setup(coreSetup, uiPlugins);
 
-    setupTransaction.end();
+    setupTransaction?.span.end();
     this.uptimePerStep.setup = { start: setupStartUptime, end: performance.now() };
     return coreSetup;
   }
@@ -407,7 +410,7 @@ export class Server {
   public async start() {
     this.log.debug('starting server');
     const startStartUptime = performance.now();
-    const startTransaction = apm.startTransaction('server-start', 'kibana-platform');
+    const startTransaction = tracingApi?.legacy.startTransaction('server-start', 'kibana-platform');
 
     const analyticsStart = this.analytics.start();
     const securityStart = this.security.start();
@@ -422,7 +425,7 @@ export class Server {
     };
 
     const deprecationsStart = this.deprecations.start();
-    const soStartSpan = startTransaction.startSpan('saved_objects.migration', 'migration');
+    const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
       pluginsInitialized: this.#pluginsInitialized,
@@ -437,7 +440,7 @@ export class Server {
     soStartSpan?.end();
 
     if (this.nodeRoles?.migrator === true) {
-      startTransaction.end();
+      startTransaction?.span.end();
       this.log.info('Detected migrator node role; shutting down Kibana...');
       throw new CriticalError(
         'Migrations completed, shutting down Kibana',
@@ -493,7 +496,7 @@ export class Server {
 
     await this.http.start();
 
-    startTransaction.end();
+    startTransaction?.span.end();
 
     this.uptimePerStep.start = { start: startStartUptime, end: performance.now() };
 

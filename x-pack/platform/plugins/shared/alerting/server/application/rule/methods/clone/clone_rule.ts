@@ -10,7 +10,8 @@ import Boom from '@hapi/boom';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
-import { withSpan } from '@kbn/apm-utils';
+import { withActiveSpan } from '@kbn/tracing';
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
 import type { SanitizedRule, RawRule } from '../../../../types';
 import { getDefaultMonitoring } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
@@ -43,8 +44,9 @@ export async function cloneRule<Params extends RuleParams = never>(
   let ruleSavedObject: SavedObject<RawRule>;
 
   try {
-    ruleSavedObject = await withSpan(
-      { name: 'encryptedSavedObjectsClient.getDecryptedAsInternalUser', type: 'rules' },
+    ruleSavedObject = await withActiveSpan(
+      'encryptedSavedObjectsClient.getDecryptedAsInternalUser',
+      { attributes: { [ATTR_SPAN_TYPE]: 'rules' } },
       () => {
         return getDecryptedRuleSo({
           id,
@@ -61,8 +63,9 @@ export async function cloneRule<Params extends RuleParams = never>(
       `update(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
     );
     // Still attempt to load the object using SOC
-    ruleSavedObject = await withSpan(
-      { name: 'unsecuredSavedObjectsClient.get', type: 'rules' },
+    ruleSavedObject = await withActiveSpan(
+      'unsecuredSavedObjectsClient.get',
+      { attributes: { type: 'rules' } },
       () => {
         return getRuleSo({
           id,
@@ -91,13 +94,16 @@ export async function cloneRule<Params extends RuleParams = never>(
       : `${ruleSavedObject.attributes.name} [Clone]`;
   const ruleId = newId ?? SavedObjectsUtils.generateId();
   try {
-    await withSpan({ name: 'authorization.ensureAuthorized', type: 'rules' }, () =>
-      context.authorization.ensureAuthorized({
-        ruleTypeId: ruleSavedObject.attributes.alertTypeId,
-        consumer: ruleSavedObject.attributes.consumer,
-        operation: WriteOperations.Create,
-        entity: AlertingAuthorizationEntity.Rule,
-      })
+    await withActiveSpan(
+      'authorization.ensureAuthorized',
+      { attributes: { [ATTR_SPAN_TYPE]: 'rules' } },
+      () =>
+        context.authorization.ensureAuthorized({
+          ruleTypeId: ruleSavedObject.attributes.alertTypeId,
+          consumer: ruleSavedObject.attributes.consumer,
+          operation: WriteOperations.Create,
+          entity: AlertingAuthorizationEntity.Rule,
+        })
     );
   } catch (error) {
     context.auditLogger?.log(
@@ -152,8 +158,9 @@ export async function cloneRule<Params extends RuleParams = never>(
     })
   );
 
-  const clonedRuleAttributes = await withSpan(
-    { name: 'createRuleSavedObject', type: 'rules' },
+  const clonedRuleAttributes = await withActiveSpan(
+    'createRuleSavedObject',
+    { attributes: { [ATTR_SPAN_TYPE]: 'rules' } },
     () =>
       createRuleSavedObject(context, {
         intervalInMs: parseDuration(ruleAttributes.schedule.interval),

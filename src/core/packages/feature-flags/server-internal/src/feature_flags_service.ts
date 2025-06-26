@@ -15,7 +15,6 @@ import type {
   MultiContextEvaluationContext,
 } from '@kbn/core-feature-flags-server';
 import type { Logger } from '@kbn/logging';
-import apm from 'elastic-apm-node';
 import { getFlattenedObject } from '@kbn/std';
 import {
   type Client,
@@ -27,6 +26,7 @@ import deepMerge from 'deepmerge';
 import { filter, switchMap, startWith, Subject, BehaviorSubject, pairwise, takeUntil } from 'rxjs';
 import { get } from 'lodash';
 import type { InitialFeatureFlagsGetter } from '@kbn/core-feature-flags-server/src/contracts';
+import { tracingApi } from '@kbn/tracing';
 import { createOpenFeatureLogger } from './create_open_feature_logger';
 import { setProviderWithRetries } from './set_provider_with_retries';
 import { type FeatureFlagsConfig, featureFlagsConfig } from './feature_flags_config';
@@ -199,7 +199,7 @@ export class FeatureFlagsService {
         ? (override as T)
         : // We have to bind the evaluation or the client will lose its internal context
           await evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
-    apm.addLabels({ [`flag_${flagName}`]: value });
+    tracingApi?.legacy.addLabels({ [`flag_${flagName}`]: value });
     // TODO: increment usage counter
     return value;
   }

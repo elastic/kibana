@@ -114,7 +114,6 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-elasticsearch-client-server-mocks",
-    "@kbn/apm-utils",
     "@kbn/core-saved-objects-server",
     "@kbn/es-types",
     "@kbn/utils",
@@ -255,6 +254,9 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/elastic-assistant-shared-state",
     "@kbn/elastic-assistant-shared-state-plugin",
-    "@kbn/spaces-utils"
+    "@kbn/spaces-utils",
+    "@kbn/tracing",
+    "@kbn/opentelemetry-utils",
+    "@kbn/opentelemetry-attributes",
   ]
 }

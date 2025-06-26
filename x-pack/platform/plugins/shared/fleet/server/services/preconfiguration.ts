@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { groupBy, omit, pick, isEqual } from 'lodash';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
-import apm from 'elastic-apm-node';
+import { tracingApi } from '@kbn/tracing';
 
 import type {
   NewPackagePolicy,
@@ -290,7 +290,10 @@ export async function ensurePreconfiguredPackagesAndPolicies(
             }))
           )}`
       );
-      const s = apm.startSpan('Add preconfigured package policies', 'preconfiguration');
+      const s = tracingApi?.legacy.startSpan(
+        'Add preconfigured package policies',
+        'preconfiguration'
+      );
       await addPreconfiguredPolicyPackages(
         esClient,
         policy!,

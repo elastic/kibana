@@ -6,7 +6,8 @@
  */
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { withSpan } from '@kbn/apm-utils';
+import { withActiveSpan } from '@kbn/tracing';
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
 
 export const bulkMarkApiKeysForInvalidation = async (
@@ -14,30 +15,34 @@ export const bulkMarkApiKeysForInvalidation = async (
   logger: Logger,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
-  await withSpan({ name: 'bulkMarkApiKeysForInvalidation', type: 'rules' }, async () => {
-    if (apiKeys.length === 0) {
-      return;
-    }
+  await withActiveSpan(
+    'bulkMarkApiKeysForInvalidation',
+    { attributes: { [ATTR_SPAN_TYPE]: 'rules' } },
+    async () => {
+      if (apiKeys.length === 0) {
+        return;
+      }
 
-    try {
-      const apiKeyIds = apiKeys.map(
-        (apiKey) => Buffer.from(apiKey, 'base64').toString().split(':')[0]
-      );
-      await savedObjectsClient.bulkCreate(
-        apiKeyIds.map((apiKeyId) => ({
-          attributes: {
-            apiKeyId,
-            createdAt: new Date().toISOString(),
-          },
-          type: API_KEY_PENDING_INVALIDATION_TYPE,
-        }))
-      );
-    } catch (e) {
-      logger.error(
-        `Failed to bulk mark list of API keys [${apiKeys
-          .map((key) => `"${key}"`)
-          .join(', ')}] for invalidation: ${e.message}`
-      );
+      try {
+        const apiKeyIds = apiKeys.map(
+          (apiKey) => Buffer.from(apiKey, 'base64').toString().split(':')[0]
+        );
+        await savedObjectsClient.bulkCreate(
+          apiKeyIds.map((apiKeyId) => ({
+            attributes: {
+              apiKeyId,
+              createdAt: new Date().toISOString(),
+            },
+            type: API_KEY_PENDING_INVALIDATION_TYPE,
+          }))
+        );
+      } catch (e) {
+        logger.error(
+          `Failed to bulk mark list of API keys [${apiKeys
+            .map((key) => `"${key}"`)
+            .join(', ')}] for invalidation: ${e.message}`
+        );
+      }
     }
-  });
+  );
 };

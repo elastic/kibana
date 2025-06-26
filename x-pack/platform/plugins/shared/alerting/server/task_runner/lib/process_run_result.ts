@@ -6,7 +6,6 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { Outcome } from 'elastic-apm-node';
 import type { RuleExecutionStatus, RuleLastRun } from '../../../common';
 import type { ElasticsearchError } from '../../lib';
 import type { ILastRun } from '../../lib/last_run_status';
@@ -21,6 +20,8 @@ import {
 import type { RuleRunMetrics } from '../../lib/rule_run_metrics_store';
 import type { RuleResultService } from '../../monitoring/rule_result_service';
 import type { RuleTaskStateAndMetrics } from '../types';
+
+type Outcome = 'unknown' | 'success' | 'failure';
 
 interface ProcessRuleRunOpts {
   logger?: Logger;

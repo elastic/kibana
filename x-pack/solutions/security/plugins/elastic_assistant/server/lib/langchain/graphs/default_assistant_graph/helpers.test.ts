@@ -6,7 +6,6 @@
  */
 
 import { streamGraph } from './helpers';
-import agent from 'elastic-apm-node';
 import { KibanaRequest } from '@kbn/core-http-server';
 import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 import { PassThrough } from 'stream';
@@ -16,8 +15,26 @@ import { waitFor } from '@testing-library/react';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { DefaultAssistantGraph } from './graph';
 import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { tracingApi } from '@kbn/tracing';
 
-jest.mock('elastic-apm-node');
+jest.mock('@kbn/tracing', () => {
+  const agent = {
+    // These will be spied on / overwritten in the tests
+    startSpan: jest.fn(),
+    isStarted: jest.fn(),
+    addLabels: jest.fn(),
+    currentTraceIds: {
+      'transaction.id': undefined,
+      'trace.id': undefined,
+    },
+  };
+
+  return {
+    tracing: {
+      legacy: agent,
+    },
+  };
+});
 
 jest.mock('@kbn/securitysolution-es-utils');
 const mockStream = new PassThrough();
@@ -72,8 +89,8 @@ describe('streamGraph', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (agent.isStarted as jest.Mock).mockReturnValue(true);
-    (agent.startSpan as jest.Mock).mockReturnValue({
+    (tracingApi!.legacy.isStarted as jest.Mock).mockReturnValue(true);
+    (tracingApi!.legacy.startSpan as jest.Mock).mockReturnValue({
       end: jest.fn(),
       ids: { 'trace.id': 'traceId' },
       transaction: { ids: { 'transaction.id': 'transactionId' } },

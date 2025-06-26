@@ -15,7 +15,6 @@ import type {
   RouteSecurity,
 } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
-import agent from 'elastic-apm-node';
 import type {
   DefaultRouteCreateOptions,
   IoTsParamsObject,
@@ -30,10 +29,10 @@ import {
 } from '@kbn/server-route-repository';
 import { jsonRt, mergeRt } from '@kbn/io-ts-utils';
 import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
-import apm from 'elastic-apm-node';
 import type { VersionedRouteRegistrar } from '@kbn/core-http-server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
+import { tracingApi } from '@kbn/tracing';
 import type { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import type {
   APMCore,
@@ -99,11 +98,9 @@ export function registerRoutes({
       request: KibanaRequest,
       response: KibanaResponseFactory
     ) => {
-      if (agent.isStarted()) {
-        agent.addLabels({
-          plugin: 'apm',
-        });
-      }
+      tracingApi?.legacy.addLabels({
+        plugin: 'apm',
+      });
 
       // init debug queries
       inspectableEsQueriesMap.set(request, []);
@@ -217,7 +214,7 @@ export function registerRoutes({
         }
 
         // capture error with APM node agent
-        apm.captureError(error);
+        tracingApi?.legacy.captureError(error);
 
         return response.custom(opts);
       } finally {

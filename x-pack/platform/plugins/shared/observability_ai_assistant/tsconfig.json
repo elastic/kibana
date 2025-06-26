@@ -37,7 +37,6 @@
     "@kbn/task-manager-plugin",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-ui-settings-server",
-    "@kbn/apm-utils",
     "@kbn/features-plugin",
     "@kbn/cloud-plugin",
     "@kbn/serverless",

@@ -6,7 +6,8 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import { withSpan } from '@kbn/apm-utils';
+import { withActiveSpan } from '@kbn/tracing';
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import type { RulesClientContext } from '../types';
 import { getRuleSo } from '../../data/rule';
@@ -31,10 +32,13 @@ export async function getRuleSavedObject(
     })
   );
 
-  return await withSpan({ name: 'unsecuredSavedObjectsClient.get', type: 'rules' }, () =>
-    getRuleSo({
-      id: ruleId,
-      savedObjectsClient: context.unsecuredSavedObjectsClient,
-    })
+  return await withActiveSpan(
+    'unsecuredSavedObjectsClient.get',
+    { attributes: { [ATTR_SPAN_TYPE]: 'rules' } },
+    () =>
+      getRuleSo({
+        id: ruleId,
+        savedObjectsClient: context.unsecuredSavedObjectsClient,
+      })
   );
 }

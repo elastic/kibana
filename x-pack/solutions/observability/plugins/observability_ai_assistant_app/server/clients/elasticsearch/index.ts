@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import { withSpan } from '@kbn/apm-utils';
+import { withActiveSpan } from '@kbn/tracing';
 
 type AIAssistantSearchRequest = ESSearchRequest & {
   index: string;
@@ -42,11 +42,11 @@ export function createElasticsearchClient({
       if (inspect) {
         logger.info(`Request (${operationName}):\n${JSON.stringify(parameters, null, 2)}`);
       }
-      return withSpan(
+      return withActiveSpan(
+        operationName,
         {
-          name: operationName,
-          labels: {
-            plugin: 'observability_ai_assistant_app',
+          attributes: {
+            'labels.plugin': 'observability_ai_assistant_app',
           },
         },
         () => {

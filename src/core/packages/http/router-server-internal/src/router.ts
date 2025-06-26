@@ -9,7 +9,6 @@
 
 import { EventEmitter } from 'node:events';
 import type { Request, ResponseToolkit } from '@hapi/hapi';
-import apm from 'elastic-apm-node';
 import type { Logger } from '@kbn/logging';
 import {
   isUnauthorizedError as isElasticsearchUnauthorizedError,
@@ -31,6 +30,8 @@ import type {
 } from '@kbn/core-http-server';
 import type { RouteSecurityGetter } from '@kbn/core-http-server';
 import { Env } from '@kbn/config';
+import { context, defaultTextMapGetter, propagation } from '@opentelemetry/api';
+import { tracingApi } from '@kbn/tracing';
 import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest, getProtocolFromRequest } from './request';
 import { kibanaResponseFactory } from './response';
@@ -183,8 +184,13 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
   public registerRoute(route: InternalRouterRoute) {
     this.routes.push({
       ...route,
-      handler: async (request, responseToolkit) =>
-        await this.handle({ request, responseToolkit, handler: route.handler }),
+      handler: async (request, responseToolkit) => {
+        const ctx = propagation.extract(context.active(), request.headers, defaultTextMapGetter);
+        return context.with(
+          ctx,
+          async () => await this.handle({ request, responseToolkit, handler: route.handler })
+        );
+      },
     });
   }
 
@@ -211,7 +217,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       return hapiResponseAdapter.handle(kibanaResponse);
     } catch (error) {
       // capture error
-      apm.captureError(error);
+      tracingApi?.legacy.captureError(error);
 
       // forward 401 errors from ES client
       if (isElasticsearchUnauthorizedError(error)) {

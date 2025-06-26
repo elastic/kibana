@@ -9,12 +9,12 @@
 
 import Url from 'url';
 import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
-import apm from 'elastic-apm-node';
 import { Server, Request } from '@hapi/hapi';
 import HapiProxy from '@hapi/h2o2';
 import { take } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { createServer, getServerOptions } from '@kbn/server-http-tools';
+import { tracingApi } from '@kbn/tracing';
 
 import { DevConfig, HttpConfig } from '../config';
 import { Log } from '../log';
@@ -143,7 +143,10 @@ export class Http1BasePathProxyServer implements BasePathProxyServer {
           // Before we proxy request to a target port we may want to wait until some
           // condition is met (e.g. until target listener is ready).
           async (request, responseToolkit) => {
-            apm.setTransactionName(`${request.method.toUpperCase()} /{basePath}/{kbnPath*}`);
+            tracingApi?.legacy.currentTransaction?.updateName(
+              `${request.method.toUpperCase()} /{basePath}/{kbnPath*}`
+            );
+
             await delayUntil().pipe(take(1)).toPromise();
             return responseToolkit.continue;
           },

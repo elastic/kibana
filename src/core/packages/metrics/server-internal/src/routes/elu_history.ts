@@ -8,8 +8,8 @@
  */
 
 import type { IRouter } from '@kbn/core-http-server';
-import apm from 'elastic-apm-node';
 import { EluMetrics } from '@kbn/core-metrics-server';
+import { metricsApi } from '@kbn/metrics';
 
 interface ELUHistoryResponse {
   /**
@@ -26,9 +26,9 @@ interface ELUHistoryResponse {
  */
 export function registerEluHistoryRoute(router: IRouter, elu: () => EluMetrics) {
   // Report the same metrics to APM
-  apm.registerMetric('elu.history.short', () => elu().short);
-  apm.registerMetric('elu.history.medium', () => elu().medium);
-  apm.registerMetric('elu.history.long', () => elu().long);
+  metricsApi?.legacy.registerMetric('elu.history.short', () => elu().short);
+  metricsApi?.legacy.registerMetric('elu.history.medium', () => elu().medium);
+  metricsApi?.legacy.registerMetric('elu.history.long', () => elu().long);
 
   router.versioned
     .get({

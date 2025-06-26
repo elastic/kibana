@@ -4,23 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SpanOptions } from '@kbn/apm-utils';
-import { withSpan, parseSpanOptions } from '@kbn/apm-utils';
 
-export function withProfilingSpan<T>(
-  optionsOrName: SpanOptions | string,
-  cb: () => Promise<T>
-): Promise<T> {
-  const options = parseSpanOptions(optionsOrName);
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
+import { createWithActiveSpan } from '@kbn/tracing';
 
-  const optionsWithDefaults = {
-    ...(options.intercept ? {} : { type: 'plugin:profiling' }),
-    ...options,
-    labels: {
-      plugin: 'profiling',
-      ...options.labels,
-    },
-  };
-
-  return withSpan(optionsWithDefaults, cb);
-}
+export const withProfilingSpan = createWithActiveSpan({
+  attributes: {
+    [ATTR_SPAN_TYPE]: 'plugin:profiling',
+    'labels.plugin': 'profiling',
+  },
+});

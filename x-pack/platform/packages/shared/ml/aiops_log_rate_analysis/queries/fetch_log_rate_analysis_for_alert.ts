@@ -11,7 +11,6 @@ import { chunk } from 'lodash';
 
 import type { estypes } from '@elastic/elasticsearch';
 
-import { withSpan } from '@kbn/apm-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import { getSampleProbability } from '@kbn/ml-random-sampler-utils';
@@ -93,18 +92,15 @@ export async function fetchLogRateAnalysisForAlert({
     ...windowParameters,
   };
 
-  const indexInfo = await withSpan(
-    { name: 'fetch_index_info', type: 'aiops-log-rate-analysis-for-alert' },
-    () =>
-      fetchIndexInfo({
-        esClient,
-        abortSignal,
-        arguments: {
-          ...indexInfoParams,
-          textFieldCandidatesOverrides: ['message', 'error.message'],
-        },
-      })
-  );
+  const indexInfo = await fetchIndexInfo({
+    esClient,
+    abortSignal,
+    arguments: {
+      ...indexInfoParams,
+      textFieldCandidatesOverrides: ['message', 'error.message'],
+    },
+  });
+
   const { textFieldCandidates, keywordFieldCandidates } = indexInfo;
 
   const logRateAnalysisType = getLogRateAnalysisTypeForCounts({
@@ -167,10 +163,7 @@ export async function fetchLogRateAnalysisForAlert({
   );
 
   // Wait for the queue to finish.
-  await withSpan(
-    { name: 'fetch_significant_items', type: 'aiops-log-rate-analysis-for-alert' },
-    () => significantItemsQueue.drain()
-  );
+  await significantItemsQueue.drain();
 
   // RETURN DATA
   // Adapt the raw significant items data for contextual insights.

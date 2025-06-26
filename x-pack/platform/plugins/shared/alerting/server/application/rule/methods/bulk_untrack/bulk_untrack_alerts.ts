@@ -7,9 +7,10 @@
 
 import { omitBy } from 'lodash';
 import Boom from '@hapi/boom';
-import { withSpan } from '@kbn/apm-utils';
 import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import type { AuditLogger } from '@kbn/core-security-server';
+import { withActiveSpan } from '@kbn/tracing';
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
 import { bulkUntrackBodySchema } from './schemas';
 import type { BulkUntrackBody } from './types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
@@ -53,13 +54,16 @@ async function bulkUntrackAlertsWithOCC(context: RulesClientContext, params: Bul
         ruleTypeId: string;
         consumer: string;
       }) =>
-        await withSpan({ name: 'authorization.ensureAuthorized', type: 'alerts' }, () =>
-          context.authorization.ensureAuthorized({
-            ruleTypeId,
-            consumer,
-            operation: WriteOperations.Update,
-            entity: AlertingAuthorizationEntity.Alert,
-          })
+        await withActiveSpan(
+          'authorization.ensureAuthorized',
+          { attributes: { [ATTR_SPAN_TYPE]: 'alerts' } },
+          () =>
+            context.authorization.ensureAuthorized({
+              ruleTypeId,
+              consumer,
+              operation: WriteOperations.Update,
+              entity: AlertingAuthorizationEntity.Alert,
+            })
         ),
     });
 

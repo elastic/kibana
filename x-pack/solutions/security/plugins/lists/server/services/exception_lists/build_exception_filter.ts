@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import agent from 'elastic-apm-node';
 import { chunk } from 'lodash/fp';
 import {
   CreateExceptionListItemSchema,
@@ -34,6 +33,7 @@ import {
   MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE,
   MAXIMUM_SMALL_VALUE_LIST_SIZE,
 } from '@kbn/securitysolution-list-constants';
+import { tracingApi } from '@kbn/tracing';
 
 import {
   SECURITY_NUM_LARGE_LIST_EXCEPTIONS,
@@ -326,7 +326,7 @@ export const buildExceptionFilter = async <
   unprocessedExceptions.push(...unprocessableValueListExceptions);
 
   if (exceptionsWithoutValueLists.length === 0 && exceptionsWithValueLists.length === 0) {
-    agent.setCustomContext({
+    tracingApi?.legacy.setCustomContext({
       [SECURITY_NUM_LARGE_LIST_EXCEPTIONS]: unprocessedExceptions.length,
       [SECURITY_NUM_REGULAR_EXCEPTIONS]: 0,
       [SECURITY_NUM_SMALL_LIST_EXCEPTIONS]: 0,
@@ -340,7 +340,7 @@ export const buildExceptionFilter = async <
     listClient,
   });
 
-  agent.setCustomContext({
+  tracingApi?.legacy.setCustomContext({
     [SECURITY_NUM_LARGE_LIST_EXCEPTIONS]:
       unprocessableValueListExceptions.length + unprocessableExceptionItems.length,
     [SECURITY_NUM_REGULAR_EXCEPTIONS]: exceptionsWithoutValueLists.length,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AgentConfigOptions } from 'elastic-apm-node';
+import type { AgentConfigOptions } from '@kbn/telemetry-config';
 import { getConfigurationFilePaths, getConfigFromFiles, applyConfigOverrides } from './utils';
 import { ApmConfiguration } from './config';
 

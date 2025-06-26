@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { withSpan } from '@kbn/apm-utils';
+import { withActiveSpan } from '@kbn/tracing';
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import type { RulesClientContext } from '../types';
 import { alertingAuthorizationFilterOpts } from '../common/constants';
@@ -17,8 +18,9 @@ export const getAuthorizationFilter = async (
   { action }: { action: BulkAction }
 ) => {
   try {
-    const authorizationTuple = await withSpan(
-      { name: 'authorization.getFindAuthorizationFilter', type: 'rules' },
+    const authorizationTuple = await withActiveSpan(
+      'authorization.getFindAuthorizationFilter',
+      { attributes: { [ATTR_SPAN_TYPE]: 'rules' } },
       () =>
         context.authorization.getFindAuthorizationFilter({
           authorizationEntity: AlertingAuthorizationEntity.Rule,

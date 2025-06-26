@@ -22,5 +22,7 @@
     "@kbn/config-mocks",
     "@kbn/logging-mocks",
     "@kbn/std",
+    "@kbn/tracing",
+    "@kbn/tracing-test-utils",
   ]
 }

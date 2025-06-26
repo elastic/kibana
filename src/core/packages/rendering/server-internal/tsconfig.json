@@ -48,6 +48,9 @@
     "@kbn/core-feature-flags-server-internal",
     "@kbn/core-feature-flags-server-mocks",
     "@kbn/core-feature-flags-server",
+    "@kbn/tracing-test-utils",
+    "@kbn/tracing",
+    "@kbn/telemetry-config",
   ],
   "exclude": [
     "target/**/*",

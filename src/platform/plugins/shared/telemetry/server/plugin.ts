@@ -42,7 +42,7 @@ import type {
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 
-import apm from 'elastic-apm-node';
+import { tracingApi } from '@kbn/tracing';
 import { buildShipperHeaders, createBuildShipperUrl } from '../common/ebt_v3_endpoint';
 import {
   type TelemetrySavedObject,
@@ -203,7 +203,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       context$: this.config$.pipe(
         map(({ labels }) => ({ labels })),
         tap(({ labels }) =>
-          Object.entries(labels).forEach(([key, value]) => apm.setGlobalLabel(key, value))
+          Object.entries(labels).forEach(([key, value]) =>
+            tracingApi?.legacy.setGlobalLabel(key, value)
+          )
         )
       ),
       schema: {

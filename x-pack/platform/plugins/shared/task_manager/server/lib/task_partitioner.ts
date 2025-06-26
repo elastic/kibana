@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from 'elastic-apm-node';
+import type { Logger } from '@kbn/core/server';
 import type { KibanaDiscoveryService } from '../kibana_discovery_service';
 import { assignPodPartitions } from './assign_pod_partitions';
 
@@ -26,6 +26,7 @@ export interface TaskPartitionerConstructorOpts {
   podName: string;
   logger: Logger;
 }
+
 export class TaskPartitioner {
   private readonly allPartitions: number[];
   private readonly podName: string;

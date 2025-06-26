@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
 import { v4 as uuidv4 } from 'uuid';
 import type { ISavedObjectsRepository, KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -15,6 +14,8 @@ import { nanosToMillis } from '@kbn/event-log-plugin/common';
 import type { CancellableTask, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { TaskPriority } from '@kbn/task-manager-plugin/server/task';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import { tracingApi } from '@kbn/tracing';
+import { SpanStatusCode } from '@opentelemetry/api';
 import type { AdHocRunStatus } from '../../common/constants';
 import { adHocRunStatus } from '../../common/constants';
 import type {
@@ -401,16 +402,16 @@ export class AdHocTaskRunner implements CancellableTask {
         );
       }
 
-      if (apm.currentTransaction) {
-        apm.currentTransaction.name = `Execute Backfill for Alerting Rule`;
-        apm.currentTransaction.addLabels({
-          alerting_rule_space_id: spaceId,
-          alerting_rule_id: rule.id,
-          alerting_rule_consumer: rule.consumer,
-          alerting_rule_name: rule.name,
-          alerting_rule_tags: rule.tags.join(', '),
-          alerting_rule_type_id: rule.alertTypeId,
-          alerting_rule_params: JSON.stringify(rule.params),
+      if (tracingApi?.legacy.currentTransaction) {
+        tracingApi?.legacy.currentTransaction.updateName(`Execute Backfill for Alerting Rule`);
+        tracingApi?.legacy.currentTransaction.setAttributes({
+          'labels.alerting_rule_space_id': spaceId,
+          'labels.alerting_rule_id': rule.id,
+          'labels.alerting_rule_consumer': rule.consumer,
+          'labels.alerting_rule_name': rule.name,
+          'labels.alerting_rule_tags': rule.tags.join(', '),
+          'labels.alerting_rule_type_id': rule.alertTypeId,
+          'labels.alerting_rule_params': JSON.stringify(rule.params),
         });
       }
 
@@ -486,8 +487,15 @@ export class AdHocTaskRunner implements CancellableTask {
           this.logger.error(message, { tags, error: { stack_trace: stack } });
         }
 
-        if (apm.currentTransaction) {
-          apm.currentTransaction.setOutcome(outcome);
+        if (tracingApi?.legacy.currentTransaction) {
+          tracingApi?.legacy.currentTransaction.setStatus({
+            code:
+              outcome === 'success'
+                ? SpanStatusCode.OK
+                : outcome === 'failure'
+                ? SpanStatusCode.ERROR
+                : SpanStatusCode.UNSET,
+          });
         }
 
         // set start and duration based on event log

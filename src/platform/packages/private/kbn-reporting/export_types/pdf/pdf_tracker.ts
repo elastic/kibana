@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import apm from 'elastic-apm-node';
+import { tracingApi } from '@kbn/tracing';
 
 interface PdfTracker {
   setCpuUsage: (cpu: number) => void;
@@ -25,25 +25,25 @@ interface ApmSpan {
 }
 
 export function getTracker(): PdfTracker {
-  const apmTrans = apm.startTransaction('generate-pdf', TRANSACTION_TYPE);
+  const apmTrans = tracingApi?.legacy.startTransaction('generate-pdf', TRANSACTION_TYPE);
 
   let apmScreenshots: ApmSpan | null = null;
 
   return {
     startScreenshots() {
-      apmScreenshots = apmTrans.startSpan('screenshots-pipeline', SPANTYPE_SETUP) || null;
+      apmScreenshots = apmTrans?.startSpan('screenshots-pipeline', SPANTYPE_SETUP) || null;
     },
     endScreenshots() {
       if (apmScreenshots) apmScreenshots.end();
     },
     setCpuUsage(cpu: number) {
-      apmTrans.setLabel('cpu', cpu, false);
+      apmTrans?.setLabel('cpu', cpu, false);
     },
     setMemoryUsage(memory: number) {
-      apmTrans.setLabel('memory', memory, false);
+      apmTrans?.setLabel('memory', memory, false);
     },
     end() {
-      if (apmTrans) apmTrans.end();
+      if (apmTrans) apmTrans?.span.end();
     },
   };
 }

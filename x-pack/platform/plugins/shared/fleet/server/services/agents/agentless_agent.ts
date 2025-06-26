@@ -14,7 +14,7 @@ import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import axios from 'axios';
 
-import apm from 'elastic-apm-node';
+import { tracingApi } from '@kbn/tracing';
 
 import { AgentlessAgentCreateOverProvisionedError } from '../../../common/errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
@@ -61,7 +61,7 @@ class AgentlessAgentService {
     soClient: SavedObjectsClientContract,
     agentlessAgentPolicy: AgentPolicy
   ) {
-    const traceId = apm.currentTransaction?.traceparent;
+    const traceId = tracingApi?.legacy.currentTraceparent;
     const errorMetadata: LogMeta = {
       trace: {
         id: traceId,
@@ -168,7 +168,7 @@ class AgentlessAgentService {
 
   public async deleteAgentlessAgent(agentlessPolicyId: string) {
     const logger = appContextService.getLogger();
-    const traceId = apm.currentTransaction?.traceparent;
+    const traceId = tracingApi?.legacy.currentTraceparent;
     const agentlessConfig = appContextService.getConfig()?.agentless;
     const tlsConfig = this.createTlsConfig(agentlessConfig);
     const requestConfig = {
@@ -226,7 +226,7 @@ class AgentlessAgentService {
 
   public async upgradeAgentlessDeployment(policyId: string) {
     const logger = appContextService.getLogger();
-    const traceId = apm.currentTransaction?.traceparent;
+    const traceId = tracingApi?.legacy.currentTraceparent;
     const agentlessConfig = appContextService.getConfig()?.agentless;
     const kibanaVersion = appContextService.getKibanaVersion();
     const tlsConfig = this.createTlsConfig(agentlessConfig);

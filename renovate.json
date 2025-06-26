@@ -1342,7 +1342,6 @@
     {
       "groupName": "APM",
       "matchDepNames": [
-        "elastic-apm-node",
         "@elastic/apm-rum",
         "@elastic/apm-rum-react",
         "@elastic/apm-rum-core"

@@ -15,12 +15,13 @@ import type {
   ScalarValue,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { withSpan } from '@kbn/apm-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { Required, ValuesType } from 'utility-types';
 import { DedotObject } from '@kbn/utility-types';
 import { unflattenObject } from '@kbn/task-manager-plugin/server/metrics/lib';
+import { withActiveSpan } from '@kbn/tracing';
+import { flattenAttributes } from '@kbn/inference-tracing/src/util/flatten_attributes';
 import { esqlResultToPlainObjects } from './esql_result_to_plain_objects';
 
 type SearchRequest = ESSearchRequest & {
@@ -129,16 +130,17 @@ export function createTracedEsClient({
     callback: () => Promise<T>
   ) => {
     logger.debug(() => `Request (${operationName}):\n${JSON.stringify(request)}`);
-    return withSpan(
+    return withActiveSpan(
+      operationName,
       {
-        name: operationName,
-        labels: {
-          ...labels,
-          ...(plugin ? { plugin } : {}),
-        },
+        attributes: flattenAttributes({
+          labels: {
+            ...labels,
+            ...(plugin ? { plugin } : {}),
+          },
+        }),
       },
-      callback,
-      logger
+      callback
     ).then((response) => {
       logger.trace(() => `Response (${operationName}):\n${JSON.stringify(response, null, 2)}`);
       return response;

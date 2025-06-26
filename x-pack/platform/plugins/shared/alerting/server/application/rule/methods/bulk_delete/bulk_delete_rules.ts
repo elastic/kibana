@@ -9,7 +9,8 @@ import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/core/server';
-import { withSpan } from '@kbn/apm-utils';
+import { withActiveSpan } from '@kbn/tracing';
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
@@ -64,8 +65,13 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
     action: 'DELETE',
   });
 
-  const { rules, errors, accListSpecificForBulkOperation } = await withSpan(
-    { name: 'retryIfBulkOperationConflicts', type: 'rules' },
+  const { rules, errors, accListSpecificForBulkOperation } = await withActiveSpan(
+    'retryIfBulkOperationConflicts',
+    {
+      attributes: {
+        [ATTR_SPAN_TYPE]: 'rules',
+      },
+    },
     () =>
       retryIfBulkOperationConflicts({
         action: 'DELETE',
@@ -137,10 +143,12 @@ const bulkDeleteWithOCC = async (
   context: RulesClientContext,
   { filter }: { filter: KueryNode | null }
 ) => {
-  const rulesFinder = await withSpan(
+  const rulesFinder = await withActiveSpan(
+    'encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser',
     {
-      name: 'encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser',
-      type: 'rules',
+      attributes: {
+        [ATTR_SPAN_TYPE]: 'rules',
+      },
     },
     () =>
       context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>({
@@ -156,8 +164,13 @@ const bulkDeleteWithOCC = async (
   const taskIdToRuleIdMapping: Record<string, string> = {};
   const ruleNameToRuleIdMapping: Record<string, string> = {};
 
-  await withSpan(
-    { name: 'Get rules, collect them and their attributes', type: 'rules' },
+  await withActiveSpan(
+    'Get rules, collect them and their attributes',
+    {
+      attributes: {
+        [ATTR_SPAN_TYPE]: 'rules',
+      },
+    },
     async () => {
       for await (const response of rulesFinder.find()) {
         await bulkMigrateLegacyActions({ context, rules: response.saved_objects });
@@ -195,8 +208,13 @@ const bulkDeleteWithOCC = async (
     await untrackRuleAlerts(context, id, attributes as RawRule);
   }
 
-  const result = await withSpan(
-    { name: 'unsecuredSavedObjectsClient.bulkDelete', type: 'rules' },
+  const result = await withActiveSpan(
+    'unsecuredSavedObjectsClient.bulkDelete',
+    {
+      attributes: {
+        [ATTR_SPAN_TYPE]: 'rules',
+      },
+    },
     () =>
       bulkDeleteRulesSo({
         savedObjectsClient: context.unsecuredSavedObjectsClient,

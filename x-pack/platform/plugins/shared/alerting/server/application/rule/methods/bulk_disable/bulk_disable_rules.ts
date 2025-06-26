@@ -8,10 +8,11 @@ import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObjectsBulkUpdateObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
 import Boom from '@hapi/boom';
-import { withSpan } from '@kbn/apm-utils';
 import pMap from 'p-map';
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { withActiveSpan } from '@kbn/tracing';
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { RawRule, SanitizedRule } from '../../../../types';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
@@ -66,8 +67,9 @@ export const bulkDisableRules = async <Params extends RuleParams>(
     action: 'DISABLE',
   });
 
-  const { errors, rules, accListSpecificForBulkOperation } = await withSpan(
-    { name: 'retryIfBulkOperationConflicts', type: 'rules' },
+  const { errors, rules, accListSpecificForBulkOperation } = await withActiveSpan(
+    'retryIfBulkOperationConflicts',
+    { attributes: { [ATTR_SPAN_TYPE]: 'rules' } },
     () =>
       retryIfBulkOperationConflicts({
         action: 'DISABLE',
@@ -133,10 +135,10 @@ const bulkDisableRulesWithOCC = async (
     untrack: boolean;
   }
 ) => {
-  const rulesFinder = await withSpan(
+  const rulesFinder = await withActiveSpan(
+    'encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser',
     {
-      name: 'encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser',
-      type: 'rules',
+      attributes: { [ATTR_SPAN_TYPE]: 'rules' },
     },
     () =>
       context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>({
@@ -152,8 +154,9 @@ const bulkDisableRulesWithOCC = async (
   const ruleNameToRuleIdMapping: Record<string, string> = {};
   const username = await context.getUserName();
 
-  await withSpan(
-    { name: 'Get rules, collect them and their attributes', type: 'rules' },
+  await withActiveSpan(
+    'Get rules, collect them and their attributes',
+    { attributes: { [ATTR_SPAN_TYPE]: 'rules' } },
     async () => {
       for await (const response of rulesFinder.find()) {
         await bulkMigrateLegacyActions({ context, rules: response.saved_objects });
@@ -227,8 +230,9 @@ const bulkDisableRulesWithOCC = async (
   // everywhere when it should be SavedObjectsBulkCreateObject. We need to fix it in
   // bulk_disable, bulk_enable, etc. to fix this cast
 
-  const result = await withSpan(
-    { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
+  const result = await withActiveSpan(
+    'unsecuredSavedObjectsClient.bulkCreate',
+    { attributes: { [ATTR_SPAN_TYPE]: 'rules' } },
     () =>
       bulkDisableRulesSo({
         savedObjectsClient: context.unsecuredSavedObjectsClient,
@@ -288,34 +292,38 @@ const tryToDisableTasks = async ({
   logger: Logger;
   taskManager: TaskManagerStartContract;
 }) => {
-  return await withSpan({ name: 'taskManager.bulkDisable', type: 'rules' }, async () => {
-    if (taskIdsToDisable.length > 0) {
-      try {
-        const resultFromDisablingTasks = await taskManager.bulkDisable(
-          taskIdsToDisable,
-          taskIdsToClearState
-        );
-        if (resultFromDisablingTasks.tasks.length) {
-          logger.debug(
-            `Successfully disabled schedules for underlying tasks: ${resultFromDisablingTasks.tasks
-              .map((task) => task.id)
-              .join(', ')}`
+  return await withActiveSpan(
+    'taskManager.bulkDisable',
+    { attributes: { [ATTR_SPAN_TYPE]: 'rules' } },
+    async () => {
+      if (taskIdsToDisable.length > 0) {
+        try {
+          const resultFromDisablingTasks = await taskManager.bulkDisable(
+            taskIdsToDisable,
+            taskIdsToClearState
           );
-        }
-        if (resultFromDisablingTasks.errors.length) {
+          if (resultFromDisablingTasks.tasks.length) {
+            logger.debug(
+              `Successfully disabled schedules for underlying tasks: ${resultFromDisablingTasks.tasks
+                .map((task) => task.id)
+                .join(', ')}`
+            );
+          }
+          if (resultFromDisablingTasks.errors.length) {
+            logger.error(
+              `Failure to disable schedules for underlying tasks: ${resultFromDisablingTasks.errors
+                .map((error) => error.id)
+                .join(', ')}`
+            );
+          }
+        } catch (error) {
           logger.error(
-            `Failure to disable schedules for underlying tasks: ${resultFromDisablingTasks.errors
-              .map((error) => error.id)
-              .join(', ')}`
+            `Failure to disable schedules for underlying tasks: ${taskIdsToDisable.join(
+              ', '
+            )}. TaskManager bulkDisable failed with Error: ${error.message}`
           );
         }
-      } catch (error) {
-        logger.error(
-          `Failure to disable schedules for underlying tasks: ${taskIdsToDisable.join(
-            ', '
-          )}. TaskManager bulkDisable failed with Error: ${error.message}`
-        );
       }
     }
-  });
+  );
 };

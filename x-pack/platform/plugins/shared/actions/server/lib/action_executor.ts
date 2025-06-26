@@ -14,13 +14,15 @@ import {
 } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
-import { withSpan } from '@kbn/apm-utils';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { withActiveSpan } from '@kbn/tracing';
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
+import { SpanStatusCode } from '@opentelemetry/api';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
 import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
@@ -376,12 +378,12 @@ export class ActionExecutor {
       throw new Error('ActionExecutor not initialized');
     }
 
-    return withSpan(
+    return withActiveSpan(
+      executeLabel,
       {
-        name: executeLabel,
-        type: 'actions',
-        labels: {
-          actions_connector_id: actionId,
+        attributes: {
+          [ATTR_SPAN_TYPE]: 'actions',
+          'labels.actions_connector_id': actionId,
         },
       },
       async (span) => {
@@ -440,10 +442,8 @@ export class ActionExecutor {
         }
 
         if (span) {
-          span.name = `${executeLabel} ${actionTypeId}`;
-          span.addLabels({
-            actions_connector_type_id: actionTypeId,
-          });
+          span.updateName(`${executeLabel} ${actionTypeId}`);
+          span.setAttribute('labels.actions_connector_type_id', actionTypeId);
         }
 
         const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
@@ -559,11 +559,11 @@ export class ActionExecutor {
           );
 
           if (result.status === 'ok') {
-            span?.setOutcome('success');
+            span?.setStatus({ code: SpanStatusCode.OK });
             event.event!.outcome = 'success';
             event.message = `action executed: ${actionLabel}`;
           } else if (result.status === 'error') {
-            span?.setOutcome('failure');
+            span?.setStatus({ code: SpanStatusCode.ERROR });
             event.event!.outcome = 'failure';
             event.message = `action execution failure: ${actionLabel}`;
             event.error = event.error || {};
@@ -576,7 +576,7 @@ export class ActionExecutor {
             }
             logger.warn(`action execution failure: ${actionLabel}: ${event.error.message}`);
           } else {
-            span?.setOutcome('failure');
+            span?.setStatus({ code: SpanStatusCode.ERROR });
             event.event!.outcome = 'failure';
             event.message = `action execution returned unexpected result: ${actionLabel}: "${result.status}"`;
             event.error = event.error || {};

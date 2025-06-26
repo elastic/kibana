@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import apm from 'elastic-apm-node';
 import { Observable, fromEventPattern, lastValueFrom, of, throwError } from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs';
 
@@ -27,6 +26,7 @@ import {
 } from '@kbn/reporting-export-types-pdf-common';
 import { ExportType, REPORTING_TRANSACTION_TYPE, RunTaskOpts } from '@kbn/reporting-server';
 
+import { tracingApi } from '@kbn/tracing';
 import { getCustomLogo } from './get_custom_logo';
 import { getFullUrls } from './get_full_urls';
 import { getTracker } from './pdf_tracker';
@@ -77,8 +77,11 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
     stream,
   }: RunTaskOpts<TaskPayloadPDF>) => {
     const logger = this.logger.get(`execute-job:${jobId}`);
-    const apmTrans = apm.startTransaction('execute-job-pdf', REPORTING_TRANSACTION_TYPE);
-    const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
+    const apmTrans = tracingApi?.legacy.startTransaction(
+      'execute-job-pdf',
+      REPORTING_TRANSACTION_TYPE
+    );
+    const apmGetAssets = tracingApi?.legacy.startSpan('get-assets', 'setup');
     let apmGeneratePdf: { end: () => void } | null | undefined;
 
     const process$: Observable<TaskRunResult> = of(1).pipe(
@@ -92,7 +95,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
         const { browserTimezone, layout, title } = job;
         apmGetAssets?.end();
 
-        apmGeneratePdf = apmTrans.startSpan('generate-pdf-pipeline', 'execute');
+        apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
 
         const tracker = getTracker();
         tracker.startScreenshots();
@@ -157,7 +160,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
 
     const stop$ = fromEventPattern(cancellationToken.on);
 
-    apmTrans.end();
+    apmTrans?.span.end();
     return lastValueFrom(process$.pipe(takeUntil(stop$)));
   };
 }

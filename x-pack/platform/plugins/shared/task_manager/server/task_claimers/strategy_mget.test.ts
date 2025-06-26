@@ -28,7 +28,6 @@ import { mockLogger } from '../test_utils';
 import type { OwnershipClaimingOpts, TaskClaimingOpts } from '../queries/task_claiming';
 import { TaskClaiming, TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
 import { taskStoreMock } from '../task_store.mock';
-import apm from 'elastic-apm-node';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import type { ClaimOwnershipResult } from '.';
 import type { FillPoolResult } from '../lib/fill_pool';
@@ -38,6 +37,8 @@ import {
   createDiscoveryServiceMock,
   createFindSO,
 } from '../kibana_discovery_service/mock_kibana_discovery_service';
+import { tracingApi } from '@kbn/tracing';
+import { createMockedTracingApi } from '@kbn/tracing-test-utils';
 
 jest.mock('../constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
@@ -52,6 +53,12 @@ jest.mock('../constants', () => ({
     'sampleTaskSharedConcurrencyType2',
   ],
 }));
+
+jest.mock('@kbn/tracing', () => {
+  return {
+    tracingApi: createMockedTracingApi(),
+  };
+});
 
 let fakeTimer: sinon.SinonFakeTimers;
 const taskManagerLogger = mockLogger();
@@ -129,7 +136,7 @@ describe('TaskClaiming', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest
-      .spyOn(apm, 'startTransaction')
+      .spyOn(tracingApi!.legacy, 'startTransaction')
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .mockImplementation(() => mockApmTrans as any);
@@ -238,7 +245,7 @@ describe('TaskClaiming', () => {
       }
       const result = unwrap(resultOrErr) as ClaimOwnershipResult;
 
-      expect(apm.startTransaction).toHaveBeenCalledWith(
+      expect(tracingApi!.legacy.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_MARK_AS_CLAIMED,
         TASK_MANAGER_TRANSACTION_TYPE
       );
@@ -291,7 +298,7 @@ describe('TaskClaiming', () => {
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Oh no]`);
 
-      expect(apm.startTransaction).toHaveBeenCalledWith(
+      expect(tracingApi!.legacy.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_MARK_AS_CLAIMED,
         TASK_MANAGER_TRANSACTION_TYPE
       );
@@ -375,7 +382,7 @@ describe('TaskClaiming', () => {
 
       const result = unwrap(resultOrErr) as ClaimOwnershipResult;
 
-      expect(apm.startTransaction).toHaveBeenCalledWith(
+      expect(tracingApi!.legacy.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_MARK_AS_CLAIMED,
         TASK_MANAGER_TRANSACTION_TYPE
       );
@@ -474,7 +481,7 @@ describe('TaskClaiming', () => {
 
       const result = unwrap(resultOrErr) as ClaimOwnershipResult;
 
-      expect(apm.startTransaction).toHaveBeenCalledWith(
+      expect(tracingApi!.legacy.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_MARK_AS_CLAIMED,
         TASK_MANAGER_TRANSACTION_TYPE
       );
@@ -540,7 +547,7 @@ describe('TaskClaiming', () => {
 
       const result = unwrap(resultOrErr) as ClaimOwnershipResult;
 
-      expect(apm.startTransaction).toHaveBeenCalledWith(
+      expect(tracingApi!.legacy.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_MARK_AS_CLAIMED,
         TASK_MANAGER_TRANSACTION_TYPE
       );
@@ -633,7 +640,7 @@ describe('TaskClaiming', () => {
 
       const result = unwrap(resultOrErr) as ClaimOwnershipResult;
 
-      expect(apm.startTransaction).toHaveBeenCalledWith(
+      expect(tracingApi!.legacy.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_MARK_AS_CLAIMED,
         TASK_MANAGER_TRANSACTION_TYPE
       );
@@ -726,7 +733,7 @@ describe('TaskClaiming', () => {
 
       const result = unwrap(resultOrErr) as ClaimOwnershipResult;
 
-      expect(apm.startTransaction).toHaveBeenCalledWith(
+      expect(tracingApi!.legacy.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_MARK_AS_CLAIMED,
         TASK_MANAGER_TRANSACTION_TYPE
       );
@@ -825,7 +832,7 @@ describe('TaskClaiming', () => {
 
       const result = unwrap(resultOrErr) as ClaimOwnershipResult;
 
-      expect(apm.startTransaction).toHaveBeenCalledWith(
+      expect(tracingApi!.legacy.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_MARK_AS_CLAIMED,
         TASK_MANAGER_TRANSACTION_TYPE
       );
@@ -1114,7 +1121,7 @@ describe('TaskClaiming', () => {
 
       const result = unwrap(resultOrErr) as ClaimOwnershipResult;
 
-      expect(apm.startTransaction).toHaveBeenCalledWith(
+      expect(tracingApi!.legacy.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_MARK_AS_CLAIMED,
         TASK_MANAGER_TRANSACTION_TYPE
       );
@@ -1242,7 +1249,7 @@ describe('TaskClaiming', () => {
 
       const result = unwrap(resultOrErr) as ClaimOwnershipResult;
 
-      expect(apm.startTransaction).toHaveBeenCalledWith(
+      expect(tracingApi!.legacy.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_MARK_AS_CLAIMED,
         TASK_MANAGER_TRANSACTION_TYPE
       );
@@ -1362,7 +1369,7 @@ describe('TaskClaiming', () => {
         taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"oh no"`);
 
-      expect(apm.startTransaction).toHaveBeenCalledWith(
+      expect(tracingApi!.legacy.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_MARK_AS_CLAIMED,
         TASK_MANAGER_TRANSACTION_TYPE
       );
@@ -1482,7 +1489,7 @@ describe('TaskClaiming', () => {
 
       const result = unwrap(resultOrErr) as ClaimOwnershipResult;
 
-      expect(apm.startTransaction).toHaveBeenCalledWith(
+      expect(tracingApi!.legacy.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_MARK_AS_CLAIMED,
         TASK_MANAGER_TRANSACTION_TYPE
       );
@@ -1615,7 +1622,7 @@ describe('TaskClaiming', () => {
 
       const result = unwrap(resultOrErr) as ClaimOwnershipResult;
 
-      expect(apm.startTransaction).toHaveBeenCalledWith(
+      expect(tracingApi!.legacy.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_MARK_AS_CLAIMED,
         TASK_MANAGER_TRANSACTION_TYPE
       );
@@ -1725,7 +1732,7 @@ describe('TaskClaiming', () => {
         taskClaiming.claimAvailableTasksIfCapacityIsAvailable({ claimOwnershipUntil: new Date() })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"oh no"`);
 
-      expect(apm.startTransaction).toHaveBeenCalledWith(
+      expect(tracingApi!.legacy.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_MARK_AS_CLAIMED,
         TASK_MANAGER_TRANSACTION_TYPE
       );
@@ -1837,7 +1844,7 @@ describe('TaskClaiming', () => {
 
       const result = unwrap(resultOrErr) as ClaimOwnershipResult;
 
-      expect(apm.startTransaction).toHaveBeenCalledWith(
+      expect(tracingApi!.legacy.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_MARK_AS_CLAIMED,
         TASK_MANAGER_TRANSACTION_TYPE
       );

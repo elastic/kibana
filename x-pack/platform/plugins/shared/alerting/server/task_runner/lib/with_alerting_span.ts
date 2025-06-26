@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { withSpan } from '@kbn/apm-utils';
+import { withActiveSpan } from '@kbn/tracing';
 
 export async function withAlertingSpan<T>(name: string, cb: () => Promise<T>): Promise<T> {
-  return withSpan({ name, type: 'rule run', labels: { plugin: 'alerting' } }, cb);
+  return withActiveSpan(name, { attributes: { 'labels.plugin': 'alerting' } }, cb);
 }

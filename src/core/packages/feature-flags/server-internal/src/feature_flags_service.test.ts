@@ -8,13 +8,18 @@
  */
 
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
-import apm from 'elastic-apm-node';
 import { type Client, OpenFeature, type Provider } from '@openfeature/server-sdk';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
+import { tracingApi } from '@kbn/tracing';
 import { FeatureFlagsService } from '..';
 import { FeatureFlagsConfig } from './feature_flags_config';
+import { createMockedTracingApi } from '@kbn/tracing-test-utils';
+
+jest.mock('@kbn/tracing', () => ({
+  tracingApi: createMockedTracingApi(),
+}));
 
 describe('FeatureFlagsService Server', () => {
   let featureFlagsService: FeatureFlagsService;
@@ -160,7 +165,7 @@ describe('FeatureFlagsService Server', () => {
       addHandlerSpy = jest.spyOn(featureFlagsClient, 'addHandler');
       featureFlagsService.setup();
       startContract = featureFlagsService.start();
-      apmSpy = jest.spyOn(apm, 'addLabels');
+      apmSpy = jest.spyOn(tracingApi!.legacy, 'addLabels');
     });
 
     // We don't need to test the client, just our APIs, so testing that it returns the fallback value should be enough.

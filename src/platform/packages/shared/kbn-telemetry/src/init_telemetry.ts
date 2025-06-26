@@ -8,25 +8,29 @@
  */
 import { loadConfiguration } from '@kbn/apm-config-loader';
 import { initTracing } from '@kbn/tracing';
+import { initMetrics } from '@kbn/metrics';
+import { resourceFromAttributes } from '@opentelemetry/resources';
+import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { AgentConfigOptions } from '@kbn/telemetry-config';
+import { assign } from 'lodash';
+
+interface InitTelemetryOptions {
+  isDistributable?: boolean;
+  agentConfig?: AgentConfigOptions;
+}
 /**
  *
- * Initializes OpenTelemetry (currently only tracing)
- *
- * @param argv                Process arguments
- * @param rootDir             Root dir of Kibana repo
- * @param isDistributable     Whether this is a distributable build
- * @param serviceName         The service name used in resource attributes
- * @returns                   A function that can be called on shutdown and allows exporters to flush their queue.
+ * Initializes OpenTelemetry tracing & metrics
  */
-export const initTelemetry = (
-  argv: string[],
-  rootDir: string,
-  isDistributable: boolean,
-  serviceName: string
-) => {
-  const apmConfigLoader = loadConfiguration(argv, rootDir, isDistributable);
 
-  const apmConfig = apmConfigLoader.getConfig(serviceName);
+export const initTelemetry = (
+  serviceName: string,
+  { isDistributable = false, agentConfig }: InitTelemetryOptions = {}
+) => {
+  const apmConfigLoader = loadConfiguration(process.argv, REPO_ROOT, isDistributable);
+
+  const apmConfig = assign(apmConfigLoader.getConfig(serviceName), agentConfig ?? {});
 
   const telemetryConfig = apmConfigLoader.getTelemetryConfig();
 
@@ -38,12 +42,26 @@ export const initTelemetry = (
   // tracing is enabled only when telemetry is enabled and tracing is not disabled
   const tracingEnabled = telemetryEnabled && telemetryConfig?.tracing?.enabled;
 
-  if (!tracingEnabled) {
-    return async () => {};
+  const metricsEnabled = telemetryEnabled && telemetryConfig?.metrics?.enabled;
+
+  const resource = resourceFromAttributes({
+    [ATTR_SERVICE_NAME]: apmConfig.serviceName,
+    [ATTR_SERVICE_VERSION]: apmConfig.serviceVersion,
+  });
+
+  if (metricsEnabled) {
+    initMetrics({
+      metricsConfig: telemetryConfig.metrics,
+      apmConfig,
+      resource,
+    });
   }
 
-  return initTracing({
-    tracingConfig: telemetryConfig.tracing,
-    apmConfig,
-  });
+  if (tracingEnabled) {
+    initTracing({
+      tracingConfig: telemetryConfig.tracing,
+      apmConfig,
+      resource,
+    });
+  }
 };
