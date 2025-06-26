@@ -46,7 +46,7 @@ export const TimelineWrapper: React.FC<TimelineWrapperProps> = React.memo(
     }, [dispatch, timelineId]);
     const { closeFlyout } = useExpandableFlyoutApi();
 
-    // pressing the ESC key closes the timeline portal
+    // pressing the ESC key closes the timeline portal unless a flyout is opened on top of it
     const onKeyDown = useCallback(
       (ev: KeyboardEvent) => {
         if (ev.key === keys.ESCAPE) {
