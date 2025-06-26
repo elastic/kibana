@@ -25,7 +25,7 @@ const referenceSchema = schema.object(
 
 const referencesSchema = schema.arrayOf(referenceSchema);
 
-const lensAttributesSchema = schema.object(
+export const lensAttributesSchema = schema.object(
   {
     title: schema.string(),
     description: schema.maybe(schema.nullable(schema.string())),
@@ -38,7 +38,7 @@ const lensAttributesSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-const lensSavedObjectSchema = schema.object(
+export const lensSavedObjectSchema = schema.object(
   {
     id: schema.string(),
     type: schema.string(),
@@ -54,7 +54,7 @@ const lensSavedObjectSchema = schema.object(
   { unknowns: 'allow' }
 );
 
-const getResultSchema = schema.object(
+const lensGetResultSchema = schema.object(
   {
     item: lensSavedObjectSchema,
     meta: schema.object(
@@ -78,10 +78,27 @@ const getResultSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-const createOptionsSchema = schema.object({
+export const lensCreateOptionsSchema = schema.object({
   overwrite: schema.maybe(schema.boolean()),
   references: schema.maybe(referencesSchema),
 });
+
+export const lensSearchOptionsSchema = schema.maybe(
+  schema.object(
+    {
+      searchFields: schema.maybe(schema.arrayOf(schema.string())),
+      types: schema.maybe(schema.arrayOf(schema.string())),
+    },
+    { unknowns: 'forbid' }
+  )
+);
+
+const lensCreateResultSchema = schema.object(
+  {
+    item: lensSavedObjectSchema,
+  },
+  { unknowns: 'forbid' }
+);
 
 // Content management service definition.
 // We need it for BWC support between different versions of the content
@@ -89,52 +106,44 @@ export const serviceDefinition: ServicesDefinition = {
   get: {
     out: {
       result: {
-        schema: getResultSchema,
+        schema: lensGetResultSchema,
       },
     },
   },
   create: {
     in: {
-      options: {
-        schema: createOptionsSchema,
-      },
       data: {
         schema: lensAttributesSchema,
+      },
+      options: {
+        schema: lensCreateOptionsSchema,
       },
     },
     out: {
       result: {
-        schema: schema.object(
-          {
-            item: lensSavedObjectSchema,
-          },
-          { unknowns: 'forbid' }
-        ),
+        schema: lensCreateResultSchema,
       },
     },
   },
   update: {
     in: {
-      options: {
-        schema: createOptionsSchema, // same schema as "create"
-      },
       data: {
         schema: lensAttributesSchema,
+      },
+      options: {
+        schema: lensCreateOptionsSchema,
+      },
+    },
+    out: {
+      result: {
+        schema: lensCreateResultSchema,
       },
     },
   },
   search: {
     in: {
       options: {
-        schema: schema.maybe(
-          schema.object(
-            {
-              searchFields: schema.maybe(schema.arrayOf(schema.string())),
-              types: schema.maybe(schema.arrayOf(schema.string())),
-            },
-            { unknowns: 'forbid' }
-          )
-        ),
+        schema: lensSearchOptionsSchema,
       },
     },
   },
