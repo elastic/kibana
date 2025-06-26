@@ -43,7 +43,7 @@ export const ActionsHeader = ({ maxWidth }: { maxWidth: number }) => {
           iconProps={{
             'data-test-subj': 'unifiedDataTable_actionsColumnHeaderIcon',
           }}
-          type="iInCircle"
+          type="info"
           content={actionsText}
         />
       )}

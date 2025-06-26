@@ -277,6 +277,20 @@
           },
           {
             "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.searchHomepage",
+            "type": "Object",
+            "tags": [],
+            "label": "searchHomepage",
+            "description": [],
+            "signature": [
+              "{ readonly visitSearchLabs: string; readonly notebooksExamples: string; readonly customerEngineerRequestForm: string; readonly elasticCommunity: string; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
             "id": "def-common.DocLinks.metricbeat",
             "type": "Object",
             "tags": [],
@@ -501,7 +515,7 @@
             "label": "siem",
             "description": [],
             "signature": [
-              "{ readonly privileges: string; readonly guide: string; readonly gettingStarted: string; readonly ml: string; readonly ruleChangeLog: string; readonly detectionsReq: string; readonly networkMap: string; readonly troubleshootGaps: string; readonly ruleApiOverview: string; readonly configureAlertSuppression: string; }"
+              "{ readonly privileges: string; readonly guide: string; readonly gettingStarted: string; readonly ml: string; readonly ruleChangeLog: string; readonly detectionsReq: string; readonly networkMap: string; readonly troubleshootGaps: string; readonly gapsTable: string; readonly ruleApiOverview: string; readonly configureAlertSuppression: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -655,7 +669,7 @@
             "label": "observability",
             "description": [],
             "signature": [
-              "{ readonly guide: string; readonly infrastructureThreshold: string; readonly logsThreshold: string; readonly metricsThreshold: string; readonly customThreshold: string; readonly monitorStatus: string; readonly monitorUptime: string; readonly tlsCertificate: string; readonly uptimeDurationAnomaly: string; readonly monitorLogs: string; readonly analyzeMetrics: string; readonly monitorUptimeSynthetics: string; readonly userExperience: string; readonly createAlerts: string; readonly syntheticsAlerting: string; readonly syntheticsCommandReference: string; readonly syntheticsProjectMonitors: string; readonly syntheticsMigrateFromIntegration: string; readonly slo: string; readonly sloBurnRateRule: string; readonly aiAssistant: string; readonly elasticManagedLlm: string; readonly elasticManagedLlmUsageCost: string; }"
+              "{ readonly guide: string; readonly infrastructureThreshold: string; readonly logsThreshold: string; readonly metricsThreshold: string; readonly customThreshold: string; readonly monitorStatus: string; readonly monitorUptime: string; readonly tlsCertificate: string; readonly uptimeDurationAnomaly: string; readonly monitorLogs: string; readonly logsStreams: string; readonly analyzeMetrics: string; readonly monitorUptimeSynthetics: string; readonly userExperience: string; readonly createAlerts: string; readonly syntheticsAlerting: string; readonly syntheticsCommandReference: string; readonly syntheticsProjectMonitors: string; readonly syntheticsMigrateFromIntegration: string; readonly slo: string; readonly sloBurnRateRule: string; readonly aiAssistant: string; readonly elasticManagedLlm: string; readonly elasticManagedLlmUsageCost: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -1062,6 +1076,20 @@
             "description": [],
             "signature": [
               "{ readonly queryRulesAPIDocumentation: string; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.datasetQuality",
+            "type": "Object",
+            "tags": [],
+            "label": "datasetQuality",
+            "description": [],
+            "signature": [
+              "{ readonly failureStore: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
