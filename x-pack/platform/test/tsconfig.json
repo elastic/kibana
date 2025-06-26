@@ -107,6 +107,5 @@
     "@kbn/repo-info",
     "@kbn/dev-cli-errors",
     "@kbn/journeys",
-    "@kbn/test-suites-xpack-platform",
   ]
 }
