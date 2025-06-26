@@ -14,12 +14,13 @@ const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
 import { CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER } from '@kbn/ml-ui-actions';
 import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { CONTROLLED_BY_SINGLE_METRIC_VIEWER_FILTER } from '@kbn/ml-common-constants/ui_actions';
+import type { MlPluginStart } from '@kbn/ml-plugin-contracts';
 
 // avoid importing from plugin root
 // import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 const ADD_PANEL_TRIGGER = 'ADD_PANEL_TRIGGER';
 
-import type { MlPluginStart, MlStartDependencies } from '../plugin';
+import type { MlStartDependencies } from '../plugin';
 import { createApplyEntityFieldFiltersAction } from './apply_entity_filters_action';
 import { createApplyInfluencerFiltersAction } from './apply_influencer_filters_action';
 import { createApplyTimeRangeSelectionAction } from './apply_time_range_action';

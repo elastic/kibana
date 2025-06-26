@@ -11,8 +11,9 @@ import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
 import { ML_ALERT_TYPES } from '@kbn/ml-common-types/alerts';
 import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-common-types/alerts';
 import { ML_APP_ROUTE, PLUGIN_ID } from '@kbn/ml-common-constants/app';
+import { formatExplorerUrl } from '@kbn/ml-locator/formatters/anomaly_detection';
+
 import type { MlCoreSetup } from '../plugin';
-import { formatExplorerUrl } from '../locator/formatters/anomaly_detection';
 
 import { registerJobsHealthAlertingRule } from './jobs_health_rule';
 import { registerAnomalyDetectionRule } from './anomaly_detection_rule';
