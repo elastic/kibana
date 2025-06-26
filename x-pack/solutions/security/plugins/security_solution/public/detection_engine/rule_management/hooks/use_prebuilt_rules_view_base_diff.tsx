@@ -50,7 +50,7 @@ export const usePrebuiltRulesViewBaseDiff = ({
 
   return {
     baseVersionFlyout:
-      isFlyoutOpen && !isLoading && data != null ? (
+      isFlyoutOpen && !isLoading && data != null && doesBaseVersionExist ? (
         <PrebuiltRulesBaseVersionFlyout
           diff={data.diff}
           currentRule={data.current_version}

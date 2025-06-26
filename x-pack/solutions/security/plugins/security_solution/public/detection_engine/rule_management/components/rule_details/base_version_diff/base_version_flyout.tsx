@@ -43,7 +43,8 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
   isReverting,
   onRevert,
 }: PrebuiltRulesBaseVersionFlyoutComponentProps): JSX.Element {
-  useConcurrecyControl(currentRule);
+  useConcurrencyControl(currentRule);
+
   const { mutateAsync: revertPrebuiltRule, isLoading } = useRevertPrebuiltRule();
   const subHeader = useMemo(
     () => <BaseVersionDiffFlyoutSubheader currentRule={currentRule} diff={diff} />,
@@ -155,14 +156,22 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
   );
 });
 
-const useConcurrecyControl = (currentRule: RuleResponse) => {
+/**
+ * We should detect situations when the rule is edited or upgraded concurrently.
+ *
+ * `revision` is the indication for any changes.
+ * If `rule.revision` has suddenly increased then it means we hit a concurrency issue.
+ *
+ * `rule.revision` gets bumped upon rule upgrade as well.
+ */
+function useConcurrencyControl(rule: RuleResponse): void {
   const concurrencyControl = useRef<PrebuiltRuleConcurrencyControl>();
   const { addWarning } = useAppToasts();
 
   useEffect(() => {
     const concurrency = concurrencyControl.current;
 
-    if (concurrency != null && concurrency.revision !== currentRule.revision) {
+    if (concurrency != null && concurrency.revision !== rule.revision) {
       addWarning({
         title: i18n.NEW_REVISION_DETECTED_WARNING,
         text: i18n.NEW_REVISION_DETECTED_WARNING_MESSAGE,
@@ -170,7 +179,7 @@ const useConcurrecyControl = (currentRule: RuleResponse) => {
     }
 
     concurrencyControl.current = {
-      revision: currentRule.revision,
+      revision: rule.revision,
     };
-  }, [addWarning, currentRule.revision]);
-};
+  }, [addWarning, rule.revision]);
+}
