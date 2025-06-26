@@ -1,7 +1,14 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
 import { setupKb } from '../utils/model_and_inference';
 import { clearKnowledgeBase, getKnowledgeBaseEntriesFromEs } from '../utils/knowledge_base';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import expect from '@kbn/expect';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const es = getService('es');
