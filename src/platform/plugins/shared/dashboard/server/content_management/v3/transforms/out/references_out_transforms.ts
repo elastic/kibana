@@ -15,7 +15,7 @@ export function transformReferencesOut(references: SavedObjectReference[]): Save
   });
 }
 
-// < 9.2 legach saved object ref name create with `${panelId}:panel_${panelId}`
+// < 9.2 legach saved object ref name shape `${panelId}:panel_${panelId}`
 const LEGACY_SAVED_OBJECT_REF_NAME_PREFIX = 'panel_';
 
 function isLegacySavedObjectRef(ref: SavedObjectReference) {
