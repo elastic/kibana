@@ -399,7 +399,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                 <EuiIconTip
                   size="s"
                   color="subdued"
-                  type="questionInCircle"
+                  type="question"
                   className="eui-alignTop"
                   data-test-subj="otherFieldsHelpTooltip"
                   aria-label={i18n.translate(
