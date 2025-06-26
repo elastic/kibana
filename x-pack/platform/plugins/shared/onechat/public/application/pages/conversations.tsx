@@ -7,11 +7,11 @@
 
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { OnechatChatView } from '../components/chat/chat_view';
+import { OnechatConversationsView } from '../components/conversations/conversations_view';
 
 const newConversationId = 'new';
 
-export const OnechatChatPage: React.FC = () => {
+export const OnechatConversationsPage: React.FC = () => {
   const { conversationId: conversationIdParam } = useParams<{ conversationId?: string }>();
 
   // TODO: Add logic to resume most recent conversation when no conversationId is provided
@@ -20,5 +20,5 @@ export const OnechatChatPage: React.FC = () => {
     return conversationIdParam === newConversationId ? undefined : conversationIdParam;
   }, [conversationIdParam]);
 
-  return <OnechatChatView conversationId={conversationId} />;
+  return <OnechatConversationsView conversationId={conversationId} />;
 };

@@ -11,9 +11,9 @@ import { EuiFlexItem, EuiPanel, useEuiTheme, euiScrollBarStyles } from '@elastic
 import { useChat } from '../../hooks/use_chat';
 import { useConversation } from '../../hooks/use_conversation';
 import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
-import { ChatInputForm } from './chat_input_form';
-import { ChatConversation } from './conversation/chat_conversation';
-import { ChatNewConversationPrompt } from './chat_new_conversation_prompt';
+import { ConversationInputForm } from './conversation_input_form';
+import { ConversationRounds } from './conversation_rounds/conversation_rounds';
+import { NewConversationPrompt } from './new_conversation_prompt';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -31,12 +31,12 @@ const scrollContainerClassName = (scrollBarStyles: string) => css`
   ${scrollBarStyles}
 `;
 
-interface ChatProps {
+interface ConversationProps {
   agentId: string;
   conversationId: string | undefined;
 }
 
-export const Chat: React.FC<ChatProps> = ({ agentId, conversationId }) => {
+export const Conversation: React.FC<ConversationProps> = ({ agentId, conversationId }) => {
   const { conversation } = useConversation({ conversationId });
   const { sendMessage } = useChat({
     conversationId,
@@ -66,7 +66,7 @@ export const Chat: React.FC<ChatProps> = ({ agentId, conversationId }) => {
   );
 
   if (!conversationId && (!conversation || conversation.rounds.length === 0)) {
-    return <ChatNewConversationPrompt onSubmit={onSubmit} />;
+    return <NewConversationPrompt onSubmit={onSubmit} />;
   }
 
   return (
@@ -74,12 +74,12 @@ export const Chat: React.FC<ChatProps> = ({ agentId, conversationId }) => {
       <EuiFlexItem grow className={scrollContainerClassName(scrollBarStyles)}>
         <div ref={scrollContainerRef} className={fullHeightClassName}>
           <EuiPanel hasBorder={false} hasShadow={false} className={conversationPanelClass}>
-            <ChatConversation conversationRounds={conversation?.rounds ?? []} />
+            <ConversationRounds conversationRounds={conversation?.rounds ?? []} />
           </EuiPanel>
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <ChatInputForm disabled={!agentId} loading={false} onSubmit={onSubmit} />
+        <ConversationInputForm disabled={!agentId} loading={false} onSubmit={onSubmit} />
       </EuiFlexItem>
     </>
   );

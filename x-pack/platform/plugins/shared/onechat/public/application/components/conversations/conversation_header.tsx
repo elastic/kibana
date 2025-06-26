@@ -19,11 +19,11 @@ import {
 import { useConversation } from '../../hooks/use_conversation';
 import { chatCommonLabels } from './i18n';
 
-interface ChatHeaderProps {
+interface ConversationHeaderProps {
   conversationId: string | undefined;
 }
 
-export const ChatHeader: React.FC<ChatHeaderProps> = ({ conversationId }) => {
+export const ConversationHeader: React.FC<ConversationHeaderProps> = ({ conversationId }) => {
   const { conversation, isLoading: isConvLoading } = useConversation({ conversationId });
 
   const { euiTheme } = useEuiTheme();

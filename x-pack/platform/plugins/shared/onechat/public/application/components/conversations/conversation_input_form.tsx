@@ -17,13 +17,17 @@ import {
 } from '@elastic/eui';
 import { chatCommonLabels } from './i18n';
 
-interface ChatInputFormProps {
+interface ConversationInputFormProps {
   disabled: boolean;
   loading: boolean;
   onSubmit: (message: string) => void;
 }
 
-export const ChatInputForm: React.FC<ChatInputFormProps> = ({ disabled, loading, onSubmit }) => {
+export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({
+  disabled,
+  loading,
+  onSubmit,
+}) => {
   const [message, setMessage] = useState<string>('');
   const { euiTheme } = useEuiTheme();
 
@@ -68,7 +72,7 @@ export const ChatInputForm: React.FC<ChatInputFormProps> = ({ disabled, loading,
     >
       <EuiFlexItem className={inputFlexItemClass}>
         <EuiTextArea
-          data-test-subj="onechatAppChatInputFormTextArea"
+          data-test-subj="onechatAppConversationInputFormTextArea"
           fullWidth
           rows={1}
           value={message}
@@ -80,7 +84,7 @@ export const ChatInputForm: React.FC<ChatInputFormProps> = ({ disabled, loading,
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           aria-label="Submit"
-          data-test-subj="onechatAppChatInputFormSubmitButton"
+          data-test-subj="onechatAppConversationInputFormSubmitButton"
           iconType="kqlFunction"
           display="fill"
           size="m"

@@ -9,7 +9,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import React from 'react';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { OnechatToolsPage } from './pages/tools';
-import { OnechatChatPage } from './pages/chat';
+import { OnechatConversationsPage } from './pages/conversations';
 import { ONECHAT_TOOLS_UI_SETTING_ID } from '../../common/constants';
 
 export const OnechatRoutes: React.FC<{}> = () => {
@@ -17,16 +17,17 @@ export const OnechatRoutes: React.FC<{}> = () => {
   return (
     <Routes>
       <Route path="/conversations/:conversationId">
-        <OnechatChatPage />
-      </Route>
-      <Route path="/">
-        <OnechatChatPage />
+        <OnechatConversationsPage />
       </Route>
       {isToolsPageEnabled && (
         <Route path="/tools">
           <OnechatToolsPage />
         </Route>
       )}
+      {/* Default to conversations page */}
+      <Route path="/">
+        <OnechatConversationsPage />
+      </Route>
     </Routes>
   );
 };

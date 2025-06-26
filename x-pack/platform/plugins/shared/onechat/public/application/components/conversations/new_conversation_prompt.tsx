@@ -18,13 +18,11 @@ import {
 } from '@elastic/eui';
 import { chatCommonLabels } from './i18n';
 
-interface ChatNewConversationPromptProps {
+interface NewConversationPromptProps {
   onSubmit: (message: string) => void;
 }
 
-export const ChatNewConversationPrompt: React.FC<ChatNewConversationPromptProps> = ({
-  onSubmit,
-}) => {
+export const NewConversationPrompt: React.FC<NewConversationPromptProps> = ({ onSubmit }) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [message, setMessage] = useState<string>('');
   const { euiTheme } = useEuiTheme();

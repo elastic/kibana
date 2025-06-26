@@ -12,11 +12,13 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
-import { Chat } from './chat';
-import { ChatHeader } from './chat_header';
+import { Conversation } from './conversation';
+import { ConversationHeader } from './conversation_header';
 import { ConversationPanel } from './conversation_panel/conversation_panel';
 
-export const OnechatChatView: React.FC<{ conversationId?: string }> = ({ conversationId }) => {
+export const OnechatConversationsView: React.FC<{ conversationId?: string }> = ({
+  conversationId,
+}) => {
   const { navigateToOnechatUrl } = useNavigation();
 
   const { euiTheme } = useEuiTheme();
@@ -36,7 +38,7 @@ export const OnechatChatView: React.FC<{ conversationId?: string }> = ({ convers
     <KibanaPageTemplate
       offset={0}
       restrictWidth={false}
-      data-test-subj="onechatPageChat"
+      data-test-subj="onechatPageConversations"
       grow={false}
       panelled={false}
     >
@@ -56,8 +58,8 @@ export const OnechatChatView: React.FC<{ conversationId?: string }> = ({ convers
           justifyContent="center"
           responsive={false}
         >
-          <ChatHeader conversationId={conversationId} />
-          <Chat agentId={OneChatDefaultAgentId} conversationId={conversationId} />
+          <ConversationHeader conversationId={conversationId} />
+          <Conversation agentId={OneChatDefaultAgentId} conversationId={conversationId} />
         </EuiFlexGroup>
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>

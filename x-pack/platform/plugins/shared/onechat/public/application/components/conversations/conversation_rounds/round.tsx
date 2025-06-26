@@ -11,11 +11,11 @@ import { EuiPanel, EuiText, useEuiTheme, useEuiFontSize } from '@elastic/eui';
 import { ConversationRound } from '@kbn/onechat-common';
 import { RoundAnswer } from './round_answer';
 
-interface ConversationRoundProps {
+interface RoundProps {
   round: ConversationRound;
 }
 
-export const ChatConversationRound: React.FC<ConversationRoundProps> = ({ round }) => {
+export const Round: React.FC<RoundProps> = ({ round }) => {
   const { euiTheme } = useEuiTheme();
 
   const { userInput } = round;

@@ -7,17 +7,17 @@
 
 import React from 'react';
 import { ConversationRound } from '@kbn/onechat-common';
-import { ChatConversationRound } from './conversation_round';
+import { Round } from './round';
 
-interface ChatConversationProps {
+interface ConversationRoundsProps {
   conversationRounds: ConversationRound[];
 }
 
-export const ChatConversation: React.FC<ChatConversationProps> = ({ conversationRounds }) => {
+export const ConversationRounds: React.FC<ConversationRoundsProps> = ({ conversationRounds }) => {
   return (
     <>
       {conversationRounds.map((round, index) => {
-        return <ChatConversationRound key={index} round={round} />;
+        return <Round key={index} round={round} />;
       })}
     </>
   );
