@@ -30,10 +30,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DocLinksStart } from '@kbn/core/public';
+import { css } from '@emotion/react';
 import type { BaseVisType, TypesStart } from '../../vis_types';
 import { VisGroups } from '../../vis_types/vis_groups_enum';
 import type { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';
 import './group_selection.scss';
+
+const visGroupStyles = {
+  groupsCardWrapper: css({
+    position: 'relative',
+  }),
+};
 
 export interface GroupSelectionProps {
   onVisTypeSelected: (visType: BaseVisType | VisTypeAlias) => void;
@@ -236,8 +243,7 @@ const VisGroup = ({ visType, onVisTypeSelected, shouldStretch = false }: VisCard
   }, [onVisTypeSelected, visType]);
   return (
     <EuiFlexItem
-      className="visNewVisDialog__groupsCardWrapper"
-      css={shouldStretch ? { gridColumn: '1 / -1' } : null}
+      css={[shouldStretch ? { gridColumn: '1 / -1' } : null, visGroupStyles.groupsCardWrapper]}
     >
       <EuiCard
         titleSize="xs"
