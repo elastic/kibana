@@ -12,8 +12,12 @@ import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plug
 import { KUBERNETES_DASHBOARD_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { DashboardState } from '@kbn/dashboard-plugin/common';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
+import { AddKubernetesDataLink } from '../add_kubernetes_data/add_kubernetes_data';
+import { useFetchDashboardById } from '../../hooks/use_fetch_dashboard_by_id';
 
 export const RenderDashboard = ({ dashboardId }: { dashboardId: string }) => {
   const {
@@ -60,6 +64,15 @@ export const RenderDashboard = ({ dashboardId }: { dashboardId: string }) => {
     dashboard.setTimeRange({ from, to });
     dashboard.setQuery({ query: '', language: 'kuery' });
   }, [dashboard, dashboardId, from, to]);
+
+  const { data: dashboardData, status } = useFetchDashboardById(dashboardId);
+
+  if (!dashboardData && status === FETCH_STATUS.LOADING) {
+    return <EuiLoadingSpinner size="xl" />;
+  }
+  if (!dashboardData && status !== FETCH_STATUS.LOADING && dashboardId.startsWith('kubernetes')) {
+    return <AddKubernetesDataLink />;
+  }
 
   return (
     <DashboardRenderer
