@@ -13,6 +13,7 @@ import { AssistantOverlay } from '@kbn/elastic-assistant';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AssistantNavLink } from '@kbn/elastic-assistant/impl/assistant_context/assistant_nav_link';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
 import {
   ElasticAssistantPublicPluginSetupDependencies,
   ElasticAssistantPublicPluginStartDependencies,
@@ -24,19 +25,18 @@ import { licenseService } from './src/hooks/licence/use_licence';
 import { ReactQueryClientProvider } from './src/context/query_client_context/elastic_assistant_query_client_provider';
 import { AssistantSpaceIdProvider } from './src/context/assistant_space_id/assistant_space_id_provider';
 import { TelemetryService } from './src/common/lib/telemetry/telemetry_service';
-import { NavigationProvider } from '@kbn/security-solution-navigation';
 
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
 export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPublicPlugin['start']>;
 
 export class ElasticAssistantPublicPlugin
   implements
-  Plugin<
-    ElasticAssistantPublicPluginSetup,
-    ElasticAssistantPublicPluginStart,
-    ElasticAssistantPublicPluginSetupDependencies,
-    ElasticAssistantPublicPluginStartDependencies
-  >
+    Plugin<
+      ElasticAssistantPublicPluginSetup,
+      ElasticAssistantPublicPluginStart,
+      ElasticAssistantPublicPluginSetupDependencies,
+      ElasticAssistantPublicPluginStartDependencies
+    >
 {
   private readonly storage = new Storage(localStorage);
   private readonly telemetry: TelemetryService = new TelemetryService();
