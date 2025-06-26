@@ -26,9 +26,7 @@ export function service(name: string, environment: string, agentName: string): S
 export function service(options: { name: string; environment: string; agentName: string }): Service;
 
 export function service(
-  options: { name: string; environment: string; agentVersion?: string } & (
-    | { agentName: string }
-  )
+  options: { name: string; environment: string; agentVersion?: string } & { agentName: string }
 ): Service;
 
 export function service(
