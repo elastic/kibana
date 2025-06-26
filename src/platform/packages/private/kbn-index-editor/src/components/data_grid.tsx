@@ -34,12 +34,13 @@ interface ESQLDataGridProps {
   totalHits?: number;
 }
 
-const sortOrder: SortOrder[] = [];
 const DEFAULT_INITIAL_ROW_HEIGHT = 5;
 const DEFAULT_ROWS_PER_PAGE = 10;
 const ROWS_PER_PAGE_OPTIONS = [10, 25];
 
 const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
+  const [sortOrder, setSortOrder] = useState<SortOrder[]>([]);
+
   const {
     services: {
       fieldFormats,
@@ -155,6 +156,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         dataView={props.dataView}
         onSetColumns={onSetColumns}
         onUpdateRowsPerPage={setRowsPerPage}
+        onSort={(newSort) => setSortOrder(newSort as SortOrder[])}
         sort={sortOrder}
         ariaLabelledBy="lookupIndexDataGrid"
         maxDocFieldsDisplayed={100}

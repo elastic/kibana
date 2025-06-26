@@ -45,6 +45,8 @@ const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
 
 const UNDO_EMIT_MS = 500; // 0.5 seconds
 
+const DOCS_PER_FETCH = 1000;
+
 interface DocUpdate {
   id?: string;
   value: Record<string, any>;
@@ -82,11 +84,16 @@ export class IndexUpdateService {
   public readonly isSaving$: Observable<boolean> = this._isSaving$.asObservable();
 
   private readonly _isFetching$ = new BehaviorSubject<boolean>(false);
-  public readonly isFetching$: Observable<boolean> = this._isSaving$.asObservable();
+  public readonly isFetching$: Observable<boolean> = this._isFetching$.asObservable();
 
   /** ES Documents */
   private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([]);
   public readonly rows$: Observable<DataTableRecord[]> = this._rows$.asObservable();
+
+  private readonly _totalHits$ = new BehaviorSubject<number>(0);
+  public readonly totalHits$: Observable<number> = this._totalHits$.asObservable();
+
+  private readonly _refreshSubject$ = new BehaviorSubject<number>(0);
 
   private readonly _subscription = new Subscription();
 
@@ -209,8 +216,8 @@ export class IndexUpdateService {
     this._subscription.add(
       this.bufferState$
         .pipe(
-          tap(() => {
-            this._isSaving$.next(true);
+          tap((updates) => {
+            this._isSaving$.next(updates.length > 0);
           }),
           debounceTime(BUFFER_TIMEOUT_MS),
           filter((updates) => updates.length > 0),
@@ -275,6 +282,7 @@ export class IndexUpdateService {
         this.dataView$,
         // Time range updates
         this.data.query.timefilter.timefilter.getTimeUpdate$().pipe(startWith(null)),
+        this._refreshSubject$,
       ])
         .pipe(
           tap(() => {
@@ -284,7 +292,7 @@ export class IndexUpdateService {
             return from(
               this.data.search.searchSource.create({
                 index: dataView.toSpec(),
-                size: 1000, // Adjust size as needed
+                size: DOCS_PER_FETCH,
               })
             ).pipe(
               tap((searchSource) => {
@@ -306,13 +314,17 @@ export class IndexUpdateService {
         )
         .subscribe({
           next: ([response, dataView]) => {
-            const { hits } = response.rawResponse.hits;
+            const { hits, total } = response.rawResponse.hits;
 
             const resultRows: DataTableRecord[] = hits.map((hit) => {
               return buildDataTableRecord(hit, dataView);
             });
 
             this._rows$.next(resultRows);
+            // `total` can be either a number or an object of type `SearchTotalHits`.
+            // We need to explicitly narrow the type before accessing `.value`.
+            const totalHitsCount = typeof total === 'number' ? total : total?.value ?? 0;
+            this._totalHits$.next(totalHitsCount);
             this._isFetching$.next(false);
           },
           error: (error) => {
@@ -320,6 +332,15 @@ export class IndexUpdateService {
           },
         })
     );
+  }
+
+  public refresh() {
+    this._isFetching$.next(true);
+    this._refreshSubject$.next(Date.now());
+  }
+
+  public setIsFetching(isFetching: boolean) {
+    this._isFetching$.next(isFetching);
   }
 
   public setIndexName(indexName: string) {

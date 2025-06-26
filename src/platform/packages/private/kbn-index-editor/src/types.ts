@@ -40,7 +40,6 @@ export interface EditLookupIndexFlyoutDeps {
 export type FlyoutDeps = EditLookupIndexFlyoutDeps & {
   indexUpdateService: IndexUpdateService;
   fileManager: FileUploadManager;
-  messageImporter: MessageImporter;
 };
 
 /** Extended kibana context */

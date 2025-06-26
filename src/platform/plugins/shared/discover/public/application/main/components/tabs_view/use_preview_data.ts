@@ -16,24 +16,29 @@ import { TabStatus } from '@kbn/unified-tabs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import type { RuntimeStateManager } from '../../state_management/redux';
-import { selectTabRuntimeState, useInternalStateSelector } from '../../state_management/redux';
+import type { RuntimeStateManager, TabState } from '../../state_management/redux';
+import {
+  selectTabRuntimeState,
+  useInternalStateSelector,
+  selectAllTabs,
+} from '../../state_management/redux';
 import { FetchStatus } from '../../../types';
 
 export const usePreviewData = (runtimeStateManager: RuntimeStateManager) => {
-  const allTabIds = useInternalStateSelector((state) => state.tabs.allIds);
+  const allTabs = useInternalStateSelector(selectAllTabs);
+
   const previewDataMap$ = useMemo(
     () =>
       combineLatest(
-        allTabIds.reduce<Record<string, Observable<TabPreviewData>>>(
-          (acc, tabId) => ({
+        allTabs.reduce<Record<string, Observable<TabPreviewData>>>((acc, tabState) => {
+          const tabId = tabState.id;
+          return {
             ...acc,
-            [tabId]: getPreviewDataObservable(runtimeStateManager, tabId),
-          }),
-          {}
-        )
+            [tabId]: getPreviewDataObservable(runtimeStateManager, tabId, tabState.initialAppState),
+          };
+        }, {})
       ),
-    [allTabIds, runtimeStateManager]
+    [allTabs, runtimeStateManager]
   );
   const previewDataMap = useObservable(previewDataMap$);
   const getPreviewData = useCallback(
@@ -83,12 +88,20 @@ const getPreviewQuery = (query: TabPreviewData['query'] | undefined): TabPreview
   };
 };
 
-const getPreviewDataObservable = (runtimeStateManager: RuntimeStateManager, tabId: string) =>
+const getPreviewDataObservable = (
+  runtimeStateManager: RuntimeStateManager,
+  tabId: string,
+  initialAppState: TabState['initialAppState'] | undefined
+) =>
   selectTabRuntimeState(runtimeStateManager, tabId).stateContainer$.pipe(
     switchMap((tabStateContainer) => {
       if (!tabStateContainer) {
-        // TODO: show the real query for tabs which are not yet initialized
-        return of({ status: TabStatus.DEFAULT, query: DEFAULT_PREVIEW_QUERY });
+        return of({
+          status: TabStatus.DEFAULT,
+          query: initialAppState?.query
+            ? getPreviewQuery(initialAppState.query)
+            : DEFAULT_PREVIEW_QUERY,
+        });
       }
 
       const { appState } = tabStateContainer;
