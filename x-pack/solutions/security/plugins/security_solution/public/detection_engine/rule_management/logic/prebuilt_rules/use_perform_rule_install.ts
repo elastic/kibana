@@ -52,7 +52,7 @@ function handleSuccessResponse(result: PerformRuleInstallationResponseBody, toas
 
   if (result.summary.failed > 0) {
     showErrorToast({
-      title: i18n.UPGRADE_RULE_FAILED(result.summary.failed),
+      title: i18n.INSTALL_RULE_FAILED(result.summary.failed),
       fullMessage: JSON.stringify(result.errors, null, 2),
       toasts,
     });

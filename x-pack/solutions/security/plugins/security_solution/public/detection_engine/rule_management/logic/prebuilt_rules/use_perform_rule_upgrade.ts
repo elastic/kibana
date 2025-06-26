@@ -12,17 +12,15 @@ import { usePerformRulesUpgradeMutation } from '../../api/hooks/prebuilt_rules/u
 import * as i18n from './translations';
 
 export const usePerformUpgradeRules = () => {
-  // const { addError, addSuccess } = useAppToasts();
   const toasts = useToasts();
 
   return usePerformRulesUpgradeMutation({
-    onError: (err) => {
+    onError: (error) => {
       showErrorToast({
         title: i18n.RULE_UPGRADE_FAILED,
-        fullMessage: JSON.stringify(err, null, 2),
+        fullMessage: JSON.stringify(error, null, 2),
         toasts,
       });
-      // addError(err, { title: i18n.RULE_UPGRADE_FAILED });
     },
     onSuccess: (result, vars) => {
       if (vars.dry_run) {
