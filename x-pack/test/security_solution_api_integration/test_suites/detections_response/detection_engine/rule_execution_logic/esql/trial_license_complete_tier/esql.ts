@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
   const internalIdPipe = (id: string) => `| where id=="${id}"`;
 
   // Failing: See https://github.com/elastic/kibana/issues/224699
-  describe.skip('@ess @serverless ES|QL rule type', () => {
+  describe('@ess @serverless ES|QL rule type', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
@@ -2206,7 +2206,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload(packetBeatPath);
       });
 
-      it('should handle shard failures and include warning in logs for query that is not aggregating', async () => {
+      it.skip('should handle shard failures and include warning in logs for query that is not aggregating', async () => {
         const doc1 = { agent: { name: 'test-1' } };
         await indexEnhancedDocuments({
           documents: [doc1],
