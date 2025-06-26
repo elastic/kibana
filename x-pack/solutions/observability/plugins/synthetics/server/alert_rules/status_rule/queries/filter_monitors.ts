@@ -50,7 +50,7 @@ export async function queryFilterMonitors({
               getRangeFilter({ from: 'now-24h/m', to: 'now/m' }),
               getTimeSpanFilter(),
               {
-                term: {
+                terms: {
                   'meta.space_id': [spaceId, ALL_SPACES_ID],
                 },
               },

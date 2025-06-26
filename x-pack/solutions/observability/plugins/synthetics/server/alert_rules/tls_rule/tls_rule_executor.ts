@@ -44,10 +44,10 @@ export class TLSRuleExecutor {
   server: SyntheticsServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>> = [];
+  monitorConfigRepository: MonitorConfigRepository;
   logger: Logger;
   spaceId: string;
   ruleName: string;
-  monitorConfigRepository: MonitorConfigRepository;
 
   constructor(
     previousStartedAt: Date | null,
@@ -67,13 +67,13 @@ export class TLSRuleExecutor {
     });
     this.server = server;
     this.syntheticsMonitorClient = syntheticsMonitorClient;
-    this.logger = server.logger;
-    this.spaceId = spaceId;
-    this.ruleName = ruleName;
     this.monitorConfigRepository = new MonitorConfigRepository(
       soClient,
       server.encryptedSavedObjects.getClient()
     );
+    this.logger = server.logger;
+    this.spaceId = spaceId;
+    this.ruleName = ruleName;
   }
 
   debug(message: string) {
