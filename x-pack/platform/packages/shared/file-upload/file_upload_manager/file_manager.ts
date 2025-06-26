@@ -57,6 +57,7 @@ export interface Config<T = IndicesIndexSettings | MappingTypeMapping> {
 export interface UploadStatus {
   analysisStatus: STATUS;
   overallImportStatus: STATUS;
+  overallImportProgress: number;
   indexCreated: STATUS;
   pipelineCreated: STATUS;
   modelDeployed: STATUS;
@@ -88,6 +89,7 @@ export class FileUploadManager {
   private readonly existingIndexMappings$ = new BehaviorSubject<MappingTypeMapping | null>(null);
 
   private mappingsCheckSubscription: Subscription;
+  private progressSubscription: Subscription;
   private readonly _settings$ = new BehaviorSubject<Config<IndicesIndexSettings>>({
     json: {},
     valid: false,
@@ -124,6 +126,7 @@ export class FileUploadManager {
     settingsJsonValid: true,
     pipelinesJsonValid: true,
     errors: [],
+    overallImportProgress: 0,
   });
   public readonly uploadStatus$ = this._uploadStatus$.asObservable();
 
@@ -202,6 +205,20 @@ export class FileUploadManager {
         });
       }
     });
+
+    // Track overall import progress across files
+    this.progressSubscription = this.fileAnalysisStatus$.subscribe((statuses) => {
+      if (statuses.length === 0) {
+        this.setStatus({ overallImportProgress: 0 });
+        return;
+      }
+
+      const totalProgress = statuses.reduce((sum, s) => sum + (s.importProgress ?? 0), 0);
+      // Normalize to a 0-100 scale by averaging across files
+      const normalized = Math.round(totalProgress / statuses.length);
+
+      this.setStatus({ overallImportProgress: normalized });
+    });
   }
 
   destroy() {
@@ -212,6 +229,7 @@ export class FileUploadManager {
     this.existingIndexMappings$.complete();
     this._uploadStatus$.complete();
     this.mappingsCheckSubscription.unsubscribe();
+    this.progressSubscription.unsubscribe();
   }
   private setStatus(status: Partial<UploadStatus>) {
     this._uploadStatus$.next({

@@ -13,6 +13,7 @@ import type { ApplicationStart, HttpSetup, NotificationsStart } from '@kbn/core/
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FileUploadResults } from '@kbn/file-upload-common';
 import useMountedState from 'react-use/lib/useMountedState';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { CLASH_ERROR_TYPE, FileUploadManager, STATUS } from '../file_upload_manager';
 
 export enum UPLOAD_TYPE {
@@ -178,7 +179,7 @@ export function useFileUpload(
     [fileUploadManager]
   );
 
-  useEffect(() => {
+  useUpdateEffect(() => {
     setIndexName('');
     setExistingIndexName(null);
   }, [indexCreateMode, setExistingIndexName]);

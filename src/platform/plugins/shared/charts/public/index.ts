@@ -9,11 +9,8 @@
 
 // TODO: https://github.com/elastic/kibana/issues/110891
 
-import {
-  RangeSelectContext,
-  ValueClickContext,
-  MultiValueClickContext,
-} from '@kbn/embeddable-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { BooleanRelation } from '@kbn/es-query';
 import { ChartsPlugin } from './plugin';
 
 export const plugin = () => new ChartsPlugin();
@@ -42,17 +39,42 @@ export { useActiveCursor } from './services/active_cursor';
 
 export interface ClickTriggerEvent {
   name: 'filter';
-  data: ValueClickContext['data'];
+  data: {
+    data: Array<{
+      table: Pick<Datatable, 'rows' | 'columns'>;
+      column: number;
+      row: number;
+      value: any;
+    }>;
+    timeFieldName?: string;
+    negate?: boolean;
+  };
 }
 
 export interface BrushTriggerEvent {
   name: 'brush';
-  data: RangeSelectContext['data'];
+  data: {
+    table: Datatable;
+    column: number;
+    range: number[];
+    timeFieldName?: string;
+  };
 }
 
 export interface MultiClickTriggerEvent {
   name: 'multiFilter';
-  data: MultiValueClickContext['data'];
+  data: {
+    data: Array<{
+      table: Pick<Datatable, 'rows' | 'columns'>;
+      cells: Array<{
+        column: number;
+        row: number;
+      }>;
+      relation?: BooleanRelation;
+    }>;
+    timeFieldName?: string;
+    negate?: boolean;
+  };
 }
 
 export type {

@@ -9,7 +9,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiForm, useEuiTheme, EuiButtonIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiForm, useEuiTheme, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -90,16 +90,18 @@ export const AddRowPanel: React.FC<AddRowPanelProps> = ({ columns, onHide }) => 
     () =>
       columns.map((column, index) => {
         return (
-          <ValueInput
-            key={column.id}
-            columnName={column.name}
-            columns={columns}
-            onChange={updateRow(column.id)}
-            autoFocus={index === 0}
-            css={css`
-              min-width: ${180}px;
-            `}
-          />
+          <EuiFlexItem key={column.id} grow={false}>
+            <ValueInput
+              key={column.id}
+              columnName={column.name}
+              columns={columns}
+              onChange={updateRow(column.id)}
+              autoFocus={index === 0}
+              css={css`
+                min-width: ${180}px;
+              `}
+            />
+          </EuiFlexItem>
         );
       }),
     [columns, updateRow]
@@ -107,38 +109,44 @@ export const AddRowPanel: React.FC<AddRowPanelProps> = ({ columns, onHide }) => 
 
   return (
     <EuiForm component="form" onSubmit={saveNewRow}>
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexGroup
-          gutterSize="s"
-          tabIndex={0}
-          className="eui-xScrollWithShadows hide-scrollbar"
-          css={css`
-            &.hide-scrollbar {
-              scrollbar-width: none;
-              padding: 0 ${euiTheme.size.xs};
-            }
-          `}
-        >
-          {inputs}
-        </EuiFlexGroup>
-        <EuiButtonIcon
-          type="submit"
-          iconType="check"
-          display="base"
-          color="success"
-          aria-label={i18n.translate('indexEditor.addRow.save', {
-            defaultMessage: 'Save',
-          })}
-        />
-        <EuiButtonIcon
-          onClick={onHide}
-          iconType="cross"
-          display="base"
-          color="danger"
-          aria-label={i18n.translate('indexEditor.addRow.cancel', {
-            defaultMessage: 'Cancel',
-          })}
-        />
+      <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexItem css={{ overflow: 'hidden' }}>
+          <EuiFlexGroup
+            gutterSize="s"
+            tabIndex={0}
+            className="eui-xScrollWithShadows hide-scrollbar"
+            css={css`
+              &.hide-scrollbar {
+                scrollbar-width: none;
+                padding: 0 ${euiTheme.size.xs};
+              }
+            `}
+          >
+            {inputs}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButtonIcon
+            type="submit"
+            iconType="check"
+            display="base"
+            color="success"
+            aria-label={i18n.translate('indexEditor.addRow.save', {
+              defaultMessage: 'Save',
+            })}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButtonIcon
+            onClick={onHide}
+            iconType="cross"
+            display="base"
+            color="danger"
+            aria-label={i18n.translate('indexEditor.addRow.cancel', {
+              defaultMessage: 'Cancel',
+            })}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiForm>
   );

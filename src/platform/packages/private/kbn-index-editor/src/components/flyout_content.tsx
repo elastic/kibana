@@ -17,6 +17,7 @@ import React, { lazy } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UnsavedChangesModal } from './unsaved_changes_modal';
+import { css } from '@emotion/css';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
 import { CustomPanel } from './custom_panel';
 import { FileDropzone } from './file_drop_zone';
@@ -37,10 +38,10 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
   const dataView = useObservable(deps.indexUpdateService.dataView$);
   const dataViewColumns = useObservable(deps.indexUpdateService.dataTableColumns$);
 
-  const totalHits = 10;
+  const totalHits = useObservable(deps.indexUpdateService.totalHits$);
 
   const rows = useObservable(deps.indexUpdateService.rows$, []);
-  const isLoading = useObservable(deps.indexUpdateService.isFetching$, true);
+  const isLoading = useObservable(deps.indexUpdateService.isFetching$, false);
 
   const fileUploadContextValue = useFileUpload(
     deps.fileManager,
@@ -52,6 +53,15 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     (res) => {
       deps.indexUpdateService.setIndexName(res!.index);
       deps.indexUpdateService.setIndexCreated(true);
+
+      deps.indexUpdateService.setIsFetching(true);
+
+      // temp fix to fetch docs when the index is ready
+      setTimeout(() => {
+        if (res?.files.some((v) => v.docCount > 0)) {
+          deps.indexUpdateService.refresh();
+        }
+      }, 3000);
     }
   );
 
@@ -65,50 +75,56 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
       }}
     >
       <CellActionsProvider getTriggerCompatibleActions={deps.uiActions.getTriggerCompatibleActions}>
-        {dataView && dataViewColumns ? (
-          <FileUploadContext.Provider value={fileUploadContextValue}>
-            <EuiFlyoutHeader hasBorder>
-              <IndexName />
+        <FileUploadContext.Provider value={fileUploadContextValue}>
+          <EuiFlyoutHeader hasBorder>
+            <IndexName />
 
-              <EuiText size="s" color="subdued">
-                <FormattedMessage
-                  id="indexEditor.flyout.headerDescription"
-                  defaultMessage={
-                    'Lookup indices can be created manually, by uploading data from a file or through the Elasticsearch API.'
-                  }
-                />
-              </EuiText>
-            </EuiFlyoutHeader>
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="indexEditor.flyout.headerDescription"
+                defaultMessage={
+                  'Lookup indices can be created manually, by uploading data from a file or through the Elasticsearch API.'
+                }
+              />
+            </EuiText>
+          </EuiFlyoutHeader>
 
-            <EuiFlyoutBody css={{ height: '100%' }}>
-              <FileDropzone noResults={noResults}>
-                <EuiFlexGroup direction="column" gutterSize="s" css={{ height: '100%' }}>
-                  <EuiFlexItem grow={false}>
-                    <CustomPanel />
-                  </EuiFlexItem>
+          <EuiFlyoutBody
+            css={css`
+              .euiFlyoutBody__overflowContent {
+                height: 100%;
+              }
+            `}
+          >
+            <FileDropzone noResults={noResults}>
+              <EuiFlexGroup direction="column" gutterSize="s" css={{ flex: 1 }}>
+                <EuiFlexItem grow={false}>
+                  <CustomPanel />
+                </EuiFlexItem>
 
+                {dataViewColumns ? (
                   <EuiFlexItem grow={false}>
                     <RowColumnCreator columns={dataViewColumns} />
                   </EuiFlexItem>
+                ) : null}
 
-                  <EuiFlexItem grow={true}>
-                    {dataView && dataViewColumns && !noResults ? (
-                      <DataGridLazy
-                        {...props}
-                        dataView={dataView}
-                        columns={dataViewColumns}
-                        rows={rows}
-                        totalHits={totalHits}
-                      />
-                    ) : null}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </FileDropzone>
-            </EuiFlyoutBody>
+                <EuiFlexItem grow={true} css={{ minHeight: 0 }}>
+                  {!noResults && dataView && dataViewColumns ? (
+                    <DataGridLazy
+                      {...props}
+                      dataView={dataView}
+                      columns={dataViewColumns}
+                      rows={rows}
+                      totalHits={totalHits}
+                    />
+                  ) : null}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </FileDropzone>
+          </EuiFlyoutBody>
 
-            <FlyoutFooter indexUpdateService={deps.indexUpdateService} onClose={props.onClose} />
-          </FileUploadContext.Provider>
-        ) : null}
+          <FlyoutFooter indexUpdateService={deps.indexUpdateService} onClose={props.onClose} />
+        </FileUploadContext.Provider>
       </CellActionsProvider>
       <UnsavedChangesModal onClose={props.onClose} />
     </KibanaContextProvider>

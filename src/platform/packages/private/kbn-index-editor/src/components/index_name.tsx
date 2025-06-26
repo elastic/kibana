@@ -42,6 +42,14 @@ export const IndexName: FC = () => {
   } = useFileUploadContext();
 
   useMount(function validateIndexNameOnMount() {
+    if (isIndexCreated) {
+      setIsInitialized(true);
+      setIsLoading(false);
+      setIndexValidationStatus(STATUS.COMPLETED);
+      setFileUploadIndexName(indexNameValue!);
+      return;
+    }
+
     if (!indexNameValue) {
       setIsInitialized(true);
       setIsLoading(false);
