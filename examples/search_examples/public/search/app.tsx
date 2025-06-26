@@ -27,7 +27,8 @@ import {
   EuiTitle,
   type UseEuiTheme,
 } from '@elastic/eui';
-import { CoreStart, useMemoizedStyles } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { IInspectorInfo } from '@kbn/data-plugin/common';
 import { DataPublicPluginStart, isRunningResponse } from '@kbn/data-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
@@ -112,7 +113,7 @@ export const SearchExamplesApp = ({
   const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
   const [warningContents, setWarningContents] = useState<SearchResponseWarning[]>([]);
   const [selectedTab, setSelectedTab] = useState(0);
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
 
   function setResponse(response: IKibanaSearchResponse) {
     setWarningContents([]);
