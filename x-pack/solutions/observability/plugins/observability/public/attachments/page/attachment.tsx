@@ -13,34 +13,34 @@ import {
   type PersistableStateAttachmentViewProps,
   type AttachmentViewObject,
   type AttachmentAction,
-  AttachmentActionType,
 } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import { AttachmentActionType } from '@kbn/cases-plugin/public';
 import * as i18n from './translations';
 
 const AttachmentChildrenLazy = React.lazy(() => import('./attachment_children'));
 const GoToAction = React.lazy(() => import('./go_to_action'));
 
-const getPageAttachmentViewObject = (): AttachmentViewObject<
-  PersistableStateAttachmentViewProps<PageAttachmentPersistedState>
-> => {
-  return {
-    event: i18n.ADDED_PAGE,
-    timelineAvatar: 'link',
-    hideDefaultActions: false,
-    children: AttachmentChildrenLazy,
-    getActions: (props: PersistableStateAttachmentViewProps<PageAttachmentPersistedState>) =>
-      getPageAttachmentActions(props.persistableStateAttachmentState),
+const getPageAttachmentViewObject =
+  (): AttachmentViewObject<PersistableStateAttachmentViewProps> => {
+    return {
+      event: i18n.ADDED_PAGE,
+      timelineAvatar: 'link',
+      hideDefaultActions: false,
+      children: AttachmentChildrenLazy,
+      getActions: (props: PersistableStateAttachmentViewProps) =>
+        getPageAttachmentActions(
+          props.persistableStateAttachmentState as PageAttachmentPersistedState
+        ),
+    };
   };
-};
 
-export const getPageAttachmentType =
-  (): PersistableStateAttachmentType<PageAttachmentPersistedState> => ({
-    id: PAGE_ATTACHMENT_TYPE,
-    icon: 'link',
-    displayName: i18n.PAGE_LABEL,
-    getAttachmentViewObject: getPageAttachmentViewObject,
-    getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_PAGE }),
-  });
+export const getPageAttachmentType = (): PersistableStateAttachmentType => ({
+  id: PAGE_ATTACHMENT_TYPE,
+  icon: 'link',
+  displayName: i18n.PAGE_LABEL,
+  getAttachmentViewObject: getPageAttachmentViewObject,
+  getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_PAGE }),
+});
 
 const getPageAttachmentActions = (state: PageAttachmentPersistedState): AttachmentAction[] => [
   {

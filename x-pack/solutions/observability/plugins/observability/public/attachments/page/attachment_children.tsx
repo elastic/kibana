@@ -8,16 +8,18 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiCallOut, EuiText, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { type PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import type { PageAttachmentPersistedState } from '@kbn/observability-schema';
 
 interface AttachmentChildrenProps {
-  persistableStateAttachmentState: PageAttachmentPersistedState;
+  persistableStateAttachmentState: PersistableStateAttachmentViewProps['persistableStateAttachmentState'];
 }
 
 export function PageAttachmentChildren({
   persistableStateAttachmentState,
 }: AttachmentChildrenProps) {
-  const { url } = persistableStateAttachmentState;
+  const pageState = persistableStateAttachmentState as PageAttachmentPersistedState;
+  const { url } = pageState;
 
   if (!url) {
     return (

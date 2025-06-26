@@ -6,6 +6,7 @@
  */
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import {
@@ -26,6 +27,7 @@ import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server'
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { PluginSetup as ESQLSetup } from '@kbn/esql/server';
+import { PAGE_ATTACHMENT_TYPE } from '@kbn/observability-schema';
 import { ObservabilityConfig } from '.';
 import { observabilityFeatureId } from '../common';
 import {
@@ -53,6 +55,7 @@ export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 interface PluginSetup {
   alerting: AlertingServerSetup;
+  cases: CasesServerSetup;
   features: FeaturesPluginSetup;
   guidedOnboarding?: GuidedOnboardingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
@@ -97,6 +100,10 @@ export class ObservabilityPlugin
     plugins.features.registerKibanaFeature(getCasesFeature(casesCapabilities, casesApiTags));
     plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
     plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
+
+    plugins.cases.attachmentFramework.registerPersistableState({
+      id: PAGE_ATTACHMENT_TYPE,
+    });
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
 

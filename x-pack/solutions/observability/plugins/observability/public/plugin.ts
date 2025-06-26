@@ -11,6 +11,7 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
+import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
 import {
   App,
   AppDeepLink,
@@ -94,6 +95,7 @@ import {
   CaseDetailsLocatorDefinition,
   CasesOverviewLocatorDefinition,
 } from '../common/locators/cases';
+import { getPageAttachmentType } from './attachments/page/attachment';
 
 export interface ConfigSchema {
   unsafe: {
@@ -118,6 +120,7 @@ export interface ConfigSchema {
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 export interface ObservabilityPublicPluginsSetup {
+  cases: CasesPublicSetup;
   data: DataPublicPluginSetup;
   fieldFormats: FieldFormatsSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
@@ -253,6 +256,8 @@ export class Plugin
 
     const logsLocator =
       pluginsSetup.share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
+
+    pluginsSetup.cases.attachmentFramework.registerPersistableState(getPageAttachmentType());
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
