@@ -11,7 +11,6 @@ import { COMPARE_ALL_OPTIONS, Filter, TimeRange, onlyDisabledFiltersChanged } fr
 import { combineLatest, distinctUntilChanged, Observable, skip, startWith } from 'rxjs';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { apiPublishesReload, apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
-import { areTimesEqual } from '../unified_search_manager';
 
 const shouldRefreshFilterCompareOptions = {
   ...COMPARE_ALL_OPTIONS,
@@ -35,7 +34,7 @@ export function newSession$(api: unknown) {
       api.timeRange$.pipe(
         distinctUntilChanged((previous: TimeRange | undefined, current: TimeRange | undefined) => {
           return (
-            areTimesEqual(current?.from, previous?.from) && areTimesEqual(current?.to, previous?.to)
+            current?.from === previous?.from && current?.to === previous?.to
           );
         })
       )

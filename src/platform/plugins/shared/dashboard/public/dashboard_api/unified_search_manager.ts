@@ -30,7 +30,6 @@ import { ESQLControlVariable } from '@kbn/esql-types';
 import { PublishingSubject, StateComparators, diffComparators } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
-import moment, { Moment } from 'moment';
 import {
   BehaviorSubject,
   Observable,
@@ -298,13 +297,13 @@ export function initializeUnifiedSearchManager(
     query: 'deepEquality',
     refreshInterval: (a: RefreshInterval | undefined, b: RefreshInterval | undefined) =>
       timeRestore$.value ? fastIsEqual(a, b) : true,
-    timeFrom: (a: string | Moment | undefined, b: string | Moment | undefined) => {
+    timeFrom: (a: string | undefined, b: string | undefined) => {
       if (!timeRestore$.value) return true; // if time restore is set to false, time range doesn't count as a change.
-      return areTimesEqual(a, b);
+      return a === b;
     },
-    timeTo: (a: string | Moment | undefined, b: string | Moment | undefined) => {
+    timeTo: (a: string | undefined, b: string | undefined) => {
       if (!timeRestore$.value) return true; // if time restore is set to false, time range doesn't count as a change.
-      return areTimesEqual(a, b);
+      return a === b;
     },
   } as StateComparators<
     Pick<DashboardState, 'filters' | 'query' | 'refreshInterval' | 'timeFrom' | 'timeTo'>
@@ -326,21 +325,14 @@ export function initializeUnifiedSearchManager(
 
     const timeRestore = timeRestore$.value ?? DEFAULT_DASHBOARD_STATE.timeRestore;
 
-    /**
-     * Parse global time filter settings
-     */
-    const { from, to } = dataService.query.timefilter.timefilter.getTime();
-    const timeFrom = timeRestore ? convertTimeToUTCString(from) : undefined;
-    const timeTo = timeRestore ? convertTimeToUTCString(to) : undefined;
-
     return {
       state: {
         filters: filter ?? DEFAULT_DASHBOARD_STATE.filters,
         query: (query as Query) ?? DEFAULT_DASHBOARD_STATE.query,
         refreshInterval: refreshInterval$.value,
-        timeFrom,
+        timeFrom: timeRestore ? timeRange$.value?.from : undefined,
         timeRestore,
-        timeTo,
+        timeTo: timeRestore ? timeRange$.value?.to : undefined,
       },
       references,
     };
@@ -423,20 +415,3 @@ export function initializeUnifiedSearchManager(
     },
   };
 }
-
-const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
-  if (moment(time).isValid()) {
-    return moment(time).utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-  } else {
-    // If it's not a valid moment date, then it should be a string representing a relative time
-    // like 'now' or 'now-15m'.
-    return time as string;
-  }
-};
-
-export const areTimesEqual = (
-  timeA?: string | Moment | undefined,
-  timeB?: string | Moment | undefined
-) => {
-  return convertTimeToUTCString(timeA) === convertTimeToUTCString(timeB);
-};
