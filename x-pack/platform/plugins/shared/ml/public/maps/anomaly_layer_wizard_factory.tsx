@@ -15,8 +15,9 @@ import { LAYER_TYPE } from '@kbn/maps-plugin/common';
 import type { VectorLayerDescriptor } from '@kbn/maps-plugin/common/descriptor_types';
 import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import type { MlPluginStart } from '@kbn/ml-plugin-contracts';
 
-import type { MlPluginStart, MlStartDependencies } from '../plugin';
+import type { MlStartDependencies } from '../plugin';
 
 import { getActualStyle } from './util';
 import { CreateAnomalySourceEditor } from './create_anomaly_source_editor';

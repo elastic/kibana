@@ -6,7 +6,9 @@
  */
 
 import { useCallback } from 'react';
-import type { SeverityThreshold } from '../../../../common/types/anomalies';
+
+import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
+
 import { useSeverityOptions } from './use_severity_options';
 
 /**
