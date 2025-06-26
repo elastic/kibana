@@ -72,8 +72,7 @@ describe('esqlQueryToOptions', () => {
   it('returns an error on a failed query', async () => {
     mockGetESQLResults.mockRejectedValueOnce('Invalid ES|QL query');
     const result = (await esqlQueryToOptions({
-      query:
-        "now this is the story all about how my life got flipped-turned upside down and i'd like to take a minute just sit right there i'll tell you how i became the prince of a town called bel air",
+      query: 'FROM index | EVAL',
       search: searchMock,
     })) as ESQLQueryToOptionsFailure;
     expect(esqlQueryToOptions.isSuccess(result)).toBe(false);
