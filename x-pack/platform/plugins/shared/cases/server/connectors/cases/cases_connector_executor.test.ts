@@ -2768,7 +2768,7 @@ describe('CasesConnectorExecutor', () => {
           alerts: allAlerts,
           groupingBy: ['host.name'],
           // MAX_OPEN_CASES < maximumCasesToOpen
-          maximumCasesToOpen: 20,
+          maximumCasesToOpen: 30,
         });
 
         expect(mockGetRecordId).toHaveBeenCalledTimes(1);
@@ -2786,7 +2786,7 @@ describe('CasesConnectorExecutor', () => {
           alerts: allAlerts,
           groupingBy: ['host.name'],
           // MAX_OPEN_CASES < maximumCasesToOpen
-          maximumCasesToOpen: 20,
+          maximumCasesToOpen: 30,
         });
 
         expect(mockGetCaseId).toHaveBeenCalledTimes(1);
@@ -2805,7 +2805,7 @@ describe('CasesConnectorExecutor', () => {
           alerts: allAlerts,
           groupingBy: ['host.name'],
           // MAX_OPEN_CASES < maximumCasesToOpen
-          maximumCasesToOpen: 20,
+          maximumCasesToOpen: 30,
         });
 
         expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
@@ -2832,11 +2832,11 @@ describe('CasesConnectorExecutor', () => {
           alerts: allAlerts,
           groupingBy: ['host.name'],
           // MAX_OPEN_CASES < maximumCasesToOpen
-          maximumCasesToOpen: 20,
+          maximumCasesToOpen: 30,
         });
 
         expect(mockLogger.warn).toHaveBeenCalledWith(
-          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases 10. Falling back to one case.`,
+          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases 20. Falling back to one case.`,
           { labels: {}, tags: ['cases-connector', 'rule:rule-test-id'] }
         );
       });
