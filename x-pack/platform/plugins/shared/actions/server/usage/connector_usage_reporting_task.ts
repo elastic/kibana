@@ -58,6 +58,7 @@ export class ConnectorUsageReportingTask {
     this.usageApiUrl = config.url;
     this.enabled = config.enabled ?? true;
     const caCertificatePath = config.ca?.path;
+    logger.warn(`usage-api config: ${JSON.stringify(config)}`);
 
     if (caCertificatePath && caCertificatePath.length > 0) {
       try {
@@ -137,6 +138,15 @@ export class ConnectorUsageReportingTask {
     if (!this.caCertificate) {
       this.logger.error(
         `Missing required CA Certificate while running ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}`
+      );
+      return {
+        state,
+      };
+    }
+
+    if (!this.usageApiUrl) {
+      this.logger.error(
+        `Missing required Usage API url while running ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}`
       );
       return {
         state,
