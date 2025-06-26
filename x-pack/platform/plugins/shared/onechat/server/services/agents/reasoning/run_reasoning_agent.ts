@@ -26,7 +26,7 @@ export type RunChatAgentFn = (
 /**
  * Create the handler function for the default onechat agent.
  */
-export const runChatAgent: RunChatAgentFn = async (
+export const runReasoningAgent: RunChatAgentFn = async (
   { nextInput, conversation = [], tools = [], runId = uuidv4(), systemPrompt },
   { logger, request, modelProvider, events }
 ) => {
@@ -58,7 +58,7 @@ export const runChatAgent: RunChatAgentFn = async (
         graphName: chatAgentGraphName,
         runId,
       },
-      recursionLimit: 10,
+      recursionLimit: 25,
       callbacks: [],
     }
   );
@@ -67,6 +67,7 @@ export const runChatAgent: RunChatAgentFn = async (
     filter(isStreamEvent),
     convertGraphEvents({
       graphName: chatAgentGraphName,
+      runName: chatAgentGraphName,
       toolIdMapping,
     }),
     addRoundCompleteEvent({ userInput: nextInput }),

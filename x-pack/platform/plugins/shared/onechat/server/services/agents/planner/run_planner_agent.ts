@@ -5,29 +5,35 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { from, filter, shareReplay } from 'rxjs';
-import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
 import { AgentHandlerContext } from '@kbn/onechat-server';
+import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
 import { addRoundCompleteEvent, extractRound, conversationToLangchainMessages } from '../utils';
-import { createAgentGraph } from './graph';
+import { createPlannerAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import { RunAgentParams, RunAgentResponse } from '../run_agent';
 
-const chatAgentGraphName = 'default-onechat-agent';
+export type RunPlannerAgentParams = Omit<RunAgentParams, 'mode'> & {
+  /**
+   * Budget, in number of steps.
+   * Defaults to 5.
+   */
+  cycleBudget?: number;
+};
 
-export type RunChatAgentParams = Omit<RunAgentParams, 'mode'>;
-
-export type RunChatAgentFn = (
-  params: RunChatAgentParams,
+export type RunPlannerAgentFn = (
+  params: RunPlannerAgentParams,
   context: AgentHandlerContext
 ) => Promise<RunAgentResponse>;
+
+const agentGraphName = 'researcher-agent';
+const defaultCycleBudget = 3;
 
 /**
  * Create the handler function for the default onechat agent.
  */
-export const runChatAgent: RunChatAgentFn = async (
-  { nextInput, conversation = [], tools = [], runId = uuidv4(), systemPrompt },
+export const runPlannerAgent: RunPlannerAgentFn = async (
+  { nextInput, conversation = [], cycleBudget = defaultCycleBudget, tools },
   { logger, request, modelProvider, events }
 ) => {
   const model = await modelProvider.getDefaultModel();
@@ -41,34 +47,34 @@ export const runChatAgent: RunChatAgentFn = async (
   const initialMessages = conversationToLangchainMessages({
     nextInput,
     previousRounds: conversation,
+    ignoreSteps: true,
   });
-  const agentGraph = await createAgentGraph({
+
+  const agentGraph = await createPlannerAgentGraph({
     logger,
     chatModel: model.chatModel,
     tools: langchainTools,
-    systemPrompt,
   });
 
   const eventStream = agentGraph.streamEvents(
-    { initialMessages },
+    {
+      initialMessages,
+      remainingCycles: cycleBudget,
+    },
     {
       version: 'v2',
-      runName: chatAgentGraphName,
+      runName: agentGraphName,
       metadata: {
-        graphName: chatAgentGraphName,
-        runId,
+        graphName: agentGraphName,
       },
-      recursionLimit: 10,
+      recursionLimit: cycleBudget * 10,
       callbacks: [],
     }
   );
 
   const events$ = from(eventStream).pipe(
     filter(isStreamEvent),
-    convertGraphEvents({
-      graphName: chatAgentGraphName,
-      toolIdMapping,
-    }),
+    convertGraphEvents({ graphName: agentGraphName, toolIdMapping }),
     addRoundCompleteEvent({ userInput: nextInput }),
     shareReplay()
   );

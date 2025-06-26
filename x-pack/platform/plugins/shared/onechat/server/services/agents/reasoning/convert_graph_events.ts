@@ -6,7 +6,7 @@
  */
 
 import { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
-import type { AIMessageChunk, BaseMessage, ToolMessage } from '@langchain/core/messages';
+import type { AIMessageChunk, ToolMessage } from '@langchain/core/messages';
 import { EMPTY, mergeMap, of, OperatorFunction } from 'rxjs';
 import {
   ChatAgentEventType,
@@ -14,30 +14,38 @@ import {
   MessageCompleteEvent,
   ToolCallEvent,
   ToolResultEvent,
+  ReasoningEvent,
 } from '@kbn/onechat-common/agents';
 import { StructuredToolIdentifier, toStructuredToolIdentifier } from '@kbn/onechat-common/tools';
 import {
   matchGraphName,
   matchEvent,
   matchName,
+  hasTag,
   createTextChunkEvent,
   extractTextContent,
   extractToolCalls,
   toolIdentifierFromToolCall,
+  createReasoningEvent,
   ToolIdMapping,
 } from '@kbn/onechat-genai-utils/langchain';
+import { isMessage, isReasoningStep } from './actions';
+import type { StateType } from './graph';
 
 export type ConvertedEvents =
   | MessageChunkEvent
   | MessageCompleteEvent
   | ToolCallEvent
-  | ToolResultEvent;
+  | ToolResultEvent
+  | ReasoningEvent;
 
 export const convertGraphEvents = ({
   graphName,
   toolIdMapping,
+  runName,
 }: {
   graphName: string;
+  runName: string;
   toolIdMapping: ToolIdMapping;
 }): OperatorFunction<LangchainStreamEvent, ConvertedEvents> => {
   return (streamEvents$) => {
@@ -49,15 +57,28 @@ export const convertGraphEvents = ({
           return EMPTY;
         }
 
+        // emit reasoning events
+        if (matchEvent(event, 'on_chain_end') && matchName(event, 'reason')) {
+          const state = event.data.output as StateType;
+          const reasoningEvents = state.addedMessages.filter(isReasoningStep);
+          const lastReasoningEvent = reasoningEvents[reasoningEvents.length - 1];
+
+          return of(createReasoningEvent(lastReasoningEvent.reasoning));
+        }
+
         // stream text chunks for the UI
-        if (matchEvent(event, 'on_chat_model_stream')) {
+        if (matchEvent(event, 'on_chat_model_stream') && hasTag(event, 'reasoning:act')) {
           const chunk: AIMessageChunk = event.data.chunk;
-          return of(createTextChunkEvent(chunk));
+          const textContent = extractTextContent(chunk);
+          if (textContent) {
+            return of(createTextChunkEvent(chunk));
+          }
         }
 
         // emit tool calls or full message on each agent step
-        if (matchEvent(event, 'on_chain_end') && matchName(event, 'agent')) {
-          const addedMessages: BaseMessage[] = event.data.output.addedMessages ?? [];
+        if (matchEvent(event, 'on_chain_end') && matchName(event, 'act')) {
+          const state = event.data.output as StateType;
+          const addedMessages = state.addedMessages.filter(isMessage);
           const lastMessage = addedMessages[addedMessages.length - 1];
 
           const toolCalls = extractToolCalls(lastMessage);

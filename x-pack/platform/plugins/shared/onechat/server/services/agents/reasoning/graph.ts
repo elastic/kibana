@@ -6,48 +6,75 @@
  */
 
 import { StateGraph, Annotation } from '@langchain/langgraph';
-import { BaseMessage, BaseMessageLike, AIMessage } from '@langchain/core/messages';
-import { messagesStateReducer } from '@langchain/langgraph';
+import { BaseMessage, AIMessage } from '@langchain/core/messages';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/core/server';
 import { InferenceChatModel } from '@kbn/inference-langchain';
-import { withSystemPrompt, defaultSystemPrompt } from './system_prompt';
+import { extractTextContent } from '@kbn/onechat-genai-utils/langchain';
+import { ReasoningStep, AddedMessage, isMessage } from './actions';
+import { getReasoningPrompt, getActPrompt } from './prompts';
 
-export const createAgentGraph = ({
+const StateAnnotation = Annotation.Root({
+  // inputs
+  initialMessages: Annotation<BaseMessage[]>({
+    reducer: (current, next) => {
+      return [...current, ...next];
+    },
+    default: () => [],
+  }),
+  // outputs
+  addedMessages: Annotation<AddedMessage[]>({
+    reducer: (current, next) => {
+      return [...current, ...next];
+    },
+    default: () => [],
+  }),
+});
+
+export type StateType = typeof StateAnnotation.State;
+
+export const createAgentGraph = async ({
   chatModel,
   tools,
-  systemPrompt = defaultSystemPrompt,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
   systemPrompt?: string;
   logger: Logger;
 }) => {
-  const StateAnnotation = Annotation.Root({
-    // inputs
-    initialMessages: Annotation<BaseMessageLike[]>({
-      reducer: messagesStateReducer,
-      default: () => [],
-    }),
-    // outputs
-    addedMessages: Annotation<BaseMessage[]>({
-      reducer: messagesStateReducer,
-      default: () => [],
-    }),
-  });
-
   const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(tools);
 
   const model = chatModel.bindTools(tools).withConfig({
     tags: ['onechat-agent'],
   });
 
-  const callModel = async (state: typeof StateAnnotation.State) => {
+  const reason = async (state: typeof StateAnnotation.State) => {
     const response = await model.invoke(
-      withSystemPrompt({
-        systemPrompt,
+      getReasoningPrompt({
         messages: [...state.initialMessages, ...state.addedMessages],
+      })
+    );
+
+    const reasoningEvent: ReasoningStep = {
+      type: 'reasoning',
+      reasoning: extractTextContent(response),
+    };
+
+    return {
+      addedMessages: [reasoningEvent],
+    };
+  };
+
+  const act = async (state: typeof StateAnnotation.State) => {
+    const actModel = chatModel.bindTools(tools).withConfig({
+      tags: ['reasoning:act'],
+    });
+
+    const response = await actModel.invoke(
+      getActPrompt({
+        initialMessages: state.initialMessages,
+        addedMessages: state.addedMessages,
       })
     );
     return {
@@ -56,7 +83,7 @@ export const createAgentGraph = ({
   };
 
   const shouldContinue = async (state: typeof StateAnnotation.State) => {
-    const messages = state.addedMessages;
+    const messages = state.addedMessages.filter(isMessage);
     const lastMessage: AIMessage = messages[messages.length - 1];
     if (lastMessage && lastMessage.tool_calls?.length) {
       return 'tools';
@@ -73,11 +100,13 @@ export const createAgentGraph = ({
 
   // note: the node names are used in the event convertion logic, they should *not* be changed
   const graph = new StateGraph(StateAnnotation)
-    .addNode('agent', callModel)
+    .addNode('reason', reason)
+    .addNode('act', act)
     .addNode('tools', toolHandler)
-    .addEdge('__start__', 'agent')
-    .addEdge('tools', 'agent')
-    .addConditionalEdges('agent', shouldContinue, {
+    .addEdge('__start__', 'reason')
+    .addEdge('reason', 'act')
+    .addEdge('tools', 'reason')
+    .addConditionalEdges('act', shouldContinue, {
       tools: 'tools',
       __end__: '__end__',
     })
