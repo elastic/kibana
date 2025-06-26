@@ -56,7 +56,9 @@ export function Uploader({ onUpload }: Props) {
     <EuiFormRow
       isInvalid={Boolean(error)}
       error={error}
-      aria-label={TESTING_SCRIPT_LABEL}
+      aria-label={i18n.translate('xpack.synthetics.monitorEdit.uploader.ariaLabel', {
+        defaultMessage: 'Input for uploading a script file for your monitor',
+      })}
       fullWidth
     >
       <EuiFilePicker
