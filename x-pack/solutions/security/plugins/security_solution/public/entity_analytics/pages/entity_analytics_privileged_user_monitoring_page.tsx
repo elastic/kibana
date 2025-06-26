@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useReducer } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
 import {
   EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingLogo,
   EuiSpacer,
   EuiText,
@@ -17,6 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
+import type { PrivMonHealthResponse } from '../../../common/api/entity_analytics/privilege_monitoring/health.gen';
 import type { InitMonitoringEngineResponse } from '../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
@@ -33,11 +35,22 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { HeaderPage } from '../../common/components/header_page';
 import { useEntityAnalyticsRoutes } from '../api/api';
+import { usePrivilegedMonitoringEngineStatus } from '../api/hooks/use_privileged_monitoring_engine_status';
+import { PrivilegedUserMonitoringManageDataSources } from '../components/privileged_user_monitoring_manage_data_sources';
+import { EmptyPrompt } from '../../common/components/empty_prompt';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 type PageState =
+  | { type: 'fetchingEngineStatus' }
   | { type: 'onboarding' }
+  | {
+      type: 'initializingEngine';
+      initResponse?: InitMonitoringEngineResponse | PrivMonHealthResponse;
+      userCount: number;
+    }
+  | { type: 'dashboard'; onboardingCallout?: OnboardingCallout; error: string | undefined }
   | { type: 'initializingEngine'; initResponse?: InitMonitoringEngineResponse; userCount: number }
-  | { type: 'dashboard'; onboardingCallout?: OnboardingCallout };
+  | { type: 'manageDataSources' };
 
 type Action =
   | { type: 'INITIALIZING_ENGINE'; userCount: number; initResponse?: InitMonitoringEngineResponse }
@@ -45,20 +58,31 @@ type Action =
   | {
       type: 'SHOW_DASHBOARD';
       onboardingCallout?: OnboardingCallout;
-    };
+      error?: string;
+    }
+  | {
+      type: 'SHOW_ONBOARDING';
+    }
+  | { type: 'SHOW_MANAGE_DATA_SOURCES' };
 
-const initialState: PageState = { type: 'onboarding' };
-
+const initialState: PageState = { type: 'fetchingEngineStatus' };
 function reducer(state: PageState, action: Action): PageState {
   switch (action.type) {
+    case 'SHOW_DASHBOARD':
+      return {
+        type: 'dashboard',
+        onboardingCallout: action.onboardingCallout,
+        error: action.error,
+      };
+    case 'SHOW_ONBOARDING':
+      return { type: 'onboarding' };
     case 'INITIALIZING_ENGINE':
       return {
         type: 'initializingEngine',
         userCount: action.userCount,
         initResponse: action.initResponse,
       };
-    case 'SHOW_DASHBOARD':
-      return { type: 'dashboard', onboardingCallout: action.onboardingCallout };
+
     case 'UPDATE_INIT_ENGINE_RESPONSE':
       if (state.type === 'initializingEngine') {
         return {
@@ -67,6 +91,8 @@ function reducer(state: PageState, action: Action): PageState {
         };
       }
       return state;
+    case 'SHOW_MANAGE_DATA_SOURCES':
+      return { type: 'manageDataSources' };
     default:
       return state;
   }
@@ -76,12 +102,27 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
   const { initPrivilegedMonitoringEngine } = useEntityAnalyticsRoutes();
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView();
+  const {
+    indicesExist: oldIndicesExist,
+    loading: oldIsSourcererLoading,
+    sourcererDataView: oldSourcererDataViewSpec,
+  } = useSourcererDataView();
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataView, status } = useDataView();
   const { dataViewSpec } = useDataViewSpec();
 
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const isSourcererLoading = useMemo(
+    () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
+    [newDataViewPickerEnabled, oldIsSourcererLoading, status]
+  );
 
+  const indicesExist = useMemo(
+    () => (newDataViewPickerEnabled ? !!dataView?.matchedIndices?.length : oldIndicesExist),
+    [dataView?.matchedIndices?.length, newDataViewPickerEnabled, oldIndicesExist]
+  );
+
+  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataViewSpec;
+  const engineStatus = usePrivilegedMonitoringEngineStatus();
   const initEngineCallBack = useCallback(
     async (userCount: number) => {
       dispatch({ type: 'INITIALIZING_ENGINE', userCount });
@@ -99,7 +140,49 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
     [initPrivilegedMonitoringEngine]
   );
 
-  const onManageUserClicked = useCallback(() => {}, []);
+  const onManageUserClicked = useCallback(() => {
+    dispatch({ type: 'SHOW_MANAGE_DATA_SOURCES' });
+  }, []);
+
+  const onBackToDashboardClicked = useCallback(() => {
+    dispatch({ type: 'SHOW_DASHBOARD' });
+  }, []);
+
+  useEffect(() => {
+    if (engineStatus.isLoading) {
+      return;
+    }
+
+    if (engineStatus.isError) {
+      const errorMessage = engineStatus.error?.body.message ?? engineStatus.data?.error?.message;
+
+      return dispatch({
+        type: 'SHOW_DASHBOARD',
+        onboardingCallout: undefined,
+        error: errorMessage,
+      });
+    }
+
+    if (engineStatus.data?.status === 'not_found') {
+      return dispatch({ type: 'SHOW_ONBOARDING' });
+    } else {
+      return dispatch({ type: 'SHOW_DASHBOARD' });
+    }
+  }, [
+    engineStatus.data?.error?.message,
+    engineStatus.data?.status,
+    engineStatus.error?.body,
+    engineStatus.isError,
+    engineStatus.isLoading,
+  ]);
+
+  const fullHeightCSS = css`
+    min-height: calc(100vh - 240px);
+  `;
+
+  if (!indicesExist) {
+    return <EmptyPrompt />;
+  }
 
   return (
     <>
@@ -110,11 +193,27 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
       )}
 
       <SecuritySolutionPageWrapper>
+        {state.type === 'fetchingEngineStatus' ||
+          (isSourcererLoading && (
+            <>
+              <HeaderPage
+                title={
+                  <FormattedMessage
+                    id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.dashboards.pageTitle"
+                    defaultMessage="Privileged user monitoring"
+                  />
+                }
+              />
+              <EuiFlexGroup alignItems="center" justifyContent="center" css={fullHeightCSS}>
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingLogo logo="logoSecurity" size="xl" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          ))}
+
         {state.type === 'onboarding' && (
           <>
-            <EuiButtonEmpty onClick={() => dispatch({ type: 'SHOW_DASHBOARD' })}>
-              {'Go to dashboards =>'}
-            </EuiButtonEmpty>
             <PrivilegedUserMonitoringOnboardingPanel onComplete={initEngineCallBack} />
             <EuiSpacer size="l" />
             <PrivilegedUserMonitoringSampleDashboardsPanel />
@@ -131,11 +230,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
                 />
               }
             />
-            <EuiFlexGroup
-              css={css`
-                min-height: calc(100vh - 240px);
-              `}
-            >
+            <EuiFlexGroup css={fullHeightCSS}>
               {state.initResponse?.status === 'error' ? (
                 <EuiEmptyPrompt
                   iconType="error"
@@ -206,17 +301,25 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
                 <EuiButtonEmpty onClick={onManageUserClicked} iconType="gear" color="primary">
                   <FormattedMessage
                     id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.dashboards.manageUsersButton"
-                    defaultMessage="Manage users"
+                    defaultMessage="Manage data sources"
                   />
                 </EuiButtonEmpty>,
               ]}
             />
             <PrivilegedUserMonitoring
               callout={state.onboardingCallout}
+              error={state.error}
               onManageUserClicked={onManageUserClicked}
               sourcererDataView={sourcererDataView}
             />
           </>
+        )}
+
+        {state.type === 'manageDataSources' && (
+          <PrivilegedUserMonitoringManageDataSources
+            onBackToDashboardClicked={onBackToDashboardClicked}
+            onDone={initEngineCallBack}
+          />
         )}
 
         <SpyRoute pageName={SecurityPageName.entityAnalyticsPrivilegedUserMonitoring} />

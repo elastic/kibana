@@ -79,6 +79,7 @@ describe('use cases add to existing case modal hook', () => {
             observables: { enabled: true },
           },
           releasePhase: 'ga',
+          settings: { displayIncrementalCaseId: false },
         }}
       >
         {children}
