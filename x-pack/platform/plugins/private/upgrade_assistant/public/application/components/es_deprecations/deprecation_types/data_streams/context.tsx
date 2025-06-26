@@ -24,6 +24,9 @@ export interface MigrationStateContext {
   // readonly resolution actions
   startReadonly: () => Promise<void>;
   cancelReadonly: () => Promise<void>;
+
+  // delete resolution actions
+  startDelete: () => Promise<void>;
 }
 
 const DataStreamMigrationContext = createContext<MigrationStateContext | undefined>(undefined);
@@ -57,6 +60,7 @@ export const DataStreamMigrationStatusProvider: React.FunctionComponent<Props> =
     cancelReindex,
     startReadonly,
     initMigration,
+    startDelete,
   } = useMigrationStatus({
     dataStreamName,
     api,
@@ -72,6 +76,7 @@ export const DataStreamMigrationStatusProvider: React.FunctionComponent<Props> =
         cancelReadonly,
         initMigration,
         loadDataStreamMetadata,
+        startDelete,
       }}
     >
       {children}

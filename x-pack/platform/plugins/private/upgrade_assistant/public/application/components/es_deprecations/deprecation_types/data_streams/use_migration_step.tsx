@@ -10,7 +10,8 @@ import { Step } from './flyout/steps/types';
 
 export function useMigrationStep(
   status: DataStreamMigrationStatus | undefined,
-  loadDataStreamMetadata: () => Promise<void>
+  loadDataStreamMetadata: () => Promise<void>,
+  modalType?: 'readonly' | 'delete'
 ) {
   const [step, setStep] = useState<Step>('initializing');
 
@@ -27,7 +28,11 @@ export function useMigrationStep(
       return () => clearTimeout(timeoutId);
     }
     if (status === DataStreamMigrationStatus.notStarted) {
-      setStep('confirm');
+      if (modalType && modalType === 'delete') {
+        setStep('confirmDelete');
+      } else {
+        setStep('confirm');
+      }
     } else if (
       [
         DataStreamMigrationStatus.failed,
@@ -38,7 +43,7 @@ export function useMigrationStep(
     ) {
       setStep('inProgress');
     }
-  }, [status]);
+  }, [status, modalType]);
 
   return [step, setStep] as const;
 }

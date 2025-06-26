@@ -45,6 +45,7 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState<'readonly' | 'delete'>('readonly');
   const dataStreamContext = useDataStreamMigrationContext();
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
     useGlobalFlyout();
@@ -99,6 +100,7 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
         <DataStreamReadonlyModal
           closeModal={closeModal}
           deprecation={deprecation}
+          modalType={modalType}
           {...dataStreamContext}
         />
       )}
@@ -128,10 +130,11 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
                         initMigration('reindex');
                       }
                     }}
-                    openModal={() => {
+                    openModal={(migrationType: 'readonly' | 'delete') => {
                       setShowModal(true);
+                      setModalType(migrationType);
                       if (migrationState.status === DataStreamMigrationStatus.notStarted) {
-                        initMigration('readonly');
+                        initMigration(migrationType);
                       }
                     }}
                   />

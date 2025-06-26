@@ -24,6 +24,7 @@ import { registerClusterSettingsRoute } from './cluster_settings';
 import { registerMigrateDataStreamRoutes } from './migrate_data_streams';
 import { registerUpdateIndexRoute } from './update_index';
 import { registerEnterpriseSearchDeprecationRoutes } from '../lib/enterprise_search/enterprise_search_deprecations_routes';
+import { registerDeleteIndexRoute } from './delete_index';
 
 export function registerRoutes(dependencies: RouteDependencies, getWorker: () => ReindexWorker) {
   registerAppRoutes(dependencies);
@@ -37,6 +38,7 @@ export function registerRoutes(dependencies: RouteDependencies, getWorker: () =>
   registerBatchReindexIndicesRoutes(dependencies, getWorker);
   registerUpdateSettingsRoute(dependencies);
   registerMlSnapshotRoutes(dependencies);
+  registerDeleteIndexRoute(dependencies);
   // Route for cloud to retrieve the upgrade status for ES and Kibana
   registerUpgradeStatusRoute(dependencies);
   registerRemoteClustersRoute(dependencies);

@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import {
+  EnrichedDeprecationInfo,
   IndicesResolutionType,
   ReindexAction,
   ReindexStatus,
@@ -43,6 +44,12 @@ const actionsI18nTexts = {
       defaultMessage: 'Resolve this issue by unfreezing this index.',
     }
   ),
+  deleteTooltipLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.indices.deleteTooltipLabel',
+    {
+      defaultMessage: 'Resolve this issue by deleting this index.',
+    }
+  ),
 };
 
 const UnfreezeActionButtons: React.FunctionComponent<{
@@ -50,17 +57,33 @@ const UnfreezeActionButtons: React.FunctionComponent<{
   openModal: () => void;
   correctiveAction: UnfreezeAction;
   setSelectedResolutionType: (step: Exclude<IndicesResolutionType, 'readonly'>) => void;
-}> = ({ openFlyout, correctiveAction, setSelectedResolutionType, openModal }) => {
-  const { reindexState, updateIndexState } = useIndexContext();
+  deprecation: EnrichedDeprecationInfo;
+}> = ({ openFlyout, correctiveAction, setSelectedResolutionType, openModal, deprecation }) => {
+  const {
+    reindexState,
+    updateIndexState: { status, updateAction },
+  } = useIndexContext();
   const reindexingInProgressOrCompleted =
     reindexState.status === ReindexStatus.inProgress ||
     reindexState.status === ReindexStatus.completed;
-  const updateInProgressOrCompleted =
-    updateIndexState.status === 'complete' || updateIndexState.status === 'inProgress';
+  const updateInProgressOrCompleted = status === 'complete' || status === 'inProgress';
+
+  const isUnfreezing = updateAction === 'unfreeze' && updateInProgressOrCompleted;
+  const isDeleting = updateAction === 'delete' && updateInProgressOrCompleted;
+
   const canDisplayUnfreeze = !!(
-    reindexState.hasRequiredPrivileges && !reindexingInProgressOrCompleted
+    reindexState.hasRequiredPrivileges &&
+    !reindexingInProgressOrCompleted &&
+    !isDeleting
   );
   const canDisplayReindex = !!(reindexState.hasRequiredPrivileges && !updateInProgressOrCompleted);
+  const canDisplayDelete = !!(
+    reindexState.hasRequiredPrivileges &&
+    !reindexingInProgressOrCompleted &&
+    !isUnfreezing &&
+    deprecation.level === 'critical'
+  );
+
   const actions: ActionButtonConfig[] = [
     {
       tooltip: actionsI18nTexts.reindexTooltipLabel,
@@ -81,6 +104,16 @@ const UnfreezeActionButtons: React.FunctionComponent<{
         setSelectedResolutionType('unfreeze');
       },
     },
+    {
+      tooltip: actionsI18nTexts.deleteTooltipLabel,
+      iconType: 'trash',
+      canDisplay: canDisplayDelete,
+      resolutionType: 'delete',
+      onClick: () => {
+        openModal();
+        setSelectedResolutionType('delete');
+      },
+    },
   ];
   return <ActionButtons actions={actions} dataTestSubjPrefix={correctiveAction.type} />;
 };
@@ -90,29 +123,43 @@ const ReindexActionButtons: React.FunctionComponent<{
   openModal: () => void;
   correctiveAction: ReindexAction;
   setSelectedResolutionType: (step: Exclude<IndicesResolutionType, 'unfreeze'>) => void;
-}> = ({ openFlyout, correctiveAction, setSelectedResolutionType, openModal }) => {
+  deprecation: EnrichedDeprecationInfo;
+}> = ({ openFlyout, correctiveAction, setSelectedResolutionType, openModal, deprecation }) => {
   const { excludedActions = [] } = correctiveAction;
-  const { reindexState, updateIndexState } = useIndexContext();
+  const {
+    reindexState,
+    updateIndexState: { status, updateAction },
+  } = useIndexContext();
   const { meta } = reindexState;
   const { isReadonly, isFollowerIndex } = meta;
   const reindexingInProgressOrCompleted =
     reindexState.status === ReindexStatus.inProgress ||
     reindexState.status === ReindexStatus.completed;
-  const updateInProgressOrCompleted =
-    updateIndexState.status === 'complete' || updateIndexState.status === 'inProgress';
+  const updateInProgressOrCompleted = status === 'complete' || status === 'inProgress';
+
+  const isSettingReadOnly = updateAction === 'readonly' && updateInProgressOrCompleted;
+  const isDeleting = updateAction === 'delete' && updateInProgressOrCompleted;
+
   const readOnlyExcluded = excludedActions.includes('readOnly');
   const reindexExcluded = excludedActions.includes('reindex');
   const canDisplayReadOnly = !!(
     reindexState.hasRequiredPrivileges &&
     !readOnlyExcluded &&
     !isReadonly &&
-    !reindexingInProgressOrCompleted
+    !reindexingInProgressOrCompleted &&
+    !isDeleting
   );
   const canDisplayReindex = !!(
     reindexState.hasRequiredPrivileges &&
     !reindexExcluded &&
     !isFollowerIndex &&
     !updateInProgressOrCompleted
+  );
+
+  const canDisplayDelete = !!(
+    reindexState.hasRequiredPrivileges &&
+    !isSettingReadOnly &&
+    deprecation.level === 'critical'
   );
   const actions: ActionButtonConfig[] = [
     {
@@ -132,6 +179,16 @@ const ReindexActionButtons: React.FunctionComponent<{
       onClick: () => {
         openModal();
         setSelectedResolutionType('readonly');
+      },
+    },
+    {
+      tooltip: actionsI18nTexts.deleteTooltipLabel,
+      iconType: 'trash',
+      canDisplay: canDisplayDelete,
+      resolutionType: 'delete',
+      onClick: () => {
+        openModal();
+        setSelectedResolutionType('delete');
       },
     },
   ];
@@ -171,6 +228,7 @@ export const ReindexActionCell: React.FunctionComponent<Props> = ({
       correctiveAction={deprecation.correctiveAction as UnfreezeAction}
       setSelectedResolutionType={setSelectedResolutionType}
       openModal={openModal}
+      deprecation={deprecation}
     />
   ) : (
     <ReindexActionButtons
@@ -178,6 +236,7 @@ export const ReindexActionCell: React.FunctionComponent<Props> = ({
       correctiveAction={deprecation.correctiveAction as ReindexAction}
       setSelectedResolutionType={setSelectedResolutionType}
       openModal={openModal}
+      deprecation={deprecation}
     />
   );
 };

@@ -175,4 +175,27 @@ describe('Readonly index modal', () => {
       expect(exists('startReindexingButton')).toBe(false);
     });
   });
+
+  describe('delete', () => {
+    it('renders a modal with index confirm step for delete', async () => {
+      const { actions, find, exists } = testBed;
+
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'reindex',
+        index: 0,
+        action: 'delete',
+      });
+
+      expect(exists('updateIndexModal')).toBe(true);
+      expect(find('updateIndexModalTitle').text()).toContain('Delete index');
+
+      expect(exists('startDeleteButton')).toBe(true);
+      expect(find('startDeleteButton').props().disabled).toBe(true);
+      await actions.reindexDeprecationFlyout.fillDeleteInputText('bad input');
+      expect(find('startDeleteButton').props().disabled).toBe(true);
+      await actions.reindexDeprecationFlyout.fillDeleteInputText('delete');
+
+      expect(find('startDeleteButton').props().disabled).toBe(false);
+    });
+  });
 });

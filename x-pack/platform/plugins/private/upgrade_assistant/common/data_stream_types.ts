@@ -15,7 +15,7 @@ export interface DataStreamsActionMetadata {
   reindexRequired: boolean;
 }
 
-export type DataStreamResolutionType = 'readonly' | 'reindex';
+export type DataStreamResolutionType = 'readonly' | 'reindex' | 'delete';
 export interface DataStreamsAction {
   type: 'dataStream';
   metadata: DataStreamsActionMetadata;
@@ -74,27 +74,27 @@ export interface DataStreamReindexStatusNotStarted {
 }
 
 export interface DataStreamReindexStatusInProgress {
-  resolutionType: 'reindex' | 'readonly';
+  resolutionType: 'reindex' | 'readonly' | 'delete';
   status: DataStreamMigrationStatus.inProgress;
   taskPercComplete: number;
   progressDetails: DataStreamProgressDetails;
 }
 
 export interface DataStreamReindexStatusCompleted {
-  resolutionType: 'reindex' | 'readonly';
+  resolutionType: 'reindex' | 'readonly' | 'delete';
   status: DataStreamMigrationStatus.completed;
   taskPercComplete: number;
   progressDetails: DataStreamProgressDetails;
 }
 
 export interface DataStreamReindexStatusFailed {
-  resolutionType: 'reindex' | 'readonly';
+  resolutionType: 'reindex' | 'readonly' | 'delete';
   status: DataStreamMigrationStatus.failed;
   errorMessage: string;
 }
 
 export interface DataStreamReindexStatusCancelled {
-  resolutionType: 'reindex' | 'readonly';
+  resolutionType: 'reindex' | 'readonly' | 'delete';
   status: DataStreamMigrationStatus.cancelled;
 }
 

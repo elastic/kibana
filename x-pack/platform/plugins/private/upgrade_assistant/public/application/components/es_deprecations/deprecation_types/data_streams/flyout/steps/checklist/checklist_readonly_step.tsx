@@ -43,7 +43,7 @@ export const ChecklistModalStep: React.FunctionComponent<{
     services: { api },
   } = useAppContext();
 
-  const { loadingState, status, hasRequiredPrivileges } = migrationState;
+  const { loadingState, status, hasRequiredPrivileges, resolutionType } = migrationState;
   const loading =
     loadingState === LoadingState.Loading || status === DataStreamMigrationStatus.inProgress;
   const isCompleted = status === DataStreamMigrationStatus.completed;
@@ -53,15 +53,19 @@ export const ChecklistModalStep: React.FunctionComponent<{
   const { data: nodes } = api.useLoadNodeDiskSpace();
 
   const showMainButton = !hasFetchFailed && !isCompleted && hasRequiredPrivileges;
-  const shouldShowCancelButton = showMainButton && status === DataStreamMigrationStatus.inProgress;
+  const shouldShowCancelButton =
+    showMainButton &&
+    status === DataStreamMigrationStatus.inProgress &&
+    resolutionType === 'readonly';
 
   return (
     <>
       <EuiModalHeader>
-        <EuiModalHeaderTitle data-test-subj="readonlyDataStreamModalTitle" size="m">
+        <EuiModalHeaderTitle data-test-subj="dataStreamModalTitle" size="m">
           <FormattedMessage
-            id="xpack.upgradeAssistant.dataStream.modal.checktlistStep.readonly.title"
-            defaultMessage="Setting data stream to read-only"
+            id="xpack.upgradeAssistant.dataStream.modal.checktlistStep.title"
+            defaultMessage="{resolutionType, select, delete {Deleting data stream} other {Setting data stream to read-only}}"
+            values={{ resolutionType }}
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -84,7 +88,7 @@ export const ChecklistModalStep: React.FunctionComponent<{
           <EuiButtonEmpty
             onClick={closeModal}
             flush="left"
-            data-test-subj="closeDataStreamReindexingButton"
+            data-test-subj="closeDataStreamModalButton"
           >
             <FormattedMessage
               id="xpack.upgradeAssistant.dataStream.migration.modal.checklistStep.closeButtonLabel"
@@ -120,7 +124,7 @@ export const ChecklistModalStep: React.FunctionComponent<{
                 disabled={loading || !hasRequiredPrivileges}
                 data-test-subj="startDataStreamMigrationButton"
               >
-                {getPrimaryButtonLabel(status)}
+                {getPrimaryButtonLabel(status, resolutionType)}
               </EuiButton>
             </EuiFlexItem>
           )}

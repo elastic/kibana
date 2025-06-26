@@ -253,6 +253,12 @@ export class ApiService {
     });
   }
 
+  public async deleteDataStream(dataStreamName: string) {
+    return await this.sendRequest({
+      path: `${API_BASE_PATH}/migrate_data_stream/${dataStreamName}`,
+      method: 'delete',
+    });
+  }
   /**
    * FINISH: Data Stream Migrations
    */
@@ -283,6 +289,13 @@ export class ApiService {
       path: `${API_BASE_PATH}/update_index/${indexName}`,
       method: 'post',
       body: { operations },
+    });
+  }
+
+  public async deleteIndex(indexName: string) {
+    return await this.sendRequest({
+      path: `${API_BASE_PATH}/delete_index/${indexName}`,
+      method: 'delete',
     });
   }
 
