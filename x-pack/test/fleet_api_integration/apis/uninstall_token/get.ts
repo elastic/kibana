@@ -264,7 +264,7 @@ export default function (providerContext: FtrProviderContext) {
           expect(body.items[0].policy_id).to.equal(selectedPolicyId);
         });
 
-        it('should return token metadata for partial policyID if found', async () => {
+        it('should not return token metadata for partial policyID', async () => {
           const selectedPolicyId = generatedPolicyArray[2].id;
 
           const response = await supertest
@@ -275,10 +275,10 @@ export default function (providerContext: FtrProviderContext) {
             .expect(200);
 
           const body: GetUninstallTokensMetadataResponse = response.body;
-          expect(body.total).to.equal(1);
+          expect(body.total).to.equal(0);
           expect(body.page).to.equal(1);
           expect(body.perPage).to.equal(20);
-          expect(body.items[0].policy_id).to.equal(selectedPolicyId);
+          expect(body.items).to.eql([]);
         });
 
         it('should not return token metadata by policy name', async () => {
