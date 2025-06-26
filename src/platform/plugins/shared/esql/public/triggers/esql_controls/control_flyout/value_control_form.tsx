@@ -10,7 +10,7 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
-import { esqlQueryToOptions } from '@kbn/esql-utils';
+import { getESQLSingleColumnValues } from '@kbn/esql-utils';
 import { isEqual } from 'lodash';
 import {
   EuiComboBox,
@@ -152,11 +152,11 @@ export function ValueControlForm({
     async (query: string) => {
       setValuesQuery(query);
 
-      const result = await esqlQueryToOptions({ query, search, timeRange });
+      const result = await getESQLSingleColumnValues({ query, search, timeRange });
       if (!isMounted()) {
         return;
       }
-      if (esqlQueryToOptions.isSuccess(result)) {
+      if (getESQLSingleColumnValues.isSuccess(result)) {
         const { options } = result;
 
         setEsqlQueryErrors([]);

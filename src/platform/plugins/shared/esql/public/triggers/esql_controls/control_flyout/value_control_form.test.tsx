@@ -18,15 +18,15 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ESQLControlsFlyout } from '.';
 
-const mockEsqlQueryToOptions = jest.fn().mockResolvedValue({
+const mockGetESQLSingleColumnValues = jest.fn().mockResolvedValue({
   options: [],
 });
 
 jest.mock('@kbn/esql-utils', () => {
-  const esqlQueryToOptions = (...args: any[]) => mockEsqlQueryToOptions(...args);
-  esqlQueryToOptions.isSuccess = jest.fn().mockResolvedValue(true);
+  const getESQLSingleColumnValues = (...args: any[]) => mockGetESQLSingleColumnValues(...args);
+  getESQLSingleColumnValues.isSuccess = jest.fn().mockResolvedValue(true);
   return {
-    esqlQueryToOptions,
+    getESQLSingleColumnValues,
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
     getLimitFromESQLQuery: jest.fn().mockReturnValue(1000),
     isQueryWrappedByPipes: jest.fn().mockReturnValue(false),
@@ -304,7 +304,7 @@ describe('ValueControlForm', () => {
         );
 
         await waitFor(() => {
-          expect(mockEsqlQueryToOptions).toHaveBeenCalledWith(
+          expect(mockGetESQLSingleColumnValues).toHaveBeenCalledWith(
             expect.objectContaining({ timeRange: mockTimeRange })
           );
         });

@@ -11,25 +11,27 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import type { TimeRange } from '@kbn/es-query';
 import { getESQLResults } from './run_query';
 
-export interface ESQLQueryToOptionsSuccess {
+export interface GetESQLSingleColumnValuesSuccess {
   options: string[];
 }
 
-export interface ESQLQueryToOptionsFailure {
+export interface GetESQLSingleColumnValuesFailure {
   columns: string[];
   errors: Error[];
 }
 
-interface ESQLQueryToOptionsParams {
+interface GetESQLSingleColumnValuesParams {
   query: string;
   search: ISearchGeneric;
   timeRange?: TimeRange;
 }
-export const esqlQueryToOptions = async ({
+export const getESQLSingleColumnValues = async ({
   query,
   search,
   timeRange,
-}: ESQLQueryToOptionsParams): Promise<ESQLQueryToOptionsSuccess | ESQLQueryToOptionsFailure> => {
+}: GetESQLSingleColumnValuesParams): Promise<
+  GetESQLSingleColumnValuesSuccess | GetESQLSingleColumnValuesFailure
+> => {
   try {
     const results = await getESQLResults({
       esqlQuery: query,
@@ -55,5 +57,7 @@ export const esqlQueryToOptions = async ({
   }
 };
 
-esqlQueryToOptions.isSuccess = (result: unknown): result is ESQLQueryToOptionsSuccess =>
-  'options' in (result as ESQLQueryToOptionsSuccess);
+getESQLSingleColumnValues.isSuccess = (
+  result: unknown
+): result is GetESQLSingleColumnValuesSuccess =>
+  'options' in (result as GetESQLSingleColumnValuesSuccess);

@@ -15,14 +15,14 @@ import { getESQLControlFactory } from './get_esql_control_factory';
 import { BehaviorSubject } from 'rxjs';
 import { ControlFetchContext } from '../../control_group/control_fetch';
 
-const mockEsqlQueryToOptions = jest.fn(() => ({ options: ['option1', 'option2'] }));
+const mockGetESQLSingleColumnValues = jest.fn(() => ({ options: ['option1', 'option2'] }));
 const mockIsSuccess = jest.fn(() => true);
 
 jest.mock('@kbn/esql-utils', () => {
-  const esqlQueryToOptions = () => mockEsqlQueryToOptions();
-  esqlQueryToOptions.isSuccess = () => mockIsSuccess();
+  const getESQLSingleColumnValues = () => mockGetESQLSingleColumnValues();
+  getESQLSingleColumnValues.isSuccess = () => mockIsSuccess();
   return {
-    esqlQueryToOptions,
+    getESQLSingleColumnValues,
   };
 });
 
@@ -108,7 +108,7 @@ describe('ESQLControlApi', () => {
         controlGroupApi,
       });
       await waitFor(() => {
-        expect(mockEsqlQueryToOptions).toHaveBeenCalledTimes(1);
+        expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(1);
         expect(mockIsSuccess).toHaveBeenCalledTimes(1);
       });
       const controlFetch$ = controlGroupApi.controlFetch$(
@@ -118,7 +118,7 @@ describe('ESQLControlApi', () => {
       controlFetch$.next({});
       controlFetch$.next({});
       await waitFor(() => {
-        expect(mockEsqlQueryToOptions).toHaveBeenCalledTimes(4);
+        expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(4);
         expect(mockIsSuccess).toHaveBeenCalledTimes(4);
       });
     });
