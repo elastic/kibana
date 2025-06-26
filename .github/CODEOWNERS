@@ -2652,7 +2652,6 @@ x-pack/solutions/security/plugins/security_solution/server/assistant/tools/defen
 /x-pack/solutions/security/plugins/security_solution/scripts/endpoint/ @elastic/security-defend-workflows
 /x-pack/test/security_solution_endpoint/ @elastic/security-defend-workflows
 /x-pack/test/security_solution_api_integration/test_suites/edr_workflows/ @elastic/security-defend-workflows
-/x-pack/test_serverless/shared/lib/security/kibana_roles/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/sections/endpoint_management @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/pages/endpoint_management @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/server/endpoint @elastic/security-defend-workflows
