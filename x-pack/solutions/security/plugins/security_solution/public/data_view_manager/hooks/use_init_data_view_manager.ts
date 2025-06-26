@@ -48,7 +48,7 @@ export const useInitDataViewManager = () => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   if (!newDataViewPickerEnabled) {
-    return;
+    return () => {};
   }
 
   const {
