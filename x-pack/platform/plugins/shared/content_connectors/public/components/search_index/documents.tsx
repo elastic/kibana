@@ -102,7 +102,7 @@ export const SearchIndexDocuments: React.FC = () => {
                 'xpack.contentConnectors.content.searchIndex.documents.noIndex.title',
                 { defaultMessage: 'Access Control Index not found' }
               )}
-              iconType="iInCircle"
+              iconType="info"
             >
               <p>
                 {i18n.translate('xpack.contentConnectors.content.searchIndex.documents.noIndex', {
