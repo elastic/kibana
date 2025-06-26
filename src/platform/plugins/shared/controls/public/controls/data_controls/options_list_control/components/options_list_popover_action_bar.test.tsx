@@ -32,7 +32,6 @@ const allOptions = [
   { value: 'toot', docCount: 11 },
 ];
 
-
 const renderComponent = ({
   componentApi,
   displaySettings,
@@ -61,9 +60,7 @@ const getSelectAllCheckbox = () => screen.getByRole('checkbox', { name: /Select 
 
 const getSearchInput = () => screen.getByRole('searchbox', { name: /Filter suggestions/i });
 
-
 describe('Options list popover', () => {
-
   test('displays search input', async () => {
     const contextMock = getOptionsListContextMock();
     contextMock.componentApi.setTotalCardinality(allOptions.length);
@@ -80,7 +77,7 @@ describe('Options list popover', () => {
     contextMock.componentApi.setTotalCardinality(allOptions.length);
     contextMock.componentApi.setAvailableOptions(take(allOptions, 5));
     renderComponent(contextMock);
-    
+
     expect(screen.getByTestId('optionsList-cardinality-label')).toHaveTextContent(
       allOptions.length.toString()
     );
