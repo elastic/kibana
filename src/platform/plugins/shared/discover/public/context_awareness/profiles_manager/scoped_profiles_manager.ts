@@ -24,7 +24,7 @@ import type {
   DocumentProfileService,
 } from '../profiles/document_profile';
 import type { RootContext } from '../profiles/root_profile';
-import type { DiscoverEBTManager } from '../../plugin_imports/discover_ebt_manager';
+import type { ScopedDiscoverEBTManager } from '../../ebt_manager';
 import { logResolutionError } from './utils';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
 import { ContextualProfileLevel } from './consts';
@@ -60,7 +60,7 @@ export class ScopedProfilesManager {
     private readonly getRootProfile: () => AppliedProfile,
     private readonly dataSourceProfileService: DataSourceProfileService,
     private readonly documentProfileService: DocumentProfileService,
-    private readonly ebtManager: DiscoverEBTManager
+    private readonly scopedEbtManager: ScopedDiscoverEBTManager
   ) {
     this.dataSourceContext$ = new BehaviorSubject(dataSourceProfileService.defaultContext);
     this.dataSourceProfile = dataSourceProfileService.getProfile({
@@ -143,7 +143,7 @@ export class ScopedProfilesManager {
           }
         }
 
-        this.ebtManager.trackContextualProfileResolvedEvent({
+        this.scopedEbtManager.trackContextualProfileResolvedEvent({
           contextLevel: ContextualProfileLevel.documentLevel,
           profileId: context.profileId,
         });
@@ -187,16 +187,16 @@ export class ScopedProfilesManager {
   private trackActiveProfiles(rootContextProfileId: string, dataSourceContextProfileId: string) {
     const dscProfiles = [rootContextProfileId, dataSourceContextProfileId];
 
-    this.ebtManager.trackContextualProfileResolvedEvent({
+    this.scopedEbtManager.trackContextualProfileResolvedEvent({
       contextLevel: ContextualProfileLevel.rootLevel,
       profileId: rootContextProfileId,
     });
-    this.ebtManager.trackContextualProfileResolvedEvent({
+    this.scopedEbtManager.trackContextualProfileResolvedEvent({
       contextLevel: ContextualProfileLevel.dataSourceLevel,
       profileId: dataSourceContextProfileId,
     });
 
-    this.ebtManager.updateProfilesContextWith(dscProfiles);
+    this.scopedEbtManager.updateProfilesContextWith(dscProfiles);
   }
 }
 
