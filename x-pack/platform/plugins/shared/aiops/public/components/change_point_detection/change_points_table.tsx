@@ -188,7 +188,6 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
             'Indicates how extreme the change is. Lower values indicate greater change.',
         }),
       },
-
       sortable: true,
       truncateText: false,
       render: (pValue: ChangePointAnnotation['p_value']) =>

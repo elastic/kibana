@@ -19,7 +19,7 @@ export interface UseFindPromptsParams {
   context: {
     isAssistantEnabled: boolean;
     httpFetch: HttpHandler;
-    toasts: IToasts;
+    toasts?: IToasts;
   };
   signal?: AbortSignal | undefined;
   params: FindSecurityAIPromptsRequestQuery;
@@ -82,7 +82,7 @@ const getPrompts = async ({
   query,
 }: {
   httpFetch: HttpHandler;
-  toasts: IToasts;
+  toasts?: IToasts;
   signal?: AbortSignal | undefined;
   query: FindSecurityAIPromptsRequestQuery;
 }) => {

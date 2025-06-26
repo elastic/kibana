@@ -108,7 +108,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
               flush="right"
               href={documentation.componentTemplates}
               target="_blank"
-              iconType="help"
+              iconType="question"
               data-test-subj="documentationLink"
             >
               <FormattedMessage
