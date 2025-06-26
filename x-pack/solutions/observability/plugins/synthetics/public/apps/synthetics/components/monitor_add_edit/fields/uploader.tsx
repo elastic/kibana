@@ -61,7 +61,7 @@ export function Uploader({ onUpload }: Props) {
     >
       <EuiFilePicker
         id="syntheticsFleetScriptRecorderUploader"
-        aria-label={'syntheticsFleetScriptRecorderUploader'}
+        aria-label={TESTING_SCRIPT_LABEL}
         data-test-subj="syntheticsFleetScriptRecorderUploader"
         ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
         initialPromptText={PROMPT_TEXT}
