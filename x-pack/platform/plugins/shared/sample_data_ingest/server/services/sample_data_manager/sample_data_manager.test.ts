@@ -67,6 +67,7 @@ describe('SampleDataManager', () => {
 
     mockArtifactManager = {
       prepareArtifact: jest.fn(),
+      cleanup: jest.fn(),
     } as any;
 
     mockIndexManager = {
@@ -88,6 +89,7 @@ describe('SampleDataManager', () => {
       manifest: mockManifest,
       mappings: mockMappings,
     });
+    mockArtifactManager.cleanup.mockResolvedValue(undefined);
 
     mockIndexManager.createAndPopulateIndex.mockResolvedValue(undefined);
     mockIndexManager.deleteIndex.mockResolvedValue(undefined);
@@ -147,6 +149,7 @@ describe('SampleDataManager', () => {
         archive: mockArchive,
         esClient,
       });
+      expect(mockArtifactManager.cleanup).toHaveBeenCalled();
 
       expect(result).toBe(expectedIndexName);
       expect(logger.info).toHaveBeenCalledWith(`Installing sample data for [${sampleType}]`);
@@ -161,7 +164,7 @@ describe('SampleDataManager', () => {
       expect(mockIndexManager.deleteIndex).toHaveBeenCalled();
     });
 
-    it('should handle artifact preparation failure', async () => {
+    it('should call cleanup when artifact preparation fails', async () => {
       const error = new Error('Artifact preparation failed');
       mockArtifactManager.prepareArtifact.mockRejectedValue(error);
 
@@ -169,13 +172,14 @@ describe('SampleDataManager', () => {
         'Artifact preparation failed'
       );
 
+      expect(mockArtifactManager.cleanup).toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalledWith(
         `Sample data installation failed for [${sampleType}]: Artifact preparation failed`
       );
       expect(mockIndexManager.createAndPopulateIndex).not.toHaveBeenCalled();
     });
 
-    it('should handle index creation failure', async () => {
+    it('should call cleanup when index creation fails', async () => {
       const error = new Error('Index creation failed');
       mockIndexManager.createAndPopulateIndex.mockRejectedValue(error);
 
@@ -183,6 +187,7 @@ describe('SampleDataManager', () => {
         'Index creation failed'
       );
 
+      expect(mockArtifactManager.cleanup).toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalledWith(
         `Sample data installation failed for [${sampleType}]: Index creation failed`
       );

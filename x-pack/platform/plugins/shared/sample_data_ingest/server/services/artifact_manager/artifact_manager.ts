@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { unlink } from 'fs/promises';
 import type { Logger } from '@kbn/logging';
 import { getArtifactName } from '@kbn/product-doc-common';
 import { DatasetSampleType } from '../../../common';
@@ -38,6 +39,7 @@ export class ArtifactManager {
   private readonly currentVersion: string;
   private readonly log: Logger;
   private artifactVersions?: Record<string, string[]>;
+  private readonly downloadedFiles = new Set<string>();
 
   constructor({
     artifactsFolder,
@@ -57,7 +59,9 @@ export class ArtifactManager {
     const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
     const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
     this.log.debug(`Downloading artifact from [${artifactUrl}]`);
-    await download(artifactUrl, artifactPath);
+    await download(artifactUrl, artifactPath, 'application/zip');
+
+    this.downloadedFiles.add(artifactPath);
 
     const archive = await openZipArchive(artifactPath);
     validateArtifactArchive(archive);
@@ -85,5 +89,17 @@ export class ArtifactManager {
     return availableVersions.includes(this.currentVersion)
       ? this.currentVersion
       : latestVersion(availableVersions);
+  }
+
+  async cleanup() {
+    for (const filePath of this.downloadedFiles) {
+      try {
+        await unlink(filePath);
+        this.log.debug(`Deleted downloaded file: ${filePath}`);
+      } catch (error) {
+        this.log.warn(`Failed to delete file ${filePath}: ${error.message}`);
+      }
+    }
+    this.downloadedFiles.clear();
   }
 }

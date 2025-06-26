@@ -14,6 +14,7 @@ import {
   loadManifestFileMock,
   majorMinorMock,
   latestVersionMock,
+  unlinkMock,
 } from './artifact_manager.test.mocks';
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
@@ -96,7 +97,11 @@ describe('ArtifactManager', () => {
       const expectedArtifactUrl = `${artifactRepositoryUrl}/${expectedArtifactName}`;
       const expectedArtifactPath = `${artifactsFolder}/${expectedArtifactName}`;
 
-      expect(downloadMock).toHaveBeenCalledWith(expectedArtifactUrl, expectedArtifactPath);
+      expect(downloadMock).toHaveBeenCalledWith(
+        expectedArtifactUrl,
+        expectedArtifactPath,
+        'application/zip'
+      );
       expect(openZipArchiveMock).toHaveBeenCalledWith(expectedArtifactPath);
       expect(validateArtifactArchiveMock).toHaveBeenCalledWith(mockArchive);
       expect(loadManifestFileMock).toHaveBeenCalledWith(mockArchive);
@@ -133,7 +138,8 @@ describe('ArtifactManager', () => {
 
       expect(downloadMock).toHaveBeenCalledWith(
         `${artifactRepositoryUrl}/${expectedArtifactName}`,
-        `${artifactsFolder}/${expectedArtifactName}`
+        `${artifactsFolder}/${expectedArtifactName}`,
+        'application/zip'
       );
     });
 
@@ -266,5 +272,24 @@ describe('ArtifactManager', () => {
     });
 
     expect(majorMinorMock).toHaveBeenCalledWith('9.0.0');
+  });
+
+  describe('cleanup', () => {
+    it('should delete downloaded files and clear the set', async () => {
+      const productName = 'kibana' as DatasetSampleType;
+
+      await artifactManager.prepareArtifact(productName);
+
+      await artifactManager.cleanup();
+
+      const expectedArtifactName = getArtifactName({
+        productName,
+        productVersion: '8.16',
+      });
+      const expectedArtifactPath = `${artifactsFolder}/${expectedArtifactName}`;
+
+      expect(unlinkMock).toHaveBeenCalledWith(expectedArtifactPath);
+      expect(unlinkMock).toHaveBeenCalledTimes(1);
+    });
   });
 });

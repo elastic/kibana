@@ -91,6 +91,7 @@ export class SampleDataManager {
       throw error;
     } finally {
       archive?.close();
+      await this.artifactManager.cleanup();
     }
   }
 
