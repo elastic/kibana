@@ -146,6 +146,188 @@ describe('overrideTimeRange', () => {
     ]);
   });
 
+  it('should maintain the same filter order', () => {
+    const filter = [
+      {
+        $state: {
+          store: 'appState',
+        },
+        meta: {
+          alias: null,
+          disabled: false,
+          field: 'event.action',
+          index: '0bde9920-4ade-4c19-8043-368aa37f1dae',
+          key: 'event.action',
+          negate: false,
+          params: ['a', 'b', 'c'],
+          type: 'phrases',
+          value: ['a', 'b', 'c'],
+        },
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                match_phrase: {
+                  'event.action': 'a',
+                },
+              },
+              {
+                match_phrase: {
+                  'event.action': 'b',
+                },
+              },
+              {
+                match_phrase: {
+                  'event.action': 'c',
+                },
+              },
+            ],
+          },
+        },
+      },
+      {
+        meta: {
+          field: 'event.start',
+          index: '0bde9920-4ade-4c19-8043-368aa37f1dae',
+          params: {},
+        },
+        query: {
+          range: {
+            'event.start': {
+              format: 'strict_date_optional_time',
+              gte: '2025-01-01T19:38:24.286Z',
+              lte: '2025-01-01T20:03:24.286Z',
+            },
+          },
+        },
+      },
+      {
+        $state: {
+          store: 'appState',
+        },
+        meta: {
+          alias: null,
+          disabled: false,
+          field: 'another.range.field',
+          index: '0bde9920-4ade-4c19-8043-368aa37f1dae',
+          key: 'another.range.field',
+          negate: false,
+          params: {
+            gte: '0',
+            lt: '10',
+          },
+          type: 'range',
+          value: {
+            gte: '0',
+            lt: '10',
+          },
+        },
+        query: {
+          range: {
+            'another.range.field': {
+              gte: '0',
+              lt: '10',
+            },
+          },
+        },
+      },
+    ];
+
+    const updated = overrideTimeRange({
+      // @ts-expect-error
+      currentFilters: filter,
+      forceNow: '2025-06-18T19:55:00.000Z',
+      logger: mockLogger,
+    });
+    expect(updated).toEqual([
+      {
+        $state: {
+          store: 'appState',
+        },
+        meta: {
+          alias: null,
+          disabled: false,
+          field: 'event.action',
+          index: '0bde9920-4ade-4c19-8043-368aa37f1dae',
+          key: 'event.action',
+          negate: false,
+          params: ['a', 'b', 'c'],
+          type: 'phrases',
+          value: ['a', 'b', 'c'],
+        },
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                match_phrase: {
+                  'event.action': 'a',
+                },
+              },
+              {
+                match_phrase: {
+                  'event.action': 'b',
+                },
+              },
+              {
+                match_phrase: {
+                  'event.action': 'c',
+                },
+              },
+            ],
+          },
+        },
+      },
+      {
+        meta: {
+          field: 'event.start',
+          index: '0bde9920-4ade-4c19-8043-368aa37f1dae',
+          params: {},
+        },
+        query: {
+          range: {
+            'event.start': {
+              format: 'strict_date_optional_time',
+              gte: '2025-06-18T19:30:00.000Z',
+              lte: '2025-06-18T19:55:00.000Z',
+            },
+          },
+        },
+      },
+      {
+        $state: {
+          store: 'appState',
+        },
+        meta: {
+          alias: null,
+          disabled: false,
+          field: 'another.range.field',
+          index: '0bde9920-4ade-4c19-8043-368aa37f1dae',
+          key: 'another.range.field',
+          negate: false,
+          params: {
+            gte: '0',
+            lt: '10',
+          },
+          type: 'range',
+          value: {
+            gte: '0',
+            lt: '10',
+          },
+        },
+        query: {
+          range: {
+            'another.range.field': {
+              gte: '0',
+              lt: '10',
+            },
+          },
+        },
+      },
+    ]);
+  });
+
   it('should return modified time range in the filter array range filters are present', () => {
     const filter = [
       {
