@@ -19,10 +19,10 @@ const mockEsqlQueryToOptions = jest.fn(() => ({ options: ['option1', 'option2'] 
 const mockIsSuccess = jest.fn(() => true);
 
 jest.mock('@kbn/esql-utils', () => {
-  const esqlQueryToOptions = () => mockEsqlQueryToOptions();
-  esqlQueryToOptions.isSuccess = () => mockIsSuccess();
+  const getESQLSingleColumnValues = () => mockEsqlQueryToOptions();
+  getESQLSingleColumnValues.isSuccess = () => mockIsSuccess();
   return {
-    esqlQueryToOptions,
+    getESQLSingleColumnValues,
   };
 });
 

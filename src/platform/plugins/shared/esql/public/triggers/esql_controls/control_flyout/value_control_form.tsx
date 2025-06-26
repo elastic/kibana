@@ -31,9 +31,9 @@ import {
 } from '@kbn/esql-types';
 import { getIndexPatternFromESQLQuery, appendStatsByToQuery } from '@kbn/esql-utils';
 import { ESQLLangEditor } from '../../../create_editor';
+import { getESQLSingleColumnValues } from '../utils/get_esql_single_column_values';
 import { ControlWidth, ControlLabel } from './shared_form_components';
 import { ChooseColumnPopover } from './choose_column_popover';
-import { esqlQueryToOptions } from './esql_query_to_options';
 
 interface ValueControlFormProps {
   search: ISearchGeneric;
@@ -152,11 +152,11 @@ export function ValueControlForm({
     async (query: string) => {
       setValuesQuery(query);
 
-      const result = await esqlQueryToOptions({ query, search, timeRange });
+      const result = await getESQLSingleColumnValues({ query, search, timeRange });
       if (!isMounted()) {
         return;
       }
-      if (esqlQueryToOptions.isSuccess(result)) {
+      if (getESQLSingleColumnValues.isSuccess(result)) {
         const { options } = result;
 
         setEsqlQueryErrors([]);

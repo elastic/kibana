@@ -23,9 +23,9 @@ const mockEsqlQueryToOptions = jest.fn().mockResolvedValue({
 });
 
 jest.mock('@kbn/controls-plugin/public', () => {
-  const esqlQueryToOptions = (...args: any[]) => mockEsqlQueryToOptions(...args);
-  esqlQueryToOptions.isSuccess = jest.fn().mockResolvedValue(true);
-  return { esqlQueryToOptions };
+  const getESQLSingleColumnValues = (...args: any[]) => mockEsqlQueryToOptions(...args);
+  getESQLSingleColumnValues.isSuccess = jest.fn().mockResolvedValue(true);
+  return { getESQLSingleColumnValues };
 });
 
 jest.mock('@kbn/esql-utils', () => {
