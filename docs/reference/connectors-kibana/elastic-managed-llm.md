@@ -14,9 +14,13 @@ Details of the currently used model are available in the [model card](https://ra
 The default LLM may change in the future based on evaluations of performance, security, and accuracy.
 ::::
 
+## Prerequisites
+
+* Requires the `manage_inference` [cluster privilege](https://www.elastic.co/docs/reference/elasticsearch/security-privileges#privileges-list-cluster) (the built-in `inference_admin` role grants this privilege)
+
 ## Region and hosting
 
-The Elastic Managed LLM is currently proxying to AWS Bedrock in AWS US regions, beginning with `us-east-1`. 
+The Elastic Managed LLM is currently proxying to AWS Bedrock in AWS US regions, beginning with `us-east-1`.
 
 ## Data protection
 
