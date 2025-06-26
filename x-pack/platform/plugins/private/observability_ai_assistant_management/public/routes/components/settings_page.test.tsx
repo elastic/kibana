@@ -161,7 +161,7 @@ describe('Settings Page', () => {
 
     await waitFor(() => {
       expect(coreStart.serverless.setBreadcrumbs).toHaveBeenCalledWith([
-        expect.objectContaining({ text: 'Observability' }),
+        expect.objectContaining({ text: 'AI Assistant' }),
       ]);
     });
   });
@@ -175,7 +175,7 @@ describe('Settings Page', () => {
 
     await waitFor(() => {
       expect(coreStart.serverless.setBreadcrumbs).toHaveBeenCalledWith([
-        expect.objectContaining({ text: 'Search' }),
+        expect.objectContaining({ text: 'AI Assistant' }),
       ]);
     });
   });
