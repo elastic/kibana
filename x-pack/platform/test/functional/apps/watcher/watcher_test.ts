@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }) {
       expect(errorCalloutText).to.be(`There is already a watch with ID '${watchID}'.`);
     });
 
-    //delete the watch
+    // delete the watch
     it('should delete the watch', async () => {
       // Navigate to the main list page
       await PageObjects.common.navigateToApp('watcher');
