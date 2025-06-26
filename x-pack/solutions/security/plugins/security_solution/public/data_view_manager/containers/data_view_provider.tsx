@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useKibana } from '../../common/lib/kibana';
@@ -16,7 +16,7 @@ const fallbackDataView = { id: '', title: '', toSpec: () => ({ id: '', title: ''
 
 export interface DefaultDataViewsContextValue {
   defaultDataView: DataView;
-  alertDataView: DataViewSpec;
+  alertDataView: DataView;
 }
 
 const DefaultDataViewContext = createContext<DefaultDataViewsContextValue | undefined>(undefined);
@@ -47,7 +47,7 @@ export const DefaultDataViewProvider: FC<PropsWithChildren> = ({ children }) => 
 
   const [defaultDataViews, setDefaultDataViews] = useState<{
     defaultDataView: DataView;
-    alertDataView: DataViewSpec;
+    alertDataView: DataView;
   }>();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -59,7 +59,7 @@ export const DefaultDataViewProvider: FC<PropsWithChildren> = ({ children }) => 
         return;
       }
 
-      const { defaultDataView: defaultDataViewMetadata, alertDataView } =
+      const { defaultDataView: defaultDataViewMetadata, alertDataView: alertDataViewSpec } =
         await createDefaultDataView({
           dataViewService: dataViews,
           uiSettings,
@@ -68,7 +68,10 @@ export const DefaultDataViewProvider: FC<PropsWithChildren> = ({ children }) => 
           http,
         });
 
-      const dataView = await dataViews?.get(defaultDataViewMetadata.id);
+      const [dataView, alertDataView] = await Promise.all([
+        dataViews?.get(defaultDataViewMetadata.id),
+        dataViews?.get(alertDataViewSpec.id),
+      ]);
 
       setDefaultDataViews({ defaultDataView: dataView, alertDataView });
     })();
