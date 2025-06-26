@@ -39,7 +39,6 @@ export const createDefaultDataView = async ({
   const configPatternList = uiSettings.get(DEFAULT_INDEX_KEY);
   let defaultDataView: SourcererModel['defaultDataView'];
   let kibanaDataViews: SourcererModel['kibanaDataViews'];
-  let siemDataView: DataView | undefined;
 
   let signal: { name: string | null; index_mapping_outdated: null | boolean } = {
     name: null,
@@ -51,7 +50,6 @@ export const createDefaultDataView = async ({
       kibanaDataViews: [],
       defaultDataView: { ...initDataView },
       signal,
-      siemDataView: undefined,
     };
   }
 
@@ -80,11 +78,10 @@ export const createDefaultDataView = async ({
       ...initDataView,
       ...dataView,
     }));
-    siemDataView = sourcererDataView.siemDataView;
   } catch (error) {
     defaultDataView = { ...initDataView, error };
     kibanaDataViews = [];
   }
 
-  return { kibanaDataViews, defaultDataView, signal, siemDataView };
+  return { kibanaDataViews, defaultDataView, signal };
 };

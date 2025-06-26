@@ -8,18 +8,11 @@
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
 import { mockDataViewManagerState } from '../mock';
 import { createInitListener } from './init_listener';
-import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import type { DataViewsServicePublic, DataView } from '@kbn/data-views-plugin/public';
 import type { RootState } from '../reducer';
 import { sharedDataViewManagerSlice } from '../slices';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../../constants';
 import { selectDataViewAsync } from '../actions';
-import type { CoreStart } from '@kbn/core/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { createDefaultDataView } from '../../utils/create_default_data_view';
-
-jest.mock('../../utils/create_default_data_view', () => ({
-  createDefaultDataView: jest.fn(),
-}));
 
 const mockDataViewsService = {
   get: jest.fn(),
@@ -30,11 +23,6 @@ const mockDataViewsService = {
   }),
   getAllDataViewLazy: jest.fn().mockReturnValue([]),
 } as unknown as DataViewsServicePublic;
-
-const http = {} as unknown as CoreStart['http'];
-const application = {} as unknown as CoreStart['application'];
-const uiSettings = {} as unknown as CoreStart['uiSettings'];
-const spaces = {} as unknown as SpacesPluginStart;
 
 const mockDispatch = jest.fn();
 const mockGetState = jest.fn(() => {
@@ -60,22 +48,12 @@ describe('createInitListener', () => {
     jest.clearAllMocks();
     listener = createInitListener({
       dataViews: mockDataViewsService,
-      http,
-      application,
-      uiSettings,
-      spaces,
+      defaultDataView: { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } as DataView,
     });
-
-    jest.mocked(createDefaultDataView).mockResolvedValue({
-      defaultDataView: { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID },
-      kibanaDataViews: [],
-    } as unknown as Awaited<ReturnType<typeof createDefaultDataView>>);
   });
 
   it('should load the data views and dispatch further actions', async () => {
     await listener.effect(sharedDataViewManagerSlice.actions.init([]), mockListenerApi);
-
-    expect(jest.mocked(createDefaultDataView)).toHaveBeenCalled();
 
     expect(jest.mocked(mockDataViewsService.getAllDataViewLazy)).toHaveBeenCalled();
 
