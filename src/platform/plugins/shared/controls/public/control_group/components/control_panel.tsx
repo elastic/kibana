@@ -165,12 +165,9 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
                 ) : isTwoLine ? null : (
                   <EuiToolTip
                     content={panelTitle || defaultPanelTitle}
-                    anchorProps={{ css: styles.tooltipAnchor }}
+                    anchorProps={{ css: styles.tooltipAnchor, className: 'eui-textTruncate' }}
                   >
-                    <EuiFormLabel
-                      css={styles.formLabel}
-                      className="eui-textTruncate controlPanel--label"
-                    >
+                    <EuiFormLabel className="controlPanel--label">
                       {panelTitle || defaultPanelTitle}
                     </EuiFormLabel>
                   </EuiToolTip>
@@ -215,14 +212,6 @@ const controlPanelStyles = {
     }),
   containerHidden: css({
     display: 'none', // Don't unmount, just hide
-  }),
-  formLabel: css({
-    padding: '0 !important',
-    height: '100%',
-    maxWidth: '100%',
-    overflow: 'hidden !important',
-    textOverflow: 'ellipsis !important',
-    whiteSpace: `nowrap !important` as 'nowrap',
   }),
   formControl: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -279,6 +268,11 @@ const controlPanelStyles = {
           backgroundColor: euiTheme.colors.backgroundFilledAccentSecondary,
           right: `calc(-${euiTheme.size.xs} - 1px)`,
         },
+      },
+      '.controlPanel--label': {
+        padding: '0 !important',
+        height: '100%',
+        maxWidth: '100%',
       },
     }),
   tooltipAnchor: css({
