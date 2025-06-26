@@ -43,7 +43,7 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
       api: embeddable,
       getEditFlyout: async () => {
         const { getEditorFlyout } = await import('../editor/get_editor_flyout');
-        
+
         return await getEditorFlyout({
           parentDashboard: embeddable,
           onSave: async (runtimeState) => {
