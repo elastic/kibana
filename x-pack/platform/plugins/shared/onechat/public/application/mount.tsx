@@ -16,7 +16,6 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { OnechatRoutes } from './routes';
 import { OnechatServicesContext } from './context/onechat_services_context';
 import type { OnechatInternalService } from '../services';
-import { InitialMessageProvider } from './context/initial_message_context';
 import { OnechatStartDependencies } from '../types';
 
 export const mountApp = async ({
@@ -41,13 +40,11 @@ export const mountApp = async ({
         <I18nProvider>
           <QueryClientProvider client={queryClient}>
             <OnechatServicesContext.Provider value={services}>
-              <InitialMessageProvider>
-                <RedirectAppLinks coreStart={core}>
-                  <Router history={history}>
-                    <OnechatRoutes />
-                  </Router>
-                </RedirectAppLinks>
-              </InitialMessageProvider>
+              <RedirectAppLinks coreStart={core}>
+                <Router history={history}>
+                  <OnechatRoutes />
+                </Router>
+              </RedirectAppLinks>
             </OnechatServicesContext.Provider>
           </QueryClientProvider>
         </I18nProvider>

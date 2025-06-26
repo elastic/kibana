@@ -11,7 +11,6 @@ import { EuiFlexItem, EuiPanel, useEuiTheme, euiScrollBarStyles } from '@elastic
 import { useChat } from '../../hooks/use_chat';
 import { useConversation } from '../../hooks/use_conversation';
 import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
-import { useInitialMessage } from '../../context/initial_message_context';
 import { ChatInputForm } from './chat_input_form';
 import { ChatConversation } from './conversation/chat_conversation';
 import { ChatNewConversationPrompt } from './chat_new_conversation_prompt';
@@ -39,18 +38,10 @@ interface ChatProps {
 
 export const Chat: React.FC<ChatProps> = ({ agentId, conversationId }) => {
   const { conversation } = useConversation({ conversationId });
-  const { initialMessage, clearInitialMessage } = useInitialMessage();
   const { sendMessage } = useChat({
     conversationId,
     agentId,
   });
-
-  useEffect(() => {
-    if (initialMessage && agentId) {
-      sendMessage(initialMessage);
-      clearInitialMessage();
-    }
-  }, [initialMessage, agentId, sendMessage, clearInitialMessage]);
 
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
