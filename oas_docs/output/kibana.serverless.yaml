@@ -11440,7 +11440,7 @@ paths:
                   type: string
                 maxPageSearchSize:
                   default: 500
-                  description: Defines the initial page size to use for the composite aggregation for each checkpoint
+                  description: The initial page size to use for the composite aggregation of each checkpoint.
                   type: integer
                 timeout:
                   default: 180s
@@ -11587,7 +11587,7 @@ paths:
                   type: string
                 maxPageSearchSize:
                   default: 500
-                  description: Defines the initial page size to use for the composite aggregation for each checkpoint
+                  description: The initial page size to use for the composite aggregation of each checkpoint.
                   type: integer
                 timeout:
                   default: 180s

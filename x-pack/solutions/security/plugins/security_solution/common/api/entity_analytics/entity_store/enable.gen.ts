@@ -69,7 +69,7 @@ export const InitEntityStoreRequestBody = z.object({
    */
   docsPerSecond: z.number().int().optional().default(10000),
   /**
-   * Defines the initial page size to use for the composite aggregation for each checkpoint
+   * The initial page size to use for the composite aggregation of each checkpoint.
    */
   maxPageSearchSize: z.number().int().optional().default(500),
 });
