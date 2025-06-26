@@ -16,11 +16,13 @@ import {
 } from '../../common/types';
 
 export const unredactionRt = t.type({
-  entity: t.string,
-  class_name: t.string,
-  start_pos: t.number,
-  end_pos: t.number,
-  type: t.union([t.literal('ner'), t.literal('regex')]),
+  start: t.number,
+  end: t.number,
+  entity: t.type({
+    class_name: t.string,
+    value: t.string,
+    mask: t.string,
+  }),
 });
 
 export const messageRt: t.Type<Message> = t.type({

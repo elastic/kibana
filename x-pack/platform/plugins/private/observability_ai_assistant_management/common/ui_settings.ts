@@ -12,7 +12,6 @@ import {
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
   aiAssistantAnonymizationRules,
-  NER_MODEL_ID,
 } from '@kbn/observability-ai-assistant-plugin/common';
 
 const baseRuleSchema = schema.object({
@@ -22,7 +21,7 @@ const baseRuleSchema = schema.object({
 const regexRuleSchema = schema.allOf([
   baseRuleSchema,
   schema.object({
-    type: schema.literal('regex'),
+    type: schema.literal('RegExp'),
     pattern: schema.string(),
     entityClass: schema.string(),
   }),
@@ -31,7 +30,7 @@ const regexRuleSchema = schema.allOf([
 const nerRuleSchema = schema.allOf([
   baseRuleSchema,
   schema.object({
-    type: schema.literal('ner'),
+    type: schema.literal('NER'),
     modelId: schema.maybe(schema.string()),
   }),
 ]);
@@ -90,13 +89,13 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       [
         {
           entityClass: 'EMAIL',
-          type: 'regex',
-          pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
+          type: 'RegExp',
+          pattern: '([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})',
           enabled: false,
         },
         {
-          type: 'ner',
-          modelId: NER_MODEL_ID,
+          type: 'NER',
+          modelId: 'elastic__distilbert-base-uncased-finetuned-conll03-english',
           enabled: false,
         },
       ],

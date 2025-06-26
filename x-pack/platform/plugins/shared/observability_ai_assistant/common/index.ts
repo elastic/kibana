@@ -67,5 +67,3 @@ export {
   E5_LARGE_IN_EIS_INFERENCE_ID,
   EIS_PRECONFIGURED_INFERENCE_IDS,
 } from './preconfigured_inference_ids';
-
-export { NER_MODEL_ID } from './utils/anonymization/redaction';

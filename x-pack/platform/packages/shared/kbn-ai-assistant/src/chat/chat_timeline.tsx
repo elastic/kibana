@@ -79,20 +79,19 @@ export interface ChatTimelineProps {
 export function highlightContent(
   content: string,
   detectedEntities: Array<{
-    start_pos: number;
-    end_pos: number;
-    entity: string;
-    class_name: string;
+    start: number;
+    end: number;
+    entity: { class_name: string; value: string; mask: string } | string;
   }>
 ): React.ReactNode {
   // Sort the entities by start position
-  const sortedEntities = [...detectedEntities].sort((a, b) => a.start_pos - b.start_pos);
+  const sortedEntities = [...detectedEntities].sort((a, b) => a.start - b.start);
   const parts: Array<string | React.ReactNode> = [];
   let lastIndex = 0;
   sortedEntities.forEach((entity, index) => {
     // Add the text before the entity
-    if (entity.start_pos > lastIndex) {
-      parts.push(content.substring(lastIndex, entity.start_pos));
+    if (entity.start > lastIndex) {
+      parts.push(content.substring(lastIndex, entity.start));
     }
 
     // Currently only highlighting the content that's not inside code blocks

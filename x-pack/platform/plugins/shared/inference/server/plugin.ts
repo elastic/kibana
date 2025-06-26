@@ -9,6 +9,8 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import { BoundInferenceClient, InferenceClient } from '@kbn/inference-common';
 import { initLangfuseProcessor, initPhoenixProcessor } from '@kbn/inference-tracing';
+import { AnonymizationRule } from '@kbn/inference-common';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { createClient as createInferenceClient, createChatModel } from './inference_client';
 import { registerRoutes } from './routes';
 import type { InferenceConfig } from './config';
@@ -70,12 +72,31 @@ export class InferencePlugin
   }
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
+    const createAnonymizationRulesPromise = (request: KibanaRequest) => {
+      return (async () => {
+        if (request) {
+          const soClient = core.savedObjects.getScopedClient(request);
+          const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
+          try {
+            const settingsStr = await uiSettingsClient.get<string>(
+              'observability:aiAssistantAnonymizationRules'
+            );
+            return JSON.parse(settingsStr ?? '[]') as AnonymizationRule[];
+          } catch {
+            return [] as AnonymizationRule[];
+          }
+        }
+        return [] as AnonymizationRule[];
+      })();
+    };
     return {
       getClient: <T extends InferenceClientCreateOptions>(options: T) => {
         return createInferenceClient({
           ...options,
+          anonymizationRulesPromise: createAnonymizationRulesPromise(options.request),
           actions: pluginsStart.actions,
           logger: this.logger.get('client'),
+          esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
         }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
 
@@ -85,6 +106,8 @@ export class InferencePlugin
           connectorId: options.connectorId,
           chatModelOptions: options.chatModelOptions,
           actions: pluginsStart.actions,
+          anonymizationRulesPromise: createAnonymizationRulesPromise(options.request),
+          esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
           logger: this.logger,
         });
       },

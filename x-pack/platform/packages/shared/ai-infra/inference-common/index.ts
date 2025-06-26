@@ -60,6 +60,14 @@ export {
   isToolNotFoundError,
   type ChatCompleteMetadata,
   type ConnectorTelemetryMetadata,
+  type AnonymizationRule,
+  type RegexAnonymizationRule,
+  type AnonymizationEntity,
+  type Anonymization,
+  type Deanonymization,
+  type AnonymizationOutput,
+  type DeanonymizationOutput,
+  type DeanonymizedMessage,
 } from './src/chat_complete';
 
 export type { BoundInferenceClient, InferenceClient } from './src/inference_client';

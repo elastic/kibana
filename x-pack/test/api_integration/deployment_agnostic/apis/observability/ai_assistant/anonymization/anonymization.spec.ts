@@ -44,14 +44,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           [
             {
               entityClass: 'EMAIL',
-              type: 'regex',
-              pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
+              type: 'RegExp',
+              pattern: '([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})',
               enabled: true,
             },
             {
               entityClass: 'URL',
-              type: 'regex',
-              pattern: 'https?://[^\\s]+',
+              type: 'RegExp',
+              pattern: '(https?:\\/\\/[^\\s"\']+)',
               enabled: true,
             },
           ],

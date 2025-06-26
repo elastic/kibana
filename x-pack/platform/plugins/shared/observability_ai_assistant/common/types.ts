@@ -29,31 +29,56 @@ export interface PendingMessage {
   aborted?: boolean;
   error?: any;
 }
-export interface DetectedEntity {
-  entity: string;
-  class_name: string;
-  start_pos: number;
-  end_pos: number;
-  hash: string;
-  type: 'ner' | 'regex';
+
+export interface Deanonymization {
+  start: number;
+  end: number;
+  entity: {
+    class_name: string;
+    value: string;
+    mask: string;
+  };
 }
 
-export type DetectedEntityType = DetectedEntity['type'];
-export interface Unredaction {
-  entity: string;
-  class_name: string;
-  start_pos: number;
-  end_pos: number;
-  type: 'ner' | 'regex';
+export interface DeanonymizationItem {
+  message: {
+    role: MessageRole;
+    content?: string;
+    toolCalls?: Array<{
+      function: {
+        name: string;
+        arguments: Record<string, any> | {};
+      };
+    }>;
+    name?: string;
+    response?: Record<string, any>;
+    toolCallId?: string;
+  };
+  deanonymizations: Deanonymization[];
 }
 
-export type UnredactionType = Unredaction['type'];
+export type DeanonymizationInput = DeanonymizationItem[];
+
+export interface DeanonymizationOutput {
+  message: {
+    content?: string;
+    toolCalls?: Array<{
+      toolCallId: string;
+      function: {
+        name: string;
+        arguments: Record<string, any>;
+      };
+    }>;
+    role: MessageRole;
+  };
+  deanonymizations: Deanonymization[];
+}
 
 export interface Message {
   '@timestamp': string;
   message: {
     content?: string;
-    unredactions?: Unredaction[];
+    unredactions?: Deanonymization[];
     name?: string;
     role: MessageRole;
     function_call?: {
@@ -61,6 +86,8 @@ export interface Message {
       arguments?: string;
       trigger: MessageRole.Assistant | MessageRole.User | MessageRole.Elastic;
     };
+    deanonymization_input?: DeanonymizationInput;
+    deanonymization_output?: DeanonymizationOutput;
     data?: string;
   };
 }
@@ -187,13 +214,13 @@ export interface InferenceChunk {
 }
 
 export interface NerAnonymizationRule {
-  type: 'ner';
+  type: 'NER';
   enabled: boolean;
   modelId?: string;
 }
 
 export interface RegexAnonymizationRule {
-  type: 'regex';
+  type: 'RegExp';
   entityClass: string;
   pattern: string;
   enabled: boolean;
