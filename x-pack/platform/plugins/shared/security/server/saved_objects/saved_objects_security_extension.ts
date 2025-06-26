@@ -345,7 +345,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     this.getCurrentUserFunc = getCurrentUser;
     this.accessControlService = new AccessControlService({
       getTypeRegistry,
-      checkPrivilegesFunc: checkPrivileges,
     });
     this.typeRegistryFunc = getTypeRegistry;
 
@@ -730,7 +729,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
     Array.from(params.types.values())
       .filter((type) => typeRegistry.supportsAccessControl(type))
-      .forEach((type) => authzActions.add(savedObjectActions.get(type, 'manageOwnership')));
+      .forEach((type) => authzActions.add(savedObjectActions.get(type, 'manage_ownership')));
 
     const checkResult: CheckAuthorizationResult<A> = await this.checkAuthorization({
       types: params.types,

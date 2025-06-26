@@ -77,11 +77,15 @@ export class ReadOnlyObjectsPlugin implements Plugin<void, void, SetupDeps> {
             },
             options
           );
+
           return response.ok({
             body: result,
           });
         } catch (error) {
-          return error;
+          return response.customError({
+            statusCode: 400,
+            body: error.message,
+          });
         }
       }
     );

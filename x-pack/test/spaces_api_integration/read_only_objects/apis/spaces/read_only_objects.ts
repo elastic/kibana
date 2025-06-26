@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_savedobjects_editor']);
     });
     after(async () => {
-      await security.testUser.restoreDefaults();
+      // await security.testUser.restoreDefaults();
     });
     describe('create and access read only objects', () => {
       it('should create a read only object', async () => {
@@ -83,6 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('cookie', testUserCookie.cookieString())
           .send({ type: 'read_only_type', isReadOnly: true })
           .expect(200);
+
         const objectId = createResponse.body.id;
         expect(createResponse.body.attributes).to.have.property('description', 'test');
         expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
@@ -94,6 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('cookie', testUserCookie.cookieString())
           .send({ objectId, type: 'read_only_type' })
           .expect(200);
+        expect(updateResponse.body.id).to.eql(objectId);
         expect(updateResponse.body.attributes).to.have.property(
           'description',
           'updated description'
@@ -130,7 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.only('transfer ownership of read only objects', () => {
+    describe('transfer ownership of read only objects', () => {
       it('should transfer ownership of read only objects by owner', async () => {
         const { cookie: testUserCookie, profileUid } = await loginAsTestUser();
         const createResponse = await supertestWithoutAuth
