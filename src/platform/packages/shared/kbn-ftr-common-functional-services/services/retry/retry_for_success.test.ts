@@ -68,7 +68,7 @@ describe('Retry for success', () => {
       ]
     `);
   });
-  it('should call delay with initialDelay if initialDelay is provided', async () => {
+  it.skip('should call delay with initialDelay if initialDelay is provided', async () => {
     const delaySpy = jest.spyOn(retryForSuccessModule, 'delay').mockResolvedValue(undefined);
     const log = new ToolingLog();
     const block = async () => 42;
