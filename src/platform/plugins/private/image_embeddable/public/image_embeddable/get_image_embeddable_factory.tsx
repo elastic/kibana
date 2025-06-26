@@ -13,14 +13,17 @@ import { BehaviorSubject, map, merge } from 'rxjs';
 import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { PresentationContainer, initializeUnsavedChanges } from '@kbn/presentation-containers';
+import {
+  PresentationContainer,
+  initializeUnsavedChanges,
+  mountDashboardFlyout,
+} from '@kbn/presentation-containers';
 import { initializeTitleManager, titleComparators } from '@kbn/presentation-publishing';
 
 import { IMAGE_CLICK_TRIGGER } from '../actions';
-import { openImageEditor } from '../components/image_editor/open_image_editor';
 import { ImageEmbeddable as ImageEmbeddableComponent } from '../components/image_embeddable';
 import { FileImageMetadata } from '../imports';
-import { filesService } from '../services/kibana_services';
+import { coreServices, filesService } from '../services/kibana_services';
 import { IMAGE_EMBEDDABLE_TYPE } from './constants';
 import { ImageConfig, ImageEmbeddableApi, ImageEmbeddableSerializedState } from './types';
 
@@ -90,16 +93,34 @@ export const getImageEmbeddableFactory = ({
         ...unsavedChangesApi,
         dataLoading$,
         supportedTriggers: () => [IMAGE_CLICK_TRIGGER],
+
         onEdit: async () => {
-          try {
-            const newImageConfig = await openImageEditor({
-              parentApi: embeddable.parentApi as PresentationContainer,
-              initialImageConfig: imageConfig$.getValue(),
-            });
-            imageConfig$.next(newImageConfig);
-          } catch {
-            // swallow the rejection, since this just means the user closed without saving
-          }
+          await mountDashboardFlyout({
+            core: coreServices,
+            api: parentApi,
+            getEditFlyout: async () => {
+              const { getImageEditor } = await import(
+                '../components/image_editor/get_image_editor'
+              );
+              try {
+                return await getImageEditor({
+                  parentApi: embeddable.parentApi as PresentationContainer,
+                  initialImageConfig: imageConfig$.getValue(),
+                  onSave: (newImageConfig: ImageConfig) => {
+                    imageConfig$.next(newImageConfig);
+                  },
+                });
+              } catch {
+                // swallow the rejection, since this just means the user closed without saving
+              }
+            },
+            flyoutPropsOverrides: {
+              type: 'overlay',
+              ownFocus: true,
+              'data-test-subj': 'createImageEmbeddableFlyout',
+              'aria-labelledby': 'image-editor-flyout-title',
+            },
+          });
         },
         isEditingEnabled: () => true,
         getTypeDisplayName: () =>

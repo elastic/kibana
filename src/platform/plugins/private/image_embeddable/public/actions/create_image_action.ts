@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CanAddNewPanel } from '@kbn/presentation-containers';
+import { CanAddNewPanel, mountDashboardFlyout } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
@@ -16,8 +16,8 @@ import {
   ADD_IMAGE_EMBEDDABLE_ACTION_ID,
   IMAGE_EMBEDDABLE_TYPE,
 } from '../image_embeddable/constants';
-import { ImageEmbeddableSerializedState } from '../image_embeddable/types';
-import { uiActionsService } from '../services/kibana_services';
+import { ImageConfig, ImageEmbeddableSerializedState } from '../image_embeddable/types';
+import { coreServices, uiActionsService } from '../services/kibana_services';
 
 const parentApiIsCompatible = async (parentApi: unknown): Promise<CanAddNewPanel | undefined> => {
   const { apiCanAddNewPanel } = await import('@kbn/presentation-containers');
@@ -36,17 +36,32 @@ export const registerCreateImageAction = () => {
     execute: async ({ embeddable: parentApi }) => {
       const canAddNewPanelParent = await parentApiIsCompatible(parentApi);
       if (!canAddNewPanelParent) throw new IncompatibleActionError();
-      const { openImageEditor } = await import('../components/image_editor/open_image_editor');
-      try {
-        const imageConfig = await openImageEditor({ parentApi: canAddNewPanelParent });
-
-        canAddNewPanelParent.addNewPanel<ImageEmbeddableSerializedState>({
-          panelType: IMAGE_EMBEDDABLE_TYPE,
-          serializedState: { rawState: { imageConfig } },
-        });
-      } catch {
-        // swallow the rejection, since this just means the user closed without saving
-      }
+      mountDashboardFlyout({
+        core: coreServices,
+        api: parentApi,
+        getEditFlyout: async () => {
+          const { getImageEditor } = await import('../components/image_editor/get_image_editor');
+          try {
+            return await getImageEditor({
+              parentApi: canAddNewPanelParent,
+              onSave: (imageConfig: ImageConfig) => {
+                canAddNewPanelParent.addNewPanel<ImageEmbeddableSerializedState>({
+                  panelType: IMAGE_EMBEDDABLE_TYPE,
+                  serializedState: { rawState: { imageConfig } },
+                });
+              },
+            });
+          } catch {
+            // swallow the rejection, since this just means the user closed without saving
+          }
+        },
+        flyoutPropsOverrides: {
+          type: 'overlay',
+          ownFocus: true,
+          'data-test-subj': 'createImageEmbeddableFlyout',
+          'aria-labelledby': 'image-editor-flyout-title',
+        },
+      });
     },
     grouping: [ADD_PANEL_ANNOTATION_GROUP],
     getDisplayName: () =>

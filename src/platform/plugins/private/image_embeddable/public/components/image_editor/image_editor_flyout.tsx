@@ -36,6 +36,7 @@ import { FilePicker } from '@kbn/shared-ux-file-picker';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import useAsync from 'react-use/lib/useAsync';
 import { FileImageMetadata, imageEmbeddableFileKind } from '../../imports';
 import { ImageConfig } from '../../types';
 import { ImageViewer } from '../image_viewer/image_viewer'; // use eager version to avoid flickering
@@ -57,13 +58,20 @@ export interface ImageEditorFlyoutProps {
   onCancel: () => void;
   onSave: (imageConfig: ImageConfig) => void;
   initialImageConfig?: ImageConfig;
-  user?: AuthenticatedUser;
+  getCurrentUser?: () => Promise<AuthenticatedUser>;
 }
 
 export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
   const isEditing = !!props.initialImageConfig;
   const { euiTheme } = useEuiTheme();
   const { validateUrl } = useImageViewerContext();
+  const [user, setUser] = useState<AuthenticatedUser | undefined>(undefined);
+  useAsync(async () => {
+    if (props.getCurrentUser) {
+      const currentUser = await props.getCurrentUser();
+      setUser(currentUser);
+    }
+  }, [props.getCurrentUser]);
 
   const [fileId, setFileId] = useState<undefined | string>(() =>
     props.initialImageConfig?.src?.type === 'file' ? props.initialImageConfig.src.fileId : undefined
@@ -425,9 +433,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
       {isFilePickerOpen && (
         <FilePicker
           kind={imageEmbeddableFileKind.id}
-          shouldAllowDelete={(file) =>
-            props.user ? props.user.profile_uid === file.user?.id : false
-          }
+          shouldAllowDelete={(file) => (user ? user.profile_uid === file.user?.id : false)}
           multiple={false}
           onClose={() => {
             setIsFilePickerOpen(false);
