@@ -51,7 +51,7 @@ export const InternalDiscoverResizableLayout = ({
   const [sidebarWidth, setSidebarWidth] = useRestorableState(
     'sidebarWidth',
     () => {
-      const widthInLocalStorage = storage.get(SIDEBAR_WIDTH_KEY);
+      const widthInLocalStorage = Number(storage.get(SIDEBAR_WIDTH_KEY));
       return widthInLocalStorage || defaultSidebarWidth;
     },
     {
