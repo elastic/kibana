@@ -78,7 +78,7 @@ export function createTelemetryConfigurationTaskConfig() {
 
           Object.entries(configArtifact.sender_channels).forEach(([channelName, config]) => {
             if (channelName === 'default') {
-              log.info('Updating default configuration');
+              log.debug('Updating default configuration');
               sender.updateDefaultQueueConfig({
                 bufferTimeSpanMillis: config.buffer_time_span_millis,
                 inflightEventsThreshold: config.inflight_events_threshold,
@@ -89,7 +89,9 @@ export function createTelemetryConfigurationTaskConfig() {
               if (!channel) {
                 log.info('Ignoring unknown channel', { channel: channelName } as LogMeta);
               } else {
-                log.info('Updating configuration for channel', { channel: channelName } as LogMeta);
+                log.debug('Updating configuration for channel', {
+                  channel: channelName,
+                } as LogMeta);
                 sender.updateQueueConfig(channel, {
                   bufferTimeSpanMillis: config.buffer_time_span_millis,
                   inflightEventsThreshold: config.inflight_events_threshold,
@@ -101,19 +103,19 @@ export function createTelemetryConfigurationTaskConfig() {
         }
 
         if (configArtifact.pagination_config) {
-          log.info('Updating pagination configuration');
+          log.debug('Updating pagination configuration');
           telemetryConfiguration.pagination_config = configArtifact.pagination_config;
           _receiver.setMaxPageSizeBytes(configArtifact.pagination_config.max_page_size_bytes);
           _receiver.setNumDocsToSample(configArtifact.pagination_config.num_docs_to_sample);
         }
 
         if (configArtifact.indices_metadata_config) {
-          log.info('Updating indices metadata configuration');
+          log.debug('Updating indices metadata configuration');
           telemetryConfiguration.indices_metadata_config = configArtifact.indices_metadata_config;
         }
 
         if (configArtifact.ingest_pipelines_stats_config) {
-          log.info('Updating ingest pipelines stats configuration');
+          log.debug('Updating ingest pipelines stats configuration');
           telemetryConfiguration.ingest_pipelines_stats_config =
             configArtifact.ingest_pipelines_stats_config;
         }

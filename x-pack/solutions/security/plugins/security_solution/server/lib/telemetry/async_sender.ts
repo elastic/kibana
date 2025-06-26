@@ -229,7 +229,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
         if (inflightEventsCounter < this.getConfigFor(channel).inflightEventsThreshold) {
           return rx.of(event);
         }
-        this.logger.info('Dropping event', { event, channel, inflightEventsCounter } as LogMeta);
+        this.logger.debug('Dropping event', { event, channel, inflightEventsCounter } as LogMeta);
         this.senderUtils?.incrementCounter(TelemetryCounter.DOCS_DROPPED, 1, channel);
 
         return rx.EMPTY;
