@@ -177,8 +177,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Editing Private Locations in Multiple Spaces', () => {
-      let testSpaceMonitorId;
-      let defaultSpaceMonitorId;
+      let testSpaceMonitorId = '';
+      let defaultSpaceMonitorId = '';
 
       it('add a test private location in multiple spaces', async () => {
         const apiRes = await testPrivateLocations.addFleetPolicy('Test Fleet Policy 2');
