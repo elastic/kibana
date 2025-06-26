@@ -64,6 +64,7 @@ export type {
   SavedObjectsBulkDeleteResponse,
   SavedObjectsChangeOwnershipOptions,
   SavedObjectsChangeOwnershipResponse,
+  SavedObjectsChangeOwnershipObject,
 } from './src/apis';
 
 export type {

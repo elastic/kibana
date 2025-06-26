@@ -17,7 +17,6 @@ import type { SavedObjectsBaseOptions } from './base';
 
 export interface SavedObjectsChangeOwnershipOptions<Attributes = unknown>
   extends SavedObjectsBaseOptions {
-  accessMode?: SavedObjectAccessControl['accessMode'];
   owner?: SavedObjectAccessControl['owner'];
 }
 
@@ -29,4 +28,9 @@ export interface SavedObjectsChangeOwnershipOptions<Attributes = unknown>
 export interface SavedObjectsChangeOwnershipResponse<T = unknown>
   extends Omit<SavedObject<T>, 'accessControl'> {
   accessControl: SavedObjectAccessControl;
+}
+
+export interface SavedObjectsChangeOwnershipObject {
+  id: string;
+  type: string;
 }
