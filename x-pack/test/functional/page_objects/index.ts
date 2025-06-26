@@ -20,7 +20,7 @@ import { CrossClusterReplicationPageProvider } from './cross_cluster_replication
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
 import { EmbeddedConsoleProvider } from './embedded_console';
 import { GeoFileUploadPageObject } from './geo_file_upload';
-import { GisPageObject } from './gis_page';
+// import { GisPageObject } from './gis_page';
 import { GraphPageObject } from './graph_page';
 import { GrokDebuggerPageObject } from './grok_debugger_page';
 import { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
@@ -89,7 +89,7 @@ export const pageObjects = {
   licenseManagement: LicenseManagementPageProvider,
   logstash: LogstashPageObject,
   maintenanceWindows: MaintenanceWindowsPageProvider,
-  maps: GisPageObject,
+  // maps: GisPageObject,
   monitoring: MonitoringPageObject,
   navigationalSearch: NavigationalSearchPageObject,
   observabilityLogsExplorer: ObservabilityLogsExplorerPageObject,

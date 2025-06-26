@@ -14,6 +14,7 @@ import { MonitoringPageObject } from './monitoring_page';
 import { AccountSettingsPageObject } from './account_settings_page';
 import { CanvasPageProvider } from './canvas_page';
 import { LensPageProvider } from './lens_page';
+import { GisPageObject } from './gis_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -27,4 +28,5 @@ export const pageObjects = {
   accountSetting: AccountSettingsPageObject,
   canvas: CanvasPageProvider,
   lens: LensPageProvider,
+  maps: GisPageObject,
 };
