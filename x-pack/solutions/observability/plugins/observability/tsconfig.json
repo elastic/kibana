@@ -9,7 +9,8 @@
     "public/**/*.json",
     "server/**/*",
     "typings/**/*",
-    "../../../../../typings/**/*"
+    "../../../../../typings/**/*",
+    "ui_tests/**/*"
   ],
   "kbn_references": [
     "@kbn/rule-data-utils",
@@ -126,6 +127,8 @@
     "@kbn/logs-data-access-plugin",
     "@kbn/core-pricing-browser-mocks",
     "@kbn/esql",
+    "@kbn/scout",
+    "@kbn/apm-synthtrace-client",
   ],
   "exclude": ["target/**/*"]
 }
