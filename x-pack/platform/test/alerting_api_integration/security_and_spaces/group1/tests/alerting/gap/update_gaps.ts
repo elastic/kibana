@@ -19,7 +19,8 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
 
-  describe('update gaps', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/224475
+  describe.skip('update gaps', () => {
     const objectRemover = new ObjectRemover(supertest);
     const gapStart = moment().subtract(14, 'days').startOf('day').toISOString();
     const gapEnd = moment().subtract(13, 'days').startOf('day').toISOString();

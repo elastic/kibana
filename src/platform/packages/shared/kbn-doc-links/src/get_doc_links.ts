@@ -31,7 +31,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const ELASTICSEARCH_SERVERLESS_APIS = `${API_DOCS}doc/elasticsearch-serverless/`;
   const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
   const KIBANA_APIS = `${API_DOCS}doc/kibana/`;
-  const KIBANA_SERVERLESS_APIS = `{$API_DOCS}doc/serverless/`;
+  const KIBANA_SERVERLESS_APIS = `${API_DOCS}doc/serverless/`;
   const SECURITY_SOLUTION_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/`;
   const ENTERPRISE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}/`;
   const ESRE_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/esre/${DOC_LINK_VERSION}/`;
@@ -193,6 +193,12 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       upgrade9x: `${ENTERPRISE_SEARCH_DOCS}upgrading-to-9-x.html`,
       usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
     },
+    searchHomepage: {
+      visitSearchLabs: `${ELASTIC_WEBSITE_URL}search-labs`,
+      notebooksExamples: `${ELASTIC_WEBSITE_URL}search-labs/tutorials/examples`,
+      customerEngineerRequestForm: `${ELASTIC_WEBSITE_URL}contact/ce-help`,
+      elasticCommunity: `${ELASTIC_WEBSITE_URL}community/`,
+    },
     metricbeat: {
       base: `${ELASTIC_DOCS}reference/beats/metricbeat`,
       configure: `${ELASTIC_DOCS}reference/beats/metricbeat/configuring-howto-metricbeat`,
@@ -309,7 +315,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       docsBase: `${ELASTIC_DOCS}solutions/search`,
       asyncSearch: `${ELASTIC_DOCS}solutions/search/async-search-api`,
       dataStreams: `${ELASTIC_DOCS}manage-data/data-store/data-streams`,
-      dataStreamsFailureStore: `${ELASTIC_DOCS}manage-data/data-store/data-streams/failure-store`,
       deprecationLogging: `${ELASTIC_DOCS}deploy-manage/monitor/logging-configuration/update-elasticsearch-logging-levels#deprecation-logging`,
       createEnrichPolicy: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-enrich-put-policy`
@@ -419,6 +424,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       detectionsReq: `${ELASTIC_DOCS}solutions/security/detect-and-alert/detections-requirements`,
       networkMap: `${ELASTIC_DOCS}solutions/security/explore/configure-network-map-data`,
       troubleshootGaps: `${ELASTIC_DOCS}troubleshoot/security/detection-rules#troubleshoot-gaps`,
+      gapsTable: `${ELASTIC_DOCS}solutions/security/detect-and-alert/monitor-rule-executions#gaps-table`,
       ruleApiOverview: isServerless
         ? `${KIBANA_APIS}group/endpoint-security-detections-api`
         : `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`,
@@ -583,6 +589,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       tlsCertificate: `${ELASTIC_DOCS}solutions/observability/incident-management/create-tls-certificate-rule`,
       uptimeDurationAnomaly: `${ELASTIC_DOCS}solutions/observability/incident-management/create-an-uptime-duration-anomaly-rule`,
       monitorLogs: `${ELASTIC_DOCS}solutions/observability/logs/explore-logs`,
+      logsStreams: `${ELASTIC_DOCS}solutions/observability/logs/streams/streams`,
       analyzeMetrics: `${ELASTIC_DOCS}solutions/observability/infra-and-hosts/analyze-infrastructure-host-metrics`,
       monitorUptimeSynthetics: `${ELASTIC_DOCS}solutions/observability/synthetics`,
       userExperience: `${ELASTIC_DOCS}solutions/observability/applications/user-experience`,
@@ -1014,6 +1021,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       queryRulesAPIDocumentation: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}group/endpoint-query_rules`
         : `${ELASTICSEARCH_APIS}group/endpoint-query_rules`,
+    },
+    datasetQuality: {
+      failureStore: `${ELASTIC_DOCS}solutions/observability/data-set-quality-monitoring#find-failed-documents-with-failure-store`,
     },
   });
 };

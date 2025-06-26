@@ -160,6 +160,9 @@ export const useDatasetQualityDetailsState = () => {
     [service]
   );
 
+  const hasFailureStore = Boolean(dataStreamDetails?.hasFailureStore);
+  const canShowFailureStoreInfo = canUserReadFailureStore && hasFailureStore;
+
   return {
     service,
     telemetryClient,
@@ -182,6 +185,8 @@ export const useDatasetQualityDetailsState = () => {
     canUserAccessDashboards,
     canUserViewIntegrations,
     canUserReadFailureStore,
+    hasFailureStore,
+    canShowFailureStoreInfo,
     expandedQualityIssue,
     isQualityIssueFlyoutOpen,
   };

@@ -30,6 +30,8 @@ import {
   LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
 } from '../constants';
 import { OnboardingSuccessCallout } from '../components/onboarding/onboarding_success_callout';
+import { AssetInventoryLoading } from '../components/asset_inventory_loading';
+import { DataViewNotFound } from '../components/errors/data_view_not_found';
 
 const getDefaultQuery = ({ query, filters, pageFilters }: AssetsBaseURLQuery): URLQuery => ({
   query,
@@ -45,9 +47,14 @@ export const AllAssets = () => {
     spaceId ? `${ASSET_INVENTORY_DATA_VIEW_ID_PREFIX}-${spaceId}` : undefined
   );
 
-  if (!dataViewQuery.data) {
-    return null;
+  if (dataViewQuery.isLoading) {
+    return <AssetInventoryLoading />;
   }
+
+  if (dataViewQuery.isError) {
+    return <DataViewNotFound refetchDataView={dataViewQuery.refetch} />;
+  }
+
   const dataViewContextValue = {
     dataView: dataViewQuery.data,
     dataViewRefetch: dataViewQuery.refetch,
@@ -81,19 +88,27 @@ const AllAssetsComponent = () => {
     enabled: !queryError,
   });
 
+  // Todo: Improve to a dedicated loading state that's not dependent on chart data
+  const isSearchBarLoading = isLoadingChartData || isFetchingChartData;
+
   return (
     <I18nProvider>
-      <AssetInventorySearchBar query={urlQuery} setQuery={setUrlQuery} />
+      <AssetInventorySearchBar
+        query={urlQuery}
+        setQuery={setUrlQuery}
+        isLoading={isSearchBarLoading}
+      />
       <EuiPageTemplate.Section>
         <AssetInventoryTitle />
         <EuiSpacer size="l" />
         <OnboardingSuccessCallout />
-        <AssetInventoryFilters setQuery={setUrlQuery} />
+        <AssetInventoryFilters query={urlQuery} setQuery={setUrlQuery} />
         <EuiSpacer size="l" />
         <AssetInventoryBarChart
           isLoading={isLoadingChartData}
           isFetching={isFetchingChartData}
           assetInventoryChartData={!!chartData && chartData.length > 0 ? chartData : []}
+          setQuery={setUrlQuery}
         />
         <EuiSpacer size="xl" />
         <AssetInventoryTableSection state={state} />
