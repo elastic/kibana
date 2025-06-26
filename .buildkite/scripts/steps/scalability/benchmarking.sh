@@ -19,6 +19,9 @@ rm -rf "${KIBANA_LOAD_TESTING_DIR}"
 rm -rf "${GCS_ARTIFACTS_DIR}"
 
 download_artifacts() {
+  echo Activating service-account for gsutil to access gs://kibana-performance
+  .buildkite/scripts/common/activate_service_account.sh gs://kibana-performance
+
   mkdir -p "${GCS_ARTIFACTS_DIR}"
 
   gsutil cp "$GCS_BUCKET/latest" "${GCS_ARTIFACTS_DIR}/"
@@ -33,7 +36,6 @@ download_artifacts() {
   tar -xzf "${LATEST_RUN_ARTIFACTS_DIR}/kibana-default.tar.gz" -C "$KIBANA_BUILD_LOCATION" --strip=1
 
   cd "$KIBANA_DIR"
-  tar -xzf "${LATEST_RUN_ARTIFACTS_DIR}/kibana-default-plugins.tar.gz"
   tar -xzf "${LATEST_RUN_ARTIFACTS_DIR}/scalability_traces.tar.gz"
 }
 

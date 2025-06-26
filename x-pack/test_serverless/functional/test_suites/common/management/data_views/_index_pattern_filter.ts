@@ -22,17 +22,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // TODO: Navigation to Data View Management is different in Serverless
       await PageObjects.common.navigateToApp('management');
       await testSubjects.click('app-card-dataViews');
+      await PageObjects.settings.createIndexPattern('logstash-*');
     });
 
     after(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
-    });
-
-    beforeEach(async function () {
-      await PageObjects.settings.createIndexPattern('logstash-*');
-    });
-
-    afterEach(async function () {
       await PageObjects.settings.removeIndexPattern();
     });
 
@@ -80,10 +74,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '@tags.raw',
         '@timestamp',
         '_id',
+        '_ignored',
         '_index',
         '_score',
         '_source',
-        '_test',
       ];
 
       expect(await PageObjects.settings.getFieldNames()).to.eql(unfilteredFields);
@@ -110,10 +104,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '@tags.raw',
         '@timestamp',
         '_id',
+        '_ignored',
         '_index',
         '_score',
         '_source',
-        'agent',
       ];
 
       expect(await PageObjects.settings.getFieldNames()).to.eql(unfilteredFields);
@@ -153,12 +147,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await es.indices.create({
         index: additionalIndexWithWrongMapping,
-        body: {
-          mappings: {
-            properties: {
-              bytes: {
-                type: 'keyword',
-              },
+        mappings: {
+          properties: {
+            bytes: {
+              type: 'keyword',
             },
           },
         },
@@ -185,10 +177,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'keyword',
         'date',
         '_id',
+        '_ignored',
         '_index',
         '',
         '_source',
-        'text',
       ]);
 
       // set other filters to check if they get reset after pressing the button

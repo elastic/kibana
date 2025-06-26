@@ -9,7 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'visualize', 'spaceSelector', 'visChart']);
+  const { common, visualize, spaceSelector, visChart } = getPageObjects([
+    'common',
+    'visualize',
+    'spaceSelector',
+    'visChart',
+  ]);
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
   const kibanaServer = getService('kibanaServer');
@@ -35,45 +40,45 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('goes back to last opened url', async () => {
-      await PageObjects.common.navigateToApp('visualize');
-      await PageObjects.visualize.openSavedVisualization('A Pie');
-      await PageObjects.common.navigateToApp('home');
+      await common.navigateToApp('visualize');
+      await visualize.openSavedVisualization('A Pie');
+      await common.navigateToApp('home');
       await appsMenu.clickLink('Visualize Library');
-      await PageObjects.visChart.waitForVisualization();
+      await visChart.waitForVisualization();
       const activeTitle = await globalNav.getLastBreadcrumb();
       expect(activeTitle).to.be('A Pie');
     });
 
     it('remembers url after switching spaces', async function () {
       // default space
-      await PageObjects.common.navigateToApp('visualize');
-      await PageObjects.visualize.openSavedVisualization('A Pie');
+      await common.navigateToApp('visualize');
+      await visualize.openSavedVisualization('A Pie');
 
-      await PageObjects.spaceSelector.openSpacesNav();
-      await PageObjects.spaceSelector.clickSpaceAvatar('another-space');
-      await PageObjects.spaceSelector.expectHomePage('another-space');
+      await spaceSelector.openSpacesNav();
+      await spaceSelector.clickSpaceAvatar('another-space');
+      await spaceSelector.expectHomePage('another-space');
 
       // other space
       await appsMenu.clickLink('Visualize Library');
-      await PageObjects.visualize.openSavedVisualization('A Pie in another space');
+      await visualize.openSavedVisualization('A Pie in another space');
 
-      await PageObjects.spaceSelector.openSpacesNav();
-      await PageObjects.spaceSelector.clickSpaceAvatar('default');
-      await PageObjects.spaceSelector.expectHomePage('default');
+      await spaceSelector.openSpacesNav();
+      await spaceSelector.clickSpaceAvatar('default');
+      await spaceSelector.expectHomePage('default');
 
       // default space
       await appsMenu.clickLink('Visualize Library');
-      await PageObjects.visChart.waitForVisualization();
+      await visChart.waitForVisualization();
       const activeTitleDefaultSpace = await globalNav.getLastBreadcrumb();
       expect(activeTitleDefaultSpace).to.be('A Pie');
 
-      await PageObjects.spaceSelector.openSpacesNav();
-      await PageObjects.spaceSelector.clickSpaceAvatar('another-space');
-      await PageObjects.spaceSelector.expectHomePage('another-space');
+      await spaceSelector.openSpacesNav();
+      await spaceSelector.clickSpaceAvatar('another-space');
+      await spaceSelector.expectHomePage('another-space');
 
       // other space
       await appsMenu.clickLink('Visualize Library');
-      await PageObjects.visChart.waitForVisualization();
+      await visChart.waitForVisualization();
       const activeTitleOtherSpace = await globalNav.getLastBreadcrumb();
       expect(activeTitleOtherSpace).to.be('A Pie in another space');
     });

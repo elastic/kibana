@@ -28,12 +28,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       try {
         await es.indices.create({
           index: ENRICH_INDEX_NAME,
-          body: {
-            mappings: {
-              properties: {
-                name: {
-                  type: 'text',
-                },
+          mappings: {
+            properties: {
+              name: {
+                type: 'text',
               },
             },
           },
@@ -53,7 +51,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }
 
       log.debug('Navigating to the enrich policies tab');
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.common.navigateToApp('indexManagement');
 
       // Navigate to the enrich policies tab

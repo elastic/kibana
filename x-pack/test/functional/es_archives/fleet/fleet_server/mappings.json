@@ -1,0 +1,237 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".fleet-agents": {
+      }
+    },
+    "index": ".fleet-agents-7",
+    "mappings": {
+      "_meta": {
+        "migrationHash": "87cab95ac988d78a78d0d66bbf05361b65dcbacf"
+      },
+      "dynamic": "false",
+      "properties": {
+        "access_api_key_id": {
+          "type": "keyword"
+        },
+        "action_seq_no": {
+          "type": "integer"
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "agent": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "keyword"
+            }
+          }
+        },
+        "default_api_key": {
+          "type": "keyword"
+        },
+        "default_api_key_id": {
+          "type": "keyword"
+        },
+        "enrolled_at": {
+          "type": "date"
+        },
+        "last_checkin": {
+          "type": "date"
+        },
+        "last_checkin_status": {
+          "type": "keyword"
+        },
+        "last_updated": {
+          "type": "date"
+        },
+        "local_metadata": {
+          "properties": {
+            "elastic": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "build": {
+                      "properties": {
+                        "original": {
+                          "fields": {
+                            "keyword": {
+                              "ignore_above": 256,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "text"
+                        }
+                      }
+                    },
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "log_level": {
+                      "type": "keyword"
+                    },
+                    "snapshot": {
+                      "type": "boolean"
+                    },
+                    "upgradeable": {
+                      "type": "boolean"
+                    },
+                    "version": {
+                      "fields": {
+                        "keyword": {
+                          "ignore_above": 16,
+                          "type": "keyword"
+                        }
+                      },
+                      "type": "text"
+                    }
+                  }
+                }
+              }
+            },
+            "host": {
+              "properties": {
+                "architecture": {
+                  "type": "keyword"
+                },
+                "hostname": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "id": {
+                  "type": "keyword"
+                },
+                "ip": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 64,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "mac": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 17,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "name": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                }
+              }
+            },
+            "os": {
+              "properties": {
+                "family": {
+                  "type": "keyword"
+                },
+                "full": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 128,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "kernel": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 128,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "name": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 256,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                },
+                "platform": {
+                  "type": "keyword"
+                },
+                "version": {
+                  "fields": {
+                    "keyword": {
+                      "ignore_above": 32,
+                      "type": "keyword"
+                    }
+                  },
+                  "type": "text"
+                }
+              }
+            }
+          }
+        },
+        "packages": {
+          "type": "keyword"
+        },
+        "policy_coordinator_idx": {
+          "type": "integer"
+        },
+        "policy_id": {
+          "type": "keyword"
+        },
+        "policy_revision_idx": {
+          "type": "integer"
+        },
+        "shared_id": {
+          "type": "keyword"
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "unenrolled_at": {
+          "type": "date"
+        },
+        "unenrollment_started_at": {
+          "type": "date"
+        },
+        "updated_at": {
+          "type": "date"
+        },
+        "upgrade_started_at": {
+          "type": "date"
+        },
+        "upgraded_at": {
+          "type": "date"
+        },
+        "user_provided_metadata": {
+          "enabled": false,
+          "type": "object"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+

@@ -9,12 +9,20 @@ export const EMAIL_ACTION_BTN = '[data-test-subj=".email-siem-ActionTypeSelectOp
 
 export const WEBHOOK_ACTION_BTN = '[data-test-subj=".webhook-siem-ActionTypeSelectOption"]';
 
+export const SERVER_LOG_ACTION_BTN = '[data-test-subj=".server-log-siem-ActionTypeSelectOption"]';
+
+export const XMATTERS_ACTION_BTN = '[data-test-subj=".xmatters-siem-ActionTypeSelectOption"]';
+
+export const CASES_SYSTEM_ACTION_BTN = '[data-test-subj=".cases-siem-ActionTypeSelectOption"]';
+
 /**
  * all rule actions buttons, elements which data-test-subj attribute ends with  '-siem-ActionTypeSelectOption'
  */
 export const ACTION_BTN = '[data-test-subj$="-siem-ActionTypeSelectOption"]';
 
 export const CREATE_ACTION_CONNECTOR_BTN = '[data-test-subj="createActionConnectorButton-0"]';
+
+export const CREATE_NEW_EMAIL_CONNECTOR = '[data-test-subj="addNewActionConnectorButton-.email"]';
 
 export const SAVE_ACTION_CONNECTOR_BTN = '[data-test-subj="saveActionButtonModal"]';
 
@@ -39,6 +47,12 @@ export const EMAIL_CONNECTOR_USER_INPUT = '[data-test-subj="emailUserInput"]';
 export const EMAIL_CONNECTOR_PASSWORD_INPUT = '[data-test-subj="emailPasswordInput"]';
 
 export const EMAIL_CONNECTOR_SERVICE_SELECTOR = '[data-test-subj="emailServiceSelectInput"]';
+
+export const CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_SELECTOR =
+  '[data-test-subj=group-by-alert-field-combobox]';
+
+export const CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_OPTIONS_LIST =
+  '[data-test-subj~=group-by-alert-field-combobox-optionsList]';
 
 export const FORM_VALIDATION_ERROR = '.euiFormErrorText';
 

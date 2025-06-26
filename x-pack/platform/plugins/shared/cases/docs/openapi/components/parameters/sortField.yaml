@@ -1,0 +1,15 @@
+in: query
+name: sortField
+description: Determines which field is used to sort the results.
+schema:
+  type: string
+  enum:
+    - createdAt
+    - updatedAt
+    - closedAt
+    - title
+    - category
+    - status
+    - severity
+  default: createdAt
+example: updatedAt

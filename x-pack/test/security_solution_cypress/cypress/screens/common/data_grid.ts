@@ -9,6 +9,10 @@ export const GET_DATA_GRID_HEADER = (fieldName: string) => {
   return `[data-test-subj="dataGridHeaderCell-${fieldName}"]`;
 };
 
+export const GET_DATA_GRID_HEADER_ACTION_BUTTON = (fieldName: string) => {
+  return `[data-test-subj="dataGridHeaderCellActionButton-${fieldName}"]`;
+};
+
 export const DATA_GRID_FIELDS = {
   TIMESTAMP: {
     fieldName: '@timestamp',
@@ -34,7 +38,7 @@ export const GET_DATA_GRID_HEADER_CELL_ACTION_GROUP = (fieldName: string) => {
 };
 
 export const DATA_GRID_FULL_SCREEN =
-  '[data-test-subj="alertsTable"] [data-test-subj="dataGridFullScreenButton"]';
+  '[data-test-subj="alertsTableIsLoaded"] [data-test-subj="dataGridFullScreenButton"]';
 
 export const DATA_GRID_FIELD_SORT_BTN = '[data-test-subj="dataGridColumnSortingButton"]';
 

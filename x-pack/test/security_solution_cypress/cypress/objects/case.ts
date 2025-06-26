@@ -30,6 +30,14 @@ export interface Connector {
   password: string;
 }
 
+export interface JiraConnector {
+  connectorName: string;
+  URL: string;
+  projectKey: string;
+  email: string;
+  token: string;
+}
+
 export interface JiraConnectorOptions {
   issueType: string;
   priority: string;
@@ -95,6 +103,8 @@ export const getCaseResponse = (): Case => ({
   totalAlerts: 0,
   version: 'test-version',
   category: null,
+  observables: [],
+  incremental_id: undefined,
 });
 
 export const getServiceNowConnector = (): Connector => ({
@@ -102,6 +112,14 @@ export const getServiceNowConnector = (): Connector => ({
   URL: 'https://www.test.service-now.com',
   username: 'Username Name',
   password: 'password',
+});
+
+export const getJiraConnector = (): JiraConnector => ({
+  connectorName: 'New Jira connector',
+  URL: 'https://www.test.jira.com',
+  projectKey: 'test',
+  email: 'test@test.com',
+  token: '1234567',
 });
 
 export const getServiceNowITSMHealthResponse = (): ServiceNowHealthResponse => ({

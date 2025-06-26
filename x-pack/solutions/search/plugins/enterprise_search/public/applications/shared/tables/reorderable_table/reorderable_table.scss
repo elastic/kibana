@@ -1,0 +1,30 @@
+.reorderableTable {
+
+  &Header {
+    > .euiFlexGroup {
+      margin: $euiSizeXS 0;
+    }
+  }
+
+  &NoItems {
+    border-top: $euiBorderThin;
+    background-color: $euiColorEmptyShade;
+  }
+
+  &Row {
+    border-top: $euiBorderThin;
+    background-color: $euiColorEmptyShade;
+
+    > .euiFlexGroup > .euiFlexItem {
+      margin: $euiSizeM 0;
+    }
+  }
+
+  .euiDraggable .euiDraggable__item.euiDraggable__item--isDisabled {
+    cursor: unset;
+  }
+
+  .unorderableRows .reorderableTableRow {
+    background-color: $euiColorLightestShade;
+  }
+}

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
-} from '@kbn/actions-simulators-plugin/server/plugin';
+} from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/actions_simulations_utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
@@ -78,7 +78,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('does not show any error toasters', async () => {
-        expect(await toasts.getToastCount()).to.be(0);
+        expect(await toasts.getCount()).to.be(0);
       });
 
       it('shows the title correctly', async () => {
@@ -294,7 +294,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('does not show any error toasters', async () => {
-        expect(await toasts.getToastCount()).to.be(0);
+        expect(await toasts.getCount()).to.be(0);
       });
 
       it('shows the title correctly', async () => {

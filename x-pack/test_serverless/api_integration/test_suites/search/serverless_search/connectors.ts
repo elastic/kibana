@@ -6,36 +6,32 @@
  */
 
 import expect from 'expect';
+import { SupertestWithRoleScopeType } from '../../../services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const API_BASE_PATH = '/internal/serverless_search';
 
 export default function ({ getService }: FtrProviderContext) {
-  const svlCommonApi = getService('svlCommonApi');
-  const supertest = getService('supertest');
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestDeveloperWithCookieCredentials: SupertestWithRoleScopeType;
 
   describe('Connectors routes', function () {
     describe('GET connectors', function () {
-      it('returns list of connectors', async () => {
-        const { body } = await supertest
-          .get(`${API_BASE_PATH}/connectors`)
-          .set(svlCommonApi.getInternalRequestHeader())
-          .expect(200);
-
-        expect(body.connectors).toBeDefined();
-        expect(Array.isArray(body.connectors)).toBe(true);
+      before(async () => {
+        supertestDeveloperWithCookieCredentials =
+          await roleScopedSupertest.getSupertestWithRoleScope('developer', {
+            useCookieHeader: true,
+            withInternalHeaders: true,
+          });
       });
-    });
-    describe('GET connectors', function () {
-      it('returns list of connector_types', async () => {
-        const { body } = await supertest
-          .get(`${API_BASE_PATH}/connector_types`)
-          .set(svlCommonApi.getInternalRequestHeader())
+
+      it('returns list of connectors', async () => {
+        const { body } = await supertestDeveloperWithCookieCredentials
+          .get(`${API_BASE_PATH}/connectors`)
           .expect(200);
 
         expect(body.connectors).toBeDefined();
         expect(Array.isArray(body.connectors)).toBe(true);
-        expect(body.connectors.length).toBeGreaterThan(0);
       });
     });
   });

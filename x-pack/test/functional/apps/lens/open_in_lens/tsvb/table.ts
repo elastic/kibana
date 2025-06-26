@@ -200,7 +200,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization('lnsDataTable');
       await retry.try(async () => {
         const closePalettePanels = await testSubjects.findAll(
-          'lns-indexPattern-PalettePanelContainerBack'
+          'lns-indexPattern-SettingWithSiblingFlyoutBack'
         );
         if (closePalettePanels.length) {
           await lens.closePalettePanel();
@@ -209,7 +209,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
 
-        await lens.openPalettePanel('lnsDatatable');
+        await lens.openPalettePanel();
         const colorStops = await lens.getPaletteColorStops();
 
         expect(colorStops).to.eql([

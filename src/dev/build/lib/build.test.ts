@@ -1,48 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { REPO_ROOT } from '@kbn/repo-info';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
-import { Config } from './config';
 import { Build } from './build';
+import { getMockConfig } from './__mocks__/get_config';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
-const config = new Config(
-  true,
-  {
-    version: '8.0.0',
-    engines: {
-      node: '*',
-    },
-    workspaces: {
-      packages: [],
-    },
-  } as any,
-  '1.2.3',
-  REPO_ROOT,
-  {
-    buildNumber: 1234,
-    buildSha: 'abcd1234',
-    buildVersion: '8.0.0',
-    buildDate: '2023-05-15T23:12:09+0000',
-  },
-  false,
-  false,
-  null,
-  '',
-  '',
-  false,
-  true,
-  true,
-  {}
-);
+const config = getMockConfig();
 
 const linuxPlatform = config.getPlatform('linux', 'x64');
 const linuxArmPlatform = config.getPlatform('linux', 'arm64');

@@ -1,0 +1,217 @@
+```markdown
+# ES|QL Operators
+
+This document provides an overview of the operators available in ES|QL, categorized into binary, unary, logical, and other operators. Each operator is accompanied by an example query to demonstrate its usage.
+
+---
+
+## Binary Operators
+
+Binary operators are used to compare or perform arithmetic operations between two values.
+
+### Equality (`==`)
+Checks if two values are equal.
+
+```esql
+FROM employees
+| WHERE first_name == "John"
+```
+
+### Inequality (`!=`)
+Checks if two values are not equal.
+
+```esql
+FROM employees
+| WHERE department != "HR"
+```
+
+### Less Than (`<`)
+Checks if a value is less than another.
+
+```esql
+FROM employees
+| WHERE salary < 50000
+```
+
+### Less Than or Equal To (`<=`)
+Checks if a value is less than or equal to another.
+
+```esql
+FROM employees
+| WHERE hire_date <= "2020-01-01"
+```
+
+### Greater Than (`>`)
+Checks if a value is greater than another.
+
+```esql
+FROM employees
+| WHERE age > 30
+```
+
+### Greater Than or Equal To (`>=`)
+Checks if a value is greater than or equal to another.
+
+```esql
+FROM employees
+| WHERE experience_years >= 5
+```
+
+### Add (`+`)
+Adds two values.
+
+```esql
+FROM employees
+| EVAL total_compensation = salary + bonus
+```
+
+### Subtract (`-`)
+Subtracts one value from another.
+
+```esql
+FROM employees
+| EVAL remaining_vacation_days = total_vacation_days - used_vacation_days
+```
+
+### Multiply (`*`)
+Multiplies two values.
+
+```esql
+FROM employees
+| EVAL annual_salary = monthly_salary * 12
+```
+
+### Divide (`/`)
+Divides one value by another.
+
+```esql
+FROM employees
+| EVAL average_salary = total_salary / employee_count
+```
+
+### Modulus (`%`)
+Returns the remainder of a division.
+
+```esql
+FROM employees
+| EVAL remainder = employee_id % 2
+```
+
+---
+
+## Unary Operators
+
+Unary operators operate on a single operand.
+
+### Negation (`-`)
+Negates a numeric value.
+
+```esql
+ROW value = 10
+| EVAL negative_value = -value
+```
+
+---
+
+## Logical Operators
+
+Logical operators are used to combine or negate conditions.
+
+### AND
+Returns `true` if both conditions are true.
+
+```esql
+FROM employees
+| WHERE age > 30 AND department == "Engineering"
+```
+
+### OR
+Returns `true` if at least one condition is true.
+
+```esql
+FROM employees
+| WHERE department == "HR" OR department == "Finance"
+```
+
+### NOT
+Negates a condition.
+
+```esql
+FROM employees
+| WHERE NOT still_hired
+```
+
+---
+
+## Other Operators
+
+### IS NULL and IS NOT NULL
+Checks if a value is `NULL` or not.
+
+#### IS NULL
+```esql
+FROM employees
+| WHERE birth_date IS NULL
+| KEEP first_name, last_name
+```
+
+#### IS NOT NULL
+```esql
+FROM employees
+| WHERE is_rehired IS NOT NULL
+| STATS COUNT(emp_no)
+```
+
+### Cast (`::`)
+Casts a value to a specific type.
+
+```esql
+FROM employees
+| EVAL salary_as_string = salary::KEYWORD
+```
+
+### IN
+Checks if a value is in a list of values.
+
+```esql
+ROW a = 1, b = 4, c = 3
+| WHERE c - a IN (3, b / 2, a)
+```
+
+### LIKE
+Filters data based on string patterns using wildcards.
+
+#Basic usage
+```esql
+FROM employees
+| WHERE first_name LIKE "J*"
+```
+
+#Escaping special characters
+```esql
+ROW message = "foo * bar"
+| WHERE message LIKE "foo \\* bar"
+```
+
+### RLIKE
+Filters data based on string patterns using regular expressions.
+
+```esql
+FROM employees
+| WHERE first_name RLIKE "J.*"
+```
+
+### Cast `::`
+
+The `::` operator provides a convenient alternative syntax to the `TO_<type>` conversion functions.
+
+Examples:
+
+```esql
+FROM employees
+| EVAL salary = salary::double
+```
+
+```esql
+ROW ver = CONCAT(("0"::INT + 1)::STRING, ".2.3")::VERSION
+```

@@ -1,0 +1,251 @@
+[
+  {
+    "agent": {
+      "build": {
+        "original": "version: 8.6.0, compiled: Mon Jan 2 23:00:00 2023, branch: 8.6, commit: e2d09ff1b8e49bfb5f8940d317eb4ac96672d956"
+      },
+      "id": "123",
+      "type": "endpoint",
+      "version": "8.6.0"
+    },
+    "@timestamp": "2024-01-29T18:35:51.819450273Z",
+    "Endpoint": {
+      "capabilities": [
+        "kill_process",
+        "suspend_process",
+        "running_processes",
+        "isolation",
+        "ebpf(auto)"
+      ],
+      "configuration": {
+        "isolation": false
+      },
+      "state": {
+        "isolation": false
+      },
+      "policy": {
+        "applied": {
+          "name": "123",
+          "id": "123",
+          "endpoint_policy_version": "1",
+          "version": "55",
+          "status": "success"
+        }
+      },
+      "status": "enrolled"
+    },
+    "ecs": {
+      "version": "1.11.0"
+    },
+    "data_stream": {
+      "namespace": "default",
+      "type": "metrics",
+      "dataset": "endpoint.metadata"
+    },
+    "elastic": {
+      "agent": {
+        "id": "123"
+      }
+    },
+    "host": {
+      "hostname": "123",
+      "os": {
+        "Ext": {
+          "variant": "Amazon Linux"
+        },
+        "kernel": "5.10.102-99.473.amzn2.x86_64 #1 SMP Wed Mar 2 19:14:12 UTC 2022",
+        "name": "Linux",
+        "family": "amazon linux",
+        "type": "linux",
+        "version": "2",
+        "platform": "amazon linux",
+        "full": "Amazon Linux 2"
+      },
+      "ip": ["127.0.0.1", "::1"],
+      "name": "123",
+      "id": "123",
+      "mac": ["aa:aa:aa:aa:aa:aa"],
+      "architecture": "x86_64"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "sequence": 34893855,
+      "ingested": "2024-01-29T18:35:53Z",
+      "created": "2024-01-29T18:35:51.819450273Z",
+      "kind": "metric",
+      "module": "endpoint",
+      "action": "endpoint_metadata",
+      "id": "123",
+      "category": ["host"],
+      "type": ["info"],
+      "dataset": "endpoint.metadata"
+    },
+    "message": "Endpoint metadata"
+  },
+  {
+    "agent": {
+      "build": {
+        "original": "version: 8.6.0, compiled: Mon Jan 2 23:00:00 2023, branch: 8.6, commit: e2d09ff1b8e49bfb5f8940d317eb4ac96672d956"
+      },
+      "id": "123",
+      "type": "endpoint",
+      "version": "8.6.0"
+    },
+    "@timestamp": "2024-01-29T16:38:37.863555622Z",
+    "Endpoint": {
+      "capabilities": [
+        "kill_process",
+        "suspend_process",
+        "running_processes",
+        "isolation",
+        "ebpf(auto)"
+      ],
+      "configuration": {
+        "isolation": false
+      },
+      "state": {
+        "isolation": false
+      },
+      "policy": {
+        "applied": {
+          "name": "123",
+          "id": "123",
+          "endpoint_policy_version": "1",
+          "version": "26",
+          "status": "success"
+        }
+      },
+      "status": "enrolled"
+    },
+    "ecs": {
+      "version": "1.11.0"
+    },
+    "data_stream": {
+      "namespace": "default",
+      "type": "metrics",
+      "dataset": "endpoint.metadata"
+    },
+    "elastic": {
+      "agent": {
+        "id": "123"
+      }
+    },
+    "host": {
+      "hostname": "123",
+      "os": {
+        "Ext": {
+          "variant": "Amazon Linux"
+        },
+        "kernel": "5.10.102-99.473.amzn2.x86_64 #1 SMP Wed Mar 2 19:14:12 UTC 2022",
+        "name": "Linux",
+        "family": "amazon linux",
+        "type": "linux",
+        "version": "2",
+        "platform": "amazon linux",
+        "full": "Amazon Linux 2"
+      },
+      "ip": ["127.0.0.1", "::1"],
+      "name": "123",
+      "id": "123",
+      "mac": ["aa:aa:aa:aa:aa:aa"],
+      "architecture": "x86_64"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "sequence": 33347679,
+      "ingested": "2024-01-29T16:38:39Z",
+      "created": "2024-01-29T16:38:37.863555622Z",
+      "kind": "metric",
+      "module": "endpoint",
+      "action": "endpoint_metadata",
+      "id": "123",
+      "category": ["host"],
+      "type": ["info"],
+      "dataset": "endpoint.metadata"
+    },
+    "message": "Endpoint metadata"
+  },
+  {
+    "agent": {
+      "build": {
+        "original": "version: 8.6.0, compiled: Mon Jan 2 23:00:00 2023, branch: 8.6, commit: e2d09ff1b8e49bfb5f8940d317eb4ac96672d956"
+      },
+      "id": "123",
+      "type": "endpoint",
+      "version": "8.6.0"
+    },
+    "@timestamp": "2024-01-29T16:35:51.210383141Z",
+    "Endpoint": {
+      "capabilities": [
+        "kill_process",
+        "suspend_process",
+        "running_processes",
+        "isolation",
+        "ebpf(auto)"
+      ],
+      "configuration": {
+        "isolation": false
+      },
+      "state": {
+        "isolation": false
+      },
+      "policy": {
+        "applied": {
+          "name": "123",
+          "id": "123",
+          "endpoint_policy_version": "1",
+          "version": "55",
+          "status": "success"
+        }
+      },
+      "status": "enrolled"
+    },
+    "ecs": {
+      "version": "1.11.0"
+    },
+    "data_stream": {
+      "namespace": "default",
+      "type": "metrics",
+      "dataset": "endpoint.metadata"
+    },
+    "elastic": {
+      "agent": {
+        "id": "123"
+      }
+    },
+    "host": {
+      "hostname": "123",
+      "os": {
+        "Ext": {
+          "variant": "Amazon Linux"
+        },
+        "kernel": "5.10.102-99.473.amzn2.x86_64 #1 SMP Wed Mar 2 19:14:12 UTC 2022",
+        "name": "Linux",
+        "family": "amazon linux",
+        "type": "linux",
+        "version": "2",
+        "platform": "amazon linux",
+        "full": "Amazon Linux 2"
+      },
+      "ip": ["127.0.0.1", "::1"],
+      "name": "123",
+      "id": "123",
+      "mac": ["aa:aa:aa:aa:aa:aa"],
+      "architecture": "x86_64"
+    },
+    "event": {
+      "agent_id_status": "verified",
+      "sequence": 34885625,
+      "ingested": "2024-01-29T16:35:53Z",
+      "created": "2024-01-29T16:35:51.210383141Z",
+      "kind": "metric",
+      "module": "endpoint",
+      "action": "endpoint_metadata",
+      "id": "123",
+      "category": ["host"],
+      "type": ["info"],
+      "dataset": "endpoint.metadata"
+    },
+    "message": "Endpoint metadata"
+  }
+]

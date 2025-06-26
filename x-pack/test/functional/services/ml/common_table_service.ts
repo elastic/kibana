@@ -50,7 +50,7 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
             .text()
             .trim();
           return acc;
-        }, {} as Record<typeof this.columns[number]['id'], string>);
+        }, {} as Record<(typeof this.columns)[number]['id'], string>);
 
         rows.push(rowObject);
       }
@@ -78,6 +78,12 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
     public async waitForTableToLoad() {
       await testSubjects.existOrFail(`~${this.tableTestSubj}`, { timeout: 60 * 1000 });
       await testSubjects.existOrFail(`${this.tableTestSubj} loaded`, { timeout: 30 * 1000 });
+    }
+
+    public async assertNonZeroRowCount() {
+      await this.waitForTableToLoad();
+      const rows = await this.parseTable();
+      expect(rows.length).to.not.eql(0, 'Table should have at least one row');
     }
 
     async getSearchInput(): Promise<WebElementWrapper> {
@@ -128,8 +134,10 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
       const headers = await table.findAllByClassName('euiTableHeaderCell');
       for (const header of headers) {
         const ariaSort = await header.getAttribute('aria-sort');
-        if (ariaSort !== 'none') {
-          const columnNameFragments = (await header.getAttribute('data-test-subj')).split('_');
+        if (ariaSort && ariaSort !== 'none') {
+          const columnNameFragments = ((await header.getAttribute('data-test-subj')) ?? '').split(
+            '_'
+          );
           const columnName = columnNameFragments.slice(1, columnNameFragments.length - 1).join('_');
           return { columnName, direction: ariaSort.replace('ending', '') };
         }
@@ -147,7 +155,11 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
       });
     }
 
-    public async invokeAction(rowIndex: number, actionSubject: string) {
+    public async invokeAction(
+      rowIndex: number,
+      actionSubject: string,
+      postActionCallback: () => Promise<void>
+    ) {
       const rows = await testSubjects.findAll(
         `${this.parentSubj ? `${this.parentSubj} > ` : ''}~${this.tableTestSubj} > ~${
           this.tableRowSubj
@@ -159,6 +171,9 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
 
       await retry.tryForTime(5000, async () => {
         await actionButton.click();
+        if (postActionCallback) {
+          await postActionCallback();
+        }
         await this.waitForTableToLoad();
       });
     }

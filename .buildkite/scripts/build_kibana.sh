@@ -19,32 +19,9 @@ is_pr_with_label "ci:build-cdn-assets" || BUILD_ARGS+=("--skip-cdn-assets")
 echo "> node scripts/build" "${BUILD_ARGS[@]}"
 node scripts/build "${BUILD_ARGS[@]}"
 
-if is_pr_with_label "ci:build-cloud-image"; then
-  echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-  node scripts/build \
-  --skip-initialize \
-  --skip-generic-folders \
-  --skip-platform-folders \
-  --skip-cdn-assets \
-  --skip-archives \
-  --docker-images \
-  --docker-tag-qualifier="$GIT_COMMIT" \
-  --docker-push \
-  --skip-docker-ubi \
-  --skip-docker-ubuntu \
-  --skip-docker-serverless \
-  --skip-docker-contexts
-  docker logout docker.elastic.co
-
-  CLOUD_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" docker.elastic.co/kibana-ci/kibana-cloud)
-  cat << EOF | buildkite-agent annotate --style "info" --context kibana-cloud-image
-
-  Kibana cloud image: \`$CLOUD_IMAGE\`
-EOF
-fi
-
 echo "--- Archive Kibana Distribution"
-linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
+version="$(jq -r '.version' package.json)"
+linuxBuild="$KIBANA_DIR/target/kibana-$version-SNAPSHOT-linux-x86_64.tar.gz"
 installDir="$KIBANA_DIR/install/kibana"
 mkdir -p "$installDir"
 tar -xzf "$linuxBuild" -C "$installDir" --strip=1

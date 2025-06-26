@@ -1,0 +1,42 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Cloud Plugin #setup interface snapshot 1`] = `
+Object {
+  "apm": Object {
+    "secretToken": undefined,
+    "url": undefined,
+  },
+  "baseUrl": "https://cloud.elastic.co",
+  "cloudDefaultPort": undefined,
+  "cloudHost": undefined,
+  "cloudId": "cloudId",
+  "csp": "aws",
+  "deploymentId": "deployment-id",
+  "elasticsearchUrl": undefined,
+  "instanceSizeMb": undefined,
+  "isCloudEnabled": true,
+  "isElasticStaffOwned": undefined,
+  "isServerlessEnabled": false,
+  "kibanaUrl": undefined,
+  "onboarding": Object {
+    "defaultSolution": undefined,
+  },
+  "organizationId": undefined,
+  "projectsUrl": "https://cloud.elastic.co/projects/",
+  "serverless": Object {
+    "orchestratorTarget": undefined,
+    "projectId": undefined,
+    "projectName": undefined,
+    "projectType": undefined,
+  },
+  "trialEndDate": undefined,
+}
+`;
+
+exports[`Cloud Plugin #start interface snapshot 1`] = `
+Object {
+  "baseUrl": "https://cloud.elastic.co",
+  "isCloudEnabled": true,
+  "projectsUrl": "https://cloud.elastic.co/projects/",
+}
+`;

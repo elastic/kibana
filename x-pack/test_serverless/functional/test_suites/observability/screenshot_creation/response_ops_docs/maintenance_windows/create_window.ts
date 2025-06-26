@@ -16,11 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('create window', function () {
     beforeEach(async () => {
-      await pageObjects.svlCommonPage.login();
-    });
-
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
+      await pageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
     it('create maintenance window screenshot', async () => {
@@ -40,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         '[data-test-subj="maintenanceWindowScopedQuerySwitch"] .euiSwitch__button'
       );
       await filterAlerts.click();
-      const radioGroup = await testSubjects.find('maintenanceWindowCategorySelectionRadioGroup');
+      const radioGroup = await testSubjects.find('maintenanceWindowSolutionSelectionRadioGroup');
       const label = await radioGroup.findByCssSelector(`label[for="observability"]`);
       await label.click();
       await testSubjects.setValue('queryInput', 'kibana.alert.rule.name: custom-threshold-rule-1');

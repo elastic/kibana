@@ -29,7 +29,7 @@
           "MlLocatorParams",
           ">"
         ],
-        "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
+        "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +43,7 @@
             "signature": [
               "\"ML_APP_LOCATOR\""
             ],
-            "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
+            "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -61,7 +61,7 @@
               "KibanaLocation",
               "<object>>"
             ],
-            "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
+            "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_locator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -75,7 +75,215 @@
                 "signature": [
                   "MlLocatorParams"
                 ],
-                "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
+                "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_locator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.MlManagementLocatorInternal",
+        "type": "Class",
+        "tags": [],
+        "label": "MlManagementLocatorInternal",
+        "description": [
+          "\nThis class is meant as a wrapper for the Management Locator.\nThis will ensure url formatting is consistent with what it was prior to being moved to the Management section."
+        ],
+        "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlManagementLocatorInternal.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "ml",
+                "id": "def-public.MlManagementLocatorInternal.Unnamed.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "share",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "share",
+                    "scope": "public",
+                    "docId": "kibSharePluginApi",
+                    "section": "def-public.SharePublicStart",
+                    "text": "SharePublicStart"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "share",
+                    "scope": "public",
+                    "docId": "kibSharePluginApi",
+                    "section": "def-public.SharePublicSetup",
+                    "text": "SharePublicSetup"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlManagementLocatorInternal.getUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "getUrl",
+            "description": [],
+            "signature": [
+              "(params: ",
+              "MlLocatorParams",
+              " | undefined, appId?: string) => Promise<{ path: string; url: string | undefined; }>"
+            ],
+            "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "ml",
+                "id": "def-public.MlManagementLocatorInternal.getUrl.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "MlLocatorParams",
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "ml",
+                "id": "def-public.MlManagementLocatorInternal.getUrl.$2",
+                "type": "string",
+                "tags": [],
+                "label": "appId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlManagementLocatorInternal.getRedirectUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "getRedirectUrl",
+            "description": [],
+            "signature": [
+              "(params: ",
+              "MlLocatorParams",
+              ", appId?: string) => { path: string; url: string | undefined; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "ml",
+                "id": "def-public.MlManagementLocatorInternal.getRedirectUrl.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "MlLocatorParams"
+                ],
+                "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "ml",
+                "id": "def-public.MlManagementLocatorInternal.getRedirectUrl.$2",
+                "type": "string",
+                "tags": [],
+                "label": "appId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlManagementLocatorInternal.navigate",
+            "type": "Function",
+            "tags": [],
+            "label": "navigate",
+            "description": [],
+            "signature": [
+              "(path: string, appId?: string) => Promise<void>"
+            ],
+            "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "ml",
+                "id": "def-public.MlManagementLocatorInternal.navigate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "ml",
+                "id": "def-public.MlManagementLocatorInternal.navigate.$2",
+                "type": "string",
+                "tags": [],
+                "label": "appId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -90,48 +298,29 @@
     "functions": [
       {
         "parentPluginId": "ml",
-        "id": "def-public.getMlSharedImports",
-        "type": "Function",
-        "tags": [],
-        "label": "getMlSharedImports",
-        "description": [],
-        "signature": [
-          "() => Promise<typeof ",
-          "x-pack/plugins/ml/public/shared",
-          ">"
-        ],
-        "path": "x-pack/plugins/ml/public/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ml",
         "id": "def-public.MLJobsAwaitingNodeWarning",
         "type": "Function",
         "tags": [],
         "label": "MLJobsAwaitingNodeWarning",
         "description": [],
         "signature": [
-          "({ jobIds }: React.PropsWithChildren<Props>) => JSX.Element"
+          "({ jobIds }: Props) => React.JSX.Element"
         ],
-        "path": "x-pack/plugins/ml/public/application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared/lazy_loader.tsx",
+        "path": "x-pack/platform/plugins/shared/ml/public/application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared/lazy_loader.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
             "id": "def-public.MLJobsAwaitingNodeWarning.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ jobIds }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<Props>"
+              "Props"
             ],
-            "path": "x-pack/plugins/ml/public/application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared/lazy_loader.tsx",
+            "path": "x-pack/platform/plugins/shared/ml/public/application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared/lazy_loader.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -148,23 +337,23 @@
         "label": "MlNodeAvailableWarningShared",
         "description": [],
         "signature": [
-          "({ nodeAvailableCallback, size }: React.PropsWithChildren<Props>) => JSX.Element | null"
+          "({ nodeAvailableCallback, size }: Props) => React.JSX.Element | null"
         ],
-        "path": "x-pack/plugins/ml/public/application/components/node_available_warning/node_available_warning_shared.tsx",
+        "path": "x-pack/platform/plugins/shared/ml/public/application/components/node_available_warning/node_available_warning_shared.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
             "id": "def-public.MlNodeAvailableWarningShared.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ nodeAvailableCallback, size }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<Props>"
+              "Props"
             ],
-            "path": "x-pack/plugins/ml/public/application/components/node_available_warning/node_available_warning_shared.tsx",
+            "path": "x-pack/platform/plugins/shared/ml/public/application/components/node_available_warning/node_available_warning_shared.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -193,13 +382,21 @@
           },
           "<",
           "MlLocatorParams",
-          "> | undefined; elasticModels?: ",
+          "> | undefined; managementLocator?: ",
+          {
+            "pluginId": "ml",
+            "scope": "public",
+            "docId": "kibMlPluginApi",
+            "section": "def-public.MlManagementLocatorInternal",
+            "text": "MlManagementLocatorInternal"
+          },
+          " | undefined; elasticModels?: ",
           "ElasticModels",
           " | undefined; } | undefined, basePath: string | undefined, params: ",
           "MlLocatorParams",
           ", dependencies?: React.DependencyList | undefined) => string"
         ],
-        "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
+        "path": "x-pack/platform/plugins/shared/ml/public/locator/use_ml_href.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -221,11 +418,19 @@
               },
               "<",
               "MlLocatorParams",
-              "> | undefined; elasticModels?: ",
+              "> | undefined; managementLocator?: ",
+              {
+                "pluginId": "ml",
+                "scope": "public",
+                "docId": "kibMlPluginApi",
+                "section": "def-public.MlManagementLocatorInternal",
+                "text": "MlManagementLocatorInternal"
+              },
+              " | undefined; elasticModels?: ",
               "ElasticModels",
               " | undefined; } | undefined"
             ],
-            "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
+            "path": "x-pack/platform/plugins/shared/ml/public/locator/use_ml_href.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -240,7 +445,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
+            "path": "x-pack/platform/plugins/shared/ml/public/locator/use_ml_href.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -255,7 +460,7 @@
             "signature": [
               "MlLocatorParams"
             ],
-            "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
+            "path": "x-pack/platform/plugins/shared/ml/public/locator/use_ml_href.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -270,7 +475,7 @@
             "signature": [
               "React.DependencyList | undefined"
             ],
-            "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
+            "path": "x-pack/platform/plugins/shared/ml/public/locator/use_ml_href.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -281,18 +486,108 @@
       },
       {
         "parentPluginId": "ml",
-        "id": "def-public.useMlNodeAvailableCheck",
+        "id": "def-public.useMlManagementHref",
         "type": "Function",
         "tags": [],
-        "label": "useMlNodeAvailableCheck",
-        "description": [],
-        "signature": [
-          "() => { mlNodesAvailable: boolean; isCloud: boolean; deploymentId: string | null; isCloudTrial: boolean; }"
+        "label": "useMlManagementHref",
+        "description": [
+          "\nProvides a URL to ML management pages"
         ],
-        "path": "x-pack/plugins/ml/public/application/components/node_available_warning/hooks.ts",
+        "signature": [
+          "(ml: { locator?: ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          "MlLocatorParams",
+          "> | undefined; managementLocator?: ",
+          {
+            "pluginId": "ml",
+            "scope": "public",
+            "docId": "kibMlPluginApi",
+            "section": "def-public.MlManagementLocatorInternal",
+            "text": "MlManagementLocatorInternal"
+          },
+          " | undefined; elasticModels?: ",
+          "ElasticModels",
+          " | undefined; } | undefined, params: ",
+          "MlLocatorParams",
+          ", appId?: string) => string | undefined"
+        ],
+        "path": "x-pack/platform/plugins/shared/ml/public/locator/use_ml_management_href.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [],
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.useMlManagementHref.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "ml",
+            "description": [],
+            "signature": [
+              "{ locator?: ",
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.LocatorPublic",
+                "text": "LocatorPublic"
+              },
+              "<",
+              "MlLocatorParams",
+              "> | undefined; managementLocator?: ",
+              {
+                "pluginId": "ml",
+                "scope": "public",
+                "docId": "kibMlPluginApi",
+                "section": "def-public.MlManagementLocatorInternal",
+                "text": "MlManagementLocatorInternal"
+              },
+              " | undefined; elasticModels?: ",
+              "ElasticModels",
+              " | undefined; } | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/ml/public/locator/use_ml_management_href.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.useMlManagementHref.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "MlLocatorParams"
+            ],
+            "path": "x-pack/platform/plugins/shared/ml/public/locator/use_ml_management_href.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.useMlManagementHref.$3",
+            "type": "string",
+            "tags": [],
+            "label": "appId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/shared/ml/public/locator/use_ml_management_href.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -300,12 +595,46 @@
     "interfaces": [
       {
         "parentPluginId": "ml",
+        "id": "def-public.AnomalySwimLaneEmbeddableState",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnomalySwimLaneEmbeddableState",
+        "description": [
+          "\nPersisted state for the Anomaly Swim Lane Embeddable."
+        ],
+        "signature": [
+          {
+            "pluginId": "ml",
+            "scope": "public",
+            "docId": "kibMlPluginApi",
+            "section": "def-public.AnomalySwimLaneEmbeddableState",
+            "text": "AnomalySwimLaneEmbeddableState"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.SerializedTitles",
+            "text": "SerializedTitles"
+          },
+          ",",
+          "AnomalySwimlaneEmbeddableCustomInput"
+        ],
+        "path": "x-pack/platform/plugins/shared/ml/public/embeddables/anomaly_swimlane/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
         "id": "def-public.DataRecognizerConfigResponse",
         "type": "Interface",
         "tags": [],
         "label": "DataRecognizerConfigResponse",
         "description": [],
-        "path": "x-pack/plugins/ml/common/types/modules.ts",
+        "path": "x-pack/platform/plugins/shared/ml/common/types/modules.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -320,7 +649,7 @@
               "DatafeedResponse",
               "[]"
             ],
-            "path": "x-pack/plugins/ml/common/types/modules.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/modules.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -335,7 +664,7 @@
               "JobResponse",
               "[]"
             ],
-            "path": "x-pack/plugins/ml/common/types/modules.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/modules.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -355,7 +684,7 @@
               "KibanaObjectResponse",
               "[]; }"
             ],
-            "path": "x-pack/plugins/ml/common/types/modules.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/modules.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -369,7 +698,7 @@
         "tags": [],
         "label": "JobExistResult",
         "description": [],
-        "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+        "path": "x-pack/platform/plugins/shared/ml/common/types/data_recognizer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -380,7 +709,7 @@
             "tags": [],
             "label": "jobsExist",
             "description": [],
-            "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/data_recognizer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -395,7 +724,7 @@
               "JobStat",
               "[]"
             ],
-            "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/data_recognizer.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -409,7 +738,7 @@
         "tags": [],
         "label": "JobStat",
         "description": [],
-        "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+        "path": "x-pack/platform/plugins/shared/ml/common/types/data_recognizer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -420,7 +749,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/data_recognizer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -431,7 +760,7 @@
             "tags": [],
             "label": "earliestTimestampMs",
             "description": [],
-            "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/data_recognizer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -442,7 +771,7 @@
             "tags": [],
             "label": "latestTimestampMs",
             "description": [],
-            "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/data_recognizer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -456,7 +785,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/data_recognizer.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -470,7 +799,7 @@
         "tags": [],
         "label": "MlCapabilitiesResponse",
         "description": [],
-        "path": "x-pack/plugins/ml/common/types/capabilities.ts",
+        "path": "x-pack/platform/plugins/shared/ml/common/types/capabilities.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -482,9 +811,9 @@
             "label": "capabilities",
             "description": [],
             "signature": [
-              "{ isADEnabled: boolean; isDFAEnabled: boolean; isNLPEnabled: boolean; } & { canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; canGetTrainedModels: boolean; canTestTrainedModels: boolean; canGetFieldInfo: boolean; canGetMlInfo: boolean; canUseAiops: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canResetJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; canViewMlNodes: boolean; canCreateTrainedModels: boolean; canDeleteTrainedModels: boolean; canStartStopTrainedModels: boolean; }"
+              "{ isADEnabled: boolean; isDFAEnabled: boolean; isNLPEnabled: boolean; } & { canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; canGetTrainedModels: boolean; canTestTrainedModels: boolean; canGetFieldInfo: boolean; canGetMlInfo: boolean; canUseAiops: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canResetJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canDeleteForecast: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; canViewMlNodes: boolean; canCreateTrainedModels: boolean; canDeleteTrainedModels: boolean; canStartStopTrainedModels: boolean; canCreateInferenceEndpoint: boolean; }"
             ],
-            "path": "x-pack/plugins/ml/common/types/capabilities.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -495,7 +824,7 @@
             "tags": [],
             "label": "upgradeInProgress",
             "description": [],
-            "path": "x-pack/plugins/ml/common/types/capabilities.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -506,7 +835,7 @@
             "tags": [],
             "label": "isPlatinumOrTrialLicense",
             "description": [],
-            "path": "x-pack/plugins/ml/common/types/capabilities.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -517,7 +846,7 @@
             "tags": [],
             "label": "mlFeatureEnabledInSpace",
             "description": [],
-            "path": "x-pack/plugins/ml/common/types/capabilities.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -533,7 +862,7 @@
         "description": [
           "\nA summary of an anomaly detection job."
         ],
-        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+        "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -546,7 +875,7 @@
             "description": [
               "\nThe identifier for the anomaly detection job."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -559,7 +888,7 @@
             "description": [
               "\nA description of the job."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -575,7 +904,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -591,7 +920,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -607,7 +936,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -625,7 +954,7 @@
               " | ",
               "JobActionState"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -641,7 +970,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -654,7 +983,7 @@
             "description": [
               "\nFlag indicating whether a datafeed exists for the job."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -667,7 +996,7 @@
             "description": [
               "\nThe identifier for the datafeed."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -680,7 +1009,7 @@
             "description": [
               "\nThe status of the datafeed."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -696,7 +1025,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -712,7 +1041,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -728,7 +1057,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -745,7 +1074,7 @@
               "CombinedJob",
               " | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -761,7 +1090,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -779,7 +1108,7 @@
               "AuditMessage",
               "> | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -792,7 +1121,7 @@
             "description": [
               "\nFlag indicating whether results of the job can be viewed in the Single Metric Viewer."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -808,7 +1137,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -825,7 +1154,7 @@
               "MlJobBlocked",
               " | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -841,7 +1170,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -857,7 +1186,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -870,7 +1199,7 @@
             "description": [
               "\nIndicates whether the job is currently awaiting assignment to a node before opening."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -887,7 +1216,7 @@
               "MlAnomalyDetectionAlertRule",
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -903,7 +1232,7 @@
             "signature": [
               "{ [x: string]: string; }"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -916,7 +1245,7 @@
             "description": [
               "\nThe size of the interval that the analysis is aggregated into, typically between 5m and 1h."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -932,7 +1261,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -952,30 +1281,96 @@
         "signature": [
           "\"ml_anomaly_swimlane\""
         ],
-        "path": "x-pack/plugins/ml/public/embeddables/constants.ts",
+        "path": "x-pack/platform/plugins/shared/ml/public/embeddables/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "ml",
-        "id": "def-public.AnomalySwimlaneEmbeddableInput",
+        "id": "def-public.AnomalySwimLaneEmbeddableApi",
         "type": "Type",
         "tags": [],
-        "label": "AnomalySwimlaneEmbeddableInput",
+        "label": "AnomalySwimLaneEmbeddableApi",
         "description": [],
         "signature": [
+          "MlEmbeddableBaseApi",
+          "<",
           {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
+            "pluginId": "ml",
+            "scope": "public",
+            "docId": "kibMlPluginApi",
+            "section": "def-public.AnomalySwimLaneEmbeddableState",
+            "text": "AnomalySwimLaneEmbeddableState"
+          },
+          "> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDataViews",
+            "text": "PublishesDataViews"
           },
           " & ",
-          "AnomalySwimlaneEmbeddableCustomInput"
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesTimeRange",
+            "text": "PublishesTimeRange"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesFilters",
+            "text": "PublishesFilters"
+          },
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; canEditUnifiedSearch?: (() => boolean) | undefined; query$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined>; } & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
+          },
+          " & { setTitle: (newTitle: string | undefined) => void; setHideTitle: (hide: boolean | undefined) => void; } & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasEditCapabilities",
+            "text": "HasEditCapabilities"
+          },
+          " & ",
+          "AnomalySwimLaneComponentApi"
         ],
-        "path": "x-pack/plugins/ml/public/embeddables/types.ts",
+        "path": "x-pack/platform/plugins/shared/ml/public/embeddables/anomaly_swimlane/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -990,23 +1385,7 @@
         "signature": [
           "\"anomaly-swim-lane\""
         ],
-        "path": "x-pack/plugins/ml/public/ui_actions/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ml",
-        "id": "def-public.GetMlSharedImportsReturnType",
-        "type": "Type",
-        "tags": [],
-        "label": "GetMlSharedImportsReturnType",
-        "description": [],
-        "signature": [
-          "typeof ",
-          "x-pack/plugins/ml/public/shared"
-        ],
-        "path": "x-pack/plugins/ml/public/index.ts",
+        "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1030,7 +1409,49 @@
           "MlLocatorParams",
           ">"
         ],
-        "path": "x-pack/plugins/ml/common/types/locator.ts",
+        "path": "x-pack/platform/plugins/shared/ml/common/types/locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.TrainedModelConfigResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "TrainedModelConfigResponse",
+        "description": [],
+        "signature": [
+          "MlTrainedModelConfig",
+          " & { metadata?: (",
+          "MlTrainedModelConfigMetadata",
+          " & { analytics_config?: ",
+          {
+            "pluginId": "@kbn/ml-data-frame-analytics-utils",
+            "scope": "common",
+            "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+            "section": "def-common.DataFrameAnalyticsConfig",
+            "text": "DataFrameAnalyticsConfig"
+          },
+          " | undefined; input: unknown; total_feature_importance?: ",
+          {
+            "pluginId": "@kbn/ml-data-frame-analytics-utils",
+            "scope": "common",
+            "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+            "section": "def-common.TotalFeatureImportance",
+            "text": "TotalFeatureImportance"
+          },
+          "[] | undefined; feature_importance_baseline?: ",
+          {
+            "pluginId": "@kbn/ml-data-frame-analytics-utils",
+            "scope": "common",
+            "docId": "kibKbnMlDataFrameAnalyticsUtilsPluginApi",
+            "section": "def-common.FeatureImportanceBaseline",
+            "text": "FeatureImportanceBaseline"
+          },
+          " | undefined; } & Record<string, unknown>) | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/ml/common/types/trained_models.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1045,9 +1466,9 @@
         "label": "ML_PAGES",
         "description": [],
         "signature": [
-          "{ readonly ANOMALY_DETECTION_JOBS_MANAGE: \"jobs\"; readonly ANOMALY_EXPLORER: \"explorer\"; readonly SINGLE_METRIC_VIEWER: \"timeseriesexplorer\"; readonly DATA_FRAME_ANALYTICS_JOBS_MANAGE: \"data_frame_analytics\"; readonly DATA_FRAME_ANALYTICS_SOURCE_SELECTION: \"data_frame_analytics/source_selection\"; readonly DATA_FRAME_ANALYTICS_CREATE_JOB: \"data_frame_analytics/new_job\"; readonly TRAINED_MODELS_MANAGE: \"trained_models\"; readonly DATA_DRIFT_INDEX_SELECT: \"data_drift_index_select\"; readonly DATA_DRIFT_CUSTOM: \"data_drift_custom\"; readonly DATA_DRIFT: \"data_drift\"; readonly NODES: \"nodes\"; readonly MEMORY_USAGE: \"memory_usage\"; readonly DATA_FRAME_ANALYTICS_EXPLORATION: \"data_frame_analytics/exploration\"; readonly DATA_FRAME_ANALYTICS_MAP: \"data_frame_analytics/map\"; readonly DATA_VISUALIZER: \"datavisualizer\"; readonly DATA_VISUALIZER_INDEX_SELECT: \"datavisualizer_index_select\"; readonly DATA_VISUALIZER_FILE: \"filedatavisualizer\"; readonly DATA_VISUALIZER_INDEX_VIEWER: \"jobs/new_job/datavisualizer\"; readonly ANOMALY_DETECTION_CREATE_JOB: \"jobs/new_job\"; readonly ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER: \"jobs/new_job/recognize\"; readonly ANOMALY_DETECTION_CREATE_JOB_SINGLE_METRIC: \"jobs/new_job/single_metric\"; readonly ANOMALY_DETECTION_CREATE_JOB_MULTI_METRIC: \"jobs/new_job/multi_metric\"; readonly ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_MULTI_METRIC: \"jobs/new_job/convert_to_multi_metric\"; readonly ANOMALY_DETECTION_CREATE_JOB_ADVANCED: \"jobs/new_job/advanced\"; readonly ANOMALY_DETECTION_CREATE_JOB_POPULATION: \"jobs/new_job/population\"; readonly ANOMALY_DETECTION_CREATE_JOB_CATEGORIZATION: \"jobs/new_job/categorization\"; readonly ANOMALY_DETECTION_CREATE_JOB_RARE: \"jobs/new_job/rare\"; readonly ANOMALY_DETECTION_CREATE_JOB_GEO: \"jobs/new_job/geo\"; readonly ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_ADVANCED: \"jobs/new_job/convert_to_advanced\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: \"jobs/new_job/step/job_type\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: \"jobs/new_job/step/index_or_search\"; readonly ANOMALY_DETECTION_CREATE_JOB_FROM_LENS: \"jobs/new_job/from_lens\"; readonly ANOMALY_DETECTION_CREATE_JOB_FROM_PATTERN_ANALYSIS: \"jobs/new_job/from_pattern_analysis\"; readonly ANOMALY_DETECTION_CREATE_JOB_FROM_MAP: \"jobs/new_job/from_map\"; readonly ANOMALY_DETECTION_MODULES_VIEW_OR_CREATE: \"modules/check_view_or_create\"; readonly SETTINGS: \"settings\"; readonly CALENDARS_MANAGE: \"settings/calendars_list\"; readonly CALENDARS_NEW: \"settings/calendars_list/new_calendar\"; readonly CALENDARS_EDIT: \"settings/calendars_list/edit_calendar\"; readonly FILTER_LISTS_MANAGE: \"settings/filter_lists\"; readonly FILTER_LISTS_NEW: \"settings/filter_lists/new_filter_list\"; readonly FILTER_LISTS_EDIT: \"settings/filter_lists/edit_filter_list\"; readonly OVERVIEW: \"overview\"; readonly NOTIFICATIONS: \"notifications\"; readonly AIOPS: \"aiops\"; readonly AIOPS_EXPLAIN_LOG_RATE_SPIKES: \"aiops/explain_log_rate_spikes\"; readonly AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT: \"aiops/explain_log_rate_spikes_index_select\"; readonly AIOPS_LOG_RATE_ANALYSIS: \"aiops/log_rate_analysis\"; readonly AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT: \"aiops/log_rate_analysis_index_select\"; readonly AIOPS_LOG_CATEGORIZATION: \"aiops/log_categorization\"; readonly AIOPS_LOG_CATEGORIZATION_INDEX_SELECT: \"aiops/log_categorization_index_select\"; readonly AIOPS_CHANGE_POINT_DETECTION: \"aiops/change_point_detection\"; readonly AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT: \"aiops/change_point_detection_index_select\"; }"
+          "{ readonly ANOMALY_DETECTION_JOBS_MANAGE: \"\"; readonly ANOMALY_DETECTION_JOBS_MANAGE_FOR_URL: \"jobs\"; readonly ANOMALY_EXPLORER: \"explorer\"; readonly SINGLE_METRIC_VIEWER: \"timeseriesexplorer\"; readonly DATA_FRAME_ANALYTICS_JOBS_MANAGE: \"\"; readonly DATA_FRAME_ANALYTICS_JOBS_MANAGE_FOR_URL: \"data_frame_analytics\"; readonly DATA_FRAME_ANALYTICS_SOURCE_SELECTION: \"data_frame_analytics/source_selection\"; readonly DATA_FRAME_ANALYTICS_CREATE_JOB: \"data_frame_analytics/new_job\"; readonly TRAINED_MODELS_MANAGE: \"trained_models\"; readonly DATA_DRIFT_INDEX_SELECT: \"data_drift_index_select\"; readonly DATA_DRIFT_CUSTOM: \"data_drift_custom\"; readonly DATA_DRIFT: \"data_drift\"; readonly NODES: \"nodes\"; readonly MEMORY_USAGE: \"memory_usage\"; readonly DATA_FRAME_ANALYTICS_EXPLORATION: \"data_frame_analytics/exploration\"; readonly DATA_FRAME_ANALYTICS_MAP: \"data_frame_analytics/map\"; readonly SUPPLIED_CONFIGURATIONS: \"ad_supplied_configurations\"; readonly DATA_VISUALIZER: \"datavisualizer\"; readonly DATA_VISUALIZER_INDEX_SELECT: \"datavisualizer_index_select\"; readonly DATA_VISUALIZER_FILE: \"filedatavisualizer\"; readonly DATA_VISUALIZER_ESQL: \"datavisualizer/esql\"; readonly DATA_VISUALIZER_INDEX_VIEWER: \"jobs/new_job/datavisualizer\"; readonly ANOMALY_DETECTION_CREATE_JOB: \"jobs/new_job\"; readonly ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER: \"jobs/new_job/recognize\"; readonly ANOMALY_DETECTION_CREATE_JOB_SINGLE_METRIC: \"jobs/new_job/single_metric\"; readonly ANOMALY_DETECTION_CREATE_JOB_MULTI_METRIC: \"jobs/new_job/multi_metric\"; readonly ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_MULTI_METRIC: \"jobs/new_job/convert_to_multi_metric\"; readonly ANOMALY_DETECTION_CREATE_JOB_ADVANCED: \"jobs/new_job/advanced\"; readonly ANOMALY_DETECTION_CREATE_JOB_POPULATION: \"jobs/new_job/population\"; readonly ANOMALY_DETECTION_CREATE_JOB_CATEGORIZATION: \"jobs/new_job/categorization\"; readonly ANOMALY_DETECTION_CREATE_JOB_RARE: \"jobs/new_job/rare\"; readonly ANOMALY_DETECTION_CREATE_JOB_GEO: \"jobs/new_job/geo\"; readonly ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_ADVANCED: \"jobs/new_job/advanced\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: \"jobs/new_job/step/job_type\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: \"jobs/new_job/step/select_source\"; readonly ANOMALY_DETECTION_CREATE_JOB_FROM_LENS: \"jobs/new_job/from_lens\"; readonly ANOMALY_DETECTION_CREATE_JOB_FROM_PATTERN_ANALYSIS: \"jobs/new_job/from_pattern_analysis\"; readonly ANOMALY_DETECTION_CREATE_JOB_FROM_MAP: \"jobs/new_job/from_map\"; readonly ANOMALY_DETECTION_MODULES_VIEW_OR_CREATE: \"modules/check_view_or_create\"; readonly SETTINGS: \"\"; readonly CALENDARS_MANAGE: \"calendars_list\"; readonly CALENDARS_DST_MANAGE: \"calendars_dst_list\"; readonly CALENDARS_NEW: \"calendars_list/new_calendar\"; readonly CALENDARS_DST_NEW: \"calendars_dst_list/new_calendar\"; readonly CALENDARS_EDIT: \"calendars_list/edit_calendar\"; readonly CALENDARS_DST_EDIT: \"calendars_dst_list/edit_calendar\"; readonly FILTER_LISTS_MANAGE: \"filter_lists\"; readonly FILTER_LISTS_NEW: \"filter_lists/new_filter_list\"; readonly FILTER_LISTS_EDIT: \"filter_lists/edit_filter_list\"; readonly OVERVIEW: \"overview\"; readonly NOTIFICATIONS: \"notifications\"; readonly AIOPS: \"aiops\"; readonly AIOPS_EXPLAIN_LOG_RATE_SPIKES: \"aiops/explain_log_rate_spikes\"; readonly AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT: \"aiops/explain_log_rate_spikes_index_select\"; readonly AIOPS_LOG_RATE_ANALYSIS: \"aiops/log_rate_analysis\"; readonly AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT: \"aiops/log_rate_analysis_index_select\"; readonly AIOPS_LOG_CATEGORIZATION: \"aiops/log_categorization\"; readonly AIOPS_LOG_CATEGORIZATION_INDEX_SELECT: \"aiops/log_categorization_index_select\"; readonly AIOPS_CHANGE_POINT_DETECTION: \"aiops/change_point_detection\"; readonly AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT: \"aiops/change_point_detection_index_select\"; }"
         ],
-        "path": "x-pack/plugins/ml/common/constants/locator.ts",
+        "path": "x-pack/platform/plugins/shared/ml/common/constants/locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1071,11 +1492,19 @@
         },
         "<",
         "MlLocatorParams",
-        "> | undefined; elasticModels?: ",
+        "> | undefined; managementLocator?: ",
+        {
+          "pluginId": "ml",
+          "scope": "public",
+          "docId": "kibMlPluginApi",
+          "section": "def-public.MlManagementLocatorInternal",
+          "text": "MlManagementLocatorInternal"
+        },
+        " | undefined; elasticModels?: ",
         "ElasticModels",
         " | undefined; }"
       ],
-      "path": "x-pack/plugins/ml/public/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/ml/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -1099,7 +1528,15 @@
         },
         "<",
         "MlLocatorParams",
-        "> | undefined; elasticModels?: ",
+        "> | undefined; managementLocator?: ",
+        {
+          "pluginId": "ml",
+          "scope": "public",
+          "docId": "kibMlPluginApi",
+          "section": "def-public.MlManagementLocatorInternal",
+          "text": "MlManagementLocatorInternal"
+        },
+        " | undefined; elasticModels?: ",
         "ElasticModels",
         " | undefined; mlApi?: { getJobs(obj?: { jobId?: string | undefined; } | undefined): Promise<{ jobs: ",
         "MlJob",
@@ -1141,17 +1578,23 @@
         "MlPutDatafeedResponse",
         ">; updateDatafeed({ datafeedId, datafeedConfig, }: { datafeedId: string; datafeedConfig: Partial<",
         "MlDatafeed",
-        ">; }): Promise<any>; deleteDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; forceDeleteDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; startDatafeed({ datafeedId, start, end, }: { datafeedId: string; start?: number | undefined; end?: number | undefined; }): Promise<any>; stopDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; forceStopDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; datafeedPreview({ datafeedId }: { datafeedId: string; }): Promise<any>; validateDetector({ detector }: { detector: ",
-        "MlDetector",
-        "; }): Promise<any>; forecast({ jobId, duration }: { jobId: string; duration?: string | undefined; }): Promise<any>; overallBuckets({ jobId, topN, bucketSpan, start, end, overallScore, }: { jobId: string; topN: string; bucketSpan: string; start: number; end: number; overallScore?: number | undefined; }): Promise<any>; hasPrivileges(obj: any): Promise<",
+        ">; }): Promise<any>; deleteDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; forceDeleteDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; startDatafeed({ datafeedId, start, end, }: { datafeedId: string; start?: number | undefined; end?: number | undefined; }): Promise<any>; stopDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; forceStopDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; datafeedPreview({ datafeedId }: { datafeedId: string; }): Promise<any>; forecast({ jobId, duration, neverExpires, }: { jobId: string; duration?: string | undefined; neverExpires?: boolean | undefined; }): Promise<any>; deleteForecast({ jobId, forecastId }: { jobId: string; forecastId: string; }): Promise<",
+        "DeleteForecastResponse",
+        ">; overallBuckets({ jobId, topN, bucketSpan, start, end, overallScore, }: { jobId: string[]; topN: string; bucketSpan: string; start: number; end: number; overallScore?: number | undefined; }): Promise<",
+        "MlGetOverallBucketsResponse",
+        ">; hasPrivileges(obj: any): Promise<",
         "MlHasPrivilegesResponse",
         ">; checkMlCapabilities(): Promise<",
         "MlCapabilitiesResponse",
-        ">; checkIndicesExists({ indices }: { indices: string[]; }): Promise<Record<string, { exists: boolean; }>>; getFieldCaps({ index, fields }: { index: string; fields: string[]; }): Promise<any>; recognizeIndex({ indexPatternTitle, filter, }: { indexPatternTitle: string; filter?: string[] | undefined; }): Promise<",
+        ">; checkIndicesExists({ indices }: { indices: string[]; }): Promise<Record<string, { exists: boolean; }>>; recognizeIndex({ indexPatternTitle, filter, }: { indexPatternTitle: string; filter?: string[] | undefined; }): Promise<",
         "RecognizeResult",
-        "[]>; listDataRecognizerModules(filter?: string[] | undefined): Promise<any>; getDataRecognizerModule({ moduleId, filter }: { moduleId: string; filter?: string[] | undefined; }): Promise<",
+        "[]>; recognizeModule({ moduleId, size }: { moduleId: string; size?: number | undefined; }): Promise<",
+        "RecognizeModuleResult",
+        ">; listDataRecognizerModules(filter?: string[] | undefined): Promise<any>; getDataRecognizerModule(params?: { moduleId: string; filter?: string[] | undefined; } | undefined): Promise<",
         "Module",
-        ">; dataRecognizerModuleJobsExist({ moduleId }: { moduleId: string; }): Promise<any>; setupDataRecognizerConfig({ moduleId, prefix, groups, indexPatternName, query, useDedicatedIndex, startDatafeed, start, end, jobOverrides, estimateModelMemory, }: { moduleId: string; prefix?: string | undefined; groups?: string[] | undefined; indexPatternName?: string | undefined; query?: any; useDedicatedIndex?: boolean | undefined; startDatafeed?: boolean | undefined; start?: number | undefined; end?: number | undefined; jobOverrides?: Partial<",
+        " | ",
+        "Module",
+        "[]>; dataRecognizerModuleJobsExist({ moduleId }: { moduleId: string; }): Promise<any>; setupDataRecognizerConfig({ moduleId, prefix, groups, indexPatternName, query, useDedicatedIndex, startDatafeed, start, end, jobOverrides, estimateModelMemory, }: { moduleId: string; prefix?: string | undefined; groups?: string[] | undefined; indexPatternName?: string | undefined; query?: any; useDedicatedIndex?: boolean | undefined; startDatafeed?: boolean | undefined; start?: number | undefined; end?: number | undefined; jobOverrides?: Partial<",
         "MlJob",
         ">[] | undefined; estimateModelMemory?: boolean | undefined; }): Promise<",
         "DataRecognizerConfigResponse",
@@ -1160,9 +1603,9 @@
         "[]; samplerShardSize?: number | undefined; runtimeMappings?: ",
         "MappingRuntimeFields",
         " | undefined; }): Promise<any>; calendars(obj?: { calendarId?: string | undefined; calendarIds?: string[] | undefined; } | undefined): Promise<",
-        "Calendar",
+        "MlCalendar",
         "[]>; addCalendar(obj: ",
-        "Calendar",
+        "MlCalendar",
         "): Promise<any>; updateCalendar(obj: ",
         "UpdateCalendar",
         "): Promise<any>; deleteCalendar({ calendarId }: { calendarId?: string | undefined; }): Promise<any>; mlNodeCount(): Promise<",
@@ -1200,7 +1643,13 @@
         ">; getDataFrameAnalyticsStats(analyticsId?: string | undefined): Promise<",
         "GetDataFrameAnalyticsStatsResponse",
         ">; createDataFrameAnalytics(analyticsId: string, analyticsConfig: ",
-        "DeepPartial",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "common",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-common.DeepPartialObject",
+          "text": "DeepPartialObject"
+        },
         "<",
         {
           "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -1209,7 +1658,9 @@
           "section": "def-common.DataFrameAnalyticsConfig",
           "text": "DataFrameAnalyticsConfig"
         },
-        ">, createDataView?: boolean, timeFieldName?: string | undefined): Promise<any>; updateDataFrameAnalytics(analyticsId: string, updateConfig: ",
+        ">, createDataView?: boolean, timeFieldName?: string | undefined): Promise<",
+        "PutDataFrameAnalyticsResponseSchema",
+        ">; updateDataFrameAnalytics(analyticsId: string, updateConfig: ",
         {
           "pluginId": "@kbn/ml-data-frame-analytics-utils",
           "scope": "common",
@@ -1228,7 +1679,13 @@
         ">; jobsExist(analyticsIds: string[], allSpaces?: boolean): Promise<",
         "JobsExistsResponse",
         ">; evaluateDataFrameAnalytics(evaluateConfig: any): Promise<any>; explainDataFrameAnalytics(jobConfig: ",
-        "DeepPartial",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "common",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-common.DeepPartialObject",
+          "text": "DeepPartialObject"
+        },
         "<",
         {
           "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -1242,7 +1699,13 @@
         ">; startDataFrameAnalytics(analyticsId: string): Promise<any>; stopDataFrameAnalytics(analyticsId: string, force?: boolean): Promise<any>; getAnalyticsAuditMessages(analyticsId: string): Promise<",
         "JobMessage",
         "[]>; validateDataFrameAnalytics(analyticsConfig: ",
-        "DeepPartial",
+        {
+          "pluginId": "@kbn/utility-types",
+          "scope": "common",
+          "docId": "kibKbnUtilityTypesPluginApi",
+          "section": "def-common.DeepPartialObject",
+          "text": "DeepPartialObject"
+        },
         "<",
         {
           "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -1252,7 +1715,13 @@
           "text": "DataFrameAnalyticsConfig"
         },
         ">): Promise<",
-        "ValidateAnalyticsJobResponse",
+        {
+          "pluginId": "@kbn/ml-validators",
+          "scope": "common",
+          "docId": "kibKbnMlValidatorsPluginApi",
+          "section": "def-common.ValidateAnalyticsJobResponse",
+          "text": "ValidateAnalyticsJobResponse"
+        },
         ">; newJobCapsAnalytics(indexPatternTitle: string, isRollup?: boolean): Promise<",
         {
           "pluginId": "@kbn/ml-anomaly-utils",
@@ -1277,9 +1746,13 @@
           "section": "def-common.MlEntityField",
           "text": "MlEntityField"
         },
-        "[], aggregationInterval: string, threshold: number, earliestMs: number, latestMs: number, dateFormatTz: string, maxRecords: number, maxExamples?: number | undefined, influencersFilterQuery?: any, functionDescription?: string | undefined): ",
+        "[], aggregationInterval: string, threshold: ",
+        "SeverityThreshold",
+        "[], earliestMs: number, latestMs: number, dateFormatTz: string, maxRecords: number, maxExamples?: number | undefined, influencersFilterQuery?: any, functionDescription?: string | undefined): ",
         "Observable",
-        "<any>; getMaxAnomalyScore(jobIds: string[], earliestMs: number, latestMs: number): Promise<any>; getCategoryDefinition(jobId: string, categoryId: string): Promise<",
+        "<",
+        "GetAnomaliesTableDataResult",
+        ">; getMaxAnomalyScore(jobIds: string[], earliestMs: number, latestMs: number): Promise<any>; getCategoryDefinition(jobId: string, categoryId: string): Promise<",
         "CategoryDefinition",
         ">; getCategoryExamples(jobId: string, categoryIds: string[], maxExamples: number): Promise<any>; fetchPartitionFieldsValues(jobId: string, searchTerm: Record<string, string>, criteriaFields: { fieldName: string; fieldValue: any; }[], earliestMs: number, latestMs: number, fieldsConfig?: ",
         "PartitionFieldsConfig",
@@ -1341,7 +1814,9 @@
           "section": "def-common.MlEntityField",
           "text": "MlEntityField"
         },
-        "[], threshold: number, earliestMs: number, latestMs: number, timeBounds: { min?: number | undefined; max?: number | undefined; }, maxResults: number, numberOfPoints: number, influencersFilterQuery?: ",
+        "[], threshold: ",
+        "SeverityThreshold",
+        "[], earliestMs: number, latestMs: number, timeBounds: { min?: number | undefined; max?: number | undefined; }, maxResults: number, numberOfPoints: number, influencersFilterQuery?: ",
         "QueryDslQueryContainer",
         " | undefined): ",
         "Observable",
@@ -1375,7 +1850,7 @@
         "CombinedJobWithStats",
         "[]>; groups(): Promise<",
         "Group",
-        "[]>; updateGroups(updatedJobs: { jobId: string; groups: string[]; }[]): Promise<any>; forceStartDatafeeds(datafeedIds: string[], start: string, end: string): Promise<any>; stopDatafeeds(datafeedIds: string[]): Promise<any>; deleteJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined): Promise<any>; closeJobs(jobIds: string[]): Promise<any>; resetJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined): Promise<",
+        "[]>; updateGroups(updatedJobs: { jobId: string; groups: string[]; }[]): Promise<any>; forceStartDatafeeds(datafeedIds: string[], start: string, end: string): Promise<any>; stopDatafeeds(datafeedIds: string[]): Promise<any>; deleteJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined, deleteAlertingRules?: boolean | undefined): Promise<any>; closeJobs(jobIds: string[]): Promise<any>; resetJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined): Promise<",
         "ResetJobsResponse",
         ">; forceStopAndCloseJob(jobId: string): Promise<{ success: boolean; }>; jobAuditMessages({ jobId, from, start, end, }: { jobId: string; from?: number | undefined; start?: string | undefined; end?: string | undefined; }): Promise<{ messages: ",
         "JobMessage",
@@ -1459,7 +1934,7 @@
         "MlSavedObjectType",
         ", ids: string[]): Promise<",
         "SavedObjectResult",
-        ">; syncSavedObjects(simulate?: boolean): Promise<",
+        ">; syncSavedObjects(simulate?: boolean, addToAllSpaces?: boolean | undefined): Promise<",
         "SyncSavedObjectResponse",
         ">; initSavedObjects(simulate?: boolean): Promise<",
         "InitializeSavedObjectResponse",
@@ -1471,6 +1946,10 @@
         "MlSavedObjectType",
         ", ids: string[]): Promise<",
         "CanDeleteMLSpaceAwareItemsResponse",
+        ">; canSyncToAllSpaces(mlSavedObjectType?: ",
+        "MlSavedObjectType",
+        " | undefined): Promise<",
+        "CanSyncToAllSpacesResponse",
         ">; trainedModelsSpaces(): Promise<",
         "TrainedModelsSpacesResponse",
         ">; updateModelsSpaces(modelIds: string[], spacesToAdd: string[], spacesToRemove: string[]): Promise<",
@@ -1503,6 +1982,8 @@
         "InferenceQueryParams",
         " | undefined): Promise<",
         "TrainedModelConfigResponse",
+        "[]>; getTrainedModelsList(): Promise<",
+        "TrainedModelUIItem",
         "[]>; getTrainedModelStats(modelId?: string | string[] | undefined, params?: ",
         "InferenceStatsQueryParams",
         " | undefined): Promise<",
@@ -1515,9 +1996,33 @@
         "IngestPipeline",
         "): Promise<",
         "IngestSimulateResponse",
-        ">; deleteTrainedModel(modelId: string, options?: { with_pipelines?: boolean | undefined; force?: boolean | undefined; }): Promise<{ acknowledge: boolean; }>; getTrainedModelsNodesOverview(): Promise<",
+        ">; deleteTrainedModel({ modelId, options, }: ",
+        "DeleteModelParams",
+        "): Promise<{ acknowledge: boolean; }>; getCuratedModelConfig(modelName: string, options?: ",
+        {
+          "pluginId": "@kbn/ml-trained-models-utils",
+          "scope": "common",
+          "docId": "kibKbnMlTrainedModelsUtilsPluginApi",
+          "section": "def-common.GetModelDownloadConfigOptions",
+          "text": "GetModelDownloadConfigOptions"
+        },
+        " | undefined): Promise<",
+        {
+          "pluginId": "@kbn/ml-trained-models-utils",
+          "scope": "common",
+          "docId": "kibKbnMlTrainedModelsUtilsPluginApi",
+          "section": "def-common.ModelDefinitionResponse",
+          "text": "ModelDefinitionResponse"
+        },
+        ">; getTrainedModelsNodesOverview(): Promise<",
         "NodesOverviewResponse",
-        ">; startModelAllocation(modelId: string, queryParams?: { number_of_allocations: number; threads_per_allocation: number; priority: \"normal\" | \"low\"; deployment_id?: string | undefined; } | undefined): Promise<{ acknowledge: boolean; }>; stopModelAllocation(modelId: string, deploymentsIds: string[], options?: { force: boolean; }): Promise<Record<string, { acknowledge: boolean; error?: ",
+        ">; startModelAllocation({ modelId, deploymentParams, adaptiveAllocationsParams, }: ",
+        "StartAllocationParams",
+        "): ",
+        "Observable",
+        "<",
+        "StartTrainedModelDeploymentResponse",
+        ">; stopModelAllocation(modelId: string, deploymentsIds: string[], options?: { force: boolean; }): Promise<Record<string, { acknowledge: boolean; error?: ",
         {
           "pluginId": "@kbn/ml-error-utils",
           "scope": "common",
@@ -1525,14 +2030,18 @@
           "section": "def-common.ErrorType",
           "text": "ErrorType"
         },
-        "; }>>; updateModelDeployment(modelId: string, deploymentId: string, params: { number_of_allocations: number; }): Promise<{ acknowledge: boolean; }>; inferTrainedModel(modelId: string, deploymentsId: string, payload: { docs: Record<string, any>[]; inference_config?: ",
-        "MlInferenceConfigUpdateContainer",
-        " | undefined; } | undefined, timeout?: string | undefined): Promise<",
+        "; }>>; updateModelDeployment(modelId: string, deploymentId: string, params: ",
+        "UpdateAllocationParams",
+        "): Promise<",
+        "MlUpdateTrainedModelDeploymentResponse",
+        ">; inferTrainedModel(modelId: string, deploymentsId: string, payload: Omit<",
+        "MlInferTrainedModelRequest",
+        ", \"model_id\">, timeout?: string | undefined): Promise<",
         "MlInferTrainedModelResponse",
         ">; trainedModelPipelineSimulate(pipeline: ",
         "IngestPipeline",
         ", docs: ",
-        "IngestSimulateDocument",
+        "IngestDocument",
         "[]): Promise<",
         "IngestSimulateResponse",
         ">; memoryUsage(type?: ",
@@ -1543,6 +2052,10 @@
         "MlTrainedModelConfig",
         ">; installElasticTrainedModelConfig(modelId: string): Promise<",
         "MlTrainedModelConfig",
+        ">; getModelsDownloadStatus(): Promise<Record<string, ",
+        "ModelDownloadState",
+        ">>; }; inferenceModels: { getAllInferenceEndpoints(): Promise<",
+        "InferenceGetResponse",
         ">; }; notifications: { findMessages(params: ",
         "NotificationsQueryParams",
         "): Promise<",
@@ -1555,9 +2068,11 @@
         "NotificationsCountResponse",
         ">; }; jsonSchema: { getSchemaDefinition(params: ",
         "GetSchemaDefinitionParams",
-        "): Promise<object>; }; } | undefined; }"
+        "): Promise<object>; }; } | undefined; components: { AnomalySwimLane: React.ForwardRefExoticComponent<",
+        "AnomalySwimLaneProps",
+        " & React.RefAttributes<{}>>; }; }"
       ],
-      "path": "x-pack/plugins/ml/public/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/ml/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -1583,7 +2098,7 @@
           },
           " extends Error"
         ],
-        "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+        "path": "x-pack/platform/plugins/shared/ml/server/lib/capabilities/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1597,7 +2112,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+            "path": "x-pack/platform/plugins/shared/ml/server/lib/capabilities/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1611,7 +2126,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+                "path": "x-pack/platform/plugins/shared/ml/server/lib/capabilities/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1639,7 +2154,7 @@
           },
           " extends Error"
         ],
-        "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+        "path": "x-pack/platform/plugins/shared/ml/server/lib/capabilities/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1653,7 +2168,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+            "path": "x-pack/platform/plugins/shared/ml/server/lib/capabilities/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1667,7 +2182,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+                "path": "x-pack/platform/plugins/shared/ml/server/lib/capabilities/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1695,7 +2210,7 @@
           },
           " extends Error"
         ],
-        "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+        "path": "x-pack/platform/plugins/shared/ml/server/lib/capabilities/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1709,7 +2224,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+            "path": "x-pack/platform/plugins/shared/ml/server/lib/capabilities/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1723,7 +2238,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
+                "path": "x-pack/platform/plugins/shared/ml/server/lib/capabilities/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1746,7 +2261,7 @@
         "description": [
           "\nA summary of an anomaly detection job."
         ],
-        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+        "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1759,7 +2274,7 @@
             "description": [
               "\nThe identifier for the anomaly detection job."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1772,7 +2287,7 @@
             "description": [
               "\nA description of the job."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1788,7 +2303,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1804,7 +2319,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1820,7 +2335,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1838,7 +2353,7 @@
               " | ",
               "JobActionState"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1854,7 +2369,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1867,7 +2382,7 @@
             "description": [
               "\nFlag indicating whether a datafeed exists for the job."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1880,7 +2395,7 @@
             "description": [
               "\nThe identifier for the datafeed."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1893,7 +2408,7 @@
             "description": [
               "\nThe status of the datafeed."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1909,7 +2424,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1925,7 +2440,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1941,7 +2456,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1958,7 +2473,7 @@
               "CombinedJob",
               " | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1974,7 +2489,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1992,7 +2507,7 @@
               "AuditMessage",
               "> | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2005,7 +2520,7 @@
             "description": [
               "\nFlag indicating whether results of the job can be viewed in the Single Metric Viewer."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2021,7 +2536,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2038,7 +2553,7 @@
               "MlJobBlocked",
               " | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2054,7 +2569,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2070,7 +2585,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2083,7 +2598,7 @@
             "description": [
               "\nIndicates whether the job is currently awaiting assignment to a node before opening."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2100,7 +2615,7 @@
               "MlAnomalyDetectionAlertRule",
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2116,7 +2631,7 @@
             "signature": [
               "{ [x: string]: string; }"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2129,7 +2644,7 @@
             "description": [
               "\nThe size of the interval that the analysis is aggregated into, typically between 5m and 1h."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2145,7 +2660,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2163,13 +2678,17 @@
         "label": "AlertingService",
         "description": [],
         "signature": [
-          "{ preview: (args_0: Readonly<{} & { timeRange: string; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; sampleSize: number; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, spaceId: string) => Promise<{ payload: ",
+          "{ preview: (args_0: Readonly<{} & { timeRange: string; sampleSize: number; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"record\" | \"bucket\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"record\" | \"bucket\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, spaceId: string, state?: ",
+          "AnomalyDetectionRuleState",
+          " | undefined) => Promise<{ payload: ",
           "AnomalyDetectionAlertPayload",
           "; context: ",
           "AnomalyDetectionAlertContext",
-          "; name: string; isHealthy: boolean; } | undefined>; }"
+          "; name: string; isHealthy: boolean; stateUpdate: ",
+          "AnomalyDetectionRuleState",
+          "; } | undefined>; }"
         ],
-        "path": "x-pack/plugins/ml/server/shared.ts",
+        "path": "x-pack/platform/plugins/shared/ml/server/shared.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2192,7 +2711,7 @@
           "MlDatafeedStats",
           "[]; }>; }"
         ],
-        "path": "x-pack/plugins/ml/server/shared.ts",
+        "path": "x-pack/platform/plugins/shared/ml/server/shared.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2207,7 +2726,7 @@
         "signature": [
           "MlDatafeedStats"
         ],
-        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed_stats.ts",
+        "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/datafeed_stats.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2222,7 +2741,7 @@
         "signature": [
           "MlJob"
         ],
-        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
+        "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/job.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2249,7 +2768,7 @@
           "Results",
           ">; }"
         ],
-        "path": "x-pack/plugins/ml/server/shared.ts",
+        "path": "x-pack/platform/plugins/shared/ml/server/shared.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2272,7 +2791,7 @@
           "AggregationsAggregate",
           ">>>; }"
         ],
-        "path": "x-pack/plugins/ml/server/shared.ts",
+        "path": "x-pack/platform/plugins/shared/ml/server/shared.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2297,7 +2816,7 @@
           "DataRecognizerConfigResponse",
           ">; }"
         ],
-        "path": "x-pack/plugins/ml/server/shared.ts",
+        "path": "x-pack/platform/plugins/shared/ml/server/shared.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2312,7 +2831,9 @@
         "signature": [
           "{ getAnomaliesTableData: (jobIds: string[], criteriaFields: ",
           "CriteriaField",
-          "[], influencers: Influencer[], aggregationInterval: string, threshold: number, earliestMs: number, latestMs: number, dateFormatTz: string, maxRecords?: number, maxExamples?: number, influencersFilterQuery?: any, functionDescription?: string | undefined) => Promise<{ anomalies: ",
+          "[], influencers: Influencer[], aggregationInterval: string, threshold: ",
+          "SeverityThreshold",
+          "[], earliestMs: number, latestMs: number, dateFormatTz: string, maxRecords?: number, maxExamples?: number, influencersFilterQuery?: any, functionDescription?: string | undefined) => Promise<{ anomalies: ",
           {
             "pluginId": "@kbn/ml-anomaly-utils",
             "scope": "common",
@@ -2322,7 +2843,7 @@
           },
           "[]; interval: string; examplesByJobId?: { [key: string]: any; } | undefined; }>; }"
         ],
-        "path": "x-pack/plugins/ml/server/shared.ts",
+        "path": "x-pack/platform/plugins/shared/ml/server/shared.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2339,7 +2860,7 @@
           " | ",
           "JobActionState"
         ],
-        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+        "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2428,7 +2949,7 @@
           "MlTrainedModelConfig",
           ">; }"
         ],
-        "path": "x-pack/plugins/ml/server/shared.ts",
+        "path": "x-pack/platform/plugins/shared/ml/server/shared.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2453,29 +2974,21 @@
         " & ",
         "ResultsServiceProvider",
         " & { alertingServiceProvider(savedObjectsClient: ",
-        {
-          "pluginId": "@kbn/core-saved-objects-api-server",
-          "scope": "common",
-          "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-          "section": "def-common.SavedObjectsClientContract",
-          "text": "SavedObjectsClientContract"
-        },
+        "SavedObjectsClientContract",
         ", request: ",
-        {
-          "pluginId": "@kbn/core-http-server",
-          "scope": "common",
-          "docId": "kibKbnCoreHttpServerPluginApi",
-          "section": "def-common.KibanaRequest",
-          "text": "KibanaRequest"
-        },
-        "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; sampleSize: number; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, spaceId: string) => Promise<{ payload: ",
+        "KibanaRequest",
+        "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; sampleSize: number; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"record\" | \"bucket\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"record\" | \"bucket\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, spaceId: string, state?: ",
+        "AnomalyDetectionRuleState",
+        " | undefined) => Promise<{ payload: ",
         "AnomalyDetectionAlertPayload",
         "; context: ",
         "AnomalyDetectionAlertContext",
-        "; name: string; isHealthy: boolean; } | undefined>; }; } & ",
+        "; name: string; isHealthy: boolean; stateUpdate: ",
+        "AnomalyDetectionRuleState",
+        "; } | undefined>; }; } & ",
         "TrainedModelsProvider"
       ],
-      "path": "x-pack/plugins/ml/server/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/ml/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -2491,7 +3004,7 @@
       "signature": [
         "void"
       ],
-      "path": "x-pack/plugins/ml/server/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/ml/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -2503,41 +3016,6 @@
     "functions": [
       {
         "parentPluginId": "ml",
-        "id": "def-common.composeValidators",
-        "type": "Function",
-        "tags": [],
-        "label": "composeValidators",
-        "description": [
-          "\nComposes multiple validators into a single function"
-        ],
-        "signature": [
-          "(validators: ((value: any) => { [key: string]: any; } | null)[]) => (value: any) => { [key: string]: any; } | null"
-        ],
-        "path": "x-pack/plugins/ml/common/util/validators.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "ml",
-            "id": "def-common.composeValidators.$1",
-            "type": "Array",
-            "tags": [],
-            "label": "validators",
-            "description": [],
-            "signature": [
-              "((value: any) => { [key: string]: any; } | null)[]"
-            ],
-            "path": "x-pack/plugins/ml/common/util/validators.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ml",
         "id": "def-common.getDefaultCapabilities",
         "type": "Function",
         "tags": [],
@@ -2547,45 +3025,10 @@
           "() => ",
           "MlCapabilities"
         ],
-        "path": "x-pack/plugins/ml/common/types/capabilities.ts",
+        "path": "x-pack/platform/plugins/shared/ml/common/types/capabilities.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ml",
-        "id": "def-common.patternValidator",
-        "type": "Function",
-        "tags": [],
-        "label": "patternValidator",
-        "description": [
-          "\nProvides a validator function for checking against pattern."
-        ],
-        "signature": [
-          "(pattern: RegExp) => (value: string) => { pattern: { matchPattern: string; }; } | null"
-        ],
-        "path": "x-pack/plugins/ml/common/util/validators.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "ml",
-            "id": "def-common.patternValidator.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "pattern",
-            "description": [],
-            "signature": [
-              "RegExp"
-            ],
-            "path": "x-pack/plugins/ml/common/util/validators.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -2600,7 +3043,7 @@
         "description": [
           "\nA summary of an anomaly detection job."
         ],
-        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+        "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2613,7 +3056,7 @@
             "description": [
               "\nThe identifier for the anomaly detection job."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2626,7 +3069,7 @@
             "description": [
               "\nA description of the job."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2642,7 +3085,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2658,7 +3101,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2674,7 +3117,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2692,7 +3135,7 @@
               " | ",
               "JobActionState"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2708,7 +3151,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2721,7 +3164,7 @@
             "description": [
               "\nFlag indicating whether a datafeed exists for the job."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2734,7 +3177,7 @@
             "description": [
               "\nThe identifier for the datafeed."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2747,7 +3190,7 @@
             "description": [
               "\nThe status of the datafeed."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2763,7 +3206,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2779,7 +3222,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2795,7 +3238,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2812,7 +3255,7 @@
               "CombinedJob",
               " | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2828,7 +3271,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2846,7 +3289,7 @@
               "AuditMessage",
               "> | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2859,7 +3302,7 @@
             "description": [
               "\nFlag indicating whether results of the job can be viewed in the Single Metric Viewer."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2875,7 +3318,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2892,7 +3335,7 @@
               "MlJobBlocked",
               " | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2908,7 +3351,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2924,7 +3367,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2937,7 +3380,7 @@
             "description": [
               "\nIndicates whether the job is currently awaiting assignment to a node before opening."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2954,7 +3397,7 @@
               "MlAnomalyDetectionAlertRule",
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2970,7 +3413,7 @@
             "signature": [
               "{ [x: string]: string; }"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2983,7 +3426,7 @@
             "description": [
               "\nThe size of the interval that the analysis is aggregated into, typically between 5m and 1h."
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2999,7 +3442,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3017,7 +3460,7 @@
         "description": [
           "\nThe status of the datafeed."
         ],
-        "path": "x-pack/plugins/ml/common/constants/states.ts",
+        "path": "x-pack/platform/plugins/shared/ml/common/constants/states.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3031,13 +3474,58 @@
         "description": [
           "\nThe status of the anomaly detection job."
         ],
-        "path": "x-pack/plugins/ml/common/constants/states.ts",
+        "path": "x-pack/platform/plugins/shared/ml/common/constants/states.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.Datafeed",
+        "type": "Type",
+        "tags": [],
+        "label": "Datafeed",
+        "description": [],
+        "signature": [
+          "MlDatafeed"
+        ],
+        "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.Job",
+        "type": "Type",
+        "tags": [],
+        "label": "Job",
+        "description": [],
+        "signature": [
+          "MlJob"
+        ],
+        "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/job.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.ML_RULE_TYPE_IDS",
+        "type": "Array",
+        "tags": [],
+        "label": "ML_RULE_TYPE_IDS",
+        "description": [],
+        "signature": [
+          "(\"xpack.ml.anomaly_detection_alert\" | \"xpack.ml.anomaly_detection_jobs_health\")[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/ml/common/constants/alerts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "ml",
         "id": "def-common.SummaryJobState",
@@ -3050,7 +3538,7 @@
           " | ",
           "JobActionState"
         ],
-        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+        "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3067,7 +3555,7 @@
         "signature": [
           "{ readonly ANOMALY_DETECTION: \"xpack.ml.anomaly_detection_alert\"; readonly AD_JOBS_HEALTH: \"xpack.ml.anomaly_detection_jobs_health\"; }"
         ],
-        "path": "x-pack/plugins/ml/common/constants/alerts.ts",
+        "path": "x-pack/platform/plugins/shared/ml/common/constants/alerts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

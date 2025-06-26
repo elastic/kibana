@@ -1,0 +1,22 @@
+{
+  "attributes": {
+    "allowHidden": false,
+    "fieldAttrs": "{}",
+    "fieldFormatMap": "{}",
+    "fields": "[]",
+    "name": "large_arrays",
+    "runtimeFieldMap": "{}",
+    "sourceFilters": "[]",
+    "timeFieldName": "@timestamp",
+    "title": "large_arrays"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2024-03-12T15:53:19.579Z",
+  "id": "69dc58dc-80f7-4c46-8fa1-eb29b0794c52",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2024-03-12T15:53:19.579Z",
+  "version": "WzEwLDFd"
+}

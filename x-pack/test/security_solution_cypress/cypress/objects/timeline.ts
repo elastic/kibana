@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
+import type { PersistTimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
 
 export interface Timeline {
   title: string;
@@ -52,12 +52,6 @@ export const getFavoritedTimeline = (): CompleteTimeline => ({
   filter: getFilter(),
 });
 
-export const getIndicatorMatchTimelineTemplate = (): CompleteTimeline => ({
-  ...getTimeline(),
-  title: 'Generic Threat Match Timeline',
-  templateTimelineId: '495ad7a7-316e-4544-8a0f-9c098daee76e',
-});
-
 export const getTimelineModifiedSourcerer = () => ({
   ...getTimeline(),
   title: 'Auditbeat Timeline',
@@ -75,9 +69,10 @@ export const getTimelineNonValidQuery = (): CompleteTimeline => ({
 });
 
 export const expectedExportedTimelineTemplate = (
-  templateResponse: Cypress.Response<TimelineResponse>
+  templateResponse: Cypress.Response<PersistTimelineResponse>,
+  username: string
 ) => {
-  const timelineTemplateBody = templateResponse.body.data.persistTimeline.timeline;
+  const timelineTemplateBody = templateResponse.body;
 
   return {
     savedObjectId: timelineTemplateBody.savedObjectId,
@@ -108,9 +103,9 @@ export const expectedExportedTimelineTemplate = (
     templateTimelineVersion: 1,
     timelineType: 'template',
     created: timelineTemplateBody.created,
-    createdBy: Cypress.env('ELASTICSEARCH_USERNAME'),
+    createdBy: username,
     updated: timelineTemplateBody.updated,
-    updatedBy: Cypress.env('ELASTICSEARCH_USERNAME'),
+    updatedBy: username,
     sort: [],
     eventNotes: [],
     globalNotes: [],
@@ -119,8 +114,11 @@ export const expectedExportedTimelineTemplate = (
   };
 };
 
-export const expectedExportedTimeline = (timelineResponse: Cypress.Response<TimelineResponse>) => {
-  const timelineBody = timelineResponse.body.data.persistTimeline.timeline;
+export const expectedExportedTimeline = (
+  timelineResponse: Cypress.Response<PersistTimelineResponse>,
+  username: string
+) => {
+  const timelineBody = timelineResponse.body;
 
   return {
     savedObjectId: timelineBody.savedObjectId,
@@ -144,9 +142,9 @@ export const expectedExportedTimeline = (timelineResponse: Cypress.Response<Time
     description: timelineBody.description,
     title: timelineBody.title,
     created: timelineBody.created,
-    createdBy: Cypress.env('ELASTICSEARCH_USERNAME'),
+    createdBy: username,
     updated: timelineBody.updated,
-    updatedBy: Cypress.env('ELASTICSEARCH_USERNAME'),
+    updatedBy: username,
     timelineType: 'default',
     sort: [],
     eventNotes: [],

@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/ecs-data-quality-dashboard",
+  "owner": [
+    "@elastic/security-threat-hunting-investigations"
+  ],
+  "group": "security",
+  "visibility": "private"
+}

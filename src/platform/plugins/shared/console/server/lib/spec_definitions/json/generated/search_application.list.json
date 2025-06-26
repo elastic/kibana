@@ -1,0 +1,24 @@
+{
+  "search_application.list": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "q": "",
+      "from": "",
+      "size": ""
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_application/search_application"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-get-behavioral-analytics",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

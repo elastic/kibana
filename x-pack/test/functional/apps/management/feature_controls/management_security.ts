@@ -16,7 +16,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const managementMenu = getService('managementMenu');
   const testSubjects = getService('testSubjects');
 
-  describe('security', () => {
+  describe('security', function () {
+    this.tags('skipFIPS');
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToApp('home');
@@ -26,7 +27,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe('no management privileges', () => {
+    describe('no management privileges', function () {
+      this.tags('skipFIPS');
       before(async () => {
         await security.testUser.setRoles(['global_dashboard_read']);
       });
@@ -61,29 +63,33 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should only render management entries controllable via Kibana privileges', async () => {
         await PageObjects.common.navigateToApp('management');
         const sections = await managementMenu.getSections();
-        expect(sections).to.have.length(2);
-        expect(sections[0]).to.eql({
-          sectionId: 'insightsAndAlerting',
-          sectionLinks: [
-            'triggersActions',
-            'cases',
-            'triggersActionsConnectors',
-            'jobsListLink',
-            'maintenanceWindows',
-          ],
-        });
-        expect(sections[1]).to.eql({
-          sectionId: 'kibana',
-          sectionLinks: [
-            'dataViews',
-            'filesManagement',
-            'objects',
-            'tags',
-            'search_sessions',
-            'spaces',
-            'settings',
-          ],
-        });
+        expect(sections).to.have.length(4);
+
+        // Order of the sections in Stack Management might change in the future
+        // so we need to find the sections by their id
+        const dataSection = sections.find((section) => section.sectionId === 'data');
+        expect(dataSection?.sectionLinks).to.eql(['data_quality', 'content_connectors']);
+        const insightsAndAlertingSection = sections.find(
+          (section) => section.sectionId === 'insightsAndAlerting'
+        );
+        expect(insightsAndAlertingSection?.sectionLinks).to.eql([
+          'triggersActionsAlerts',
+          'triggersActions',
+          'cases',
+          'triggersActionsConnectors',
+          'reporting',
+          'maintenanceWindows',
+        ]);
+        const kibanaSection = sections.find((section) => section.sectionId === 'kibana');
+        expect(kibanaSection?.sectionLinks).to.eql([
+          'dataViews',
+          'filesManagement',
+          'objects',
+          'aiAssistantManagementSelection',
+          'tags',
+          'spaces',
+          'settings',
+        ]);
       });
     });
   });

@@ -15,6 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const pageObjects = getPageObjects(['common', 'uptime']);
     const supertest = getService('supertest');
     const retry = getService('retry');
+    const toasts = getService('toasts');
 
     describe('overview page alert flyout controls', function () {
       const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
@@ -86,7 +87,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('can save alert', async () => {
         await alerts.clickSaveRuleButton(ruleName);
         await alerts.clickSaveAlertsConfirmButton();
-        await pageObjects.common.closeToast();
+        await toasts.dismiss();
       });
 
       it('posts an alert, verifies its presence, and deletes the alert', async () => {
@@ -97,7 +98,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.tryForTime(60 * 1000, async () => {
           // add a delay before next call to not overload the server
           await setTimeoutAsync(1500);
-          const apiResponse = await supertest.get('/api/alerts/_find?search=uptime-test');
+          const apiResponse = await supertest.get('/api/alerting/rules/_find?search=uptime-test');
           const alertsFromThisTest = apiResponse.body.data.filter(
             ({ name }: { name: string }) => name === 'uptime-test'
           );
@@ -110,7 +111,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // for our test helper to input into the flyout.
         const {
           actions,
-          alertTypeId,
+          rule_type_id: alertTypeId,
           consumer,
           id,
           params: { numTimes, timerangeUnit, timerangeCount, filters },
@@ -133,7 +134,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             `{"tags":[],"url.port":["5678"],"observer.geo.name":["mpls"],"monitor.type":["http"]}`
           );
         } finally {
-          await supertest.delete(`/api/alerts/alert/${id}`).set('kbn-xsrf', 'true').expect(204);
+          await supertest.delete(`/api/alerting/rule/${id}`).set('kbn-xsrf', 'true').expect(204);
         }
       });
     });
@@ -171,13 +172,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('can save alert', async () => {
         await alerts.clickSaveRuleButton(alertId);
         await alerts.clickSaveAlertsConfirmButton();
-        await pageObjects.common.closeToast();
+        await toasts.dismiss();
       });
 
       it('has created a valid alert with expected parameters', async () => {
         let alert: any;
         await retry.tryForTime(60 * 1000, async () => {
-          const apiResponse = await supertest.get(`/api/alerts/_find?search=${alertId}`);
+          const apiResponse = await supertest.get(`/api/alerting/rules/_find?search=${alertId}`);
           const alertsFromThisTest = apiResponse.body.data.filter(
             ({ name }: { name: string }) => name === alertId
           );
@@ -190,7 +191,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // for our test helper to input into the flyout.
         const {
           actions,
-          alertTypeId,
+          rule_type_id: alertTypeId,
           consumer,
           id,
           params,
@@ -205,7 +206,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(params).to.eql({});
           expect(interval).to.eql('11m');
         } finally {
-          await supertest.delete(`/api/alerts/alert/${id}`).set('kbn-xsrf', 'true').expect(204);
+          await supertest.delete(`/api/alerting/rule/${id}`).set('kbn-xsrf', 'true').expect(204);
         }
       });
     });

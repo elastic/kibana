@@ -9,7 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { lens, timePicker, dashboard } = getPageObjects(['lens', 'timePicker', 'dashboard']);
+  const { svlCommonPage, lens, timePicker, dashboard } = getPageObjects([
+    'svlCommonPage',
+    'lens',
+    'timePicker',
+    'dashboard',
+  ]);
 
   const pieChart = getService('pieChart');
   const testSubjects = getService('testSubjects');
@@ -22,6 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);
+      await svlCommonPage.loginWithPrivilegedRole();
     });
 
     after(async () => {
@@ -35,23 +41,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should hide the "Convert to Lens" menu item if no split slices were defined', async () => {
-      const visPanel = await panelActions.getPanelHeading('Pie - No split slices');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('Pie - No split slices')).to.eql(false);
     });
 
     it('should hide the "Convert to Lens" menu item if more than 3 split slices were defined', async () => {
-      const visPanel = await panelActions.getPanelHeading('Pie - 4 layers');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('Pie - 4 layers')).to.eql(false);
     });
 
     it('should show the "Convert to Lens" menu item', async () => {
-      const visPanel = await panelActions.getPanelHeading('Pie - 1 Split slice');
-      expect(await panelActions.canConvertToLens(visPanel)).to.eql(true);
+      expect(await panelActions.canConvertToLensByTitle('Pie - 1 Split slice')).to.eql(true);
     });
 
     it('should convert aggregation with params', async () => {
-      const visPanel = await panelActions.getPanelHeading('Pie - Agg with params');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Pie - Agg with params');
       await lens.waitForVisualization('partitionVisChart');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -68,8 +70,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should convert terms to slice by', async () => {
       const expectedTableData = ['ios', 'osx', 'win 7', 'win 8', 'win xp'];
 
-      const visPanel = await panelActions.getPanelHeading('Pie - Basic count');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Pie - Basic count');
       await lens.waitForVisualization('partitionVisChart');
       await lens.enableEchDebugState();
 
@@ -84,19 +85,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pieChart.expectPieChartLabels(expectedTableData);
     });
 
-    it('should convert Donut type correctly', async () => {
-      const visPanel = await panelActions.getPanelHeading('Pie - Basic count');
-      await panelActions.convertToLens(visPanel);
+    it('should convert pie with hole type correctly', async () => {
+      await panelActions.convertToLensByTitle('Pie - Basic count');
       await lens.waitForVisualization('partitionVisChart');
 
       const chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
       const type = await chartSwitcher.getVisibleText();
-      expect(type).to.be('Donut');
+      expect(type).to.be('Pie');
+      const donutHole = await lens.getDonutHoleSize();
+      expect(donutHole).to.be('Small');
     });
 
     it('should convert Pie types correctly', async () => {
-      const visPanel = await panelActions.getPanelHeading('Pie - Non Donut');
-      await panelActions.convertToLens(visPanel);
+      await panelActions.convertToLensByTitle('Pie - Non Donut');
       await lens.waitForVisualization('partitionVisChart');
 
       const chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');

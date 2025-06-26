@@ -18,6 +18,9 @@ export function MonitoringElasticsearchSummaryStatusProvider({ getService }) {
   const SUBJ_SUMMARY_DATA_SIZE = `${SUBJ_SUMMARY} > dataSize`;
   const SUBJ_SUMMARY_HEALTH = `${SUBJ_SUMMARY} > statusIcon`;
 
+  const SUBJ_SUMMARY_LOGS = 'monitoringLogs';
+  const SUBJ_SUMMARY_LOGS_LINK = `${SUBJ_SUMMARY_LOGS} > monitoringLogsLink`;
+
   return new (class ElasticsearchSummaryStatus {
     async getContent() {
       return {
@@ -30,6 +33,10 @@ export function MonitoringElasticsearchSummaryStatusProvider({ getService }) {
         dataSize: await testSubjects.getVisibleText(SUBJ_SUMMARY_DATA_SIZE),
         health: await testSubjects.getAttribute(SUBJ_SUMMARY_HEALTH, 'alt'),
       };
+    }
+
+    viewLogsLinkIsShowing() {
+      return testSubjects.exists(SUBJ_SUMMARY_LOGS_LINK);
     }
   })();
 }

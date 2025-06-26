@@ -1,0 +1,21 @@
+# SPACE
+
+Returns a string composed of a specified number of spaces.
+
+## Syntax
+
+`SPACE(number)`
+
+### Parameters
+
+#### `number`
+
+The number of spaces to include in the resulting string.
+
+## Examples
+
+```esql
+ROW message = CONCAT("Hello", SPACE(1), "World!");
+```
+
+This example creates a string with the word "Hello," followed by a single space, and then the word "World!".

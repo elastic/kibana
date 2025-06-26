@@ -1,0 +1,21 @@
+{
+  "search_application.delete_behavioral_analytics": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_application/analytics/{name}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-delete-behavioral-analytics",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

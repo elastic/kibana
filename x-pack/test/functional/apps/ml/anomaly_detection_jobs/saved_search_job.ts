@@ -290,8 +290,10 @@ export default function ({ getService }: FtrProviderContext) {
       describe(` ${testData.suiteTitle}`, function () {
         it('job creation loads the multi metric wizard for the source data', async () => {
           await ml.testExecution.logTestStep('job creation loads the job management page');
-          await ml.navigation.navigateToMl();
-          await ml.navigation.navigateToJobManagement();
+          await ml.navigation.navigateToStackManagementMlSection(
+            'anomaly_detection',
+            'ml-jobs-list'
+          );
 
           await ml.testExecution.logTestStep(
             'job creation loads the new job source selection page'
@@ -308,6 +310,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('job creation navigates through the multi metric wizard and sets all needed fields', async () => {
           await ml.testExecution.logTestStep('job creation displays the time range step');
           await ml.jobWizardCommon.assertTimeRangeSectionExists();
+          await ml.commonUI.assertDatePickerDataTierOptionsVisible(true);
 
           await ml.testExecution.logTestStep('job creation sets the time range');
           await ml.jobWizardCommon.clickUseFullDataButton(
@@ -408,8 +411,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep(
             'job creation displays the created job in the job list'
           );
-          await ml.navigation.navigateToMl();
-          await ml.navigation.navigateToJobManagement();
+          await ml.navigation.navigateToStackManagementMlSection(
+            'anomaly_detection',
+            'ml-jobs-list'
+          );
 
           await ml.jobTable.filterWithSearchString(testData.jobId, 1);
 
@@ -423,7 +428,7 @@ export default function ({ getService }: FtrProviderContext) {
             ...testData.expected.row,
           });
 
-          await ml.jobTable.assertJobRowDetailsCounts(
+          await ml.jobExpandedDetails.assertJobRowDetailsCounts(
             testData.jobId,
             {
               job_id: testData.jobId,

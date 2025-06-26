@@ -15,7 +15,7 @@ import type {
 import type { APIEndpoint } from '@kbn/observability-onboarding-plugin/server/routes';
 import { formatRequest } from '@kbn/server-route-repository';
 
-export function createObservabilityOnboardingApiClient(st: supertest.SuperTest<supertest.Test>) {
+export function createObservabilityOnboardingApiClient(st: supertest.Agent) {
   return async <TEndpoint extends APIEndpoint>(
     options: {
       type?: 'form-data';
@@ -43,7 +43,7 @@ export function createObservabilityOnboardingApiClient(st: supertest.SuperTest<s
         .set('Content-type', 'multipart/form-data');
 
       for (const field of fields) {
-        formDataRequest.field(field[0], field[1]);
+        void formDataRequest.field(field[0], field[1]);
       }
 
       res = await formDataRequest;

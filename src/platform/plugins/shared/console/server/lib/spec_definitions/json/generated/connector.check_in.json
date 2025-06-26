@@ -1,0 +1,21 @@
+{
+  "connector.check_in": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_connector/{connector_id}/_check_in"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-check-in",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

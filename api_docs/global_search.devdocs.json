@@ -13,7 +13,7 @@
         "description": [
           "\nResponse returned from the {@link GlobalSearchPluginStart | global search service}'s `find` API\n"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,7 +30,7 @@
               "GlobalSearchResult",
               "[]"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -46,7 +46,7 @@
         "description": [
           "\nOptions for the server-side {@link GlobalSearchPluginStart.find | find API}"
         ],
-        "path": "x-pack/plugins/global_search/public/services/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/public/services/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -62,7 +62,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/global_search/public/services/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/public/services/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -79,7 +79,24 @@
               "Observable",
               "<void> | undefined"
             ],
-            "path": "x-pack/plugins/global_search/public/services/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/public/services/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "globalSearch",
+            "id": "def-public.GlobalSearchFindOptions.client",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [
+              "\nA ES client of type IScopedClusterClient is passed to the `find` call.\nWhen performing calls to ES, the interested provider can utilize this parameter to identify the specific cluster."
+            ],
+            "signature": [
+              "IScopedClusterClient",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/global_search/public/services/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -95,7 +112,7 @@
         "description": [
           "\nSearch parameters for the {@link GlobalSearchPluginStart.find | `find` API}\n"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -111,7 +128,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -127,7 +144,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -143,7 +160,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -159,7 +176,7 @@
         "description": [
           "\nOptions provided to {@link GlobalSearchResultProvider | a result provider}'s `find` method."
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -172,7 +189,7 @@
             "description": [
               "\nA custom preference token associated with a search 'session' that should be used to get consistent scoring\nwhen performing calls to ES. Can also be used as a 'session' token for providers returning data from elsewhere\nthan an elasticsearch cluster."
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -189,7 +206,24 @@
               "Observable",
               "<void>"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "globalSearch",
+            "id": "def-public.GlobalSearchProviderFindOptions.client",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [
+              "\nA ES client of type IScopedClusterClient is passed to the `find` call.\nWhen performing calls to ES, the interested provider can utilize this parameter to identify the specific cluster."
+            ],
+            "signature": [
+              "IScopedClusterClient",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -202,7 +236,7 @@
             "description": [
               "\nThe total maximum number of results (including all batches, not per emission) that should be returned by the provider for a given `find` request.\nAny result emitted exceeding this quota will be ignored by the service and not emitted to the consumer."
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -218,7 +252,7 @@
         "description": [
           "\nRepresentation of a result returned by a {@link GlobalSearchResultProvider | result provider}"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -231,7 +265,7 @@
             "description": [
               "an id that should be unique for an individual provider's results"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -244,7 +278,7 @@
             "description": [
               "the title/label of the result"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -257,7 +291,7 @@
             "description": [
               "the type of result"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -273,7 +307,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -289,7 +323,7 @@
             "signature": [
               "string | { path: string; prependBasePath: boolean; }"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -302,7 +336,7 @@
             "description": [
               "the score of the result, from 1 (lowest) to 100 (highest)"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -326,7 +360,7 @@
               },
               "> | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -342,7 +376,7 @@
         "description": [
           "\nGlobalSearch result provider, to be registered using the {@link GlobalSearchPluginSetup | global search API}"
         ],
-        "path": "x-pack/plugins/global_search/public/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -355,7 +389,7 @@
             "description": [
               "\nid of the provider"
             ],
-            "path": "x-pack/plugins/global_search/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -379,7 +413,7 @@
               "GlobalSearchProviderResult",
               "[]>"
             ],
-            "path": "x-pack/plugins/global_search/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -393,7 +427,7 @@
                 "signature": [
                   "GlobalSearchFindParams"
                 ],
-                "path": "x-pack/plugins/global_search/public/types.ts",
+                "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -408,7 +442,7 @@
                 "signature": [
                   "GlobalSearchProviderFindOptions"
                 ],
-                "path": "x-pack/plugins/global_search/public/types.ts",
+                "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -428,7 +462,7 @@
             "signature": [
               "() => string[] | Promise<string[]>"
             ],
-            "path": "x-pack/plugins/global_search/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -450,7 +484,7 @@
         "signature": [
           "GlobalSearchFindParams"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -467,7 +501,7 @@
         "signature": [
           "string | { path: string; prependBasePath: boolean; }"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -486,7 +520,7 @@
           "GlobalSearchProviderResult",
           ", \"url\"> & { url: string; }"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -511,7 +545,7 @@
         },
         ") => void; }"
       ],
-      "path": "x-pack/plugins/global_search/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -541,7 +575,7 @@
         "GlobalSearchBatchedResults",
         ">; getSearchableTypes: () => Promise<string[]>; }"
       ],
-      "path": "x-pack/plugins/global_search/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -561,7 +595,7 @@
         "description": [
           "\nResponse returned from the {@link GlobalSearchPluginStart | global search service}'s `find` API\n"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -578,7 +612,7 @@
               "GlobalSearchResult",
               "[]"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -594,7 +628,7 @@
         "description": [
           "\nOptions for the server-side {@link GlobalSearchPluginStart.find | find API}\n"
         ],
-        "path": "x-pack/plugins/global_search/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -610,7 +644,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -627,7 +661,24 @@
               "Observable",
               "<void> | undefined"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "globalSearch",
+            "id": "def-server.GlobalSearchFindOptions.client",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [
+              "\nA ES client of type IScopedClusterClient is passed to the `find` call.\nWhen performing calls to ES, the interested provider can utilize this parameter to identify the specific cluster."
+            ],
+            "signature": [
+              "IScopedClusterClient",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -643,7 +694,7 @@
         "description": [
           "\nContext passed to server-side {@GlobalSearchResultProvider | result provider}'s `find` method.\n"
         ],
-        "path": "x-pack/plugins/global_search/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -656,42 +707,18 @@
             "description": [],
             "signature": [
               "{ savedObjects: { client: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              },
+              "SavedObjectsClientContract",
               "; typeRegistry: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.ISavedObjectTypeRegistry",
-                "text": "ISavedObjectTypeRegistry"
-              },
+              "ISavedObjectTypeRegistry",
               "; }; uiSettings: { client: ",
-              {
-                "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-common.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              },
+              "IUiSettingsClient",
               "; }; capabilities: ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-capabilities-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              },
+              "Capabilities",
               ">; }"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -707,7 +734,7 @@
         "description": [
           "\nOptions provided to {@link GlobalSearchResultProvider | a result provider}'s `find` method."
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -720,7 +747,7 @@
             "description": [
               "\nA custom preference token associated with a search 'session' that should be used to get consistent scoring\nwhen performing calls to ES. Can also be used as a 'session' token for providers returning data from elsewhere\nthan an elasticsearch cluster."
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -737,7 +764,24 @@
               "Observable",
               "<void>"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "globalSearch",
+            "id": "def-server.GlobalSearchProviderFindOptions.client",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [
+              "\nA ES client of type IScopedClusterClient is passed to the `find` call.\nWhen performing calls to ES, the interested provider can utilize this parameter to identify the specific cluster."
+            ],
+            "signature": [
+              "IScopedClusterClient",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -750,7 +794,7 @@
             "description": [
               "\nThe total maximum number of results (including all batches, not per emission) that should be returned by the provider for a given `find` request.\nAny result emitted exceeding this quota will be ignored by the service and not emitted to the consumer."
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -766,7 +810,7 @@
         "description": [
           "\nRepresentation of a result returned by a {@link GlobalSearchResultProvider | result provider}"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -779,7 +823,7 @@
             "description": [
               "an id that should be unique for an individual provider's results"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -792,7 +836,7 @@
             "description": [
               "the title/label of the result"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -805,7 +849,7 @@
             "description": [
               "the type of result"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -821,7 +865,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -837,7 +881,7 @@
             "signature": [
               "string | { path: string; prependBasePath: boolean; }"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -850,7 +894,7 @@
             "description": [
               "the score of the result, from 1 (lowest) to 100 (highest)"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -874,7 +918,7 @@
               },
               "> | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -890,7 +934,7 @@
         "description": [
           "\nGlobalSearch result provider, to be registered using the {@link GlobalSearchPluginSetup | global search API}\n"
         ],
-        "path": "x-pack/plugins/global_search/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -903,7 +947,7 @@
             "description": [
               "\nid of the provider"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -935,7 +979,7 @@
               "GlobalSearchProviderResult",
               "[]>"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -949,7 +993,7 @@
                 "signature": [
                   "GlobalSearchFindParams"
                 ],
-                "path": "x-pack/plugins/global_search/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -964,7 +1008,7 @@
                 "signature": [
                   "GlobalSearchProviderFindOptions"
                 ],
-                "path": "x-pack/plugins/global_search/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -985,7 +1029,7 @@
                     "text": "GlobalSearchProviderContext"
                   }
                 ],
-                "path": "x-pack/plugins/global_search/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1013,7 +1057,7 @@
               },
               ") => string[] | Promise<string[]>"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1033,7 +1077,7 @@
                     "text": "GlobalSearchProviderContext"
                   }
                 ],
-                "path": "x-pack/plugins/global_search/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1053,7 +1097,7 @@
         "description": [
           "\nglobalSearch route handler context.\n"
         ],
-        "path": "x-pack/plugins/global_search/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1083,7 +1127,7 @@
               "GlobalSearchBatchedResults",
               ">"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1097,7 +1141,7 @@
                 "signature": [
                   "GlobalSearchFindParams"
                 ],
-                "path": "x-pack/plugins/global_search/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1118,7 +1162,7 @@
                     "text": "GlobalSearchFindOptions"
                   }
                 ],
-                "path": "x-pack/plugins/global_search/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1138,7 +1182,7 @@
             "signature": [
               "() => Promise<string[]>"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1162,7 +1206,7 @@
         "signature": [
           "string | { path: string; prependBasePath: boolean; }"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1181,7 +1225,7 @@
           "GlobalSearchProviderResult",
           ", \"url\"> & { url: string; }"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1207,28 +1251,16 @@
           "text": "GlobalSearchFindOptions"
         },
         ", request: ",
-        {
-          "pluginId": "@kbn/core-http-server",
-          "scope": "common",
-          "docId": "kibKbnCoreHttpServerPluginApi",
-          "section": "def-common.KibanaRequest",
-          "text": "KibanaRequest"
-        },
+        "KibanaRequest",
         "<unknown, unknown, unknown, any>) => ",
         "Observable",
         "<",
         "GlobalSearchBatchedResults",
         ">; getSearchableTypes: (request: ",
-        {
-          "pluginId": "@kbn/core-http-server",
-          "scope": "common",
-          "docId": "kibKbnCoreHttpServerPluginApi",
-          "section": "def-common.KibanaRequest",
-          "text": "KibanaRequest"
-        },
+        "KibanaRequest",
         "<unknown, unknown, unknown, any>) => Promise<string[]>; }"
       ],
-      "path": "x-pack/plugins/global_search/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -1252,7 +1284,7 @@
         },
         ") => void; }"
       ],
-      "path": "x-pack/plugins/global_search/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",

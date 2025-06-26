@@ -1,0 +1,34 @@
+# CATEGORIZE
+
+Groups text messages into categories of similarly formatted text values.
+
+## Syntax
+
+`CATEGORIZE(field)`
+
+### Parameters
+
+#### `field`
+
+Expression to categorize.
+
+## Examples
+
+Categorizing server log messages
+
+Categorizes server log messages into categories and aggregates their counts.
+
+```esql
+FROM sample_data
+| STATS count = COUNT() BY category=CATEGORIZE(message)
+```
+
+## Limitations
+
+- Cannot be used within other expressions.
+- Cannot be used with multiple groupings.
+- Cannot be used or referenced within aggregate functions.
+
+## Additional Notes
+
+- The `CATEGORIZE` function requires a platinum license.

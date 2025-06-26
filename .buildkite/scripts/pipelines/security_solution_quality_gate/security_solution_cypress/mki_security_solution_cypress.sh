@@ -9,20 +9,18 @@ if [ -z "$1" ]
 fi
 
 source .buildkite/scripts/common/util.sh
-source .buildkite/scripts/steps/functional/common_cypress.sh
 .buildkite/scripts/bootstrap.sh
 
 export JOB=kibana-security-solution-chrome
 
 buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" "true"
 
-mkdir .ftr
-vault_get security-quality-gate/role-users data -format=json > .ftr/role_users.json
+source .buildkite/scripts/pipelines/security_solution_quality_gate/prepare_vault_entries.sh
 
 cd x-pack/test/security_solution_cypress
 set +e
 
-QA_API_KEY=$(vault_get security-solution-quality-gate qa_api_key)
-BK_ANALYTICS_API_KEY=$(vault_get security-solution-quality-gate serverless-sec-sol-cypress-bk-api-key)
+export BK_ANALYTICS_API_KEY=$(vault_get security-solution-quality-gate $BK_TEST_SUITE_KEY)
 
-BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY CLOUD_QA_API_KEY=$QA_API_KEY yarn $1; status=$?; yarn junit:merge || :; exit $status
+echo "--- Triggering Kibana tests for $1"
+BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY  yarn $1; status=$?; yarn junit:merge || :; exit $status

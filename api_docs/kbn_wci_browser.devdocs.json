@@ -1,0 +1,263 @@
+{
+  "id": "@kbn/wci-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/wci-browser",
+        "id": "def-public.IntegrationComponentDescriptor",
+        "type": "Interface",
+        "tags": [],
+        "label": "IntegrationComponentDescriptor",
+        "description": [],
+        "path": "x-pack/solutions/chat/packages/wci-browser/src/integration_ui_descriptor.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-browser",
+            "id": "def-public.IntegrationComponentDescriptor.getType",
+            "type": "Function",
+            "tags": [],
+            "label": "getType",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/wci-common",
+                "scope": "common",
+                "docId": "kibKbnWciCommonPluginApi",
+                "section": "def-common.IntegrationType",
+                "text": "IntegrationType"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-browser/src/integration_ui_descriptor.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/wci-browser",
+            "id": "def-public.IntegrationComponentDescriptor.getConfigurationForm",
+            "type": "Function",
+            "tags": [],
+            "label": "getConfigurationForm",
+            "description": [],
+            "signature": [
+              "() => React.ComponentType<",
+              {
+                "pluginId": "@kbn/wci-browser",
+                "scope": "public",
+                "docId": "kibKbnWciBrowserPluginApi",
+                "section": "def-public.IntegrationConfigurationFormProps",
+                "text": "IntegrationConfigurationFormProps"
+              },
+              ">"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-browser/src/integration_ui_descriptor.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/wci-browser",
+            "id": "def-public.IntegrationComponentDescriptor.getToolCallComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "getToolCallComponent",
+            "description": [],
+            "signature": [
+              "(toolName: string) => React.ComponentType<",
+              {
+                "pluginId": "@kbn/wci-browser",
+                "scope": "public",
+                "docId": "kibKbnWciBrowserPluginApi",
+                "section": "def-public.IntegrationToolComponentProps",
+                "text": "IntegrationToolComponentProps"
+              },
+              ">"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-browser/src/integration_ui_descriptor.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wci-browser",
+                "id": "def-public.IntegrationComponentDescriptor.getToolCallComponent.$1",
+                "type": "string",
+                "tags": [],
+                "label": "toolName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/chat/packages/wci-browser/src/integration_ui_descriptor.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-browser",
+        "id": "def-public.IntegrationConfigurationFormProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "IntegrationConfigurationFormProps",
+        "description": [],
+        "path": "x-pack/solutions/chat/packages/wci-browser/src/integration_ui_descriptor.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-browser",
+            "id": "def-public.IntegrationConfigurationFormProps.form",
+            "type": "Object",
+            "tags": [],
+            "label": "form",
+            "description": [],
+            "signature": [
+              "{ watch: ",
+              "UseFormWatch",
+              "<any>; getValues: ",
+              "UseFormGetValues",
+              "<any>; getFieldState: ",
+              "UseFormGetFieldState",
+              "<any>; setError: ",
+              "UseFormSetError",
+              "<any>; clearErrors: ",
+              "UseFormClearErrors",
+              "<any>; setValue: ",
+              "UseFormSetValue",
+              "<any>; trigger: ",
+              "UseFormTrigger",
+              "<any>; formState: ",
+              "FormState",
+              "<any>; resetField: ",
+              "UseFormResetField",
+              "<any>; reset: ",
+              "UseFormReset",
+              "<any>; handleSubmit: ",
+              "UseFormHandleSubmit",
+              "<any, undefined>; unregister: ",
+              "UseFormUnregister",
+              "<any>; control: ",
+              "Control",
+              "<any, any>; register: ",
+              "UseFormRegister",
+              "<any>; setFocus: ",
+              "UseFormSetFocus",
+              "<any>; }"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-browser/src/integration_ui_descriptor.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-browser",
+        "id": "def-public.IntegrationToolComponentProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "IntegrationToolComponentProps",
+        "description": [
+          "\nProps that will be passed to the tool call component"
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-browser/src/integration_ui_descriptor.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-browser",
+            "id": "def-public.IntegrationToolComponentProps.integration",
+            "type": "Object",
+            "tags": [],
+            "label": "integration",
+            "description": [
+              "\nThe integration the call was made with"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wci-common",
+                "scope": "common",
+                "docId": "kibKbnWciCommonPluginApi",
+                "section": "def-common.Integration",
+                "text": "Integration"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-browser/src/integration_ui_descriptor.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-browser",
+            "id": "def-public.IntegrationToolComponentProps.toolCall",
+            "type": "Object",
+            "tags": [],
+            "label": "toolCall",
+            "description": [
+              "\nThe tool call to render"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wci-common",
+                "scope": "common",
+                "docId": "kibKbnWciCommonPluginApi",
+                "section": "def-common.ToolCall",
+                "text": "ToolCall"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-browser/src/integration_ui_descriptor.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-browser",
+            "id": "def-public.IntegrationToolComponentProps.toolResult",
+            "type": "string",
+            "tags": [],
+            "label": "toolResult",
+            "description": [
+              "\nIf tool call is complete, will contain the string result of the call"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-browser/src/integration_ui_descriptor.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

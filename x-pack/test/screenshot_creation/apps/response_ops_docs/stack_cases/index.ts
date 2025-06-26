@@ -6,8 +6,8 @@
  */
 
 import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
-import { createAndUploadFile } from '../../../../cases_api_integration/common/lib/api';
-import { CASES_FILE_KIND } from '../../../../cases_api_integration/common/lib/constants';
+import { createAndUploadFile } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
+import { CASES_FILE_KIND } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export const caseTitle = 'Web transactions';
@@ -47,8 +47,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./list_view'));
+    loadTestFile(require.resolve('./settings'));
     loadTestFile(require.resolve('./details_view'));
-    loadTestFile(require.resolve('./external_connections'));
-    loadTestFile(require.resolve('./custom_fields'));
   });
 }

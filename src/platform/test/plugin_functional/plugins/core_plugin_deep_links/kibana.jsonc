@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/core-plugin-deep-links-plugin",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "corePluginDeepLinks",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "core_plugin_deep_links"
+    ]
+  }
+}

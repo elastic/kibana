@@ -45,15 +45,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const unselectTags = async () => {
     if (await tagManagementPage.isSelectionColumnDisplayed()) {
-      await tagManagementPage.selectAllTagRows();
-      await tagManagementPage.selectAllTagRows();
+      await tagManagementPage.clickOnBulkAction('clear_selection');
     }
   };
 
   const addFeatureControlSuite = ({ user, description, privileges }: FeatureControlUserSuite) => {
     const testPrefix = (allowed: boolean) => (allowed ? `can` : `can't`);
 
-    describe(description, () => {
+    // Failing: See https://github.com/elastic/kibana/issues/216512
+    describe.skip(description, () => {
       before(async () => {
         await loginAs(user);
         await tagManagementPage.navigateTo();

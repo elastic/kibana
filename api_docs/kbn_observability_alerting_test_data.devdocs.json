@@ -31,7 +31,7 @@
           "AxiosResponse",
           "<any, any>>"
         ],
-        "path": "x-pack/packages/observability/alerting_test_data/src/create_apm_error_count_threshold_rule.ts",
+        "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_apm_error_count_threshold_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +45,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/observability/alerting_test_data/src/create_apm_error_count_threshold_rule.ts",
+            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_apm_error_count_threshold_rule.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -66,7 +66,7 @@
           "AxiosResponse",
           "<any, any>>"
         ],
-        "path": "x-pack/packages/observability/alerting_test_data/src/create_apm_failed_transaction_rate_rule.ts",
+        "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_apm_failed_transaction_rate_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -80,7 +80,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/observability/alerting_test_data/src/create_apm_failed_transaction_rate_rule.ts",
+            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_apm_failed_transaction_rate_rule.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -101,7 +101,7 @@
           "AxiosResponse",
           "<any, any>>"
         ],
-        "path": "x-pack/packages/observability/alerting_test_data/src/create_custom_threshold_rule.ts",
+        "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_custom_threshold_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -115,7 +115,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/observability/alerting_test_data/src/create_custom_threshold_rule.ts",
+            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_custom_threshold_rule.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -130,7 +130,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/observability/alerting_test_data/src/create_custom_threshold_rule.ts",
+            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_custom_threshold_rule.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -142,7 +142,7 @@
             "tags": [],
             "label": "ruleParams",
             "description": [],
-            "path": "x-pack/packages/observability/alerting_test_data/src/create_custom_threshold_rule.ts",
+            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_custom_threshold_rule.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -156,7 +156,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/packages/observability/alerting_test_data/src/create_custom_threshold_rule.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_custom_threshold_rule.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -170,7 +170,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/packages/observability/alerting_test_data/src/create_custom_threshold_rule.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_custom_threshold_rule.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -184,7 +184,7 @@
                 "signature": [
                   "{ criteria: any[]; groupBy?: string[] | undefined; searchConfiguration: { query: { query?: string | undefined; }; }; } | undefined"
                 ],
-                "path": "x-pack/packages/observability/alerting_test_data/src/create_custom_threshold_rule.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_custom_threshold_rule.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -206,7 +206,7 @@
           "AxiosResponse",
           "<any, any>>"
         ],
-        "path": "x-pack/packages/observability/alerting_test_data/src/create_data_view.ts",
+        "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_data_view.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -217,7 +217,7 @@
             "tags": [],
             "label": "{\n  indexPattern,\n  id,\n}",
             "description": [],
-            "path": "x-pack/packages/observability/alerting_test_data/src/create_data_view.ts",
+            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_data_view.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -228,7 +228,7 @@
                 "tags": [],
                 "label": "indexPattern",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/create_data_view.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_data_view.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -239,7 +239,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/create_data_view.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_data_view.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -261,7 +261,7 @@
           "AxiosResponse",
           "<any, any>>"
         ],
-        "path": "x-pack/packages/observability/alerting_test_data/src/create_index_connector.ts",
+        "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_index_connector.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -280,7 +280,7 @@
           "AxiosResponse",
           "<any, any>>"
         ],
-        "path": "x-pack/packages/observability/alerting_test_data/src/create_rule.ts",
+        "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -294,7 +294,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/observability/alerting_test_data/src/create_rule.ts",
+            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_rule.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -313,7 +313,7 @@
         "signature": [
           "() => Promise<void>"
         ],
-        "path": "x-pack/packages/observability/alerting_test_data/src/run.ts",
+        "path": "x-pack/solutions/observability/packages/alerting-test-data/src/run.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -332,7 +332,7 @@
         "tags": [],
         "label": "scenario1",
         "description": [],
-        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+        "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -343,7 +343,7 @@
             "tags": [],
             "label": "dataView",
             "description": [],
-            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -354,7 +354,7 @@
                 "tags": [],
                 "label": "indexPattern",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -365,7 +365,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -376,7 +376,7 @@
                 "tags": [],
                 "label": "shouldCreate",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -389,7 +389,7 @@
             "tags": [],
             "label": "ruleParams",
             "description": [],
-            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -400,7 +400,7 @@
                 "tags": [],
                 "label": "consumer",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -411,7 +411,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -422,7 +422,7 @@
                 "tags": [],
                 "label": "params",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -435,12 +435,18 @@
                     "description": [],
                     "signature": [
                       "{ comparator: ",
-                      "Comparator",
+                      {
+                        "pluginId": "@kbn/alerting-comparators",
+                        "scope": "common",
+                        "docId": "kibKbnAlertingComparatorsPluginApi",
+                        "section": "def-common.COMPARATORS",
+                        "text": "COMPARATORS"
+                      },
                       "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; filter: string; aggType: ",
                       "Aggregators",
                       "; }[]; }[]"
                     ],
-                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+                    "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -451,7 +457,7 @@
                     "tags": [],
                     "label": "searchConfiguration",
                     "description": [],
-                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+                    "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -462,7 +468,7 @@
                         "tags": [],
                         "label": "query",
                         "description": [],
-                        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+                        "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count.ts",
                         "deprecated": false,
                         "trackAdoption": false,
                         "children": [
@@ -473,7 +479,7 @@
                             "tags": [],
                             "label": "query",
                             "description": [],
-                            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count.ts",
+                            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count.ts",
                             "deprecated": false,
                             "trackAdoption": false
                           }
@@ -495,7 +501,7 @@
         "tags": [],
         "label": "scenario2",
         "description": [],
-        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+        "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_groupby.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -506,7 +512,7 @@
             "tags": [],
             "label": "dataView",
             "description": [],
-            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_groupby.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -517,7 +523,7 @@
                 "tags": [],
                 "label": "indexPattern",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_groupby.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -528,7 +534,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_groupby.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -539,7 +545,7 @@
                 "tags": [],
                 "label": "shouldCreate",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_groupby.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -552,7 +558,7 @@
             "tags": [],
             "label": "ruleParams",
             "description": [],
-            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_groupby.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -563,7 +569,7 @@
                 "tags": [],
                 "label": "consumer",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_groupby.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -574,7 +580,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_groupby.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -585,7 +591,7 @@
                 "tags": [],
                 "label": "params",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_groupby.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -598,12 +604,18 @@
                     "description": [],
                     "signature": [
                       "{ comparator: ",
-                      "Comparator",
+                      {
+                        "pluginId": "@kbn/alerting-comparators",
+                        "scope": "common",
+                        "docId": "kibKbnAlertingComparatorsPluginApi",
+                        "section": "def-common.COMPARATORS",
+                        "text": "COMPARATORS"
+                      },
                       "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; filter: string; aggType: ",
                       "Aggregators",
                       "; }[]; }[]"
                     ],
-                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+                    "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_groupby.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -617,7 +629,7 @@
                     "signature": [
                       "string[]"
                     ],
-                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+                    "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_groupby.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -628,7 +640,7 @@
                     "tags": [],
                     "label": "searchConfiguration",
                     "description": [],
-                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+                    "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_groupby.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -639,7 +651,7 @@
                         "tags": [],
                         "label": "query",
                         "description": [],
-                        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+                        "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_groupby.ts",
                         "deprecated": false,
                         "trackAdoption": false,
                         "children": [
@@ -650,7 +662,7 @@
                             "tags": [],
                             "label": "query",
                             "description": [],
-                            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
+                            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_groupby.ts",
                             "deprecated": false,
                             "trackAdoption": false
                           }
@@ -672,7 +684,7 @@
         "tags": [],
         "label": "scenario3",
         "description": [],
-        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+        "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_nodata.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -683,7 +695,7 @@
             "tags": [],
             "label": "dataView",
             "description": [],
-            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_nodata.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -694,7 +706,7 @@
                 "tags": [],
                 "label": "indexPattern",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_nodata.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -705,7 +717,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_nodata.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -716,7 +728,7 @@
                 "tags": [],
                 "label": "shouldCreate",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_nodata.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -729,7 +741,7 @@
             "tags": [],
             "label": "ruleParams",
             "description": [],
-            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_nodata.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -740,7 +752,7 @@
                 "tags": [],
                 "label": "consumer",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_nodata.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -751,7 +763,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_nodata.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -762,7 +774,7 @@
                 "tags": [],
                 "label": "params",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_nodata.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -775,12 +787,18 @@
                     "description": [],
                     "signature": [
                       "{ comparator: ",
-                      "Comparator",
+                      {
+                        "pluginId": "@kbn/alerting-comparators",
+                        "scope": "common",
+                        "docId": "kibKbnAlertingComparatorsPluginApi",
+                        "section": "def-common.COMPARATORS",
+                        "text": "COMPARATORS"
+                      },
                       "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; filter: string; aggType: ",
                       "Aggregators",
                       "; }[]; }[]"
                     ],
-                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+                    "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_nodata.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -791,7 +809,7 @@
                     "tags": [],
                     "label": "searchConfiguration",
                     "description": [],
-                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+                    "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_nodata.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -802,7 +820,7 @@
                         "tags": [],
                         "label": "query",
                         "description": [],
-                        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+                        "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_nodata.ts",
                         "deprecated": false,
                         "trackAdoption": false,
                         "children": [
@@ -813,7 +831,7 @@
                             "tags": [],
                             "label": "query",
                             "description": [],
-                            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_nodata.ts",
+                            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_log_count_nodata.ts",
                             "deprecated": false,
                             "trackAdoption": false
                           }
@@ -835,7 +853,7 @@
         "tags": [],
         "label": "scenario4",
         "description": [],
-        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+        "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -846,7 +864,7 @@
             "tags": [],
             "label": "dataView",
             "description": [],
-            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -857,7 +875,7 @@
                 "tags": [],
                 "label": "indexPattern",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -868,7 +886,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -879,7 +897,7 @@
                 "tags": [],
                 "label": "shouldCreate",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -892,7 +910,7 @@
             "tags": [],
             "label": "ruleParams",
             "description": [],
-            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -903,7 +921,7 @@
                 "tags": [],
                 "label": "consumer",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -914,7 +932,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -925,7 +943,7 @@
                 "tags": [],
                 "label": "params",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -938,12 +956,18 @@
                     "description": [],
                     "signature": [
                       "{ comparator: ",
-                      "Comparator",
+                      {
+                        "pluginId": "@kbn/alerting-comparators",
+                        "scope": "common",
+                        "docId": "kibKbnAlertingComparatorsPluginApi",
+                        "section": "def-common.COMPARATORS",
+                        "text": "COMPARATORS"
+                      },
                       "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; field: string; aggType: ",
                       "Aggregators",
                       "; }[]; }[]"
                     ],
-                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+                    "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -954,7 +978,7 @@
                     "tags": [],
                     "label": "searchConfiguration",
                     "description": [],
-                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+                    "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -965,7 +989,7 @@
                         "tags": [],
                         "label": "query",
                         "description": [],
-                        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+                        "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg.ts",
                         "deprecated": false,
                         "trackAdoption": false,
                         "children": [
@@ -976,7 +1000,7 @@
                             "tags": [],
                             "label": "query",
                             "description": [],
-                            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg.ts",
+                            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg.ts",
                             "deprecated": false,
                             "trackAdoption": false
                           }
@@ -998,7 +1022,7 @@
         "tags": [],
         "label": "scenario5",
         "description": [],
-        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+        "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1009,7 +1033,7 @@
             "tags": [],
             "label": "dataView",
             "description": [],
-            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1020,7 +1044,7 @@
                 "tags": [],
                 "label": "indexPattern",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1031,7 +1055,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1042,7 +1066,7 @@
                 "tags": [],
                 "label": "shouldCreate",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1055,7 +1079,7 @@
             "tags": [],
             "label": "ruleParams",
             "description": [],
-            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1066,7 +1090,7 @@
                 "tags": [],
                 "label": "consumer",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1077,7 +1101,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1088,7 +1112,7 @@
                 "tags": [],
                 "label": "params",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1101,12 +1125,18 @@
                     "description": [],
                     "signature": [
                       "{ comparator: ",
-                      "Comparator",
+                      {
+                        "pluginId": "@kbn/alerting-comparators",
+                        "scope": "common",
+                        "docId": "kibKbnAlertingComparatorsPluginApi",
+                        "section": "def-common.COMPARATORS",
+                        "text": "COMPARATORS"
+                      },
                       "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; field: string; aggType: ",
                       "Aggregators",
                       "; }[]; }[]"
                     ],
-                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+                    "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -1120,7 +1150,7 @@
                     "signature": [
                       "string[]"
                     ],
-                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+                    "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -1131,7 +1161,7 @@
                     "tags": [],
                     "label": "searchConfiguration",
                     "description": [],
-                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+                    "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -1142,7 +1172,7 @@
                         "tags": [],
                         "label": "query",
                         "description": [],
-                        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+                        "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
                         "deprecated": false,
                         "trackAdoption": false,
                         "children": [
@@ -1153,7 +1183,7 @@
                             "tags": [],
                             "label": "query",
                             "description": [],
-                            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
+                            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
                             "deprecated": false,
                             "trackAdoption": false
                           }
@@ -1175,7 +1205,7 @@
         "tags": [],
         "label": "scenario6",
         "description": [],
-        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+        "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1186,7 +1216,7 @@
             "tags": [],
             "label": "dataView",
             "description": [],
-            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1197,7 +1227,7 @@
                 "tags": [],
                 "label": "indexPattern",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1208,7 +1238,7 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1219,7 +1249,7 @@
                 "tags": [],
                 "label": "shouldCreate",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1232,7 +1262,7 @@
             "tags": [],
             "label": "ruleParams",
             "description": [],
-            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1243,7 +1273,7 @@
                 "tags": [],
                 "label": "consumer",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1254,7 +1284,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1265,7 +1295,7 @@
                 "tags": [],
                 "label": "params",
                 "description": [],
-                "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+                "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1278,12 +1308,18 @@
                     "description": [],
                     "signature": [
                       "{ comparator: ",
-                      "Comparator",
+                      {
+                        "pluginId": "@kbn/alerting-comparators",
+                        "scope": "common",
+                        "docId": "kibKbnAlertingComparatorsPluginApi",
+                        "section": "def-common.COMPARATORS",
+                        "text": "COMPARATORS"
+                      },
                       "; threshold: number[]; timeSize: number; timeUnit: string; metrics: { name: string; field: string; aggType: ",
                       "Aggregators",
                       "; }[]; }[]"
                     ],
-                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+                    "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -1294,7 +1330,7 @@
                     "tags": [],
                     "label": "searchConfiguration",
                     "description": [],
-                    "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+                    "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -1305,7 +1341,7 @@
                         "tags": [],
                         "label": "query",
                         "description": [],
-                        "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+                        "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
                         "deprecated": false,
                         "trackAdoption": false,
                         "children": [
@@ -1316,7 +1352,7 @@
                             "tags": [],
                             "label": "query",
                             "description": [],
-                            "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
+                            "path": "x-pack/solutions/observability/packages/alerting-test-data/src/scenarios/custom_threshold_metric_avg_nodata.ts",
                             "deprecated": false,
                             "trackAdoption": false
                           }

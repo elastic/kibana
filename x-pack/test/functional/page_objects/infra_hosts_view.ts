@@ -29,23 +29,6 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('hostsViewTableAddFilterButton');
     },
 
-    async clickCloseFlyoutButton() {
-      return testSubjects.click('euiFlyoutCloseButton');
-    },
-
-    async getBetaBadgeExists() {
-      return testSubjects.exists('infra-beta-badge');
-    },
-
-    // Inventory UI
-    async clickTryHostViewLink() {
-      return await testSubjects.click('inventory-hostsView-link');
-    },
-
-    async clickTryHostViewBadge() {
-      return await testSubjects.click('inventory-hostsView-link-badge');
-    },
-
     // Table
 
     async getHostsTable() {
@@ -61,6 +44,36 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return table.findAllByTestSubject('hostsView-tableRow');
     },
 
+    async getHostsRowDataWithAlerts(row: WebElementWrapper) {
+      // Find all the row cells
+      const cells = await row.findAllByCssSelector('[data-test-subj*="hostsView-tableRow-"]');
+
+      // Retrieve content for each cell
+      const [
+        alertsCount,
+        title,
+        cpuUsage,
+        normalizedLoad,
+        memoryUsage,
+        memoryFree,
+        diskSpaceUsage,
+        rx,
+        tx,
+      ] = await Promise.all(cells.map((cell) => this.getHostsCellContent(cell)));
+
+      return {
+        alertsCount,
+        title,
+        cpuUsage,
+        normalizedLoad,
+        memoryUsage,
+        memoryFree,
+        diskSpaceUsage,
+        rx,
+        tx,
+      };
+    },
+
     async getHostsRowData(row: WebElementWrapper) {
       // Find all the row cells
       const cells = await row.findAllByCssSelector('[data-test-subj*="hostsView-tableRow-"]');
@@ -69,7 +82,16 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       const [title, cpuUsage, normalizedLoad, memoryUsage, memoryFree, diskSpaceUsage, rx, tx] =
         await Promise.all(cells.map((cell) => this.getHostsCellContent(cell)));
 
-      return { title, cpuUsage, normalizedLoad, memoryUsage, memoryFree, diskSpaceUsage, rx, tx };
+      return {
+        title,
+        cpuUsage,
+        normalizedLoad,
+        memoryUsage,
+        memoryFree,
+        diskSpaceUsage,
+        rx,
+        tx,
+      };
     },
 
     async getHostsCellContent(cell: WebElementWrapper) {
@@ -111,11 +133,12 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     async clickAndValidateMetricChartActionOptions() {
       const element = await testSubjects.find('hostsView-metricChart-tx');
       await element.moveMouseTo();
+
       const button = await element.findByTestSubject('embeddablePanelToggleMenuIcon');
       await button.click();
-      await testSubjects.existOrFail('embeddablePanelAction-openInLens');
-      // forces the modal to close
-      await element.click();
+      const menuElement = await testSubjects.find('presentationPanelContextMenuItems');
+      await menuElement.moveMouseTo();
+      return testSubjects.existOrFail('embeddablePanelAction-openInLens');
     },
 
     // KPIs
@@ -234,8 +257,8 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     // Sorting
-    getCpuUsageHeader() {
-      return testSubjects.find('tableHeaderCell_cpu_2');
+    getCpuHeader() {
+      return testSubjects.find('tableHeaderCell_cpuV2_2');
     },
 
     getTitleHeader() {
@@ -243,8 +266,8 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async sortByCpuUsage() {
-      const diskLatency = await this.getCpuUsageHeader();
-      const button = await testSubjects.findDescendant('tableHeaderSortButton', diskLatency);
+      const cpu = await this.getCpuHeader();
+      const button = await testSubjects.findDescendant('tableHeaderSortButton', cpu);
       await button.click();
     },
 

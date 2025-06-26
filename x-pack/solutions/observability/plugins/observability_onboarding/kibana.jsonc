@@ -1,0 +1,39 @@
+{
+  "type": "plugin",
+  "id": "@kbn/observability-onboarding-plugin",
+  "owner": [
+    "@elastic/obs-ux-logs-team"
+  ],
+  "group": "observability",
+  "visibility": "private",
+  "plugin": {
+    "id": "observabilityOnboarding",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "observability_onboarding"
+    ],
+    "requiredPlugins": [
+      "data",
+      "observability",
+      "observabilityShared",
+      "logsShared",
+      "discover",
+      "share",
+      "fleet",
+      "customIntegrations",
+      "apm"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

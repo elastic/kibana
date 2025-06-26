@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Overview', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/overview');
+        await common.navigateToApp('elasticsearch/overview');
       });
 
       it('loads a landing page with product cards', async function () {
@@ -40,26 +40,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Search Applications product card visible',
           async () => await testSubjects.exists('enterpriseSearchApplicationsProductCard')
         );
-        await retry.waitFor(
-          'Behavioral Analytics product card visible',
-          async () => await testSubjects.exists('enterpriseSearchAnalyticsProductCard')
-        );
-        await a11y.testAppSnapshot();
-      });
-
-      it('loads a setup guide', async function () {
-        await testSubjects.click('setupGuideLink');
-        await retry.waitFor(
-          'setup guide visible',
-          async () => await testSubjects.exists('setupGuide')
-        );
         await a11y.testAppSnapshot();
       });
     });
 
     describe('Content', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/content/search_indices');
+        await common.navigateToApp('elasticsearch/content/search_indices');
       });
 
       it('loads the indices page', async function () {
@@ -73,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Elasticsearch', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/elasticsearch');
+        await common.navigateToApp('elasticsearch/elasticsearch');
       });
 
       it('loads a setup guide', async function () {
@@ -85,29 +72,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('App Search', () => {
+    describe('Playground', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/app_search');
+        await common.navigateToApp('elasticsearch/applications');
       });
 
-      it('loads a setup guide', async function () {
+      it('loads playground', async function () {
         await retry.waitFor(
-          'setup guide visible',
-          async () => await testSubjects.exists('setupGuide')
-        );
-        await a11y.testAppSnapshot();
-      });
-    });
-
-    describe('Workplace Search', () => {
-      before(async () => {
-        await common.navigateToApp('enterprise_search/workplace_search');
-      });
-
-      it('loads a setup guide', async function () {
-        await retry.waitFor(
-          'setup guide visible',
-          async () => await testSubjects.exists('setupGuide')
+          'playground docs link',
+          async () => await testSubjects.exists('playground-documentation-link')
         );
         await a11y.testAppSnapshot();
       });
@@ -115,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Search Applications', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/applications');
+        await common.navigateToApp('elasticsearch/applications/search_applications');
       });
 
       it('loads search applications list', async function () {
@@ -128,7 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
     describe('Behavioral Analytics', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/analytics');
+        await common.navigateToApp('elasticsearch/analytics');
       });
 
       it('loads Behavioral Analytics page', async function () {
@@ -141,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
     describe('Vector Search', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/vector_search');
+        await common.navigateToApp('elasticsearch/vector_search');
       });
 
       it('loads Vector Search page', async function () {
@@ -154,7 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
     describe('AI Search', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/ai_search');
+        await common.navigateToApp('elasticsearch/ai_search');
       });
 
       it('loads AI Search page', async function () {

@@ -21,411 +21,116 @@
     "functions": [
       {
         "parentPluginId": "@kbn/aiops-utils",
-        "id": "def-common.getLogRateAnalysisType",
+        "id": "def-common.getCategorizationDataViewField",
         "type": "Function",
         "tags": [],
-        "label": "getLogRateAnalysisType",
+        "label": "getCategorizationDataViewField",
         "description": [
-          "\nIdentify the log rate analysis type based on the baseline/deviation\ntime ranges on a given log rate histogram.\n"
+          "\nThis function returns the categorization field from the DataView.\nIt checks for the presence of 'message', 'error.message', or 'event.original' in that order.\nIf none of these fields are present, it returns the first text field from the DataView.\n"
         ],
         "signature": [
-          "(logRateHistogram: ",
+          "(dataView: ",
           {
-            "pluginId": "@kbn/aiops-utils",
+            "pluginId": "dataViews",
             "scope": "common",
-            "docId": "kibKbnAiopsUtilsPluginApi",
-            "section": "def-common.LogRateHistogramItem",
-            "text": "LogRateHistogramItem"
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
           },
-          "[], windowParameters: ",
+          ") => { messageField: ",
           {
-            "pluginId": "@kbn/aiops-utils",
+            "pluginId": "dataViews",
             "scope": "common",
-            "docId": "kibKbnAiopsUtilsPluginApi",
-            "section": "def-common.WindowParameters",
-            "text": "WindowParameters"
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
           },
-          ") => ",
+          " | null; dataViewFields: ",
           {
-            "pluginId": "@kbn/aiops-utils",
+            "pluginId": "dataViews",
             "scope": "common",
-            "docId": "kibKbnAiopsUtilsPluginApi",
-            "section": "def-common.LogRateAnalysisType",
-            "text": "LogRateAnalysisType"
-          }
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          "[]; }"
         ],
-        "path": "x-pack/packages/ml/aiops_utils/get_log_rate_analysis_type.ts",
+        "path": "src/platform/packages/shared/kbn-aiops-utils/src/get_categorization_field.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.getLogRateAnalysisType.$1",
-            "type": "Array",
-            "tags": [],
-            "label": "logRateHistogram",
-            "description": [
-              "The log rate histogram."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/aiops-utils",
-                "scope": "common",
-                "docId": "kibKbnAiopsUtilsPluginApi",
-                "section": "def-common.LogRateHistogramItem",
-                "text": "LogRateHistogramItem"
-              },
-              "[]"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/get_log_rate_analysis_type.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.getLogRateAnalysisType.$2",
+            "id": "def-common.getCategorizationDataViewField.$1",
             "type": "Object",
             "tags": [],
-            "label": "windowParameters",
+            "label": "dataView",
             "description": [
-              "The window parameters with baseline and deviation time range."
+              ", the DataView to check"
             ],
             "signature": [
               {
-                "pluginId": "@kbn/aiops-utils",
+                "pluginId": "dataViews",
                 "scope": "common",
-                "docId": "kibKbnAiopsUtilsPluginApi",
-                "section": "def-common.WindowParameters",
-                "text": "WindowParameters"
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
               }
             ],
-            "path": "x-pack/packages/ml/aiops_utils/get_log_rate_analysis_type.ts",
+            "path": "src/platform/packages/shared/kbn-aiops-utils/src/get_categorization_field.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
         "returnComment": [
-          "The log rate analysis type."
+          "an object containing the message field DataViewField and dataViewFields"
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/aiops-utils",
-        "id": "def-common.getSnappedWindowParameters",
+        "id": "def-common.getCategorizationField",
         "type": "Function",
         "tags": [],
-        "label": "getSnappedWindowParameters",
+        "label": "getCategorizationField",
         "description": [
-          "\n\nConverts window paramaters from the brushes to “snap” the brushes to the chart histogram bar width and ensure timestamps\ncorrespond to bucket timestamps\n"
+          "\nThis function returns the categorization field from the list of fields.\nIt checks for the presence of 'message', 'error.message', or 'event.original' in that order.\nIf none of these fields are present, it returns the first field from the list,\nAssumes text fields have been passed in the `fields` array.\n"
         ],
         "signature": [
-          "(windowParameters: ",
-          {
-            "pluginId": "@kbn/aiops-utils",
-            "scope": "common",
-            "docId": "kibKbnAiopsUtilsPluginApi",
-            "section": "def-common.WindowParameters",
-            "text": "WindowParameters"
-          },
-          ", snapTimestamps: number[]) => ",
-          {
-            "pluginId": "@kbn/aiops-utils",
-            "scope": "common",
-            "docId": "kibKbnAiopsUtilsPluginApi",
-            "section": "def-common.WindowParameters",
-            "text": "WindowParameters"
-          }
+          "(fields: string[]) => string | undefined"
         ],
-        "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
+        "path": "src/platform/packages/shared/kbn-aiops-utils/src/get_categorization_field.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.getSnappedWindowParameters.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "windowParameters",
-            "description": [
-              "time range definition for baseline and deviation to be used by log rate analysis"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/aiops-utils",
-                "scope": "common",
-                "docId": "kibKbnAiopsUtilsPluginApi",
-                "section": "def-common.WindowParameters",
-                "text": "WindowParameters"
-              }
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.getSnappedWindowParameters.$2",
+            "id": "def-common.getCategorizationField.$1",
             "type": "Array",
             "tags": [],
-            "label": "snapTimestamps",
+            "label": "fields",
             "description": [
-              "time range definition that always corresponds to histogram bucket timestamps"
+              ", the list of fields to check"
             ],
             "signature": [
-              "number[]"
+              "string[]"
             ],
-            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
+            "path": "src/platform/packages/shared/kbn-aiops-utils/src/get_categorization_field.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
         "returnComment": [
-          "WindowParameters"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/aiops-utils",
-        "id": "def-common.getWindowParameters",
-        "type": "Function",
-        "tags": [],
-        "label": "getWindowParameters",
-        "description": [
-          "\nGiven a point in time (e.g. where a user clicks), use simple heuristics to compute:\n\n1. The time window around the click to evaluate for changes\n2. The historical time window prior to the click to use as a baseline.\n\nThe philosophy here is that charts are displayed with different granularities according to their\noverall time window. We select the log deviation and historical time windows inline with the\noverall time window.\n\nThe algorithm for doing this is based on the typical granularities that exist in machine data.\n"
-        ],
-        "signature": [
-          "(clickTime: number, minTime: number, maxTime: number) => ",
-          {
-            "pluginId": "@kbn/aiops-utils",
-            "scope": "common",
-            "docId": "kibKbnAiopsUtilsPluginApi",
-            "section": "def-common.WindowParameters",
-            "text": "WindowParameters"
-          }
-        ],
-        "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.getWindowParameters.$1",
-            "type": "number",
-            "tags": [],
-            "label": "clickTime",
-            "description": [
-              "timestamp of the clicked log rate deviation."
-            ],
-            "signature": [
-              "number"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.getWindowParameters.$2",
-            "type": "number",
-            "tags": [],
-            "label": "minTime",
-            "description": [
-              "minimum timestamp of the time window to be analysed"
-            ],
-            "signature": [
-              "number"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.getWindowParameters.$3",
-            "type": "number",
-            "tags": [],
-            "label": "maxTime",
-            "description": [
-              "maximum timestamp of the time window to be analysed"
-            ],
-            "signature": [
-              "number"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [
-          "WindowParameters"
+          "string | undefined, the categorization field if found, otherwise undefined"
         ],
         "initialIsOpen": false
       }
     ],
-    "interfaces": [
-      {
-        "parentPluginId": "@kbn/aiops-utils",
-        "id": "def-common.LogRateHistogramItem",
-        "type": "Interface",
-        "tags": [],
-        "label": "LogRateHistogramItem",
-        "description": [
-          "\nLog rate histogram item"
-        ],
-        "path": "x-pack/packages/ml/aiops_utils/log_rate_histogram_item.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.LogRateHistogramItem.time",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "time",
-            "description": [
-              "\nTime of bucket"
-            ],
-            "signature": [
-              "string | number"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/log_rate_histogram_item.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.LogRateHistogramItem.value",
-            "type": "number",
-            "tags": [],
-            "label": "value",
-            "description": [
-              "\nNumber of doc count for that time bucket"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/log_rate_histogram_item.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/aiops-utils",
-        "id": "def-common.WindowParameters",
-        "type": "Interface",
-        "tags": [
-          "export",
-          "interface",
-          "typedef"
-        ],
-        "label": "WindowParameters",
-        "description": [
-          "\nTime range definition for baseline and deviation to be used by log rate analysis.\n"
-        ],
-        "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.WindowParameters.baselineMin",
-            "type": "number",
-            "tags": [],
-            "label": "baselineMin",
-            "description": [
-              "Baseline minimum value"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.WindowParameters.baselineMax",
-            "type": "number",
-            "tags": [],
-            "label": "baselineMax",
-            "description": [
-              "Baseline maximum value"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.WindowParameters.deviationMin",
-            "type": "number",
-            "tags": [],
-            "label": "deviationMin",
-            "description": [
-              "Deviation minimum value"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/aiops-utils",
-            "id": "def-common.WindowParameters.deviationMax",
-            "type": "number",
-            "tags": [],
-            "label": "deviationMax",
-            "description": [
-              "Deviation maximum value"
-            ],
-            "path": "x-pack/packages/ml/aiops_utils/window_parameters.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "@kbn/aiops-utils",
-        "id": "def-common.LogRateAnalysisType",
-        "type": "Type",
-        "tags": [],
-        "label": "LogRateAnalysisType",
-        "description": [
-          "\nUnion type of log rate analysis types."
-        ],
-        "signature": [
-          "\"spike\" | \"dip\""
-        ],
-        "path": "x-pack/packages/ml/aiops_utils/log_rate_analysis_type.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/aiops-utils",
-        "id": "def-common.LOG_RATE_ANALYSIS_TYPE",
-        "type": "Object",
-        "tags": [],
-        "label": "LOG_RATE_ANALYSIS_TYPE",
-        "description": [
-          "\nThe type of log rate analysis (spike or dip) will affect how parameters are\npassed to the analysis API endpoint."
-        ],
-        "signature": [
-          "{ readonly SPIKE: \"spike\"; readonly DIP: \"dip\"; }"
-        ],
-        "path": "x-pack/packages/ml/aiops_utils/log_rate_analysis_type.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ]
+    "misc": [],
+    "objects": []
   }
 }

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -26,17 +27,14 @@ import {
 } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 import { IInspectorInfo } from '@kbn/data-plugin/common';
-import {
-  DataPublicPluginStart,
-  IKibanaSearchResponse,
-  isRunningResponse,
-} from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, isRunningResponse } from '@kbn/data-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import React, { useEffect, useState } from 'react';
@@ -44,9 +42,11 @@ import { lastValueFrom } from 'rxjs';
 import { PLUGIN_ID, PLUGIN_NAME, SERVER_SEARCH_ROUTE_PATH } from '../../common';
 import { IMyStrategyResponse } from '../../common/types';
 
-interface SearchExamplesAppDeps {
-  notifications: CoreStart['notifications'];
-  http: CoreStart['http'];
+interface SearchExamplesAppDeps
+  extends Pick<
+    CoreStart,
+    'notifications' | 'http' | 'analytics' | 'i18n' | 'theme' | 'userProfile'
+  > {
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
@@ -86,6 +86,7 @@ export const SearchExamplesApp = ({
   navigation,
   data,
   unifiedSearch,
+  ...startServices
 }: SearchExamplesAppDeps) => {
   const { IndexPatternSelect } = unifiedSearch.ui;
   const [getCool, setGetCool] = useState<boolean>(false);
@@ -180,13 +181,15 @@ export const SearchExamplesApp = ({
     const aggs = [{ type: metricAggType, params: { field: selectedNumericField!.name } }];
     const aggsDsl = data.search.aggs.createAggConfigs(dataView, aggs).toDsl();
 
+    const body = {
+      aggs: aggsDsl,
+      query,
+    };
+
     const req = {
       params: {
         index: dataView.title,
-        body: {
-          aggs: aggsDsl,
-          query,
-        },
+        ...body,
       },
       // Add a custom request parameter to be consumed by `MyStrategy`.
       ...(strategy ? { get_cool: getCool } : {}),
@@ -196,7 +199,7 @@ export const SearchExamplesApp = ({
     setAbortController(abortController);
 
     // Submit the search request using the `data.search` service.
-    setRequest(req.params.body);
+    setRequest(body);
     setRawResponse({});
     setWarningContents([]);
     setIsLoading(true);
@@ -220,7 +223,7 @@ export const SearchExamplesApp = ({
             const executedAt = (res as IMyStrategyResponse).executed_at;
             const message = (
               <EuiText>
-                Searched {res.rawResponse.hits.total} documents. <br />
+                Searched {res.rawResponse.hits.total as number} documents. <br />
                 The ${metricAggType} of {selectedNumericField!.name} is{' '}
                 {aggResult ? Math.floor(aggResult) : 0}.
                 <br />
@@ -232,18 +235,13 @@ export const SearchExamplesApp = ({
               </EuiText>
             );
             notifications.toasts.addSuccess(
-              {
-                title: 'Query result',
-                text: toMountPoint(message),
-              },
-              {
-                toastLifeTimeMs: 300000,
-              }
+              { title: 'Query result', text: toMountPoint(message, startServices) },
+              { toastLifeTimeMs: 300000 }
             );
             if (res.warning) {
               notifications.toasts.addWarning({
                 title: 'Warning',
-                text: toMountPoint(res.warning),
+                text: toMountPoint(res.warning, startServices),
               });
             }
           }
@@ -333,11 +331,13 @@ export const SearchExamplesApp = ({
         setWarningContents(warnings);
       }
 
-      const message = <EuiText>Searched {result.rawResponse.hits.total} documents.</EuiText>;
+      const message = (
+        <EuiText>Searched {result.rawResponse.hits.total as number} documents.</EuiText>
+      );
       notifications.toasts.addSuccess(
         {
           title: 'Query result',
-          text: toMountPoint(message),
+          text: toMountPoint(message, startServices),
         },
         {
           toastLifeTimeMs: 300000,

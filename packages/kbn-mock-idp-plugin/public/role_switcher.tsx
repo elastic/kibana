@@ -1,24 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
-import { EuiButton, EuiPopover, EuiContextMenu } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
+
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { MOCK_IDP_REALM_NAME, MOCK_IDP_REALM_TYPE } from '@kbn/mock-idp-utils/src/constants';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
-import {
-  MOCK_IDP_REALM_NAME,
-  MOCK_IDP_REALM_TYPE,
-  MOCK_IDP_SECURITY_ROLE_NAMES,
-  MOCK_IDP_OBSERVABILITY_ROLE_NAMES,
-  MOCK_IDP_SEARCH_ROLE_NAMES,
-} from '@kbn/mock-idp-utils/src/constants';
+
 import { createReloadPageToast } from './reload_page_toast';
 import type { CreateSAMLResponseParams } from '../server';
 
@@ -53,25 +50,26 @@ export const useAuthenticator = (reloadPage = false) => {
   });
 };
 
-export interface RoleSwitcherProps {
-  projectType?: string;
-}
-
-export const RoleSwitcher: FunctionComponent<RoleSwitcherProps> = ({ projectType }) => {
+export const RoleSwitcher = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { services } = useKibana<CoreStart>();
+  const [roles, setRoles] = useState<string[]>([]);
   const [currentUserState, getCurrentUser] = useCurrentUser();
   const [authenticateUserState, authenticateUser] = useAuthenticator();
+  const { services } = useKibana<CoreStart>();
 
   useEffect(() => {
     getCurrentUser();
-  }, [getCurrentUser, authenticateUserState.value]);
+    services.http
+      .get<{ roles: string[] }>('/mock_idp/supported_roles')
+      .then((response) => setRoles(response.roles));
+  }, [getCurrentUser, authenticateUserState.value, services]);
 
   useEffect(() => {
     if (authenticateUserState.value) {
       services.notifications.toasts.add(
         createReloadPageToast({
           user: authenticateUserState.value,
+          userProfile: services.userProfile,
           theme: services.theme,
           i18n: services.i18n,
         })
@@ -79,18 +77,15 @@ export const RoleSwitcher: FunctionComponent<RoleSwitcherProps> = ({ projectType
     }
   }, [authenticateUserState.value]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!currentUserState.value || !isAuthenticatedWithMockIDP(currentUserState.value)) {
+  if (
+    !currentUserState.value ||
+    !isAuthenticatedWithMockIDP(currentUserState.value) ||
+    roles.length === 0
+  ) {
     return null;
   }
 
   const [currentRole] = currentUserState.value.roles;
-
-  const roles =
-    projectType === 'security'
-      ? MOCK_IDP_SECURITY_ROLE_NAMES
-      : projectType === 'observability'
-      ? MOCK_IDP_OBSERVABILITY_ROLE_NAMES
-      : MOCK_IDP_SEARCH_ROLE_NAMES;
 
   return (
     <EuiPopover
@@ -154,7 +149,7 @@ const createForm = (url: string, fields: Record<string, string>) => {
   form.setAttribute('action', url);
 
   for (const key in fields) {
-    if (!fields.hasOwnProperty(key)) {
+    if (!Object.hasOwn(fields, key)) {
       continue;
     }
     const input = document.createElement('input');

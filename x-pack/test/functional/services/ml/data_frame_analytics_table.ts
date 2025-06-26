@@ -95,7 +95,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
 
         if (tableEnvironment === 'stackMgmtJobList') {
           const $spaces = $tr
-            .findTestSubject('mlAnalyticsTableColumnSpaces')
+            .findTestSubject('mlTableColumnSpaces')
             .find('.euiTableCellContent')
             .find('.euiAvatar--space');
           const spaces = [];
@@ -147,11 +147,15 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
     }
 
     public async assertJobRowViewButtonExists(analyticsId: string) {
-      await testSubjects.existOrFail(this.rowSelector(analyticsId, 'mlAnalyticsJobViewButton'));
+      await testSubjects.existOrFail(this.rowSelector(analyticsId, 'mlAnalyticsJobViewButton'), {
+        allowHidden: true, // Table action may be only visible on row hover
+      });
     }
 
     public async assertJobRowMapButtonExists(analyticsId: string) {
-      await testSubjects.existOrFail(this.rowSelector(analyticsId, 'mlAnalyticsJobMapButton'));
+      await testSubjects.existOrFail(this.rowSelector(analyticsId, 'mlAnalyticsJobMapButton'), {
+        allowHidden: true, // Table action may be only visible on row hover
+      });
     }
 
     public async assertJobRowViewButtonEnabled(analyticsId: string, expectedValue: boolean) {
@@ -201,12 +205,13 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
       await searchBarInput.type(filter);
       await this.assertAnalyticsSearchInputValue(filter);
 
-      const rows = await this.parseAnalyticsTable();
+      const rows = (await this.parseAnalyticsTable()) ?? [];
       const filteredRows = rows.filter((row) => row.id === filter);
       expect(filteredRows).to.have.length(
         expectedRowCount,
         `Filtered DFA job table should have ${expectedRowCount} row(s) for filter '${filter}' (got matching items '${filteredRows}')`
       );
+      return rows;
     }
 
     public async assertAnalyticsJobDisplayedInTable(
@@ -214,20 +219,22 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
       shouldBeDisplayed: boolean,
       refreshButtonTestSubj = 'mlDatePickerRefreshPageButton'
     ) {
-      await this.waitForRefreshButtonLoaded(refreshButtonTestSubj);
-      await testSubjects.click(`~${refreshButtonTestSubj}`);
-      await this.waitForRefreshButtonLoaded(refreshButtonTestSubj);
-      await testSubjects.existOrFail('mlAnalyticsJobList', { timeout: 30 * 1000 });
-
-      if (shouldBeDisplayed) {
-        await this.filterWithSearchString(analyticsId, 1);
-      } else {
+      const shouldNotBeDisplayed = shouldBeDisplayed === false;
+      if (shouldNotBeDisplayed) {
         if (await testSubjects.exists('mlNoDataFrameAnalyticsFound', { timeout: 1000 })) {
           // no jobs at all, no other assertion needed
           return;
         }
         await this.filterWithSearchString(analyticsId, 0);
+        return;
       }
+
+      await this.waitForRefreshButtonLoaded(refreshButtonTestSubj);
+      await testSubjects.click(`~${refreshButtonTestSubj}`);
+      await this.waitForRefreshButtonLoaded(refreshButtonTestSubj);
+      await testSubjects.existOrFail('mlAnalyticsJobList', { timeout: 30 * 1000 });
+
+      await this.filterWithSearchString(analyticsId, 1);
     }
 
     public async assertAnalyticsRowFields(analyticsId: string, expectedRow: object) {
@@ -432,7 +439,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
       const vars: Record<string, string> = {};
 
       for (const row of $('tr').toArray()) {
-        const [name, value] = $(row).find('td').toArray();
+        const [name, value] = $(row).find('td').find('.euiTableCellContent').toArray();
 
         vars[$(name).text().trim()] = $(value).text().trim();
       }

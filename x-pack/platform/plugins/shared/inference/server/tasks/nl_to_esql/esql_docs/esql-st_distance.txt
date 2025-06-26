@@ -1,0 +1,33 @@
+# ST_DISTANCE
+
+Computes the distance between two points. For cartesian geometries, it calculates the pythagorean distance in the same units as the original coordinates. For geographic geometries, it computes the circular distance along the great circle in meters.
+
+## Syntax
+
+`ST_DISTANCE(geomA, geomB)`
+
+### Parameters
+
+#### geomA
+
+- Expression of type `geo_point` or `cartesian_point`.
+- If `null`, the function returns `null`.
+
+#### geomB
+
+- Expression of type `geo_point` or `cartesian_point`.
+- If `null`, the function returns `null`.
+- Must have the same coordinate system as `geomA`. Combining `geo_point` and `cartesian_point` parameters is not supported.
+
+## Examples
+
+Calculating the distance between two points
+
+```esql
+FROM airports
+| WHERE abbrev == "CPH"
+| EVAL distance = ST_DISTANCE(location, city_location)
+| KEEP abbrev, name, location, city_location, distance
+```
+
+This example calculates the distance between the airport's location and the city's location for the airport with the abbreviation "CPH".

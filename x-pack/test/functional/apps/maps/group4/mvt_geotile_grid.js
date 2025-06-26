@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 const MB_VECTOR_SOURCE_ID = 'g1xkv';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['maps']);
+  const { maps } = getPageObjects(['maps']);
   const inspector = getService('inspector');
   const security = getService('security');
 
@@ -28,8 +28,8 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should render with mvt-source (style meta from ES)', async () => {
-      await PageObjects.maps.loadSavedMap('MVT geotile grid (style meta from ES)');
-      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+      await maps.loadSavedMap('MVT geotile grid (style meta from ES)');
+      const mapboxStyle = await maps.getMapboxStyle();
 
       const tileUrl = new URL(
         mapboxStyle.sources[MB_VECTOR_SOURCE_ID].tiles[0],
@@ -53,7 +53,7 @@ export default function ({ getPageObjects, getService }) {
         index: 'logstash-*',
         gridPrecision: '8',
         renderAs: 'grid',
-        requestBody: `(aggs:(max_of_bytes:(max:(field:bytes))),fields:!((field:'@timestamp',format:date_time),(field:'relatedContent.article:modified_time',format:date_time),(field:'relatedContent.article:published_time',format:date_time),(field:utc_time,format:date_time)),query:(bool:(filter:!((range:('@timestamp':(format:strict_date_optional_time,gte:'2015-09-20T00:00:00.000Z',lte:'2015-09-20T01:00:00.000Z'))),(exists:(field:geo.coordinates))),must:!(),must_not:!(),should:!())),runtime_mappings:())`,
+        requestBody: `(aggs:(max_of_bytes:(max:(field:bytes))),query:(bool:(filter:!((range:('@timestamp':(format:strict_date_optional_time,gte:'2015-09-20T00:00:00.000Z',lte:'2015-09-20T01:00:00.000Z'))),(exists:(field:geo.coordinates))),must:!(),must_not:!(),should:!())),runtime_mappings:())`,
       });
 
       //Should correctly load meta for style-rule (sigma is set to 1, opacity to 1)
@@ -78,29 +78,29 @@ export default function ({ getPageObjects, getService }) {
           1622,
           'rgba(0,0,0,0)',
           1623,
-          '#ecf1f7',
+          '#e4eefd',
           2643.875,
-          '#d9e3ef',
+          '#d3e3fe',
           3664.75,
-          '#c5d5e7',
+          '#c1d8fe',
           4685.625,
-          '#b2c7df',
+          '#afceff',
           5706.5,
-          '#9eb9d8',
+          '#9dc3ff',
           6727.375,
-          '#8bacd0',
+          '#8bb8ff',
           7748.25,
-          '#769fc8',
+          '#77adff',
           8769.125,
-          '#6092c0',
+          '#61a2ff',
         ],
         'fill-opacity': 0.75,
       });
     });
 
     it('should render with mvt-source (style meta from local - count)', async () => {
-      await PageObjects.maps.loadSavedMap('MVT geotile grid (style meta from local - count)');
-      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+      await maps.loadSavedMap('MVT geotile grid (style meta from local - count)');
+      const mapboxStyle = await maps.getMapboxStyle();
 
       const fillLayer = mapboxStyle.layers.find(
         (layer) => layer.id === MB_VECTOR_SOURCE_ID + '_fill'
@@ -123,29 +123,29 @@ export default function ({ getPageObjects, getService }) {
           0,
           'rgba(0,0,0,0)',
           1,
-          '#ecf1f7',
+          '#e4eefd',
           1.875,
-          '#d9e3ef',
+          '#d3e3fe',
           2.75,
-          '#c5d5e7',
+          '#c1d8fe',
           3.625,
-          '#b2c7df',
+          '#afceff',
           4.5,
-          '#9eb9d8',
+          '#9dc3ff',
           5.375,
-          '#8bacd0',
+          '#8bb8ff',
           6.25,
-          '#769fc8',
+          '#77adff',
           7.125,
-          '#6092c0',
+          '#61a2ff',
         ],
         'fill-opacity': 0.75,
       });
     });
 
     it('should render with mvt-source (style meta from local - metric)', async () => {
-      await PageObjects.maps.loadSavedMap('MVT geotile grid (style meta from local - metric)');
-      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+      await maps.loadSavedMap('MVT geotile grid (style meta from local - metric)');
+      const mapboxStyle = await maps.getMapboxStyle();
 
       const fillLayer = mapboxStyle.layers.find(
         (layer) => layer.id === MB_VECTOR_SOURCE_ID + '_fill'
@@ -168,29 +168,29 @@ export default function ({ getPageObjects, getService }) {
           -1,
           'rgba(0,0,0,0)',
           0,
-          '#ecf1f7',
+          '#e4eefd',
           1867.625,
-          '#d9e3ef',
+          '#d3e3fe',
           3735.25,
-          '#c5d5e7',
+          '#c1d8fe',
           5602.875,
-          '#b2c7df',
+          '#afceff',
           7470.5,
-          '#9eb9d8',
+          '#9dc3ff',
           9338.125,
-          '#8bacd0',
+          '#8bb8ff',
           11205.75,
-          '#769fc8',
+          '#77adff',
           13073.375,
-          '#6092c0',
+          '#61a2ff',
         ],
         'fill-opacity': 0.75,
       });
     });
 
     it('should render heatmap layer', async () => {
-      await PageObjects.maps.loadSavedMap('geo grid heatmap example');
-      const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+      await maps.loadSavedMap('geo grid heatmap example');
+      const mapboxStyle = await maps.getMapboxStyle();
 
       const heatmapLayer = mapboxStyle.layers.find((layer) => layer.id === '3xlvm_heatmap');
 

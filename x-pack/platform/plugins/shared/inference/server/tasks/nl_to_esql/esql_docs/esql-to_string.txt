@@ -1,0 +1,29 @@
+# TO_STRING
+
+Converts an input value into a string.
+
+## Syntax
+
+`TO_STRING(field)`
+
+### Parameters
+
+#### `field`
+
+The input value to be converted. This can be a single- or multi-valued column or an expression.
+
+## Examples
+
+Converting a single value to a string
+
+```esql
+ROW a=10
+| EVAL j = TO_STRING(a)
+```
+
+Converting a multivalued field to a string
+
+```esql
+ROW a=[10, 9, 8]
+| EVAL j = TO_STRING(a)
+```

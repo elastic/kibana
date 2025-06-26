@@ -56,7 +56,7 @@ export function RuleDetailsPageProvider({ getService }: FtrProviderContext) {
       const alertDurationEpoch = await find.byCssSelector(
         'input[data-test-subj="alertsDurationEpoch"]'
       );
-      return parseInt(await alertDurationEpoch.getAttribute('value'), 10);
+      return parseInt((await alertDurationEpoch.getAttribute('value')) ?? '0', 10);
     },
     async clickAlertMuteButton(alert: string) {
       const muteAlertButton = await testSubjects.find(`muteAlertButton_${alert}`);
@@ -92,7 +92,7 @@ export function RuleDetailsPageProvider({ getService }: FtrProviderContext) {
     },
     async clickPaginationNextPage() {
       const nextButton = await testSubjects.find(`pagination-button-next`);
-      nextButton.click();
+      await nextButton.click();
     },
     async isViewInAppDisabled() {
       await retry.try(async () => {

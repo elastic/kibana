@@ -1,0 +1,26 @@
+{
+  "ml.get_filters": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "from": "",
+      "size": [
+        "100"
+      ]
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ml/filters",
+      "_ml/filters/{filter_id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-filters",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

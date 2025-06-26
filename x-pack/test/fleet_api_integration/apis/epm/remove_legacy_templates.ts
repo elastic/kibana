@@ -10,16 +10,14 @@ import path from 'path';
 import fs from 'fs';
 import { promisify } from 'util';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 const sleep = promisify(setTimeout);
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
-  const dockerServers = getService('dockerServers');
-  const server = dockerServers.get('registry');
   const esClient = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const uploadPkgName = 'apache';
   const uploadPkgVersion = '0.1.4';
@@ -100,12 +98,15 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  describe('legacy component template removal', async () => {
+  describe('Legacy component template removal', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
 
     afterEach(async () => {
-      if (!server.enabled) return;
+      if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
       await deleteLegacyComponentTemplates();
       await uninstallPackage(uploadPkgName, uploadPkgVersion);
     });
@@ -139,6 +140,8 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       await waitUntilLegacyComponentTemplatesCreated();
+      // wait 10s before uploading again to avoid getting 429
+      await sleep(10000);
       await installUploadPackage();
 
       const { component_templates: allComponentTemplates } =

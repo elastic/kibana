@@ -1,0 +1,22 @@
+# TO_LOWER
+
+Returns a new string with all characters in the input string converted to lowercase.
+
+## Syntax
+
+`TO_LOWER(str)`
+
+### Parameters
+
+#### `str`
+
+String expression. If `null`, the function returns `null`.
+
+## Examples
+
+```esql
+ROW message = "Some Text"
+| EVAL message_lower = TO_LOWER(message)
+```
+
+This example converts the string in the `message` column to lowercase and stores the result in a new column named `message_lower`.

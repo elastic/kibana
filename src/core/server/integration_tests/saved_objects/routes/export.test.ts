@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import supertest from 'supertest';
@@ -15,13 +16,16 @@ import {
 } from '@kbn/core-usage-data-server-mocks';
 import { savedObjectsExporterMock } from '@kbn/core-saved-objects-import-export-server-mocks';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
-import { setupServer, createExportableType } from '@kbn/core-test-helpers-test-utils';
+import {
+  setupServer,
+  createExportableType,
+  SetupServerReturn,
+} from '@kbn/core-test-helpers-test-utils';
 import {
   registerExportRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 
-type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 const allowedTypes = ['index-pattern', 'search'];
 const config = {
   maxImportPayloadBytes: 26214400,
@@ -31,19 +35,18 @@ let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
 
 describe('POST /api/saved_objects/_export', () => {
   let server: SetupServerReturn['server'];
-  let httpSetup: SetupServerReturn['httpSetup'];
+  let createRouter: SetupServerReturn['createRouter'];
   let handlerContext: SetupServerReturn['handlerContext'];
   let exporter: ReturnType<typeof savedObjectsExporterMock.create>;
 
   beforeEach(async () => {
-    ({ server, httpSetup, handlerContext } = await setupServer());
+    ({ server, createRouter, handlerContext } = await setupServer());
     handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
       allowedTypes.map(createExportableType)
     );
     exporter = handlerContext.savedObjects.getExporter();
 
-    const router =
-      httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
+    const router = createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
     handlerContext.savedObjects.getExporter = jest
       .fn()
       .mockImplementation(() => exporter as ReturnType<typeof savedObjectsExporterMock.create>);
@@ -85,13 +88,11 @@ describe('POST /api/saved_objects/_export', () => {
 
     exporter.exportByTypes.mockResolvedValueOnce(createListStream(sortedObjects));
 
-    const result = await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/_export')
-      .send({
-        type: 'search',
-        search: 'my search string',
-        includeReferencesDeep: true,
-      });
+    const result = await supertest(server.listener).post('/api/saved_objects/_export').send({
+      type: 'search',
+      search: 'my search string',
+      includeReferencesDeep: true,
+    });
 
     expect(result.status).toBe(200);
     expect(result.header).toEqual(

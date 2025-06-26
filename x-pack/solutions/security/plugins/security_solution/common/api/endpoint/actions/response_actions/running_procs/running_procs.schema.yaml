@@ -1,0 +1,58 @@
+openapi: 3.0.0
+info:
+  title: Get Running Processes Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/action/running_procs:
+    post:
+      summary: Get running processes
+      operationId: EndpointGetProcessesAction
+      description: Get a list of all processes running on an endpoint.
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetProcessesRouteRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetProcessesRouteResponse'
+
+components:
+  schemas:
+    GetProcessesRouteRequestBody:
+      example:
+        endpoint_ids:
+          - "ed518850-681a-4d60-bb98-e22640cae2a8"
+      allOf:
+        - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
+    GetProcessesRouteResponse:
+      type: object
+      properties: { }
+      example:
+        data:
+          id: "233db9ea-6733-4849-9226-5a7039c7161d"
+          agents:
+            - "ed518850-681a-4d60-bb98-e22640cae2a8"
+          command: "running-processes"
+          agentType: "endpoint"
+          isExpired: false
+          isCompleted: true
+          wasSuccessful: true
+          errors: [ ]
+          startedAt: "2022-07-29T19:08:49.126Z"
+          completedAt: "2022-07-29T19:09:44.961Z"
+          outputs:
+            ed518850-681a-4d60-bb98-e22640cae2a8:
+              type: "json"
+              content:
+                key: "value"
+          createdBy: "myuser"
+          comment: ""
+          parameters: { }

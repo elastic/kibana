@@ -10,7 +10,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const TEST_START_TIME = 'Jan 2, 2021 @ 00:00:00.000';
 const TEST_END_TIME = 'Jan 2, 2022 @ 00:00:00.000';
-const metaFields = ['_id', '_index', '_score'];
+const metaFields = ['_id', '_index', '_score', '_ignored'];
 
 const fieldsWithData = [
   'ts',
@@ -60,12 +60,12 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   describe('Fields existence info', () => {
     before(async () => {
       await esArchiver.load(
-        'test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
+        'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
       );
       await kibanaServer.importExport.load(
-        'test/api_integration/fixtures/kbn_archiver/index_patterns/constant_keyword.json'
+        'src/platform/test/api_integration/fixtures/kbn_archiver/index_patterns/constant_keyword.json'
       );
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('unifiedFieldListExamples');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitFor('combobox is ready', async () => {
@@ -78,19 +78,18 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await PageObjects.timePicker.setAbsoluteRange(TEST_START_TIME, TEST_END_TIME);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-      await PageObjects.unifiedFieldList.toggleSidebarSection('meta');
+      await PageObjects.unifiedFieldList.openSidebarSection('meta');
     });
 
     after(async () => {
       await esArchiver.unload(
-        'test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
+        'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
       );
       await kibanaServer.importExport.unload(
-        'test/api_integration/fixtures/kbn_archiver/index_patterns/constant_keyword.json'
+        'src/platform/test/api_integration/fixtures/kbn_archiver/index_patterns/constant_keyword.json'
       );
       await PageObjects.unifiedFieldList.cleanSidebarLocalStorage();
       await kibanaServer.savedObjects.cleanStandardList();
-      await PageObjects.svlCommonPage.forceLogout();
     });
 
     describe('existence', () => {

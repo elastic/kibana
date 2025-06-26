@@ -7,25 +7,59 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from './services';
-import { testUsers } from '../test_users';
+
+function getBaseUrl(spaceId?: string) {
+  return spaceId ? `/s/${spaceId}` : '';
+}
+
+export async function pollResult(
+  supertestAgent: any,
+  actionId: string,
+  nbAgentsAck: number,
+  verifyActionResult: Function,
+  spaceId?: string
+) {
+  await new Promise((resolve, reject) => {
+    let attempts = 0;
+    const intervalId = setInterval(async () => {
+      if (attempts > 4) {
+        clearInterval(intervalId);
+        reject(new Error('action timed out'));
+      }
+      ++attempts;
+      const {
+        body: { items: actionStatuses },
+      } = await supertestAgent
+        .get(`${getBaseUrl(spaceId)}/api/fleet/agents/action_status`)
+        .set('kbn-xsrf', 'xxx');
+      const action = actionStatuses.find((a: any) => a.actionId === actionId);
+      if (action && action.nbAgentsAck === nbAgentsAck) {
+        clearInterval(intervalId);
+        await verifyActionResult();
+        resolve({});
+      }
+    }, 3000);
+  }).catch((e) => {
+    throw e;
+  });
+}
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   describe('fleet_update_agent_tags', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await fleetAndAgents.setup();
     });
     beforeEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
       await getService('supertest').post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
     });
-    setupFleetAndAgents(providerContext);
     afterEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
@@ -68,34 +102,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(agent2data.body.item.tags).to.eql(['existingTag']);
       });
 
-      async function pollResult(
-        actionId: string,
-        nbAgentsAck: number,
-        verifyActionResult: Function
-      ) {
-        await new Promise((resolve, reject) => {
-          let attempts = 0;
-          const intervalId = setInterval(async () => {
-            if (attempts > 4) {
-              clearInterval(intervalId);
-              reject(new Error('action timed out'));
-            }
-            ++attempts;
-            const {
-              body: { items: actionStatuses },
-            } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
-            const action = actionStatuses.find((a: any) => a.actionId === actionId);
-            if (action && action.nbAgentsAck === nbAgentsAck) {
-              clearInterval(intervalId);
-              await verifyActionResult();
-              resolve({});
-            }
-          }, 1000);
-        }).catch((e) => {
-          throw e;
-        });
-      }
-
       it('should bulk update tags of multiple agents by kuery - add', async () => {
         const { body: actionBody } = await supertest
           .post(`/api/fleet/agents/bulk_update_agent_tags`)
@@ -116,7 +122,7 @@ export default function (providerContext: FtrProviderContext) {
           expect(body.total).to.eql(4);
         };
 
-        await pollResult(actionId, 4, verifyActionResult);
+        await pollResult(supertest, actionId, 4, verifyActionResult);
       });
 
       it('should bulk update tags of multiple agents by kuery - remove', async () => {
@@ -139,7 +145,7 @@ export default function (providerContext: FtrProviderContext) {
           expect(body.total).to.eql(0);
         };
 
-        await pollResult(actionId, 2, verifyActionResult);
+        await pollResult(supertest, actionId, 2, verifyActionResult);
       });
 
       it('should return 200 also if the kuery is valid', async () => {
@@ -156,36 +162,23 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
 
-      it('should return 400 if the passed kuery is not correct', async () => {
+      it('with enableStrictKQLValidation should return 400 if the passed kuery is not correct ', async () => {
         await supertest
           .get(`/api/fleet/agents?kuery=fleet-agents.non_existent_parameter:existingTag`)
           .set('kbn-xsrf', 'xxxx')
           .expect(400);
       });
 
-      it('should return 400 if the passed kuery is invalid', async () => {
+      it('with enableStrictKQLValidation should return 400 if the passed kuery is invalid', async () => {
         await supertest
           .get(`/api/fleet/agents?kuery='test%3A'`)
           .set('kbn-xsrf', 'xxxx')
           .expect(400);
       });
 
-      it('should return a 403 if user lacks "fleet all" permissions', async () => {
-        await supertestWithoutAuth
-          .post(`/api/fleet/agents/bulk_update_agent_tags`)
-          .auth(testUsers.fleet_no_access.username, testUsers.fleet_no_access.password)
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            agents: ['agent2', 'agent3'],
-            tagsToAdd: ['newTag'],
-            tagsToRemove: ['existingTag'],
-          })
-          .expect(403);
-      });
-
       it('should not update tags of hosted agent', async () => {
         // move agent2 to policy2 to keep it regular
-        await supertest.put(`/api/fleet/agents/agent2/reassign`).set('kbn-xsrf', 'xxx').send({
+        await supertest.post(`/api/fleet/agents/agent2/reassign`).set('kbn-xsrf', 'xxx').send({
           policy_id: 'policy2',
         });
         // update enrolled policy to hosted

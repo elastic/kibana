@@ -1,29 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { execSync } from 'child_process';
 import axios from 'axios';
+import { getKibanaDir } from '#pipeline-utils';
 
 async function getPrProjects() {
-  const match = /^kibana-pr-([0-9]+)-(elasticsearch|security|observability)$/;
+  // BOOKMARK - List of Kibana project types
+  const match = /^(keep.?)?kibana-pr-([0-9]+)-(elasticsearch|security|observability|chat)$/;
   try {
+    // BOOKMARK - List of Kibana project types
     return (
       await Promise.all([
         projectRequest.get('/api/v1/serverless/projects/elasticsearch'),
         projectRequest.get('/api/v1/serverless/projects/security'),
         projectRequest.get('/api/v1/serverless/projects/observability'),
+        // TODO handle the new 'chat' project type - https://elastic.slack.com/archives/C5UDAFZQU/p1741692053429579
       ])
     )
       .map((response) => response.data.items)
       .flat()
       .filter((project) => project.name.match(match))
       .map((project) => {
-        const [, prNumber, projectType] = project.name.match(match);
+        const [, , prNumber, projectType] = project.name.match(match);
         return {
           id: project.id,
           name: project.name,
@@ -43,12 +48,21 @@ async function getPrProjects() {
 async function deleteProject({
   type,
   id,
+  name,
 }: {
-  type: 'elasticsearch' | 'observability' | 'security';
+  // BOOKMARK - List of Kibana project types
+  type: 'elasticsearch' | 'security' | 'observability' | 'chat';
   id: number;
+  name: string;
 }) {
   try {
+    // TODO handle the new 'chat' project type, and ideally rename 'elasticsearch' to 'search'
     await projectRequest.delete(`/api/v1/serverless/projects/${type}/${id}`);
+
+    execSync(`.buildkite/scripts/common/deployment_credentials.sh unset ${name}`, {
+      cwd: getKibanaDir(),
+      stdio: 'inherit',
+    });
   } catch (e) {
     if (e.isAxiosError) {
       const message =
@@ -61,7 +75,7 @@ async function deleteProject({
 
 async function purgeProjects() {
   const prProjects = await getPrProjects();
-  const projectsToPurge = [];
+  const projectsToPurge: typeof prProjects = [];
   for (const project of prProjects) {
     const NOW = new Date().getTime() / 1000;
     const DAY_IN_SECONDS = 60 * 60 * 24;
@@ -88,7 +102,7 @@ async function purgeProjects() {
     } else if (
       !Boolean(
         pullRequest.labels.filter((label: any) =>
-          /^ci:project-deploy-(elasticearch|security|observability)$/.test(label.name)
+          /^ci:project-deploy-(elasticsearch|security|observability)$/.test(label.name)
         ).length
       )
     ) {
@@ -115,6 +129,7 @@ const projectRequest = axios.create({
   headers: {
     Authorization: `ApiKey ${process.env.PROJECT_API_KEY}`,
   },
+  allowAbsoluteUrls: false,
 });
 
 purgeProjects().catch((e) => {

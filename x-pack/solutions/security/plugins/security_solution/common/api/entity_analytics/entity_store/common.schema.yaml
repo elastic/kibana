@@ -1,0 +1,210 @@
+openapi: 3.0.0
+info:
+  title: Entity Store Common Schema
+  description: Common schema for Entity Store
+  version: '1'
+paths: {}
+components:
+  schemas:
+    EntityType:
+      type: string
+      enum:
+        - user
+        - host
+        - service
+        - generic
+
+    EngineDescriptor:
+      type: object
+      required:
+        - type
+        - indexPattern
+        - status
+        - fieldHistoryLength
+      properties:
+        type:
+          $ref: '#/components/schemas/EntityType'
+        indexPattern:
+          $ref: '#/components/schemas/IndexPattern'
+        status:
+          $ref: '#/components/schemas/EngineStatus'
+        filter:
+          type: string
+        fieldHistoryLength:
+          type: integer
+        lookbackPeriod:
+          type: string
+          default: 24h
+          pattern: '[smdh]$'
+        timestampField:
+          type: string
+        timeout:
+          type: string
+          default: 180s
+          pattern: '[smdh]$'
+        frequency:
+          type: string
+          default: 1m
+          pattern: '[smdh]$'
+        delay:
+          type: string
+          default: 1m
+          pattern: '[smdh]$'
+        docsPerSecond:
+          type: integer
+        error:
+          type: object
+          required:
+            - message
+            - action
+          properties:
+            message:
+              type: string
+            action:
+              type: string
+              enum:
+                - init
+
+    EngineStatus:
+      type: string
+      enum:
+        - installing
+        - started
+        - stopped
+        - updating
+        - error
+
+    EngineComponentStatus:
+      type: object
+      required:
+          - id
+          - installed
+          - resource
+      properties:
+        id:
+          type: string
+        installed:
+          type: boolean
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        resource:
+          $ref: '#/components/schemas/EngineComponentResource'
+        health:
+          type: string
+          enum:
+            - green
+            - yellow
+            - red
+            - unknown
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              message:
+                type: string
+
+    Metadata:
+      allOf:
+        - $ref: '#/components/schemas/TransformStatsMetadata'
+
+    TransformStatsMetadata:
+      type: object
+      required:
+        - pages_processed
+        - documents_processed
+        - documents_indexed
+        - trigger_count
+        - index_time_in_ms
+        - index_total
+        - index_failures
+        - search_time_in_ms
+        - search_total
+        - search_failures
+        - processing_time_in_ms
+        - processing_total
+        - exponential_avg_checkpoint_duration_ms
+        - exponential_avg_documents_indexed
+        - exponential_avg_documents_processed
+      properties:
+        pages_processed:
+          type: integer
+        documents_processed:
+          type: integer
+        documents_indexed:
+          type: integer
+        documents_deleted:
+          type: integer
+        trigger_count:
+          type: integer
+        index_time_in_ms:
+          type: integer
+        index_total:
+          type: integer
+        index_failures:
+          type: integer
+        search_time_in_ms:
+          type: integer
+        search_total:
+          type: integer
+        search_failures:
+          type: integer
+        processing_time_in_ms:
+          type: integer
+        processing_total:
+          type: integer
+        delete_time_in_ms:
+          type: integer
+        exponential_avg_checkpoint_duration_ms:
+          type: integer
+        exponential_avg_documents_indexed:
+          type: integer
+        exponential_avg_documents_processed:
+          type: integer
+
+    EngineComponentResource:
+      type: string
+      enum:
+        - entity_engine
+        - entity_definition
+        - index
+        - component_template
+        - index_template
+        - ingest_pipeline
+        - enrich_policy
+        - task
+        - transform
+
+    StoreStatus:
+      type: string
+      enum:
+        - not_installed
+        - installing
+        - running
+        - stopped
+        - error
+
+    IndexPattern:
+      type: string
+
+    InspectQuery:
+      type: object
+      properties:
+        response:
+          type: array
+          items:
+            type: string
+        dsl:
+          type: array
+          items:
+            type: string
+      required:
+        - dsl
+        - response
+    Interval:
+      type: string
+      description: Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour. Must be less than or equal to half the duration of the lookback period,
+      pattern: '^[1-9]\d*[smh]$' # any number except zero followed by one of the suffixes 's', 'm', 'h'
+      example: '1h'

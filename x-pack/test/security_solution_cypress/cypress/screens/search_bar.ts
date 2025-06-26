@@ -20,9 +20,6 @@ export const GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON = (localSearchBarSelector: strin
 export const ADD_FILTER_FORM_FIELD_INPUT =
   '[data-test-subj="filterFieldSuggestionList"] input[data-test-subj="comboBoxSearchInput"]';
 
-export const ADD_FILTER_FORM_FIELD_OPTION = (value: string) =>
-  `[data-test-subj="comboBoxOptionsList filterFieldSuggestionList-optionsList"] button[title="${value}"]`;
-
 export const ADD_FILTER_FORM_OPERATOR_FIELD =
   '[data-test-subj="filterOperatorList"] input[data-test-subj="comboBoxSearchInput"]';
 
@@ -38,6 +35,8 @@ export const GLOBAL_SEARCH_BAR_FILTER_ITEM_DELETE = '#popoverFor_filter0 button[
 
 export const GLOBAL_SEARCH_BAR_PINNED_FILTER = '.globalFilterItem-isPinned';
 
+export const GLOBAL_SEARCH_BAR_EDIT_FILTER_MENU_ITEM = '[data-test-subj="editFilter"]';
+
 export const LOCAL_KQL_INPUT = `[data-test-subj="unifiedQueryInput"] textarea`;
 
 export const GLOBAL_KQL_INPUT = `[data-test-subj="filters-global-container"] ${LOCAL_KQL_INPUT}`;
@@ -49,3 +48,9 @@ export const AUTO_SUGGEST_HOST_NAME_VALUE = `[data-test-subj='autocompleteSugges
 export const EDIT_AS_QUERY_DSL = getDataTestSubjectSelector('editQueryDSL');
 
 export const KIBANA_CODE_EDITOR = getDataTestSubjectSelector('kibanaCodeEditor');
+
+export const NAV_SEARCH_INPUT = '[data-test-subj="nav-search-input"]';
+
+export const NAV_SEARCH_RESULTS = '[aria-label="Filter options"]';
+
+export const NAV_SEARCH_NO_RESULTS = '[data-test-subj="nav-search-no-results"]';

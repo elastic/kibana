@@ -13,11 +13,11 @@
           "\nA page to display when Kibana has no data, prompting a person to add integrations or create a new data view."
         ],
         "signature": [
-          "({ onDataViewCreated, noDataConfig, allowAdHocDataView, showPlainSpinner, }: ",
+          "({ onDataViewCreated, noDataConfig, allowAdHocDataView, onTryESQL, onESQLNavigationComplete, showPlainSpinner, }: ",
           "KibanaNoDataPageProps",
-          ") => JSX.Element | null"
+          ") => React.JSX.Element | null"
         ],
-        "path": "packages/shared-ux/page/kibana_no_data/impl/src/kibana_no_data_page.tsx",
+        "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/impl/src/kibana_no_data_page.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -26,12 +26,12 @@
             "id": "def-public.KibanaNoDataPage.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onDataViewCreated,\n  noDataConfig,\n  allowAdHocDataView,\n  showPlainSpinner,\n}",
+            "label": "{\n  onDataViewCreated,\n  noDataConfig,\n  allowAdHocDataView,\n  onTryESQL,\n  onESQLNavigationComplete,\n  showPlainSpinner,\n}",
             "description": [],
             "signature": [
               "KibanaNoDataPageProps"
             ],
-            "path": "packages/shared-ux/page/kibana_no_data/impl/src/kibana_no_data_page.tsx",
+            "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/impl/src/kibana_no_data_page.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -52,9 +52,9 @@
         "signature": [
           "({ children, ...dependencies }: React.PropsWithChildren<",
           "KibanaNoDataPageKibanaDependencies",
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/page/kibana_no_data/impl/src/services.tsx",
+        "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/impl/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -63,14 +63,14 @@
             "id": "def-public.KibanaNoDataPageKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  ...dependencies\n}",
+            "label": "{ children, ...dependencies }",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
               "KibanaNoDataPageKibanaDependencies",
               ">"
             ],
-            "path": "packages/shared-ux/page/kibana_no_data/impl/src/services.tsx",
+            "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/impl/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -91,9 +91,9 @@
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<",
           "KibanaNoDataPageServices",
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/page/kibana_no_data/impl/src/services.tsx",
+        "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/impl/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -109,7 +109,7 @@
               "KibanaNoDataPageServices",
               ">"
             ],
-            "path": "packages/shared-ux/page/kibana_no_data/impl/src/services.tsx",
+            "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/impl/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -140,7 +140,7 @@
           " & ",
           "RedirectAppLinksKibanaDependencies"
         ],
-        "path": "packages/shared-ux/page/kibana_no_data/types/index.d.ts",
+        "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -163,7 +163,7 @@
           " & ",
           "NoDataViewsPromptServices"
         ],
-        "path": "packages/shared-ux/page/kibana_no_data/types/index.d.ts",
+        "path": "src/platform/packages/private/shared-ux/page/kibana_no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

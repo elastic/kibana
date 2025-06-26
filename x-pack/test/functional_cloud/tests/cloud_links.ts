@@ -6,11 +6,14 @@
  */
 
 import expect from '@kbn/expect';
+import type { DarkModeValue as ColorMode } from '@kbn/user-profile-components';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
-  const PageObjects = getPageObjects(['common', 'header']);
+  const browser = getService('browser');
+  const PageObjects = getPageObjects(['common', 'header', 'userProfiles', 'settings']);
+  const testSubjects = getService('testSubjects');
 
   describe('Cloud Links integration', function () {
     before(async () => {
@@ -31,12 +34,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Guided onboarding', () => {
-      it('The button "Setup guides" is loaded', async () => {
-        expect(await find.byCssSelector('[data-test-subj="guideButtonRedirect"]')).to.not.be(null);
-        const cloudLink = await find.byLinkText('Setup guides');
-        expect(cloudLink).to.not.be(null);
-      });
-
       it('The help link "Setup guides" is added', async () => {
         await PageObjects.common.clickAndValidate(
           'helpMenuButton',
@@ -47,31 +44,77 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ).to.not.be(null);
       });
 
-      it('A button to open a modal to view the CloudID and ES endpoint is added', async () => {
+      it('Can open "Connection details" overlay with ES URL and Cloud ID', async () => {
         await PageObjects.common.clickAndValidate('helpMenuButton', 'connectionDetailsHelpLink');
         expect(await find.byCssSelector('[data-test-subj="connectionDetailsHelpLink"]')).to.not.be(
           null
         );
 
-        // Open the modal
+        // Open connection details overlay.
         await PageObjects.common.clickAndValidate(
           'connectionDetailsHelpLink',
           'deploymentDetailsModal'
         );
 
-        const esEndpointInput = await find.byCssSelector(
-          '[data-test-subj="deploymentDetailsEsEndpoint"]'
-        );
-        const esEndpointValue = await esEndpointInput.getAttribute('value');
-        expect(esEndpointValue).to.be('https://ES123abc.hello.com:443');
+        const esUrlRow = await find.byCssSelector('[data-test-subj="connectionDetailsEsUrl"]');
+        const esUrlText = await esUrlRow.findByTestSubject('copyText');
+        const esUrlTextValue = await esUrlText.getVisibleText();
+        expect(esUrlTextValue).to.be('https://ES123abc.hello.com:443');
 
-        const cloudIdInput = await find.byCssSelector(
-          '[data-test-subj="deploymentDetailsCloudID"]'
+        // Show Cloud ID text row.
+        await PageObjects.common.clickAndValidate(
+          'connectionDetailsCloudIdSwitch',
+          'connectionDetailsCloudId'
         );
-        const cloudIdInputValue = await cloudIdInput.getAttribute('value');
-        expect(cloudIdInputValue).to.be(
+
+        const cloudIdRow = await find.byCssSelector('[data-test-subj="connectionDetailsCloudId"]');
+        const cloudIdText = await cloudIdRow.findByTestSubject('copyText');
+        const cloudIdTextValue = await cloudIdText.getVisibleText();
+        expect(cloudIdTextValue).to.be(
           'ftr_fake_cloud_id:aGVsbG8uY29tOjQ0MyRFUzEyM2FiYyRrYm4xMjNhYmM='
         );
+      });
+
+      it('Can create an API key', async () => {
+        // Open connection details overlay.
+        await PageObjects.common.clickAndValidate('helpMenuButton', 'connectionDetailsHelpLink');
+        await PageObjects.common.clickAndValidate(
+          'connectionDetailsHelpLink',
+          'deploymentDetailsModal'
+        );
+
+        // Navigate to the "API key" tab.
+        await PageObjects.common.clickAndValidate(
+          'connectionDetailsTabBtn-apiKeys',
+          'connectionDetailsApiKeyForm'
+        );
+
+        // Select the input form.
+        const form = await find.byCssSelector(
+          '[data-test-subj="connectionDetailsApiKeyConfigForm"]'
+        );
+
+        // Select the name <input> in that form.
+        const nameInput = await form.findByCssSelector('[name="api-key-name"]');
+
+        // Enter a name for the API key.
+        const keyName = 'test-api-key-' + Date.now().toString(36);
+        await nameInput.type(keyName);
+
+        // Click the submit button.
+        const submitButton = await form.findByCssSelector('button[type="submit"]');
+        await submitButton.click();
+
+        // Wait for the success message to appear.
+        const successForm = await find.byCssSelector(
+          '[data-test-subj="connectionDetailsApiKeySuccessForm"]'
+        );
+
+        // Check that user is shown the API key value.
+        const apiKeyRow = await successForm.findByTestSubject('connectionDetailsApiKeyValueRow');
+        const apiKeyText = await apiKeyRow.findByTestSubject('copyText');
+        const apiKeyTextValue = await apiKeyText.getVisibleText();
+        expect(apiKeyTextValue.length).to.be.greaterThan(40);
       });
     });
 
@@ -100,10 +143,120 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(cloudLink).to.not.be(null);
       });
 
-      it('Shows the theme darkMode toggle', async () => {
-        await PageObjects.common.clickAndValidate('userMenuButton', 'darkModeToggle');
-        const darkModeSwitch = await find.byCssSelector('[data-test-subj="darkModeToggleSwitch"]');
-        expect(darkModeSwitch).to.not.be(null);
+      it('Shows the appearance button', async () => {
+        await PageObjects.common.clickAndValidate('userMenuButton', 'appearanceSelector');
+      });
+    });
+
+    describe('Appearance selector modal', () => {
+      const openAppearanceSelectorModal = async () => {
+        // Check if the user menu is open
+        await find.byCssSelector('[data-test-subj="userMenu"]', 1000).catch(async () => {
+          await testSubjects.click('userMenuButton');
+        });
+        await testSubjects.click('appearanceSelector');
+        const appearanceModal = await find.byCssSelector(
+          '[data-test-subj="appearanceModal"]',
+          1000
+        );
+        expect(appearanceModal).to.not.be(null);
+      };
+
+      const refreshPage = async () => {
+        await browser.refresh();
+        await testSubjects.exists('globalLoadingIndicator-hidden');
+      };
+
+      const changeColorMode = async (colorMode: ColorMode) => {
+        await openAppearanceSelectorModal();
+        await testSubjects.click(`colorModeKeyPadItem${colorMode}`);
+        await testSubjects.click('appearanceModalSaveButton');
+        await testSubjects.missingOrFail('appearanceModal');
+      };
+
+      after(async () => {
+        await changeColorMode('space_default');
+
+        await PageObjects.common.navigateToUrl('management', 'kibana/settings', {
+          basePath: '',
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+          shouldUseHashForSubUrl: false,
+        });
+
+        // Reset the space default dark mode to "disabled"
+        await PageObjects.settings.setAdvancedSettingsSelect('theme:darkMode', 'disabled');
+        {
+          const advancedSetting = await PageObjects.settings.getAdvancedSettings('theme:darkMode');
+          expect(advancedSetting).to.be('disabled');
+        }
+
+        await refreshPage();
+      });
+
+      it('has 4 color mode options to chose from', async () => {
+        await openAppearanceSelectorModal();
+        const colorModes: ColorMode[] = ['light', 'dark', 'system', 'space_default'];
+        for (const colorMode of colorModes) {
+          const themeModeButton = await testSubjects.find(`colorModeKeyPadItem${colorMode}`, 1000);
+          expect(themeModeButton).to.not.be(null);
+        }
+        await testSubjects.click('appearanceModalDiscardButton');
+      });
+
+      it('can change the color mode to dark', async () => {
+        await changeColorMode('dark');
+        await refreshPage();
+        const colorModeTag = await PageObjects.userProfiles.getThemeTag();
+        expect(colorModeTag).to.be('borealisdark');
+      });
+
+      it('can change the color mode to light', async () => {
+        await changeColorMode('light');
+        await refreshPage();
+        const colorModeTag = await PageObjects.userProfiles.getThemeTag();
+        expect(colorModeTag).to.be('borealislight');
+      });
+
+      it('can change the color mode to space_default', async () => {
+        // Let's make sure we are in light mode before changing to space_default
+        await changeColorMode('light');
+
+        {
+          await refreshPage();
+          const colorModeTag = await PageObjects.userProfiles.getThemeTag();
+          expect(colorModeTag).to.be('borealislight');
+        }
+
+        // Change the space default dark mode to "enabled"
+        await PageObjects.common.navigateToUrl('management', 'kibana/settings', {
+          basePath: '',
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+          shouldUseHashForSubUrl: false,
+        });
+
+        await PageObjects.settings.setAdvancedSettingsSelect('theme:darkMode', 'enabled');
+        {
+          const advancedSetting = await PageObjects.settings.getAdvancedSettings('theme:darkMode');
+          expect(advancedSetting).to.be('enabled');
+        }
+
+        // Make sure we are still in light mode as per the User profile
+        // even after setting the space default to "dark"
+        {
+          await refreshPage();
+          const colorModeTag = await PageObjects.userProfiles.getThemeTag();
+          expect(colorModeTag).to.be('borealislight');
+        }
+
+        await changeColorMode('space_default');
+
+        {
+          await refreshPage();
+          const colorModeTag = await PageObjects.userProfiles.getThemeTag();
+          expect(colorModeTag).to.be('borealisdark'); // We are now in dark mode
+        }
       });
     });
   });

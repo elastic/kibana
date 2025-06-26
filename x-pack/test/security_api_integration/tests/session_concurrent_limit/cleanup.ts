@@ -5,26 +5,30 @@
  * 2.0.
  */
 
-import { parse as parseCookie, Cookie } from 'tough-cookie';
-import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import expect from '@kbn/expect';
-import { adminTestUser } from '@kbn/test';
-import type { AuthenticationProvider } from '@kbn/security-plugin/common';
-import {
+import type {
   AggregateName,
   AggregationsMultiTermsAggregate,
   AggregationsMultiTermsBucket,
   AggregationsTopHitsAggregate,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import type { Cookie } from 'tough-cookie';
+import { parse as parseCookie } from 'tough-cookie';
+
+import expect from '@kbn/expect';
 import {
   getSAMLRequestId,
   getSAMLResponse,
 } from '@kbn/security-api-integration-helpers/saml/saml_tools';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { AuthenticationProvider } from '@kbn/security-plugin/common';
+import { adminTestUser } from '@kbn/test';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
+  const esSupertest = getService('esSupertest');
   const es = getService('es');
   const security = getService('security');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
@@ -150,6 +154,15 @@ export default function ({ getService }: FtrProviderContext) {
     });
   }
 
+  async function addESDebugLoggingSettings() {
+    const addLogging = {
+      persistent: {
+        'logger.org.elasticsearch.xpack.security.authc': 'debug',
+      },
+    };
+    await esSupertest.put('/_cluster/settings').send(addLogging).expect(200);
+  }
+
   describe('Session Concurrent Limit cleanup', () => {
     before(async () => {
       await security.user.create('anonymous_user', {
@@ -166,6 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
     beforeEach(async function () {
       this.timeout(120000);
       await es.cluster.health({ index: '.kibana_security_session*', wait_for_status: 'green' });
+      await addESDebugLoggingSettings();
       await esDeleteAllIndices('.kibana_security_session*');
     });
 
@@ -199,17 +213,35 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should properly clean up sessions that exceeded concurrent session limit even for multiple providers', async function () {
-      this.timeout(100000);
+      this.timeout(160000);
 
       log.debug(`Log in as ${testUser.username} and SAML user 3 times each with a 0.5s delay.`);
 
       const basicSessionCookieOne = await loginWithBasic(testUser);
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(1);
+      });
+
       const samlSessionCookieOne = await loginWithSAML();
-      await setTimeoutAsync(500);
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(2);
+      });
+
       const basicSessionCookieTwo = await loginWithBasic(testUser);
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(3);
+      });
+
       const samlSessionCookieTwo = await loginWithSAML();
-      await setTimeoutAsync(500);
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(4);
+      });
+
       const basicSessionCookieThree = await loginWithBasic(testUser);
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(5);
+      });
+
       const samlSessionCookieThree = await loginWithSAML();
 
       log.debug('Waiting for all sessions to be persisted...');
@@ -221,7 +253,7 @@ export default function ({ getService }: FtrProviderContext) {
       await runCleanupTaskSoon();
       log.debug('Waiting for cleanup job to run...');
       await retry.tryForTime(30000, async () => {
-        // The oldest session should have been removed, but the rest should still be valid.
+        // The oldest sessions should have been removed, but the rest should still be valid.
         expect(await getNumberOfSessionDocuments()).to.be(4);
       });
 
@@ -301,7 +333,8 @@ export default function ({ getService }: FtrProviderContext) {
       // 3. Remove `createdAt` field for the latest sessions emulating legacy sessions.
       await es.updateByQuery({
         index: '.kibana_security_session*',
-        body: { script: 'ctx._source.remove("createdAt")', query: { ids: { values: sessionIds } } },
+        script: 'ctx._source.remove("createdAt")',
+        query: { ids: { values: sessionIds } },
         refresh: true,
       });
 
@@ -386,8 +419,11 @@ export default function ({ getService }: FtrProviderContext) {
       log.debug(`Starting SAML handshake 3 times.`);
 
       const unauthenticatedSessionOne = await startSAMLHandshake();
+      await setTimeoutAsync(500);
       const unauthenticatedSessionTwo = await startSAMLHandshake();
+      await setTimeoutAsync(500);
       const unauthenticatedSessionThree = await startSAMLHandshake();
+      await setTimeoutAsync(500);
 
       log.debug('Waiting for all sessions to be persisted...');
       await retry.tryForTime(20000, async () => {

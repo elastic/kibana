@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -13,7 +14,7 @@ import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import '../jest_matchers';
 import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
-import { delay, parseLogFile } from '../test_utils';
+import { parseLogFile } from '../test_utils';
 import {
   getBaseMigratorParams,
   getSampleAType,
@@ -32,7 +33,6 @@ describe('ZDT with v2 compat - basic document migration', () => {
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 
   const createBaseline = async () => {
@@ -101,26 +101,6 @@ describe('ZDT with v2 compat - basic document migration', () => {
       },
     };
 
-    // legacyType -> we add a new migration
-
-    legacyType.mappings.properties = {
-      ...legacyType.mappings.properties,
-      newField: { type: 'text' },
-    };
-
-    legacyType.migrations = {
-      ...legacyType.migrations,
-      '8.0.0': (document) => {
-        return {
-          ...document,
-          attributes: {
-            ...document.attributes,
-            newField: `populated ${document.id}`,
-          },
-        };
-      },
-    };
-
     const { runMigrations, client, savedObjectsRepository } = await getKibanaMigratorTestKit({
       ...getBaseMigratorParams(),
       logFilePath,
@@ -145,7 +125,9 @@ describe('ZDT with v2 compat - basic document migration', () => {
 
     expect(mappingMeta.docVersions).toEqual({
       sample_a: '10.2.0',
-      legacy: '8.0.0',
+      // legacy types are defaulted to 10.0.0 since 8.9.0
+      // https://github.com/elastic/kibana/pull/158267
+      legacy: '10.0.0',
     });
 
     const { saved_objects: sampleADocs } = await savedObjectsRepository.find({ type: 'sample_a' });
@@ -198,32 +180,32 @@ describe('ZDT with v2 compat - basic document migration', () => {
       {
         id: 'legacy-0',
         type: 'legacy',
-        attributes: { someField: `legacy 0`, newField: `populated legacy-0` },
+        attributes: { someField: `legacy 0` },
       },
       {
         id: 'legacy-1',
         type: 'legacy',
-        attributes: { someField: `legacy 1`, newField: `populated legacy-1` },
+        attributes: { someField: `legacy 1` },
       },
       {
         id: 'legacy-2',
         type: 'legacy',
-        attributes: { someField: `legacy 2`, newField: `populated legacy-2` },
+        attributes: { someField: `legacy 2` },
       },
       {
         id: 'legacy-3',
         type: 'legacy',
-        attributes: { someField: `legacy 3`, newField: `populated legacy-3` },
+        attributes: { someField: `legacy 3` },
       },
       {
         id: 'legacy-4',
         type: 'legacy',
-        attributes: { someField: `legacy 4`, newField: `populated legacy-4` },
+        attributes: { someField: `legacy 4` },
       },
     ]);
 
     const records = await parseLogFile(logFilePath);
-    expect(records).toContainLogEntry('Starting to process 10 documents');
+    expect(records).toContainLogEntry('Starting to process 5 documents');
     expect(records).toContainLogEntry('Migration completed');
   });
 });

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -14,7 +15,7 @@ import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server
 import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
 import '../jest_matchers';
 import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
-import { delay, createType, parseLogFile } from '../test_utils';
+import { createType, parseLogFile } from '../test_utils';
 import { getBaseMigratorParams } from '../fixtures/zdt_base.fixtures';
 
 const logFilePath = Path.join(__dirname, 'v2_with_mv_same_stack_version.test.log');
@@ -31,7 +32,6 @@ describe('V2 algorithm - using model versions - upgrade without stack version in
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 
   const getTestModelVersionType = ({ beforeUpgrade }: { beforeUpgrade: boolean }) => {
@@ -39,7 +39,6 @@ describe('V2 algorithm - using model versions - upgrade without stack version in
       name: 'test_mv',
       namespaceType: 'single',
       migrations: {},
-      switchToModelVersionAt: '8.8.0',
       modelVersions: {
         1: {
           changes: [],
@@ -91,7 +90,7 @@ describe('V2 algorithm - using model versions - upgrade without stack version in
     const { runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
       ...getBaseMigratorParams({
         migrationAlgorithm: 'v2',
-        kibanaVersion: '8.8.0',
+        kibanaVersion: '8.18.0',
       }),
       types: [getTestModelVersionType({ beforeUpgrade: true })],
     });
@@ -115,16 +114,16 @@ describe('V2 algorithm - using model versions - upgrade without stack version in
     const modelVersionType = getTestModelVersionType({ beforeUpgrade: false });
 
     const { runMigrations, client, savedObjectsRepository } = await getKibanaMigratorTestKit({
-      ...getBaseMigratorParams({ migrationAlgorithm: 'v2', kibanaVersion: '8.8.0' }),
+      ...getBaseMigratorParams({ migrationAlgorithm: 'v2', kibanaVersion: '8.18.0' }),
       logFilePath,
       types: [modelVersionType],
     });
     await runMigrations();
 
     const indices = await client.indices.get({ index: '.kibana*' });
-    expect(Object.keys(indices)).toEqual(['.kibana_8.8.0_001']);
+    expect(Object.keys(indices)).toEqual(['.kibana_8.18.0_001']);
 
-    const index = indices['.kibana_8.8.0_001'];
+    const index = indices['.kibana_8.18.0_001'];
     const mappings = index.mappings ?? {};
     const mappingMeta = mappings._meta ?? {};
 
@@ -138,7 +137,9 @@ describe('V2 algorithm - using model versions - upgrade without stack version in
       indexTypesMap: {
         '.kibana': ['test_mv'],
       },
-      migrationMappingPropertyHashes: expect.any(Object),
+      mappingVersions: {
+        test_mv: '10.2.0',
+      },
     });
 
     const { saved_objects: testMvDocs } = await savedObjectsRepository.find({

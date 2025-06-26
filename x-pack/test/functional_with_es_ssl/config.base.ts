@@ -9,7 +9,7 @@ import Fs from 'fs';
 import { join } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test';
-import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';
+import { getAllExternalServiceSimulatorPaths } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/actions_simulations_utils';
 import { pageObjects } from './page_objects';
 
 // .server-log is specifically not enabled
@@ -79,14 +79,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--plugin-path=${join(__dirname, 'plugins/cases')}`,
         `--plugin-path=${join(
           __dirname,
-          '../alerting_api_integration/common/plugins/actions_simulators'
+          '../../platform/test/alerting_api_integration/common/plugins/actions_simulators'
         )}`,
         `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify([
-          'internalAlertsTable',
+          'stackAlertsPage',
           'ruleTagFilter',
           'ruleStatusFilter',
         ])}`,
-        `--xpack.alerting.rules.minimumScheduleInterval.value="2s"`,
+        `--xpack.alerting.rules.minimumScheduleInterval.value="5s"`,
         `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
         `--xpack.actions.preconfiguredAlertHistoryEsIndex=false`,
         `--xpack.actions.preconfigured=${JSON.stringify({
@@ -126,6 +126,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
               spaces: ['*'],
             },
           ],
+          elasticsearch: {
+            indices: [
+              {
+                names: ['.alerts-*'],
+                privileges: ['read'],
+              },
+            ],
+          },
         },
         only_actions_role: {
           kibana: [

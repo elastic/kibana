@@ -14,7 +14,7 @@ import { ALERTS_HISTOGRAM_SERIES, ALERT_RULE_NAME, MESSAGE } from '../../../scre
 import { TIMELINE_QUERY, TIMELINE_VIEW_IN_ANALYZER } from '../../../screens/timeline';
 import { selectAlertsHistogram } from '../../../tasks/alerts';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
-import { deleteTimelines } from '../../../tasks/api_calls/common';
+import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 describe('Ransomware Detection Alerts', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
@@ -26,7 +26,7 @@ describe('Ransomware Detection Alerts', { tags: ['@ess', '@serverless'] }, () =>
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'ransomware_detection');
+    cy.task('esArchiverUnload', { archiveName: 'ransomware_detection' });
   });
 
   describe('Ransomware in Alerts Page', () => {

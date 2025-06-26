@@ -25,7 +25,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     const header = getPageObject('header');
 
     before(async () => {
-      await svlCommonPage.login();
+      await svlCommonPage.loginWithPrivilegedRole();
     });
 
     beforeEach(async () => {
@@ -35,7 +35,6 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
     after(async () => {
       await svlCases.api.deleteAllCaseItems();
-      await svlCommonPage.forceLogout();
     });
 
     it('creates a case', async () => {
@@ -80,14 +79,14 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
           {
             key: 'valid_key_1',
             label: 'Summary',
-            type: CustomFieldTypes.TEXT,
-            required: true,
+            type: CustomFieldTypes.TEXT as const,
+            required: false,
           },
           {
             key: 'valid_key_2',
             label: 'Sync',
-            type: CustomFieldTypes.TOGGLE,
-            required: true,
+            type: CustomFieldTypes.TOGGLE as const,
+            required: false,
           },
         ];
 
@@ -97,7 +96,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         await cases.create.openCreateCasePage();
 
         // verify custom fields on create case page
-        await testSubjects.existOrFail('create-case-custom-fields');
+        await testSubjects.existOrFail('caseCustomFields');
 
         await cases.create.setTitle(caseTitle);
         await cases.create.setDescription('this is a test description');

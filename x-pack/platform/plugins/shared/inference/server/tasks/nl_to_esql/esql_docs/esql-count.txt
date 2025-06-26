@@ -1,0 +1,62 @@
+## COUNT
+
+The `COUNT` function returns the total number of input values. If no field is specified, it counts the number of rows.
+
+## Syntax
+
+`COUNT(field)`
+
+### Parameters
+
+#### `field`
+
+An expression that outputs values to be counted. If omitted, the function is equivalent to `COUNT(*)`, which counts the number of rows.
+
+## Examples
+
+### Count specific field values
+
+```esql
+FROM employees
+| STATS COUNT(height)
+```
+
+Count the number of non-null values in the `height` field.
+
+### Count the number of rows
+
+```esql
+FROM employees
+| STATS count = COUNT(*) BY languages
+| SORT languages DESC
+```
+
+Count the total number of rows grouped by the `languages` field and sort the results in descending order.
+
+### Count values using inline functions
+
+```esql
+ROW words="foo;bar;baz;qux;quux;foo"
+| STATS word_count = COUNT(SPLIT(words, ";"))
+```
+
+Count the number of elements in a string split by the `;` delimiter.
+
+### Count values based on a condition
+
+```esql
+ROW n=1
+| WHERE n < 0
+| STATS COUNT(n)
+```
+
+Count the number of rows where the value of `n` is less than 0.
+
+### Count based on two different expressions
+
+```esql
+ROW n=1
+| STATS COUNT(n > 0 OR NULL), COUNT(n < 0 OR NULL)
+```
+
+Count the number of rows where `n > 0` and `n < 0` separately.

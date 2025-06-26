@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DetailPanelCopy component When DetailPanelCopy is mounted renders DetailPanelCopy correctly 1`] = `
+<div>
+  <div
+    class="euiText emotion-euiText-s-DetailPanelListItem"
+    data-test-subj="sessionView:detail-panel-list-item"
+  >
+    <span
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+    >
+      <span>
+        copy component test
+      </span>
+    </span>
+  </div>
+</div>
+`;

@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { LoginState } from '@kbn/security-plugin/common/login_state';
-import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import { KNOWN_SERVERLESS_ROLE_DEFINITIONS } from '@kbn/security-solution-plugin/common/test';
 import { LOGOUT_URL } from '../urls/navigation';
 import {
   CLOUD_SERVERLESS,
+  DEFAULT_SERVERLESS_ROLE,
   ELASTICSEARCH_PASSWORD,
   ELASTICSEARCH_USERNAME,
   IS_SERVERLESS,
@@ -26,7 +26,7 @@ export const defaultUser: User = {
   password: Cypress.env(ELASTICSEARCH_PASSWORD),
 };
 
-export const getEnvAuth = (role: SecurityRoleName): User => {
+export const getEnvAuth = (role: string): User => {
   if (
     (Cypress.env(IS_SERVERLESS) || Cypress.env(CLOUD_SERVERLESS)) &&
     !(role in KNOWN_SERVERLESS_ROLE_DEFINITIONS)
@@ -40,19 +40,33 @@ export const getEnvAuth = (role: SecurityRoleName): User => {
   return user;
 };
 
-export const login = (role?: SecurityRoleName): void => {
+export const login = (role?: string): void => {
   let testRole = '';
 
   if (Cypress.env(IS_SERVERLESS)) {
     if (!role) {
-      testRole = Cypress.env(CLOUD_SERVERLESS) ? 'admin' : 'system_indices_superuser';
+      testRole = DEFAULT_SERVERLESS_ROLE;
     } else {
       testRole = role;
     }
+
     cy.task('getSessionCookie', testRole).then((cookie) => {
-      cy.setCookie('sid', cookie as string);
+      cy.setCookie('sid', cookie as string, {
+        // "hostOnly: true" sets the cookie without a domain.
+        // This makes cookie available only for the current host (not subdomains).
+        // It's needed to match the Serverless backend behavior where cookies are set without a domain.
+        // More info: https://github.com/elastic/kibana/issues/221741
+        hostOnly: true,
+      });
     });
+
     cy.visit('/');
+
+    cy.getCookies().then((cookies) => {
+      // Ensure that there's only a single session cookie named 'sid'.
+      const sessionCookies = cookies.filter((cookie) => cookie.name === 'sid');
+      expect(sessionCookies).to.have.length(1);
+    });
   } else {
     const user = role ? getEnvAuth(role) : defaultUser;
     loginWithUser(user);

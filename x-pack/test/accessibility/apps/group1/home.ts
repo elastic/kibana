@@ -13,7 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
 
-  describe('Kibana Home Accessibility', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/216219
+  describe.skip('Kibana Home Accessibility', () => {
     before(async () => {
       await common.navigateToApp('home');
     });
@@ -23,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Kibana overview page meets a11y requirements ', async () => {
-      await testSubjects.click('homSolutionPanel homSolutionPanel_kibana');
+      await testSubjects.click('homeSolutionPanel homeSolutionPanel_kibana');
       await a11y.testAppSnapshot();
     });
 
@@ -48,19 +49,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('Enterprise search overview page meets a11y requirements ', async () => {
       await home.clickGoHome();
-      await testSubjects.click('homSolutionPanel homSolutionPanel_enterpriseSearch');
+      await testSubjects.click('homeSolutionPanel homeSolutionPanel_enterpriseSearch');
       await a11y.testAppSnapshot();
     });
 
     it('Observability overview page meets a11y requirements ', async () => {
       await home.clickGoHome();
-      await testSubjects.click('homSolutionPanel homSolutionPanel_observability');
+      await testSubjects.click('homeSolutionPanel homeSolutionPanel_observability');
       await a11y.testAppSnapshot();
     });
 
     it('Security overview page meets a11y requirements ', async () => {
       await home.clickGoHome();
-      await testSubjects.click('homSolutionPanel homSolutionPanel_securitySolution');
+      await testSubjects.click('homeSolutionPanel homeSolutionPanel_securitySolution');
       await a11y.testAppSnapshot();
     });
 

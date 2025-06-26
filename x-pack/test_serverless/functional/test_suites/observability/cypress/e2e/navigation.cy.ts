@@ -27,7 +27,7 @@ describe.skip('Serverless', () => {
     cy.loginAsElasticUser();
 
     cy.contains('Logs Explorer').click();
-    cy.url().should('include', '/app/observability-log-explorer');
+    cy.url().should('include', '/app/observability-logs-explorer');
 
     cy.contains('Dashboards').click();
     cy.url().should('include', '/app/dashboards');
@@ -151,16 +151,6 @@ describe.skip('Serverless', () => {
   it('sets traces nav item as active', () => {
     cy.visitKibana('/app/apm/traces/explorer/waterfall');
 
-    cy.getByTestSubj('nav-item-id-observability_project_nav.apm').should(
-      'have.class',
-      'euiSideNavItemButton-isOpen'
-    );
-    cy.getByTestSubj('nav-item-id-observability_project_nav.apm.apm:traces').should(
-      'have.class',
-      'euiSideNavItemButton-isSelected'
-    );
-
-    cy.visitKibana('/app/apm/traces/explorer/critical_path');
     cy.getByTestSubj('nav-item-id-observability_project_nav.apm').should(
       'have.class',
       'euiSideNavItemButton-isOpen'

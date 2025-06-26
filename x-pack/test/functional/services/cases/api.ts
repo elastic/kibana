@@ -21,12 +21,12 @@ import {
   getCase,
   createConfiguration,
   getConfigurationRequest,
-} from '../../../cases_api_integration/common/lib/api';
+} from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
 import {
   loginUsers,
   suggestUserProfiles,
-} from '../../../cases_api_integration/common/lib/api/user_profiles';
-import { User } from '../../../cases_api_integration/common/lib/authentication/types';
+} from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api/user_profiles';
+import { User } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/authentication/types';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateRandomCaseWithoutConnector } from './helpers';
@@ -156,6 +156,24 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
         getConfigurationRequest({
           overrides: {
             customFields,
+            owner,
+          },
+        })
+      );
+    },
+
+    async createConfigWithTemplates({
+      templates,
+      owner,
+    }: {
+      templates: Configuration['templates'];
+      owner: string;
+    }) {
+      return createConfiguration(
+        kbnSupertest,
+        getConfigurationRequest({
+          overrides: {
+            templates,
             owner,
           },
         })

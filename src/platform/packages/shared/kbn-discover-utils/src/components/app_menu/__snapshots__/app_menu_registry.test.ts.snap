@@ -1,0 +1,184 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AppMenuRegistry should allow to override actions under submenu 1`] = `
+Array [
+  Object {
+    "controlProps": Object {
+      "label": "Action 2",
+      "onClick": [MockFunction],
+    },
+    "id": "action-2",
+    "order": 200,
+    "type": "secondary",
+  },
+  Object {
+    "actions": Array [
+      Object {
+        "controlProps": Object {
+          "label": "Action 3.2",
+          "onClick": [MockFunction],
+        },
+        "id": "action-3-2",
+        "order": 200,
+        "type": "secondary",
+      },
+      Object {
+        "controlProps": Object {
+          "label": "Action Custom",
+          "onClick": [MockFunction],
+        },
+        "id": "action-3-1",
+        "type": "custom",
+      },
+    ],
+    "id": "action-3",
+    "label": "Action 3",
+    "order": 300,
+    "type": "secondary",
+  },
+  Object {
+    "controlProps": Object {
+      "iconType": "bell",
+      "label": "Action 1",
+      "onClick": [MockFunction],
+    },
+    "id": "action-1",
+    "order": 100,
+    "type": "primary",
+  },
+]
+`;
+
+exports[`AppMenuRegistry should allow to register custom actions 1`] = `
+Array [
+  Object {
+    "controlProps": Object {
+      "label": "Action Custom",
+      "onClick": [MockFunction],
+    },
+    "id": "action-custom",
+    "type": "custom",
+  },
+  Object {
+    "actions": Array [
+      Object {
+        "controlProps": Object {
+          "label": "Action Custom Submenu 1",
+          "onClick": [MockFunction],
+        },
+        "id": "action-custom-submenu-1",
+        "type": "custom",
+      },
+    ],
+    "id": "action-custom-submenu",
+    "label": "Action Custom Submenu",
+    "type": "custom",
+  },
+  Object {
+    "controlProps": Object {
+      "label": "Action 2",
+      "onClick": [MockFunction],
+    },
+    "id": "action-2",
+    "order": 200,
+    "type": "secondary",
+  },
+  Object {
+    "actions": Array [
+      Object {
+        "controlProps": Object {
+          "iconType": "heart",
+          "label": "Action 3.1",
+          "onClick": [MockFunction],
+        },
+        "id": "action-3-1",
+        "order": 100,
+        "type": "secondary",
+      },
+      Object {
+        "controlProps": Object {
+          "label": "Action 3.2",
+          "onClick": [MockFunction],
+        },
+        "id": "action-3-2",
+        "order": 200,
+        "type": "secondary",
+      },
+    ],
+    "id": "action-3",
+    "label": "Action 3",
+    "order": 300,
+    "type": "secondary",
+  },
+  Object {
+    "controlProps": Object {
+      "iconType": "bell",
+      "label": "Action 1",
+      "onClick": [MockFunction],
+    },
+    "id": "action-1",
+    "order": 100,
+    "type": "primary",
+  },
+]
+`;
+
+exports[`AppMenuRegistry should allow to register custom actions under submenu 1`] = `
+Array [
+  Object {
+    "controlProps": Object {
+      "label": "Action 2",
+      "onClick": [MockFunction],
+    },
+    "id": "action-2",
+    "order": 200,
+    "type": "secondary",
+  },
+  Object {
+    "actions": Array [
+      Object {
+        "controlProps": Object {
+          "iconType": "heart",
+          "label": "Action 3.1",
+          "onClick": [MockFunction],
+        },
+        "id": "action-3-1",
+        "order": 100,
+        "type": "secondary",
+      },
+      Object {
+        "controlProps": Object {
+          "label": "Action Custom",
+          "onClick": [MockFunction],
+        },
+        "id": "action-custom",
+        "order": 101,
+        "type": "custom",
+      },
+      Object {
+        "controlProps": Object {
+          "label": "Action 3.2",
+          "onClick": [MockFunction],
+        },
+        "id": "action-3-2",
+        "order": 200,
+        "type": "secondary",
+      },
+    ],
+    "id": "action-3",
+    "label": "Action 3",
+    "order": 300,
+    "type": "secondary",
+  },
+  Object {
+    "controlProps": Object {
+      "iconType": "bell",
+      "label": "Action 1",
+      "onClick": [MockFunction],
+    },
+    "id": "action-1",
+    "order": 100,
+    "type": "primary",
+  },
+]
+`;

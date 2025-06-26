@@ -8,7 +8,7 @@
 import {
   ExternalServiceSimulator,
   getExternalServiceSimulatorPath,
-} from '@kbn/actions-simulators-plugin/server/plugin';
+} from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/actions_simulations_utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -18,6 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const actions = getService('actions');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
+  const toasts = getService('toasts');
+
   let simulatorUrl: string;
   let editSimulatorUrl: string;
 
@@ -44,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('secrets.token-input', 'tester');
       await commonScreenshots.takeScreenshot('tines-connector', screenshotDirectories);
       await testSubjects.click('create-connector-flyout-save-test-btn');
-      await pageObjects.common.clearAllToasts();
+      await toasts.dismissAll();
       await commonScreenshots.takeScreenshot('tines-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });

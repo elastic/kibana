@@ -15,13 +15,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Partial results example', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('searchExamples');
       await testSubjects.click('/search');
-    });
-
-    after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
     });
 
     it('should update a progress bar', async () => {
@@ -34,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('requestFibonacci');
 
       await retry.waitFor('update progress bar', async () => {
-        const newValue = await progressBar.getAttribute('value');
+        const newValue = (await progressBar.getAttribute('value')) ?? '';
         return parseFloat(newValue) > 0;
       });
     });

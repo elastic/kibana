@@ -11,6 +11,5 @@ import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB } from '../../screens/expandable_f
  * Open the Insights tab in the document details expandable flyout left section
  */
 export const openInsightsTab = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB).scrollIntoView();
   cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB).click();
 };

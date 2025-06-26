@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { User } from '../authentication/types';
-import { GetService, AlertDef } from '../../types';
+import type { User } from '../authentication/types';
+import type { GetService, AlertDef } from '../../types';
 import { getSpaceUrlPrefix } from '../authentication/spaces';
 
 export const createAlert = async (
@@ -17,7 +17,7 @@ export const createAlert = async (
 ) => {
   const supertest = getService('supertestWithoutAuth');
   const { body: response, status } = await supertest
-    .post(`${getSpaceUrlPrefix(spaceId)}/api/alerts/alert`)
+    .post(`${getSpaceUrlPrefix(spaceId)}/api/alerting/rule`)
     .auth(user.username, user.password)
     .send(alertDef)
     .set('kbn-xsrf', 'foo');

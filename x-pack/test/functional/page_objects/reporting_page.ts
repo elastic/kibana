@@ -11,7 +11,8 @@ import path from 'path';
 import type SuperTest from 'supertest';
 import { format as formatUrl } from 'url';
 import { promisify } from 'util';
-import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-plugin/common/constants';
+
+import { INTERNAL_ROUTES, REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
 import { FtrService } from '../ftr_provider_context';
 
 const writeFileAsync = promisify(fs.writeFile);
@@ -25,7 +26,7 @@ export class ReportingPageObject extends FtrService {
   private readonly security = this.ctx.getService('security');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
-  private readonly share = this.ctx.getPageObject('share');
+  private readonly exports = this.ctx.getPageObject('exports');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
 
   async forceSharedItemsContainerSize({ width }: { width: number }) {
@@ -34,6 +35,30 @@ export class ReportingPageObject extends FtrService {
       el.style.flex="none";
       el.style.width="${width}px";
     `);
+  }
+
+  async getReportJobId(timeout: number): Promise<string> {
+    this.log.debug('getReportJobId');
+
+    try {
+      // get the report job id from a data attribute on the download button
+      const jobIdElement = await this.find.byCssSelector('[data-test-jobId]', timeout);
+      if (!jobIdElement) {
+        throw new Error('Failed to find report job id.');
+      }
+      const jobId = await jobIdElement.getAttribute('data-test-jobId');
+      if (!jobId) {
+        throw new Error('Failed to find report job id.');
+      }
+      return jobId;
+    } catch (err) {
+      let errorText = 'Unknown error';
+      if (await this.find.existsByCssSelector('[data-test-errorText]')) {
+        const errorTextEl = await this.find.byCssSelector('[data-test-errorText]');
+        errorText = (await errorTextEl.getAttribute('data-test-errorText')) ?? errorText;
+      }
+      throw new Error(`Test report failed: ${errorText}: ${err}`, { cause: err });
+    }
   }
 
   async getReportURL(timeout: number) {
@@ -49,10 +74,12 @@ export class ReportingPageObject extends FtrService {
 
       return url;
     } catch (err) {
-      const errorTextEl = await this.find.byCssSelector('[data-test-errorText]');
-      const errorText = await errorTextEl.getAttribute('data-test-errorText');
-      const newError = new Error(`Test report failed: ${errorText}: ${err}`);
-      throw newError;
+      let errorText = 'Unknown error';
+      if (await this.find.existsByCssSelector('[data-test-errorText]')) {
+        const errorTextEl = await this.find.byCssSelector('[data-test-errorText]');
+        errorText = (await errorTextEl.getAttribute('data-test-errorText')) ?? errorText;
+      }
+      throw new Error(`Test report failed: ${errorText}: ${err}`, { cause: err });
     }
   }
 
@@ -73,34 +100,46 @@ export class ReportingPageObject extends FtrService {
     });
     const urlWithoutBase = fullUrl.replace(baseURL, '');
     const res = await this.security.testUserSupertest.get(urlWithoutBase);
-    return res;
+    return res ?? '';
   }
 
-  async getRawPdfReportData(url: string): Promise<Buffer> {
-    this.log.debug(`getRawPdfReportData for ${url}`);
+  async getReportInfo(jobId: string) {
+    this.log.debug(`getReportInfo for ${jobId}`);
+    const response = await this.getResponse(INTERNAL_ROUTES.JOBS.INFO_PREFIX + `/${jobId}`);
+    return response.body;
+  }
+
+  async getRawReportData(url: string): Promise<Buffer> {
+    this.log.debug(`getRawReportData for ${url}`);
     const response = await this.getResponse(url);
     expect(response.body).to.be.a(Buffer);
     return response.body as Buffer;
   }
 
-  async openCsvReportingPanel() {
-    this.log.debug('openCsvReportingPanel');
-    await this.share.openShareMenuItem('CSV Reports');
+  async openShareMenuItem(itemTitle: string) {
+    this.log.debug(`openShareMenuItem title:${itemTitle}`);
+    const isShareMenuOpen = await this.testSubjects.exists('shareContextMenu');
+    if (!isShareMenuOpen) {
+      await this.testSubjects.click('shareTopNavButton');
+    } else {
+      // there is no easy way to ensure the menu is at the top level
+      // so just close the existing menu
+      await this.testSubjects.click('shareTopNavButton');
+      // and then re-open the menu
+      await this.testSubjects.click('shareTopNavButton');
+    }
+    const menuPanel = await this.find.byCssSelector('div.euiContextMenuPanel');
+    await this.testSubjects.click(`sharePanel-${itemTitle.replace(' ', '')}`);
+    await this.testSubjects.waitForDeleted(menuPanel);
   }
 
-  async openPdfReportingPanel() {
-    this.log.debug('openPdfReportingPanel');
-    await this.share.openShareMenuItem('PDF Reports');
+  async openExportPopover() {
+    this.log.debug('open export popover');
+    await this.exports.clickExportTopNavButton();
   }
 
-  async openPngReportingPanel() {
-    this.log.debug('openPngReportingPanel');
-    await this.share.openShareMenuItem('PNG Reports');
-  }
-
-  async clearToastNotifications() {
-    const toasts = await this.testSubjects.findAll('toastCloseButton');
-    await Promise.all(toasts.map(async (t) => await t.click()));
+  async selectExportItem(label: string) {
+    await this.exports.clickPopoverItem(label);
   }
 
   async getQueueReportError() {
@@ -199,7 +238,7 @@ export class ReportingPageObject extends FtrService {
       const titleColumn = await row.findByTestSubject('reportingListItemObjectTitle');
       const title = await titleColumn.getVisibleText();
       if (title === reportTitle) {
-        titleColumn.click();
+        await titleColumn.click();
         return;
       }
     }
@@ -219,5 +258,9 @@ export class ReportingPageObject extends FtrService {
     const fullPath = path.resolve(baselineFolder, `${fileName}.${reportExt}`);
     this.log.debug(`baselineReportPath (${fullPath})`);
     return fullPath;
+  }
+
+  async copyReportingPOSTURLValueToClipboard() {
+    await this.exports.copyExportAssetText();
   }
 }

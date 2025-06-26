@@ -6,28 +6,26 @@
  */
 import { Client } from '@elastic/elasticsearch';
 import {
-  SLO_DESTINATION_INDEX_PATTERN,
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-} from '@kbn/observability-plugin/common/slo/constants';
+  SLI_DESTINATION_INDEX_PATTERN,
+  SUMMARY_DESTINATION_INDEX_PATTERN,
+} from '@kbn/slo-plugin/common/constants';
 
 export class SloEsClient {
   constructor(private esClient: Client) {}
 
   public async getSLOSummaryDataById(id: string) {
     return await this.esClient.search({
-      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: { 'slo.id': id },
-              },
-              {
-                term: { isTempDoc: false },
-              },
-            ],
-          },
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
+      query: {
+        bool: {
+          filter: [
+            {
+              term: { 'slo.id': id },
+            },
+            {
+              term: { isTempDoc: false },
+            },
+          ],
         },
       },
     });
@@ -35,16 +33,14 @@ export class SloEsClient {
 
   public async getSLORollupDataById(id: string) {
     return await this.esClient.search({
-      index: SLO_DESTINATION_INDEX_PATTERN,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: { 'slo.id': id },
-              },
-            ],
-          },
+      index: SLI_DESTINATION_INDEX_PATTERN,
+      query: {
+        bool: {
+          filter: [
+            {
+              term: { 'slo.id': id },
+            },
+          ],
         },
       },
     });

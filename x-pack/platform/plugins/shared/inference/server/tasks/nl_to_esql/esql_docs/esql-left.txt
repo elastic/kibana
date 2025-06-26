@@ -1,0 +1,29 @@
+# LEFT
+
+Returns a substring that extracts a specified number of characters from the beginning of a string.
+
+## Syntax
+
+`LEFT(string, length)`
+
+### Parameters
+
+#### `string`
+
+The string from which to return a substring.
+
+#### `length`
+
+The number of characters to return.
+
+## Examples
+
+```esql
+FROM employees
+| KEEP last_name
+| EVAL left = LEFT(last_name, 3)
+| SORT last_name ASC
+| LIMIT 5
+```
+
+Extracts the first three characters from the `last_name` column, sorts the results alphabetically, and limits the output to the first five rows.

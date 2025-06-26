@@ -1,0 +1,96 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConfirmDeleteModal component confirms delete for multiple pipelines 1`] = `
+<EuiConfirmModal
+  aria-labelledby="generated-id"
+  buttonColor="danger"
+  cancelButtonText={
+    <Memo(MemoizedFormattedMessage)
+      defaultMessage="Cancel"
+      id="xpack.logstash.confirmDeleteModal.cancelButtonLabel"
+    />
+  }
+  confirmButtonText={
+    <Memo(MemoizedFormattedMessage)
+      defaultMessage="Delete {numPipelinesSelected} pipelines"
+      id="xpack.logstash.confirmDeleteModal.deletedPipelinesConfirmButtonLabel"
+      values={
+        Object {
+          "numPipelinesSelected": 2,
+        }
+      }
+    />
+  }
+  defaultFocusedButton="cancel"
+  onCancel={[MockFunction]}
+  onConfirm={[MockFunction]}
+  title={
+    <Memo(MemoizedFormattedMessage)
+      defaultMessage="Delete {numPipelinesSelected} pipelines"
+      id="xpack.logstash.confirmDeleteModal.deletedPipelinesTitle"
+      values={
+        Object {
+          "numPipelinesSelected": 2,
+        }
+      }
+    />
+  }
+  titleProps={
+    Object {
+      "id": "generated-id",
+    }
+  }
+>
+  <p>
+    <MemoizedFormattedMessage
+      defaultMessage="You cannot recover deleted pipelines."
+      id="xpack.logstash.confirmDeleteModal.deletedPipelinesWarningMessage"
+    />
+  </p>
+</EuiConfirmModal>
+`;
+
+exports[`ConfirmDeleteModal component confirms delete for single pipeline 1`] = `
+<EuiConfirmModal
+  aria-labelledby="generated-id"
+  buttonColor="danger"
+  cancelButtonText={
+    <Memo(MemoizedFormattedMessage)
+      defaultMessage="Cancel"
+      id="xpack.logstash.confirmDeleteModal.cancelButtonLabel"
+    />
+  }
+  confirmButtonText={
+    <Memo(MemoizedFormattedMessage)
+      defaultMessage="Delete pipeline"
+      id="xpack.logstash.confirmDeleteModal.deletedPipelineConfirmButtonLabel"
+    />
+  }
+  defaultFocusedButton="cancel"
+  onCancel={[MockFunction]}
+  onConfirm={[MockFunction]}
+  title={
+    <Memo(MemoizedFormattedMessage)
+      defaultMessage="Delete pipeline \\"{id}\\""
+      id="xpack.logstash.confirmDeleteModal.deletedPipelineTitle"
+      values={
+        Object {
+          "id": "testId",
+        }
+      }
+    />
+  }
+  titleProps={
+    Object {
+      "id": "generated-id",
+    }
+  }
+>
+  <p>
+    <MemoizedFormattedMessage
+      defaultMessage="You cannot recover a deleted pipeline"
+      id="xpack.logstash.confirmDeleteModal.deletedPipelineWarningMessage"
+    />
+  </p>
+</EuiConfirmModal>
+`;

@@ -7,8 +7,11 @@
 
 import { FullAgentPolicy } from '@kbn/fleet-plugin/common/types';
 import { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services/artifacts/types';
-import { InternalManifestSchema } from '@kbn/security-solution-plugin/server/endpoint/schemas/artifacts';
+import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
+import { InternalUnifiedManifestBaseSchema } from '@kbn/security-solution-plugin/server/endpoint/schemas/artifacts';
 import { TranslatedExceptionListItem } from '@kbn/security-solution-plugin/server/endpoint/schemas/artifacts/lists';
+import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 export interface AgentPolicyResponseType {
   _index: string;
@@ -17,12 +20,12 @@ export interface AgentPolicyResponseType {
   _source: { data: FullAgentPolicy };
 }
 
-export interface InternalManifestSchemaResponseType {
+export interface InternalUnifiedManifestSchemaResponseType {
   _index: string;
   _id: string;
   _score: number;
   _source: {
-    'endpoint:user-artifact-manifest': InternalManifestSchema;
+    'endpoint:unified-user-artifact-manifest': InternalUnifiedManifestBaseSchema;
   };
 }
 
@@ -119,6 +122,19 @@ export const getArtifactsListTestsData = () => [
       confirmSelector: 'trustedAppsListPage-deleteModal-submitButton',
       card: 'trustedAppsListPage-card',
     },
+    listId: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+    createBody: {
+      entries: [
+        {
+          type: 'match',
+          field: 'process.hash.sha256',
+          value: 'a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476',
+          operator: 'included',
+        },
+      ],
+      tags: [GLOBAL_ARTIFACT_TAG],
+      os_types: ['windows'],
+    } as Partial<CreateExceptionListItemSchema>,
     urlPath: 'trusted_apps',
     pageObject: 'trustedApps',
     fleetArtifact: {
@@ -127,7 +143,7 @@ export const getArtifactsListTestsData = () => [
       getExpectedUpdatedtArtifactWhenCreate: (): ArtifactElasticsearchProperties => ({
         type: 'trustlist',
         identifier: 'endpoint-trustlist-windows-v1',
-        body: 'eJxVjEEKwjAQRe+StZSkadO0VxGR6cyEBmIbklSU4t2N4kb+7r3HPwSvJXnOYjofojwji0lkf4uBxenPOc+BqoxpQ865WSAvTV6g7U0tt8gJypZq4FcMOzFV+vvjB2C5IuQvvEPYPxQ6PUiU6Kwy1qCczWgcmNYoHEmzJKsk8CA7mK2WyuqRnKOeeqVa1w1GvC51bz2HPRA=',
+        body: 'eJxVzNEKgyAUgOF3OdcxNMvMVxkxTp4jCa5EbWxE7z422MVuvx/+A3itOXABez2gvhKDhRLuKTI0f80HjgQWUt4cl3JZsCyXsmDba2hgS5yxbhkshNXFnZig+f34ia7eHJYvPjDuH8VODcIJ543URjsx61F71K2WbiTFgowUyIPocDZKSKNG8p566qVsfTdoOKdzOt89hz0Q',
         package_name: 'endpoint',
         created: '2000-01-01T00:00:00.000Z',
         relative_url:
@@ -136,8 +152,8 @@ export const getArtifactsListTestsData = () => [
         decoded_size: 193,
         decoded_sha256: '016bec11c5b1d6f8609fd3525202aa12baf0132484abf368d5011100d5ec1ec4',
         encryption_algorithm: 'none',
-        encoded_sha256: 'ce6a4e9bf54d3d70b2bdcc8ca0b28ffd7f16fa42412bccb6d7399c0250442c13',
-        encoded_size: 152,
+        encoded_sha256: '814aabc04d674ccdeb7c1acfe74120cb52ad1392d6924a7d813e08f8b6cd0f0f',
+        encoded_size: 153,
       }),
       getExpectedUpdatedArtifactBodyWhenCreate: (): ArtifactBodyType => ({
         entries: [
@@ -157,7 +173,7 @@ export const getArtifactsListTestsData = () => [
       getExpectedUpdatedArtifactWhenUpdate: (): ArtifactElasticsearchProperties => ({
         type: 'trustlist',
         identifier: 'endpoint-trustlist-windows-v1',
-        body: 'eJx9jEsKAjEQRK8ivR5cuMwBvIQj0nZKCPQkIR8ZGby7HRHBjfSq6r2ujRBbCajkThu1RwY5qmHJCpp+2C1AvcFckqDWPVZIb3x9iymjcEvFeIii3cNb+5nDytIuwhVqj9bfWfsA4ua5cPRpOSb1KN8UFGN/2v0zDkOh59nuBSaWRvA=',
+        body: 'eJx9jEEKwjAUBa8ibx1cuMwBvIQtEpMnBH6TkJ9KpeTuEkHBjcthhtnB1Gqkwl52tGchLDQuRQjz4+6REmBRavZUPXKjX5u7vcNcWF3LFRYxeVkDA8xnx835dvVOKVSFwcPJOoS301RdCnk5ZwmsX4rC8TeHf8VpJOhzn/sLJpZG8A==',
         package_name: 'endpoint',
         created: '2000-01-01T00:00:00.000Z',
         relative_url:
@@ -166,8 +182,8 @@ export const getArtifactsListTestsData = () => [
         decoded_size: 198,
         decoded_sha256: 'ac2bf74a73885f9a5a1700c328bf1a5a8f6cb72f2465a575335ea99dac0d4c10',
         encryption_algorithm: 'none',
-        encoded_sha256: '90baa7e228dbffc00864707d2df784593a754466f3903841f40cbab9dc015177',
-        encoded_size: 131,
+        encoded_sha256: '28d81b2787cea23fcb88d02b1c09940858963a62c60cdfd7a2b7564cfc251708',
+        encoded_size: 130,
       }),
       getExpectedUpdatedArtifactBodyWhenUpdate: (): ArtifactBodyType => ({
         entries: [
@@ -206,8 +222,9 @@ export const getArtifactsListTestsData = () => [
           selector: 'fieldAutocompleteComboBox',
         },
         {
-          type: 'customClick',
-          selector: 'button[title="agent.ephemeral_id"]',
+          type: 'input',
+          selector: 'fieldAutocompleteComboBox',
+          value: 'agent.ephemeral_id',
         },
         {
           type: 'click',
@@ -248,10 +265,6 @@ export const getArtifactsListTestsData = () => [
           value: 'agent.id',
         },
         {
-          type: 'customClick',
-          selector: 'button[title="agent.id"]',
-        },
-        {
           type: 'input',
           selector: 'valuesAutocompleteMatch',
           value: 'test super large value',
@@ -281,6 +294,19 @@ export const getArtifactsListTestsData = () => [
       confirmSelector: 'EventFiltersListPage-deleteModal-submitButton',
       card: 'EventFiltersListPage-card',
     },
+    listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+    createBody: {
+      entries: [
+        {
+          field: 'agent.ephemeral_id',
+          value: 'endpoint',
+          type: 'match',
+          operator: 'included',
+        },
+      ],
+      tags: [GLOBAL_ARTIFACT_TAG],
+      os_types: ['windows'],
+    } as Partial<CreateExceptionListItemSchema>,
     urlPath: 'event_filters',
     pageObject: 'eventFilters',
     fleetArtifact: {
@@ -289,7 +315,7 @@ export const getArtifactsListTestsData = () => [
       getExpectedUpdatedtArtifactWhenCreate: (): ArtifactElasticsearchProperties => ({
         type: 'eventfilterlist',
         identifier: 'endpoint-eventfilterlist-windows-v1',
-        body: 'eJxVjEEKwzAMBP+ic+kD8pUSgrA3qUCxha2EltC/Vwm9lL0sM8sehOJN0Gl4HORvAw3UZTUF3f7cLNAckpegd9gTKxrrJDmG1aJ7beGlJN0yTvq7w4uTT4n7BXfW7aIlW5Xi9BkjX6sIL5c=',
+        body: 'eJxVzFEKwjAQRdG9vO/iArKVUsqQPHVgmoRkWpSSvYvFH3/PhXuC2ZuyI8wn/F2JgK5bNWL6a3elJQTIg9lvrE9ubGKrJkwolU28NARojrYnfvW340uir1H6hYfYfmlOtWh2jGUs4wOrCC+X',
         package_name: 'endpoint',
         created: '2000-01-01T00:00:00.000Z',
         relative_url:
@@ -298,8 +324,8 @@ export const getArtifactsListTestsData = () => [
         decoded_size: 136,
         decoded_sha256: 'b3373c93ffc795d954f22c625c084dc5874a156ec0cb3d4af1c3dab0b965fa30',
         encryption_algorithm: 'none',
-        encoded_sha256: 'c1b30df9457ba007065fff1388c026ad269e63fbed535b506ac559fd616aabe9',
-        encoded_size: 107,
+        encoded_sha256: 'cc9bc4e3cc2c2767c3f56b17ebf4901dbe7e82f15720d48c745370e028c5e887',
+        encoded_size: 108,
       }),
       getExpectedUpdatedArtifactBodyWhenCreate: (): ArtifactBodyType => ({
         entries: [
@@ -319,7 +345,7 @@ export const getArtifactsListTestsData = () => [
       getExpectedUpdatedArtifactWhenUpdate: (): ArtifactElasticsearchProperties => ({
         type: 'eventfilterlist',
         identifier: 'endpoint-eventfilterlist-windows-v1',
-        body: 'eJxVzEEKwkAMheGrDFmLB+hVikiYeS2B2A6TjCildze1biS77+dlIyzeBEbDuJG/K2ggk0dV0OWvTQItEXkOvUqJvFY09rWFypK1Fxz6e4IXZ79nti8+WfuhDvNkPYZJuc1IZ9hvcR86lDCb',
+        body: 'eJxVzEEKwyAURdGtyBuHLsCtlFA++hoEa+T7LQnBvZc0nXR6LtwDLKaJDf5+wPZKeLT0qpmY/tozMUd4yMJitxQxYa1UsVXhkUrIPfLU34SbBHsEaV98S+6nGpu51ivVZdGF7gpjHvP4ADqUMJs=',
         package_name: 'endpoint',
         created: '2000-01-01T00:00:00.000Z',
         relative_url:
@@ -328,8 +354,8 @@ export const getArtifactsListTestsData = () => [
         decoded_size: 140,
         decoded_sha256: 'e4f00c88380d2c429eeb2741ad19383b94d76f79744b098b095befc24003e158',
         encryption_algorithm: 'none',
-        encoded_sha256: '99386e3d9a67eac88f0a4cc4ac36ad42cfda42598ce0ee1c11a8afc50bf004fe',
-        encoded_size: 108,
+        encoded_sha256: 'e371e2a28b59bd942ca7ef9665dae7c9b27409ad6f2ca3bff6357a98deb23c12',
+        encoded_size: 110,
       }),
       getExpectedUpdatedArtifactBodyWhenUpdate: (): ArtifactBodyType => ({
         entries: [
@@ -456,6 +482,31 @@ export const getArtifactsListTestsData = () => [
       card: 'blocklistCard',
     },
     pageObject: 'blocklist',
+    listId: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
+    createBody: {
+      entries: [
+        {
+          type: 'match_any',
+          field: 'file.hash.md5',
+          value: ['741462ab431a22233c787baab9b653c7'],
+          operator: 'included',
+        },
+        {
+          type: 'match_any',
+          field: 'file.hash.sha1',
+          value: ['aedb279e378bed6c2db3c9dc9e12ba635e0b391c'],
+          operator: 'included',
+        },
+        {
+          type: 'match_any',
+          field: 'file.hash.sha256',
+          value: ['a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476'],
+          operator: 'included',
+        },
+      ],
+      tags: [GLOBAL_ARTIFACT_TAG],
+      os_types: ['windows'],
+    } as Partial<CreateExceptionListItemSchema>,
     urlPath: 'blocklist',
     fleetArtifact: {
       identifier: 'endpoint-blocklist-windows-v1',
@@ -465,11 +516,11 @@ export const getArtifactsListTestsData = () => [
         identifier: 'endpoint-blocklist-windows-v1',
         relative_url:
           '/api/fleet/artifacts/endpoint-blocklist-windows-v1/637f1e8795406904980ae2ab4a69cea967756571507f6bd7fc94cde0add20df2',
-        body: 'eJylzsFqwzAMgOF38bkU27Jlu69SQpEtmQTSNCTpWCl595qyy45bj9IvxPdUMm3LIKs6nZ9qe8yiTmodrvMo6vCr1UFGbrEOoxx7WvvjlX27uc2y0HZbWhqmMt5ZuG1/Psk3le1SaBW+0PRo4YvGeytnFZxxaCk7MGStBSghhkyUU0bfBtXt3X74q2ntyXyAIuFsQxIIMQtjsZyhJC5JjM2E4EVnSKb8G2c9fsJzEHTRpUaDEYvOmLASWjQNCaI5Gk0StKMcQZsIiWtlz94YW13AN7vbX9OOoO0=',
+        body: 'eJylzk1qw0AMQOG7aG3C/GpmfJVggkbSYIPjmNgpDcF3LxS66LLN+sHje4Eu+33SDfrzC/bnqtDDNl3XWaH71dqks0APbZr1NNI2nq4SoYPbqnfab3foYVp4fogKdD8n/STeL0ybyoWWJ3TwQfNDoT9DCjagoxq8Jeec95xyqkS1VIyeEwzHcHR/NW0j2TdQpFJdKupTrirITqrnIlzUukroo5rqi+V/41zEd3jBJ8OGW7aYkU3Fgo3QoeUiXo1ka0iTCVSzNzb7Iq1JlGitayHhN3s4vgDTjqDt',
         encryption_algorithm: 'none',
         package_name: 'endpoint',
-        encoded_size: 218,
-        encoded_sha256: '751aacf865573055bef82795d23d99b7ab695eb5fb2a36f1231f02f52da8adc0',
+        encoded_size: 219,
+        encoded_sha256: 'e803c1ee6aec0885092bfd6c288839f42b31107dd6d0bb2c8e2d2b9f8fc8b293',
         decoded_size: 501,
         decoded_sha256: '637f1e8795406904980ae2ab4a69cea967756571507f6bd7fc94cde0add20df2',
         compression_algorithm: 'zlib',
@@ -517,11 +568,11 @@ export const getArtifactsListTestsData = () => [
         identifier: 'endpoint-blocklist-windows-v1',
         relative_url:
           '/api/fleet/artifacts/endpoint-blocklist-windows-v1/3ead6ce4e34cb4411083a44bfe813d9442d296981ee8d56e727e6cff14dea0f0',
-        body: 'eJx9jUEKwzAQA79S9lx66NEP6CeSEhZboYaNbWynJIT8vetSArkUnaQR0kYINXsUMt1GdU0gQ8VPSUDXExs9xCkcveCWuL6Ux4TMNWaNfbAyOzhNfytY2NbBcoGglIHDquzNMivsyJq+zxxcnB5RHPLh2jyW9n7517l/S8+96QOI6kW/',
+        body: 'eJx9jUEKwjAURK8isw4uXOYAXqKV8kmmGPhNQpJKS/HuEkHBjcxqmMebA4ytBFbY4UDbM2FRw5KVMD/bHKgeFnNQnrO0OwxSZpGWCixCdLp6epiPhZu4NjmpVNY6Sdxh8BBdCTvA2XEsEn1arkk9y7d1Pbf+fvrHXN7Q7dnzAojqRb8=',
         encryption_algorithm: 'none',
         package_name: 'endpoint',
-        encoded_size: 132,
-        encoded_sha256: '9f81934389ff29599c0b0f16aa91b9f5cebd95d51271a47ea469662a61a29884',
+        encoded_size: 131,
+        encoded_sha256: 'f0e2dc2aa8d968b704baa11bf3100db91a85991d5de431f8c389b7417335a701',
         decoded_size: 197,
         decoded_sha256: '3ead6ce4e34cb4411083a44bfe813d9442d296981ee8d56e727e6cff14dea0f0',
         compression_algorithm: 'zlib',
@@ -610,6 +661,19 @@ export const getArtifactsListTestsData = () => [
       confirmSelector: 'hostIsolationExceptionsDeletionConfirm',
       card: 'hostIsolationExceptionsCard',
     },
+    listId: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
+    createBody: {
+      entries: [
+        {
+          type: 'match',
+          field: 'destination.ip',
+          value: '1.1.1.1',
+          operator: 'included',
+        },
+      ],
+      tags: [GLOBAL_ARTIFACT_TAG],
+      os_types: ['windows', 'linux', 'macos'],
+    } as Partial<CreateExceptionListItemSchema>,
     pageObject: 'hostIsolationExceptions',
     urlPath: 'host_isolation_exceptions',
     fleetArtifact: {
@@ -620,11 +684,11 @@ export const getArtifactsListTestsData = () => [
         identifier: 'endpoint-hostisolationexceptionlist-windows-v1',
         relative_url:
           '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-windows-v1/2c3ee2b5e7f86f8c336a3df7e59a1151b11d7eec382442032e69712d6a6459e0',
-        body: 'eJxVjEEKgDAMBP+Sswhe/YqIhHaFQG1LG0UR/24ULzK3mWVPQtQiqNQPJ+mRQT1VWXIANb82C4K36FFVIquk2Eq2UcoorKlYk+jC6uHNflfY2enkuL5y47A+tmtf6BqNG647LBE=',
+        body: 'eJxVjEEKgzAUBe/y1kFwm6uIyCd5hQ9pEpKvWCR3LxVclNnNwFxgtqbs8MsF+1TCo+u7JsL9tZcyRXhEdtMspiVPWuFQKptYafDQHNIeGeGeFU8JtgXptzwk7T87TzcY61jHF647LBE=',
         encryption_algorithm: 'none',
         package_name: 'endpoint',
-        encoded_size: 101,
-        encoded_sha256: 'ee949ea39fe547e06add448956fa7d94ea14d1c30a368dce7058a1cb6ac278f9',
+        encoded_size: 104,
+        encoded_sha256: 'f958ada742a0be63d136901317c6bfd04b2ab5f52cdd0e872461089b0009bb3e',
         decoded_size: 131,
         decoded_sha256: '2c3ee2b5e7f86f8c336a3df7e59a1151b11d7eec382442032e69712d6a6459e0',
         compression_algorithm: 'zlib',
@@ -650,11 +714,11 @@ export const getArtifactsListTestsData = () => [
         identifier: 'endpoint-hostisolationexceptionlist-windows-v1',
         relative_url:
           '/api/fleet/artifacts/endpoint-hostisolationexceptionlist-windows-v1/4b62473b4cf057277b3297896771cc1061c3bea2c4f7ec1ef5c2546f33d5d9e8',
-        body: 'eJxVjEEKgzAQRe8ya4kgXeUqIjIkvzAQk5CMYpHevVPpprzde59/EbI2QSc/X6SvCvLUZasJNPy1pyBFixFdJbNKyU6qjUpFYy3NmuSQ9oho9neFk4OugfstD077107uZpwe9F6MDzBbLKo=',
+        body: 'eJxVjEEKwyAUBe/y1pJC6MqrlBA++gofrIr+hJbg3UsCXZTZzcAcYLam7PCPA/aphEfXV02E+2tPZYrwiOymWUxLnrTCoVQ2sdLgoTmkLTLC/VZ8S7A1SL/kLmk77Txd3OY7xjKW8QUwWyyq',
         encryption_algorithm: 'none',
         package_name: 'endpoint',
-        encoded_size: 107,
-        encoded_sha256: 'dbcc8f50044d43453fbffb4edda6aa0cd42075621827986393d625404f2b6b81',
+        encoded_size: 108,
+        encoded_sha256: '84df618343078f43a54299bcebef03010f3ec4ffdf7160448882fee9bafa1adb',
         decoded_size: 134,
         decoded_sha256: '4b62473b4cf057277b3297896771cc1061c3bea2c4f7ec1ef5c2546f33d5d9e8',
         compression_algorithm: 'zlib',
@@ -718,7 +782,7 @@ export const getCreateMultipleData = () => ({
     getExpectedUpdatedArtifactWhenCreateMultipleFirst: (): ArtifactElasticsearchProperties => ({
       type: 'trustlist',
       identifier: 'endpoint-trustlist-windows-v1',
-      body: 'eJzNjlEKwjAQRO+y38UD9ABewhaJyRQXtknYbKRSencTEcEb+DnzZobZCdGUUWi87GTPDBqp8JoFNPywhSGhwazJo5QTNvhq7vYOpgx1lrRxjl5qQGjuZw6b83b1rkBasfkPJ7UDP06TuhjSek4SoF/Fgr5vd9ZAx3wMf3dtYS3Wr83HC1Eec3Q=',
+      body: 'eJzNjlEKwjAQBe+y38ED5ABewhaJySsubJuwu5VK6d0lgoI38PMxj2F2wuLKMIqXnfzZQJGM5yag8MMmhhSK1LRmmJ2wIa+ebu9jbdDkVSkSL1nWgkLho8OWsl9zMgjMKNAjydpBjsOgaSl1Plcp0O9iQff7nbXQMR7h79ImVvOeNh4vUR5zdA==',
       package_name: 'endpoint',
       created: '2000-01-01T00:00:00.000Z',
       relative_url:
@@ -727,8 +791,8 @@ export const getCreateMultipleData = () => ({
       decoded_size: 323,
       decoded_sha256: '329fc9176a24d64f4376d2c25d5db5b31cf86b288dac83c8a004dfe5bbfdc7d0',
       encryption_algorithm: 'none',
-      encoded_sha256: '89be728e6132d4442f887657b092c3603199df71eb832881164f7d297fad2c4f',
-      encoded_size: 137,
+      encoded_sha256: '4d9eecb830948eabd721563fd2473900207d043126e66eac2ef78f9e05a80adb',
+      encoded_size: 136,
     }),
     getExpectedUpdatedArtifactBodyWhenCreateMultipleFirst: (
       firstSuffix: string,
@@ -762,7 +826,7 @@ export const getCreateMultipleData = () => ({
     getExpectedUpdatedArtifactWhenCreateMultipleSecond: (): ArtifactElasticsearchProperties => ({
       type: 'trustlist',
       identifier: 'endpoint-trustlist-windows-v1',
-      body: 'eJzNjlEKwjAQRO+y38UD5ABewhaJmxEXtknYJFIpvbtpEcEb+DnzZoZZCbGaoJC7rFRfGeSoyJwVNPywu0BDh9kSo5QTFnCr/nYEU4b5mqxziawtIHT3M4fFc72yL9Be7P7Ta9sBu3E0H0Oaz0kD7KtEse/Xh1igbdqGv7tWwCke36btDcSBc8g=',
+      body: 'eJzNjlEKwjAQRO8y38ED5ABewhaJyYiBbRJ2U6mU3l1aUPAGfg5veLwVLF0zDf6yor8a4WF5akK4H3bPlASPpjXS7MSFce7hdhxro4ZeFR65RJkTE9xHxyXEfo3BKDSDwzPIvIPoh0FDSXU6V0nU78rC3d8fWRO2cXN/l2aMtRxt4/YGxIFzyA==',
       package_name: 'endpoint',
       created: '2000-01-01T00:00:00.000Z',
       relative_url:
@@ -771,8 +835,8 @@ export const getCreateMultipleData = () => ({
       decoded_size: 324,
       decoded_sha256: '3be2ce848f9b49d6531e6dc80f43579e00adbc640d3f785c14c8f9fa2652500a',
       encryption_algorithm: 'none',
-      encoded_sha256: 'eb1cb904f23c233fb10a8909e40902ad69d11d0fe42759d385307a7f84bdc111',
-      encoded_size: 137,
+      encoded_sha256: '68304c35bbe863d0fbb15cf7e5ae5c84bad17aa7a3bc26828f9f0b20e0df6ed8',
+      encoded_size: 136,
     }),
     getExpectedUpdatedArtifactBodyWhenCreateMultipleSecond: (
       firstSuffix: string,

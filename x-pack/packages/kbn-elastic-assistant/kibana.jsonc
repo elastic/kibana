@@ -1,5 +1,0 @@
-{
-  "id": "@kbn/elastic-assistant",
-  "owner": "@elastic/security-solution",
-  "type": "shared-browser"
-}

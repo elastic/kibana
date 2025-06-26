@@ -3,14 +3,21 @@ steps:
     label: Pre-Build
     timeout_in_minutes: 10
     agents:
-      queue: kibana-default
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
 
   - wait
 
   - command: .buildkite/scripts/steps/fleet/install_all_packages.sh
     label: Install All Packages
     agents:
-      queue: n2-2
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      localSsds: 1
+      machineType: n2-standard-2
     env:
       # ensure that the FTR logs all output for these tests
       DISABLE_CI_LOG_OUTPUT_CAPTURE: 'true'
@@ -24,4 +31,7 @@ steps:
   - label: Post-Build
     command: .buildkite/scripts/lifecycle/post_build.sh
     agents:
-      queue: kibana-default
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2

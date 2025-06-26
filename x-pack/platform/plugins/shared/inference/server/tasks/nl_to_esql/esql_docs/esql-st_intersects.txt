@@ -1,0 +1,28 @@
+# ST_INTERSECTS
+
+Determines whether two geometries intersect. Two geometries intersect if they share any point in common, including points along lines or within polygons. This function is the inverse of `ST_DISJOINT`.
+
+## Syntax
+
+`ST_INTERSECTS(geomA, geomB)`
+
+### Parameters
+
+#### `geomA`
+
+An expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`. If `null`, the function returns `null`.
+
+#### `geomB`
+
+An expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`. If `null`, the function returns `null`. The coordinate system of `geomB` must match that of `geomA`. Combining `geo_*` and `cartesian_*` parameters is not allowed.
+
+## Examples
+
+Checking if a location intersects with a polygon
+
+```esql
+FROM airports
+| WHERE ST_INTERSECTS(location, TO_GEOSHAPE("POLYGON((42 14, 43 14, 43 15, 42 15, 42 14))"))
+```
+
+This example filters airports to find those whose `location` intersects with the specified polygon.

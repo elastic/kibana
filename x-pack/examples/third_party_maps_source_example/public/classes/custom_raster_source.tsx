@@ -122,18 +122,6 @@ export class CustomRasterSource implements IRasterSource {
     return false;
   }
 
-  getIndexPatternIds(): string[] {
-    return [];
-  }
-
-  getQueryableIndexPatternIds(): string[] {
-    return [];
-  }
-
-  isESSource(): boolean {
-    return false;
-  }
-
   // Returns function used to format value
   async createFieldFormatter(field: IField): Promise<FieldFormatter | null> {
     return null;

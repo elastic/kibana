@@ -1,0 +1,103 @@
+openapi: 3.0.0
+info:
+  title: Get Rule Execution Results API endpoint
+  version: '1'
+paths:
+  /internal/detection_engine/rules/{ruleId}/execution/results:
+    put:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: GetRuleExecutionResults
+      summary: Returns execution results of a given rule (aggregated by execution UUID) from Event Log.
+      tags:
+        - Rule Execution Log API
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          description: Saved object ID of the rule to get execution results for
+          schema:
+            type: string
+            minLength: 1
+        - name: start
+          in: query
+          required: true
+          description: Start date of the time range to query
+          schema:
+            type: string
+            format: date-time
+        - name: end
+          in: query
+          required: true
+          description: End date of the time range to query
+          schema:
+            type: string
+            format: date-time
+        - name: query_text
+          in: query
+          required: false
+          description: Query text to filter results by
+          schema:
+            type: string
+            default: ''
+        - name: status_filters
+          in: query
+          required: false
+          description: Comma-separated list of rule execution statuses to filter results by
+          schema:
+            type: array
+            items:
+              $ref: '../../model/execution_status.schema.yaml#/components/schemas/RuleExecutionStatus'
+            default: []
+        - name: run_type_filters
+          in: query
+          required: false
+          description: Comma-separated list of rule run types to filter results by
+          schema:
+            type: array
+            items:
+              $ref: '../../model/execution_run_type.schema.yaml#/components/schemas/RuleRunType'
+            default: []
+        - name: sort_field
+          in: query
+          required: false
+          description: Field to sort results by
+          schema:
+            $ref: '../../model/execution_result.schema.yaml#/components/schemas/SortFieldOfRuleExecutionResult'
+            default: timestamp
+        - name: sort_order
+          in: query
+          required: false
+          description: Sort order to sort results by
+          schema:
+            $ref: '../../../model/sorting.schema.yaml#/components/schemas/SortOrder'
+            default: desc
+        - name: page
+          in: query
+          required: false
+          description: Page number to return
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          required: false
+          description: Number of results per page
+          schema:
+            type: integer
+            default: 20
+      responses:
+        200:
+          description: Indicates a successful call
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events:
+                    type: array
+                    items:
+                      $ref: '../../model/execution_result.schema.yaml#/components/schemas/RuleExecutionResult'
+                  total:
+                    type: integer

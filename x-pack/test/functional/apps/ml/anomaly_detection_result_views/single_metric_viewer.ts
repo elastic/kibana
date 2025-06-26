@@ -60,8 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('opens a job from job list link', async () => {
         await ml.testExecution.logTestStep('navigate to job list');
-        await ml.navigation.navigateToMl();
-        await ml.navigation.navigateToJobManagement();
+        await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
         await ml.testExecution.logTestStep('open job in single metric viewer');
         await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
@@ -89,6 +88,13 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.testExecution.logTestStep('anomalies table is not empty');
         await ml.anomaliesTable.assertTableNotEmpty();
+      });
+
+      it('should click on an anomaly marker', async () => {
+        await ml.singleMetricViewer.assertAnomalyMarkerExist();
+        await ml.singleMetricViewer.openAnomalyMarkerActionsPopover();
+        await ml.anomaliesTable.assertAnomalyActionDiscoverButtonExists(0);
+        await ml.anomaliesTable.ensureAnomalyActionDiscoverButtonClicked(0);
       });
     });
 
@@ -147,14 +153,20 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('opens a job from job list link', async () => {
         await ml.testExecution.logTestStep('navigate to job list');
-        await ml.navigation.navigateToMl();
-        await ml.navigation.navigateToJobManagement();
+        await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
         await ml.testExecution.logTestStep('open job in single metric viewer');
         await ml.jobTable.filterWithSearchString(jobConfig.job_id, 1);
 
         await ml.jobTable.clickOpenJobInSingleMetricViewerButton(jobConfig.job_id);
         await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
+
+        // assert that the results view is not displayed when no entity is selected
+        await ml.testExecution.logTestStep('does not display the chart');
+        await ml.singleMetricViewer.assertChartNotExist();
+
+        await ml.testExecution.logTestStep('does not display the anomalies table');
+        await ml.anomaliesTable.assertTableNotExists();
       });
 
       it('render entity control', async () => {
@@ -193,7 +205,9 @@ export default function ({ getService }: FtrProviderContext) {
         // Also sorting by name is enforced because the model plot is enabled
         // and anomalous only is disabled
         await ml.singleMetricViewer.assertEntityConfig('day_of_week', false, 'name', 'desc');
+      });
 
+      it('should render the singe metric viewer chart and anomaly table', async () => {
         await ml.testExecution.logTestStep('displays the chart');
         await ml.singleMetricViewer.assertChartExist();
 
@@ -202,6 +216,14 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.testExecution.logTestStep('anomalies table is not empty');
         await ml.anomaliesTable.assertTableNotEmpty();
+      });
+
+      it('should click the Discover action in the anomaly table', async () => {
+        await ml.anomaliesTable.assertAnomalyActionsMenuButtonExists(0);
+        await ml.anomaliesTable.scrollRowIntoView(0);
+        await ml.anomaliesTable.assertAnomalyActionsMenuButtonEnabled(0, true);
+        await ml.anomaliesTable.assertAnomalyActionDiscoverButtonExists(0);
+        await ml.anomaliesTable.ensureAnomalyActionDiscoverButtonClicked(0);
       });
     });
   });

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -46,6 +47,8 @@ async function createTypeCheckConfigs(log: SomeDevLog, projects: TsProject[]) {
         ...config.compilerOptions,
         composite: true,
         rootDir: '.',
+        noEmit: false,
+        emitDeclarationOnly: true,
         paths: project.repoRel === 'tsconfig.base.json' ? config.compilerOptions?.paths : undefined,
       },
       kbn_references: undefined,
@@ -125,7 +128,7 @@ run(
           ...(flagsReader.boolean('verbose') ? ['--verbose'] : []),
         ],
         env: {
-          NODE_OPTIONS: '--max-old-space-size=8192',
+          NODE_OPTIONS: '--max-old-space-size=10240',
         },
         cwd: REPO_ROOT,
         wait: true,

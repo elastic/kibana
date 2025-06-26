@@ -7,12 +7,13 @@
 
 import expect from '@kbn/expect';
 import { getPolicySettingsFormTestSubjects } from '@kbn/security-solution-plugin/public/management/pages/policy/view/policy_settings_form/mocks';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../configs/ftr_provider_context';
 
 export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
   const testSubjects = getService('testSubjects');
   const retryService = getService('retry');
+  const toasts = getService('toasts');
   const formTestSubj = getPolicySettingsFormTestSubjects();
 
   return {
@@ -107,11 +108,11 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
       await this.ensureIsOnDetailsPage();
 
       // Sometimes, data retrieval errors may have been encountered by other security solution processes
-      // (ex. index fields search here: `x-pack/plugins/security_solution/public/common/containers/source/index.tsx:181`)
+      // (ex. index fields search here: `x-pack/solutions/security/plugins/security_solution/public/common/containers/source/index.tsx:181`)
       // which are displayed using one or more Toast messages. This in turn prevents the user from
       // actually clicking the Save button. Because those errors are not associated with Policy details,
       // we'll first check that all toasts are cleared
-      await pageObjects.common.clearAllToasts();
+      await toasts.dismissAll();
 
       await testSubjects.click('policyDetailsSaveButton');
       await testSubjects.existOrFail('policyDetailsConfirmModal');

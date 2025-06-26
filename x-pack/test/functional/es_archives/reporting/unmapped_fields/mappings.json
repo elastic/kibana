@@ -6,7 +6,8 @@
       "dynamic": false,
       "properties": {
         "text": {
-          "type": "text"
+          "type": "text",
+          "fielddata": "true"
         }
       }
     }

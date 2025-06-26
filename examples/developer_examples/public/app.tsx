@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState } from 'react';
@@ -23,15 +24,17 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core/public';
+import { RenderingService } from '@kbn/core-rendering-browser';
 import { ExampleDefinition } from './types';
 
 interface Props {
+  rendering: RenderingService;
   examples: ExampleDefinition[];
   navigateToApp: (appId: string) => void;
   getUrlForApp: (appId: string) => string;
 }
 
-function DeveloperExamples({ examples, navigateToApp, getUrlForApp }: Props) {
+function DeveloperExamples({ examples, navigateToApp, getUrlForApp, rendering }: Props) {
   const [search, setSearch] = useState<string>('');
 
   const lcSearch = search.toLowerCase();
@@ -43,8 +46,8 @@ function DeveloperExamples({ examples, navigateToApp, getUrlForApp }: Props) {
         return false;
       });
 
-  return (
-    <>
+  return rendering.addContext(
+    <EuiPageTemplate offset={0}>
       <EuiPageTemplate.Header>
         <EuiFlexGroup justifyContent={'spaceBetween'}>
           <EuiFlexItem>
@@ -103,7 +106,7 @@ function DeveloperExamples({ examples, navigateToApp, getUrlForApp }: Props) {
           ))}
         </EuiFlexGroup>
       </EuiPageTemplate.Section>
-    </>
+    </EuiPageTemplate>
   );
 }
 

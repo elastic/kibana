@@ -15,9 +15,22 @@ import {
   RISK_DETAILS_NAV,
 } from '../screens/hosts/host_risk';
 
-export const navigateToHostRiskDetailTab = () => {
+export const navigateToHostRiskDetailTab = (attempts = 3) => {
+  // this was causing flakiness
+  // on very rare occasions the tab is not navigated to, so we now retry
+  if (attempts === 0) {
+    throw new Error('navigateToHostRiskDetailTab failed after 3 attempts');
+  }
+  cy.get(LOADING_SPINNER).should('not.exist');
   cy.get(RISK_DETAILS_NAV).click();
   cy.get(LOADING_SPINNER).should('not.exist');
+  cy.get(RISK_DETAILS_NAV).then(($tab) => {
+    if ($tab.hasClass('euiTab-isSelected')) {
+      return;
+    } else if (attempts > 0) {
+      navigateToHostRiskDetailTab(attempts - 1);
+    }
+  });
 };
 
 export const openRiskTableFilterAndSelectTheCriticalOption = () => {

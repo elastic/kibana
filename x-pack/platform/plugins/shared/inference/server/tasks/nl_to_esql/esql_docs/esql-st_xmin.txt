@@ -1,0 +1,27 @@
+# ST_XMIN
+
+Extracts the minimum value of the `x` coordinates from the supplied geometry. For geometries of type `geo_point` or `geo_shape`, this corresponds to the minimum `longitude` value.
+
+## Syntax
+
+`ST_XMIN(point)`
+
+### Parameters
+
+#### `point`
+
+Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If `null`, the function returns `null`.
+
+## Examples
+
+Extracting the bounding box coordinates of a city boundary
+
+The following query calculates the minimum and maximum `x` and `y` coordinates of the bounding box for the city boundary of the airport with the abbreviation "CPH":
+
+```esql
+FROM airport_city_boundaries
+| WHERE abbrev == "CPH"
+| EVAL envelope = ST_ENVELOPE(city_boundary)
+| EVAL xmin = ST_XMIN(envelope), xmax = ST_XMAX(envelope), ymin = ST_YMIN(envelope), ymax = ST_YMAX(envelope)
+| KEEP abbrev, airport, xmin, xmax, ymin, ymax
+```

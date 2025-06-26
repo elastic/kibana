@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
@@ -11,7 +12,7 @@ import supertest from 'supertest';
 import { omit } from 'lodash';
 
 import { ContextService } from '@kbn/core-http-context-server-internal';
-import { createCoreContext, createHttpServer } from '@kbn/core-http-server-mocks';
+import { createCoreContext } from '@kbn/core-http-server-mocks';
 import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
@@ -20,6 +21,7 @@ import { statusServiceMock } from '@kbn/core-status-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { registerStatusRoute } from '@kbn/core-status-server-internal';
+import { createInternalHttpService } from '../../utilities';
 
 const coreId = Symbol('core');
 
@@ -48,7 +50,7 @@ describe('GET /api/status', () => {
     const coreContext = createCoreContext({ coreId });
     const contextService = new ContextService(coreContext);
 
-    server = createHttpServer(coreContext);
+    server = createInternalHttpService(coreContext);
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
     httpSetup = await server.setup({
       context: contextService.setup({ pluginDependencies: new Map() }),
@@ -83,6 +85,7 @@ describe('GET /api/status', () => {
           branch: 'xbranch',
           buildNum: 1234,
           buildSha: 'xsha',
+          buildShaShort: 'x',
           dist: true,
           version: '9.9.9-SNAPSHOT',
           buildDate: new Date('2023-05-15T23:12:09.000Z'),
@@ -209,6 +212,7 @@ describe('GET /api/status', () => {
         build_number: 1234,
         build_snapshot: true,
         build_date: new Date('2023-05-15T23:12:09.000Z').toISOString(),
+        build_flavor: 'traditional',
       });
       const metricsMockValue = await firstValueFrom(metrics.getOpsMetrics$());
       expect(result.body.metrics).toEqual({

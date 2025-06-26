@@ -1,0 +1,49 @@
+{
+  "type": "plugin",
+  "id": "@kbn/elastic-assistant-plugin",
+  "owner": [
+    "@elastic/security-generative-ai"
+  ],
+  "group": "security",
+  "visibility": "private",
+  "description": "Server APIs for the Elastic AI Assistant",
+  "plugin": {
+    "id": "elasticAssistant",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "elasticAssistant"
+    ],
+    "requiredPlugins": [
+      "actions",
+      "alerting",
+      "data",
+      "eventLog",
+      "ml",
+      "ruleRegistry",
+      "taskManager",
+      "licensing",
+      "llmTasks",
+      "inference",
+      "productDocBase",
+      "spaces",
+      "security",
+      "stackConnectors",
+      "triggersActionsUi",
+      "elasticAssistantSharedState",
+      "aiAssistantManagementSelection",
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils"
+    ]
+  },
+  "build": {
+    "extraExcludes": [
+      // Only include the encoded versions in the build due to https://github.com/elastic/kibana/issues/202114
+      "**/knowledge_base/security_labs/*.md",
+      "!**/knowledge_base/security_labs/*.encoded.md"
+    ]
+  }
+}

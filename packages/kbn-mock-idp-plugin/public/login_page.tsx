@@ -1,51 +1,47 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
-  EuiPageTemplate,
-  EuiEmptyPrompt,
-  EuiComboBox,
-  EuiInlineEditTitle,
-  EuiFormRow,
-  EuiSpacer,
-  EuiComboBoxOptionOption,
   EuiButtonEmpty,
+  EuiComboBox,
+  EuiEmptyPrompt,
+  EuiFormRow,
+  EuiInlineEditTitle,
+  EuiPageTemplate,
+  EuiSpacer,
 } from '@elastic/eui';
-import React, { ChangeEvent, FunctionComponent } from 'react';
-import { FormikProvider, useFormik, Field, Form } from 'formik';
+import { Field, Form, FormikProvider, useFormik } from 'formik';
+import type { ChangeEvent } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-import {
-  MOCK_IDP_SECURITY_ROLE_NAMES,
-  MOCK_IDP_OBSERVABILITY_ROLE_NAMES,
-  MOCK_IDP_SEARCH_ROLE_NAMES,
-} from '@kbn/mock-idp-utils/src/constants';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+
 import { useAuthenticator } from './role_switcher';
 
-export interface LoginPageProps {
-  projectType?: string;
-}
-
-export const LoginPage: FunctionComponent<LoginPageProps> = ({ projectType }) => {
-  const roles =
-    projectType === 'security'
-      ? MOCK_IDP_SECURITY_ROLE_NAMES
-      : projectType === 'observability'
-      ? MOCK_IDP_OBSERVABILITY_ROLE_NAMES
-      : MOCK_IDP_SEARCH_ROLE_NAMES;
+export const LoginPage = () => {
+  const { services } = useKibana<CoreStart>();
+  const [roles, setRoles] = useState<string[]>([]);
+  const isRolesDefined = () => roles.length > 0;
 
   const [, switchCurrentUser] = useAuthenticator(true);
   const formik = useFormik({
     initialValues: {
       full_name: 'Test User',
-      role: roles[0],
+      role: undefined,
     },
     async onSubmit(values) {
+      if (!values.role) {
+        return;
+      }
       await switchCurrentUser({
         username: sanitizeUsername(values.full_name),
         full_name: values.full_name,
@@ -54,6 +50,22 @@ export const LoginPage: FunctionComponent<LoginPageProps> = ({ projectType }) =>
       });
     },
   });
+
+  const formikRef = useRef(formik);
+
+  useEffect(() => {
+    formikRef.current = formik;
+  }, [formik]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await services.http.get<{ roles: string[] }>('/mock_idp/supported_roles');
+      setRoles(response.roles);
+      formikRef.current.setFieldValue('role', response.roles[0]);
+    };
+
+    fetchData();
+  }, [services]);
 
   return (
     <FormikProvider value={formik}>
@@ -98,6 +110,8 @@ export const LoginPage: FunctionComponent<LoginPageProps> = ({ projectType }) =>
                   <EuiFormRow error={formik.errors.role} isInvalid={!!formik.errors.role}>
                     <Field
                       as={EuiComboBox}
+                      isLoading={!isRolesDefined()}
+                      disabled={!isRolesDefined()}
                       name="role"
                       placeholder="Select your role"
                       singleSelection={{ asPlainText: true }}
@@ -129,13 +143,14 @@ export const LoginPage: FunctionComponent<LoginPageProps> = ({ projectType }) =>
               actions={[
                 <EuiButton
                   type="submit"
-                  disabled={!formik.isValid}
+                  data-test-subj="loginButton"
+                  disabled={!formik.isValid || !isRolesDefined()}
                   isLoading={formik.isSubmitting}
                   fill
                 >
                   Log in
                 </EuiButton>,
-                <EuiButtonEmpty size="xs" href="/">
+                <EuiButtonEmpty size="xs" href="/login">
                   More login options
                 </EuiButtonEmpty>,
               ]}

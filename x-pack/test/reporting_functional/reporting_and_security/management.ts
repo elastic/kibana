@@ -14,7 +14,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const browser = getService('browser');
   const reportingFunctional = getService('reportingFunctional');
 
-  describe('Access to Management > Reporting', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/225172
+  describe.skip('Access to Management > Reporting', () => {
     before(async () => {
       await reportingFunctional.initEcommerce();
     });
@@ -24,13 +25,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     it('does not allow user that does not have reporting privileges', async () => {
       await reportingFunctional.loginDataAnalyst();
-      await PageObjects.common.navigateToApp('reporting');
+      await PageObjects.common.navigateToApp('reporting', { path: '/exports' });
       await testSubjects.missingOrFail('reportJobListing');
     });
 
     it('does allow user with reporting privileges', async () => {
       await reportingFunctional.loginReportingUser();
-      await PageObjects.common.navigateToApp('reporting');
+      await PageObjects.common.navigateToApp('reporting', { path: '/exports' });
       await testSubjects.existOrFail('reportJobListing');
     });
 
@@ -39,7 +40,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);
 
-      await PageObjects.reporting.openPdfReportingPanel();
+      await PageObjects.reporting.selectExportItem('PDF');
       await PageObjects.reporting.clickGenerateReportButton();
 
       await PageObjects.common.navigateToApp('reporting');
@@ -53,6 +54,32 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await browser.switchToWindow(dashboardWindowHandle);
 
       await PageObjects.dashboard.expectOnDashboard(dashboardTitle);
+    });
+
+    it('Allows user to view report details', async () => {
+      await PageObjects.common.navigateToApp('reporting');
+      await (await testSubjects.findAll('euiCollapsedItemActionsButton'))[0].click();
+
+      await (await testSubjects.find('reportViewInfoLink')).click();
+
+      await testSubjects.existOrFail('reportInfoFlyout');
+    });
+
+    describe('Schedules', () => {
+      it('does allow user with reporting privileges o navigate to the Schedules tab', async () => {
+        await reportingFunctional.loginReportingUser();
+
+        await PageObjects.common.navigateToApp('reporting');
+        await (await testSubjects.find('reportingTabs-schedules')).click();
+        await testSubjects.existOrFail('reportSchedulesTable');
+      });
+
+      it('does not allow user to access schedules that does not have reporting privileges', async () => {
+        await reportingFunctional.loginDataAnalyst();
+
+        await PageObjects.common.navigateToApp('reporting');
+        await testSubjects.missingOrFail('reportingTabs-schedules');
+      });
     });
   });
 };

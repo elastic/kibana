@@ -1,0 +1,83 @@
+## KEEP
+
+The `KEEP` command specifies which columns are returned and the order in which they appear in the output.
+
+## Syntax
+
+`KEEP columns`
+
+### Parameters
+
+#### `columns`
+
+A comma-separated list of columns to retain. Supports wildcards. If a column matches multiple expressions, precedence rules determine the final output.
+
+## Note
+
+The KEEP command is used to specify which columns to return and their order.
+
+When a field name matches multiple expressions, precedence rules are applied. Fields are added in the order they appear. If one field matches multiple expressions, the following precedence rules apply (from highest to lowest priority):
+
+1. Complete field name (without wildcards)
+2. Partial wildcard expressions (like `fieldNam*`)
+3. Only wildcard (`*`)
+
+If a field matches two expressions with the same precedence, the rightmost expression wins.
+
+Important: only the columns in the KEEP command can be used after a KEEP command.
+
+## Examples
+
+### Return columns in a specific order
+
+The following query returns the `emp_no`, `first_name`, `last_name`, and `height` columns in the specified order:
+
+```esql
+FROM employees
+| KEEP emp_no, first_name, last_name, height
+```
+
+### Use wildcards to match column names
+
+This query keeps all columns with names starting with `h`:
+
+```esql
+FROM employees
+| KEEP h*
+```
+
+### Combine specific columns and wildcards
+
+The asterisk wildcard (`*`) matches all columns not explicitly specified. This query returns all columns starting with `h` first, followed by all other columns:
+
+```esql
+FROM employees
+| KEEP h*, *
+```
+
+### Precedence of complete field names over wildcards
+
+When a column matches both a complete field name and a wildcard, the complete field name takes precedence:
+
+```esql
+FROM employees
+| KEEP first_name, last_name, first_name*
+```
+
+### Wildcard precedence and ordering
+
+If a column matches multiple wildcard expressions, the rightmost expression takes precedence, even if it is less specific:
+
+```esql
+FROM employees
+| KEEP first_name*, last_name, first_na*
+```
+
+### Lowest precedence for the `*` wildcard
+
+The `*` wildcard has the lowest precedence. The order of other arguments determines the output order:
+
+```esql
+FROM employees
+| KEEP *, first_name
+```

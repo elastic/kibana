@@ -13,36 +13,45 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
     'common',
+    'svlCommonPage',
     'discover',
     'timePicker',
     'header',
-    'unifiedSearch',
-    'settings',
   ]);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
   const elasticChart = getService('elasticChart');
+  const dataViews = getService('dataViews');
 
   describe('discover request counts', function describeIndexTests() {
     before(async function () {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await PageObjects.svlCommonPage.loginAsAdmin();
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
+      );
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
-        'bfetch:disable': true,
+        // 'bfetch:disable': true, // bfetch is already disabled in serverless
         // TODO: Removed ES|QL setting since ES|QL isn't supported in Serverless
       });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
     });
@@ -94,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       savedSearchesRequests?: number;
       setQuery: (query: string) => Promise<void>;
     }) => {
-      it('should send 2 search requests (documents + chart) on page load', async () => {
+      it('should send no more than 2 search requests (documents + chart) on page load', async () => {
         await browser.refresh();
         await browser.execute(async () => {
           performance.setResourceTimingBufferSize(Number.MAX_SAFE_INTEGER);
@@ -104,20 +113,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(searchCount).to.be(2);
       });
 
-      it('should send 2 requests (documents + chart) when refreshing', async () => {
+      it('should send no more than 2 requests (documents + chart) when refreshing', async () => {
         await expectSearches(type, 2, async () => {
           await queryBar.clickQuerySubmitButton();
         });
       });
 
-      it('should send 2 requests (documents + chart) when changing the query', async () => {
+      it('should send no more than 2 requests (documents + chart) when changing the query', async () => {
         await expectSearches(type, 2, async () => {
           await setQuery(query1);
           await queryBar.clickQuerySubmitButton();
         });
       });
 
-      it('should send 2 requests (documents + chart) when changing the time range', async () => {
+      it('should send no more than 2 requests (documents + chart) when changing the time range', async () => {
         await expectSearches(type, 2, async () => {
           await PageObjects.timePicker.setAbsoluteRange(
             'Sep 21, 2015 @ 06:31:44.000',
@@ -126,16 +135,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should send 2 requests (documents + chart) when toggling the chart visibility', async () => {
-        await expectSearches(type, 2, async () => {
+      it(`should send no requests (documents + chart) when toggling the chart visibility`, async () => {
+        await expectSearches(type, 0, async () => {
+          // hide chart
+          await PageObjects.discover.toggleChartVisibility();
+          // show chart
           await PageObjects.discover.toggleChartVisibility();
         });
-        await expectSearches(type, 2, async () => {
+      });
+      it(`should send a request for chart data when toggling the chart visibility after a time range change`, async () => {
+        // hide chart
+        await PageObjects.discover.toggleChartVisibility();
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Sep 21, 2015 @ 06:31:44.000',
+          'Sep 24, 2015 @ 00:00:00.000'
+        );
+        await waitForLoadingToFinish();
+        await expectSearches(type, 1, async () => {
+          // show chart, we expect a request for the chart data, since the time range changed
           await PageObjects.discover.toggleChartVisibility();
         });
       });
 
-      it('should send 2 requests for saved search changes', async () => {
+      it('should send no more than 2 requests for saved search changes', async () => {
         await setQuery(query1);
         await queryBar.clickQuerySubmitButton();
         await PageObjects.timePicker.setAbsoluteRange(
@@ -180,7 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         setQuery: (query) => queryBar.setQuery(query),
       });
 
-      it('should send 2 requests (documents + chart) when adding a filter', async () => {
+      it('should send no more than 2 requests (documents + chart) when adding a filter', async () => {
         await expectSearches(type, 2, async () => {
           await filterBar.addFilter({
             field: 'extension',
@@ -190,33 +212,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should send 2 requests (documents + chart) when sorting', async () => {
+      it('should send no more than 2 requests (documents + chart) when sorting', async () => {
         await expectSearches(type, 2, async () => {
           await PageObjects.discover.clickFieldSort('@timestamp', 'Sort Old-New');
         });
       });
 
-      it('should send 2 requests (documents + chart) when changing to a breakdown field without an other bucket', async () => {
+      it('should send no more than 2 requests (documents + chart) when changing to a breakdown field without an other bucket', async () => {
         await expectSearches(type, 2, async () => {
           await PageObjects.discover.chooseBreakdownField('type');
         });
       });
 
-      it('should send 3 requests (documents + chart + other bucket) when changing to a breakdown field with an other bucket', async () => {
+      it('should send no more than 3 requests (documents + chart + other bucket) when changing to a breakdown field with an other bucket', async () => {
         await expectSearches(type, 3, async () => {
           await PageObjects.discover.chooseBreakdownField('extension.raw');
         });
       });
 
-      it('should send 2 requests (documents + chart) when changing the chart interval', async () => {
+      it('should send no more than 2 requests (documents + chart) when changing the chart interval', async () => {
         await expectSearches(type, 2, async () => {
           await PageObjects.discover.setChartInterval('Day');
         });
       });
 
-      it('should send 2 requests (documents + chart) when changing the data view', async () => {
+      it('should send no more than 2 requests (documents + chart) when changing the data view', async () => {
         await expectSearches(type, 2, async () => {
-          await PageObjects.discover.selectIndexPattern('long-window-logstash-*');
+          await dataViews.switchToAndValidate('long-window-logstash-*');
         });
       });
     });

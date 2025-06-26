@@ -10,8 +10,9 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'error']);
+  const PageObjects = getPageObjects(['common', 'error', 'dashboard']);
   const ml = getService('ml');
+  const esArchiver = getService('esArchiver');
 
   const testUsers = [{ user: USER.ML_UNAUTHORIZED, discoverAvailable: true }];
 
@@ -39,6 +40,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await PageObjects.error.expectForbidden();
         });
 
+        it('should not allow access to the ML sections in Stack Management', async () => {
+          await ml.testExecution.logTestStep(
+            'should not load the ML stack management overview page'
+          );
+          // Management ML sections are not registered and don't show up at all in the side nav when user does not have authorization.
+          await ml.navigation.assertStackManagementMlSectionNotExist();
+        });
+
         it('should not display the ML entry in Kibana app menu', async () => {
           await ml.testExecution.logTestStep('should open the Kibana app menu');
           await ml.navigation.navigateToKibanaHome();
@@ -47,14 +56,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('should not display the ML nav link');
           await ml.navigation.assertKibanaNavMLEntryNotExists();
         });
-
-        it('should not allow access to the Stack Management ML page', async () => {
-          await ml.testExecution.logTestStep(
-            'should load the stack management with the ML menu item being absent'
-          );
-          await ml.navigation.navigateToStackManagement({ expectMlLink: false });
-        });
       });
     }
+
+    describe('for user with no ML access and Kibana features access', function () {
+      before(async () => {
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+        await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
+        await ml.securityUI.loginAs(USER.ML_DISABLED);
+        await ml.api.cleanMlIndices();
+      });
+
+      after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+        await ml.securityUI.logout();
+      });
+
+      it('should not register ML embeddables in the dashboard', async () => {
+        await ml.testExecution.logTestStep(
+          'should not contain ML embeddable in the Add panel list'
+        );
+        await PageObjects.dashboard.navigateToApp();
+        await PageObjects.dashboard.clickCreateDashboardPrompt();
+        await ml.dashboardEmbeddables.assertMlSectionExists(false);
+      });
+    });
   });
 }

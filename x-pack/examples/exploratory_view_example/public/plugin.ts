@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, AppNavLinkStatus } from '@kbn/core/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 import type { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
@@ -29,7 +29,7 @@ export class ExploratoryViewExamplePlugin
     core.application.register({
       id: 'exploratory_view_example',
       title: 'Observability Exploratory View example',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: mount(core),
       order: 1000,
     });

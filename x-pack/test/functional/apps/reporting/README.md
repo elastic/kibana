@@ -9,7 +9,6 @@ Functional tests on report generation are under the applications that use report
  - `x-pack/test/functional/apps/visualize/reporting.ts`
 
 **CSV Report testing:**
- - `x-pack/test/functional/apps/dashboard/reporting/download_csv.ts`
  - `x-pack/test/functional/apps/discover/reporting.ts`
 
 Reporting Management app tests are in `functional/apps/reporting_management`.

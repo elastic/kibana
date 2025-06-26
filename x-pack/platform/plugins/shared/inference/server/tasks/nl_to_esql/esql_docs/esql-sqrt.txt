@@ -1,0 +1,29 @@
+# SQRT
+
+Returns the square root of a number. The input can be any numeric value, and the return value is always a double. Square roots of negative numbers and infinities are `null`.
+
+## Syntax
+
+`SQRT(number)`
+
+### Parameters
+
+#### `number`
+
+Numeric expression. If `null`, the function returns `null`.
+
+## Examples
+
+```esql
+ROW d = 100.0
+| EVAL s = SQRT(d)
+```
+
+Calculate the square root of the value `100.0`.
+
+```esql
+FROM employees
+| KEEP first_name, last_name, height
+| EVAL sqrt_height = SQRT(height)
+```
+Keep only the first_name, last_name, height columns, and then create a new `sqrt_height` which equals to the square root of all the values in the height column.

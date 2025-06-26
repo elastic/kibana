@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visEditor, visualize, lens, timePicker, visChart } = getPageObjects([
+  const { visEditor, visualize, lens, visChart, timePicker } = getPageObjects([
     'visEditor',
     'visualize',
     'visChart',
@@ -21,10 +21,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const find = getService('find');
 
   describe('Metric', function describeIndexTests() {
-    const isNewChartsLibraryEnabled = true;
-
     before(async () => {
-      await visualize.initTests(isNewChartsLibraryEnabled);
+      await visualize.initTests();
     });
 
     beforeEach(async () => {
@@ -225,7 +223,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await dimensions[0].click();
 
-      await lens.openPalettePanel('lnsMetric');
+      await lens.openPalettePanel();
       const colorStops = await lens.getPaletteColorStops();
 
       expect(colorStops).to.eql([

@@ -1,0 +1,257 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OnboardingContextProvider config when all requirements are met should return all topics config correctly 1`] = `
+Map {
+  "default" => Object {
+    "body": Array [
+      Object {
+        "cards": Array [
+          Object {
+            "id": "defaultCard1",
+          },
+        ],
+        "id": "defaultGroup1",
+      },
+    ],
+    "id": "default",
+  },
+  "topic1" => Object {
+    "body": Array [
+      Object {
+        "cards": Array [
+          Object {
+            "id": "topic1Card1",
+          },
+        ],
+        "id": "topic1Group1",
+      },
+    ],
+    "capabilitiesRequired": Array [
+      "capability1",
+    ],
+    "experimentalFlagRequired": "flag1",
+    "id": "topic1",
+    "licenseTypeRequired": "gold",
+  },
+  "topic2" => Object {
+    "body": Array [
+      Object {
+        "cards": Array [
+          Object {
+            "experimentalFlagRequired": "flag1",
+            "id": "topic2Card1",
+          },
+          Object {
+            "id": "topic2Card2",
+            "licenseTypeRequired": "gold",
+          },
+          Object {
+            "capabilitiesRequired": Array [
+              "capability1",
+            ],
+            "id": "topic2Card3",
+          },
+        ],
+        "id": "topic2Group1",
+      },
+    ],
+    "id": "topic2",
+  },
+}
+`;
+
+exports[`OnboardingContextProvider config when the required capabilities are not met should filter the topics config correctly 1`] = `
+Map {
+  "default" => Object {
+    "body": Array [
+      Object {
+        "cards": Array [
+          Object {
+            "id": "defaultCard1",
+          },
+        ],
+        "id": "defaultGroup1",
+      },
+    ],
+    "id": "default",
+  },
+  "topic2" => Object {
+    "body": Array [
+      Object {
+        "cards": Array [
+          Object {
+            "experimentalFlagRequired": "flag1",
+            "id": "topic2Card1",
+          },
+          Object {
+            "id": "topic2Card2",
+            "licenseTypeRequired": "gold",
+          },
+        ],
+        "id": "topic2Group1",
+      },
+    ],
+    "id": "topic2",
+  },
+}
+`;
+
+exports[`OnboardingContextProvider config when the required experimental flag is not met and the required license is not met either and the required capabilities are not met either should return only the default topics config 1`] = `
+Map {
+  "default" => Object {
+    "body": Array [
+      Object {
+        "cards": Array [
+          Object {
+            "id": "defaultCard1",
+          },
+        ],
+        "id": "defaultGroup1",
+      },
+    ],
+    "id": "default",
+  },
+}
+`;
+
+exports[`OnboardingContextProvider config when the required experimental flag is not met and the required license is not met either should filter the topics config correctly 1`] = `
+Map {
+  "default" => Object {
+    "body": Array [
+      Object {
+        "cards": Array [
+          Object {
+            "id": "defaultCard1",
+          },
+        ],
+        "id": "defaultGroup1",
+      },
+    ],
+    "id": "default",
+  },
+  "topic2" => Object {
+    "body": Array [
+      Object {
+        "cards": Array [
+          Object {
+            "capabilitiesRequired": Array [
+              "capability1",
+            ],
+            "id": "topic2Card3",
+          },
+        ],
+        "id": "topic2Group1",
+      },
+    ],
+    "id": "topic2",
+  },
+}
+`;
+
+exports[`OnboardingContextProvider config when the required experimental flag is not met should filter the topics config correctly 1`] = `
+Map {
+  "default" => Object {
+    "body": Array [
+      Object {
+        "cards": Array [
+          Object {
+            "id": "defaultCard1",
+          },
+        ],
+        "id": "defaultGroup1",
+      },
+    ],
+    "id": "default",
+  },
+  "topic2" => Object {
+    "body": Array [
+      Object {
+        "cards": Array [
+          Object {
+            "id": "topic2Card2",
+            "licenseTypeRequired": "gold",
+          },
+          Object {
+            "capabilitiesRequired": Array [
+              "capability1",
+            ],
+            "id": "topic2Card3",
+          },
+        ],
+        "id": "topic2Group1",
+      },
+    ],
+    "id": "topic2",
+  },
+}
+`;
+
+exports[`OnboardingContextProvider config when the required license is not met and the required capabilities are not met either should filter the topics config correctly 1`] = `
+Map {
+  "default" => Object {
+    "body": Array [
+      Object {
+        "cards": Array [
+          Object {
+            "id": "defaultCard1",
+          },
+        ],
+        "id": "defaultGroup1",
+      },
+    ],
+    "id": "default",
+  },
+  "topic2" => Object {
+    "body": Array [
+      Object {
+        "cards": Array [
+          Object {
+            "experimentalFlagRequired": "flag1",
+            "id": "topic2Card1",
+          },
+        ],
+        "id": "topic2Group1",
+      },
+    ],
+    "id": "topic2",
+  },
+}
+`;
+
+exports[`OnboardingContextProvider config when the required license is not met should filter the topics config correctly 1`] = `
+Map {
+  "default" => Object {
+    "body": Array [
+      Object {
+        "cards": Array [
+          Object {
+            "id": "defaultCard1",
+          },
+        ],
+        "id": "defaultGroup1",
+      },
+    ],
+    "id": "default",
+  },
+  "topic2" => Object {
+    "body": Array [
+      Object {
+        "cards": Array [
+          Object {
+            "experimentalFlagRequired": "flag1",
+            "id": "topic2Card1",
+          },
+          Object {
+            "capabilitiesRequired": Array [
+              "capability1",
+            ],
+            "id": "topic2Card3",
+          },
+        ],
+        "id": "topic2Group1",
+      },
+    ],
+    "id": "topic2",
+  },
+}
+`;

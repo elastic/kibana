@@ -1,0 +1,24 @@
+## LENGTH
+
+Returns the character length of a string.
+
+## Syntax
+
+`LENGTH(string)`
+
+### Parameters
+
+#### `string`
+
+String expression. If `null`, the function returns `null`.
+
+## Examples
+
+```esql
+FROM airports
+| WHERE country == "India"
+| KEEP city
+| EVAL fn_length = LENGTH(city)
+```
+
+This example calculates the character length of the `city` field for airports located in India.

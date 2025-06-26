@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { CasesSetup } from '@kbn/cases-plugin/server/types';
+import { CasesServerSetup } from '@kbn/cases-plugin/server/types';
 import { Plugin, CoreSetup } from '@kbn/core/server';
 import { getExternalReferenceAttachment } from './attachments/external_reference';
 import { getPersistableStateAttachmentServer } from './attachments/persistable_state';
 
 export interface CasesExamplePublicSetupDeps {
-  cases: CasesSetup;
+  cases: CasesServerSetup;
 }
 
 export class CasesFixturePlugin implements Plugin<void, void, CasesExamplePublicSetupDeps> {

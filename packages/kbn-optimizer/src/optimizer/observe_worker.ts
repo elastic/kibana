@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { inspect } from 'util';
 
 import { fork, type ChildProcess } from 'child_process';
 import * as Rx from 'rxjs';
-import { map, takeUntil, first, ignoreElements } from 'rxjs/operators';
+import { map, takeUntil, first, ignoreElements } from 'rxjs';
 
 import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle, BundleRemotes } from '../common';
 
@@ -61,12 +62,19 @@ function usingWorkerProc<T>(config: OptimizerConfig, fn: (proc: ChildProcess) =>
       const proc = fork(require.resolve('../worker/run_worker'), [], {
         execArgv: [
           `--require=@kbn/babel-register/install`,
-          '--openssl-legacy-provider',
           ...(inspectFlag && config.inspectWorkers
             ? [`${inspectFlag}=${inspectPortCounter++}`]
             : []),
         ],
         stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
+        env: {
+          // NOTE: with the default 2000 limit we get a lot of recursive watcher recreations (introduced in watchpack v2)
+          // which makes the experience horrible and the performance between 2.5x to 3x worse when watching.
+          // If that fails in other mac machines with lower defaults for maxfiles and maxfilesperproc
+          // or just low powerful ones we need to default to polling instead of relying in the OS events watcher system.
+          // That can be done in the worker/run_compilers file.
+          WATCHPACK_WATCHER_LIMIT: '4000',
+        },
       });
 
       return {

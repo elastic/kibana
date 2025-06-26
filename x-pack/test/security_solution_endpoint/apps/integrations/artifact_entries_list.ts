@@ -14,7 +14,7 @@ import {
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
 import { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../configs/ftr_provider_context';
 import {
   ArtifactBodyType,
   getArtifactsListTestsData,
@@ -35,7 +35,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const esClient = getService('es');
   const supertest = getService('supertest');
-  const find = getService('find');
+  const toasts = getService('toasts');
   const policyTestResources = getService('policyTestResources');
   const unzipPromisify = promisify(unzip);
 
@@ -51,13 +51,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .set('kbn-xsrf', 'true');
   };
 
-  // Flaky: https://github.com/elastic/kibana/issues/173682
-  // FLAKY: https://github.com/elastic/kibana/issues/173681
-  // FLAKY: https://github.com/elastic/kibana/issues/173682
-  describe.skip('For each artifact list under management', function () {
+  describe('For each artifact list under management', function () {
     targetTags(this, ['@ess', '@serverless']);
-
     this.timeout(60_000 * 5);
+
     let indexedData: IndexedHostsAndAlertsResponse;
     let policyInfo: PolicyTestResourceInfo;
 
@@ -77,13 +74,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Check edited artifact is in the list with new values (wait for list to be updated)
       let updatedArtifact: ArtifactElasticsearchProperties | undefined;
       await retry.waitForWithTimeout('fleet artifact is updated', 120_000, async () => {
-        const artifacts = await endpointArtifactsTestResources.getArtifacts();
+        const artifacts = await endpointArtifactsTestResources.getArtifactsFromUnifiedManifestSO();
 
+        // This expects manifest artifact to come from unified so
         const manifestArtifact = artifacts.find((artifact) => {
           return (
-            artifact.artifactId ===
-              `${expectedArtifact.identifier}-${expectedArtifact.decoded_sha256}` &&
-            artifact.policyId === policy?.packagePolicy.id
+            artifact.artifactIds.includes(
+              `${expectedArtifact.identifier}-${expectedArtifact.decoded_sha256}`
+            ) && artifact.policyId === policy?.packagePolicy.id
           );
         });
 
@@ -151,15 +149,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       suffix?: string
     ) => {
       for (const formAction of actions) {
-        if (formAction.type === 'customClick') {
-          await find.clickByCssSelector(formAction.selector, testSubjects.FIND_TIME);
-        } else if (formAction.type === 'click') {
+        if (formAction.type === 'click') {
           await testSubjects.click(formAction.selector);
         } else if (formAction.type === 'input') {
-          await testSubjects.setValue(
-            formAction.selector,
-            (formAction.value || '') + (suffix ? suffix : '')
-          );
+          const newValue = (formAction.value || '') + (suffix ? suffix : '');
+          await testSubjects.setValue(formAction.selector, newValue);
+          await testSubjects.getAttribute(formAction.selector, 'value').then((value) => {
+            if (value !== newValue) {
+              return testSubjects.setValue(formAction.selector, newValue);
+            }
+          });
         } else if (formAction.type === 'clear') {
           await (
             await (await testSubjects.find(formAction.selector)).findByCssSelector('button')
@@ -190,7 +189,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       if (options?.policyId) {
         await testSubjects.click(`${actions.pageObject}-form-effectedPolicies-perPolicy`);
-        await testSubjects.click(`policy-${options.policyId}-checkbox`);
+        await testSubjects.click(
+          `${actions.pageObject}-form-effectedPolicies-policiesSelector-policy-${options.policyId}-checkbox`
+        );
       }
 
       // Submit create artifact form
@@ -209,7 +210,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       if (options?.policyId) {
         await testSubjects.click(`${actions.pageObject}-form-effectedPolicies-perPolicy`);
-        await testSubjects.click(`policy-${options.policyId}-checkbox`);
+        await testSubjects.click(
+          `${actions.pageObject}-form-effectedPolicies-policiesSelector-policy-${options.policyId}-checkbox`
+        );
       }
 
       // Submit edit artifact form
@@ -217,7 +220,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     for (const testData of getArtifactsListTestsData()) {
-      describe(`When on the ${testData.title} entries list`, function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/219465
+      describe.skip(`When on the ${testData.title} entries list`, function () {
         beforeEach(async () => {
           policyInfo = await policyTestResources.createPolicy();
           await removeAllArtifacts();
@@ -244,7 +248,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               checkResult.value
             );
           }
-          await pageObjects.common.closeToast();
+          await toasts.dismiss();
 
           // Title is shown after adding an item
           expect(await testSubjects.getVisibleText('header-page-title')).to.equal(testData.title);
@@ -259,11 +263,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it(`should be able to update an existing ${testData.title} entry`, async () => {
-          await createArtifact(testData);
+          await endpointArtifactsTestResources.createArtifact(testData.listId, testData.createBody);
+          await browser.refresh();
+
           await updateArtifact(testData, { policyId: policyInfo.packagePolicy.id });
 
           // Check edited artifact is in the list with new values (wait for list to be updated)
-          await retry.waitForWithTimeout('entry is updated in list', 10000, async () => {
+          await retry.waitForWithTimeout('entry is updated in list', 20000, async () => {
             const currentValue = await testSubjects.getVisibleText(
               `${testData.pagePrefix}-card-criteriaConditions${
                 testData.pagePrefix === 'EventFiltersListPage' ? '-condition' : ''
@@ -278,7 +284,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             );
           }
 
-          await pageObjects.common.closeToast();
+          await toasts.dismiss();
 
           // Title still shown after editing an item
           expect(await testSubjects.getVisibleText('header-page-title')).to.equal(testData.title);
@@ -293,7 +299,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it(`should be able to delete the existing ${testData.title} entry`, async () => {
-          await createArtifact(testData);
+          await endpointArtifactsTestResources.createArtifact(testData.listId, testData.createBody);
+          await browser.refresh();
+
           await deleteArtifact(testData);
           // We only expect one artifact to have been visible
           await testSubjects.missingOrFail(testData.delete.card);
@@ -330,13 +338,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       const testData = getCreateMultipleData();
-      it(`should get correct atifact when multiple entries are created`, async () => {
+      it(`should get correct artifact when multiple entries are created`, async () => {
         // Create first trusted app
         await createArtifact(testData, {
           policyId: firstPolicy.packagePolicy.id,
           suffix: firstSuffix,
         });
-        await pageObjects.common.closeToast();
+        await toasts.dismiss();
 
         // Create second trusted app
         await createArtifact(testData, {
@@ -344,11 +352,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           suffix: secondSuffix,
           createButton: 'pageAddButton',
         });
-        await pageObjects.common.closeToast();
+        await toasts.dismiss();
 
         // Create third trusted app
         await createArtifact(testData, { suffix: thirdSuffix, createButton: 'pageAddButton' });
-        await pageObjects.common.closeToast();
+        await toasts.dismiss();
 
         // Checks if fleet artifact has been updated correctly
         await checkFleetArtifacts(

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createFlagError } from '@kbn/dev-cli-errors';
@@ -40,7 +41,7 @@ run(
           })
       : [{ name: path.parse(journeyPath).name, path: journeyPath }];
 
-    const skippedFilePath = 'x-pack/test/scalability/disabled_scalability_tests.json';
+    const skippedFilePath = 'x-pack/platform/test/scalability/disabled_scalability_tests.json';
     const skipped: string[] = JSON.parse(
       fs.readFileSync(path.resolve(REPO_ROOT, skippedFilePath), 'utf8')
     ).map((relativePath: string) => path.resolve(REPO_ROOT, relativePath));
@@ -88,7 +89,7 @@ run(
         cmd: 'node',
         args: [
           'scripts/functional_tests',
-          ['--config', 'x-pack/test/scalability/config.ts'],
+          ['--config', 'x-pack/platform/test/scalability/config.ts'],
           kibanaBuildDir ? ['--kibana-install-dir', kibanaBuildDir] : [],
           '--debug',
           '--logToFile',

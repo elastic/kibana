@@ -9,6 +9,8 @@ import expect from '@kbn/expect';
 import { createScenarios as createAPIScenarios } from '../../reporting_api_integration/services/scenarios';
 import { FtrProviderContext } from '../ftr_provider_context';
 
+const GENERATE_CSV_DATA_TEST_SUBJ = 'embeddablePanelAction-generateCsvReport';
+
 export function createScenarios(
   context: Pick<FtrProviderContext, 'getPageObjects' | 'getService'>
 ) {
@@ -26,6 +28,7 @@ export function createScenarios(
     'dashboard',
     'discover',
     'canvas',
+    'exports',
   ]);
   const scenariosAPI = createAPIScenarios(context);
 
@@ -74,72 +77,71 @@ export function createScenarios(
     await PageObjects.canvas.loadFirstWorkpad(title);
   };
 
-  const getSavedSearchPanel = async (savedSearchTitle: string) => {
-    return await testSubjects.find(`embeddablePanelHeading-${savedSearchTitle.replace(' ', '')}`);
-  };
-  const tryDashboardDownloadCsvFail = async (savedSearchTitle: string) => {
-    const savedSearchPanel = await getSavedSearchPanel(savedSearchTitle);
-    await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
-    await dashboardPanelActions.clickContextMenuMoreItem();
-    const actionItemTestSubj = 'embeddablePanelAction-downloadCsvReport';
-    await testSubjects.existOrFail(actionItemTestSubj);
-    /* wait for the full panel to display or else the test runner could click the wrong option! */ await testSubjects.click(
-      actionItemTestSubj
+  const tryDashboardGenerateCsvFail = async (savedSearchTitle: string) => {
+    await dashboardPanelActions.clickPanelActionByTitle(
+      GENERATE_CSV_DATA_TEST_SUBJ,
+      savedSearchTitle
     );
-    await testSubjects.existOrFail('downloadCsvFail');
+    await testSubjects.existOrFail('generateCsvFail');
   };
-  const tryDashboardDownloadCsvNotAvailable = async (savedSearchTitle: string) => {
-    const savedSearchPanel = await getSavedSearchPanel(savedSearchTitle);
-    await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
-    await dashboardPanelActions.clickContextMenuMoreItem();
-    await testSubjects.missingOrFail('embeddablePanelAction-downloadCsvReport');
-  };
-  const tryDashboardDownloadCsvSuccess = async (savedSearchTitle: string) => {
-    const savedSearchPanel = await getSavedSearchPanel(savedSearchTitle);
-    await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
-    await dashboardPanelActions.clickContextMenuMoreItem();
-    const actionItemTestSubj = 'embeddablePanelAction-downloadCsvReport';
-    await testSubjects.existOrFail(actionItemTestSubj);
-    /* wait for the full panel to display or else the test runner could click the wrong option! */ await testSubjects.click(
-      actionItemTestSubj
+  const tryDashboardGenerateCsvNotAvailable = async (savedSearchTitle: string) => {
+    await dashboardPanelActions.expectMissingPanelAction(
+      GENERATE_CSV_DATA_TEST_SUBJ,
+      savedSearchTitle
     );
-    await testSubjects.existOrFail('csvDownloadStarted'); /* validate toast panel */
+  };
+  const tryDashboardGenerateCsvSuccess = async (savedSearchTitle: string) => {
+    await dashboardPanelActions.expectExistsPanelAction(
+      GENERATE_CSV_DATA_TEST_SUBJ,
+      savedSearchTitle
+    );
+    await dashboardPanelActions.clickPanelActionByTitle(
+      GENERATE_CSV_DATA_TEST_SUBJ,
+      savedSearchTitle
+    );
+    await testSubjects.existOrFail('csvReportStarted'); /* validate toast panel */
   };
   const tryDiscoverCsvFail = async () => {
-    await PageObjects.reporting.openCsvReportingPanel();
+    await PageObjects.reporting.openExportPopover();
     await PageObjects.reporting.clickGenerateReportButton();
     const queueReportError = await PageObjects.reporting.getQueueReportError();
     expect(queueReportError).to.be(true);
   };
+
   const tryDiscoverCsvNotAvailable = async () => {
-    await PageObjects.share.clickShareTopNavButton();
-    await testSubjects.missingOrFail('sharePanel-CSVReports');
+    expect(await PageObjects.exports.exportButtonExists()).to.be(false);
   };
+
   const tryDiscoverCsvSuccess = async () => {
-    await PageObjects.reporting.openCsvReportingPanel();
+    await PageObjects.reporting.openExportPopover();
+    await PageObjects.exports.clickPopoverItem('CSV');
     expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
   };
   const tryGeneratePdfFail = async () => {
-    await PageObjects.reporting.openPdfReportingPanel();
+    await PageObjects.reporting.openExportPopover();
+    await PageObjects.reporting.selectExportItem('PDF');
     await PageObjects.reporting.clickGenerateReportButton();
     const queueReportError = await PageObjects.reporting.getQueueReportError();
     expect(queueReportError).to.be(true);
   };
   const tryGeneratePdfNotAvailable = async () => {
-    PageObjects.share.clickShareTopNavButton();
-    await testSubjects.missingOrFail(`sharePanel-PDFReports`);
+    await PageObjects.exports.clickExportTopNavButton();
+    await testSubjects.missingOrFail(`exportMenuItem-PDF`);
   };
   const tryGeneratePdfSuccess = async () => {
-    await PageObjects.reporting.openPdfReportingPanel();
+    await PageObjects.reporting.openExportPopover();
+    await PageObjects.reporting.selectExportItem('PDF');
     expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
   };
   const tryGeneratePngSuccess = async () => {
-    await PageObjects.reporting.openPngReportingPanel();
+    await PageObjects.reporting.openExportPopover();
+    await PageObjects.reporting.selectExportItem('PNG');
     expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
   };
+
   const tryReportsNotAvailable = async () => {
     await PageObjects.share.clickShareTopNavButton();
-    await testSubjects.missingOrFail('sharePanel-Reports');
+    await testSubjects.missingOrFail('Export');
   };
 
   return {
@@ -148,9 +150,9 @@ export function createScenarios(
     openSavedDashboard,
     openSavedSearch,
     openCanvasWorkpad,
-    tryDashboardDownloadCsvFail,
-    tryDashboardDownloadCsvNotAvailable,
-    tryDashboardDownloadCsvSuccess,
+    tryDashboardGenerateCsvFail,
+    tryDashboardGenerateCsvNotAvailable,
+    tryDashboardGenerateCsvSuccess,
     tryDiscoverCsvFail,
     tryDiscoverCsvNotAvailable,
     tryDiscoverCsvSuccess,

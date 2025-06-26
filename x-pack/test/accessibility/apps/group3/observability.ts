@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('observability');
     });
 
-    describe('Overview', async () => {
+    describe('Overview', () => {
       before(async () => {
         await observability.overview.common.openAlertsSectionAndWaitToAppear();
         await a11y.testAppSnapshot();

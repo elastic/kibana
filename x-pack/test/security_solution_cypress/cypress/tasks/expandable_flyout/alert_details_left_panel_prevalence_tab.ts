@@ -5,12 +5,21 @@
  * 2.0.
  */
 
-import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON } from '../../screens/expandable_flyout/alert_details_left_panel_prevalence_tab';
+import {
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE_TYPE_CELL,
+} from '../../screens/expandable_flyout/alert_details_left_panel_prevalence_tab';
 
 /**
  * Open the Prevalence tab under the Visualize tab in the document details expandable flyout left section
  */
 export const openPrevalenceTab = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON).scrollIntoView();
-  cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON).should('be.visible').click();
+  cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON).click();
+};
+
+/**
+ * Open timeline from a prevalence detail table cell
+ */
+export const openTimelineFromPrevalenceTableCell = () => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE_TYPE_CELL).first().click();
 };

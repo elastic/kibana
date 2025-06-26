@@ -9,7 +9,7 @@ import { createTestConfig } from '../../config.base';
 
 /**
  * Make sure to create a MKI deployment with custom Kibana image, that includes feature flags arguments
- * This tests most likely will fail on default MKI project
+ * These tests most likely will fail on default MKI project
  */
 export default createTestConfig({
   serverlessProject: 'security',
@@ -24,5 +24,5 @@ export default createTestConfig({
 
   // include settings from project controller
   // https://github.com/elastic/project-controller/blob/main/internal/project/security/config/elasticsearch.yml
-  esServerArgs: ['xpack.ml.nlp.enabled=false'],
+  esServerArgs: ['xpack.ml.nlp.enabled=true'],
 });

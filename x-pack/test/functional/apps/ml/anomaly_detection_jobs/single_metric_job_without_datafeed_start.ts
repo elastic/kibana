@@ -73,8 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('job creation loads the single metric wizard for the source data', async () => {
       await ml.testExecution.logTestStep('job creation loads the job management page');
-      await ml.navigation.navigateToMl();
-      await ml.navigation.navigateToJobManagement();
+      await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
       await ml.testExecution.logTestStep('job creation loads the new job source selection page');
       await ml.jobManagement.navigateToNewJobSourceSelection();
@@ -89,6 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('job creation navigates through the single metric wizard and sets all needed fields', async () => {
       await ml.testExecution.logTestStep('job creation displays the time range step');
       await ml.jobWizardCommon.assertTimeRangeSectionExists();
+      await ml.commonUI.assertDatePickerDataTierOptionsVisible(true);
 
       await ml.testExecution.logTestStep('job creation sets the time range');
       await ml.jobWizardCommon.clickUseFullDataButton(
@@ -142,7 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
       await ml.jobTable.assertJobRowFields(jobId, getExpectedRow(jobId));
 
-      await ml.jobTable.assertJobRowDetailsCounts(
+      await ml.jobExpandedDetails.assertJobRowDetailsCounts(
         jobId,
         getExpectedCounts(jobId),
         getExpectedModelSizeStats(jobId)

@@ -1,0 +1,52 @@
+## DATE_TRUNC
+
+The `DATE_TRUNC` function rounds down a date to the closest specified interval.
+
+## Syntax
+
+`DATE_TRUNC(interval, date)`
+
+### Parameters
+
+#### `interval`
+
+The interval to which the date is rounded down, expressed using the timespan literal syntax.
+
+#### `date`
+
+The date expression to be truncated.
+
+## Examples
+
+Truncate hire dates to the year
+
+```esql
+FROM employees
+| KEEP first_name, last_name, hire_date
+| EVAL year_hired = DATE_TRUNC(1 year, hire_date)
+```
+
+This example truncates the `hire_date` field to the beginning of the year and stores the result in a new column named `year_hired`.
+
+Number of hires per year
+
+```esql
+FROM employees
+| EVAL year = DATE_TRUNC(1 year, hire_date)
+| STATS hires = COUNT(emp_no) BY year
+| SORT year
+```
+
+This example calculates the number of hires per year by truncating the `hire_date` field to the year and grouping the results.
+
+Hourly error rate
+
+```esql
+FROM sample_data
+| EVAL error = CASE(message LIKE "*error*", 1, 0)
+| EVAL hour = DATE_TRUNC(1 hour, @timestamp)
+| STATS error_rate = AVG(error) BY hour
+| SORT hour
+```
+
+This example calculates the hourly error rate by truncating the `@timestamp` field to the hour and averaging the `error` values for each hour.

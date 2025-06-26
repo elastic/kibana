@@ -1,0 +1,29 @@
+# MV_PSERIES_WEIGHTED_SUM
+
+Converts a multivalued expression into a single-valued column by multiplying each element in the input list by its corresponding term in the P-Series and computing the sum.
+
+## Syntax
+
+`MV_PSERIES_WEIGHTED_SUM(number, p)`
+
+### Parameters
+
+#### `number`
+
+A multivalue expression.
+
+#### `p`
+
+A constant number representing the *p* parameter in the P-Series. It determines the impact of each element’s contribution to the weighted sum.
+
+## Examples
+
+Calculating the weighted sum of a multivalued column
+
+```esql
+ROW a = [70.0, 45.0, 21.0, 21.0, 21.0]
+| EVAL sum = MV_PSERIES_WEIGHTED_SUM(a, 1.5)
+| KEEP sum
+```
+
+This example calculates the weighted sum of the multivalued column `a` using a P-Series parameter of `1.5`. The result is stored in the `sum` column.

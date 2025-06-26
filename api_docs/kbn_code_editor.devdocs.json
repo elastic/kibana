@@ -31,7 +31,7 @@
           "\nRenders a Monaco code editor with EUI color theme.\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "@kbn/code-editor",
             "scope": "common",
@@ -39,31 +39,29 @@
             "section": "def-common.CodeEditorProps",
             "text": "CodeEditorProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/code_editor/impl/index.tsx",
+        "path": "src/platform/packages/shared/shared-ux/code_editor/impl/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/code-editor",
             "id": "def-common.CodeEditor.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/code-editor",
                 "scope": "common",
                 "docId": "kibKbnCodeEditorPluginApi",
                 "section": "def-common.CodeEditorProps",
                 "text": "CodeEditorProps"
-              },
-              ">"
+              }
             ],
-            "path": "packages/shared-ux/code_editor/impl/index.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -82,7 +80,7 @@
           "\nRenders a Monaco code editor in the same style as other EUI form fields."
         ],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "@kbn/code-editor",
             "scope": "common",
@@ -90,31 +88,29 @@
             "section": "def-common.CodeEditorProps",
             "text": "CodeEditorProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/code_editor/impl/index.tsx",
+        "path": "src/platform/packages/shared/shared-ux/code_editor/impl/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/code-editor",
             "id": "def-common.CodeEditorField.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/code-editor",
                 "scope": "common",
                 "docId": "kibKbnCodeEditorPluginApi",
                 "section": "def-common.CodeEditorProps",
                 "text": "CodeEditorProps"
-              },
-              ">"
+              }
             ],
-            "path": "packages/shared-ux/code_editor/impl/index.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -132,7 +128,7 @@
         "tags": [],
         "label": "CodeEditorProps",
         "description": [],
-        "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+        "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -148,7 +144,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -164,7 +160,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -177,7 +173,7 @@
             "description": [
               "ID of the editor language"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -190,7 +186,7 @@
             "description": [
               "Value of the editor"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -208,7 +204,7 @@
               "editor",
               ".IModelContentChangedEvent) => void) | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -222,7 +218,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+                "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -238,7 +234,7 @@
                   "editor",
                   ".IModelContentChangedEvent"
                 ],
-                "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+                "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -253,13 +249,13 @@
             "tags": [],
             "label": "options",
             "description": [
-              "\nOptions for the Monaco Code Editor\nDocumentation of options can be found here:\nhttps://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.istandaloneeditorconstructionoptions.html"
+              "\nOptions for the Monaco Code Editor\nDocumentation of options can be found here:\nhttps://microsoft.github.io/monaco-editor/docs.html#interfaces/editor.IStandaloneEditorConstructionOptions.html"
             ],
             "signature": [
               "editor",
               ".IStandaloneEditorConstructionOptions | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -270,13 +266,13 @@
             "tags": [],
             "label": "suggestionProvider",
             "description": [
-              "\nSuggestion provider for autocompletion\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.completionitemprovider.html"
+              "\nSuggestion provider for autocompletion\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.CompletionItemProvider.html"
             ],
             "signature": [
               "languages",
               ".CompletionItemProvider | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -287,13 +283,13 @@
             "tags": [],
             "label": "signatureProvider",
             "description": [
-              "\nSignature provider for function parameter info\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.signaturehelpprovider.html"
+              "\nSignature provider for function parameter info\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.SignatureHelpProvider.html"
             ],
             "signature": [
               "languages",
               ".SignatureHelpProvider | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -304,13 +300,13 @@
             "tags": [],
             "label": "hoverProvider",
             "description": [
-              "\nHover provider for hover documentation\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.hoverprovider.html"
+              "\nHover provider for hover documentation\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.HoverProvider.html"
             ],
             "signature": [
               "languages",
               ".HoverProvider | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -321,13 +317,30 @@
             "tags": [],
             "label": "languageConfiguration",
             "description": [
-              "\nLanguage config provider for bracket\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.languageconfiguration.html"
+              "\nLanguage config provider for bracket\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.LanguageConfiguration.html"
             ],
             "signature": [
               "languages",
               ".LanguageConfiguration | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.codeActions",
+            "type": "Object",
+            "tags": [],
+            "label": "codeActions",
+            "description": [
+              "\nCodeAction provider for code actions on markers feedback\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.CodeActionProvider.html"
+            ],
+            "signature": [
+              "languages",
+              ".CodeActionProvider | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -343,7 +356,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -361,7 +374,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -381,7 +394,7 @@
               "editor",
               ".IStandaloneCodeEditor) => void) | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -396,7 +409,7 @@
                   "editor",
                   ".IStandaloneCodeEditor"
                 ],
-                "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+                "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -406,19 +419,19 @@
           },
           {
             "parentPluginId": "@kbn/code-editor",
-            "id": "def-common.CodeEditorProps.useDarkTheme",
-            "type": "CompoundType",
+            "id": "def-common.CodeEditorProps.editorWillUnmount",
+            "type": "Function",
             "tags": [],
-            "label": "useDarkTheme",
-            "description": [
-              "\nShould the editor use the dark theme"
-            ],
+            "label": "editorWillUnmount",
+            "description": [],
             "signature": [
-              "boolean | undefined"
+              "(() => void) | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/code-editor",
@@ -432,7 +445,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -448,7 +461,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -462,7 +475,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -478,7 +491,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -492,7 +505,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -506,7 +519,143 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.readOnlyMessage",
+            "type": "string",
+            "tags": [],
+            "label": "readOnlyMessage",
+            "description": [
+              "\nAlternate text to display, when an attempt is made to edit read only content. (Defaults to \"Cannot edit in read-only editor\")"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.fitToContent",
+            "type": "Object",
+            "tags": [],
+            "label": "fitToContent",
+            "description": [
+              "\nEnables the editor to grow vertically to fit its content.\nThis option overrides the `height` option."
+            ],
+            "signature": [
+              "{ minLines?: number | undefined; maxLines?: number | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.accessibilityOverlayEnabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accessibilityOverlayEnabled",
+            "description": [
+              "\nEnables the editor to get disabled when pressing ESC to resolve focus trapping for accessibility."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.enableFindAction",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "enableFindAction",
+            "description": [
+              "\nEnables the Search bar functionality in the editor. Disabled by default."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.classNameCss",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "classNameCss",
+            "description": [
+              "\nCustom CSS class to apply to the container"
+            ],
+            "signature": [
+              "InterpolationPrimitive",
+              " | ",
+              "ArrayInterpolation",
+              "<",
+              "Theme",
+              "> | ",
+              "FunctionInterpolation",
+              "<",
+              "Theme",
+              ">"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.enableCustomContextMenu",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "enableCustomContextMenu",
+            "description": [
+              "\nEnables a custom context menu with Cut, Copy, Paste actions. Disabled by default."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.customContextMenuActions",
+            "type": "Array",
+            "tags": [],
+            "label": "customContextMenuActions",
+            "description": [
+              "\nIf the custom context menu is enable through {@link enableCustomContextMenu},\nthis prop allows adding more custom menu actions, on top of the default Cut, Copy, and Paste actions."
+            ],
+            "signature": [
+              "ContextMenuAction",
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -518,95 +667,218 @@
     "misc": [
       {
         "parentPluginId": "@kbn/code-editor",
-        "id": "def-common.LANG",
+        "id": "def-common.CONSOLE_LANG_ID",
         "type": "string",
         "tags": [],
-        "label": "LANG",
+        "label": "CONSOLE_LANG_ID",
+        "description": [],
+        "signature": [
+          "\"console\""
+        ],
+        "path": "src/platform/packages/shared/kbn-monaco/src/languages/console/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/code-editor",
+        "id": "def-common.CONSOLE_OUTPUT_LANG_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONSOLE_OUTPUT_LANG_ID",
+        "description": [],
+        "signature": [
+          "\"consoleOutput\""
+        ],
+        "path": "src/platform/packages/shared/kbn-monaco/src/languages/console/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/code-editor",
+        "id": "def-common.ESQL_LANG_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ESQL_LANG_ID",
+        "description": [],
+        "signature": [
+          "\"esql\""
+        ],
+        "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/lib/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/code-editor",
+        "id": "def-common.ID",
+        "type": "string",
+        "tags": [],
+        "label": "ID",
         "description": [],
         "signature": [
           "\"css\""
         ],
-        "path": "packages/shared-ux/code_editor/impl/languages/css/constants.ts",
+        "path": "src/platform/packages/shared/kbn-monaco/src/languages/css/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/code-editor",
-        "id": "def-common.LANG",
+        "id": "def-common.ID",
         "type": "string",
         "tags": [],
-        "label": "LANG",
-        "description": [],
-        "signature": [
-          "\"markdown\""
-        ],
-        "path": "packages/shared-ux/code_editor/impl/languages/markdown/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/code-editor",
-        "id": "def-common.LANG",
-        "type": "string",
-        "tags": [],
-        "label": "LANG",
-        "description": [],
-        "signature": [
-          "\"yaml\""
-        ],
-        "path": "packages/shared-ux/code_editor/impl/languages/yaml/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/code-editor",
-        "id": "def-common.LANG",
-        "type": "string",
-        "tags": [],
-        "label": "LANG",
+        "label": "ID",
         "description": [],
         "signature": [
           "\"handlebars\""
         ],
-        "path": "packages/shared-ux/code_editor/impl/languages/handlebars/constants.ts",
+        "path": "src/platform/packages/shared/kbn-monaco/src/languages/handlebars/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/code-editor",
-        "id": "def-common.LANG",
+        "id": "def-common.ID",
         "type": "string",
         "tags": [],
-        "label": "LANG",
+        "label": "ID",
+        "description": [],
+        "signature": [
+          "\"markdown\""
+        ],
+        "path": "src/platform/packages/shared/kbn-monaco/src/languages/markdown/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/code-editor",
+        "id": "def-common.ID",
+        "type": "string",
+        "tags": [],
+        "label": "ID",
+        "description": [],
+        "signature": [
+          "\"yaml\""
+        ],
+        "path": "src/platform/packages/shared/kbn-monaco/src/languages/yaml/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/code-editor",
+        "id": "def-common.ID",
+        "type": "string",
+        "tags": [],
+        "label": "ID",
         "description": [],
         "signature": [
           "\"hjson\""
         ],
-        "path": "packages/shared-ux/code_editor/impl/languages/hjson/constants.ts",
+        "path": "src/platform/packages/shared/kbn-monaco/src/languages/hjson/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/code-editor",
-        "id": "def-common.LANG",
+        "id": "def-common.ID",
         "type": "string",
         "tags": [],
-        "label": "LANG",
+        "label": "ID",
         "description": [],
         "signature": [
           "\"grok\""
         ],
-        "path": "packages/shared-ux/code_editor/impl/languages/grok/constants.ts",
+        "path": "src/platform/packages/shared/kbn-monaco/src/languages/grok/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/code-editor",
+        "id": "def-common.ID",
+        "type": "string",
+        "tags": [],
+        "label": "ID",
+        "description": [],
+        "signature": [
+          "\"xjson\""
+        ],
+        "path": "src/platform/packages/shared/kbn-monaco/src/languages/xjson/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/code-editor",
+        "id": "def-common.ID",
+        "type": "string",
+        "tags": [],
+        "label": "ID",
+        "description": [],
+        "signature": [
+          "\"painless\""
+        ],
+        "path": "src/platform/packages/shared/kbn-monaco/src/languages/painless/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/code-editor",
+        "id": "def-common.ID",
+        "type": "string",
+        "tags": [],
+        "label": "ID",
+        "description": [],
+        "signature": [
+          "\"sql\""
+        ],
+        "path": "src/platform/packages/shared/kbn-monaco/src/languages/sql/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/code-editor",
+        "id": "def-common.monacoeditoresmvseditoreditor.api",
+        "type": "Object",
+        "tags": [],
+        "label": "'monaco-editor/esm/vs/editor/editor.api'",
+        "description": [],
+        "signature": [
+          "typeof ",
+          "node_modules/monaco-editor/esm/vs/editor/editor.api"
+        ],
+        "path": "src/platform/packages/shared/kbn-monaco/src/monaco_imports.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/code-editor",
+        "id": "def-common.monacoeditoresmvseditoreditor.api",
+        "type": "Object",
+        "tags": [],
+        "label": "'monaco-editor/esm/vs/editor/editor.api'",
+        "description": [],
+        "signature": [
+          "typeof ",
+          "node_modules/monaco-editor/esm/vs/editor/editor.api"
+        ],
+        "path": "src/platform/packages/shared/kbn-monaco/src/register_globals.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

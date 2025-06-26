@@ -1,0 +1,198 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ReindexStep renders 1`] = `
+<Fragment>
+  <EuiFlyoutBody>
+    <EuiText>
+      <p>
+        <MemoizedFormattedMessage
+          defaultMessage="The index will be read-only during reindexing. You won't be able to add, update, or delete documents until reindexing is complete. If you need to reindex to a new cluster, use the reindex API. {docsLink}"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexDescription"
+          values={
+            Object {
+              "docsLink": <EuiLink
+                href="https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-reindex"
+                target="_blank"
+              >
+                Learn more
+              </EuiLink>,
+            }
+          }
+        />
+      </p>
+      <p>
+        <MemoizedFormattedMessage
+          defaultMessage="Reindexing is performed in the background. You can return to the Upgrade Assistant to view progress or resume reindexing after a Kibana restart."
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.readonlyCallout.backgroundResumeDetail"
+        />
+      </p>
+    </EuiText>
+    <EuiSpacer />
+    <ReindexProgress
+      cancelReindex={[MockFunction]}
+      reindexState={
+        Object {
+          "errorMessage": null,
+          "hasRequiredPrivileges": true,
+          "lastCompletedStep": undefined,
+          "loadingState": 1,
+          "meta": Object {
+            "aliases": Array [],
+            "indexName": "myIndex",
+            "isClosedIndex": false,
+            "isFollowerIndex": false,
+            "isFrozen": false,
+            "isInDataStream": false,
+            "isReadonly": false,
+            "reindexName": "reindexed-myIndex",
+          },
+          "reindexTaskPercComplete": null,
+          "reindexWarnings": Array [],
+          "status": undefined,
+        }
+      }
+    />
+  </EuiFlyoutBody>
+  <EuiFlyoutFooter>
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          flush="left"
+          iconType="cross"
+          onClick={[MockFunction]}
+        >
+          <MemoizedFormattedMessage
+            defaultMessage="Close"
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.closeButtonLabel"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexGroup
+        gutterSize="s"
+        justifyContent="flexEnd"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButton
+            color="primary"
+            data-test-subj="startReindexingButton"
+            disabled={false}
+            fill={true}
+            isLoading={false}
+            onClick={[MockFunction]}
+          >
+            <MemoizedFormattedMessage
+              defaultMessage="Start reindexing"
+              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexButton.runReindexLabel"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
+</Fragment>
+`;
+
+exports[`ReindexStep renders for frozen indices 1`] = `
+<Fragment>
+  <EuiFlyoutBody>
+    <FrozenCallOut />
+    <EuiText>
+      <p>
+        <MemoizedFormattedMessage
+          defaultMessage="The index will be read-only during reindexing. You won't be able to add, update, or delete documents until reindexing is complete. If you need to reindex to a new cluster, use the reindex API. {docsLink}"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexDescription"
+          values={
+            Object {
+              "docsLink": <EuiLink
+                href="https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-reindex"
+                target="_blank"
+              >
+                Learn more
+              </EuiLink>,
+            }
+          }
+        />
+      </p>
+      <p>
+        <MemoizedFormattedMessage
+          defaultMessage="Reindexing is performed in the background. You can return to the Upgrade Assistant to view progress or resume reindexing after a Kibana restart."
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.readonlyCallout.backgroundResumeDetail"
+        />
+      </p>
+    </EuiText>
+    <EuiSpacer />
+    <ReindexProgress
+      cancelReindex={[MockFunction]}
+      reindexState={
+        Object {
+          "errorMessage": null,
+          "hasRequiredPrivileges": true,
+          "lastCompletedStep": undefined,
+          "loadingState": 1,
+          "meta": Object {
+            "aliases": Array [],
+            "indexName": "myIndex",
+            "isClosedIndex": false,
+            "isFollowerIndex": false,
+            "isFrozen": true,
+            "isInDataStream": false,
+            "isReadonly": false,
+            "reindexName": "reindexed-myIndex",
+          },
+          "reindexTaskPercComplete": null,
+          "reindexWarnings": Array [],
+          "status": undefined,
+        }
+      }
+    />
+  </EuiFlyoutBody>
+  <EuiFlyoutFooter>
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          flush="left"
+          iconType="cross"
+          onClick={[MockFunction]}
+        >
+          <MemoizedFormattedMessage
+            defaultMessage="Close"
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.closeButtonLabel"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexGroup
+        gutterSize="s"
+        justifyContent="flexEnd"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButton
+            color="primary"
+            data-test-subj="startReindexingButton"
+            disabled={false}
+            fill={true}
+            isLoading={false}
+            onClick={[MockFunction]}
+          >
+            <MemoizedFormattedMessage
+              defaultMessage="Start reindexing"
+              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexButton.runReindexLabel"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
+</Fragment>
+`;

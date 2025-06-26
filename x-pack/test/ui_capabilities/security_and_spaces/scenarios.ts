@@ -24,7 +24,7 @@ const NoKibanaPrivileges: User = {
   },
 };
 
-const Superuser: User = {
+export const Superuser: User = {
   username: 'superuser',
   fullName: 'superuser',
   password: 'superuser-password',
@@ -96,7 +96,7 @@ const DualPrivilegesRead: User = {
   },
 };
 
-const GlobalAll: User = {
+export const GlobalAll: User = {
   username: 'global_all',
   fullName: 'global_all',
   password: 'global_all-password',
@@ -227,6 +227,43 @@ const NothingSpaceRead: User = {
   },
 };
 
+export const ReadSecurity: User = {
+  username: 'read_security',
+  fullName: 'read_security',
+  password: 'read_security-password',
+  role: {
+    name: 'read_security_role',
+    kibana: [
+      {
+        base: ['all'],
+        spaces: ['*'],
+      },
+    ],
+    elasticsearch: {
+      cluster: ['read_security'],
+      indices: [],
+    },
+  },
+};
+
+export const ManageSecurity: User = {
+  username: 'manage_security',
+  fullName: 'manage_security',
+  password: 'manage_security-password',
+  role: {
+    name: 'manage_security_role',
+    kibana: [
+      {
+        base: ['all'],
+        spaces: ['*'],
+      },
+    ],
+    elasticsearch: {
+      cluster: ['manage_security'],
+    },
+  },
+};
+
 export const Users: User[] = [
   NoKibanaPrivileges,
   Superuser,
@@ -241,6 +278,8 @@ export const Users: User[] = [
   EverythingSpaceRead,
   NothingSpaceAll,
   NothingSpaceRead,
+  ReadSecurity,
+  ManageSecurity,
 ];
 
 const EverythingSpace: Space = {

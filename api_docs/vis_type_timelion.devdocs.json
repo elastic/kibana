@@ -14,7 +14,7 @@
       "tags": [],
       "label": "VisTypeTimelionPluginStart",
       "description": [],
-      "path": "src/plugins/vis_types/timelion/public/plugin.ts",
+      "path": "src/platform/plugins/private/vis_types/timelion/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -34,7 +34,7 @@
             "TimelionFunctionArgsSuggestion",
             "[]; }"
           ],
-          "path": "src/plugins/vis_types/timelion/public/plugin.ts",
+          "path": "src/platform/plugins/private/vis_types/timelion/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],

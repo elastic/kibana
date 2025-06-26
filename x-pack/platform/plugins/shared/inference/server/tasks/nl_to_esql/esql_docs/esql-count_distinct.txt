@@ -1,0 +1,52 @@
+## COUNT_DISTINCT
+
+The `COUNT_DISTINCT` function returns the approximate number of distinct values in a column or expression.
+
+## Syntax
+
+`COUNT_DISTINCT(field, precision)`
+
+### Parameters
+
+#### `field`
+
+The column or literal for which to count the number of distinct values.
+
+#### `precision`
+
+(Optional) The precision threshold. The maximum supported value is 40,000. Thresholds above this value will behave as if set to 40,000. The default value is 3,000. Higher precision thresholds may increase memory usage and processing time.
+
+## Examples
+
+Counting distinct values in multiple columns
+
+```esql
+FROM hosts
+| STATS COUNT_DISTINCT(ip0), COUNT_DISTINCT(ip1)
+```
+
+This example calculates the approximate number of distinct values in the `ip0` and `ip1` columns.
+
+Configuring the precision threshold
+
+```esql
+FROM hosts
+| STATS COUNT_DISTINCT(ip0, 80000), COUNT_DISTINCT(ip1, 5)
+```
+
+This example demonstrates how to specify a precision threshold for each column. The `ip0` column uses a high precision threshold of 80,000, while the `ip1` column uses a low threshold of 5.
+
+Counting distinct values from a split string
+
+```esql
+ROW words="foo;bar;baz;qux;quux;foo"
+| STATS distinct_word_count = COUNT_DISTINCT(SPLIT(words, ";"))
+```
+
+This example splits the `words` string into multiple values using the `SPLIT` function and counts the unique values. The result is the number of distinct words in the string.
+
+### Notes
+
+- Computing exact counts requires loading values into a set and returning its size, which doesn't scale well for high-cardinality sets or large values due to memory usage and communication overhead.
+- The HyperLogLog++ algorithm's accuracy depends on the leading zeros of hashed values, and the exact distributions of hashes in a dataset can affect the accuracy of the cardinality.
+- Even with a low threshold, the error remains very low (1-6%) even when counting millions of items.

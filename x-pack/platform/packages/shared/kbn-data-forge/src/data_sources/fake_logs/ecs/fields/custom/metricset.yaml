@@ -1,0 +1,11 @@
+- name: metricset
+  title: Metricset
+  description: >
+    Metricset data
+  type: group
+  fields:
+    - name: interval
+      type: long
+      level: custom
+      description: >
+        The interval of the data

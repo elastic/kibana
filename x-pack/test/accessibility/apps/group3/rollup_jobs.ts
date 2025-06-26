@@ -17,7 +17,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Stack management- rollup a11y tests', () => {
     const rollupJobName = `rollup${Date.now().toString()}`;
     before(async () => {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
       });
@@ -29,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    describe('create a rollup job wizard', async () => {
+    describe('create a rollup job wizard', () => {
       it('step 1 - logistics', async () => {
         await testSubjects.click('createRollupJobButton');
         await PageObjects.rollup.verifyStepIsActive(1);
@@ -86,7 +88,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         path: `/_rollup/job/${rollupJobName}`,
         method: 'DELETE',
       });
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
   });
 }

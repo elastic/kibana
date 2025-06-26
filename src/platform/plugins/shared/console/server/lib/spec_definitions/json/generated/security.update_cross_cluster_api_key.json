@@ -1,0 +1,21 @@
+{
+  "security.update_cross_cluster_api_key": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_security/cross_cluster/api_key/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-update-cross-cluster-api-key",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

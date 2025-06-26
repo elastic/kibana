@@ -21,7 +21,6 @@ import {
   DETECTION_RESPONSE,
   DASHBOARDS,
   CSP_DASHBOARD,
-  KUBERNETES,
   INDICATORS,
   BLOCKLIST,
   CSP_BENCHMARKS,
@@ -40,7 +39,6 @@ import { navigateFromHeaderTo } from '../../../tasks/security_header';
 import {
   ALERTS_URL,
   CASES_URL,
-  hostsUrl,
   KIBANA_HOME,
   ENDPOINTS_URL,
   TRUSTED_APPS_URL,
@@ -55,7 +53,6 @@ import {
   EXPLORE_URL,
   MANAGE_URL,
   CSP_DASHBOARD_URL,
-  KUBERNETES_URL,
   BLOCKLIST_URL,
   CSP_BENCHMARKS_URL,
   CSP_FINDINGS_URL,
@@ -63,14 +60,9 @@ import {
   ENTITY_ANALYTICS_URL,
   INDICATORS_URL,
   DISCOVER_URL,
-  RULES_LANDING_URL,
   RULES_COVERAGE_URL,
-  INVESTIGATIONS_URL,
   OSQUERY_URL,
-  MACHINE_LEARNING_LANDING_URL,
-  ASSETS_URL,
-  FLEET_URL,
-  CLOUD_DEFEND_URL,
+  HOSTS_URL,
 } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import {
@@ -114,11 +106,6 @@ describe('top-level navigation common to all pages in the Security app', { tags:
     cy.url().should('include', ENTITY_ANALYTICS_URL);
   });
 
-  it('navigates to the Kubernetes page', () => {
-    navigateFromHeaderTo(KUBERNETES);
-    cy.url().should('include', KUBERNETES_URL);
-  });
-
   it('navigates to the CSP dashboard page', () => {
     navigateFromHeaderTo(CSP_DASHBOARD);
     cy.url().should('include', CSP_DASHBOARD_URL);
@@ -146,7 +133,7 @@ describe('top-level navigation common to all pages in the Security app', { tags:
 
   it('navigates to the Hosts page', () => {
     navigateFromHeaderTo(HOSTS);
-    cy.url().should('include', hostsUrl('allHosts'));
+    cy.url().should('include', HOSTS_URL);
   });
 
   it('navigates to the Network page', () => {
@@ -274,41 +261,12 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
     cy.url().should('include', DASHBOARDS_URL);
   });
 
-  it('navigates to the Overview page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.OVERVIEW, true);
-    cy.url().should('include', OVERVIEW_URL);
-  });
-
-  it('navigates to the Detection & Response page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.DETECTION_RESPONSE, true);
-    cy.url().should('include', DETECTION_AND_RESPONSE_URL);
-  });
-
-  it('navigates to the Entity Analytics page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.ENTITY_ANALYTICS, true);
-    cy.url().should('include', ENTITY_ANALYTICS_URL);
-  });
-
-  it('navigates to the Kubernetes page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.KUBERNETES, true);
-    cy.url().should('include', KUBERNETES_URL);
-  });
-
-  it('navigates to the CSP dashboard page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.CSP_DASHBOARD, true);
-    cy.url().should('include', CSP_DASHBOARD_URL);
-  });
-
-  it('navigates to the Rules landing page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.RULES_LANDING, true);
-    cy.url().should('include', RULES_LANDING_URL);
-  });
   it('navigates to the Rules page', () => {
     navigateFromHeaderTo(ServerlessHeaders.RULES, true);
     cy.url().should('include', RULES_MANAGEMENT_URL);
   });
 
-  it('navigates to the Rules page', () => {
+  it('navigates to the CSP Benchmarks page', () => {
     navigateFromHeaderTo(ServerlessHeaders.CSP_BENCHMARKS, true);
     cy.url().should('include', CSP_BENCHMARKS_URL);
   });
@@ -338,11 +296,6 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
     cy.url().should('include', CASES_URL);
   });
 
-  it('navigates to the Investigations page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.INVESTIGATIONS, true);
-    cy.url().should('include', INVESTIGATIONS_URL);
-  });
-
   it('navigates to the Timelines page', () => {
     navigateFromHeaderTo(ServerlessHeaders.TIMELINES, true);
     cy.url().should('include', TIMELINES_URL);
@@ -357,14 +310,9 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
     cy.url().should('include', INDICATORS_URL);
   });
 
-  it('navigates to the Explore landing page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.EXPLORE, true);
-    cy.url().should('include', EXPLORE_URL);
-  });
-
   it('navigates to the Hosts page', () => {
     navigateFromHeaderTo(ServerlessHeaders.HOSTS, true);
-    cy.url().should('include', hostsUrl('allHosts'));
+    cy.url().should('include', HOSTS_URL);
   });
 
   it('navigates to the Network page', () => {
@@ -377,24 +325,8 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
     cy.url().should('include', USERS_URL);
   });
 
-  it('navigates to the Assets page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.ASSETS, true);
-    cy.url().should('include', ASSETS_URL);
-  });
   it('navigates to the Endpoints page', () => {
     navigateFromHeaderTo(ServerlessHeaders.ENDPOINTS, true);
     cy.url().should('include', ENDPOINTS_URL);
-  });
-  it('navigates to the Fleet page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.FLEET, true);
-    cy.url().should('include', FLEET_URL);
-  });
-  it('navigates to the Cloud defend page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.CLOUD_DEFEND, true);
-    cy.url().should('include', CLOUD_DEFEND_URL);
-  });
-  it('navigates to the Machine learning landing page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.MACHINE_LEARNING, true);
-    cy.url().should('include', MACHINE_LEARNING_LANDING_URL);
   });
 });

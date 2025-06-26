@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { readFile } from 'fs/promises';
@@ -36,10 +37,14 @@ export async function generateNoticeFromSource({ productName, directory, log }: 
   const select = [
     '**/*.{js,mjs,scss,css,ts,tsx}',
     '!{node_modules,build,dist,data,built_assets,shared_built_assets}/**',
-    '!packages/*/{node_modules,build,dist}/**',
+    '!packages/**/{node_modules,build,dist}/**',
     '!src/plugins/*/{node_modules,build,dist}/**',
+    '!src/core/packages/**/{node_modules,build,dist}/**',
+    '!src/platform/**/{node_modules,build,dist}/**',
     '!x-pack/{node_modules,build,dist,data}/**',
-    '!x-pack/packages/*/{node_modules,build,dist}/**',
+    '!x-pack/packages/**/{node_modules,build,dist}/**',
+    '!x-pack/platform/**/{node_modules,build,dist}/**',
+    '!x-pack/solutions/**/{node_modules,build,dist}/**',
     '!x-pack/plugins/**/{node_modules,build,dist}/**',
     '!**/target/**',
   ];

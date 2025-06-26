@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { DynamicSettings } from '@kbn/synthetics-plugin/common/runtime_types';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '@kbn/synthetics-plugin/common/constants';
+import { DynamicSettings } from '@kbn/uptime-plugin/common/runtime_types';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '@kbn/uptime-plugin/common/constants';
+import { makeChecks } from '@kbn/test-suites-xpack-observability/api_integration/apis/uptime/rest/helper/make_checks';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { makeChecks } from '../../../api_integration/apis/uptime/rest/helper/make_checks';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const { uptime: uptimePage } = getPageObjects(['uptime']);

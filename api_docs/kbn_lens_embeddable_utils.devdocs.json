@@ -42,7 +42,7 @@
             "text": "ChartColumn"
           }
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/formula.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/formula.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -56,7 +56,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/formula.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/formula.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -76,7 +76,7 @@
                     "text": "FormulaValueConfig"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/formula.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/formula.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -101,7 +101,7 @@
                 "text": "FormulaValueConfig"
               }
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/formula.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/formula.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -148,7 +148,7 @@
                 "text": "PersistedIndexPatternLayer"
               }
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/formula.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/formula.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -162,7 +162,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/formula.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/formula.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -183,7 +183,7 @@
                     "text": "PersistedIndexPatternLayer"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/formula.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/formula.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -204,7 +204,7 @@
                     "text": "DataView"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/formula.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/formula.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -225,7 +225,7 @@
                     "text": "FormulaPublicApi"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/formula.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/formula.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -260,7 +260,7 @@
             "text": "VisualizationAttributesBuilder"
           }
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/lens_attributes_builder.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/lens_attributes_builder.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -274,7 +274,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/lens_attributes_builder.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/lens_attributes_builder.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -285,7 +285,7 @@
                 "tags": [],
                 "label": "lens",
                 "description": [],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/lens_attributes_builder.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/lens_attributes_builder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -299,7 +299,7 @@
                     "signature": [
                       "T"
                     ],
-                    "path": "packages/kbn-lens-embeddable-utils/attribute_builder/lens_attributes_builder.ts",
+                    "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/lens_attributes_builder.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -316,7 +316,59 @@
             "label": "build",
             "description": [],
             "signature": [
-              "() => LensAttributes<\"lnsXY\", ",
+              "() => { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: \"lnsXY\"; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -324,9 +376,113 @@
                 "section": "def-public.XYState",
                 "text": "XYState"
               },
-              "> | LensAttributes<\"lnsPie\", ",
+              "; }; } | { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: \"lnsPie\"; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: ",
               "PieVisualizationState",
-              "> | LensAttributes<\"lnsHeatmap\", ",
+              "; }; } | { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: \"lnsHeatmap\"; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -334,7 +490,59 @@
                 "section": "def-public.HeatmapVisualizationState",
                 "text": "HeatmapVisualizationState"
               },
-              "> | LensAttributes<\"lnsGauge\", ",
+              "; }; } | { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: \"lnsGauge\"; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -342,7 +550,59 @@
                 "section": "def-public.GaugeVisualizationState",
                 "text": "GaugeVisualizationState"
               },
-              "> | LensAttributes<\"lnsDatatable\", ",
+              "; }; } | { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: \"lnsDatatable\"; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -350,7 +610,59 @@
                 "section": "def-public.DatatableVisualizationState",
                 "text": "DatatableVisualizationState"
               },
-              "> | LensAttributes<\"lnsLegacyMetric\", ",
+              "; }; } | { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: \"lnsLegacyMetric\"; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
                 "scope": "common",
@@ -358,7 +670,59 @@
                 "section": "def-common.LegacyMetricState",
                 "text": "LegacyMetricState"
               },
-              "> | LensAttributes<\"lnsMetric\", ",
+              "; }; } | { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: \"lnsMetric\"; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -366,9 +730,61 @@
                 "section": "def-public.MetricVisualizationState",
                 "text": "MetricVisualizationState"
               },
-              "> | LensAttributes<string, unknown>"
+              "; }; } | { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: string; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: unknown; }; }"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/lens_attributes_builder.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/lens_attributes_builder.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -410,7 +826,7 @@
           },
           ">"
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/metric_chart.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/metric_chart.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -424,7 +840,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/metric_chart.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/metric_chart.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -461,7 +877,7 @@
                   },
                   ">>"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/metric_chart.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/metric_chart.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -479,7 +895,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/metric_chart.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/metric_chart.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -503,7 +919,7 @@
               },
               ", \"indexPatternId\">>"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/metric_chart.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/metric_chart.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -526,7 +942,7 @@
                 "text": "MetricVisualizationState"
               }
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/metric_chart.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/metric_chart.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -541,16 +957,10 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/metric_chart.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/metric_chart.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -574,7 +984,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/metric_chart.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/metric_chart.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -590,7 +1000,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/metric_chart.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/metric_chart.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -632,7 +1042,7 @@
           },
           ">"
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -646,7 +1056,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -666,7 +1076,7 @@
                     "text": "MetricLayerConfig"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -708,7 +1118,7 @@
               },
               ", \"indexPatternId\">>"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -722,7 +1132,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -737,7 +1147,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -758,7 +1168,7 @@
                     "text": "DataView"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -779,7 +1189,7 @@
                     "text": "FormulaPublicApi"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -804,16 +1214,10 @@
                 "text": "DataView"
               },
               ") => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -827,7 +1231,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -848,7 +1252,7 @@
                     "text": "DataView"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -873,7 +1277,7 @@
                 "text": "MetricVisualizationState"
               }
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -887,7 +1291,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -902,7 +1306,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -920,7 +1324,7 @@
             "signature": [
               "() => string | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -944,7 +1348,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -977,7 +1381,7 @@
             "text": "StaticChartColumn"
           }
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/static.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/static.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -991,7 +1395,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/static.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/static.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1011,7 +1415,7 @@
                     "text": "StaticValueConfig"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/static.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/static.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1036,7 +1440,7 @@
                 "text": "StaticValueConfig"
               }
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/static.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/static.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1067,7 +1471,7 @@
                 "text": "PersistedIndexPatternLayer"
               }
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/static.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/static.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1081,7 +1485,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/static.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/static.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1102,12 +1506,254 @@
                     "text": "PersistedIndexPatternLayer"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/static.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/columns/static.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/lens-embeddable-utils",
+        "id": "def-common.XYByValueAnnotationsLayer",
+        "type": "Class",
+        "tags": [],
+        "label": "XYByValueAnnotationsLayer",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.XYByValueAnnotationsLayer",
+            "text": "XYByValueAnnotationsLayer"
+          },
+          " implements ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.ChartLayer",
+            "text": "ChartLayer"
+          },
+          "<",
+          "XYByValueAnnotationLayerConfig",
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_by_value_annotation_layer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/lens-embeddable-utils",
+            "id": "def-common.XYByValueAnnotationsLayer.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_by_value_annotation_layer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-embeddable-utils",
+                "id": "def-common.XYByValueAnnotationsLayer.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "layerConfig",
+                "description": [],
+                "signature": [
+                  "XYByValueAnnotationsLayerConfig"
+                ],
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_by_value_annotation_layer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/lens-embeddable-utils",
+            "id": "def-common.XYByValueAnnotationsLayer.getName",
+            "type": "Function",
+            "tags": [],
+            "label": "getName",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_by_value_annotation_layer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/lens-embeddable-utils",
+            "id": "def-common.XYByValueAnnotationsLayer.getLayer",
+            "type": "Function",
+            "tags": [],
+            "label": "getLayer",
+            "description": [],
+            "signature": [
+              "(layerId: string) => Record<string, Omit<",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedLayer",
+                "text": "FormBasedLayer"
+              },
+              ", \"indexPatternId\">>"
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_by_value_annotation_layer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-embeddable-utils",
+                "id": "def-common.XYByValueAnnotationsLayer.getLayer.$1",
+                "type": "string",
+                "tags": [],
+                "label": "layerId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_by_value_annotation_layer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/lens-embeddable-utils",
+            "id": "def-common.XYByValueAnnotationsLayer.getReference",
+            "type": "Function",
+            "tags": [],
+            "label": "getReference",
+            "description": [],
+            "signature": [
+              "(layerId: string, chartDataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ") => ",
+              "SavedObjectReference",
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_by_value_annotation_layer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-embeddable-utils",
+                "id": "def-common.XYByValueAnnotationsLayer.getReference.$1",
+                "type": "string",
+                "tags": [],
+                "label": "layerId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_by_value_annotation_layer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/lens-embeddable-utils",
+                "id": "def-common.XYByValueAnnotationsLayer.getReference.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "chartDataView",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataView",
+                    "text": "DataView"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_by_value_annotation_layer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/lens-embeddable-utils",
+            "id": "def-common.XYByValueAnnotationsLayer.getLayerConfig",
+            "type": "Function",
+            "tags": [],
+            "label": "getLayerConfig",
+            "description": [],
+            "signature": [
+              "(layerId: string) => ",
+              "XYByValueAnnotationLayerConfig"
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_by_value_annotation_layer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-embeddable-utils",
+                "id": "def-common.XYByValueAnnotationsLayer.getLayerConfig.$1",
+                "type": "string",
+                "tags": [],
+                "label": "layerId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_by_value_annotation_layer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/lens-embeddable-utils",
+            "id": "def-common.XYByValueAnnotationsLayer.getDataView",
+            "type": "Function",
+            "tags": [],
+            "label": "getDataView",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_by_value_annotation_layer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -1146,7 +1792,7 @@
           },
           ">"
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1160,7 +1806,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1205,7 +1851,7 @@
                   },
                   " | undefined; }"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1223,7 +1869,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1247,7 +1893,7 @@
               },
               ", \"indexPatternId\">>"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1270,7 +1916,7 @@
                 "text": "XYState"
               }
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1285,16 +1931,10 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1318,7 +1958,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1334,7 +1974,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1376,7 +2016,7 @@
           },
           ">"
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1390,7 +2030,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1410,7 +2050,7 @@
                     "text": "XYDataLayerConfig"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1428,7 +2068,7 @@
             "signature": [
               "() => string | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1463,20 +2103,20 @@
                 "pluginId": "lens",
                 "scope": "public",
                 "docId": "kibLensPluginApi",
-                "section": "def-public.DateHistogramIndexPatternColumn",
-                "text": "DateHistogramIndexPatternColumn"
+                "section": "def-public.GenericIndexPatternColumn",
+                "text": "GenericIndexPatternColumn"
               },
               " | ",
               {
                 "pluginId": "lens",
                 "scope": "public",
                 "docId": "kibLensPluginApi",
-                "section": "def-public.GenericIndexPatternColumn",
-                "text": "GenericIndexPatternColumn"
+                "section": "def-public.DateHistogramIndexPatternColumn",
+                "text": "DateHistogramIndexPatternColumn"
               },
               "; }"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1496,7 +2136,7 @@
                     "text": "DataView"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1517,7 +2157,7 @@
                     "text": "XYLayerOptions"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1559,7 +2199,7 @@
               },
               ", \"indexPatternId\">>"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1573,7 +2213,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1588,7 +2228,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1609,7 +2249,7 @@
                     "text": "DataView"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1630,7 +2270,7 @@
                     "text": "FormulaPublicApi"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1655,16 +2295,10 @@
                 "text": "DataView"
               },
               ") => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1678,7 +2312,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1699,7 +2333,7 @@
                     "text": "DataView"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1724,7 +2358,7 @@
                 "text": "XYDataLayerConfig"
               }
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1738,7 +2372,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1753,7 +2387,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1779,7 +2413,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1821,7 +2455,7 @@
           },
           ">"
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1835,7 +2469,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1855,7 +2489,7 @@
                     "text": "XYReferenceLinesLayerConfig"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1873,7 +2507,7 @@
             "signature": [
               "() => string | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1897,7 +2531,7 @@
               },
               ", \"indexPatternId\">>"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1911,7 +2545,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1926,7 +2560,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1951,16 +2585,10 @@
                 "text": "DataView"
               },
               ") => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1974,7 +2602,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1995,7 +2623,7 @@
                     "text": "DataView"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2020,7 +2648,7 @@
                 "text": "XYReferenceLineLayerConfig"
               }
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2034,7 +2662,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2049,7 +2677,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2075,7 +2703,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2104,7 +2732,7 @@
           },
           "<TValueConfig>"
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2118,7 +2746,7 @@
             "signature": [
               "() => TValueConfig"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2144,7 +2772,7 @@
           },
           "<TVisualizationState>"
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2158,7 +2786,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2174,7 +2802,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2198,7 +2826,7 @@
               },
               ", \"indexPatternId\">>"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2214,7 +2842,7 @@
             "signature": [
               "() => TVisualizationState"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2229,16 +2857,10 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2262,7 +2884,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2304,7 +2926,7 @@
           },
           ">"
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2349,7 +2971,7 @@
                 "text": "PersistedIndexPatternLayer"
               }
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2363,7 +2985,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2384,7 +3006,7 @@
                     "text": "PersistedIndexPatternLayer"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2405,7 +3027,7 @@
                     "text": "DataView"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2426,7 +3048,7 @@
                     "text": "FormulaPublicApi"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2454,7 +3076,7 @@
           },
           "<TLayer>"
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2474,7 +3096,7 @@
                 "text": "FormulaPublicApi"
               }
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2494,7 +3116,7 @@
                 "text": "DataView"
               }
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2508,7 +3130,7 @@
             "signature": [
               "TLayer"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2522,7 +3144,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2546,7 +3168,7 @@
           },
           "<TLayerConfig>"
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2560,7 +3182,7 @@
             "signature": [
               "() => string | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2600,7 +3222,7 @@
               },
               ", \"indexPatternId\">>"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2614,7 +3236,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2629,7 +3251,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2650,7 +3272,7 @@
                     "text": "DataView"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2671,7 +3293,7 @@
                     "text": "FormulaPublicApi"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2696,16 +3318,10 @@
                 "text": "DataView"
               },
               ") => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2719,7 +3335,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2740,7 +3356,7 @@
                     "text": "DataView"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2758,7 +3374,7 @@
             "signature": [
               "(layerId: string, acessorId: string) => TLayerConfig"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2772,7 +3388,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2787,7 +3403,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2813,7 +3429,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2839,7 +3455,7 @@
           },
           " extends ChartModelBase"
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/index.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2853,7 +3469,7 @@
             "signature": [
               "\"lnsMetric\""
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/index.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2873,7 +3489,7 @@
                 "text": "MetricLayerConfig"
               }
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/index.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2887,7 +3503,7 @@
         "tags": [],
         "label": "MetricLayerConfig",
         "description": [],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2911,7 +3527,7 @@
               "TimeScaleUnit",
               " | undefined; format?: { id: string; params?: { decimals: number; compact?: boolean | undefined; } | undefined; } | undefined; }, \"formula\"> & { color?: string | undefined; value: string; }"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2932,7 +3548,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2946,7 +3562,7 @@
             "signature": [
               "\"metricTrendline\" | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2969,7 +3585,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2983,7 +3599,7 @@
         "tags": [],
         "label": "MetricLayerOptions",
         "description": [],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2997,7 +3613,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3011,7 +3627,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3025,7 +3641,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3039,7 +3655,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/metric_layer.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3079,7 +3695,7 @@
           },
           ">"
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3108,7 +3724,7 @@
                 "text": "PersistedIndexPatternLayer"
               }
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3122,7 +3738,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3143,7 +3759,7 @@
                     "text": "PersistedIndexPatternLayer"
                   }
                 ],
-                "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3161,7 +3777,7 @@
         "tags": [],
         "label": "VisualizationAttributesBuilder",
         "description": [],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3173,7 +3789,59 @@
             "label": "build",
             "description": [],
             "signature": [
-              "() => LensAttributes<\"lnsXY\", ",
+              "() => { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: \"lnsXY\"; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -3181,9 +3849,113 @@
                 "section": "def-public.XYState",
                 "text": "XYState"
               },
-              "> | LensAttributes<\"lnsPie\", ",
+              "; }; } | { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: \"lnsPie\"; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: ",
               "PieVisualizationState",
-              "> | LensAttributes<\"lnsHeatmap\", ",
+              "; }; } | { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: \"lnsHeatmap\"; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -3191,7 +3963,59 @@
                 "section": "def-public.HeatmapVisualizationState",
                 "text": "HeatmapVisualizationState"
               },
-              "> | LensAttributes<\"lnsGauge\", ",
+              "; }; } | { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: \"lnsGauge\"; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -3199,7 +4023,59 @@
                 "section": "def-public.GaugeVisualizationState",
                 "text": "GaugeVisualizationState"
               },
-              "> | LensAttributes<\"lnsDatatable\", ",
+              "; }; } | { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: \"lnsDatatable\"; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -3207,7 +4083,59 @@
                 "section": "def-public.DatatableVisualizationState",
                 "text": "DatatableVisualizationState"
               },
-              "> | LensAttributes<\"lnsLegacyMetric\", ",
+              "; }; } | { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: \"lnsLegacyMetric\"; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
                 "scope": "common",
@@ -3215,7 +4143,59 @@
                 "section": "def-common.LegacyMetricState",
                 "text": "LegacyMetricState"
               },
-              "> | LensAttributes<\"lnsMetric\", ",
+              "; }; } | { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: \"lnsMetric\"; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: ",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -3223,9 +4203,61 @@
                 "section": "def-public.MetricVisualizationState",
                 "text": "MetricVisualizationState"
               },
-              "> | LensAttributes<string, unknown>"
+              "; }; } | { title: string; description?: string | undefined; references: ",
+              "SavedObjectReference",
+              "[]; visualizationType: string; state: { query: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              "; filters: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "> | undefined; internalReferences?: ",
+              "SavedObjectReference",
+              "[] | undefined; datasourceStates: { formBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.FormBasedPersistedState",
+                "text": "FormBasedPersistedState"
+              },
+              " | undefined; textBased?: ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.TextBasedPersistedState",
+                "text": "TextBasedPersistedState"
+              },
+              " | undefined; }; visualization: unknown; }; }"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3251,7 +4283,7 @@
           },
           " extends ChartModelBase"
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/index.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3272,7 +4304,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/index.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3286,7 +4318,7 @@
             "signature": [
               "\"lnsXY\""
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/index.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3307,7 +4339,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/index.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3321,7 +4353,7 @@
         "tags": [],
         "label": "XYDataLayerConfig",
         "description": [],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3342,7 +4374,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3363,7 +4395,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3377,7 +4409,7 @@
             "signature": [
               "\"data\" | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3400,7 +4432,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3414,7 +4446,7 @@
         "tags": [],
         "label": "XYLayerOptions",
         "description": [],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3428,7 +4460,7 @@
             "signature": [
               "TopValuesBucketedColumn | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3442,7 +4474,7 @@
             "signature": [
               "DateHistogramBucketedColumn | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3463,7 +4495,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_data_layer.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3477,7 +4509,7 @@
         "tags": [],
         "label": "XYReferenceLinesLayerConfig",
         "description": [],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3498,7 +4530,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3512,7 +4544,7 @@
             "signature": [
               "\"referenceLine\" | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3535,7 +4567,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/layers/xy_reference_lines_layer.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3549,7 +4581,7 @@
         "tags": [],
         "label": "XYVisualOptions",
         "description": [],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3570,7 +4602,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3591,7 +4623,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3612,7 +4644,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3626,7 +4658,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3647,7 +4679,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3668,7 +4700,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3689,7 +4721,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3710,7 +4742,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
+            "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3744,7 +4776,7 @@
             "text": "MetricChartModel"
           }
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/index.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3759,7 +4791,7 @@
         "signature": [
           "\"lnsXY\" | \"lnsMetric\""
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/index.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3784,7 +4816,7 @@
           "TimeScaleUnit",
           " | undefined; format?: { id: string; params?: { decimals: number; compact?: boolean | undefined; } | undefined; } | undefined; }, \"formula\"> & { color?: string | undefined; value: string; }"
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3797,7 +4829,59 @@
         "label": "LensAttributes",
         "description": [],
         "signature": [
-          "LensAttributes<\"lnsXY\", ",
+          "{ title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: \"lnsXY\"; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
             "scope": "public",
@@ -3805,9 +4889,113 @@
             "section": "def-public.XYState",
             "text": "XYState"
           },
-          "> | LensAttributes<\"lnsPie\", ",
+          "; }; } | { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: \"lnsPie\"; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
           "PieVisualizationState",
-          "> | LensAttributes<\"lnsHeatmap\", ",
+          "; }; } | { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: \"lnsHeatmap\"; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
             "scope": "public",
@@ -3815,7 +5003,59 @@
             "section": "def-public.HeatmapVisualizationState",
             "text": "HeatmapVisualizationState"
           },
-          "> | LensAttributes<\"lnsGauge\", ",
+          "; }; } | { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: \"lnsGauge\"; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
             "scope": "public",
@@ -3823,7 +5063,59 @@
             "section": "def-public.GaugeVisualizationState",
             "text": "GaugeVisualizationState"
           },
-          "> | LensAttributes<\"lnsDatatable\", ",
+          "; }; } | { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: \"lnsDatatable\"; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
             "scope": "public",
@@ -3831,7 +5123,59 @@
             "section": "def-public.DatatableVisualizationState",
             "text": "DatatableVisualizationState"
           },
-          "> | LensAttributes<\"lnsLegacyMetric\", ",
+          "; }; } | { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: \"lnsLegacyMetric\"; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
             "scope": "common",
@@ -3839,7 +5183,59 @@
             "section": "def-common.LegacyMetricState",
             "text": "LegacyMetricState"
           },
-          "> | LensAttributes<\"lnsMetric\", ",
+          "; }; } | { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: \"lnsMetric\"; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
           {
             "pluginId": "lens",
             "scope": "public",
@@ -3847,9 +5243,61 @@
             "section": "def-public.MetricVisualizationState",
             "text": "MetricVisualizationState"
           },
-          "> | LensAttributes<string, unknown>"
+          "; }; } | { title: string; description?: string | undefined; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: string; state: { query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: unknown; }; }"
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3878,7 +5326,7 @@
             "text": "XYLayerConfig"
           }
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3907,7 +5355,7 @@
             "text": "MetricVisualizationState"
           }
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3922,7 +5370,7 @@
         "signature": [
           "\"lnsMetric\""
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/constants.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3937,7 +5385,7 @@
         "signature": [
           "\"metricTrendline\""
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/constants.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3970,7 +5418,7 @@
           },
           " | undefined; value: string; }"
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3985,7 +5433,7 @@
         "signature": [
           "\"lnsXY\" | \"lnsMetric\""
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4000,7 +5448,7 @@
         "signature": [
           "\"data\""
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/constants.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4015,7 +5463,7 @@
         "signature": [
           "\"lnsXY\""
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/constants.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4030,7 +5478,7 @@
         "signature": [
           "\"referenceLine\""
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/constants.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4059,7 +5507,7 @@
             "text": "XYReferenceLinesLayerConfig"
           }
         ],
-        "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/index.ts",
+        "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/attribute_builder/visualization_types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -146,6 +146,41 @@ export function TrainedModelsProvider({ getService }: FtrProviderContext, mlComm
         await testSubjects.missingOrFail('mlTestModelsFlyout');
       });
     },
+
+    async closeCheckingSpacePermissionsModal(): Promise<void> {
+      await retry.tryForTime(3_000, async () => {
+        await testSubjects.click('mlDeleteSpaceAwareItemCheckModalOverlayCloseButton');
+        await testSubjects.missingOrFail('mlDeleteSpaceAwareItemCheckModalOverlay');
+      });
+    },
+
+    async selectModel(name: string): Promise<void> {
+      await retry.tryForTime(3_000, async () => {
+        await testSubjects.click(`checkboxSelectRow-${name}`);
+        await testSubjects.isChecked(`checkboxSelectRow-${name}`);
+      });
+    },
+
+    async clickBulkDelete() {
+      await retry.tryForTime(3_000, async () => {
+        await testSubjects.click('mlTrainedModelsDeleteSelectedModelsButton');
+        await testSubjects.existOrFail('mlDeleteSpaceAwareItemCheckModalOverlay');
+      });
+    },
+
+    async assertShowAllSelected(expectChecked: boolean) {
+      expect(await testSubjects.isEuiSwitchChecked(`mlModelsShowAllSwitch`)).to.eql(
+        expectChecked,
+        `Expected the "Show all" control to be ${expectChecked ? 'enabled' : 'disabled'}`
+      );
+    },
+
+    async showAllModels() {
+      await retry.tryForTime(3_000, async () => {
+        await mlCommonUI.toggleSwitchIfNeeded('mlModelsShowAllSwitch', true);
+        await this.assertShowAllSelected(true);
+      });
+    },
   };
 }
 

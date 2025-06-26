@@ -6,7 +6,7 @@
     "source": {
       "id_field": "host.name",
       "id_value": "suricata-zeek-sensor-toronto",
-      "criticality_level": "important",
+      "criticality_level": "high_impact",
       "@timestamp": "2022-08-12T14:45:36.171Z",
       "updated_at": "2022-08-12T14:45:36.171Z"
     },
@@ -22,7 +22,7 @@
     "source": {
       "id_field": "host.name",
       "id_value": "host-0",
-      "criticality_level": "very_important",
+      "criticality_level": "extreme_impact",
       "@timestamp": "2022-08-12T14:45:36.171Z",
       "updated_at": "2022-08-12T14:45:36.171Z"
     },
@@ -38,7 +38,7 @@
     "source": {
       "id_field": "host.name",
       "id_value": "zeek-newyork-sha-aa8df15",
-      "criticality_level": "normal",
+      "criticality_level": "medium_impact",
       "@timestamp": "2022-08-12T14:45:36.171Z",
       "updated_at": "2022-08-12T14:45:36.171Z"
     },
@@ -54,7 +54,7 @@
     "source": {
       "id_field": "host.name",
       "id_value": "zeek-sensor-amsterdam",
-      "criticality_level": "low",
+      "criticality_level": "low_impact",
       "@timestamp": "2022-08-12T14:45:36.171Z",
       "updated_at": "2022-08-12T14:45:36.171Z"
     },
@@ -70,7 +70,7 @@
     "source": {
       "id_field": "host.name",
       "id_value": "suricata-sensor-london",
-      "criticality_level": "important",
+      "criticality_level": "high_impact",
       "@timestamp": "2022-08-12T14:45:36.171Z",
       "updated_at": "2022-08-12T14:45:36.171Z"
     },
@@ -86,7 +86,7 @@
     "source": {
       "id_field": "user.name",
       "id_value": "root",
-      "criticality_level": "very_important",
+      "criticality_level": "extreme_impact",
       "@timestamp": "2022-08-12T14:45:36.171Z",
       "updated_at": "2022-08-12T14:45:36.171Z"
     },
@@ -102,7 +102,7 @@
     "source": {
       "id_field": "user.name",
       "id_value": "User 2",
-      "criticality_level": "important",
+      "criticality_level": "high_impact",
       "@timestamp": "2022-08-12T14:45:36.171Z",
       "updated_at": "2022-08-12T14:45:36.171Z"
     },
@@ -118,7 +118,7 @@
     "source": {
       "id_field": "host.name",
       "id_value": "abc",
-      "criticality_level": "normal",
+      "criticality_level": "medium_impact",
       "@timestamp": "2022-08-12T14:45:36.171Z",
       "updated_at": "2022-08-12T14:45:36.171Z"
     },
@@ -134,7 +134,7 @@
     "source": {
       "id_field": "user.name",
       "id_value": "abc",
-      "criticality_level": "not_important",
+      "criticality_level": "low_impact",
       "@timestamp": "2022-08-12T14:45:36.171Z",
       "updated_at": "2022-08-12T14:45:36.171Z"
     },

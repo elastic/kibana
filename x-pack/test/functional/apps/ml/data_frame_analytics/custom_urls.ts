@@ -73,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
-      await ml.api.createAndRunDFAJob(dfaJobConfig);
+      await ml.api.createAndRunDFAJob(dfaJobConfig, 3 * 60 * 1000);
     });
 
     after(async () => {
@@ -89,8 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('opens the custom URLs tab in the edit job flyout', async () => {
         await ml.testExecution.logTestStep('load the analytics management page');
-        await ml.navigation.navigateToMl();
-        await ml.navigation.navigateToDataFrameAnalytics();
+        await ml.navigation.navigateToStackManagementMlSection('analytics', 'mlAnalyticsJobList');
         await ml.dataFrameAnalyticsTable.waitForAnalyticsToLoad();
 
         await ml.testExecution.logTestStep('open the custom URLs tab in the edit job flyout');

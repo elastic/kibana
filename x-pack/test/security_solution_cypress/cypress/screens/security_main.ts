@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const CLOSE_TIMELINE_BUTTON = '[data-test-subj="close-timeline"]';
-
 export const MAIN_PAGE = '[data-test-subj="kibanaChrome"]';
 
 export const TIMELINE_TOGGLE_BUTTON = '[data-test-subj="timeline-bottom-bar-title-button"]';
