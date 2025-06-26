@@ -36,7 +36,7 @@ describe('FilterListUsagePopover', () => {
       entityType: 'detector',
       entityValues: ['mean responsetime', 'max responsetime', 'count'],
     };
-    const { getByRole, container, queryByText } = render(
+    const { getByRole, queryByText, getByText } = render(
       <FilterListUsagePopover {...detectorProps} />
     );
 
@@ -46,8 +46,9 @@ describe('FilterListUsagePopover', () => {
     const user = userEvent.setup();
     await user.click(getByRole('button'));
 
-    // Popover should now be open – list item should appear in the document
-    expect(queryByText('mean responsetime')).toBeInTheDocument();
-    expect(container.firstChild).toMatchSnapshot();
+    // Verify popover content is visible without using snapshots
+    expect(getByText('mean responsetime')).toBeInTheDocument();
+    expect(getByText('max responsetime')).toBeInTheDocument();
+    expect(getByText('count')).toBeInTheDocument();
   });
 });
