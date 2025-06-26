@@ -201,7 +201,7 @@ export const encodeQueryUrl = (
   servicesStart: DataPublicPluginStart,
   filters: Filter[],
   groupBy?: string[]
-): unknown => {
+): LocationDescriptorObject['search'] => {
   return encodeQuery({
     query: servicesStart.query.queryString.getDefaultQuery(),
     filters,
