@@ -9,7 +9,7 @@ exports[`FormLabelWithIconTip component renders as expected 1`] = `
   <EuiIconTip
     content="tooltip text"
     size="s"
-    type="questionInCircle"
+    type="question"
   />
 </div>
 `;

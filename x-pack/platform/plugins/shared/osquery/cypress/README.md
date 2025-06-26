@@ -20,7 +20,7 @@ A headless browser is a browser simulation program that does not have a user int
 
 #### FTR (CI)
 
-This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/test/osquery_cypress`
+This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/solutions/security/test/osquery_cypress`
 
 ### Test Execution: Examples
 
@@ -101,13 +101,13 @@ We use es_archiver to manage the data that our Cypress tests need.
 3. When you are sure that you have all the data you need run the following command from: `x-pack/platform/plugins/shared/osquery`
 
 ```sh
-node ../../../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../test/osquery_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
+node ../../../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../solutions/security/test/osquery_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
 ```
 
 Example:
 
 ```sh
-node ../../../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../test/osquery_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://elastic:changeme@localhost:9220
+node ../../../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../solutions/security/test/osquery_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://elastic:changeme@localhost:9220
 ```
 
 Note that the command will create the folder if it does not exist.
