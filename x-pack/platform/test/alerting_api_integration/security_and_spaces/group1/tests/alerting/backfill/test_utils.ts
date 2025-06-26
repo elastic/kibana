@@ -61,7 +61,8 @@ export async function waitForEventLogDocs(
   getService: FtrProviderContext['getService'],
   id: string,
   spaceId: string,
-  actions: Map<string, { gte: number } | { equal: number }>
+  actions: Map<string, { gte: number } | { equal: number }>,
+  collapseByExecutionUUid?: boolean
 ) {
   return await retry.try(async () => {
     return await getEventLog({
@@ -71,6 +72,7 @@ export async function waitForEventLogDocs(
       id,
       provider: 'alerting',
       actions,
+      collapseByExecutionUUid,
     });
   });
 }

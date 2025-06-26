@@ -559,7 +559,8 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         getService,
         backfillId,
         spaceId,
-        new Map([['execute-backfill', { equal: 4 }]])
+        new Map([['execute-backfill', { equal: 4 }]]),
+        true
       );
 
       log.info(`Event log events: ${JSON.stringify(events)}`);
