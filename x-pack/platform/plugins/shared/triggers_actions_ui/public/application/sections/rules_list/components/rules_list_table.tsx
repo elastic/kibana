@@ -296,7 +296,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           )}
           size="s"
           color="subdued"
-          type="questionInCircle"
+          type="question"
           className="eui-alignTop"
         />
         <PercentileSelectablePopover
@@ -425,7 +425,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
                             }
                           `}
                           data-test-subj="ruleDisabledByLicenseTooltip"
-                          type="questionInCircle"
+                          type="question"
                           content={checkEnabledResult.message}
                           position="right"
                         />
@@ -485,7 +485,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
               content={LAST_RUN_CONTENT}
               size="s"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
               aria-label={LAST_RUN_CONTENT}
             />
@@ -533,7 +533,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
               content={SNOOZE_RULE_NOTIFICATIONS}
               size="s"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
               aria-label={SNOOZE_RULE_NOTIFICATIONS}
             />
@@ -650,7 +650,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
               )}
               size="s"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
             />
           </span>
@@ -732,7 +732,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
               )}
               size="s"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
             />
           </span>
