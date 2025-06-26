@@ -18,7 +18,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeExecutorResult, isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { Option, none, some } from 'fp-ts/Option';
-import { getInferenceApiParams } from '../helpers';
 import { ReadOnlyConnectorMessage } from './read_only';
 import {
   ActionConnector,
@@ -44,7 +43,7 @@ export interface EditConnectorFlyoutProps {
   onClose: () => void;
   tab?: EditConnectorTabs;
   onConnectorUpdated?: (connector: ActionConnector) => void;
-  enforceAdaptiveAllocations?: boolean;
+  isServerless: boolean;
 }
 
 const getConnectorWithoutSecrets = (
@@ -58,7 +57,6 @@ const getConnectorWithoutSecrets = (
 const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   actionTypeRegistry,
   connector,
-  enforceAdaptiveAllocations: enforceAdaptiveAllocationsProp,
   onClose,
   tab = EditConnectorTabs.Configuration,
   onConnectorUpdated,
@@ -66,10 +64,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const {
     docLinks,
     application: { capabilities },
-    enforceAdaptiveAllocations: enforceAdaptiveAllocationsContext,
   } = useKibana().services;
-  const enforceAdaptiveAllocations =
-    enforceAdaptiveAllocationsProp ?? enforceAdaptiveAllocationsContext;
 
   const isMounted = useRef(false);
   const canSave = hasSaveActionsCapability(capabilities);
@@ -183,8 +178,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
        * At this point the form is valid
        * and there are no pre submit error messages.
        */
-      const connectorData = getInferenceApiParams(data, !!enforceAdaptiveAllocations) ?? data;
-      const { name, config, secrets } = connectorData;
+      const { name, config, secrets } = data;
       const validConnector = {
         id: connector.id,
         name: name ?? '',
@@ -214,7 +208,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
       setShowFormErrors(true);
     }
   }, [
-    enforceAdaptiveAllocations,
     onConnectorUpdated,
     submit,
     preSubmitValidator,
@@ -258,7 +251,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                 actionTypeModel={actionTypeModel}
                 connector={getConnectorWithoutSecrets(connector)}
                 isEdit={isEdit}
-                enforceAdaptiveAllocations={enforceAdaptiveAllocations}
                 onChange={setFormState}
                 onFormModifiedChange={onFormModifiedChange}
               />
@@ -311,7 +303,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     showButtons,
     isSaved,
     isSaving,
-    enforceAdaptiveAllocations,
     onClickSave,
     isFormModified,
     hasErrors,

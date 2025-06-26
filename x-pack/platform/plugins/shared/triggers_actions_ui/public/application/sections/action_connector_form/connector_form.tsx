@@ -19,6 +19,9 @@ import { ConnectorFormFields } from './connector_form_fields';
 import { ConnectorFormSchema } from './types';
 import { EncryptedFieldsCallout } from './encrypted_fields_callout';
 
+const MIN_ALLOCATIONS = 0;
+const DEFAULT_NUM_THREADS = 1;
+
 export interface ConnectorFormState {
   isValid: boolean | undefined;
   isSubmitted: boolean;
@@ -41,7 +44,6 @@ interface Props {
   actionTypeModel: ActionTypeModel | null;
   connector: ConnectorFormSchema & { isMissingSecrets: boolean };
   isEdit: boolean;
-  enforceAdaptiveAllocations?: boolean;
   /** Handler to receive state changes updates */
   onChange?: (state: ConnectorFormState) => void;
   /** Handler to receive update on the form "isModified" state */
@@ -51,6 +53,7 @@ interface Props {
 
 interface ProviderConfig {
   [key: string]: unknown;
+  max_number_of_allocations?: number;
   adaptive_allocations?: { max_number_of_allocations?: number };
 }
 /**
@@ -69,9 +72,8 @@ interface ProviderConfig {
 const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
   if (
     data.actionTypeId === '.inference' &&
-    // explicit check to see if this field exists
-    (data?.config?.providerConfig as ProviderConfig)?.adaptive_allocations
-      ?.max_number_of_allocations
+    // explicit check to see if this field exists as it only exists in serverless
+    (data.config?.providerConfig as ProviderConfig)?.adaptive_allocations?.max_number_of_allocations
   ) {
     return {
       ...data,
@@ -113,6 +115,34 @@ const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
 
 // TODO: Remove when https://github.com/elastic/kibana/issues/133107 is resolved
 const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
+  // Temp solution for inference - connector framework will be updated with ability for connector to add its own serializer/deserializer
+  if (
+    formData.actionTypeId === '.inference' &&
+    // explicit check to see if this field exists as it only exists in serverless
+    (formData.config?.providerConfig as ProviderConfig)?.max_number_of_allocations !== undefined
+  ) {
+    const providerConfig = formData.config?.providerConfig as ProviderConfig;
+    const { max_number_of_allocations: maxAllocations, ...restProviderConfig } =
+      providerConfig || {};
+
+    return {
+      ...formData,
+      config: {
+        ...formData.config,
+        providerConfig: {
+          ...restProviderConfig,
+          adaptive_allocations: {
+            enabled: true,
+            min_number_of_allocations: MIN_ALLOCATIONS,
+            ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
+          },
+          // Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
+          num_threads: DEFAULT_NUM_THREADS,
+        },
+      },
+    };
+  }
+
   if (
     formData.actionTypeId !== '.webhook' &&
     formData.actionTypeId !== '.cases-webhook' &&
@@ -149,7 +179,6 @@ const ConnectorFormComponent: React.FC<Props> = ({
   actionTypeModel,
   connector,
   isEdit,
-  enforceAdaptiveAllocations,
   onChange,
   onFormModifiedChange,
   setResetForm,
@@ -197,7 +226,6 @@ const ConnectorFormComponent: React.FC<Props> = ({
       <ConnectorFormFields
         actionTypeModel={actionTypeModel}
         isEdit={isEdit}
-        enforceAdaptiveAllocations={enforceAdaptiveAllocations}
         registerPreSubmitValidator={registerPreSubmitValidator}
       />
       <EuiSpacer size="m" />

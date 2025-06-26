@@ -21,7 +21,6 @@
       "licensing",
       "ml",
       "share",
-      "triggersActionsUi",
     ],
     "optionalPlugins": [
       "cloud",

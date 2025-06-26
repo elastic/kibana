@@ -19,7 +19,6 @@
       "management",
       "features",
       "share",
-      "triggersActionsUi"
     ],
     "optionalPlugins": [
       "security",

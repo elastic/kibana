@@ -64,7 +64,6 @@ export {
 } from './application/sections/action_connector_form';
 
 export type { ConnectorFormSchema } from './application/sections/action_connector_form';
-export { getInferenceApiParams } from './application/sections/action_connector_form';
 
 export type { ConfigFieldSchema, SecretsFieldSchema } from './application/components';
 

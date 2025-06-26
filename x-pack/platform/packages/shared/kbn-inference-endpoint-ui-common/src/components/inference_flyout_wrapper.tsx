@@ -21,11 +21,13 @@ import {
 import React, { useCallback } from 'react';
 import { HttpSetup, IToasts } from '@kbn/core/public';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { getInferenceApiParams } from '@kbn/triggers-actions-ui-plugin/public';
 import * as LABELS from '../translations';
 import type { InferenceEndpoint } from '../types/types';
 import { InferenceServiceFormFields } from './inference_service_form_fields';
 import { useInferenceEndpointMutation } from '../hooks/use_inference_endpoint_mutation';
+
+const MIN_ALLOCATIONS = 0;
+const DEFAULT_NUM_THREADS = 1;
 
 const formDeserializer = (data: InferenceEndpoint) => {
   if (
@@ -52,6 +54,37 @@ const formDeserializer = (data: InferenceEndpoint) => {
   }
 
   return data;
+};
+
+// This serializer is used to transform the form data before sending it to the server
+const formSerializer = (formData: InferenceEndpoint) => {
+  if (
+    // explicit check to see if this field exists as it only exists in serverless
+    formData.config?.providerConfig?.max_number_of_allocations !== undefined
+  ) {
+    const providerConfig = formData.config?.providerConfig;
+    const { max_number_of_allocations: maxAllocations, ...restProviderConfig } =
+      providerConfig || {};
+
+    return {
+      ...formData,
+      config: {
+        ...formData.config,
+        providerConfig: {
+          ...restProviderConfig,
+          adaptive_allocations: {
+            enabled: true,
+            min_number_of_allocations: MIN_ALLOCATIONS,
+            ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
+          },
+          // Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
+          num_threads: DEFAULT_NUM_THREADS,
+        },
+      },
+    };
+  }
+
+  return formData;
 };
 
 interface InferenceFlyoutWrapperProps {
@@ -97,6 +130,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
         providerSecrets: {},
       },
     },
+    serializer: formSerializer,
     deserializer: formDeserializer,
   });
   const handleSubmit = useCallback(async () => {
@@ -105,8 +139,8 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
       return;
     }
 
-    mutate(getInferenceApiParams(data, enforceAdaptiveAllocations) ?? data, !!isEdit);
-  }, [form, isEdit, enforceAdaptiveAllocations, mutate]);
+    mutate(data, !!isEdit);
+  }, [form, isEdit, mutate]);
 
   const isPreconfigured = inferenceEndpoint?.config.inferenceId.startsWith('.');
 

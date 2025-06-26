@@ -20,7 +20,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
-import { getInferenceApiParams } from '../helpers';
 import { CreateConnectorFilter } from './create_connector_filter';
 import {
   ActionConnector,
@@ -45,24 +44,20 @@ export interface CreateConnectorFlyoutProps {
   featureId?: string;
   onConnectorCreated?: (connector: ActionConnector) => void;
   onTestConnector?: (connector: ActionConnector) => void;
-  enforceAdaptiveAllocations?: boolean;
+  isServerless?: boolean;
 }
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   actionTypeRegistry,
   featureId,
-  enforceAdaptiveAllocations: enforceAdaptiveAllocationsProp,
   onClose,
   onConnectorCreated,
   onTestConnector,
 }) => {
   const {
     application: { capabilities },
-    enforceAdaptiveAllocations: enforceAdaptiveAllocationsContext,
   } = useKibana().services;
   const { isLoading: isSavingConnector, createConnector } = useCreateConnector();
-  const enforceAdaptiveAllocations =
-    enforceAdaptiveAllocationsProp ?? enforceAdaptiveAllocationsContext;
 
   const isMounted = useRef(false);
   const [allActionTypes, setAllActionTypes] = useState<ActionTypeIndex | undefined>(undefined);
@@ -162,8 +157,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
        * At this point the form is valid
        * and there are no pre submit error messages.
        */
-      const connectorData = getInferenceApiParams(data, !!enforceAdaptiveAllocations) ?? data;
-      const { actionTypeId, name, config, secrets } = connectorData;
+      const { actionTypeId, name, config, secrets } = data;
       const validConnector = {
         actionTypeId,
         name: name ?? '',
@@ -176,7 +170,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     } else {
       setShowFormErrors(true);
     }
-  }, [submit, preSubmitValidator, createConnector, enforceAdaptiveAllocations]);
+  }, [submit, preSubmitValidator, createConnector]);
 
   const resetActionType = useCallback(() => setActionType(null), []);
 
@@ -285,7 +279,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
               actionTypeModel={actionTypeModel}
               connector={initialConnector}
               isEdit={false}
-              enforceAdaptiveAllocations={enforceAdaptiveAllocations}
               onChange={setFormState}
               setResetForm={setResetForm}
             />

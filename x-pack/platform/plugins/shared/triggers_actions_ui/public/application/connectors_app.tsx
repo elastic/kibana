@@ -59,7 +59,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   theme$: Observable<CoreTheme>;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   share: SharePluginStart;
-  enforceAdaptiveAllocations: boolean;
+  isServerless: boolean;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
@@ -92,12 +92,14 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
 export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) => {
   const {
     actions: { validateEmailAddresses, enabledEmailServices, isWebhookSslWithPfxEnabled },
+    isServerless,
   } = useKibana().services;
 
   return (
     <ConnectorProvider
       value={{
         services: { validateEmailAddresses, enabledEmailServices, isWebhookSslWithPfxEnabled },
+        isServerless,
       }}
     >
       <Routes>

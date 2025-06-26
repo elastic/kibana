@@ -84,7 +84,6 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   licensing: LicensingPluginStart;
   expressions: ExpressionsStart;
   isServerless: boolean;
-  enforceAdaptiveAllocations?: boolean;
   fieldFormats: FieldFormatsStart;
   lens: LensPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;
@@ -123,10 +122,13 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
   const {
     actions: { validateEmailAddresses, enabledEmailServices },
     application: { navigateToApp },
+    isServerless,
   } = useKibana().services;
 
   return (
-    <ConnectorProvider value={{ services: { validateEmailAddresses, enabledEmailServices } }}>
+    <ConnectorProvider
+      value={{ services: { validateEmailAddresses, enabledEmailServices }, isServerless }}
+    >
       <Routes>
         <Route
           exact

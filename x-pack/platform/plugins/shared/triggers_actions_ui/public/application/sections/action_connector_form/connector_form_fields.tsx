@@ -31,12 +31,9 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
 }) => {
   const {
     application: { capabilities },
-    enforceAdaptiveAllocations: enforceAdaptiveAllocationsContext,
   } = useKibana().services;
   const canSave = hasSaveActionsCapability(capabilities);
   const FieldsComponent = actionTypeModel?.actionConnectorFields ?? null;
-  const enforceAdaptiveAllocations =
-    enforceAdaptiveAllocationsProp ?? enforceAdaptiveAllocationsContext;
 
   return (
     <>
@@ -67,7 +64,6 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
               <FieldsComponent
                 readOnly={!canSave}
                 isEdit={isEdit}
-                enforceAdaptiveAllocations={enforceAdaptiveAllocations}
                 registerPreSubmitValidator={registerPreSubmitValidator}
               />
             </Suspense>
