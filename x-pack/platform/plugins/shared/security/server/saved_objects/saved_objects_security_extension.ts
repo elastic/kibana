@@ -47,7 +47,6 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import type { AuthorizeObject } from '@kbn/core-saved-objects-server/src/extensions/security';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { SavedObjectActions } from '@kbn/security-authorization-core/src/actions/saved_object';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type {
   Actions,
@@ -466,7 +465,16 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         actionsArray.map((action) => [this.actions.savedObject.get(type, action), { type, action }])
       )
     );
-    const privilegeActions = [...privilegeActionsMap.keys(), this.actions.login]; // Always check login action, we will need it later for redacting namespaces
+    const typeRegistry = await this.typeRegistryFunc();
+    const ownershipActions = Array.from(params.types.values())
+      .filter((type) => typeRegistry.supportsAccessControl(type))
+      .map((type) => this.actions.savedObject.get(type, 'manage_ownership'));
+
+    const privilegeActions = [
+      ...privilegeActionsMap.keys(),
+      this.actions.login,
+      ...ownershipActions,
+    ]; // Always check login action, we will need it later for redacting namespaces
     const { hasAllRequested, privileges } = await this.checkPrivileges(
       privilegeActions,
       getAuthorizableSpaces(spaces, allowGlobalResource)
@@ -723,13 +731,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       throw new Error('No spaces specified for authorization');
     }
 
-    const typeRegistry = await this.typeRegistryFunc();
-    const savedObjectActions = new SavedObjectActions();
     const { authzActions } = this.translateActions(params.actions);
-
-    Array.from(params.types.values())
-      .filter((type) => typeRegistry.supportsAccessControl(type))
-      .forEach((type) => authzActions.add(savedObjectActions.get(type, 'manage_ownership')));
 
     const checkResult: CheckAuthorizationResult<A> = await this.checkAuthorization({
       types: params.types,
