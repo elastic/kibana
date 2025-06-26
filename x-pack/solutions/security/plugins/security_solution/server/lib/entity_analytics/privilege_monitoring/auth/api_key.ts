@@ -32,9 +32,9 @@ export interface ApiKeyManagerDependencies {
 
 export const getApiKeyManager = (deps: ApiKeyManagerDependencies) => {
   return {
-    generate: generate(deps),
-    getApiKey: getApiKey(deps),
-    getClientFromApiKey: getClientFromApiKey(deps),
+    generate: () => generate(deps),
+    getApiKey: () => getApiKey(deps),
+    getClientFromApiKey: (apiKey: PrivilegeMonitoringAPIKey) => getClientFromApiKey(deps, apiKey),
     getRequestFromApiKey,
   };
 };
@@ -92,21 +92,23 @@ const getRequestFromApiKey = async (apiKey: PrivilegeMonitoringAPIKey) => {
     api_key: apiKey.apiKey,
   });
 };
-const getClientFromApiKey =
-  (deps: ApiKeyManagerDependencies) => async (apiKey: PrivilegeMonitoringAPIKey) => {
-    const fakeRequest = getFakeKibanaRequest({
-      id: apiKey.id,
-      api_key: apiKey.apiKey,
-    });
-    const clusterClient = deps.core.elasticsearch.client.asScoped(fakeRequest);
-    const soClient = deps.core.savedObjects.getScopedClient(fakeRequest, {
-      includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name],
-    });
-    return {
-      clusterClient,
-      soClient,
-    };
+const getClientFromApiKey = (
+  deps: ApiKeyManagerDependencies,
+  apiKey: PrivilegeMonitoringAPIKey
+) => {
+  const fakeRequest = getFakeKibanaRequest({
+    id: apiKey.id,
+    api_key: apiKey.apiKey,
+  });
+  const clusterClient = deps.core.elasticsearch.client.asScoped(fakeRequest);
+  const soClient = deps.core.savedObjects.getScopedClient(fakeRequest, {
+    includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name],
+  });
+  return {
+    clusterClient,
+    soClient,
   };
+};
 
 export const generateAPIKey = async (
   req: KibanaRequest,

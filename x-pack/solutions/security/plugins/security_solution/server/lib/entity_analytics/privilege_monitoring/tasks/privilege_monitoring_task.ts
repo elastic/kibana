@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, AnalyticsServiceSetup } from '@kbn/core/server';
+import type { Logger, AnalyticsServiceSetup, AuditLogger } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -23,11 +23,14 @@ import {
   stateSchemaByVersion,
   type LatestTaskStateSchema as PrivilegeMonitoringTaskState,
 } from './state';
+import { getApiKeyManager } from '../auth/api_key';
+import { PrivilegeMonitoringDataClient } from '../privilege_monitoring_data_client';
 
 interface RegisterParams {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   logger: Logger;
   telemetry: AnalyticsServiceSetup;
+  auditLogger?: AuditLogger;
   taskManager: TaskManagerSetupContract | undefined;
   experimentalFeatures: ExperimentalFeatures;
   kibanaVersion: string;
@@ -39,6 +42,9 @@ interface RunParams {
   telemetry: AnalyticsServiceSetup;
   experimentalFeatures: ExperimentalFeatures;
   taskInstance: ConcreteTaskInstance;
+  getPrivilegedUserMonitoringDataClient: (
+    namespace: string
+  ) => Promise<undefined | PrivilegeMonitoringDataClient>;
 }
 
 interface StartParams {
@@ -54,6 +60,7 @@ const getTaskId = (namespace: string): string => `${TYPE}:${namespace}:${VERSION
 export const registerPrivilegeMonitoringTask = ({
   getStartServices,
   logger,
+  auditLogger,
   telemetry,
   taskManager,
   kibanaVersion,
@@ -65,6 +72,38 @@ export const registerPrivilegeMonitoringTask = ({
     );
     return;
   }
+  const getPrivilegedUserMonitoringDataClient = async (namespace: string) => {
+    const [core, { taskManager: taskManagerStart, security, encryptedSavedObjects }] =
+      await getStartServices();
+
+    const apiKeyManager = getApiKeyManager({
+      core,
+      logger,
+      security,
+      encryptedSavedObjects,
+      namespace,
+    });
+
+    const apiKey = await apiKeyManager.getApiKey();
+
+    const client = apiKey ? apiKeyManager.getClientFromApiKey(apiKey) : undefined;
+
+    logger.info('[Privilege Monitoring] Unable to create client in task. Exiting from the task.');
+
+    if (!client) return;
+
+    return new PrivilegeMonitoringDataClient({
+      logger,
+      clusterClient: client.clusterClient,
+      namespace,
+      soClient: client.soClient,
+      taskManager: taskManagerStart,
+      auditLogger,
+      kibanaVersion,
+      telemetry,
+      apiKeyManager,
+    });
+  };
 
   taskManager.registerTaskDefinitions({
     [getTaskName()]: {
@@ -75,6 +114,7 @@ export const registerPrivilegeMonitoringTask = ({
         logger,
         telemetry,
         experimentalFeatures,
+        getPrivilegedUserMonitoringDataClient,
       }),
     },
   });
@@ -85,6 +125,9 @@ const createPrivilegeMonitoringTaskRunnerFactory =
     logger: Logger;
     telemetry: AnalyticsServiceSetup;
     experimentalFeatures: ExperimentalFeatures;
+    getPrivilegedUserMonitoringDataClient: (
+      namespace: string
+    ) => Promise<undefined | PrivilegeMonitoringDataClient>;
   }): TaskRunCreatorFunction =>
   ({ taskInstance }) => {
     let cancelled = false;
@@ -97,6 +140,7 @@ const createPrivilegeMonitoringTaskRunnerFactory =
           telemetry: deps.telemetry,
           taskInstance,
           experimentalFeatures: deps.experimentalFeatures,
+          getPrivilegedUserMonitoringDataClient: deps.getPrivilegedUserMonitoringDataClient,
         }),
       cancel: async () => {
         cancelled = true;
@@ -110,6 +154,7 @@ const runPrivilegeMonitoringTask = async ({
   telemetry,
   taskInstance,
   experimentalFeatures,
+  getPrivilegedUserMonitoringDataClient,
 }: RunParams): Promise<{
   state: PrivilegeMonitoringTaskState;
 }> => {
@@ -127,8 +172,14 @@ const runPrivilegeMonitoringTask = async ({
 
   try {
     logger.info('[Privilege Monitoring] Running privilege monitoring task');
+    const dataClient = await getPrivilegedUserMonitoringDataClient(state.namespace);
+    if (!dataClient) {
+      logger.error('[Privilege Monitoring] error creating data client.');
+      throw Error('No data client was found');
+    }
+    await dataClient.plainIndexSync();
   } catch (e) {
-    logger.error('[Privilege Monitoring] Error running privilege monitoring task', e);
+    logger.error(`[Privilege Monitoring] Error running privilege monitoring task ${e.message}`);
   }
   return { state: updatedState };
 };

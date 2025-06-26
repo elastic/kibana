@@ -157,8 +157,6 @@ export class PrivilegeMonitoringDataClient {
       this.opts.telemetry?.reportEvent(PRIVMON_ENGINE_INITIALIZATION_EVENT.eventType, {
         duration,
       });
-      // sync all index users from monitoring sources
-      await this.plainIndexSync();
     } catch (e) {
       this.log('error', `Error initializing privilege monitoring engine: ${e}`);
       this.audit(

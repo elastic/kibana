@@ -283,6 +283,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       getStartServices: core.getStartServices,
       taskManager: plugins.taskManager,
       logger: this.logger,
+      auditLogger: plugins.security?.audit.withoutRequest,
       telemetry: core.analytics,
       kibanaVersion: pluginContext.env.packageInfo.version,
       experimentalFeatures,

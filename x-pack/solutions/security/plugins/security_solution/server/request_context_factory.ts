@@ -23,7 +23,6 @@ import { AssetInventoryDataClient } from './lib/asset_inventory/asset_inventory_
 import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
 import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
-import { getApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
 import { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
 import { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
 import { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
@@ -40,6 +39,8 @@ import type {
   SecuritySolutionRequestHandlerContext,
 } from './types';
 import { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/privilege_monitoring_data_client';
+import { getApiKeyManager as getApiKeyManagerEntityStore } from './lib/entity_analytics/privilege_monitoring/auth/api_key';
+import { getApiKeyManager as getApiKeyManagerPrivilegedUserMonitoring } from './lib/entity_analytics/entity_store/auth/api_key';
 
 export interface IRequestContextFactory {
   create(
@@ -113,7 +114,17 @@ export class RequestContextFactory implements IRequestContextFactory {
     const getAuditLogger = () => security?.audit.asScoped(request);
 
     const getEntityStoreApiKeyManager = () =>
-      getApiKeyManager({
+      getApiKeyManagerEntityStore({
+        core: coreStart,
+        logger: options.logger,
+        security: startPlugins.security,
+        encryptedSavedObjects: startPlugins.encryptedSavedObjects,
+        request,
+        namespace: getSpaceId(),
+      });
+
+    const getPrivilegedUserMonitoringApiKeyManager = () =>
+      getApiKeyManagerPrivilegedUserMonitoring({
         core: coreStart,
         logger: options.logger,
         security: startPlugins.security,
@@ -161,6 +172,8 @@ export class RequestContextFactory implements IRequestContextFactory {
       getDataViewsService: () => dataViewsService,
 
       getEntityStoreApiKeyManager,
+
+      getPrivilegedUserMonitoringApiKeyManager,
 
       getProductFeatureService: () => productFeaturesService,
 
@@ -263,6 +276,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           namespace: getSpaceId(),
           soClient: coreContext.savedObjects.client,
           taskManager: startPlugins.taskManager,
+          apiKeyManager: getPrivilegedUserMonitoringApiKeyManager(),
           auditLogger: getAuditLogger(),
           kibanaVersion: options.kibanaVersion,
           telemetry: core.analytics,
