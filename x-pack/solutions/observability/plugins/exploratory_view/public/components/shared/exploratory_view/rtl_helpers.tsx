@@ -27,7 +27,6 @@ import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public'
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import * as useValuesListHook from '@kbn/observability-shared-plugin/public/hooks/use_values_list';
@@ -139,7 +138,6 @@ export const mockCore: () => Partial<CoreStart & ExploratoryViewPublicPluginsSta
     lens: lensPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
     dataViews: dataViewPluginMocks.createStartContract(),
-    cases: casesPluginMock.createStartContract(),
   };
 
   return core;

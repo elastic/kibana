@@ -20,7 +20,6 @@
       "share"
     ],
     "optionalPlugins": [
-      "cases",
       "guidedOnboarding"
     ],
     "requiredBundles": [

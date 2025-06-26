@@ -40,7 +40,6 @@
       "fieldsMetadata"
     ],
     "optionalPlugins": [
-      "cases",
       "spaces",
       "ml",
       "home",
