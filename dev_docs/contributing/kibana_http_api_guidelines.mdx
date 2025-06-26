@@ -123,7 +123,7 @@ GET    /api/resource              # List - retrieve all resources (with paginati
 
 1. **Consistent response structures**: Ensure GET and POST/PUT responses return the same structure with identical fields.
 
-2. **Idempotent operations**: POST for creation and PUT for updates should be idempotent - running the same request multiple times should result in the same state.
+2. **Idempotent operations**: POST for creation and PUT for updates should be idempotent - running the same request multiple times should result in the same state. This is related to read/GETs without side-effects.
 
 3. **Complete state**: After each operation, return the complete state of the resource, not just acknowledgment.
 
@@ -155,7 +155,19 @@ GET    /api/resource              # List - retrieve all resources (with paginati
 #### Example: Complete API for a resource
 
 ```typescript
-// Create, Retrieve, Update
+// Retrieve
+router.get(
+  {
+    path: '/api/resource',
+    validate: false,
+  },
+  async (context, request, response) => {
+    // Implementation...
+    return response.ok({ body: completeResourceState });
+  }
+);
+
+// Create, update
 router.(get|post|put)(
   {
     path: '/api/resource',
