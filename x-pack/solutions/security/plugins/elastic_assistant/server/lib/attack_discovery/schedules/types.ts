@@ -9,6 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { RuleExecutorOptions, RuleType, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { SecurityAttackDiscoveryAlert } from '@kbn/alerts-as-data-utils';
 import { AttackDiscoveryScheduleParams } from '@kbn/elastic-assistant-common';
+import { ALERT_WORKFLOW_STATUS_UPDATED_AT } from '@kbn/rule-data-utils';
 import {
   ALERT_ATTACK_DISCOVERY_API_CONFIG,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
@@ -51,6 +52,7 @@ export type AttackDiscoveryAlertDocument = Omit<
     id?: string;
     name: string;
   }>;
+  [ALERT_WORKFLOW_STATUS_UPDATED_AT]?: string;
 };
 
 export type AttackDiscoveryExecutorOptions = RuleExecutorOptions<

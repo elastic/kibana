@@ -349,6 +349,7 @@ paths:
                     - $ref: '#/components/schemas/jira_config'
                     - $ref: '#/components/schemas/genai_azure_config'
                     - $ref: '#/components/schemas/genai_openai_config'
+                    - $ref: '#/components/schemas/genai_openai_other_config'
                     - $ref: '#/components/schemas/opsgenie_config'
                     - $ref: '#/components/schemas/pagerduty_config'
                     - $ref: '#/components/schemas/sentinelone_config'
@@ -7670,6 +7671,17 @@ paths:
                               timestamp: '2023-10-31T00:00:00.000Z'
                   ids:
                     - 9e946bfc-3118-4c77-bb25-67d781191921
+              example27:
+                description: The following request triggers the filling of gaps for the specified rule ids and time range
+                summary: Fill Gaps - Manually trigger the filling of gaps for specified rules
+                value:
+                  action: fill_gaps
+                  ids:
+                    - 748694f0-6977-4ea5-8384-cd2e39730779
+                    - 164d0918-f720-4c9f-9f5c-c5122587cf19
+                  run:
+                    end_date: '2025-03-10T23:59:59.999Z'
+                    start_date: '2025-03-01T00:00:00.000Z'
             schema:
               oneOf:
                 - $ref: '#/components/schemas/Security_Detections_API_BulkDeleteRules'
@@ -7678,6 +7690,7 @@ paths:
                 - $ref: '#/components/schemas/Security_Detections_API_BulkExportRules'
                 - $ref: '#/components/schemas/Security_Detections_API_BulkDuplicateRules'
                 - $ref: '#/components/schemas/Security_Detections_API_BulkManualRuleRun'
+                - $ref: '#/components/schemas/Security_Detections_API_BulkManualRuleFillGaps'
                 - $ref: '#/components/schemas/Security_Detections_API_BulkEditRules'
       responses:
         '200':
@@ -36373,6 +36386,63 @@ paths:
       tags:
         - Security AI Assistant API
   /api/security_ai_assistant/current_user/conversations:
+    delete:
+      description: This endpoint allows users to permanently delete all conversations.
+      operationId: DeleteAllConversations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                excludedIds:
+                  description: Optional list of conversation IDs to delete.
+                  example:
+                    - abc123
+                    - def456
+                  items:
+                    type: string
+                  type: array
+        required: false
+      responses:
+        '200':
+          content:
+            application/json:
+              example:
+                success: true
+              schema:
+                type: object
+                properties:
+                  failures:
+                    items:
+                      type: string
+                    type: array
+                  success:
+                    example: true
+                    type: boolean
+                  totalDeleted:
+                    example: 10
+                    type: number
+          description: Indicates a successful call. The conversations were deleted successfully.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    example: Bad Request
+                    type: string
+                  message:
+                    example: Invalid conversation ID
+                    type: string
+                  statusCode:
+                    example: 400
+                    type: number
+          description: Generic Error. This response indicates an issue with the request.
+      summary: Delete conversations
+      tags:
+        - Security AI Assistant API
     post:
       description: Create a new Security AI Assistant conversation.
       operationId: CreateConversation
@@ -53248,6 +53318,9 @@ components:
         - ESQL_INDEX_PATTERN
         - MANUAL_RULE_RUN_FEATURE
         - MANUAL_RULE_RUN_DISABLED_RULE
+        - THRESHOLD_RULE_TYPE_IN_SUPPRESSION
+        - UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD
+        - RULE_FILL_GAPS_DISABLED_RULE
       type: string
     Security_Detections_API_BulkActionSkipResult:
       type: object
@@ -53257,7 +53330,9 @@ components:
         name:
           type: string
         skip_reason:
-          $ref: '#/components/schemas/Security_Detections_API_BulkEditSkipReason'
+          oneOf:
+            - $ref: '#/components/schemas/Security_Detections_API_BulkEditSkipReason'
+            - $ref: '#/components/schemas/Security_Detections_API_BulkGapsFillingSkipReason'
       required:
         - id
         - skip_reason
@@ -53499,6 +53574,48 @@ components:
           type: string
       required:
         - action
+    Security_Detections_API_BulkGapsFillingSkipReason:
+      enum:
+        - NO_GAPS_TO_FILL
+      type: string
+    Security_Detections_API_BulkManualRuleFillGaps:
+      type: object
+      properties:
+        action:
+          enum:
+            - fill_gaps
+          type: string
+        fill_gaps:
+          description: Object that describes applying a manual gap fill action for the specified time range.
+          type: object
+          properties:
+            end_date:
+              description: End date of the manual gap fill
+              type: string
+            start_date:
+              description: Start date of the manual gap fill
+              type: string
+          required:
+            - start_date
+            - end_date
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
+          type: string
+        ids:
+          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          items:
+            type: string
+          minItems: 1
+          type: array
+        query:
+          description: Query to filter rules.
+          type: string
+      required:
+        - action
+        - fill_gaps
     Security_Detections_API_BulkManualRuleRun:
       type: object
       properties:
@@ -65338,12 +65455,30 @@ components:
             The URL of the incoming webhook. If you are using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.
     genai_secrets:
       title: Connector secrets properties for an OpenAI connector
-      description: Defines secrets for connectors when type is `.gen-ai`.
+      description: |
+        Defines secrets for connectors when type is `.gen-ai`. Supports both API key authentication (OpenAI, Azure OpenAI, and `Other`) and PKI authentication (`Other` provider only). PKI fields must be base64-encoded PEM content.
       type: object
       properties:
         apiKey:
           type: string
-          description: The OpenAI API key.
+          description: |
+            The API key for authentication. For OpenAI and Azure OpenAI providers, it is required. For the `Other` provider, it is required if you do not use PKI authentication. With PKI, you can also optionally include an API key if the OpenAI-compatible service supports or requires one.
+        certificateData:
+          type: string
+          description: |
+            Base64-encoded PEM certificate content for PKI authentication (Other provider only). Required for PKI.
+          minLength: 1
+        privateKeyData:
+          type: string
+          description: |
+            Base64-encoded PEM private key content for PKI authentication (Other provider only). Required for PKI.
+          minLength: 1
+        caData:
+          type: string
+          description: |
+            Base64-encoded PEM CA certificate content for PKI authentication (Other provider only). Optional.
+          minLength: 1
+      required: []
     opsgenie_secrets:
       title: Connector secrets properties for an Opsgenie connector
       required:
@@ -65513,6 +65648,52 @@ components:
           description: |
             A password for HTTP basic authentication. It is applicable only when `usesBasic` is `true`.
           type: string
+    genai_openai_other_config:
+      title: Connector request properties for an OpenAI connector with Other provider
+      description: |
+        Defines properties for connectors when type is `.gen-ai` and the API provider is `Other` (OpenAI-compatible service), including optional PKI authentication.
+      type: object
+      required:
+        - apiProvider
+        - apiUrl
+        - defaultModel
+      properties:
+        apiProvider:
+          type: string
+          description: The OpenAI API provider.
+          enum:
+            - Other
+        apiUrl:
+          type: string
+          description: The OpenAI-compatible API endpoint.
+        defaultModel:
+          type: string
+          description: The default model to use for requests.
+        certificateData:
+          type: string
+          description: PEM-encoded certificate content.
+          minLength: 1
+        privateKeyData:
+          type: string
+          description: PEM-encoded private key content.
+          minLength: 1
+        caData:
+          type: string
+          description: PEM-encoded CA certificate content.
+          minLength: 1
+        verificationMode:
+          type: string
+          description: SSL verification mode for PKI authentication.
+          enum:
+            - full
+            - certificate
+            - none
+          default: full
+        headers:
+          type: object
+          description: Custom headers to include in requests.
+          additionalProperties:
+            type: string
     defender_secrets:
       title: Connector secrets properties for a Microsoft Defender for Endpoint connector
       required:

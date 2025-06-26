@@ -79,6 +79,8 @@
     "@kbn/ui-theme",
     "@kbn/apm-utils",
     "@kbn/ml-field-stats-flyout",
+    "@kbn/config-schema",
+    "@kbn/aiops-utils",
   ],
   "exclude": [
     "target/**/*",

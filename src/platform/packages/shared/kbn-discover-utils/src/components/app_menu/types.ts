@@ -38,6 +38,7 @@ export enum AppMenuActionId {
   new = 'new',
   open = 'open',
   share = 'share',
+  export = 'export',
   alerts = 'alerts',
   inspect = 'inspect',
   createRule = 'createRule',

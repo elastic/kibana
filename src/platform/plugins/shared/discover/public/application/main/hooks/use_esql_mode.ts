@@ -100,6 +100,7 @@ export function useEsqlMode({
                     columns: true,
                     rowHeight: true,
                     breakdownField: true,
+                    hideChart: true,
                   })
                 );
               }
@@ -158,6 +159,7 @@ export function useEsqlMode({
                 columns: true,
                 rowHeight: false,
                 breakdownField: false,
+                hideChart: false,
               })
             );
           }

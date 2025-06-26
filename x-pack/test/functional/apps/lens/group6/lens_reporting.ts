@@ -9,13 +9,14 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, dashboard, lens, reporting, timePicker, visualize } = getPageObjects([
+  const { common, dashboard, lens, reporting, timePicker, visualize, exports } = getPageObjects([
     'common',
     'dashboard',
     'lens',
     'reporting',
     'timePicker',
     'visualize',
+    'exports',
   ]);
   const es = getService('es');
   const testSubjects = getService('testSubjects');
@@ -53,23 +54,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      if (await testSubjects.exists('shareContextModal')) {
-        await lens.closeShareModal();
+      if (await testSubjects.exists('toastCloseButton')) {
+        await testSubjects.click('toastCloseButton');
       }
+
+      await lens.closeExportFlyout();
     });
 
     it('should not cause PDF reports to fail', async () => {
       await dashboard.navigateToApp();
       await listingTable.clickItemLink('dashboard', 'Lens reportz');
-      await reporting.openExportTab();
+      await reporting.selectExportItem('PDF');
       await reporting.clickGenerateReportButton();
-      await lens.closeShareModal();
+      await lens.closeExportFlyout();
       const url = await reporting.getReportURL(60000);
       expect(url).to.be.ok();
-      if (await testSubjects.exists('toastCloseButton')) {
-        await testSubjects.click('toastCloseButton');
-      }
-      await lens.closeShareModal();
     });
 
     for (const type of ['PNG', 'PDF'] as const) {
@@ -93,11 +92,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           // now remove a dimension to make it incomplete
           await lens.removeDimension('lnsXY_yDimensionPanel');
-          // open the share menu and check that reporting is disabled
-          await lens.clickShareModal();
 
-          expect(await testSubjects.exists('export')).to.be(false);
-          await lens.closeShareModal();
+          expect(await lens.isPopoverItemEnabled(type)).to.eql(false);
         });
 
         it(`should be able to download report of the current visualization`, async () => {
@@ -108,12 +104,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             field: 'bytes',
           });
 
-          await lens.openReportingShare(type);
+          await lens.clickPopoverItem(type);
           await reporting.clickGenerateReportButton();
 
           const url = await reporting.getReportURL(60000);
-
-          await lens.closeShareModal();
 
           expect(url).to.be.ok();
           if (await testSubjects.exists('toastCloseButton')) {
@@ -123,17 +117,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it(`should enable curl reporting if the visualization is saved`, async () => {
           await lens.save(`ASavedVisualizationToShareIn${type}`);
+          await lens.clickPopoverItem(type);
 
-          await lens.openReportingShare(type);
-          await testSubjects.existOrFail('shareReportingCopyURL');
-          expect(await testSubjects.getVisibleText('shareReportingCopyURL')).to.eql(
-            'Copy Post URL'
-          );
-          await lens.closeShareModal();
+          const copyButton = await exports.getExportAssetTextButton();
+
+          if (copyButton) {
+            expect(await copyButton.getAttribute('aria-label')).to.eql('Copy export asset value');
+          }
         });
 
         it(`should produce a valid URL for reporting`, async () => {
-          await lens.openReportingShare(type);
+          await lens.clickPopoverItem(type);
           await reporting.clickGenerateReportButton();
           await reporting.getReportURL(60000);
           if (await testSubjects.exists('toastCloseButton')) {

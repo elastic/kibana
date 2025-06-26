@@ -380,6 +380,7 @@ import type {
   ResolveTimelineResponse,
 } from './timeline/resolve_timeline/resolve_timeline_route.gen';
 import type {
+  CreateRuleMigrationRequestBodyInput,
   CreateRuleMigrationResponse,
   CreateRuleMigrationRulesRequestParamsInput,
   CreateRuleMigrationRulesRequestBodyInput,
@@ -413,7 +414,7 @@ import type {
   StopRuleMigrationRequestParamsInput,
   StopRuleMigrationResponse,
   UpdateRuleMigrationRequestParamsInput,
-  UpdateRuleMigrationResponse,
+  UpdateRuleMigrationRequestBodyInput,
   UpdateRuleMigrationRulesRequestParamsInput,
   UpdateRuleMigrationRulesRequestBodyInput,
   UpdateRuleMigrationRulesResponse,
@@ -815,7 +816,7 @@ For detailed information on Kibana actions and alerting, and additional API call
   /**
    * Creates a new rule migration and returns the corresponding migration_id
    */
-  async createRuleMigration() {
+  async createRuleMigration(props: CreateRuleMigrationProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateRuleMigration`);
     return this.kbnClient
       .request<CreateRuleMigrationResponse>({
@@ -824,6 +825,7 @@ For detailed information on Kibana actions and alerting, and additional API call
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'PUT',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2560,12 +2562,13 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
   async updateRuleMigration(props: UpdateRuleMigrationProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateRuleMigration`);
     return this.kbnClient
-      .request<UpdateRuleMigrationResponse>({
+      .request({
         path: replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'PATCH',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2670,6 +2673,9 @@ export interface CreateAssetCriticalityRecordProps {
 }
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
+}
+export interface CreateRuleMigrationProps {
+  body: CreateRuleMigrationRequestBodyInput;
 }
 export interface CreateRuleMigrationRulesProps {
   params: CreateRuleMigrationRulesRequestParamsInput;
@@ -2941,6 +2947,7 @@ export interface UpdateRuleProps {
 }
 export interface UpdateRuleMigrationProps {
   params: UpdateRuleMigrationRequestParamsInput;
+  body: UpdateRuleMigrationRequestBodyInput;
 }
 export interface UpdateRuleMigrationRulesProps {
   params: UpdateRuleMigrationRulesRequestParamsInput;
