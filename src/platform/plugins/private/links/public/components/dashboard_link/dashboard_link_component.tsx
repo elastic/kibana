@@ -104,7 +104,8 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
     }
 
     if (linkOptions.useCurrentDateRange && timeRange) {
-      params.timeRange = timeRange;
+      params.timeFrom = timeRange.from;
+      params.timeTo = timeRange.to;
     }
 
     params.filters = linkOptions.useCurrentFilters ? filters : filters?.filter(isFilterPinned);

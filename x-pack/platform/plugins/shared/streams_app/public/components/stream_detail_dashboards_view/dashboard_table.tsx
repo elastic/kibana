@@ -70,7 +70,11 @@ export function DashboardsTable({
                 });
               }
               const url = dashboardLocator?.getRedirectUrl(
-                { dashboardId: id, timeRange: timeState.timeRange } || ''
+                {
+                  dashboardId: id,
+                  timeFrom: timeState.timeRange.from,
+                  timeTo: timeState.timeRange.to,
+                } || ''
               );
               if (url) {
                 application.navigateToUrl(url);

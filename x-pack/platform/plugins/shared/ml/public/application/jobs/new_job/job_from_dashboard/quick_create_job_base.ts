@@ -232,11 +232,8 @@ export class QuickJobCreatorBase {
 
     const params: DashboardLocatorParams = {
       dashboardId: savedObjectId,
-      timeRange: {
-        from: '$earliest$',
-        to: '$latest$',
-        mode: 'absolute',
-      },
+      timeFrom: '$earliest$',
+      timeTo: '$latest$',
       filters: getFiltersForDSLQuery(
         datafeedConfig.query,
         undefined,

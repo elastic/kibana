@@ -66,7 +66,8 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
     }
 
     if (timeRangeFromEvent) {
-      params.timeRange = timeRangeFromEvent;
+      params.timeFrom = timeRangeFromEvent.from;
+      params.timeTo = timeRangeFromEvent.to;
     }
 
     const location = await this.locator.getLocation(params);
