@@ -6,11 +6,10 @@
  */
 
 import expect from 'expect';
-import { getPrebuiltRuleMockOfType } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,
-  createRuleAssetSavedObject,
+  createRuleAssetSavedObjectOfType,
   deleteAllPrebuiltRuleAssets,
   reviewPrebuiltRulesToInstall,
 } from '../../../../utils';
@@ -28,17 +27,11 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('ML rules are excluded from response', async () => {
-      const mlFields = getPrebuiltRuleMockOfType('machine_learning');
-
-      const mlRuleAsset = await createRuleAssetSavedObject({
-        ...mlFields,
-        alert_suppression: undefined, // TODO: Investigate!
+      const mlRuleAsset = createRuleAssetSavedObjectOfType('machine_learning', {
         tags: ['Type: ML'],
       });
-
-      const nonMlRuleAsset = await createRuleAssetSavedObject({
+      const nonMlRuleAsset = createRuleAssetSavedObjectOfType('query', {
         tags: ['Type: Custom Query'],
-        type: 'query',
       });
 
       await createPrebuiltRuleAssetSavedObjects(es, [mlRuleAsset, nonMlRuleAsset]);

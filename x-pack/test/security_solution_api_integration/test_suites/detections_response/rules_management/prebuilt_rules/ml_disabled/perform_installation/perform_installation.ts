@@ -6,11 +6,10 @@
  */
 
 import expect from 'expect';
-import { getPrebuiltRuleMockOfType } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,
-  createRuleAssetSavedObject,
+  createRuleAssetSavedObjectOfType,
   deleteAllPrebuiltRuleAssets,
   installPrebuiltRules,
 } from '../../../../utils';
@@ -28,56 +27,36 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('ML rules are skipped during installation if mode is ALL_RULES', async () => {
-      const mlFields = getPrebuiltRuleMockOfType('machine_learning');
-
-      const mlRuleAsset = await createRuleAssetSavedObject({
-        ...mlFields,
-        alert_suppression: undefined, // TODO: Investigate!
-      });
-
-      const nonMlRuleAsset = await createRuleAssetSavedObject({
-        type: 'query',
-      });
-
+      const mlRuleAsset = createRuleAssetSavedObjectOfType('machine_learning');
+      const nonMlRuleAsset = createRuleAssetSavedObjectOfType('query');
       await createPrebuiltRuleAssetSavedObjects(es, [mlRuleAsset, nonMlRuleAsset]);
 
       const performInstallationResponse = await installPrebuiltRules(es, supertest);
-
-      expect(performInstallationResponse.summary).toEqual({
-        total: 1,
-        succeeded: 1,
-        skipped: 0, // ML rules are skipped silently as if they were not present, so do not count towards "skipped"
-        failed: 0,
+      expect(performInstallationResponse).toMatchObject({
+        summary: {
+          total: 1,
+          succeeded: 1,
+          skipped: 0, // ML rules are skipped silently as if they were not present, so they don't count towards "skipped"
+          failed: 0,
+        },
+        results: {
+          created: [{ type: 'query' }],
+        },
       });
-      expect(performInstallationResponse.results.created).toHaveLength(1);
-      expect(performInstallationResponse.results.created?.[0].type).toEqual('query');
     });
 
-    it('ML rules return an error on installation if mode is SPECIFIC_RULES', async () => {
-      const mlFields = {
-        ...getPrebuiltRuleMockOfType('machine_learning'),
-        rule_id: 'ml-rule',
-        version: 1,
-      };
-      const mlRuleAsset = await createRuleAssetSavedObject({
-        ...mlFields,
-        alert_suppression: undefined, // TODO: Investigate!
-      });
+    it('ML rules produce an error during installation if mode is SPECIFIC_RULES', async () => {
+      const mlRuleFields = { rule_id: 'ml-rule', version: 1 };
+      const mlRuleAsset = createRuleAssetSavedObjectOfType('machine_learning', mlRuleFields);
 
-      const nonMlRuleFields = {
-        rule_id: 'non-ml-rule',
-        version: 1,
-        tags: ['Type: Custom Query'],
-      };
-      const nonMlRuleAsset = await createRuleAssetSavedObject({
-        ...nonMlRuleFields,
-      });
+      const nonMlRuleFields = { rule_id: 'non-ml-rule', version: 1 };
+      const nonMlRuleAsset = createRuleAssetSavedObjectOfType('query', nonMlRuleFields);
 
       await createPrebuiltRuleAssetSavedObjects(es, [mlRuleAsset, nonMlRuleAsset]);
 
       const performInstallationResponse = await installPrebuiltRules(es, supertest, [
-        { rule_id: mlFields.rule_id, version: mlFields.version },
-        { rule_id: nonMlRuleFields.rule_id, version: nonMlRuleFields.version },
+        mlRuleFields,
+        nonMlRuleFields,
       ]);
 
       expect(performInstallationResponse).toMatchObject({
@@ -89,7 +68,7 @@ export default ({ getService }: FtrProviderContext): void => {
           {
             message: 'Your license does not support machine learning. Please upgrade your license.',
             status_code: 403,
-            rules: [{ rule_id: mlFields.rule_id }],
+            rules: [{ rule_id: mlRuleFields.rule_id }],
           },
         ],
       });

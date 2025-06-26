@@ -9,8 +9,10 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Rules Management - Prebuilt Rules (ML Disabled)', function () {
-    this.tags('skipFIPS'); // TODO: CHECK IF WE NEED THIS
     loadTestFile(require.resolve('./review_installation'));
     loadTestFile(require.resolve('./perform_installation'));
+    loadTestFile(require.resolve('./review_upgrade'));
+    loadTestFile(require.resolve('./perform_upgrade'));
+    loadTestFile(require.resolve('./status'));
   });
 };
