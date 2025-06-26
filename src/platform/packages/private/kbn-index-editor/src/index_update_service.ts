@@ -40,6 +40,7 @@ import {
   timer,
   withLatestFrom,
 } from 'rxjs';
+import { parsePrimitive } from './utils';
 
 const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
 
@@ -388,8 +389,15 @@ export class IndexUpdateService {
   }
 
   /* Partial doc update */
-  public updateDoc(id: string, update: Record<string, any>) {
-    this.actions$.next({ type: 'add', payload: { id, value: update } });
+  public updateDoc(id: string, update: Record<string, unknown>) {
+    const parsedUpdate = Object.entries(update).reduce<Record<string, unknown>>(
+      (acc, [key, value]) => {
+        acc[key] = parsePrimitive(value);
+        return acc;
+      },
+      {}
+    );
+    this.actions$.next({ type: 'add', payload: { id, value: parsedUpdate } });
   }
 
   /**

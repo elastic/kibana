@@ -118,34 +118,38 @@ export const AddRowPanel: React.FC<AddRowPanelProps> = ({ columns, onHide }) => 
             css={css`
               &.hide-scrollbar {
                 scrollbar-width: none;
-                padding: 0 ${euiTheme.size.xs};
+                padding: 0 ${euiTheme.size.xxs};
               }
             `}
           >
             {inputs}
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButtonIcon
-            type="submit"
-            iconType="check"
-            display="base"
-            color="success"
-            aria-label={i18n.translate('indexEditor.addRow.save', {
-              defaultMessage: 'Save',
-            })}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButtonIcon
-            onClick={onHide}
-            iconType="cross"
-            display="base"
-            color="danger"
-            aria-label={i18n.translate('indexEditor.addRow.cancel', {
-              defaultMessage: 'Cancel',
-            })}
-          />
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem>
+              <EuiButtonIcon
+                type="submit"
+                iconType="check"
+                display="base"
+                color="success"
+                aria-label={i18n.translate('indexEditor.addRow.save', {
+                  defaultMessage: 'Save',
+                })}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiButtonIcon
+                onClick={onHide}
+                iconType="cross"
+                display="base"
+                color="danger"
+                aria-label={i18n.translate('indexEditor.addRow.cancel', {
+                  defaultMessage: 'Cancel',
+                })}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiForm>
