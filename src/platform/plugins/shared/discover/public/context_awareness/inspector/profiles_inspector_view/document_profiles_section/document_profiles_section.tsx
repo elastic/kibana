@@ -11,27 +11,27 @@ import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { Profiles } from '../../../../application/main/hooks/use_active_profiles';
 import { ProfileSection } from '../profile_section';
 import { DocumentProfileTable } from './document_profile_table';
 import { getExpandAction } from './get_expand_action';
+import type { Contexts } from '../../../hooks/use_active_contexts';
 
-export function DocumentsProfilesSection({
-  documentsProfiles,
+export function DocumentProfilesSection({
+  documentContexts,
   onViewRecordDetails,
 }: {
-  documentsProfiles: Profiles['documentContexts'];
+  documentContexts: Contexts['documentContexts'];
   onViewRecordDetails: (record: DataTableRecord) => void;
 }) {
   const [expandedProfileId, setExpandedProfileId] = useState<string | undefined>(undefined);
   const sortedDocumentProfiles = useMemo(() => {
-    return Object.keys(documentsProfiles ?? {})
+    return Object.keys(documentContexts ?? {})
       .sort()
       .map((profileId) => ({
         profileId,
-        recordCount: documentsProfiles?.[profileId]?.length ?? 0,
+        recordCount: documentContexts?.[profileId]?.length ?? 0,
       }));
-  }, [documentsProfiles]);
+  }, [documentContexts]);
 
   return (
     <ProfileSection
@@ -103,7 +103,7 @@ export function DocumentsProfilesSection({
                   <DocumentProfileTable
                     onViewRecordDetails={(record) => onViewRecordDetails(record)}
                     profileId={expandedProfileId}
-                    records={documentsProfiles?.[expandedProfileId] ?? []}
+                    records={documentContexts?.[expandedProfileId] ?? []}
                   />
                 ),
               }

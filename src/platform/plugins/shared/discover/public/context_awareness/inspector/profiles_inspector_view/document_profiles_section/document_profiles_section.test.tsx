@@ -8,26 +8,26 @@
  */
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { DocumentsProfilesSection } from './documents_profiles_section';
+import { DocumentProfilesSection } from './document_profiles_section';
 import { getDataTableRecordWithContextMock } from '../../../__mocks__';
 import { userEvent } from '@testing-library/user-event';
 
-const setup = (props: Partial<React.ComponentProps<typeof DocumentsProfilesSection>> = {}) => {
+const setup = (props: Partial<React.ComponentProps<typeof DocumentProfilesSection>> = {}) => {
   const onViewRecordDetails = jest.fn();
   const user = userEvent.setup();
 
   const allProps = {
-    documentsProfiles: {},
+    documentContexts: {},
     onViewRecordDetails,
     ...props,
   };
 
-  render(<DocumentsProfilesSection {...allProps} />);
+  render(<DocumentProfilesSection {...allProps} />);
 
   return { onViewRecordDetails, user };
 };
 
-describe('<DocumentsProfilesSection />', () => {
+describe('<DocumentProfilesSection />', () => {
   it('should render the title', () => {
     // When
     setup();
@@ -57,13 +57,13 @@ describe('<DocumentsProfilesSection />', () => {
   });
 
   describe('when there is one profile', () => {
-    const documentsProfiles = {
+    const documentContexts = {
       profile1: [getDataTableRecordWithContextMock()],
     };
 
     it('should render the profile ID', () => {
       // When
-      setup({ documentsProfiles });
+      setup({ documentContexts });
 
       // Then
       expect(screen.getByText('profile1')).toBeVisible();
@@ -71,7 +71,7 @@ describe('<DocumentsProfilesSection />', () => {
 
     it('should render the record count', () => {
       // When
-      setup({ documentsProfiles });
+      setup({ documentContexts });
 
       // Then
       expect(screen.getByText('1')).toBeVisible();
@@ -80,7 +80,7 @@ describe('<DocumentsProfilesSection />', () => {
     describe('when the expand action is clicked', () => {
       it('should call onViewRecordDetails with the first record', async () => {
         // Given
-        const { onViewRecordDetails, user } = setup({ documentsProfiles });
+        const { onViewRecordDetails, user } = setup({ documentContexts });
 
         // When
         await user.click(screen.getByTestId('documentsProfilesSectionExpandAction'));
@@ -88,13 +88,13 @@ describe('<DocumentsProfilesSection />', () => {
 
         // Then
         expect(onViewRecordDetails).toHaveBeenCalled();
-        expect(onViewRecordDetails).toHaveBeenCalledWith(documentsProfiles.profile1[0]);
+        expect(onViewRecordDetails).toHaveBeenCalledWith(documentContexts.profile1[0]);
       });
     });
   });
 
   describe('when there are multiple profiles', () => {
-    const documentsProfiles = {
+    const documentContexts = {
       profile1: [getDataTableRecordWithContextMock()],
       profile2: [
         getDataTableRecordWithContextMock(),
@@ -106,7 +106,7 @@ describe('<DocumentsProfilesSection />', () => {
 
     it('should render the profile IDs', () => {
       // When
-      setup({ documentsProfiles });
+      setup({ documentContexts });
 
       // Then
       expect(screen.getByText('profile1')).toBeVisible();
@@ -116,7 +116,7 @@ describe('<DocumentsProfilesSection />', () => {
 
     it('should render the record count', () => {
       // When
-      setup({ documentsProfiles });
+      setup({ documentContexts });
 
       // Then
       expect(screen.getByText('1')).toBeVisible();

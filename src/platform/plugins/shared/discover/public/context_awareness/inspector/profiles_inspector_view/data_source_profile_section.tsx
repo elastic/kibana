@@ -10,13 +10,13 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Profiles } from '../../../application/main/hooks/use_active_profiles';
 import { ProfileSection } from './profile_section';
+import type { Contexts } from '../../hooks/use_active_contexts';
 
 export function DataSourceProfileSection({
-  dataSourceProfile,
+  dataSourceContext,
 }: {
-  dataSourceProfile: Profiles['dataSourceContext'];
+  dataSourceContext: Contexts['dataSourceContext'];
 }) {
   return (
     <ProfileSection
@@ -33,7 +33,7 @@ export function DataSourceProfileSection({
                 defaultMessage: 'Profile ID',
               }
             ),
-            description: dataSourceProfile.profileId,
+            description: dataSourceContext.profileId,
           },
           {
             title: i18n.translate(
@@ -42,7 +42,7 @@ export function DataSourceProfileSection({
                 defaultMessage: 'Category',
               }
             ),
-            description: dataSourceProfile.category,
+            description: dataSourceContext.category,
           },
         ]}
       />

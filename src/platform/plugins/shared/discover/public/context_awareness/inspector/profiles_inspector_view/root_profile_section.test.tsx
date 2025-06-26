@@ -14,26 +14,26 @@ import { getContextWithProfileIdMock } from '../../__mocks__';
 import type { RootContext } from '../../profiles';
 import { SolutionType } from '../../profiles';
 
-const rootProfileMock = getContextWithProfileIdMock<RootContext>({
+const rootContextMock = getContextWithProfileIdMock<RootContext>({
   profileId: 'test-root-profile-id',
   solutionType: SolutionType.Observability,
 });
 
 describe('RootProfileSection', () => {
   it('renders the title correctly', () => {
-    render(<RootProfileSection rootProfile={rootProfileMock} />);
+    render(<RootProfileSection rootContext={rootContextMock} />);
     expect(screen.getByText('Root profile')).toBeVisible();
   });
 
   it('displays the profile ID when provided', () => {
-    render(<RootProfileSection rootProfile={rootProfileMock} />);
+    render(<RootProfileSection rootContext={rootContextMock} />);
 
     expect(screen.getByText('Profile ID')).toBeVisible();
     expect(screen.getByText('test-root-profile-id')).toBeVisible();
   });
 
   it('displays the solution type when provided', () => {
-    render(<RootProfileSection rootProfile={rootProfileMock} />);
+    render(<RootProfileSection rootContext={rootContextMock} />);
 
     expect(screen.getByText('Solution type')).toBeVisible();
     expect(screen.getByText(SolutionType.Observability)).toBeVisible();

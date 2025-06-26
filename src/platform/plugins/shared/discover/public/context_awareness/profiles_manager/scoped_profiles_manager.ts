@@ -182,10 +182,10 @@ export class ScopedProfilesManager {
     );
   }
 
-  public getContexts$() {
+  public getContexts() {
     return {
-      rootContext$: this.rootContext$,
-      dataSourceContext$: this.dataSourceContext$,
+      rootContext: this.rootContext$.getValue(),
+      dataSourceContext: this.dataSourceContext$.getValue(),
     };
   }
 

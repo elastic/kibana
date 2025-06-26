@@ -11,6 +11,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { getProfilesInspectorView } from './get_profiles_inspector_view';
 import { getDataSourceContextMock, getRootContextMock } from '../__mocks__';
+import type { ContextsAdapter } from '../hooks';
 
 describe('getProfilesInspectorView', () => {
   it('should return the title', () => {
@@ -39,22 +40,22 @@ describe('getProfilesInspectorView', () => {
   });
 
   describe('when profiles are available', () => {
-    const profilesAdapter = {
-      getRootProfile: jest.fn().mockReturnValue(getRootContextMock()),
-      getDataSourceProfile: jest.fn().mockReturnValue(getDataSourceContextMock()),
-      getDocumentsProfiles: jest.fn().mockReturnValue({}),
+    const contextsAdapter: ContextsAdapter = {
+      getRootContext: jest.fn().mockReturnValue(getRootContextMock()),
+      getDataSourceContext: jest.fn().mockReturnValue(getDataSourceContextMock()),
+      getDocumentContexts: jest.fn().mockReturnValue({}),
       openDocDetails: jest.fn(),
     };
 
     it('should show the view', () => {
       const { shouldShow } = getProfilesInspectorView();
-      expect(shouldShow?.({ profiles: profilesAdapter })).toBe(true);
+      expect(shouldShow?.({ contexts: contextsAdapter })).toBe(true);
     });
 
     it('should render the component', async () => {
       const { component: Component } = getProfilesInspectorView();
 
-      render(<Component title="" adapters={{ profiles: profilesAdapter }} />);
+      render(<Component title="" adapters={{ contexts: contextsAdapter }} />);
 
       await waitFor(() => expect(screen.getByTestId('profilesInspectorView')).toBeVisible());
     });

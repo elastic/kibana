@@ -11,16 +11,17 @@ import { render, screen } from '@testing-library/react';
 import { ProfilesInspectorView } from './profiles_inspector_view';
 import React from 'react';
 import { getRootContextMock, getDataSourceContextMock } from '../../__mocks__';
+import type { ContextsAdapter } from '../../hooks';
 
-const mockProfilesAdapter = {
-  getRootProfile: jest.fn().mockReturnValue(getRootContextMock()),
-  getDataSourceProfile: jest.fn().mockReturnValue(getDataSourceContextMock()),
-  getDocumentsProfiles: jest.fn().mockReturnValue({}),
+const mockContextsAdapter: ContextsAdapter = {
+  getRootContext: jest.fn().mockReturnValue(getRootContextMock()),
+  getDataSourceContext: jest.fn().mockReturnValue(getDataSourceContextMock()),
+  getDocumentContexts: jest.fn().mockReturnValue({}),
   openDocDetails: jest.fn(),
 };
 
 const setup = () => {
-  render(<ProfilesInspectorView profilesAdapter={mockProfilesAdapter} />);
+  render(<ProfilesInspectorView contextsAdapter={mockContextsAdapter} />);
 };
 
 describe('<ProfilesInspectorView />', () => {

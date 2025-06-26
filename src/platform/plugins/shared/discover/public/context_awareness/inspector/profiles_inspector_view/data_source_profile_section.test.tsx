@@ -13,26 +13,26 @@ import { DataSourceProfileSection } from './data_source_profile_section';
 import { getContextWithProfileIdMock } from '../../__mocks__';
 import { DataSourceCategory, type DataSourceContext } from '../../profiles';
 
-const dataSourceProfile = getContextWithProfileIdMock<DataSourceContext>({
+const dataSourceContext = getContextWithProfileIdMock<DataSourceContext>({
   profileId: 'test-profile-id',
   category: DataSourceCategory.Logs,
 });
 
 describe('DataSourceProfileSection', () => {
   it('renders the title correctly', () => {
-    render(<DataSourceProfileSection dataSourceProfile={dataSourceProfile} />);
+    render(<DataSourceProfileSection dataSourceContext={dataSourceContext} />);
     expect(screen.getByText('Data source profile')).toBeVisible();
   });
 
   it('displays the profile ID when provided', () => {
-    render(<DataSourceProfileSection dataSourceProfile={dataSourceProfile} />);
+    render(<DataSourceProfileSection dataSourceContext={dataSourceContext} />);
 
     expect(screen.getByText('Profile ID')).toBeVisible();
     expect(screen.getByText('test-profile-id')).toBeVisible();
   });
 
   it('displays the category when provided', () => {
-    render(<DataSourceProfileSection dataSourceProfile={dataSourceProfile} />);
+    render(<DataSourceProfileSection dataSourceContext={dataSourceContext} />);
 
     expect(screen.getByText('Category')).toBeVisible();
     expect(screen.getByText(DataSourceCategory.Logs)).toBeVisible();

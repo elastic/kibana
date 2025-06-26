@@ -9,12 +9,12 @@
 
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import type { ProfilesAdapter } from '../../../application/main/hooks/use_active_profiles';
 import { DataSourceProfileSection } from './data_source_profile_section';
 import { RootProfileSection } from './root_profile_section';
-import { DocumentsProfilesSection } from './documents_profiles_display';
+import { DocumentProfilesSection } from './document_profiles_section';
+import type { ContextsAdapter } from '../../hooks';
 
-export function ProfilesInspectorView({ profilesAdapter }: { profilesAdapter: ProfilesAdapter }) {
+export function ProfilesInspectorView({ contextsAdapter }: { contextsAdapter: ContextsAdapter }) {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -22,11 +22,11 @@ export function ProfilesInspectorView({ profilesAdapter }: { profilesAdapter: Pr
       data-test-subj="profilesInspectorView"
       css={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.s }}
     >
-      <RootProfileSection rootProfile={profilesAdapter.getRootProfile()} />
-      <DataSourceProfileSection dataSourceProfile={profilesAdapter.getDataSourceProfile()} />
-      <DocumentsProfilesSection
-        onViewRecordDetails={profilesAdapter.openDocDetails}
-        documentsProfiles={profilesAdapter.getDocumentsProfiles()}
+      <RootProfileSection rootContext={contextsAdapter.getRootContext()} />
+      <DataSourceProfileSection dataSourceContext={contextsAdapter.getDataSourceContext()} />
+      <DocumentProfilesSection
+        onViewRecordDetails={contextsAdapter.openDocDetails}
+        documentContexts={contextsAdapter.getDocumentContexts()}
       />
     </div>
   );

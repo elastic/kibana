@@ -10,10 +10,10 @@
 import { EuiDescriptionList } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { Profiles } from '../../../application/main/hooks/use_active_profiles';
 import { ProfileSection } from './profile_section';
+import type { Contexts } from '../../hooks/use_active_contexts';
 
-export function RootProfileSection({ rootProfile }: { rootProfile: Profiles['rootContext'] }) {
+export function RootProfileSection({ rootContext }: { rootContext: Contexts['rootContext'] }) {
   return (
     <ProfileSection
       title={i18n.translate('discover.inspector.profilesInspectorView.rootProfileTitle', {
@@ -26,7 +26,7 @@ export function RootProfileSection({ rootProfile }: { rootProfile: Profiles['roo
             title: i18n.translate('discover.inspector.profilesInspectorView.rootProfileIdTitle', {
               defaultMessage: 'Profile ID',
             }),
-            description: rootProfile.profileId,
+            description: rootContext.profileId,
           },
           {
             title: i18n.translate(
@@ -35,7 +35,7 @@ export function RootProfileSection({ rootProfile }: { rootProfile: Profiles['roo
                 defaultMessage: 'Solution type',
               }
             ),
-            description: rootProfile.solutionType,
+            description: rootContext.solutionType,
           },
         ]}
       />

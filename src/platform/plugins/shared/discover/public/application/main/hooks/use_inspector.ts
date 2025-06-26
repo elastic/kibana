@@ -10,20 +10,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import type {
   InspectorSession,
-  RequestAdapter,
   Start as InspectorPublicPluginStart,
-  Adapters,
 } from '@kbn/inspector-plugin/public';
 import type { DiscoverStateContainer } from '../state_management/discover_state';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
 import { internalStateActions, useInternalStateDispatch } from '../state_management/redux';
-import type { ProfilesAdapter } from './use_active_profiles';
-import { useActiveProfiles } from './use_active_profiles';
-
-export interface InspectorAdapters extends Adapters {
-  lensRequests?: RequestAdapter;
-  profiles?: ProfilesAdapter;
-}
+import { useActiveContexts } from '../../../context_awareness/hooks';
 
 export function useInspector({
   inspector,
@@ -35,7 +27,7 @@ export function useInspector({
   const dispatch = useInternalStateDispatch();
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
-  const getProfilesAdapter = useActiveProfiles({
+  const getContextsAdapter = useActiveContexts({
     dataDocuments$: stateContainer.dataState.data$.documents$,
   });
 
@@ -52,7 +44,7 @@ export function useInspector({
     const session = inspector.open(
       {
         requests: new AggregateRequestAdapter(requestAdapters),
-        profiles: getProfilesAdapter({
+        contexts: getContextsAdapter({
           onOpenDocDetails: (record) => {
             session?.close();
             dispatch(internalStateActions.setExpandedDoc({ expandedDoc: record }));
@@ -68,7 +60,7 @@ export function useInspector({
     stateContainer.dataState.inspectorAdapters,
     stateContainer.savedSearchState,
     inspector,
-    getProfilesAdapter,
+    getContextsAdapter,
   ]);
 
   useEffect(() => {

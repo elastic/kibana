@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DocumentsProfilesSection } from './documents_profiles_section';
+export { DocumentProfilesSection } from './document_profiles_section';

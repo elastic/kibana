@@ -139,9 +139,7 @@ export class DiscoverPlugin
       );
     }
 
-    if (plugins.inspector) {
-      plugins.inspector.registerView(getProfilesInspectorView());
-    }
+    plugins.inspector.registerView(getProfilesInspectorView());
 
     const {
       setTrackedUrl,

@@ -8,12 +8,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { InspectorViewDescription } from '@kbn/inspector-plugin/public';
-import React from 'react';
-import { dynamic } from '@kbn/shared-ux-utility';
-import type { InspectorAdapters } from '../../application/main/hooks/use_inspector';
+import type { Adapters, InspectorViewDescription } from '@kbn/inspector-plugin/public';
+import React, { lazy } from 'react';
+import { withSuspense } from '@kbn/shared-ux-utility';
+import type { ContextsAdapter } from '../hooks';
 
-const ProfilesInspectorViewComponent = dynamic(() => import('./profiles_inspector_view'));
+const ProfilesInspectorViewComponent = withSuspense(
+  lazy(() => import('./profiles_inspector_view'))
+);
+
+export interface InspectorAdapters extends Adapters {
+  contexts?: ContextsAdapter;
+}
 
 export const getProfilesInspectorView = (): InspectorViewDescription => ({
   title: i18n.translate('discover.inspector.profilesInspectorViewTitle', {
@@ -24,13 +30,13 @@ export const getProfilesInspectorView = (): InspectorViewDescription => ({
     defaultMessage: 'View the active Discover profiles',
   }),
   shouldShow(adapters: InspectorAdapters) {
-    return Boolean(adapters.profiles);
+    return Boolean(adapters.contexts);
   },
-  component: ({ adapters: { profiles } }: { adapters: InspectorAdapters }) => {
-    if (!profiles) {
+  component: ({ adapters: { contexts } }: { adapters: InspectorAdapters }) => {
+    if (!contexts) {
       return null;
     }
 
-    return <ProfilesInspectorViewComponent profilesAdapter={profiles} />;
+    return <ProfilesInspectorViewComponent contextsAdapter={contexts} />;
   },
 });
