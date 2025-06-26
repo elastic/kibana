@@ -105,5 +105,13 @@
     "@kbn/repo-info",
     "@kbn/dev-cli-errors",
     "@kbn/journeys",
+    "@kbn/reporting-common",
+    "@kbn/discover-plugin",
+    "@kbn/reporting-export-types-csv-common",
+    "@kbn/rison",
+    "@kbn/reporting-export-types-pdf-common",
+    "@kbn/reporting-export-types-png-common",
+    "@kbn/reporting-server",
+    "@kbn/lens-plugin",
   ]
 }
