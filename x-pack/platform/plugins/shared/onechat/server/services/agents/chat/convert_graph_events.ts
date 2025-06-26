@@ -36,10 +36,8 @@ export type ConvertedEvents =
 export const convertGraphEvents = ({
   graphName,
   toolIdMapping,
-  runName,
 }: {
   graphName: string;
-  runName: string;
   toolIdMapping: ToolIdMapping;
 }): OperatorFunction<LangchainStreamEvent, ConvertedEvents> => {
   return (streamEvents$) => {

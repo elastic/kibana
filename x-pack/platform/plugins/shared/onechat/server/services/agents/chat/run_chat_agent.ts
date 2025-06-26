@@ -67,7 +67,6 @@ export const runChatAgent: RunChatAgentFn = async (
     filter(isStreamEvent),
     convertGraphEvents({
       graphName: chatAgentGraphName,
-      runName: chatAgentGraphName,
       toolIdMapping,
     }),
     addRoundCompleteEvent({ userInput: nextInput }),

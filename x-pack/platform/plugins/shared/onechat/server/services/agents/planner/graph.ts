@@ -9,11 +9,11 @@ import { z } from '@kbn/zod';
 import { StateGraph, Annotation } from '@langchain/langgraph';
 import { BaseMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
-import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/core/server';
 import { InferenceChatModel } from '@kbn/inference-langchain';
 import { extractTextContent } from '@kbn/onechat-genai-utils/langchain';
+import { createAgentGraph } from '../chat/graph';
 import {
   getPlanningPrompt,
   getExecutionPrompt,
@@ -92,21 +92,24 @@ export const createPlannerAgentGraph = async ({
   const executeStep = async (state: StateType) => {
     const nextTask = state.plan[0];
 
-    const agentExecutor = createReactAgent({
-      llm: chatModel,
+    const executorAgent = createAgentGraph({
+      chatModel,
       tools,
-    }).withConfig({
-      tags: ['planner:execute_step'],
+      logger: log,
+      systemPrompt: '',
     });
 
-    const { messages } = await agentExecutor.invoke({
-      messages: getExecutionPrompt({
-        task: nextTask,
-        backlog: state.backlog,
-      }),
-    });
+    const { addedMessages } = await executorAgent.invoke(
+      {
+        initialMessages: getExecutionPrompt({
+          task: nextTask,
+          backlog: state.backlog,
+        }),
+      },
+      { tags: ['executor_agent'], metadata: { graphName: 'executor_agent' } }
+    );
 
-    const messageContent = extractTextContent(messages[messages.length - 1]);
+    const messageContent = extractTextContent(addedMessages[addedMessages.length - 1]);
 
     log.trace(() => `executeStep - step: ${nextTask} - response: ${messageContent}`);
 
