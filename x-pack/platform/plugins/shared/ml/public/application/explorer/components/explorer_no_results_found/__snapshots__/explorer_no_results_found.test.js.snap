@@ -12,7 +12,7 @@ exports[`ExplorerNoResultsFound snapshot 1`] = `
     >
       <span
         color="subdued"
-        data-euiicon-type="iInCircle"
+        data-euiicon-type="info"
       />
     </div>
     <div
