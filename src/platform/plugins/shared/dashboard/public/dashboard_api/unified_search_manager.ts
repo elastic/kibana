@@ -372,7 +372,8 @@ export function initializeUnifiedSearchManager(
             filters: filters ?? DEFAULT_DASHBOARD_STATE.filters,
             query: query ?? DEFAULT_DASHBOARD_STATE.query,
             refreshInterval,
-            timeRange,
+            timeFrom: timeRange?.from,
+            timeTo: timeRange?.to,
           })),
           combineLatestWith(lastSavedState$),
           map(([latestState, lastSavedState]) =>
