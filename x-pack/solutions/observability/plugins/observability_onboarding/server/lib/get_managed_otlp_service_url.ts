@@ -18,6 +18,10 @@ import type { ObservabilityOnboardingRouteHandlerResources } from '../routes/typ
 export async function getManagedOtlpServiceUrl({
   plugins,
 }: ObservabilityOnboardingRouteHandlerResources): Promise<string> {
+  if (!plugins.apm) {
+    return '';
+  }
+
   const managedApmServiceUrl = await firstValueFrom(plugins.apm.setup.config$).then((apmConfig) => {
     return apmConfig.managedServiceUrl;
   });
