@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 
 export const ASSISTANT_CARD_TITLE = i18n.translate(
-  'xpack.securitySolution.onboarding.assistantCard.title',
+  'xpack.securitySolution.onboarding.assistantCardService.title',
   {
-    defaultMessage: 'Configure AI Provider',
+    defaultMessage: 'Configure AI service',
   }
 );
 export const ASSISTANT_CARD_DESCRIPTION = i18n.translate(

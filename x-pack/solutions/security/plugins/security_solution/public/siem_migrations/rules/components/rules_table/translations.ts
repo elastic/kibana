@@ -85,16 +85,16 @@ export const REPROCESS_RULES_DIALOG_DESCRIPTION = i18n.translate(
 );
 
 export const START_RULE_MIGRATION_MODAL_AI_CONNECTOR_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.startRuleMigrationModal.aiConnectorLabel',
+  'xpack.securitySolution.siemMigrations.rules.table.startRuleMigrationModal.aiServiceLabel',
   {
-    defaultMessage: 'AI connector',
+    defaultMessage: 'AI service',
   }
 );
 
 export const START_RULE_MIGRATION_MODAL_SETUP_NEW_AI_CONNECTOR_HELP_TEXT = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.startRuleMigrationModal.setupNewAiConnectorHelpText',
+  'xpack.securitySolution.siemMigrations.rules.table.startRuleMigrationModal.setupNewAiConnectorServiceHelpText',
   {
-    defaultMessage: 'Configure AI Provider',
+    defaultMessage: 'Configure AI service',
   }
 );
 
