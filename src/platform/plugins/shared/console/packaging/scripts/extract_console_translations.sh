@@ -11,8 +11,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Path to the source translations directory (resolve relative path)
 SOURCE_TRANSLATIONS_DIR="$(realpath "$SCRIPT_DIR/../../../../../../../x-pack/platform/plugins/private/translations/translations")"
 
-# Output directory for Console-specific translations (one level up from scripts)
-OUTPUT_DIR="$(realpath "$SCRIPT_DIR/../translations")"
+# Output directory for Console-specific translations (in react folder)
+OUTPUT_DIR="$(realpath "$SCRIPT_DIR/../react/translations")"
 
 echo "=== Extracting Console translation messages..."
 echo ""

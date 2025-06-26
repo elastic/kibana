@@ -1,0 +1,14 @@
+{
+  "ml.get_categories": {
+    "data_autocomplete_rules": {
+      "page": {
+        "__template": {
+          "from": 0,
+          "size": 100
+        },
+        "from": 0,
+        "size": 100
+      }
+    }
+  }
+}

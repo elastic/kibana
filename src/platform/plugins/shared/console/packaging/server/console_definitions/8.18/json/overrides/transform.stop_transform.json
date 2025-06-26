@@ -1,0 +1,7 @@
+{
+  "transform.stop_transform": {
+    "patterns": [
+      "_transform/_all/_stop"
+    ]
+  }
+}

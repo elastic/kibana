@@ -1,0 +1,10 @@
+{
+  "snapshot.create": {
+    "data_autocomplete_rules": {
+      "indices": "*",
+      "ignore_unavailable": { "__one_of": [true, false] },
+      "include_global_state": { "__one_of": [true, false] },
+      "partial": { "__one_of": [true, false] }
+    }
+  }
+}

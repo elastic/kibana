@@ -9,8 +9,9 @@
 
 require('@kbn/babel-register').install();
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+// const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 // const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
@@ -19,20 +20,23 @@ const isProd = process.env.NODE_ENV === 'production';
 
 const BABEL_PRESET = require.resolve('@kbn/babel-preset/webpack_preset');
 
-module.exports = {
-  mode: process.env.NODE_ENV || 'development',
-  entry: require.resolve('./index.tsx'),
-  context: __dirname,
-  devtool: 'cheap-source-map',
-  output: {
-    libraryTarget: 'commonjs',
-    path: path.resolve(__dirname, '../target'),
-    filename: 'index.js',
-    publicPath: '',
-    chunkLoadingGlobal: 'webpackChunk_console_bundle',
-  },
-  devtool: 'source-map',
-  externals: [
+module.exports = [
+  // React bundle configuration
+  {
+    mode: process.env.NODE_ENV || 'development',
+    entry: require.resolve('./react/index.tsx'),
+    context: __dirname,
+    devtool: 'cheap-source-map',
+    output: {
+      libraryTarget: 'commonjs',
+      path: path.resolve(__dirname, '../target/react'),
+      filename: 'index.js',
+      publicPath: '',
+      chunkLoadingGlobal: 'webpackChunk_console_react_bundle',
+    },
+    target: 'web',
+    devtool: 'source-map',
+    externals: [
     {
       '@elastic/eui': 'commonjs @elastic/eui',
       '@emotion/css': 'commonjs @emotion/css',
@@ -205,10 +209,81 @@ module.exports = {
     splitChunks: false,
   },
 
-  plugins: [
-    new NodeLibsBrowserPlugin(),
-    new CleanWebpackPlugin(),
-    // new MonacoWebpackPlugin({}),
-    /* new BundleAnalyzerPlugin() */
-  ],
-};
+    plugins: [
+      new NodeLibsBrowserPlugin(),
+      new CleanWebpackPlugin({
+        cleanOnceBeforeBuildPatterns: [path.resolve(__dirname, '../target/react/**/*')],
+      }),
+      // new MonacoWebpackPlugin({}),
+      /* new BundleAnalyzerPlugin() */
+    ],
+  },
+
+  // Server bundle configuration
+  {
+    mode: process.env.NODE_ENV || 'development',
+    entry: require.resolve('./server/index.ts'),
+    context: __dirname,
+    devtool: 'cheap-source-map',
+    output: {
+      libraryTarget: 'commonjs',
+      path: path.resolve(__dirname, '../target/server'),
+      filename: 'index.js',
+      publicPath: '',
+    },
+    target: 'node',
+    devtool: 'source-map',
+    externals: [
+      // Externalize Node.js built-ins and npm packages, but not relative imports
+      function (context, request, callback) {
+        // Don't externalize relative imports
+        if (request.startsWith('.') || request.startsWith('/')) {
+          return callback();
+        }
+        // Externalize Node.js built-ins and npm packages
+        if (/^[a-z@]/.test(request)) {
+          return callback(null, 'commonjs ' + request);
+        }
+        callback();
+      },
+    ],
+    module: {
+      rules: [
+        {
+          test: /\.(js|tsx?)$/,
+          exclude: /node_modules/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              babelrc: false,
+              envName: 'development',
+              presets: [BABEL_PRESET],
+            },
+          },
+        },
+      ],
+    },
+    resolve: {
+      alias: {},
+      extensions: ['.js', '.ts', '.tsx'],
+    },
+    optimization: {
+      minimize: false,
+      noEmitOnErrors: true,
+      splitChunks: false,
+    },
+    plugins: [
+      new CleanWebpackPlugin({
+        cleanOnceBeforeBuildPatterns: [path.resolve(__dirname, '../target/server/**/*')],
+      }),
+      new CopyWebpackPlugin({
+        patterns: [
+          {
+            from: path.resolve(__dirname, 'server/console_definitions'),
+            to: path.resolve(__dirname, '../target/server/console_definitions'),
+          },
+        ],
+      }),
+    ],
+  }
+];

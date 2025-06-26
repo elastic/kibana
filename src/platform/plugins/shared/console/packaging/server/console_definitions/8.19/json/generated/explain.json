@@ -1,0 +1,37 @@
+{
+  "explain": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "analyzer": "",
+      "analyze_wildcard": "__flag__",
+      "default_operator": [
+        "and",
+        "or"
+      ],
+      "df": "",
+      "lenient": "__flag__",
+      "preference": "",
+      "routing": "",
+      "_source": "__flag__",
+      "_source_excludes": [],
+      "_source_includes": [],
+      "stored_fields": [],
+      "q": ""
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "{index}/_explain/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/search-explain.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

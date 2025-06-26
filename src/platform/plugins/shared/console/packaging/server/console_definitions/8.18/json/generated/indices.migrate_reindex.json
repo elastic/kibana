@@ -1,0 +1,21 @@
+{
+  "indices.migrate_reindex": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_migration/reindex"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/migrate-data-stream.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

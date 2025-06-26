@@ -1157,6 +1157,7 @@
     "classnames": "2.2.6",
     "commander": "^4.1.1",
     "constate": "^3.3.3",
+    "copy-webpack-plugin": "^13.0.0",
     "copy-to-clipboard": "^3.3.3",
     "core-js": "^3.37.1",
     "cronstrue": "^1.51.0",

@@ -16,7 +16,7 @@ VERSIONS=("9.0" "8.19" "8.18")
 echo "=== Console Definitions Generator ==="
 echo "Script directory: $SCRIPT_DIR"
 echo "Temporary working directory: $WORK_DIR"
-echo "Final output will be at: $SCRIPT_DIR/console_definitions"
+echo "Final output will be at: $(realpath "$SCRIPT_DIR/../server/console_definitions")"
 
 # Clean and create working directory
 if [ -d "$WORK_DIR" ]; then
@@ -71,7 +71,7 @@ process_version() {
     echo "Console definitions for version $version generated successfully!"
 
     # Create final destination directory
-    PERSISTENT_DEST="$SCRIPT_DIR/../console_definitions/$version"
+    PERSISTENT_DEST="$(realpath "$SCRIPT_DIR/../server/console_definitions/$version")"
     mkdir -p "$PERSISTENT_DEST"
 
     # Copy entire spec_definitions directory structure from Kibana repo
@@ -107,7 +107,7 @@ echo ""
 echo "=== All versions processed successfully! ==="
 echo "Generated definitions located at:"
 for version in "${VERSIONS[@]}"; do
-    PERSISTENT_DEST="$SCRIPT_DIR/../console_definitions/$version"
+    PERSISTENT_DEST="$(realpath "$SCRIPT_DIR/../server/console_definitions/$version")"
     if [ -d "$PERSISTENT_DEST" ]; then
         echo "  - Version $version: $PERSISTENT_DEST"
         echo "    JS definitions: $(ls -1 "$PERSISTENT_DEST/js" 2>/dev/null | wc -l) files"
@@ -118,5 +118,5 @@ for version in "${VERSIONS[@]}"; do
 done
 
 echo ""
-echo "Console definitions are now available in the packaging folder:"
-echo "$SCRIPT_DIR/../console_definitions/"
+echo "Console definitions are now available in the server folder:"
+echo "$(realpath "$SCRIPT_DIR/../server/console_definitions/")"

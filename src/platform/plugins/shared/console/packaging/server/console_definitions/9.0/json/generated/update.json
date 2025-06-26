@@ -1,0 +1,48 @@
+{
+  "update": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "if_primary_term": "",
+      "if_seq_no": "",
+      "include_source_on_error": "__flag__",
+      "lang": [
+        "painless"
+      ],
+      "refresh": [
+        "true",
+        "false",
+        "wait_for"
+      ],
+      "require_alias": "__flag__",
+      "retry_on_conflict": "",
+      "routing": "",
+      "timeout": [
+        "1m",
+        "-1",
+        "0"
+      ],
+      "wait_for_active_shards": [
+        "1",
+        "all",
+        "index-setting"
+      ],
+      "_source": "__flag__",
+      "_source_excludes": [],
+      "_source_includes": []
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "{index}/_update/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/v9/operation/operation-update",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}
