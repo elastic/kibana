@@ -43,7 +43,7 @@ export const OverviewPage: React.FC = () => {
   const { loading: locationsLoading, locationsLoaded } = useSelector(selectServiceLocationsState);
 
   useSyntheticsPageReady({
-    meta: { description: '[ttfmp_synthetics] Synthetics overview page has loaded monitor data' },
+    meta: { description: '[ttfmp_synthetics] Synthetics overview page has loaded monitor data.' },
   });
 
   useEffect(() => {
