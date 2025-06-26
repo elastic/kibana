@@ -78,7 +78,6 @@ export const createNavigationTree = ({
               defaultMessage: 'AI Assistant',
             }),
           },
-          { link: 'inventory', spaceBefore: 'm' },
           ...(streamsAvailable
             ? [
                 {
@@ -99,6 +98,7 @@ export const createNavigationTree = ({
             : []),
           {
             id: 'apm',
+            link: 'apm:services',
             title: i18n.translate('xpack.serverlessObservability.nav.applications', {
               defaultMessage: 'Applications',
             }),
@@ -114,7 +114,7 @@ export const createNavigationTree = ({
                   },
                   { link: 'apm:traces' },
                   { link: 'apm:dependencies' },
-                  { link: 'apm:settings' },
+                  { link: 'apm:settings', sideNavStatus: 'hidden' },
                 ],
               },
               {
@@ -151,6 +151,7 @@ export const createNavigationTree = ({
           },
           {
             id: 'metrics',
+            link: 'metrics:inventory',
             title: i18n.translate('xpack.serverlessObservability.nav.infrastructure', {
               defaultMessage: 'Infrastructure',
             }),
@@ -168,7 +169,7 @@ export const createNavigationTree = ({
                     ),
                   },
                   { link: 'metrics:hosts' },
-                  { link: 'metrics:settings' },
+                  { link: 'metrics:settings', sideNavStatus: 'hidden' },
                 ],
               },
             ],
