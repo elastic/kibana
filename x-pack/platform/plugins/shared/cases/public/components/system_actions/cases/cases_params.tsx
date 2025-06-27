@@ -19,8 +19,10 @@ import {
   EuiSpacer,
   EuiComboBox,
   EuiCallOut,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 import type { CasesActionParams } from './types';
 import { CASES_CONNECTOR_SUB_ACTION } from '../../../../common/constants';
@@ -73,6 +75,8 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       }),
     [configurations, owner]
   );
+
+  const isAttackDiscoveryRuleType = ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID;
 
   const { timeWindow, reopenClosedCases, groupingBy, templateId } = useMemo(
     () =>
@@ -169,11 +173,13 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
 
   const selectedOptions = groupingBy.map((field) => ({ value: field, label: field }));
   const selectedTemplate = currentConfiguration.templates.find((t) => t.key === templateId);
-  const defaultTemplate = {
-    key: DEFAULT_EMPTY_TEMPLATE_KEY,
-    name: i18n.DEFAULT_EMPTY_TEMPLATE_NAME,
-    caseFields: null,
-  };
+  const defaultTemplate = useMemo(() => {
+    return {
+      key: DEFAULT_EMPTY_TEMPLATE_KEY,
+      name: i18n.DEFAULT_EMPTY_TEMPLATE_NAME,
+      caseFields: null,
+    };
+  }, []);
 
   const onTemplateChange = useCallback(
     ({ key, caseFields }: Pick<CasesConfigurationUITemplate, 'caseFields' | 'key'>) => {
@@ -181,6 +187,24 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     },
     [editSubActionProperty]
   );
+
+  if (isAttackDiscoveryRuleType) {
+    return (
+      <EuiToolTip
+        data-test-subj="case-action-attack-discovery-tooltip"
+        content={i18n.ATTACK_DISCOVERY_TEMPLATE_TOOLTIP}
+      >
+        <TemplateSelector
+          key={currentConfiguration.id}
+          isLoading={isLoadingCaseConfiguration}
+          templates={[defaultTemplate, ...currentConfiguration.templates]}
+          onTemplateChange={onTemplateChange}
+          initialTemplate={selectedTemplate}
+          isDisabled={true}
+        />
+      </EuiToolTip>
+    );
+  }
 
   return (
     <>

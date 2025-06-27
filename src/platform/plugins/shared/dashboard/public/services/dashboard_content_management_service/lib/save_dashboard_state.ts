@@ -33,7 +33,7 @@ export const saveDashboardState = async ({
 
   const { attributes, references } = getSerializedState({
     controlGroupReferences,
-    generateNewIds: saveOptions.saveAsCopy,
+    generateNewIds: saveOptions.saveAsCopy, // When saving a dashboard as a copy, we should generate new IDs for all panels
     dashboardState,
     panelReferences,
     searchSourceReferences,

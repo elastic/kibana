@@ -194,6 +194,11 @@ export const allowedExperimentalValues = Object.freeze({
   storeGapsInEventLogEnabled: true,
 
   /**
+   * Enables scheduling gap fills for rules
+   */
+  bulkFillRuleGapsEnabled: false,
+
+  /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
   filterProcessDescendantsForEventFiltersEnabled: true,
@@ -222,7 +227,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables Privilege Monitoring
    */
-  privilegeMonitoringEnabled: false,
+  privilegedUserMonitoringDisabled: false,
 
   /**
    * Disables the siem migrations feature
@@ -265,15 +270,10 @@ export const allowedExperimentalValues = Object.freeze({
   newDataViewPickerEnabled: false,
 
   /**
-   * Automatically installs the security AI prompts package
-   */
-  securityAIPromptsEnabled: false,
-
-  /**
    * Enables Microsoft Defender for  Endpoint's RunScript RTR command
    * Release: 8.19/9.1
    */
-  microsoftDefenderEndpointRunScriptEnabled: false,
+  microsoftDefenderEndpointRunScriptEnabled: true,
 
   /**
    * Enables advanced mode for Trusted Apps creation and update

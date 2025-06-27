@@ -29,7 +29,7 @@ const TRACES_ESQL_RECOMMENDED_QUERIES = [
     name: i18n.translate('xpack.observability.recommendedQueries.slowDatabaseQueries.name', {
       defaultMessage: 'Database queries',
     }),
-    query: `FROM ${TRACES_INDEX_PATTERN} | WHERE QSTR("span.type:db OR db.system:*")`,
+    query: `FROM ${TRACES_INDEX_PATTERN} | WHERE QSTR("span.type:db OR db.system.name:*")`,
     description: i18n.translate(
       'xpack.observability.recommendedQueries.slowDatabaseQueries.description',
       {
