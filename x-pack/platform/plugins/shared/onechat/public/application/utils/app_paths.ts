@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-
-export const OnechatConversationsPage = () => {
-  return <div>OnechatConversationsPage</div>;
+export const appPaths = {
+  chat: {
+    new: '/conversations/new',
+    conversation: ({ conversationId }: { conversationId: string }) => {
+      return `/conversations/${conversationId}`;
+    },
+  },
 };
