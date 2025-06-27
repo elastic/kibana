@@ -80,9 +80,6 @@ describe('custom_host_settings', () => {
       microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
       microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
       microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
-      usage: {
-        url: 'usage-api',
-      },
     };
 
     test('ensure it copies over the config parts that it does not touch', () => {
