@@ -80,9 +80,11 @@ export class MonitoringEntitySourceDescriptorClient {
   }
 
   async find() {
-    return this.dependencies.soClient.find<MonitoringEntitySourceDescriptor>({
+    const scopedSoClient = this.dependencies.soClient.asScopedToNamespace(
+      this.dependencies.namespace
+    );
+    return scopedSoClient.find<MonitoringEntitySourceDescriptor>({
       type: monitoringEntitySourceTypeName,
-      namespaces: [this.dependencies.namespace],
     });
   }
 

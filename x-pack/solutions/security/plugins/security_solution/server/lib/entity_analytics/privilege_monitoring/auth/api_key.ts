@@ -12,10 +12,9 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 
-import { SECURITY_EXTENSION_ID, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 import { PrivilegeMonitoringApiKeyType, getPrivmonEncryptedSavedObjectId } from './saved_object';
-import { privilegeMonitoringRuntimePrivileges } from './privileges';
 import { monitoringEntitySourceType, privilegeMonitoringTypeName } from '../saved_objects';
 
 export interface ApiKeyManager {
@@ -124,9 +123,7 @@ export const generateAPIKey = async (
   deps.logger.info('Generating Privmon API key');
   const apiKey = await deps.security.authc.apiKeys.grantAsInternalUser(req, {
     name: 'Privilege Monitoring API key',
-    role_descriptors: {
-      privmon_admin: privilegeMonitoringRuntimePrivileges([]),
-    },
+    role_descriptors: {},
     metadata: {
       description: 'API key used to manage the resources in the privilege monitoring engine',
     },

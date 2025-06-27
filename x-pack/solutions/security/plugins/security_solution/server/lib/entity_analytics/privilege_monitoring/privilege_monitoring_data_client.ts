@@ -537,6 +537,8 @@ export class PrivilegeMonitoringDataClient {
         existingUserId: existingUserMap.get(username),
       }));
 
+      if (usersToWrite.length === 0) return batchUsernames;
+
       const ops = this.buildBulkOperationsForUsers(usersToWrite, this.getIndex());
       this.log('debug', `Executing bulk operations for ${usersToWrite.length} users`);
       try {

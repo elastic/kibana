@@ -25,6 +25,7 @@ import {
 } from './state';
 import { getApiKeyManager } from '../auth/api_key';
 import { PrivilegeMonitoringDataClient } from '../privilege_monitoring_data_client';
+import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
 
 interface RegisterParams {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
@@ -90,11 +91,13 @@ export const registerPrivilegeMonitoringTask = ({
 
     if (!client) return;
 
+    const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart: core, namespace });
+
     return new PrivilegeMonitoringDataClient({
       logger,
       clusterClient: client.clusterClient,
       namespace,
-      soClient: client.soClient,
+      soClient,
       taskManager: taskManagerStart,
       auditLogger,
       kibanaVersion,
