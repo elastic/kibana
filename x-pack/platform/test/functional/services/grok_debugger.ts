@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 
 export function GrokDebuggerProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -17,7 +16,6 @@ export function GrokDebuggerProvider({ getService }: FtrProviderContext) {
   // test subject selectors
   const SUBJ_CONTAINER = 'grokDebuggerContainer';
 
-  const SUBJ_UI_ACE_PATTERN_INPUT = `${SUBJ_CONTAINER} > acePatternInput > codeEditorContainer`;
   const SUBJ_BTN_TOGGLE_CUSTOM_PATTERNS_INPUT = `${SUBJ_CONTAINER} > btnToggleCustomPatternsInput`;
   const SUBJ_BTN_SIMULATE = `${SUBJ_CONTAINER} > btnSimulate`;
 
@@ -57,28 +55,6 @@ export function GrokDebuggerProvider({ getService }: FtrProviderContext) {
         const value = JSON.parse(await this.getEventOutput());
         expect(value).to.eql(expectedValue);
       });
-    }
-
-    async assertPatternInputSyntaxHighlighting(expectedHighlights: Array<{ token: string; content: string }>) {
-      const patternInputElement = await testSubjects.find(SUBJ_UI_ACE_PATTERN_INPUT);
-      const highlightedElements = await patternInputElement.findAllByXpath(
-        './/div[@class="ace_line"]/*'
-      );
-
-      expect(highlightedElements.length).to.be(expectedHighlights.length);
-      await Promise.all(
-        highlightedElements.map(async (element, index) => {
-          const highlightClass = await element.getAttribute('class');
-          const highlightedContent = await element.getVisibleText();
-
-          const expectedHighlight = expectedHighlights[index];
-          const expectedHighlightClass = `ace_${expectedHighlight.token}`;
-          const expectedHighlightedContent = expectedHighlight.content;
-
-          expect(highlightClass).to.be(expectedHighlightClass);
-          expect(highlightedContent).to.be(expectedHighlightedContent);
-        })
-      );
     }
   })();
 }
