@@ -15,7 +15,6 @@ import React, {
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -36,6 +35,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { BenefitsCallout } from './benefits_callout';
 
 enum FeedbackType {
   FeatureRequest = 'featureRequest',
@@ -80,6 +80,8 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
   const showPlatinumOrHigherCallout =
     isPlatinumOrHigherLicense && feedbackType !== FeedbackType.OtherFeedback;
 
+  const isSendFeedbackButtonDisabled = !feedbackText.trim().length;
+
   const getEmail = useCallback(async () => {
     try {
       const user = await core.security.authc.getCurrentUser();
@@ -90,10 +92,12 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
   }, [core.security.authc]);
 
   const checkIfLicenseIsPlatinum = useCallback(async () => {
-    const license = await getLicense();
-
-    const isPlatinum = license.hasAtLeast('platinum');
-    setIsPlatinumOrHigherLicense(isPlatinum);
+    try {
+      const license = await getLicense();
+      setIsPlatinumOrHigherLicense(license.hasAtLeast('platinum'));
+    } catch (_) {
+      setIsPlatinumOrHigherLicense(false);
+    }
   }, [getLicense]);
 
   useEffect(() => {
@@ -111,6 +115,11 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
   const footerBackgroundCss = {
     backgroundColor: euiTheme.colors.backgroundBasePlain,
     borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+  };
+
+  const bottomTextCss = {
+    maxWidth: 148,
+    padding: 0,
   };
 
   const Label = ({ children }: PropsWithChildren) => (
@@ -198,26 +207,7 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
               onChange={handleChangeFeedbackType}
             />
           </EuiFormRow>
-          {showPlatinumOrHigherCallout && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiCallOut
-                color="warning"
-                title={
-                  <FormattedMessage
-                    id="xpack.intercept.feedbackFlyout.platinumOrHigherCallout.title"
-                    defaultMessage="Use your Platinum license benefits instead"
-                  />
-                }
-              >
-                <FormattedMessage
-                  id="xpack.intercept.feedbackFlyout.platinumOrHigherCallout.content"
-                  defaultMessage="Please submit your improvement request in the dedicated support channel so we can get back to you faster."
-                />
-              </EuiCallOut>
-              <EuiSpacer size="s" />
-            </>
-          )}
+          {showPlatinumOrHigherCallout && <BenefitsCallout />}
           <EuiFormRow
             label={
               <Label>
@@ -282,11 +272,11 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter css={footerBackgroundCss}>
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs">
+            <EuiFlexGroup gutterSize="none">
               <EuiFlexItem grow={false}>
-                <EuiText size="xs">
+                <EuiText size="xs" css={bottomTextCss}>
                   <FormattedMessage
                     id="xpack.intercept.feedbackFlyout.form.infoText"
                     defaultMessage="We'll get the information about your session."
@@ -314,7 +304,7 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
             <EuiButton
               fill
               data-test-subj="sendFeedbackButton"
-              disabled={!feedbackText.trim().length}
+              disabled={isSendFeedbackButtonDisabled}
               onClick={submitFeedback}
             >
               <FormattedMessage
