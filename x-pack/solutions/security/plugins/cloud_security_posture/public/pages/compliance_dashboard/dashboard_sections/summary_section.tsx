@@ -47,7 +47,7 @@ export const getPolicyTemplateQuery = (
   activeNamespace
     ? {
         'rule.benchmark.posture_type': policyTemplate,
-        [`${FINDINGS_GROUPING_OPTIONS.NAMESPACE}`]: activeNamespace,
+        'data_stream.namespace': activeNamespace,
       }
     : {
         'rule.benchmark.posture_type': policyTemplate,

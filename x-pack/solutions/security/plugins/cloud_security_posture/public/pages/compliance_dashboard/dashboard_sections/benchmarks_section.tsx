@@ -43,7 +43,7 @@ export const getBenchmarkIdQuery = (
     ? {
         'rule.benchmark.id': benchmark.meta.benchmarkId,
         'rule.benchmark.version': benchmark.meta.benchmarkVersion,
-        [`${FINDINGS_GROUPING_OPTIONS.NAMESPACE}`]: activeNamespace,
+        'data_stream.namespace': activeNamespace,
       }
     : {
         'rule.benchmark.id': benchmark.meta.benchmarkId,

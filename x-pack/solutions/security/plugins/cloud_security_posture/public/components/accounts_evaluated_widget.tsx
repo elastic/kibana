@@ -67,7 +67,7 @@ export const AccountsEvaluatedWidget = ({
     navToFindings(
       activeNamespace
         ? {
-            [`${FINDINGS_GROUPING_OPTIONS.NAMESPACE}`]: activeNamespace,
+            'data_stream.namespace': activeNamespace,
             'cloud.provider': provider,
             'rule.benchmark.posture_type': CSPM_POLICY_TEMPLATE,
           }
@@ -80,7 +80,7 @@ export const AccountsEvaluatedWidget = ({
     navToFindings(
       activeNamespace
         ? {
-            [`${FINDINGS_GROUPING_OPTIONS.NAMESPACE}`]: activeNamespace,
+            'data_stream.namespace': activeNamespace,
             'rule.benchmark.id': cisBenchmark,
           }
         : { 'rule.benchmark.id': cisBenchmark },
