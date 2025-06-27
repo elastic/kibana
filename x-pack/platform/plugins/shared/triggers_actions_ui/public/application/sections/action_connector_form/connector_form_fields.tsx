@@ -19,14 +19,12 @@ import { ConnectorFormFieldsGlobal } from './connector_form_fields_global';
 interface ConnectorFormFieldsProps {
   actionTypeModel: ActionTypeModel | null;
   isEdit: boolean;
-  enforceAdaptiveAllocations?: boolean;
   registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
 }
 
 const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   actionTypeModel,
   isEdit,
-  enforceAdaptiveAllocations: enforceAdaptiveAllocationsProp,
   registerPreSubmitValidator,
 }) => {
   const {
