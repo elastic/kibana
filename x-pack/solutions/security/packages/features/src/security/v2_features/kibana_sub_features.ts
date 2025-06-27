@@ -782,7 +782,11 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
             read: [],
           },
           ui: ['showEndpointExceptions', 'crudEndpointExceptions'],
-          api: [`${APP_ID}-showEndpointExceptions`, `${APP_ID}-crudEndpointExceptions`],
+          api: [
+            `${APP_ID}-showEndpointExceptions`,
+            `${APP_ID}-crudEndpointExceptions`,
+            `${APP_ID}-writeGlobalArtifacts`,
+          ],
         },
         {
           replacedBy: [
