@@ -10,6 +10,8 @@ import { test } from '../fixtures';
 
 import { SLODataService } from '../services/slo_data_service';
 
+/* eslint-disable playwright/no-wait-for-selector */
+
 test.describe('SLOs Overview', { tag: ['@ess', '@svlOblt'] }, () => {
   let dataService: SLODataService;
 

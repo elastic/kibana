@@ -22,9 +22,7 @@ async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
 
       await syntheticsRunner.setup();
 
-      await syntheticsRunner.loadTestFiles(async () => {
-        require('./journeys');
-      });
+      await syntheticsRunner.loadTestFiles(async () => {});
 
       await syntheticsRunner.run();
     },
