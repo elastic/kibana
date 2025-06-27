@@ -19,7 +19,7 @@ import {
  * @param allMessages The combined messages to use as a fallback if no deanonymization data is found
  * @returns An Observable that emits a single array of messages with deanonymization data added
  */
-export function getDeanonymizedMessages(
+export function addAnonymizationData(
   messages: Message[]
 ): OperatorFunction<StreamingChatResponseEvent, Message[]> {
   return (source$) => {

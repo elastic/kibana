@@ -78,7 +78,7 @@ import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_
 import { createOrUpdateKnowledgeBaseIndexAssets } from '../index_assets/create_or_update_knowledge_base_index_assets';
 import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
 import { LEGACY_CUSTOM_INFERENCE_ID } from '../../../common/preconfigured_inference_ids';
-import { getDeanonymizedMessages } from './operators/get_deanonymized_messages';
+import { addAnonymizationData } from './operators/add_anonymization_data';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -331,7 +331,7 @@ export class ObservabilityAIAssistantClient {
             ]).pipe(
               switchMap(([addedMessages, title, systemMessage]) => {
                 return nextEvents$.pipe(
-                  getDeanonymizedMessages(initialMessages.concat(addedMessages)),
+                  addAnonymizationData(initialMessages.concat(addedMessages)),
                   switchMap((deanonymizedMessages) => {
                     const lastMessage = last(deanonymizedMessages);
 
