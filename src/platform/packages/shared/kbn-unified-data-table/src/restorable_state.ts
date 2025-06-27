@@ -12,9 +12,11 @@ import { createRestorableStateProvider } from '@kbn/restorable-state';
 type SelectedDocId = string;
 
 export interface UnifiedDataTableRestorableState {
+  inTableSearchTerm: string;
   selectedDocsMap: Record<SelectedDocId, boolean>;
+  isFilterActive: boolean;
   isCompareActive: boolean;
 }
 
-export const { withRestorableState, useRestorableState } =
+export const { withRestorableState, useRestorableState, useRestorableRef } =
   createRestorableStateProvider<UnifiedDataTableRestorableState>();

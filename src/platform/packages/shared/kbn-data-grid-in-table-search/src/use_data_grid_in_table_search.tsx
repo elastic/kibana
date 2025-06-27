@@ -19,6 +19,7 @@ import { getHighlightColors } from './get_highlight_colors';
 export interface UseDataGridInTableSearchProps
   extends Pick<InTableSearchControlProps, 'rows' | 'visibleColumns'> {
   enableInTableSearch?: boolean;
+  initialInTableSearchTerm?: string;
   dataGridWrapper: HTMLElement | null;
   dataGridRef: React.RefObject<EuiDataGridRefProps | null>;
   cellContext: EuiDataGridProps['cellContext'] | undefined;
@@ -32,6 +33,7 @@ export interface UseDataGridInTableSearchState {
 }
 
 export interface UseDataGridInTableSearchReturn {
+  inTableSearchTerm: UseDataGridInTableSearchState['inTableSearchTerm'];
   inTableSearchTermCss?: UseDataGridInTableSearchState['inTableSearchTermCss'];
   inTableSearchControl: React.JSX.Element | undefined;
   cellContextWithInTableSearchSupport: EuiDataGridProps['cellContext'];
@@ -43,6 +45,7 @@ export const useDataGridInTableSearch = (
 ): UseDataGridInTableSearchReturn => {
   const {
     enableInTableSearch = true,
+    initialInTableSearchTerm = '',
     dataGridWrapper,
     dataGridRef,
     visibleColumns,
@@ -70,7 +73,9 @@ export const useDataGridInTableSearch = (
   }, [renderCellValue, euiTheme]);
 
   const [{ inTableSearchTerm, inTableSearchTermCss }, setInTableSearchState] =
-    useState<UseDataGridInTableSearchState>(() => ({ inTableSearchTerm: '' }));
+    useState<UseDataGridInTableSearchState>(() => ({
+      inTableSearchTerm: initialInTableSearchTerm,
+    }));
 
   const inTableSearchControl = useMemo(() => {
     if (!enableInTableSearch) {
@@ -81,6 +86,7 @@ export const useDataGridInTableSearch = (
       : 0;
     return (
       <InTableSearchControl
+        initialInTableSearchTerm={initialInTableSearchTerm}
         inTableSearchTerm={inTableSearchTerm}
         visibleColumns={visibleColumns}
         rows={rows}
@@ -115,6 +121,7 @@ export const useDataGridInTableSearch = (
     );
   }, [
     enableInTableSearch,
+    initialInTableSearchTerm,
     setInTableSearchState,
     visibleColumns,
     rows,
@@ -146,12 +153,14 @@ export const useDataGridInTableSearch = (
 
   return useMemo(
     () => ({
+      inTableSearchTerm,
       inTableSearchTermCss,
       inTableSearchControl,
       cellContextWithInTableSearchSupport,
       renderCellValueWithInTableSearchSupport,
     }),
     [
+      inTableSearchTerm,
       inTableSearchTermCss,
       inTableSearchControl,
       cellContextWithInTableSearchSupport,

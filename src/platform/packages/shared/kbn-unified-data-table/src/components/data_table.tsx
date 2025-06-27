@@ -96,7 +96,7 @@ import {
   type ColorIndicatorControlColumnParams,
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
-import { useRestorableState, withRestorableState } from '../restorable_state';
+import { withRestorableState, useRestorableState, useRestorableRef } from '../restorable_state';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
 const VIRTUALIZATION_OPTIONS: EuiDataGridProps['virtualizationOptions'] = {
@@ -520,7 +520,7 @@ const InternalUnifiedDataTable = ({
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
-  const [isFilterActive, setIsFilterActive] = useState(false);
+  const [isFilterActive, setIsFilterActive] = useRestorableState('isFilterActive', false);
   const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);
@@ -760,13 +760,16 @@ const InternalUnifiedDataTable = ({
 
   const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
 
+  const inTableSearchTermRef = useRestorableRef('inTableSearchTerm', '');
   const {
+    inTableSearchTerm,
     inTableSearchTermCss,
     inTableSearchControl,
     cellContextWithInTableSearchSupport,
     renderCellValueWithInTableSearchSupport,
   } = useDataGridInTableSearch({
     enableInTableSearch,
+    initialInTableSearchTerm: inTableSearchTermRef.current,
     dataGridWrapper,
     dataGridRef,
     visibleColumns,
@@ -775,6 +778,7 @@ const InternalUnifiedDataTable = ({
     cellContext,
     pagination: paginationObj,
   });
+  inTableSearchTermRef.current = inTableSearchTerm;
 
   const renderCustomPopover = useMemo(
     () => renderCellPopover ?? getCustomCellPopoverRenderer(),
@@ -1037,6 +1041,7 @@ const InternalUnifiedDataTable = ({
     rows,
     selectedDocsState,
     enableComparisonMode,
+    setIsFilterActive,
     setIsCompareActive,
     fieldFormats,
     unifiedDataTableContextValue.pageIndex,

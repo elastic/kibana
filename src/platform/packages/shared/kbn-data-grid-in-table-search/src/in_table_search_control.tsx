@@ -49,6 +49,7 @@ const innerCss = css`
 
 export interface InTableSearchControlProps
   extends Omit<UseFindMatchesProps, 'onScrollToActiveMatch'> {
+  initialInTableSearchTerm?: string;
   pageSize: number | null; // null when the pagination is disabled
   getColumnIndexFromId: (columnId: string) => number;
   scrollToCell: (params: { rowIndex: number; columnIndex: number; align: 'center' }) => void;
@@ -59,6 +60,7 @@ export interface InTableSearchControlProps
 }
 
 export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
+  initialInTableSearchTerm,
   pageSize,
   getColumnIndexFromId,
   scrollToCell,
@@ -174,6 +176,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
       {isInputVisible ? (
         <>
           <InTableSearchInput
+            initialInTableSearchTerm={initialInTableSearchTerm}
             matchesCount={matchesCount}
             activeMatchPosition={activeMatchPosition}
             isProcessing={isProcessing}

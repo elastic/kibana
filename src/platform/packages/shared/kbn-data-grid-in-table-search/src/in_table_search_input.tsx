@@ -26,6 +26,7 @@ import {
 } from './constants';
 
 export interface InTableSearchInputProps {
+  initialInTableSearchTerm?: string;
   matchesCount: number | null;
   activeMatchPosition: number | null;
   isProcessing: boolean;
@@ -37,6 +38,7 @@ export interface InTableSearchInputProps {
 
 export const InTableSearchInput: React.FC<InTableSearchInputProps> = React.memo(
   ({
+    initialInTableSearchTerm,
     matchesCount,
     activeMatchPosition,
     isProcessing,
@@ -47,7 +49,7 @@ export const InTableSearchInput: React.FC<InTableSearchInputProps> = React.memo(
   }) => {
     const { inputValue, handleInputChange } = useDebouncedValue({
       onChange: onChangeSearchTerm,
-      value: '',
+      value: initialInTableSearchTerm || '',
     });
 
     const onInputChange = useCallback(
