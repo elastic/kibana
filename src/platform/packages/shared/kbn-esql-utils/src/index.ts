@@ -51,4 +51,3 @@ export {
 export { sanitazeESQLInput } from './utils/sanitaze_input';
 export { replaceESQLQueryIndexPattern } from './utils/replace_index_pattern';
 export { extractCategorizeTokens } from './utils/extract_categorize_tokens';
-export { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';

@@ -15,10 +15,10 @@ import {
   ESQLVariableType,
 } from '@kbn/esql-types';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import { getESQLSingleColumnValues } from '@kbn/esql-utils';
 import { TimeRange } from '@kbn/es-query';
 import { dataService } from '../../services/kibana_services';
 import { ControlGroupApi } from '../../control_group/types';
+import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
 
 function selectedOptionsComparatorFunction(a?: string[], b?: string[]) {
   return deepEqual(a ?? [], b ?? []);
@@ -77,7 +77,7 @@ export function initializeESQLControlSelections(
       timeRange: timeRange$?.getValue(),
     });
     if (getESQLSingleColumnValues.isSuccess(result)) {
-      availableOptions$.next(result.options);
+      availableOptions$.next(result.values);
     }
   }
   const fetchSubscription = controlFetch$.subscribe(updateAvailableOptions);
