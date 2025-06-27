@@ -78,6 +78,6 @@
     "cypress:run:qa:serverless:rule_management:related_integrations": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/rule_management/related_integrations/**/*.cy.ts'",
     "cypress:run:qa:serverless:rule_management:rule_actions": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/rule_management/rule_actions/**/*.cy.ts'",
     "cypress:run:qa:serverless:rule_management:rule_details": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/rule_management/rule_details/**/*.cy.ts'",
-    "cypress:run:qa:serverless:rule_management:rules_table": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/rule_management/rules_table/**/*.cy.ts'",
+    "cypress:run:qa:serverless:rule_management:rules_table": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/rule_management/rules_table/**/*.cy.ts'"
   }
 }
