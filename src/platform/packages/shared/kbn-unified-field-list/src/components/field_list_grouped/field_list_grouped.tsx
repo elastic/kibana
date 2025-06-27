@@ -103,11 +103,14 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
           ];
         })
       ),
-    (restoredAccordionState) => {
-      return (
-        fieldGroupsToShow.length !== Object.keys(restoredAccordionState).length ||
-        fieldGroupsToShow.some(([key]) => !(key in restoredAccordionState))
-      );
+    {
+      shouldStoreDefaultValueRightAway: true, // otherwise, it would re-initialize with the localStorage value which might get updated in the meantime
+      shouldIgnoredRestoredValue: (restoredAccordionState) => {
+        return (
+          fieldGroupsToShow.length !== Object.keys(restoredAccordionState).length ||
+          fieldGroupsToShow.some(([key]) => !(key in restoredAccordionState))
+        );
+      },
     }
   );
 
