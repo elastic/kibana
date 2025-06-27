@@ -286,6 +286,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body.engines[0].components).toEqual([
             expect.objectContaining({ resource: 'entity_definition' }),
             expect.objectContaining({ resource: 'transform' }),
+            expect.objectContaining({ resource: 'transform' }),
             expect.objectContaining({ resource: 'ingest_pipeline' }),
             expect.objectContaining({ resource: 'index_template' }),
             expect.objectContaining({ resource: 'task' }),
