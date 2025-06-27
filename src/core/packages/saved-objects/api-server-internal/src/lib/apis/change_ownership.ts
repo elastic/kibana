@@ -195,8 +195,8 @@ export const updateObjectOwnership = async <T>(
       return left({ id, type, error });
     }
     if (authorizationResult?.status !== 'fully_authorized') {
-      const error = SavedObjectsErrorHelpers.createBadRequestError(
-        `User is not authorized to change ownership of type "${type}".`
+      const error = SavedObjectsErrorHelpers.decorateForbiddenError(
+        new Error(`User is not authorized to change ownership of type "${type}".`)
       );
       return left({ id, type, error });
     }
