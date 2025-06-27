@@ -9,10 +9,10 @@
   "plugin": {
     "id": "exploratoryView",
     "browser": true,
-    "server": false,
+    "server": true,
     "configPath": [
       "xpack",
-      "exploratory_view"
+      "exploratoryView"
     ],
     "requiredPlugins": [
       "alerting",
