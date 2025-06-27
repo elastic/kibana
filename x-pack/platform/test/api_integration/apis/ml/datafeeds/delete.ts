@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe('update datafeeds with spaces', () => {
+  describe('delete datafeeds with spaces', () => {
     before(async () => {
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });
@@ -55,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.testResources.cleanMLSavedObjects();
     });
 
-    it('should update datafeed with correct space', async () => {
+    it('should delete datafeed with correct space', async () => {
       await deleteDatafeed(datafeedIdSpace1, USER.ML_POWERUSER_ALL_SPACES, 200, idSpace1);
 
       const exists = await ml.api.datafeedExist(datafeedIdSpace1);
@@ -63,11 +63,11 @@ export default ({ getService }: FtrProviderContext) => {
       expect(exists).to.eql(false, `expected datafeed exists to be false (got ${exists})`);
     });
 
-    it('should not update datafeed with incorrect space', async () => {
+    it('should not delete datafeed with incorrect space', async () => {
       await deleteDatafeed(datafeedIdSpace1, USER.ML_POWERUSER_ALL_SPACES, 404, idSpace2);
     });
 
-    it('should not be updatable by ml viewer user', async () => {
+    it('should not be deletable by ml viewer user', async () => {
       await deleteDatafeed(datafeedIdSpace1, USER.ML_VIEWER_ALL_SPACES, 403, idSpace1);
     });
   });
