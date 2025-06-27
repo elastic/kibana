@@ -6,7 +6,7 @@
  */
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ loadTestFile }: ) {
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('watcher app', () => {
     loadTestFile(require.resolve('./watcher_test'));
   });
