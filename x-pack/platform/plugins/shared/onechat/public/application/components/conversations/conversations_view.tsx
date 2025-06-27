@@ -10,17 +10,12 @@ import { css } from '@emotion/css';
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
-import { useNavigation } from '../../hooks/use_navigation';
-import { appPaths } from '../../utils/app_paths';
 import { Conversation } from './conversation';
 import { ConversationHeader } from './conversation_header';
-import { ConversationPanel } from './conversation_panel/conversation_panel';
 
 export const OnechatConversationsView: React.FC<{ conversationId?: string }> = ({
   conversationId,
 }) => {
-  const { navigateToOnechatUrl } = useNavigation();
-
   const { euiTheme } = useEuiTheme();
 
   const pageSectionContentClassName = css`
@@ -42,14 +37,6 @@ export const OnechatConversationsView: React.FC<{ conversationId?: string }> = (
       grow={false}
       panelled={false}
     >
-      <KibanaPageTemplate.Sidebar paddingSize="none" minWidth={280}>
-        <ConversationPanel
-          onNewConversationSelect={() => {
-            navigateToOnechatUrl(appPaths.chat.new);
-          }}
-        />
-      </KibanaPageTemplate.Sidebar>
-
       <KibanaPageTemplate.Section paddingSize="none" grow contentProps={{ css: 'height: 100%' }}>
         <EuiFlexGroup
           className={pageSectionContentClassName}
