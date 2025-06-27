@@ -20,7 +20,6 @@ export const TINY_TEXT_EMBEDDING_MODEL_ID = SUPPORTED_TRAINED_MODELS.TINY_TEXT_E
 // tiny inference endpoints
 export const TINY_ELSER_INFERENCE_ID = 'pt_tiny_elser_inference_id';
 export const TINY_TEXT_EMBEDDING_INFERENCE_ID = 'pt_tiny_text_embedding_inference_id';
-export const ELSER_INFERENCE_ID = '.elser-2-elasticsearch';
 
 export async function importModel(
   getService: DeploymentAgnosticFtrProviderContext['getService'],
@@ -125,13 +124,6 @@ export function createTinyTextEmbeddingInferenceEndpoint(
     inferenceId,
     taskType: 'text_embedding',
   });
-}
-
-export async function setupKb(getService: DeploymentAgnosticFtrProviderContext['getService']) {
-  const { status, body } = await setupKnowledgeBase(getService, ELSER_INFERENCE_ID);
-  await waitForKnowledgeBaseReady(getService);
-
-  return { status, body };
 }
 
 export async function deployTinyElserAndSetupKb(
