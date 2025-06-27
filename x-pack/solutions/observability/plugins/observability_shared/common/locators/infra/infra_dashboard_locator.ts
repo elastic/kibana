@@ -33,7 +33,7 @@ export class InfraDashboardLocatorDefinition
 
     return {
       app: 'metrics',
-      path: `/entity/${url.pathname}?${searchParams.toString()}`,
+      path: `${url.pathname}?${searchParams.toString()}`,
       state: params.state ? params.state : {},
     };
   };

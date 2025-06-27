@@ -182,14 +182,12 @@ export class Plugin implements InfraClientPluginClass {
                       ...(navigation?.map((nav) => ({
                         label: formatDynamicNavigationPath(nav.title),
                         app: 'metrics',
-                        path: getDynamicNavigationPath(
-                          nav.href ?? formatDynamicNavigationPath(nav.title)
-                        ),
+                        path: nav.href ?? '/',
                         deepLinks: nav.subItems?.map((subNav) => {
                           return {
                             id: subNav.id,
                             title: formatDynamicNavigationPath(subNav.title),
-                            path: getDynamicNavigationPath(subNav.href),
+                            path: subNav.href,
                           };
                         }),
                       })) ?? []),
@@ -271,12 +269,12 @@ export class Plugin implements InfraClientPluginClass {
           return {
             id: `dynamic_${nav.id}`,
             title: formatDynamicNavigationPath(nav.title),
-            path: nav.href ? getDynamicNavigationPath(nav.href) : undefined,
+            path: nav.href,
             deepLinks: (nav.subItems ?? []).map((subNav) => {
               return {
                 id: `dynamic_${subNav.id}`,
                 title: formatDynamicNavigationPath(subNav.title),
-                path: getDynamicNavigationPath(subNav.href),
+                path: subNav.href,
               };
             }),
           };

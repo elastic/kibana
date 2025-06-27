@@ -19,6 +19,13 @@ import { useDatePickerContext } from '../../hooks/use_date_picker';
 const getLensAttributesParams = (
   entityDefinition: EnrichedEntityDefinitionsResponse
 ): UseLensAttributesParams => {
+  const stats = entityDefinition.metrics
+    .filter((metric) => metric.instrument === 'gauge' || metric.instrument === 'updowncounter')
+    .map((metric) => {
+      return `${metric.metricName} = max(${metric.metricName}::double)`;
+    })
+    .join(', ');
+
   const where = entityDefinition.attributes
     .map((attribute) => {
       return `${attribute} IS NOT NULL`;
@@ -31,7 +38,7 @@ const getLensAttributesParams = (
     })
     .join(', ');
 
-  const query = `FROM metrics-* | WHERE ${where} | LIMIT 1000 | STATS z = count(*), w = count(*) BY ${keep}`;
+  const query = `FROM metrics-* | WHERE ${where} | LIMIT 1000 | STATS ${stats} BY ${keep}`;
 
   return {
     chartType: 'table',
@@ -39,18 +46,12 @@ const getLensAttributesParams = (
       esql: query,
     },
     title: entityDefinition.name,
-    metrics: [
-      {
-        value: 'z',
-        format: 'percent',
-        decimals: 2,
-      },
-      {
-        value: 'w',
-        format: 'percent',
-        decimals: 2,
-      },
-    ],
+    metrics: entityDefinition.metrics
+      .filter((metric) => metric.instrument === 'gauge')
+      .map((metric) => ({
+        value: metric.metricName,
+        format: metric.unit === 'By' ? 'bytes' : metric.unit === 's' ? 'duration' : undefined,
+      })),
     rows: entityDefinition.attributes.map((attribute) => ({
       field: attribute,
       oneClickFilter: !!entityDefinition.navigation?.href,
