@@ -29,6 +29,17 @@ export interface AssistantResponse {
   message: string;
 }
 
+export enum ConversationRoundStepType {
+  toolCall = 'toolCall',
+  reasoning = 'reasoning',
+}
+
+// tool call step
+
+export type ConversationRoundStepMixin<TType extends ConversationRoundStepType, TData> = TData & {
+  type: TType;
+};
+
 /**
  * Represents a tool call with the corresponding result.
  */
@@ -51,14 +62,6 @@ export interface ToolCallWithResult {
   result: string;
 }
 
-export enum ConversationRoundStepType {
-  toolCall = 'toolCall',
-}
-
-export type ConversationRoundStepMixin<TType extends ConversationRoundStepType, TData> = TData & {
-  type: TType;
-};
-
 export type ToolCallStep = ConversationRoundStepMixin<
   ConversationRoundStepType.toolCall,
   ToolCallWithResult
@@ -68,8 +71,26 @@ export const isToolCallStep = (step: ConversationRoundStep): step is ToolCallSte
   return step.type === ConversationRoundStepType.toolCall;
 };
 
-// may have more type of steps later.
-export type ConversationRoundStep = ToolCallStep;
+// reasoning step
+
+export interface ReasoningStepData {
+  /** plain text reasoning content */
+  reasoning: string;
+}
+
+export type ReasoningStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.reasoning,
+  ReasoningStepData
+>;
+
+export const isReasoningStep = (step: ConversationRoundStep): step is ReasoningStep => {
+  return step.type === ConversationRoundStepType.reasoning;
+};
+
+/**
+ * Defines all possible types for round steps.
+ */
+export type ConversationRoundStep = ToolCallStep | ReasoningStep;
 
 /**
  * Represents a round in a conversation, containing all the information
