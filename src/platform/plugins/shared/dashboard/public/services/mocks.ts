@@ -81,7 +81,7 @@ export const setStubLogger = () => {
 export const mockDashboardContentManagementService = {
   loadDashboardState: jest.fn().mockImplementation(() =>
     Promise.resolve({
-      dashboardInput: {},
+      dashboardState: {},
     } as LoadDashboardReturn)
   ),
   saveDashboardState: jest.fn(),

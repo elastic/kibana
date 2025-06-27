@@ -47,24 +47,24 @@ export async function loadDashboardApi({
   // --------------------------------------------------------------------------------------
   // Combine saved object state and session storage state
   // --------------------------------------------------------------------------------------
-  const sessionStorageInput = ((): Partial<DashboardState> | undefined => {
+  const sessionStorageState = ((): Partial<DashboardState> | undefined => {
     if (!creationOptions?.useSessionStorageIntegration) return;
     return getDashboardBackupService().getState(savedObjectResult.dashboardId);
   })();
 
   const combinedSessionState: DashboardState = {
     ...DEFAULT_DASHBOARD_STATE,
-    ...(savedObjectResult?.dashboardInput ?? {}),
-    ...sessionStorageInput,
+    ...(savedObjectResult?.dashboardState ?? {}),
+    ...sessionStorageState,
   };
-  combinedSessionState.references = sessionStorageInput?.references?.length
-    ? sessionStorageInput?.references
+  combinedSessionState.references = sessionStorageState?.references?.length
+    ? sessionStorageState?.references
     : savedObjectResult?.references;
 
   // --------------------------------------------------------------------------------------
   // Combine state with overrides.
   // --------------------------------------------------------------------------------------
-  const overrideState = creationOptions?.getInitialInput?.();
+  const overrideState = creationOptions?.getDashboardState?.();
 
   // Back up any view mode passed in explicitly.
   if (overrideState?.viewMode) {

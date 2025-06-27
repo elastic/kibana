@@ -94,7 +94,7 @@ export function buildMockDashboardApi({
       newDashboardCreated: savedObjectId === undefined,
       dashboardId: savedObjectId,
       managed: false,
-      dashboardInput: {
+      dashboardState: {
         ...initialState,
       },
       references: [],

@@ -49,7 +49,7 @@ export interface LoadDashboardReturn {
   dashboardId?: string;
   managed?: boolean;
   resolveMeta?: DashboardResolveMeta;
-  dashboardInput: DashboardState;
+  dashboardState: DashboardState;
 
   /**
    * Raw references returned directly from the Dashboard saved object. These
