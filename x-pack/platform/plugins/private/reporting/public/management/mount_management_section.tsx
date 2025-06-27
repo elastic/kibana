@@ -83,7 +83,7 @@ export async function mountManagementSection({
                     render={(routerProps) => {
                       return (
                         <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
-                          <ReportingTabs config={config} {...routerProps} />
+                          <ReportingTabs config={config} />
                         </Suspense>
                       );
                     }}

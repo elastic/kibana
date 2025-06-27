@@ -58,7 +58,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
       it('Allows user to view report details', async () => {
         await retry.try(async () => {
-          //   await reportingFunctional.loginReportingUser();
           await PageObjects.common.navigateToApp('reporting');
         });
 
@@ -159,11 +158,12 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     describe('non privilege user', () => {
-      before(async () => {
-        await reportingFunctional.loginDataAnalyst();
-      });
       it('does not allow user that does not have reporting privileges', async () => {
-        await PageObjects.common.navigateToApp('reporting');
+        await retry.try(async () => {
+          await reportingFunctional.loginDataAnalyst();
+          await PageObjects.common.navigateToApp('reporting');
+        });
+
         await testSubjects.missingOrFail('reportJobListing');
       });
 

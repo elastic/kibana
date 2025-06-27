@@ -248,7 +248,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
           enabled: (item) => item.enabled,
           type: 'icon',
           icon: 'cross',
-          onClick: (item) => setReportAndOpenDisableFlyout(item),
+          onClick: (item) => setReportAndOpenDisableModal(item),
         },
       ],
     },
@@ -267,7 +267,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
     setIsConfigFlyOutOpen(false);
   }, [setSelectedReport, setIsConfigFlyOutOpen]);
 
-  const setReportAndOpenDisableFlyout = useCallback(
+  const setReportAndOpenDisableModal = useCallback(
     (report: ScheduledReportApiJSON) => {
       setSelectedReport(report);
       setIsDisableModalConfirmationOpen(true);
@@ -275,7 +275,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
     [setSelectedReport, setIsDisableModalConfirmationOpen]
   );
 
-  const unSetReportAndCloseDisableFlyout = useCallback(() => {
+  const unSetReportAndCloseDisableModal = useCallback(() => {
     setSelectedReport(null);
     setIsDisableModalConfirmationOpen(false);
   }, [setSelectedReport, setIsDisableModalConfirmationOpen]);
@@ -284,12 +284,12 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
     if (selectedReport) {
       bulkDisableScheduledReports({ ids: [selectedReport.id] });
     }
-    unSetReportAndCloseDisableFlyout();
-  }, [selectedReport, bulkDisableScheduledReports, unSetReportAndCloseDisableFlyout]);
+    unSetReportAndCloseDisableModal();
+  }, [selectedReport, bulkDisableScheduledReports, unSetReportAndCloseDisableModal]);
 
   const onCancel = useCallback(
-    () => unSetReportAndCloseDisableFlyout(),
-    [unSetReportAndCloseDisableFlyout]
+    () => unSetReportAndCloseDisableModal(),
+    [unSetReportAndCloseDisableModal]
   );
 
   const tableOnChangeCallback = useCallback(
