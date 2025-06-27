@@ -19,7 +19,6 @@ export default function apmApiIntegrationTests({
     loadTestFile(require.resolve('./data_view'));
     loadTestFile(require.resolve('./dependencies'));
     loadTestFile(require.resolve('./diagnostics'));
-    loadTestFile(require.resolve('./entities'));
     loadTestFile(require.resolve('./environment'));
     loadTestFile(require.resolve('./error_rate'));
     loadTestFile(require.resolve('./errors'));

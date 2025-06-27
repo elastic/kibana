@@ -6,13 +6,13 @@
  */
 
 import kbnRison from '@kbn/rison';
-import { SECURITY_SOLUTION_DATA_VIEW } from '../../../constants';
+import { SECURITY_SOLUTION_INDEX_PATTERN } from '../../../constants';
 
 export const getDiscoverESQLState = (query?: string) => {
   return kbnRison.encode({
     dataSource: { type: 'esql' },
     query: {
-      esql: query ?? `FROM ${SECURITY_SOLUTION_DATA_VIEW} | WHERE host.name == "siem-kibana"`,
+      esql: query ?? `FROM ${SECURITY_SOLUTION_INDEX_PATTERN} | WHERE host.name == "siem-kibana"`,
     },
   });
 };

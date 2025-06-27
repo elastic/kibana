@@ -101,6 +101,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...monitor,
           locations: [privateLocation1],
           name: 'https://www.google.com',
+          spaces: ['default'],
         })
       );
     });
@@ -203,6 +204,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           locations: [privateLocation1],
           revision: 2,
           url: 'https://www.google.com',
+          spaces: ['default'],
         })
       );
     });
@@ -230,6 +232,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...monitor,
           locations: [privateLocation1],
           name: 'test name',
+          spaces: ['default'],
         })
       );
 
@@ -265,6 +268,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           revision: 3,
           url: 'https://www.google.com',
           locations: [omit(privateLocation1, 'spaces'), omit(privateLocation2, 'spaces')],
+          spaces: ['default'],
         })
       );
     });
@@ -283,6 +287,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           revision: 4,
           url: 'https://www.google.com',
           locations: [omit(privateLocation2, 'spaces')],
+          spaces: ['default'],
         })
       );
     });

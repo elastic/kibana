@@ -12,6 +12,7 @@ import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { RootState } from '../reducer';
 import { sharedDataViewManagerSlice } from '../slices';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../../constants';
+import { DEFAULT_ALERT_DATA_VIEW_ID } from '../../../../common/constants';
 import { selectDataViewAsync } from '../actions';
 import type { CoreStart } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -68,6 +69,7 @@ describe('createInitListener', () => {
 
     jest.mocked(createDefaultDataView).mockResolvedValue({
       defaultDataView: { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID },
+      alertDataView: { id: DEFAULT_ALERT_DATA_VIEW_ID },
       kibanaDataViews: [],
     } as unknown as Awaited<ReturnType<typeof createDefaultDataView>>);
   });
@@ -83,9 +85,10 @@ describe('createInitListener', () => {
       sharedDataViewManagerSlice.actions.setDataViews([])
     );
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
-      sharedDataViewManagerSlice.actions.setDefaultDataViewId(
-        DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID
-      )
+      sharedDataViewManagerSlice.actions.setDataViewId({
+        defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+        alertDataViewId: DEFAULT_ALERT_DATA_VIEW_ID,
+      })
     );
 
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
@@ -102,14 +105,14 @@ describe('createInitListener', () => {
     );
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       selectDataViewAsync({
-        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+        id: DEFAULT_ALERT_DATA_VIEW_ID,
         scope: DataViewManagerScopeName.detections,
       })
     );
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-        scope: DataViewManagerScopeName.detections,
+        scope: DataViewManagerScopeName.analyzer,
       })
     );
   });

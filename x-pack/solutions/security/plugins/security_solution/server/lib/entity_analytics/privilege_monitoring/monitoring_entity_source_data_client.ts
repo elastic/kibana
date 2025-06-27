@@ -10,7 +10,7 @@ import type {
   MonitoringEntitySourceDescriptor,
   MonitoringEntitySourceResponse,
 } from '../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
-import { MonitoringEntitySourceDescriptorClient } from './saved_object/monitoring_entity_source';
+import { MonitoringEntitySourceDescriptorClient } from './saved_objects';
 
 interface MonitoringEntitySourceDataClientOpts {
   logger: Logger;
@@ -31,7 +31,9 @@ export class MonitoringEntitySourceDataClient {
   public async init(
     input: MonitoringEntitySourceDescriptor
   ): Promise<MonitoringEntitySourceResponse> {
-    const descriptor = await this.monitoringEntitySourceClient.create(input);
+    const descriptor = await this.monitoringEntitySourceClient.create({
+      ...input,
+    });
     this.log('debug', 'Initializing MonitoringEntitySourceDataClient Saved Object');
     return descriptor;
   }
@@ -46,7 +48,7 @@ export class MonitoringEntitySourceDataClient {
 
     const sanitizedUpdate = {
       ...update,
-      matchers: update.matchers?.map((matcher) => ({
+      matchers: update.matchers?.map((matcher: { fields: string[]; values: string[] }) => ({
         fields: matcher.fields ?? [],
         values: matcher.values ?? [],
       })),
@@ -58,6 +60,11 @@ export class MonitoringEntitySourceDataClient {
   public async delete() {
     this.log('debug', 'Deleting Monitoring Entity Source Sync saved object');
     return this.monitoringEntitySourceClient.delete();
+  }
+
+  public async list(): Promise<MonitoringEntitySourceResponse[]> {
+    this.log('debug', 'Finding all Monitoring Entity Source Sync saved objects');
+    return this.monitoringEntitySourceClient.findAll();
   }
 
   private log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {

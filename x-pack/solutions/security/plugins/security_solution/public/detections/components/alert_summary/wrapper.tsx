@@ -64,8 +64,8 @@ export interface WrapperProps {
  */
 export const Wrapper = memo(({ packages, ruleResponse }: WrapperProps) => {
   const spaceId = useSpaceId();
-  const signalIndexName = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
-  const dataViewSpec = useMemo(() => ({ title: signalIndexName }), [signalIndexName]);
+  const oldSignalIndexName = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
+  const dataViewSpec = useMemo(() => ({ title: oldSignalIndexName }), [oldSignalIndexName]);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
@@ -74,9 +74,10 @@ export const Wrapper = memo(({ packages, ruleResponse }: WrapperProps) => {
     skip: newDataViewPickerEnabled, // skip data view creation if the new data view picker is enabled
   });
 
-  // TODO: use alert only data view when it is ready
-  // https://github.com/elastic/security-team/issues/12589
   const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
+  const signalIndexName = newDataViewPickerEnabled
+    ? experimentalDataView?.getIndexPattern() ?? ''
+    : oldSignalIndexName;
   const loading = newDataViewPickerEnabled ? status !== 'ready' : oldDataViewLoading;
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
 

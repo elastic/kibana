@@ -7,19 +7,14 @@
 
 import { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
 import type { AIMessageChunk, BaseMessage, ToolMessage } from '@langchain/core/messages';
-import { EMPTY, map, merge, mergeMap, of, OperatorFunction, share, toArray } from 'rxjs';
+import { EMPTY, mergeMap, of, OperatorFunction } from 'rxjs';
 import {
   ChatAgentEventType,
-  isMessageCompleteEvent,
-  isToolCallEvent,
-  isToolResultEvent,
   MessageChunkEvent,
   MessageCompleteEvent,
-  RoundCompleteEvent,
   ToolCallEvent,
   ToolResultEvent,
 } from '@kbn/onechat-common/agents';
-import { RoundInput, ConversationRoundStepType } from '@kbn/onechat-common/chat';
 import { StructuredToolIdentifier, toStructuredToolIdentifier } from '@kbn/onechat-common/tools';
 import {
   matchGraphName,
@@ -27,8 +22,10 @@ import {
   matchName,
   createTextChunkEvent,
   extractTextContent,
+  extractToolCalls,
+  toolIdentifierFromToolCall,
+  ToolIdMapping,
 } from '@kbn/onechat-genai-utils/langchain';
-import { getToolCalls } from './utils/from_langchain_messages';
 
 export type ConvertedEvents =
   | MessageChunkEvent
@@ -36,56 +33,12 @@ export type ConvertedEvents =
   | ToolCallEvent
   | ToolResultEvent;
 
-export const addRoundCompleteEvent = ({
-  userInput,
-}: {
-  userInput: RoundInput;
-}): OperatorFunction<ConvertedEvents, ConvertedEvents | RoundCompleteEvent> => {
-  return (events$) => {
-    const shared$ = events$.pipe(share());
-    return merge(
-      shared$,
-      shared$.pipe(
-        toArray(),
-        map<ConvertedEvents[], RoundCompleteEvent>((events) => {
-          const toolCalls = events.filter(isToolCallEvent).map((event) => event.data);
-          const toolResults = events.filter(isToolResultEvent).map((event) => event.data);
-          const messages = events.filter(isMessageCompleteEvent).map((event) => event.data);
-          const event: RoundCompleteEvent = {
-            type: ChatAgentEventType.roundComplete,
-            data: {
-              round: {
-                userInput,
-                steps: toolCalls.map((toolCall) => {
-                  const toolResult = toolResults.find(
-                    (result) => result.toolCallId === toolCall.toolCallId
-                  );
-                  return {
-                    type: ConversationRoundStepType.toolCall,
-                    toolCallId: toolCall.toolCallId,
-                    toolId: toolCall.toolId,
-                    args: toolCall.args,
-                    result: toolResult?.result ?? 'unknown',
-                  };
-                }),
-                assistantResponse: { message: messages[messages.length - 1].messageContent },
-              },
-            },
-          };
-
-          return event;
-        })
-      )
-    );
-  };
-};
-
 export const convertGraphEvents = ({
   graphName,
-  runName,
+  toolIdMapping,
 }: {
   graphName: string;
-  runName: string;
+  toolIdMapping: ToolIdMapping;
 }): OperatorFunction<LangchainStreamEvent, ConvertedEvents> => {
   return (streamEvents$) => {
     const toolCallIdToIdMap = new Map<string, StructuredToolIdentifier>();
@@ -107,16 +60,17 @@ export const convertGraphEvents = ({
           const addedMessages: BaseMessage[] = event.data.output.addedMessages ?? [];
           const lastMessage = addedMessages[addedMessages.length - 1];
 
-          const toolCalls = getToolCalls(lastMessage);
+          const toolCalls = extractToolCalls(lastMessage);
           if (toolCalls.length > 0) {
             const toolCallEvents: ToolCallEvent[] = [];
 
             for (const toolCall of toolCalls) {
-              toolCallIdToIdMap.set(toolCall.toolCallId, toolCall.toolId);
+              const toolId = toolIdentifierFromToolCall(toolCall, toolIdMapping);
+              toolCallIdToIdMap.set(toolCall.toolCallId, toolId);
               toolCallEvents.push({
                 type: ChatAgentEventType.toolCall,
                 data: {
-                  toolId: toolCall.toolId,
+                  toolId,
                   toolCallId: toolCall.toolCallId,
                   args: toolCall.args,
                 },

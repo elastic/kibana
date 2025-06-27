@@ -70,7 +70,7 @@ export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
         <h2>Alerts</h2>
       </EuiText>
       {isEmpty(alertState.alerts) ? (
-        <EuiCallOut title="No Alerts!" color="warning" iconType="help">
+        <EuiCallOut title="No Alerts!" color="warning" iconType="question">
           <p>
             The people in {alert.params.craft as string} at the moment <b>are not</b>{' '}
             {alert.params.op as string} {alert.params.outerSpaceCapacity as string}

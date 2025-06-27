@@ -50,7 +50,8 @@
     "@kbn/react-kibana-mount",
     "@kbn/field-utils",
     "@kbn/language-documentation",
-    "@kbn/esql-types"
+    "@kbn/esql-types",
+    "@kbn/aiops-utils",
   ],
   "exclude": [
     "target/**/*",

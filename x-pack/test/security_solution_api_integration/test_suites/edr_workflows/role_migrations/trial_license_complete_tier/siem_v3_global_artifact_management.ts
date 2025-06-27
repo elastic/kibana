@@ -133,14 +133,27 @@ export default function ({ getService }: FtrProviderContext) {
 
         describe(`${deprecatedSiem}:ALL`, () => {
           // siem:ALL includes Endpoint Exceptions both on ESS and Serverless
-          it('should add global_artifact_management:ALL', async () => {
+          it('@skipInServerless should add global_artifact_management:ALL on ESS', async () => {
             await putDeprecatedSiemPrivilegesInRole(['all']);
 
             expect(await getMigratedSiemFeaturesFromRole()).to.eql([
               // sub-features toggle enabled to show Global Artifact Management
               'minimal_all',
-              // Endpoint exceptions are tied to siem:ALL, hence the global_artifact_management_all
+              // Endpoint exceptions are tied to siem:ALL, hence the global_artifact_management_all to keep behaviour
               'global_artifact_management_all',
+            ]);
+          });
+
+          it('@skipInEss should add global_artifact_management:ALL and endpoint_exceptions:ALL on serverless', async () => {
+            await putDeprecatedSiemPrivilegesInRole(['all']);
+
+            expect(await getMigratedSiemFeaturesFromRole()).to.eql([
+              // sub-features toggle enabled to show Global Artifact Management
+              'minimal_all',
+              // Endpoint exceptions are tied to siem:ALL, hence the global_artifact_management_all to keep behaviour
+              'global_artifact_management_all',
+              // Enpdoint Exceptions were included in siem:ALL, so we need to include them in siem:MINIMAL_ALL
+              'endpoint_exceptions_all',
             ]);
           });
         });

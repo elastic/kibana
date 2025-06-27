@@ -75,7 +75,7 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, { esMo
         <EuiSpacer size="m" />
         <EuiCallOut
           color="warning"
-          iconType="help"
+          iconType="question"
           title={
             <EuiText>
               <p>

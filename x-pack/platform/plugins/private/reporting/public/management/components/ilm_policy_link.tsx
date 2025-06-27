@@ -10,33 +10,33 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
-import type { ApplicationStart } from '@kbn/core/public';
 import { ILM_POLICY_NAME } from '@kbn/reporting-common';
 
 import { LocatorPublic, SerializableRecord } from '../../shared_imports';
 
 interface Props {
-  navigateToUrl: ApplicationStart['navigateToUrl'];
   locator: LocatorPublic<SerializableRecord>;
 }
 
 const i18nTexts = {
   buttonLabel: i18n.translate('xpack.reporting.listing.reports.ilmPolicyLinkText', {
-    defaultMessage: 'Edit reporting ILM policy',
+    defaultMessage: 'Edit ILM policy',
   }),
 };
 
-export const IlmPolicyLink: FunctionComponent<Props> = ({ locator, navigateToUrl }) => {
+export const IlmPolicyLink: FunctionComponent<Props> = ({ locator }) => {
   return (
     <EuiButtonEmpty
       data-test-subj="ilmPolicyLink"
-      size="xs"
+      size="s"
+      iconType="popout"
       onClick={() => {
         const url = locator.getRedirectUrl({
           page: 'policy_edit',
           policyName: ILM_POLICY_NAME,
         });
-        navigateToUrl(url);
+        window.open(url, '_blank');
+        window.focus();
       }}
     >
       {i18nTexts.buttonLabel}

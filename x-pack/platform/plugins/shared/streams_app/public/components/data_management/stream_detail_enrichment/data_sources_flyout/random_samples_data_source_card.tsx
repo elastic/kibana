@@ -24,7 +24,7 @@ export const RandomSamplesDataSourceCard = ({
       title={DATA_SOURCES_I18N.randomSamples.name}
       subtitle={DATA_SOURCES_I18N.randomSamples.subtitle}
     >
-      <EuiCallOut iconType="iInCircle" size="s" title={DATA_SOURCES_I18N.randomSamples.callout} />
+      <EuiCallOut iconType="info" size="s" title={DATA_SOURCES_I18N.randomSamples.callout} />
       <EuiSpacer size="m" />
     </DataSourceCard>
   );

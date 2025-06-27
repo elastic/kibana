@@ -25,7 +25,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
 
-  describe('recall', function () {
+  describe('tool: recall', function () {
     before(async () => {
       await deployTinyElserAndSetupKb(getService);
       await addSampleDocsToInternalKb(getService, technicalSampleDocs);

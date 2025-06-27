@@ -72,11 +72,11 @@ describe('NewChat', () => {
   });
 
   it('renders custom icons', () => {
-    render(<NewChat {...defaultProps} iconType="help" />);
+    render(<NewChat {...defaultProps} iconType="question" />);
 
     const newChatButton = screen.getByTestId('newChat');
 
-    expect(newChatButton.querySelector('[data-euiicon-type="help"]')).toBeInTheDocument();
+    expect(newChatButton.querySelector('[data-euiicon-type="question"]')).toBeInTheDocument();
   });
 
   it('does NOT render an icon when iconType is null', () => {

@@ -1,6 +1,6 @@
 # EXP
 
-The EXP function calculates the value of Euler's number (e) raised to the power of a given number.
+Returns the value of e raised to the power of the given number.
 
 ## Syntax
 
@@ -8,19 +8,15 @@ The EXP function calculates the value of Euler's number (e) raised to the power 
 
 ### Parameters
 
-#### number
+#### `number`
 
-A numeric expression. If the parameter is `null`, the function will also return `null`.
+Numeric expression. If `null`, the function returns `null`.
 
 ## Examples
-
 
 ```esql
 ROW d = 5.0
 | EVAL s = EXP(d)
 ```
 
-```esql
-FROM geo
-| EVAL exp = EXP(x)
-```
+Calculate e raised to the power of 5.0.

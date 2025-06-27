@@ -69,7 +69,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
     <EuiButtonIcon
       display="empty"
       size="s"
-      iconType="iInCircle"
+      iconType="info"
       color="primary"
       data-test-subj="documentMetadataButton"
       onClick={(e: React.MouseEvent<HTMLElement>) => {

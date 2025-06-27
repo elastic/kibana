@@ -6,15 +6,80 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import { BuiltinToolIds as Tools } from '@kbn/onechat-common';
 import type { ResearchGoal } from './graph';
 import {
-  isActionResult,
+  isSearchResult,
   isReflectionResult,
+  isResearchGoalResult,
   BacklogItem,
   ReflectionResult,
-  ActionResult,
+  ResearchGoalResult,
+  SearchResult,
 } from './backlog';
+
+export const getIdentifyResearchGoalPrompt = ({
+  discussion,
+}: {
+  discussion: BaseMessageLike[];
+}): BaseMessageLike[] => {
+  return [
+    [
+      'system',
+      `
+      You are a thoughtful and rigorous research assistant preparing to initiate a deep research process.
+
+      Your task is to extract the user's **research intent** based on the conversation so far. This intent will guide a costly and time-consuming investigation.
+      The goal must be clear and specific — but you should not worry about *how* it will be achieved, only *what* the user wants to know.
+
+      There are two possible outcomes:
+        1. **If the user's messages clearly express a research goal**, use the \`set_research_goal\` tool with two fields:
+           - \`researchGoal\`: A concise and actionable research objective.
+           - \`reasoning\`: A brief explanation of how you interpreted the user’s input to reach this goal. Include what signal in their message pointed to the goal you chose. This will be surfaced to the user.
+
+        2. **If the user's intent is vague or incomplete**, respond in plain text asking brief, high-signal questions
+           aimed only at clarifying the *intent or focus of the research*. Do not ask for details about tools,
+           data sources, indices, or execution — those will be handled later in the workflow.
+
+      Constraints:
+      - Only follow the possible outcomes: plain text response for clarification or calling \`set_research_goal\` to set the research goal.
+      - Only use the \`set_research_goal\` tool when the user's intent is explicit.
+      - Never make up a goal if the context is too vague.
+      - When asking for clarification, keep your language natural, friendly, and streamable.
+
+      ## Examples:
+
+      ### Example A:
+
+      User messages:
+
+      > "I'd like to understand more about the effects of red meat consumption."
+
+      *expected response ->* tool use:
+      \`\`\`json
+      {
+        "tool_name": "set_research_goal",
+        "parameters": {
+          "researchGoal": "Investigate the health effects of red meat consumption based on current scientific evidence.",
+          "reasoning": "The user asked to understand the effects of red meat consumption. I must investigate the health effects of red meat consumption. I should back my research on scientific evidences."
+        }
+      }
+
+      ### Example B:
+
+      User messages:
+
+      > "I'm interested in tech and society, maybe something on AI."
+
+      *expected response ->* Plain text reply:
+
+      "Can you clarify what aspect of AI interests you most? For example, are you thinking about ethics, job displacement, regulation, or something else?"
+
+      Begin by reading the conversation so far. Either use the set_research_goal tool with a precise objective, or respond in plain text asking for clarification if needed.
+      `,
+    ],
+    ...discussion,
+  ];
+};
 
 export const getExecutionPrompt = ({
   currentResearchGoal,
@@ -29,34 +94,21 @@ export const getExecutionPrompt = ({
       `You are a research agent at Elasticsearch with access to external tools.
 
       ### Your task
-      - Based on a research goal, choose the most appropriate tool to help resolve it.
+      - Based on a given goal, choose the most appropriate tools to help resolve it.
       - You will also be provided with a list of past actions and results.
 
       ### Instructions
-      - You must select one tool and invoke it with the most relevant and precise parameters.
-      - Choose the tool that will best help fulfill the current research goal.
-      - Some tools (e.g., search) may require contextual information (such as an index name or prior step result). Retrieve it from the action history if needed.
+      - Read the action history to understand previous steps
+      - Some tools may require contextual information (such as an index name or prior step result). Retrieve it from the action history if needed.
       - Do not repeat a tool invocation that has already been attempted with the same or equivalent parameters.
-      - Think carefully about what the goal requires and which tool best advances it.
-
-      ### Constraints
-      - Tool use is mandatory. You must respond with a tool call.
-      - Do not speculate or summarize. Only act by selecting the best next tool and invoking it.
-
-      ### Tools description
-      Your two main search tools are "${Tools.relevanceSearch}" and "${Tools.naturalLanguageSearch}"
-      - When doing fulltext search, prefer the "${
-        Tools.relevanceSearch
-      }" tool as it performs better for plain fulltext searches.
-      - For more advanced queries (filtering, aggregation, buckets), use the "${
-        Tools.naturalLanguageSearch
-      }" tool.
-
+      - Think carefully about what the goal requires and which tool(s) best advances it.
+      - Do not speculate or summarize. Only act according to your given goal.
 
       ### Output format
-      Respond using the tool-calling schema provided by the system.
+      - Your response will be read by another agent which can understand any format
+      - You can either return plain text, json, or any combination of the two, as you see fit depending on your goal.
 
-      ### Additional information
+      ### Additional information:
       - The current date is ${new Date().toISOString()}.
       `,
     ],
@@ -218,7 +270,7 @@ export const getAnswerPrompt = ({
 
       ### Gathered information
 
-      ${renderBacklog(backlog.filter(isActionResult))}
+      ${renderBacklog(backlog.filter(isSearchResult))}
     `,
     ],
   ];
@@ -226,7 +278,10 @@ export const getAnswerPrompt = ({
 
 const renderBacklog = (backlog: BacklogItem[]): string => {
   const renderItem = (item: BacklogItem, i: number) => {
-    if (isActionResult(item)) {
+    if (isResearchGoalResult(item)) {
+      return renderResearchGoalResult(item, i);
+    }
+    if (isSearchResult(item)) {
       return renderActionResult(item, i);
     }
     if (isReflectionResult(item)) {
@@ -236,6 +291,19 @@ const renderBacklog = (backlog: BacklogItem[]): string => {
   };
 
   return backlog.map((item, i) => renderItem(item, i)).join('\n\n');
+};
+
+const renderResearchGoalResult = (
+  { researchGoal, reasoning }: ResearchGoalResult,
+  index: number
+): string => {
+  return `### Cycle ${index + 1}
+
+  At cycle "${index + 1}", you identified the main research topic based on the current discussion:
+
+  - You defined the research goal as: "${researchGoal}"
+  - The reasoning behind this decision was: "${reasoning}"
+  `;
 };
 
 const renderReflectionResult = (
@@ -259,23 +327,16 @@ ${nextQuestions.map((question) => `  - ${question}`).join('\n')}`
   `;
 };
 
-const renderActionResult = (actionResult: ActionResult, index: number): string => {
+const renderActionResult = (actionResult: SearchResult, index: number): string => {
   return `### Cycle ${index + 1}
 
-  At cycle "${index + 1}", you performed the following action:
+  At cycle "${index + 1}", you delegated one of the sub-tasks to another agent:
 
-  - Action type: tool execution
+  - Research goal: "${actionResult.researchGoal}"
 
-  - Tool name: ${actionResult.toolName}
-
-  - Tool parameters:
+  - The agent's response:
   \`\`\`json
-  ${JSON.stringify(actionResult.arguments, undefined, 2)}
-  \`\`\`
-
-  - Tool response:
-    \`\`\`json
-  ${JSON.stringify(actionResult.response, undefined, 2)}
+  ${actionResult.output}
   \`\`\`
   `;
 };

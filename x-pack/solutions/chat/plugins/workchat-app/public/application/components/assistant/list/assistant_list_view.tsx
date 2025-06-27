@@ -127,7 +127,7 @@ export const AssistantListView: React.FC<AssistantListViewProps> = ({ agents }) 
     >
       New
     </EuiButton>,
-    <EuiButtonEmpty iconType={'questionInCircle'} color="primary" iconSide="left" href="/">
+    <EuiButtonEmpty iconType={'question'} color="primary" iconSide="left" href="/">
       Learn more
     </EuiButtonEmpty>,
   ];

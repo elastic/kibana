@@ -193,7 +193,7 @@ export const PartitionsSelector: FC<PartitionsSelectorProps> = ({
               })}
               position="right"
             >
-              <EuiIcon size="s" type="questionInCircle" />
+              <EuiIcon size="s" type="question" />
             </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>

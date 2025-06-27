@@ -260,26 +260,6 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "infra",
-            "id": "def-server.InfraRequestHandlerContext.entityManager",
-            "type": "Object",
-            "tags": [],
-            "label": "entityManager",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "entityManager",
-                "scope": "server",
-                "docId": "kibEntityManagerPluginApi",
-                "section": "def-server.EntityManagerServerPluginStart",
-                "text": "EntityManagerServerPluginStart"
-              }
-            ],
-            "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

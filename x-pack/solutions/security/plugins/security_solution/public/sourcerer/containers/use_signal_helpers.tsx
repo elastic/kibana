@@ -30,9 +30,6 @@ export const useSignalHelpers = (): {
   const { indicesExist, dataViewId: oldDataViewId } = useSourcererDataView(
     SourcererScopeName.detections
   );
-  const { dataView: detectionsDataView } = useDataView(SourcererScopeName.detections);
-
-  const dataViewId = newDataViewPickerEnabled ? oldDataViewId : detectionsDataView?.id ?? null;
 
   const { indexFieldsSearch } = useOldDataView();
   const dispatch = useDispatch();
@@ -53,6 +50,9 @@ export const useSignalHelpers = (): {
     : signalIndexNameSourcerer;
 
   const { dataView: experimentalDefaultDataView } = useDataView(SourcererScopeName.default);
+  const dataViewId = newDataViewPickerEnabled
+    ? experimentalDefaultDataView?.id ?? null
+    : oldDataViewId;
 
   const defaultDataViewPattern = newDataViewPickerEnabled
     ? experimentalDefaultDataView?.getIndexPattern() ?? ''

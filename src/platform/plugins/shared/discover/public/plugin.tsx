@@ -57,13 +57,10 @@ import type {
   DiscoverStartPlugins,
 } from './types';
 import { DISCOVER_CELL_ACTIONS_TRIGGER } from './context_awareness/types';
-import type {
-  DiscoverEBTContextProps,
-  DiscoverEBTManager,
-} from './plugin_imports/discover_ebt_manager';
+import type { DiscoverEBTContextProps, DiscoverEBTManager } from './ebt_manager';
+import { registerDiscoverEBTManagerAnalytics } from './ebt_manager/discover_ebt_manager_registrations';
 import type { ProfilesManager } from './context_awareness';
 import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
-import { registerDiscoverEBTManagerAnalytics } from './plugin_imports/discover_ebt_manager_registrations';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -262,7 +259,7 @@ export class DiscoverPlugin
 
     const getDiscoverServicesInternal = async () => {
       const ebtManager = await getEmptyEbtManager();
-      const { profilesManager } = await this.createProfileServices(ebtManager);
+      const { profilesManager } = await this.createProfileServices();
       return this.getDiscoverServices({ core, plugins, profilesManager, ebtManager });
     };
 
@@ -280,7 +277,7 @@ export class DiscoverPlugin
     }
   }
 
-  private async createProfileServices(ebtManager: DiscoverEBTManager) {
+  private async createProfileServices() {
     const {
       RootProfileService,
       DataSourceProfileService,
@@ -294,8 +291,7 @@ export class DiscoverPlugin
     const profilesManager = new ProfilesManager(
       rootProfileService,
       dataSourceProfileService,
-      documentProfileService,
-      ebtManager
+      documentProfileService
     );
 
     return {
@@ -324,7 +320,7 @@ export class DiscoverPlugin
       dataSourceProfileService,
       documentProfileService,
       profilesManager,
-    } = await this.createProfileServices(ebtManager);
+    } = await this.createProfileServices();
     const services = await this.getDiscoverServices({
       core,
       plugins,

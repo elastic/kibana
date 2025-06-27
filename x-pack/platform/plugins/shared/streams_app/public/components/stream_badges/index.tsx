@@ -158,6 +158,10 @@ export function DiscoverBadgeButton({
       href={discoverLink}
       iconType="discoverApp"
       size="xs"
+      aria-label={i18n.translate(
+        'xpack.streams.entityDetailViewWithoutParams.openInDiscoverBadgeLabel',
+        { defaultMessage: 'Open in Discover' }
+      )}
     />
   );
 }

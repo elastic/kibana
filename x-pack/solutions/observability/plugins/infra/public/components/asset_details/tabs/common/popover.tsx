@@ -44,11 +44,7 @@ export const Popover = ({
           `}
           data-test-subj={props['data-test-subj']}
         >
-          <EuiIcon
-            type="questionInCircle"
-            color={iconColor ?? 'text'}
-            size={iconSize ?? 'original'}
-          />
+          <EuiIcon type="question" color={iconColor ?? 'text'} size={iconSize ?? 'original'} />
         </button>
       }
       isOpen={isPopoverOpen}

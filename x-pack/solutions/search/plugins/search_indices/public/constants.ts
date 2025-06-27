@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export enum QueryKeys {
   FetchIndex = 'fetchIndex',
   FetchMapping = 'fetchMapping',
@@ -24,3 +26,11 @@ export const API_KEY_PLACEHOLDER = 'YOUR_API_KEY';
 export const INDEX_PLACEHOLDER = 'my-index';
 
 export const DEFAULT_DOCUMENT_PAGE_SIZE = 10;
+
+export const BREADCRUMB_TEXT = i18n.translate('xpack.searchIndices.indexManagement.breadcrumb', {
+  defaultMessage: 'Build',
+});
+
+export const PARENT_BREADCRUMB = {
+  text: BREADCRUMB_TEXT,
+};

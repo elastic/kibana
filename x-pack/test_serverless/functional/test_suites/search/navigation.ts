@@ -241,6 +241,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       );
       await solutionNavigation.sidenav.expectOnlyDefinedLinks([
         'search_project_nav',
+        'home',
         'analyze',
         'discover',
         'dashboards',

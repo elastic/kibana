@@ -26,13 +26,19 @@ import type { AgentExplorerItem } from '../agent_list';
 import { AgentContextualInformation } from './agent_contextual_information';
 import { AgentInstancesDetails } from './agent_instances_details';
 
-function useAgentInstancesFetcher({ serviceName }: { serviceName: string }) {
-  const {
-    query: { environment, kuery },
-  } = useApmParams('/settings/agent-explorer');
-
-  const { start, end } = useTimeRange({ rangeFrom: 'now-24h', rangeTo: 'now' });
-
+function useAgentInstancesFetcher({
+  serviceName,
+  environment,
+  kuery,
+  start,
+  end,
+}: {
+  serviceName: string;
+  environment: string;
+  kuery: string;
+  start: string;
+  end: string;
+}) {
   return useProgressiveFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/services/{serviceName}/agent_instances', {
@@ -66,9 +72,18 @@ export function AgentInstances({
   latestVersionsFailed,
   onClose,
 }: Props) {
-  const { query } = useApmParams('/settings/agent-explorer');
+  const {
+    query,
+    query: { environment, kuery },
+  } = useApmParams('/settings/agent-explorer');
+
+  const { start, end } = useTimeRange({ rangeFrom: 'now-24h', rangeTo: 'now' });
 
   const instances = useAgentInstancesFetcher({
+    environment,
+    kuery,
+    start,
+    end,
     serviceName: agent.serviceName,
   });
 
@@ -105,7 +120,10 @@ export function AgentInstances({
           <EuiSpacer size="m" />
           <AgentInstancesDetails
             serviceName={agent.serviceName}
+            environment={environment}
             agentName={agent.agentName}
+            start={start}
+            end={end}
             agentDocsPageUrl={agent.agentDocsPageUrl}
             isLoading={isLoading}
             items={instances.data?.items ?? []}

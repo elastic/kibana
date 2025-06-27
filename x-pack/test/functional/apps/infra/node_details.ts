@@ -651,23 +651,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           { metric: 'memoryUsage' },
           { metric: 'diskUsage' },
         ].forEach(({ metric }) => {
-          it(`${metric} tile should not be shown`, async () => {
-            await pageObjects.assetDetails.assetDetailsKPITileMissing(metric);
+          it(`${metric} tile should be shown`, async () => {
+            const titleValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(metric);
+            expect(titleValue).to.be('N/A');
           });
-        });
-
-        it('should show add metrics callout', async () => {
-          await pageObjects.assetDetails.addMetricsCalloutExists();
-        });
-      });
-
-      describe('Processes Tab', () => {
-        before(async () => {
-          await pageObjects.assetDetails.clickProcessesTab();
-        });
-
-        it('should show add metrics callout', async () => {
-          await pageObjects.assetDetails.addMetricsCalloutExists();
         });
       });
     });

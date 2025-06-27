@@ -137,7 +137,7 @@ export function initializeUnsavedChangesManager({
           // dashboardStateToBackup.references will be used instead of savedObjectResult.references
           // To avoid missing references, make sure references contains all references
           // even if panels or control group does not have unsaved changes
-          dashboardStateToBackup.references = [...references, ...controlGroupReferences];
+          dashboardStateToBackup.references = [...(references ?? []), ...controlGroupReferences];
           if (hasPanelChanges) dashboardStateToBackup.panels = panels;
           if (hasControlGroupChanges) dashboardStateToBackup.controlGroupInput = controlGroupInput;
         }
@@ -158,18 +158,14 @@ export function initializeUnsavedChangesManager({
         : undefined;
     }
 
-    if (!lastSavedDashboardState.panels[childId]) return;
-    return {
-      rawState: lastSavedDashboardState.panels[childId].explicitInput,
-      references: getReferences(childId),
-    };
+    return layoutManager.internalApi.getLastSavedStateForPanel(childId);
   };
 
   return {
     api: {
       asyncResetToLastSavedState: async () => {
         const savedState = lastSavedState$.value;
-        layoutManager.internalApi.reset(savedState);
+        layoutManager.internalApi.reset();
         unifiedSearchManager.internalApi.reset(savedState);
         settingsManager.internalApi.reset(savedState);
 

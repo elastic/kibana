@@ -13,7 +13,6 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { has } from 'lodash';
 
 import { getDashboardContentManagementCache } from '..';
-import { convertPanelsArrayToPanelSectionMaps } from '../../../../common/lib/dashboard_panel_converters';
 import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
 import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
 import { cleanFiltersForSerialize } from '../../../utils/clean_filters_for_serialize';
@@ -156,10 +155,6 @@ export const loadDashboardState = async ({
         }
       : undefined;
 
-  const { panels: panelMap, sections: sectionsMap } = convertPanelsArrayToPanelSectionMaps(
-    panels ?? []
-  );
-
   return {
     managed,
     references,
@@ -172,10 +167,9 @@ export const loadDashboardState = async ({
       description,
       timeRange,
       filters,
-      panels: panelMap,
+      panels,
       query,
       title,
-      sections: sectionsMap,
 
       viewMode: 'view', // dashboards loaded from saved object default to view mode. If it was edited recently, the view mode from session storage will override this.
       tags:

@@ -24,6 +24,3 @@ Only request metadata is logged in AWS CloudWatch.
 No information related to prompts is retained.
 Logged metadata includes the timestamp, model used, region, and request status.
 
-## Early access
-
-Early access is available by submitting the form provided [here](https://forms.gle/o1AwPMVYMziHbom28).

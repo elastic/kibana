@@ -12,10 +12,6 @@ import { pick } from 'lodash';
 import moment, { Moment } from 'moment';
 
 import type { Reference } from '@kbn/content-management-utils';
-import {
-  convertPanelSectionMapsToPanelsArray,
-  generateNewPanelIds,
-} from '../../common/lib/dashboard_panel_converters';
 import type { DashboardAttributes } from '../../server';
 
 import type { DashboardState } from '../../common';
@@ -26,6 +22,7 @@ import {
 } from '../services/dashboard_content_management_service/lib/dashboard_versioning';
 import { dataService, savedObjectsTaggingService } from '../services/kibana_services';
 import { DashboardApi } from './types';
+import { generateNewPanelIds } from './generate_new_panel_ids';
 
 const LATEST_DASHBOARD_CONTAINER_VERSION = convertNumberToDashboardVersion(LATEST_VERSION);
 
@@ -64,7 +61,6 @@ export const getSerializedState = ({
     filters,
     timeRestore,
     description,
-    sections,
 
     // Dashboard options
     useMargins,
@@ -78,10 +74,7 @@ export const getSerializedState = ({
   let { panels } = dashboardState;
   let prefixedPanelReferences = panelReferences;
   if (generateNewIds) {
-    const { panels: newPanels, references: newPanelReferences } = generateNewPanelIds(
-      panels,
-      panelReferences
-    );
+    const { newPanels, newPanelReferences } = generateNewPanelIds(panels, panelReferences);
     panels = newPanels;
     prefixedPanelReferences = newPanelReferences;
     //
@@ -98,7 +91,6 @@ export const getSerializedState = ({
     syncTooltips,
     hidePanelTitles,
   };
-  const savedPanels = convertPanelSectionMapsToPanelsArray(panels, sections, true);
 
   /**
    * Parse global time filter settings
@@ -123,7 +115,7 @@ export const getSerializedState = ({
     refreshInterval,
     timeRestore,
     options,
-    panels: savedPanels,
+    panels,
     timeFrom,
     title,
     timeTo,

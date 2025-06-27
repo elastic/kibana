@@ -1,0 +1,25 @@
+## KQL
+
+Performs a KQL query and returns `true` if the provided KQL query string matches the row.
+
+## Syntax
+
+`KQL(query)`
+
+### Parameters
+
+#### `query`
+
+Query string in KQL query string format.
+
+## Examples
+
+```esql
+FROM books
+| WHERE KQL("author: Faulkner")
+| KEEP book_no, author
+| SORT book_no
+| LIMIT 5
+```
+
+This example filters rows where the `author` field matches "Faulkner," keeps the `book_no` and `author` columns, sorts the results by `book_no`, and limits the output to 5 rows.

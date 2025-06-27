@@ -23,10 +23,11 @@ export const createAgentHandlerContext = <TParams = Record<string, unknown>>({
   manager: RunnerManager;
 }): AgentHandlerContext => {
   const { onEvent } = agentExecutionParams;
-  const { request, defaultConnectorId, elasticsearch, modelProviderFactory, toolsService } =
+  const { request, defaultConnectorId, elasticsearch, modelProviderFactory, toolsService, logger } =
     manager.deps;
   return {
     request,
+    logger,
     esClient: elasticsearch.client.asScoped(request),
     modelProvider: modelProviderFactory({ request, defaultConnectorId }),
     runner: manager.getRunner(),

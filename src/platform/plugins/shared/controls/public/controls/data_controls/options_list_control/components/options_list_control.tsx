@@ -55,10 +55,14 @@ const optionListControlStyles = {
     font-weight: ${euiTheme.font.weight.medium};
   `,
   invalidSelectionsToken: css({ verticalAlign: 'text-bottom' }),
-  filterButton: ({ euiTheme }: UseEuiTheme) => css`
-    font-weight: ${euiTheme.font.weight.regular} !important;
-    color: ${euiTheme.colors.subduedText} !important;
-  `,
+  filterButton: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      fontWeight: `${euiTheme.font.weight.regular} !important` as 'normal',
+      color: `${euiTheme.colors.subduedText} !important`,
+      '&:hover::before': {
+        background: `${euiTheme.colors.backgroundBaseSubdued} !important`,
+      },
+    }),
   filterButtonText: css({
     flexGrow: 1,
     textAlign: 'left',

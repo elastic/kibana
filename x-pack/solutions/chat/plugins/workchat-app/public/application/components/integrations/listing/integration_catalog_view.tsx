@@ -185,7 +185,7 @@ export const IntegrationCatalogView: React.FC = () => {
                   title={
                     <div className={titleStyle}>
                       {cardData.title}
-                      <EuiIcon type="iInCircle" size="s" className={iconStyle} />
+                      <EuiIcon type="info" size="s" className={iconStyle} />
                     </div>
                   }
                   titleSize="xs"
@@ -223,7 +223,7 @@ export const IntegrationCatalogView: React.FC = () => {
                   title={
                     <div className={titleStyle}>
                       {cardData.title}
-                      <EuiIcon type="iInCircle" size="s" className={iconStyle} />
+                      <EuiIcon type="info" size="s" className={iconStyle} />
                     </div>
                   }
                   titleSize="xs"

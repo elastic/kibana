@@ -15,7 +15,7 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
 import { formatFieldValue, getFieldValue } from '@kbn/discover-utils';
-import { ServiceNameBadgeWithActions } from '@kbn/discover-contextual-components';
+import { FieldBadgeWithActions } from '@kbn/discover-contextual-components/src/data_types/logs/components/cell_actions_popover';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import type { CellRenderersExtensionParams } from '../../../context_awareness';
 import { AGENT_NAME_FIELD } from '../../../../common/data_types/logs/constants';
@@ -55,7 +55,7 @@ export const getServiceNameCell =
     );
 
     return (
-      <ServiceNameBadgeWithActions
+      <FieldBadgeWithActions
         onFilter={actions.addFilter}
         icon={getIcon}
         rawValue={serviceNameValue}

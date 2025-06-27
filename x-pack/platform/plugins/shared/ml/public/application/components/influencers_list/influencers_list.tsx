@@ -12,11 +12,19 @@
 import type { FC } from 'react';
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  EuiToolTip,
+  EuiProgress,
+  EuiBadge,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getSeverity, getFormattedSeverityScore } from '@kbn/ml-anomaly-utils';
-import { abbreviateWholeNumber } from '../../formatters/abbreviate_whole_number';
+import { i18n } from '@kbn/i18n';
 import type { EntityCellFilter } from '../entity_cell';
 import { EntityCell } from '../entity_cell';
 import { useInfluencersListStyles } from './influencers_list_styles';
@@ -70,7 +78,6 @@ const Influencer: FC<InfluencerProps> = ({ influencerFieldName, influencerFilter
   const maxScore = Math.floor(valueData.maxAnomalyScore);
   const maxScoreLabel = getFormattedSeverityScore(valueData.maxAnomalyScore);
   const severity = getSeverity(maxScore);
-  const totalScore = Math.floor(valueData.sumAnomalyScore);
   const totalScoreLabel = getFormattedSeverityScore(valueData.sumAnomalyScore);
 
   // Ensure the bar has some width for 0 scores.
@@ -87,29 +94,36 @@ const Influencer: FC<InfluencerProps> = ({ influencerFieldName, influencerFilter
           filter={influencerFilter}
         />
       </div>
-      <div css={styles.progress}>
-        <div css={styles.progressBarHolder}>
-          <div css={styles.progressBar(severity.id, barScore)} />
-        </div>
-        <div css={styles.scoreLabel(severity.id)}>
+      <EuiFlexGroup gutterSize="xs" alignItems="center">
+        <EuiFlexItem grow={false} css={{ width: '100%' }}>
+          <EuiProgress
+            value={barScore}
+            max={100}
+            size="xs"
+            color={styles.progressColor(severity)}
+            css={styles.progressBar}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
           <EuiToolTip
             position="right"
             title={`${influencerFieldName}: ${valueData.influencerFieldValue}`}
             content={tooltipContent}
           >
-            <span>{maxScoreLabel}</span>
+            <EuiBadge
+              color={styles.influencerBadgeBackgroundColor(severity)}
+              css={styles.influencerBadgeTextColor(severity)}
+              onClick={() => {}}
+              onClickAriaLabel={i18n.translate('xpack.ml.influencersList.badgeClickAreaLabel', {
+                defaultMessage: 'Anomaly score details for {influencerFieldName}',
+                values: { influencerFieldName },
+              })}
+            >
+              {maxScoreLabel}
+            </EuiBadge>
           </EuiToolTip>
-        </div>
-      </div>
-      <div css={styles.totalScoreLabel}>
-        <EuiToolTip
-          position="right"
-          title={`${influencerFieldName}: ${valueData.influencerFieldValue}`}
-          content={tooltipContent}
-        >
-          <span>{totalScore > 0 ? abbreviateWholeNumber(totalScore, 4) : totalScoreLabel}</span>
-        </EuiToolTip>
-      </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 };

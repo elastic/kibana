@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import type {
-  ActionsClientChatBedrockConverse,
-  ActionsClientChatVertexAI,
-  ActionsClientChatOpenAI,
-} from '@kbn/langchain/server';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { Command } from '@langchain/langgraph';
 import { z } from '@kbn/zod';
 import type { SelectIndexPatternAnnotation } from '../../state';
+import type { CreateLlmInstance } from '../../../../utils/common';
 
 const ShortlistedIndexPatterns = z
   .object({
@@ -23,15 +19,12 @@ const ShortlistedIndexPatterns = z
     'Object containing array of shortlisted index patterns that might be used to generate the query'
   );
 
-export const getShortlistIndexPatterns = ({
+export const getShortlistIndexPatterns = async ({
   createLlmInstance,
 }: {
-  createLlmInstance: () =>
-    | ActionsClientChatBedrockConverse
-    | ActionsClientChatVertexAI
-    | ActionsClientChatOpenAI;
+  createLlmInstance: CreateLlmInstance;
 }) => {
-  const llm = createLlmInstance();
+  const llm = await createLlmInstance();
 
   return async (state: typeof SelectIndexPatternAnnotation.State) => {
     const systemMessage = new SystemMessage({

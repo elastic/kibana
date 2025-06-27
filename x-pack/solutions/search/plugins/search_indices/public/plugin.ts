@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import {
+  type CoreSetup,
+  type CoreStart,
+  type Plugin,
+  DEFAULT_APP_CATEGORIES,
+} from '@kbn/core/public';
 import { SEARCH_INDICES_CREATE_INDEX } from '@kbn/deeplinks-search/constants';
 import { i18n } from '@kbn/i18n';
 
@@ -92,6 +97,7 @@ export class SearchIndicesPlugin
     core.application.register({
       id: SEARCH_INDEX_MANAGEMENT_APP_ID,
       appRoute: SEARCH_INDEX_MANAGEMENT_APP_BASE,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       title: i18n.translate('xpack.searchIndices.elasticsearchIndices.indexManagementTitle', {
         defaultMessage: 'Index Management',
       }),
@@ -103,7 +109,8 @@ export class SearchIndicesPlugin
           indexManagement: plugins.indexManagement,
         });
       },
-      visibleIn: [],
+      order: 1,
+      visibleIn: ['sideNav'],
     });
 
     registerLocators(plugins.share);

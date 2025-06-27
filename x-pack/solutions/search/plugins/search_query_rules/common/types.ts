@@ -45,6 +45,7 @@ export type QueryRuleEditorForm = Pick<
   'criteria' | 'type' | 'actions'
 > & {
   mode: 'create' | 'edit';
+  isAlways: boolean;
   rulesetId: string;
   ruleId: string;
 };

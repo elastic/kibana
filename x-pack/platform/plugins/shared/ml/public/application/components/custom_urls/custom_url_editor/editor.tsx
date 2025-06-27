@@ -413,7 +413,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
                                 }
                               )}
                               position="top"
-                              type="iInCircle"
+                              type="info"
                             />
                           </EuiFlexItem>
                         ) : null}

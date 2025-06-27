@@ -73,6 +73,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await esClient.deleteByQuery({
         index: SYNTHETICS_RULE_ALERT_INDEX,
         query: { match_all: {} },
+        conflicts: 'proceed',
       });
     });
 

@@ -277,6 +277,20 @@
           },
           {
             "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.searchHomepage",
+            "type": "Object",
+            "tags": [],
+            "label": "searchHomepage",
+            "description": [],
+            "signature": [
+              "{ readonly visitSearchLabs: string; readonly notebooksExamples: string; readonly customerEngineerRequestForm: string; readonly elasticCommunity: string; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
             "id": "def-common.DocLinks.metricbeat",
             "type": "Object",
             "tags": [],

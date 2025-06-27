@@ -78,7 +78,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     }
   }
 
-  describe('Lifecycle', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/225196
+  describe.skip('Lifecycle', () => {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);

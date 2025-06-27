@@ -10,7 +10,7 @@ import {
   ConfigKey,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../../../common/runtime_types';
-import { LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE } from '../../synthetics_monitor';
+import { LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE } from '../../synthetics_monitor/legacy_synthetics_monitor';
 
 export type SyntheticsMonitorWithSecretsAttributes860 = Omit<
   SyntheticsMonitorWithSecretsAttributes,

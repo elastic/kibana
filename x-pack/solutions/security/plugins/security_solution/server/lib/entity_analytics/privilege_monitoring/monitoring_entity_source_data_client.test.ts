@@ -11,7 +11,7 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
-import { monitoringEntitySourceTypeName } from './saved_object/monitoring_entity_source_type';
+import { monitoringEntitySourceTypeName } from './saved_objects';
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 
 describe('MonitoringEntitySourceDataClient', () => {
@@ -32,6 +32,7 @@ describe('MonitoringEntitySourceDataClient', () => {
   const testDescriptor = {
     type: 'test-type',
     name: 'Test Source',
+    indexPattern: 'test-index-pattern',
     matchers: [
       {
         fields: ['user.role'],
@@ -49,13 +50,19 @@ describe('MonitoringEntitySourceDataClient', () => {
 
   describe('init', () => {
     it('should initialize Monitoring Entity Source Sync Config Successfully', async () => {
+      defaultOpts.soClient.update.mockImplementation(() => {
+        const err = new Error('Not found');
+        // Simulate Kibana-style 404 error
+        (err as Error & { output?: { statusCode: number } }).output = { statusCode: 404 };
+        throw err;
+      });
       defaultOpts.soClient.find.mockResolvedValue({
         total: 0,
         saved_objects: [],
       } as unknown as SavedObjectsFindResponse<unknown, unknown>);
 
       defaultOpts.soClient.create.mockResolvedValue({
-        id: `entity-analytics-monitoring-entity-source-${namespace}`,
+        id: 'temp-id', // TODO: update to use dynamic ID
         type: monitoringEntitySourceTypeName,
         attributes: testDescriptor,
         references: [],
@@ -66,7 +73,9 @@ describe('MonitoringEntitySourceDataClient', () => {
       expect(defaultOpts.soClient.create).toHaveBeenCalledWith(
         monitoringEntitySourceTypeName,
         testDescriptor,
-        { id: `entity-analytics-monitoring-entity-source-${namespace}` }
+        {
+          id: `entity-analytics-monitoring-entity-source-${namespace}-${testDescriptor.type}-${testDescriptor.indexPattern}`,
+        }
       );
 
       expect(result).toEqual(testDescriptor);
@@ -76,7 +85,6 @@ describe('MonitoringEntitySourceDataClient', () => {
   describe('get', () => {
     it('should get Monitoring Entity Source Sync Config Successfully', async () => {
       const getResponse = {
-        id: `entity-analytics-monitoring-entity-source-${namespace}`,
         type: monitoringEntitySourceTypeName,
         attributes: testDescriptor,
         references: [],
@@ -85,7 +93,7 @@ describe('MonitoringEntitySourceDataClient', () => {
       const result = await dataClient.get();
       expect(defaultOpts.soClient.get).toHaveBeenCalledWith(
         monitoringEntitySourceTypeName,
-        `entity-analytics-monitoring-entity-source-${namespace}`
+        `temp-id` // TODO: https://github.com/elastic/security-team/issues/12851
       );
       expect(result).toEqual(getResponse.attributes);
     });
@@ -98,12 +106,25 @@ describe('MonitoringEntitySourceDataClient', () => {
         saved_objects: [{ attributes: testDescriptor }],
       } as unknown as SavedObjectsFindResponse<unknown, unknown>;
 
+      const testSourceObject = {
+        filter: {},
+        indexPattern: 'test-index-pattern',
+        matchers: [
+          {
+            fields: ['user.role'],
+            values: ['admin'],
+          },
+        ],
+        name: 'Test Source',
+        type: 'test-type',
+      };
+
       defaultOpts.soClient.find.mockResolvedValue(
         existingDescriptor as unknown as SavedObjectsFindResponse<unknown, unknown>
       );
 
       defaultOpts.soClient.update.mockResolvedValue({
-        id: `entity-analytics-monitoring-entity-source-${namespace}`,
+        id: `temp-id`, // TODO: https://github.com/elastic/security-team/issues/12851
         type: monitoringEntitySourceTypeName,
         attributes: { ...testDescriptor, name: 'Updated Source' },
         references: [],
@@ -114,8 +135,8 @@ describe('MonitoringEntitySourceDataClient', () => {
 
       expect(defaultOpts.soClient.update).toHaveBeenCalledWith(
         monitoringEntitySourceTypeName,
-        `entity-analytics-monitoring-entity-source-${namespace}`,
-        testDescriptor,
+        `entity-analytics-monitoring-entity-source-${namespace}-${testDescriptor.type}-${testDescriptor.indexPattern}`,
+        testSourceObject,
         { refresh: 'wait_for' }
       );
 
@@ -128,7 +149,7 @@ describe('MonitoringEntitySourceDataClient', () => {
       await dataClient.delete();
       expect(mockSavedObjectClient.delete).toHaveBeenCalledWith(
         monitoringEntitySourceTypeName,
-        `entity-analytics-monitoring-entity-source-${namespace}`
+        `temp-id` // TODO: https://github.com/elastic/security-team/issues/12851
       );
     });
   });

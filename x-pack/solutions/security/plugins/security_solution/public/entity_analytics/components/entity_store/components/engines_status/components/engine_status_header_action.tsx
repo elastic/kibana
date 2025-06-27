@@ -60,7 +60,7 @@ export function EngineStatusHeaderAction({
           }
           color="warning"
           position="right"
-          type="iInCircle"
+          type="info"
         />
       </div>
     );

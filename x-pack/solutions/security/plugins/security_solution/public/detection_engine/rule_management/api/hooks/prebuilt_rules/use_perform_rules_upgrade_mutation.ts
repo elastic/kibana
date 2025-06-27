@@ -20,6 +20,7 @@ import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt
 import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './use_fetch_prebuilt_rules_upgrade_review_query';
 import { retryOnRateLimitedError } from './retry_on_rate_limited_error';
 import { cappedExponentialBackoff } from './capped_exponential_backoff';
+import { useInvalidateFetchPrebuiltRuleBaseVersionQuery } from './use_fetch_prebuilt_rule_base_version_query';
 
 export const PERFORM_RULES_UPGRADE_KEY = ['POST', PERFORM_RULE_UPGRADE_URL];
 
@@ -38,6 +39,7 @@ export const usePerformRulesUpgradeMutation = (
     useInvalidateFetchPrebuiltRulesUpgradeReviewQuery();
   const invalidateRuleStatus = useInvalidateFetchPrebuiltRulesStatusQuery();
   const invalidateFetchCoverageOverviewQuery = useInvalidateFetchCoverageOverviewQuery();
+  const invalidateFetchPrebuiltRuleBaseVerison = useInvalidateFetchPrebuiltRuleBaseVersionQuery();
 
   return useMutation<PerformRuleUpgradeResponseBody, unknown, PerformRuleUpgradeRequestBody>(
     (args: PerformRuleUpgradeRequestBody) => {
@@ -55,6 +57,7 @@ export const usePerformRulesUpgradeMutation = (
         invalidateFetchPrebuiltRulesUpgradeReview();
         invalidateRuleStatus();
         invalidateFetchCoverageOverviewQuery();
+        invalidateFetchPrebuiltRuleBaseVerison();
 
         if (options?.onSettled) {
           options.onSettled(...args);

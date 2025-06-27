@@ -25,6 +25,13 @@ const INVESTIGATE_IN_TIMELINE_BUTTON = getDataTestSubjectSelector(
   'investigate-in-timeline-take-action-button'
 );
 const TIMELINE_BODY = getDataTestSubjectSelector('timeline-body');
+const TYPE_FILTER_BOX = getDataTestSubjectSelector('optionsList-control-0');
+const NAME_FILTER_BOX = getDataTestSubjectSelector('optionsList-control-1');
+const ID_FILTER_BOX = getDataTestSubjectSelector('optionsList-control-2');
+
+const getFilterValueDataTestSubj = (value: string) => {
+  return getDataTestSubjectSelector('optionsList-control-selection-' + value);
+};
 
 const timestamp = Date.now();
 
@@ -496,5 +503,50 @@ describe('Asset Inventory page - user flyout', { tags: ['@ess'] }, () => {
         const count = matchedElements.length;
         expect(count).to.be.greaterThan(0);
       });
+  });
+
+  it('each filter should be populated with correct options', () => {
+    // Type Filter Box should only contain 2 options
+    cy.get(TYPE_FILTER_BOX).click();
+    cy.get(getFilterValueDataTestSubj('exists')).should('be.visible');
+    cy.get(getFilterValueDataTestSubj('Service Usage Technology')).should('be.visible');
+
+    // Name Filter Box should only contain 2 options
+    cy.get(NAME_FILTER_BOX).click();
+    cy.get(getFilterValueDataTestSubj('exists')).should('be.visible');
+    cy.get(getFilterValueDataTestSubj('generic_name_test')).should('be.visible');
+    cy.get(getFilterValueDataTestSubj('host_name_test')).should('be.visible');
+    cy.get(getFilterValueDataTestSubj('service_name_test')).should('be.visible');
+    cy.get(getFilterValueDataTestSubj('user_name_test')).should('be.visible');
+
+    // ID Filter Box should only contain 2 options
+    cy.get(ID_FILTER_BOX).click();
+    cy.get(getFilterValueDataTestSubj('exists')).should('be.visible');
+    cy.get(
+      getFilterValueDataTestSubj(
+        '/subscriptions/ef111ee2-6c89-4b09-92c6-5c2321f888df/resourceGroups/cloud-shell-storage-centralindia/providers/Microsoft.Storage/storageAccounts/csg100320021acf35e2/tableServices/default'
+      )
+    ).should('be.visible');
+    cy.get(getFilterValueDataTestSubj('host_name_test')).should('be.visible');
+    cy.get(getFilterValueDataTestSubj('service_name_test')).should('be.visible');
+    cy.get(getFilterValueDataTestSubj('user_name_test')).should('be.visible');
+  });
+
+  it('should be able to filter using type filter box', () => {
+    cy.get(TYPE_FILTER_BOX).click();
+    cy.get(getFilterValueDataTestSubj('Service Usage Technology')).click();
+    cy.get(getDataTestSubjectSelector('docTableExpandToggleColumn')).should('have.length', 1);
+  });
+
+  it('should be able to filter using name filter box', () => {
+    cy.get(NAME_FILTER_BOX).click();
+    cy.get(getFilterValueDataTestSubj('user_name_test')).click();
+    cy.get(getDataTestSubjectSelector('docTableExpandToggleColumn')).should('have.length', 1);
+  });
+
+  it('should be able to filter using id filter box', () => {
+    cy.get(ID_FILTER_BOX).click();
+    cy.get(getFilterValueDataTestSubj('host_name_test')).click();
+    cy.get(getDataTestSubjectSelector('docTableExpandToggleColumn')).should('have.length', 1);
   });
 });

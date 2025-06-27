@@ -27,6 +27,14 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         breadcrumbStatus: 'hidden',
         children: [
           {
+            id: 'home',
+            title: i18n.translate('xpack.serverlessSearch.nav.home', {
+              defaultMessage: 'Home',
+            }),
+            link: 'searchHomepage',
+            spaceBefore: 'm',
+          },
+          {
             id: 'analyze',
             title: i18n.translate('xpack.serverlessSearch.nav.analyze', {
               defaultMessage: 'Analyze',
@@ -35,6 +43,20 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             children: [
               {
                 link: 'discover',
+              },
+              {
+                title: i18n.translate('xpack.serverlessSearch.nav.chat', {
+                  defaultMessage: 'Chat',
+                }),
+                renderAs: 'accordion',
+                children: [
+                  {
+                    link: 'onechat:conversations',
+                  },
+                  {
+                    link: 'onechat:tools',
+                  },
+                ],
               },
               {
                 link: 'dashboards',

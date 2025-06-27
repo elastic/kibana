@@ -33,7 +33,7 @@ export const JobsAwaitingNodeWarning: FC<Props> = ({ jobCount }) => {
           />
         }
         color="primary"
-        iconType="iInCircle"
+        iconType="info"
       >
         <div>
           <FormattedMessage

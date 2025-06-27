@@ -22,6 +22,9 @@ interface StubRuleOptions {
   hasAlertSuppressionPerRuleExecution: boolean;
   hasAlertSuppressionPerTimePeriod: boolean;
   alertSuppressionFieldsCount: number;
+  hasResponseActions: boolean;
+  hasResponseActionsEndpoint: boolean;
+  hasResponseActionsOsquery: boolean;
 }
 
 const createStubRule = ({
@@ -37,6 +40,9 @@ const createStubRule = ({
   hasAlertSuppressionPerRuleExecution,
   hasAlertSuppressionPerTimePeriod,
   alertSuppressionFieldsCount,
+  hasResponseActions,
+  hasResponseActionsEndpoint,
+  hasResponseActionsOsquery,
 }: StubRuleOptions): RuleMetric => ({
   rule_name: 'rule-name',
   rule_id: 'id-123',
@@ -56,6 +62,9 @@ const createStubRule = ({
   has_alert_suppression_per_rule_execution: hasAlertSuppressionPerRuleExecution,
   has_alert_suppression_per_time_period: hasAlertSuppressionPerTimePeriod,
   alert_suppression_fields_count: alertSuppressionFieldsCount,
+  has_response_actions: hasResponseActions,
+  has_response_actions_endpoint: hasResponseActionsEndpoint,
+  has_response_actions_osquery: hasResponseActionsOsquery,
 });
 
 describe('Detections Usage and Metrics', () => {
@@ -74,6 +83,9 @@ describe('Detections Usage and Metrics', () => {
         hasAlertSuppressionPerRuleExecution: true,
         hasAlertSuppressionPerTimePeriod: false,
         alertSuppressionFieldsCount: 3,
+        hasResponseActions: false,
+        hasResponseActionsEndpoint: false,
+        hasResponseActionsOsquery: false,
       });
       const usage = updateRuleUsage(stubRule, getInitialRulesUsage());
 
@@ -102,6 +114,14 @@ describe('Detections Usage and Metrics', () => {
             suppressed_per_time_period: 0,
             suppresses_missing_fields: 1,
           },
+          response_actions: {
+            enabled: 0,
+            disabled: 0,
+            response_actions: {
+              endpoint: 0,
+              osquery: 0,
+            },
+          },
         },
         eql: {
           alerts: 1,
@@ -126,6 +146,14 @@ describe('Detections Usage and Metrics', () => {
             suppressed_per_time_period: 0,
             suppresses_missing_fields: 1,
           },
+          response_actions: {
+            enabled: 0,
+            disabled: 0,
+            response_actions: {
+              endpoint: 0,
+              osquery: 0,
+            },
+          },
         },
       });
     });
@@ -144,6 +172,9 @@ describe('Detections Usage and Metrics', () => {
         hasAlertSuppressionPerRuleExecution: false,
         hasAlertSuppressionPerTimePeriod: false,
         alertSuppressionFieldsCount: 0,
+        hasResponseActions: false,
+        hasResponseActionsEndpoint: false,
+        hasResponseActionsOsquery: false,
       });
       const stubQueryRuleOne = createStubRule({
         ruleType: 'query',
@@ -158,6 +189,9 @@ describe('Detections Usage and Metrics', () => {
         hasAlertSuppressionPerRuleExecution: false,
         hasAlertSuppressionPerTimePeriod: false,
         alertSuppressionFieldsCount: 0,
+        hasResponseActions: false,
+        hasResponseActionsEndpoint: false,
+        hasResponseActionsOsquery: false,
       });
       const stubQueryRuleTwo = createStubRule({
         ruleType: 'query',
@@ -172,6 +206,9 @@ describe('Detections Usage and Metrics', () => {
         hasAlertSuppressionPerRuleExecution: false,
         hasAlertSuppressionPerTimePeriod: true,
         alertSuppressionFieldsCount: 2,
+        hasResponseActions: false,
+        hasResponseActionsEndpoint: false,
+        hasResponseActionsOsquery: false,
       });
       const stubMachineLearningOne = createStubRule({
         ruleType: 'machine_learning',
@@ -186,6 +223,9 @@ describe('Detections Usage and Metrics', () => {
         hasAlertSuppressionPerRuleExecution: false,
         hasAlertSuppressionPerTimePeriod: true,
         alertSuppressionFieldsCount: 2,
+        hasResponseActions: false,
+        hasResponseActionsEndpoint: false,
+        hasResponseActionsOsquery: false,
       });
       const stubMachineLearningTwo = createStubRule({
         ruleType: 'machine_learning',
@@ -200,6 +240,9 @@ describe('Detections Usage and Metrics', () => {
         hasAlertSuppressionPerRuleExecution: false,
         hasAlertSuppressionPerTimePeriod: false,
         alertSuppressionFieldsCount: 0,
+        hasResponseActions: false,
+        hasResponseActionsEndpoint: false,
+        hasResponseActionsOsquery: false,
       });
 
       let usage = updateRuleUsage(stubEqlRule, getInitialRulesUsage());
@@ -233,6 +276,14 @@ describe('Detections Usage and Metrics', () => {
             suppressed_per_time_period: 2,
             suppresses_missing_fields: 0,
           },
+          response_actions: {
+            enabled: 0,
+            disabled: 0,
+            response_actions: {
+              endpoint: 0,
+              osquery: 0,
+            },
+          },
         },
         elastic_total: {
           alerts: 28,
@@ -256,6 +307,14 @@ describe('Detections Usage and Metrics', () => {
             suppressed_per_rule_execution: 0,
             suppressed_per_time_period: 0,
             suppresses_missing_fields: 0,
+          },
+          response_actions: {
+            enabled: 0,
+            disabled: 0,
+            response_actions: {
+              endpoint: 0,
+              osquery: 0,
+            },
           },
         },
         eql: {
@@ -281,6 +340,14 @@ describe('Detections Usage and Metrics', () => {
             suppressed_per_time_period: 0,
             suppresses_missing_fields: 0,
           },
+          response_actions: {
+            enabled: 0,
+            disabled: 0,
+            response_actions: {
+              endpoint: 0,
+              osquery: 0,
+            },
+          },
         },
         machine_learning: {
           alerts: 22,
@@ -305,6 +372,14 @@ describe('Detections Usage and Metrics', () => {
             suppressed_per_time_period: 1,
             suppresses_missing_fields: 0,
           },
+          response_actions: {
+            enabled: 0,
+            disabled: 0,
+            response_actions: {
+              endpoint: 0,
+              osquery: 0,
+            },
+          },
         },
         query: {
           alerts: 10,
@@ -328,6 +403,14 @@ describe('Detections Usage and Metrics', () => {
             suppressed_per_rule_execution: 0,
             suppressed_per_time_period: 1,
             suppresses_missing_fields: 0,
+          },
+          response_actions: {
+            enabled: 0,
+            disabled: 0,
+            response_actions: {
+              endpoint: 0,
+              osquery: 0,
+            },
           },
         },
       });
@@ -411,6 +494,9 @@ describe('Detections Usage and Metrics', () => {
             hasAlertSuppressionPerRuleExecution: true,
             hasAlertSuppressionPerTimePeriod: false,
             alertSuppressionFieldsCount: 3,
+            hasResponseActions: false,
+            hasResponseActionsEndpoint: false,
+            hasResponseActionsOsquery: false,
           });
           const usage = updateRuleUsage(rule1, getInitialRulesUsage()) as ReturnType<
             typeof updateRuleUsage
@@ -439,6 +525,9 @@ describe('Detections Usage and Metrics', () => {
             hasAlertSuppressionPerRuleExecution: true,
             hasAlertSuppressionPerTimePeriod: false,
             alertSuppressionFieldsCount: 3,
+            hasResponseActions: false,
+            hasResponseActionsEndpoint: false,
+            hasResponseActionsOsquery: false,
           });
           const usageAddedByOne = updateRuleUsage(rule2, usage) as ReturnType<
             typeof updateRuleUsage

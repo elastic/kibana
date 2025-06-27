@@ -239,7 +239,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
                 defaultMessage:
                   'Document count found is based on a smaller set of sampled records.',
               })}
-              type="questionInCircle"
+              type="question"
             />
           </div>
         ),

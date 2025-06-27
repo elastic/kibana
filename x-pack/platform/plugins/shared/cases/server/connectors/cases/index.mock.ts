@@ -87,6 +87,9 @@ export const alertsWithNoGrouping = [
   { _id: 'alert-id-5', _index: 'alert-index-5' },
 ];
 
+export const groupedAlerts = null;
+export const internallyManagedAlerts = false;
+
 export const groupingBy = ['host.name', 'dest.ip'];
 export const rule = {
   id: 'rule-test-id',

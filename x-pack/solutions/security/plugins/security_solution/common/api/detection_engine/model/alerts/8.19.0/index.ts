@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import type {
+  ALERT_UPDATED_AT,
+  ALERT_UPDATED_BY_USER_ID,
+  ALERT_UPDATED_BY_USER_NAME,
+} from '@kbn/rule-data-utils';
 import type { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
 import type {
   Ancestor8180,
@@ -33,6 +38,9 @@ export interface BaseFields8190 extends BaseFields8180 {
   [ALERT_ORIGINAL_DATA_STREAM_DATASET]?: string;
   [ALERT_ORIGINAL_DATA_STREAM_NAMESPACE]?: string;
   [ALERT_ORIGINAL_DATA_STREAM_TYPE]?: string;
+  [ALERT_UPDATED_AT]?: string;
+  [ALERT_UPDATED_BY_USER_ID]?: string;
+  [ALERT_UPDATED_BY_USER_NAME]?: string;
 }
 
 export interface WrappedFields8190<T extends BaseFields8190> {

@@ -22,6 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
   const TEST_TYPES = [
     'sampleAdHocTaskTimingOut',
     'lowPriorityTask',
+    'normalLongRunningPriorityTask',
     'sampleOneTimeTaskThrowingError',
     'sampleRecurringTaskTimingOut',
     'sampleRecurringTaskWhichHangs',
@@ -129,6 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:siem.savedQueryRule',
         'alerting:siem.thresholdRule',
         'alerting:slo.rules.burnRate',
+        'alerting:streams.rules.esql',
         'alerting:transform_health',
         'alerting:xpack.ml.anomaly_detection_alert',
         'alerting:xpack.ml.anomaly_detection_jobs_health',
@@ -189,6 +191,7 @@ export default function ({ getService }: FtrProviderContext) {
         'security:telemetry-filterlist-artifact',
         'security:telemetry-lists',
         'security:telemetry-prebuilt-rule-alerts',
+        'security:telemetry-response-actions-rules',
         'security:telemetry-timelines',
         'session_cleanup',
         'slo:bulk-delete-task',

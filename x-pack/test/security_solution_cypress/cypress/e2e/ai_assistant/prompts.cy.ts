@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N } from '@kbn/security-solution-plugin/public/assistant/content/prompts/user/translations';
 import { PromptCreateProps } from '@kbn/elastic-assistant-common/impl/schemas';
 import { IS_SERVERLESS } from '../../env_var_names_constants';
 import { QUICK_PROMPT_BADGE, USER_PROMPT } from '../../screens/ai_assistant';
@@ -182,10 +181,6 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       expandFirstAlert();
       openAssistant('alert');
       cy.get(QUICK_PROMPT_BADGE(testPrompt.name)).should('be.visible');
-      cy.get(USER_PROMPT).should(
-        'have.text',
-        EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N
-      );
       cy.get(QUICK_PROMPT_BADGE(testPrompt.name)).click();
       cy.get(USER_PROMPT).should('have.text', testPrompt.content);
     });

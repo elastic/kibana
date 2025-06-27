@@ -37,6 +37,9 @@ export const PRIVILEGED_MONITOR_USERS_INDEX_MAPPING: MappingProperties = {
   'user.is_privileged': {
     type: 'boolean',
   },
+  'labels.sources': {
+    type: 'keyword',
+  },
 };
 
 export const generateUserIndexMappings = (): MappingTypeMapping => ({

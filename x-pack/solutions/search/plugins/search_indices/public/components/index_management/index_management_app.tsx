@@ -10,16 +10,8 @@ import { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useRef, useEffect, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
-
-const breadcrumbText = i18n.translate('xpack.searchIndices.breadcrumb', {
-  defaultMessage: 'Data',
-});
-
-const breadcrumb = {
-  text: breadcrumbText,
-};
+import { PARENT_BREADCRUMB } from '../../constants';
 
 export const SearchIndexManagementApp: React.FC<{
   indexManagement: IndexManagementPluginSetup;
@@ -34,7 +26,7 @@ export const SearchIndexManagementApp: React.FC<{
       });
 
       const wrapBreadcrumbValue = !cloud?.isServerlessEnabled
-        ? [wrapBreadcrumb(breadcrumb, history)]
+        ? [wrapBreadcrumb(PARENT_BREADCRUMB, history)]
         : [];
 
       const breadcrumbValue = [

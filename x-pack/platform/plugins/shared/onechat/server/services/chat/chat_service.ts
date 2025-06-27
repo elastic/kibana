@@ -24,6 +24,7 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import {
+  AgentMode,
   type RoundInput,
   type Conversation,
   type ChatEvent,
@@ -68,6 +69,10 @@ export interface ChatConverseParams {
    * If empty, will use the default agent id.
    */
   agentId?: AgentIdentifier;
+  /**
+   * Agent mode to use for this round of conversation.
+   */
+  mode?: AgentMode;
   /**
    * Id of the genAI connector to use.
    * If empty, will use the default connector.
@@ -115,17 +120,12 @@ class ChatServiceImpl implements ChatService {
 
   converse({
     agentId = OneChatDefaultAgentId,
+    mode = AgentMode.normal,
     conversationId,
     connectorId,
     request,
     nextInput,
-  }: {
-    agentId?: string;
-    connectorId?: string;
-    conversationId?: string;
-    nextInput: RoundInput;
-    request: KibanaRequest;
-  }): Observable<ChatEvent> {
+  }: ChatConverseParams): Observable<ChatEvent> {
     const isNewConversation = !conversationId;
 
     return forkJoin({
@@ -161,7 +161,7 @@ class ChatServiceImpl implements ChatService {
           conversationId,
           conversationClient,
         });
-        const agentEvents$ = getExecutionEvents$({ agent, conversation$, nextInput });
+        const agentEvents$ = getExecutionEvents$({ agent, mode, conversation$, nextInput });
 
         const title$ = isNewConversation
           ? generatedTitle$({ chatModel, conversation$, nextInput })
@@ -292,10 +292,12 @@ const updateConversation$ = ({
 
 const getExecutionEvents$ = ({
   conversation$,
+  mode,
   nextInput,
   agent,
 }: {
   conversation$: Observable<Conversation>;
+  mode: AgentMode;
   nextInput: RoundInput;
   agent: ExecutableConversationalAgent;
 }): Observable<ChatAgentEvent> => {
@@ -305,6 +307,7 @@ const getExecutionEvents$ = ({
         agent
           .execute({
             agentParams: {
+              agentMode: mode,
               nextInput,
               conversation: conversation.rounds,
             },
@@ -324,7 +327,7 @@ const getExecutionEvents$ = ({
         return () => {};
       });
     }),
-    shareReplay(1)
+    shareReplay()
   );
 };
 

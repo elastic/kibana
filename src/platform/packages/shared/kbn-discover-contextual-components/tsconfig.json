@@ -19,8 +19,6 @@
   "kbn_references": [
     "@kbn/field-formats-plugin",
     "@kbn/discover-utils",
-    "@kbn/router-utils",
-    "@kbn/management-settings-ids",
     "@kbn/share-plugin",
     "@kbn/unified-data-table",
     "@kbn/unified-doc-viewer",

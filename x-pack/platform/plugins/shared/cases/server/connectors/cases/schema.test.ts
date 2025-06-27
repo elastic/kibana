@@ -10,9 +10,11 @@ import { CasesConnectorRunParamsSchema } from './schema';
 describe('CasesConnectorRunParamsSchema', () => {
   const getParams = (overrides = {}) => ({
     alerts: [{ _id: 'alert-id', _index: 'alert-index' }],
+    groupedAlerts: null,
     groupingBy: ['host.name'],
     rule: { id: 'rule-id', name: 'Test rule', tags: [], ruleUrl: 'https://example.com' },
     owner: 'cases',
+    internallyManagedAlerts: false,
     ...overrides,
   });
 
@@ -25,9 +27,11 @@ describe('CasesConnectorRunParamsSchema', () => {
             "_index": "alert-index",
           },
         ],
+        "groupedAlerts": null,
         "groupingBy": Array [
           "host.name",
         ],
+        "internallyManagedAlerts": false,
         "maximumCasesToOpen": 5,
         "owner": "cases",
         "reopenClosedCases": false,
@@ -189,13 +193,13 @@ describe('CasesConnectorRunParamsSchema', () => {
       ).toThrow();
     });
 
-    it('does not accept maximumCasesToOpen to be more than 10', () => {
+    it('does not accept maximumCasesToOpen to be more than 20', () => {
       const params = getParams();
 
       expect(() =>
         CasesConnectorRunParamsSchema.validate({
           ...params,
-          maximumCasesToOpen: 11,
+          maximumCasesToOpen: 21,
         })
       ).toThrow();
     });

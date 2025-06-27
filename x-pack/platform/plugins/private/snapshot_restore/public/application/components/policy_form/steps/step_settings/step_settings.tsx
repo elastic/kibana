@@ -152,7 +152,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
             flush="right"
             href={docLinks.links.snapshotRestore.createSnapshot}
             target="_blank"
-            iconType="help"
+            iconType="question"
           >
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepSettings.docsButtonLabel"
