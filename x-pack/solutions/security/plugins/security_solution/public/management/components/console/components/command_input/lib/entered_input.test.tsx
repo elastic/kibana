@@ -359,6 +359,7 @@ describe('When using `EnteredInput` class with Argument-Based Bare Flags', () =>
     commandDefinition = {
       name: 'runscript',
       about: 'Run a script',
+      RenderComponent: () => null,
       args: {
         ScriptName: {
           required: false,
