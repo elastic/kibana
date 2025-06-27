@@ -27,8 +27,8 @@ import { inputsActions } from '../../common/store/inputs';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useSecurityTags } from '../context/dashboard_context';
 
-const initialInput = new BehaviorSubject<
-  ReturnType<NonNullable<DashboardCreationOptions['getInitialInput']>>
+const dashboardState$ = new BehaviorSubject<
+  ReturnType<NonNullable<DashboardCreationOptions['getDashboardState']>>
 >({});
 
 const DashboardRendererComponent = ({
@@ -109,8 +109,8 @@ const DashboardRendererComponent = ({
   const getCreationOptions: () => Promise<DashboardCreationOptions> = useCallback(() => {
     return Promise.resolve({
       useSessionStorageIntegration: true,
-      getInitialInput: () => {
-        return initialInput.value;
+      getDashboardState: () => {
+        return dashboardState$.value;
       },
       getIncomingEmbeddable: () =>
         embeddable.getStateTransfer().getIncomingEmbeddablePackage(APP_UI_ID, true),
@@ -159,8 +159,8 @@ const DashboardRendererComponent = ({
   }, [dashboardContainer, firstSecurityTagId, isCreateDashboard]);
 
   useEffect(() => {
-    /** We need to update the initial input on navigation so that changes to filter pills, queries, etc. get applied */
-    initialInput.next({ timeRange, viewMode, query, filters });
+    /** We need to update the dashboard state on navigation so that changes to filter pills, queries, etc. get applied */
+    dashboardState$.next({ timeRange, viewMode, query, filters });
   }, [timeRange, viewMode, query, filters]);
 
   /** Dashboard renderer is stored in the state as it's a temporary solution for

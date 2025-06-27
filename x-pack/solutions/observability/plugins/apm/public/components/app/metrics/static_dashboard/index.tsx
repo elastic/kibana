@@ -80,7 +80,7 @@ async function getCreationOptions(
     }
 
     return {
-      getInitialInput: () => ({
+      getDashboardState: () => ({
         viewMode: 'view',
         panels,
         controlGroupState,
