@@ -16,7 +16,12 @@
     "../../../../typings/**/*",
     "../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
   ],
-  "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
+  "exclude": [
+    "target/**/*",
+    "*/plugins/**/*",
+    "plugins/**/*",
+    "security_solution_api_integration/**/*",
+  ],
   "kbn_references": [
     "@kbn/test",
     "@kbn/expect",
@@ -48,5 +53,6 @@
     "@kbn/cypress-test-helper",
     "@kbn/fleet-plugin",
     "@kbn/repo-info",
+    "@kbn/task-manager-plugin",
   ]
 }

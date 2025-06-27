@@ -1,7 +1,7 @@
 Within this folder is input test data for tests within the folder:
 
 ```ts
-x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/trial_license_complete_tier/keyword_family
+x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/trial_license_complete_tier/keyword_family
 ```
 
 where these are small ECS compliant input indexes that try to express tests that exercise different parts of
