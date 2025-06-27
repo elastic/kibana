@@ -6,7 +6,7 @@
  */
 
 import { StateGraph, Annotation } from '@langchain/langgraph';
-import { BaseMessage, AIMessage } from '@langchain/core/messages';
+import { BaseMessage, BaseMessageLike, AIMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
@@ -14,7 +14,7 @@ import type { Logger } from '@kbn/core/server';
 import { InferenceChatModel } from '@kbn/inference-langchain';
 import { withSystemPrompt, defaultSystemPrompt } from './system_prompt';
 
-export const createAgentGraph = async ({
+export const createAgentGraph = ({
   chatModel,
   tools,
   systemPrompt = defaultSystemPrompt,
@@ -26,7 +26,7 @@ export const createAgentGraph = async ({
 }) => {
   const StateAnnotation = Annotation.Root({
     // inputs
-    initialMessages: Annotation<BaseMessage[]>({
+    initialMessages: Annotation<BaseMessageLike[]>({
       reducer: messagesStateReducer,
       default: () => [],
     }),
@@ -45,7 +45,7 @@ export const createAgentGraph = async ({
 
   const callModel = async (state: typeof StateAnnotation.State) => {
     const response = await model.invoke(
-      await withSystemPrompt({
+      withSystemPrompt({
         systemPrompt,
         messages: [...state.initialMessages, ...state.addedMessages],
       })

@@ -71,7 +71,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
 
   /**
    * Returns a list of all indexes for Crowdstrike data supported for response actions
-   * @private
+   * @internal
    */
   private async fetchIndexNames(): Promise<string[]> {
     const cachedInfo = this.cache.get<string[]>('fetchIndexNames');
@@ -225,7 +225,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
 
   /**
    * Sends actions to Crowdstrike directly (via Connector)
-   * @private
+   * @internal
    */
   private async sendAction(
     actionType: SUB_ACTION,

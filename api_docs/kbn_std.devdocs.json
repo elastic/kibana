@@ -626,6 +626,47 @@
       },
       {
         "parentPluginId": "@kbn/std",
+        "id": "def-common.fromExternalVariant",
+        "type": "Function",
+        "tags": [],
+        "label": "fromExternalVariant",
+        "description": [],
+        "signature": [
+          "(obj: T) => ",
+          {
+            "pluginId": "@kbn/std",
+            "scope": "common",
+            "docId": "kibKbnStdPluginApi",
+            "section": "def-common.FromExternalVariant",
+            "text": "FromExternalVariant"
+          },
+          "<T>"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/from_external_variant.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.fromExternalVariant.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "obj",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/from_external_variant.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
         "id": "def-common.get",
         "type": "Function",
         "tags": [],
@@ -2049,6 +2090,23 @@
           "any[] | { [k: string]: any; }"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/deep_freeze.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
+        "id": "def-common.FromExternalVariant",
+        "type": "Type",
+        "tags": [],
+        "label": "FromExternalVariant",
+        "description": [
+          "\nGiven a record type `{a: X; b: Y}`, produces a distributed union:\n`{ type: \"a\"; value: X } | { type: \"b\"; value: Y }`."
+        ],
+        "signature": [
+          "T extends any ? { [K in keyof T]: { type: K; value: T[K]; }; }[keyof T] : never"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/from_external_variant.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
