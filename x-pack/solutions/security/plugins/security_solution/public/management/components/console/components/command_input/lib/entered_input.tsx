@@ -133,37 +133,31 @@ export class EnteredInput {
                   side === 'right')
               ) {
                 const argState = enteredCommand.argState[argName]?.at(argIndex);
-                const selectorValue = argState?.valueText || argState?.value || '';
 
-                // Smart conditional replacement based on whether typed value matches selector value
+                // Simple duplication prevention: check if typed value matches selector value
                 let replacementLength = argChrLength; // Default: just replace argument name
+                const selectorValue = argState?.valueText || '';
 
-                // Check if there's a value after the argument name
-                if (charAfterArgName === '=' || charAfterArgName === ' ') {
-                  const searchIndex = startSearchIndexForNextArg + 1; // Skip separator
-                  const remainingInput = input.substring(searchIndex);
+                // If there's a value after the argument name, check for exact match
+                if ((charAfterArgName === '=' || charAfterArgName === ' ') && selectorValue) {
+                  const valueStart = startSearchIndexForNextArg + 1;
+                  const remainingText = input.substring(valueStart);
 
-                  // Check if typed value exactly matches selector value (to avoid duplication)
-                  const firstChar = remainingInput.charAt(0);
-
-                  if ((firstChar === '"' || firstChar === "'") && selectorValue) {
-                    // Handle quoted values generically
-                    const closingQuoteIndex = remainingInput.indexOf(firstChar, 1);
-                    if (closingQuoteIndex > 0) {
-                      const quotedContent = remainingInput.substring(1, closingQuoteIndex);
-                      if (quotedContent === selectorValue) {
-                        // Exact match - replace entire quoted pattern
-                        replacementLength = argChrLength + 1 + closingQuoteIndex + 1; // arg + = + "value"
-                      }
-                    }
-                  } else if (
-                    remainingInput.startsWith(`${selectorValue} `) ||
-                    remainingInput === selectorValue
+                  // Check for exact match (quoted or unquoted)
+                  const firstChar = remainingText.charAt(0);
+                  if (
+                    (firstChar === '"' || firstChar === "'") &&
+                    remainingText.startsWith(`${firstChar}${selectorValue}${firstChar}`)
                   ) {
-                    // Exact match unquoted - replace entire pattern
+                    // Quoted value: --arg="value" or --arg='value'
+                    replacementLength = argChrLength + 1 + selectorValue.length + 2; // arg + = + "value"
+                  } else if (
+                    remainingText.startsWith(`${selectorValue} `) ||
+                    remainingText === selectorValue
+                  ) {
+                    // Unquoted value: --arg=value
                     replacementLength = argChrLength + 1 + selectorValue.length; // arg + = + value
                   }
-                  // If no exact match, keep default (just replace arg name) - allows typing
                 }
 
                 const replaceValues: InputCharacter[] = Array.from(

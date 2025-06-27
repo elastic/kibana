@@ -15,6 +15,9 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
     args: {},
   };
 
+  // Arguments that should use empty strings for bare flags instead of boolean true
+  const EMPTY_STRING_BARE_FLAGS_ARGS = ['ScriptName', 'file'];
+
   if (!input) {
     return response;
   }
@@ -66,8 +69,10 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
 
           response.args[argName].push(newArgValue);
         } else {
-          // Argument has not value (bare), set it to empty string
-          response.args[argName].push('');
+          // Argument has no value (bare flag)
+          // Use empty string for whitelisted arguments, boolean true for others
+          const useStringValue = EMPTY_STRING_BARE_FLAGS_ARGS.includes(argName);
+          response.args[argName].push(useStringValue ? '' : true);
         }
       }
     }
