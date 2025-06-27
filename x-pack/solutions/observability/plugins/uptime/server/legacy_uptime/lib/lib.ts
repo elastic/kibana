@@ -106,8 +106,15 @@ export class UptimeEsClient {
 
     let esRequestStatus: RequestStatus = RequestStatus.PENDING;
 
+    const isInspectorEnabled = await this.getInspectEnabled();
+
     try {
-      res = await this.baseESClient.search(esParams, { meta: true });
+      res = await this.baseESClient.search(esParams, {
+        meta: true,
+        context: {
+          requesterPlugin: isInspectorEnabled ? 'synthetics' : undefined,
+        },
+      });
       esRequestStatus = RequestStatus.OK;
     } catch (e) {
       esError = e;
@@ -126,7 +133,6 @@ export class UptimeEsClient {
         })
       );
     }
-    const isInspectorEnabled = await this.getInspectEnabled();
     if (isInspectorEnabled && this.request) {
       debugESCall({
         startTime,
@@ -152,13 +158,18 @@ export class UptimeEsClient {
     const esParams = { index: this.heartbeatIndices, ...params };
     const startTime = process.hrtime();
 
+    const isInspectorEnabled = await this.getInspectEnabled();
+
     try {
-      res = await this.baseESClient.count(esParams, { meta: true });
+      res = await this.baseESClient.count(esParams, {
+        meta: true,
+        context: {
+          requesterPlugin: isInspectorEnabled ? 'synthetics' : undefined,
+        },
+      });
     } catch (e) {
       esError = e;
     }
-
-    const isInspectorEnabled = await this.getInspectEnabled();
 
     if (isInspectorEnabled && this.request) {
       debugESCall({

@@ -82,14 +82,19 @@ export class SyntheticsEsClient {
 
     let esRequestStatus: RequestStatus = RequestStatus.PENDING;
 
+    const isInspectorEnabled = await this.getInspectEnabled();
     try {
-      res = await this.baseESClient.search(esParams, { meta: true });
+      res = await this.baseESClient.search(esParams, {
+        meta: true,
+        context: {
+          requesterPlugin: isInspectorEnabled ? 'synthetics' : undefined,
+        },
+      });
       esRequestStatus = RequestStatus.OK;
     } catch (e) {
       esError = e;
       esRequestStatus = RequestStatus.ERROR;
     }
-    const isInspectorEnabled = await this.getInspectEnabled();
     if ((isInspectorEnabled || this.isDev) && this.request) {
       this.inspectableEsQueries.push(
         getInspectResponse({
@@ -182,13 +187,18 @@ export class SyntheticsEsClient {
     const esParams = { index: SYNTHETICS_INDEX_PATTERN, ...params };
     const startTime = process.hrtime();
 
+    const isInspectorEnabled = await this.getInspectEnabled();
+
     try {
-      res = await this.baseESClient.count(esParams, { meta: true });
+      res = await this.baseESClient.count(esParams, {
+        meta: true,
+        context: {
+          requesterPlugin: isInspectorEnabled ? 'synthetics' : undefined,
+        },
+      });
     } catch (e) {
       esError = e;
     }
-
-    const isInspectorEnabled = await this.getInspectEnabled();
 
     if (isInspectorEnabled && this.request) {
       debugESCall({

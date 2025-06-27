@@ -198,9 +198,20 @@ export const instrumentEsQueryAndDeprecationLogger = ({
   const warningLogger = logger.get('warnings'); // elasticsearch.warnings
 
   client.diagnostic.on('response', (error, event) => {
+    const customLoggerName = event?.meta?.request?.options?.context?.requesterPlugin as
+      | string
+      | undefined;
+    // if (event?.meta.request.params.path.includes('/_count')) {
+    //   console.log(JSON.stringify(event, null, 2));
+    //   console.log(customLoggerName);
+    // }
+
+    const customLogger = customLoggerName ? queryLogger.get(customLoggerName) : queryLogger;
+    const level = customLoggerName ? 'info' : 'debug';
+
     // we could check this once and not subscribe to response events if both are disabled,
     // but then we would not be supporting hot reload of the logging configuration.
-    const logQuery = queryLogger.isLevelEnabled('debug');
+    const logQuery = customLogger.isLevelEnabled(level);
     const logDeprecation = deprecationLogger.isLevelEnabled('debug');
 
     if (error && isMaximumResponseSizeExceededError(error)) {
@@ -213,7 +224,7 @@ export const instrumentEsQueryAndDeprecationLogger = ({
 
       if (logQuery) {
         const meta = getEcsResponseLog(event, bytes);
-        queryLogger.debug(queryMsg, meta);
+        customLogger[level](queryMsg, meta);
       }
 
       if (logDeprecation && event.warnings && event.warnings.filter(isEsWarning).length > 0) {
