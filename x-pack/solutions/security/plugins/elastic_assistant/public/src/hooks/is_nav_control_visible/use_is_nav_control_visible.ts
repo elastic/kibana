@@ -26,7 +26,8 @@ function getVisibility(
     (appId && applications.get(appId)?.category?.id) || DEFAULT_APP_CATEGORIES.kibana.id;
 
   if (preferredAssistantType === AIAssistantType.Security) {
-    return categoryId !== DEFAULT_APP_CATEGORIES.observability.id;
+    return categoryId !== DEFAULT_APP_CATEGORIES.observability.id &&
+      categoryId !== DEFAULT_APP_CATEGORIES.enterpriseSearch.id;
   }
 
   return DEFAULT_APP_CATEGORIES.security.id === categoryId;
