@@ -36,7 +36,6 @@ import {
 import type { NavigationEntry } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability/constants';
 import type { ObservabilityDynamicNavigation } from '@kbn/observability-navigation-plugin/public';
-import type { DynamicNavigationItem } from '@kbn/observability-navigation-plugin/common/types';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
@@ -183,12 +182,14 @@ export class Plugin implements InfraClientPluginClass {
                       ...(navigation?.map((nav) => ({
                         label: formatDynamicNavigationPath(nav.title),
                         app: 'metrics',
-                        path: getDynamicNavigationPath(nav),
+                        path: getDynamicNavigationPath(
+                          nav.href ?? formatDynamicNavigationPath(nav.title)
+                        ),
                         deepLinks: nav.subItems?.map((subNav) => {
                           return {
                             id: subNav.id,
                             title: formatDynamicNavigationPath(subNav.title),
-                            path: getDynamicNavigationPath(subNav, nav.title),
+                            path: getDynamicNavigationPath(subNav.href),
                           };
                         }),
                       })) ?? []),
@@ -270,12 +271,12 @@ export class Plugin implements InfraClientPluginClass {
           return {
             id: `dynamic_${nav.id}`,
             title: formatDynamicNavigationPath(nav.title),
-            path: getDynamicNavigationPath(nav),
+            path: nav.href ? getDynamicNavigationPath(nav.href) : undefined,
             deepLinks: (nav.subItems ?? []).map((subNav) => {
               return {
                 id: `dynamic_${subNav.id}`,
                 title: formatDynamicNavigationPath(subNav.title),
-                path: getDynamicNavigationPath(subNav, nav.id),
+                path: getDynamicNavigationPath(subNav.href),
               };
             }),
           };
@@ -407,23 +408,8 @@ const getLogsExplorerAccessible$ = (application: CoreStart['application']) => {
 const formatDynamicNavigationPath = (title: string) => {
   return title.replace(/\s+/g, '-').toLowerCase();
 };
-const getDynamicNavigationPath = (
-  nav: DynamicNavigationItem | ObservabilityDynamicNavigation,
-  parentTitle?: string
-) => {
-  const url = new URL(
-    `/entity/${
-      parentTitle ? `${formatDynamicNavigationPath(parentTitle)}/` : ''
-    }${formatDynamicNavigationPath(nav.title)}`,
-    window.location.origin
-  );
-  if (nav.dashboardId) {
-    url.searchParams.set('dashboardId', nav.dashboardId);
-  }
-  if (nav.entityId) {
-    url.searchParams.set('entityId', nav.entityId);
-  }
-  return `${url.pathname}${url.search}`;
+const getDynamicNavigationPath = (href: string) => {
+  return `/entity/${href}`;
 };
 
 const createNavEntryFromRoute = ({ path, title }: LogsRoute): NavigationEntry => ({

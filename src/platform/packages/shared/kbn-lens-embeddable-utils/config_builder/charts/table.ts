@@ -11,6 +11,7 @@ import type {
   FormBasedPersistedState,
   FormulaPublicApi,
   DatatableVisualizationState,
+  PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensTableConfig } from '../types';
@@ -21,7 +22,12 @@ import {
   getAdhocDataviews,
   mapToFormula,
 } from '../utils';
-import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
+import {
+  getBreakdownColumn,
+  getColumnFromLayer,
+  getFormulaColumn,
+  getValueColumn,
+} from '../columns';
 
 const ACCESSOR = 'metric_formula_accessor';
 function buildVisualizationState(config: LensTableConfig): DatatableVisualizationState {
@@ -31,11 +37,14 @@ function buildVisualizationState(config: LensTableConfig): DatatableVisualizatio
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
     columns: [
-      { columnId: ACCESSOR },
-      ...(layer.breakdown || []).map((breakdown, i) => ({
-        columnId: `${ACCESSOR}_breakdown_${i}`,
+      ...(layer.metrics || []).map((_, i) => ({
+        columnId: `${ACCESSOR}_${i}`,
       })),
-      ...(layer.splitBy || []).map((breakdown, i) => ({ columnId: `${ACCESSOR}_splitby_${i}` })),
+      ...(layer.rows || []).map((row, i) => ({
+        columnId: `${ACCESSOR}_rows_${i}`,
+        href: typeof row === 'string' ? undefined : row.href,
+      })),
+      ...(layer.splitBy || []).map((_, i) => ({ columnId: `${ACCESSOR}_splitby_${i}` })),
     ],
   };
 }
@@ -46,25 +55,19 @@ function buildFormulaLayer(
   formulaAPI?: FormulaPublicApi
 ): FormBasedPersistedState['layers'][0] {
   const layers = {
-    [DEFAULT_LAYER_ID]: {
-      ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView, formulaAPI),
-    },
+    [DEFAULT_LAYER_ID]: layer.metrics.reduce((acc, curr, valueIndex) => {
+      const formulaColumn = getFormulaColumn(
+        `${ACCESSOR}_${valueIndex}`,
+        mapToFormula(curr),
+        dataView,
+        formulaAPI,
+        valueIndex > 0 ? acc : undefined
+      );
+      return { ...acc, ...formulaColumn };
+    }, {} as PersistedIndexPatternLayer),
   };
 
   const defaultLayer = layers[DEFAULT_LAYER_ID];
-
-  if (layer.breakdown) {
-    layer.breakdown.reverse().forEach((breakdown, x) => {
-      const columnName = `${ACCESSOR}_breakdown_${x}`;
-      const breakdownColumn = getBreakdownColumn({
-        options: breakdown,
-        dataView,
-      });
-      addLayerColumn(defaultLayer, columnName, breakdownColumn, true);
-    });
-  } else {
-    throw new Error('breakdown must be defined for table!');
-  }
 
   if (layer.splitBy) {
     layer.splitBy.forEach((breakdown, x) => {
@@ -81,24 +84,31 @@ function buildFormulaLayer(
 }
 
 function getValueColumns(layer: LensTableConfig) {
-  if (layer.breakdown && layer.breakdown.filter((b) => typeof b !== 'string').length) {
-    throw new Error('breakdown must be a field name when not using index source');
-  }
   if (layer.splitBy && layer.splitBy.filter((s) => typeof s !== 'string').length) {
     throw new Error('xAxis must be a field name when not using index source');
   }
   return [
-    ...(layer.breakdown
-      ? layer.breakdown.map((b, i) => {
-          return getValueColumn(`${ACCESSOR}_breakdown_${i}`, b as string);
+    ...(layer.rows
+      ? layer.rows.map((b, i) => {
+          return getValueColumn(
+            `${ACCESSOR}_rows_${i}`,
+            typeof b === 'string' ? b : 'field' in b ? b.field : ''
+          );
         })
       : []),
     ...(layer.splitBy
       ? layer.splitBy.map((b, i) => {
-          return getValueColumn(`${ACCESSOR}_splitby_${i}`, b as string);
+          return getValueColumn(
+            `${ACCESSOR}_splitby_${i}`,
+            typeof b === 'string' ? b : 'field' in b ? b.field : ''
+          );
         })
       : []),
-    getValueColumn(ACCESSOR, layer.value),
+    ...(layer.metrics
+      ? layer.metrics.map((b, i) => {
+          return getColumnFromLayer(`${ACCESSOR}_${i}`, b);
+        })
+      : []),
   ];
 }
 

@@ -10,11 +10,13 @@ interface NavigationItemBase {
   title: string;
   entityId?: string;
   dashboardId?: string;
+  href?: string;
   order?: number;
 }
 
-export interface DynamicNavigationItem extends NavigationItemBase {
+export interface DynamicNavigationItem extends Omit<NavigationItemBase, 'href'> {
   dashboardId: string;
+  href: string;
 }
 
 export interface ObservabilityDynamicNavigation extends NavigationItemBase {

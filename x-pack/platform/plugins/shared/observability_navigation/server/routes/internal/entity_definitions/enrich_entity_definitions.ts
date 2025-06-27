@@ -30,13 +30,16 @@ export async function enrichEntityDefinitions(
 
   return entityDefinitions.map((definition) => {
     const navigationItem = navigationItemsMap.get(definition.id);
+
     if (navigationItem) {
       return {
         ...definition,
         navigation: {
           id: navigationItem.id,
+          entityId: navigationItem.entityId,
           title: navigationItem.title,
           dashboardId: navigationItem.dashboardId,
+          href: navigationItem.href,
         },
       };
     }

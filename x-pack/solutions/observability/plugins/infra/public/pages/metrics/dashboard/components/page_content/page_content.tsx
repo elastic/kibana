@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_timerange_metadata';
 import { RenderDashboard } from '../dashboard/render_dashboard';
+import { EntityTable } from '../entity_table/entity_table';
 
 export const PageContent = ({
   dashboardId,
@@ -27,5 +28,10 @@ export const PageContent = ({
     return null;
   }
 
-  return <RenderDashboard dashboardId={dashboardId} />;
+  return (
+    <>
+      {enitiyId ? <EntityTable entityId={enitiyId} /> : null}
+      <RenderDashboard dashboardId={dashboardId} />
+    </>
+  );
 };

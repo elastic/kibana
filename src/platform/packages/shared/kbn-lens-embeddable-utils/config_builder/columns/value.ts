@@ -9,6 +9,7 @@
 
 import type { TextBasedLayerColumn } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { LensBaseLayer } from '../types';
 
 export function getValueColumn(
   id: string,
@@ -19,5 +20,32 @@ export function getValueColumn(
     columnId: id,
     fieldName: fieldName || id,
     ...(type ? { meta: { type } } : {}),
+  };
+}
+
+export function getColumnFromLayer(id: string, layer: LensBaseLayer): TextBasedLayerColumn {
+  return {
+    columnId: id,
+    fieldName: layer.value || id,
+    label: layer.label || layer.value || id,
+    meta: { type: 'number' },
+    ...(layer.format
+      ? {
+          params: {
+            format: {
+              id: layer.format as any,
+              ...(layer.compactValues || layer.normalizeByUnit || layer.decimals
+                ? {
+                    params: {
+                      compact: layer.compactValues,
+                      decimals: layer.decimals || 0,
+                    },
+                  }
+                : {}),
+            },
+          },
+        }
+      : {}),
+    inMetricDimension: true,
   };
 }

@@ -11,7 +11,7 @@ import { AssetDetailsFlyoutLocatorDefinition } from './asset_details_flyout_loca
 import { HostsLocatorDefinition } from './hosts_locator';
 import { InventoryLocatorDefinition } from './inventory_locator';
 import querystring from 'querystring';
-import { KubernetesDashboardLocatorDefinition } from './kubernetes_dashboard_locator';
+import { InfraDashboardLocatorDefinition } from './infra_dashboard_locator';
 
 const setupAssetDetailsLocator = async () => {
   const assetDetailsLocator = new AssetDetailsLocatorDefinition();
@@ -23,11 +23,11 @@ const setupAssetDetailsLocator = async () => {
   };
 };
 
-const setupKubernetesDashboardLocator = async () => {
-  const kubernetesDashboardLocator = new KubernetesDashboardLocatorDefinition();
+const setupInfraDashboardLocator = async () => {
+  const infraDashboardLocator = new InfraDashboardLocatorDefinition();
 
   return {
-    kubernetesDashboardLocator,
+    infraDashboardLocator,
   };
 };
 const setupHostsLocator = async () => {
@@ -254,16 +254,15 @@ describe('Infra Locators', () => {
     });
   });
   describe('Kubernetes Dashboards Locator', () => {
-    const params = {
-      dashboardId: 'kubernetes_cluster',
-    };
     it('should create a link to a specific Kubernetes Dashboard', async () => {
-      const { kubernetesDashboardLocator } = await setupKubernetesDashboardLocator();
-      const { app, path, state } = await kubernetesDashboardLocator.getLocation(params);
+      const { infraDashboardLocator } = await setupInfraDashboardLocator();
+      const { app, path, state } = await infraDashboardLocator.getLocation({
+        relativePath: '/kubernetes/pod',
+      });
 
       expect(app).toBe('metrics');
       expect(path).toBe(
-        `/kubernetes/${params.dashboardId}?dashboardParams=${rison.encodeUnknown({
+        `entity/kubernetes/pod?dashboardParams=${rison.encodeUnknown({
           dateRange: {
             from: 'now-15m',
             to: 'now',
@@ -275,8 +274,11 @@ describe('Infra Locators', () => {
     });
 
     it('should return a link to the Kubernetes Dashboards page', async () => {
-      const { kubernetesDashboardLocator } = await setupKubernetesDashboardLocator();
-      const { app, path } = await kubernetesDashboardLocator.getLocation();
+      const { infraDashboardLocator } = await setupInfraDashboardLocator();
+
+      const { app, path } = await infraDashboardLocator.getLocation({
+        relativePath: '/kubernetes',
+      });
 
       expect(app).toBe('metrics');
       expect(path).toBe('/kubernetes');

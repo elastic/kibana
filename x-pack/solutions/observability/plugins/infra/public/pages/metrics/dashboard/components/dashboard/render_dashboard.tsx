@@ -9,8 +9,7 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
-import { KUBERNETES_DASHBOARD_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
-import type { SerializableRecord } from '@kbn/utility-types';
+import { INFRA_DASHBOARD_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
 import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
@@ -36,26 +35,14 @@ export const RenderDashboard = ({ dashboardId }: { dashboardId: string }) => {
     });
   }, [from, to]);
 
-  const getLocatorParams = useCallback(
-    (params: SerializableRecord) => {
-      return {
-        dashboardId: params?.dashboardId ?? dashboardId,
-      };
-    },
-    [dashboardId]
-  );
-
   const locator = useMemo(() => {
-    const baseLocator = share.url.locators.get(KUBERNETES_DASHBOARD_LOCATOR_ID);
+    const baseLocator = share.url.locators.get(INFRA_DASHBOARD_LOCATOR_ID);
     if (!baseLocator) return;
 
     return {
       ...baseLocator,
-      getRedirectUrl: (params: SerializableRecord) =>
-        baseLocator.getRedirectUrl(getLocatorParams(params)),
-      navigate: (params: SerializableRecord) => baseLocator.navigate(getLocatorParams(params)),
     };
-  }, [share, getLocatorParams]);
+  }, [share]);
 
   const [dashboard, setDashboard] = useState<DashboardApi | undefined>(undefined);
 

@@ -32,6 +32,7 @@ import {
   LensDataset,
   LensDatatableDataset,
   LensESQLDataset,
+  LensTableConfig,
 } from './types';
 
 type DataSourceStateLayer =
@@ -160,7 +161,7 @@ export function getDatasetIndex(dataset?: LensDataset) {
 }
 
 function buildDatasourceStatesLayer(
-  layer: LensBaseLayer | LensBaseXYLayer,
+  layer: LensBaseLayer | LensBaseXYLayer | LensTableConfig,
   i: number,
   dataset: LensDataset,
   dataView: DataView | undefined,
@@ -172,7 +173,7 @@ function buildDatasourceStatesLayer(
   getValueColumns: (config: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
 ): ['textBased' | 'formBased', DataSourceStateLayer | undefined] {
   function buildValueLayer(
-    config: LensBaseLayer | LensBaseXYLayer
+    config: LensBaseLayer | LensBaseXYLayer | LensTableConfig
   ): TextBasedPersistedState['layers'][0] {
     const table = dataset as LensDatatableDataset;
     const newLayer = {
@@ -194,7 +195,7 @@ function buildDatasourceStatesLayer(
   }
 
   function buildESQLLayer(
-    config: LensBaseLayer | LensBaseXYLayer
+    config: LensBaseLayer | LensBaseXYLayer | LensTableConfig
   ): TextBasedPersistedState['layers'][0] {
     const columns = getValueColumns(layer, i);
 
@@ -217,7 +218,10 @@ function buildDatasourceStatesLayer(
   return ['formBased', buildFormulaLayers(layer, i, dataView!)];
 }
 export const buildDatasourceStates = async (
-  config: (LensBaseConfig & { layers: LensBaseXYLayer[] }) | (LensBaseLayer & LensBaseConfig),
+  config:
+    | (LensBaseConfig & { layers: LensBaseXYLayer[] })
+    | (LensBaseLayer & LensBaseConfig)
+    | LensTableConfig,
   dataviews: Record<string, DataView>,
   buildFormulaLayers: (
     config: unknown,
@@ -234,7 +238,8 @@ export const buildDatasourceStates = async (
   for (let i = 0; i < configLayers.length; i++) {
     const layer = configLayers[i];
     const layerId = `layer_${i}`;
-    const dataset = layer.dataset || mainDataset;
+
+    const dataset = 'dataset' in layer ? layer.dataset : mainDataset;
 
     if (!dataset && 'type' in layer && (layer as LensAnnotationLayer).type !== 'annotation') {
       throw Error('dataset must be defined');
