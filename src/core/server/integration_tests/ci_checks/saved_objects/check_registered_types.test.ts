@@ -154,6 +154,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "osquery-saved-query": "a8ef11610473e3d1b51a8fdacb2799d8a610818e",
         "policy-settings-protection-updates-note": "c05c4c33a5e5bd1fa153991f300d040ac5d6f38d",
         "privilege-monitoring-status": "4daec76df427409bcd64250f5c23f5ab86c8bac3",
+        "privmon-api-key": "a8de0d86a01d07dbe02dba2f9073b4730d6f1fd9",
         "product-doc-install-status": "ee7817c45bf1c41830290c8ef535e726c86f7c19",
         "query": "1966ccce8e9853018111fb8a1dee500228731d9e",
         "risk-engine-configuration": "533a0a3f2dbef1c95129146ec4d5714de305be1a",
