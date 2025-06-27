@@ -592,6 +592,8 @@ export class DashboardPageObject extends FtrService {
     const modalDialog = await this.testSubjects.find('savedObjectSaveModal');
 
     this.log.debug('entering new title');
+    // Wait for the title input to be enabled before setting the value to avoid flakiness
+    await this.testSubjects.waitForEnabled('savedObjectTitle');
     await this.testSubjects.setValue('savedObjectTitle', dashboardTitle);
 
     if (saveOptions.storeTimeWithDashboard !== undefined) {
