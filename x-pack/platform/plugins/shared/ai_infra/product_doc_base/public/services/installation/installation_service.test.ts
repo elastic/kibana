@@ -42,6 +42,17 @@ describe('InstallationService', () => {
       const response = await service.getInstallationStatus();
       expect(response).toEqual(expected);
     });
+    it('calls the endpoint with the right parameters for different inference IDs', async () => {
+      await service.getInstallationStatus({
+        inferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+      });
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(http.get).toHaveBeenCalledWith(INSTALLATION_STATUS_API_PATH, {
+        query: {
+          inferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+        },
+      });
+    });
   });
   describe('#install', () => {
     beforeEach(() => {
@@ -52,9 +63,20 @@ describe('InstallationService', () => {
       await service.install();
       expect(http.post).toHaveBeenCalledTimes(1);
       expect(http.post).toHaveBeenCalledWith(INSTALL_ALL_API_PATH, {
-        body: {
+        body: JSON.stringify({
           inferenceId,
-        },
+        }),
+      });
+    });
+    it('calls the endpoint with the right parameters for different inference IDs', async () => {
+      await service.install({
+        inferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+      });
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(INSTALL_ALL_API_PATH, {
+        body: JSON.stringify({
+          inferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+        }),
       });
     });
     it('returns the value from the server', async () => {
@@ -79,11 +101,23 @@ describe('InstallationService', () => {
       await service.uninstall();
       expect(http.post).toHaveBeenCalledTimes(1);
       expect(http.post).toHaveBeenCalledWith(UNINSTALL_ALL_API_PATH, {
-        body: {
+        body: JSON.stringify({
           inferenceId,
-        },
+        }),
       });
     });
+    it('calls the endpoint with the right parameters for different inference IDs', async () => {
+      await service.uninstall({
+        inferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+      });
+      expect(http.post).toHaveBeenCalledTimes(1);
+      expect(http.post).toHaveBeenCalledWith(UNINSTALL_ALL_API_PATH, {
+        body: JSON.stringify({
+          inferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+        }),
+      });
+    });
+
     it('returns the value from the server', async () => {
       const expected = { stubbed: true };
       http.post.mockResolvedValue(expected);
