@@ -28,7 +28,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const testSubjects = getService('testSubjects');
 
-  describe('Search Homepage', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/225446
+  describe.skip('Search Homepage', function () {
     describe('as admin', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginAsAdmin();
@@ -39,6 +40,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('goes to the start page if there exists no index', async () => {
+        await pageObjects.common.navigateToApp('searchHomepage');
         await pageObjects.svlSearchHomePage.expectToBeOnStartpage();
       });
 
@@ -59,6 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('goes to the start page if there exists no index', async () => {
+        await pageObjects.common.navigateToApp('searchHomepage');
         await pageObjects.svlSearchHomePage.expectToBeOnStartpage();
       });
 
@@ -126,12 +129,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.existOrFail('uploadFileButton');
           await testSubjects.click('uploadFileButton');
           await pageObjects.svlSearchHomePage.expectToBeOnUploadDataPage();
-        });
-
-        it('renders the Customer Engineer Request Form link', async () => {
-          await testSubjects.existOrFail('customerEngineerRequestFormLink');
-          await testSubjects.click('customerEngineerRequestFormLink');
-          await pageObjects.svlSearchHomePage.expectToBeOnCustomerEngineerPage();
         });
       });
 

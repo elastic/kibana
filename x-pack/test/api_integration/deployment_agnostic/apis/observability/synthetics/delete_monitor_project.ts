@@ -15,7 +15,7 @@ import { REQUEST_TOO_LARGE_DELETE } from '@kbn/synthetics-plugin/server/routes/m
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
-import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
+import { syntheticsMonitorSavedObjectType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
@@ -95,7 +95,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const savedObjectsResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .query({
-            filter: `${syntheticsMonitorType}.attributes.project_id: "${project}"`,
+            filter: `${syntheticsMonitorSavedObjectType}.attributes.project_id: "${project}"`,
           })
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
@@ -157,7 +157,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const savedObjectsResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .query({
-            filter: `${syntheticsMonitorType}.attributes.project_id: "${project}"`,
+            filter: `${syntheticsMonitorSavedObjectType}.attributes.project_id: "${project}"`,
           })
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
@@ -180,7 +180,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const responseAfterDeletion = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .query({
-            filter: `${syntheticsMonitorType}.attributes.project_id: "${project}"`,
+            filter: `${syntheticsMonitorSavedObjectType}.attributes.project_id: "${project}"`,
           })
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
@@ -230,7 +230,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const savedObjectsResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .query({
-            filter: `${syntheticsMonitorType}.attributes.project_id: "${project}"`,
+            filter: `${syntheticsMonitorSavedObjectType}.attributes.project_id: "${project}"`,
           })
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
@@ -238,7 +238,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const secondProjectSavedObjectResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .query({
-            filter: `${syntheticsMonitorType}.attributes.project_id: "${secondProject}"`,
+            filter: `${syntheticsMonitorSavedObjectType}.attributes.project_id: "${secondProject}"`,
           })
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
@@ -263,7 +263,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const responseAfterDeletion = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .query({
-            filter: `${syntheticsMonitorType}.attributes.project_id: "${project}"`,
+            filter: `${syntheticsMonitorSavedObjectType}.attributes.project_id: "${project}"`,
           })
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
@@ -271,7 +271,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const secondResponseAfterDeletion = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .query({
-            filter: `${syntheticsMonitorType}.attributes.project_id: "${secondProject}"`,
+            filter: `${syntheticsMonitorSavedObjectType}.attributes.project_id: "${secondProject}"`,
           })
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
@@ -350,7 +350,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const savedObjectsResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .query({
-            filter: `${syntheticsMonitorType}.attributes.project_id: "${project}"`,
+            filter: `${syntheticsMonitorSavedObjectType}.attributes.project_id: "${project}"`,
           })
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
@@ -358,7 +358,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const secondSpaceProjectSavedObjectResponse = await supertest
           .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
           .query({
-            filter: `${syntheticsMonitorType}.attributes.project_id: "${project}"`,
+            filter: `${syntheticsMonitorSavedObjectType}.attributes.project_id: "${project}"`,
           })
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
@@ -387,7 +387,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const responseAfterDeletion = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .query({
-            filter: `${syntheticsMonitorType}.attributes.project_id: "${project}"`,
+            filter: `${syntheticsMonitorSavedObjectType}.attributes.project_id: "${project}"`,
           })
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
@@ -395,7 +395,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const secondSpaceResponseAfterDeletion = await supertest
           .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
           .query({
-            filter: `${syntheticsMonitorType}.attributes.project_id: "${project}"`,
+            filter: `${syntheticsMonitorSavedObjectType}.attributes.project_id: "${project}"`,
           })
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
@@ -449,7 +449,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const savedObjectsResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .query({
-            filter: `${syntheticsMonitorType}.attributes.project_id: "${project}"`,
+            filter: `${syntheticsMonitorSavedObjectType}.attributes.project_id: "${project}"`,
           })
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
@@ -485,7 +485,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const responseAfterDeletion = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .query({
-            filter: `${syntheticsMonitorType}.attributes.project_id: "${project}"`,
+            filter: `${syntheticsMonitorSavedObjectType}.attributes.project_id: "${project}"`,
           })
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
