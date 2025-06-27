@@ -49,7 +49,10 @@ describe('createInitListener', () => {
     jest.clearAllMocks();
     listener = createInitListener({
       dataViews: mockDataViewsService,
-      defaultDataView: { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } as DataView,
+      defaultDataViews: {
+        defaultDataView: { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } as DataView,
+        alertDataView: { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } as DataView,
+      },
     });
   });
 
