@@ -32,7 +32,7 @@ describe('DensitySettings', () => {
   it('renders the density settings component with label', () => {
     renderDensitySettingsComponent();
     expect(screen.getByTestId('lnsDensitySettings')).toBeInTheDocument();
-    expect(
+expect(screen.getByLabelText('Density', { selector: 'label' })).toBeInTheDocument();
       screen.getAllByText('Density').find((element) => element.tagName.toLowerCase() === 'label')
     ).toBeInTheDocument();
   });
