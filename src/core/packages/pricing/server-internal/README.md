@@ -81,7 +81,15 @@ export class MyPlugin implements Plugin {
       },
     ]);
 
-    const isActiveObservabilityComplete = core.pricing.isActiveProduct({ name: 'observability', tier: 'complete' });
+    /**
+     * Checks if a specific feature is available in the current pricing tier configuration.
+     * Resolves asynchronously after the pricing service has been set up and all the plugins have registered their features.
+     */
+    core.pricing.isFeatureAvailable('my-plugin:feature1').then((isActiveObservabilityComplete) => {
+      if (isActiveObservabilityComplete) {
+        // Enable feature1
+      }
+    });
   }
 
   public start(core: CoreStart) {

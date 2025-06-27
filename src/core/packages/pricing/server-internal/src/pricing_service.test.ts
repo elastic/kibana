@@ -107,14 +107,22 @@ describe('PricingService', () => {
       expect(registry.get('feature2')).toBeDefined();
     });
 
-    it('allows checking if a product is active', async () => {
+    it('allows checking if a feature is available', async () => {
       await service.preboot({ http: prebootHttp });
       const setup = await service.setup({ http: setupHttp });
 
-      const isActiveObservabilityComplete = setup.isActiveProduct({
-        name: 'observability',
-        tier: 'complete',
-      });
+      const mockFeatures: PricingProductFeature[] = [
+        {
+          id: 'feature1',
+          description: 'A feature',
+          products: [{ name: 'observability', tier: 'complete' }],
+        },
+      ];
+
+      setup.registerProductFeatures(mockFeatures);
+      await setup.evaluateProductFeatures();
+
+      const isActiveObservabilityComplete = await setup.isFeatureAvailable('feature1');
       expect(isActiveObservabilityComplete).toBe(true);
     });
   });

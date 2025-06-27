@@ -293,7 +293,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
     pricing: {
-      isActiveProduct: deps.pricing.isActiveProduct,
+      isFeatureAvailable: deps.pricing.isFeatureAvailable,
       registerProductFeatures: deps.pricing.registerProductFeatures,
     },
     security: {

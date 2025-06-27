@@ -9,7 +9,7 @@
 
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
-import { firstValueFrom } from 'rxjs';
+import { Subject, firstValueFrom } from 'rxjs';
 import type { IConfigService } from '@kbn/config';
 import {
   type PricingProductFeature,
@@ -36,14 +36,22 @@ export class PricingService {
   private readonly configService: IConfigService;
   private readonly logger: Logger;
   private readonly productFeaturesRegistry: ProductFeaturesRegistry;
+
+  private readonly isEvaluated$ = new Subject<void>();
+  private readonly isEvaluatedPromise = firstValueFrom(this.isEvaluated$);
+
   private pricingConfig: PricingConfigType;
-  private tiersClient: PricingTiersClient | undefined;
+  private tiersClient: PricingTiersClient;
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('pricing-service');
     this.configService = core.configService;
     this.productFeaturesRegistry = new ProductFeaturesRegistry();
     this.pricingConfig = { tiers: { enabled: false, products: [] } };
+    this.tiersClient = new PricingTiersClient(
+      this.pricingConfig.tiers,
+      this.productFeaturesRegistry
+    );
   }
 
   public preboot({ http }: PrebootDeps) {
@@ -65,10 +73,7 @@ export class PricingService {
       this.configService.atPath<PricingConfigType>('pricing')
     );
 
-    this.tiersClient = new PricingTiersClient(
-      this.pricingConfig.tiers,
-      this.productFeaturesRegistry
-    );
+    this.tiersClient.setTiers(this.pricingConfig.tiers);
 
     registerRoutes(http.createRouter(''), {
       pricingConfig: this.pricingConfig,
@@ -76,7 +81,19 @@ export class PricingService {
     });
 
     return {
-      isActiveProduct: this.tiersClient.isActiveProduct,
+      /**
+       * Evaluates the product features and emits the `isEvaluated$` signal.
+       * This should be called after all plugins have registered their features.
+       */
+      evaluateProductFeatures: () => this.isEvaluated$.next(),
+      /**
+       * Checks if a specific feature is available in the current pricing tier configuration.
+       * Resolves asynchronously after the pricing service has been set up and all the plugins have registered their features.
+       */
+      isFeatureAvailable: async (featureId: string) => {
+        await this.isEvaluatedPromise;
+        return this.tiersClient.isFeatureAvailable(featureId);
+      },
       registerProductFeatures: (features: PricingProductFeature[]) => {
         features.forEach((feature) => {
           this.productFeaturesRegistry.register(feature);
@@ -86,10 +103,6 @@ export class PricingService {
   }
 
   public start() {
-    if (!this.tiersClient) {
-      throw new Error('Tiers client not initialized');
-    }
-
     return {
       isFeatureAvailable: this.tiersClient.isFeatureAvailable,
     };

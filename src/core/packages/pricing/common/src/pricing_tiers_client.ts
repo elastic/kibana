@@ -28,9 +28,18 @@ export class PricingTiersClient implements IPricingTiersClient {
    * @param productFeaturesRegistry - Registry containing the available product features
    */
   constructor(
-    private readonly tiers: TiersConfig,
+    private tiers: TiersConfig,
     private readonly productFeaturesRegistry: ProductFeaturesRegistry
   ) {}
+
+  /**
+   * Sets the pricing tiers configuration.
+   *
+   * @param tiers - The new pricing tiers configuration
+   */
+  setTiers = (tiers: TiersConfig) => {
+    this.tiers = tiers;
+  };
 
   /**
    * Checks if pricing tiers are enabled in the current configuration.
@@ -47,8 +56,9 @@ export class PricingTiersClient implements IPricingTiersClient {
    *
    * @param product - The product to check
    * @returns True if the product is active, false otherwise
+   * @internal
    */
-  isActiveProduct = (product: PricingProduct) => {
+  private isActiveProduct = (product: PricingProduct) => {
     return Boolean(this.tiers.products?.some((currentProduct) => isEqual(currentProduct, product)));
   };
 
