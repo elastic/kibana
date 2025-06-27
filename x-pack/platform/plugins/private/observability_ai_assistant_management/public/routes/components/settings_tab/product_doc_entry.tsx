@@ -22,11 +22,11 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useGetProductDocStatus } from '../../../hooks/use_get_product_doc_status';
 import { useInstallProductDoc } from '../../../hooks/use_install_product_doc';
 import { useUninstallProductDoc } from '../../../hooks/use_uninstall_product_doc';
-import { useInferenceId } from './inference_id_context';
+import { useAssistantSettings } from './settings_context';
 
 export function ProductDocEntry() {
   const { overlays } = useKibana().services;
-  const { selectedInferenceId } = useInferenceId();
+  const { selectedInferenceId } = useAssistantSettings();
 
   const [isInstalled, setInstalled] = useState<boolean>(true);
   const [isInstalling, setInstalling] = useState<boolean>(false);

@@ -11,6 +11,7 @@ import { SearchService } from './search_service';
 import { getIndicesForProductNames } from './utils';
 
 import { performSearch } from './perform_search';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 jest.mock('./perform_search');
 const performSearchMock = performSearch as jest.MockedFn<typeof performSearch>;
 
@@ -32,7 +33,7 @@ describe('SearchService', () => {
   });
 
   describe('#search', () => {
-    it('calls `performSearch` with the right parameters', async () => {
+    it('calls `performSearch` with the right default parameters', async () => {
       await service.search({
         query: 'What is Kibana?',
         products: ['kibana'],
@@ -46,6 +47,64 @@ describe('SearchService', () => {
         size: 42,
         highlights: 3,
         index: getIndicesForProductNames(['kibana']),
+        client: esClient,
+      });
+    });
+    it('calls `performSearch` with the right default ELSER inference', async () => {
+      await service.search({
+        query: 'What is Kibana?',
+        products: ['kibana'],
+        max: 42,
+        highlights: 3,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+
+      expect(performSearchMock).toHaveBeenCalledTimes(1);
+      expect(performSearchMock).toHaveBeenCalledWith({
+        searchQuery: 'What is Kibana?',
+        size: 42,
+        highlights: 3,
+        index: getIndicesForProductNames(['kibana']),
+        client: esClient,
+      });
+    });
+
+    it('calls `performSearch` with the right ELSER EIS inference ID', async () => {
+      await service.search({
+        query: 'What is Kibana?',
+        products: ['kibana'],
+        max: 42,
+        highlights: 3,
+        inferenceId: defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID,
+      });
+
+      expect(performSearchMock).toHaveBeenCalledTimes(1);
+      expect(performSearchMock).toHaveBeenCalledWith({
+        searchQuery: 'What is Kibana?',
+        size: 42,
+        highlights: 3,
+        index: getIndicesForProductNames(['kibana']),
+        client: esClient,
+      });
+    });
+    it('reroutes `performSearch` to multilingual index when inference ID is E5 small', async () => {
+      await service.search({
+        query: 'What is Kibana?',
+        products: ['kibana'],
+        max: 42,
+        highlights: 3,
+        inferenceId: defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+      });
+
+      expect(performSearchMock).toHaveBeenCalledTimes(1);
+      expect(performSearchMock).toHaveBeenCalledWith({
+        searchQuery: 'What is Kibana?',
+        size: 42,
+        highlights: 3,
+        index: getIndicesForProductNames(
+          ['kibana'],
+          defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL
+        ),
         client: esClient,
       });
     });

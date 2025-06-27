@@ -46,7 +46,7 @@ export const registerInstallationRoutes = ({
     },
     async (ctx, req, res) => {
       const { installClient, documentationManager } = getServices();
-      const inferenceId = req.query?.inferenceId ?? defaultInferenceEndpoints.ELSER;
+      const inferenceId = req.query?.inferenceId;
       const installStatus = await installClient.getInstallationStatus({
         inferenceId,
       });
@@ -85,7 +85,7 @@ export const registerInstallationRoutes = ({
     async (ctx, req, res) => {
       const { documentationManager } = getServices();
 
-      const inferenceId = req.body?.inferenceId ?? defaultInferenceEndpoints.ELSER;
+      const inferenceId = req.body?.inferenceId;
 
       await documentationManager.install({
         request: req,

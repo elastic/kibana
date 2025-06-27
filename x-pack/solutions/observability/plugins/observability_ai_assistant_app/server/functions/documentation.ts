@@ -72,7 +72,7 @@ export async function registerDocumentationFunction({
         connectorId,
         request: resources.request,
         functionCalling: simulateFunctionCalling ? 'simulated' : 'auto',
-        // @TODO FOR OBS TEAM
+        // @TODO: FOR OBS ASSISTANT TEAM
         inferenceId: defaultInferenceEndpoints.ELSER,
       });
 

@@ -29,7 +29,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { UISettings } from './ui_settings';
 import { ProductDocEntry } from './product_doc_entry';
 import { ChangeKbModel } from './change_kb_model';
-import { InferenceIdProvider } from './inference_id_context';
+import { AssistantSettingsProvider } from './settings_context';
 
 const GoToSpacesButton = ({ getUrlForSpaces }: { getUrlForSpaces: () => string }) => {
   return (
@@ -71,7 +71,7 @@ export function SettingsTab() {
   };
 
   return (
-    <InferenceIdProvider>
+    <AssistantSettingsProvider>
       <EuiPanel hasBorder grow={false}>
         {config.spacesEnabled && (
           <EuiDescribedFormGroup
@@ -188,6 +188,6 @@ export function SettingsTab() {
 
         <UISettings knowledgeBase={knowledgeBase} />
       </EuiPanel>
-    </InferenceIdProvider>
+    </AssistantSettingsProvider>
   );
 }
