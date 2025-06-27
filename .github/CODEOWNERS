@@ -2289,7 +2289,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/kibana-management
 
 # Security Solution
-/x-pack/test/functional/fixtures/kbn_archiver/security_solution/timelines/7.15.0_space @elastic/security-solution # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_api_integration/test_suites/investigation/timeline/tests/timeline_migrations.ts#L58
+/x-pack/test/functional/fixtures/kbn_archiver/security_solution/timelines/7.15.0_space @elastic/security-solution # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/test/security_solution_api_integration/test_suites/investigation/timeline/tests/timeline_migrations.ts#L58
 /x-pack/test/functional/es_archives/packetbeat @elastic/security-solution
 /x-pack/test/common/services/ingest_manager.ts @elastic/security-solution # Assigned per blame
 /x-pack/test/security_solution_ftr @elastic/security-solution
@@ -2303,7 +2303,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/accessibility/apps/group3/security_solution.ts @elastic/security-solution
 /x-pack/test/functional/es_archives/endpoint/ @elastic/security-solution
 /x-pack/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
-/x-pack/test/security_solution_api_integration @elastic/security-solution
+/x-pack/solutions/security/test/security_solution_api_integration @elastic/security-solution
 /x-pack/test/api_integration/apis/security_solution @elastic/security-solution
 /x-pack/test/functional/es_archives/auditbeat/default @elastic/security-solution
 
@@ -2344,7 +2344,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 # AI4DSOC in Security Solution
 /x-pack/test/security_solution_cypress/cypress/e2e/ai4dsoc @elastic/security-engineering-productivity
 /x-pack/test/security_solution_cypress/cypress/e2e/ai4dsoc/privileges @elastic/security-generative-ai
-/x-pack/test/security_solution_api_integration/test_suites/ai4dsoc @elastic/security-engineering-productivity
+/x-pack/solutions/security/test/security_solution_api_integration/test_suites/ai4dsoc @elastic/security-engineering-productivity
 
 # Security Solution cross teams ownership
 /x-pack/test/security_solution_cypress/cypress/fixtures @elastic/security-detections-response @elastic/security-threat-hunting
@@ -2364,10 +2364,10 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 
 /x-pack/solutions/security/plugins/security_solution/server/routes @elastic/security-detections-response @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/server/utils @elastic/security-detections-response @elastic/security-threat-hunting
-x-pack/test/security_solution_api_integration/test_suites/detections_response/utils @elastic/security-detections-response
-x-pack/test/security_solution_api_integration/test_suites/detections_response/telemetry @elastic/security-detections-response
-x-pack/test/security_solution_api_integration/test_suites/detections_response/user_roles @elastic/security-detections-response
-x-pack/test/security_solution_api_integration/test_suites/sources @elastic/security-detections-response
+x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/utils @elastic/security-detections-response
+x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry @elastic/security-detections-response
+x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/user_roles @elastic/security-detections-response
+x-pack/solutions/security/test/security_solution_api_integration/test_suites/sources @elastic/security-detections-response
 /x-pack/test/common/utils/security_solution/detections_response @elastic/security-detections-response
 /x-pack/test/functional/es_archives/signals @elastic/security-detections-response
 /x-pack/test/functional/es_archives/rule_keyword_family @elastic/security-detections-response
@@ -2400,7 +2400,7 @@ x-pack/solutions/security/plugins/security_solution/public/asset_inventory @elas
 /x-pack/solutions/security/plugins/security_solution/public/siem_migrations @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations @elastic/security-threat-hunting
 
-x-pack/test/security_solution_api_integration/test_suites/siem_migrations @elastic/security-threat-hunting
+x-pack/solutions/security/test/security_solution_api_integration/test_suites/siem_migrations @elastic/security-threat-hunting
 
 /x-pack/test_serverless/functional/test_suites/security/ftr/discover @elastic/security-threat-hunting
 x-pack/test_serverless/functional/test_suites/security/config.context_awareness.ts @elastic/security-threat-hunting
@@ -2506,8 +2506,8 @@ x-pack/test_serverless/functional/test_suites/security/config.context_awareness.
 /x-pack/test/functional/es_archives/auditbeat/uncommon_processes @elastic/security-threat-hunting-investigations
 /x-pack/test/functional/es_archives/auditbeat/users @elastic/security-threat-hunting-investigations                             # soon transfer to @elastic/security-entity-analytics
 
-x-pack/test/security_solution_api_integration/test_suites/explore @elastic/security-threat-hunting-investigations               # soon partially transfer to @elastic/security-entity-analytics
-x-pack/test/security_solution_api_integration/test_suites/investigations @elastic/security-threat-hunting-investigations
+x-pack/solutions/security/test/security_solution_api_integration/test_suites/explore @elastic/security-threat-hunting-investigations               # soon partially transfer to @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_api_integration/test_suites/investigations @elastic/security-threat-hunting-investigations
 
 /x-pack/test_serverless/functional/test_suites/security/config.context_awareness.ts @elastic/security-threat-hunting-investigations
 
@@ -2565,7 +2565,7 @@ x-pack/test/security_solution_api_integration/test_suites/investigations @elasti
 /x-pack/solutions/security/plugins/security_solution/docs/rfcs/detection_response @elastic/security-detection-rule-management @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/rule_management @elastic/security-detection-rule-management
-/x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management @elastic/security-detection-rule-management
+/x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management @elastic/security-detection-rule-management
 
 /x-pack/solutions/security/plugins/security_solution/public/common/components/health_truncate_text @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/common/components/links_to_docs @elastic/security-detection-rule-management
@@ -2626,9 +2626,9 @@ x-pack/test/security_solution_api_integration/test_suites/investigations @elasti
 
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/detection_engine @elastic/security-detection-engine
 
-/x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine @elastic/security-detection-engine
-/x-pack/test/security_solution_api_integration/test_suites/detections_response/utils/rules/rule_gaps.ts @elastic/security-detection-engine
-/x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists @elastic/security-detection-engine
+/x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine @elastic/security-detection-engine
+/x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/utils/rules/rule_gaps.ts @elastic/security-detection-engine
+/x-pack/solutions/security/test/security_solution_api_integration/test_suites/lists_and_exception_lists @elastic/security-detection-engine
 /x-pack/test/functional/es_archives/asset_criticality @elastic/security-detection-engine
 
 ## Security Threat Intelligence - Under Security Platform
@@ -2652,7 +2652,7 @@ x-pack/solutions/security/plugins/security_solution/server/assistant/tools/defen
 /x-pack/solutions/security/plugins/security_solution/server/fleet_integration/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/scripts/endpoint/ @elastic/security-defend-workflows
 /x-pack/test/security_solution_endpoint/ @elastic/security-defend-workflows
-/x-pack/test/security_solution_api_integration/test_suites/edr_workflows/ @elastic/security-defend-workflows
+/x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/ @elastic/security-defend-workflows
 /x-pack/test_serverless/shared/lib/security/kibana_roles/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/sections/endpoint_management @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/pages/endpoint_management @elastic/security-defend-workflows
@@ -2677,7 +2677,7 @@ x-pack/solutions/security/plugins/security_solution/common/search_strategy/secur
 x-pack/solutions/security/plugins/security_solution/public/entity_analytics @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/risk_score @elastic/security-entity-analytics
-x-pack/test/security_solution_api_integration/test_suites/entity_analytics @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics @elastic/security-entity-analytics
 x-pack/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics @elastic/security-entity-analytics
@@ -2687,7 +2687,7 @@ x-pack/platform/plugins/shared/entity_manager/server/lib/entities @elastic/entit
 x-pack/platform/plugins/shared/entity_manager/server/lib/auth @elastic/entity-store
 
 ## Security Solution sub teams - GenAI
-x-pack/test/security_solution_api_integration/test_suites/genai @elastic/security-generative-ai
+x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai @elastic/security-generative-ai
 
 ## Security Solution sub teams - Automatic Import
 x-pack/platform/test/automatic_import_api_integration @elastic/security-scalability
