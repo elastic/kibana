@@ -7,3 +7,4 @@
 
 export { FeedbackFlyout } from './feedback_flyout';
 export { FeedbackButton } from './feedback_button';
+export { BenefitsCallout } from './benefits_callout';
