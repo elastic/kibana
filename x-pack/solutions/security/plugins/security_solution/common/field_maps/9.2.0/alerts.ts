@@ -6,7 +6,7 @@
  */
 
 import { alertsFieldMap8190 } from '../8.19.0';
-import { ACTOR_ENTITY_ID, TARGET_ENTITY_ID } from '../field_names';
+import { ACTOR_ENTITY_ID, RELATED_ENTITY, TARGET_ENTITY_ID } from '../field_names';
 
 export const alertsFieldMap920 = {
   ...alertsFieldMap8190,
@@ -16,6 +16,11 @@ export const alertsFieldMap920 = {
    * Right now, these fields are only relevant for security's alerts and audit logs. Therefore, we add them here.
    */
   [ACTOR_ENTITY_ID]: {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  [RELATED_ENTITY]: {
     type: 'keyword',
     array: true,
     required: false,

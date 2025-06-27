@@ -67,4 +67,5 @@ export const ALERT_RULE_TIMESTAMP_OVERRIDE = `${ALERT_RULE_NAMESPACE}.timestamp_
 export const ALERT_RULE_INDICES = `${ALERT_RULE_NAMESPACE}.indices` as const;
 
 export const ACTOR_ENTITY_ID = 'actor.entity.id' as const;
+export const RELATED_ENTITY = 'related.entity' as const;
 export const TARGET_ENTITY_ID = 'target.entity.id' as const;

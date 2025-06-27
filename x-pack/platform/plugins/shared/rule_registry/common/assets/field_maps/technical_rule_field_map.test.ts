@@ -391,11 +391,6 @@ it('matches snapshot', () => {
         "required": false,
         "type": "version",
       },
-      "related.entity": Object {
-        "array": true,
-        "required": false,
-        "type": "keyword",
-      },
       "tags": Object {
         "array": true,
         "required": false,

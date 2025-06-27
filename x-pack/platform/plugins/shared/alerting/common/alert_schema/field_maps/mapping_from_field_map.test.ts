@@ -368,13 +368,6 @@ describe('mappingFromFieldMap', () => {
             },
           },
         },
-        related: {
-          properties: {
-            entity: {
-              type: 'keyword',
-            },
-          },
-        },
         tags: {
           type: 'keyword',
         },
