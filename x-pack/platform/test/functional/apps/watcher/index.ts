@@ -4,6 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export { rawScheduledReportSchema as rawScheduledReportSchemaV1 } from './v1';
-export { rawScheduledReportSchema as rawScheduledReportSchemaV2 } from './v2';
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('watcher app', () => {
+    loadTestFile(require.resolve('./watcher_test'));
+  });
+}
