@@ -184,6 +184,7 @@ export class CiStatsReporter {
     const isElasticCommitter = email && email.endsWith('@elastic.co');
 
     const defaultMeta = {
+      isCI: process.env.CI === 'true' || process.env.BUILDKITE === 'true',
       kibanaUuid,
       isElasticCommitter,
       committerHash: email
