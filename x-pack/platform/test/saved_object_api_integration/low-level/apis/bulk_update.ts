@@ -429,5 +429,223 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
     });
+
+    describe('without object namespace override', () => {
+      describe('from the default space', () => {
+        it('handles single namespace objects in the default space', async () => {
+          const response = await supertest
+            .put(`${getUrlPrefix(defaultNamespace)}/api/saved_objects/_bulk_update`)
+            .send([{ ...singleDefaultNamespaceObject }])
+            .expect(200);
+
+          const savedObjects = JSON.parse(response.text);
+          expect(savedObjects).toEqual({
+            saved_objects: [
+              expect.objectContaining({
+                ...singleDefaultNamespaceObject,
+                namespaces: [defaultNamespace],
+              }),
+            ],
+          });
+
+          // Verify the raw document
+          const result = await es.get({
+            index: '.kibana',
+            id: `${singleDefaultNamespaceObject.type}:${singleDefaultNamespaceObject.id}`,
+          });
+
+          expect(result.found).toBeTruthy();
+          expect(result._source).toBeDefined();
+          expect(result._source).toEqual(
+            expect.objectContaining({
+              [singleDefaultNamespaceObject.type]: expect.objectContaining({
+                ...singleDefaultNamespaceObject.attributes,
+              }),
+            })
+          );
+          expect(result._source).not.toHaveProperty('namespace'); // there should be no namespace/namespaces
+          expect(result._source).not.toHaveProperty('namespaces');
+        });
+
+        it('handles multi namespace objects in the default space', async () => {
+          const response = await supertest
+            .put(`${getUrlPrefix(defaultNamespace)}/api/saved_objects/_bulk_update`)
+            .send([{ ...multiDefaultNamespaceObject }])
+            .expect(200);
+
+          const savedObjects = JSON.parse(response.text);
+          expect(savedObjects).toEqual({
+            saved_objects: [
+              expect.objectContaining({
+                ...multiDefaultNamespaceObject,
+                namespaces: [defaultNamespace],
+              }),
+            ],
+          });
+
+          // Verify the raw document
+          const result = await es.get({
+            index: '.kibana_analytics',
+            id: `${multiDefaultNamespaceObject.type}:${multiDefaultNamespaceObject.id}`,
+          });
+
+          expect(result.found).toBeTruthy();
+          expect(result._source).toBeDefined();
+          expect(result._source).toEqual(
+            expect.objectContaining({
+              [multiDefaultNamespaceObject.type]: expect.objectContaining({
+                ...multiDefaultNamespaceObject.attributes,
+              }),
+              namespaces: [defaultNamespace], // namespace has not changed
+            })
+          );
+          expect(result._source).not.toHaveProperty('namespace');
+        });
+
+        it('handles namespace agnostic objects', async () => {
+          const response = await supertest
+            .put(`${getUrlPrefix(defaultNamespace)}/api/saved_objects/_bulk_update`)
+            .send([{ ...namespaceAgnosticObject }])
+            .expect(200);
+
+          const savedObjects = JSON.parse(response.text);
+          expect(savedObjects).toEqual({
+            saved_objects: [expect.objectContaining(namespaceAgnosticObject)], // no namespace/namespaces
+          });
+
+          // Verify the raw document
+          const result = await es.get({
+            index: '.kibana',
+            id: `${namespaceAgnosticObject.type}:${namespaceAgnosticObject.id}`,
+          });
+
+          expect(result.found).toBeTruthy();
+          expect(result._source).toBeDefined();
+          expect(result._source).toEqual(
+            expect.objectContaining({
+              [namespaceAgnosticObject.type]: expect.objectContaining({
+                ...namespaceAgnosticObject.attributes,
+              }),
+            })
+          );
+          expect(result._source).not.toHaveProperty('namespace');
+          expect(result._source).not.toHaveProperty('namespaces');
+        });
+      });
+
+      describe('from a non-default space', () => {
+        const singleNamespaceObject = {
+          type: 'isolatedtype',
+          id: 'space2-isolatedtype-id',
+          attributes: {
+            title: 'Updated title attribute!',
+          },
+        };
+
+        const multiNamespaceObject = {
+          type: 'index-pattern',
+          id: 'space2-index-pattern-id',
+          attributes: {
+            title: 'Updated title attribute!',
+          },
+        };
+
+        const namespace = 'space_2';
+
+        it('handles single namespace objects in non-default space', async () => {
+          const response = await supertest
+            .put(`${getUrlPrefix(namespace)}/api/saved_objects/_bulk_update`)
+            .send([{ ...singleNamespaceObject }])
+            .expect(200);
+
+          const savedObjects = JSON.parse(response.text);
+          expect(savedObjects).toEqual({
+            saved_objects: [
+              expect.objectContaining({ ...singleNamespaceObject, namespaces: [namespace] }),
+            ],
+          });
+
+          // Verify the raw document
+          const result = await es.get({
+            index: '.kibana',
+            id: `${namespace}:${singleNamespaceObject.type}:${singleNamespaceObject.id}`,
+          });
+
+          expect(result.found).toBeTruthy();
+          expect(result._source).toBeDefined();
+          expect(result._source).toEqual(
+            expect.objectContaining({
+              [singleNamespaceObject.type]: expect.objectContaining({
+                ...singleNamespaceObject.attributes,
+              }),
+              namespace, // namespace has not changed
+            })
+          );
+          expect(result._source).not.toHaveProperty('namespaces');
+        });
+
+        it('handles multi namespace objects in non-default space', async () => {
+          const response = await supertest
+            .put(`${getUrlPrefix(namespace)}/api/saved_objects/_bulk_update`)
+            .send([{ ...multiNamespaceObject }])
+            .expect(200);
+
+          const savedObjects = JSON.parse(response.text);
+          expect(savedObjects).toEqual({
+            saved_objects: [
+              expect.objectContaining({ ...multiNamespaceObject, namespaces: [namespace] }),
+            ],
+          });
+
+          // Verify the raw document
+          const result = await es.get({
+            index: '.kibana_analytics',
+            id: `${multiNamespaceObject.type}:${multiNamespaceObject.id}`,
+          });
+
+          expect(result.found).toBeTruthy();
+          expect(result._source).toBeDefined();
+          expect(result._source).toEqual(
+            expect.objectContaining({
+              [multiNamespaceObject.type]: expect.objectContaining({
+                ...multiNamespaceObject.attributes,
+              }),
+              namespaces: [namespace], // namespace has not changed
+            })
+          );
+          expect(result._source).not.toHaveProperty('namespace');
+        });
+
+        it('handles namespace agnostic objects', async () => {
+          const response = await supertest
+            .put(`${getUrlPrefix(namespace)}/api/saved_objects/_bulk_update`)
+            .send([{ ...namespaceAgnosticObject }])
+            .expect(200);
+
+          const savedObjects = JSON.parse(response.text);
+          expect(savedObjects).toEqual({
+            saved_objects: [expect.objectContaining(namespaceAgnosticObject)], // no namespace/namespaces
+          });
+
+          // Verify the raw document
+          const result = await es.get({
+            index: '.kibana',
+            id: `${namespaceAgnosticObject.type}:${namespaceAgnosticObject.id}`,
+          });
+
+          expect(result.found).toBeTruthy();
+          expect(result._source).toBeDefined();
+          expect(result._source).toEqual(
+            expect.objectContaining({
+              [namespaceAgnosticObject.type]: expect.objectContaining({
+                ...namespaceAgnosticObject.attributes,
+              }),
+            })
+          );
+          expect(result._source).not.toHaveProperty('namespace');
+          expect(result._source).not.toHaveProperty('namespaces');
+        });
+      });
+    });
   });
 }
