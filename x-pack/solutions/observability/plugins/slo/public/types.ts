@@ -74,7 +74,7 @@ export interface SLOPublicPluginsSetup {
 
 export interface SLOPublicPluginsStart {
   aiops: AiopsPluginStart;
-  cases: CasesPublicStart;
+  cases?: CasesPublicStart;
   charts: ChartsPluginStart;
   cloud?: CloudStart;
   dashboard: DashboardStart;

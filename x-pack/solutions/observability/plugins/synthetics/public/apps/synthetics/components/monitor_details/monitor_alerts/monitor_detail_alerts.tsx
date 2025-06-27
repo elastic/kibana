@@ -9,7 +9,7 @@ import React from 'react';
 import { AlertConsumers, SYNTHETICS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { useParams } from 'react-router-dom';
 import { ObservabilityAlertsTable, AlertActions } from '@kbn/observability-plugin/public';
-import { useKibana } from '@kbn/observability-plugin/public/utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useRefreshedRangeFromUrl } from '../../../hooks';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
