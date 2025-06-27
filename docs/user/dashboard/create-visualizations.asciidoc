@@ -27,7 +27,10 @@ Use one of the editors to create visualizations of your data. Each editor offers
 | Use Vega to create new types of visualizations
 
 .3+| Annotations and navigation
-| <<add-text,Text>>
+| <<collapsible-sections, Collapsible sections>>
+| Organize your dashboard into sections that can be collapsed and save loading time
+
+| <<add-text, Markdown text>>
 | Add context to your dashboard with markdown-based *text*
 
 | <<add-image,Image>>
