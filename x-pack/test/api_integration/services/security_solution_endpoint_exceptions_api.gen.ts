@@ -53,7 +53,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .send(props.body as object);
     },
     /**
-     * Delete an Elastic Endpoint exception list item by using the `id` or `item_id` field.
+     * Delete an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
      */
     deleteEndpointListItem(props: DeleteEndpointListItemProps, kibanaSpace: string = 'default') {
       return supertest
@@ -75,7 +75,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .query(props.query);
     },
     /**
-     * Get the details of an Elastic Endpoint exception list item by using the `id` or `item_id` field.
+     * Get the details of an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
      */
     readEndpointListItem(props: ReadEndpointListItemProps, kibanaSpace: string = 'default') {
       return supertest
@@ -86,7 +86,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .query(props.query);
     },
     /**
-     * Update an Elastic Endpoint exception list item by using the `id` or `item_id` field.
+     * Update an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
      */
     updateEndpointListItem(props: UpdateEndpointListItemProps, kibanaSpace: string = 'default') {
       return supertest
