@@ -6,6 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
+import { aiAssistantAnonymizationRules } from '@kbn/inference-common';
 import {
   LlmProxy,
   createLlmProxy,
@@ -40,7 +41,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       // configure anonymization rules for these tests
       await setAdvancedSettings(supertest, {
-        'observability:aiAssistantAnonymizationRules': JSON.stringify(
+        [aiAssistantAnonymizationRules]: JSON.stringify(
           [
             {
               entityClass: 'EMAIL',
@@ -66,7 +67,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await observabilityAIAssistantAPIClient.deleteActionConnector({ actionId: connectorId });
       await clearConversations(es);
       await setAdvancedSettings(supertest, {
-        'observability:aiAssistantAnonymizationRules': [],
+        [aiAssistantAnonymizationRules]: [],
       });
     });
 

@@ -160,3 +160,5 @@ export {
 } from './src/prompt';
 
 export { type BoundOptions, type UnboundOptions, bindApi } from './src/bind';
+
+export { aiAssistantAnonymizationRules } from './src/ui_settings/settings_keys';

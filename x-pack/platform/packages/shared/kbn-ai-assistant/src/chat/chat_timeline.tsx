@@ -17,9 +17,9 @@ import {
   type Message,
   type ObservabilityAIAssistantChatService,
   type TelemetryEventTypeWithPayload,
-  aiAssistantAnonymizationRules,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { AnonymizationRule } from '@kbn/observability-ai-assistant-plugin/common';
+import { aiAssistantAnonymizationRules } from '@kbn/inference-common';
+import { AnonymizationRule } from '@kbn/inference-common';
 import { ChatItem } from './chat_item';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';

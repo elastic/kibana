@@ -6,8 +6,6 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { aiAssistantAnonymizationRules } from '@kbn/observability-ai-assistant-plugin/common';
-import { uiSettings } from '../common/ui_settings';
 
 export type ObservabilityPluginSetup = ReturnType<AiAssistantManagementPlugin['setup']>;
 
@@ -21,8 +19,6 @@ export class AiAssistantManagementPlugin implements Plugin<ObservabilityPluginSe
   constructor() {}
 
   public setup(core: CoreSetup<PluginStart>, plugins: PluginSetup) {
-    const { [aiAssistantAnonymizationRules]: anonymizationRules, ...restSettings } = uiSettings;
-    core.uiSettings.register(restSettings);
     return {};
   }
 

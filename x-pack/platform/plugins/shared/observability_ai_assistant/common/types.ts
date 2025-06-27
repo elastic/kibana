@@ -207,23 +207,3 @@ export enum ConversationAccess {
   SHARED = 'shared',
   PRIVATE = 'private',
 }
-
-export interface InferenceChunk {
-  chunkText: string;
-  charStartOffset: number;
-}
-
-export interface NerAnonymizationRule {
-  type: 'NER';
-  enabled: boolean;
-  modelId?: string;
-}
-
-export interface RegexAnonymizationRule {
-  type: 'RegExp';
-  entityClass: string;
-  pattern: string;
-  enabled: boolean;
-}
-
-export type AnonymizationRule = NerAnonymizationRule | RegexAnonymizationRule;

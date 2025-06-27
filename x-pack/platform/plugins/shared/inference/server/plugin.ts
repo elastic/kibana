@@ -7,9 +7,13 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { BoundInferenceClient, InferenceClient } from '@kbn/inference-common';
+import {
+  BoundInferenceClient,
+  InferenceClient,
+  AnonymizationRule,
+  aiAssistantAnonymizationRules,
+} from '@kbn/inference-common';
 import { initLangfuseProcessor, initPhoenixProcessor } from '@kbn/inference-tracing';
-import { AnonymizationRule } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { createClient as createInferenceClient, createChatModel } from './inference_client';
 import { registerRoutes } from './routes';
@@ -22,6 +26,7 @@ import {
   InferenceSetupDependencies,
   InferenceStartDependencies,
 } from './types';
+import { uiSettings } from '../common/ui_settings';
 
 export class InferencePlugin
   implements
@@ -60,6 +65,8 @@ export class InferencePlugin
     coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>,
     pluginsSetup: InferenceSetupDependencies
   ): InferenceServerSetup {
+    const { [aiAssistantAnonymizationRules]: anonymizationRules, ...restSettings } = uiSettings;
+    coreSetup.uiSettings.register(restSettings);
     const router = coreSetup.http.createRouter();
 
     registerRoutes({
@@ -78,9 +85,7 @@ export class InferencePlugin
           const soClient = core.savedObjects.getScopedClient(request);
           const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
           try {
-            const settingsStr = await uiSettingsClient.get<string>(
-              'observability:aiAssistantAnonymizationRules'
-            );
+            const settingsStr = await uiSettingsClient.get<string>(aiAssistantAnonymizationRules);
             return JSON.parse(settingsStr ?? '[]') as AnonymizationRule[];
           } catch {
             return [] as AnonymizationRule[];
