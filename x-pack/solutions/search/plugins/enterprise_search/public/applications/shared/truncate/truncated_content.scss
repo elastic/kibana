@@ -1,3 +1,6 @@
+@use 'sass:math';
+@use 'eui/eui_variables' as eui;
+
 .truncated-content {
   position: relative;
   z-index: 2;
@@ -10,15 +13,15 @@
     transform: translateY(-50%);
     left: -3px;
     margin-top: -1px;
-    background: $euiColorEmptyShade;
+    background: eui.$euiColorEmptyShade;
     border-radius: 2px;
     width: calc(100% + 4px);
     height: calc(100% + 4px);
     padding: 0 2px;
     display: none;
     align-items: center;
-    box-shadow: 0 1px 3px $euiColorInk;
-    border: 1px solid $euiBorderColor;
+    box-shadow: 0 1px 3px eui.$euiColorInk;
+    border: 1px solid eui.$euiBorderColor;
     width: auto;
     white-space: nowrap;
 

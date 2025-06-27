@@ -1,11 +1,16 @@
+@use 'sass:math';
+@use 'eui/eui_mixins' as mixins;
+@use 'eui/eui_variables' as eui;
+
 .conHistory {
-  @include euiBottomShadow;
-  padding: $euiSizeM;
+  @include mixins.euiBottomShadow;
+  padding: eui.$euiSizeM;
 }
 
 .conHistory__body {
   display: flex;
-  height: $euiSizeXL * 10;
+  height: math.mul(eui.$euiSizeXL, 10);
+
   > ul {
     margin-bottom: 0;
   }

@@ -1,3 +1,6 @@
+@use 'sass:math';
+@use 'eui/eui_variables' as eui;
+
 .unifiedFieldListSidebar {
   overflow: hidden;
   margin: 0 !important;
@@ -7,7 +10,7 @@
 
   &--collapsed {
     width: auto;
-    padding: $euiSizeS $euiSizeS 0;
+    padding: eui.$euiSizeS eui.$euiSizeS 0;
   }
 
   &.unifiedFieldListSidebar--fullWidth {
@@ -15,13 +18,13 @@
   }
 
   &:not(.unifiedFieldListSidebar--fullWidth) {
-    width: $euiSize * 19;
+    width: math.mul(eui.$euiSize, 19);
   }
 
   @include euiBreakpoint('xs', 's') {
     width: 100%;
-    padding: $euiSize;
-    background-color: $euiPageBackgroundColor;
+    padding: eui.$euiSize;
+    background-color: eui.$euiPageBackgroundColor;
   }
 }
 
@@ -30,11 +33,14 @@
 // * the dragged element has a padding to the left and right,
 
 .unifiedFieldListSidebar__list {
-  padding: $euiSizeS $euiSizeXS 0 $euiSizeXS;
+  padding: eui.$euiSizeS eui.$euiSizeXS 0 eui.$euiSizeXS;
 
-  > *, .euiAccordion__triggerWrapper, .euiAccordion__children, .unifiedFieldListItemButton {
-    padding-left: $euiSizeXS;
-    padding-right: $euiSizeXS;
+  >*,
+  .euiAccordion__triggerWrapper,
+  .euiAccordion__children,
+  .unifiedFieldListItemButton {
+    padding-left: eui.$euiSizeXS;
+    padding-right: eui.$euiSizeXS;
   }
 
   .unifiedFieldListSidebar__accordionContainer {
@@ -43,8 +49,12 @@
   }
 
   @include euiBreakpoint('xs', 's') {
-    padding: $euiSizeS 0 0 0;
-    > *, .euiAccordion__triggerWrapper, .unifiedFieldListSidebar__accordionContainer, .unifiedFieldListItemButton {
+    padding: eui.$euiSizeS 0 0 0;
+
+    > *,
+    .euiAccordion__triggerWrapper,
+    .unifiedFieldListSidebar__accordionContainer,
+    .unifiedFieldListItemButton {
       padding-left: 0;
       padding-right: 0;
     }
@@ -57,10 +67,10 @@
 
 .unifiedFieldListSidebar__mobile {
   width: 100%;
-  padding: $euiSizeS $euiSizeS 0;
+  padding: eui.$euiSizeS eui.$euiSizeS 0;
 
   .unifiedFieldListSidebar__mobileBadge {
-    margin-left: $euiSizeS;
+    margin-left: eui.$euiSizeS;
     vertical-align: text-bottom;
   }
 }
@@ -71,12 +81,12 @@
 
 .unifiedFieldListSidebar .unifiedFieldListItemButton {
   &.kbnFieldButton {
-    margin-bottom: calc($euiSizeXS / 2);
+    margin-bottom: calc(eui.$euiSizeXS / 2);
     background: none;
     box-shadow: none;
   }
 }
 
 .unifiedFieldListItemButton__dragging {
-  background: $euiColorEmptyShade;
+  background: eui.$euiColorEmptyShade;
 }

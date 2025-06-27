@@ -1,7 +1,7 @@
 // Main layout
-@import './default';
-@import './sidebar';
+@use './default';
+@use './sidebar';
 
 // Components
-@import './agg';
-@import './agg_params';
+@use './agg';
+@use './agg_params';

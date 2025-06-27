@@ -1,7 +1,7 @@
-@import '../shared';
+@use '../shared' as shared;
 
 .pipelineProcessorsEditor__itemTooltip {
   position: fixed;
   pointer-events: none;
-  z-index: $processorItemMouseTooltipZIndex;
+  z-index: shared.$processorItemMouseTooltipZIndex;
 }

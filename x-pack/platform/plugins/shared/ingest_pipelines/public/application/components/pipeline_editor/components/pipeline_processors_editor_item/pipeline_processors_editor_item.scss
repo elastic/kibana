@@ -1,12 +1,12 @@
-@import '../shared';
+@use '../shared' as shared;
 
 .pipelineProcessorsEditor__item {
-  transition: border-color $euiAnimSpeedExtraSlow $euiAnimSlightResistance;
+  transition: border-color shared.$euiAnimSpeedExtraSlow shared.$euiAnimSlightResistance;
   min-height: 50px;
 
   &--selected {
-    border: $euiBorderThin;
-    border-color: $euiColorPrimary;
+    border: shared.$euiBorderThin;
+    border-color: shared.$euiColorPrimary;
   }
 
   &--displayNone {
@@ -18,7 +18,7 @@
   }
 
   &__processorTypeLabel {
-    line-height: $euiButtonHeightSmall;
+    line-height: shared.$euiButtonHeightSmall;
   }
 
   &__textContainer {
@@ -26,10 +26,11 @@
     border-bottom: 1px dashed transparent;
 
     &--notEditing {
-      border-bottom: $euiBorderEditable;
-      border-width: $euiBorderWidthThin;
+      border-bottom: shared.$euiBorderEditable;
+      border-width: shared.$euiBorderWidthThin;
+
       &:hover {
-        border-color: $euiColorMediumShade;
+        border-color: shared.$euiColorMediumShade;
       }
     }
   }
@@ -41,7 +42,7 @@
   }
 
   &__textInput {
-    height: $euiSizeL;
+    height: shared.$euiSizeL;
     min-width: 200px;
   }
 
@@ -49,6 +50,7 @@
     &:hover {
       transform: none !important;
     }
+
     &--cancel {
       // Ensure that the cancel button is above the drop zones
       z-index: $cancelButtonZIndex;
@@ -72,8 +74,10 @@
   &__controlsFlexItem {
     min-width: 0;
   }
+
   &__descriptionContainer {
     min-width: 0;
+
     &--displayNone {
       display: none;
     }

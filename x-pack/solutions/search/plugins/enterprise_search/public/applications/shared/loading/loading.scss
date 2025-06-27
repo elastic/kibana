@@ -1,5 +1,8 @@
+@use 'sass:math';
+@use 'eui/eui_variables' as eui;
+
 .enterpriseSearchLoading {
-  z-index: $euiZLevel2;
+  z-index: eui.$euiZLevel2;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -7,11 +10,11 @@
 }
 
 .enterpriseSearchLoadingOverlay {
-  z-index: $euiZLevel1;
+  z-index: eui.$euiZLevel1;
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
-  background-color: rgba($euiColorEmptyShade, .75);
+  background-color: rgba(eui.$euiColorEmptyShade, .75);
 }

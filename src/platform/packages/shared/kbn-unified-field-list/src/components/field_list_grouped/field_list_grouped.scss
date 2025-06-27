@@ -1,21 +1,26 @@
+@use 'sass:math';
+@use 'eui/eui_variables' as eui;
+@use 'eui/eui_mixins' as mixins;
+
 /**
  * 1. Don't cut off the shadow of the field items
  */
 
 .unifiedFieldList__fieldListGrouped {
-  margin-left: -$euiSize; /* 1 */
+  margin-left: math.negate(eui.$euiSize);
+  /* 1 */
   position: relative;
   flex-grow: 1;
   overflow: auto;
 
-  @include euiOverflowShadow;
-  @include euiScrollBar;
+  @include mixins.euiOverflowShadow;
+  @include mixins.euiScrollBar;
 }
 
 .unifiedFieldList__fieldListGrouped__container {
-  padding-top: $euiSizeS;
+  padding-top: eui.$euiSizeS;
   position: absolute;
   top: 0;
-  left: $euiSize; /* 1 */
-  right: $euiSizeXS; /* 1 */
+  left: eui.$euiSize; /* 1 */
+  right: eui.$euiSizeXS; /* 1 */
 }

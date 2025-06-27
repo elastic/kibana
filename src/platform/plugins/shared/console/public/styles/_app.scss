@@ -1,5 +1,8 @@
 // TODO: Move all of the styles here (should be modularised by, e.g., CSS-in-JS or CSS modules).
 
+@use 'sass:math';
+@use 'eui/eui_variables' as eui;
+
 #consoleRoot {
   display: flex;
   flex: 1 1 auto;
@@ -9,7 +12,7 @@
 }
 
 .consoleContainer {
-  padding: $euiSizeM;
+  padding: eui.$euiSizeM;
   gap: 0;
 
   &--embeddable {
@@ -19,7 +22,7 @@
 }
 
 .consoleTabs {
-  padding: 0 $euiSizeS;
+  padding: 0 eui.$euiSizeS;
 }
 
 .consoleEditorPanel {
@@ -40,7 +43,7 @@
 
   &__spinner {
     width: 100%;
-    background-color: $euiFormBackgroundColor;
+    background-color: eui.$euiFormBackgroundColor;
   }
 }
 
@@ -49,7 +52,8 @@
   padding: 0;
 }
 
-.conApp__output, .conApp_example {
+.conApp__output,
+.conApp_example {
   height: 100%;
   display: flex;
   flex: 1 1 1px;
@@ -63,39 +67,39 @@
 
 .conApp__actionsPanel {
   button {
-    height: $euiSize * 1.1;
-    width: $euiSize * 1.1;
+    height: eui.$euiSize * 1.1;
+    width: eui.$euiSize * 1.1;
   }
 
   position: absolute;
-  z-index: $euiZLevel1;
+  z-index: eui.$euiZLevel1;
   top: 0;
   // Adjust for possible scrollbars
-  right: $euiSize;
-  height: $euiSizeL;
-  background-color: $euiFormBackgroundColor;
-  border-radius: $euiSizeXS;
-  box-shadow: 0 0 $euiSizeXS * .5 $euiSizeXS * .5 $euiColorLightShade;
-  padding-top: $euiSize * .1;
+  right: eui.$euiSize;
+  height: eui.$euiSizeL;
+  background-color: eui.$euiFormBackgroundColor;
+  border-radius: eui.$euiSizeXS;
+  box-shadow: 0 0 eui.$euiSizeXS * .5 eui.$euiSizeXS * .5 eui.$euiColorLightShade;
+  padding-top: eui.$euiSize * .1;
   overflow-y: auto;
 }
 
 .conApp__editorActions {
   @extend .conApp__actionsPanel;
   // For IE11
-  min-width: $euiSizeL * 2;
+  min-width: eui.$euiSizeL * 2;
 }
 
 .conApp__outputActions {
   @extend .conApp__actionsPanel;
   // For IE11
-  min-width: $euiSizeL;
+  min-width: eui.$euiSizeL;
 }
 
 .conApp__resizerButton {
   // Give the aria selection border priority when the divider is selected on IE11 and Chrome
-  z-index: $euiZLevel1;
-  background-color: $euiColorLightestShade;
+  z-index: eui.$euiZLevel1;
+  background-color: eui.$euiColorLightestShade;
   // The margin ensures that the resizer doesn't cover the top border of the selected request
   // in the output panel, when in vertical layout
   margin-bottom: 1px;
@@ -105,7 +109,7 @@
 
 .conApp__requestProgressBarContainer {
   position: relative;
-  z-index: $euiZLevel2;
+  z-index: eui.$euiZLevel2;
 }
 
 /*
@@ -113,7 +117,8 @@
  */
 .console__monaco_editor__selectedRequests {
   position: relative;
-  padding: $euiSizeXS; /* Adds space between border and text */
+  padding: eui.$euiSizeXS;
+  /* Adds space between border and text */
 }
 
 /* Adding a pseudo-element to create padding between the border and the line in the Monaco editor */
@@ -121,26 +126,27 @@
   content: '';
   position: absolute;
   top: 0;
-  bottom: -$euiSize * .1;
-  left: -$euiSize * .5;
+  bottom: -eui.$euiSize * .1;
+  left: -eui.$euiSize * .5;
   right: 0;
-  background: transparentize($euiColorPrimary, .95);
-  border: $euiBorderThin;
-  border-color: $euiColorPrimary;
-  pointer-events: none; /* Ensures the pseudo-element doesn't block interactions */
+  background: transparentize(eui.$euiColorPrimary, .95);
+  border: eui.$euiBorderThin;
+  border-color: eui.$euiColorPrimary;
+  pointer-events: none;
+  /* Ensures the pseudo-element doesn't block interactions */
 }
 
 /*
  * The styling for the multiple-response status code decorations
  */
 %monaco__status_badge {
-  font-family: $euiFontFamily;
-  font-size: $euiFontSizeS;
-  font-weight: $euiFontWeightMedium;
-  line-height: $euiLineHeight;
-  padding: calc($euiSizeXS / 2) $euiSizeXS;
+  font-family: eui.$euiFontFamily;
+  font-size: eui.$euiFontSizeS;
+  font-weight: eui.$euiFontWeightMedium;
+  line-height: eui.$euiLineHeight;
+  padding: calc(eui.$euiSizeXS / 2) eui.$euiSizeXS;
   display: inline-block;
-  border-radius: calc($euiBorderRadius / 2);
+  border-radius: calc(eui.$euiBorderRadius / 2);
   white-space: nowrap;
   vertical-align: top;
   cursor: default;
@@ -148,43 +154,43 @@
 }
 
 .monaco__status_code_line--primary {
-  background-color: transparentize($euiColorPrimary, .9);
+  background-color: transparentize(eui.$euiColorPrimary, .9);
 }
 
 .monaco__status_code_line_number--primary {
-  background-color: transparentize($euiColorPrimary, .5);
+  background-color: transparentize(eui.$euiColorPrimary, .5);
 }
 
 .monaco__status_code_line--success {
-  background-color: transparentize($euiColorSuccess, .9);
+  background-color: transparentize(eui.$euiColorSuccess, .9);
 }
 
 .monaco__status_code_line_number--success {
-  background-color: transparentize($euiColorSuccess, .5);
+  background-color: transparentize(eui.$euiColorSuccess, .5);
 }
 
 .monaco__status_code_line--default {
-  background-color: transparentize($euiColorLightShade, .9);
+  background-color: transparentize(eui.$euiColorLightShade, .9);
 }
 
 .monaco__status_code_line_number--default {
-  background-color: transparentize($euiColorLightShade, .5);
+  background-color: transparentize(eui.$euiColorLightShade, .5);
 }
 
 .monaco__status_code_line--warning {
-  background-color: transparentize($euiColorWarning, .9);
+  background-color: transparentize(eui.$euiColorWarning, .9);
 }
 
 .monaco__status_code_line_number--warning {
-  background-color: transparentize($euiColorWarning, .5);
+  background-color: transparentize(eui.$euiColorWarning, .5);
 }
 
 .monaco__status_code_line--danger {
-  background-color: transparentize($euiColorDanger, .9);
+  background-color: transparentize(eui.$euiColorDanger, .9);
 }
 
 .monaco__status_code_line_number--danger {
-  background-color: transparentize($euiColorDanger, .5);
+  background-color: transparentize(eui.$euiColorDanger, .5);
 }
 
 /*
@@ -192,7 +198,7 @@
  */
 .kibanaCodeEditor .monaco-editor .suggest-widget {
   // the value needs to be above the z-index of the resizer bar
-  z-index: $euiZLevel1 + 2;
+  z-index: eui.$euiZLevel1 + 2;
 }
 
 // We need to hide the file input element to prevent the default browser styles

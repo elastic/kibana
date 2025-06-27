@@ -1,5 +1,7 @@
+@use '@elastic/charts/dist/theme';
+@use 'eui/eui_mixins' as mixins;
+
 // Charts themes available app-wide
-@import '@elastic/charts/dist/theme';
 
 // We apply brute force focus states to anything not coming from Eui
 // which has focus states designed at the component level.
@@ -11,7 +13,7 @@
     // The focus policy causes double focus rings to appear on EuiSelectableList
     // since the focusable element does not contain a class starting with "eui".
     &:not(.euiSelectableList__list > ul) {
-      @include euiFocusRing;
+      @include mixins.euiFocusRing;
     }
   }
 }

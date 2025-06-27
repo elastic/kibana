@@ -1,6 +1,11 @@
+@use 'sass:math';
+@use 'eui/eui_variables' as eui;
+@use 'eui/eui_mixins' as mixins;
+
 .enterpriseSearchDocumentsHeader {
-  @include euiBreakpoint('xs','s', 'm') {
-    padding-right: $euiSizeL;
+  @include mixins.euiBreakpoint('xs', 's', 'm') {
+    padding-right: eui.$euiSizeL;
   }
-  padding-right: 2 * $euiSizeXXL;
+
+  padding-right: math.mul(2, eui.$euiSizeXXL);
 }

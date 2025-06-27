@@ -1,22 +1,25 @@
+@use 'sass:math';
+@use 'eui/eui_variables' as eui;
+
 .reorderableTable {
 
   &Header {
-    > .euiFlexGroup {
-      margin: $euiSizeXS 0;
+    >.euiFlexGroup {
+      margin: eui.$euiSizeXS 0;
     }
   }
 
   &NoItems {
-    border-top: $euiBorderThin;
-    background-color: $euiColorEmptyShade;
+    border-top: eui.$euiBorderThin;
+    background-color: eui.$euiColorEmptyShade;
   }
 
   &Row {
-    border-top: $euiBorderThin;
-    background-color: $euiColorEmptyShade;
+    border-top: eui.$euiBorderThin;
+    background-color: eui.$euiColorEmptyShade;
 
-    > .euiFlexGroup > .euiFlexItem {
-      margin: $euiSizeM 0;
+    >.euiFlexGroup > .euiFlexItem {
+      margin: eui.$euiSizeM 0;
     }
   }
 
@@ -25,6 +28,6 @@
   }
 
   .unorderableRows .reorderableTableRow {
-    background-color: $euiColorLightestShade;
+    background-color: eui.$euiColorLightestShade;
   }
 }

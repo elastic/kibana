@@ -1,10 +1,14 @@
+@use 'sass:math';
+@use 'eui/eui_variables' as eui;
+
 .appSearchAccordion--bordered {
-  border: $euiBorderThin;
-  border-radius: $euiBorderRadius;
-  padding: $euiSizeM;
+  border: eui.$euiBorderThin;
+  border-radius: eui.$euiBorderRadius;
+  padding: eui.$euiSizeM;
 }
 
-.appSearchAccordion--bordered, .appSearchAccordion {
+.appSearchAccordion--bordered,
+.appSearchAccordion {
   .euiBasicTable {
     .euiTableRow > .euiTableRowCell {
       border-bottom: none;

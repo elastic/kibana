@@ -7,8 +7,8 @@
 //   transform__legend--small
 //   transform__legend-isLoading
 
-@import 'sections/create_transform/components/aggregation_list/index';
-@import 'sections/create_transform/components/group_by_list/index';
-@import 'sections/create_transform/components/wizard/index';
-@import 'sections/transform_management/components/create_transform_button/index';
-@import 'sections/transform_management/components/stats_bar/index';
+@use 'sections/create_transform/components/aggregation_list/index';
+@use 'sections/create_transform/components/group_by_list/index';
+@use 'sections/create_transform/components/wizard/index';
+@use 'sections/transform_management/components/create_transform_button/index';
+@use 'sections/transform_management/components/stats_bar/index';

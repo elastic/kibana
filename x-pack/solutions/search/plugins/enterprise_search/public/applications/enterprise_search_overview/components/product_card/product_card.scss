@@ -1,5 +1,7 @@
+@use 'sass:math';
+
 .productCard {
   & &-features {
-    padding-top: 1.5rem;
+    padding-top: math.mul(1.5, 1rem);
   }
 }

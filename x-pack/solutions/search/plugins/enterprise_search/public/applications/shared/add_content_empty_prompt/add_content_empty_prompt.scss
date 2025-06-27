@@ -1,5 +1,8 @@
+@use 'sass:math';
+@use 'eui/eui_mixins' as mixins;
+
 .addContentEmptyPrompt {
-  @include euiBreakpoint('xs','s') {
+  @include mixins.euiBreakpoint('xs', 's') {
     flex-direction: column-reverse;
   }
 }

@@ -1,6 +1,10 @@
+@use 'sass:math';
+@use 'eui/eui_variables' as eui;
+
 .chooseEmbeddingModelSelectedBorder::before {
-  border: 1px solid $euiColorPrimary;
+  border: 1px solid eui.$euiColorPrimary;
 }
+
 .chooseEmbeddingModelBorder::before {
-  border: 1px solid $euiColorLightShade;
+  border: 1px solid eui.$euiColorLightShade;
 }

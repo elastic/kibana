@@ -1,10 +1,12 @@
-@import './drag_drop_mixins';
+@use 'sass:math';
+@use './drag_drop_mixins';
+@use 'eui/eui_mixins' as mixins;
 
 // Draggable item
 .domDraggable {
   cursor: grab;
-  @include mixinDomDragDrop;
-  @include mixinDomDraggableHover;
+  @include mixins.mixinDomDragDrop;
+  @include mixins.mixinDomDraggableHover;
 
   // Include a possible nested button like when using FieldButton
   & .kbnFieldButton__button,
@@ -13,7 +15,7 @@
   }
 
   &:focus {
-    @include euiFocusRing;
+    @include mixins.euiFocusRing;
   }
 }
 
@@ -40,6 +42,7 @@
   }
 }
 
-.domDraggable_active--move, .domDraggable_dragover_keyboard--move {
+.domDraggable_active--move,
+.domDraggable_dragover_keyboard--move {
   opacity: 0;
 }

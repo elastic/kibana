@@ -1,3 +1,5 @@
+@use 'eui/eui_variables' as eui;
+
 .unifiedDataTable {
   width: 100%;
   max-width: 100%;
@@ -6,28 +8,33 @@
 }
 
 .unifiedDataTable__cellValue {
-  font-family: $euiCodeFontFamily;
+  font-family: eui.$euiCodeFontFamily;
 }
 
 .unifiedDataTable__cell--expanded {
-  background-color: $euiColorHighlight;
+  background-color: eui.$euiColorHighlight;
 }
 
 .unifiedDataTable__cell--selected {
-  background-color: $euiColorHighlight;
+  background-color: eui.$euiColorHighlight;
 }
 
 .unifiedDataTable__cellPopover {
+
   // Fixes https://github.com/elastic/kibana/issues/145216 in Chrome
   .lines-content.monaco-editor-background {
     overflow: unset !important;
     contain: unset !important;
   }
+
+  // Adding standard property for compatibility
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
 }
 
 .unifiedDataTable__cellPopoverValue {
-  font-family: $euiCodeFontFamily;
-  font-size: $euiFontSizeS;
+  font-family: eui.$euiCodeFontFamily;
+  font-size: eui.$euiFontSizeS;
 }
 
 .unifiedDataTable__inner {
@@ -45,7 +52,7 @@
   }
 
   .euiDataGrid--headerUnderline .euiDataGridHeader {
-    border-bottom: $euiBorderThin;
+    border-bottom: eui.$euiBorderThin;
   }
 
   .euiDataGridRowCell--controlColumn .euiDataGridRowCell__content,
@@ -58,12 +65,13 @@
     border-left: 0;
     border-right: 0;
   }
+
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='additionalRowControl_menuControl'] .euiDataGridRowCell__content {
     padding-bottom: 0;
   }
 
   .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id='select'] {
-    padding-left: $euiSizeXS;
+    padding-left: eui.$euiSizeXS;
     padding-right: 0;
   }
 
@@ -73,13 +81,14 @@
     border-left: 0;
     border-right: 0;
   }
+
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='colorIndicator'] .euiDataGridRowCell__content {
     height: 100%;
     border-bottom: 0;
   }
 
   .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover {
-    background-color: $euiColorLightestShade; // we keep using a deprecated shade until a proper token is available
+    background-color: eui.$euiColorLightestShade; // we keep using a deprecated shade until a proper token is available
   }
 
   .euiDataGrid__scrollOverlay .euiDataGrid__scrollBarOverlayRight {
@@ -99,11 +108,11 @@
   align-items: start;
 
   .euiDataGridHeaderCell__draggableIcon {
-    padding-block: calc($euiSizeXS / 2); // to align with a token height
+    padding-block: calc(eui.$euiSizeXS / 2); // to align with a token height
   }
 
   .euiDataGridHeaderCell__button {
-    margin-block: -$euiSizeXS; // to override Eui value for Density "Expanded"
+    margin-block: -eui.$euiSizeXS; // to override Eui value for Density "Expanded"
   }
 }
 
@@ -145,6 +154,7 @@
 }
 
 .unifiedDataTable__descriptionList {
+
   // force the content truncation when "Single line" row height setting is active
   .euiDataGridRowCell__content--defaultHeight & {
     -webkit-line-clamp: 1;
@@ -159,12 +169,12 @@
   margin-inline: 0 0;
   padding-inline: 0;
   background: transparent;
-  font-weight: $euiFontWeightBold;
+  font-weight: eui.$euiFontWeightBold;
   line-height: inherit; // Required for EuiDataGrid lineCount to work correctly
 }
 
 .unifiedDataTable__descriptionListDescription {
-  margin-inline: $euiSizeS $euiSizeS;
+  margin-inline: eui.$euiSizeS eui.$euiSizeS;
   padding-inline: 0;
   word-break: break-all;
   white-space: normal;
@@ -182,11 +192,12 @@
     // For most width-height-ratios that will never be hit, because we'd usually limit
     // it by the way smaller height. But images with very large width and very small height
     // might be limited by that.
-    max-width: ($euiSizeXXL * 12.5) !important;
+    max-width: (eui.$euiSizeXXL * 12.5) !important;
   }
 }
 
 @include euiBreakpoint('xs', 's', 'm') {
+
   // EUI issue to hide 'of' text https://github.com/elastic/eui/issues/4654
   .unifiedDataTable__flyoutDocumentNavigation .euiPagination__compressedText {
     display: none;
@@ -194,8 +205,7 @@
 }
 
 // Ensure full screen data grids are not covered by elements with a z-index
-.unifiedDataTable__fullScreen *:not(
-.euiDataGrid--fullScreen,
+.unifiedDataTable__fullScreen *:not(.euiDataGrid--fullScreen,
 .euiDataGrid--fullScreen *,
 [data-euiportal='true'],
 [data-euiportal='true'] *) {

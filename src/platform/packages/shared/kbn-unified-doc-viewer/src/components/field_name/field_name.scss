@@ -1,20 +1,24 @@
+@use 'sass:math';
+@use 'eui/eui_variables' as eui;
+@use 'eui/eui_mixins' as mixins;
+
 .kbnDocViewer__fieldIconContainer {
-  padding-top: $euiSizeXS * 1.5;
-  line-height: $euiSize;
+  padding-top: math.mul(eui.$euiSizeXS, 1.5);
+  line-height: eui.$euiSize;
 }
 
 .kbnDocViewer__fieldName {
-  padding: $euiSizeXS;
+  padding: eui.$euiSizeXS;
   padding-left: 0;
-  line-height: $euiLineHeight;
+  line-height: eui.$euiLineHeight;
 
   .euiDataGridRowCell__popover & {
-    font-size: $euiFontSizeS;
-    line-height: $euiLineHeight;
+    font-size: eui.$euiFontSizeS;
+    line-height: eui.$euiLineHeight;
   }
 }
 
 .kbnDocViewer__multiFieldBadge {
-  @include euiFont;
-  margin: $euiSizeXS 0;
+  @include mixins.euiFont;
+  margin: eui.$euiSizeXS 0;
 }

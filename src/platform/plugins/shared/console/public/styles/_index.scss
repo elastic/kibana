@@ -5,8 +5,8 @@
 //   conChart__legend--small
 //   conChart__legend-isLoading
 
-@import 'app';
-@import 'components/index';
+@use 'app';
+@use 'components/index';
 
 .ace_editor.ace_autocomplete {
   resize: horizontal;
@@ -15,6 +15,7 @@
   .ace_scroller {
     z-index: -1;
   }
+
   .ace_scrollbar.ace_scrollbar-v {
     z-index: -1;
   }

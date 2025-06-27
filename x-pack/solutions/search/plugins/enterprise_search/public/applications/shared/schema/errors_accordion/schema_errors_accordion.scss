@@ -1,4 +1,8 @@
+@use 'sass:math';
+@use 'eui/eui_variables' as eui;
+
 .schemaErrorsAccordion {
+
   // Fixes the accordion button content not stretching to full-width
   .euiAccordion__button > :last-child {
     flex-grow: 1;
@@ -7,9 +11,9 @@
   // Tweak spacing
   .euiAccordion__childWrapper {
     position: relative;
-    top: -($euiSizeS);
-    padding-left: $euiSizeL;
-    padding-right: $euiSizeL;
+    top: math.negate(eui.$euiSizeS);
+    padding-left: eui.$euiSizeL;
+    padding-right: eui.$euiSizeL;
   }
 
   // Remove extra border-bottom on last table row

@@ -1,3 +1,7 @@
+@use 'sass:math';
+@use 'sass:color';
+@use 'eui/eui_variables' as eui;
+
 .apiKeySuccessPanel {
-  background-color: transparentize($euiColorSuccess, .9);
+  background-color: color.transparentize(eui.$euiColorSuccess, .9);
 }

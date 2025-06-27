@@ -1,5 +1,9 @@
+@use 'sass:color';
+
+@use 'eui/eui_variables' as eui;
+
 .codeBoxPanel {
-  border-top: $euiBorderThin $euiColorLightShade;
+  border-top: eui.$euiBorderThin eui.$euiColorLightShade;
 }
 
 .codeBoxCodeBlock {

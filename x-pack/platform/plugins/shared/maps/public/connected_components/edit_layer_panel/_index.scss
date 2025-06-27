@@ -1,5 +1,5 @@
-@import 'layer_panel';
-@import 'layer_settings/index';
-@import 'filter_editor/filter_editor';
-@import 'join_editor/resources/join';
-@import 'style_settings/style_settings';
+@use 'layer_panel';
+@use 'layer_settings/index';
+@use 'filter_editor/filter_editor';
+@use 'join_editor/resources/join';
+@use 'style_settings/style_settings';
