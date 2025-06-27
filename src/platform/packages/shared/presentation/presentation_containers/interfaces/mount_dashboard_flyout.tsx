@@ -20,6 +20,7 @@ const defaultFlyoutProps: OverlayFlyoutOpenOptions = {
   paddingSize: 'm',
   maxWidth: 500,
   hideCloseButton: true,
+  ownFocus: true,
   isResizable: true,
   outsideClickCloses: true,
 };
@@ -37,14 +38,14 @@ const LoadingPanel = (
 
 const EditPanelWrapper = ({
   closeFlyout,
-  getEditFlyout,
+  loadFlyout,
 }: {
   closeFlyout: () => void;
-  getEditFlyout: (({ closeFlyout }: { closeFlyout: () => void }) => Promise<void | JSX.Element | null>) | undefined;
+  loadFlyout: (({ closeFlyout }: { closeFlyout: () => void }) => Promise< JSX.Element | null>);
 }) => {
   const [EditFlyoutPanel, setEditFlyoutPanel] = React.useState<React.JSX.Element | null>(null);
   useAsync(async () => {
-    const editFlyoutContent = await getEditFlyout?.({ closeFlyout });
+    const editFlyoutContent = await loadFlyout?.({ closeFlyout });
     if (editFlyoutContent) {
       setEditFlyoutPanel(editFlyoutContent);
     } else {
@@ -60,24 +61,25 @@ const EditPanelWrapper = ({
 export const mountDashboardFlyout = ({
   core,
   api,
-  getEditFlyout,
+  loadFlyout,
   flyoutProps,
 }: {
   core: CoreStart;
   api?: EmbeddableApiContext['embeddable'];
-  getEditFlyout: (({ closeFlyout }: { closeFlyout: () => void }) => Promise<void | JSX.Element | null>) | undefined;
+  loadFlyout: (({ closeFlyout }: { closeFlyout: () => void }) => Promise< JSX.Element | null>);
   flyoutProps?: Partial<OverlayFlyoutOpenOptions>;
 }) => {
   const overlayTracker = tracksOverlays(api) ? api : undefined;
   let flyoutRef: ReturnType<CoreStart['overlays']['openFlyout']>;
 
-  const closeFlyout = () => {
+  const onClose = () => {
     overlayTracker?.clearOverlays();
     flyoutRef?.close();
-  };
+  }
+
   flyoutRef = core.overlays.openFlyout(
-    toMountPoint(<EditPanelWrapper closeFlyout={closeFlyout} getEditFlyout={getEditFlyout} />, core),
-    { ...defaultFlyoutProps, onClose: closeFlyout, ...flyoutProps }
+    toMountPoint(<EditPanelWrapper closeFlyout={onClose} loadFlyout={loadFlyout} />, core),
+    { ...defaultFlyoutProps, onClose, ...flyoutProps }
   );
   overlayTracker?.openOverlay(flyoutRef);
 };

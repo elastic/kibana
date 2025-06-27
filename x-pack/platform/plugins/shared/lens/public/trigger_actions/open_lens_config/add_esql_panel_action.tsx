@@ -44,7 +44,7 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
     mountDashboardFlyout({
       core: this.core,
       api,
-      getEditFlyout: async ({ closeFlyout })  => {
+      loadFlyout: async ({ closeFlyout })  => {
         if (!apiIsPresentationContainer(api)) throw new IncompatibleActionError();
         const embeddable = await api.addNewPanel<object, LensApi>({
           panelType: 'lens',

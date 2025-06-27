@@ -21,7 +21,7 @@ export async function addFromLibrary(dashboardApi: DashboardApi) {
   mountDashboardFlyout({
     core: coreServices,
     api: dashboardApi,
-    getEditFlyout: async ({ closeFlyout })  => {
+    loadFlyout: async ({ closeFlyout })  => {
       const { getAddFromLibraryFlyout } = await import('@kbn/embeddable-plugin/public');
 
        return await getAddFromLibraryFlyout({
@@ -31,11 +31,6 @@ export async function addFromLibrary(dashboardApi: DashboardApi) {
       });
     },
     flyoutProps: {
-      type: 'push',
-      ownFocus: true,
-      size: 'm',
-      maxWidth: 500,
-      paddingSize: 'm',
       'data-test-subj': 'dashboardAddPanel',
       'aria-labelledby': modalTitleId,
     },

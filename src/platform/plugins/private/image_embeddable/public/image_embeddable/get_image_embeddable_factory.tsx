@@ -98,7 +98,7 @@ export const getImageEmbeddableFactory = ({
           await mountDashboardFlyout({
             core: coreServices,
             api: parentApi,
-            getEditFlyout: async ({ closeFlyout }) => {
+            loadFlyout: async ({ closeFlyout }) => {
               const { getImageEditor } = await import(
                 '../components/image_editor/get_image_editor'
               );

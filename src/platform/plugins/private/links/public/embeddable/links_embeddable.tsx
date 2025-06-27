@@ -234,7 +234,7 @@ export const getLinksEmbeddableFactory = () => {
           mountDashboardFlyout({
             core: coreServices,
             api: api.parentApi,
-            getEditFlyout: async ({ closeFlyout })  => {
+            loadFlyout: async ({ closeFlyout })  => {
               const { getEditorFlyout } = await import('../editor/get_editor_flyout');
 
               return await getEditorFlyout({
@@ -271,11 +271,8 @@ export const getLinksEmbeddableFactory = () => {
               });
             },
             flyoutProps: {
-              maxWidth: 500,
               type: 'overlay',
-              paddingSize: 'm',
               ownFocus: true,
-              outsideClickCloses: false,
               'data-test-subj': 'links--panelEditor--flyout',
             },
           });
