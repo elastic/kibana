@@ -92,7 +92,7 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
     }
   }, [core.security.authc]);
 
-  const checkIfLicenseIsPlatinum = useCallback(async () => {
+  const checkIfLicenseIsPlatinumOrHigherExcludingTrial = useCallback(async () => {
     try {
       const license = await getLicense();
       const isPlatinumOrHigherExcludingTrial =
@@ -109,8 +109,8 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
   }, [getEmail]);
 
   useEffect(() => {
-    checkIfLicenseIsPlatinum();
-  }, [checkIfLicenseIsPlatinum]);
+    checkIfLicenseIsPlatinumOrHigherExcludingTrial();
+  }, [checkIfLicenseIsPlatinumOrHigherExcludingTrial]);
 
   const boldTextCss = {
     fontWeight: euiTheme.font.weight.semiBold,
@@ -267,7 +267,7 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiText size="s">
+                <EuiText size="s" color="subdued">
                   <FormattedMessage
                     id="xpack.intercept.feedbackFlyout.form.infoText"
                     defaultMessage="Session data included"
