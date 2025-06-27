@@ -593,7 +593,7 @@ describe('getCasesConnectorType', () => {
         expect(
           adapter.getKibanaPrivileges?.({
             consumer: 'alerts',
-            producer: AlertConsumers.LOGS,
+            producer: AlertConsumers.SIEM,
           })
         ).toEqual([
           'cases:observability/createCase',

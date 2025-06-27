@@ -320,7 +320,7 @@ describe('CasesParamsFields renders', () => {
       useKibanaMock.mockReturnValue({
         services: {
           ...createStartServicesMock(),
-          // simulate a serverless security project
+          // simulate a observability security project
           cloud: { isServerlessEnabled: true, serverless: { projectType: 'observability' } },
           data: { dataViews: {} },
         },
@@ -340,7 +340,7 @@ describe('CasesParamsFields renders', () => {
 
       const securityOwnedRule = {
         ...defaultProps,
-        // these two would normally produce an observability owner
+        // these two would normally produce a security owner
         producerId: 'securitySolution',
         featureId: 'securitySolution',
         actionParams: {
