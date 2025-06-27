@@ -46,6 +46,19 @@ export interface DeprecationSettings {
   docLinksKey: string;
 }
 
+/**
+ * Type for the technical preview settings.
+ * @public
+ * */
+export type TechnicalPreviewSettings =
+  | boolean
+  | {
+      /** Technical Preview message */
+      message?: string;
+      /** Key to documentation links */
+      docLinksKey?: string;
+    };
+
 export interface GetUiSettingsContext {
   request?: KibanaRequest;
 }
@@ -86,6 +99,8 @@ export interface UiSettingsParams<T = unknown> {
   type?: UiSettingsType;
   /** optional deprecation information. Used to generate a deprecation warning. */
   deprecation?: DeprecationSettings;
+  /** A flag indicating that this setting is a technical preview. If true, the setting will display a tech preview badge after the title. */
+  technicalPreview?: TechnicalPreviewSettings;
   /**
    * index of the settings within its category (ascending order, smallest will be displayed first).
    * Used for ordering in the UI.
