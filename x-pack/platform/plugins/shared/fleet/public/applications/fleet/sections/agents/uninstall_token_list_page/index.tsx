@@ -195,7 +195,7 @@ export const UninstallTokenListPage = () => {
         />
 
         <EuiToolTip content={SEARCH_BY_POLICY_ID_OR_NAME_HINT}>
-          <EuiIcon type="iInCircle" />
+          <EuiIcon type="info" />
         </EuiToolTip>
       </EuiFlexGroup>
 
