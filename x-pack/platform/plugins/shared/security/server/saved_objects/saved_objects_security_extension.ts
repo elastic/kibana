@@ -91,6 +91,7 @@ export enum SecurityAction {
   UPDATE,
   BULK_UPDATE,
   UPDATE_OBJECTS_SPACES,
+  MANAGE_ACCESS_CONTROL,
 }
 
 /**
@@ -342,9 +343,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     this.errors = errors;
     this.checkPrivilegesFunc = checkPrivileges;
     this.getCurrentUserFunc = getCurrentUser;
-    this.accessControlService = new AccessControlService({
-      getTypeRegistry,
-    });
+    this.accessControlService = new AccessControlService();
     this.typeRegistryFunc = getTypeRegistry;
 
     // This comment block is a quick reference for the action map, which maps authorization actions
@@ -368,6 +367,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     // Update                             'update'                AuditAction.UPDATE
     // Bulk Update                        'bulk_update'           AuditAction.UPDATE
     // Update Objects Spaces              'share_to_space'        AuditAction.UPDATE_OBJECTS_SPACES
+    // Manage Objects Access Control      'manage_access_control'      N/A
     this.actionMap = new Map([
       [SecurityAction.CHECK_CONFLICTS, { authzAction: 'bulk_create', auditAction: undefined }],
       [
@@ -409,6 +409,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       [
         SecurityAction.UPDATE_OBJECTS_SPACES,
         { authzAction: 'share_to_space', auditAction: AuditAction.UPDATE_OBJECTS_SPACES },
+      ],
+      [
+        SecurityAction.MANAGE_ACCESS_CONTROL,
+        { authzAction: 'manage_access_control', auditAction: undefined },
       ],
     ]);
   }
@@ -467,8 +471,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       Array.from(params.types.values())
         .filter((type) => typeRegistry.supportsAccessControl(type))
         .map((type) => [
-          this.actions.savedObject.get(type, 'manage_ownership'),
-          { type, action: 'manage_ownership' as A },
+          this.actions.savedObject.get(type, 'manage_access_control'),
+          { type, action: 'manage_access_control' as A },
         ])
     );
 
@@ -590,11 +594,13 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
    * @param typeAndSpacesMap The set of spaces to check authorization for an object type
    * @returns An array of objects that can be modified
    */
-  private async checkAccessControl(
-    objects: AuthorizeObject[],
-    action: SecurityAction,
-    typeAndSpacesMap: Map<string, Set<string>>
-  ): Promise<{
+  private async checkAccessControl<A extends string>({
+    objects,
+    action,
+  }: {
+    objects: AuthorizeObject[];
+    action: SecurityAction;
+  }): Promise<{
     authorizedObjects: AuthorizeObject[];
     unauthorizedObjects: AuthorizeObject[];
   }> {
@@ -604,16 +610,24 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       action === SecurityAction.DELETE ||
       action === SecurityAction.BULK_DELETE ||
       action === SecurityAction.CREATE ||
-      action === SecurityAction.BULK_CREATE
+      action === SecurityAction.BULK_CREATE ||
+      action === SecurityAction.MANAGE_ACCESS_CONTROL
     ) {
       const results = await Promise.all(
-        objects.map((obj) =>
-          this.accessControlService.canModifyObject({
+        objects.map(async (obj) => {
+          const { hasAllRequested } = await this.checkPrivilegesFunc(
+            this.actions.savedObject.get(obj.type, 'manage_access_control'),
+            [ALL_NAMESPACES_STRING]
+          );
+          return this.accessControlService.canModifyObject({
             type: obj.type,
             object: obj,
-            spacesToAuthorize: typeAndSpacesMap.get(obj.type) ?? new Set([ALL_NAMESPACES_STRING]),
-          })
-        )
+            hasManageOwnershipPrivilege: hasAllRequested,
+            typeSupportsAccessControl: (await this.typeRegistryFunc()).supportsAccessControl(
+              obj.type
+            ),
+          });
+        })
       );
       return objects.reduce<{
         authorizedObjects: AuthorizeObject[];
@@ -656,7 +670,11 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     const unauthorizedTypes = new Set<string>();
 
     if (auditObjects && auditObjects.length > 0) {
-      const filteredObjects = await this.checkAccessControl(auditObjects, action, typesAndSpaces);
+      const filteredObjects = await this.checkAccessControl({
+        objects: auditObjects,
+        action,
+      });
+
       filteredObjects.unauthorizedObjects.forEach(({ type }) => {
         unauthorizedTypes.add(type);
       });
@@ -1146,13 +1164,14 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   ): Promise<CheckAuthorizationResult<A>> {
     const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
-    const action = SecurityAction.UPDATE; // TODO: Change to a more specific action for ownership transfer
+
+    const action = SecurityAction.MANAGE_ACCESS_CONTROL;
 
     this.assertObjectsArrayNotEmpty(objects, action);
 
     const enforceMap = new Map<string, Set<string>>();
     const spacesToAuthorize = new Set<string>([namespaceString]);
-
+    objects.forEach((obj) => enforceMap.set(obj.type, spacesToAuthorize)); // Always enforce authZ for the active space
     const authorizationResult = await this.authorize({
       actions: new Set([action]),
       types: new Set(objects.map((obj) => obj.type)),
@@ -1160,7 +1179,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       enforceMap,
       auditOptions: { objects },
       accessControlOptions: {
-        changeAccessMode: true,
+        changeOwnership: true,
       },
     });
 
@@ -1258,6 +1277,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         }
         return getIsAuthorizedForInboundReference(inbound);
       });
+
       // If the user is not authorized to access at least one inbound reference of this object, then we should omit this object.
       const isAuthorizedForGraph =
         requestedObjectsSet.has(objKey) || // If true, this is one of the requested objects, and we checked authorization above

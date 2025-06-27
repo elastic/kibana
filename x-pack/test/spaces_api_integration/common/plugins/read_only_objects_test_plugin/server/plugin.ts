@@ -110,6 +110,29 @@ export class ReadOnlyObjectsPlugin implements Plugin<void, void, SetupDeps> {
         });
       }
     );
+    router.get(
+      {
+        path: '/read_only_objects/{objectId}',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: {
+          params: schema.object({
+            objectId: schema.string(),
+          }),
+        },
+      },
+      async (context, request, response) => {
+        const soClient = (await context.core).savedObjects.client;
+        const result = await soClient.get(READ_ONLY_TYPE, request.params.objectId);
+        return response.ok({
+          body: result,
+        });
+      }
+    );
     router.put(
       {
         path: '/read_only_objects/update',

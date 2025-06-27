@@ -225,10 +225,9 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   }
 
   changeOwnership<T = unknown>(
-    type: string,
-    id: string,
-    options?: SavedObjectsChangeOwnershipOptions<T> | undefined
+    objects: Array<{ type: string; id: string }>,
+    options: SavedObjectsChangeOwnershipOptions<T>
   ): Promise<SavedObjectsChangeOwnershipResponse<T>> {
-    return this._repository.changeOwnership(type, id, options);
+    return this._repository.changeOwnership(objects, options);
   }
 }

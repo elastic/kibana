@@ -20,7 +20,6 @@ describe('AccessControlService', () => {
   } as unknown as AuthenticatedUser;
 
   const getTypeRegistry = jest.fn();
-  const checkPrivilegesFunc = jest.fn();
   const mockTypeRegistry = {
     supportsAccessControl: jest.fn(),
   } as unknown as jest.Mocked<ISavedObjectTypeRegistry>;
@@ -30,9 +29,7 @@ describe('AccessControlService', () => {
     getTypeRegistry.mockResolvedValue(mockTypeRegistry);
     mockTypeRegistry.supportsAccessControl.mockReturnValue(true);
 
-    accessControlService = new AccessControlService({
-      getTypeRegistry,
-    });
+    accessControlService = new AccessControlService();
   });
 
   describe('setUserForOperation', () => {
@@ -47,35 +44,27 @@ describe('AccessControlService', () => {
         accessControl: { accessMode: 'read_only' as const, owner: 'testuser' },
       };
 
-      return accessControlService
-        .canModifyObject({
-          type: 'dashboard',
-          object: testObject,
-          spacesToAuthorize: new Set(),
-        })
-        .then((result) => {
-          // Since the user is the owner, it should return true
-          expect(result).toBe(true);
-        });
+      const result = accessControlService.canModifyObject({
+        type: 'dashboard',
+        object: testObject,
+      });
+      expect(result).toBe(true);
     });
 
     it('should set null user for operation', () => {
       accessControlService.setUserForOperation(null);
 
       // Test the null user was properly set
-      return accessControlService
-        .canModifyObject({
+      expect(
+        accessControlService.canModifyObject({
           type: 'dashboard',
           object: {
             type: 'dashboard',
             id: 'my-dashboard',
             accessControl: { accessMode: 'read_only' as const, owner: 'anotheruser' },
           },
-          spacesToAuthorize: new Set(),
         })
-        .then((result) => {
-          expect(result).toBe(false);
-        });
+      ).toBe(true);
     });
   });
 
@@ -86,10 +75,9 @@ describe('AccessControlService', () => {
     it('returns true when type does not support access control', async () => {
       mockTypeRegistry.supportsAccessControl.mockReturnValue(false);
 
-      const result = await accessControlService.canModifyObject({
+      const result = accessControlService.canModifyObject({
         type: 'dashboard',
         object: { type: 'dashboard', id: 'my-dashboard' },
-        spacesToAuthorize: new Set(),
       });
 
       expect(result).toBe(true);
@@ -97,138 +85,53 @@ describe('AccessControlService', () => {
     });
 
     it('returns true when object has no access control defined', async () => {
-      const result = await accessControlService.canModifyObject({
+      const result = accessControlService.canModifyObject({
         type: 'dashboard',
         object: { type: 'dashboard', id: 'my-dashboard' },
-        spacesToAuthorize: new Set(),
       });
 
       expect(result).toBe(true);
     });
 
-    it('returns true when there is no current user', async () => {
+    it('returns false when there is no current user', async () => {
       accessControlService.setUserForOperation(null);
 
-      const result = await accessControlService.canModifyObject({
+      const result = accessControlService.canModifyObject({
         type: 'dashboard',
         object: {
           type: 'dashboard',
           id: 'my-dashboard',
           accessControl: { accessMode: 'read_only', owner: 'anotheruser' },
         },
-        spacesToAuthorize: new Set(),
       });
 
       expect(result).toBe(false);
     });
 
     it('returns true when the access mode is not read_only', async () => {
-      const result = await accessControlService.canModifyObject({
+      const result = accessControlService.canModifyObject({
         type: 'dashboard',
         object: {
           type: 'dashboard',
           id: 'my-dashboard',
           accessControl: { owner: 'anotheruser' },
         },
-        spacesToAuthorize: new Set(),
       });
 
       expect(result).toBe(true);
     });
 
     it('returns true when the user is the owner', async () => {
-      const result = await accessControlService.canModifyObject({
+      const result = accessControlService.canModifyObject({
         type: 'dashboard',
         object: {
           type: 'dashboard',
           id: 'my-dashboard',
           accessControl: { accessMode: 'read_only', owner: 'testuser' },
         },
-        spacesToAuthorize: new Set(),
       });
 
       expect(result).toBe(true);
-    });
-
-    it('returns true when the user has the required privilege in a single space', async () => {
-      checkPrivilegesFunc.mockResolvedValue({ hasAllRequested: true });
-      const spacesToAuthorize = new Set(['space1']);
-
-      const result = await accessControlService.canModifyObject({
-        type: 'dashboard',
-        object: {
-          type: 'dashboard',
-          id: 'my-dashboard',
-          accessControl: { accessMode: 'read_only', owner: 'anotheruser' },
-        },
-        spacesToAuthorize,
-      });
-
-      expect(result).toBe(true);
-      expect(checkPrivilegesFunc).toHaveBeenCalledWith('saved_object/dashboard:manage_ownership', [
-        'space1',
-      ]);
-    });
-
-    it('returns true when the user has the required privilege in multiple spaces', async () => {
-      checkPrivilegesFunc.mockResolvedValue({ hasAllRequested: true });
-      const spacesToAuthorize = new Set(['space1', 'space2', 'space3']);
-
-      const result = await accessControlService.canModifyObject({
-        type: 'visualization',
-        object: {
-          type: 'visualization',
-          id: 'my-viz',
-          accessControl: { accessMode: 'read_only', owner: 'anotheruser' },
-        },
-        spacesToAuthorize,
-      });
-
-      expect(result).toBe(true);
-      expect(checkPrivilegesFunc).toHaveBeenCalledWith(
-        'saved_object/visualization:manage_ownership',
-        expect.arrayContaining(['space1', 'space2', 'space3'])
-      );
-      // Verify the array has exactly 3 elements
-      expect(checkPrivilegesFunc.mock.calls[0][1]).toHaveLength(3);
-    });
-
-    it('correctly constructs the privilege string based on object type', async () => {
-      checkPrivilegesFunc.mockResolvedValue({ hasAllRequested: true });
-      const spacesToAuthorize = new Set(['space1']);
-
-      await accessControlService.canModifyObject({
-        type: 'lens',
-        object: {
-          type: 'lens',
-          id: 'my-lens',
-          accessControl: { accessMode: 'read_only', owner: 'anotheruser' },
-        },
-        spacesToAuthorize,
-      });
-
-      expect(checkPrivilegesFunc).toHaveBeenCalledWith('saved_object/lens:manage_ownership', [
-        'space1',
-      ]);
-    });
-
-    it('returns false when none of the conditions for modification are met', async () => {
-      const spacesToAuthorize = new Set(['space1']);
-
-      const result = await accessControlService.canModifyObject({
-        type: 'dashboard',
-        object: {
-          type: 'dashboard',
-          id: 'my-dashboard',
-          accessControl: { accessMode: 'read_only', owner: 'anotheruser' },
-        },
-        spacesToAuthorize,
-      });
-
-      expect(result).toBe(false);
-      expect(checkPrivilegesFunc).toHaveBeenCalledWith('saved_object/dashboard:manage_ownership', [
-        'space1',
-      ]);
     });
   });
 });

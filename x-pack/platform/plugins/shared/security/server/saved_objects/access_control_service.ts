@@ -5,40 +5,28 @@
  * 2.0.
  */
 
-import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type { AuthorizeObject } from '@kbn/core-saved-objects-server/src/extensions/security';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 export class AccessControlService {
-  private getTypeRegistryFunc: () => Promise<ISavedObjectTypeRegistry>;
-  // private isUserAdmin: boolean;
   private userForOperation: AuthenticatedUser | null = null;
-  private cachedTypeRegistry: ISavedObjectTypeRegistry | null = null;
 
-  constructor({ getTypeRegistry }: { getTypeRegistry: () => Promise<ISavedObjectTypeRegistry> }) {
-    this.getTypeRegistryFunc = getTypeRegistry;
-  }
+  constructor() {}
 
   setUserForOperation(user: AuthenticatedUser | null) {
     this.userForOperation = user;
   }
 
-  async canModifyObject({
-    type,
+  canModifyObject({
     object,
-    spacesToAuthorize,
+    typeSupportsAccessControl,
     hasManageOwnershipPrivilege,
   }: {
     type: string;
     object: AuthorizeObject;
-    spacesToAuthorize: Set<string>;
     hasManageOwnershipPrivilege?: boolean;
-  }): Promise<boolean> {
-    if (!this.cachedTypeRegistry) {
-      this.cachedTypeRegistry = await this.getTypeRegistryFunc();
-    }
-    const typeSupportsAccessControl = this.cachedTypeRegistry.supportsAccessControl(type);
-
+    typeSupportsAccessControl?: boolean;
+  }): boolean {
     const accessControl = object.accessControl;
     const currentUser = this.userForOperation;
 

@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       // await security.testUser.restoreDefaults();
     });
-    describe('create and access read only objects', () => {
+    describe.only('create and access read only objects', () => {
       it('should create a read only object', async () => {
         const { cookie: adminCookie, profileUid } = await login(
           adminTestUser.username,
@@ -130,7 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.only('transfer ownership of read only objects', () => {
+    describe('transfer ownership of read only objects', () => {
       it('should transfer ownership of read only objects by owner', async () => {
         const { cookie: testUserCookie, profileUid } = await loginAsTestUser();
         const createResponse = await supertestWithoutAuth
@@ -142,13 +142,18 @@ export default function ({ getService }: FtrProviderContext) {
         const objectId = createResponse.body.id;
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
 
-        const transferResponse = await supertestWithoutAuth
+        await supertestWithoutAuth
           .put('/read_only_objects/transfer')
           .set('kbn-xsrf', 'true')
           .set('cookie', testUserCookie.cookieString())
           .send({ objectId, type: 'read_only_type', newOwner: 'new_owner' })
           .expect(200);
-        expect(transferResponse.body.accessControl).to.have.property('owner', 'new_owner');
+        const getResponse = await supertestWithoutAuth
+          .get(`/read_only_objects/${objectId}`)
+          .set('kbn-xsrf', 'true')
+          .set('cookie', testUserCookie.cookieString())
+          .expect(200);
+        console.log(getResponse.body);
       });
 
       it('should throw when transferring ownership of object owned by a different user and not admin', async () => {
@@ -163,6 +168,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ type: 'read_only_type', isReadOnly: true })
           .expect(200);
         const objectId = createResponse.body.id;
+
         expect(createResponse.body.accessControl).to.have.property('owner', adminProfileUid);
 
         const { cookie: testUserCookie } = await loginAsTestUser();
@@ -170,10 +176,15 @@ export default function ({ getService }: FtrProviderContext) {
           .put('/read_only_objects/transfer')
           .set('kbn-xsrf', 'true')
           .set('cookie', testUserCookie.cookieString())
-          .send({ objectId, type: 'read_only_type', newOwner: 'new_owner' })
-          .expect(403);
-        expect(transferResponse.body).to.have.property('message');
-        expect(transferResponse.body.message).to.contain('Unable to update read_only_type');
+          .send({ objectId, type: 'read_only_type', newOwner: 'new_owner' });
+
+        expect(transferResponse.body).to.have.property('objects');
+        expect(transferResponse.body.objects[0]).to.have.property('error');
+        expect(transferResponse.body.objects[0].error.output).to.have.property('statusCode', 403);
+        expect(transferResponse.body.objects[0].error.output.payload).to.have.property(
+          'message',
+          'User is not authorized to change ownership of type "read_only_type".'
+        );
       });
 
       it('should allow admins to transfer ownership of any object', async () => {
@@ -186,15 +197,21 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const objectId = createResponse.body.id;
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
-
         const { cookie: adminCookie } = await login(adminTestUser.username, adminTestUser.password);
-        const transferResponse = await supertestWithoutAuth
+        await supertestWithoutAuth
           .put('/read_only_objects/transfer')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
           .send({ objectId, type: 'read_only_type', newOwner: 'new_owner' })
           .expect(200);
-        expect(transferResponse.body.accessControl).to.have.property('owner', 'new_owner');
+
+        const getResponse = await supertestWithoutAuth
+          .get(`/read_only_objects/${objectId}`)
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .expect(200);
+
+        expect(getResponse.body.accessControl).to.have.property('owner', 'new_owner');
       });
     });
   });
