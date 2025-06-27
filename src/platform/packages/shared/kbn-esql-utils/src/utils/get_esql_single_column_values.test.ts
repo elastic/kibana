@@ -24,7 +24,7 @@ describe('getESQLSingleColumnValues', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
-  it('returns only options on success', async () => {
+  it('returns values only on success', async () => {
     mockGetESQLResults.mockResolvedValueOnce({
       response: {
         columns: [{ name: 'column1' }],
@@ -36,10 +36,13 @@ describe('getESQLSingleColumnValues', () => {
       search: searchMock,
     })) as GetESQLSingleColumnValuesSuccess;
     expect(getESQLSingleColumnValues.isSuccess(result)).toBe(true);
-    expect('columns' in result).toBe(false);
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "options": Array [
+        "columns": Array [
+          "column1",
+        ],
+        "errors": Array [],
+        "values": Array [
           "option1",
           "option2",
         ],
@@ -58,7 +61,6 @@ describe('getESQLSingleColumnValues', () => {
       search: searchMock,
     })) as GetESQLSingleColumnValuesFailure;
     expect(getESQLSingleColumnValues.isSuccess(result)).toBe(false);
-    expect('options' in result).toBe(false);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "columns": Array [
@@ -66,6 +68,7 @@ describe('getESQLSingleColumnValues', () => {
           "column2",
         ],
         "errors": Array [],
+        "values": Array [],
       }
     `);
   });
@@ -76,13 +79,13 @@ describe('getESQLSingleColumnValues', () => {
       search: searchMock,
     })) as GetESQLSingleColumnValuesFailure;
     expect(getESQLSingleColumnValues.isSuccess(result)).toBe(false);
-    expect('options' in result).toBe(false);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "columns": Array [],
         "errors": Array [
           "Invalid ES|QL query",
         ],
+        "values": Array [],
       }
     `);
   });
