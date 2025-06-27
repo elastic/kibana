@@ -86,6 +86,35 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await enableStreams(apiClient);
         });
 
+        it('reports enabled status', async () => {
+          expect(await getEnabled()).to.eql(true);
+        });
+
+        it('reports conflict if disabled on Elasticsearch level', async () => {
+          await esClient.transport.request({
+            method: 'POST',
+            path: '/_streams/logs/_disable',
+          });
+          expect(await getEnabled()).to.eql('conflict');
+        });
+
+        it('reports enabled after calling enabled again', async () => {
+          await enableStreams(apiClient);
+          expect(await getEnabled()).to.eql(true);
+        });
+
+        it('Elasticsearch streams is enabled too', async () => {
+          const response = await esClient.transport.request({
+            method: 'GET',
+            path: '/_streams/status',
+          });
+          expect(response).to.eql({
+            logs: {
+              enabled: true,
+            },
+          });
+        });
+
         it('is enabled', async () => {
           await disableStreams(apiClient);
         });

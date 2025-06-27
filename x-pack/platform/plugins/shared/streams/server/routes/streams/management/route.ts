@@ -78,11 +78,22 @@ export const getStreamsStatusRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  handler: async ({ request, getScopedClients }): Promise<{ enabled: boolean }> => {
+  handler: async ({ request, getScopedClients }): Promise<{ enabled: boolean | 'conflict' }> => {
     const { streamsClient } = await getScopedClients({ request });
 
+    let enabled: boolean | 'conflict';
+    try {
+      enabled = await streamsClient.isStreamsEnabled();
+    } catch (error) {
+      if (error.name === 'StreamsStatusConflictError') {
+        enabled = 'conflict';
+      } else {
+        throw error;
+      }
+    }
+
     return {
-      enabled: await streamsClient.isStreamsEnabled(),
+      enabled,
     };
   },
 });
