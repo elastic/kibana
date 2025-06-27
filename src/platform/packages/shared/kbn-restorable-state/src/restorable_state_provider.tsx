@@ -22,6 +22,7 @@ import React, {
 } from 'react';
 import useLatest from 'react-use/lib/useLatest';
 import useUnmount from 'react-use/lib/useUnmount';
+import useMount from 'react-use/lib/useMount';
 import { BehaviorSubject, Subject, map } from 'rxjs';
 
 export interface RestorableStateProviderProps<TState extends object> {
@@ -168,8 +169,12 @@ export const createRestorableStateProvider = <TState extends object>() => {
   const useRestorableState = <TKey extends keyof TState>(
     key: TKey,
     initialValue: InitialValue<TState, TKey>,
-    shouldIgnoredRestoredValue?: ShouldIgnoredRestoredValue<TState, TKey>
+    options?: {
+      shouldIgnoredRestoredValue?: ShouldIgnoredRestoredValue<TState, TKey>;
+      shouldStoreDefaultValueRightAway?: boolean;
+    }
   ) => {
+    const { shouldIgnoredRestoredValue, shouldStoreDefaultValueRightAway } = options || {};
     const { initialState$, onInitialStateChange } = useContext(context);
     const [value, _setValue] = useState(() =>
       getInitialValue(initialState$.getValue(), key, initialValue, shouldIgnoredRestoredValue)
@@ -189,15 +194,37 @@ export const createRestorableStateProvider = <TState extends object>() => {
       });
     });
 
+    useMount(() => {
+      const restorableState = initialState$.getValue();
+      if (shouldStoreDefaultValueRightAway && value !== restorableState?.[key]) {
+        onInitialStateChange?.({ ...restorableState, [key]: value });
+      }
+    });
+
     useInitialStateRefresh(key, initialValue, _setValue, shouldIgnoredRestoredValue);
 
     return [value, setValue] as const;
   };
 
-  const useRestorableRef = <TKey extends keyof TState>(key: TKey, initialValue: TState[TKey]) => {
+  const useRestorableRef = <TKey extends keyof TState>(
+    key: TKey,
+    initialValue: TState[TKey],
+    options?: {
+      shouldStoreDefaultValueRightAway?: boolean;
+    }
+  ) => {
+    const { shouldStoreDefaultValueRightAway } = options || {};
     const { initialState$, onInitialStateChange } = useContext(context);
     const initialState = initialState$.getValue();
     const valueRef = useRef(getInitialValue(initialState, key, initialValue));
+
+    useMount(() => {
+      const value = valueRef.current;
+      const restorableState = initialState$.getValue();
+      if (shouldStoreDefaultValueRightAway && value !== restorableState?.[key]) {
+        onInitialStateChange?.({ ...restorableState, [key]: value });
+      }
+    });
 
     useUnmount(() => {
       onInitialStateChange?.({ ...initialState$.getValue(), [key]: valueRef.current });
