@@ -94,10 +94,33 @@ export default function ({ getService }: FtrProviderContext) {
             listId: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
             privileges: ['read', 'host_isolation_exceptions_all'],
           },
+
+          {
+            listId: ENDPOINT_LIST_ID,
+            privileges: ['minimal_all'],
+          },
+          {
+            listId: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+            privileges: ['minimal_read', 'trusted_applications_all'],
+          },
+          {
+            listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+            privileges: ['minimal_read', 'event_filters_all'],
+          },
+          {
+            listId: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
+            privileges: ['minimal_read', 'blocklist_all'],
+          },
+          {
+            listId: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
+            privileges: ['minimal_read', 'host_isolation_exceptions_all'],
+          },
         ];
 
         for (const artifactType of artifactTypes) {
-          it(`should allow creating a global artifact on ${artifactType.listId} list`, async () => {
+          it(`should allow creating a global artifact on ${
+            artifactType.listId
+          } list with original privileges ${artifactType.privileges.join(', ')}`, async () => {
             const supertestGlobalArtifactManager = await createUserWithSiemPrivileges(siemVersion, [
               ...artifactType.privileges,
 
