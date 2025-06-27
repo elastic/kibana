@@ -18,7 +18,7 @@ import { isBoolean } from 'lodash';
 /**
  * Props for a {@link FieldTitle} component.
  */
-export interface TitleProps<T extends SettingType> {
+export interface TechnicalPreviewBadgeProps<T extends SettingType> {
   /** The {@link FieldDefinition} corresponding the setting. */
   field: Pick<FieldDefinition<T>, 'technicalPreview'>;
 }
@@ -43,7 +43,7 @@ const badgeBaseProps: Pick<EuiBetaBadgeProps, 'alignment' | 'label' | 'size'> = 
  */
 export const FieldTitleTechnicalPreviewBadge = <T extends SettingType>({
   field,
-}: TitleProps<T>) => {
+}: TechnicalPreviewBadgeProps<T>) => {
   if (!field.technicalPreview) {
     return null;
   }
