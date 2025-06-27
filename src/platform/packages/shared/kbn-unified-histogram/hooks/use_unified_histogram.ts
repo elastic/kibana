@@ -17,9 +17,10 @@ import type {
 import { useEffect, useMemo, useState } from 'react';
 import { Observable, Subject, of } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
-import { pick } from 'lodash';
+import { cloneDeep, pick } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
+import useLatest from 'react-use/lib/useLatest';
 import { UnifiedHistogramChartProps } from '../components/chart/chart';
 import {
   UnifiedHistogramExternalVisContextStatus,
@@ -126,6 +127,9 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
     nextVisContext: UnifiedHistogramVisContext | undefined,
     externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
   ) => void;
+  /**
+   * Callback to modify the default Lens vis attributes used in the chart
+   */
   getModifiedVisAttributes?: (
     attributes: TypedLensByValueInput['attributes']
   ) => TypedLensByValueInput['attributes'];
@@ -237,6 +241,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
   const lensVisServiceCurrentSuggestionContext = useObservable(
     lensVisService?.currentSuggestionContext$ ?? EMPTY_SUGGESTION_CONTEXT
   );
+  const latestGetModifiedVisAttributes = useLatest(props.getModifiedVisAttributes);
 
   useEffect(() => {
     if (isChartLoading || !lensVisService) {
@@ -259,7 +264,9 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
       table,
       onSuggestionContextChange: stateProps.onSuggestionContextChange,
       onVisContextChanged: stateProps.onVisContextChanged,
-      getModifiedVisAttributes: props.getModifiedVisAttributes,
+      getModifiedVisAttributes: (attributes) => {
+        return latestGetModifiedVisAttributes.current?.(cloneDeep(attributes)) ?? attributes;
+      },
     });
   }, [
     columns,
@@ -267,8 +274,8 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     dataView,
     externalVisContext,
     isChartLoading,
+    latestGetModifiedVisAttributes,
     lensVisService,
-    props.getModifiedVisAttributes,
     requestParams.filters,
     requestParams.query,
     stateProps.breakdown?.field,

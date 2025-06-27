@@ -148,6 +148,16 @@ export interface DefaultAppStateExtension {
 }
 
 /**
+ * Parameters passed to the modified vis attributes extension
+ */
+export interface ModifiedVisAttributesExtensionParams {
+  /**
+   * The vis attributes to modify
+   */
+  attributes: TypedLensByValueInput['attributes'];
+}
+
+/**
  * Parameters passed to the cell renderers extension
  */
 export interface CellRenderersExtensionParams {
@@ -318,8 +328,12 @@ export interface Profile {
    * Chart
    */
 
+  /**
+   * Allows modifying the default vis attributes used in the Discover chart
+   * @returns The modified vis attributes to use in the chart
+   */
   getModifiedVisAttributes: (
-    attributes: TypedLensByValueInput['attributes']
+    params: ModifiedVisAttributesExtensionParams
   ) => TypedLensByValueInput['attributes'];
 
   /**

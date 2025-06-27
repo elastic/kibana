@@ -19,7 +19,7 @@ import {
   UnifiedHistogramExternalVisContextStatus,
   UnifiedHistogramFetchStatus,
 } from '@kbn/unified-histogram';
-import { cloneDeep, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Observable } from 'rxjs';
 import {
@@ -354,6 +354,14 @@ export const useDiscoverHistogram = (
     [dispatch, setOverriddenVisContextAfterInvalidation, stateContainer.savedSearchState]
   );
 
+  const getModifiedVisAttributesAccessor = useProfileAccessor('getModifiedVisAttributes');
+  const getModifiedVisAttributes = useCallback<
+    NonNullable<UseUnifiedHistogramProps['getModifiedVisAttributes']>
+  >(
+    (attributes) => getModifiedVisAttributesAccessor((params) => params.attributes)({ attributes }),
+    [getModifiedVisAttributesAccessor]
+  );
+
   const chartHidden = useAppStateSelector((state) => state.hideChart);
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
@@ -367,14 +375,6 @@ export const useDiscoverHistogram = (
       }
     },
     [breakdownField, stateContainer.appState]
-  );
-
-  const getModifiedVisAttributesAccessor = useProfileAccessor('getModifiedVisAttributes');
-  const getModifiedVisAttributes = useCallback<
-    NonNullable<UseUnifiedHistogramProps['getModifiedVisAttributes']>
-  >(
-    (attributes) => getModifiedVisAttributesAccessor((attrs) => attrs)(cloneDeep(attributes)),
-    [getModifiedVisAttributesAccessor]
   );
 
   return {
