@@ -87,6 +87,7 @@
     "@kbn/ui-theme",
     "@kbn/ai-security-labs-content",
     "@kbn/inference-langchain"
+    "@kbn/security-solution-features"
   ],
   "exclude": [
     "target/**/*",

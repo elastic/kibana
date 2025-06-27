@@ -73,7 +73,7 @@ src/platform/packages/shared/kbn-calculate-auto @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
 x-pack/platform/plugins/private/canvas @elastic/kibana-presentation
 packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
-x-pack/test/cases_api_integration/common/plugins/cases @elastic/response-ops
+x-pack/platform/test/cases_api_integration/common/plugins/cases @elastic/response-ops
 src/platform/packages/shared/kbn-cases-components @elastic/response-ops
 x-pack/platform/plugins/shared/cases @elastic/response-ops @elastic/kibana-cases
 src/platform/packages/shared/kbn-cbor @elastic/kibana-operations
@@ -692,7 +692,7 @@ x-pack/solutions/observability/packages/observability-ai/observability-ai-common
 x-pack/solutions/observability/packages/observability-ai/observability-ai-server @elastic/obs-ai-assistant
 x-pack/solutions/observability/packages/alert-details @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting-test-data @elastic/obs-ux-management-team
-x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
+x-pack/platform/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/observability_logs_explorer @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability_onboarding @elastic/obs-ux-logs-team
@@ -857,7 +857,7 @@ x-pack/solutions/security/packages/connectors @elastic/security-threat-hunting-i
 x-pack/solutions/security/packages/distribution-bar @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/packages/features @elastic/security-threat-hunting-investigations
-x-pack/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
+x-pack/platform/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
 x-pack/solutions/security/packages/navigation @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
@@ -1216,8 +1216,8 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/functional/es_archives/lens/reporting/ @elastic/appex-sharedux
 /x-pack/test/functional/es_archives/reporting/ @elastic/appex-sharedux
 /x-pack/test/functional/fixtures/kbn_archiver/reporting/ @elastic/appex-sharedux
-/x-pack/test/reporting_api_integration/ @elastic/appex-sharedux
-/x-pack/test/reporting_functional/ @elastic/appex-sharedux
+/x-pack/platform/test/reporting_api_integration/ @elastic/response-ops
+/x-pack/platform/test/reporting_functional/ @elastic/response-ops
 /x-pack/test/stack_functional_integration/apps/reporting/ @elastic/appex-sharedux
 /docs/user/reporting @elastic/appex-sharedux
 /docs/settings/reporting-settings.asciidoc @elastic/appex-sharedux
@@ -1495,7 +1495,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 ^/src/platform/test/interpreter_functional/snapshots @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/54342
 ^/src/platform/test/functional/services/inspector.ts @elastic/kibana-presentation
 /x-pack/test/functional/services/canvas_element.ts @elastic/kibana-presentation
-/x-pack/test/functional/page_objects/canvas_page.ts @elastic/kibana-presentation
+/x-pack/platform/test/functional/page_objects/canvas_page.ts @elastic/kibana-presentation
 /x-pack/test/accessibility/apps/group3/canvas.ts @elastic/kibana-presentation
 /x-pack/test/upgrade/apps/canvas @elastic/kibana-presentation
 /x-pack/test/upgrade/apps/dashboard @elastic/kibana-presentation
@@ -2041,7 +2041,8 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/task_manager_claimer_update_by_query/ @elastic/response-ops
 /docs/user/alerting/ @elastic/response-ops
 /docs/management/connectors/ @elastic/response-ops
-/x-pack/test/cases_api_integration/ @elastic/response-ops
+/x-pack/platform/test/cases_api_integration/ @elastic/response-ops
+/x-pack/solutions/security/test/cases_api_integration/ @elastic/response-ops
 /x-pack/test/functional/services/cases/ @elastic/response-ops @elastic/kibana-cases
 /x-pack/test/functional_with_es_ssl/apps/cases/ @elastic/response-ops @elastic/kibana-cases
 /x-pack/test/api_integration/apis/cases/ @elastic/response-ops @elastic/kibana-cases
@@ -2704,7 +2705,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/test/functional_solution_sidenav/services.ts @elastic/appex-sharedux
 /x-pack/test/functional_solution_sidenav/index.ts @elastic/appex-sharedux
 /x-pack/test/functional_cloud @elastic/appex-sharedux
-/x-pack/test/functional/page_objects/reporting_page.ts @elastic/appex-sharedux
+/x-pack/platform/test/functional/page_objects/reporting_page.ts @elastic/response-ops
 /x-pack/platform/test/functional/services/user_menu.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/179270
 /x-pack/test/accessibility/apps/**/config.ts @elastic/appex-sharedux
 /x-pack/test/accessibility/apps/**/index.ts @elastic/appex-sharedux
