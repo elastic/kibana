@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
-import type { CoreStart, SavedObjectReference, ResolvedSimpleSavedObject } from '@kbn/core/public';
+
+import type { Ast } from '@kbn/interpreter';
+import type { CoreStart } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
+import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
 import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -340,14 +343,14 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
   // datasources should validate their arguments
   initialize: (
     state?: P,
-    savedObjectReferences?: SavedObjectReference[],
+    references?: Reference[],
     initialContext?: VisualizeFieldContext | VisualizeEditorContext,
     indexPatternRefs?: IndexPatternRef[],
     indexPatterns?: IndexPatternMap
   ) => T;
 
   // Given the current state, which parts should be saved?
-  getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
+  getPersistableState: (state: T) => { state: P; references: Reference[] };
 
   insertLayer: (state: T, newLayerId: string, linkToLayers?: string[]) => T;
   createEmptyLayer: (indexPatternId: string) => T;
@@ -506,9 +509,9 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
    */
   isEqual: (
     persistableState1: P,
-    references1: SavedObjectReference[],
+    references1: Reference[],
     persistableState2: P,
-    references2: SavedObjectReference[]
+    references2: Reference[]
   ) => boolean;
   /**
    * Get RenderEventCounters events for telemetry
@@ -525,11 +528,11 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
 
   getDatasourceInfo: (
     state: T,
-    references?: SavedObjectReference[],
+    references?: Reference[],
     dataViewsService?: DataViewsPublicPluginStart
   ) => Promise<DataSourceInfo[]>;
 
-  injectReferencesToLayers?: (state: T, references?: SavedObjectReference[]) => T;
+  injectReferencesToLayers?: (state: T, references?: Reference[]) => T;
 }
 
 export interface DatasourceFixAction<T> {
@@ -1085,7 +1088,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
       mainPalette?: SuggestionRequest['mainPalette'],
       datasourceStates?: GeneralDatasourceStates,
       annotationGroups?: AnnotationGroups,
-      references?: SavedObjectReference[]
+      references?: Reference[]
     ): T;
   };
 
@@ -1126,7 +1129,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     state: T,
     datasource?: Datasource,
     datasourceState?: { state: unknown }
-  ) => { state: P; savedObjectReferences: SavedObjectReference[] };
+  ) => { state: P; references: Reference[] };
   /** Frame needs to know which layers the visualization is currently using */
   getLayerIds: (state: T) => string[];
   /** Reset button on each layer triggers this */
@@ -1363,9 +1366,9 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
 
   isEqual?: (
     state1: P,
-    references1: SavedObjectReference[],
+    references1: Reference[],
     state2: P,
-    references2: SavedObjectReference[],
+    references2: Reference[],
     annotationGroups: AnnotationGroups
   ) => boolean;
 
@@ -1473,9 +1476,9 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
 }
 
 export interface SharingSavedObjectProps {
-  outcome?: ResolvedSimpleSavedObject['outcome'];
-  aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
-  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
+  outcome?: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
   sourceId?: string;
 }
 

@@ -75,7 +75,6 @@ const createInstance = async () => {
       application: applicationServiceMock.createStartContract(),
       embeddable: embeddablePluginMock.createStartContract(),
       spaces: spacesPluginMock.createStartContract(),
-      savedObjectsClient: coreMock.createStart().savedObjects.client,
       savedObjectsTaggingOss: savedObjectTaggingOssPluginMock.createStart(),
       savedSearch: savedSearchPluginMock.createStartContract(),
       navigation: navigationPluginMock.createStartContract(),

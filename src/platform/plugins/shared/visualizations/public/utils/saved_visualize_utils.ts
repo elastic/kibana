@@ -8,7 +8,7 @@
  */
 
 import _ from 'lodash';
-import type { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import {
   extractSearchSourceReferences,
@@ -18,7 +18,7 @@ import {
 } from '@kbn/data-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { VisualizationSavedObject, Reference } from '../../common/content_management';
+import { VisualizationSavedObject } from '../../common/content_management';
 import { saveWithConfirmation, checkForDuplicateTitle } from './saved_objects_utils';
 import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
 import type {
@@ -49,25 +49,13 @@ const getDefaults = (opts: GetVisOptions) => ({
   version: 1,
 });
 
-export function mapHitSource(
+function mapHitSource(
   visTypes: Pick<TypesStart, 'get'>,
-  {
-    attributes,
-    id,
-    references,
-    updatedAt,
-    managed,
-  }: {
-    attributes: SavedObjectAttributes;
-    id: string;
-    references: SavedObjectReference[];
-    updatedAt?: string;
-    managed?: boolean;
-  }
+  { attributes, id, references, updatedAt, managed }: VisualizationSavedObject
 ) {
   const newAttributes: {
     id: string;
-    references: SavedObjectReference[];
+    references: Reference[];
     managed?: boolean;
     url: string;
     savedObjectType?: string;
@@ -154,8 +142,8 @@ export async function findListItems(
   visTypes: Pick<TypesStart, 'get' | 'getAliases'>,
   search: string,
   size: number,
-  references?: SavedObjectReference[],
-  referencesToExclude?: SavedObjectReference[]
+  references?: Reference[],
+  referencesToExclude?: Reference[]
 ) {
   const visAliases = visTypes.getAliases();
   const extensions = visAliases
@@ -195,7 +183,7 @@ export async function findListItems(
 
       if (config) {
         return {
-          ...config.toListItem(savedObject as any),
+          ...config.toListItem(savedObject),
           references: savedObject.references,
         };
       } else {
@@ -339,7 +327,7 @@ export async function saveVisualization(
     version: savedObject.version ?? '1',
     kibanaSavedObjectMeta: {},
   };
-  let references: SavedObjectReference[] = baseReferences;
+  let references: Reference[] = baseReferences;
 
   if (savedObject.searchSource) {
     const { searchSourceJSON, references: searchSourceReferences } =

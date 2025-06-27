@@ -19,15 +19,9 @@ import {
   CreateResult,
   UpdateResult,
 } from '@kbn/content-management-plugin/common';
-import type { ContentManagementCrudTypes } from '@kbn/content-management-utils';
+import type { ContentManagementCrudTypes, Reference } from '@kbn/content-management-utils';
 
 import { VisualizationContentType } from '../types';
-
-export interface Reference {
-  type: string;
-  id: string;
-  name: string;
-}
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type VisualizationSavedObjectAttributes = {
@@ -40,6 +34,7 @@ export type VisualizationSavedObjectAttributes = {
   visState?: string;
   uiStateJSON?: string;
   savedSearchRefName?: string;
+  typeName?: unknown;
 };
 
 export interface VisualizationSavedObject {
