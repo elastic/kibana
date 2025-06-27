@@ -16,6 +16,10 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { sourcererAdapterSelector } from '../redux/selectors';
 import type { SharedDataViewSelectionState } from '../redux/types';
 
+const INITIAL_DV = new DataView({
+  fieldFormats: {} as FieldFormatsStartCommon,
+});
+
 /*
  * This hook should be used whenever we need the actual DataView and not just the spec for the
  * selected data view.
@@ -33,12 +37,7 @@ export const useDataView = (
   );
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const [localStatus, setLocalStatus] = useState<SharedDataViewSelectionState['status']>('loading');
-  const [retrievedDataView, setRetrievedDataView] = useState<DataView>(
-    () =>
-      new DataView({
-        fieldFormats: {} as FieldFormatsStartCommon,
-      })
-  );
+  const [retrievedDataView, setRetrievedDataView] = useState<DataView>(INITIAL_DV);
 
   useEffect(() => {
     (async () => {
