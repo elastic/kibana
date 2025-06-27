@@ -24,11 +24,3 @@ export const setAdvancedSettings = async (
     .send({ changes: settings })
     .expect(200);
 };
-export const getAdvancedSettings = async (supertest: SuperTest.Agent) => {
-  return supertest
-    .get('/internal/kibana/settings')
-    .set('kbn-xsrf', 'true')
-    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-    .expect(200);
-};
