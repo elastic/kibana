@@ -39,7 +39,7 @@ const entityDefinitionsRoute = createServerRoute({
   async handler({ params, request, getScopedClients }): Promise<EntityDefinitionsResponse[]> {
     const { soClient, packageClient, scopedClusterClient } = await getScopedClients({ request });
     const { namespace } = params.path;
-    const { entityId } = params.query;
+    const { entityId } = params.query || {};
 
     const [entityDefinitions, navigationItems] = await Promise.all([
       getEntityDefinitions({ soClient, namespace }),
