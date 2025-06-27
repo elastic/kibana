@@ -50,7 +50,7 @@ export const GroupingLicenseCtaMessageTrialButton: React.FC<
 export const groupingLicenseCtaMessageTitle = i18n.translate(
   'xpack.logsOverview.groupingLicenseCtaMessageTitle',
   {
-    defaultMessage: 'Unlock advanced insights',
+    defaultMessage: 'Unlock advanced log insights',
   }
 );
 
@@ -58,7 +58,7 @@ export const groupingLicenseCtaMessageDescription = i18n.translate(
   'xpack.logsOverview.groupingLicenseCtaMessageDescription',
   {
     defaultMessage:
-      'Get instant access to relevant, grouped patterns that highlight the most interesting logs.',
+      'Get instant access to machine learning patterns that group and highlight your most important logs.',
   }
 );
 
@@ -72,6 +72,6 @@ export const groupingLicenseCtaMessageDetailsButtonTitle = i18n.translate(
 export const groupingLicenseCtaMessageTrialButtonTitle = i18n.translate(
   'xpack.logsOverview.groupingLicenseCtaMessageTrialButtonTitle',
   {
-    defaultMessage: 'Start trial',
+    defaultMessage: 'Start free trial',
   }
 );
