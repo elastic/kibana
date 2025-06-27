@@ -13,7 +13,7 @@ const ELASTIC_SUPPORT_LINK = 'https://support.elastic.co/';
 
 export const BenefitsCallout = () => (
   <>
-    <EuiSpacer size="s" />
+    <EuiSpacer size="m" />
     <EuiCallOut
       color="warning"
       title={
@@ -38,6 +38,6 @@ export const BenefitsCallout = () => (
         }}
       />
     </EuiCallOut>
-    <EuiSpacer size="s" />
+    <EuiSpacer size="m" />
   </>
 );
