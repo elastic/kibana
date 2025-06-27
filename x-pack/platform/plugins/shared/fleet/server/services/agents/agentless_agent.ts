@@ -378,22 +378,22 @@ class AgentlessAgentService {
       kuery: `policy_id:"${policy.id}"`,
     });
 
-    let defaultFleetHost: FleetServerHost | undefined;
-
-    if (policy.fleet_server_host_id) {
-      // Tech Debt: change this when we add the internal fleet server config to use the internal fleet server host
-      // https://github.com/elastic/security-team/issues/9695
-      defaultFleetHost = await fleetServerHostService.get(soClient, policy.fleet_server_host_id);
-    } else {
-      throw new AgentlessAgentConfigError('missing fleet_server_host_id');
-    }
-
-    if (!defaultFleetHost) {
-      throw new AgentlessAgentConfigError('missing default Fleet server host');
-    }
     if (!enrollmentApiKeys.length) {
       throw new AgentlessAgentConfigError('missing Fleet enrollment token');
     }
+
+    if (!policy.fleet_server_host_id) {
+      throw new AgentlessAgentConfigError('missing fleet_server_host_id');
+    }
+
+    let defaultFleetHost: FleetServerHost;
+
+    try {
+      defaultFleetHost = await fleetServerHostService.get(soClient, policy.fleet_server_host_id);
+    } catch (e) {
+      throw new AgentlessAgentConfigError('missing default Fleet server host');
+    }
+
     const fleetToken = enrollmentApiKeys[0].api_key;
     const fleetUrl = defaultFleetHost?.host_urls[0];
     return { fleetUrl, fleetToken };
