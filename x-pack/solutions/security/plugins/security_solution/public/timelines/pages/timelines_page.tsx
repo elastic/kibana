@@ -33,7 +33,7 @@ export const TimelinesPage = React.memo(() => {
 
   const { dataView, status } = useDataView(DataViewManagerScopeName.default);
   // NOTE: there should be a Suspense / some kind of loader here as this value is not settled immediately
-  const experimentalIndicesExist = !!dataView.matchedIndices?.length;
+  const experimentalIndicesExist = !!dataView.matchedIndices.length;
 
   const indicesExist = newDataViewPickerEnabled ? experimentalIndicesExist : oldIndicesExist;
 
@@ -49,7 +49,7 @@ export const TimelinesPage = React.memo(() => {
   const timelineType =
     tabName === TimelineTypeEnum.default ? TimelineTypeEnum.default : TimelineTypeEnum.template;
 
-  if (newDataViewPickerEnabled && status === 'loading') {
+  if (newDataViewPickerEnabled && status !== 'ready') {
     return null;
   }
 
