@@ -96,7 +96,7 @@ const cloudProjects: Array<[ServerlessProjectType, string]> = [
           const owner = getOwnerFromRuleConsumerProducer({
             consumer: 'should be ignored',
             producer: 'should be ignored',
-            serverlessProjectType: cloudProjectType as ServerlessProjectType,
+            serverlessProjectType: cloudProjectType,
           });
 
           expect(owner).toBe(expectedOwner);
