@@ -144,8 +144,10 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
       }
     };
 
-    fetchTags();
-  }, [setAllTags, notifications]);
+    if (agent?.active) {
+      fetchTags();
+    }
+  }, [setAllTags, notifications, agent]);
 
   const headerRightContent = useMemo(
     () =>
