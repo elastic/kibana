@@ -7,7 +7,7 @@
 //   indChart__legend--small
 //   indChart__legend-isLoading
 
-@import './application/components/mappings_editor/index';
+@use './application/components/mappings_editor/index';
 
 .indTable {
   // The index table is a bespoke table and can't make use of EuiBasicTable's width settings

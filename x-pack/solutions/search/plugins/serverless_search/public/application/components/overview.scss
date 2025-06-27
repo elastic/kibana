@@ -1,10 +1,14 @@
+@use 'sass:math';
+@use 'sass:color';
+@use 'eui/eui_variables' as eui;
+
 .serverlessSearchHeaderSection > div {
   padding-bottom: 0;
   padding-top: 0;
 }
 
 .serverlessSearchOverviewFooterSection {
-  background-color: transparentize($euiColorPrimary, .9);
+  background-color: color.transparentize(eui.$euiColorPrimary, .9);
 }
 
 .serverlessSearchCloudDetailsCopyPanel {

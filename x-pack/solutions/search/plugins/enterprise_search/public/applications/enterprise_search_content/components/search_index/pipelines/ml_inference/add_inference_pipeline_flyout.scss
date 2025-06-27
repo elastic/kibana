@@ -1,6 +1,9 @@
+@use 'sass:math';
+@use 'eui/eui_variables' as eui;
+
 .enterpriseSearchInferencePipelineFlyout {
   .resizableContainer {
-    min-height: $euiSizeXL * 10;
+    min-height: math.mul(eui.$euiSizeXL, 10);
 
     .reviewCodeBlock {
       height: 100%;
@@ -9,7 +12,7 @@
 
   .enterpriseSearchInferencePipelineFlyoutFooter {
     .euiButtonEmpty {
-      padding-inline: $euiSizeM;
+      padding-inline: eui.$euiSizeM;
     }
   }
 }

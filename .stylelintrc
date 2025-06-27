@@ -34,6 +34,7 @@ rules:
       - for
       - at-root
       - warn
+      - use
   comment-no-empty: true
   no-duplicate-at-import-rules: true
   no-duplicate-selectors: true

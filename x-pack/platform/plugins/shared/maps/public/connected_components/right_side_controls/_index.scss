@@ -1,6 +1,6 @@
-@import 'mixins';
+@use 'mixins';
 
-@import 'right_side_controls';
-@import 'attribution_control/attribution_control';
-@import 'layer_control/index';
-@import 'mouse_coordinates_control/mouse_coordinates_control';
+@use 'right_side_controls';
+@use 'attribution_control/attribution_control';
+@use 'layer_control/index';
+@use 'mouse_coordinates_control/mouse_coordinates_control';

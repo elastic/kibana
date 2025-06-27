@@ -1,5 +1,5 @@
-@import '@elastic/eui/src/global_styling/variables/size';
-@import '../shared';
+@use '@elastic/eui/src/global_styling/variables/size';
+@use '../shared';
 
 .pipelineProcessorsEditor__tree {
   &__container {
@@ -31,6 +31,7 @@
       pointer-events: none;
     }
   }
+
   $dropZoneButtonHeight: 60px;
   $dropZoneButtonOffsetY: $dropZoneButtonHeight * .5;
 
@@ -45,6 +46,7 @@
 
     &--visible {
       pointer-events: visible !important;
+
       &:hover {
         transform: none !important;
       }
@@ -62,6 +64,7 @@
   &__onFailureHandlerContainer {
     margin-top: $euiSizeS;
     margin-bottom: $euiSizeS;
+
     & > * {
       overflow: visible;
     }

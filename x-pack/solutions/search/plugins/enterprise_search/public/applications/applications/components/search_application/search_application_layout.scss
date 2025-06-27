@@ -1,4 +1,6 @@
+@use 'sass:math';
+@use 'eui/eui_variables' as eui;
 
 .searchApplicationHeaderBackgroundColor {
-  background-color: $euiColorLightestShade;
+  background-color: eui.$euiColorLightestShade;
 }

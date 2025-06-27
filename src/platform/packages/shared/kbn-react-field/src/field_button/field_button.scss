@@ -1,23 +1,27 @@
+@use 'sass:math';
+@use 'eui/eui_variables' as eui;
+@use 'eui/eui_mixins' as mixins;
+
 .kbnFieldButton {
-  @include euiFontSizeS;
-  border-radius: $euiBorderRadius;
-  margin-bottom: $euiSizeXS;
-  padding: 0 $euiSizeS;
+  @include mixins.euiFontSizeS;
+  border-radius: eui.$euiBorderRadius;
+  margin-bottom: eui.$euiSizeXS;
+  padding: 0 eui.$euiSizeS;
   display: flex;
   align-items: flex-start;
-  transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance,
-    background-color $euiAnimSpeedFast $euiAnimSlightResistance; // sass-lint:disable-line indentation
+  transition: box-shadow eui.$euiAnimSpeedFast eui.$euiAnimSlightResistance,
+    background-color eui.$euiAnimSpeedFast eui.$euiAnimSlightResistance; // sass-lint:disable-line indentation
 
   &:focus-within,
   &-isActive {
-    @include euiFocusRing;
+    @include mixins.euiFocusRing;
   }
 }
 
 .kbnFieldButton__button {
   flex-grow: 1;
   text-align: left;
-  padding: $euiSizeS 0;
+  padding: eui.$euiSizeS 0;
   display: flex;
   align-items: flex-start;
   line-height: normal;
@@ -30,46 +34,46 @@
 
 .kbnFieldButton__name {
   flex-grow: 1;
-  padding: 0 $euiSizeS;
+  padding: 0 eui.$euiSizeS;
 }
 
 .kbnFieldButton__infoIcon {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: $euiSize;
+  min-height: eui.$euiSize;
   flex-shrink: 0;
   line-height: 0;
 }
 
 .kbnFieldButton__fieldAction {
-  margin-left: $euiSizeS;
+  margin-left: eui.$euiSizeS;
 }
 
 .kbnFieldButton__dragHandle {
-  margin-right: $euiSizeS;
+  margin-right: eui.$euiSizeS;
 }
 
 .kbnFieldButton__fieldAction,
 .kbnFieldButton__dragHandle {
-  line-height: $euiSizeXL;
+  line-height: eui.$euiSizeXL;
 }
 
 // Reduce text size and spacing for the small size
 .kbnFieldButton--xs {
-  font-size: $euiFontSizeXS;
+  font-size: eui.$euiFontSizeXS;
 
   .kbnFieldButton__button {
-    padding: $euiSizeXS 0;
+    padding: eui.$euiSizeXS 0;
   }
 
   .kbnFieldButton__fieldAction {
-    margin-left: $euiSizeXS;
+    margin-left: eui.$euiSizeXS;
   }
 
   .kbnFieldButton__fieldAction,
   .kbnFieldButton__dragHandle {
-    line-height: $euiSizeL;
+    line-height: eui.$euiSizeL;
   }
 }
 

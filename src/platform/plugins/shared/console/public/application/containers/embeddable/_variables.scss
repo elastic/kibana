@@ -1,4 +1,7 @@
-$embeddableConsoleBackground: lightOrDarkTheme($euiColorDarkestShade, $euiColorInk);
-$embeddableConsoleText: lighten(makeHighContrastColor($euiColorLightestShade, $embeddableConsoleBackground), 20%);
-$embeddableConsoleInitialHeight: $euiSizeXXL;
-$embeddableConsoleMaxHeight: calc(100vh - var(--euiFixedHeadersOffset, 0) - $euiSize);
+@use 'sass:math';
+@use 'eui/eui_variables' as eui;
+
+$embeddableConsoleBackground: lightOrDarkTheme(eui.$euiColorDarkestShade, eui.$euiColorInk);
+$embeddableConsoleText: lighten(makeHighContrastColor(eui.$euiColorLightestShade, $embeddableConsoleBackground), 20%);
+$embeddableConsoleInitialHeight: eui.$euiSizeXXL;
+$embeddableConsoleMaxHeight: calc(100vh - var(--euiFixedHeadersOffset, 0) - eui.$euiSize);

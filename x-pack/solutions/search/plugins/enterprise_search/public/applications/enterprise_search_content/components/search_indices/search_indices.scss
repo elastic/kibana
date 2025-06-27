@@ -1,3 +1,6 @@
+@use 'sass:math';
+@use 'eui/eui_variables' as eui;
+
 .entSearchIndicesSearchBar {
-  max-width: $euiSizeXXL * 10
+  max-width: math.mul(eui.$euiSizeXXL, 10);
 }

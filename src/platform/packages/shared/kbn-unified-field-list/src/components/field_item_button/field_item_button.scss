@@ -1,3 +1,6 @@
+@use 'sass:math';
+@use 'eui/eui_variables' as eui;
+
 // Removes EUI focus ring
 @mixin removeEuiFocusRing {
   outline: none;
@@ -12,7 +15,7 @@
   @include removeEuiFocusRing;
 
   #{$target} {
-    outline: $euiFocusRingSize solid currentColor; // Safari & Firefox
+    outline: eui.$euiFocusRingSize solid currentColor; // Safari & Firefox
   }
 
   &:focus-visible #{$target} {
@@ -29,14 +32,16 @@
  * 2. When tabbed to, this element needs to be visible for keyboard accessibility.
  */
 .unifiedFieldListItemButton__action {
-  opacity: 0; /* 1 */
+  opacity: 0;
+  /* 1 */
 
   &--always {
     opacity: 1;
   }
 
   &:focus {
-    opacity: 1; /* 2 */
+    opacity: 1;
+    /* 2 */
   }
 }
 
@@ -45,7 +50,9 @@
   @include euiSlightShadow;
   background: $euiColorEmptyShade;
   border-radius: $euiBorderRadius;
+
   &.kbnFieldButton {
+
     &:focus-within,
     &-isActive {
       @include removeEuiFocusRing;
@@ -106,6 +113,7 @@
     .unifiedFieldListItemButton__fieldIcon {
       opacity: 0;
     }
+
     .unifiedFieldListItemButton__fieldIconDrag {
       opacity: 1;
     }

@@ -7,10 +7,10 @@
 //   mapChart__legend--small
 //   mapChart__legend-isLoading
 
-@import 'mixins';
-@import 'mapbox_hacks';
-@import 'connected_components/index';
-@import 'components/index';
-@import 'classes/index';
-@import 'animations';
-@import 'react_embeddable/index';
+@use 'mixins';
+@use 'mapbox_hacks';
+@use 'connected_components/index';
+@use 'components/index';
+@use 'classes/index';
+@use 'animations';
+@use 'react_embeddable/index';

@@ -1,21 +1,24 @@
-@import './drag_drop_mixins';
+@use 'sass:math';
+@use './drag_drop_mixins';
+@use 'eui/eui_variables' as eui;
 
 // Drop area
 .domDroppable {
   @include mixinDomDragDrop;
+
   &:not(.domDroppable__overlayWrapper) {
     @include mixinDomDroppable;
   }
 }
 
 .domDraggable_ghost {
-  position: absolute !important;  // sass-lint:disable-line no-important
-  margin: 0 !important;  // sass-lint:disable-line no-important
+  position: absolute !important; // sass-lint:disable-line no-important
+  margin: 0 !important; // sass-lint:disable-line no-important
   top: 0;
   width: 100%;
   left: 0;
   opacity: .9;
-  transform: translate($euiSizeS, $euiSizeL);
+  transform: translate(eui.$euiSizeS, eui.$euiSizeL);
   z-index: $domDragDropZLevel3;
   pointer-events: none;
   outline: $euiFocusRingSize solid currentColor; // Safari & Firefox
@@ -51,7 +54,7 @@
 }
 
 .domDroppable--incompatible:not(.domDroppable__overlayWrapper) {
-  background-color:  $euiColorBackgroundBaseWarning !important;
+  background-color: $euiColorBackgroundBaseWarning !important;
   &:before {
     border: $euiBorderWidthThin dashed $euiColorBorderBaseWarning !important;
   }

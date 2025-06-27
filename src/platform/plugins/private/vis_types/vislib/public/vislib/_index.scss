@@ -1,8 +1,8 @@
-@import './variables';
-@import './vislib_vis_type';
+@use './variables';
+@use './vislib_vis_type';
 
-@import './lib/index';
-@import './components/tooltip/index';
-@import './components/legend/index';
+@use './lib/index';
+@use './components/tooltip/index';
+@use './components/legend/index';
 
-@import './visualizations/gauges/index';
+@use './visualizations/gauges/index';
