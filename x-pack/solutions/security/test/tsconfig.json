@@ -16,7 +16,12 @@
     "../../../../typings/**/*",
     "../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
   ],
-  "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
+  "exclude": [
+    "target/**/*",
+    "*/plugins/**/*",
+    "plugins/**/*",
+    "security_solution_api_integration/**/*",
+  ],
   "kbn_references": [
     "@kbn/test",
     "@kbn/expect",
