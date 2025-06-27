@@ -147,7 +147,7 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
       )}
     </>
   ) : (
-    <EuiCallOut title={i18n.EMPTY_MAPPING_WARNING_TITLE} color="warning" iconType="help">
+    <EuiCallOut title={i18n.EMPTY_MAPPING_WARNING_TITLE} color="warning" iconType="question">
       {i18n.EMPTY_MAPPING_WARNING_DESC}
     </EuiCallOut>
   );
