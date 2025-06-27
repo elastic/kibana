@@ -44,13 +44,10 @@ describe('dashboard locator', () => {
 
     expect(location).toMatchObject({
       app: 'dashboards',
-      path: '#/create?_g=(time:(from:now-15m,mode:relative,to:now))',
+      path: '#/create?_g=(time:(from:now-15m,to:now))',
       state: {
-        timeRange: {
-          from: 'now-15m',
-          mode: 'relative',
-          to: 'now',
-        },
+        timeFrom: 'now-15m',
+        timeTo: 'now',
       },
     });
   });
@@ -91,7 +88,7 @@ describe('dashboard locator', () => {
 
     expect(location).toMatchObject({
       app: 'dashboards',
-      path: `#/view/123?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))`,
+      path: `#/view/123?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,to:now))`,
       state: {
         filters: [
           {
@@ -126,11 +123,8 @@ describe('dashboard locator', () => {
           pause: false,
           value: 300,
         },
-        timeRange: {
-          from: 'now-15m',
-          mode: 'relative',
-          to: 'now',
-        },
+        timeFrom: 'now-15m',
+        timeTo: 'now',
       },
     });
   });
@@ -152,7 +146,7 @@ describe('dashboard locator', () => {
 
     expect(location).toMatchObject({
       app: 'dashboards',
-      path: `#/view/123?_g=(filters:!(),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&searchSessionId=__sessionSearchId__`,
+      path: `#/view/123?_g=(filters:!(),refreshInterval:(pause:!f,value:300),time:(from:now-15m,to:now))&searchSessionId=__sessionSearchId__`,
       state: {
         filters: [],
         query: {
@@ -163,11 +157,8 @@ describe('dashboard locator', () => {
           pause: false,
           value: 300,
         },
-        timeRange: {
-          from: 'now-15m',
-          mode: 'relative',
-          to: 'now',
-        },
+        timeFrom: 'now-15m',
+        timeTo: 'now',
       },
     });
   });
@@ -228,7 +219,7 @@ describe('dashboard locator', () => {
       useHash: false,
     });
 
-    expect(location.path.indexOf('relative')).toBeGreaterThan(1);
+    expect(location.path).toBe('#/create?_g=(time:(from:now-15m,to:now))');
   });
 
   describe('preserving saved filters', () => {
