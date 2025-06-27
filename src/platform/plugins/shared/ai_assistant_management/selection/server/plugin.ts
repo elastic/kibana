@@ -57,7 +57,7 @@ export class AIAssistantManagementSelectionPlugin
           'aiAssistantManagementSelection.preferredAIAssistantTypeSettingDescription',
           {
             defaultMessage:
-              "Control whether the Search & Observability or Security AI assistants appear only in their own solutions, more widely across Kibana (but not in each other's solution), or not at all. Customize assistant availability to fit your workflow.",
+              "Control whether the Search & Observability or Security AI assistants appear only in their own solutions, more widely across Kibana (but not in each others solution), or not at all. Customize assistant availability to fit your workflow.",
           }
         ),
         schema: schema.oneOf(
