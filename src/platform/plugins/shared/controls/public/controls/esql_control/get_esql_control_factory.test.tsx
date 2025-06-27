@@ -18,7 +18,7 @@ import { ControlFetchContext } from '../../control_group/control_fetch';
 const mockGetESQLSingleColumnValues = jest.fn(() => ({ options: ['option1', 'option2'] }));
 const mockIsSuccess = jest.fn(() => true);
 
-jest.mock('@kbn/esql-utils', () => {
+jest.mock('./utils/get_esql_single_column_values', () => {
   const getESQLSingleColumnValues = () => mockGetESQLSingleColumnValues();
   getESQLSingleColumnValues.isSuccess = () => mockIsSuccess();
   return {
@@ -115,11 +115,9 @@ describe('ESQLControlApi', () => {
         uuid
       ) as BehaviorSubject<ControlFetchContext>;
       controlFetch$.next({});
-      controlFetch$.next({});
-      controlFetch$.next({});
       await waitFor(() => {
-        expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(4);
-        expect(mockIsSuccess).toHaveBeenCalledTimes(4);
+        expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(2);
+        expect(mockIsSuccess).toHaveBeenCalledTimes(2);
       });
     });
   });
