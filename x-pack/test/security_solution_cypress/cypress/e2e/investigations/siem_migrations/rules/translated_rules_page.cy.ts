@@ -31,7 +31,7 @@ import { GET_STARTED_URL } from '../../../../urls/navigation';
 describe(
   'Rule Migrations - Translated Rules Page',
   {
-    tags: ['@ess', '@serverless', '@serverlessQA'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     beforeEach(() => {
