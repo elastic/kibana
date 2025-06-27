@@ -14,6 +14,7 @@ import {
   appendToESQLQuery,
   isESQLColumnSortable,
   hasTransformationalCommand,
+  getCategorizeField,
 } from '@kbn/esql-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
@@ -244,9 +245,35 @@ export class LensVisService {
             preferredVisAttributes: externalVisContext?.attributes,
           });
 
+          let suggestion = allSuggestions[0];
+
+          const categorizeField = getCategorizeField(queryParams.query.esql);
+          if (categorizeField) {
+            const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
+
+            if (
+              'layers' in suggestionVisualizationState &&
+              Array.isArray(suggestionVisualizationState.layers)
+            ) {
+              suggestion = {
+                ...suggestion,
+                visualizationState: {
+                  ...(suggestionVisualizationState ?? {}),
+                  preferredSeriesType: 'horizontal_bar',
+                  layers: suggestionVisualizationState.layers.map((layer) => {
+                    return {
+                      ...layer,
+                      seriesType: 'bar_horizontal',
+                    };
+                  }),
+                },
+              };
+            }
+          }
+
           if (allSuggestions.length) {
             availableSuggestionsWithType.push({
-              suggestion: allSuggestions[0],
+              suggestion,
               type: UnifiedHistogramSuggestionType.lensSuggestion,
             });
           }
@@ -622,12 +649,16 @@ export class LensVisService {
       return [];
     }
 
-    const preferredChartType = preferredVisAttributes
+    let preferredChartType = preferredVisAttributes
       ? mapVisToChartType(preferredVisAttributes.visualizationType)
       : undefined;
 
     let visAttributes = preferredVisAttributes;
 
+    const categorizeField = getCategorizeField(query.esql);
+    if (categorizeField && !preferredVisAttributes && !preferredChartType) {
+      preferredChartType = ChartType.XY;
+    }
     if (preferredVisAttributes) {
       visAttributes = injectESQLQueryIntoLensLayers(preferredVisAttributes, query);
     }
