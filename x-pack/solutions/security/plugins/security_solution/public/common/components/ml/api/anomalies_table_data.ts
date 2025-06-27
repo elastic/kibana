@@ -9,12 +9,17 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { Anomalies, InfluencerInput, CriteriaFields } from '../types';
 import { KibanaServices } from '../../../lib/kibana';
 
+export interface SeverityThreshold {
+  min: number;
+  max?: number;
+}
+
 export interface Body {
   jobIds: string[];
   criteriaFields: CriteriaFields[];
   influencers: InfluencerInput[];
   aggregationInterval: string;
-  threshold: number;
+  threshold: SeverityThreshold[];
   earliestMs: number;
   latestMs: number;
   dateFormatTz: string;
