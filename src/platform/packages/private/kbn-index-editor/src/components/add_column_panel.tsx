@@ -73,6 +73,7 @@ export const AddColumnPanel: React.FC<AddColumnPanelProps> = ({ onHide }) => {
           <EuiFieldText
             autoFocus
             compressed
+            required
             placeholder={i18n.translate('indexEditor.addColumn.name', {
               defaultMessage: 'Column name',
             })}

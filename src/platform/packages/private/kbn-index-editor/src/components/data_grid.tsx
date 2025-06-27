@@ -25,8 +25,6 @@ import { difference, intersection } from 'lodash';
 import { KibanaContextExtra } from '../types';
 import { getCellValueRenderer } from './value_input_control';
 
-const MemoizedUnifiedDataTable = React.memo(UnifiedDataTable);
-
 interface ESQLDataGridProps {
   rows: DataTableRecord[];
   dataView: DataView;
@@ -166,7 +164,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
 
   return (
     <>
-      <MemoizedUnifiedDataTable
+      <UnifiedDataTable
         columns={visibleColumns}
         rows={rows}
         columnsMeta={columnsMeta}
