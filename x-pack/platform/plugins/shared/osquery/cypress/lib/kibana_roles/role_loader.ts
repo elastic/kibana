@@ -7,16 +7,13 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { KbnClient } from '@kbn/test';
-import { Role } from '@kbn/security-plugin/common';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { KbnClient } from '@kbn/test';
+import type { Role } from '@kbn/security-plugin/common';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { inspect } from 'util';
-import { AxiosError } from 'axios';
-import {
-  getServerlessSecurityKibanaRoleDefinitions,
-  ServerlessSecurityRoles,
-  YamlRoleDefinitions,
-} from './kibana_roles';
+import type { AxiosError } from 'axios';
+import type { ServerlessSecurityRoles, YamlRoleDefinitions } from './kibana_roles';
+import { getServerlessSecurityKibanaRoleDefinitions } from './kibana_roles';
 import { STANDARD_HTTP_HEADERS } from '../default_http_headers';
 
 const ignoreHttp409Error = (error: AxiosError) => {
@@ -55,11 +52,13 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
         `Unknown role: [${String(name)}]. Valid values are: [${Object.keys(this.roles).join(', ')}]`
       );
     }
+
     const roleName = role.name;
     const roleNames = [roleName];
     if (additionalRoleName) {
       roleNames.push(additionalRoleName);
     }
+
     await this.createRole(role);
     await this.createUser(roleName, 'changeme', roleNames);
 
@@ -88,6 +87,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
       .catch(this.logPromiseError)
       .then((response) => {
         this.logger.info(`Role [${roleName}] created/updated`, response?.data);
+
         return response;
       });
   }
@@ -120,6 +120,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
       .catch(this.logPromiseError)
       .then((response) => {
         this.logger.info(`User [${username}] created/updated`, response?.data);
+
         return response;
       });
   }
