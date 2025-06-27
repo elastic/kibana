@@ -12,10 +12,13 @@ export function parsePrimitive(value: unknown): string | number | boolean | unkn
     return value;
   }
   const trimmed = value.trim();
-  if (/^(true|false)$/i.test(trimmed)) {
-    return trimmed.toLowerCase() === 'true';
-  }
-  if (trimmed !== '' && !isNaN(Number(trimmed))) {
+  const lower = trimmed.toLowerCase();
+  // booleans
+  if (lower === 'true') return true;
+  if (lower === 'false') return false;
+
+  // numbers
+  if (trimmed !== '' && !isNaN(Number(trimmed) && isFinite(Number(trimmed)))) {
     return Number(trimmed);
   }
   return value;
