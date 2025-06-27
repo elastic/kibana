@@ -417,7 +417,8 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         new Map([
           ['execute-timeout', { equal: 1 }],
           ['execute-backfill', { equal: 1 }],
-        ])
+        ]),
+        true // collapse by execution UUID
       );
 
       // each event log event should have these fields
