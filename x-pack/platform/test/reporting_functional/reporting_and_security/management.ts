@@ -17,6 +17,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const browser = getService('browser');
   const reportingFunctional = getService('reportingFunctional');
   const reportingApi = getService('reportingAPI');
+  const retry = getService('retry');
 
   describe('Access to Management > Reporting', () => {
     before(async () => {
@@ -27,57 +28,59 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await reportingApi.deleteAllReports();
     });
 
-    it('does not allow user that does not have reporting privileges', async () => {
-      await reportingFunctional.loginDataAnalyst();
-      await PageObjects.common.navigateToApp('reporting');
-      await testSubjects.missingOrFail('reportJobListing');
-    });
+    describe('Exports', () => {
+      it('does allow user with reporting privileges', async () => {
+        await reportingFunctional.loginReportingUser();
+        await PageObjects.common.navigateToApp('reporting');
+        await testSubjects.existOrFail('reportJobListing');
+      });
 
-    it('does allow user with reporting privileges', async () => {
-      await reportingFunctional.loginReportingUser();
-      await PageObjects.common.navigateToApp('reporting');
-      await testSubjects.existOrFail('reportJobListing');
-    });
+      it('Allows users to navigate back to where a report was generated', async () => {
+        const dashboardTitle = 'Ecom Dashboard';
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);
 
-    it('Allows users to navigate back to where a report was generated', async () => {
-      const dashboardTitle = 'Ecom Dashboard';
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);
+        await PageObjects.reporting.selectExportItem('PDF');
+        await PageObjects.reporting.clickGenerateReportButton();
 
-      await PageObjects.reporting.selectExportItem('PDF');
-      await PageObjects.reporting.clickGenerateReportButton();
+        await PageObjects.common.navigateToApp('reporting');
+        await PageObjects.common.sleep(3000); // Wait an amount of time for auto-polling to refresh the jobs
 
-      await PageObjects.common.navigateToApp('reporting');
-      await PageObjects.common.sleep(3000); // Wait an amount of time for auto-polling to refresh the jobs
+        // We do not need to wait for the report to finish generating
+        await (await testSubjects.find('euiCollapsedItemActionsButton')).click();
+        await (await testSubjects.find('reportOpenInKibanaApp')).click();
 
-      // We do not need to wait for the report to finish generating
-      await (await testSubjects.find('euiCollapsedItemActionsButton')).click();
-      await (await testSubjects.find('reportOpenInKibanaApp')).click();
+        const [, dashboardWindowHandle] = await browser.getAllWindowHandles();
+        await browser.switchToWindow(dashboardWindowHandle);
 
-      const [, dashboardWindowHandle] = await browser.getAllWindowHandles();
-      await browser.switchToWindow(dashboardWindowHandle);
+        await PageObjects.dashboard.expectOnDashboard(dashboardTitle);
+      });
 
-      await PageObjects.dashboard.expectOnDashboard(dashboardTitle);
-    });
+      it('Allows user to view report details', async () => {
+        await retry.try(async () => {
+          //   await reportingFunctional.loginReportingUser();
+          await PageObjects.common.navigateToApp('reporting');
+        });
 
-    it('Allows user to view report details', async () => {
-      await PageObjects.common.navigateToApp('reporting');
-      await testSubjects.existOrFail('reportJobListing');
-      await (await testSubjects.findAll('euiCollapsedItemActionsButton'))[0].click();
+        await testSubjects.existOrFail('reportJobListing');
 
-      await (await testSubjects.find('reportViewInfoLink')).click();
+        await (await testSubjects.findAll('euiCollapsedItemActionsButton'))[0].click();
 
-      await testSubjects.existOrFail('reportInfoFlyout');
-      await testSubjects.click('euiFlyoutCloseButton');
-      await testSubjects.missingOrFail('reportInfoFlyout');
+        await (await testSubjects.find('reportViewInfoLink')).click();
+
+        await testSubjects.existOrFail('reportInfoFlyout');
+        await testSubjects.click('euiFlyoutCloseButton');
+        await testSubjects.missingOrFail('reportInfoFlyout');
+      });
     });
 
     describe('Schedules', () => {
       const dashboardTitle = 'Ecom Dashboard';
       it('does allow user with reporting privileges to navigate to the Schedules tab', async () => {
-        await reportingFunctional.loginReportingUser();
+        await retry.try(async () => {
+          await PageObjects.common.navigateToApp('reporting');
+        });
 
-        await PageObjects.common.navigateToApp('reporting');
         await (await testSubjects.find('reportingTabs-schedules')).click();
         await testSubjects.existOrFail('reportSchedulesTable');
       });
@@ -153,11 +156,18 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         await PageObjects.dashboard.expectOnDashboard(dashboardTitle);
       });
+    });
+
+    describe('non privilege user', () => {
+      before(async () => {
+        await reportingFunctional.loginDataAnalyst();
+      });
+      it('does not allow user that does not have reporting privileges', async () => {
+        await PageObjects.common.navigateToApp('reporting');
+        await testSubjects.missingOrFail('reportJobListing');
+      });
 
       it('does not allow user to access schedules that does not have reporting privileges', async () => {
-        await reportingFunctional.loginDataAnalyst();
-
-        await PageObjects.common.navigateToApp('reporting', { path: 'exports' });
         await testSubjects.missingOrFail('reportingTabs-schedules');
       });
     });
