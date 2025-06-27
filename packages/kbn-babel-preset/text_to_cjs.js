@@ -15,25 +15,43 @@
  * module.
  */
 module.exports = function ({ types: t }) {
+  // Babel runs this plugin for every file that it processes. If the current
+  // file has the `.text` extension we create a fresh AST that simply exports
+  // the raw file contents (`code`) via `module.exports = "..."`. For all other
+  // files we fall back to Babel's normal parser.
   return {
-    name: 'text-to-module',
-    visitor: {
-      Program(path, state) {
-        if (!state.filename.endsWith('.text')) return;
+    name: 'text-to-cjs',
 
-        const fs = require('fs');
-        const content = fs.readFileSync(state.filename, 'utf8');
+    /**
+     * Override Babel's parser only for `.text` files.
+     *
+     * @param {string} code  The entire contents of the file that Babel is
+     *                       processing (for .text files this is arbitrary
+     *                       plain-text, not valid JS).
+     * @param {object} opts  Parser options – we only care about `opts.filename`.
+     * @param {Function} parse  The default Babel parse function.
+     */
+    parserOverride(code, opts, parse) {
+      const filename = opts.sourceFileName || '';
 
-        const moduleExports = t.memberExpression(t.identifier('module'), t.identifier('exports'));
-        const assign = t.expressionStatement(
-          t.assignmentExpression('=', moduleExports, t.stringLiteral(content))
-        );
+      if (filename.endsWith('.text')) {
+        // Build: module.exports = "<raw contents>";
+        const program = t.program([
+          t.expressionStatement(
+            t.assignmentExpression(
+              '=',
+              t.memberExpression(t.identifier('module'), t.identifier('exports')),
+              t.stringLiteral(code)
+            )
+          ),
+        ]);
 
-        // Mutate the Program body in-place to prevent recursion
-        path.node.body = [assign];
-        // Prevent further traversal on this file
-        path.stop();
-      },
+        // Babel expects a `File` node.
+        return t.file(program, [], []);
+      }
+
+      // For non-.text files fall back to default behaviour.
+      return parse(code, opts);
     },
   };
 };
