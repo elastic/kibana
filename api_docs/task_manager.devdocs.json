@@ -650,6 +650,10 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/plugin_api_integration/test_suites/task_manager/task_management.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/task_manager_claimer_update_by_query/test_suites/task_manager/task_management.ts"
               }
             ]
           },
