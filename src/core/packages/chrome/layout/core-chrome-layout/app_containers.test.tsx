@@ -9,7 +9,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
 
 import { AppWrapper } from './app_containers';
@@ -17,9 +17,12 @@ import { AppWrapper } from './app_containers';
 describe('AppWrapper', () => {
   it('toggles the `hidden-chrome` class depending on the chrome visibility state', () => {
     const chromeVisible$ = new BehaviorSubject<boolean>(true);
+    const { getByTestId, rerender } = render(
+      <AppWrapper chromeVisible={chromeVisible$.value}>app-content</AppWrapper>
+    );
 
-    const component = mount(<AppWrapper chromeVisible$={chromeVisible$}>app-content</AppWrapper>);
-    expect(component.getDOMNode()).toMatchInlineSnapshot(`
+    // The data-test-subj attribute is used for querying
+    expect(getByTestId('kbnAppWrapper visibleChrome')).toMatchInlineSnapshot(`
       <div
         class="kbnAppWrapper"
         data-test-subj="kbnAppWrapper visibleChrome"
@@ -29,8 +32,8 @@ describe('AppWrapper', () => {
     `);
 
     act(() => chromeVisible$.next(false));
-    component.update();
-    expect(component.getDOMNode()).toMatchInlineSnapshot(`
+    rerender(<AppWrapper chromeVisible={chromeVisible$.value}>app-content</AppWrapper>);
+    expect(getByTestId('kbnAppWrapper hiddenChrome')).toMatchInlineSnapshot(`
       <div
         class="kbnAppWrapper kbnAppWrapper--hiddenChrome"
         data-test-subj="kbnAppWrapper hiddenChrome"
@@ -40,8 +43,8 @@ describe('AppWrapper', () => {
     `);
 
     act(() => chromeVisible$.next(true));
-    component.update();
-    expect(component.getDOMNode()).toMatchInlineSnapshot(`
+    rerender(<AppWrapper chromeVisible={chromeVisible$.value}>app-content</AppWrapper>);
+    expect(getByTestId('kbnAppWrapper visibleChrome')).toMatchInlineSnapshot(`
       <div
         class="kbnAppWrapper"
         data-test-subj="kbnAppWrapper visibleChrome"
