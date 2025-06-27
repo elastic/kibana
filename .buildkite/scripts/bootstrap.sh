@@ -26,12 +26,6 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
   fi
 fi
 
-df -h
-
-which node
-
-ls -la ~/.kibana
-
 if ! yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"; then
   echo "bootstrap failed, trying again in 15 seconds"
   sleep 15
@@ -48,4 +42,5 @@ if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   check_for_changed_files 'yarn kbn bootstrap'
 fi
 
+# Clear the cache after installation
 rm -rf ./.yarn-local-mirror
