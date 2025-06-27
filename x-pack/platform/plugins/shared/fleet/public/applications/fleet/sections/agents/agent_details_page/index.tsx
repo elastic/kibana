@@ -129,7 +129,9 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     // Fetch all tags when the component mounts
     const fetchTags = async () => {
       try {
-        const agentTagsResponse = await sendGetAgentTags({});
+        const agentTagsResponse = await sendGetAgentTags({
+          showInactive: agent?.status === 'inactive',
+        });
         if (agentTagsResponse.error) {
           throw agentTagsResponse.error;
         }
