@@ -56,7 +56,7 @@ import { AnnotationsTable } from '../components/annotations/annotations_table';
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { SelectInterval } from '../components/controls/select_interval/select_interval';
-import { SelectSeverity } from '../components/controls/select_severity/select_severity';
+import { SelectSeverity } from '../components/controls/select_severity';
 import { forecastServiceFactory } from '../services/forecast_service';
 import { timeSeriesExplorerServiceFactory } from '../util/time_series_explorer_service';
 import { mlJobServiceFactory } from '../services/job_service';
@@ -111,7 +111,7 @@ export class TimeSeriesExplorer extends React.Component {
     selectedEntities: PropTypes.object,
     selectedForecastId: PropTypes.string,
     tableInterval: PropTypes.string,
-    tableSeverity: PropTypes.number,
+    tableSeverity: PropTypes.object,
     zoom: PropTypes.object,
     handleJobSelectionChange: PropTypes.func,
   };
@@ -337,7 +337,7 @@ export class TimeSeriesExplorer extends React.Component {
         this.getCriteriaFields(selectedDetectorIndex, entityControls),
         [],
         tableInterval,
-        tableSeverity,
+        tableSeverity.val,
         earliestMs,
         latestMs,
         dateFormatTz,
@@ -1062,7 +1062,7 @@ export class TimeSeriesExplorer extends React.Component {
                   }}
                 />
               }
-              iconType="help"
+              iconType="question"
               size="s"
             />
             <EuiSpacer size="m" />

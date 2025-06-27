@@ -14,6 +14,7 @@ import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import type { JobId } from './anomaly_detection_jobs/job';
 import type { ML_PAGES } from '../constants/locator';
+import type { SeverityThreshold } from './anomalies';
 
 type OptionalPageState = (object & { globalState?: MlCommonGlobalState }) | undefined;
 
@@ -119,7 +120,7 @@ export interface ExplorerAppState {
     /**
      * Indicated severity threshold for both swim lanes
      */
-    severity?: number;
+    severity?: SeverityThreshold[];
   };
   mlExplorerFilter: {
     influencersFilterQuery?: InfluencersFilterQuery;
