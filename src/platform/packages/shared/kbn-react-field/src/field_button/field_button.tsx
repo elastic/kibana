@@ -188,7 +188,6 @@ const componentStyles = {
     });
   },
   fieldButtonWrapperXs: (themeContext: UseEuiTheme) => {
-    const { euiTheme } = themeContext;
     const { fontSize } = euiFontSize(themeContext, 'xs');
     return css({
       fontSize,
