@@ -69,7 +69,12 @@ export class AIAssistantManagementSelectionPlugin
           ],
           { defaultValue: AIAssistantType.Default }
         ),
-        options: [AIAssistantType.Default, AIAssistantType.Observability,AIAssistantType.Security, AIAssistantType.Never],
+        options: [
+          AIAssistantType.Default,
+          AIAssistantType.Observability,
+          AIAssistantType.Security,
+          AIAssistantType.Never,
+        ],
         type: 'select',
         optionLabels: {
           [AIAssistantType.Default]: i18n.translate(
