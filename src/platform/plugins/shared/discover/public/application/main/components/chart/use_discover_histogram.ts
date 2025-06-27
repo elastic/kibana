@@ -59,12 +59,18 @@ import {
   useCurrentTabSelector,
   useInternalStateDispatch,
 } from '../../state_management/redux';
+import type { InitialUnifiedHistogramLayoutProps } from '../../state_management/redux/runtime_state';
 
 const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
 const EMPTY_FILTERS: Filter[] = [];
 
+export interface UseUnifiedHistogramOptions {
+  initialLayoutProps?: InitialUnifiedHistogramLayoutProps;
+}
+
 export const useDiscoverHistogram = (
-  stateContainer: DiscoverStateContainer
+  stateContainer: DiscoverStateContainer,
+  options?: UseUnifiedHistogramOptions
 ): UseUnifiedHistogramProps & { setUnifiedHistogramApi: (api: UnifiedHistogramApi) => void } => {
   const services = useDiscoverServices();
   const {
@@ -377,6 +383,7 @@ export const useDiscoverHistogram = (
     initialState: {
       chartHidden,
       timeInterval,
+      topPanelHeight: options?.initialLayoutProps?.topPanelHeight,
       totalHitsStatus: UnifiedHistogramFetchStatus.loading,
       totalHitsResult: undefined,
     },

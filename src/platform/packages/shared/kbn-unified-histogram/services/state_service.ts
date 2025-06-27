@@ -8,6 +8,7 @@
  */
 
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { omitBy, isUndefined } from 'lodash';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { PublishingSubject } from '@kbn/presentation-publishing';
 import { UnifiedHistogramFetchStatus } from '..';
@@ -145,7 +146,7 @@ export const createStateService = (
     topPanelHeight: initialTopPanelHeight,
     totalHitsResult: undefined,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
-    ...initialState,
+    ...omitBy(initialState, isUndefined),
   });
 
   const updateState = (stateUpdate: Partial<UnifiedHistogramState>) => {
