@@ -14,6 +14,16 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import useAsync from 'react-use/lib/useAsync';
 import { tracksOverlays } from '..';
 
+const defaultFlyoutProps: OverlayFlyoutOpenOptions = {
+  size: 'm',
+  type: 'push',
+  paddingSize: 'm',
+  maxWidth: 500,
+  hideCloseButton: true,
+  isResizable: true,
+  outsideClickCloses: true,
+};
+
 const LoadingPanel = (
   <>
     <EuiFlyoutHeader hasBorder>
@@ -30,13 +40,17 @@ const EditPanelWrapper = ({
   getEditFlyout,
 }: {
   closeFlyout: () => void;
-  getEditFlyout: (() => Promise<void | JSX.Element | null>) | undefined;
+  getEditFlyout: (({ closeFlyout }: { closeFlyout: () => void }) => Promise<void | JSX.Element | null>) | undefined;
 }) => {
   const [EditFlyoutPanel, setEditFlyoutPanel] = React.useState<React.JSX.Element | null>(null);
   useAsync(async () => {
-    const editFlyoutContent = await getEditFlyout?.();
+    const editFlyoutContent = await getEditFlyout?.({ closeFlyout });
     if (editFlyoutContent) {
-      setEditFlyoutPanel(React.cloneElement(editFlyoutContent, { closeFlyout }));
+      setEditFlyoutPanel(editFlyoutContent);
+    } else {
+      // If no content is returned, we close the flyout
+      closeFlyout();
+      throw new Error('Edit flyout content is not available');
     }
   }, []);
 
@@ -47,31 +61,24 @@ export const mountDashboardFlyout = ({
   core,
   api,
   getEditFlyout,
-  flyoutPropsOverrides,
+  flyoutProps,
 }: {
   core: CoreStart;
   api?: EmbeddableApiContext['embeddable'];
-  getEditFlyout: (() => Promise<void | JSX.Element | null>) | undefined;
-  flyoutPropsOverrides?: Partial<OverlayFlyoutOpenOptions>;
+  getEditFlyout: (({ closeFlyout }: { closeFlyout: () => void }) => Promise<void | JSX.Element | null>) | undefined;
+  flyoutProps?: Partial<OverlayFlyoutOpenOptions>;
 }) => {
   const overlayTracker = tracksOverlays(api) ? api : undefined;
-  const onClose = () => {
+  let flyoutRef: ReturnType<CoreStart['overlays']['openFlyout']>;
+
+  const closeFlyout = () => {
     overlayTracker?.clearOverlays();
     flyoutRef?.close();
   };
-  const flyoutRef = core.overlays.openFlyout(
-    toMountPoint(<EditPanelWrapper closeFlyout={onClose} getEditFlyout={getEditFlyout} />, core),
-    { ...flyoutProps, onClose, ...flyoutPropsOverrides }
+  flyoutRef = core.overlays.openFlyout(
+    toMountPoint(<EditPanelWrapper closeFlyout={closeFlyout} getEditFlyout={getEditFlyout} />, core),
+    { ...defaultFlyoutProps, onClose: closeFlyout, ...flyoutProps }
   );
   overlayTracker?.openOverlay(flyoutRef);
 };
 
-const flyoutProps: OverlayFlyoutOpenOptions = {
-  size: 's',
-  type: 'push',
-  paddingSize: 'm',
-  maxWidth: 800,
-  hideCloseButton: true,
-  isResizable: true,
-  outsideClickCloses: true,
-};

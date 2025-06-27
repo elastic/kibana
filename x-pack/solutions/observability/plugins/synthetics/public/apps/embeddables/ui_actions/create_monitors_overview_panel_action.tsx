@@ -16,7 +16,6 @@ import { CoreStart } from '@kbn/core/public';
 import { ClientPluginsStart } from '../../../plugin';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../constants';
 import { ADD_SYNTHETICS_MONITORS_OVERVIEW_ACTION_ID } from './constants';
-import { openMonitorConfiguration } from '../common/monitors_open_configuration';
 
 export function createMonitorsOverviewPanelAction(
   coreStart: CoreStart,
@@ -32,7 +31,9 @@ export function createMonitorsOverviewPanelAction(
     },
     execute: async ({ embeddable }) => {
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
-      const initialState = await openMonitorConfiguration({
+      const { openMonitorConfiguration } = await import('../common/monitors_open_configuration');
+
+      await openMonitorConfiguration({
         coreStart,
         pluginStart,
         title: i18n.translate(
@@ -42,15 +43,18 @@ export function createMonitorsOverviewPanelAction(
           }
         ),
         type: SYNTHETICS_MONITORS_EMBEDDABLE,
+        onConfirm: (state) => {
+          try {
+            embeddable.addNewPanel({
+              panelType: SYNTHETICS_MONITORS_EMBEDDABLE,
+              serializedState: { rawState: state },
+            });
+          } catch (e) {
+            return Promise.reject();
+          }
+        },
       });
-      try {
-        embeddable.addNewPanel({
-          panelType: SYNTHETICS_MONITORS_EMBEDDABLE,
-          serializedState: { rawState: initialState },
-        });
-      } catch (e) {
-        return Promise.reject();
-      }
+     
     },
     getDisplayName: () =>
       i18n.translate('xpack.synthetics.syntheticsEmbeddable.monitors.ariaLabel', {

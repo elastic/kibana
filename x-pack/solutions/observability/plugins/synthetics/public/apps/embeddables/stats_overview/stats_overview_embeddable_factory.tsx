@@ -31,7 +31,6 @@ import { MonitorFilters } from '../monitors_overview/types';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
 import { ClientPluginsStart } from '../../../plugin';
 import { StatsOverviewComponent } from './stats_overview_component';
-import { openMonitorConfiguration } from '../common/monitors_open_configuration';
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.synthetics.statusOverview.list.displayName', {
@@ -133,7 +132,9 @@ export const getStatsOverviewEmbeddableFactory = (
         isEditingEnabled: () => true,
         onEdit: async () => {
           try {
-            const result = await openMonitorConfiguration({
+            const { openMonitorConfiguration } = await import('../common/monitors_open_configuration');
+
+            await openMonitorConfiguration({
               coreStart,
               pluginStart,
               initialState: {
@@ -143,8 +144,10 @@ export const getStatsOverviewEmbeddableFactory = (
                 defaultMessage: 'Create monitor stats',
               }),
               type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
+              onConfirm: (result) => {
+                filters$.next(result.filters);
+              },
             });
-            filters$.next(result.filters);
           } catch (e) {
             return Promise.reject();
           }

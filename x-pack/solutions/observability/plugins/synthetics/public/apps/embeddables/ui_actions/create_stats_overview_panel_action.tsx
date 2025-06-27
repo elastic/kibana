@@ -16,7 +16,6 @@ import { CoreStart } from '@kbn/core/public';
 import { ClientPluginsStart } from '../../../plugin';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
 import { ADD_SYNTHETICS_OVERVIEW_ACTION_ID } from './constants';
-import { openMonitorConfiguration } from '../common/monitors_open_configuration';
 
 export function createStatusOverviewPanelAction(
   coreStart: CoreStart,
@@ -33,18 +32,23 @@ export function createStatusOverviewPanelAction(
     execute: async ({ embeddable }) => {
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
       try {
-        const initialState = await openMonitorConfiguration({
+        const { openMonitorConfiguration } = await import('../common/monitors_open_configuration');
+
+        await openMonitorConfiguration({
           coreStart,
           pluginStart,
           title: i18n.translate('xpack.synthetics.editSyntheticsOverviewEmbeddableTitle.title', {
             defaultMessage: 'Create monitor stats',
           }),
           type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
+          onConfirm: (state) => {
+            embeddable.addNewPanel({
+              panelType: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
+              serializedState: { rawState: state },
+            });
+          }
         });
-        embeddable.addNewPanel({
-          panelType: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
-          serializedState: { rawState: initialState },
-        });
+       
       } catch (e) {
         return Promise.reject();
       }

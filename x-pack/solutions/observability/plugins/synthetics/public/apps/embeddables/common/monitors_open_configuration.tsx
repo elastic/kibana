@@ -11,10 +11,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ClientPluginsStart } from '../../../plugin';
-import { MonitorConfiguration } from './monitor_configuration';
 import { SYNTHETICS_MONITORS_EMBEDDABLE, SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
 import { OverviewMonitorsEmbeddableCustomState } from '../monitors_overview/monitors_embeddable_factory';
 import { OverviewStatsEmbeddableCustomState } from '../stats_overview/stats_overview_embeddable_factory';
+import { MonitorConfiguration } from './monitor_configuration';
 
 interface CommonParams {
   title: string;
@@ -25,20 +25,6 @@ interface CommonParams {
 type OverviewMonitorsInput = Required<OverviewMonitorsEmbeddableCustomState>;
 type OverviewStatsInput = Required<OverviewStatsEmbeddableCustomState>;
 
-// Function overloads to provide type safety without casting
-export async function openMonitorConfiguration(
-  params: CommonParams & {
-    initialState?: OverviewMonitorsInput;
-    type: typeof SYNTHETICS_MONITORS_EMBEDDABLE;
-  }
-): Promise<OverviewMonitorsInput>;
-export async function openMonitorConfiguration(
-  params: CommonParams & {
-    initialState?: OverviewStatsInput;
-    type: typeof SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE;
-  }
-): Promise<OverviewStatsInput>;
-
 // Implementation
 export async function openMonitorConfiguration({
   coreStart,
@@ -46,46 +32,41 @@ export async function openMonitorConfiguration({
   initialState,
   title,
   type,
+  onConfirm,
 }: CommonParams & {
   initialState?: OverviewMonitorsInput | OverviewStatsInput;
   type: typeof SYNTHETICS_MONITORS_EMBEDDABLE | typeof SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE;
-}): Promise<OverviewMonitorsInput | OverviewStatsInput> {
+  onConfirm?: (state: OverviewMonitorsInput | OverviewStatsInput) => void;
+}) {
   const { overlays } = coreStart;
   const queryClient = new QueryClient();
-  return new Promise(async (resolve, reject) => {
-    try {
-      const flyoutSession = overlays.openFlyout(
-        toMountPoint(
-          <KibanaContextProvider
-            services={{
-              ...coreStart,
-              ...pluginStart,
+  const flyoutSession = overlays.openFlyout(
+    toMountPoint(
+      <KibanaContextProvider
+        services={{
+          ...coreStart,
+          ...pluginStart,
+        }}
+      >
+        <QueryClientProvider client={queryClient}>
+          <MonitorConfiguration
+            title={title}
+            initialInput={initialState}
+            onCreate={(update) => {
+              flyoutSession.close();
+              onConfirm?.(update);
+            }}
+            onCancel={() => {
+              flyoutSession.close();
             }}
           >
-            <QueryClientProvider client={queryClient}>
-              <MonitorConfiguration
-                title={title}
-                initialInput={initialState}
-                onCreate={(update) => {
-                  flyoutSession.close();
-                  resolve(update);
-                }}
-                onCancel={() => {
-                  flyoutSession.close();
-                  reject();
-                }}
-              >
-                {type === SYNTHETICS_MONITORS_EMBEDDABLE ? (
-                  <MonitorConfiguration.ViewSwitch />
-                ) : null}
-              </MonitorConfiguration>
-            </QueryClientProvider>
-          </KibanaContextProvider>,
-          coreStart
-        )
-      );
-    } catch (error) {
-      reject(error);
-    }
-  });
+            {type === SYNTHETICS_MONITORS_EMBEDDABLE ? (
+              <MonitorConfiguration.ViewSwitch />
+            ) : null}
+          </MonitorConfiguration>
+        </QueryClientProvider>
+      </KibanaContextProvider>,
+      coreStart
+    )
+  );
 }

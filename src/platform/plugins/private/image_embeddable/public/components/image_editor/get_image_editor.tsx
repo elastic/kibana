@@ -9,7 +9,6 @@
 
 import React from 'react';
 
-import { tracksOverlays, CanAddNewPanel } from '@kbn/presentation-containers';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
 import { ImageConfig } from '../../image_embeddable/types';
@@ -20,21 +19,15 @@ import { ImageViewerContext } from '../image_viewer/image_viewer_context';
 import { ImageEditorFlyout } from './image_editor_flyout';
 
 export const getImageEditor = async ({
-  parentApi,
   initialImageConfig,
   onSave,
+  closeFlyout,
 }: {
-  parentApi: CanAddNewPanel;
   initialImageConfig?: ImageConfig;
   onSave?: (imageConfig: ImageConfig) => void;
+  closeFlyout: () => void;
 }) => {
   const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
-
-  /**
-   * If available, the parent API will keep track of which flyout is open and close it
-   * if the app changes, disable certain actions when the flyout is open, etc.
-   */
-  const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
 
   return (
     <FilesContext client={filesClient}>
@@ -53,10 +46,10 @@ export const getImageEditor = async ({
           getCurrentUser={coreServices.security.authc.getCurrentUser}
           onSave={(imageConfig: ImageConfig) => {
             onSave?.(imageConfig);
-            overlayTracker?.clearOverlays();
+            closeFlyout();
           }}
           onCancel={() => {
-            overlayTracker?.clearOverlays();
+            closeFlyout();
           }}
           initialImageConfig={initialImageConfig}
         />

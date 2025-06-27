@@ -41,10 +41,11 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
     mountDashboardFlyout({
       core: coreServices,
       api: embeddable,
-      getEditFlyout: async () => {
+      getEditFlyout: async ({ closeFlyout })  => {
         const { getEditorFlyout } = await import('../editor/get_editor_flyout');
 
         return await getEditorFlyout({
+          closeFlyout,
           parentDashboard: embeddable,
           onSave: async (runtimeState) => {
             if (!runtimeState) return;
@@ -71,7 +72,7 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
           },
         });
       },
-      flyoutPropsOverrides: {
+      flyoutProps: {
         maxWidth: 500,
         type: 'overlay',
         paddingSize: 'm',

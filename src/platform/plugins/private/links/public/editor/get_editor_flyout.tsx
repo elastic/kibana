@@ -26,15 +26,14 @@ import LinksEditor from '../components/editor/links_editor';
 export async function getEditorFlyout({
   initialState,
   parentDashboard,
+  closeFlyout,
   onSave,
 }: {
   initialState?: LinksRuntimeState;
   parentDashboard?: unknown;
   onSave?: (newState?: LinksRuntimeState) => void;
+  closeFlyout: () => void;
 }) {
-  const overlayTracker =
-    parentDashboard && tracksOverlays(parentDashboard) ? parentDashboard : undefined;
-
   const parentDashboardId =
     parentDashboard && apiPublishesSavedObjectId(parentDashboard)
       ? parentDashboard.savedObjectId$.value
@@ -42,16 +41,12 @@ export async function getEditorFlyout({
 
   const flyoutId = `linksEditorFlyout-${uuidv4()}`;
 
-  const closeEditorFlyout = () => {
-    overlayTracker?.clearOverlays();
-  };
-
   /**
    * Close the flyout whenever the app changes - this handles cases for when the flyout is open outside of the
    * Dashboard app (`overlayTracker` is not available)
    */
   coreServices.application.currentAppId$.pipe(skip(1), take(1)).subscribe(() => {
-    if (!overlayTracker) closeEditorFlyout();
+    closeFlyout();
   });
 
   const onSaveToLibrary = async (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => {
@@ -69,12 +64,12 @@ export async function getEditorFlyout({
         options: { references },
       });
       await onSave?.(newState);
-      closeEditorFlyout();
+      closeFlyout();
     } else {
       const saveResult = await runSaveToLibrary(newState);
       await onSave?.(newState);
       // If saveResult is undefined, the user cancelled the save as modal and we should not close the flyout
-      if (saveResult) closeEditorFlyout();
+      if (saveResult) closeFlyout();
     }
   };
 
@@ -85,12 +80,12 @@ export async function getEditorFlyout({
       layout: newLayout,
     };
     await onSave?.(newState);
-    closeEditorFlyout();
+    closeFlyout();
   };
 
   const onCancel = async () => {
     await onSave?.(undefined);
-    closeEditorFlyout();
+    closeFlyout();
   };
 
   return (

@@ -7,16 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { openAddFromLibraryFlyout } from '@kbn/embeddable-plugin/public';
+import { mountDashboardFlyout } from '@kbn/presentation-containers';
 import { DashboardApi } from '../dashboard_api/types';
+import { coreServices } from '../services/kibana_services';
+import { htmlIdGenerator } from '@elastic/eui';
 
-export function addFromLibrary(dashboardApi: DashboardApi) {
-  dashboardApi.openOverlay(
-    openAddFromLibraryFlyout({
-      container: dashboardApi,
-      onClose: () => {
-        dashboardApi.clearOverlays();
-      },
-    })
-  );
+
+const htmlId = htmlIdGenerator('modalTitleId');
+
+export async function addFromLibrary(dashboardApi: DashboardApi) {
+  const modalTitleId = htmlId();
+
+  mountDashboardFlyout({
+    core: coreServices,
+    api: dashboardApi,
+    getEditFlyout: async ({ closeFlyout })  => {
+      const { getAddFromLibraryFlyout } = await import('@kbn/embeddable-plugin/public');
+
+       return await getAddFromLibraryFlyout({
+        api: dashboardApi,
+        modalTitleId,
+        closeFlyout,
+      });
+    },
+    flyoutProps: {
+      type: 'push',
+      ownFocus: true,
+      size: 'm',
+      maxWidth: 500,
+      paddingSize: 'm',
+      'data-test-subj': 'dashboardAddPanel',
+      'aria-labelledby': modalTitleId,
+    },
+  });
+
 }

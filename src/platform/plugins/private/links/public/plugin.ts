@@ -113,7 +113,7 @@ export class LinksPlugin
                   onEdit: async (savedObjectId: string) => {
                     mountDashboardFlyout({
                       core: coreServices,
-                      getEditFlyout: async () => {
+                      getEditFlyout: async ({ closeFlyout })  => {
                         const [{ getEditorFlyout }, { deserializeLinksSavedObject }] =
                           await Promise.all([
                             import('./editor/get_editor_flyout'),
@@ -125,10 +125,11 @@ export class LinksPlugin
                         );
 
                         return await getEditorFlyout({
+                          closeFlyout,
                           initialState,
                         });
                       },
-                      flyoutPropsOverrides: {
+                      flyoutProps: {
                         maxWidth: 500,
                         type: 'overlay',
                         paddingSize: 'm',

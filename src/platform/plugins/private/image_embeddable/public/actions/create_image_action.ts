@@ -39,11 +39,11 @@ export const registerCreateImageAction = () => {
       mountDashboardFlyout({
         core: coreServices,
         api: parentApi,
-        getEditFlyout: async () => {
+        getEditFlyout: async ({ closeFlyout }) => {
           const { getImageEditor } = await import('../components/image_editor/get_image_editor');
           try {
             return await getImageEditor({
-              parentApi: canAddNewPanelParent,
+              closeFlyout,
               onSave: (imageConfig: ImageConfig) => {
                 canAddNewPanelParent.addNewPanel<ImageEmbeddableSerializedState>({
                   panelType: IMAGE_EMBEDDABLE_TYPE,
@@ -55,7 +55,7 @@ export const registerCreateImageAction = () => {
             // swallow the rejection, since this just means the user closed without saving
           }
         },
-        flyoutPropsOverrides: {
+        flyoutProps: {
           type: 'overlay',
           ownFocus: true,
           'data-test-subj': 'createImageEmbeddableFlyout',

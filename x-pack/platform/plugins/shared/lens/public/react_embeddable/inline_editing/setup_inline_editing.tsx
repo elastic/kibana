@@ -53,7 +53,7 @@ export function prepareInlineEditPanel(
   uuid?: string,
   parentApi?: unknown
 ) {
-  return async function openConfigPanel({
+  return async function getConfigPanel({
     onApply,
     onCancel,
     hideTimeFilterInfo,

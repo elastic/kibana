@@ -25,7 +25,6 @@ import { MonitorFilters } from './types';
 import { StatusGridComponent } from './monitors_grid_component';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../constants';
 import { ClientPluginsStart } from '../../../plugin';
-import { openMonitorConfiguration } from '../common/monitors_open_configuration';
 import { OverviewView } from '../../synthetics/state';
 
 export const getOverviewPanelTitle = () =>
@@ -112,7 +111,9 @@ export const getMonitorsEmbeddableFactory = (
         serializeState,
         onEdit: async () => {
           try {
-            const result = await openMonitorConfiguration({
+            const { openMonitorConfiguration } = await import('../common/monitors_open_configuration');
+
+            await openMonitorConfiguration({
               coreStart,
               pluginStart,
               initialState: {
@@ -126,9 +127,12 @@ export const getMonitorsEmbeddableFactory = (
                 }
               ),
               type: SYNTHETICS_MONITORS_EMBEDDABLE,
+              onConfirm: (result) => {
+                filters$.next(result.filters);
+                view$.next(result.view);
+              },
             });
-            filters$.next(result.filters);
-            view$.next(result.view);
+           
           } catch (e) {
             return Promise.reject();
           }

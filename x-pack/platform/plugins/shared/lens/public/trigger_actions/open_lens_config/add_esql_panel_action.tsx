@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer, mountDashboardFlyout } from '@kbn/presentation-containers';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { ACTION_CREATE_ESQL_CHART } from './constants';
@@ -40,18 +41,23 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
   }
 
   public async execute({ embeddable: api }: EmbeddableApiContext) {
-    if (!apiIsPresentationContainer(api)) throw new IncompatibleActionError();
-    const embeddable = await api.addNewPanel<object, LensApi>({
-      panelType: 'lens',
-      serializedState: {
-        rawState: {
-          id: generateId(),
-          isNewPanel: true,
-          attributes: { references: [] },
-        },
-      },
+    mountDashboardFlyout({
+      core: this.core,
+      api,
+      getEditFlyout: async ({ closeFlyout })  => {
+        if (!apiIsPresentationContainer(api)) throw new IncompatibleActionError();
+        const embeddable = await api.addNewPanel<object, LensApi>({
+          panelType: 'lens',
+          serializedState: {
+            rawState: {
+              id: generateId(),
+              isNewPanel: true,
+              attributes: { references: [] },
+            },
+          },
+        });
+        return await embeddable?.onEdit?.({ closeFlyout });
+      }
     });
-    // open the flyout if embeddable has been created successfully
-    embeddable?.onEdit?.();
   }
-}
+};

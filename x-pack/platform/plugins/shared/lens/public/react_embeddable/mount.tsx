@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import { TracksOverlays } from '@kbn/presentation-containers';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
@@ -34,7 +34,7 @@ export function mountInlinePanel(
     container?: HTMLElement | null;
   } = {}
 ) {
-  const dataTestSubjFinal = dataTestSubj ?? 'customizeLens';
+
   if (container) {
     ReactDOM.render(InlinePanel, container);
   } else {
@@ -49,20 +49,12 @@ export function mountInlinePanel(
         coreStart
       ),
       {
-        className: 'lnsConfigPanel__overlay',
-        css: inlineFlyoutStyles,
-        size: 's',
-        'data-test-subj': dataTestSubjFinal,
-        type: 'push',
-        paddingSize: 'm',
-        maxWidth: 800,
-        hideCloseButton: true,
-        isResizable: true,
+        ...flyoutOptions,
+        "data-test-subj": dataTestSubj ?? 'customizeLens',
         onClose: (overlayRef) => {
           overlayTracker?.clearOverlays();
           overlayRef.close();
         },
-        outsideClickCloses: true,
       }
     );
     if (uuid) {
@@ -89,3 +81,15 @@ const inlineFlyoutStyles = ({ euiTheme }: UseEuiTheme) => `
     }
   }
 `;
+
+const flyoutOptions: OverlayFlyoutOpenOptions = {
+  css: inlineFlyoutStyles,
+  size: 's',
+  'data-test-subj': 'customizeLens',
+  type: 'push',
+  paddingSize: 'm',
+  maxWidth: 800,
+  hideCloseButton: true,
+  isResizable: true,
+  outsideClickCloses: true,
+}

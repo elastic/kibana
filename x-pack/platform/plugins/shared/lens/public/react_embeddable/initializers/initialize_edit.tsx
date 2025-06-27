@@ -19,7 +19,6 @@ import {
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { noop } from 'lodash';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import { tracksOverlays } from '@kbn/presentation-containers';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { Filter } from '@kbn/es-query';
@@ -34,7 +33,6 @@ import {
 import { extractInheritedViewModeObservable } from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 import { setupPanelManagement } from '../inline_editing/panel_management';
-import { mountInlinePanel } from '../mount';
 import { StateManagementConfig } from './initialize_state_management';
 import { apiPublishesInlineEditingCapabilities } from '../type_guards';
 import { SearchContextConfig } from './initialize_search_context';
@@ -180,7 +178,7 @@ export function initializeEditApi(
   };
 
   // This will handle both edit and read only mode based on the view mode
-  const openInlineEditor = prepareInlineEditPanel(
+  const getInlineEditor = prepareInlineEditPanel(
     initialState,
     getModifiedState,
     updateState,
@@ -227,27 +225,23 @@ export function initializeEditApi(
     ? parentApi.canEditInline
     : true;
 
-  const openConfigurationPanel = async (
-    { showOnly }: { showOnly: boolean } = { showOnly: false }
+  const getConfigurationPanel = async (
+    { showOnly }: { showOnly: boolean} = { showOnly: false }
   ) => {
+
     // save the initial state in case it needs to revert later on
     const firstState = getState();
-
-    const rootEmbeddable = parentApi;
-    const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
-    const ConfigPanel = await openInlineEditor({
+    const ConfigPanel = await getInlineEditor({
       // restore the first state found when the panel opened
       onCancel: () => updateState({ ...firstState }),
       // the getState() here contains the wrong filters references but the input attributes
-      // are correct as openInlineEditor() handler is using the getModifiedState() function
+      // are correct as getInlineEditor() handler is using the getModifiedState() function
       onApply: showOnly
         ? noop
         : (attributes: LensRuntimeState['attributes']) =>
             updateState({ ...getState(), attributes }),
     });
-    if (ConfigPanel) {
-      mountInlinePanel(ConfigPanel, startDependencies.coreStart, overlayTracker, { uuid });
-    }
+    return ConfigPanel 
   };
 
   return {
@@ -267,6 +261,7 @@ export function initializeEditApi(
        * Lens will leverage the neutral nature of this function to build the inline editing experience
        */
       onEdit: async () => {
+        console.log('onEdit called');
         if (!parentApi || !apiHasAppContext(parentApi)) {
           return;
         }
@@ -282,7 +277,7 @@ export function initializeEditApi(
           return navigateFn();
         }
 
-        openConfigurationPanel({ showOnly: false });
+        return getConfigurationPanel({ showOnly: false });
       },
       /**
        * Check everything here: user/app permissions and the current inline editing state
@@ -305,7 +300,7 @@ export function initializeEditApi(
         if (!parentApi || !apiHasAppContext(parentApi)) {
           return;
         }
-        openConfigurationPanel({ showOnly: true });
+        return getConfigurationPanel({ showOnly: true });
       },
       getEditHref: async () => {
         if (!parentApi || !apiHasAppContext(parentApi)) {
