@@ -10,6 +10,7 @@ import type { CoreAuditService } from '@kbn/core/server';
 import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { isDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { InstallationStatus } from '../../../common/install_status';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import {
@@ -29,7 +30,6 @@ import type {
   DocUpdateOptions,
 } from './types';
 import { INSTALL_ALL_TASK_ID_MULTILINGUAL } from '../../tasks/install_all';
-import { isDefaultElserInferenceId } from '../../tasks/utils';
 
 const TEN_MIN_IN_MS = 10 * 60 * 1000;
 
@@ -65,7 +65,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
     this.auditService = auditService;
   }
 
-  async install(options: DocInstallOptions = {}): Promise<void> {
+  async install(options: DocInstallOptions): Promise<void> {
     const { request, force = false, wait = false } = options;
     const inferenceId = options.inferenceId ?? defaultInferenceEndpoints.ELSER;
 
@@ -108,9 +108,8 @@ export class DocumentationManager implements DocumentationManagerAPI {
     }
   }
 
-  async update(options: DocUpdateOptions = {}): Promise<void> {
-    const { request, wait = false } = options;
-    const inferenceId = options.inferenceId ?? defaultInferenceEndpoints.ELSER;
+  async update(options: DocUpdateOptions): Promise<void> {
+    const { request, wait = false, inferenceId } = options;
 
     const taskId = await scheduleEnsureUpToDateTask({
       taskManager: this.taskManager,
@@ -141,9 +140,8 @@ export class DocumentationManager implements DocumentationManagerAPI {
     }
   }
 
-  async uninstall(options: DocUninstallOptions = {}): Promise<void> {
-    const { request, wait = false } = options;
-    const inferenceId = options.inferenceId ?? defaultInferenceEndpoints.ELSER;
+  async uninstall(options: DocUninstallOptions): Promise<void> {
+    const { request, wait = false, inferenceId } = options;
 
     const taskId = await scheduleUninstallAllTask({
       taskManager: this.taskManager,
@@ -175,7 +173,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
   /**
    * @param inferenceId - The inference ID to get the status for. If not provided, the default ELSER inference ID will be used.
    */
-  async getStatus({ inferenceId }: { inferenceId?: string } = {}): Promise<DocGetStatusResponse> {
+  async getStatus({ inferenceId }: { inferenceId: string }): Promise<DocGetStatusResponse> {
     const taskId = isDefaultElserInferenceId(inferenceId)
       ? INSTALL_ALL_TASK_ID
       : INSTALL_ALL_TASK_ID_MULTILINGUAL;

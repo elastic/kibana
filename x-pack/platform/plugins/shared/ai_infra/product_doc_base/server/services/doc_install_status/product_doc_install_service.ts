@@ -9,16 +9,19 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { ProductName, DocumentationProduct } from '@kbn/product-doc-common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import type { Logger } from '@kbn/logging';
+import { isDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { ProductInstallState } from '../../../common/install_status';
 import { productDocInstallStatusSavedObjectTypeName as typeName } from '../../../common/consts';
 import type { ProductDocInstallStatusAttributes as TypeAttributes } from '../../saved_objects';
-import { isDefaultElserInferenceId } from '../../tasks/utils';
 
 export class ProductDocInstallClient {
   private soClient: SavedObjectsClientContract;
+  private log: Logger;
 
-  constructor({ soClient }: { soClient: SavedObjectsClientContract }) {
+  constructor({ soClient, log }: { soClient: SavedObjectsClientContract; log: Logger }) {
     this.soClient = soClient;
+    this.log = log;
   }
 
   async getInstallationStatus({
@@ -56,8 +59,7 @@ export class ProductDocInstallClient {
 
       return installStatus;
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(
+      this.log.error(
         `An error occurred getting installation status saved object for inferenceId [${inferenceId}]
         Query: ${JSON.stringify(query, null, 2)}`,
         error

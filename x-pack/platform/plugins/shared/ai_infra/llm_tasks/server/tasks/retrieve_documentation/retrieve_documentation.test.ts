@@ -16,6 +16,7 @@ const truncateMock = truncate as jest.MockedFn<typeof truncate>;
 const countTokensMock = countTokens as jest.MockedFn<typeof countTokens>;
 
 import { summarizeDocument } from './summarize_document';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 jest.mock('./summarize_document');
 const summarizeDocumentMock = summarizeDocument as jest.MockedFn<typeof summarizeDocument>;
 
@@ -65,6 +66,7 @@ describe('retrieveDocumentation', () => {
       max: 5,
       connectorId: '.my-connector',
       functionCalling: 'simulated',
+      inferenceId: defaultInferenceEndpoints.ELSER,
     });
 
     expect(result).toEqual({
@@ -92,6 +94,7 @@ describe('retrieveDocumentation', () => {
       max: 5,
       connectorId: '.my-connector',
       functionCalling: 'simulated',
+      inferenceId: defaultInferenceEndpoints.ELSER,
     });
 
     expect(searchDocAPI).toHaveBeenCalledTimes(1);
@@ -127,6 +130,7 @@ describe('retrieveDocumentation', () => {
       connectorId: '.my-connector',
       maxDocumentTokens: 100,
       tokenReductionStrategy: 'highlight',
+      inferenceId: defaultInferenceEndpoints.ELSER,
     });
 
     expect(result.documents.length).toEqual(3);
@@ -162,6 +166,7 @@ describe('retrieveDocumentation', () => {
       connectorId: '.my-connector',
       maxDocumentTokens: 100,
       tokenReductionStrategy: 'truncate',
+      inferenceId: defaultInferenceEndpoints.ELSER,
     });
 
     expect(result.documents.length).toEqual(3);
@@ -201,6 +206,7 @@ describe('retrieveDocumentation', () => {
       connectorId: '.my-connector',
       maxDocumentTokens: 100,
       tokenReductionStrategy: 'summarize',
+      inferenceId: defaultInferenceEndpoints.ELSER,
     });
 
     expect(result.documents.length).toEqual(3);
@@ -230,6 +236,7 @@ describe('retrieveDocumentation', () => {
       connectorId: '.my-connector',
       maxDocumentTokens: 100,
       tokenReductionStrategy: 'summarize',
+      inferenceId: defaultInferenceEndpoints.ELSER,
     });
 
     expect(result).toEqual({

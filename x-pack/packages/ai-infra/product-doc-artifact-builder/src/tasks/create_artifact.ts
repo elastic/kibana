@@ -38,7 +38,7 @@ export const createArtifact = async ({
 
   const zip = new AdmZip();
 
-  const inferenceId = semanticTextMapping?.inference_id ?? DEFAULT_ELSER;
+  const inferenceId = semanticTextMapping?.inference_id || DEFAULT_ELSER;
 
   const mappings = getArtifactMappings(semanticTextMapping);
   const mappingFileContent = JSON.stringify(mappings, undefined, 2);

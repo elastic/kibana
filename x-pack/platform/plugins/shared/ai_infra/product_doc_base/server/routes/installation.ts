@@ -32,7 +32,7 @@ export const registerInstallationRoutes = ({
       path: INSTALLATION_STATUS_API_PATH,
       validate: {
         query: schema.object({
-          inferenceId: schema.maybe(schema.string()),
+          inferenceId: schema.string({ defaultValue: defaultInferenceEndpoints.ELSER }),
         }),
       },
       options: {
@@ -69,7 +69,7 @@ export const registerInstallationRoutes = ({
       path: INSTALL_ALL_API_PATH,
       validate: {
         body: schema.object({
-          inferenceId: schema.maybe(schema.string()),
+          inferenceId: schema.string({ defaultValue: defaultInferenceEndpoints.ELSER }),
         }),
       },
       options: {
@@ -122,7 +122,7 @@ export const registerInstallationRoutes = ({
       path: UNINSTALL_ALL_API_PATH,
       validate: {
         body: schema.object({
-          inferenceId: schema.maybe(schema.string()),
+          inferenceId: schema.string({ defaultValue: defaultInferenceEndpoints.ELSER }),
         }),
       },
       options: {

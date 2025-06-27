@@ -21,7 +21,7 @@ import * as i18n from './translations';
 
 export const ProductDocumentationManagement = React.memo<{
   status?: InstallationStatus;
-  inferenceId?: string;
+  inferenceId: string;
 }>(({ status, inferenceId }) => {
   const {
     mutateAsync: installProductDoc,

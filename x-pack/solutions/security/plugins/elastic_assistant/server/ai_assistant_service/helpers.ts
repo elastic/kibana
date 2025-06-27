@@ -16,6 +16,7 @@ import type { Logger } from '@kbn/logging';
 import { getResourceName } from '.';
 import { knowledgeBaseIngestPipeline } from '../ai_assistant_data_clients/knowledge_base/ingest_pipeline';
 import { GetElser } from '../types';
+import { ELASTICSEARCH_ELSER_INFERENCE_ID } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
 
 /**
  * Creates a function that returns the ELSER model ID
@@ -154,12 +155,17 @@ export const ensureProductDocumentationInstalled = async ({
   logger: Logger;
 }) => {
   try {
-    const { status } = await productDocManager.getStatus();
+    const { status } = await productDocManager.getStatus({
+      inferenceId: ELASTICSEARCH_ELSER_INFERENCE_ID,
+    });
     if (status !== 'installed') {
       logger.debug(`Installing product documentation for AIAssistantService`);
       setIsProductDocumentationInProgress(true);
       try {
-        await productDocManager.install({ wait: true });
+        await productDocManager.install({
+          wait: true,
+          inferenceId: ELASTICSEARCH_ELSER_INFERENCE_ID,
+        });
         logger.debug(`Successfully installed product documentation for AIAssistantService`);
       } catch (e) {
         logger.warn(`Failed to install product documentation for AIAssistantService: ${e.message}`);

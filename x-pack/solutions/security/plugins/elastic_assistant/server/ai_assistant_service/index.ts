@@ -542,7 +542,9 @@ export class AIAssistantService {
   }
 
   public async getProductDocumentationStatus(): Promise<InstallationStatus> {
-    const status = await this.productDocManager?.getStatus();
+    const status = await this.productDocManager?.getStatus({
+      inferenceId: ELASTICSEARCH_ELSER_INFERENCE_ID,
+    });
 
     if (!status) {
       return 'uninstalled';

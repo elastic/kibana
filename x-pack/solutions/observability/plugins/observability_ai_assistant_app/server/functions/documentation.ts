@@ -7,6 +7,7 @@
 
 import { DocumentationProduct } from '@kbn/product-doc-common';
 import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { FunctionRegistrationParameters } from '.';
 
 export const RETRIEVE_DOCUMENTATION_NAME = 'retrieve_elastic_doc';
@@ -71,6 +72,8 @@ export async function registerDocumentationFunction({
         connectorId,
         request: resources.request,
         functionCalling: simulateFunctionCalling ? 'simulated' : 'auto',
+        // @TODO FOR OBS TEAM
+        inferenceId: defaultInferenceEndpoints.ELSER,
       });
 
       return {

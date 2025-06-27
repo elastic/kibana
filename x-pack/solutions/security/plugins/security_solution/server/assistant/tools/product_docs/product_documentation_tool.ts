@@ -15,6 +15,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
+import { ELASTICSEARCH_ELSER_INFERENCE_ID } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base/field_maps_configuration';
 import { APP_UI_ID } from '../../../../common';
 
 const toolDetails = {
@@ -50,6 +51,7 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
           connectorId,
           request,
           functionCalling: 'auto',
+          inferenceId: ELASTICSEARCH_ELSER_INFERENCE_ID,
         });
 
         const enrichedDocuments = response.documents.map(enrichDocument(contentReferencesStore));

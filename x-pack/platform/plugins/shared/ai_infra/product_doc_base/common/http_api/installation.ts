@@ -28,5 +28,5 @@ export interface UninstallResponse {
 }
 
 export interface ProductDocInstallParams {
-  inferenceId?: string;
+  inferenceId: string;
 }

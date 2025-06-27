@@ -34,10 +34,10 @@ export const getArtifactName = ({
 export const parseArtifactName = (artifactName: string) => {
   let name = artifactName.replace(/\.zip$/, '');
   // First, extract out the inference Id which is prefixed by --
-  const inferenceIdMatch = inferenceIdRegexp.exec(name);
+  const inferenceIdMatch = name.match(inferenceIdRegexp);
   name = inferenceIdMatch ? name.replace(inferenceIdMatch[0], '') : artifactName;
 
-  const match = artifactNameRegexp.exec(name);
+  const match = name.match(artifactNameRegexp);
   if (match) {
     const productName = match[1].toLowerCase() as ProductName;
     const productVersion = match[2].toLowerCase();

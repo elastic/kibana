@@ -24,7 +24,13 @@ export interface SemanticTextMapping extends BaseSemanticTextMapping {
     element_type?: string;
   };
 }
-const INFERENCE_ID_TO_SEMANTIC_TEXT_MAPPING: Record<string, SemanticTextMapping> = {
+
+type SupportedInferenceId = typeof DEFAULT_E5_SMALL | typeof DEFAULT_ELSER;
+const isSupportedInferenceId = (inferenceId: string): inferenceId is SupportedInferenceId => {
+  return inferenceId === DEFAULT_E5_SMALL || inferenceId === DEFAULT_ELSER;
+};
+
+const INFERENCE_ID_TO_SEMANTIC_TEXT_MAPPING: Record<SupportedInferenceId, SemanticTextMapping> = {
   [DEFAULT_E5_SMALL]: {
     type: 'semantic_text',
     inference_id: DEFAULT_E5_SMALL,
@@ -42,7 +48,7 @@ const INFERENCE_ID_TO_SEMANTIC_TEXT_MAPPING: Record<string, SemanticTextMapping>
   },
 };
 export const getSemanticTextMapping = (inferenceId: string): SemanticTextMapping => {
-  if (INFERENCE_ID_TO_SEMANTIC_TEXT_MAPPING[inferenceId]) {
+  if (isSupportedInferenceId(inferenceId)) {
     return INFERENCE_ID_TO_SEMANTIC_TEXT_MAPPING[inferenceId];
   }
   throw new Error(`Semantic text mapping for Inference ID ${inferenceId} not found`);

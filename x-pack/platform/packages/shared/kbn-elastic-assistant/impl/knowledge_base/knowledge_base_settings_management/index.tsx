@@ -32,6 +32,7 @@ import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
 import { useSearchParams } from 'react-router-dom-v5-compat';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { useKnowledgeBaseUpdater } from '../../assistant/settings/use_settings_updater/use_knowledge_base_updater';
 import { ProductDocumentationManagement } from '../../assistant/settings/product_documentation';
 import { KnowledgeBaseTour } from '../../tour/knowledge_base';
@@ -338,7 +339,10 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
 
   return (
     <>
-      <ProductDocumentationManagement status={kbStatus?.product_documentation_status} />
+      <ProductDocumentationManagement
+        status={kbStatus?.product_documentation_status}
+        inferenceId={defaultInferenceEndpoints.ELSER}
+      />
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">
         <EuiText size={'m'}>
           <FormattedMessage

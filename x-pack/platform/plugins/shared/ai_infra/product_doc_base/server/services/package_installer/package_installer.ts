@@ -243,9 +243,7 @@ export class PackageInstaller {
     } catch (e) {
       let message = e.message;
       if (message.includes('End of central directory record signature not found.')) {
-        message =
-          `No artifact available for product [${productName}]/[${productVersion}] for Inference ID [${inferenceId}]. ` +
-          e.message;
+        message = `No artifact available for product [${productName}]/[${productVersion}] for Inference ID [${inferenceId}]. Please select a different model or contact your administrator.`;
       }
       this.log.error(
         `Error during documentation installation of product [${productName}]/[${productVersion}] : ${message}`

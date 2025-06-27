@@ -10,8 +10,9 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { isDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { InternalServices } from '../types';
-import { isDefaultElserInferenceId, isTaskCurrentlyRunningError } from './utils';
+import { isTaskCurrentlyRunningError } from './utils';
 
 export const INSTALL_ALL_TASK_TYPE = 'ProductDocBase:InstallAll';
 export const INSTALL_ALL_TASK_ID = 'ProductDocBase:InstallAll';
