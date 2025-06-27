@@ -23,6 +23,7 @@ import {
   type ESQLCallbacks,
 } from '@kbn/esql-validation-autocomplete';
 import { getFieldsByTypeRetriever } from '@kbn/esql-validation-autocomplete/src/autocomplete/autocomplete';
+import { modeDescription } from '@kbn/esql-validation-autocomplete/src/autocomplete/commands/enrich/util';
 import {
   TIME_SYSTEM_DESCRIPTIONS,
   TIME_SYSTEM_PARAMS,
@@ -35,10 +36,9 @@ import { ENRICH_MODES } from '@kbn/esql-validation-autocomplete/src/definitions/
 import { within } from '@kbn/esql-validation-autocomplete/src/shared/helpers';
 import { getPolicyHelper } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
 import { i18n } from '@kbn/i18n';
-import { modeDescription } from '@kbn/esql-validation-autocomplete/src/autocomplete/commands/enrich/util';
-import { monacoPositionToOffset } from '../shared/utils';
-import { monaco } from '../../../monaco_imports';
+import { monaco } from '../../../../monaco_imports';
 import { getVariablesHoverContent } from './helpers';
+import { monacoPositionToOffset } from '../../../../esql/lib/shared/utils';
 
 const ACCEPTABLE_TYPES_HOVER = i18n.translate('monaco.esql.hover.acceptableTypes', {
   defaultMessage: 'Acceptable types',
