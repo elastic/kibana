@@ -246,6 +246,14 @@ export const topNavStrings = {
       defaultMessage: 'Create a copy of your dashboard',
     }),
   },
+  add: {
+    label: i18n.translate('dashboard.topNave.addButtonAriaLabel', {
+      defaultMessage: 'add',
+    }),
+    description: i18n.translate('dashboard.topNave.addConfigDescription', {
+      defaultMessage: 'Add content to your dashboard',
+    }),
+  },
 };
 
 export const getControlButtonTitle = () =>

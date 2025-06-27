@@ -57,6 +57,7 @@ import {
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
+import { confirmDiscardUnsavedChanges } from '../dashboard_listing/confirm_overlays';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -287,6 +288,14 @@ export function InternalDashboardTopNav({
           content: unsavedChangesBadgeStrings.getUnsavedChangedBadgeToolTipContent(),
           position: 'bottom',
         } as EuiToolTipProps,
+        iconOnClick: () => {
+          confirmDiscardUnsavedChanges(async () => {
+            await dashboardApi.asyncResetToLastSavedState();
+          });
+        },
+        iconType: 'editorUndo',
+        iconOnClickAriaLabel: unsavedChangesBadgeStrings.getUnsavedChangedBadgeText(),
+        iconSide: 'right',
       });
     }
 
