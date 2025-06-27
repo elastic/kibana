@@ -91,7 +91,7 @@ export enum SecurityAction {
   UPDATE,
   BULK_UPDATE,
   UPDATE_OBJECTS_SPACES,
-  MANAGE_ACCESS_CONTROL,
+  MANAGE_OWNERSHIP,
 }
 
 /**
@@ -367,7 +367,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     // Update                             'update'                AuditAction.UPDATE
     // Bulk Update                        'bulk_update'           AuditAction.UPDATE
     // Update Objects Spaces              'share_to_space'        AuditAction.UPDATE_OBJECTS_SPACES
-    // Manage Objects Access Control      'manage_access_control'      N/A
+    // Manage Objects Access Control      'manage_ownership'      N/A
     this.actionMap = new Map([
       [SecurityAction.CHECK_CONFLICTS, { authzAction: 'bulk_create', auditAction: undefined }],
       [
@@ -411,8 +411,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         { authzAction: 'share_to_space', auditAction: AuditAction.UPDATE_OBJECTS_SPACES },
       ],
       [
-        SecurityAction.MANAGE_ACCESS_CONTROL,
-        { authzAction: 'manage_access_control', auditAction: undefined },
+        SecurityAction.MANAGE_OWNERSHIP,
+        { authzAction: 'manage_ownership', auditAction: undefined },
       ],
     ]);
   }
@@ -471,8 +471,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       Array.from(params.types.values())
         .filter((type) => typeRegistry.supportsAccessControl(type))
         .map((type) => [
-          this.actions.savedObject.get(type, 'manage_access_control'),
-          { type, action: 'manage_access_control' as A },
+          this.actions.savedObject.get(type, 'manage_ownership'),
+          { type, action: 'manage_ownership' as A },
         ])
     );
 
@@ -611,12 +611,12 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       action === SecurityAction.BULK_DELETE ||
       action === SecurityAction.CREATE ||
       action === SecurityAction.BULK_CREATE ||
-      action === SecurityAction.MANAGE_ACCESS_CONTROL
+      action === SecurityAction.MANAGE_OWNERSHIP
     ) {
       const results = await Promise.all(
         objects.map(async (obj) => {
           const { hasAllRequested } = await this.checkPrivilegesFunc(
-            this.actions.savedObject.get(obj.type, 'manage_access_control'),
+            this.actions.savedObject.get(obj.type, 'manage_ownership'),
             [ALL_NAMESPACES_STRING]
           );
           return this.accessControlService.canModifyObject({
@@ -1165,7 +1165,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
 
-    const action = SecurityAction.MANAGE_ACCESS_CONTROL;
+    const action = SecurityAction.MANAGE_OWNERSHIP;
 
     this.assertObjectsArrayNotEmpty(objects, action);
 
