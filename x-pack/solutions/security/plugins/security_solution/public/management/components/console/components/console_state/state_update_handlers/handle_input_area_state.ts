@@ -31,7 +31,8 @@ const setArgSelectorValueToParsedArgs = (
     for (const argName of Object.keys(enteredCommand.argsWithValueSelectors)) {
       if (parsedInput.hasArg(argName)) {
         const argumentValues = enteredCommand.argState[argName] ?? [];
-        parsedInput.args[argName] = argumentValues.map((itemState) => itemState.value);
+        // Always set selector values using valueText for proper command reconstruction
+        parsedInput.args[argName] = argumentValues.map((itemState) => itemState.valueText);
       }
     }
   }
@@ -50,11 +51,9 @@ const initializeArgSelectorStateFromParsedArgs = (
         parsedInput.hasArg(argName) &&
         (!enteredCommand.argState[argName] || enteredCommand.argState[argName].length === 0)
       ) {
-        // Get parsed values from input
         const parsedValues = parsedInput.args[argName];
         enteredCommand.argState[argName] = [];
 
-        // For each parsed value, create a state entry
         parsedValues.forEach((parsedValue, index) => {
           enteredCommand.argState[argName][index] = {
             value: parsedValue,
@@ -105,7 +104,6 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
               id: uuidV4(),
               input: payload.command,
               display: payload.display ?? payload.command,
-              // Save selector state (argState) if present
               argState: state.input.enteredCommand?.argState,
             },
             ...state.input.history.slice(0, 99),
