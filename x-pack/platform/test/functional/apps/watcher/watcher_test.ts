@@ -7,11 +7,12 @@
 
 import expect from '@kbn/expect';
 import { keyBy } from 'lodash';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const watchID = 'watchID';
 const watchName = 'watch Name';
 const updatedName = 'updatedName';
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -85,7 +86,7 @@ export default function ({ getService, getPageObjects }) {
       const watchList = keyBy(await PageObjects.watcher.getWatches(), 'id');
       log.debug(watchList);
       expect(watchList.watchID.name).to.eql([watchName]);
-      await PageObjects.watcher.deleteWatch(watchID);
+      await PageObjects.watcher.deleteWatch();
       await testSubjects.click('confirmModalConfirmButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {

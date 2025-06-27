@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 
 export function GrokDebuggerProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -25,11 +26,11 @@ export function GrokDebuggerProvider({ getService }: FtrProviderContext) {
       await testSubjects.click(SUBJ_BTN_SIMULATE);
     }
 
-    async setEventInput(value) {
+    async setEventInput(value: string) {
       await monacoEditor.setCodeEditorValue(value, 0);
     }
 
-    async setPatternInput(value) {
+    async setPatternInput(value: string) {
       await monacoEditor.setCodeEditorValue(value, 1);
     }
 
@@ -37,7 +38,7 @@ export function GrokDebuggerProvider({ getService }: FtrProviderContext) {
       await testSubjects.click(SUBJ_BTN_TOGGLE_CUSTOM_PATTERNS_INPUT);
     }
 
-    async setCustomPatternsInput(value) {
+    async setCustomPatternsInput(value: string) {
       await monacoEditor.setCodeEditorValue(value, 2);
     }
 
@@ -51,14 +52,14 @@ export function GrokDebuggerProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    async assertEventOutput(expectedValue) {
+    async assertEventOutput(expectedValue: string) {
       await retry.try(async () => {
         const value = JSON.parse(await this.getEventOutput());
         expect(value).to.eql(expectedValue);
       });
     }
 
-    async assertPatternInputSyntaxHighlighting(expectedHighlights) {
+    async assertPatternInputSyntaxHighlighting(expectedHighlights: Array<{ token: string; content: string }>) {
       const patternInputElement = await testSubjects.find(SUBJ_UI_ACE_PATTERN_INPUT);
       const highlightedElements = await patternInputElement.findAllByXpath(
         './/div[@class="ace_line"]/*'
