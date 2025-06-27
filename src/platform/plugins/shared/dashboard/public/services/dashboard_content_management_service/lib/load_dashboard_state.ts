@@ -134,16 +134,8 @@ export const loadDashboardState = async ({
   const query = migrateLegacyQuery(
     searchSource?.getOwnField('query') || queryString.getDefaultQuery() // TODO SAVED DASHBOARDS determine if migrateLegacyQuery is still needed
   );
-  const {
-    refreshInterval,
-    description,
-    timeRestore,
-    options,
-    panels,
-    timeFrom,
-    timeTo,
-    title,
-  } = attributes;
+  const { refreshInterval, description, timeRestore, options, panels, timeFrom, timeTo, title } =
+    attributes;
 
   const timeRange =
     timeRestore && timeFrom && timeTo

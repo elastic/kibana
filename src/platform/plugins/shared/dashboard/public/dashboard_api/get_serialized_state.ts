@@ -16,10 +16,6 @@ import type { DashboardAttributes } from '../../server';
 
 import type { DashboardState } from '../../common';
 import { LATEST_VERSION } from '../../common/content_management';
-import {
-  convertDashboardVersionToNumber,
-  convertNumberToDashboardVersion,
-} from '../services/dashboard_content_management_service/lib/dashboard_versioning';
 import { dataService, savedObjectsTaggingService } from '../services/kibana_services';
 import { DashboardApi } from './types';
 import { generateNewPanelIds } from './generate_new_panel_ids';
