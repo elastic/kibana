@@ -533,13 +533,13 @@
                                 "two": {
                                   "type": "long",
                                   "_meta": {
-                                    "description": "Number of query rules configured with two suppression field"
+                                    "description": "Number of query rules configured with two suppression fields"
                                   }
                                 },
                                 "three": {
                                   "type": "long",
                                   "_meta": {
-                                    "description": "Number of query rules configured with three suppression field"
+                                    "description": "Number of query rules configured with three suppression fields"
                                   }
                                 }
                               }
@@ -3080,19 +3080,19 @@
                                 "max": {
                                   "type": "float",
                                   "_meta": {
-                                    "description": "The max duration"
+                                    "description": "The max duration of time spent indexing alerts"
                                   }
                                 },
                                 "avg": {
                                   "type": "float",
                                   "_meta": {
-                                    "description": "The avg duration"
+                                    "description": "The avg duration of time spent indexing alerts"
                                   }
                                 },
                                 "min": {
                                   "type": "float",
                                   "_meta": {
-                                    "description": "The min duration"
+                                    "description": "The min duration of time spent indexing alerts"
                                   }
                                 }
                               }
@@ -3102,19 +3102,19 @@
                                 "max": {
                                   "type": "float",
                                   "_meta": {
-                                    "description": "The max duration"
+                                    "description": "The max duration of time spent searching alerts"
                                   }
                                 },
                                 "avg": {
                                   "type": "float",
                                   "_meta": {
-                                    "description": "The avg duration"
+                                    "description": "The avg duration of time spent searching alerts"
                                   }
                                 },
                                 "min": {
                                   "type": "float",
                                   "_meta": {
-                                    "description": "The min duration"
+                                    "description": "The min duration of time spent searching alerts"
                                   }
                                 }
                               }
@@ -3124,19 +3124,19 @@
                                 "max": {
                                   "type": "float",
                                   "_meta": {
-                                    "description": "The max duration"
+                                    "description": "The max duration of time spent enriching alerts"
                                   }
                                 },
                                 "avg": {
                                   "type": "float",
                                   "_meta": {
-                                    "description": "The avg duration"
+                                    "description": "The avg duration of time spent enriching alerts"
                                   }
                                 },
                                 "min": {
                                   "type": "float",
                                   "_meta": {
-                                    "description": "The min duration"
+                                    "description": "The min duration of time spent enriching alerts"
                                   }
                                 }
                               }

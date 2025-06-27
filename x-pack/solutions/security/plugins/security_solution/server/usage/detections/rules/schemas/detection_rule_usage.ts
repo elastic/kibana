@@ -66,13 +66,13 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         two: {
           type: 'long',
           _meta: {
-            description: 'Number of query rules configured with two suppression field',
+            description: 'Number of query rules configured with two suppression fields',
           },
         },
         three: {
           type: 'long',
           _meta: {
-            description: 'Number of query rules configured with three suppression field',
+            description: 'Number of query rules configured with three suppression fields',
           },
         },
       },

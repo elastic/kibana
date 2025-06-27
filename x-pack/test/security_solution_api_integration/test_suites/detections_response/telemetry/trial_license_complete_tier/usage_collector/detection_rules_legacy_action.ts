@@ -88,6 +88,12 @@ export default ({ getService }: FtrProviderContext) => {
               alerts: 4,
               notifications_enabled: 1,
             },
+            query_custom: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
+              enabled: 1,
+              alerts: 4,
+              notifications_enabled: 1,
+            },
             custom_total: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
               enabled: 1,

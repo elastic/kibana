@@ -52,43 +52,43 @@ export const ruleStatusMetricsSchema: MakeSchemaFrom<EventLogStatusMetric> = {
       index_duration: {
         max: {
           type: 'float',
-          _meta: { description: 'The max duration' },
+          _meta: { description: 'The max duration of time spent indexing alerts' },
         },
         avg: {
           type: 'float',
-          _meta: { description: 'The avg duration' },
+          _meta: { description: 'The avg duration of time spent indexing alerts' },
         },
         min: {
           type: 'float',
-          _meta: { description: 'The min duration' },
+          _meta: { description: 'The min duration of time spent indexing alerts' },
         },
       },
       search_duration: {
         max: {
           type: 'float',
-          _meta: { description: 'The max duration' },
+          _meta: { description: 'The max duration of time spent searching alerts' },
         },
         avg: {
           type: 'float',
-          _meta: { description: 'The avg duration' },
+          _meta: { description: 'The avg duration of time spent searching alerts' },
         },
         min: {
           type: 'float',
-          _meta: { description: 'The min duration' },
+          _meta: { description: 'The min duration of time spent searching alerts' },
         },
       },
       enrichment_duration: {
         max: {
           type: 'float',
-          _meta: { description: 'The max duration' },
+          _meta: { description: 'The max duration of time spent enriching alerts' },
         },
         avg: {
           type: 'float',
-          _meta: { description: 'The avg duration' },
+          _meta: { description: 'The avg duration of time spent enriching alerts' },
         },
         min: {
           type: 'float',
-          _meta: { description: 'The min duration' },
+          _meta: { description: 'The min duration of time spent enriching alerts' },
         },
       },
       gap_duration: {
