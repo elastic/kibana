@@ -121,11 +121,6 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
     borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
   };
 
-  const bottomTextCss = {
-    maxWidth: 148,
-    padding: 0,
-  };
-
   const Label = ({ children }: PropsWithChildren) => (
     <EuiText size="xs" css={boldTextCss}>
       {children}
@@ -179,14 +174,6 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
       <EuiFlyoutBody>
         <EuiForm component="form">
           <EuiFormRow
-            label={
-              <Label>
-                <FormattedMessage
-                  id="xpack.intercept.feedbackFlyout.form.select.label"
-                  defaultMessage="Type"
-                />
-              </Label>
-            }
             helpText={
               !showBenefitsCallout && (
                 <>
@@ -278,12 +265,12 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
       <EuiFlyoutFooter css={footerBackgroundCss}>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="none">
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiText size="xs" css={bottomTextCss}>
+                <EuiText size="s">
                   <FormattedMessage
                     id="xpack.intercept.feedbackFlyout.form.infoText"
-                    defaultMessage="We'll get the information about your session."
+                    defaultMessage="Session data included"
                   />
                 </EuiText>
               </EuiFlexItem>
