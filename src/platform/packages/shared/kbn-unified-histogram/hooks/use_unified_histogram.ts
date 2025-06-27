@@ -9,7 +9,11 @@
 
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
-import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import type {
+  EmbeddableComponentProps,
+  LensEmbeddableInput,
+  TypedLensByValueInput,
+} from '@kbn/lens-plugin/public';
 import { useEffect, useMemo, useState } from 'react';
 import { Observable, Subject, of } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
@@ -122,6 +126,9 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
     nextVisContext: UnifiedHistogramVisContext | undefined,
     externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
   ) => void;
+  getModifiedVisAttributes?: (
+    attributes: TypedLensByValueInput['attributes']
+  ) => TypedLensByValueInput['attributes'];
 };
 
 export type UnifiedHistogramApi = {
@@ -155,7 +162,7 @@ const EMPTY_SUGGESTION_CONTEXT: Observable<UnifiedHistogramSuggestionContext> = 
 
 export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnifiedHistogramResult => {
   const [stateService] = useState(() => {
-    const { services, initialState, localStorageKeyPrefix } = props;
+    const { services, initialState, localStorageKeyPrefix, getModifiedVisAttributes } = props;
     return createStateService({ services, initialState, localStorageKeyPrefix });
   });
   const [lensVisService, setLensVisService] = useState<LensVisService>();
@@ -252,6 +259,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
       table,
       onSuggestionContextChange: stateProps.onSuggestionContextChange,
       onVisContextChanged: stateProps.onVisContextChanged,
+      getModifiedVisAttributes: props.getModifiedVisAttributes,
     });
   }, [
     columns,
@@ -260,6 +268,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     externalVisContext,
     isChartLoading,
     lensVisService,
+    props.getModifiedVisAttributes,
     requestParams.filters,
     requestParams.query,
     stateProps.breakdown?.field,

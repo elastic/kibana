@@ -23,6 +23,7 @@ import type { OmitIndexSignature } from 'type-fest';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
@@ -312,6 +313,14 @@ export interface Profile {
   getDefaultAdHocDataViews: () => Array<
     Omit<DataViewSpec, 'id'> & { id: NonNullable<DataViewSpec['id']> }
   >;
+
+  /**
+   * Chart
+   */
+
+  getModifiedVisAttributes: (
+    attributes: TypedLensByValueInput['attributes']
+  ) => TypedLensByValueInput['attributes'];
 
   /**
    * Data grid

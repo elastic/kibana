@@ -11,6 +11,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { extractCategorizeTokens, getCategorizeColumns, getCategorizeField } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import type { XYDataLayerConfig, XYState } from '@kbn/lens-plugin/public';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
@@ -103,12 +104,42 @@ export const createPatternDataSourceProfileProvider = (
     getDefaultAppState: (prev) => (params) => {
       return {
         ...prev(params),
-        hideChart: true,
         columns: [
           { name: 'Count', width: 150 },
           { name: 'Pattern', width: undefined },
         ],
       };
+    },
+    getModifiedVisAttributes: (prev) => (attributes) => {
+      const prevAttributes = prev(attributes);
+
+      if (prevAttributes.visualizationType === 'lnsXY') {
+        const vis = prevAttributes.state.visualization as XYState;
+        const visLayer = vis.layers[0] as XYDataLayerConfig;
+
+        visLayer.seriesType = 'bar_horizontal_stacked';
+
+        const query = prevAttributes.state.query;
+
+        if (isOfAggregateQueryType(query)) {
+          const newQuery = {
+            esql: `${query.esql} | EVAL Pattern = CASE(LENGTH(Pattern) > 20, CONCAT(SUBSTRING(Pattern, 0, 10), "...", SUBSTRING(Pattern, LENGTH(Pattern) - 10)), Pattern)`,
+          };
+
+          prevAttributes.state.query = newQuery;
+
+          const textBasedLayer = prevAttributes.state.datasourceStates.textBased?.layers
+            ? Object.values(prevAttributes.state.datasourceStates.textBased.layers)[0]
+            : undefined;
+
+          if (textBasedLayer) {
+            textBasedLayer.query = newQuery;
+            delete textBasedLayer.table;
+          }
+        }
+      }
+
+      return prevAttributes;
     },
   },
   resolve: (params) => {
