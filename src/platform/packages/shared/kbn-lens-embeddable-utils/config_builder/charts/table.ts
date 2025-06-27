@@ -37,14 +37,14 @@ function buildVisualizationState(config: LensTableConfig): DatatableVisualizatio
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
     columns: [
+      ...(layer.rows || []).map((row, i) => ({
+        columnId: `${ACCESSOR}_rows_${i}`,
+        oneClickFilter: typeof row === 'string' ? undefined : row.oneClickFilter,
+      })),
+      ...(layer.splitBy || []).map((_, i) => ({ columnId: `${ACCESSOR}_splitby_${i}` })),
       ...(layer.metrics || []).map((_, i) => ({
         columnId: `${ACCESSOR}_${i}`,
       })),
-      ...(layer.rows || []).map((row, i) => ({
-        columnId: `${ACCESSOR}_rows_${i}`,
-        href: typeof row === 'string' ? undefined : row.href,
-      })),
-      ...(layer.splitBy || []).map((_, i) => ({ columnId: `${ACCESSOR}_splitby_${i}` })),
     ],
   };
 }

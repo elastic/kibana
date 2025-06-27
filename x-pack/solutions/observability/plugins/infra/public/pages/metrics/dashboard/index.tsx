@@ -30,11 +30,12 @@ export const Dashboard = () => {
   const { search } = useLocation();
   const { namespace, name } = useParams<{ namespace: string; name?: string }>();
 
-  const { dashboardId, entityId } = useMemo(() => {
+  const { dashboardId, entityId, kuery } = useMemo(() => {
     const query = new URLSearchParams(search);
     return {
       dashboardId: query.get('dashboardId') ?? '',
       entityId: query.get('entityId'),
+      kuery: query.get('kuery') ? decodeURIComponent(query.get('kuery')!) : undefined,
     };
   }, [search]);
 
@@ -77,7 +78,7 @@ export const Dashboard = () => {
           data-test-subj="infraKubernetesPage"
         >
           <KubernetesTimeRangeMetadataProvider>
-            <PageContent dashboardId={dashboardId} enitiyId={entityId} />
+            <PageContent dashboardId={dashboardId} entityId={entityId} kuery={kuery} />
           </KubernetesTimeRangeMetadataProvider>
         </PageTemplate>
       </EuiErrorBoundary>

@@ -18,7 +18,13 @@ import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { AddKubernetesDataLink } from '../add_kubernetes_data/add_kubernetes_data';
 import { useFetchDashboardById } from '../../hooks/use_fetch_dashboard_by_id';
 
-export const RenderDashboard = ({ dashboardId }: { dashboardId: string }) => {
+export const RenderDashboard = ({
+  dashboardId,
+  kuery,
+}: {
+  dashboardId: string;
+  kuery?: string;
+}) => {
   const {
     services: { share },
   } = useKibanaContextForPlugin();
@@ -29,11 +35,12 @@ export const RenderDashboard = ({ dashboardId }: { dashboardId: string }) => {
     const getInitialInput = (): Partial<DashboardState> => ({
       viewMode: 'view' as ViewMode,
       timeRange: { from, to },
+      query: { query: kuery ?? '', language: 'kuery' },
     });
     return Promise.resolve<DashboardCreationOptions>({
       getInitialInput,
     });
-  }, [from, to]);
+  }, [from, kuery, to]);
 
   const locator = useMemo(() => {
     const baseLocator = share.url.locators.get(INFRA_DASHBOARD_LOCATOR_ID);
@@ -49,8 +56,8 @@ export const RenderDashboard = ({ dashboardId }: { dashboardId: string }) => {
   useEffect(() => {
     if (!dashboard) return;
     dashboard.setTimeRange({ from, to });
-    dashboard.setQuery({ query: '', language: 'kuery' });
-  }, [dashboard, dashboardId, from, to]);
+    dashboard.setQuery({ query: kuery ?? '', language: 'kuery' });
+  }, [dashboard, dashboardId, from, kuery, to]);
 
   const { data: dashboardData, status } = useFetchDashboardById(dashboardId);
 

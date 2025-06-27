@@ -11,6 +11,7 @@ export type InfraDashboardLocator = LocatorPublic<InfraDashboardLocatorParams>;
 
 export interface InfraDashboardLocatorParams extends SerializableRecord {
   relativePath: string;
+  kuery?: string;
 }
 
 export const INFRA_DASHBOARD_LOCATOR_ID = 'INFRA_DASHBOARD_LOCATOR_ID';
@@ -23,9 +24,16 @@ export class InfraDashboardLocatorDefinition
   public readonly getLocation = async (
     params: InfraDashboardLocatorParams & { state?: SerializableRecord }
   ) => {
+    const url = new URL(params.relativePath, 'http://placeholder'); // required to parse relative paths
+    const searchParams = new URLSearchParams(url.search);
+
+    if (params.kuery) {
+      searchParams.set('kuery', encodeURIComponent(params.kuery));
+    }
+
     return {
       app: 'metrics',
-      path: `/entity/${params.relativePath}`,
+      path: `/entity/${url.pathname}?${searchParams.toString()}`,
       state: params.state ? params.state : {},
     };
   };

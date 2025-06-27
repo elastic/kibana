@@ -143,9 +143,7 @@ export interface LensBreakdownTopValuesConfig {
 export interface LensTableRowConfig {
   field: string;
   name?: string;
-  href?: string;
-
-  directlyFilterOnClick?: boolean;
+  oneClickFilter?: boolean;
 }
 
 export type LensBreakdownConfig =

@@ -13,10 +13,12 @@ import { EntityTable } from '../entity_table/entity_table';
 
 export const PageContent = ({
   dashboardId,
-  enitiyId,
+  entityId,
+  kuery,
 }: {
   dashboardId: string;
-  enitiyId?: string | null;
+  entityId?: string | null;
+  kuery?: string;
 }) => {
   const { data, status } = useTimeRangeMetadataContext();
 
@@ -30,8 +32,8 @@ export const PageContent = ({
 
   return (
     <>
-      {enitiyId ? <EntityTable entityId={enitiyId} /> : null}
-      <RenderDashboard dashboardId={dashboardId} />
+      {entityId ? <EntityTable entityId={entityId} /> : null}
+      <RenderDashboard dashboardId={dashboardId} kuery={kuery} />
     </>
   );
 };
