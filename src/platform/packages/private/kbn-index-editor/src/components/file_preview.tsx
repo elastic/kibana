@@ -162,7 +162,7 @@ export const FilesPreview: FC = () => {
     return () => {
       // clean up ad hoc data views
     };
-  }, [fetchFilePreview, filesStatus]);
+  }, [fetchFilePreview, filesStatus, uploadStatus.overallImportStatus]);
 
   if (!filePreviewItems.length) return null;
 
