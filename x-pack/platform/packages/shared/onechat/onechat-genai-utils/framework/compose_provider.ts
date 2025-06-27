@@ -9,6 +9,8 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PlainIdToolIdentifier, ToolProviderId, ToolDescriptor } from '@kbn/onechat-common';
 import type { ToolProvider, ExecutableTool } from '@kbn/onechat-server';
 
+// TODO: use stuff from x-pack/platform/packages/shared/onechat/onechat-common/agents/profiles.ts instead
+
 export interface ByToolIdRule {
   type: 'by_tool_id';
   providerId: ToolProviderId;

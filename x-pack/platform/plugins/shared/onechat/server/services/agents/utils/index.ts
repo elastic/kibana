@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { addRoundCompleteEvent } from './add_round_complete_event';
-export { extractRound } from './extract_round';
-export { conversationToLangchainMessages } from './to_langchain_messages';
+export { createInternalRegistry } from './create_registry';
+export { combineAgentProviders } from './combine_providers';

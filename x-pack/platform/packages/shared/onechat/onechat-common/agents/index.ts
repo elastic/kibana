@@ -46,3 +46,4 @@ export {
   toSerializedAgentIdentifier,
   toStructuredAgentIdentifier,
 } from './identifiers';
+export type { AgentProfile } from './profiles';

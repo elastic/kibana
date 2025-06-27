@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { addRoundCompleteEvent } from './add_round_complete_event';
-export { extractRound } from './extract_round';
-export { conversationToLangchainMessages } from './to_langchain_messages';
+export { createClient, type AgentProfileClient } from './client';

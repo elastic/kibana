@@ -24,3 +24,11 @@ export {
   unknownToolProviderId,
 } from './tools';
 export { BuiltinToolIds, BuiltinTags } from './constants';
+export {
+  ToolSelectionType,
+  type ByIdToolSelection,
+  type ByProviderSelection,
+  type ToolSelection,
+  isByIdToolSelection,
+  isByProviderToolSelection,
+} from './tool_selection';
