@@ -14,9 +14,10 @@ paths:
   /api/endpoint_list:
     post:
       description: >-
-        Create an endpoint exception list, which groups endpoint exception list
-        items. If an endpoint exception list already exists, an empty response
-        is returned.
+        Create the exception list for Elastic Endpoint rule exceptions. When you
+        create the exception list, it will have a `list_id` of `endpoint_list`.
+        If the Elastic Endpoint exception list already exists, your request will
+        return an empty response.
       operationId: CreateEndpointList
       responses:
         '200':
@@ -57,8 +58,8 @@ paths:
   /api/endpoint_list/items:
     delete:
       description: >-
-        Delete an Elastic Endpoint exception list item by using the `id` or `item_id`
-        field.
+        Delete an Elastic Endpoint exception list item by using the `id` or
+        `item_id` field.
       operationId: DeleteEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -117,7 +118,8 @@ paths:
         - Security Endpoint Exceptions API
     get:
       description: >-
-        Get the details of an Elastic Endpoint exception list item by using the `id` or `item_id` field.
+        Get the details of an Elastic Endpoint exception list item by using the
+        `id` or `item_id` field.
       operationId: ReadEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -178,7 +180,8 @@ paths:
         - Security Endpoint Exceptions API
     post:
       description: >-
-        Create an Elastic Endpoint exception list item, and associate it with the Elastic Endpoint exception list.
+        Create an Elastic Endpoint exception list item, and associate it with
+        the Elastic Endpoint exception list.
       operationId: CreateEndpointListItem
       requestBody:
         content:
@@ -258,7 +261,8 @@ paths:
         - Security Endpoint Exceptions API
     put:
       description: >-
-        Update an Elastic Endpoint exception list item by using the `id` or `item_id` field.
+        Update an Elastic Endpoint exception list item by using the `id` or
+        `item_id` field.
       operationId: UpdateEndpointListItem
       requestBody:
         content:
@@ -526,9 +530,7 @@ components:
       example: This list tracks allowlisted values.
       type: string
     ExceptionListHumanId:
-      description: >-
-        Exception list's human readable string identifier, e.g.
-        `trusted-linux-processes`.
+      description: Exception list's human readable string identifier, e.g. `endpoint_list`.
       example: simple_list
       format: nonempty
       minLength: 1
@@ -966,7 +968,8 @@ security:
   - BasicAuth: []
 tags:
   - description: >-
-      The Endpoint Exceptions API allows you to manage exceptions for the Elastic Endpoint rule. Elastic Endpoint exceptions prevent the Elastic Endpoint rule from generating alerts from incoming events
+      Endpoint Exceptions API allows you to manage detection rule endpoint
+      exceptions to prevent a rule from generating an alert from incoming events
       even when the rule's other criteria are met.
     name: Security Endpoint Exceptions API
     x-displayName: Security endpoint exceptions
