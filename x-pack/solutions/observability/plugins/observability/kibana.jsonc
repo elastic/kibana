@@ -28,7 +28,6 @@
       "fieldFormats",
       "uiActions",
       "presentationUtil",
-      "exploratoryView",
       "features",
       "files",
       "inspector",
@@ -50,6 +49,7 @@
     ],
     "optionalPlugins": [
       "discover",
+      "exploratoryView",
       "home",
       "usageCollection",
       "cloud",

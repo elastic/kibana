@@ -145,7 +145,7 @@ export interface ObservabilityPublicPluginsStart {
   dataViewEditor: DataViewEditorStart;
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
-  exploratoryView: ExploratoryViewPublicStart;
+  exploratoryView?: ExploratoryViewPublicStart;
   fieldFormats: FieldFormatsStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
