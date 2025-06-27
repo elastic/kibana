@@ -10,8 +10,10 @@ import { OverviewTestBed, setupOverviewPage } from './overview.helpers';
 
 describe('Overview Page', () => {
   let testBed: OverviewTestBed;
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+
   beforeEach(async () => {
-    testBed = await setupOverviewPage(setupEnvironment().httpSetup);
+    testBed = await setupOverviewPage(httpSetup);
     testBed.component.update();
   });
 
@@ -27,6 +29,31 @@ describe('Overview Page', () => {
       const { exists } = testBed;
 
       expect(exists('documentationLink')).toBe(true);
+    });
+  });
+
+  describe('Machine Learning callout', () => {
+    test('Shows ML disabled callout when ML is disabled', async () => {
+      httpRequestsMockHelpers.setLoadMlEnabledResponse({ mlEnabled: false });
+
+      testBed = await setupOverviewPage(httpSetup);
+      testBed.component.update();
+
+      const { exists, find } = testBed;
+
+      expect(exists('mlDisabledCallout')).toBe(true);
+      expect(find('mlDisabledCallout').text()).toContain('Machine Learning is disabled');
+    });
+
+    test('Does not show ML disabled callout when ML is enabled', async () => {
+      httpRequestsMockHelpers.setLoadMlEnabledResponse({ mlEnabled: true });
+
+      testBed = await setupOverviewPage(httpSetup);
+      testBed.component.update();
+
+      const { exists } = testBed;
+
+      expect(exists('mlDisabledCallout')).toBe(false);
     });
   });
 });

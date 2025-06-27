@@ -24,6 +24,7 @@ import { registerClusterSettingsRoute } from './cluster_settings';
 import { registerMigrateDataStreamRoutes } from './migrate_data_streams';
 import { registerUpdateIndexRoute } from './update_index';
 import { registerEnterpriseSearchDeprecationRoutes } from '../lib/enterprise_search/enterprise_search_deprecations_routes';
+import { registerMLEnabledRoute } from './ml_enabled_cluster';
 
 export function registerRoutes(dependencies: RouteDependencies, getWorker: () => ReindexWorker) {
   registerAppRoutes(dependencies);
@@ -42,6 +43,8 @@ export function registerRoutes(dependencies: RouteDependencies, getWorker: () =>
   registerRemoteClustersRoute(dependencies);
   registerNodeDiskSpaceRoute(dependencies);
   registerClusterSettingsRoute(dependencies);
+  // Route to check if ML is enabled in the cluster
+  registerMLEnabledRoute(dependencies);
 
   // Data streams reindexing
   registerMigrateDataStreamRoutes(dependencies);
