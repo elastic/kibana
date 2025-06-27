@@ -75,10 +75,11 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
   const [feedbackText, setFeedbackText] = useState('');
   const [feedbackType, setFeedbackType] = useState(FeedbackType.FeatureRequest);
   const [userEmail, setUserEmail] = useState('');
-  const [isPlatinumOrHigherLicense, setIsPlatinumOrHigherLicense] = useState(false);
+  const [isPlatinumOrHigherExcludingTrialLicense, setIsPlatinumOrHigherExcludingTrialLicense] =
+    useState(false);
 
-  const showPlatinumOrHigherCallout =
-    isPlatinumOrHigherLicense && feedbackType !== FeedbackType.OtherFeedback;
+  const showBenefitsCallout =
+    isPlatinumOrHigherExcludingTrialLicense && feedbackType !== FeedbackType.OtherFeedback;
 
   const isSendFeedbackButtonDisabled = !feedbackText.trim().length;
 
@@ -94,9 +95,12 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
   const checkIfLicenseIsPlatinum = useCallback(async () => {
     try {
       const license = await getLicense();
-      setIsPlatinumOrHigherLicense(license.hasAtLeast('platinum'));
+      const isPlatinumOrHigherExcludingTrial =
+        license.hasAtLeast('platinum') && license.type !== 'trial';
+
+      setIsPlatinumOrHigherExcludingTrialLicense(isPlatinumOrHigherExcludingTrial);
     } catch (_) {
-      setIsPlatinumOrHigherLicense(false);
+      setIsPlatinumOrHigherExcludingTrialLicense(false);
     }
   }, [getLicense]);
 
@@ -184,7 +188,7 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
               </Label>
             }
             helpText={
-              !showPlatinumOrHigherCallout && (
+              !showBenefitsCallout && (
                 <>
                   <EuiSpacer size="s" />
                   <EuiText size="s">
@@ -207,7 +211,7 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
               onChange={handleChangeFeedbackType}
             />
           </EuiFormRow>
-          {showPlatinumOrHigherCallout && <BenefitsCallout />}
+          {showBenefitsCallout && <BenefitsCallout />}
           <EuiFormRow
             label={
               <Label>
