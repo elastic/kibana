@@ -309,6 +309,16 @@ export class DiscoverPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
+  public async getHistogramHeight() {
+    const histogram = await this.testSubjects.find('unifiedHistogramResizablePanelFixed');
+    return (await histogram.getSize()).height;
+  }
+
+  public async resizeHistogramBy(distance: number) {
+    const resizeButton = await this.testSubjects.find('unifiedHistogramResizableButton');
+    await this.browser.dragAndDrop({ location: resizeButton }, { location: { x: 0, y: distance } });
+  }
+
   public async getChartInterval() {
     const button = await this.testSubjects.find('unifiedHistogramTimeIntervalSelectorButton');
     return await button.getAttribute('data-selected-value');

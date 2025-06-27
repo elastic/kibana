@@ -113,7 +113,7 @@ export const initializeSession: InternalStateThunkActionCreator<
     if (TABS_ENABLED && !wasTabInitialized) {
       const tabInitialGlobalState = tabState.initialGlobalState;
 
-      if (tabInitialGlobalState?.filters) {
+      if (tabInitialGlobalState?.filters?.length) {
         services.filterManager.setGlobalFilters(cloneDeep(tabInitialGlobalState.filters));
       }
 
