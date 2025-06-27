@@ -8,7 +8,6 @@
  */
 import React from 'react';
 import type { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiSkeletonText, EuiSkeletonTitle } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import useAsync from 'react-use/lib/useAsync';
@@ -65,19 +64,18 @@ export const openDashboardFlyout = ({
   flyoutProps,
 }: {
   core: CoreStart;
-  api?: EmbeddableApiContext['embeddable'];
+  api?: unknown;
   loadContent: (({ closeFlyout }: { closeFlyout: () => void }) => Promise< JSX.Element | void>);
   flyoutProps?: Partial<OverlayFlyoutOpenOptions>;
 }) => {
   const overlayTracker = tracksOverlays(api) ? api : undefined;
-  let flyoutRef: ReturnType<CoreStart['overlays']['openFlyout']>;
 
   const onClose = () => {
     overlayTracker?.clearOverlays();
     flyoutRef?.close();
   }
 
-  flyoutRef = core.overlays.openFlyout(
+  const flyoutRef = core.overlays.openFlyout(
     toMountPoint(<EditPanelWrapper closeFlyout={onClose} loadContent={loadContent} />, core),
     { ...defaultFlyoutProps, onClose, ...flyoutProps }
   );
