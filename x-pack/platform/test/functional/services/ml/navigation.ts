@@ -28,9 +28,12 @@ export function MachineLearningNavigationProvider({
       });
     },
 
-    async navigateToMlViaAppsMenu() {
+    async navigateToMlViaAppsMenu(attrs: { navigatesFromDiscover?: boolean } = {}) {
       await retry.tryForTime(60 * 1000, async () => {
         await appsMenu.clickLink('Machine Learning');
+        if (attrs.navigatesFromDiscover) {
+          await PageObjects.discover.leaveWithoutSaving();
+        }
         await testSubjects.existOrFail('mlApp', { timeout: 2000 });
       });
     },
@@ -279,8 +282,8 @@ export function MachineLearningNavigationProvider({
       await this.navigateToArea('~mlMainTab & ~dataVisualizer', 'mlPageDataVisualizerSelector');
     },
 
-    async navigateToDataVisualizerFromAppsMenu() {
-      await this.navigateToMlViaAppsMenu();
+    async navigateToDataVisualizerFromAppsMenu(attrs: { navigatesFromDiscover?: boolean } = {}) {
+      await this.navigateToMlViaAppsMenu(attrs);
       await this.navigateToArea('~mlMainTab & ~dataVisualizer', 'mlPageDataVisualizerSelector');
     },
 

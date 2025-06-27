@@ -109,6 +109,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('unifiedHistogramEditVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.leaveWithoutSaving();
       await retry.try(async () => {
         const breakdownLabel = await testSubjects.find(
           'lnsDragDrop_domDraggable_Top 3 values of extension.raw'
