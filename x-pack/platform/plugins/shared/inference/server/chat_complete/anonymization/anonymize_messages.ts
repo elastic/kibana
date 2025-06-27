@@ -49,7 +49,7 @@ function getEntityMask(entity: { class_name: string; value: string }) {
   return `${entity.class_name}_${hash}`;
 }
 
-async function anonymize({
+export async function anonymize({
   input,
   anonymizationRules,
   esClient,
