@@ -34,10 +34,9 @@ const nerRuleSchema = schema.allOf([
 export const uiSettings: Record<string, UiSettingsParams> = {
   [aiAssistantAnonymizationRules]: {
     category: ['observability'],
-    name: i18n.translate(
-      'xpack.observabilityAiAssistantManagement.settingsTab.anonymizationRulesLabel',
-      { defaultMessage: 'Anonymization Rules' }
-    ),
+    name: i18n.translate('xpack.inference.anonymizationRulesLabel', {
+      defaultMessage: 'Anonymization Rules',
+    }),
     value: JSON.stringify(
       [
         {
@@ -55,10 +54,8 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       null,
       2
     ),
-    description: i18n.translate(
-      'xpack.observabilityAiAssistantManagement.settingsPage.anonymizationRulesDescription',
-      {
-        defaultMessage: `List of anonymization rules
+    description: i18n.translate('xpack.inference.anonymizationRulesDescription', {
+      defaultMessage: `List of anonymization rules
           <ul>
             <li><strong>type:</strong> "ner" or "regex"</li>
             <li><strong>entityClass:</strong> (regex type only) eg: EMAIL, URL, IP</li>
@@ -66,13 +63,12 @@ export const uiSettings: Record<string, UiSettingsParams> = {
             <li><strong>modelId:</strong> (ner type only) ID of the NER (Named Entity Recognition) model to use</li>
             <li><strong>enabled:</strong> boolean flag to turn the rule on or off</li>
           </ul>`,
-        values: {
-          ul: (chunks) => `<ul>${chunks}</ul>`,
-          li: (chunks) => `<li>${chunks}</li>`,
-          strong: (chunks) => `<strong>${chunks}</strong>`,
-        },
-      }
-    ),
+      values: {
+        ul: (chunks) => `<ul>${chunks}</ul>`,
+        li: (chunks) => `<li>${chunks}</li>`,
+        strong: (chunks) => `<strong>${chunks}</strong>`,
+      },
+    }),
     schema: schema.arrayOf(schema.oneOf([regexRuleSchema, nerRuleSchema])),
     type: 'json',
     requiresPageReload: true,
