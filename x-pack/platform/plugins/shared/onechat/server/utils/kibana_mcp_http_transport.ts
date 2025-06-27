@@ -122,8 +122,6 @@ export class KibanaMcpHttpTransport implements Transport {
     responseFactory: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
     try {
-      this._logger.debug('Processing POST request');
-
       // Validate the Accept header
       const acceptHeader = request.headers.accept;
 
