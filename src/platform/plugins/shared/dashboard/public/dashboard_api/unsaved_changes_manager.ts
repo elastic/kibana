@@ -122,8 +122,10 @@ export function initializeUnsavedChangesManager({
 
       // backup unsaved changes if configured to do so
       if (creationOptions?.useSessionStorageIntegration) {
+        // TODO investigate why timeFrom, timeTo, and refreshInterval are omitted from backup state
         const dashboardStateToBackup: Partial<DashboardState> = omit(dashboardChanges ?? {}, [
-          'timeRange',
+          'timeFrom',
+          'timeTo',
           'refreshInterval',
         ]);
 
