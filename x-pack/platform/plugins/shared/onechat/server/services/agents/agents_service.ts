@@ -6,16 +6,20 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { SecurityServiceStart, ElasticsearchServiceStart } from '@kbn/core/server';
 import type { Runner } from '@kbn/onechat-server';
 import type { AgentsServiceSetup, AgentsServiceStart } from './types';
 import { createInternalRegistry } from './utils';
 import { createDefaultAgentProvider } from './default_provider';
+import { createClient, createStorage } from './profiles';
 
 export interface AgentsServiceSetupDeps {
   logger: Logger;
 }
 
 export interface AgentsServiceStartDeps {
+  security: SecurityServiceStart;
+  elasticsearch: ElasticsearchServiceStart;
   getRunner: () => Runner;
 }
 
@@ -33,12 +37,28 @@ export class AgentsService {
       throw new Error('#start called before #setup');
     }
 
-    const { getRunner } = startDeps;
+    const { logger } = this.setupDeps;
+    const { getRunner, security, elasticsearch } = startDeps;
+
     const defaultAgentProvider = createDefaultAgentProvider();
     const registry = createInternalRegistry({ providers: [defaultAgentProvider], getRunner });
 
+    const getProfileClient: AgentsServiceStart['getProfileClient'] = async (request) => {
+      const authUser = security.authc.getCurrentUser(request);
+      if (!authUser) {
+        throw new Error('No user bound to the provided request');
+      }
+
+      const esClient = elasticsearch.client.asScoped(request).asInternalUser;
+      const storage = createStorage({ logger, esClient });
+      const user = { id: authUser.profile_uid!, username: authUser.username };
+
+      return createClient({ user, storage });
+    };
+
     return {
       registry,
+      getProfileClient,
       execute: async (args) => {
         return getRunner().runAgent(args);
       },

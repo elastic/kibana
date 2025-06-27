@@ -6,3 +6,4 @@
  */
 
 export { createClient, type AgentProfileClient } from './client';
+export { createStorage } from './storage';
