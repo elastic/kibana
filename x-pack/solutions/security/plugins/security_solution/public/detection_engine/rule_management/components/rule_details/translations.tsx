@@ -475,3 +475,18 @@ export const HAS_RULE_UPDATE_CALLOUT_BUTTON = i18n.translate(
     defaultMessage: 'Review update',
   }
 );
+
+export const MODIFIED_PREBUILT_DIFF_TOOLTIP_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.ruleDiffTooltipTitle',
+  {
+    defaultMessage: 'Unable to view rule diff',
+  }
+);
+
+export const MODIFIED_PREBUILT_DIFF_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.ruleDiffTooltipContent',
+  {
+    defaultMessage:
+      "This rule hasn't been updated in a while and the original Elastic version cannot be found. We recommend updating this rule to the latest version.",
+  }
+);

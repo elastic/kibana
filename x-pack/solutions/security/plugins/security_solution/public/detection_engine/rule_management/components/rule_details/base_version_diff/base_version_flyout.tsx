@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useRef, useEffect } from 'react';
+import React, { memo, useCallback, useMemo, useRef, useEffect, useState } from 'react';
 import { EuiButton, EuiCallOut, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type { PartialRuleDiff, RuleResponse } from '../../../../../../common/api/detection_engine';
@@ -43,12 +43,18 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
   isReverting,
   onRevert,
 }: PrebuiltRulesBaseVersionFlyoutComponentProps): JSX.Element {
-  useConcurrencyControl(currentRule);
+  const isOutdated = useConcurrencyControl(currentRule);
 
   const { mutateAsync: revertPrebuiltRule, isLoading } = useRevertPrebuiltRule();
   const subHeader = useMemo(
-    () => <BaseVersionDiffFlyoutSubheader currentRule={currentRule} diff={diff} />,
-    [currentRule, diff]
+    () => (
+      <BaseVersionDiffFlyoutSubheader
+        currentRule={currentRule}
+        diff={diff}
+        isOutdated={isOutdated}
+      />
+    ),
+    [currentRule, diff, isOutdated]
   );
 
   const revertRule = useCallback(async () => {
@@ -83,14 +89,14 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
     return isReverting ? (
       <EuiButton
         onClick={revertRule}
-        isDisabled={isLoading}
+        isDisabled={isLoading || isOutdated}
         fill
         data-test-subj="revertPrebuiltRuleFromFlyoutButton"
       >
         {i18n.REVERT_BUTTON_LABEL}
       </EuiButton>
     ) : null;
-  }, [isLoading, isReverting, revertRule]);
+  }, [isLoading, isOutdated, isReverting, revertRule]);
 
   const extraTabs = useMemo(() => {
     const headerCallout = isReverting ? (
@@ -139,7 +145,13 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
     };
 
     return [updatesTab, jsonViewTab];
-  }, [baseRule, currentRule, diff, isReverting]);
+    /**
+     * We want to statically load this data so it doesn't change while user is viewing so
+     * we don't rerender the diff displays based on `currentRule`, `baseRule`, or `diff`.
+     * User is alerted to stale data when present via the `isOutdated` prop
+     */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isReverting]);
 
   return (
     <RuleDetailsFlyout
@@ -164,8 +176,9 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
  *
  * `rule.revision` gets bumped upon rule upgrade as well.
  */
-function useConcurrencyControl(rule: RuleResponse): void {
+function useConcurrencyControl(rule: RuleResponse): boolean {
   const concurrencyControl = useRef<PrebuiltRuleConcurrencyControl>();
+  const [isOutdated, setIsOutdated] = useState(false);
   const { addWarning } = useAppToasts();
 
   useEffect(() => {
@@ -176,10 +189,13 @@ function useConcurrencyControl(rule: RuleResponse): void {
         title: i18n.NEW_REVISION_DETECTED_WARNING,
         text: i18n.NEW_REVISION_DETECTED_WARNING_MESSAGE,
       });
+      setIsOutdated(true);
     }
 
     concurrencyControl.current = {
       revision: rule.revision,
     };
   }, [addWarning, rule.revision]);
+
+  return isOutdated;
 }

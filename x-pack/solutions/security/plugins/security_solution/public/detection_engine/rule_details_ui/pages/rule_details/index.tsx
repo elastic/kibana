@@ -663,7 +663,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 subtitle={subTitle}
                 subtitle2={
                   <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="flexStart">
-                    <CustomizedPrebuiltRuleBadge rule={rule} />
+                    <CustomizedPrebuiltRuleBadge
+                      rule={rule}
+                      doesBaseVersionExist={doesBaseVersionExist}
+                      openRuleDiffFlyout={openFlyout}
+                    />
                     <EuiFlexGroup alignItems="center" gutterSize="xs">
                       <EuiFlexItem grow={false}>
                         {ruleStatusI18n.STATUS}

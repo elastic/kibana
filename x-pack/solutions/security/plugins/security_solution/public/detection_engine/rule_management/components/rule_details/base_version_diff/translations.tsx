@@ -102,3 +102,11 @@ export const NEW_REVISION_DETECTED_WARNING_MESSAGE = i18n.translate(
       'The installed rule was changed, the rule modifications diff flyout has been updated.',
   }
 );
+
+export const OUTDATED_DIFF_CALLOUT_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.baseVersionFlyout.outdatedDiffCalloutMessage',
+  {
+    defaultMessage:
+      'Changes have been made to the installed rule, please reload the page to view updated diff.',
+  }
+);
