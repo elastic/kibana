@@ -57,8 +57,6 @@ export async function getEventLog(
     .filter((event) => event?.event?.action)
     .filter((event) => actions.has(event?.event?.action!));
 
-  console.log(`getEventLog events ${JSON.stringify(events)}`);
-
   const actionExecutionUuidMap = new Map<string, number>();
   const foundActions = events
     .map((event) => ({
