@@ -91,7 +91,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     describe('Schedules', () => {
-      it('does allow user with reporting privileges o navigate to the Schedules tab', async () => {
+      it('does allow user with reporting privileges to navigate to the Schedules tab', async () => {
         await reportingFunctional.loginReportingUser();
 
         await PageObjects.common.navigateToApp('reporting');
