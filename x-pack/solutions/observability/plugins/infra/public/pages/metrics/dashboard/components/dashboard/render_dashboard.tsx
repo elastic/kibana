@@ -16,7 +16,6 @@ import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useHistory } from 'react-router-dom';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
-import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { AddKubernetesDataLink } from '../add_kubernetes_data/add_kubernetes_data';
 import { useFetchDashboardById } from '../../hooks/use_fetch_dashboard_by_id';
 
@@ -28,10 +27,8 @@ export const RenderDashboard = ({
   kuery?: string;
 }) => {
   const {
-    services: { share, uiSettings, notifications },
+    services: { share, notifications },
   } = useKibanaContextForPlugin();
-  const { dateRange } = useDatePickerContext();
-  const { from, to } = dateRange;
 
   const history = useHistory();
 
@@ -39,16 +36,16 @@ export const RenderDashboard = ({
     () =>
       createKbnUrlStateStorage({
         history,
-        useHash: uiSettings.get('state:storeInSessionStorage'),
+        useHash: false,
+        useHashQuery: false,
         ...withNotifyOnErrors(notifications.toasts),
       }),
-    [history, notifications.toasts, uiSettings]
+    [history, notifications.toasts]
   );
 
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
     const getInitialInput = (): Partial<DashboardState> => ({
       viewMode: 'view' as ViewMode,
-      timeRange: { from, to },
       query: { query: kuery ?? '', language: 'kuery' },
     });
 
@@ -58,8 +55,9 @@ export const RenderDashboard = ({
       unifiedSearchSettings: {
         kbnUrlStateStorage,
       },
+      useSearchSessionsIntegration: true,
     });
-  }, [from, kbnUrlStateStorage, kuery, to]);
+  }, [kbnUrlStateStorage, kuery]);
 
   const locator = useMemo(() => {
     const baseLocator = share.url.locators.get(INFRA_DASHBOARD_LOCATOR_ID);
@@ -74,9 +72,8 @@ export const RenderDashboard = ({
 
   useEffect(() => {
     if (!dashboard) return;
-    dashboard.setTimeRange({ from, to });
     dashboard.setQuery({ query: kuery ?? '', language: 'kuery' });
-  }, [dashboard, dashboardId, from, kuery, to]);
+  }, [dashboard, dashboardId, kuery]);
 
   const { data: dashboardData, status } = useFetchDashboardById(dashboardId);
 

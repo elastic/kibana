@@ -14,7 +14,6 @@ import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { LensWrapper } from '../../../../../components/lens/lens_wrapper';
 import type { UseLensAttributesParams } from '../../../../../hooks/use_lens_attributes';
 import { useLensAttributes } from '../../../../../hooks/use_lens_attributes';
-import { useDatePickerContext } from '../../hooks/use_date_picker';
 
 const getLensAttributesParams = (
   entityDefinition: EnrichedEntityDefinitionsResponse
@@ -63,13 +62,17 @@ export const EntityTableContent = ({
 }: {
   entityDefinition: EnrichedEntityDefinitionsResponse;
 }) => {
-  const { services } = useKibanaContextForPlugin();
-  const { dateRange } = useDatePickerContext();
-  const { from, to } = dateRange;
+  const {
+    services: {
+      share,
+      data: {
+        query: { timefilter },
+      },
+    },
+  } = useKibanaContextForPlugin();
+  const { from, to } = timefilter.timefilter.getTime();
 
-  const locator = services.share.url.locators.get<InfraDashboardLocatorParams>(
-    INFRA_DASHBOARD_LOCATOR_ID
-  );
+  const locator = share.url.locators.get<InfraDashboardLocatorParams>(INFRA_DASHBOARD_LOCATOR_ID);
 
   const params = useMemo(() => getLensAttributesParams(entityDefinition), [entityDefinition]);
 

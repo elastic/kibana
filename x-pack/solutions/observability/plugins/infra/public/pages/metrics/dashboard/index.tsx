@@ -15,7 +15,6 @@ import { TimeRangeMetadataProvider } from '../../../hooks/use_timerange_metadata
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useFetchDashboardById } from './hooks/use_fetch_dashboard_by_id';
-import { DatePickerProvider, useDatePickerContext } from './hooks/use_date_picker';
 import { PageContent } from './components/page_content/page_content';
 
 export const Dashboard = () => {
@@ -24,12 +23,13 @@ export const Dashboard = () => {
       observabilityShared: {
         navigation: { PageTemplate },
       },
+      data: {
+        query: { timefilter },
+      },
     },
   } = useKibanaContextForPlugin();
 
-  const { dateRange } = useDatePickerContext();
-  const from = new Date(Date.now() - 1000 * 60 * 10).toISOString();
-  const to = new Date().toISOString();
+  const { from, to } = timefilter.timefilter.getTime();
 
   const parsedDateRange = useTimeRange({
     rangeFrom: from,
@@ -76,24 +76,22 @@ export const Dashboard = () => {
   }
 
   return (
-    <DatePickerProvider dateRange={undefined}>
-      <EuiErrorBoundary>
-        <PageTemplate
-          pageHeader={{
-            pageTitle,
-          }}
-          data-test-subj="infraKubernetesPage"
+    <EuiErrorBoundary>
+      <PageTemplate
+        pageHeader={{
+          pageTitle,
+        }}
+        data-test-subj="infraKubernetesPage"
+      >
+        <TimeRangeMetadataProvider
+          kuery=""
+          dataSource="kubernetes"
+          start={parsedDateRange.from}
+          end={parsedDateRange.to}
         >
-          <TimeRangeMetadataProvider
-            kuery=""
-            dataSource="kubernetes"
-            start={parsedDateRange.from}
-            end={parsedDateRange.to}
-          >
-            <PageContent dashboardId={dashboardId} entityId={entityId} kuery={kuery} />
-          </TimeRangeMetadataProvider>
-        </PageTemplate>
-      </EuiErrorBoundary>
-    </DatePickerProvider>
+          <PageContent dashboardId={dashboardId} entityId={entityId} kuery={kuery} />
+        </TimeRangeMetadataProvider>
+      </PageTemplate>
+    </EuiErrorBoundary>
   );
 };

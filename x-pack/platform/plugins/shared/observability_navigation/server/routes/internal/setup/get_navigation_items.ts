@@ -158,14 +158,7 @@ export async function getNavigationItems({
                 title: item.sideNavTitle,
                 dashboardId: item.id,
                 order: item.sideNavOrder,
-                href: buildHref(
-                  id,
-                  {
-                    entityId: item.entityId,
-                    dashboardId: item.id,
-                  },
-                  formatId(KUBERNETES)
-                ),
+                href: buildHref(id, formatId(KUBERNETES)),
               };
 
               return navItem;
@@ -174,32 +167,37 @@ export async function getNavigationItems({
         ]
       : [];
 
-  return mergeNavigationItems(
+  const mergedNavigationItems = mergeNavigationItems(
     integrationNavigation,
-    navigationOverrides
-      .flatMap((item) => item.attributes)
-      .flatMap((nav) =>
-        nav.navigation.map((item) => ({
-          ...item,
-          href: item.href
-            ? appendQueryParams(item.href, {
-                ...(item.entityId ? { entityId: item.entityId } : {}),
-                ...(item.dashboardId ? { dashboardId: item.dashboardId } : {}),
-              })
-            : undefined,
-        }))
-      )
+    navigationOverrides.flatMap((item) => item.attributes).flatMap((nav) => nav.navigation)
   );
+
+  return mergedNavigationItems.map((item) => ({
+    ...item,
+    href: item.href
+      ? appendQueryParams(item.href, {
+          ...(item.entityId ? { entityId: item.entityId } : {}),
+          ...(item.dashboardId ? { dashboardId: item.dashboardId } : {}),
+        })
+      : undefined,
+    subItems: item.subItems?.map((subItem) => ({
+      ...subItem,
+      href: appendQueryParams(subItem.href, {
+        ...(subItem.entityId ? { entityId: subItem.entityId } : {}),
+        ...(subItem.dashboardId ? { dashboardId: subItem.dashboardId } : {}),
+      }),
+    })),
+  }));
 }
 
 function formatId(id: string): string {
   return id.toLowerCase().replace(/[\.\s]/g, '-');
 }
 
-function buildHref(id: string, queryParams: Record<string, string>, parent?: string): string {
+function buildHref(id: string, parent?: string): string {
   const href = `${parent ? `${parent}/` : ''}${id}`;
 
-  return appendQueryParams(href, queryParams);
+  return href;
 }
 
 function appendQueryParams(href: string, queryParams: Record<string, string>): string {
