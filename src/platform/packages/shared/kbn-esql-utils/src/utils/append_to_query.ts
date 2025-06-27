@@ -46,6 +46,10 @@ export function appendWhereClauseToESQLQuery(
   // Adding the backticks here are they are needed for special char fields
   let fieldName = sanitazeESQLInput(field);
 
+  // If we have no field mappings, then we do a last ditch infer as some fields are not mapped
+  // but might not actually be string values, so casting them to string will break the query.
+  fieldType ??= typeof value;
+
   // casting to string
   // there are some field types such as the ip that need
   // to cast in string first otherwise ES will fail

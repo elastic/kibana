@@ -48,7 +48,7 @@ export function SpanSummaryField({
         data-test-subj={`unifiedDocViewerObservabilityTracesAttribute-${fieldId}`}
         label={fieldConfiguration.title}
         field={fieldId}
-        value={fieldValue as string}
+        value={fieldValue!}
         formattedValue={fieldValue as string}
         fieldMetadata={fieldConfiguration.fieldMetadata}
         loading={isTransactionNameFieldWithoutValue && loading}

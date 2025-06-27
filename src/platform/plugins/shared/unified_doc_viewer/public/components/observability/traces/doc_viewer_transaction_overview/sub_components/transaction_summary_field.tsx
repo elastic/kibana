@@ -33,7 +33,7 @@ export function TransactionSummaryField({
         data-test-subj={`unifiedDocViewerObservabilityTracesAttribute-${fieldId}`}
         label={fieldConfiguration.title}
         field={fieldId}
-        value={fieldConfiguration.value as string}
+        value={fieldConfiguration.value}
         formattedValue={fieldConfiguration.value as string}
         fieldMetadata={fieldConfiguration.fieldMetadata}
         showActions={showActions}

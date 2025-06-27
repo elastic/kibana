@@ -58,10 +58,10 @@ describe('appendToQuery', () => {
       );
     });
 
-    it('appends a where clause in an existing query with casting to string when the type is not given', () => {
-      expect(appendWhereClauseToESQLQuery('from logstash-* // meow', 'dest', 'tada!', '-')).toBe(
+    it('appends a where clause in an existing query inferring whether to cast when the type is not given', () => {
+      expect(appendWhereClauseToESQLQuery('from logstash-* // meow', 'num', 220, '-')).toBe(
         `from logstash-* // meow
-| WHERE \`dest\`::string!="tada!"`
+| WHERE \`num\`!=220`
       );
     });
 

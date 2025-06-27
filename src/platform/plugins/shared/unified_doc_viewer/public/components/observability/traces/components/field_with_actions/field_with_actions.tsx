@@ -17,7 +17,7 @@ export interface FieldWithActionsProps {
   fieldMetadata?: PartialFieldMetadataPlain;
   formattedValue: string;
   label: string;
-  value: string;
+  value: string | number;
   children: React.ReactNode;
   loading?: boolean;
   showActions?: boolean;
@@ -72,7 +72,7 @@ export function FieldWithActions({
 
         <EuiFlexItem grow={2}>
           {showActions ? (
-            <FieldHoverActionPopover title={value} value={value} field={field}>
+            <FieldHoverActionPopover title={value as string} value={value} field={field}>
               {fieldContent}
             </FieldHoverActionPopover>
           ) : (
