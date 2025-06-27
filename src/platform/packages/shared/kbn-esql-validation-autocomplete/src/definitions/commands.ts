@@ -583,7 +583,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage: 'Join table with another table.',
     }),
     declaration: `LOOKUP JOIN <lookup_index> ON <field_name>`,
-    preview: true,
+    preview: false,
     examples: [
       '… | LOOKUP JOIN lookup_index ON join_field',
       // TODO: Uncomment when other join types are implemented

@@ -8,6 +8,7 @@
  */
 
 import React, { useEffect, useCallback } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiTitle,
   EuiFlexGroup,
@@ -243,7 +244,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   return (
     <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
       <FlyoutPanels.Item
-        className="fieldEditor__mainFlyoutPanel"
+        css={styles.flyoutPanel}
         data-test-subj="indexPatternEditorFlyout"
         border="right"
       >
@@ -263,7 +264,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         )}
         <Form
           form={form}
-          className="indexPatternEditor__form"
+          css={styles.patternEditorForm}
           error={form.getErrors()}
           isInvalid={form.isSubmitted && !form.isValid && form.getErrors().length}
           data-validation-error={form.getErrors().length ? '1' : '0'}
@@ -350,6 +351,16 @@ const IndexPatternEditorFlyoutContentComponent = ({
       </FlyoutPanels.Item>
     </FlyoutPanels.Group>
   );
+};
+
+const styles = {
+  patternEditorForm: css({
+    flexGrow: 1,
+  }),
+  flyoutPanel: css({
+    display: 'flex',
+    flexDirection: 'column',
+  }),
 };
 
 export const IndexPatternEditorFlyoutContent = React.memo(IndexPatternEditorFlyoutContentComponent);

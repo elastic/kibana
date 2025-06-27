@@ -78,7 +78,6 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         // Disabled features are automatically added to the space when a solution is set
         'apm',
         'infrastructure',
-        'inventory',
         'logs',
         'observabilityCases',
         'observabilityCasesV2',

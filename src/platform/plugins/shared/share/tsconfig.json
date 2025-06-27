@@ -1,9 +1,9 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../../../typings/emotion.d.ts"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/kibana-utils-plugin",
@@ -20,7 +20,6 @@
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/react-kibana-mount",
     "@kbn/shared-ux-tabbed-modal",
-    "@kbn/test-jest-helpers",
     "@kbn/core-user-profile-browser",
     "@kbn/datemath",
     "@kbn/core-http-server-internal",
@@ -33,8 +32,7 @@
     "@kbn/std",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-router-server-mocks",
+    "@kbn/licensing-plugin"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

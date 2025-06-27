@@ -13,65 +13,55 @@ import React from 'react';
 import { firstValueFrom } from 'rxjs';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
-import { ShareContext, ShareMenuItemV2 } from '@kbn/share-plugin/public';
+import { ShareContext, type ExportShare } from '@kbn/share-plugin/public';
 import { LocatorParams } from '@kbn/reporting-common/types';
+import { ReportParamsGetter, ReportParamsGetterOptions } from '../../types';
 import { getSearchCsvJobParams, CsvSearchModeParams } from '../shared/get_search_csv_job_params';
 import type { ExportModalShareOpts } from '.';
 import { checkLicense } from '../..';
 
-export const reportingCsvShareProvider = ({
+export const getCsvReportParams: ReportParamsGetter<
+  ReportParamsGetterOptions & { forShareUrl?: boolean },
+  CsvSearchModeParams
+> = ({ sharingData, forShareUrl = false }) => {
+  const getSearchSource = sharingData.getSearchSource as ({
+    addGlobalTimeFilter,
+    absoluteTime,
+  }: {
+    addGlobalTimeFilter?: boolean;
+    absoluteTime?: boolean;
+  }) => SerializedSearchSourceFields;
+
+  if (sharingData.isTextBased) {
+    // csv v2 uses locator params
+    return {
+      isEsqlMode: true,
+      locatorParams: sharingData.locatorParams as LocatorParams[],
+    };
+  }
+
+  // csv v1 uses search source and columns
+  return {
+    isEsqlMode: false,
+    columns: sharingData.columns as string[] | undefined,
+    searchSource: getSearchSource({
+      addGlobalTimeFilter: true,
+      absoluteTime: !forShareUrl,
+    }),
+  };
+};
+
+export const reportingCsvExportProvider = ({
   apiClient,
-  application,
-  license,
   usesUiCapabilities,
   startServices$,
-}: ExportModalShareOpts) => {
-  const getShareMenuItems = ({ objectType, sharingData }: ShareContext) => {
-    if ('search' !== objectType) {
-      return [];
-    }
-
-    const getSearchSource = sharingData.getSearchSource as ({
-      addGlobalTimeFilter,
-      absoluteTime,
-    }: {
-      addGlobalTimeFilter?: boolean;
-      absoluteTime?: boolean;
-    }) => SerializedSearchSourceFields;
-
-    const getSearchModeParams = (forShareUrl?: boolean): CsvSearchModeParams => {
-      if (sharingData.isTextBased) {
-        // csv v2 uses locator params
-        return {
-          isEsqlMode: true,
-          locatorParams: sharingData.locatorParams as LocatorParams[],
-        };
-      }
-
-      // csv v1 uses search source and columns
-      return {
-        isEsqlMode: false,
-        columns: sharingData.columns as string[] | undefined,
-        searchSource: getSearchSource({
-          addGlobalTimeFilter: true,
-          absoluteTime: !forShareUrl,
-        }),
-      };
-    };
-
-    const shareActions: ShareMenuItemV2[] = [];
-
-    const licenseCheck = checkLicense(license.check('reporting', 'basic'));
-    const licenseToolTipContent = licenseCheck.message;
-    const licenseHasCsvReporting = licenseCheck.showLinks;
-    const licenseDisabled = !licenseCheck.enableLinks;
-
-    let capabilityHasCsvReporting = false;
-    if (usesUiCapabilities) {
-      capabilityHasCsvReporting = application.capabilities.discover?.generateCsv === true;
-    } else {
-      capabilityHasCsvReporting = true; // deprecated
-    }
+}: ExportModalShareOpts): ExportShare => {
+  const getShareMenuItems = ({
+    objectType,
+    sharingData,
+  }: ShareContext): ReturnType<ExportShare['config']> => {
+    const getSearchModeParams = (forShareUrl?: boolean): CsvSearchModeParams =>
+      getCsvReportParams({ sharingData, forShareUrl });
 
     const generateReportingJobCSV = ({ intl }: { intl: InjectedIntl }) => {
       const { reportType, decoratedJobParams } = getSearchCsvJobParams({
@@ -131,66 +121,81 @@ export const reportingCsvShareProvider = ({
       });
     };
 
-    if (licenseHasCsvReporting && capabilityHasCsvReporting) {
-      const panelTitle = i18n.translate(
-        'reporting.share.contextMenu.export.csvReportsButtonLabel',
-        {
-          defaultMessage: 'Export',
-        }
-      );
+    const panelTitle = i18n.translate('reporting.share.contextMenu.export.csvReportsButtonLabel', {
+      defaultMessage: 'Export',
+    });
 
-      const reportingUrl = new URL(window.location.origin);
+    const { reportType, decoratedJobParams } = getSearchCsvJobParams({
+      apiClient,
+      searchModeParams: getSearchModeParams(true),
+      title: sharingData.title as string,
+    });
 
-      const { reportType, decoratedJobParams } = getSearchCsvJobParams({
-        apiClient,
-        searchModeParams: getSearchModeParams(true),
-        title: sharingData.title as string,
-      });
+    const relativePath = apiClient.getReportingPublicJobPath(reportType, decoratedJobParams);
 
-      const relativePath = apiClient.getReportingPublicJobPath(reportType, decoratedJobParams);
+    const absoluteUrl = new URL(relativePath, window.location.href).toString();
 
-      const absoluteUrl = new URL(relativePath, window.location.href).toString();
-
-      shareActions.push({
-        shareMenuItem: {
-          name: panelTitle,
-          toolTipContent: licenseToolTipContent,
-          disabled: licenseDisabled,
-          ['data-test-subj']: 'Export',
-        },
-        helpText: (
-          <FormattedMessage
-            id="reporting.share.csv.reporting.helpTextCSV"
-            defaultMessage="Export a CSV of this {objectType}."
-            values={{ objectType }}
-          />
-        ),
-        reportType,
-        label: 'CSV',
-        copyURLButton: {
-          id: 'reporting.share.modalContent.csv.copyUrlButtonLabel',
-          dataTestSubj: 'shareReportingCopyURL',
-          label: 'Post URL',
-        },
-        generateExportButton: (
-          <FormattedMessage
-            id="reporting.share.generateButtonLabelCSV"
-            data-test-subj="generateReportButton"
-            defaultMessage="Generate CSV"
-          />
-        ),
-        generateExport: generateReportingJobCSV,
-        generateExportUrl: () => absoluteUrl,
-        generateCopyUrl: reportingUrl,
-        renderCopyURLButton: true,
-      });
-    }
-
-    return shareActions;
+    return {
+      name: panelTitle,
+      exportType: reportType,
+      label: 'CSV',
+      icon: 'tableDensityNormal',
+      generateAssetExport: generateReportingJobCSV,
+      helpText: (
+        <FormattedMessage
+          id="reporting.share.csv.reporting.helpTextCSV"
+          defaultMessage="Export a CSV of this {objectType}."
+          values={{ objectType }}
+        />
+      ),
+      generateExportButtonLabel: (
+        <FormattedMessage
+          id="reporting.share.generateButtonLabelCSV"
+          data-test-subj="generateReportButton"
+          defaultMessage="Generate CSV"
+        />
+      ),
+      copyAssetURIConfig: {
+        headingText: i18n.translate('reporting.export.csv.exportFlyout.csvExportCopyUriHeading', {
+          defaultMessage: 'Post URL',
+        }),
+        helpText: i18n.translate('reporting.export.csv.exportFlyout.csvExportCopyUriHelpText', {
+          defaultMessage:
+            'Allows to generate selected file format programmatically outside Kibana or in Watcher.',
+        }),
+        contentType: 'text',
+        generateAssetURIValue: () => absoluteUrl,
+      },
+    };
   };
 
   return {
-    id: 'csvReportsModal',
-    getShareMenuItems,
+    shareType: 'integration',
+    id: 'csvReports',
+    groupId: 'export',
+    config: getShareMenuItems,
+    prerequisiteCheck: ({ license, capabilities }) => {
+      if (!license) {
+        return false;
+      }
+
+      const licenseCheck = checkLicense(license.check('reporting', 'basic'));
+
+      const licenseHasCsvReporting = licenseCheck.showLinks;
+
+      let capabilityHasCsvReporting = false;
+
+      if (usesUiCapabilities) {
+        capabilityHasCsvReporting = capabilities.discover?.generateCsv === true;
+      } else {
+        capabilityHasCsvReporting = true; // deprecated
+      }
+
+      if (!(licenseHasCsvReporting && capabilityHasCsvReporting)) {
+        return false;
+      }
+
+      return true;
+    },
   };
 };
