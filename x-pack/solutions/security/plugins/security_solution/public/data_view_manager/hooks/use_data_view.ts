@@ -6,9 +6,10 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { type DataView } from '@kbn/data-views-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 import { useSelector } from 'react-redux';
+import { type FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
 import { DataViewManagerScopeName } from '../constants';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
@@ -21,7 +22,7 @@ import type { SharedDataViewSelectionState } from '../redux/types';
  */
 export const useDataView = (
   dataViewManagerScope: DataViewManagerScopeName = DataViewManagerScopeName.default
-): { dataView: DataView | undefined; status: SharedDataViewSelectionState['status'] } => {
+): { dataView: DataView; status: SharedDataViewSelectionState['status'] } => {
   const {
     services: { dataViews },
     notifications,
@@ -31,13 +32,21 @@ export const useDataView = (
     sourcererAdapterSelector(dataViewManagerScope)
   );
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const [retrievedDataView, setRetrievedDataView] = useState<DataView | undefined>();
+  const [localStatus, setLocalStatus] = useState<SharedDataViewSelectionState['status']>('loading');
+  const [retrievedDataView, setRetrievedDataView] = useState<DataView>(
+    () =>
+      new DataView({
+        fieldFormats: {} as FieldFormatsStartCommon,
+      })
+  );
 
   useEffect(() => {
     (async () => {
       if (!dataViewId || internalStatus !== 'ready') {
-        return setRetrievedDataView(undefined);
+        return;
       }
+
+      setLocalStatus('loading');
 
       try {
         // TODO: remove conditional .get call when new data view picker is stabilized
@@ -45,22 +54,23 @@ export const useDataView = (
         // double for dataViews service
         const currDv = await dataViews?.get(dataViewId);
         setRetrievedDataView(currDv);
+        setLocalStatus('ready');
       } catch (error) {
-        setRetrievedDataView(undefined);
         // TODO: (remove conditional call when feature flag is on (mocks are broken for some tests))
         notifications?.toasts?.danger({
           title: 'Error retrieving data view',
           body: `Error: ${error?.message ?? 'unknown'}`,
         });
+        setLocalStatus('error');
       }
     })();
   }, [dataViews, dataViewId, internalStatus, notifications]);
 
   return useMemo(() => {
     if (!newDataViewPickerEnabled) {
-      return { dataView: undefined, status: internalStatus };
+      return { dataView: retrievedDataView, status: localStatus };
     }
 
-    return { dataView: retrievedDataView, status: retrievedDataView ? internalStatus : 'loading' };
-  }, [newDataViewPickerEnabled, retrievedDataView, internalStatus]);
+    return { dataView: retrievedDataView, status: localStatus };
+  }, [newDataViewPickerEnabled, retrievedDataView, localStatus]);
 };
