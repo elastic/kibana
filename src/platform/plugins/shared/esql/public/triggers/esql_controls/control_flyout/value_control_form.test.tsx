@@ -19,7 +19,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ESQLControlsFlyout } from '.';
 
 const mockGetESQLSingleColumnValues = jest.fn().mockResolvedValue({
-  values: [],
+  options: [],
 });
 
 jest.mock('@kbn/esql-utils', () => {
