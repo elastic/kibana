@@ -121,7 +121,6 @@ export const OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR =
 export const OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID =
   'observability:logsExplorer:allowedDataViews';
 export const OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID = 'observability:newLogsOverview';
-export const OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE = 'observability:entityCentricExperience';
 export const OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID = 'observability:logSources';
 export const OBSERVABILITY_ENABLE_LOGS_STREAM = 'observability:enableLogsStream';
 export const OBSERVABILITY_AI_ASSISTANT_SIMULATED_FUNCTION_CALLING =
@@ -130,6 +129,8 @@ export const OBSERVABILITY_AI_ASSISTANT_SEARCH_CONNECTOR_INDEX_PATTERN =
   'observability:aiAssistantSearchConnectorIndexPattern';
 export const OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS = 'observability:searchExcludedDataTiers';
 export const OBSERVABILITY_ENABLE_STREAMS_UI = 'observability:enableStreamsUI';
+export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS =
+  'observability:streamsEnableSignificantEvents';
 
 // Reporting settings
 export const XPACK_REPORTING_CUSTOM_PDF_LOGO_ID = 'xpackReporting:customPdfLogo';

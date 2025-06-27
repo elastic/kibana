@@ -32,7 +32,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const alertingApi = getService('alertingApi');
   const samlAuth = getService('samlAuth');
 
-  describe('get_alerts_dataset_info', function () {
+  describe('tool: get_alerts_dataset_info', function () {
     this.tags(['failsOnMKI']);
     let llmProxy: LlmProxy;
     let connectorId: string;
