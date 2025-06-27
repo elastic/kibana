@@ -32,18 +32,9 @@ export function deanonymizeMessage(
   });
 
   return (source$) => {
-    // Buffer to store chunks
-    const chunks: ChatCompletionChunkEvent[] = [];
-
     return source$.pipe(
-      // Filter out regular chunks without emitting them
-      filter((event) => {
-        if (event.type === ChatCompletionEventType.ChatCompletionChunk) {
-          chunks.push(event as ChatCompletionChunkEvent);
-          return false; // Don't emit chunks
-        }
-        return true; // Pass through other events
-      }),
+      // Filter out original chunk events (we recreate a single deanonymized chunk later)
+      filter((event) => event.type !== ChatCompletionEventType.ChatCompletionChunk),
       // Process message events and create a new chunk plus the message
       mergeMap((event) => {
         if (event.type === ChatCompletionEventType.ChatCompletionMessage) {
