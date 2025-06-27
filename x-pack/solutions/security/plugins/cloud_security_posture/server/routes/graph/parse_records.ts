@@ -91,18 +91,22 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
     const { docs, ips, hosts, users, actorIds, action, targetIds, isOriginAlert } = record;
     const actorIdsArray = castArray(actorIds);
     const targetIdsArray = castArray(targetIds);
+    const targetIdsArraySafe: string[] = [];
     const unknownTargets: string[] = [];
 
     // Ensure all targets has an id (target can return null from the query)
     targetIdsArray.forEach((id, idx) => {
       if (!id) {
-        targetIdsArray[idx] = `unknown ${uuidv4()}`;
-        unknownTargets.push(targetIdsArray[idx]);
+        const generatedTargetId = `unknown ${uuidv4()}`;
+        targetIdsArraySafe.push(generatedTargetId);
+        unknownTargets.push(generatedTargetId);
+      } else {
+        targetIdsArraySafe.push(id);
       }
     });
 
     // Create entity nodes
-    [...actorIdsArray, ...targetIdsArray].forEach((id) => {
+    [...actorIdsArray, ...targetIdsArraySafe].forEach((id) => {
       if (nodesMap[id] === undefined) {
         nodesMap[id] = {
           id,
@@ -120,7 +124,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
 
     // Create label nodes
     for (const actorId of actorIdsArray) {
-      for (const targetId of targetIdsArray) {
+      for (const targetId of targetIdsArraySafe) {
         const edgeId = `a(${actorId})-b(${targetId})`;
 
         if (edgeLabelsNodes[edgeId] === undefined) {
