@@ -160,7 +160,7 @@ const DashboardRendererComponent = ({
 
   useEffect(() => {
     /** We need to update the initial input on navigation so that changes to filter pills, queries, etc. get applied */
-    initialInput.next({ timeRange, viewMode, query, filters });
+    initialInput.next({ timeFrom: timeRange.from, timeTo: timeRange.to, viewMode, query, filters });
   }, [timeRange, viewMode, query, filters]);
 
   /** Dashboard renderer is stored in the state as it's a temporary solution for
