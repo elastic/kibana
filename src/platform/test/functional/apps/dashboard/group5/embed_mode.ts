@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -57,7 +57,6 @@ export default function ({
       await browser.setWindowSize(1300, 900);
     });
 
-    // Fails in chrome 128+ https://github.com/elastic/kibana-operations/issues/199
     describe('default URL params', () => {
       it('hides the chrome', async () => {
         const globalNavShown = await globalNav.exists();
@@ -92,7 +91,6 @@ export default function ({
       });
     });
 
-    // Fails in chrome 128+ https://github.com/elastic/kibana-operations/issues/199
     describe('non-default URL params', () => {
       it('shows or hides elements based on URL params', async () => {
         const currentUrl = await browser.getCurrentUrl();
