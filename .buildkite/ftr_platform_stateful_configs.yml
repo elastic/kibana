@@ -158,10 +158,10 @@ enabled:
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/security/config.ts
   - x-pack/test/banners_functional/config.ts
-  - x-pack/test/cases_api_integration/security_and_spaces/config_basic.ts
-  - x-pack/test/cases_api_integration/security_and_spaces/config_trial.ts
-  - x-pack/test/cases_api_integration/security_and_spaces/config_no_public_base_url.ts
-  - x-pack/test/cases_api_integration/spaces_only/config.ts
+  - x-pack/platform/test/cases_api_integration/security_and_spaces/config_basic.ts
+  - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial.ts
+  - x-pack/platform/test/cases_api_integration/security_and_spaces/config_no_public_base_url.ts
+  - x-pack/platform/test/cases_api_integration/spaces_only/config.ts
   - x-pack/test/disable_ems/config.ts
   - x-pack/test/examples/config.ts
   - x-pack/test/fleet_api_integration/config.agent.ts
@@ -273,11 +273,11 @@ enabled:
   - x-pack/test/licensing_plugin/config.public.ts
   - x-pack/test/licensing_plugin/config.ts
   - x-pack/test/plugin_functional/config.ts
-  - x-pack/test/reporting_api_integration/reporting_and_security.config.ts
-  - x-pack/test/reporting_api_integration/reporting_without_security.config.ts
-  - x-pack/test/reporting_functional/reporting_and_deprecated_security.config.ts
-  - x-pack/test/reporting_functional/reporting_and_security.config.ts
-  - x-pack/test/reporting_functional/reporting_without_security.config.ts
+  - x-pack/platform/test/reporting_api_integration/reporting_and_security.config.ts
+  - x-pack/platform/test/reporting_api_integration/reporting_without_security.config.ts
+  - x-pack/platform/test/reporting_functional/reporting_and_deprecated_security.config.ts
+  - x-pack/platform/test/reporting_functional/reporting_and_security.config.ts
+  - x-pack/platform/test/reporting_functional/reporting_without_security.config.ts
   - x-pack/test/rule_registry/security_and_spaces/config_basic.ts
   - x-pack/test/rule_registry/security_and_spaces/config_trial.ts
   - x-pack/test/rule_registry/spaces_only/config_basic.ts
