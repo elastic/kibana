@@ -278,7 +278,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(stacktraceAccordionState).to.equal('false');
         expect(qualityIssuesAccordionState).to.equal('true');
 
-        // Clicking on Stacktrace control of the same row while the Flyout is still open
+        // Clicking on Stacktrace control of the different row while the Flyout is still open
         await dataGrid.clickStacktraceLeadingControl(2);
 
         const stacktraceAccordionState2 = await testSubjects.getAccordionState(
