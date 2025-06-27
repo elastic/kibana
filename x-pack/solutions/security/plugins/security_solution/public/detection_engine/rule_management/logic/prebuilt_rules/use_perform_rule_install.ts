@@ -7,11 +7,11 @@
 import type { IToasts } from '@kbn/core/public';
 import type { PerformRuleInstallationResponseBody } from '../../../../../common/api/detection_engine';
 import { useToasts } from '../../../../common/lib/kibana';
-import { showErrorToast } from '../../../rule_management_ui/components/rule_import_modal/utils';
 import { usePerformAllRulesInstallMutation } from '../../api/hooks/prebuilt_rules/use_perform_all_rules_install_mutation';
 import { usePerformSpecificRulesInstallMutation } from '../../api/hooks/prebuilt_rules/use_perform_specific_rules_install_mutation';
 
 import * as i18n from './translations';
+import { showErrorToast } from '../../../../common/components/utils';
 
 export const usePerformInstallAllRules = () => {
   const toasts = useToasts();
@@ -48,7 +48,10 @@ function handleErrorResponse(error: unknown, toasts: IToasts) {
 }
 
 function handleSuccessResponse(result: PerformRuleInstallationResponseBody, toasts: IToasts) {
-  toasts.addSuccess(getSuccessToastMessage(result));
+  const successToastMessage = getSuccessToastMessage(result);
+  if (successToastMessage) {
+    toasts.addSuccess(successToastMessage);
+  }
 
   if (result.summary.failed > 0) {
     showErrorToast({

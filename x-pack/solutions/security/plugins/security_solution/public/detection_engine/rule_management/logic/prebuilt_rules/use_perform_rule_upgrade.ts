@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { showErrorToast } from '../../../../common/components/utils';
 import { useToasts } from '../../../../common/lib/kibana';
-import { showErrorToast } from '../../../rule_management_ui/components/rule_import_modal/utils';
 import { usePerformRulesUpgradeMutation } from '../../api/hooks/prebuilt_rules/use_perform_rules_upgrade_mutation';
 
 import * as i18n from './translations';
@@ -27,7 +27,11 @@ export const usePerformUpgradeRules = () => {
         // This is a preflight check, no need to show toast
         return;
       }
-      toasts.addSuccess(getSuccessToastMessage(result));
+
+      const successToastMessage = getSuccessToastMessage(result);
+      if (successToastMessage) {
+        toasts.addSuccess(getSuccessToastMessage(result));
+      }
 
       if (result.summary.failed > 0) {
         showErrorToast({
