@@ -43,7 +43,7 @@ export function CollapseSetting({
             <span>
               {i18n.translate('xpack.lens.collapse.label', { defaultMessage: 'Collapse by' })}
               {''}
-              <EuiIcon type="questionInCircle" color="subdued" size="s" className="eui-alignTop" />
+              <EuiIcon type="question" color="subdued" size="s" className="eui-alignTop" />
             </span>
           </EuiToolTip>
         }
