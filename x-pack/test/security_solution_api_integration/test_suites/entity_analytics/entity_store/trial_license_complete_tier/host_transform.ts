@@ -67,10 +67,6 @@ export default function (providerContext: FtrProviderContext) {
         // We expect this document to be skipped, since 25h ago is outside of lookback window
         await es.index(buildHostTransformDocument(HOST_NAME, { ip: '1.1.1.3' }, twentyFiveHoursAgo));
 
-        const seventyHoursAgo: string = new Date(Date.now() - 70 * 60 * 60 * 1000);
-        // We expect this document to be skipped, since 70h ago is outside of lookback window
-        await es.index(buildHostTransformDocument(HOST_NAME, { ip: '1.1.1.4' }, twentyFiveHoursAgo));
-
         // Now enable the Entity Store...
         const response = await supertest
           .post('/api/entity_store/enable')
