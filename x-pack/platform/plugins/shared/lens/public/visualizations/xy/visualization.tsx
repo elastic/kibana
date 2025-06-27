@@ -7,7 +7,6 @@
 
 import React, { useState } from 'react';
 import { isEqual } from 'lodash';
-import useObservable from 'react-use/lib/useObservable';
 
 import { Position } from '@elastic/charts';
 import { EuiPopover, EuiSelectable } from '@elastic/eui';
@@ -17,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { CoreStart, CoreTheme, SavedObjectReference, ThemeServiceStart } from '@kbn/core/public';
+import { CoreStart, SavedObjectReference, ThemeServiceStart } from '@kbn/core/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { getAnnotationAccessor } from '@kbn/event-annotation-components';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
@@ -31,8 +30,9 @@ import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-com
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
-import { getKbnPalettes } from '@kbn/palettes';
+import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
 
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -149,7 +149,6 @@ export const getXyVisualization = ({
   data,
   paletteService,
   fieldFormats,
-  useLegacyTimeAxis,
   kibanaTheme,
   eventAnnotationService,
   unifiedSearch,
@@ -162,7 +161,6 @@ export const getXyVisualization = ({
   paletteService: PaletteRegistry;
   eventAnnotationService: EventAnnotationServiceType;
   fieldFormats: FieldFormatsStart;
-  useLegacyTimeAxis: boolean;
   kibanaTheme: ThemeServiceStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViewsService: DataViewsPublicPluginStart;
@@ -743,7 +741,7 @@ export const getXyVisualization = ({
   },
 
   ToolbarComponent(props) {
-    return <XyToolbar {...props} useLegacyTimeAxis={useLegacyTimeAxis} />;
+    return <XyToolbar {...props} />;
   },
 
   DimensionEditorComponent(props) {
@@ -754,18 +752,16 @@ export const getXyVisualization = ({
       paletteService,
     };
 
-    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, {
-      darkMode: false,
-      name: 'amsterdam',
-    });
-    const palettes = getKbnPalettes(theme);
+    const isDarkMode = useKibanaIsDarkMode();
+    const palettes = useKbnPalettes();
+
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     const dimensionEditor = isReferenceLayer(layer) ? (
       <ReferenceLinePanel {...allProps} palettes={palettes} />
     ) : isAnnotationsLayer(layer) ? (
       <AnnotationsPanel {...allProps} dataViewsService={dataViewsService} />
     ) : (
-      <DataDimensionEditor {...allProps} palettes={palettes} isDarkMode={theme.darkMode} />
+      <DataDimensionEditor {...allProps} palettes={palettes} isDarkMode={isDarkMode} />
     );
 
     return dimensionEditor;
@@ -1360,6 +1356,7 @@ export const stackingTypes = [
       defaultMessage: 'Stacked',
     }),
     subtypes: ['bar_stacked', 'area_stacked', 'bar_horizontal_stacked'],
+    dataTestSubj: 'lnsStackingOptionsButtonStacked',
   },
   {
     type: 'unstacked',
@@ -1367,6 +1364,7 @@ export const stackingTypes = [
       defaultMessage: 'Unstacked',
     }),
     subtypes: ['bar', 'area', 'bar_horizontal'],
+    dataTestSubj: 'lnsStackingOptionsButtonUnstacked',
   },
   {
     type: 'percentage',
@@ -1378,6 +1376,7 @@ export const stackingTypes = [
       'area_percentage_stacked',
       'bar_horizontal_percentage_stacked',
     ],
+    dataTestSubj: 'lnsStackingOptionsButtonPercentage',
   },
 ];
 
@@ -1395,10 +1394,11 @@ const SubtypeSwitch = ({
     return null;
   }
   const subTypeIndex = stackingType.subtypes.indexOf(layer.seriesType);
-  const options = stackingTypes.map(({ label, subtypes }) => ({
+  const options = stackingTypes.map(({ label, subtypes, dataTestSubj }) => ({
     label,
     value: subtypes[subTypeIndex],
     checked: subtypes[subTypeIndex] === layer.seriesType ? ('on' as const) : undefined,
+    'data-test-subj': dataTestSubj,
   }));
 
   return (
@@ -1415,6 +1415,7 @@ const SubtypeSwitch = ({
             fullWidth
             size="s"
             label={stackingType.label}
+            data-test-subj="lnsStackingOptionsButton"
           />
         }
         isOpen={flyoutOpen}

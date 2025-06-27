@@ -520,7 +520,7 @@ describe('getLayers', () => {
           ignoreGlobalFilters: true,
           annotations: [
             {
-              color: '#D33115',
+              color: '#d33115',
               extraFields: ['geo.src'],
               filter: {
                 language: 'lucene',
@@ -571,7 +571,7 @@ describe('getLayers', () => {
           ignoreGlobalFilters: true,
           annotations: [
             {
-              color: '#D33115',
+              color: '#d33115',
               extraFields: ['geo.src'],
               filter: {
                 language: 'lucene',
@@ -639,7 +639,7 @@ describe('getLayers', () => {
           ignoreGlobalFilters: true,
           annotations: [
             {
-              color: '#D33115',
+              color: '#d33115',
               extraFields: ['geo.src'],
               filter: {
                 language: 'lucene',
@@ -665,7 +665,7 @@ describe('getLayers', () => {
           ignoreGlobalFilters: false,
           annotations: [
             {
-              color: '#0000FF',
+              color: '#0000ff',
               filter: {
                 language: 'kql',
                 query: 'tags: error AND tags: security',
@@ -689,7 +689,7 @@ describe('getLayers', () => {
           ignoreGlobalFilters: true,
           annotations: [
             {
-              color: '#FF0000',
+              color: '#ff0000',
               extraFields: ['category.keyword', 'price'],
               filter: {
                 language: 'kql',
@@ -749,7 +749,7 @@ describe('getLayers', () => {
           ignoreGlobalFilters: true,
           annotations: [
             {
-              color: '#D33115',
+              color: '#d33115',
               extraFields: ['geo.src'],
               filter: {
                 language: 'lucene',

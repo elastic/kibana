@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
+import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from '@kbn/core/server';
 import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import {
   PluginStart as DataPluginStart,
@@ -30,6 +30,7 @@ import type { CustomVisualizationMigrations } from './migrations/types';
 import { LensAppLocatorDefinition } from '../common/locator/locator';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { LensStorage } from './content_management';
+import { registerLensAPIRoutes } from './api/routes';
 
 export interface PluginSetupContract {
   taskManager?: TaskManagerSetupContract;
@@ -51,7 +52,7 @@ export interface LensServerPluginSetup {
   /**
    * Server side embeddable definition which provides migrations to run if Lens state is embedded into another saved object somewhere
    */
-  lensEmbeddableFactory: ReturnType<typeof makeLensEmbeddableFactory> | undefined;
+  lensEmbeddableFactory: ReturnType<typeof makeLensEmbeddableFactory>;
   /**
    * Register custom migration functions for custom third party Lens visualizations
    */
@@ -65,8 +66,11 @@ export class LensServerPlugin
   implements Plugin<LensServerPluginSetup, {}, PluginSetupContract, PluginStartContract>
 {
   private customVisualizationMigrations: CustomVisualizationMigrations = {};
+  private readonly logger: Logger;
 
-  constructor(private initializerContext: PluginInitializerContext) {}
+  constructor(private initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
 
   setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract) {
     const getFilterMigrations = plugins.data.query.filterManager.getAllMigrations.bind(
@@ -96,6 +100,13 @@ export class LensServerPlugin
       this.customVisualizationMigrations
     );
     plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory());
+
+    registerLensAPIRoutes({
+      http: core.http,
+      contentManagement: plugins.contentManagement,
+      logger: this.logger,
+    });
+
     return {
       lensEmbeddableFactory,
       registerVisualizationMigration: (

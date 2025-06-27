@@ -31,13 +31,14 @@
       "features",
       "fieldFormats",
       "inspector",
+      "lens",
       "licensing",
+      "maps",
       "navigation",
       "ruleRegistry",
       "sessionView",
       "spaces",
       "taskManager",
-      "threatIntelligence",
       "timelines",
       "triggersActionsUi",
       "uiActions",
@@ -57,7 +58,8 @@
       "inference",
       "discoverShared",
       "productDocBase",
-      "telemetry"
+      "telemetry",
+      "elasticAssistantSharedState",
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
@@ -68,9 +70,7 @@
       "usageCollection",
       "lists",
       "home",
-      "lens",
       "management",
-      "maps",
       "dataViewFieldEditor",
       "osquery",
       "savedObjectsTaggingOss",
@@ -84,12 +84,10 @@
       "kibanaUtils",
       "kibanaReact",
       "usageCollection",
-      "lens",
       "lists",
       "ml",
       "unifiedSearch",
-      "esql",
-      "maps"
+      "esql"
     ],
     "extraPublicDirs": [
       "common"

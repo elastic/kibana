@@ -13,9 +13,13 @@ import { useAssistantAvailability } from '../../../assistant/use_assistant_avail
 import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
 import { Header } from '.';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../assistant/use_assistant_availability');
+jest.mock('../../../common/hooks/use_space_id', () => ({
+  useSpaceId: jest.fn(),
+}));
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
@@ -31,11 +35,14 @@ const defaultProps = {
   onConnectorIdSelected: jest.fn(),
   openFlyout: jest.fn(),
   setLocalStorageAttackDiscoveryMaxAlerts: jest.fn(),
+  showFlyout: false,
 };
 
 describe('Actions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    (useSpaceId as jest.Mock).mockReturnValue('default');
 
     (useAssistantAvailability as jest.Mock).mockReturnValue({
       hasAssistantPrivilege: true,

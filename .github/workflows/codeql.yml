@@ -7,7 +7,7 @@ on:
 jobs:
   analyze:
     name: Analyze
-    runs-on: ubuntu-latest
+    runs-on: kibana
     permissions:
       actions: read
       contents: read
@@ -27,10 +27,11 @@ jobs:
         ref: ${{ matrix.branch }}
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@45775bd8235c68ba998cffa5171334d58593da47 # v3.28.15
+      uses: github/codeql-action/init@ff0a06e83cb2de871e5a09832bc6a81e7276941f # v3.28.18
       with:
         languages: ${{ matrix.language }}
         config-file: ./.github/codeql/codeql-config.yml
+        debug: true
 
     # TODO: Possibly required to follow all call paths, however, when enabled, the step below runs out of memory.
     # Possible workarounds: Apply for access to the GitHub beta where we can use beefier machines, or run it ourselves on Buildkite
@@ -47,7 +48,7 @@ jobs:
         echo "CHECKOUT_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@45775bd8235c68ba998cffa5171334d58593da47 # v3.28.15
+      uses: github/codeql-action/analyze@ff0a06e83cb2de871e5a09832bc6a81e7276941f # v3.28.18
       env:
         NODE_OPTIONS: "--max-old-space-size=8192"
         CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES: true
@@ -56,6 +57,7 @@ jobs:
         # Refer to https://github.com/github/codeql/blob/59a77a873c894bca7274a7ed7c7c6d937547e9b3/javascript/resources/tools/autobuild.sh#L7-L13
         # 2 * 14576, considering our runner is 4 CPU/16GB.
         CODEQL_RAM: 29152
+        CODEQL_THREADS: 2
       with:
         category: "/language:${{matrix.language}}"
         ref: ${{ env.CHECKOUT_REF }}

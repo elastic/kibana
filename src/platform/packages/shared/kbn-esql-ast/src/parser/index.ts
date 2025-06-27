@@ -8,10 +8,10 @@
  */
 
 export {
-  getLexer,
   createParser,
   parse,
   parseErrors,
+  Parser,
   type ParseOptions,
   type ParseResult,
 } from './parser';

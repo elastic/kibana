@@ -107,7 +107,7 @@
             "label": "get",
             "description": [],
             "signature": [
-              "({ id, index }: GetAlertParams) => Promise<{ _index: string; \"@timestamp\"?: string | undefined; \"kibana.alert.rule.rule_type_id\"?: string | undefined; \"kibana.alert.rule.consumer\"?: string | undefined; \"kibana.alert.instance.id\"?: string | undefined; \"kibana.alert.rule.category\"?: string | undefined; \"kibana.alert.rule.name\"?: string | undefined; \"kibana.alert.rule.producer\"?: string | undefined; \"kibana.alert.rule.revision\"?: number | undefined; \"kibana.alert.rule.uuid\"?: string | undefined; \"kibana.alert.status\"?: string | undefined; \"kibana.alert.uuid\"?: string | undefined; \"kibana.space_ids\"?: string[] | undefined; \"event.action\"?: string | undefined; tags?: string[] | undefined; \"kibana.alert.rule.execution.uuid\"?: string | undefined; \"event.kind\"?: string | undefined; \"event.original\"?: string | undefined; \"kibana.alert.action_group\"?: string | undefined; \"kibana.alert.case_ids\"?: string[] | undefined; \"kibana.alert.consecutive_matches\"?: number | undefined; \"kibana.alert.duration.us\"?: number | undefined; \"kibana.alert.end\"?: string | undefined; \"kibana.alert.flapping\"?: boolean | undefined; \"kibana.alert.flapping_history\"?: boolean[] | undefined; \"kibana.alert.intended_timestamp\"?: string | undefined; \"kibana.alert.last_detected\"?: string | undefined; \"kibana.alert.maintenance_window_ids\"?: string[] | undefined; \"kibana.alert.pending_recovered_count\"?: number | undefined; \"kibana.alert.previous_action_group\"?: string | undefined; \"kibana.alert.reason\"?: string | undefined; \"kibana.alert.rule.execution.timestamp\"?: string | undefined; \"kibana.alert.rule.execution.type\"?: string | undefined; \"kibana.alert.rule.parameters\"?: { [key: string]: unknown; } | undefined; \"kibana.alert.rule.tags\"?: string[] | undefined; \"kibana.alert.severity_improving\"?: boolean | undefined; \"kibana.alert.start\"?: string | undefined; \"kibana.alert.time_range\"?: unknown; \"kibana.alert.url\"?: string | undefined; \"kibana.alert.workflow_assignee_ids\"?: string[] | undefined; \"kibana.alert.workflow_status\"?: string | undefined; \"kibana.alert.workflow_tags\"?: string[] | undefined; \"kibana.version\"?: string | undefined; \"ecs.version\"?: string | undefined; \"kibana.alert.risk_score\"?: number | undefined; \"kibana.alert.rule.author\"?: string | undefined; \"kibana.alert.rule.created_at\"?: string | undefined; \"kibana.alert.rule.created_by\"?: string | undefined; \"kibana.alert.rule.description\"?: string | undefined; \"kibana.alert.rule.enabled\"?: string | undefined; \"kibana.alert.rule.from\"?: string | undefined; \"kibana.alert.rule.interval\"?: string | undefined; \"kibana.alert.rule.license\"?: string | undefined; \"kibana.alert.rule.note\"?: string | undefined; \"kibana.alert.rule.references\"?: string[] | undefined; \"kibana.alert.rule.rule_id\"?: string | undefined; \"kibana.alert.rule.rule_name_override\"?: string | undefined; \"kibana.alert.rule.to\"?: string | undefined; \"kibana.alert.rule.type\"?: string | undefined; \"kibana.alert.rule.updated_at\"?: string | undefined; \"kibana.alert.rule.updated_by\"?: string | undefined; \"kibana.alert.rule.version\"?: string | undefined; \"kibana.alert.severity\"?: string | undefined; \"kibana.alert.suppression.docs_count\"?: number | undefined; \"kibana.alert.suppression.end\"?: string | undefined; \"kibana.alert.suppression.start\"?: string | undefined; \"kibana.alert.suppression.terms.field\"?: string[] | undefined; \"kibana.alert.suppression.terms.value\"?: string[] | undefined; \"kibana.alert.system_status\"?: string | undefined; \"kibana.alert.workflow_reason\"?: string | undefined; \"kibana.alert.workflow_status_updated_at\"?: string | undefined; \"kibana.alert.workflow_user\"?: string | undefined; }>"
+              "({ id, index }: GetAlertParams) => Promise<{ _index: string; \"@timestamp\"?: string | undefined; \"kibana.alert.rule.rule_type_id\"?: string | undefined; \"kibana.alert.rule.consumer\"?: string | undefined; \"kibana.alert.instance.id\"?: string | undefined; \"kibana.alert.rule.category\"?: string | undefined; \"kibana.alert.rule.name\"?: string | undefined; \"kibana.alert.rule.producer\"?: string | undefined; \"kibana.alert.rule.revision\"?: number | undefined; \"kibana.alert.rule.uuid\"?: string | undefined; \"kibana.alert.status\"?: string | undefined; \"kibana.alert.uuid\"?: string | undefined; \"kibana.space_ids\"?: string[] | undefined; \"event.action\"?: string | undefined; tags?: string[] | undefined; \"kibana.alert.rule.execution.uuid\"?: string | undefined; \"event.kind\"?: string | undefined; \"event.original\"?: string | undefined; \"kibana.alert.action_group\"?: string | undefined; \"kibana.alert.case_ids\"?: string[] | undefined; \"kibana.alert.consecutive_matches\"?: number | undefined; \"kibana.alert.duration.us\"?: number | undefined; \"kibana.alert.end\"?: string | undefined; \"kibana.alert.flapping\"?: boolean | undefined; \"kibana.alert.flapping_history\"?: boolean[] | undefined; \"kibana.alert.intended_timestamp\"?: string | undefined; \"kibana.alert.last_detected\"?: string | undefined; \"kibana.alert.maintenance_window_ids\"?: string[] | undefined; \"kibana.alert.pending_recovered_count\"?: number | undefined; \"kibana.alert.previous_action_group\"?: string | undefined; \"kibana.alert.reason\"?: string | undefined; \"kibana.alert.rule.execution.timestamp\"?: string | undefined; \"kibana.alert.rule.execution.type\"?: string | undefined; \"kibana.alert.rule.parameters\"?: { [key: string]: unknown; } | undefined; \"kibana.alert.rule.tags\"?: string[] | undefined; \"kibana.alert.severity_improving\"?: boolean | undefined; \"kibana.alert.start\"?: string | undefined; \"kibana.alert.time_range\"?: unknown; \"kibana.alert.updated_at\"?: string | undefined; \"kibana.alert.updated_by.user.id\"?: string | undefined; \"kibana.alert.updated_by.user.name\"?: string | undefined; \"kibana.alert.url\"?: string | undefined; \"kibana.alert.workflow_assignee_ids\"?: string[] | undefined; \"kibana.alert.workflow_status\"?: string | undefined; \"kibana.alert.workflow_tags\"?: string[] | undefined; \"kibana.version\"?: string | undefined; \"ecs.version\"?: string | undefined; \"kibana.alert.risk_score\"?: number | undefined; \"kibana.alert.rule.author\"?: string | undefined; \"kibana.alert.rule.created_at\"?: string | undefined; \"kibana.alert.rule.created_by\"?: string | undefined; \"kibana.alert.rule.description\"?: string | undefined; \"kibana.alert.rule.enabled\"?: string | undefined; \"kibana.alert.rule.from\"?: string | undefined; \"kibana.alert.rule.interval\"?: string | undefined; \"kibana.alert.rule.license\"?: string | undefined; \"kibana.alert.rule.note\"?: string | undefined; \"kibana.alert.rule.references\"?: string[] | undefined; \"kibana.alert.rule.rule_id\"?: string | undefined; \"kibana.alert.rule.rule_name_override\"?: string | undefined; \"kibana.alert.rule.to\"?: string | undefined; \"kibana.alert.rule.type\"?: string | undefined; \"kibana.alert.rule.updated_at\"?: string | undefined; \"kibana.alert.rule.updated_by\"?: string | undefined; \"kibana.alert.rule.version\"?: string | undefined; \"kibana.alert.severity\"?: string | undefined; \"kibana.alert.suppression.docs_count\"?: number | undefined; \"kibana.alert.suppression.end\"?: string | undefined; \"kibana.alert.suppression.start\"?: string | undefined; \"kibana.alert.suppression.terms.field\"?: string[] | undefined; \"kibana.alert.suppression.terms.value\"?: string[] | undefined; \"kibana.alert.system_status\"?: string | undefined; \"kibana.alert.workflow_reason\"?: string | undefined; \"kibana.alert.workflow_status_updated_at\"?: string | undefined; \"kibana.alert.workflow_user\"?: string | undefined; }>"
             ],
             "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts",
             "deprecated": false,
@@ -415,7 +415,7 @@
                 "section": "def-common.MultiField",
                 "text": "MultiField"
               },
-              "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>>, TAggregations>>"
+              "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_by.user.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_by.user.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>>, TAggregations>>"
             ],
             "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts",
             "deprecated": false,
@@ -617,7 +617,7 @@
                 "section": "def-common.MultiField",
                 "text": "MultiField"
               },
-              "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>>, { groupByFields: ",
+              "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_by.user.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_by.user.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>>, { groupByFields: ",
               "AggregationsMultiBucketAggregateBase",
               "<{ key: string; }>; }>>"
             ],
@@ -1772,54 +1772,6 @@
     "functions": [
       {
         "parentPluginId": "ruleRegistry",
-        "id": "def-server.alertAuditEvent",
-        "type": "Function",
-        "tags": [],
-        "label": "alertAuditEvent",
-        "description": [],
-        "signature": [
-          "({ action, id, outcome, error }: ",
-          {
-            "pluginId": "ruleRegistry",
-            "scope": "server",
-            "docId": "kibRuleRegistryPluginApi",
-            "section": "def-server.AlertAuditEventParams",
-            "text": "AlertAuditEventParams"
-          },
-          ") => ",
-          "AuditEvent"
-        ],
-        "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.alertAuditEvent.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ action, id, outcome, error }",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "ruleRegistry",
-                "scope": "server",
-                "docId": "kibRuleRegistryPluginApi",
-                "section": "def-server.AlertAuditEventParams",
-                "text": "AlertAuditEventParams"
-              }
-            ],
-            "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ruleRegistry",
         "id": "def-server.createPersistenceRuleTypeWrapper",
         "type": "Function",
         "tags": [],
@@ -1952,7 +1904,23 @@
           "SavedObjectReference",
           "[]) => TParams; } | undefined; isExportable: boolean; defaultScheduleInterval?: string | undefined; ruleTaskTimeout?: string | undefined; doesSetRecoveryContext?: boolean | undefined; autoRecoverAlerts?: boolean | undefined; getViewInAppRelativeUrl?: ",
           "GetViewInAppRelativeUrlFn",
-          "<TParams> | undefined; }"
+          "<TParams> | undefined; priority?: ",
+          {
+            "pluginId": "taskManager",
+            "scope": "server",
+            "docId": "kibTaskManagerPluginApi",
+            "section": "def-server.TaskPriority",
+            "text": "TaskPriority"
+          },
+          ".NormalLongRunning | ",
+          {
+            "pluginId": "taskManager",
+            "scope": "server",
+            "docId": "kibTaskManagerPluginApi",
+            "section": "def-server.TaskPriority",
+            "text": "TaskPriority"
+          },
+          ".Normal | undefined; internallyManaged?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts",
         "deprecated": false,
@@ -1995,82 +1963,6 @@
       }
     ],
     "interfaces": [
-      {
-        "parentPluginId": "ruleRegistry",
-        "id": "def-server.AlertAuditEventParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "AlertAuditEventParams",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.AlertAuditEventParams.action",
-            "type": "Enum",
-            "tags": [],
-            "label": "action",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "ruleRegistry",
-                "scope": "server",
-                "docId": "kibRuleRegistryPluginApi",
-                "section": "def-server.AlertAuditAction",
-                "text": "AlertAuditAction"
-              }
-            ],
-            "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.AlertAuditEventParams.outcome",
-            "type": "string",
-            "tags": [],
-            "label": "outcome",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.AlertAuditEventParams.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.AlertAuditEventParams.error",
-            "type": "Object",
-            "tags": [],
-            "label": "error",
-            "description": [],
-            "signature": [
-              "Error | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "ruleRegistry",
         "id": "def-server.ComponentTemplateOptions",
@@ -2166,7 +2058,7 @@
               "\nID of the Kibana feature associated with the index.\nUsed by alerts-as-data RBAC.\n\nNote from @dhurley14\nThe purpose of the `feature` param is to force the user to update\nthe data structure which contains the mapping of consumers to alerts\nas data indices. The idea is it is typed such that it forces the\nuser to go to the code and modify it. At least until a better system\nis put in place or we move the alerts as data client out of rule registry.\n"
             ],
             "signature": [
-              "\"ml\" | \"monitoring\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"alerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"discover\" | \"AlertingExample\""
+              "\"ml\" | \"monitoring\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"alerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"discover\" | \"streams\" | \"AlertingExample\""
             ],
             "path": "x-pack/platform/plugins/shared/rule_registry/server/rule_data_plugin_service/index_options.ts",
             "deprecated": false,
@@ -2590,7 +2482,7 @@
                 "section": "def-common.MultiField",
                 "text": "MultiField"
               },
-              "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & OutputOf<SetOptional<{ readonly \"kibana.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; }; readonly \"kibana.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; }; readonly \"kibana.alert.context\": { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.evaluation.values\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; readonly array: true; }; readonly \"kibana.alert.group\": { readonly type: \"object\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.group.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.group.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; }>>>>(request: TSearchRequest) => Promise<",
+              "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_by.user.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_by.user.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & OutputOf<SetOptional<{ readonly \"kibana.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; }; readonly \"kibana.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; }; readonly \"kibana.alert.context\": { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.evaluation.values\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; readonly array: true; }; readonly \"kibana.alert.grouping\": { readonly type: \"object\"; readonly dynamic: true; readonly array: false; readonly required: false; }; readonly \"kibana.alert.group\": { readonly type: \"object\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.group.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.group.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; }>>>>(request: TSearchRequest) => Promise<",
               {
                 "pluginId": "@kbn/es-types",
                 "scope": "common",
@@ -3562,18 +3454,6 @@
     "enums": [
       {
         "parentPluginId": "ruleRegistry",
-        "id": "def-server.AlertAuditAction",
-        "type": "Enum",
-        "tags": [],
-        "label": "AlertAuditAction",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ruleRegistry",
         "id": "def-server.Dataset",
         "type": "Enum",
         "tags": [],
@@ -4101,82 +3981,7 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "ruleRegistry",
-        "id": "def-server.operationAlertAuditActionMap",
-        "type": "Object",
-        "tags": [],
-        "label": "operationAlertAuditActionMap",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.operationAlertAuditActionMap.WriteOperations.Update",
-            "type": "Enum",
-            "tags": [],
-            "label": "[WriteOperations.Update]",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "ruleRegistry",
-                "scope": "server",
-                "docId": "kibRuleRegistryPluginApi",
-                "section": "def-server.AlertAuditAction",
-                "text": "AlertAuditAction"
-              }
-            ],
-            "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.operationAlertAuditActionMap.ReadOperations.Find",
-            "type": "Enum",
-            "tags": [],
-            "label": "[ReadOperations.Find]",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "ruleRegistry",
-                "scope": "server",
-                "docId": "kibRuleRegistryPluginApi",
-                "section": "def-server.AlertAuditAction",
-                "text": "AlertAuditAction"
-              }
-            ],
-            "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.operationAlertAuditActionMap.ReadOperations.Get",
-            "type": "Enum",
-            "tags": [],
-            "label": "[ReadOperations.Get]",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "ruleRegistry",
-                "scope": "server",
-                "docId": "kibRuleRegistryPluginApi",
-                "section": "def-server.AlertAuditAction",
-                "text": "AlertAuditAction"
-              }
-            ],
-            "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/audit_events.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "objects": [],
     "setup": {
       "parentPluginId": "ruleRegistry",
       "id": "def-server.RuleRegistryPluginSetupContract",
@@ -4331,7 +4136,7 @@
             "section": "def-common.MultiField",
             "text": "MultiField"
           },
-          "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>>"
+          "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_by.user.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_by.user.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>>"
         ],
         "path": "x-pack/platform/plugins/shared/rule_registry/common/parse_technical_fields.ts",
         "deprecated": false,
@@ -4773,7 +4578,7 @@
         "label": "ParsedTechnicalFields",
         "description": [],
         "signature": [
-          "{ readonly \"@timestamp\": string; readonly \"kibana.alert.rule.rule_type_id\": string; readonly \"kibana.alert.rule.consumer\": string; readonly \"kibana.alert.instance.id\": string; readonly \"kibana.alert.rule.category\": string; readonly \"kibana.alert.rule.name\": string; readonly \"kibana.alert.rule.producer\": string; readonly \"kibana.alert.rule.revision\": number; readonly \"kibana.alert.rule.uuid\": string; readonly \"kibana.alert.status\": string; readonly \"kibana.alert.uuid\": string; readonly \"kibana.space_ids\": string[]; readonly \"event.action\"?: string | undefined; readonly tags?: string[] | undefined; readonly \"kibana.alert.rule.execution.uuid\"?: string | undefined; readonly \"event.kind\"?: string | undefined; readonly \"event.original\"?: string | undefined; readonly \"kibana.alert.action_group\"?: string | undefined; readonly \"kibana.alert.case_ids\"?: string[] | undefined; readonly \"kibana.alert.consecutive_matches\"?: number | undefined; readonly \"kibana.alert.duration.us\"?: number | undefined; readonly \"kibana.alert.end\"?: string | undefined; readonly \"kibana.alert.flapping\"?: boolean | undefined; readonly \"kibana.alert.flapping_history\"?: boolean[] | undefined; readonly \"kibana.alert.intended_timestamp\"?: string | undefined; readonly \"kibana.alert.last_detected\"?: string | undefined; readonly \"kibana.alert.maintenance_window_ids\"?: string[] | undefined; readonly \"kibana.alert.pending_recovered_count\"?: number | undefined; readonly \"kibana.alert.previous_action_group\"?: string | undefined; readonly \"kibana.alert.reason\"?: string | undefined; readonly \"kibana.alert.rule.execution.timestamp\"?: string | undefined; readonly \"kibana.alert.rule.execution.type\"?: string | undefined; readonly \"kibana.alert.rule.parameters\"?: { [key: string]: unknown; } | undefined; readonly \"kibana.alert.rule.tags\"?: string[] | undefined; readonly \"kibana.alert.severity_improving\"?: boolean | undefined; readonly \"kibana.alert.start\"?: string | undefined; readonly \"kibana.alert.time_range\"?: unknown; readonly \"kibana.alert.url\"?: string | undefined; readonly \"kibana.alert.workflow_assignee_ids\"?: string[] | undefined; readonly \"kibana.alert.workflow_status\"?: string | undefined; readonly \"kibana.alert.workflow_tags\"?: string[] | undefined; readonly \"kibana.version\"?: string | undefined; readonly \"ecs.version\"?: string | undefined; readonly \"kibana.alert.risk_score\"?: number | undefined; readonly \"kibana.alert.rule.author\"?: string | undefined; readonly \"kibana.alert.rule.created_at\"?: string | undefined; readonly \"kibana.alert.rule.created_by\"?: string | undefined; readonly \"kibana.alert.rule.description\"?: string | undefined; readonly \"kibana.alert.rule.enabled\"?: string | undefined; readonly \"kibana.alert.rule.from\"?: string | undefined; readonly \"kibana.alert.rule.interval\"?: string | undefined; readonly \"kibana.alert.rule.license\"?: string | undefined; readonly \"kibana.alert.rule.note\"?: string | undefined; readonly \"kibana.alert.rule.references\"?: string[] | undefined; readonly \"kibana.alert.rule.rule_id\"?: string | undefined; readonly \"kibana.alert.rule.rule_name_override\"?: string | undefined; readonly \"kibana.alert.rule.to\"?: string | undefined; readonly \"kibana.alert.rule.type\"?: string | undefined; readonly \"kibana.alert.rule.updated_at\"?: string | undefined; readonly \"kibana.alert.rule.updated_by\"?: string | undefined; readonly \"kibana.alert.rule.version\"?: string | undefined; readonly \"kibana.alert.severity\"?: string | undefined; readonly \"kibana.alert.suppression.docs_count\"?: number | undefined; readonly \"kibana.alert.suppression.end\"?: string | undefined; readonly \"kibana.alert.suppression.start\"?: string | undefined; readonly \"kibana.alert.suppression.terms.field\"?: string[] | undefined; readonly \"kibana.alert.suppression.terms.value\"?: string[] | undefined; readonly \"kibana.alert.system_status\"?: string | undefined; readonly \"kibana.alert.workflow_reason\"?: string | undefined; readonly \"kibana.alert.workflow_status_updated_at\"?: string | undefined; readonly \"kibana.alert.workflow_user\"?: string | undefined; }"
+          "{ readonly \"@timestamp\": string; readonly \"kibana.alert.rule.rule_type_id\": string; readonly \"kibana.alert.rule.consumer\": string; readonly \"kibana.alert.instance.id\": string; readonly \"kibana.alert.rule.category\": string; readonly \"kibana.alert.rule.name\": string; readonly \"kibana.alert.rule.producer\": string; readonly \"kibana.alert.rule.revision\": number; readonly \"kibana.alert.rule.uuid\": string; readonly \"kibana.alert.status\": string; readonly \"kibana.alert.uuid\": string; readonly \"kibana.space_ids\": string[]; readonly \"event.action\"?: string | undefined; readonly tags?: string[] | undefined; readonly \"kibana.alert.rule.execution.uuid\"?: string | undefined; readonly \"event.kind\"?: string | undefined; readonly \"event.original\"?: string | undefined; readonly \"kibana.alert.action_group\"?: string | undefined; readonly \"kibana.alert.case_ids\"?: string[] | undefined; readonly \"kibana.alert.consecutive_matches\"?: number | undefined; readonly \"kibana.alert.duration.us\"?: number | undefined; readonly \"kibana.alert.end\"?: string | undefined; readonly \"kibana.alert.flapping\"?: boolean | undefined; readonly \"kibana.alert.flapping_history\"?: boolean[] | undefined; readonly \"kibana.alert.intended_timestamp\"?: string | undefined; readonly \"kibana.alert.last_detected\"?: string | undefined; readonly \"kibana.alert.maintenance_window_ids\"?: string[] | undefined; readonly \"kibana.alert.pending_recovered_count\"?: number | undefined; readonly \"kibana.alert.previous_action_group\"?: string | undefined; readonly \"kibana.alert.reason\"?: string | undefined; readonly \"kibana.alert.rule.execution.timestamp\"?: string | undefined; readonly \"kibana.alert.rule.execution.type\"?: string | undefined; readonly \"kibana.alert.rule.parameters\"?: { [key: string]: unknown; } | undefined; readonly \"kibana.alert.rule.tags\"?: string[] | undefined; readonly \"kibana.alert.severity_improving\"?: boolean | undefined; readonly \"kibana.alert.start\"?: string | undefined; readonly \"kibana.alert.time_range\"?: unknown; readonly \"kibana.alert.updated_at\"?: string | undefined; readonly \"kibana.alert.updated_by.user.id\"?: string | undefined; readonly \"kibana.alert.updated_by.user.name\"?: string | undefined; readonly \"kibana.alert.url\"?: string | undefined; readonly \"kibana.alert.workflow_assignee_ids\"?: string[] | undefined; readonly \"kibana.alert.workflow_status\"?: string | undefined; readonly \"kibana.alert.workflow_tags\"?: string[] | undefined; readonly \"kibana.version\"?: string | undefined; readonly \"ecs.version\"?: string | undefined; readonly \"kibana.alert.risk_score\"?: number | undefined; readonly \"kibana.alert.rule.author\"?: string | undefined; readonly \"kibana.alert.rule.created_at\"?: string | undefined; readonly \"kibana.alert.rule.created_by\"?: string | undefined; readonly \"kibana.alert.rule.description\"?: string | undefined; readonly \"kibana.alert.rule.enabled\"?: string | undefined; readonly \"kibana.alert.rule.from\"?: string | undefined; readonly \"kibana.alert.rule.interval\"?: string | undefined; readonly \"kibana.alert.rule.license\"?: string | undefined; readonly \"kibana.alert.rule.note\"?: string | undefined; readonly \"kibana.alert.rule.references\"?: string[] | undefined; readonly \"kibana.alert.rule.rule_id\"?: string | undefined; readonly \"kibana.alert.rule.rule_name_override\"?: string | undefined; readonly \"kibana.alert.rule.to\"?: string | undefined; readonly \"kibana.alert.rule.type\"?: string | undefined; readonly \"kibana.alert.rule.updated_at\"?: string | undefined; readonly \"kibana.alert.rule.updated_by\"?: string | undefined; readonly \"kibana.alert.rule.version\"?: string | undefined; readonly \"kibana.alert.severity\"?: string | undefined; readonly \"kibana.alert.suppression.docs_count\"?: number | undefined; readonly \"kibana.alert.suppression.end\"?: string | undefined; readonly \"kibana.alert.suppression.start\"?: string | undefined; readonly \"kibana.alert.suppression.terms.field\"?: string[] | undefined; readonly \"kibana.alert.suppression.terms.value\"?: string[] | undefined; readonly \"kibana.alert.system_status\"?: string | undefined; readonly \"kibana.alert.workflow_reason\"?: string | undefined; readonly \"kibana.alert.workflow_status_updated_at\"?: string | undefined; readonly \"kibana.alert.workflow_user\"?: string | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/rule_registry/common/parse_technical_fields.ts",
         "deprecated": false,

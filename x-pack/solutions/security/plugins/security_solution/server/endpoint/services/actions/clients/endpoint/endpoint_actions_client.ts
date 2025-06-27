@@ -77,7 +77,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       return cacheResponse;
     }
 
-    const agentPolicyInfo = await this.fetchFleetInfoForAgents(agentIds, ['endpoint']);
+    const agentPolicyInfo = await this.fetchFleetInfoForAgents(agentIds);
 
     this.cache.set(cacheKey, agentPolicyInfo);
     return agentPolicyInfo;

@@ -6,10 +6,13 @@
  */
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 
-export function generateMultipleServicesData({ from, to }: { from: number; to: number }) {
+export function generateMultipleServicesData(
+  { from, to }: { from: number; to: number },
+  quantity = 50
+) {
   const range = timerange(from, to);
 
-  const services = Array(50)
+  const services = Array(quantity)
     .fill(0)
     .map((_, idx) =>
       apm

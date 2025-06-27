@@ -31,7 +31,6 @@ export enum SYNTHETICS_API_URLS {
   INDEX_SIZE = `/internal/synthetics/index_size`,
   AGENT_POLICIES = `/internal/synthetics/agent_policies`,
   PRIVATE_LOCATIONS_MONITORS = `/internal/synthetics/private_locations/monitors`,
-  SYNC_GLOBAL_PARAMS = `/internal/synthetics/sync_global_params`,
   ENABLE_DEFAULT_ALERTING = `/internal/synthetics/enable_default_alerting`,
   GET_ACTIONS_CONNECTORS = `/internal/synthetics/get_actions_connectors`,
   GET_CONNECTOR_TYPES = `/internal/synthetics/get_connector_types`,
@@ -47,6 +46,7 @@ export enum SYNTHETICS_API_URLS {
   CERTS = '/internal/synthetics/certs',
 
   SUGGESTIONS = `/internal/synthetics/suggestions`,
+  MAINTENANCE_WINDOWS = `/internal/synthetics/monitors/maintenance_windows`,
 
   // Project monitor public endpoint
   SYNTHETICS_MONITORS_PROJECT = '/api/synthetics/project/{projectName}/monitors',

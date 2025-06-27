@@ -51,7 +51,7 @@ export async function suggest(
     // don't suggest finishing characters if the expression is a column
     // because "EVAL columnName" is a useless expression
     expressionRoot &&
-    !isColumnItem(expressionRoot)
+    (!isColumnItem(expressionRoot) || insideAssignment)
   ) {
     suggestions.push(pipeCompleteItem, { ...commaCompleteItem, text: ', ' });
   }

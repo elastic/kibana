@@ -34,7 +34,6 @@ import {
   type WindowParameters,
 } from '@kbn/aiops-log-rate-analysis';
 import { type BrushSelectionUpdatePayload } from '@kbn/aiops-log-rate-analysis/state';
-import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -202,7 +201,6 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
   const barColors = useLogRateAnalysisBarColors();
 
   const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
-  const useLegacyTimeAxis = uiSettings.get('visualization:useLegacyTimeAxis', false);
 
   const overallSeriesName = i18n.translate(
     'xpack.aiops.dataGrid.field.documentCountChart.seriesLabel',
@@ -510,14 +508,13 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
             position={Position.Bottom}
             showOverlappingTicks={true}
             tickFormat={(value) => xAxisFormatter.convert(value)}
-            labelFormat={useLegacyTimeAxis ? undefined : () => ''}
-            timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
-            style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
+            labelFormat={() => ''}
           />
           {adjustedChartPoints?.length && (
             <HistogramBarSeries
               id={SPEC_ID}
               name={chartPointsSplit ? overallSeriesNameWithSplit : overallSeriesName}
+              // Defaults to multi layer time axis as of Elastic Charts v70
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="time"
@@ -534,6 +531,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
             <HistogramBarSeries
               id={`${SPEC_ID}_split`}
               name={chartPointsSplitLabel}
+              // Defaults to multi layer time axis as of Elastic Charts v70
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="time"

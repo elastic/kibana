@@ -234,6 +234,25 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
                     ),
                   })
                 ),
+                resource_data: schema.maybe(
+                  schema.object({
+                    project: schema.maybe(
+                      schema.object({
+                        search: schema.maybe(
+                          schema.object({
+                            type: schema.oneOf([
+                              schema.literal('general'),
+                              schema.literal('vector'),
+                              schema.literal('timeseries'),
+                            ]),
+                          })
+                        ),
+                      })
+                    ),
+                    // Can be added in the future if needed:
+                    // deployment: schema.maybe(schema.object({})),
+                  })
+                ),
               },
               { unknowns: 'ignore' }
             )
@@ -248,8 +267,8 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         },
       },
       async (context, request, response) => {
-        const { uiSettings, savedObjects } = await context.core;
-        const defaultRoute = await uiSettings.client.get<string>('defaultRoute');
+        const { uiSettings } = await context.core;
+        const defaultRoute = await uiSettings.client.get<string>('defaultRoute', { request });
         const nextCandidateRoute = parseNextURL(request.url.href);
 
         const route = nextCandidateRoute === '/' ? defaultRoute : nextCandidateRoute;
@@ -264,13 +283,20 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
             })
           : undefined;
 
+        const queryResourceDataRaw = request.query?.resource_data ?? undefined;
+        const queryResourceData = queryResourceDataRaw
+          ? camelcaseKeys(queryResourceDataRaw, {
+              deep: true,
+            })
+          : undefined;
+
         const solutionType = this.config.onboarding?.default_solution;
 
-        if (queryOnboardingToken || queryOnboardingSecurity) {
+        if (queryOnboardingToken || queryOnboardingSecurity || queryResourceData) {
           core
             .getStartServices()
             .then(async ([coreStart]) => {
-              const soClient = savedObjects.getClient({
+              const soClient = coreStart.savedObjects.getScopedClient(request, {
                 includedHiddenTypes: [CLOUD_DATA_SAVED_OBJECT_TYPE],
               });
 
@@ -279,6 +305,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
                 onboardingToken: queryOnboardingToken,
                 solutionType,
                 security: queryOnboardingSecurity,
+                resourceData: queryResourceData,
               });
             })
             .catch((errorMsg) => this.logger.error(errorMsg));

@@ -187,6 +187,26 @@ const TrustedAppDataSchema = schema.object(
   { unknowns: 'ignore' }
 );
 
+/**
+ * Schema to validate Trusted Apps in Advanced mode
+ */
+const TrustedAppAdvancedModeDataSchema = schema.object(
+  {
+    entries: schema.arrayOf(
+      schema.object(
+        {
+          field: schema.string(),
+        },
+        { unknowns: 'ignore' }
+      ),
+      { minSize: 1 }
+    ),
+  },
+  {
+    unknowns: 'ignore',
+  }
+);
+
 export class TrustedAppValidator extends BaseValidator {
   static isTrustedApp(item: { listId: string }): boolean {
     return item.listId === ENDPOINT_ARTIFACT_LISTS.trustedApps.id;
@@ -207,8 +227,8 @@ export class TrustedAppValidator extends BaseValidator {
     await this.validateTrustedAppData(item);
     await this.validateCanCreateByPolicyArtifacts(item);
     await this.validateByPolicyItem(item);
-    await this.validateCreateOwnerSpaceIds(item);
     await this.validateCanCreateGlobalArtifacts(item);
+    await this.validateCreateOwnerSpaceIds(item);
 
     return item;
   }
@@ -270,7 +290,16 @@ export class TrustedAppValidator extends BaseValidator {
     await this.validateBasicData(item);
 
     try {
-      TrustedAppDataSchema.validate(item, { os: item.osTypes[0] });
+      const isTAAdvancedModeFeatureFlagEnabled =
+        this.endpointAppContext.experimentalFeatures.trustedAppsAdvancedMode;
+      const isAdvancedMode = item.tags.includes('form_mode:advanced');
+      if (!isTAAdvancedModeFeatureFlagEnabled && isAdvancedMode) {
+        throw new Error('Trusted apps advanced mode feature is not enabled');
+      } else if (isTAAdvancedModeFeatureFlagEnabled && isAdvancedMode) {
+        TrustedAppAdvancedModeDataSchema.validate(item);
+      } else {
+        TrustedAppDataSchema.validate(item, { os: item.osTypes[0] });
+      }
     } catch (error) {
       throw new EndpointArtifactExceptionValidationError(error.message);
     }

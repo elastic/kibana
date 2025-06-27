@@ -13,6 +13,7 @@ import {
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users';
 
 import { EndpointSecurityTestRolesLoader } from '@kbn/security-solution-plugin/scripts/endpoint/common/role_and_user_loader';
+import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context_edr_workflows';
 
 export const ROLE = ENDPOINT_SECURITY_ROLE_NAMES;
@@ -63,8 +64,8 @@ export function RolesUsersProvider({ getService }: FtrProviderContext) {
       if (predefinedRole) {
         const roleConfig = rolesMapping[predefinedRole];
         if (extraPrivileges) {
-          roleConfig.kibana[0].feature.siemV2 = [
-            ...roleConfig.kibana[0].feature.siemV2,
+          roleConfig.kibana[0].feature[SECURITY_FEATURE_ID] = [
+            ...roleConfig.kibana[0].feature[SECURITY_FEATURE_ID],
             ...extraPrivileges,
           ];
         }
@@ -84,7 +85,7 @@ export function RolesUsersProvider({ getService }: FtrProviderContext) {
               spaces: ['*'],
               base: [],
               feature: {
-                siemV2: customRole.extraPrivileges,
+                [SECURITY_FEATURE_ID]: customRole.extraPrivileges,
               },
             },
           ],

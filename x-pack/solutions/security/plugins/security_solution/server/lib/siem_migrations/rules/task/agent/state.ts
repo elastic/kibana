@@ -11,7 +11,7 @@ import type { RuleTranslationResult } from '../../../../../../common/siem_migrat
 import type {
   ElasticRulePartial,
   OriginalRule,
-  RuleMigration,
+  RuleMigrationRule,
 } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationResources } from '../retrievers/rule_resource_retriever';
 
@@ -30,9 +30,13 @@ export const migrateRuleState = Annotation.Root({
     default: () => '',
   }),
   translation_result: Annotation<RuleTranslationResult>(),
-  comments: Annotation<RuleMigration['comments']>({
+  comments: Annotation<RuleMigrationRule['comments']>({
     // Translation subgraph causes the original main graph comments to be concatenated again, we need to deduplicate them.
     reducer: (current, value) => uniq(value ? (current ?? []).concat(value) : current),
     default: () => [],
   }),
+});
+
+export const migrateRuleConfigSchema = Annotation.Root({
+  skipPrebuiltRulesMatching: Annotation<boolean | undefined>(),
 });

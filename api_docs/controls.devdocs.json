@@ -49,6 +49,99 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-public.serializeRuntimeState",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "serializeRuntimeState",
+        "description": [],
+        "signature": [
+          "(runtimeState: Partial<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlGroupRuntimeState",
+            "text": "ControlGroupRuntimeState"
+          },
+          "<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.DefaultControlState",
+            "text": "DefaultControlState"
+          },
+          ">>) => ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.SerializedPanelState",
+            "text": "SerializedPanelState"
+          },
+          "<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlGroupSerializedState",
+            "text": "ControlGroupSerializedState"
+          },
+          ">"
+        ],
+        "path": "src/platform/plugins/shared/controls/public/control_group/utils/serialize_runtime_state.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_app/url/bwc/extract_control_group_state.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_app/url/bwc/extract_control_group_state.ts"
+          }
+        ],
+        "children": [
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.serializeRuntimeState.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimeState",
+            "description": [],
+            "signature": [
+              "Partial<",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlGroupRuntimeState",
+                "text": "ControlGroupRuntimeState"
+              },
+              "<",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.DefaultControlState",
+                "text": "DefaultControlState"
+              },
+              ">>"
+            ],
+            "path": "src/platform/plugins/shared/controls/public/control_group/utils/serialize_runtime_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -1127,7 +1220,7 @@
             "section": "def-public.PresentationContainer",
             "text": "PresentationContainer"
           },
-          " & ",
+          "<unknown> & ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -1143,23 +1236,7 @@
             "section": "def-common.ControlGroupSerializedState",
             "text": "ControlGroupSerializedState"
           },
-          ", ",
-          {
-            "pluginId": "controls",
-            "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.ControlGroupRuntimeState",
-            "text": "ControlGroupRuntimeState"
-          },
-          "<",
-          {
-            "pluginId": "controls",
-            "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.DefaultControlState",
-            "text": "DefaultControlState"
-          },
-          ">> & ",
+          "> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1215,31 +1292,15 @@
             "section": "def-public.HasEditCapabilities",
             "text": "HasEditCapabilities"
           },
-          " & Pick<",
+          " & ",
           {
-            "pluginId": "@kbn/presentation-publishing",
+            "pluginId": "@kbn/presentation-containers",
             "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesUnsavedChanges",
-            "text": "PublishesUnsavedChanges"
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.HasLastSavedChildState",
+            "text": "HasLastSavedChildState"
           },
-          "<",
-          {
-            "pluginId": "controls",
-            "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.ControlGroupRuntimeState",
-            "text": "ControlGroupRuntimeState"
-          },
-          "<",
-          {
-            "pluginId": "controls",
-            "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.DefaultControlState",
-            "text": "DefaultControlState"
-          },
-          ">>, \"unsavedChanges$\"> & ",
+          "<object> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1254,6 +1315,14 @@
             "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.PublishesDisabledActionIds",
             "text": "PublishesDisabledActionIds"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesUnsavedChanges",
+            "text": "PublishesUnsavedChanges"
           },
           " & Partial<",
           {
@@ -1272,14 +1341,6 @@
             "text": "PublishesUnifiedSearch"
           },
           "> & ",
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.HasSaveNotification",
-            "text": "HasSaveNotification"
-          },
-          " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1335,7 +1396,7 @@
             "section": "def-common.ControlLabelPosition",
             "text": "ControlLabelPosition"
           },
-          ">; asyncResetUnsavedChanges: () => Promise<void>; controlFetch$: (controlUuid: string, onReload?: (() => void) | undefined) => ",
+          ">; controlFetch$: (controlUuid: string, onReload?: (() => void) | undefined) => ",
           "Observable",
           "<",
           "ControlFetchContext",
@@ -1363,7 +1424,7 @@
             "section": "def-common.ControlGroupEditorConfig",
             "text": "ControlGroupEditorConfig"
           },
-          " | undefined; getLastSavedControlState: (controlUuid: string) => object; setChainingSystem: (chainingSystem: ",
+          " | undefined; setChainingSystem: (chainingSystem: ",
           {
             "pluginId": "controls",
             "scope": "common",
@@ -1393,7 +1454,7 @@
             "section": "def-public.PresentationContainer",
             "text": "PresentationContainer"
           },
-          " & ",
+          "<unknown> & ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -1409,23 +1470,7 @@
             "section": "def-common.ControlGroupSerializedState",
             "text": "ControlGroupSerializedState"
           },
-          ", ",
-          {
-            "pluginId": "controls",
-            "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.ControlGroupRuntimeState",
-            "text": "ControlGroupRuntimeState"
-          },
-          "<",
-          {
-            "pluginId": "controls",
-            "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.DefaultControlState",
-            "text": "DefaultControlState"
-          },
-          ">> & ",
+          "> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1481,31 +1526,15 @@
             "section": "def-public.HasEditCapabilities",
             "text": "HasEditCapabilities"
           },
-          " & Pick<",
+          " & ",
           {
-            "pluginId": "@kbn/presentation-publishing",
+            "pluginId": "@kbn/presentation-containers",
             "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesUnsavedChanges",
-            "text": "PublishesUnsavedChanges"
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.HasLastSavedChildState",
+            "text": "HasLastSavedChildState"
           },
-          "<",
-          {
-            "pluginId": "controls",
-            "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.ControlGroupRuntimeState",
-            "text": "ControlGroupRuntimeState"
-          },
-          "<",
-          {
-            "pluginId": "controls",
-            "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.DefaultControlState",
-            "text": "DefaultControlState"
-          },
-          ">>, \"unsavedChanges$\"> & ",
+          "<object> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1520,6 +1549,14 @@
             "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.PublishesDisabledActionIds",
             "text": "PublishesDisabledActionIds"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesUnsavedChanges",
+            "text": "PublishesUnsavedChanges"
           },
           " & Partial<",
           {
@@ -1538,14 +1575,6 @@
             "text": "PublishesUnifiedSearch"
           },
           "> & ",
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.HasSaveNotification",
-            "text": "HasSaveNotification"
-          },
-          " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1601,7 +1630,7 @@
             "section": "def-common.ControlLabelPosition",
             "text": "ControlLabelPosition"
           },
-          ">; asyncResetUnsavedChanges: () => Promise<void>; controlFetch$: (controlUuid: string, onReload?: (() => void) | undefined) => ",
+          ">; controlFetch$: (controlUuid: string, onReload?: (() => void) | undefined) => ",
           "Observable",
           "<",
           "ControlFetchContext",
@@ -1629,7 +1658,7 @@
             "section": "def-common.ControlGroupEditorConfig",
             "text": "ControlGroupEditorConfig"
           },
-          " | undefined; getLastSavedControlState: (controlUuid: string) => object; setChainingSystem: (chainingSystem: ",
+          " | undefined; setChainingSystem: (chainingSystem: ",
           {
             "pluginId": "controls",
             "scope": "common",
@@ -1654,7 +1683,7 @@
             "text": "DefaultControlState"
           },
           ">>) => void; getInput$: () => ",
-          "BehaviorSubject",
+          "Observable",
           "<",
           {
             "pluginId": "controls",
@@ -1671,7 +1700,23 @@
             "section": "def-common.DefaultControlState",
             "text": "DefaultControlState"
           },
-          ">>; }"
+          ">>; getInput: () => ",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlGroupRuntimeState",
+            "text": "ControlGroupRuntimeState"
+          },
+          "<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.DefaultControlState",
+            "text": "DefaultControlState"
+          },
+          ">; }"
         ],
         "path": "src/platform/plugins/shared/controls/public/control_group/control_group_renderer/types.ts",
         "deprecated": false,
@@ -1858,7 +1903,7 @@
             "section": "def-public.PublishesUnsavedChanges",
             "text": "PublishesUnsavedChanges"
           },
-          "<object> & Partial<",
+          " & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1926,7 +1971,7 @@
             "section": "def-public.ControlGroupApi",
             "text": "ControlGroupApi"
           },
-          "> & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; grow: ",
+          "> & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; grow$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1934,7 +1979,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined>; width: ",
+          "<boolean | undefined>; width$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -2022,7 +2067,7 @@
             "section": "def-public.PublishesUnsavedChanges",
             "text": "PublishesUnsavedChanges"
           },
-          "<object> & Partial<",
+          " & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -2090,7 +2135,7 @@
             "section": "def-public.ControlGroupApi",
             "text": "ControlGroupApi"
           },
-          "> & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; grow: ",
+          "> & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; grow$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -2098,7 +2143,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined>; width: ",
+          "<boolean | undefined>; width$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -2167,7 +2212,7 @@
             "section": "def-public.PublishesUnsavedChanges",
             "text": "PublishesUnsavedChanges"
           },
-          "<object> & Partial<",
+          " & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -2235,7 +2280,7 @@
             "section": "def-public.ControlGroupApi",
             "text": "ControlGroupApi"
           },
-          "> & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; grow: ",
+          "> & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; grow$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -2243,7 +2288,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined>; width: ",
+          "<boolean | undefined>; width$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -2336,7 +2381,7 @@
             "section": "def-public.PublishesUnsavedChanges",
             "text": "PublishesUnsavedChanges"
           },
-          "<object> & Partial<",
+          " & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -2404,7 +2449,7 @@
             "section": "def-public.ControlGroupApi",
             "text": "ControlGroupApi"
           },
-          "> & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; grow: ",
+          "> & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; grow$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -2412,7 +2457,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined>; width: ",
+          "<boolean | undefined>; width$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -2517,7 +2562,7 @@
             "section": "def-public.PublishesUnsavedChanges",
             "text": "PublishesUnsavedChanges"
           },
-          "<object> & Partial<",
+          " & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -2585,7 +2630,7 @@
             "section": "def-public.ControlGroupApi",
             "text": "ControlGroupApi"
           },
-          "> & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; grow: ",
+          "> & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; grow$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -2593,7 +2638,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined>; width: ",
+          "<boolean | undefined>; width$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -2696,7 +2741,7 @@
             "section": "def-public.PublishesUnsavedChanges",
             "text": "PublishesUnsavedChanges"
           },
-          "<object> & Partial<",
+          " & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -2764,7 +2809,7 @@
             "section": "def-public.ControlGroupApi",
             "text": "ControlGroupApi"
           },
-          "> & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; grow: ",
+          "> & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; grow$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -2772,7 +2817,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined>; width: ",
+          "<boolean | undefined>; width$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",

@@ -486,24 +486,41 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       const LOCK_ID = 'my_lock_with_lock';
 
       describe('Successful execution and concurrent calls', () => {
-        let executions: number;
+        let successfulLockAcquisitions: number;
+        let failedLockAcquisitions: number;
         let runWithLock: () => Promise<string | undefined>;
         let results: Array<PromiseSettledResult<string | undefined>>;
 
         before(async () => {
-          executions = 0;
+          successfulLockAcquisitions = 0;
+          failedLockAcquisitions = 0;
           runWithLock = async () => {
-            return withLock({ esClient: es, lockId: LOCK_ID, logger }, async () => {
-              executions++;
-              await sleep(100);
-              return 'was called';
-            });
+            try {
+              return await withLock({ esClient: es, lockId: LOCK_ID, logger }, async () => {
+                successfulLockAcquisitions++;
+                await pRetry(() => {
+                  if (failedLockAcquisitions < 2) {
+                    throw new Error(
+                      'Waiting for lock acquisition failures before releasing the lock'
+                    );
+                  }
+                });
+                return 'was called';
+              });
+            } catch (error) {
+              failedLockAcquisitions++;
+              throw error;
+            }
           };
           results = await Promise.allSettled([runWithLock(), runWithLock(), runWithLock()]);
         });
 
         it('executes the callback only once', async () => {
-          expect(executions).to.be(1);
+          expect(successfulLockAcquisitions).to.be(1);
+        });
+
+        it('makes failed lock acquisition attempts', async () => {
+          expect(failedLockAcquisitions).to.be(2);
         });
 
         it('returns the callback result for the successful call', async () => {

@@ -22,8 +22,6 @@ import { TablePanelConfig as table } from './table';
 import { GaugePanelConfig as gauge } from './gauge';
 import { MarkdownPanelConfig as markdown } from './markdown';
 
-import './_panel_config.scss';
-
 const panelConfigTypes = {
   timeseries,
   table,

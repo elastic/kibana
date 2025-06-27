@@ -27,7 +27,7 @@ You must add a `translations` directory at the root of your plugin. This directo
 To simplify the localization process, {{kib}} provides tools for the following functions:
 
 * Verify all translations have translatable strings and extract default messages from templates
-* Verify translation files and integrate them into {kib}
+* Verify translation files and integrate them into {{kib}}
 
 To use {{kib}} i18n tooling, create a `.i18nrc.json` file with the following configs:
 

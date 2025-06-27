@@ -16,11 +16,14 @@ import {
 import { i18n } from '@kbn/i18n';
 // // import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 // // import { SubscriptionNotAllowed } from '../subscription_not_allowed';
+import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
+import semverGte from 'semver/functions/gte';
 import {
   getAssetInputHiddenVars,
   getAssetPolicy,
   hasErrors,
   getDefaultCloudCredentialsType,
+  getCloudConnectorRemoteRoleTemplate,
 } from './utils';
 import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
@@ -31,6 +34,7 @@ import { CLOUDBEAT_AWS } from './aws_credentials_form/constants';
 import { GcpAccountTypeSelect } from './gcp_credentials_form/gcp_account_type_select';
 import { AzureAccountTypeSelect } from './azure_credentials_form/azure_account_type_select';
 import { useEnsureDefaultNamespace } from './hooks';
+import { useKibana } from '../../hooks/use_kibana';
 
 const EditScreenStepTitle = () => (
   <>
@@ -89,6 +93,8 @@ export const CloudAssetInventoryPolicyTemplateForm =
       isAgentlessEnabled,
       defaultSetupTechnology,
     }) => {
+      const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '0.18.0';
+      const { cloud, uiSettings } = useKibana().services;
       const input = getSelectedOption(newPolicy.inputs);
       const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
         input,
@@ -108,17 +114,36 @@ export const CloudAssetInventoryPolicyTemplateForm =
         [onChange]
       );
 
+      const cloudConnectorsEnabled =
+        uiSettings.get(SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING) || false;
+
+      const cloudConnectorRemoteRoleTemplate = getCloudConnectorRemoteRoleTemplate({
+        input,
+        cloud,
+        packageInfo,
+      });
+
+      const showCloudConnectors =
+        cloudConnectorsEnabled &&
+        !!cloudConnectorRemoteRoleTemplate &&
+        semverGte(packageInfo.version, CLOUD_CONNECTOR_VERSION_ENABLED_ESS);
+
       // /**
       //  * - Updates policy inputs by user selection
       //  * - Updates hidden policy vars
       //  */
       const setEnabledPolicyInput = useCallback(
         (inputType: AssetInput) => {
-          const inputVars = getAssetInputHiddenVars(inputType, packageInfo, setupTechnology);
+          const inputVars = getAssetInputHiddenVars(
+            inputType,
+            packageInfo,
+            setupTechnology,
+            showCloudConnectors
+          );
           const policy = getAssetPolicy(newPolicy, inputType, inputVars);
           updatePolicy(policy);
         },
-        [setupTechnology, packageInfo, newPolicy, updatePolicy]
+        [packageInfo, setupTechnology, showCloudConnectors, newPolicy, updatePolicy]
       );
 
       // // search for non null fields of the validation?.vars object
@@ -205,7 +230,6 @@ export const CloudAssetInventoryPolicyTemplateForm =
               <EuiSpacer size="l" />
             </>
           )}
-
           <FormattedMessage
             id="xpack.securitySolution.assetInventory.fleetIntegration.configureAssetIntegrationDescription"
             defaultMessage="Select the cloud service provider (CSP) you want to monitor and then fill in the name and description to help identify this integration"
@@ -226,7 +250,6 @@ export const CloudAssetInventoryPolicyTemplateForm =
               disabled={isEditPage}
             />
           )}
-
           {input.type === 'cloudbeat/asset_inventory_gcp' && (
             <GcpAccountTypeSelect
               input={input}
@@ -235,7 +258,6 @@ export const CloudAssetInventoryPolicyTemplateForm =
               disabled={isEditPage}
             />
           )}
-
           {input.type === 'cloudbeat/asset_inventory_azure' && (
             <AzureAccountTypeSelect
               input={input}
@@ -249,7 +271,6 @@ export const CloudAssetInventoryPolicyTemplateForm =
             fields={integrationFields}
             onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
           />
-
           {shouldRenderAgentlessSelector && (
             <SetupTechnologySelector
               disabled={isEditPage}
@@ -274,7 +295,6 @@ export const CloudAssetInventoryPolicyTemplateForm =
               }}
             />
           )}
-
           <PolicyTemplateVarsForm
             input={input}
             newPolicy={newPolicy}
@@ -284,6 +304,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
             setupTechnology={setupTechnology}
             isEditPage={isEditPage}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
+            showCloudConnectors={showCloudConnectors}
           />
           <EuiSpacer />
         </>

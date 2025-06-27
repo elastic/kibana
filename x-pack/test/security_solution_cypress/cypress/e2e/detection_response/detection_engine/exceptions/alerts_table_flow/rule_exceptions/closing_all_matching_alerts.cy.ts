@@ -48,9 +48,7 @@ const getExceptionList1 = () => ({
   list_id: 'exception_list_1',
 });
 
-// Failing: See https://github.com/elastic/kibana/issues/199905
-// Failing: See https://github.com/elastic/kibana/issues/199905
-describe.skip('Close matching Alerts ', { tags: ['@ess', '@serverless'] }, () => {
+describe('Close matching Alerts ', { tags: ['@ess', '@serverless'] }, () => {
   const ITEM_NAME = 'Sample Exception Item';
 
   beforeEach(() => {

@@ -9,10 +9,10 @@
   "plugin": {
     "id": "exploratoryView",
     "browser": true,
-    "server": false,
+    "server": true,
     "configPath": [
       "xpack",
-      "exploratory_view"
+      "exploratoryView"
     ],
     "requiredPlugins": [
       "alerting",
@@ -23,6 +23,7 @@
       "features",
       "files",
       "inspector",
+      "lens",
       "observabilityShared",
       "security",
       "share",
@@ -33,7 +34,6 @@
       "discover",
       "embeddable",
       "home",
-      "lens",
       "licensing",
       "spaces",
       "usageCollection",

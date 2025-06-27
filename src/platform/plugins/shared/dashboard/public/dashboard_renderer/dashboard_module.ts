@@ -17,3 +17,4 @@ export { ExportCSVAction } from '../dashboard_actions/export_csv_action';
 export { AddToLibraryAction } from '../dashboard_actions/library_add_action';
 export { UnlinkFromLibraryAction } from '../dashboard_actions/library_unlink_action';
 export { CopyToDashboardAction } from '../dashboard_actions/copy_to_dashboard_action';
+export { AddSectionAction } from '../dashboard_actions/add_section_action';

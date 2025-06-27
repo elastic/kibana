@@ -17,10 +17,20 @@ import merge from 'lodash/merge';
 import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
-import { SUPPORTED_CLOUDBEAT_INPUTS, ASSET_POLICY_TEMPLATE, ASSET_NAMESPACE } from './constants';
+
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import {
+  SUPPORTED_CLOUDBEAT_INPUTS,
+  ASSET_POLICY_TEMPLATE,
+  ASSET_NAMESPACE,
+  TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
+  TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
+  SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
+} from './constants';
 
 import {
   DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
+  DEFAULT_AGENTLESS_CLOUD_CONNECTORS_AWS_CREDENTIALS_TYPE,
   DEFAULT_AWS_CREDENTIALS_TYPE,
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
 } from './aws_credentials_form/aws_credentials_form_options';
@@ -28,7 +38,11 @@ import { GCP_CREDENTIALS_TYPE } from './gcp_credentials_form/gcp_credential_form
 import type { AssetInput, AssetInventoryInputTypes, NewPackagePolicyAssetInput } from './types';
 import type { AwsCredentialsType } from './aws_credentials_form/types';
 import googleCloudLogo from './assets/icons/google_cloud_logo.svg';
-import { AWS_CREDENTIALS_TYPE, CLOUDBEAT_AWS } from './aws_credentials_form/constants';
+import {
+  AWS_CREDENTIALS_TYPE,
+  AWS_SINGLE_ACCOUNT,
+  CLOUDBEAT_AWS,
+} from './aws_credentials_form/constants';
 import { CLOUDBEAT_GCP } from './gcp_credentials_form/constants';
 import { AZURE_CREDENTIALS_TYPE, CLOUDBEAT_AZURE } from './azure_credentials_form/constants';
 import {
@@ -48,6 +62,16 @@ export const isAssetInput = (
 ): input is NewPackagePolicyAssetInput =>
   SUPPORTED_CLOUDBEAT_INPUTS.includes(input.type as AssetInput);
 
+export interface GetAwsCredentialTypeConfigParams {
+  setupTechnology: SetupTechnology | undefined;
+  optionId: string;
+  showCloudConnectors: boolean;
+  inputType:
+    | 'cloudbeat/asset_inventory_aws'
+    | 'cloudbeat/asset_inventory_gcp'
+    | 'cloudbeat/asset_inventory_azure';
+}
+
 const getAssetType = (policyTemplateInput: AssetInput) => {
   switch (policyTemplateInput) {
     case CLOUDBEAT_AWS:
@@ -58,6 +82,20 @@ const getAssetType = (policyTemplateInput: AssetInput) => {
       return 'n/a';
   }
 };
+
+export interface GetCloudConnectorRemoteRoleTemplateParams {
+  input: NewPackagePolicyAssetInput;
+  cloud: Pick<
+    CloudSetup,
+    | 'isCloudEnabled'
+    | 'cloudId'
+    | 'cloudHost'
+    | 'deploymentUrl'
+    | 'serverless'
+    | 'isServerlessEnabled'
+  >;
+  packageInfo: PackageInfo;
+}
 
 const getDeploymentType = (policyTemplateInput: AssetInput) => {
   switch (policyTemplateInput) {
@@ -223,22 +261,63 @@ export const getDefaultGcpHiddenVars = (
   };
 };
 
+export const getCloudDefaultAwsCredentialConfig = ({
+  isAgentless,
+  showCloudConnectors,
+  packageInfo,
+}: {
+  isAgentless: boolean;
+  packageInfo: PackageInfo;
+  showCloudConnectors: boolean;
+}) => {
+  let credentialsType;
+  const hasCloudFormationTemplate = !!getAssetCloudFormationDefaultValue(packageInfo);
+  if (!showCloudConnectors && isAgentless) {
+    credentialsType = DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE;
+  } else if (showCloudConnectors && isAgentless) {
+    credentialsType = DEFAULT_AGENTLESS_CLOUD_CONNECTORS_AWS_CREDENTIALS_TYPE;
+  } else if (hasCloudFormationTemplate && !isAgentless) {
+    credentialsType = DEFAULT_AWS_CREDENTIALS_TYPE;
+  } else {
+    credentialsType = DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE;
+  }
+  const config: {
+    [key: string]: {
+      value: string | boolean;
+      type: 'text' | 'bool';
+    };
+  } = {
+    'aws.credentials.type': {
+      value: credentialsType,
+      type: 'text',
+    },
+    ...(showCloudConnectors && {
+      'aws.supports_cloud_connectors': {
+        value: showCloudConnectors,
+        type: 'bool',
+      },
+    }),
+  };
+
+  return config;
+};
+
 /**
  * Input vars that are hidden from the user
  */
 export const getAssetInputHiddenVars = (
   inputType: AssetInput,
   packageInfo: PackageInfo,
-  setupTechnology: SetupTechnology
+  setupTechnology: SetupTechnology,
+  showCloudConnectors: boolean
 ): Record<string, PackagePolicyConfigRecordEntry> | undefined => {
   switch (inputType) {
     case CLOUDBEAT_AWS:
-      return {
-        'aws.credentials.type': {
-          value: getDefaultAwsCredentialsType(packageInfo, setupTechnology),
-          type: 'text',
-        },
-      };
+      return getCloudDefaultAwsCredentialConfig({
+        isAgentless: setupTechnology === SetupTechnology.AGENTLESS,
+        packageInfo,
+        showCloudConnectors,
+      });
     case CLOUDBEAT_AZURE:
       return {
         'azure.credentials.type': {
@@ -439,4 +518,95 @@ export const getTemplateUrlFromPackageInfo = (
     }, '');
     return cloudFormationTemplate !== '' ? cloudFormationTemplate : undefined;
   }
+};
+
+export const getCloudProvider = (type: string): string | undefined => {
+  if (type.includes('aws')) return 'aws';
+  if (type.includes('azure')) return 'azure';
+  if (type.includes('gcp')) return 'gcp';
+  return undefined;
+};
+
+export const getCloudCredentialVarsConfig = ({
+  setupTechnology,
+  optionId,
+  showCloudConnectors,
+  inputType,
+}: GetAwsCredentialTypeConfigParams): Record<string, PackagePolicyConfigRecordEntry> => {
+  const supportsCloudConnector =
+    setupTechnology === SetupTechnology.AGENTLESS &&
+    optionId === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS &&
+    showCloudConnectors;
+
+  const credentialType = `${getCloudProvider(inputType)}.credentials.type`;
+  const supportCloudConnectors = `${getCloudProvider(inputType)}.supports_cloud_connectors`;
+
+  if (showCloudConnectors) {
+    return {
+      [credentialType]: { value: optionId },
+      [supportCloudConnectors]: { value: supportsCloudConnector },
+    };
+  }
+
+  return {
+    [credentialType]: { value: optionId },
+  };
+};
+export const getCloudProviderFromCloudHost = (
+  cloudHost: string | undefined
+): string | undefined => {
+  if (!cloudHost) return undefined;
+  const match = cloudHost.match(/\b(aws|gcp|azure)\b/);
+  return match?.[1];
+};
+
+export const getDeploymentIdFromUrl = (url: string | undefined): string | undefined => {
+  if (!url) return undefined;
+  const match = url.match(/\/deployments\/([^/?#]+)/);
+  return match?.[1];
+};
+
+export const getKibanaComponentId = (cloudId: string | undefined): string | undefined => {
+  if (!cloudId) return undefined;
+
+  const base64Part = cloudId.split(':')[1];
+  const decoded = atob(base64Part);
+  const [, , kibanaComponentId] = decoded.split('$');
+
+  return kibanaComponentId || undefined;
+};
+
+export const getCloudConnectorRemoteRoleTemplate = ({
+  input,
+  cloud,
+  packageInfo,
+}: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
+  let elasticResourceId: string | undefined;
+  const accountType = input?.streams?.[0]?.vars?.['aws.account_type']?.value ?? AWS_SINGLE_ACCOUNT;
+
+  const provider = getCloudProviderFromCloudHost(cloud?.cloudHost);
+
+  if (!provider || provider !== 'aws') return undefined;
+
+  const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
+
+  const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
+
+  if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
+    elasticResourceId = cloud.serverless.projectId;
+  }
+
+  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
+    elasticResourceId = kibanaComponentId;
+  }
+
+  if (!elasticResourceId) return undefined;
+
+  return getTemplateUrlFromPackageInfo(
+    packageInfo,
+    input.policy_template,
+    SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
+  )
+    ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
+    ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId);
 };

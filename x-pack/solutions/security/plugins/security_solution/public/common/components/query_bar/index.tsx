@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import type { PropsWithChildren, FC } from 'react';
 import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
 import deepEqual from 'fast-deep-equal';
@@ -20,14 +20,14 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { css, Global } from '@emotion/react';
 import { useKibana } from '../../lib/kibana';
 import { convertToQueryType } from './convert_to_query_type';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { matchFiltersToIndexPattern } from './match_filters_to_index_pattern';
 
 export interface QueryBarComponentProps {
   dataTestSubj?: string;
   dateRangeFrom?: string;
   dateRangeTo?: string;
   hideSavedQuery?: boolean;
-  indexPattern: DataViewBase;
+  indexPattern: DataView | DataViewBase;
   isLoading?: boolean;
   isRefreshPaused?: boolean;
   filterQuery: Query;
@@ -41,6 +41,7 @@ export interface QueryBarComponentProps {
   displayStyle?: SearchBarProps['displayStyle'];
   isDisabled?: boolean;
   bubbleSubmitEvent?: boolean;
+  preventCacheClearOnUnmount?: boolean;
 }
 
 export const isDataView = (obj: unknown): obj is DataView =>
@@ -87,8 +88,8 @@ export const QueryBar = memo<QueryBarComponentProps>(
     displayStyle,
     isDisabled,
     bubbleSubmitEvent,
+    preventCacheClearOnUnmount = false,
   }) => {
-    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
     const { data } = useKibana().services;
     const [dataView, setDataView] = useState<DataView>();
     const onQuerySubmit = useCallback(
@@ -160,25 +161,20 @@ export const QueryBar = memo<QueryBarComponentProps>(
         createDataView();
       }
       return () => {
-        if (dv?.id && !newDataViewPickerEnabled) {
+        // Cache needs to be cleared in certain instances where ad-hoc dataviews are created, like rule creation
+        if (dv?.id && !preventCacheClearOnUnmount) {
           data.dataViews.clearInstanceCache(dv?.id);
         }
       };
-    }, [data.dataViews, indexPattern, isEsql, newDataViewPickerEnabled]);
+    }, [data.dataViews, indexPattern, isEsql, preventCacheClearOnUnmount]);
 
     const searchBarFilters = useMemo(() => {
-      if (isDataView(indexPattern) || isEsql) {
+      if (!dataView?.id || isEsql) {
         return filters;
       }
 
-      /**
-       * We update filters and set new data view id to make sure that SearchBar does not show data view picker
-       * More details in https://github.com/elastic/kibana/issues/174026
-       */
-      const updatedFilters = cloneDeep(filters);
-      updatedFilters.forEach((filter) => (filter.meta.index = indexPattern.title));
-      return updatedFilters;
-    }, [filters, indexPattern, isEsql]);
+      return matchFiltersToIndexPattern(dataView.id, filters);
+    }, [filters, isEsql, dataView?.id]);
 
     const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
     const arrDataView = useMemo(() => (dataView != null ? [dataView] : []), [dataView]);

@@ -15,6 +15,7 @@ import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { PublishesESQLVariables } from '@kbn/esql-types';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
+  CanAddNewSection,
   CanExpandPanels,
   HasLastSavedChildState,
   HasSerializedChildState,
@@ -44,32 +45,17 @@ import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/p
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import {
-  DashboardLocatorParams,
-  DashboardPanelMap,
-  DashboardSettings,
-  DashboardState,
-} from '../../common';
+import { DashboardLocatorParams, DashboardSettings, DashboardState } from '../../common';
 import type { DashboardAttributes, GridData } from '../../server/content_management';
 import {
   LoadDashboardReturn,
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
+import { DashboardLayout } from './layout_manager/types';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
-export type DashboardLayoutItem = { gridData: GridData } & HasType;
-export interface DashboardLayout {
-  [uuid: string]: DashboardLayoutItem;
-}
-
-export interface DashboardChildState {
-  [uuid: string]: SerializedPanelState<object>;
-}
-
-export interface DashboardChildren {
-  [uuid: string]: DefaultEmbeddableApi;
-}
+export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
 
 export interface DashboardCreationOptions {
   getInitialInput?: () => Partial<DashboardState>;
@@ -102,6 +88,7 @@ export interface DashboardCreationOptions {
 }
 
 export type DashboardApi = CanExpandPanels &
+  CanAddNewSection &
   HasAppContext &
   HasExecutionContext &
   HasLastSavedChildState &
@@ -151,6 +138,8 @@ export type DashboardApi = CanExpandPanels &
     scrollToPanel: (panelRef: HTMLDivElement) => void;
     scrollToPanelId$: PublishingSubject<string | undefined>;
     scrollToTop: () => void;
+    scrollToBottom: () => void;
+    scrollToBottom$: Subject<void>;
     setFilters: (filters?: Filter[] | undefined) => void;
     setFullScreenMode: (fullScreenMode: boolean) => void;
     setHighlightPanelId: (id: string | undefined) => void;
@@ -168,5 +157,6 @@ export interface DashboardInternalApi {
   layout$: BehaviorSubject<DashboardLayout>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
   setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
-  serializePanels: () => { references: Reference[]; panels: DashboardPanelMap };
+  serializeLayout: () => Pick<DashboardState, 'panels' | 'references'>;
+  isSectionCollapsed: (sectionId?: string) => boolean;
 }

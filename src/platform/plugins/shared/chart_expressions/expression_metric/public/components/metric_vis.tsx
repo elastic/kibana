@@ -184,14 +184,13 @@ export const MetricVis = ({
         title: String(title),
         subtitle,
         icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
-        extra: ({ fontSize, color }) => (
+        extra: ({ color }) => (
           <SecondaryMetric
             row={row}
             config={config}
             columns={data.columns}
             getMetricFormatter={getMetricFormatter}
             color={config.metric.secondaryColor}
-            fontSize={fontSize}
             trendConfig={
               hasDynamicColoring && trendConfig
                 ? { ...trendConfig, borderColor: color }
@@ -212,14 +211,13 @@ export const MetricVis = ({
       title: String(title),
       subtitle,
       icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
-      extra: ({ fontSize, color }) => (
+      extra: ({ color }) => (
         <SecondaryMetric
           row={row}
           config={config}
           columns={data.columns}
           getMetricFormatter={getMetricFormatter}
           color={config.metric.secondaryColor}
-          fontSize={fontSize}
           trendConfig={
             hasDynamicColoring && trendConfig ? { ...trendConfig, borderColor: color } : trendConfig
           }
@@ -274,6 +272,8 @@ export const MetricVis = ({
 
   const minHeight = chartBaseTheme.metric.minHeight;
 
+  // this needs to use a useEffect as it depends on the scrollContainerRef
+  // which is not available on the first render
   useEffect(() => {
     const minimumRequiredVerticalSpace = minHeight * numRows;
     setScrollChildHeight(

@@ -1,0 +1,21 @@
+{
+  "esql.list_queries": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_query/queries"
+    ],
+    "documentation": null,
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

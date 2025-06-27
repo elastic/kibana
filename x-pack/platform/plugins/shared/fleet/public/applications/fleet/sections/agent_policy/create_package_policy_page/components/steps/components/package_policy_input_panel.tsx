@@ -197,7 +197,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
             {showTopLevelDescription && (
               <EuiText size="s" color="subdued">
                 <ReactMarkdown>
-                  {String(inputStreams[0].packageInputStream.description)}
+                  {String(inputStreams[0]?.packageInputStream?.description)}
                 </ReactMarkdown>
               </EuiText>
             )}
@@ -305,7 +305,9 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     updatePackagePolicyInput(updatedInput);
                   }}
                   inputStreamValidationResults={
-                    inputValidationResults?.streams![packagePolicyInputStream!.data_stream!.dataset]
+                    inputValidationResults?.streams?.[
+                      packagePolicyInputStream!.data_stream!.dataset
+                    ] ?? {}
                   }
                   forceShowErrors={forceShowErrors}
                   isEditPage={isEditPage}

@@ -130,6 +130,7 @@ export interface InstallPackageResponse {
   items: AssetReference[];
   _meta: {
     install_source: InstallSource;
+    name: string;
   };
 }
 
@@ -145,12 +146,13 @@ export interface InstallResult {
   error?: Error;
   installType: InstallType;
   installSource?: InstallSource;
+  pkgName: string;
 }
 
 export interface BulkInstallPackageInfo {
   name: string;
   version: string;
-  result: InstallResult;
+  result: Omit<InstallResult, 'pkgName'>;
 }
 
 export interface BulkInstallPackagesResponse {
@@ -232,3 +234,17 @@ export type GetInputsTemplatesResponse =
   | {
       inputs: any;
     };
+
+export interface DeletePackageDatastreamAssetsRequest {
+  params: {
+    pkgName: string;
+    pkgVersion: string;
+  };
+  query: {
+    packagePolicyId: string;
+  };
+}
+
+export interface DeletePackageDatastreamAssetsResponse {
+  success: boolean;
+}

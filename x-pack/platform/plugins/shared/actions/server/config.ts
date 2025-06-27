@@ -125,14 +125,44 @@ export const configSchema = schema.object({
       {
         domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
         recipient_allowlist: schema.maybe(schema.arrayOf(schema.string())),
+        services: schema.maybe(
+          schema.object(
+            {
+              enabled: schema.maybe(
+                schema.arrayOf(
+                  schema.oneOf([
+                    schema.literal('google-mail'),
+                    schema.literal('microsoft-exchange'),
+                    schema.literal('microsoft-outlook'),
+                    schema.literal('amazon-ses'),
+                    schema.literal('elastic-cloud'),
+                    schema.literal('other'),
+                    schema.literal('*'),
+                  ]),
+                  { minSize: 1 }
+                )
+              ),
+              ses: schema.maybe(
+                schema.object({
+                  host: schema.string({ minLength: 1 }),
+                  port: schema.number({ min: 1, max: 65535 }),
+                })
+              ),
+            },
+            {
+              validate: (obj) => {
+                if (obj && Object.keys(obj).length === 0) {
+                  return 'email.services.enabled or email.services.ses must be defined';
+                }
+              },
+            }
+          )
+        ),
       },
       {
         validate: (obj) => {
-          if (
-            (obj.domain_allowlist && obj.recipient_allowlist) ||
-            (!obj.domain_allowlist && !obj.recipient_allowlist)
-          ) {
-            return 'Email configuration requires either domain_allowlist or recipient_allowlist to be specified (but not both)';
+          if (obj && Object.keys(obj).length === 0) {
+            return 'email.domain_allowlist, email.recipient_allowlist or email.services must be defined';
           }
         },
       }
@@ -152,12 +182,22 @@ export const configSchema = schema.object({
   ),
   usage: schema.object({
     url: schema.string({ defaultValue: DEFAULT_USAGE_API_URL }),
+    enabled: schema.maybe(schema.boolean({ defaultValue: true })),
     ca: schema.maybe(
       schema.object({
         path: schema.string(),
       })
     ),
   }),
+  webhook: schema.maybe(
+    schema.object({
+      ssl: schema.object({
+        pfx: schema.object({
+          enabled: schema.boolean({ defaultValue: true }),
+        }),
+      }),
+    })
+  ),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;

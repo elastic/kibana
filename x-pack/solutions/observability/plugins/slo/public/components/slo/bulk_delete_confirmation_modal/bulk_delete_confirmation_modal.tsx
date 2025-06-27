@@ -18,7 +18,7 @@ export interface Props {
 }
 
 export function SloBulkDeleteConfirmationModal({ items, onCancel, onConfirm }: Props) {
-  const { mutate: bulkDelete } = useBulkDeleteSlo();
+  const { mutate: bulkDelete } = useBulkDeleteSlo({ onConfirm });
 
   return (
     <EuiConfirmModal
@@ -40,7 +40,6 @@ export function SloBulkDeleteConfirmationModal({ items, onCancel, onConfirm }: P
       onCancel={onCancel}
       onConfirm={() => {
         bulkDelete({ items: items.map((item) => ({ id: item.id })) });
-        onConfirm();
       }}
     >
       {i18n.translate('xpack.slo.bulkDeleteConfirmationModal.descriptionText', {

@@ -9,13 +9,12 @@
 
 import type { QueryState } from '@kbn/data-plugin/common';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { GLOBAL_STATE_URL_KEY } from '../../../../common/constants';
 
 export interface DiscoverGlobalStateContainer {
   get: () => QueryState | null;
   set: (state: QueryState) => Promise<void>;
 }
-
-export const GLOBAL_STATE_URL_KEY = '_g';
 
 export const getDiscoverGlobalStateContainer = (
   stateStorage: IKbnUrlStateStorage

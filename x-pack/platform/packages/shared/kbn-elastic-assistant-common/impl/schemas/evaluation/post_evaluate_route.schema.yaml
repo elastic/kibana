@@ -59,6 +59,8 @@ components:
           type: array
           items:
             type: string
+          minItems: 1
+          maxItems: 1
         datasetName:
           type: string
         evaluatorConnectorId:

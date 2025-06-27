@@ -28,27 +28,29 @@
       "fieldFormats",
       "uiActions",
       "presentationUtil",
-      "exploratoryView",
       "features",
       "files",
       "inspector",
+      "lens",
       "observabilityShared",
       "ruleRegistry",
       "triggersActionsUi",
       "security",
       "share",
       "unifiedSearch",
+      "visualizations",
       "dashboard",
       "expressions",
       "logsShared",
       "licensing",
       "navigation",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "esql"
     ],
     "optionalPlugins": [
       "discover",
+      "exploratoryView",
       "home",
-      "lens",
       "usageCollection",
       "cloud",
       "spaces",
@@ -56,8 +58,7 @@
       "guidedOnboarding",
       "observabilityAIAssistant",
       "investigate",
-      "streams",
-      "visualizations"
+      "streams"
     ],
     "requiredBundles": [
       "data",

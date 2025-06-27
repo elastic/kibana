@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { useGroupTakeActionsItems } from '../../../detections/hooks/alerts_table/use_group_take_action_items';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
@@ -54,16 +54,16 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
   loading,
 }: TopRiskScoreContributorsAlertsProps<T>) => {
   const { to, from } = useGlobalTime();
-  const [{ loading: userInfoLoading, signalIndexName, hasIndexWrite, hasIndexMaintenance }] =
-    useUserData();
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
+  const [{ loading: userInfoLoading, hasIndexWrite, hasIndexMaintenance }] = useUserData();
+
+  const { sourcererDataView: oldSourcererDataViewSpec } = useSourcererDataView(
     SourcererScopeName.detections
   );
-
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
-
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
+  const sourcererDataViewSpec: DataViewSpec = newDataViewPickerEnabled
+    ? experimentalDataViewSpec
+    : oldSourcererDataViewSpec;
 
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -148,6 +148,7 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
             <GroupedAlertsTable
               accordionButtonContent={defaultGroupTitleRenderers}
               accordionExtraActionGroupStats={accordionExtraActionGroupStats}
+              dataViewSpec={sourcererDataViewSpec}
               defaultFilters={defaultFilters}
               defaultGroupingOptions={defaultGroupingOptions}
               from={from}
@@ -156,8 +157,6 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
               groupTakeActionItems={groupTakeActionItems}
               loading={userInfoLoading || loading}
               renderChildComponent={renderGroupedAlertTable}
-              runtimeMappings={sourcererDataView.runtimeFieldMap as RunTimeMappings}
-              signalIndexName={signalIndexName}
               tableId={TableId.alertsRiskInputs}
               to={to}
             />

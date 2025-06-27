@@ -256,6 +256,7 @@ export const basicCase: CaseUI = {
   category: null,
   customFields: [],
   observables: [],
+  incrementalId: undefined,
 };
 
 export const basicFileMock: FileJSON = {
@@ -380,6 +381,7 @@ export const mockCase: CaseUI = {
   category: null,
   customFields: [],
   observables: [],
+  incrementalId: undefined,
 };
 
 export const basicCasePost: CaseUI = {
@@ -451,8 +453,15 @@ export const cases: CasesUI = [
     comments: [],
     status: CaseStatuses['in-progress'],
     severity: CaseSeverity.MEDIUM,
+    incrementalId: 1,
   },
-  { ...pushedCase, updatedAt: laterTime, id: '2', totalComment: 0, comments: [] },
+  {
+    ...pushedCase,
+    updatedAt: laterTime,
+    id: '2',
+    totalComment: 0,
+    comments: [],
+  },
   { ...basicCase, id: '3', totalComment: 0, comments: [] },
   { ...basicCase, id: '4', totalComment: 0, comments: [] },
   caseWithAlerts,
@@ -565,6 +574,7 @@ export const basicCaseSnake: Case = {
   updated_by: elasticUserSnake,
   owner: SECURITY_SOLUTION_OWNER,
   customFields: [],
+  incremental_id: undefined,
 } as Case;
 
 export const caseWithAlertsSnake = {
@@ -618,6 +628,7 @@ export const casesSnake: Cases = [
   {
     ...pushedCaseSnake,
     id: '1',
+    incremental_id: 1,
     totalComment: 0,
     comments: [],
     status: CaseStatuses['in-progress'],

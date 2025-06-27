@@ -51,7 +51,6 @@ import {
   isAnnotationsLayer,
   isByReferenceAnnotationsLayer,
 } from './visualization_helpers';
-import { cloneDeep } from 'lodash';
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import {
   XYPersistedByReferenceAnnotationLayerConfig,
@@ -109,7 +108,6 @@ set(core, 'application.capabilities.visualize_v2.save', true);
 const xyVisualization = getXyVisualization({
   paletteService: paletteServiceMock,
   fieldFormats: fieldFormatsMock,
-  useLegacyTimeAxis: false,
   kibanaTheme: themeServiceMock.createStartContract(),
   eventAnnotationService: eventAnnotationServiceMock,
   core,
@@ -3773,7 +3771,7 @@ describe('xy_visualization', () => {
         annotationGroupId: `annotation-group-id-${index}`,
         __lastSaved: {
           ...byValueLayer,
-          annotations: cloneDeep(byValueLayer.annotations),
+          annotations: structuredClone(byValueLayer.annotations),
           title: 'My saved object title',
           description: 'some description',
           tags: [],

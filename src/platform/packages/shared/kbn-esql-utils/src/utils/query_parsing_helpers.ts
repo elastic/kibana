@@ -6,7 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { parse, Walker, walk, BasicPrettyPrinter } from '@kbn/esql-ast';
+import {
+  parse,
+  Walker,
+  walk,
+  BasicPrettyPrinter,
+  isFunctionExpression,
+  isColumn,
+} from '@kbn/esql-ast';
 
 import type {
   ESQLSource,
@@ -275,4 +282,105 @@ export const fixESQLQueryWithVariables = (
   }
 
   return queryString;
+};
+
+export const getCategorizeColumns = (esql: string): string[] => {
+  const { root } = parse(esql);
+  const statsCommand = root.commands.find(({ name }) => name === 'stats');
+  if (!statsCommand) {
+    return [];
+  }
+  const options: ESQLCommandOption[] = [];
+  const columns: string[] = [];
+
+  walk(statsCommand, {
+    visitCommandOption: (node) => options.push(node),
+  });
+
+  const statsByOptions = options.find(({ name }) => name === 'by');
+
+  // categorize is part of the stats by command
+  if (!statsByOptions) {
+    return [];
+  }
+
+  const categorizeOptions = statsByOptions.args.filter((arg) => {
+    return (arg as ESQLFunction).text.toLowerCase().indexOf('categorize') !== -1;
+  }) as ESQLFunction[];
+
+  if (categorizeOptions.length) {
+    categorizeOptions.forEach((arg) => {
+      // ... STATS ... BY CATEGORIZE(field)
+      if (isFunctionExpression(arg) && arg.name === 'categorize') {
+        columns.push(arg.text);
+      } else {
+        // ... STATS ... BY pattern = CATEGORIZE(field)
+        const columnArgs = arg.args.filter((a) => isColumn(a));
+        columnArgs.forEach((c) => columns.push((c as ESQLColumn).name));
+      }
+    });
+  }
+
+  // If there is a rename command, we need to check if the column is renamed
+  const renameCommand = root.commands.find(({ name }) => name === 'rename');
+  if (!renameCommand) {
+    return columns;
+  }
+  const renameFunctions: ESQLFunction[] = [];
+  walk(renameCommand, {
+    visitFunction: (node) => renameFunctions.push(node),
+  });
+
+  renameFunctions.forEach((renameFunction) => {
+    const { original, renamed } = getArgsFromRenameFunction(renameFunction);
+    const oldColumn = original.name;
+    const newColumn = renamed.name;
+    if (columns.includes(oldColumn)) {
+      columns[columns.indexOf(oldColumn)] = newColumn;
+    }
+  });
+  return columns;
+};
+
+/**
+ * Extracts the original and renamed columns from a rename function.
+ * RENAME original AS renamed Vs RENAME renamed = original
+ * @param renameFunction
+ */
+export const getArgsFromRenameFunction = (
+  renameFunction: ESQLFunction
+): { original: ESQLColumn; renamed: ESQLColumn } => {
+  if (renameFunction.name === 'as') {
+    return {
+      original: renameFunction.args[0] as ESQLColumn,
+      renamed: renameFunction.args[1] as ESQLColumn,
+    };
+  }
+
+  return {
+    original: renameFunction.args[1] as ESQLColumn,
+    renamed: renameFunction.args[0] as ESQLColumn,
+  };
+};
+
+/**
+ * Extracts the fields used in the CATEGORIZE function from an ESQL query.
+ * @param esql: string - The ESQL query string
+ */
+export const getCategorizeField = (esql: string): string[] => {
+  const { root } = parse(esql);
+  const columns: string[] = [];
+  const functions = Walker.matchAll(root.commands, {
+    type: 'function',
+    name: 'categorize',
+  }) as ESQLFunction[];
+
+  if (functions.length) {
+    functions.forEach((func) => {
+      for (const arg of func.args) if (isColumn(arg)) columns.push(arg.name);
+    });
+    return columns;
+  }
+
+  return columns;
 };

@@ -25,6 +25,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 
@@ -57,6 +58,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   element: HTMLElement;
   theme$: Observable<CoreTheme>;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  share: SharePluginStart;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
@@ -88,11 +90,15 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
 
 export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) => {
   const {
-    actions: { validateEmailAddresses },
+    actions: { validateEmailAddresses, enabledEmailServices, isWebhookSslWithPfxEnabled },
   } = useKibana().services;
 
   return (
-    <ConnectorProvider value={{ services: { validateEmailAddresses } }}>
+    <ConnectorProvider
+      value={{
+        services: { validateEmailAddresses, enabledEmailServices, isWebhookSslWithPfxEnabled },
+      }}
+    >
       <Routes>
         <Route
           path={`/:section(${sectionsRegex})`}

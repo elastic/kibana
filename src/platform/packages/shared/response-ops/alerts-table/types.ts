@@ -63,7 +63,7 @@ export interface Consumer {
   name: string;
 }
 
-export type AlertsTableSupportedConsumers = Exclude<AlertConsumers, 'alerts'>;
+export type AlertsTableSupportedConsumers = Exclude<AlertConsumers, 'alerts' | 'streams'>;
 
 export type CellComponent = NonNullable<AlertsTableProps['renderCellValue']>;
 

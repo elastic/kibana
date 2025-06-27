@@ -130,6 +130,7 @@ describe('ProjectMonitorFormatter', () => {
   syntheticsService.addConfigs = jest.fn();
   syntheticsService.editConfig = jest.fn();
   syntheticsService.deleteConfigs = jest.fn();
+  syntheticsService.getMaintenanceWindows = jest.fn();
 
   const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createStart().getClient();
 
@@ -491,14 +492,14 @@ const soData = [
       ...payloadData[0],
       revision: 1,
     } as any),
-    type: 'synthetics-monitor',
+    type: 'synthetics-monitor-multi-space',
   },
   {
     attributes: formatSecrets({
       ...payloadData[1],
       revision: 1,
     } as any),
-    type: 'synthetics-monitor',
+    type: 'synthetics-monitor-multi-space',
   },
 ];
 

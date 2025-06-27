@@ -6,8 +6,11 @@
  */
 
 import type { LoginState } from '@kbn/security-plugin/common/login_state';
-import type { Role } from '@kbn/security-plugin/common';
-import { ENDPOINT_SECURITY_ROLE_NAMES } from '../../../../scripts/endpoint/common/roles_users';
+import type { FeaturesPrivileges, Role } from '@kbn/security-plugin/common';
+import {
+  ENDPOINT_SECURITY_ROLE_NAMES,
+  getT1Analyst,
+} from '../../../../scripts/endpoint/common/roles_users';
 import type { SecurityTestUser } from '../common/constants';
 import { KIBANA_KNOWN_DEFAULT_ACCOUNTS } from '../common/constants';
 import { COMMON_API_HEADERS, request } from './common';
@@ -33,6 +36,15 @@ interface CyLoginTask {
    * @param role
    */
   withCustomRole(role: Role): ReturnType<typeof sendApiLoginRequest>;
+
+  /**
+   * Creates a role with the provided Kibana privileges, and basic ES/index privileges,
+   * then creates a user and logs in with the new user.
+   * @param kibanaPrivileges
+   */
+  withCustomKibanaPrivileges(
+    kibanaPrivileges: FeaturesPrivileges
+  ): ReturnType<typeof sendApiLoginRequest>;
 }
 
 /**
@@ -58,11 +70,24 @@ export const login: CyLoginTask = (
         username = result.username;
         password = result.password;
         // Set cookie asynchronously
-        return cy.setCookie('sid', result.cookie as string);
+        return cy.setCookie('sid', result.cookie as string, {
+          // "hostOnly: true" sets the cookie without a domain.
+          // This makes cookie available only for the current host (not subdomains).
+          // It's needed to match the Serverless backend behavior where cookies are set without a domain.
+          // More info: https://github.com/elastic/kibana/issues/221741
+          hostOnly: true,
+        });
       })
       .then(() => {
         // Visit URL after setting cookie
         return cy.visit('/');
+      })
+      .then(() => {
+        cy.getCookies().then((cookies) => {
+          // Ensure that there's only a single session cookie named 'sid'.
+          const sessionCookies = cookies.filter((cookie) => cookie.name === 'sid');
+          expect(sessionCookies).to.have.length(1);
+        });
       })
       .then(() => {
         // Return username and password
@@ -90,12 +115,28 @@ login.withCustomRole = (role: Role): ReturnType<typeof sendApiLoginRequest> => {
   });
 };
 
+login.withCustomKibanaPrivileges = (kibanaPrivileges: FeaturesPrivileges) => {
+  const base = getT1Analyst();
+
+  const customRole: typeof base = {
+    ...base,
+    kibana: [
+      {
+        ...base.kibana[0],
+        feature: kibanaPrivileges,
+      },
+    ],
+  };
+
+  return login.withCustomRole({ name: 'customRole', ...customRole });
+};
+
 /**
  * Send login via API
  * @param username
  * @param password
  *
- * @private
+ * @internal
  */
 const sendApiLoginRequest = (
   username: string,

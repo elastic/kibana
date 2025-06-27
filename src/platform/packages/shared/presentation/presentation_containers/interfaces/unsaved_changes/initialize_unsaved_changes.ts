@@ -12,10 +12,12 @@ import {
   SerializedPanelState,
   StateComparators,
   areComparatorsEqual,
+  getTitle,
 } from '@kbn/presentation-publishing';
 import { MaybePromise } from '@kbn/utility-types';
 import { Observable, combineLatestWith, debounceTime, map, of } from 'rxjs';
 import { apiHasLastSavedChildState } from '../last_saved_child_state';
+import { PresentationContainer } from '../presentation_container';
 
 const UNSAVED_CHANGES_DEBOUNCE = 100;
 
@@ -50,7 +52,20 @@ export const initializeUnsavedChanges = <StateType extends object = object>({
     debounceTime(UNSAVED_CHANGES_DEBOUNCE),
     map(([, lastSavedState]) => {
       const currentState = serializeState().rawState;
-      return !areComparatorsEqual(getComparators(), lastSavedState, currentState, defaultState);
+      return !areComparatorsEqual(
+        getComparators(),
+        lastSavedState,
+        currentState,
+        defaultState,
+        (key: string) => {
+          const childApi = (parentApi as Partial<PresentationContainer>).children$?.getValue()[
+            uuid
+          ];
+          const childlTitle = childApi ? getTitle(childApi) : undefined;
+          const childLabel = childlTitle ? `"${childlTitle}"` : uuid;
+          return `child: ${childLabel}, key: ${key}`;
+        }
+      );
     })
   );
 

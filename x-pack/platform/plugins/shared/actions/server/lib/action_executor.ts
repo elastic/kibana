@@ -590,7 +590,10 @@ export class ActionExecutor {
         }
 
         // start genai extension
-        if (result.status === 'ok' && shouldTrackGenAiToken(actionTypeId)) {
+        if (
+          result.status === 'ok' &&
+          shouldTrackGenAiToken(actionTypeId, `${validatedParams.subAction}`)
+        ) {
           getGenAiTokenTracking({
             actionTypeId,
             logger,

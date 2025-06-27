@@ -120,12 +120,11 @@
     "@kbn/core-capabilities-common",
     "@kbn/presentation-panel-plugin",
     "@kbn/esql-types",
+    "@kbn/react-kibana-context-theme",
     "@kbn/fields-metadata-plugin",
-    "@kbn/response-ops-rule-form",
     "@kbn/alerts-ui-shared",
-    "@kbn/rule-data-utils",
-    "@kbn/response-ops-rule-params",
-    "@kbn/esql-ast"
+    "@kbn/deeplinks-analytics",
+    "@kbn/core-http-server",
   ],
   "exclude": ["target/**/*"]
 }

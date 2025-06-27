@@ -77,7 +77,8 @@
     "@kbn/core-http-server-utils",
     "@kbn/response-ops-rule-params",
     "@kbn/datemath",
-    "@kbn/elastic-assistant-common"
+    "@kbn/elastic-assistant-common",
+    "@kbn/response-ops-recurring-schedule-form"
   ],
   "exclude": [
     "target/**/*"

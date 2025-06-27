@@ -184,14 +184,14 @@ export function getArtifactStagingPipelineTriggers() {
 /**
  * This pipeline checks if there are any changes in the incorporated $BEATS_MANIFEST_LATEST_URL (beats version)
  * and triggers a staging artifact build.
- * Should be triggered for all open branches with a fixed version excluding 7.17: not main, 7.17 and 8.x.
+ * Should be triggered for all open branches with a fixed version excluding 7.17: 8.*, 9.* without main.
  *
  * TODO: we could basically do the check logic of .buildkite/scripts/steps/artifacts/trigger.sh in here, and remove kibana-artifacts-trigger
  */
 export function getArtifactBuildTriggers() {
   const versions = getVersionsFile();
-  const targetVersions = versions.prevMajors.filter((version) =>
-    Boolean(version.branch.match(/[0-9]{1,2}\.[0-9]{1,2}/))
+  const targetVersions = versions.versions.filter(
+    (version) => version.branch !== '7.17' && version.branch !== 'main'
   );
 
   return targetVersions.map(

@@ -30,7 +30,8 @@
     "@kbn/core-security-browser-mocks",
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/core-feature-flags-browser-mocks",
-    "@kbn/core-rendering-browser-mocks"
+    "@kbn/core-rendering-browser-mocks",
+    "@kbn/core-pricing-browser-mocks"
   ],
   "exclude": [
     "target/**/*",

@@ -4,20 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
+import pRetry from 'p-retry';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { defaultOriginalRule, migrationRulesRouteHelpersFactory } from '../../utils';
+import { defaultOriginalRule, ruleMigrationRouteHelpersFactory } from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const migrationRulesRoutes = migrationRulesRouteHelpersFactory(supertest);
+  const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
   describe('Stop Migration', () => {
     let migrationId: string;
     beforeEach(async () => {
-      migrationId = uuidv4();
-      await migrationRulesRoutes.create({
+      const createMigrationRespose = await migrationRulesRoutes.create({});
+      migrationId = createMigrationRespose.body.migration_id;
+      await migrationRulesRoutes.addRulesToMigration({
         migrationId,
         payload: [defaultOriginalRule],
       });
@@ -31,29 +32,45 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await migrationRulesRoutes.start({
         migrationId,
         payload: {
-          connector_id: 'preconfigured-bedrock',
+          settings: {
+            connector_id: 'preconfigured-bedrock',
+          },
         },
       });
       expect(body).to.eql({ started: true });
 
       // check if it running correctly
-      let statsResponse = await migrationRulesRoutes.stats({ migrationId });
+      const statsResponse = await migrationRulesRoutes.stats({ migrationId });
       expect(statsResponse.body.status).to.eql('running');
 
       // Stop Migration
       const response = await migrationRulesRoutes.stop({ migrationId });
       expect(response.body).to.eql({ stopped: true });
 
-      // check if the migration is stopped
-      statsResponse = await migrationRulesRoutes.stats({ migrationId });
-      expect(statsResponse.body.status).to.eql('ready');
+      await pRetry(
+        async () => {
+          const currentStatsResponse = await migrationRulesRoutes.stats({ migrationId });
+          if (currentStatsResponse.body.status !== 'stopped') {
+            throw new Error('Retry until migration is stopped');
+          }
+          return currentStatsResponse;
+        },
+        {
+          retries: 3,
+        }
+      );
+
+      const migrationResponse = await migrationRulesRoutes.get({ migrationId });
+      expect(migrationResponse.body?.last_execution?.is_stopped).to.eql(true);
+      expect(migrationResponse.body?.last_execution?.finished_at).to.be.ok();
     });
+
     describe('error scenarios', () => {
       it('should return 404 if migration id is invalid and non-existent', async () => {
         await migrationRulesRoutes.start({
           migrationId: 'invalid_migration_id',
           expectStatusCode: 404,
-          payload: { connector_id: 'preconfigured-bedrock' },
+          payload: { settings: { connector_id: 'preconfigured-bedrock' } },
         });
       });
 

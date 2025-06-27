@@ -6,10 +6,14 @@
  */
 
 import React, { CSSProperties } from 'react';
+import { css } from '@emotion/react';
+
+const circleIconStyles = css({ overflow: 'visible' });
 
 export const CircleIcon = ({ style }: { style: CSSProperties }) => (
   <svg
-    className="euiIcon euiIcon--medium mapFillableCircle"
+    className="euiIcon euiIcon--medium"
+    css={circleIconStyles}
     xmlns="http://www.w3.org/2000/svg"
     width="16"
     height="16"

@@ -11,7 +11,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useKibana } from '../../common/lib/kibana';
 import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_expandable_flyout_close';
 import {
-  UniversalEntityPanelKey,
+  GenericEntityPanelKey,
   UserPanelKey,
   HostPanelKey,
   ServicePanelKey,
@@ -51,7 +51,7 @@ describe('useDynamicEntityFlyout', () => {
     (useOnExpandableFlyoutClose as jest.Mock).mockImplementation(({ callback }) => callback);
   });
 
-  it('should open the flyout with correct params for a universal entity', () => {
+  it('should open the flyout with correct params for a generic entity', () => {
     const { result } = renderHook(() =>
       useDynamicEntityFlyout({ onFlyoutClose: onFlyoutCloseMock })
     );
@@ -67,7 +67,7 @@ describe('useDynamicEntityFlyout', () => {
 
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
-        id: UniversalEntityPanelKey,
+        id: GenericEntityPanelKey,
         params: { entityDocId: '123', scopeId: 'scope1', contextId: 'context1' },
       },
     });

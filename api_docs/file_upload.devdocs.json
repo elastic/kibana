@@ -464,7 +464,7 @@
                 "section": "def-common.IngestPipeline",
                 "text": "IngestPipeline"
               },
-              " | undefined)[]) => Promise<",
+              " | undefined)[], existingIndex?: boolean | undefined) => Promise<",
               "InitializeImportResponse",
               ">"
             ],
@@ -539,6 +539,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "fileUpload",
+                "id": "def-public.IImporter.initializeImport.$5",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "existingIndex",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1697,23 +1712,7 @@
       }
     ],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "fileUpload",
-        "id": "def-common.TIKA_PREVIEW_CHARS",
-        "type": "number",
-        "tags": [],
-        "label": "TIKA_PREVIEW_CHARS",
-        "description": [],
-        "signature": [
-          "100000"
-        ],
-        "path": "x-pack/platform/plugins/private/file_upload/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   }
 }

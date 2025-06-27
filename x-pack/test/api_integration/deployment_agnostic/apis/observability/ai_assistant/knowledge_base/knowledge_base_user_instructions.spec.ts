@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
-import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
+import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/context';
 import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import pRetry from 'p-retry';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
@@ -274,6 +274,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(status).to.be(200);
 
         void proxy.interceptTitle('This is a conversation title');
+        void proxy.interceptQueryRewrite('This is the rewritten user prompt');
         void proxy.interceptWithResponse('I, the LLM, hear you!');
 
         const messages: Message[] = [
@@ -301,6 +302,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(createResponse.status).to.be(200);
 
         await proxy.waitForAllInterceptorsToHaveBeenCalled();
+
         const conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
         const conversationId = conversationCreatedEvent.conversation.id;
 
@@ -354,42 +356,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(JSON.parse(contextMessage?.message.data!).suggestions.length).to.be(0);
       });
 
-      it('does not add the instruction conversation for other users', async () => {
+      it('does not add the user instruction for other users', async () => {
         const conversation = await getConversationForUser('admin');
 
         expect(conversation.systemMessage).to.not.contain(userInstructionText);
         expect(conversation.messages.length).to.be(4);
-      });
-    });
-
-    describe('Instructions can be saved and cleared again', () => {
-      async function updateInstruction(text: string) {
-        const { status } = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
-          params: {
-            body: {
-              id: 'my-instruction-that-will-be-cleared',
-              text,
-              public: false,
-            },
-          },
-        });
-        expect(status).to.be(200);
-
-        const res = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
-        });
-        expect(res.status).to.be(200);
-
-        return res.body.userInstructions[0].text;
-      }
-
-      it('can clear the instruction', async () => {
-        const res1 = await updateInstruction('This is a user instruction that will be cleared');
-        expect(res1).to.be('This is a user instruction that will be cleared');
-
-        const res2 = await updateInstruction('');
-        expect(res2).to.be('');
       });
     });
 
@@ -440,7 +411,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('includes private KB instructions in the system message sent to the LLM', async () => {
-        const simulatorPromise = proxy.interceptWithResponse('Hello from LLM Proxy');
+        void proxy.interceptQueryRewrite('This is the rewritten user prompt');
+        void proxy.interceptWithResponse('Hello from LLM Proxy');
         const messages: Message[] = [
           {
             '@timestamp': new Date().toISOString(),
@@ -463,10 +435,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         });
         await proxy.waitForAllInterceptorsToHaveBeenCalled();
-        const simulator = await simulatorPromise;
-        const requestData = simulator.requestBody;
-        expect(requestData.messages[0].content).to.contain(userInstructionText);
-        expect(requestData.messages[0].content).to.eql(systemMessage);
+
+        const { requestBody } = proxy.interceptedRequests[1];
+        expect(requestBody.messages[0].content).to.contain(userInstructionText);
+        expect(requestBody.messages[0].content).to.eql(systemMessage);
       });
     });
 

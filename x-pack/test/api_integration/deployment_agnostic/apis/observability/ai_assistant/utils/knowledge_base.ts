@@ -92,7 +92,7 @@ export async function setupKnowledgeBase(
   const statusResult = await getKnowledgeBaseStatus(observabilityAIAssistantAPIClient);
 
   log.debug(
-    `Setting up knowledge base with inference endpoint = "${TINY_ELSER_INFERENCE_ID}", concreteWriteIndex = ${statusResult.body.concreteWriteIndex}, currentInferenceId = ${statusResult.body.currentInferenceId}, isReIndexing = ${statusResult.body.isReIndexing}`
+    `Setting up knowledge base with inferenceId = "${inferenceId}", concreteWriteIndex = ${statusResult.body.concreteWriteIndex}, currentInferenceId = ${statusResult.body.currentInferenceId}, isReIndexing = ${statusResult.body.isReIndexing}`
   );
   const { body, status } = await observabilityAIAssistantAPIClient.admin({
     endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
@@ -267,6 +267,16 @@ export async function getKnowledgeBaseEntriesFromEs(es: Client) {
   });
 
   return res.hits.hits;
+}
+
+export async function addKnowledgeBaseEntryToEs(es: Client, entry: KnowledgeBaseEntry) {
+  const result = await es.index({
+    index: resourceNames.writeIndexAlias.kb,
+    document: entry,
+    refresh: true,
+  });
+
+  return result;
 }
 
 export function getKnowledgeBaseEntriesFromApi({

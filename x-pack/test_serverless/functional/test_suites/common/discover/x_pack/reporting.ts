@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'svlCommonPage',
     'discover',
     'timePicker',
-    'share',
+    'exports',
     'unifiedFieldList',
     'timePicker',
   ]);
@@ -34,8 +34,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // close any open notification toasts
     await toasts.dismissAll();
 
-    await PageObjects.reporting.openExportTab();
+    await PageObjects.exports.clickExportTopNavButton();
+    await PageObjects.reporting.selectExportItem('CSV');
     await PageObjects.reporting.clickGenerateReportButton();
+    await PageObjects.exports.closeExportFlyout();
+    await PageObjects.exports.clickExportTopNavButton();
 
     const url = await PageObjects.reporting.getReportURL(timeout);
     // TODO: Fetch CSV client side in Serverless since `PageObjects.reporting.getResponse()`
@@ -85,12 +88,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        await PageObjects.share.closeShareModal();
+        await PageObjects.exports.closeExportFlyout();
       });
 
       it('is available if new', async () => {
-        await PageObjects.reporting.openExportTab();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await PageObjects.reporting.openExportPopover();
+        expect(await PageObjects.exports.isPopoverItemEnabled('CSV')).to.be(true);
+        await PageObjects.reporting.openExportPopover();
       });
 
       it('becomes available when saved', async () => {
@@ -98,8 +102,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'my search - expectEnabledGenerateReportButton',
           true
         );
-        await PageObjects.reporting.openExportTab();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await PageObjects.reporting.openExportPopover();
+        expect(await PageObjects.exports.isPopoverItemEnabled('CSV')).to.be(true);
+        await PageObjects.reporting.openExportPopover();
       });
     });
 
