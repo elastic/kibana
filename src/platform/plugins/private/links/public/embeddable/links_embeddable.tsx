@@ -234,7 +234,7 @@ export const getLinksEmbeddableFactory = () => {
           openDashboardFlyout({
             core: coreServices,
             api: api.parentApi,
-            loadFlyout: async ({ closeFlyout })  => {
+            loadContent: async ({ closeFlyout })  => {
               const { getEditorFlyout } = await import('../editor/get_editor_flyout');
 
               return await getEditorFlyout({

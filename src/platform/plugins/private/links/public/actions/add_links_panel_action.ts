@@ -11,7 +11,8 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
-import { apiIsPresentationContainer, openDashboardFlyout } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { openDashboardFlyout } from '@kbn/presentation-containers/interfaces/mount_dashboard_flyout';
 import {
   apiPublishesDescription,
   apiPublishesTitle,
@@ -41,7 +42,7 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
     openDashboardFlyout({
       core: coreServices,
       api: embeddable,
-      loadFlyout: async ({ closeFlyout })  => {
+      loadContent: async ({ closeFlyout })  => {
         const { getEditorFlyout } = await import('../editor/get_editor_flyout');
 
         return await getEditorFlyout({

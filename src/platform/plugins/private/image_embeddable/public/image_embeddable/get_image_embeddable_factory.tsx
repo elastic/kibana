@@ -13,11 +13,8 @@ import { BehaviorSubject, map, merge } from 'rxjs';
 import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import {
-  PresentationContainer,
-  initializeUnsavedChanges,
-  openDashboardFlyout,
-} from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { openDashboardFlyout } from '@kbn/presentation-containers/interfaces/mount_dashboard_flyout';
 import { initializeTitleManager, titleComparators } from '@kbn/presentation-publishing';
 
 import { IMAGE_CLICK_TRIGGER } from '../actions';
@@ -98,7 +95,7 @@ export const getImageEmbeddableFactory = ({
           await openDashboardFlyout({
             core: coreServices,
             api: parentApi,
-            loadFlyout: async ({ closeFlyout }) => {
+            loadContent: async ({ closeFlyout }) => {
               const { getImageEditor } = await import(
                 '../components/image_editor/get_image_editor'
               );

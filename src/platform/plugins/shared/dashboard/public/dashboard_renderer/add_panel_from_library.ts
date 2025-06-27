@@ -21,7 +21,7 @@ export async function addFromLibrary(dashboardApi: DashboardApi) {
   openDashboardFlyout({
     core: coreServices,
     api: dashboardApi,
-    loadFlyout: async ({ closeFlyout })  => {
+    loadContent: async ({ closeFlyout })  => {
       const { getAddFromLibraryFlyout } = await import('@kbn/embeddable-plugin/public');
 
        return await getAddFromLibraryFlyout({

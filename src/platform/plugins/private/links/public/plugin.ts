@@ -26,7 +26,7 @@ import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-publishing';
-import { openDashboardFlyout } from '@kbn/presentation-containers';
+import { openDashboardFlyout } from '@kbn/presentation-containers/interfaces/mount_dashboard_flyout';
 import { LinksSerializedState } from './types';
 import { APP_ICON, APP_NAME, CONTENT_ID, LATEST_VERSION } from '../common';
 import { LinksCrudTypes } from '../common/content_management';
@@ -113,7 +113,7 @@ export class LinksPlugin
                   onEdit: async (savedObjectId: string) => {
                     openDashboardFlyout({
                       core: coreServices,
-                      loadFlyout: async ({ closeFlyout })  => {
+                      loadContent: async ({ closeFlyout })  => {
                         const [{ getEditorFlyout }, { deserializeLinksSavedObject }] =
                           await Promise.all([
                             import('./editor/get_editor_flyout'),
