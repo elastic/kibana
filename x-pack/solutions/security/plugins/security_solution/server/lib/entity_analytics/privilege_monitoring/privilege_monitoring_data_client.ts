@@ -234,34 +234,25 @@ export class PrivilegeMonitoringDataClient {
   }
 
   public async searchPrivilegesIndices(query: string | undefined) {
-    const { indices } = await this.esClient.fieldCaps({
+    const { indices, fields } = await this.esClient.fieldCaps({
       index: [query ? `*${query}*` : '*', ...PRE_EXCLUDE_INDICES],
       types: ['keyword'],
       fields: ['user.name.keyword'], // search for indices with field 'user.name.keyword' of type 'keyword'
-      include_unmapped: false,
+      include_unmapped: true,
       ignore_unavailable: true,
       allow_no_indices: true,
       expand_wildcards: 'open',
-      include_empty_fields: false,
+      include_empty_fields: true,
       filters: '-parent',
-      index_filter: {
-        bool: {
-          must: [
-            {
-              exists: {
-                field: 'user.name.keyword',
-              },
-            },
-          ],
-        },
-      },
     });
 
-    if (!Array.isArray(indices) || indices.length === 0) {
+    const indicesWithUserName = fields['user.name.keyword']?.keyword?.indices ?? indices;
+
+    if (!Array.isArray(indicesWithUserName) || indicesWithUserName.length === 0) {
       return [];
     }
 
-    return indices.filter(
+    return indicesWithUserName.filter(
       (name) => !POST_EXCLUDE_INDICES.some((pattern) => name.startsWith(pattern))
     );
   }
