@@ -7,22 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
-
-const root = css`
-  position: sticky;
-  overflow: hidden;
-  grid-area: sidebar;
-  align-self: start;
-  display: flex;
-  gap: 12px;
-  flex-direction: column;
-  align-items: center;
-  height: 100%;
-  width: var(--kbn-layout--sidebar-width);
-  z-index: var(--kbn-layout--aboveFlyoutLevel);
-`;
-
-export const styles = {
-  root,
-};
+export { LegacyFixedLayout } from './legacy_fixed_layout';
