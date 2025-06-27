@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       // await security.testUser.restoreDefaults();
     });
-    describe.only('create and access read only objects', () => {
+    describe('create and access read only objects', () => {
       it('should create a read only object', async () => {
         const { cookie: adminCookie, profileUid } = await login(
           adminTestUser.username,
