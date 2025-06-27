@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import {
   clearKnowledgeBase,
   getKnowledgeBaseEntriesFromEs,
@@ -7,6 +14,7 @@ import {
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import expect from '@kbn/expect';
 import { ELSER_ON_ML_NODE_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/common/preconfigured_inference_ids';
+
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
