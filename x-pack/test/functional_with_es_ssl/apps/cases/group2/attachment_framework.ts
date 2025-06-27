@@ -19,6 +19,7 @@ import { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
 import {
   deleteAllCaseItems,
   findCases,
+  getCase,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
