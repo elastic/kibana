@@ -9,11 +9,13 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useKibana } from '../../../common/lib/kibana';
-import { FLYOUT_PREVIEW_LINK_TEST_ID } from './test_ids';
+import { FLYOUT_LINK_TEST_ID } from './test_ids';
 import { DocumentEventTypes } from '../../../common/lib/telemetry';
-import { getPreviewPanelParams } from '../utils/link_utils';
+import { PreviewLink } from './preview_link';
+import { getRightPanelParams } from '../utils/link_utils';
+import { useWhichFlyout } from '../../document_details/shared/hooks/use_which_flyout';
 
-interface PreviewLinkProps {
+interface FlyoutLinkProps {
   /**
    * Field name
    */
@@ -26,6 +28,10 @@ interface PreviewLinkProps {
    * Scope id to use for the preview panel
    */
   scopeId: string;
+  /**
+   * Whether the flyout is open
+   */
+  isFlyoutOpen?: boolean;
   /**
    * Rule id to use for the preview panel
    */
@@ -41,23 +47,28 @@ interface PreviewLinkProps {
 }
 
 /**
- * Renders a link that opens a preview panel
- * If the field is not previewable, the link will not be rendered
+ * Renders a link that opens the right panel or preview panel
+ * If a flyout is open, the link will open the preview panel
+ * If a flyout is not open, the link will open the right panel
+ * If the field does not have flyout, the link will not be rendered
  */
-export const PreviewLink: FC<PreviewLinkProps> = ({
+export const FlyoutLink: FC<FlyoutLinkProps> = ({
   field,
   value,
   scopeId,
+  isFlyoutOpen,
   ruleId,
   children,
-  'data-test-subj': dataTestSubj = FLYOUT_PREVIEW_LINK_TEST_ID,
+  'data-test-subj': dataTestSubj,
 }) => {
-  const { openPreviewPanel } = useExpandableFlyoutApi();
+  const { openFlyout } = useExpandableFlyoutApi();
   const { telemetry } = useKibana().services;
+  const whichFlyout = useWhichFlyout();
+  const renderPreview = isFlyoutOpen || whichFlyout !== null;
 
-  const previewParams = useMemo(
+  const rightPanelParams = useMemo(
     () =>
-      getPreviewPanelParams({
+      getRightPanelParams({
         value,
         field,
         scopeId,
@@ -67,20 +78,31 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
   );
 
   const onClick = useCallback(() => {
-    if (previewParams) {
-      openPreviewPanel({
-        id: previewParams.id,
-        params: previewParams.params,
+    if (rightPanelParams) {
+      openFlyout({
+        right: {
+          id: rightPanelParams.id,
+          params: rightPanelParams.params,
+        },
       });
       telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
         location: scopeId,
-        panel: 'preview',
+        panel: 'right',
       });
     }
-  }, [scopeId, telemetry, openPreviewPanel, previewParams]);
+  }, [rightPanelParams, scopeId, telemetry, openFlyout]);
 
-  return previewParams ? (
-    <EuiLink onClick={onClick} data-test-subj={dataTestSubj}>
+  // If the flyout is open, render the preview link
+  if (renderPreview) {
+    return (
+      <PreviewLink field={field} value={value} scopeId={scopeId} data-test-subj={dataTestSubj}>
+        {children}
+      </PreviewLink>
+    );
+  }
+
+  return rightPanelParams ? (
+    <EuiLink onClick={onClick} data-test-subj={dataTestSubj ?? FLYOUT_LINK_TEST_ID}>
       {children ?? value}
     </EuiLink>
   ) : (

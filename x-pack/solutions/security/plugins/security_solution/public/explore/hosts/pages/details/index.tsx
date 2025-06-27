@@ -279,6 +279,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     indexNames={selectedPatterns}
                     jobNameById={jobNameById}
                     scopeId={SourcererScopeName.default}
+                    isFlyoutOpen={false}
                   />
                 )}
               </AnomalyTableProvider>

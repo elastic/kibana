@@ -247,6 +247,7 @@ const NetworkDetailsComponent: React.FC = () => {
               indexPatterns={selectedPatterns}
               jobNameById={jobNameById}
               scopeId={SourcererScopeName.default}
+              isFlyoutOpen={false}
             />
 
             <EuiHorizontalRule />
