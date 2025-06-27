@@ -1216,8 +1216,8 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/functional/es_archives/lens/reporting/ @elastic/appex-sharedux
 /x-pack/test/functional/es_archives/reporting/ @elastic/appex-sharedux
 /x-pack/test/functional/fixtures/kbn_archiver/reporting/ @elastic/appex-sharedux
-/x-pack/test/reporting_api_integration/ @elastic/appex-sharedux
-/x-pack/test/reporting_functional/ @elastic/appex-sharedux
+/x-pack/platform/test/reporting_api_integration/ @elastic/response-ops
+/x-pack/platform/test/reporting_functional/ @elastic/response-ops
 /x-pack/test/stack_functional_integration/apps/reporting/ @elastic/appex-sharedux
 /docs/user/reporting @elastic/appex-sharedux
 /docs/settings/reporting-settings.asciidoc @elastic/appex-sharedux
@@ -1495,7 +1495,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 ^/src/platform/test/interpreter_functional/snapshots @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/54342
 ^/src/platform/test/functional/services/inspector.ts @elastic/kibana-presentation
 /x-pack/test/functional/services/canvas_element.ts @elastic/kibana-presentation
-/x-pack/test/functional/page_objects/canvas_page.ts @elastic/kibana-presentation
+/x-pack/platform/test/functional/page_objects/canvas_page.ts @elastic/kibana-presentation
 /x-pack/test/accessibility/apps/group3/canvas.ts @elastic/kibana-presentation
 /x-pack/test/upgrade/apps/canvas @elastic/kibana-presentation
 /x-pack/test/upgrade/apps/dashboard @elastic/kibana-presentation
@@ -2705,7 +2705,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/test/functional_solution_sidenav/services.ts @elastic/appex-sharedux
 /x-pack/test/functional_solution_sidenav/index.ts @elastic/appex-sharedux
 /x-pack/test/functional_cloud @elastic/appex-sharedux
-/x-pack/test/functional/page_objects/reporting_page.ts @elastic/appex-sharedux
+/x-pack/platform/test/functional/page_objects/reporting_page.ts @elastic/response-ops
 /x-pack/platform/test/functional/services/user_menu.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/179270
 /x-pack/test/accessibility/apps/**/config.ts @elastic/appex-sharedux
 /x-pack/test/accessibility/apps/**/index.ts @elastic/appex-sharedux
