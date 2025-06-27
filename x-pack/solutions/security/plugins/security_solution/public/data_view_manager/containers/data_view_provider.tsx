@@ -5,21 +5,13 @@
  * 2.0.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FC, PropsWithChildren } from 'react';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useKibana } from '../../common/lib/kibana';
 import { createDefaultDataView } from '../utils/create_default_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-
-const fallbackDataView = { id: '', title: '', toSpec: () => ({ id: '', title: '' }) } as DataView;
-
-export interface DefaultDataViewsContextValue {
-  defaultDataView: DataView;
-  alertDataView: DataView;
-}
-
-const DefaultDataViewContext = createContext<DefaultDataViewsContextValue | undefined>(undefined);
+import { fallbackDataViews } from './constants';
+import { DefaultDataViewContext, type DefaultDataViewsContextValue } from './context';
 
 /**
  * Internal-only hook to fetch default data view in given space, during init
@@ -29,10 +21,7 @@ export const useDefaultDataViews = () => {
   const defaultDataViews = useContext(DefaultDataViewContext);
 
   if (!newDataViewPickerEnabled) {
-    return {
-      defaultDataView: fallbackDataView,
-      alertDataView: fallbackDataView,
-    } as unknown as DefaultDataViewsContextValue;
+    return fallbackDataViews;
   }
 
   if (!defaultDataViews) {
@@ -45,10 +34,7 @@ export const useDefaultDataViews = () => {
 export const DefaultDataViewProvider: FC<PropsWithChildren> = ({ children }) => {
   const { dataViews, uiSettings, spaces, application, http } = useKibana().services;
 
-  const [defaultDataViews, setDefaultDataViews] = useState<{
-    defaultDataView: DataView;
-    alertDataView: DataView;
-  }>();
+  const [defaultDataViews, setDefaultDataViews] = useState<DefaultDataViewsContextValue>();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 

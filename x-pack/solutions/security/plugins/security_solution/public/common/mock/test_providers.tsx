@@ -40,6 +40,9 @@ import { UserPrivilegesProvider } from '../components/user_privileges/user_privi
 import { MockDiscoverInTimelineContext } from '../components/discover_in_timeline/mocks/discover_in_timeline_provider';
 import { createMockStore } from './create_store';
 import type { StartServices } from '../../types';
+import { TestDefaultDataViewProvider } from '../../data_view_manager/containers/test_default_data_views_provider';
+
+jest.mock('../../data_view_manager/containers/data_view_provider');
 
 interface Props {
   children?: React.ReactNode;
@@ -84,23 +87,25 @@ export const TestProvidersComponent = ({
         <UpsellingProviderMock>
           <ReduxStoreProvider store={store}>
             <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-              <QueryClientProvider client={queryClient}>
-                <MockDiscoverInTimelineContext>
-                  <MockAssistantProvider>
-                    <ExpandableFlyoutTestProvider>
-                      <ConsoleManager>
-                        <CellActionsProvider
-                          getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
-                        >
-                          <EuiProvider highContrastMode={false}>
-                            <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-                          </EuiProvider>
-                        </CellActionsProvider>
-                      </ConsoleManager>
-                    </ExpandableFlyoutTestProvider>
-                  </MockAssistantProvider>
-                </MockDiscoverInTimelineContext>
-              </QueryClientProvider>
+              <TestDefaultDataViewProvider>
+                <QueryClientProvider client={queryClient}>
+                  <MockDiscoverInTimelineContext>
+                    <MockAssistantProvider>
+                      <ExpandableFlyoutTestProvider>
+                        <ConsoleManager>
+                          <CellActionsProvider
+                            getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
+                          >
+                            <EuiProvider highContrastMode={false}>
+                              <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                            </EuiProvider>
+                          </CellActionsProvider>
+                        </ConsoleManager>
+                      </ExpandableFlyoutTestProvider>
+                    </MockAssistantProvider>
+                  </MockDiscoverInTimelineContext>
+                </QueryClientProvider>
+              </TestDefaultDataViewProvider>
             </ThemeProvider>
           </ReduxStoreProvider>
         </UpsellingProviderMock>
