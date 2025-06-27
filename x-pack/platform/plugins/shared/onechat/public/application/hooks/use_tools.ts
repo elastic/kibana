@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { useOnechatServices } from './use_onechat_service';
 
 export const useOnechatTools = () => {
@@ -17,4 +18,21 @@ export const useOnechatTools = () => {
   });
 
   return { tools: data?.tools ?? [], isLoading, error };
+};
+
+export const useOnechatBaseTools = () => {
+  const { tools, ...rest } = useOnechatTools();
+
+  const baseTools = useMemo(
+    () => tools.filter((tool) => tool.meta.providerId === 'builtIn'),
+    [tools]
+  );
+  return { tools: baseTools, ...rest };
+};
+
+export const useOnechatEsqlTools = () => {
+  const { tools, ...rest } = useOnechatTools();
+
+  const esqlTools = useMemo(() => tools.filter((tool) => tool.meta.providerId === 'esql'), [tools]);
+  return { tools: esqlTools, ...rest };
 };

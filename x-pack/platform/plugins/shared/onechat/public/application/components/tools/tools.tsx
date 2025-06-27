@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
-import { OnechatToolsTable } from './tools_table';
+import { OnechatBaseTools } from './base_tools';
+import { OnechatEsqlTools } from './esql_tools';
+
 export const OnechatTools = () => {
   return (
     <KibanaPageTemplate>
@@ -22,7 +25,9 @@ export const OnechatTools = () => {
         })}
       />
       <KibanaPageTemplate.Section>
-        <OnechatToolsTable />
+        <OnechatEsqlTools />
+        <EuiSpacer size="xl" />
+        <OnechatBaseTools />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
