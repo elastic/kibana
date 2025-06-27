@@ -44,7 +44,9 @@ export class InstallationService {
 
     if (!response.installed) {
       throw new Error(
-        `Installation did not complete successfully.\n${response.failureReason ?? ''}`
+        `Installation did not complete successfully.${
+          response.failureReason ? `\n${response.failureReason}` : ''
+        }`
       );
     }
     return response;

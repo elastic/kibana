@@ -90,10 +90,9 @@ describe('InstallationService', () => {
       const expected = { installed: false };
       http.post.mockResolvedValue(expected);
 
-      await expect(service.install()).rejects.toThrowErrorMatchingInlineSnapshot(`
-        "Installation did not complete successfully.
-        "
-      `);
+      await expect(service.install()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Installation did not complete successfully."`
+      );
     });
   });
   describe('#uninstall', () => {
