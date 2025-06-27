@@ -55,7 +55,7 @@ export const useSignalHelpers = (): {
     : oldDataViewId;
 
   const defaultDataViewPattern = newDataViewPickerEnabled
-    ? experimentalDefaultDataView?.getIndexPattern() ?? ''
+    ? experimentalDefaultDataView.getIndexPattern() ?? ''
     : oldDefaultDataView.title;
 
   const signalIndexNeedsInit = useMemo(
