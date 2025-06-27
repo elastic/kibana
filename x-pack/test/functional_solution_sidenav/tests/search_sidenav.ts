@@ -42,7 +42,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // check side nav links
         await solutionNavigation.sidenav.expectSectionExists('search_project_nav');
         await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'enterpriseSearch',
+          deepLinkId: 'searchHomepage',
         });
 
         // check the Data > Indices section
