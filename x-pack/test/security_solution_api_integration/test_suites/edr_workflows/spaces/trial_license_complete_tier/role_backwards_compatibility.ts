@@ -6,14 +6,16 @@
  */
 
 import TestAgent from 'supertest/lib/agent';
-import { ENDPOINT_ARTIFACT_LIST_IDS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import {
+  ENDPOINT_ARTIFACT_LISTS,
+  ENDPOINT_ARTIFACT_LIST_IDS,
+  ENDPOINT_LIST_ID,
+} from '@kbn/securitysolution-list-constants';
 import { Role } from '@kbn/security-plugin-types-common';
 import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
 import { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
-
-export const SIEM_VERSIONS = ['siem', 'siemV2', 'siemV3'] as const;
 
 export default function ({ getService }: FtrProviderContext) {
   const utils = getService('securitySolutionUtils');
@@ -23,61 +25,88 @@ export default function ({ getService }: FtrProviderContext) {
   describe('@ess @skipInServerless, @skipInServerlessMKI Endpoint Artifacts space awareness user role backwards compatibility until siemV3', function () {
     const afterEachDataCleanup: Array<Pick<ArtifactTestData, 'cleanup'>> = [];
 
+    const SIEM_VERSIONS = ['siem', 'siemV2', 'siemV3'] as const;
+
     let globalArtifactManagerRole: Role;
-    let supertestGlobalArtifactManager: TestAgent;
+
+    const createUserWithSiemPrivileges = async (
+      siemVersion: (typeof SIEM_VERSIONS)[number],
+      siemPrivileges: string[]
+    ): Promise<TestAgent> => {
+      globalArtifactManagerRole = Object.assign(
+        rolesUsersProvider.loader.getPreDefinedRole('t1_analyst'),
+        { name: 'globalArtifactManager' }
+      );
+
+      // remove actual siem
+      delete globalArtifactManagerRole.kibana[0].feature[SECURITY_FEATURE_ID];
+
+      // add (deprecated) siem feature
+      globalArtifactManagerRole.kibana[0].feature[siemVersion] = siemPrivileges;
+
+      rolesUsersProvider.loader.create(globalArtifactManagerRole);
+      const globalArtifactManagerUser = await rolesUsersProvider.loader.create(
+        globalArtifactManagerRole
+      );
+
+      return utils.createSuperTest(
+        globalArtifactManagerUser.username,
+        globalArtifactManagerUser.password
+      );
+    };
+
+    after(async () => {
+      if (globalArtifactManagerRole) {
+        await rolesUsersProvider.loader.delete(globalArtifactManagerRole.name);
+        // @ts-expect-error
+        globalArtifactManagerRole = undefined;
+      }
+    });
+
+    afterEach(async () => {
+      await Promise.allSettled(afterEachDataCleanup.splice(0).map((data) => data.cleanup()));
+    });
 
     // testing with all SIEM versions for backward compatibility
     for (const siemVersion of SIEM_VERSIONS) {
       describe(`with ${siemVersion} feature version`, () => {
-        before(async () => {
-          globalArtifactManagerRole = Object.assign(
-            rolesUsersProvider.loader.getPreDefinedRole('t1_analyst'),
-            { name: 'globalArtifactManager' }
-          );
+        const artifactTypes: Array<{
+          listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number] | typeof ENDPOINT_LIST_ID;
+          privileges: string[];
+        }> = [
+          {
+            listId: ENDPOINT_LIST_ID,
+            privileges: ['all'],
+          },
+          {
+            listId: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+            privileges: ['read', 'trusted_applications_all'],
+          },
+          {
+            listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+            privileges: ['read', 'event_filters_all'],
+          },
+          {
+            listId: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
+            privileges: ['read', 'blocklist_all'],
+          },
+          {
+            listId: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
+            privileges: ['read', 'host_isolation_exceptions_all'],
+          },
+        ];
 
-          delete globalArtifactManagerRole.kibana[0].feature[SECURITY_FEATURE_ID];
+        for (const artifactType of artifactTypes) {
+          it(`should allow creating a global artifact on ${artifactType.listId} list`, async () => {
+            const supertestGlobalArtifactManager = await createUserWithSiemPrivileges(siemVersion, [
+              ...artifactType.privileges,
 
-          globalArtifactManagerRole.kibana[0].feature[siemVersion] = [
-            'all', // for Endpoint Exceptions
-            'trusted_applications_all',
-            'event_filters_all',
-            'blocklist_all',
-            'host_isolation_exceptions_all',
+              // adding global access to current version, old version should receive it during rule migration
+              ...(siemVersion === SECURITY_FEATURE_ID ? ['global_artifact_management_all'] : []),
+            ]);
 
-            // adding global access to current version, old version should receive it during rule migration
-            ...(siemVersion === SECURITY_FEATURE_ID ? ['global_artifact_management_all'] : []),
-          ];
-
-          rolesUsersProvider.loader.create(globalArtifactManagerRole);
-
-          const globalArtifactManagerUser = await rolesUsersProvider.loader.create(
-            globalArtifactManagerRole
-          );
-
-          supertestGlobalArtifactManager = await utils.createSuperTest(
-            globalArtifactManagerUser.username,
-            globalArtifactManagerUser.password
-          );
-        });
-
-        after(async () => {
-          if (globalArtifactManagerRole) {
-            await rolesUsersProvider.loader.delete(globalArtifactManagerRole.name);
-            // @ts-expect-error
-            globalArtifactManagerRole = undefined;
-          }
-        });
-
-        afterEach(async () => {
-          await Promise.allSettled(afterEachDataCleanup.splice(0).map((data) => data.cleanup()));
-        });
-
-        const artifactListIds = [...ENDPOINT_ARTIFACT_LIST_IDS, ENDPOINT_LIST_ID] as const;
-
-        for (const artifactListId of artifactListIds) {
-          it(`should allow creating a global artifact on ${artifactListId} list`, async () => {
             const createdArtifact = await endpointArtifactTestResources.createArtifact(
-              artifactListId,
+              artifactType.listId,
               { tags: [GLOBAL_ARTIFACT_TAG] },
               { supertest: supertestGlobalArtifactManager }
             );
