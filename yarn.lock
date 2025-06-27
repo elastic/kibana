@@ -4770,6 +4770,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-http-rate-limiter-browser-internal@link:src/core/packages/http/rate-limiter-browser-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-http-rate-limiter-internal@link:src/core/packages/http/rate-limiter-internal":
   version "0.0.0"
   uid ""

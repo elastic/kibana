@@ -179,6 +179,7 @@ src/core/packages/http/browser-mocks @elastic/kibana-core
 src/core/packages/http/common @elastic/kibana-core
 src/core/packages/http/context-server-internal @elastic/kibana-core
 src/core/packages/http/context-server-mocks @elastic/kibana-core
+src/core/packages/http/rate-limiter-browser-internal @elastic/kibana-core
 src/core/packages/http/rate-limiter-internal @elastic/kibana-core
 src/core/packages/http/request-handler-context-server @elastic/kibana-core
 src/core/packages/http/request-handler-context-server-internal @elastic/kibana-core

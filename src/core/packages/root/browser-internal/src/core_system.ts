@@ -25,6 +25,7 @@ import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
 import { FeatureFlagsService } from '@kbn/core-feature-flags-browser-internal';
 import { HttpService } from '@kbn/core-http-browser-internal';
+import { HttpRateLimiterService } from '@kbn/core-http-rate-limiter-browser-internal';
 import { SettingsService, UiSettingsService } from '@kbn/core-ui-settings-browser-internal';
 import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
@@ -92,6 +93,7 @@ export class CoreSystem {
   private readonly injectedMetadata: InjectedMetadataService;
   private readonly notifications: NotificationsService;
   private readonly http: HttpService;
+  private readonly httpRateLimiter: HttpRateLimiterService;
   private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
   private readonly settings: SettingsService;
@@ -152,6 +154,7 @@ export class CoreSystem {
     this.theme = new ThemeService();
     this.notifications = new NotificationsService();
     this.http = new HttpService();
+    this.httpRateLimiter = new HttpRateLimiterService();
     this.savedObjects = new SavedObjectsService();
     this.uiSettings = new UiSettingsService();
     this.settings = new SettingsService();
@@ -257,6 +260,7 @@ export class CoreSystem {
         fatalErrors: this.fatalErrorsSetup,
         executionContext,
       });
+      this.httpRateLimiter.setup({ http });
       const security = this.security.setup();
       const userProfile = this.userProfile.setup();
       this.chrome.setup({ analytics });
@@ -319,6 +323,7 @@ export class CoreSystem {
       const fatalErrors = this.fatalErrors.start();
       const theme = this.theme.start();
       await this.integrations.start({ uiSettings });
+      this.httpRateLimiter.start();
 
       const coreUiTargetDomElement = document.createElement('div');
       coreUiTargetDomElement.id = 'kibana-body';
