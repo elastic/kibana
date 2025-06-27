@@ -62,7 +62,6 @@ import {
   scheduleMarkRemovedTasksAsUnrecognizedDefinition,
 } from './removed_tasks/mark_removed_tasks_as_unrecognized';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
-import { getElasticsearchAndSOAvailability } from './lib/get_es_and_so_availability';
 import { LicenseSubscriber } from './license_subscriber';
 
 export interface TaskManagerSetupContract {
