@@ -126,6 +126,12 @@ tags:
   - description: Machine learning
     name: ml
     x-displayName: Machine learning
+  - description: Interact with the Observability AI Assistant resources.
+    externalDocs:
+      description: Observability AI Assistant
+      url: https://www.elastic.co/docs/solutions/observability/observability-ai-assistant
+    name: observability_ai_assistant
+    x-displayName: Observability AI Assistant
   - name: roles
     x-displayName: Roles
     description: Manage the roles that grant Elasticsearch and Kibana privileges.
@@ -43579,6 +43585,107 @@ paths:
       summary: Add or update a note
       tags:
         - Security Timeline API
+  /api/observability_ai_assistant/chat/complete:
+    post:
+      description: |
+        Create a new chat completion by using the Observability AI Assistant. 
+
+        The API returns the model's response based on the current conversation context. 
+
+        It also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM). 
+
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      operationId: observability-ai-assistant-chat-complete
+      requestBody:
+        content:
+          application/json:
+            examples:
+              chatCompleteRequestExample:
+                $ref: '#/components/schemas/Observability_AI_Assistant_API_ChatCompleteRequestExample'
+            schema:
+              type: object
+              properties:
+                actions:
+                  items:
+                    $ref: '#/components/schemas/Observability_AI_Assistant_API_Function'
+                  type: array
+                connectorId:
+                  description: A unique identifier for the connector.
+                  type: string
+                conversationId:
+                  description: A unique identifier for the conversation if you are continuing an existing conversation.
+                  type: string
+                disableFunctions:
+                  description: Flag indicating whether all function calls should be disabled for the conversation. If true, no calls to functions will be made.
+                  type: boolean
+                instructions:
+                  description: An array of instruction objects, which can be either simple strings or detailed objects.
+                  items:
+                    $ref: '#/components/schemas/Observability_AI_Assistant_API_Instruction'
+                  type: array
+                messages:
+                  description: An array of message objects containing the conversation history.
+                  items:
+                    $ref: '#/components/schemas/Observability_AI_Assistant_API_Message'
+                  type: array
+                persist:
+                  description: Indicates whether the conversation should be saved to storage. If true, the conversation will be saved and will be available in Kibana.
+                  type: boolean
+                title:
+                  description: A title for the conversation.
+                  type: string
+              required:
+                - messages
+                - connectorId
+                - persist
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                chatCompleteResponseExample:
+                  $ref: '#/components/schemas/Observability_AI_Assistant_API_ChatCompleteResponseExample'
+              schema:
+                type: object
+          description: Successful response
+      summary: Generate a chat completion
+      tags:
+        - observability_ai_assistant
+      x-codeSamples:
+        - lang: cURL
+          source: |
+            curl --request POST 'localhost:5601/api/observability_ai_assistant/chat/complete' -u <username>:<password> -H 'kbn-xsrf: true' -H "Content-Type: application/json" --data '
+            {
+            "connectorId": "<connectorId>",
+            "disableFunctions": false,
+              "messages": [
+                {
+                  "@timestamp": "2025-06-25T23:45:00.000Z",
+                  "message": {
+                    "role": "user",
+                    "content": "Is my Elasticsearch cluster healthy right now?"
+                  }
+                }
+              ],
+            "persist": false,
+            "actions": [
+              {
+                "name": "get_cluster_health",
+                "description": "Fetch the current Elasticsearch cluster-health status and key metrics.",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "includeShardStats": {
+                      "type": "boolean",
+                      "default": false
+                    }
+                  }
+                }
+              }
+            ],
+            "instructions": ["When the user asks about Elasticsearch cluster health, use the get_cluster_health tool to retrieve cluster health, then summarize the response in plain English."]
+            }'
+      x-state: Technical Preview
   /api/osquery/live_queries:
     get:
       description: Get a list of all live queries.
@@ -66670,6 +66777,134 @@ components:
           $ref: '#/components/schemas/Machine_learning_APIs_mlSyncResponseSuccess'
       title: Sync API response for trained models
       type: object
+    Observability_AI_Assistant_API_ChatCompleteRequestExample:
+      summary: Example of completing a chat interaction
+      value: |
+        {
+          "connectorId": "<connectorId>",
+          "disableFunctions": false,
+          "messages": [
+            {
+              "@timestamp": "2025-06-25T23:45:00.000Z",
+              "message": {
+                "role": "user",
+                "content": "Is my Elasticsearch cluster healthy right now?"
+              }
+            }
+          ],
+          "persist": false,
+          "actions": [
+            {
+              "name": "get_cluster_health",
+              "description": "Fetch the current Elasticsearch cluster-health status and key metrics.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "includeShardStats": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                }
+              }
+            }
+          ],
+          "instructions": ["When the user asks about Elasticsearch cluster health, use the get_cluster_health tool to retrieve cluster health, then summarize the response in plain English."]
+        }
+    Observability_AI_Assistant_API_ChatCompleteResponseExample:
+      summary: Get a chat completion from the Observability AI Assistant
+      value: |
+        data: {"model":"unknown","choices":[{"delta":{"content":"","function_call":{"name":"get_cluster_health","arguments":"{\"includeShardStats\":true}"}},"finish_reason":null,"index":0}],"created":1750936626911,"id":"9c8eff9b-4fd4-4203-a4ab-2e364688deff","object":"chat.completion.chunk"}
+
+        data: [DONE]
+    Observability_AI_Assistant_API_Function:
+      type: object
+      properties:
+        description:
+          description: The description of the function.
+          type: string
+        name:
+          description: The name of the function.
+          type: string
+        parameters:
+          description: The parameters of the function.
+          type: object
+    Observability_AI_Assistant_API_FunctionCall:
+      description: Details of the function call within the message.
+      type: object
+      properties:
+        arguments:
+          description: The arguments for the function call.
+          type: string
+        name:
+          description: The name of the function.
+          type: string
+        trigger:
+          description: The trigger of the function call.
+          enum:
+            - assistant
+            - user
+            - elastic
+          type: string
+      required:
+        - name
+        - trigger
+    Observability_AI_Assistant_API_Instruction:
+      oneOf:
+        - description: A simple instruction represented as a string.
+          type: string
+        - description: A detailed instruction with an ID and text.
+          type: object
+          properties:
+            id:
+              description: A unique identifier for the instruction.
+              type: string
+            text:
+              description: The text of the instruction.
+              type: string
+          required:
+            - id
+            - text
+    Observability_AI_Assistant_API_Message:
+      name: Message
+      type: object
+      properties:
+        '@timestamp':
+          description: The timestamp when the message was created.
+          type: string
+        message:
+          description: The main content of the message.
+          type: object
+          properties:
+            content:
+              description: The content of the message.
+              type: string
+            data:
+              description: Additional data associated with the message.
+              type: string
+            event:
+              description: The event related to the message.
+              type: string
+            function_call:
+              $ref: '#/components/schemas/Observability_AI_Assistant_API_FunctionCall'
+            name:
+              description: The name associated with the message.
+              type: string
+            role:
+              $ref: '#/components/schemas/Observability_AI_Assistant_API_MessageRoleEnum'
+          required:
+            - role
+      required:
+        - '@timestamp'
+        - message
+    Observability_AI_Assistant_API_MessageRoleEnum:
+      description: The role of the message sender.
+      enum:
+        - system
+        - assistant
+        - function
+        - user
+        - elastic
+      type: string
     Saved_objects_400_response:
       title: Bad request
       type: object
