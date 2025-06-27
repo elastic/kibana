@@ -11,7 +11,7 @@ import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { INDEX_PATTERN_REGEX } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import type {
-  Color,
+  EdgeColor,
   EdgeDataModel,
   EntityNodeDataModel,
   GraphRequest,
@@ -19,6 +19,11 @@ import type {
   GroupNodeDataModel,
   LabelNodeDataModel,
   NodeDataModel,
+  NodeDocumentDataModel,
+} from '@kbn/cloud-security-posture-common/types/graph/v1';
+import {
+  DOCUMENT_TYPE_ALERT,
+  DOCUMENT_TYPE_EVENT,
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import type { Writable } from '@kbn/utility-types';
@@ -27,13 +32,13 @@ type EsQuery = GraphRequest['query']['esQuery'];
 
 interface GraphEdge {
   badge: number;
+  docs: string[] | string;
   ips?: string[] | string;
   hosts?: string[] | string;
   users?: string[] | string;
   actorIds: string[] | string;
   action: string;
   targetIds: string[] | string;
-  eventOutcome: string;
   isOrigin: boolean;
   isOriginAlert: boolean;
   isAlert: boolean;
@@ -177,8 +182,9 @@ const fetchGraph = async ({
 
   const query = `FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
-    .join(',')} METADATA _index
+    .join(',')} METADATA _id, _index
 | WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
+// Origin event and alerts allow us to identify the start position of graph traversal
 | EVAL isOrigin = ${
     originEventIds.length > 0
       ? `event.id in (${originEventIds.map((_id, idx) => `?og_id${idx}`).join(', ')})`
@@ -190,7 +196,17 @@ const fetchGraph = async ({
       : 'false'
   }
 | EVAL isAlert = _index LIKE "*.alerts-security.alerts-*"
+// Aggregate document's data for popover expansion and metadata enhancements
+// We format it as JSON string, the best alternative so far. Tried to use tuple using MV_APPEND
+// but it flattens the data and we lose the structure
+| EVAL docType = CASE (isAlert, "${DOCUMENT_TYPE_ALERT}", "${DOCUMENT_TYPE_EVENT}")
+| EVAL docData = CONCAT("{",
+    "\\"id\\":\\"", _id, "\\"",
+    ",\\"type\\":\\"", docType, "\\"",
+    ",\\"index\\":\\"", _index, "\\"",
+  "}")
 | STATS badge = COUNT(*),
+  docs = VALUES(docData),
   ips = VALUES(related.ip),
   // hosts = VALUES(related.hosts),
   users = VALUES(related.user),
@@ -198,11 +214,10 @@ const fetchGraph = async ({
     BY actorIds = actor.entity.id,
       action = event.action,
       targetIds = target.entity.id,
-      eventOutcome = event.outcome,
       isOrigin,
       isOriginAlert
 | LIMIT 1000
-| SORT isOrigin DESC`;
+| SORT isOrigin DESC, action`;
 
   logger.trace(`Executing query [${query}]`);
 
@@ -286,16 +301,15 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
     }
 
     const {
+      docs,
       ips,
       hosts,
       users,
       actorIds,
       action,
       targetIds,
-      isOrigin,
       isOriginAlert,
       isAlert,
-      eventOutcome,
     } = record;
     const actorIdsArray = castArray(actorIds);
     const targetIdsArray = castArray(targetIds);
@@ -315,7 +329,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
         nodesMap[id] = {
           id,
           label: unknownTargets.includes(id) ? 'Unknown' : undefined,
-          color: isOriginAlert || isAlert ? 'danger' : 'primary',
+          color: 'primary',
           ...determineEntityNodeShape(
             id,
             castArray(ips ?? []),
@@ -336,11 +350,11 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
         }
 
         const labelNode: LabelNodeDataModel = {
-          id: edgeId + `label(${action})outcome(${eventOutcome})`,
+          id: edgeId + `label(${action})`,
           label: action,
-          color:
-            isOriginAlert || isAlert ? 'danger' : eventOutcome === 'failed' ? 'warning' : 'primary',
+          color: isOriginAlert || isAlert ? 'danger' : 'primary',
           shape: 'label',
+          documentsData: parseDocumentsData(docs),
         };
 
         nodesMap[labelNode.id] = labelNode;
@@ -348,7 +362,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
         labelEdges[labelNode.id] = {
           source: actorId,
           target: targetId,
-          edgeType: isOrigin ? 'solid' : 'dashed',
+          edgeType: 'solid',
         };
       }
     }
@@ -419,8 +433,19 @@ const createEdgesAndGroups = (context: ParseContext) => {
         shape: 'group',
       };
       nodesMap[groupNode.id] = groupNode;
-      let groupEdgesColor: Color = 'primary';
-      let groupEdgesType: EdgeDataModel['type'] = 'dashed';
+      let groupEdgesColor: EdgeColor = 'subdued';
+
+      // Order of creation matters when using dagre layout, first create edges to the group node,
+      // then connect the group node to the label nodes
+      connectEntitiesAndLabelNode(
+        edgesMap,
+        nodesMap,
+        labelEdges[edgeLabelsIds[0]].source,
+        groupNode.id,
+        labelEdges[edgeLabelsIds[0]].target,
+        'solid',
+        groupEdgesColor
+      );
 
       edgeLabelsIds.forEach((edgeLabelId) => {
         (nodesMap[edgeLabelId] as Writable<LabelNodeDataModel>).parentId = groupNode.id;
@@ -435,28 +460,8 @@ const createEdgesAndGroups = (context: ParseContext) => {
 
         if ((nodesMap[edgeLabelId] as LabelNodeDataModel).color === 'danger') {
           groupEdgesColor = 'danger';
-        } else if (
-          (nodesMap[edgeLabelId] as LabelNodeDataModel).color === 'warning' &&
-          groupEdgesColor !== 'danger'
-        ) {
-          // Use warning only if there's no danger color
-          groupEdgesColor = 'warning';
-        }
-
-        if (labelEdges[edgeLabelId].edgeType === 'solid') {
-          groupEdgesType = 'solid';
         }
       });
-
-      connectEntitiesAndLabelNode(
-        edgesMap,
-        nodesMap,
-        labelEdges[edgeLabelsIds[0]].source,
-        groupNode.id,
-        labelEdges[edgeLabelsIds[0]].target,
-        groupEdgesType,
-        groupEdgesColor
-      );
     }
   });
 };
@@ -468,7 +473,7 @@ const connectEntitiesAndLabelNode = (
   labelNodeId: string,
   targetNodeId: string,
   edgeType: EdgeDataModel['type'] = 'solid',
-  colorOverride?: Color
+  colorOverride?: EdgeColor
 ) => {
   [
     connectNodes(nodesMap, sourceNodeId, labelNodeId, edgeType, colorOverride),
@@ -483,16 +488,15 @@ const connectNodes = (
   sourceNodeId: string,
   targetNodeId: string,
   edgeType: EdgeDataModel['type'] = 'solid',
-  colorOverride?: Color
+  colorOverride?: EdgeColor
 ): EdgeDataModel => {
   const sourceNode = nodesMap[sourceNodeId];
   const targetNode = nodesMap[targetNodeId];
   const color =
-    sourceNode.shape !== 'group' && targetNode.shape !== 'label'
-      ? sourceNode.color
-      : targetNode.shape !== 'group'
-      ? targetNode.color
-      : 'primary';
+    (sourceNode.shape === 'label' && sourceNode.color === 'danger') ||
+    (targetNode.shape === 'label' && targetNode.color === 'danger')
+      ? 'danger'
+      : 'subdued';
 
   return {
     id: `a(${sourceNodeId})-b(${targetNodeId})`,
@@ -501,4 +505,12 @@ const connectNodes = (
     color: colorOverride ?? color,
     type: edgeType,
   };
+};
+
+const parseDocumentsData = (docs: string[] | string): NodeDocumentDataModel[] => {
+  if (typeof docs === 'string') {
+    return [JSON.parse(docs)];
+  }
+
+  return docs.map((doc) => JSON.parse(doc));
 };

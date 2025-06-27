@@ -55,9 +55,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should enable both download and URL sharing for valid configuration', async () => {
-      await lens.clickShareModal();
-
       expect(await lens.isExportActionEnabled()).to.eql(true);
+
+      await lens.clickShareButton();
       expect(await lens.isShareActionEnabled('link'));
     });
 
@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should be able to download CSV data of the current visualization', async () => {
       await lens.setCSVDownloadDebugFlag(true);
-      await lens.openCSVDownloadExport();
+      await lens.triggerCSVDownloadExport();
 
       const csv = await lens.getCSVContent();
       expect(csv).to.be.ok();
@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
       });
 
-      await lens.openCSVDownloadExport();
+      await lens.triggerCSVDownloadExport();
 
       const csv = await lens.getCSVContent();
       expect(csv).to.be.ok();

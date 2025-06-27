@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type { Runner } from '@kbn/onechat-server';
 import type { AgentsServiceSetup, AgentsServiceStart } from './types';
 import { createInternalRegistry } from './utils';
-import { createDefaultAgentProvider } from './conversational';
+import { createDefaultAgentProvider } from './default_provider';
 
 export interface AgentsServiceSetupDeps {
   logger: Logger;
@@ -33,9 +33,8 @@ export class AgentsService {
       throw new Error('#start called before #setup');
     }
 
-    const { logger } = this.setupDeps;
     const { getRunner } = startDeps;
-    const defaultAgentProvider = createDefaultAgentProvider({ logger });
+    const defaultAgentProvider = createDefaultAgentProvider();
     const registry = createInternalRegistry({ providers: [defaultAgentProvider], getRunner });
 
     return {

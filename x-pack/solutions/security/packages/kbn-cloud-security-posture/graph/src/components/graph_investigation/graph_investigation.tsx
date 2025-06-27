@@ -17,7 +17,7 @@ import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import { Graph, isEntityNode } from '../../..';
+import { Graph, isEntityNode, type NodeProps } from '../../..';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
 import { EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
@@ -26,14 +26,31 @@ import { AnimatedSearchBarContainer, useBorder } from './styles';
 import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from './search_filters';
 import { useEntityNodeExpandPopover } from './use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from './use_label_node_expand_popover';
+import { NodeViewModel } from '../types';
 
-const useGraphPopovers = (
-  dataViewId: string,
-  setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>,
-  searchFilters: Filter[]
-) => {
-  const nodeExpandPopover = useEntityNodeExpandPopover(setSearchFilters, dataViewId, searchFilters);
-  const labelExpandPopover = useLabelNodeExpandPopover(setSearchFilters, dataViewId, searchFilters);
+const useGraphPopovers = ({
+  dataViewId,
+  searchFilters,
+  setSearchFilters,
+  nodeDetailsClickHandler,
+}: {
+  dataViewId: string;
+  searchFilters: Filter[];
+  setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>;
+  nodeDetailsClickHandler?: (node: NodeProps) => void;
+}) => {
+  const nodeExpandPopover = useEntityNodeExpandPopover(
+    setSearchFilters,
+    dataViewId,
+    searchFilters,
+    nodeDetailsClickHandler
+  );
+  const labelExpandPopover = useLabelNodeExpandPopover(
+    setSearchFilters,
+    dataViewId,
+    searchFilters,
+    nodeDetailsClickHandler
+  );
 
   const openPopoverCallback = useCallback(
     (cb: Function, ...args: unknown[]) => {
@@ -100,6 +117,11 @@ export interface GraphInvestigationProps {
   };
 
   /**
+   * Callback when show event preview is clicked.
+   */
+  onOpenEventPreview?: (node: NodeViewModel) => void;
+
+  /**
    * Whether to show investigate in timeline action button. Defaults value is false.
    */
   showInvestigateInTimeline?: boolean;
@@ -131,6 +153,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     showInvestigateInTimeline = false,
     showToggleSearch = false,
     onInvestigateInTimeline,
+    onOpenEventPreview,
   }: GraphInvestigationProps) => {
     const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
     const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
@@ -188,18 +211,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       return lastValidEsQuery.current;
     }, [dataView, kquery, notifications, searchFilters, uiSettings]);
 
-    const { nodeExpandPopover, labelExpandPopover, openPopoverCallback } = useGraphPopovers(
-      dataView?.id ?? '',
-      setSearchFilters,
-      searchFilters
-    );
-    const nodeExpandButtonClickHandler = (...args: unknown[]) =>
-      openPopoverCallback(nodeExpandPopover.onNodeExpandButtonClick, ...args);
-    const labelExpandButtonClickHandler = (...args: unknown[]) =>
-      openPopoverCallback(labelExpandPopover.onNodeExpandButtonClick, ...args);
-    const isPopoverOpen = [nodeExpandPopover, labelExpandPopover].some(
-      ({ state: { isOpen } }) => isOpen
-    );
     const { data, refresh, isFetching } = useFetchGraphData({
       req: {
         query: {
@@ -216,6 +227,28 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         keepPreviousData: true,
       },
     });
+
+    const nodeDetailsClickHandler = useCallback(
+      (node: NodeProps) => {
+        onOpenEventPreview?.(node.data);
+      },
+      [onOpenEventPreview]
+    );
+
+    const { nodeExpandPopover, labelExpandPopover, openPopoverCallback } = useGraphPopovers({
+      dataViewId: dataView?.id ?? '',
+      searchFilters,
+      setSearchFilters,
+      nodeDetailsClickHandler: onOpenEventPreview ? nodeDetailsClickHandler : undefined,
+    });
+
+    const nodeExpandButtonClickHandler = (...args: unknown[]) =>
+      openPopoverCallback(nodeExpandPopover.onNodeExpandButtonClick, ...args);
+    const labelExpandButtonClickHandler = (...args: unknown[]) =>
+      openPopoverCallback(labelExpandPopover.onNodeExpandButtonClick, ...args);
+    const isPopoverOpen = [nodeExpandPopover, labelExpandPopover].some(
+      ({ state: { isOpen } }) => isOpen
+    );
 
     const nodes = useMemo(() => {
       return (
