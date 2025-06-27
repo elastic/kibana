@@ -19,6 +19,7 @@ export async function createAndInstallTransforms(
   // Latest transform
   try {
     const latestTransform = generateLatestTransform(definition);
+    console.log(`KUBA DEBUG: LATEST transform pre-request\n${JSON.stringify(latestTransform)}`);
     await retryTransientEsErrors(() => esClient.transform.putTransform(latestTransform), {
       logger,
     });
@@ -35,10 +36,11 @@ export async function createAndInstallTransforms(
   // Backfill transform
   try {
     const backfillTransform = generateLatestBackfillTransform(definition);
+    //Tx
+    console.log(`KUBA DEBUG: BACKFILL transform pre-request\n${JSON.stringify(backfillTransform)}`);
     await retryTransientEsErrors(() => esClient.transform.putTransform(backfillTransform), {
       logger,
     });
-    console.log("KUBA DEBUG: created a Backfill transform");
     output.push({ type: 'transform', id: backfillTransform.transform_id });
   } catch (e) {
     logger.error(

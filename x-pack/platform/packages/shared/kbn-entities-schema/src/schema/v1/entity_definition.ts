@@ -33,7 +33,7 @@ export const entityDefinitionSchema = z.object({
   latest: z.object({
     timestampField: z.string(),
     lookbackPeriod: z.optional(durationSchema).default('24h'),
-    backfillPeriod: z.optional(durationSchema).default('24h'),
+    backfillPeriod: z.optional(durationSchema).default('60h'),
     settings: z.optional(
       z.object({
         syncField: z.optional(z.string()),

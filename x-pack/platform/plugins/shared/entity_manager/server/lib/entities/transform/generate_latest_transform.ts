@@ -47,31 +47,28 @@ export function generateLatestTransform(
 
   // TODO(kuba) NOTE: Since we have backfill transform that is separate, the
   // syncDelay should be equal to frequency so that the two do not overlap.
-  console.log(`KUBA DEBUG: params for regular ${definition.id} transform: ${JSON.stringify(definition.latest.settings)} and ${ENTITY_DEFAULT_LATEST_SYNC_DELAY}`);
-  return generateTransformPutRequest({
+  const putRequest = generateTransformPutRequest({
     definition,
     filter,
     transformId: generateLatestTransformId(definition),
     frequency: definition.latest.settings?.frequency ?? ENTITY_DEFAULT_LATEST_FREQUENCY,
-    syncDelay:
-      definition.latest.settings?.syncDelay ??
-      definition.latest.settings?.frequency ??
-      ENTITY_DEFAULT_LATEST_SYNC_DELAY,
+    syncDelay: definition.latest.settings?.syncDelay ?? ENTITY_DEFAULT_LATEST_SYNC_DELAY,
     docsPerSecond: definition.latest.settings?.docsPerSecond,
   });
+  return putRequest
 }
 
 export function generateLatestBackfillTransform(
   definition: EntityDefinition
 ): TransformPutTransformRequest {
-  console.log("KUBA DEBUG: calling generateLatestTransformBackfill()");
+  const originalLookback = definition.latest.lookbackPeriod;
   // Set the filter to correct time, i.e. `now-backfillPeriod`
   definition.latest.lookbackPeriod = definition.latest.backfillPeriod;
-  console.log(`KUBA DEBUG: using backfillPeriod of ${definition.latest.backfillPeriod}`);
   const putRequest: TransformPutTransformRequest = generateLatestTransform(definition);
   putRequest.transform_id = generateLatestBackfillTransformId(putRequest.transform_id);
   delete putRequest.sync;
   delete putRequest.frequency;
+  definition.latest.lookbackPeriod = originalLookback;
   return putRequest;
 }
 
