@@ -139,6 +139,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const { data: allResultsData, isLoading } = useAllResults({
     actionId,
+    liveQueryActionId,
     startDate,
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
