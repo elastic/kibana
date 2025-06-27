@@ -6,31 +6,36 @@
  */
 
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { getSavedObjectKqlFilter } from '../../common';
+import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { monitorAttributes, syntheticsMonitorType } from '../../../../common/types/saved_objects';
-import { SyntheticsServerSetup } from '../../../types';
+import {
+  legacyMonitorAttributes,
+  syntheticsMonitorAttributes,
+  syntheticsMonitorSOTypes,
+} from '../../../../common/types/saved_objects';
 
 type Payload = Array<{
   id: string;
   count: number;
 }>;
 
-interface ExpectedResponse {
-  locations: {
-    buckets: Array<{
-      key: string;
-      doc_count: number;
-    }>;
-  };
+interface Bucket {
+  key: string;
+  doc_count: number;
 }
 
 const aggs = {
+  locations_legacy: {
+    terms: {
+      field: `${legacyMonitorAttributes}.locations.id`,
+      size: 20000,
+    },
+  },
   locations: {
     terms: {
-      field: `${monitorAttributes}.locations.id`,
-      size: 10000,
+      field: `${syntheticsMonitorAttributes}.locations.id`,
+      size: 20000,
     },
   },
 };
@@ -40,27 +45,44 @@ export const getLocationMonitors: SyntheticsRestApiRouteFactory<Payload> = () =>
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_MONITORS,
 
   validate: {},
-  handler: async ({ server }) => {
-    return await getMonitorsByLocation(server);
+  handler: async ({ server, savedObjectsClient, syntheticsMonitorClient }) => {
+    const soClient = server.coreStart.savedObjects.createInternalRepository();
+    const { locations } = await getPrivateLocationsAndAgentPolicies(
+      savedObjectsClient,
+      syntheticsMonitorClient
+    );
+
+    const locationMonitors = await soClient.find({
+      type: syntheticsMonitorSOTypes,
+      perPage: 0,
+      aggs,
+      namespaces: [ALL_SPACES_ID],
+    });
+
+    const aggsResp = locationMonitors.aggregations as
+      | {
+          locations_legacy?: { buckets: Bucket[] };
+          locations?: { buckets: Bucket[] };
+        }
+      | undefined;
+
+    // Merge counts from both buckets
+    const counts: Record<string, number> = {};
+
+    aggsResp?.locations_legacy?.buckets.forEach(({ key, doc_count: docCount }) => {
+      counts[key] = (counts[key] || 0) + docCount;
+    });
+    aggsResp?.locations?.buckets.forEach(({ key, doc_count: docCount }) => {
+      counts[key] = (counts[key] || 0) + docCount;
+    });
+
+    return Object.entries(counts)
+      .map(([id, count]) => ({
+        id,
+        count,
+      }))
+      .filter(({ id }) =>
+        locations.some((location) => location.id === id || location.label === id)
+      );
   },
 });
-
-export const getMonitorsByLocation = async (server: SyntheticsServerSetup, locationId?: string) => {
-  const soClient = server.coreStart.savedObjects.createInternalRepository();
-  const locationFilter = getSavedObjectKqlFilter({ field: 'locations.id', values: locationId });
-
-  const locationMonitors = await soClient.find<unknown, ExpectedResponse>({
-    type: syntheticsMonitorType,
-    perPage: 0,
-    aggs,
-    filter: locationFilter,
-    namespaces: [ALL_SPACES_ID],
-  });
-
-  return (
-    locationMonitors.aggregations?.locations.buckets.map(({ key: id, doc_count: count }) => ({
-      id,
-      count,
-    })) ?? []
-  );
-};

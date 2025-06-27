@@ -28,7 +28,6 @@
       "fieldFormats",
       "uiActions",
       "presentationUtil",
-      "exploratoryView",
       "features",
       "files",
       "inspector",
@@ -45,10 +44,12 @@
       "logsShared",
       "licensing",
       "navigation",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "esql"
     ],
     "optionalPlugins": [
       "discover",
+      "exploratoryView",
       "home",
       "usageCollection",
       "cloud",

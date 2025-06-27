@@ -217,6 +217,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     'security',
     'settings',
     'header',
+    'discover',
   ]);
 
   // Helpers
@@ -633,14 +634,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should load the Logs tab section when clicking on it', async () => {
-            await testSubjects.existOrFail('hostsView-logs');
+            await testSubjects.existOrFail('embeddedSavedSearchDocTable');
           });
 
           it('should load the Logs tab with the right columns', async () => {
             await retry.tryForTime(5000, async () => {
-              const columnLabels = await pageObjects.infraHostsView.getLogsTableColumnHeaders();
+              const columnHeaders = await pageObjects.discover.getDocHeader();
 
-              expect(columnLabels).to.eql(['Timestamp', 'host.name', 'Message']);
+              expect(columnHeaders).to.have.string('@timestamp');
+              expect(columnHeaders).to.have.string('Summary');
             });
           });
         });

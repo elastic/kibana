@@ -271,7 +271,7 @@ const WhatIsAssetCriticalityPanel: React.FC = () => {
       />
       <EuiSpacer size="l" />
       <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiIcon type="questionInCircle" size="xl" />
+        <EuiIcon type="question" size="xl" />
         <EuiTitle size="xxs">
           <h3>
             <FormattedMessage
@@ -325,7 +325,7 @@ const EntityStoreFeatureFlagNotAvailableCallout: React.FC = () => {
           />
         }
         color="primary"
-        iconType="iInCircle"
+        iconType="info"
       >
         <EuiText size="s">
           <FormattedMessage
@@ -387,7 +387,7 @@ const InsufficientAssetCriticalityPrivilegesCallout: React.FC = () => {
         />
       }
       color="primary"
-      iconType="iInCircle"
+      iconType="info"
     >
       <EuiText size="s">
         <FormattedMessage
@@ -422,7 +422,7 @@ const AssetCriticalityIssueCallout: React.FC<{ errorMessage?: string | ReactNode
           />
         }
         color="primary"
-        iconType="iInCircle"
+        iconType="info"
       >
         <EuiText size="s">{msg}</EuiText>
       </EuiCallOut>
