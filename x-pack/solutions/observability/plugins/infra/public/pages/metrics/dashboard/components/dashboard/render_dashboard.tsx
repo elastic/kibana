@@ -13,6 +13,8 @@ import { INFRA_DASHBOARD_LOCATOR_ID } from '@kbn/observability-shared-plugin/com
 import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import { useHistory } from 'react-router-dom';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { AddKubernetesDataLink } from '../add_kubernetes_data/add_kubernetes_data';
@@ -26,21 +28,38 @@ export const RenderDashboard = ({
   kuery?: string;
 }) => {
   const {
-    services: { share },
+    services: { share, uiSettings, notifications },
   } = useKibanaContextForPlugin();
-
   const { dateRange } = useDatePickerContext();
   const { from, to } = dateRange;
+
+  const history = useHistory();
+
+  const kbnUrlStateStorage = useMemo(
+    () =>
+      createKbnUrlStateStorage({
+        history,
+        useHash: uiSettings.get('state:storeInSessionStorage'),
+        ...withNotifyOnErrors(notifications.toasts),
+      }),
+    [history, notifications.toasts, uiSettings]
+  );
+
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
     const getInitialInput = (): Partial<DashboardState> => ({
       viewMode: 'view' as ViewMode,
       timeRange: { from, to },
       query: { query: kuery ?? '', language: 'kuery' },
     });
+
     return Promise.resolve<DashboardCreationOptions>({
       getInitialInput,
+      useUnifiedSearchIntegration: true,
+      unifiedSearchSettings: {
+        kbnUrlStateStorage,
+      },
     });
-  }, [from, kuery, to]);
+  }, [from, kbnUrlStateStorage, kuery, to]);
 
   const locator = useMemo(() => {
     const baseLocator = share.url.locators.get(INFRA_DASHBOARD_LOCATOR_ID);
@@ -74,6 +93,7 @@ export const RenderDashboard = ({
       savedObjectId={dashboardId}
       getCreationOptions={getCreationOptions}
       onApiAvailable={setDashboard}
+      showPlainSpinner
     />
   );
 };

@@ -10,12 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiErrorBoundary, EuiLoadingSpinner } from '@elastic/eui';
 import { useLocation, useParams } from 'react-router-dom';
 import { FETCH_STATUS, useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { TimeRangeMetadataProvider } from '../../../hooks/use_timerange_metadata';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useFetchDashboardById } from './hooks/use_fetch_dashboard_by_id';
-import { DatePicker } from './components/date_picker/date_picker';
-import { DatePickerProvider } from './hooks/use_date_picker';
-import { KubernetesTimeRangeMetadataProvider } from './hooks/use_kubernetes_timerange_metadata';
+import { DatePickerProvider, useDatePickerContext } from './hooks/use_date_picker';
 import { PageContent } from './components/page_content/page_content';
 
 export const Dashboard = () => {
@@ -27,9 +27,17 @@ export const Dashboard = () => {
     },
   } = useKibanaContextForPlugin();
 
+  const { dateRange } = useDatePickerContext();
+  const from = new Date(Date.now() - 1000 * 60 * 10).toISOString();
+  const to = new Date().toISOString();
+
+  const parsedDateRange = useTimeRange({
+    rangeFrom: from,
+    rangeTo: to,
+  });
+
   const { search } = useLocation();
   const { namespace, name } = useParams<{ namespace: string; name?: string }>();
-
   const { dashboardId, entityId, kuery } = useMemo(() => {
     const query = new URLSearchParams(search);
     return {
@@ -73,13 +81,17 @@ export const Dashboard = () => {
         <PageTemplate
           pageHeader={{
             pageTitle,
-            rightSideItems: [<DatePicker />],
           }}
           data-test-subj="infraKubernetesPage"
         >
-          <KubernetesTimeRangeMetadataProvider>
+          <TimeRangeMetadataProvider
+            kuery=""
+            dataSource="kubernetes"
+            start={parsedDateRange.from}
+            end={parsedDateRange.to}
+          >
             <PageContent dashboardId={dashboardId} entityId={entityId} kuery={kuery} />
-          </KubernetesTimeRangeMetadataProvider>
+          </TimeRangeMetadataProvider>
         </PageTemplate>
       </EuiErrorBoundary>
     </DatePickerProvider>
