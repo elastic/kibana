@@ -58,7 +58,7 @@ paths:
   /api/endpoint_list/items:
     delete:
       description: >-
-        Delete an Elastic Endpoint exception list item by using the `id` or
+        Delete an Elastic Endpoint exception list item specified by the `id` or
         `item_id` field.
       operationId: DeleteEndpointListItem
       parameters:
