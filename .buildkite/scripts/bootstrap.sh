@@ -26,6 +26,16 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
   fi
 fi
 
+df -h
+
+# Clear up reference kibana
+if [[ -d ~/.kibana ]]; then
+  echo "Removing reference kibana node_modules"
+  rm -rf ~/.kibana
+fi
+
+df -h
+
 if ! yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"; then
   echo "bootstrap failed, trying again in 15 seconds"
   sleep 15
