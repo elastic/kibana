@@ -9,7 +9,7 @@ import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_acti
 import type { CasesConnectorConfig, CasesConnectorSecrets } from './types';
 import { getCasesConnectorAdapter, getCasesConnectorType } from '.';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { SECURITY_PROJECT_TYPE_ID } from '../../../common/constants';
+import { OBSERVABILITY_PROJECT_TYPE_ID, SECURITY_PROJECT_TYPE_ID } from '../../../common/constants';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
@@ -581,6 +581,31 @@ describe('getCasesConnectorType', () => {
           'cases:securitySolution/findConfigurations',
           'cases:securitySolution/reopenCase',
           'cases:securitySolution/assignCase',
+        ]);
+      });
+
+      it('correctly overrides the consumer and producer if the project is serverless observability', () => {
+        const adapter = getCasesConnectorAdapter({
+          serverlessProjectType: OBSERVABILITY_PROJECT_TYPE_ID,
+          logger: mockLogger,
+        });
+
+        expect(
+          adapter.getKibanaPrivileges?.({
+            consumer: 'alerts',
+            producer: AlertConsumers.LOGS,
+          })
+        ).toEqual([
+          'cases:observability/createCase',
+          'cases:observability/updateCase',
+          'cases:observability/deleteCase',
+          'cases:observability/pushCase',
+          'cases:observability/createComment',
+          'cases:observability/updateComment',
+          'cases:observability/deleteComment',
+          'cases:observability/findConfigurations',
+          'cases:observability/reopenCase',
+          'cases:observability/assignCase',
         ]);
       });
     });

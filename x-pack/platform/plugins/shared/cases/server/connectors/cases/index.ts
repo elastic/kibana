@@ -18,7 +18,7 @@ import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant
 import type { ServerlessProjectType } from '../../../common/constants/types';
 import { CasesConnector } from './cases_connector';
 import { DEFAULT_MAX_OPEN_CASES } from './constants';
-import { CASES_CONNECTOR_ID, CASES_CONNECTOR_TITLE } from '../../../common/constants';
+import { CASES_CONNECTOR_ID, CASES_CONNECTOR_TITLE, OWNER_INFO } from '../../../common/constants';
 import { getOwnerFromRuleConsumerProducer } from '../../../common/utils/owner';
 
 import type {
@@ -79,9 +79,16 @@ export const getCasesConnectorType = ({
       throw new Error('Cannot authorize cases. Owner is not defined in the subActionParams.');
     }
 
-    const owner = serverlessProjectType
-      ? serverlessProjectType
-      : (params?.subActionParams?.owner as string);
+    let owner: string;
+    if (serverlessProjectType) {
+      const foundOwner = Object.entries(OWNER_INFO).find(([, info]) => {
+        return info.serverlessProjectType === serverlessProjectType;
+      });
+
+      owner = foundOwner ? foundOwner[1].id : OWNER_INFO.cases.id;
+    } else {
+      owner = params?.subActionParams?.owner as string;
+    }
 
     return constructRequiredKibanaPrivileges(owner);
   },
