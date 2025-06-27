@@ -161,7 +161,7 @@ export * from './impl/assistant/api/conversations/bulk_update_actions_conversati
 export { getConversationById } from './impl/assistant/api/conversations/conversations';
 
 export { UpgradeButtons } from './impl/upgrade/upgrade_buttons';
-export { getUserConversationsExist, getPrompts, bulkUpdatePrompts } from './impl/assistant/api';
+export { getUserConversationsExist, bulkUpdatePrompts } from './impl/assistant/api';
 
 export {
   /** A range slider component, typically used to configure the number of alerts sent as context */
@@ -184,6 +184,8 @@ export { getCombinedMessage } from './impl/assistant/prompt/helpers';
 export { useChatComplete } from './impl/assistant/api/chat_complete/use_chat_complete';
 export { useFetchAnonymizationFields } from './impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 
+export { useFindPrompts } from './impl/assistant/api/security_ai_prompts/use_find_prompts';
+
 export interface UseAssistantAvailability {
   // True when searchAiLake configurations is available
   hasSearchAILakeConfigurations: boolean;
@@ -199,4 +201,6 @@ export interface UseAssistantAvailability {
   hasUpdateAIAssistantAnonymization: boolean;
   // When true, user has `Edit` privilege for `Global Knowledge Base`
   hasManageGlobalKnowledgeBase: boolean;
+  // remove once product has signed off on prompt text
+  isStarterPromptsEnabled: boolean;
 }
