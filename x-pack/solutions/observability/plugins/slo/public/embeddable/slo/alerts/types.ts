@@ -66,7 +66,7 @@ export interface SloEmbeddableDeps {
   charts: ChartsPluginStart;
   uiActions: UiActionsStart;
   serverless?: ServerlessPluginStart;
-  cases: CasesPublicStart;
+  cases?: CasesPublicStart;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
 }
