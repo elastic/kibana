@@ -64,7 +64,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
           <EuiCallOut
             size="s"
             color="warning"
-            iconType="iInCircle"
+            iconType="info"
             title={
               <FormattedMessage
                 id="xpack.snapshotRestore.policyDetails.managedPolicyWarningTitle"

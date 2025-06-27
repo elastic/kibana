@@ -45,6 +45,20 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 link: 'discover',
               },
               {
+                title: i18n.translate('xpack.serverlessSearch.nav.chat', {
+                  defaultMessage: 'Chat',
+                }),
+                renderAs: 'accordion',
+                children: [
+                  {
+                    link: 'onechat:conversations',
+                  },
+                  {
+                    link: 'onechat:tools',
+                  },
+                ],
+              },
+              {
                 link: 'dashboards',
                 getIsActive: ({ pathNameSerialized, prepend }) => {
                   return pathNameSerialized.startsWith(prepend('/app/dashboards'));
