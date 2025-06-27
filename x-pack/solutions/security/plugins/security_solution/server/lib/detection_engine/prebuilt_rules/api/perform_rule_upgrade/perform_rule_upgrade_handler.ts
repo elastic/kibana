@@ -41,7 +41,7 @@ import { zipRuleVersions } from '../../logic/rule_versions/zip_rule_versions';
 import type { RuleVersions } from '../../logic/diff/calculate_rule_diff';
 import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
-import { getAllUpgradableRules } from '../../logic/utils';
+import { getPossibleUpgrades } from '../../logic/utils';
 
 export const performRuleUpgradeHandler = async (
   context: SecuritySolutionRequestHandlerContext,
@@ -94,7 +94,7 @@ export const performRuleUpgradeHandler = async (
         filter,
       });
 
-      const upgradableRules = await getAllUpgradableRules(
+      const upgradableRules = await getPossibleUpgrades(
         allCurrentVersions,
         latestVersionsMap,
         mlAuthz

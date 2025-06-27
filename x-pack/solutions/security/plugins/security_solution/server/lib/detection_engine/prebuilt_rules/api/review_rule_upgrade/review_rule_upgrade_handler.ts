@@ -24,7 +24,7 @@ import { type RuleVersionSpecifier } from '../../logic/rule_versions/rule_versio
 import { zipRuleVersions } from '../../logic/rule_versions/zip_rule_versions';
 import { calculateRuleUpgradeInfo } from './calculate_rule_upgrade_info';
 import type { MlAuthz } from '../../../../machine_learning/authz';
-import { getAllUpgradableRules } from '../../logic/utils';
+import { getPossibleUpgrades } from '../../logic/utils';
 
 const DEFAULT_SORT: ReviewRuleUpgradeSort = {
   field: 'name',
@@ -114,7 +114,7 @@ async function calculateUpgradeableRulesDiff({
         sortOrder: sort.order,
       });
 
-  const upgradableRules = await getAllUpgradableRules(
+  const upgradableRules = await getPossibleUpgrades(
     currentRuleVersions,
     latestVersionsMap,
     mlAuthz

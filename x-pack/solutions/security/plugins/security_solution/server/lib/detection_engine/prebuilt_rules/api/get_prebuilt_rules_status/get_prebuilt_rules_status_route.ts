@@ -12,7 +12,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
-import { excludeLicenseRestrictedRules, getAllUpgradableRules } from '../../logic/utils';
+import { excludeLicenseRestrictedRules, getPossibleUpgrades } from '../../logic/utils';
 
 export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -58,7 +58,7 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
             mlAuthz
           );
 
-          const upgradableRules = await getAllUpgradableRules(
+          const upgradableRules = await getPossibleUpgrades(
             currentRuleVersions,
             latestRuleVersionsMap,
             mlAuthz

@@ -38,7 +38,7 @@ export async function excludeLicenseRestrictedRules<T extends { type: Type }>(
   return rules.filter((_rule, index) => validationResults[index].valid);
 }
 
-function getRulesWithTargetVersion(
+function getRulesWithAvailableTargetVersion(
   currentRules: RuleVersionSpecifier[],
   targetRulesMap: Map<string, BasicRuleInfo>
 ): BasicRuleInfo[] {
@@ -52,18 +52,18 @@ function getRulesWithTargetVersion(
 }
 
 /**
- * Given current and a target rules, returns a list of rules that can be upgraded, along with their target type.
+ * Given current and a target rules, returns a list of possible upgrade targets.
  *
  * @param currentRules The list of rules currently installed.
  * @param targetRulesMap A map of the latest available rule versions, with rule_id as the key.
  * * @param mlAuthz Machine Learning authorization object
- * @returns An array of rules that have a newer version available.
+ * @returns An array of target rule version specifiers.
  */
-export function getAllUpgradableRules(
+export function getPossibleUpgrades(
   currentRules: RuleVersionSpecifier[],
   targetRulesMap: Map<string, BasicRuleInfo>,
   mlAuthz: MlAuthz
-): Promise<BasicRuleInfo[]> {
-  const rulesWithTargetVersion = getRulesWithTargetVersion(currentRules, targetRulesMap);
+): Promise<RuleVersionSpecifier[]> {
+  const rulesWithTargetVersion = getRulesWithAvailableTargetVersion(currentRules, targetRulesMap);
   return excludeLicenseRestrictedRules(rulesWithTargetVersion, mlAuthz);
 }

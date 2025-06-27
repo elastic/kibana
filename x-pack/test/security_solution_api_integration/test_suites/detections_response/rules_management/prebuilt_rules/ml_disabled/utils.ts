@@ -11,6 +11,10 @@ import { RuleParamsWithDefaultValue } from '@kbn/response-ops-rule-params';
 import { CreateRuleRequestBody } from '@kbn/alerting-plugin/common/routes/rule/apis/create';
 import { createRuleThroughAlertingEndpoint } from '../../../utils';
 
+/**
+ * Creates a machine learning rule through the alerting endpoint.
+ * Useful during testing under Basic and Essential licenses, as the DE rule creation API does not permit the creation of ML rules under those licenses.
+ */
 export async function createMlRuleThroughAlertingEndpoint(
   supertest: SuperTest.Agent,
   paramsOverride: Partial<RuleParamsWithDefaultValue> = {}
