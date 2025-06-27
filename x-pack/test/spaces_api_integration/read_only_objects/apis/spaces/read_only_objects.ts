@@ -153,7 +153,8 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('cookie', testUserCookie.cookieString())
           .expect(200);
-        console.log(getResponse.body);
+        expect(getResponse.body).to.have.property('accessControl');
+        expect(getResponse.body.accessControl).to.have.property('owner', 'new_owner');
       });
 
       it('should throw when transferring ownership of object owned by a different user and not admin', async () => {
