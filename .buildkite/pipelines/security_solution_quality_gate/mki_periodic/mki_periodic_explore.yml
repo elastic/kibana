@@ -18,7 +18,7 @@ steps:
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:explore:cases
         label: 'Cypress MKI - Cases'
-        key: test_explore
+        key: test_explore_cases
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:

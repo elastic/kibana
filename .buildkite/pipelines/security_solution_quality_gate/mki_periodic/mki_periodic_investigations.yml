@@ -4,7 +4,7 @@ steps:
     steps:
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:alerts
         label: 'Cypress MKI - Alerts'
-        key: test_investigations
+        key: test_investigations_alerts
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
@@ -18,7 +18,7 @@ steps:
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:dashboards
         label: 'Cypress MKI - Dashboards'
-        key: test_investigations
+        key: test_investigations_dashboards
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
@@ -32,7 +32,7 @@ steps:
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:siem_migrations
         label: 'Cypress MKI - SIEM Integrations'
-        key: test_investigations
+        key: test_investigations_siem_migrations
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
@@ -46,7 +46,7 @@ steps:
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:sourcerer
         label: 'Cypress MKI - Sourcerer'
-        key: test_investigations
+        key: test_investigations_sourcerer
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
@@ -60,7 +60,7 @@ steps:
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:threat_intelligence
         label: 'Cypress MKI - Threat Intelligence'
-        key: test_investigations
+        key: test_investigations_threat_intelligence
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
@@ -74,7 +74,7 @@ steps:
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:timeline_templates
         label: 'Cypress MKI - Timeline Templates'
-        key: test_investigations
+        key: test_investigations_timeline_templates
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
@@ -88,7 +88,7 @@ steps:
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:timelines
         label: 'Cypress MKI - Timelines'
-        key: test_investigations
+        key: test_investigations_timelines
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
         agents:
