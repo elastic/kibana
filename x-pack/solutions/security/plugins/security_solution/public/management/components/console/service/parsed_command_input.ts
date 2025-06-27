@@ -16,7 +16,8 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
   };
 
   // Arguments that should use empty strings for bare flags instead of boolean true
-  const EMPTY_STRING_BARE_FLAGS_ARGS = ['ScriptName', 'file'];
+  // These are typically selector arguments that can have values
+  const EMPTY_STRING_BARE_FLAGS_ARGS = ['ScriptName', 'file', 'CloudFile'];
 
   if (!input) {
     return response;

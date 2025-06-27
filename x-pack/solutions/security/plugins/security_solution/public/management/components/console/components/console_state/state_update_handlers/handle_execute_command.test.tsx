@@ -44,6 +44,34 @@ describe('When a Console command is entered by the user', () => {
     expect(renderResult.getByTestId('test-commandUsage')).toBeTruthy();
   });
 
+  it('should show help for commands with whitelisted arguments (ScriptName, file)', async () => {
+    // Add a command with whitelisted arguments to test
+    const mockCommand: CommandDefinition = {
+      name: 'testscript',
+      about: 'Test script command',
+      RenderComponent: () => <div data-test-subj="exec-output">{'Command executed'}</div>,
+      args: {
+        ScriptName: {
+          required: true,
+          allowMultiples: false,
+          about: 'Script name',
+        },
+        file: {
+          required: false,
+          allowMultiples: false,
+          about: 'File path',
+        },
+      },
+    };
+
+    commands.push(mockCommand);
+    render();
+
+    // Test help with whitelisted arguments (should work with empty string values)
+    await enterCommand('testscript --help');
+    expect(renderResult.getByTestId('test-commandUsage')).toBeTruthy();
+  });
+
   it('should render custom command `--help` output when Command service defines `getCommandUsage()`', async () => {
     const cmd2 = commands.find((command) => command.name === 'cmd2');
 

@@ -55,6 +55,54 @@ describe('when using parsed command input utils', () => {
       );
     });
 
+    it('should parse whitelisted arguments (ScriptName, Args) with values', () => {
+      const input = 'runscript --ScriptName=test.ps1 --Args=-arg1 -arg2';
+      const parsedCommand = parseCommandInput(input);
+
+      expect(parsedCommand).toEqual(
+        parsedCommandWith({
+          input,
+          name: 'runscript',
+          args: {
+            ScriptName: ['test.ps1'],
+            Args: ['-arg1 -arg2'],
+          },
+        })
+      );
+    });
+
+    it('should parse whitelisted arguments (CloudFile, CommandLine) with values', () => {
+      const input =
+        'runscript --CloudFile="https://example.com/script.ps1" --CommandLine="-arg1 -arg2"';
+      const parsedCommand = parseCommandInput(input);
+
+      expect(parsedCommand).toEqual(
+        parsedCommandWith({
+          input,
+          name: 'runscript',
+          args: {
+            CloudFile: ['https://example.com/script.ps1'],
+            CommandLine: ['-arg1 -arg2'],
+          },
+        })
+      );
+    });
+
+    it('should parse help argument when used alone', () => {
+      const input = 'runscript --help';
+      const parsedCommand = parseCommandInput(input);
+
+      expect(parsedCommand).toEqual(
+        parsedCommandWith({
+          input,
+          name: 'runscript',
+          args: {
+            help: [true],
+          },
+        })
+      );
+    });
+
     it('should parse arguments that have a single string value', () => {
       const input = 'foo --one value --two=value2';
       const parsedCommand = parseCommandInput(input);

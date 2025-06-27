@@ -320,3 +320,137 @@ describe('When using `EnteredInput` class', () => {
     }
   );
 });
+
+describe('When using `EnteredInput` class with Argument-Based Bare Flags', () => {
+  let enteredInput: EnteredInput;
+  let commandDefinition: CommandDefinition;
+
+  const createSelectorInput = (
+    leftOfCursorText: string = 'runscript --ScriptName',
+    rightOfCursorText: string = '',
+    argValueSelectorState: EnteredCommand['argState'] = {}
+  ): EnteredInput => {
+    const parsedInput = parseCommandInput(leftOfCursorText + rightOfCursorText);
+    const enteredCommand: EnteredCommand = {
+      commandDefinition,
+      argState: argValueSelectorState,
+      argsWithValueSelectors: {
+        ScriptName: {
+          required: false,
+          allowMultiples: false,
+          about: 'Script to run',
+          mustHaveValue: 'truthy',
+          SelectorComponent: () => null, // Mock selector component
+        },
+      },
+    };
+
+    enteredInput = new EnteredInput(
+      leftOfCursorText,
+      rightOfCursorText,
+      parsedInput,
+      enteredCommand
+    );
+
+    return enteredInput;
+  };
+
+  beforeEach(() => {
+    commandDefinition = {
+      name: 'runscript',
+      about: 'Run a script',
+      args: {
+        ScriptName: {
+          required: false,
+          allowMultiples: false,
+          about: 'Script to run',
+          mustHaveValue: 'truthy',
+          SelectorComponent: () => null,
+        },
+      },
+    };
+  });
+
+  describe('Argument-Based Bare Flag Parsing', () => {
+    it('should handle whitelisted arguments (ScriptName) with empty string for bare flags', () => {
+      const parsedInput = parseCommandInput('runscript --ScriptName');
+
+      expect(parsedInput.args.ScriptName).toEqual(['']);
+    });
+
+    it('should handle regular arguments with boolean true for bare flags', () => {
+      const parsedInput = parseCommandInput('runscript --help');
+
+      expect(parsedInput.args.help).toEqual([true]);
+    });
+
+    it('should handle mixed whitelisted and regular arguments', () => {
+      const parsedInput = parseCommandInput('runscript --ScriptName --help');
+
+      expect(parsedInput.args.ScriptName).toEqual(['']); // Whitelisted
+      expect(parsedInput.args.help).toEqual([true]); // Regular
+    });
+
+    it('should handle help used alone', () => {
+      const parsedInput = parseCommandInput('runscript --help');
+
+      expect(parsedInput.args.help).toEqual([true]);
+    });
+
+    it('should handle realistic whitelisted argument combinations without help', () => {
+      const parsedInput = parseCommandInput('runscript --ScriptName --Arg');
+
+      expect(parsedInput.args.ScriptName).toEqual(['']);
+      expect(parsedInput.args.Arg).toEqual([true]);
+    });
+  });
+
+  describe('Input/Display State Separation with New Parsing', () => {
+    it('should include selector values in getFullText() by default', () => {
+      const input = createSelectorInput('runscript --ScriptName', '', {
+        ScriptName: [{ value: 'test.ps1', valueText: 'test.ps1', store: undefined }],
+      });
+
+      expect(input.getFullText()).toEqual('runscript --ScriptName="test.ps1"');
+    });
+
+    it('should exclude selector values when explicitly requested', () => {
+      const input = createSelectorInput('runscript --ScriptName', '', {
+        ScriptName: [{ value: 'test.ps1', valueText: 'test.ps1', store: undefined }],
+      });
+
+      expect(input.getFullText(false)).toEqual('runscript --ScriptName');
+    });
+
+    it('should handle complex values with spaces in quotes', () => {
+      const input = createSelectorInput('runscript --ScriptName', '', {
+        ScriptName: [{ value: 'my script.ps1', valueText: 'my script.ps1', store: undefined }],
+      });
+
+      expect(input.getFullText()).toEqual('runscript --ScriptName="my script.ps1"');
+    });
+  });
+
+  describe('Bare Flag Compatibility', () => {
+    it('should work correctly when ScriptName is provided as bare flag', () => {
+      const input = createSelectorInput(
+        'runscript --ScriptName', // Bare flag, should be parsed as ''
+        '',
+        {
+          ScriptName: [{ value: 'test.ps1', valueText: 'test.ps1', store: undefined }],
+        }
+      );
+
+      // Should reconstruct correctly despite bare flag parsing difference
+      expect(input.getFullText()).toEqual(`runscript --ScriptName="test.ps1"`);
+    });
+
+    it('should handle empty selector values gracefully', () => {
+      const input = createSelectorInput('runscript --ScriptName', '', {
+        ScriptName: [{ value: '', valueText: '', store: undefined }],
+      });
+
+      expect(input.getFullText()).toEqual('runscript --ScriptName=""');
+    });
+  });
+});
