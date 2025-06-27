@@ -10,6 +10,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Type } from '@kbn/config-schema';
 import type { UiCounterMetricType } from '@kbn/analytics';
+import type { SolutionId } from '@kbn/core-chrome-browser';
 
 /**
  * UI element type to represent the settings.
@@ -50,7 +51,7 @@ export interface GetUiSettingsContext {
   request?: KibanaRequest;
 }
 
-export type UiSettingsSolution = 'es' | 'oblt' | 'security';
+export type UiSettingsSolution = SolutionId | 'classic';
 
 /**
  * UiSettings parameters defined by the plugins.

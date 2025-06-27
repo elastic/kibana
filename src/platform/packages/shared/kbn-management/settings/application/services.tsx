@@ -157,10 +157,7 @@ export const SettingsApplicationKibanaProvider: FC<
         ([settingId, settingDef]) =>
           !settingDef.readonly &&
           !client.isCustom(settingId) &&
-          (!solution ||
-            solution === 'classic' ||
-            !settingDef.solution ||
-            settingDef.solution === solution)
+          (!solution || !settingDef.solution || settingDef.solution === solution)
       )
     );
     return normalizeSettings(rawSettings);
