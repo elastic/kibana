@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { processMonitors } from './get_all_monitors';
+import { processMonitors } from './process_monitors';
 import * as getLocations from '../../synthetics_service/get_all_locations';
 
 describe('processMonitors', () => {
