@@ -108,6 +108,9 @@ export function SloDetailsPage() {
   usePageReady({
     isReady: !isLoading && slo !== undefined,
     isRefreshing: isRefetching,
+    meta: {
+      description: '[ttfmp_slos] The SLO details page has loaded and SLO data is present.',
+    },
   });
 
   useBreadcrumbs(getBreadcrumbs(basePath, slo), { serverless });

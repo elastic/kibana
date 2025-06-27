@@ -285,3 +285,11 @@ To enable the API, add the following to your Kibana config
 uiSettings.overrides:
   onechat:esqlToolApi:enabled: true
 ```
+
+## Chat UI
+To enable the Chat UI located at `/app/chat/`, add the following to your Kibana config:
+
+```yaml
+uiSettings.overrides:
+  onechat:ui:enabled: true
+```
