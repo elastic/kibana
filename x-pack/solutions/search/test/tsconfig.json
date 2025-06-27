@@ -1,0 +1,33 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "node",
+      "cheerio",
+      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types",
+      "@kbn/ambient-ftr-types"
+    ],
+    "resolveJsonModule": true,
+  },
+  "include": [
+    "**/*",
+    "../../../../typings/**/*",
+    "../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
+  ],
+  "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
+  "kbn_references": [
+    "@kbn/test",
+    "@kbn/core-http-common",
+    "@kbn/scout-info",
+    "@kbn/test-suites-xpack-platform",
+    "@kbn/expect",
+    "@kbn/guided-onboarding-plugin",
+    "@kbn/test-suites-src",
+    "@kbn/guided-onboarding",
+    "@kbn/search-playground",
+    "@kbn/tooling-log",
+    "@kbn/test-suites-xpack",
+  ]
+}

@@ -13,8 +13,6 @@ import { CONFIGURATIONS_PATH } from '../../common/constants';
 export const routes: SecuritySubPluginRoutes = [
   {
     path: `${CONFIGURATIONS_PATH}/:tab?`,
-    component: withSecurityRoutePageWrapper(Configurations, SecurityPageName.configurations, {
-      redirectOnMissing: true,
-    }),
+    component: withSecurityRoutePageWrapper(Configurations, SecurityPageName.configurations),
   },
 ];

@@ -40,7 +40,8 @@
     "@kbn/core-chrome-browser",
     "@kbn/serverless",
     "@kbn/utility-types",
-    "@kbn/search-navigation"
+    "@kbn/search-navigation",
+    "@kbn/search-queries",
   ],
   "exclude": [
     "target/**/*",

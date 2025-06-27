@@ -326,7 +326,9 @@ describe('Cookie based SessionStorage', () => {
         register: jest.fn(),
         auth: {
           strategy: jest.fn(),
-          test: jest.fn(() => ['foo', 'bar']),
+          test: jest.fn(() => ({
+            credentials: ['foo', 'bar'],
+          })),
         },
       };
 
@@ -352,7 +354,51 @@ describe('Cookie based SessionStorage', () => {
       );
 
       expect(loggingSystemMock.collect(logger).warn).toEqual([
-        ['Found 2 auth sessions when we were only expecting 1.'],
+        ['Found multiple auth sessions. Found:[2] sessions. Checking equality...'],
+      ]);
+
+      expect(loggingSystemMock.collect(logger).error).toEqual([
+        ['Found multiple auth sessions. Found:[2] unequal sessions'],
+      ]);
+    });
+
+    it('returns sessions if multiple session cookies are detected and are equal.', async () => {
+      const mockServer = {
+        register: jest.fn(),
+        auth: {
+          strategy: jest.fn(),
+          test: jest.fn(() => ({
+            credentials: ['foo', 'foo'],
+          })),
+        },
+      };
+
+      const mockRequest = httpServerMock.createKibanaRequest();
+
+      const factory = await createCookieSessionStorageFactory(
+        logger.get(),
+        mockServer as any,
+        cookieOptions,
+        true
+      );
+
+      expect(mockServer.register).toBeCalledTimes(1);
+      expect(mockServer.auth.strategy).toBeCalledTimes(1);
+
+      const session = await factory.asScoped(mockRequest).get();
+      expect(session).toBe('foo');
+
+      expect(mockServer.auth.test).toBeCalledTimes(1);
+      expect(mockServer.auth.test).toHaveBeenCalledWith(
+        'security-cookie',
+        ensureRawRequest(mockRequest)
+      );
+
+      expect(loggingSystemMock.collect(logger).warn).toEqual([
+        ['Found multiple auth sessions. Found:[2] sessions. Checking equality...'],
+      ]);
+      expect(loggingSystemMock.collect(logger).error).toEqual([
+        ['Found multiple auth sessions. Found:[2] equal sessions'],
       ]);
     });
 
@@ -361,7 +407,9 @@ describe('Cookie based SessionStorage', () => {
         register: jest.fn(),
         auth: {
           strategy: jest.fn(),
-          test: jest.fn(() => ['foo']),
+          test: jest.fn(() => ({
+            credentials: ['foo'],
+          })),
         },
       };
 

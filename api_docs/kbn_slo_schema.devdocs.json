@@ -817,6 +817,21 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.BulkPurgeRollupInput",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkPurgeRollupInput",
+        "description": [],
+        "signature": [
+          "{ list: string[]; purgePolicy: { purgeType: \"fixed_age\"; age: string; } | { purgeType: \"fixed_time\"; timestamp: string; }; } & { force?: boolean | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/bulk_purge_rollup.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.BulkPurgeRollupParams",
         "type": "Type",
         "tags": [],

@@ -203,7 +203,7 @@ export const AssetCriticalityTitle = () => (
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiIcon type="iInCircle" color="subdued" />
+        <EuiIcon type="info" color="subdued" />
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiToolTip>
@@ -272,13 +272,11 @@ const option = (
   dropdownDisplay: (
     <AssetCriticalityBadge
       criticalityLevel={level}
-      style={{ lineHeight: 'inherit' }}
+      css={{ lineHeight: 'inherit' }}
       dataTestSubj="asset-criticality-modal-select-option"
     />
   ),
-  inputDisplay: (
-    <AssetCriticalityBadge criticalityLevel={level} style={{ lineHeight: 'inherit' }} />
-  ),
+  inputDisplay: <AssetCriticalityBadge criticalityLevel={level} css={{ lineHeight: 'inherit' }} />,
 });
 
 export const assetCriticalityOptions: Array<EuiSuperSelectOption<CriticalityLevelWithUnassigned>> =

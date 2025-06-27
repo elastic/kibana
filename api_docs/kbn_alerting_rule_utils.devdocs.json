@@ -35,7 +35,7 @@
             "section": "def-common.Group",
             "text": "Group"
           },
-          "[]) => Record<string, string>"
+          "[]) => Record<string, string | string[]>"
         ],
         "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/get_ecs_groups.ts",
         "deprecated": false,
@@ -125,6 +125,47 @@
       },
       {
         "parentPluginId": "@kbn/alerting-rule-utils",
+        "id": "def-common.getFormattedGroups",
+        "type": "Function",
+        "tags": [],
+        "label": "getFormattedGroups",
+        "description": [],
+        "signature": [
+          "(grouping?: Record<string, string> | undefined) => ",
+          {
+            "pluginId": "@kbn/alerting-rule-utils",
+            "scope": "common",
+            "docId": "kibKbnAlertingRuleUtilsPluginApi",
+            "section": "def-common.Group",
+            "text": "Group"
+          },
+          "[] | undefined"
+        ],
+        "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/group_by_object_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-rule-utils",
+            "id": "def-common.getFormattedGroups.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "grouping",
+            "description": [],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/group_by_object_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-rule-utils",
         "id": "def-common.getGroupByObject",
         "type": "Function",
         "tags": [],
@@ -166,6 +207,39 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-rule-utils",
+        "id": "def-common.unflattenGrouping",
+        "type": "Function",
+        "tags": [],
+        "label": "unflattenGrouping",
+        "description": [],
+        "signature": [
+          "(grouping?: Record<string, string> | undefined) => Record<string, any> | undefined"
+        ],
+        "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/group_by_object_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-rule-utils",
+            "id": "def-common.unflattenGrouping.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "grouping",
+            "description": [],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/group_by_object_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],

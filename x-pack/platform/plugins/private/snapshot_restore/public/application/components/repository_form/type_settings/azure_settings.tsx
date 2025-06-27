@@ -14,6 +14,7 @@ import {
   EuiSelect,
   EuiSwitch,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { AzureRepository, Repository } from '../../../../../common/types';
 import { RepositorySettingsValidation } from '../../../services/validation';
@@ -49,6 +50,15 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
       maxSnapshotBytesPerSec,
     },
   } = repository;
+  const clientId = useGeneratedHtmlId({
+    prefix: 'azureClientInput',
+  });
+  const containerId = useGeneratedHtmlId({
+    prefix: 'azureContainerInput',
+  });
+  const basePathId = useGeneratedHtmlId({
+    prefix: 'azureBasePathInput',
+  });
   const hasErrors: boolean = Boolean(Object.keys(settingErrors).length);
 
   const locationModeOptions = ['primary_only', 'secondary_only'].map((option) => ({
@@ -86,10 +96,12 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
       >
         <EuiFormRow
           label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeAzure.clientLabel"
-              defaultMessage="Client"
-            />
+            <span id={clientId}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeAzure.clientLabel"
+                defaultMessage="Client"
+              />
+            </span>
           }
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.client)}
@@ -109,6 +121,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
                 }}
                 data-test-subj="clientInput"
                 disabled={isManagedRepository}
+                aria-labelledby={clientId}
               />
             }
           />
@@ -137,10 +150,12 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
       >
         <EuiFormRow
           label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeAzure.containerLabel"
-              defaultMessage="Container"
-            />
+            <span id={containerId}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeAzure.containerLabel"
+                defaultMessage="Container"
+              />
+            </span>
           }
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.container)}
@@ -160,6 +175,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
                 }}
                 data-test-subj="containerInput"
                 disabled={isManagedRepository}
+                aria-labelledby={containerId}
               />
             }
           />
@@ -188,10 +204,12 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
       >
         <EuiFormRow
           label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeAzure.basePathLabel"
-              defaultMessage="Base path"
-            />
+            <span id={basePathId}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeAzure.basePathLabel"
+                defaultMessage="Base path"
+              />
+            </span>
           }
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.basePath)}
@@ -211,6 +229,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
                 }}
                 data-test-subj="basePathInput"
                 disabled={isManagedRepository}
+                aria-labelledby={basePathId}
               />
             }
           />

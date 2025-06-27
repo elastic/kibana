@@ -89,7 +89,7 @@
                 "section": "def-server.APMEventESSearchRequest",
                 "text": "APMEventESSearchRequest"
               },
-              ">(operationName: string, params: TParams) => Promise<TypedSearchResponse<TParams>>"
+              ">(operationName: string, params: TParams, options?: { skipProcessorEventFilter?: boolean | undefined; } | undefined) => Promise<TypedSearchResponse<TParams>>"
             ],
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
             "deprecated": false,
@@ -124,6 +124,33 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "apmDataAccess",
+                "id": "def-server.APMEventClient.search.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "apmDataAccess",
+                    "id": "def-server.APMEventClient.search.$3.skipProcessorEventFilter",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "skipProcessorEventFilter",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -1089,27 +1116,27 @@
               "InfoResponse",
               ">; }; ingest: ",
               "default",
-              "; knnSearch: { <TDocument = unknown>(this: That, params: ",
-              "KnnSearchRequest",
-              ", options?: ",
+              "; knnSearch: { (this: That, params?: ",
+              "TODO",
+              " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "KnnSearchResponse",
-              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-              "KnnSearchRequest",
-              ", options?: ",
+              "TODO",
+              ">; (this: That, params?: ",
+              "TODO",
+              " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "KnnSearchResponse",
-              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
-              "KnnSearchRequest",
-              ", options?: ",
+              "TODO",
+              ", unknown>>; (this: That, params?: ",
+              "TODO",
+              " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "KnnSearchResponse",
-              "<TDocument>>; }; license: ",
+              "TODO",
+              ">; }; license: ",
               "default",
               "; logstash: ",
               "default",
@@ -1701,17 +1728,6 @@
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "apmDataAccess",
-            "id": "def-server.DocumentSourcesRequest.enableContinuousRollups",
-            "type": "boolean",
-            "tags": [],
-            "label": "enableContinuousRollups",
-            "description": [],
-            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1921,7 +1937,7 @@
         "label": "ApmDataAccessServices",
         "description": [],
         "signature": [
-          "{ getDocumentSources: ({ enableContinuousRollups, end, kuery, start, }: Omit<",
+          "{ getDocumentSources: ({ end, kuery, start }: Omit<",
           {
             "pluginId": "apmDataAccess",
             "scope": "server",
@@ -2097,7 +2113,7 @@
               "section": "def-server.ApmDataAccessServicesParams",
               "text": "ApmDataAccessServicesParams"
             },
-            ") => { getDocumentSources: ({ enableContinuousRollups, end, kuery, start, }: Omit<",
+            ") => { getDocumentSources: ({ end, kuery, start }: Omit<",
             {
               "pluginId": "apmDataAccess",
               "scope": "server",

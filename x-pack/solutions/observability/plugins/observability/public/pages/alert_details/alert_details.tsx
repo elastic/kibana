@@ -6,8 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -19,6 +18,8 @@ import {
   EuiTabbedContentTab,
   useEuiTheme,
   EuiFlexGroup,
+  EuiNotificationBadge,
+  EuiIcon,
 } from '@elastic/eui';
 import {
   AlertStatus,
@@ -34,10 +35,11 @@ import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
-import { BetaBadge } from '../../components/experimental_badge';
+import { usePageReady } from '@kbn/ebt-tools';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
-import { AlertDetailsSource } from './types';
+import { AlertDetailsSource, TAB_IDS, TabId } from './types';
 import { SourceBar } from './components';
+import { InvestigationGuide } from './components/investigation_guide';
 import { StatusBar } from './components/status_bar';
 import { observabilityFeatureId } from '../../../common';
 import { useKibana } from '../../utils/kibana_react';
@@ -55,6 +57,12 @@ import { CustomThresholdRule } from '../../components/custom_threshold/component
 import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
 import { AlertHistoryChart } from './components/alert_history';
 import StaleAlert from './components/stale_alert';
+import { RelatedDashboards } from './components/related_dashboards';
+import { getAlertTitle } from '../../utils/format_alert_title';
+import { AlertSubtitle } from './components/alert_subtitle';
+import { ProximalAlertsCallout } from './proximal_alerts_callout';
+import { useTabId } from './hooks/use_tab_id';
+import { useRelatedDashboards } from './hooks/use_related_dashboards';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -69,23 +77,12 @@ export const LOG_DOCUMENT_COUNT_RULE_TYPE_ID = 'logs.alert.document.count';
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
 
-const OVERVIEW_TAB_ID = 'overview';
-const METADATA_TAB_ID = 'metadata';
-const RELATED_ALERTS_TAB_ID = 'related_alerts';
-const ALERT_DETAILS_TAB_URL_STORAGE_KEY = 'tabId';
-type TabId = typeof OVERVIEW_TAB_ID | typeof METADATA_TAB_ID | typeof RELATED_ALERTS_TAB_ID;
-
-export const getPageTitle = (ruleCategory: string) => {
-  return i18n.translate('xpack.observability.pages.alertDetails.pageTitle.title', {
-    defaultMessage:
-      '{ruleCategory} {ruleCategory, select, Anomaly {detected} Inventory {threshold breached} other {breached}}',
-    values: {
-      ruleCategory,
-    },
-  });
+const isTabId = (value: string): value is TabId => {
+  return Object.values<string>(TAB_IDS).includes(value);
 };
 
 export function AlertDetails() {
+  const { services } = useKibana();
   const {
     cases: {
       helpers: { canUseCases },
@@ -96,43 +93,48 @@ export function AlertDetails() {
     observabilityAIAssistant,
     uiSettings,
     serverless,
-  } = useKibana().services;
-  const { onPageReady } = usePerformanceContext();
-
-  const { search } = useLocation();
-  const history = useHistory();
+  } = services;
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
+  const { getUrlTabId, setUrlTabId } = useTabId();
+  const urlTabId = getUrlTabId();
+  const {
+    isLoadingRelatedDashboards,
+    suggestedDashboards,
+    linkedDashboards,
+    refetchRelatedDashboards,
+  } = useRelatedDashboards(alertId);
+
   const [isLoading, alertDetail] = useFetchAlertDetail(alertId);
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
   const CasesContext = getCasesContext();
   const userCasesPermissions = canUseCases([observabilityFeatureId]);
   const ruleId = alertDetail?.formatted.fields[ALERT_RULE_UUID];
   const { rule, refetch } = useFetchRule({
-    ruleId,
+    ruleId: ruleId || '',
   });
+
+  const onSuccessAddSuggestedDashboard = useCallback(async () => {
+    await Promise.all([refetchRelatedDashboards(), refetch()]);
+  }, [refetch, refetchRelatedDashboards]);
+
+  // used to trigger refetch when rule edit flyout closes
+  const onUpdate = useCallback(() => {
+    refetch();
+  }, [refetch]);
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();
   const [sources, setSources] = useState<AlertDetailsSource[]>();
-  const [activeTabId, setActiveTabId] = useState<TabId>(() => {
-    const searchParams = new URLSearchParams(search);
-    const urlTabId = searchParams.get(ALERT_DETAILS_TAB_URL_STORAGE_KEY);
+  const [activeTabId, setActiveTabId] = useState<TabId>();
 
-    return urlTabId && [OVERVIEW_TAB_ID, METADATA_TAB_ID, RELATED_ALERTS_TAB_ID].includes(urlTabId)
-      ? (urlTabId as TabId)
-      : OVERVIEW_TAB_ID;
-  });
-  const handleSetTabId = async (tabId: TabId) => {
+  const handleSetTabId = async (tabId: TabId, newUrlState?: Record<string, string>) => {
     setActiveTabId(tabId);
 
-    let searchParams = new URLSearchParams(search);
-    if (tabId === RELATED_ALERTS_TAB_ID) {
-      searchParams.set(ALERT_DETAILS_TAB_URL_STORAGE_KEY, tabId);
+    if (newUrlState) {
+      setUrlTabId(tabId, true, newUrlState);
     } else {
-      searchParams = new URLSearchParams();
-      searchParams.set(ALERT_DETAILS_TAB_URL_STORAGE_KEY, tabId);
+      setUrlTabId(tabId, true);
     }
-    history.replace({ search: searchParams.toString() });
   };
 
   useEffect(() => {
@@ -158,8 +160,9 @@ export function AlertDetails() {
     if (alertDetail) {
       setRuleTypeModel(ruleTypeRegistry.get(alertDetail?.formatted.fields[ALERT_RULE_TYPE_ID]!));
       setAlertStatus(alertDetail?.formatted?.fields[ALERT_STATUS] as AlertStatus);
+      setActiveTabId(urlTabId && isTabId(urlTabId) ? urlTabId : 'overview');
     }
-  }, [alertDetail, ruleTypeRegistry]);
+  }, [alertDetail, ruleTypeRegistry, urlTabId]);
 
   useBreadcrumbs(
     [
@@ -172,7 +175,7 @@ export function AlertDetails() {
       },
       {
         text: alertDetail
-          ? getPageTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
+          ? getAlertTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
           : defaultBreadcrumb,
       },
     ],
@@ -183,11 +186,20 @@ export function AlertDetails() {
     setAlertStatus(ALERT_STATUS_UNTRACKED);
   }, []);
 
-  useEffect(() => {
-    if (!isLoading && !!alertDetail && activeTabId === OVERVIEW_TAB_ID) {
-      onPageReady();
-    }
-  }, [onPageReady, alertDetail, isLoading, activeTabId]);
+  const showRelatedAlertsFromCallout = () => {
+    handleSetTabId('related_alerts', {
+      filterProximal: 'true',
+    });
+  };
+
+  usePageReady({
+    isRefreshing: isLoading,
+    isReady: !isLoading && !!alertDetail && activeTabId === 'overview',
+    meta: {
+      description:
+        '[ttfmp_alert_details] The Observability Alert Details overview page has loaded successfully.',
+    },
+  });
 
   if (isLoading) {
     return <CenterJustifiedSpinner />;
@@ -238,6 +250,10 @@ export function AlertDetails() {
 
         <EuiSpacer size="m" />
         <EuiFlexGroup direction="column" gutterSize="m">
+          <ProximalAlertsCallout
+            alertDetail={alertDetail}
+            switchTabs={showRelatedAlertsFromCallout}
+          />
           <SourceBar alert={alertDetail.formatted} sources={sources} />
           <AlertDetailContextualInsights alert={alertDetail} />
           {rule && alertDetail.formatted && (
@@ -259,6 +275,11 @@ export function AlertDetails() {
     ) : (
       <EuiPanel hasShadow={false} data-test-subj="overviewTabPanel" paddingSize="none">
         <EuiSpacer size="l" />
+        <ProximalAlertsCallout
+          alertDetail={alertDetail}
+          switchTabs={showRelatedAlertsFromCallout}
+        />
+        <EuiSpacer size="l" />
         <AlertDetailContextualInsights alert={alertDetail} />
         <EuiSpacer size="l" />
         <AlertOverview alert={alertDetail.formatted} alertStatus={alertStatus} />
@@ -275,9 +296,22 @@ export function AlertDetails() {
     </EuiPanel>
   );
 
-  const tabs: EuiTabbedContentTab[] = [
+  const relatedDashboardsTab =
+    alertDetail && rule ? (
+      <RelatedDashboards
+        suggestedDashboards={suggestedDashboards}
+        linkedDashboards={linkedDashboards}
+        isLoadingRelatedDashboards={isLoadingRelatedDashboards}
+        rule={rule}
+        onSuccessAddSuggestedDashboard={onSuccessAddSuggestedDashboard}
+      />
+    ) : (
+      <EuiLoadingSpinner />
+    );
+
+  const tabs: Array<Omit<EuiTabbedContentTab, 'id'> & { id: TabId }> = [
     {
-      id: OVERVIEW_TAB_ID,
+      id: 'overview',
       name: i18n.translate('xpack.observability.alertDetails.tab.overviewLabel', {
         defaultMessage: 'Overview',
       }),
@@ -285,7 +319,7 @@ export function AlertDetails() {
       content: overviewTab,
     },
     {
-      id: METADATA_TAB_ID,
+      id: 'metadata',
       name: i18n.translate('xpack.observability.alertDetails.tab.metadataLabel', {
         defaultMessage: 'Metadata',
       }),
@@ -293,19 +327,62 @@ export function AlertDetails() {
       content: metadataTab,
     },
     {
-      id: RELATED_ALERTS_TAB_ID,
+      id: 'investigation_guide',
+      name: (
+        <>
+          <FormattedMessage
+            id="xpack.observability.alertDetails.tab.investigationGuideLabel"
+            defaultMessage="Investigation guide"
+          />
+          {rule?.artifacts?.investigation_guide?.blob && (
+            <EuiNotificationBadge color="success" css={{ marginLeft: '5px' }}>
+              <EuiIcon type="dot" size="s" />
+            </EuiNotificationBadge>
+          )}
+        </>
+      ),
+      'data-test-subj': 'investigationGuideTab',
+      content: (
+        <InvestigationGuide
+          blob={rule?.artifacts?.investigation_guide?.blob}
+          onUpdate={onUpdate}
+          refetch={refetch}
+          rule={rule}
+        />
+      ),
+    },
+    {
+      id: 'related_alerts',
       name: (
         <>
           <FormattedMessage
             id="xpack.observability.alertDetails.tab.relatedAlertsLabe"
             defaultMessage="Related alerts"
           />
-          &nbsp;
-          <BetaBadge size="s" iconType="beta" style={{ verticalAlign: 'middle' }} />
         </>
       ),
       'data-test-subj': 'relatedAlertsTab',
       content: <RelatedAlerts alertData={alertDetail} />,
+    },
+    {
+      id: 'related_dashboards',
+      name: (
+        <>
+          <FormattedMessage
+            id="xpack.observability.alertDetails.tab.relatedDashboardsLabel"
+            defaultMessage="Related dashboards"
+          />
+          {isLoadingRelatedDashboards ? (
+            <EuiLoadingSpinner css={{ marginLeft: '5px' }} />
+          ) : (
+            <EuiNotificationBadge color="success" css={{ marginLeft: '5px' }}>
+              {(linkedDashboards?.length || 0) + (suggestedDashboards?.length || 0)}
+            </EuiNotificationBadge>
+          )}
+        </>
+      ),
+      'data-test-subj': 'relatedDashboardsTab',
+      content: relatedDashboardsTab,
     },
   ];
 
@@ -313,7 +390,11 @@ export function AlertDetails() {
     <ObservabilityPageTemplate
       pageHeader={{
         pageTitle: alertDetail?.formatted ? (
-          getPageTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
+          <>
+            {getAlertTitle(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])}
+            <EuiSpacer size="xs" />
+            <AlertSubtitle alert={alertDetail.formatted} />
+          </>
         ) : (
           <EuiLoadingSpinner />
         ),
@@ -328,6 +409,9 @@ export function AlertDetails() {
               alertIndex={alertDetail?.raw._index}
               alertStatus={alertStatus}
               onUntrackAlert={onUntrackAlert}
+              onUpdate={onUpdate}
+              rule={rule}
+              refetch={refetch}
             />
           </CasesContext>,
         ],

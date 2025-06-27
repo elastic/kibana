@@ -31,8 +31,14 @@ export function getConnectorType(): InferenceConnector {
     iconClass: 'sparkles',
     isExperimental: true,
     selectMessage: i18n.translate('xpack.stackConnectors.components.inference.selectMessageText', {
-      defaultMessage: 'Use the Elastic Managed LLM for your chat and RAG use cases.',
+      defaultMessage: 'Send requests to AI providers such as Amazon Bedrock, OpenAI and more.',
     }),
+    selectMessagePreconfigured: i18n.translate(
+      'xpack.stackConnectors.components.inference.selectMessagePreconfiguredText',
+      {
+        defaultMessage: 'Use the Elastic Managed LLM for your chat and RAG use cases.',
+      }
+    ),
     actionTypeTitle: INFERENCE_CONNECTOR_TITLE,
     validateParams: async (
       actionParams: InferenceActionParams
@@ -106,5 +112,6 @@ export function getConnectorType(): InferenceConnector {
     },
     actionConnectorFields: lazy(() => import('./connector')),
     actionParamsFields: lazy(() => import('./params')),
+    actionReadOnlyExtraComponent: lazy(() => import('./usage_cost_message')),
   };
 }

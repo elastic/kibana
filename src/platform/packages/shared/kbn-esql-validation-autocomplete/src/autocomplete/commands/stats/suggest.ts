@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType } from '@kbn/esql-types';
-import { ESQLFunction } from '@kbn/esql-ast';
+import { ESQLColumn, ESQLCommand, ESQLCommandOption, ESQLFunction } from '@kbn/esql-ast';
 import { isSingleItem } from '../../../..';
 import { CommandSuggestParams, Location } from '../../../definitions/types';
 import type { SuggestionRawDefinition } from '../../types';
@@ -18,7 +18,12 @@ import {
   getControlSuggestionIfSupported,
 } from '../../factories';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
-import { isExpressionComplete, pushItUpInTheList, suggestForExpression } from '../../helper';
+import {
+  handleFragment,
+  isExpressionComplete,
+  pushItUpInTheList,
+  suggestForExpression,
+} from '../../helper';
 import {
   byCompleteItem,
   getDateHistogramCompletionItem,
@@ -31,6 +36,7 @@ import { isMarkerNode } from '../../../shared/context';
 export async function suggest({
   innerText,
   command,
+  columnExists,
   getColumnsByType,
   getSuggestedUserDefinedColumnName,
   getPreferences,
@@ -40,10 +46,6 @@ export async function suggest({
 }: CommandSuggestParams<'stats'>): Promise<SuggestionRawDefinition[]> {
   const pos = getPosition(innerText, command);
 
-  const columnSuggestions = pushItUpInTheList(
-    await getColumnsByType('any', [], { advanceCursor: true, openSuggestions: true }),
-    true
-  );
   const lastCharacterTyped = innerText[innerText.length - 1];
   const controlSuggestions = getControlSuggestionIfSupported(
     Boolean(supportsControls),
@@ -71,7 +73,7 @@ export async function suggest({
         { ...commaCompleteItem, command: TRIGGER_SUGGESTION_COMMAND, text: ', ' },
       ];
 
-    case 'after_where':
+    case 'after_where': {
       const whereFn = command.args[command.args.length - 1] as ESQLFunction;
       const expressionRoot = isMarkerNode(whereFn.args[1]) ? undefined : whereFn.args[1]!;
 
@@ -96,21 +98,51 @@ export async function suggest({
       }
 
       return suggestions;
+    }
 
-    case 'grouping_expression_after_assignment':
-      return [
-        ...getFunctionSuggestions({ location: Location.STATS_BY }),
-        getDateHistogramCompletionItem((await getPreferences?.())?.histogramBarTarget),
-        ...columnSuggestions,
-      ];
+    case 'grouping_expression_after_assignment': {
+      const histogramBarTarget = (await getPreferences?.())?.histogramBarTarget;
 
-    case 'grouping_expression_without_assignment':
-      return [
-        ...getFunctionSuggestions({ location: Location.STATS_BY }),
-        getDateHistogramCompletionItem((await getPreferences?.())?.histogramBarTarget),
-        ...columnSuggestions,
-        getNewUserDefinedColumnSuggestion(getSuggestedUserDefinedColumnName()),
-      ];
+      const columnSuggestions = pushItUpInTheList(
+        await getColumnsByType('any', [], { openSuggestions: true }),
+        true
+      );
+
+      return suggestColumns(
+        columnSuggestions,
+        [
+          ...getFunctionSuggestions({ location: Location.STATS_BY }),
+          getDateHistogramCompletionItem(histogramBarTarget),
+        ],
+        innerText,
+        columnExists
+      );
+    }
+
+    case 'grouping_expression_without_assignment': {
+      const histogramBarTarget = (await getPreferences?.())?.histogramBarTarget;
+
+      const ignored = alreadyUsedColumns(command);
+
+      const columnSuggestions = pushItUpInTheList(
+        await getColumnsByType('any', ignored, { openSuggestions: true }),
+        true
+      );
+
+      const suggestions = await suggestColumns(
+        columnSuggestions,
+        [
+          ...getFunctionSuggestions({ location: Location.STATS_BY }),
+          getDateHistogramCompletionItem(histogramBarTarget),
+        ],
+        innerText,
+        columnExists
+      );
+
+      suggestions.push(getNewUserDefinedColumnSuggestion(getSuggestedUserDefinedColumnName()));
+
+      return suggestions;
+    }
 
     case 'grouping_expression_complete':
       return [
@@ -121,4 +153,54 @@ export async function suggest({
     default:
       return [];
   }
+}
+
+function alreadyUsedColumns(command: ESQLCommand<'stats'>) {
+  const byOption = command.args.find((arg) => isSingleItem(arg) && arg.name === 'by') as
+    | ESQLCommandOption
+    | undefined;
+
+  const columnNodes = (byOption?.args.filter((arg) => isSingleItem(arg) && arg.type === 'column') ??
+    []) as ESQLColumn[];
+
+  return columnNodes.map((node) => node.parts.join('.'));
+}
+
+function suggestColumns(
+  columnSuggestions: SuggestionRawDefinition[],
+  otherSuggestions: SuggestionRawDefinition[],
+  innerText: string,
+  columnExists: (name: string) => boolean
+) {
+  return handleFragment(
+    innerText,
+    (fragment) => columnExists(fragment),
+    async (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
+      // fie<suggest>
+      return [
+        ...columnSuggestions.map((suggestion) => {
+          return {
+            ...suggestion,
+            text: suggestion.text,
+            rangeToReplace,
+          };
+        }),
+        ...otherSuggestions,
+      ];
+    },
+    (fragment: string, rangeToReplace: { start: number; end: number }) => {
+      // field<suggest>
+      const finalSuggestions = [
+        { ...pipeCompleteItem, text: ' | ' },
+        { ...commaCompleteItem, text: ', ' },
+      ];
+      return finalSuggestions.map<SuggestionRawDefinition>((s) => ({
+        ...s,
+        filterText: fragment,
+        text: fragment + s.text,
+        command: TRIGGER_SUGGESTION_COMMAND,
+        rangeToReplace,
+      }));
+    }
+  );
 }

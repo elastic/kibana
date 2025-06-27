@@ -8,8 +8,10 @@
 import { type ElasticsearchClient } from '@kbn/core/server';
 
 export function createManagedOtlpServiceApiKey(esClient: ElasticsearchClient, name: string) {
+  const timestamp = new Date().toISOString();
+
   return esClient.security.createApiKey({
-    name,
+    name: `${name}-${timestamp}`,
     role_descriptors: {
       otel_managed_service: {
         cluster: [],

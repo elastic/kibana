@@ -9,12 +9,6 @@ xpack.serverless.chat.enabled: true
 ## Cloud settings
 xpack.cloud.serverless.project_type: search
 
-## Fine-tune the search solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
-xpack.features.overrides:
-  ### Not sure if CHAT solution uses dashboard or maps
-  ### Maps feature is hidden in Role management since it's automatically granted by Dashboard feature.
-  maps_v2.hidden: true
-
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/workchat
 
@@ -30,3 +24,6 @@ xpack.spaces.maxSpaces: 1
 
 ## Content Connectors in stack management
 xpack.contentConnectors.enabled: false
+
+## Disable Kibana Product Intercept
+xpack.product_intercept.enabled: false

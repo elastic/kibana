@@ -10,7 +10,7 @@ import {
   type ApplicationLinksUpdateParams,
 } from './application_links_updater';
 import type { AppLinkItems, LinkItem } from '../../common/links/types';
-import { hasCapabilities as mockHasCapabilities } from '../../common/lib/capabilities';
+import { hasCapabilities, existCapabilities } from '../../common/lib/capabilities';
 import type { Capabilities, IUiSettingsClient } from '@kbn/core/public';
 import type { ExperimentalFeatures, SecurityPageName } from '../../../common';
 import type { ILicense } from '@kbn/licensing-plugin/public';
@@ -18,11 +18,15 @@ import type { UpsellingService } from '@kbn/security-solution-upselling/service'
 
 jest.mock('../../common/lib/capabilities', () => ({
   hasCapabilities: jest.fn(),
+  existCapabilities: jest.fn(),
 }));
+
+const mockHasCapabilities = hasCapabilities as jest.Mock;
+const mockExistCapabilities = existCapabilities as jest.Mock;
 
 // Allow access to private method just for testing
 const appLinks = applicationLinksUpdater as unknown as {
-  filterAppLinks: (links: AppLinkItems, params: ApplicationLinksUpdateParams) => LinkItem[];
+  processAppLinks: (links: AppLinkItems, params: ApplicationLinksUpdateParams) => LinkItem[];
 };
 
 const link: LinkItem = {
@@ -31,7 +35,7 @@ const link: LinkItem = {
   title: 'Test',
 };
 
-describe('ApplicationLinks - filterAppLinks', () => {
+describe('ApplicationLinksUpdater', () => {
   const createMockParams = (
     overrides: Partial<ApplicationLinksUpdateParams> = {}
   ): ApplicationLinksUpdateParams => ({
@@ -51,115 +55,129 @@ describe('ApplicationLinks - filterAppLinks', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockHasCapabilities.mockReturnValue(true);
+    mockExistCapabilities.mockReturnValue(true);
   });
 
-  it('should include a link when all links are allowed', () => {
-    (mockHasCapabilities as jest.Mock).mockReturnValue(true);
+  describe('processAppLinks', () => {
+    it('should include a link when all links are allowed', () => {
+      const params = createMockParams();
+      const result = appLinks.processAppLinks([link], params);
 
-    const params = createMockParams();
-    const result = appLinks.filterAppLinks([link], params);
-
-    expect(result).toEqual([link]);
-  });
-
-  it('should exclude a link when capabilities are not met and not upsellable', () => {
-    (mockHasCapabilities as jest.Mock).mockReturnValue(false);
-
-    const links: AppLinkItems = [{ ...link, capabilities: ['admin'] }];
-
-    const params = createMockParams();
-    const result = appLinks.filterAppLinks(links, params);
-
-    expect(result).toEqual([]);
-  });
-
-  it('should mark a link as unauthorized if upsellable but capabilities fail', () => {
-    (mockHasCapabilities as jest.Mock).mockReturnValue(false);
-
-    const links: AppLinkItems = [{ ...link, capabilities: ['advanced_access'] }];
-
-    const params = createMockParams({
-      upselling: { isPageUpsellable: jest.fn(() => true) } as unknown as UpsellingService,
+      expect(result).toEqual([link]);
     });
 
-    const result = appLinks.filterAppLinks(links, params);
+    it('should exclude a link when capabilities do not exist and not upsellable', () => {
+      mockExistCapabilities.mockReturnValue(false);
 
-    expect(result).toEqual([expect.objectContaining({ ...link, unauthorized: true })]);
-  });
+      const links: AppLinkItems = [{ ...link, capabilities: ['admin'] }];
 
-  it('should filter out a link based on uiSettingsClient', () => {
-    (mockHasCapabilities as jest.Mock).mockReturnValue(true);
+      const params = createMockParams();
+      const result = appLinks.processAppLinks(links, params);
 
-    const links: AppLinkItems = [{ ...link, uiSettingRequired: 'showBeta' }];
-
-    const params = createMockParams({
-      uiSettingsClient: { get: jest.fn(() => false) } as unknown as IUiSettingsClient,
+      expect(result).toEqual([]);
     });
 
-    const result = appLinks.filterAppLinks(links, params);
+    it('should mark link as unavailable when capabilities do not exist and it is upsellable', () => {
+      mockExistCapabilities.mockReturnValue(false);
 
-    expect(result).toEqual([]);
-  });
+      const links: AppLinkItems = [{ ...link, capabilities: ['advanced_access'] }];
 
-  it('should filter out links based on experimental features', () => {
-    (mockHasCapabilities as jest.Mock).mockReturnValue(true);
+      const params = createMockParams({
+        upselling: { isPageUpsellable: jest.fn(() => true) } as unknown as UpsellingService,
+      });
 
-    const links: AppLinkItems = [
-      { ...link, experimentalKey: 'labsEnabled' as keyof ExperimentalFeatures },
-    ];
+      const result = appLinks.processAppLinks(links, params);
 
-    const params = createMockParams({
-      experimentalFeatures: { labsEnabled: false } as unknown as ExperimentalFeatures,
+      expect(result).toEqual([expect.objectContaining({ ...link, unavailable: true })]);
     });
 
-    const result = appLinks.filterAppLinks(links, params);
+    it('should mark a link as unauthorized if capabilities exist but requirements are not met', () => {
+      mockExistCapabilities.mockReturnValue(true);
+      mockHasCapabilities.mockReturnValue(false);
 
-    expect(result).toEqual([]);
-  });
+      const links: AppLinkItems = [{ ...link, capabilities: ['advanced_access'] }];
 
-  it('should recurse and filter child links', () => {
-    (mockHasCapabilities as jest.Mock).mockImplementation(
-      (caps, required) => required?.includes('read') ?? true
-    );
+      const params = createMockParams({
+        upselling: { isPageUpsellable: jest.fn(() => true) } as unknown as UpsellingService,
+      });
 
-    const links: AppLinkItems = [
-      {
-        id: 'parent' as SecurityPageName,
-        path: '/app/parent',
-        title: 'Parent',
-        capabilities: ['read'],
-        links: [
-          {
-            id: 'child-1' as SecurityPageName,
-            title: 'Child 1',
-            path: '/app/child-1',
-            capabilities: ['read'],
-          },
-          {
-            id: 'child-2' as SecurityPageName,
-            title: 'Child 2',
-            path: '/app/child-2',
-            capabilities: ['admin'],
-          },
-        ],
-      },
-    ];
+      const result = appLinks.processAppLinks(links, params);
 
-    const params = createMockParams({
-      upselling: { isPageUpsellable: jest.fn(() => false) } as unknown as UpsellingService,
+      expect(result).toEqual([expect.objectContaining({ ...link, unauthorized: true })]);
     });
 
-    const result = appLinks.filterAppLinks(links, params);
+    it('should filter out a link based on uiSettingsClient', () => {
+      const links: AppLinkItems = [{ ...link, uiSettingRequired: 'showBeta' }];
 
-    expect(result).toEqual([
-      expect.objectContaining({
-        id: 'parent',
-        links: [
-          expect.objectContaining({
-            id: 'child-1',
-          }),
-        ],
-      }),
-    ]);
+      const params = createMockParams({
+        uiSettingsClient: { get: jest.fn(() => false) } as unknown as IUiSettingsClient,
+      });
+
+      const result = appLinks.processAppLinks(links, params);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should filter out links based on experimental features', () => {
+      const links: AppLinkItems = [
+        { ...link, experimentalKey: 'labsEnabled' as keyof ExperimentalFeatures },
+      ];
+
+      const params = createMockParams({
+        experimentalFeatures: { labsEnabled: false } as unknown as ExperimentalFeatures,
+      });
+
+      const result = appLinks.processAppLinks(links, params);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should recurse and filter child links', () => {
+      mockExistCapabilities.mockImplementation(
+        (_caps, required) => required?.includes('read') ?? true
+      );
+
+      const links: AppLinkItems = [
+        {
+          id: 'parent' as SecurityPageName,
+          path: '/app/parent',
+          title: 'Parent',
+          capabilities: ['read'],
+          links: [
+            {
+              id: 'child-1' as SecurityPageName,
+              title: 'Child 1',
+              path: '/app/child-1',
+              capabilities: ['read'],
+            },
+            {
+              id: 'child-2' as SecurityPageName,
+              title: 'Child 2',
+              path: '/app/child-2',
+              capabilities: ['admin'],
+            },
+          ],
+        },
+      ];
+
+      const params = createMockParams({
+        upselling: { isPageUpsellable: jest.fn(() => false) } as unknown as UpsellingService,
+      });
+
+      const result = appLinks.processAppLinks(links, params);
+
+      expect(result).toEqual([
+        expect.objectContaining({
+          id: 'parent',
+          links: [
+            expect.objectContaining({
+              id: 'child-1',
+            }),
+          ],
+        }),
+      ]);
+    });
   });
 });

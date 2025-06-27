@@ -8,6 +8,7 @@
 import { EuiCode, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { useDatasetQualityDetailsState } from '../../../../hooks';
 import {
   overviewPanelDatasetQualityIndicatorDegradedDocs,
   overviewPanelDatasetQualityIndicatorFailedDocs,
@@ -22,7 +23,6 @@ import {
 import { useOverviewSummaryPanel } from '../../../../hooks/use_overview_summary_panel';
 import { DatasetQualityIndicator } from '../../../quality_indicator';
 import { Panel, PanelIndicator } from './panel';
-import { useDatasetQualityDetailsContext } from '../../context';
 
 const degradedDocsTooltip = (
   <FormattedMessage
@@ -41,14 +41,14 @@ const degradedDocsTooltip = (
 const failedDocsColumnTooltip = (
   <FormattedMessage
     id="xpack.datasetQuality.failedDocsSummaryTooltip"
-    defaultMessage="The number of documents sent to failure store due to an issue during ingestion."
+    defaultMessage="The number of documents sent to failure store due to an issue during ingestion. Failed documents are only captured if the failure store is explicitly enabled."
   />
 );
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function Summary() {
-  const { isFailureStoreEnabled } = useDatasetQualityDetailsContext();
+  const { canShowFailureStoreInfo } = useDatasetQualityDetailsState();
   const {
     isSummaryPanelLoading,
     totalDocsCount,
@@ -103,7 +103,7 @@ export default function Summary() {
           isLoading={isSummaryPanelLoading}
           tooltip={degradedDocsTooltip}
         />
-        {isFailureStoreEnabled && (
+        {canShowFailureStoreInfo && (
           <PanelIndicator
             label={overviewPanelDatasetQualityIndicatorFailedDocs}
             value={totalFailedDocsCount}

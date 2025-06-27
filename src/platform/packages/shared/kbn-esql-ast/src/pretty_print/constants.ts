@@ -25,7 +25,7 @@
  * DISSECT input "pattern"
  * ```
  */
-export const commandsWithNoCommaArgSeparator = new Set(['grok', 'dissect']);
+export const commandsWithNoCommaArgSeparator = new Set(['grok', 'dissect', 'sample']);
 
 /**
  * This set tracks command options which use an equals sign to separate

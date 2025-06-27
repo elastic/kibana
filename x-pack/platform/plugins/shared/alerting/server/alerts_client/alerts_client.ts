@@ -19,7 +19,11 @@ import {
   ALERT_START,
 } from '@kbn/rule-data-utils';
 import { flatMap, get, isEmpty, keys } from 'lodash';
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MsearchRequestItem,
+  MsearchResponseItem,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { DeepPartial } from '@kbn/utility-types';
@@ -48,7 +52,6 @@ import type {
   UpdateableAlert,
   GetSummarizedAlertsParams,
   GetMaintenanceWindowScopedQueryAlertsParams,
-  ScopedQueryAggregationResult,
 } from './types';
 import {
   buildNewAlert,
@@ -57,11 +60,11 @@ import {
   buildRecoveredAlert,
   formatRule,
   getHitsWithCount,
-  getScopedQueryHitsWithIds,
   getLifecycleAlertsQueries,
   getMaintenanceWindowAlertsQuery,
   getContinualAlertsQuery,
   isAlertImproving,
+  shouldCreateAlertsInAllSpaces,
 } from './lib';
 import { isValidAlertIndexName } from '../alerts_service';
 import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
@@ -71,6 +74,7 @@ import {
 } from '../task_runner/maintenance_windows';
 import { ErrorWithType } from '../lib/error_with_type';
 import { DEFAULT_MAX_ALERTS } from '../config';
+import { RUNTIME_MAINTENANCE_WINDOW_ID_FIELD } from './lib/get_summarized_alerts_query';
 
 export interface AlertsClientParams extends CreateAlertsClientParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
@@ -286,6 +290,22 @@ export class AlertsClient<
     return { hits, total, aggregations };
   }
 
+  public async msearch<Aggregation = unknown>(
+    searches: MsearchRequestItem[]
+  ): Promise<Array<MsearchResponseItem<Alert & AlertData>>> {
+    const esClient = await this.options.elasticsearchClientPromise;
+    const index = this.isUsingDataStreams()
+      ? this.indexTemplateAndPattern.alias
+      : this.indexTemplateAndPattern.pattern;
+    const { responses } = await esClient.msearch<Alert & AlertData>({
+      index,
+      searches,
+      ignore_unavailable: true,
+    });
+
+    return responses;
+  }
+
   public report(
     alert: ReportedAlert<
       AlertData,
@@ -384,8 +404,12 @@ export class AlertsClient<
   public async persistAlerts(): Promise<AlertsAffectedByMaintenanceWindows> {
     // Persist alerts first
     await this.persistAlertsHelper();
-
-    return await this.updatePersistedAlertsWithMaintenanceWindowIds();
+    try {
+      return await this.updatePersistedAlertsWithMaintenanceWindowIds();
+    } catch (err) {
+      this.options.logger.error('Error updating maintenance window IDs:', err);
+      return { alertIds: [], maintenanceWindowIds: [] };
+    }
   }
 
   public getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean) {
@@ -465,6 +489,11 @@ export class AlertsClient<
     const currentTime = this.startedAtString ?? new Date().toISOString();
     const esClient = await this.options.elasticsearchClientPromise;
 
+    const createAlertsInAllSpaces = shouldCreateAlertsInAllSpaces({
+      ruleTypeId: this.ruleType.id,
+      ruleTypeAlertDef: this.ruleType.alerts,
+      logger: this.options.logger,
+    });
     const { rawActiveAlerts, rawRecoveredAlerts } = this.getRawAlertInstancesForState();
 
     const activeAlerts = this.legacyAlertsClient.getProcessedAlerts(ALERT_STATUS_ACTIVE);
@@ -503,6 +532,7 @@ export class AlertsClient<
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
               kibanaVersion: this.options.kibanaVersion,
+              dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
             })
           );
         } else {
@@ -525,6 +555,7 @@ export class AlertsClient<
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
               kibanaVersion: this.options.kibanaVersion,
+              dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
             })
           );
         }
@@ -559,6 +590,7 @@ export class AlertsClient<
                 payload: this.reportedAlerts[id],
                 recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
                 kibanaVersion: this.options.kibanaVersion,
+                dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
               })
             : buildUpdatedRecoveredAlert<AlertData>({
                 alert: trackedAlert,
@@ -684,7 +716,7 @@ export class AlertsClient<
     const isLifecycleAlert = this.ruleType.autoRecoverAlerts ?? false;
     const maxAlertLimit = this.legacyAlertsClient.getMaxAlertLimit();
 
-    const query = getMaintenanceWindowAlertsQuery({
+    const searches = getMaintenanceWindowAlertsQuery({
       executionUuid,
       ruleId,
       maintenanceWindows,
@@ -692,9 +724,32 @@ export class AlertsClient<
       maxAlertLimit,
     });
 
-    const response = await this.search<ScopedQueryAggregationResult>(query);
+    const responses = await this.msearch(searches);
+    const alertsByMaintenanceWindowIds: ScopedQueryAlerts = {};
 
-    return getScopedQueryHitsWithIds(response.aggregations);
+    responses.forEach((response) => {
+      if ('error' in response) {
+        this.options.logger.error(
+          `Error fetching scoped query alerts for maintenance windows ${this.ruleInfoMessage}: ${response.error.reason}`,
+          this.logTags
+        );
+        return;
+      }
+      response.hits.hits.forEach(({ fields }) => {
+        if (!fields) {
+          return;
+        }
+        const mwIdField = fields[RUNTIME_MAINTENANCE_WINDOW_ID_FIELD];
+
+        if (!alertsByMaintenanceWindowIds[mwIdField]) {
+          alertsByMaintenanceWindowIds[mwIdField] = [];
+        }
+
+        alertsByMaintenanceWindowIds[mwIdField].push(get(fields, ALERT_UUID)[0]);
+      });
+    });
+
+    return alertsByMaintenanceWindowIds;
   }
 
   private async updateAlertMaintenanceWindowIds(idsToUpdate: string[]) {
@@ -781,7 +836,7 @@ export class AlertsClient<
 
     // Run aggs to get all scoped query alert IDs, returns a record<maintenanceWindowId, alertIds>,
     // indicating the maintenance window has matches a number of alerts with the scoped query.
-    const aggsResult = await this.getMaintenanceWindowScopedQueryAlerts({
+    const alertsByMaintenanceWindowIds = await this.getMaintenanceWindowScopedQueryAlerts({
       ruleId: this.options.rule.id,
       spaceId: this.options.rule.spaceId,
       executionUuid: this.options.rule.executionId,
@@ -791,7 +846,9 @@ export class AlertsClient<
     const alertsAffectedByScopedQuery: string[] = [];
     const appliedMaintenanceWindowIds: string[] = [];
 
-    for (const [scopedQueryMaintenanceWindowId, alertIds] of Object.entries(aggsResult)) {
+    for (const [scopedQueryMaintenanceWindowId, alertIds] of Object.entries(
+      alertsByMaintenanceWindowIds
+    )) {
       // Go through matched alerts, find the in memory object
       alertIds.forEach((alertId) => {
         const newAlert = newAlerts.find((alert) => alert.getUuid() === alertId);

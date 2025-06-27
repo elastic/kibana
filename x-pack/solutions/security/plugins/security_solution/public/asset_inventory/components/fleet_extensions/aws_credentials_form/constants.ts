@@ -20,4 +20,5 @@ export const AWS_CREDENTIALS_TYPE = {
   TEMPORARY_KEYS: 'temporary_keys',
   SHARED_CREDENTIALS: 'shared_credentials',
   CLOUD_FORMATION: 'cloud_formation',
+  CLOUD_CONNECTORS: 'cloud_connectors',
 } as const;

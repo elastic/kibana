@@ -14416,9 +14416,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_api/routes/benchmarks.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_api/routes/benchmarks.ts",
     "fileName": "benchmarks.ts",
-    "directory": "x-pack/test/cloud_security_posture_api",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_api",
     "tags": [
       "FTR",
       "API INTEGRATION",
@@ -14585,9 +14585,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts",
     "fileName": "csp_benchmark_rules_bulk_update.ts",
-    "directory": "x-pack/test/cloud_security_posture_api",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_api",
     "tags": [
       "FTR",
       "API INTEGRATION"
@@ -14812,9 +14812,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts",
     "fileName": "csp_benchmark_rules_get_states.ts",
-    "directory": "x-pack/test/cloud_security_posture_api",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_api",
     "tags": [
       "FTR",
       "API INTEGRATION",
@@ -14935,9 +14935,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_api/routes/get_detection_engine_alerts_count_by_rule_tags.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_api/routes/get_detection_engine_alerts_count_by_rule_tags.ts",
     "fileName": "get_detection_engine_alerts_count_by_rule_tags.ts",
-    "directory": "x-pack/test/cloud_security_posture_api",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_api",
     "tags": [
       "FTR",
       "API INTEGRATION"
@@ -15038,9 +15038,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_api/routes/index.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_api/routes/index.ts",
     "fileName": "index.ts",
-    "directory": "x-pack/test/cloud_security_posture_api",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_api",
     "tags": [
       "FTR",
       "API INTEGRATION"
@@ -15074,9 +15074,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_api/routes/stats.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_api/routes/stats.ts",
     "fileName": "stats.ts",
-    "directory": "x-pack/test/cloud_security_posture_api",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_api",
     "tags": [
       "FTR",
       "API INTEGRATION"
@@ -15435,9 +15435,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_api/routes/status.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_api/routes/status.ts",
     "fileName": "status.ts",
-    "directory": "x-pack/test/cloud_security_posture_api",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_api",
     "tags": [
       "FTR",
       "API INTEGRATION"
@@ -15538,9 +15538,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_api/routes/vulnerabilities_dashboard.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_api/routes/vulnerabilities_dashboard.ts",
     "fileName": "vulnerabilities_dashboard.ts",
-    "directory": "x-pack/test/cloud_security_posture_api",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_api",
     "tags": [
       "FTR",
       "API INTEGRATION"
@@ -15660,9 +15660,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_api/telemetry/telemetry.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_api/telemetry/telemetry.ts",
     "fileName": "telemetry.ts",
-    "directory": "x-pack/test/cloud_security_posture_api",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_api",
     "tags": [
       "FTR",
       "API INTEGRATION"
@@ -15803,9 +15803,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/agentless/create_agent.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/agentless/create_agent.ts",
     "fileName": "create_agent.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR"
     ],
@@ -15882,9 +15882,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/cloud_tests/benchmark_sanity.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/benchmark_sanity.ts",
     "fileName": "benchmark_sanity.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR"
     ],
@@ -15982,9 +15982,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/dashboard_sanity.ts",
     "fileName": "dashboard_sanity.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR"
     ],
@@ -16254,9 +16254,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/cloud_tests/findings_sanity.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/findings_sanity.ts",
     "fileName": "findings_sanity.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR"
     ],
@@ -16367,9 +16367,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/cloud_tests/index.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests/index.ts",
     "fileName": "index.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR"
     ],
@@ -16402,9 +16402,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/data_views/data_views.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/data_views/data_views.ts",
     "fileName": "data_views.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR",
       "HAS SKIP"
@@ -16545,9 +16545,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/data_views/index.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/data_views/index.ts",
     "fileName": "index.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR"
     ],
@@ -16580,9 +16580,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/pages/benchmark.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/pages/benchmark.ts",
     "fileName": "benchmark.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR",
       "HAS SKIP"
@@ -16725,9 +16725,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cnvm/cis_integration_cnvm.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cnvm/cis_integration_cnvm.ts",
     "fileName": "cis_integration_cnvm.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR",
       "HAS SKIP"
@@ -16849,9 +16849,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts",
     "fileName": "cis_integration_aws.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR",
       "HAS SKIP"
@@ -17390,9 +17390,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts",
     "fileName": "cis_integration_azure.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR"
     ],
@@ -17779,9 +17779,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts",
     "fileName": "cis_integration_gcp.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR",
       "HAS SKIP"
@@ -18266,9 +18266,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_eks.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_eks.ts",
     "fileName": "cis_integration_eks.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR"
     ],
@@ -18479,9 +18479,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_k8s.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_k8s.ts",
     "fileName": "cis_integration_k8s.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR"
     ],
@@ -18560,9 +18560,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/pages/compliance_dashboard.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/pages/compliance_dashboard.ts",
     "fileName": "compliance_dashboard.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR",
       "HAS SKIP",
@@ -18752,9 +18752,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_alerts.ts",
     "fileName": "findings_alerts.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR",
       "HAS SKIP"
@@ -18964,9 +18964,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/pages/findings_grouping.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_grouping.ts",
     "fileName": "findings_grouping.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR"
     ],
@@ -19282,9 +19282,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/pages/findings_old_data.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_old_data.ts",
     "fileName": "findings_old_data.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR"
     ],
@@ -19384,9 +19384,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/pages/findings_onboarding.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings_onboarding.ts",
     "fileName": "findings_onboarding.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR"
     ],
@@ -19484,9 +19484,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/pages/findings.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/pages/findings.ts",
     "fileName": "findings.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR"
     ],
@@ -19760,9 +19760,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/pages/index.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/pages/index.ts",
     "fileName": "index.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR"
     ],
@@ -19795,9 +19795,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/pages/rules.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/pages/rules.ts",
     "fileName": "rules.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR",
       "HAS SKIP"
@@ -20410,9 +20410,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts",
     "fileName": "vulnerabilities_grouping.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR"
     ],
@@ -20663,9 +20663,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/pages/vulnerabilities.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerabilities.ts",
     "fileName": "vulnerabilities.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR"
     ],
@@ -20872,9 +20872,9 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts",
+    "filePath": "x-pack/solutions/security/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts",
     "fileName": "vulnerability_dashboard.ts",
-    "directory": "x-pack/test/cloud_security_posture_functional",
+    "directory": "x-pack/solutions/security/test/cloud_security_posture_functional",
     "tags": [
       "FTR"
     ],

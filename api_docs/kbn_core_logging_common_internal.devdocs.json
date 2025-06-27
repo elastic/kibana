@@ -425,6 +425,68 @@
       },
       {
         "parentPluginId": "@kbn/core-logging-common-internal",
+        "id": "def-common.ErrorConversion",
+        "type": "Object",
+        "tags": [],
+        "label": "ErrorConversion",
+        "description": [],
+        "path": "src/core/packages/logging/common-internal/src/layouts/conversions/error.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.ErrorConversion.pattern",
+            "type": "Object",
+            "tags": [],
+            "label": "pattern",
+            "description": [],
+            "signature": [
+              "RegExp"
+            ],
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/error.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.ErrorConversion.convert",
+            "type": "Function",
+            "tags": [],
+            "label": "convert",
+            "description": [],
+            "signature": [
+              "(record: ",
+              "LogRecord",
+              ") => string"
+            ],
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/error.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-logging-common-internal",
+                "id": "def-common.ErrorConversion.convert.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "record",
+                "description": [],
+                "signature": [
+                  "LogRecord"
+                ],
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/error.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-common-internal",
         "id": "def-common.LevelConversion",
         "type": "Object",
         "tags": [],

@@ -25,4 +25,5 @@ export type Scenario<TFields extends Fields = Fields> = (options: ScenarioInitOp
   bootstrap?: (options: ScenarioPhaseOptions) => Promise<void>;
   generate: Generate<TFields>;
   teardown?: (options: ScenarioPhaseOptions) => Promise<void>;
+  setupPipeline?: (options: ScenarioPhaseOptions) => void;
 }>;

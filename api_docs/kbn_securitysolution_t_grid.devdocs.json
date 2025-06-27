@@ -29,7 +29,7 @@
         "signature": [
           "(result: ",
           "DropResult",
-          ") => boolean"
+          "<string>) => boolean"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
@@ -43,7 +43,8 @@
             "label": "result",
             "description": [],
             "signature": [
-              "DropResult"
+              "DropResult",
+              "<string>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
@@ -64,7 +65,7 @@
         "signature": [
           "(result: ",
           "DropResult",
-          ") => boolean"
+          "<string>) => boolean"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
@@ -78,7 +79,8 @@
             "label": "result",
             "description": [],
             "signature": [
-              "DropResult"
+              "DropResult",
+              "<string>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
@@ -99,7 +101,7 @@
         "signature": [
           "(result: ",
           "DropResult",
-          ") => boolean"
+          "<string>) => boolean"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
@@ -113,7 +115,8 @@
             "label": "result",
             "description": [],
             "signature": [
-              "DropResult"
+              "DropResult",
+              "<string>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
@@ -134,7 +137,7 @@
         "signature": [
           "(result: ",
           "DropResult",
-          " | { draggableId: string; }) => boolean"
+          "<string> | { draggableId: string; }) => boolean"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
@@ -149,7 +152,7 @@
             "description": [],
             "signature": [
               "DropResult",
-              " | { draggableId: string; }"
+              "<string> | { draggableId: string; }"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
@@ -170,7 +173,7 @@
         "signature": [
           "(result: ",
           "DropResult",
-          " | { draggableId: string; }) => boolean"
+          "<string> | { draggableId: string; }) => boolean"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
@@ -185,7 +188,7 @@
             "description": [],
             "signature": [
               "DropResult",
-              " | { draggableId: string; }"
+              "<string> | { draggableId: string; }"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
@@ -305,7 +308,7 @@
         "signature": [
           "(result: ",
           "DropResult",
-          ") => boolean"
+          "<string>) => boolean"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
@@ -319,7 +322,8 @@
             "label": "result",
             "description": [],
             "signature": [
-              "DropResult"
+              "DropResult",
+              "<string>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
@@ -459,7 +463,7 @@
         "signature": [
           "(result: ",
           "DropResult",
-          ") => string"
+          "<string>) => string"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
@@ -473,7 +477,8 @@
             "label": "result",
             "description": [],
             "signature": [
-              "DropResult"
+              "DropResult",
+              "<string>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
@@ -494,7 +499,7 @@
         "signature": [
           "(result: ",
           "DropResult",
-          ") => string"
+          "<string>) => string"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
@@ -508,7 +513,8 @@
             "label": "result",
             "description": [],
             "signature": [
-              "DropResult"
+              "DropResult",
+              "<string>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
@@ -799,7 +805,7 @@
         "signature": [
           "(result: ",
           "DropResult",
-          ") => boolean"
+          "<string>) => boolean"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
@@ -813,7 +819,8 @@
             "label": "result",
             "description": [],
             "signature": [
-              "DropResult"
+              "DropResult",
+              "<string>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
@@ -834,7 +841,7 @@
         "signature": [
           "(result: ",
           "DropResult",
-          ") => boolean"
+          "<string>) => boolean"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
@@ -848,7 +855,8 @@
             "label": "result",
             "description": [],
             "signature": [
-              "DropResult"
+              "DropResult",
+              "<string>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
@@ -869,7 +877,7 @@
         "signature": [
           "(result: ",
           "DropResult",
-          ") => boolean"
+          "<string>) => boolean"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
@@ -883,7 +891,8 @@
             "label": "result",
             "description": [],
             "signature": [
-              "DropResult"
+              "DropResult",
+              "<string>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
@@ -904,7 +913,7 @@
         "signature": [
           "(result: ",
           "DropResult",
-          ") => boolean"
+          "<string>) => boolean"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
@@ -918,7 +927,8 @@
             "label": "result",
             "description": [],
             "signature": [
-              "DropResult"
+              "DropResult",
+              "<string>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,
@@ -972,7 +982,7 @@
         "signature": [
           "(result: ",
           "DropResult",
-          ") => boolean"
+          "<string>) => boolean"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
         "deprecated": false,
@@ -986,7 +996,8 @@
             "label": "result",
             "description": [],
             "signature": [
-              "DropResult"
+              "DropResult",
+              "<string>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
             "deprecated": false,

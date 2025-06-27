@@ -97,6 +97,22 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/storage-adapter",
+                "id": "def-server.StorageIndexAdapter.Unnamed.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "StorageIndexAdapterOptions",
+                  "<TApplicationType>"
+                ],
+                "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -486,7 +502,7 @@
                   "SearchHighlight",
                   " | undefined; track_total_hits?: ",
                   "SearchTrackHits",
-                  " | undefined; indices_boost?: Record<string, number>[] | undefined; docvalue_fields?: (string | ",
+                  " | undefined; indices_boost?: Partial<Record<string, number>>[] | undefined; docvalue_fields?: (string | ",
                   "QueryDslFieldAndFormat",
                   ")[] | undefined; knn?: ",
                   "KnnSearch",
@@ -1057,7 +1073,7 @@
               "SearchHighlight",
               " | undefined; track_total_hits?: ",
               "SearchTrackHits",
-              " | undefined; indices_boost?: Record<string, number>[] | undefined; docvalue_fields?: (string | ",
+              " | undefined; indices_boost?: Partial<Record<string, number>>[] | undefined; docvalue_fields?: (string | ",
               "QueryDslFieldAndFormat",
               ")[] | undefined; knn?: ",
               "KnnSearch",
@@ -1140,7 +1156,7 @@
           "SearchHighlight",
           " | undefined; track_total_hits?: ",
           "SearchTrackHits",
-          " | undefined; indices_boost?: Record<string, number>[] | undefined; docvalue_fields?: (string | ",
+          " | undefined; indices_boost?: Partial<Record<string, number>>[] | undefined; docvalue_fields?: (string | ",
           "QueryDslFieldAndFormat",
           ")[] | undefined; knn?: ",
           "KnnSearch",

@@ -25,7 +25,18 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
             title: 'Home',
           },
           {
+            link: 'discover',
+            spaceBefore: 'l',
+          },
+          {
+            link: 'dashboards',
+            getIsActive: ({ pathNameSerialized, prepend }) => {
+              return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+            },
+          },
+          {
             link: 'workchat:agents',
+            spaceBefore: 'l',
           },
           {
             link: 'workchat:integrations',

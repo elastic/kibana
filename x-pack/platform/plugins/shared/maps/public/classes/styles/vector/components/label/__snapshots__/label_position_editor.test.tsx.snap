@@ -31,13 +31,8 @@ exports[`should render 1`] = `
 `;
 
 exports[`should render as disabled when label is not set 1`] = `
-<EuiToolTip
-  anchorClassName="mapStyleFormDisabledTooltip"
+<DisabledToolTip
   content="Set 'Label' to enable"
-  delay="regular"
-  disableScreenReaderOutput={false}
-  display="inlineBlock"
-  position="top"
 >
   <EuiFormRow
     label="Label position"
@@ -66,17 +61,12 @@ exports[`should render as disabled when label is not set 1`] = `
       value="CENTER"
     />
   </EuiFormRow>
-</EuiToolTip>
+</DisabledToolTip>
 `;
 
 exports[`should render as disabled when label position is disabled 1`] = `
-<EuiToolTip
-  anchorClassName="mapStyleFormDisabledTooltip"
+<DisabledToolTip
   content="simulated disabled error"
-  delay="regular"
-  disableScreenReaderOutput={false}
-  display="inlineBlock"
-  position="top"
 >
   <EuiFormRow
     label="Label position"
@@ -105,5 +95,5 @@ exports[`should render as disabled when label position is disabled 1`] = `
       value="CENTER"
     />
   </EuiFormRow>
-</EuiToolTip>
+</DisabledToolTip>
 `;

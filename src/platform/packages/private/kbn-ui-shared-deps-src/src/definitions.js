@@ -76,6 +76,7 @@ const externals = {
   immer: '__kbnSharedDeps__.Immer',
   reselect: '__kbnSharedDeps__.Reselect',
   'fastest-levenshtein': '__kbnSharedDeps__.FastestLevenshtein',
+  'chroma-js': '__kbnSharedDeps__.ChromaJs',
   // cache some used methods of the react-use library
   ...[
     'useAsync',

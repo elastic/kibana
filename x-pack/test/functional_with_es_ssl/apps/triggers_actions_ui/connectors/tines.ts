@@ -9,11 +9,11 @@ import expect from '@kbn/expect';
 import {
   tinesAgentWebhook,
   tinesStory1,
-} from '@kbn/actions-simulators-plugin/server/tines_simulation';
+} from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/actions_simulations_utils';
 import {
   ExternalServiceSimulator,
   getExternalServiceSimulatorPath,
-} from '@kbn/actions-simulators-plugin/server/plugin';
+} from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/actions_simulations_utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';

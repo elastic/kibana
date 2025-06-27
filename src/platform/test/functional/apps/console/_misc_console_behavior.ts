@@ -130,7 +130,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               const url = await browser.getCurrentUrl();
               // The url that is open is https://www.elastic.co/guide/en/elasticsearch/reference/master/search-search.html
               // but it redirects to https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search
-              expect(url).to.contain('operation-search');
+              expect(url).to.contain('www.elastic.co/docs');
             });
           });
         });

@@ -7,8 +7,8 @@
 
 import type { AuthenticatedUser, SecurityServiceStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { truncate } from 'lodash';
+import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import type { TaskInstance, TaskUserScope } from '../task';
 
 export interface APIKeyResult {
@@ -125,11 +125,10 @@ export const createApiKey = async (
 export const getApiKeyAndUserScope = async (
   taskInstances: TaskInstance[],
   request: KibanaRequest,
-  security: SecurityServiceStart,
-  spaces?: SpacesPluginStart
+  security: SecurityServiceStart
 ): Promise<Map<string, ApiKeyAndUserScope>> => {
   const apiKeyByTaskIdMap = await createApiKey(taskInstances, request, security);
-  const space = await spaces?.spacesService.getActiveSpace(request);
+  const space = getSpaceIdFromPath(request.url.pathname);
   const user = security.authc.getCurrentUser(request);
 
   const apiKeyAndUserScopeByTaskId = new Map<string, ApiKeyAndUserScope>();
@@ -141,7 +140,7 @@ export const getApiKeyAndUserScope = async (
         apiKey: encodedApiKeyResult.apiKey,
         userScope: {
           apiKeyId: encodedApiKeyResult.apiKeyId,
-          spaceId: space?.id || 'default',
+          spaceId: space?.spaceId || 'default',
           // Set apiKeyCreatedByUser to true if the user passed in their own API key, since we do
           // not want to invalidate a specific API key that was not created by the task manager
           apiKeyCreatedByUser: isRequestApiKeyType(user),

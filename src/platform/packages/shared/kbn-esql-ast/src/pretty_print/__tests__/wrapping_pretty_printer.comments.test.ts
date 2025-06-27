@@ -102,6 +102,21 @@ FROM index
   | LIMIT 123`);
     });
   });
+
+  /**
+   * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
+   * get back to it after 9.1 release.
+   */
+  describe.skip('RERANK', () => {
+    test('comments around all elements', () => {
+      assertReprint(
+        `FROM a
+  | /*0*/ RERANK /*1*/ "query" /*2*/
+        ON /*3*/ field /*4*/
+        WITH /*5*/ id /*6*/`
+      );
+    });
+  });
 });
 
 describe('expressions', () => {
@@ -429,6 +444,34 @@ ROW
     });
   });
 
+  describe('list tuple expressions', () => {
+    test('numeric list literal, surrounded from three sides', () => {
+      assertReprint(`FROM a | WHERE b IN ()`);
+      assertReprint(`FROM a | WHERE b NOT IN (/* 1 */ 123456789 /* 2 */)`);
+      assertReprint(`FROM a
+  | WHERE
+      b IN
+        (
+          /* 1 */ 123456789 /* 2 */ // 3
+        )`);
+      assertReprint(`FROM a
+  | WHERE
+      b IN
+        (
+          /* 1 */ 123456789 /* 2 */, // 3
+          "asdfasdfasdfasdfasdfasdfasdfasdfasfd" /* 4 */
+        )`);
+      assertReprint(`FROM a
+  | WHERE
+      b IN
+        (
+          /* 1 */ 123456789 /* 2 */, // 3
+          "asdfasdfasdfasdfasdfasdfasdfasdfasfd" /* 4 */,
+          /* 5 */ 123456789 /* 6 */ // 7
+        )`);
+    });
+  });
+
   describe('rename expressions', () => {
     test('rename expression, surrounded from three sides', () => {
       const query = `
@@ -460,7 +503,7 @@ ROW 1
         // 2
         /* 3 */
         // 4
-        /* 5 */ /* 6 */ a AS b /* 7 */ /* 8 */, // 9
+        /* 5 */ /* 6 */ a AS b, /* 7 */ /* 8 */ // 9
         
         x AS y
         `;
@@ -475,7 +518,7 @@ ROW 1
       /* 3 */
       // 4
       /* 5 */ /* 6 */ a AS
-        b, /* 7 */ /* 8 */ // 9
+        b /* 7 */ /* 8 */, // 9
       x AS y`);
     });
 
@@ -497,7 +540,7 @@ ROW 1
       /* 1 */
       /* 2 */ a /* 3 */ AS
         /* 4 */
-        /* 5 */ b, /* 6 */
+        /* 5 */ b /* 6 */,
       x AS y`);
     });
   });

@@ -45,7 +45,9 @@ type GetTotalCountsResults = Pick<
   | 'count_rules_by_notify_when'
   | 'count_rules_with_tags'
   | 'count_rules_snoozed'
+  | 'count_rules_snoozed_by_type'
   | 'count_rules_muted'
+  | 'count_rules_muted_by_type'
   | 'count_rules_with_muted_alerts'
   | 'count_rules_with_linked_dashboards'
   | 'count_rules_with_investigation_guide'
@@ -312,7 +314,31 @@ export async function getTotalCountAggregations({
         },
         sum_rules_with_tags: { sum: { field: 'rule_with_tags' } },
         sum_rules_snoozed: { sum: { field: 'rule_snoozed' } },
+        sum_rules_snoozed_by_type: {
+          filter: {
+            term: { rule_snoozed: 1 },
+          },
+          aggs: {
+            by_alert_type: {
+              terms: {
+                field: 'alert.alertTypeId',
+              },
+            },
+          },
+        },
         sum_rules_muted: { sum: { field: 'rule_muted' } },
+        sum_rules_muted_by_type: {
+          filter: {
+            term: { rule_muted: 1 },
+          },
+          aggs: {
+            by_alert_type: {
+              terms: {
+                field: 'alert.alertTypeId',
+              },
+            },
+          },
+        },
         sum_rules_with_muted_alerts: { sum: { field: 'rule_with_muted_alerts' } },
         sum_rules_with_linked_dashboards: { sum: { field: 'rule_with_linked_dashboards' } },
         sum_rules_with_investigation_guide: { sum: { field: 'rule_with_investigation_guide' } },
@@ -341,7 +367,13 @@ export async function getTotalCountAggregations({
       by_search_type: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
       sum_rules_with_tags: AggregationsSingleMetricAggregateBase;
       sum_rules_snoozed: AggregationsSingleMetricAggregateBase;
+      sum_rules_snoozed_by_type: {
+        by_alert_type: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
+      };
       sum_rules_muted: AggregationsSingleMetricAggregateBase;
+      sum_rules_muted_by_type: {
+        by_alert_type: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
+      };
       sum_rules_with_muted_alerts: AggregationsSingleMetricAggregateBase;
       sum_rules_with_linked_dashboards: AggregationsSingleMetricAggregateBase;
       sum_rules_with_investigation_guide: AggregationsSingleMetricAggregateBase;
@@ -377,6 +409,12 @@ export async function getTotalCountAggregations({
       count_rules_with_tags: aggregations.sum_rules_with_tags.value ?? 0,
       count_rules_by_notify_when: countRulesByNotifyWhen,
       count_rules_snoozed: aggregations.sum_rules_snoozed.value ?? 0,
+      count_rules_snoozed_by_type: {
+        ...parseSimpleRuleTypeBucket(aggregations.sum_rules_snoozed_by_type.by_alert_type.buckets),
+      },
+      count_rules_muted_by_type: {
+        ...parseSimpleRuleTypeBucket(aggregations.sum_rules_muted_by_type.by_alert_type.buckets),
+      },
       count_rules_muted: aggregations.sum_rules_muted.value ?? 0,
       count_rules_with_muted_alerts: aggregations.sum_rules_with_muted_alerts.value ?? 0,
       count_rules_with_linked_dashboards: aggregations.sum_rules_with_linked_dashboards.value ?? 0,
@@ -430,6 +468,8 @@ export async function getTotalCountAggregations({
       count_rules_with_linked_dashboards: 0,
       count_rules_with_investigation_guide: 0,
       count_connector_types_by_consumers: {},
+      count_rules_snoozed_by_type: {},
+      count_rules_muted_by_type: {},
       throttle_time: {
         min: '0s',
         avg: '0s',

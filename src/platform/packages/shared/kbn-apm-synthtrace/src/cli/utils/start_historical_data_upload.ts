@@ -11,14 +11,13 @@ import { once, range } from 'lodash';
 import moment from 'moment';
 import { cpus } from 'os';
 import Path from 'path';
-import { Worker } from 'worker_threads';
-import { LogLevel } from '../../..';
 import { bootstrap } from './bootstrap';
 import { RunOptions } from './parse_run_cli_flags';
-import { WorkerData } from './synthtrace_worker';
 import { getScenario } from './get_scenario';
 import { StreamManager } from './stream_manager';
-import { indexHistoricalData } from './index_historical_data';
+import { indexData } from './index_data';
+import { runWorker } from './workers/run_worker';
+import { WorkerData } from './workers/historical_data/synthtrace_historical_data_worker';
 
 export async function startHistoricalDataUpload({
   runOptions,
@@ -31,29 +30,41 @@ export async function startHistoricalDataUpload({
 }) {
   const { logger, clients } = await bootstrap(runOptions);
 
-  const file = runOptions.file;
+  const files = runOptions.files;
 
-  const scenario = await logger.perf('get_scenario', async () => {
-    const fn = await getScenario({ file, logger });
-    return fn({
-      ...runOptions,
-      logger,
-      from,
-      to,
-    });
-  });
+  const scenarios = await logger.perf('get_scenario', async () =>
+    Promise.all(
+      files.map(async (file) => {
+        const fn = await getScenario({ file, logger });
+        return fn({
+          ...runOptions,
+          logger,
+          from,
+          to,
+        });
+      })
+    )
+  );
 
   const teardown = once(async () => {
-    if (scenario.teardown) {
-      await scenario.teardown(clients);
-    }
+    await Promise.all(
+      scenarios.map(async (scenario) => {
+        if (scenario.teardown) {
+          return scenario.teardown(clients);
+        }
+      })
+    );
   });
 
   const streamManager = new StreamManager(logger, teardown);
 
-  if (scenario.bootstrap) {
-    await scenario.bootstrap(clients);
-  }
+  await Promise.all(
+    scenarios.map(async (scenario) => {
+      if (scenario.bootstrap) {
+        return scenario.bootstrap(clients);
+      }
+    })
+  );
 
   const cores = cpus().length;
 
@@ -95,76 +106,17 @@ export async function startHistoricalDataUpload({
       workerIndex: index,
       bucketFrom: rangeStep(interval),
       bucketTo: rangeStep(interval + intervalSpan),
+      file: files[index % files.length],
     }));
-
-  function runService({
-    bucketFrom,
-    bucketTo,
-    workerIndex,
-  }: {
-    bucketFrom: Date;
-    bucketTo: Date;
-    workerIndex: number;
-  }) {
-    return new Promise((resolve, reject) => {
-      logger.debug(`Setting up Worker: ${workerIndex}`);
-      const workerData: WorkerData = {
-        runOptions,
-        bucketFrom,
-        bucketTo,
-        workerId: workerIndex.toString(),
-        from,
-        to,
-      };
-      const worker = new Worker(Path.join(__dirname, './worker.js'), {
-        workerData,
-      });
-
-      streamManager.trackWorker(worker);
-
-      worker.on('message', ([logLevel, msg]: [string, string]) => {
-        switch (logLevel) {
-          case LogLevel.debug:
-            logger.debug(msg);
-            return;
-          case LogLevel.info:
-            logger.info(msg);
-            return;
-          case LogLevel.verbose:
-            logger.verbose(msg);
-            return;
-          case LogLevel.warn:
-            logger.warning(msg);
-            return;
-          case LogLevel.error:
-            logger.error(msg);
-            return;
-          default:
-            logger.info(msg);
-        }
-      });
-      worker.on('error', (message) => {
-        logger.error(message);
-        reject();
-      });
-      worker.on('exit', (code) => {
-        if (code === 2) reject(new Error(`Worker ${workerIndex} exited with error: ${code}`));
-        if (code === 1) {
-          logger.info(`Worker ${workerIndex} exited early because cancellation was requested`);
-        }
-        resolve(null);
-      });
-      worker.postMessage('start');
-    });
-  }
 
   const workerServices =
     intervals.length === 1
       ? // just run in this process. it's hard to attach
         // a debugger to a worker_thread, see:
         // https://issues.chromium.org/issues/41461728
-        [
-          indexHistoricalData({
+        files.map((file) =>
+          indexData({
+            file,
             bucketFrom: intervals[0].bucketFrom,
             bucketTo: intervals[0].bucketTo,
             clients,
@@ -174,9 +126,17 @@ export async function startHistoricalDataUpload({
             from,
             to,
             streamManager,
-          }),
-        ]
-      : range(0, intervals.length).map((index) => runService(intervals[index]));
+          })
+        )
+      : range(0, intervals.length).map((index) =>
+          runWorker<WorkerData>({
+            logger,
+            streamManager,
+            workerIndex: index,
+            workerScriptPath: Path.join(__dirname, './workers/historical_data/worker.js'),
+            workerData: { ...intervals[index], workerId: index.toString(), from, to, runOptions },
+          })
+        );
 
   await Promise.race(workerServices);
 

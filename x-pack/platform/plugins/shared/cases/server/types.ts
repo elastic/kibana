@@ -39,12 +39,12 @@ import type { PersistableStateAttachmentTypeRegistry } from './attachment_framew
 export interface CasesServerSetupDependencies {
   alerting: AlertingServerSetup;
   actions: ActionsPluginSetup;
-  lens?: LensServerPluginSetup;
+  lens: LensServerPluginSetup;
   features: FeaturesPluginSetup;
   files: FilesSetup;
   security: SecurityPluginSetup;
   licensing: LicensingPluginSetup;
-  taskManager?: TaskManagerSetupContract;
+  taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginSetup;
   cloud?: CloudSetup;
@@ -55,7 +55,7 @@ export interface CasesServerStartDependencies {
   features: FeaturesPluginStart;
   files: FilesStart;
   licensing: LicensingPluginStart;
-  taskManager?: TaskManagerStartContract;
+  taskManager: TaskManagerStartContract;
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   notifications: NotificationsPluginStart;

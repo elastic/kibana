@@ -54,6 +54,7 @@ type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 export interface CasesContextFeatures {
   alerts: { sync?: boolean; enabled?: boolean; isExperimental?: boolean };
   metrics: SingleCaseMetricsFeature[];
+  observables?: { enabled: boolean };
 }
 
 export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
@@ -69,6 +70,9 @@ export interface CasesUiConfigType {
     allowedMimeTypes: string[];
   };
   stack: {
+    enabled: boolean;
+  };
+  incrementalId: {
     enabled: boolean;
   };
 }
@@ -340,4 +344,8 @@ export interface CasesCapabilities {
   [CREATE_COMMENT_CAPABILITY]: boolean;
   [CASES_REOPEN_CAPABILITY]: boolean;
   [ASSIGN_CASE_CAPABILITY]: boolean;
+}
+
+export interface CasesSettings {
+  displayIncrementalCaseId: boolean;
 }

@@ -19,7 +19,6 @@ import {
   handleIsOperator,
   isFullScreen,
   isPrimitiveArray,
-  showGlobalFilters,
 } from './helpers';
 
 import { mockBrowserFields } from '../../../common/containers/source/mock';
@@ -245,32 +244,6 @@ describe('Build KQL Query', () => {
     expect(cleanUpKqlQuery(kqlQuery)).toEqual(
       '(name : "Provider 1" and name : "Provider 3" and name : "Provider 4") or (name : "Provider 2" and name : "Provider 5") or (name : "Provider 3") or (name : "Provider 4") or (name : "Provider 5") or (name : "Provider 6") or (name : "Provider 7") or (name : "Provider 8") or (name : "Provider 9") or (name : "Provider 10")'
     );
-  });
-
-  describe('showGlobalFilters', () => {
-    test('it returns false when `globalFullScreen` is true and `graphEventId` is NOT an empty string, because Resolver IS showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: true, graphEventId: 'a valid id' })).toBe(false);
-    });
-
-    test('it returns true when `globalFullScreen` is true and `graphEventId` is undefined, because Resolver is NOT showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: true, graphEventId: undefined })).toBe(true);
-    });
-
-    test('it returns true when `globalFullScreen` is true and `graphEventId` is an empty string, because Resolver is NOT showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: true, graphEventId: '' })).toBe(true);
-    });
-
-    test('it returns true when `globalFullScreen` is false and `graphEventId` is NOT an empty string, because Resolver IS showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: false, graphEventId: 'a valid id' })).toBe(true);
-    });
-
-    test('it returns true when `globalFullScreen` is false and `graphEventId` is undefined, because Resolver is NOT showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: false, graphEventId: undefined })).toBe(true);
-    });
-
-    test('it returns true when `globalFullScreen` is false and `graphEventId` is an empty string, because Resolver is NOT showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: false, graphEventId: '' })).toBe(true);
-    });
   });
 });
 

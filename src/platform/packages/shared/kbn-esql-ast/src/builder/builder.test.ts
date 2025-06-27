@@ -118,7 +118,7 @@ describe('source', () => {
     const node = Builder.expression.source.node({
       index: 'my_index',
       sourceType: 'index',
-      cluster: Builder.expression.literal.string('my_cluster', { unquoted: true }),
+      prefix: Builder.expression.literal.string('my_cluster', { unquoted: true }),
     });
     const text = BasicPrettyPrinter.expression(node);
 
@@ -129,7 +129,7 @@ describe('source', () => {
     const node = Builder.expression.source.node({
       index: 'my_index',
       sourceType: 'index',
-      cluster: 'my_cluster',
+      prefix: 'my_cluster',
     });
     const text = BasicPrettyPrinter.expression(node);
 
@@ -289,7 +289,7 @@ describe('literal', () => {
 
   describe('lists', () => {
     test('string list', () => {
-      const node = Builder.expression.literal.list({
+      const node = Builder.expression.list.literal({
         values: [
           Builder.expression.literal.string('a'),
           Builder.expression.literal.string('b'),
@@ -302,7 +302,7 @@ describe('literal', () => {
     });
 
     test('integer list', () => {
-      const node = Builder.expression.literal.list({
+      const node = Builder.expression.list.literal({
         values: [
           Builder.expression.literal.integer(1),
           Builder.expression.literal.integer(2),
@@ -315,7 +315,7 @@ describe('literal', () => {
     });
 
     test('boolean list', () => {
-      const node = Builder.expression.literal.list({
+      const node = Builder.expression.list.literal({
         values: [
           Builder.expression.literal.boolean(true),
           Builder.expression.literal.boolean(false),

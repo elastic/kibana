@@ -43,7 +43,11 @@ import type {
   UpgradePackagePolicyResponse,
 } from '../../../common/types';
 import { installationStatuses, inputsFormat } from '../../../common/constants';
-import { PackagePolicyNotFoundError, PackagePolicyRequestError } from '../../errors';
+import {
+  PackagePolicyNotFoundError,
+  PackagePolicyRequestError,
+  CustomPackagePolicyNotAllowedForAgentlessError,
+} from '../../errors';
 import {
   getInstallation,
   getInstallations,
@@ -263,6 +267,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       savedObjectsClient: soClient,
       pkgName: pkg!.name,
     });
+
     wasPackageAlreadyInstalled = installation?.install_status === 'installed';
 
     // Create package policy
@@ -291,7 +296,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   } catch (error) {
     appContextService
       .getLogger()
-      .error(`Error while creating package policy due to error: ${error.message}`);
+      .error(`Error while creating package policy due to error: ${error.message}`, { error });
     if (!wasPackageAlreadyInstalled) {
       const installation = await getInstallation({
         savedObjectsClient: soClient,
@@ -308,6 +313,29 @@ export const createPackagePolicyHandler: FleetRequestHandler<
           esClient,
         });
       }
+    }
+
+    if (error instanceof CustomPackagePolicyNotAllowedForAgentlessError) {
+      // Agentless deployments have 1:1 agent to integration policies
+      // We delete the associated agent policy previously created.
+      const agentPolicyId = newPolicy.policy_ids?.[0];
+
+      if (agentPolicyId) {
+        appContextService
+          .getLogger()
+          .info(
+            `Deleting agent policy ${agentPolicyId}, associated with custom integration not allowed for agentless deployment`
+          );
+
+        await agentPolicyService.delete(soClient, esClient, agentPolicyId).catch(() => {
+          appContextService
+            .getLogger()
+            .error(
+              `Failed to delete agent policy ${agentPolicyId}, associated with custom integration not allowed for agentless deployment`
+            );
+        });
+      }
+      throw error;
     }
 
     if (error.statusCode) {

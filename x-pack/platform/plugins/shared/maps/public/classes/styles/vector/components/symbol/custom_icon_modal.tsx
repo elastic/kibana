@@ -25,6 +25,7 @@ import {
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { IconPreview } from './icon_preview';
@@ -54,7 +55,7 @@ const strings = {
         {i18n.translate('xpack.maps.customIconModal.cutoffRangeLabel', {
           defaultMessage: 'Alpha threshold',
         })}{' '}
-        <EuiIcon color="subdued" type="questionInCircle" />
+        <EuiIcon color="subdued" type="question" />
       </>
     </EuiToolTip>
   ),
@@ -90,7 +91,7 @@ const strings = {
         {i18n.translate('xpack.maps.customIconModal.radiusRangeLabel', {
           defaultMessage: 'Radius',
         })}{' '}
-        <EuiIcon color="subdued" type="questionInCircle" />
+        <EuiIcon color="subdued" type="question" />
       </>
     </EuiToolTip>
   ),
@@ -102,6 +103,16 @@ const strings = {
     i18n.translate('xpack.maps.customIconModal.saveButtonLabel', {
       defaultMessage: 'Save',
     }),
+};
+
+const styles = {
+  wrapper: css({
+    maxWidth: '210px',
+    minHeight: '210px',
+  }),
+  iconForm: css({
+    minWidth: '400px',
+  }),
 };
 
 function getFileNameWithoutExt(fileName: string) {
@@ -260,7 +271,6 @@ export class CustomIconModal extends Component<Props, State> {
               showInput
               showLabels
               compressed
-              className="mapsCutoffRange"
               onChange={this._handleCutoffChange}
             />
           </EuiFormRow>
@@ -308,7 +318,7 @@ export class CustomIconModal extends Component<Props, State> {
   private _renderIconPreview() {
     const { svg, isFileInvalid, cutoff, radius } = this.state;
     return svg !== '' ? (
-      <EuiFlexItem className="mapsIconPreview__wrapper mapsCustomIconForm__preview" grow={false}>
+      <EuiFlexItem css={styles.wrapper} grow={false}>
         <IconPreview svg={svg} isSvgInvalid={isFileInvalid} cutoff={cutoff} radius={radius} />
       </EuiFlexItem>
     ) : null;
@@ -332,7 +342,7 @@ export class CustomIconModal extends Component<Props, State> {
         </EuiModalHeader>
         <EuiModalBody>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart" gutterSize="m">
-            <EuiFlexItem className="mapsCustomIconForm" grow={2}>
+            <EuiFlexItem css={styles.iconForm} grow={2}>
               <EuiFormRow
                 className="mapsCustomIconForm__image"
                 display="rowCompressed"

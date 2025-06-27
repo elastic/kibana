@@ -69,7 +69,7 @@ function MapsListViewComp({ history }: Props) {
     page: 'list',
   });
 
-  const isReadOnly = !getMapsCapabilities()?.save;
+  const isReadOnly = !getMapsCapabilities().save;
   const initialPageSize = getUiSettings().get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
   // TLDR; render should be side effect free

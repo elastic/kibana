@@ -48,11 +48,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       let onboardingId: string;
 
       beforeEach(async () => {
-        const createFlowResponse = await adminClient
-          .post('/internal/observability_onboarding/flow')
-          .send({
-            name: 'test-onboarding',
-          });
+        const createFlowResponse = await adminClient.post(
+          '/internal/observability_onboarding/flow'
+        );
 
         onboardingId = createFlowResponse.body.onboardingFlow.id;
 
@@ -95,10 +93,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('updates step status with message', async () => {
+        const message = 'Download failed';
         const step = {
           name: 'ea-download',
           status: 'danger',
-          message: 'Download failed',
+          message: Buffer.from(message, 'utf8').toString('base64'),
         };
         const response = await adminClientWithAPIKey
           .post(`/internal/observability_onboarding/flow/${onboardingId}/step/${step.name}`)
@@ -116,7 +115,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const stepProgress = savedState.attributes.progress?.[step.name];
         expect(stepProgress).to.have.property('status', step.status);
-        expect(stepProgress).to.have.property('message', step.message);
+        expect(stepProgress).to.have.property('message', message);
       });
     });
   });

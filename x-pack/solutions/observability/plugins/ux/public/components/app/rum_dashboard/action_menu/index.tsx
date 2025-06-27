@@ -63,27 +63,21 @@ export function UXActionMenu({
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
           <EuiHeaderLinks gutterSize="xs">
+            <UxInspectorHeaderLink isDev={isDev} />
             <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
               <EuiHeaderLink
                 data-test-subj="uxAnalyzeBtn"
-                color="text"
+                color="primary"
                 href={uxExploratoryViewLink}
-                iconType="visBarVerticalStacked"
               >
                 {ANALYZE_DATA}
               </EuiHeaderLink>
             </EuiToolTip>
-            <EuiHeaderLink
-              color="primary"
-              iconType="indexOpen"
-              iconSide="left"
-              href={application.getUrlForApp('/apm/tutorial')}
-            >
+            <EuiHeaderLink color="primary" href={application.getUrlForApp('/apm/tutorial')}>
               {i18n.translate('xpack.ux.addDataButtonLabel', {
                 defaultMessage: 'Add data',
               })}
             </EuiHeaderLink>
-            <UxInspectorHeaderLink isDev={isDev} />
           </EuiHeaderLinks>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -8,11 +8,11 @@
 import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import type { ConfigSchema as StackConnectorsConfigType } from '../server/config';
 import { registerConnectorTypes } from './connector_types';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
-import type { StackConnectorsConfigType } from '../common/types';
 
 export type Setup = void;
 export type Start = void;

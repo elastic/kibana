@@ -140,7 +140,10 @@ class ReportingPanelContentUi extends Component<Props, State, WithEuiThemeProps>
       return <ErrorUrlTooLongPanel isUnsaved={false} />;
     }
     return (
-      <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
+      <EuiCopy
+        textToCopy={this.state.absoluteUrl}
+        tooltipProps={{ anchorClassName: 'eui-displayBlock' }}
+      >
         {(copy) => (
           <EuiButton
             color={isUnsaved ? 'warning' : 'primary'}
@@ -291,9 +294,12 @@ class ReportingPanelContentUi extends Component<Props, State, WithEuiThemeProps>
   private createReportingJob = async () => {
     const { startServices$, apiClient, intl } = this.props;
     const [coreStart] = await Rx.firstValueFrom(startServices$);
-    const decoratedJobParams = apiClient.getDecoratedJobParams(this.props.getJobParams());
-    const { toasts } = coreStart.notifications;
+    const {
+      rendering,
+      notifications: { toasts },
+    } = coreStart;
 
+    const decoratedJobParams = apiClient.getDecoratedJobParams(this.props.getJobParams());
     this.setState({ isCreatingReportJob: true });
 
     try {
@@ -321,7 +327,7 @@ class ReportingPanelContentUi extends Component<Props, State, WithEuiThemeProps>
               ),
             }}
           />,
-          coreStart
+          rendering
         ),
         'data-test-subj': 'queueReportSuccess',
       });

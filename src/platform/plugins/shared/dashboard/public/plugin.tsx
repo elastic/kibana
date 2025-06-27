@@ -77,7 +77,6 @@ import type { FindDashboardsService } from './services/dashboard_content_managem
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
-import type { ConfigSchema } from '../server/config';
 
 export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
@@ -134,7 +133,7 @@ export class DashboardPlugin
   implements
     Plugin<DashboardSetup, DashboardStart, DashboardSetupDependencies, DashboardStartDependencies>
 {
-  constructor(private initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext) {
     setLogger(initializerContext.logger.get('dashboard'));
   }
 
@@ -312,13 +311,7 @@ export class DashboardPlugin
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     setKibanaServices(core, plugins);
 
-    untilPluginStartServicesReady().then(() => {
-      registerActions({
-        plugins,
-        allowByValueEmbeddables:
-          this.initializerContext.config.get<ConfigSchema>()?.allowByValueEmbeddables ?? true,
-      });
-    });
+    untilPluginStartServicesReady().then(() => registerActions(plugins));
 
     return {
       registerDashboardPanelPlacementSetting,

@@ -8,18 +8,28 @@
 import { GetSLOSettingsResponse } from '@kbn/slo-schema';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from './constants';
 
+/**
+ * @returns the local SLO summary index or the remote cluster indices based on the settings.
+ * If `useAllRemoteClusters` is false and no remote clusters are selected it returns only the local index.
+ * If `useAllRemoteClusters` is true, it returns both the local index and a wildcard remote index.
+ * If `useAllRemoteClusters` is false, it returns the local index and only the indices of the selected remote clusters that are connected.
+ */
 export const getSLOSummaryIndices = (
   settings: GetSLOSettingsResponse,
-  remoteClusters: Array<{ name: string; isConnected: boolean }>
+  remoteClusters: Array<{ name: string; isConnected: boolean }> = []
 ): string[] => {
   const { useAllRemoteClusters, selectedRemoteClusters } = settings;
   if (!useAllRemoteClusters && selectedRemoteClusters.length === 0) {
     return [SUMMARY_DESTINATION_INDEX_PATTERN];
   }
 
+  if (useAllRemoteClusters) {
+    return [SUMMARY_DESTINATION_INDEX_PATTERN, `*:${SUMMARY_DESTINATION_INDEX_PATTERN}`];
+  }
+
   return remoteClusters.reduce(
     (acc, { name, isConnected }) => {
-      if (isConnected && (useAllRemoteClusters || selectedRemoteClusters.includes(name))) {
+      if (isConnected && selectedRemoteClusters.includes(name)) {
         acc.push(`${name}:${SUMMARY_DESTINATION_INDEX_PATTERN}`);
       }
       return acc;

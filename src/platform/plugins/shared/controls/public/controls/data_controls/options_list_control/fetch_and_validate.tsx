@@ -19,17 +19,24 @@ import {
 } from 'rxjs';
 
 import { PublishingSubject } from '@kbn/presentation-publishing';
+import {
+  OptionsListSearchTechnique,
+  OptionsListSortingType,
+} from '../../../../common/options_list';
 import { OptionsListSuccessResponse } from '../../../../common/options_list/types';
 import { isValidSearch } from '../../../../common/options_list/is_valid_search';
 import { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
 import { ControlFetchContext } from '../../../control_group/control_fetch';
-import { ControlStateManager } from '../../types';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
-import { OptionsListComponentApi, OptionsListComponentState, OptionsListControlApi } from './types';
+import { OptionsListComponentApi, OptionsListControlApi } from './types';
 
 export function fetchAndValidate$({
   api,
-  stateManager,
+  requestSize$,
+  runPastTimeout$,
+  selectedOptions$,
+  searchTechnique$,
+  sort$,
   controlFetch$,
 }: {
   api: Pick<OptionsListControlApi, 'dataViews$' | 'field$' | 'setBlockingError' | 'parentApi'> &
@@ -37,11 +44,11 @@ export function fetchAndValidate$({
       loadingSuggestions$: BehaviorSubject<boolean>;
       debouncedSearchString: Observable<string>;
     };
-  stateManager: ControlStateManager<
-    Pick<OptionsListComponentState, 'requestSize' | 'runPastTimeout' | 'searchTechnique' | 'sort'>
-  > & {
-    selectedOptions: PublishingSubject<OptionsListSelection[] | undefined>;
-  };
+  requestSize$: PublishingSubject<number>;
+  runPastTimeout$: PublishingSubject<boolean | undefined>;
+  selectedOptions$: PublishingSubject<OptionsListSelection[] | undefined>;
+  searchTechnique$: PublishingSubject<OptionsListSearchTechnique | undefined>;
+  sort$: PublishingSubject<OptionsListSortingType | undefined>;
   controlFetch$: (onReload: () => void) => Observable<ControlFetchContext>;
 }): Observable<OptionsListSuccessResponse | { error: Error }> {
   const requestCache = new OptionsListFetchCache();
@@ -54,8 +61,8 @@ export function fetchAndValidate$({
     api.parentApi.allowExpensiveQueries$,
     api.parentApi.ignoreParentSettings$,
     api.debouncedSearchString,
-    stateManager.sort,
-    stateManager.searchTechnique,
+    sort$,
+    searchTechnique$,
     // cannot use requestSize directly, because we need to be able to reset the size to the default without refetching
     api.loadMoreSubject.pipe(
       startWith(null), // start with null so that `combineLatest` subscription fires
@@ -69,11 +76,7 @@ export function fetchAndValidate$({
         abortController = undefined;
       }
     }),
-    withLatestFrom(
-      stateManager.requestSize,
-      stateManager.runPastTimeout,
-      stateManager.selectedOptions
-    ),
+    withLatestFrom(requestSize$, runPastTimeout$, selectedOptions$),
     switchMap(
       async ([
         [

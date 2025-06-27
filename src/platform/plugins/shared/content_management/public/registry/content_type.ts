@@ -26,7 +26,7 @@ export class ContentType {
   }
 
   public get icon(): string {
-    return this.definition.icon ?? 'questionInCircle';
+    return this.definition.icon ?? 'question';
   }
 
   public get crud(): CrudClient | undefined {

@@ -44,7 +44,7 @@ const waitForRender = async (
 describe('<RolesGridPage />', () => {
   let apiClientMock: jest.Mocked<PublicMethodsOf<RolesAPIClient>>;
   let history: ReturnType<typeof scopedHistoryMock.create>;
-  const { userProfile, theme, i18n, analytics, notifications } = coreMock.createStart();
+  const { userProfile, theme, i18n, analytics, notifications, rendering } = coreMock.createStart();
 
   beforeEach(() => {
     history = scopedHistoryMock.create();
@@ -98,6 +98,7 @@ describe('<RolesGridPage />', () => {
         analytics={analytics}
         theme={theme}
         userProfile={userProfile}
+        rendering={rendering}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -121,6 +122,7 @@ describe('<RolesGridPage />', () => {
         analytics={analytics}
         theme={theme}
         userProfile={userProfile}
+        rendering={rendering}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -146,6 +148,7 @@ describe('<RolesGridPage />', () => {
         analytics={analytics}
         theme={theme}
         userProfile={userProfile}
+        rendering={rendering}
       />
     );
     await waitForRender(wrapper, (updatedWrapper) => {
@@ -165,6 +168,7 @@ describe('<RolesGridPage />', () => {
         analytics={analytics}
         theme={theme}
         userProfile={userProfile}
+        rendering={rendering}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -210,6 +214,7 @@ describe('<RolesGridPage />', () => {
         analytics={analytics}
         theme={theme}
         userProfile={userProfile}
+        rendering={rendering}
         readOnly
       />
     );

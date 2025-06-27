@@ -21,8 +21,6 @@ export const DashboardRoutes = () => (
 export const routes: SecuritySubPluginRoutes = [
   {
     path: DASHBOARDS_PATH,
-    component: withSecurityRoutePageWrapper(DashboardRoutes, SecurityPageName.dashboards, {
-      redirectOnMissing: true,
-    }),
+    component: withSecurityRoutePageWrapper(DashboardRoutes, SecurityPageName.dashboards),
   },
 ];

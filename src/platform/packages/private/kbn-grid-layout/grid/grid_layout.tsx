@@ -8,20 +8,30 @@
  */
 
 import classNames from 'classnames';
-import deepEqual from 'fast-deep-equal';
-import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { combineLatest, pairwise, map, distinctUntilChanged } from 'rxjs';
+import { combineLatest } from 'rxjs';
+import { cloneDeep } from 'lodash';
 
 import { css } from '@emotion/react';
 
 import { GridHeightSmoother } from './grid_height_smoother';
-import { GridRow } from './grid_row';
+import { GridPanel, GridPanelDragPreview } from './grid_panel';
+import {
+  GridSectionDragPreview,
+  GridSectionFooter,
+  GridSectionHeader,
+  GridSectionWrapper,
+} from './grid_section';
 import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
 import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
-import { isLayoutEqual } from './utils/equality_checks';
-import { getRowKeysInOrder, resolveGridRow } from './utils/resolve_grid_row';
+import {
+  getPanelKeysInOrder,
+  getSectionsInOrder,
+  resolveGridSection,
+} from './utils/resolve_grid_section';
+import { getOrderedLayout } from './utils/conversions';
+import { isOrderedLayoutEqual } from './utils/equality_checks';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -31,6 +41,11 @@ export type GridLayoutProps = {
   accessMode?: GridAccessMode;
   className?: string; // this makes it so that custom CSS can be passed via Emotion
 } & UseCustomDragHandle;
+
+type GridLayoutElementsInOrder = Array<{
+  type: 'header' | 'footer' | 'panel' | 'wrapper';
+  id: string;
+}>;
 
 export const GridLayout = ({
   layout,
@@ -50,46 +65,36 @@ export const GridLayout = ({
     expandedPanelId,
     accessMode,
   });
+  const [elementsInOrder, setElementsInOrder] = useState<GridLayoutElementsInOrder>([]);
 
-  const [rowIdsInOrder, setRowIdsInOrder] = useState<string[]>(getRowKeysInOrder(layout));
   /**
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
    */
   useEffect(() => {
-    if (!isLayoutEqual(layout, gridLayoutStateManager.gridLayout$.getValue())) {
-      const newLayout = cloneDeep(layout);
+    const orderedLayout = getOrderedLayout(layout);
+    if (!isOrderedLayoutEqual(orderedLayout, gridLayoutStateManager.gridLayout$.getValue())) {
+      const newLayout = cloneDeep(orderedLayout);
       /**
        * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
        * so, we need to loop through each row and ensure it is compacted
        */
-      Object.entries(newLayout).forEach(([rowId, row]) => {
-        newLayout[rowId] = resolveGridRow(row);
+      Object.entries(newLayout).forEach(([sectionId, row]) => {
+        newLayout[sectionId].panels = resolveGridSection(row.panels);
       });
       gridLayoutStateManager.gridLayout$.next(newLayout);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layout]);
 
-  /**
-   * Set up subscriptions
-   */
   useEffect(() => {
     /**
-     * This subscription calls the passed `onLayoutChange` callback when the layout changes;
-     * if the row IDs have changed, it also sets `rowIdsInOrder` to trigger a re-render
+     * This subscription calls the passed `onLayoutChange` callback when the layout changes
      */
-    const onLayoutChangeSubscription = gridLayoutStateManager.gridLayout$
-      .pipe(pairwise())
-      .subscribe(([layoutBefore, layoutAfter]) => {
-        if (!isLayoutEqual(layoutBefore, layoutAfter)) {
-          onLayoutChange(layoutAfter);
-
-          if (!deepEqual(Object.keys(layoutBefore), Object.keys(layoutAfter))) {
-            setRowIdsInOrder(getRowKeysInOrder(layoutAfter));
-          }
-        }
-      });
-
+    const onLayoutChangeSubscription = gridLayoutStateManager.layoutUpdated$.subscribe(
+      (newLayout) => {
+        onLayoutChange(newLayout);
+      }
+    );
     return () => {
       onLayoutChangeSubscription.unsubscribe();
     };
@@ -98,21 +103,56 @@ export const GridLayout = ({
 
   useEffect(() => {
     /**
-     * This subscription ensures that rows get re-rendered when their orders change
+     * This subscription sets the rendered elements and the `gridTemplateString`,
+     * which defines the grid layout structure as follows:
+     * - Each grid section has two named grid lines: `start-<sectionId>` and `end-<sectionId>`,
+     *   marking the start and end of the section. Headers and footers are positioned relative to these lines.
+     * - Grid rows are named `gridRow-<sectionId>`, and panels are positioned relative to these lines.
      */
-    const rowOrderSubscription = combineLatest([
-      gridLayoutStateManager.proposedGridLayout$,
-      gridLayoutStateManager.gridLayout$,
-    ])
-      .pipe(
-        map(([proposedGridLayout, gridLayout]) =>
-          getRowKeysInOrder(proposedGridLayout ?? gridLayout)
-        ),
-        distinctUntilChanged(deepEqual)
-      )
-      .subscribe((rowKeys) => {
-        setRowIdsInOrder(rowKeys);
+    const renderSubscription = gridLayoutStateManager.gridLayout$.subscribe((sections) => {
+      const currentElementsInOrder: GridLayoutElementsInOrder = [];
+      let gridTemplateString = '';
+
+      getSectionsInOrder(sections).forEach((section) => {
+        const { id } = section;
+
+        /** Header */
+        if (!section.isMainSection) {
+          currentElementsInOrder.push({ type: 'header', id });
+          gridTemplateString += `auto `;
+        }
+
+        /** Panels */
+        gridTemplateString += `[start-${id}] `;
+        if (Object.keys(section.panels).length && (section.isMainSection || !section.isCollapsed)) {
+          let maxRow = 0;
+          getPanelKeysInOrder(section.panels).forEach((panelId) => {
+            const panel = section.panels[panelId];
+            maxRow = Math.max(maxRow, panel.row + panel.height);
+            currentElementsInOrder.push({
+              type: 'panel',
+              id: panel.id,
+            });
+          });
+          gridTemplateString += `repeat(${maxRow}, [gridRow-${id}] calc(var(--kbnGridRowHeight) * 1px)) `;
+          currentElementsInOrder.push({
+            type: 'wrapper',
+            id,
+          });
+        }
+        gridTemplateString += `[end-${section.id}] `;
+
+        /** Footer */
+        if (!section.isMainSection) {
+          currentElementsInOrder.push({ type: 'footer', id });
+          gridTemplateString += `auto `;
+        }
       });
+
+      setElementsInOrder(currentElementsInOrder);
+      gridTemplateString = gridTemplateString.replaceAll('] [', ' ');
+      if (layoutRef.current) layoutRef.current.style.gridTemplateRows = gridTemplateString;
+    });
 
     /**
      * This subscription adds and/or removes the necessary class names related to styling for
@@ -138,7 +178,7 @@ export const GridLayout = ({
     });
 
     return () => {
-      rowOrderSubscription.unsubscribe();
+      renderSubscription.unsubscribe();
       gridLayoutClassSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -158,21 +198,28 @@ export const GridLayout = ({
     <GridLayoutContext.Provider value={memoizedContext}>
       <GridHeightSmoother>
         <div
+          data-test-subj="kbnGridLayout"
           ref={(divElement) => {
             layoutRef.current = divElement;
             setDimensionsRef(divElement);
           }}
           className={classNames('kbnGrid', className)}
-          css={[
-            styles.layoutPadding,
-            styles.hasActivePanel,
-            styles.singleColumn,
-            styles.hasExpandedPanel,
-          ]}
+          css={[styles.layout, styles.hasActivePanel, styles.singleColumn, styles.hasExpandedPanel]}
         >
-          {rowIdsInOrder.map((rowId) => (
-            <GridRow key={rowId} rowId={rowId} />
-          ))}
+          {elementsInOrder.map((element) => {
+            switch (element.type) {
+              case 'header':
+                return <GridSectionHeader key={element.id} sectionId={element.id} />;
+              case 'panel':
+                return <GridPanel key={element.id} panelId={element.id} />;
+              case 'wrapper':
+                return <GridSectionWrapper key={`${element.id}--wrapper`} sectionId={element.id} />;
+              case 'footer':
+                return <GridSectionFooter key={`${element.id}--footer`} sectionId={element.id} />;
+            }
+          })}
+          <GridPanelDragPreview />
+          <GridSectionDragPreview />
         </div>
       </GridHeightSmoother>
     </GridLayoutContext.Provider>
@@ -180,11 +227,21 @@ export const GridLayout = ({
 };
 
 const styles = {
-  layoutPadding: css({
+  layout: css({
+    display: 'grid',
+    gap: 'calc(var(--kbnGridGutterSize) * 1px)',
     padding: 'calc(var(--kbnGridGutterSize) * 1px)',
+    gridAutoRows: 'calc(var(--kbnGridRowHeight) * 1px)',
+    gridTemplateColumns: `repeat(
+          var(--kbnGridColumnCount),
+          calc(
+            (100% - (var(--kbnGridGutterSize) * (var(--kbnGridColumnCount) - 1) * 1px)) /
+              var(--kbnGridColumnCount)
+          )
+        )`,
   }),
   hasActivePanel: css({
-    '&:has(.kbnGridPanel--active), &:has(.kbnGridRowHeader--active)': {
+    '&:has(.kbnGridPanel--active), &:has(.kbnGridSectionHeader--active)': {
       // disable pointer events and user select on drag + resize
       userSelect: 'none',
       pointerEvents: 'none',
@@ -192,50 +249,40 @@ const styles = {
   }),
   singleColumn: css({
     '&.kbnGrid--mobileView': {
-      '.kbnGridRow': {
-        gridTemplateColumns: '100%',
-        gridTemplateRows: 'auto',
-        gridAutoFlow: 'row',
-        gridAutoRows: 'auto',
-      },
-      '.kbnGridPanel': {
+      gridTemplateColumns: '100%',
+      gridTemplateRows: 'auto !important',
+      gridAutoFlow: 'row',
+      gridAutoRows: 'auto',
+      '.kbnGridPanel, .kbnGridSectionHeader': {
         gridArea: 'unset !important',
       },
     },
   }),
   hasExpandedPanel: css({
-    '&:has(.kbnGridPanel--expanded)': {
+    ':has(.kbnGridPanel--expanded)': {
       height: '100%',
-      // targets the grid row container that contains the expanded panel
-      '& .kbnGridRowContainer:has(.kbnGridPanel--expanded)': {
-        '.kbnGridRowHeader': {
-          height: '0px', // used instead of 'display: none' due to a11y concerns
-          padding: '0px',
-          display: 'block',
-          overflow: 'hidden',
-        },
-        '.kbnGridRow': {
-          display: 'block !important', // overwrite grid display
-          height: '100%',
-          '.kbnGridPanel': {
-            '&.kbnGridPanel--expanded': {
-              height: '100% !important',
-            },
-            // hide the non-expanded panels
-            '&:not(.kbnGridPanel--expanded)': {
-              position: 'absolute',
-              top: '-9999px',
-              left: '-9999px',
-              visibility: 'hidden', // remove hidden panels and their contents from tab order for a11y
-            },
-          },
-        },
+      display: 'block',
+      paddingBottom: 'calc(var(--kbnGridGutterSize) * 1px) !important',
+      '.kbnGridSectionHeader, .kbnGridSectionFooter': {
+        height: '0px', // better than 'display: none' for a11y – header may hold info relevant to the expanded panel
+        padding: '0px',
+        display: 'block',
+        overflow: 'hidden',
       },
-      // targets the grid row containers that **do not** contain the expanded panel
-      '& .kbnGridRowContainer:not(:has(.kbnGridPanel--expanded))': {
-        position: 'absolute',
-        top: '-9999px',
-        left: '-9999px',
+      '.kbnGridSectionFooter': {
+        visibility: 'hidden',
+      },
+      '.kbnGridPanel': {
+        '&.kbnGridPanel--expanded': {
+          height: '100% !important',
+        },
+        // hide the non-expanded panels
+        '&:not(.kbnGridPanel--expanded)': {
+          position: 'absolute',
+          top: '-9999px',
+          left: '-9999px',
+          visibility: 'hidden', // remove hidden panels and their contents from tab order for a11y
+        },
       },
     },
   }),

@@ -1,6 +1,7 @@
 project: 'Kibana reference'
 toc:
   - file: index.md
+  - file: kibana-accessibility-statement.md
   - file: configuration-reference.md
     children:
       - file: cloud/elastic-cloud-kibana-settings.md
@@ -57,6 +58,7 @@ toc:
       - file: connectors-kibana/webhook-action-type.md
       - file: connectors-kibana/cases-webhook-action-type.md
       - file: connectors-kibana/xmatters-action-type.md
+      - file: connectors-kibana/xsoar-action-type.md
       - file: connectors-kibana/pre-configured-connectors.md
   - file: kibana-plugins.md
   - file: commands.md

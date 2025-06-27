@@ -16,7 +16,7 @@ import {
 import { AstNodeParserFields, Builder } from '../../builder';
 import { ESQLAstField, ESQLAstRerankCommand } from '../../types';
 import { firstItem, resolveItem } from '../../visitor/utils';
-import { createColumn, createCommand, createIdentifierOrParam } from '../factories';
+import { createColumn, createCommand } from '../factories';
 import { getPosition } from '../helpers';
 import { collectBooleanExpression, getConstant } from '../walkers';
 
@@ -71,9 +71,19 @@ export const createRerankCommand = (ctx: RerankCommandContext): ESQLAstRerankCom
   const query = resolveItem(getConstant(ctx._queryText)) as ESQLAstRerankCommand['query'];
   const fieldsCtx = ctx.rerankFields();
   const fields = visitRerankFields(fieldsCtx);
-  const inferenceIdCtx = ctx._inferenceId;
-  const maybeInferenceId = inferenceIdCtx ? createIdentifierOrParam(inferenceIdCtx) : undefined;
-  const inferenceId = maybeInferenceId ?? Builder.identifier('', { incomplete: true });
+
+  /**
+   * @todo Parse out correctly "inference command options" once grammar for the RERANK
+   * command is stabilized. Currently, we comment out `inferenceId` parsing to get
+   * the latest grammar merged, while RERANK command will not make it to 9.1 anyways.
+   */
+
+  // const inferenceIdCtx = ctx._inferenceId;
+  const inferenceCommandOptions = ctx.inferenceCommandOptions();
+  // const maybeInferenceId = inferenceIdCtx ? createIdentifierOrParam(inferenceIdCtx) : undefined;
+  // const inferenceId = maybeInferenceId ?? Builder.identifier('', { incomplete: true });
+
+  const inferenceId = Builder.identifier('', { incomplete: true });
   const command = createCommand<'rerank', ESQLAstRerankCommand>('rerank', ctx, {
     query,
     fields,
@@ -97,14 +107,14 @@ export const createRerankCommand = (ctx: RerankCommandContext): ESQLAstRerankCom
       name: 'with',
       args: [inferenceId],
     },
-    withCtx && inferenceIdCtx
+    withCtx && inferenceCommandOptions
       ? {
-          location: getPosition(withCtx.symbol, inferenceIdCtx.stop),
+          location: getPosition(withCtx.symbol, inferenceCommandOptions.stop),
         }
       : undefined
   );
 
-  if (query.incomplete || inferenceId.incomplete || !onCtx || !withCtx) {
+  if (query.incomplete || inferenceId.incomplete || !onCtx) {
     command.incomplete = true;
   }
 

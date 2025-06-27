@@ -305,7 +305,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.st_centroid_agg', {
         defaultMessage: 'ST_CENTROID_AGG',
       }),
-      preview: false,
+      preview: true,
       description: (
         <Markdown
           openLinksInNewTab
@@ -336,7 +336,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.st_extent_agg', {
         defaultMessage: 'ST_EXTENT_AGG',
       }),
-      preview: false,
+      preview: true,
       description: (
         <Markdown
           openLinksInNewTab
@@ -379,7 +379,7 @@ export const functions = {
             {
               defaultMessage: `
   ### STD DEV
-  The standard deviation of a numeric field.
+  The population standard deviation of a numeric field.
 
   \`\`\`esql
   FROM employees
@@ -466,7 +466,9 @@ export const functions = {
             {
               defaultMessage: `
   ### VALUES
-  Returns all values in a group as a multivalued field. The order of the returned values isn’t guaranteed. If you need the values returned in order use [\`MV_SORT\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/mv-functions#esql-mv_sort).
+  Returns unique values as a multivalued field. The order of the returned values isn’t guaranteed.
+  If you need the values returned in order use
+  [\`MV_SORT\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/mv-functions#esql-mv_sort).
 
   \`\`\`esql
   FROM employees

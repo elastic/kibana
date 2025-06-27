@@ -15,6 +15,8 @@ toc:
   - toc: release-notes
   - toc: extend
 subs:
+  version: "9.0.0"
+  branch: "9.0"
   ecloud:   "Elastic Cloud"
   ech:   "Elastic Cloud Hosted"
   ess:   "Elasticsearch Service"
@@ -52,6 +54,7 @@ subs:
   bedrock:   "Amazon Bedrock"
   gemini:   "Google Gemini"
   hive:   "TheHive"
+  xsoar:   "XSOAR"
   report-features:   "reporting features"
   ml:   "machine learning"
   ccs:   "cross-cluster search"

@@ -50,7 +50,7 @@ export const DEFAULT_MAP_UI_STATE = {
   flyoutDisplay: FLYOUT_STATE.NONE,
   drawMode: DRAW_MODE.NONE,
   isFullScreen: false,
-  isReadOnly: !getMapsCapabilities()?.save,
+  isReadOnly: !getMapsCapabilities().save,
   isLayerTOCOpen: DEFAULT_IS_LAYER_TOC_OPEN,
   isTimesliderOpen: false,
   // storing TOC detail visibility outside of map.layerList because its UI state and not map rendering state.
