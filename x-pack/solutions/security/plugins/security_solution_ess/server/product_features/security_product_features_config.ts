@@ -22,6 +22,7 @@ import {
   ProductFeaturesPrivileges,
 } from '@kbn/security-solution-features/privileges';
 import { SECURITY_FEATURE_ID_V3 } from '@kbn/security-solution-features/constants';
+import { APP_ID } from '@kbn/security-solution-plugin/common';
 
 export const getSecurityProductFeaturesConfigurator =
   (enabledProductFeatureKeys: ProductFeatureKeys) => (): ProductFeaturesSecurityConfig => {
@@ -116,6 +117,12 @@ const securityProductFeaturesConfig: Record<
                 }
               ),
             },
+            api: [
+              ...(baseFeatureConfig.privileges.all.api ?? []),
+
+              // API access must be also added, as only UI privileges are copied when replacing a deprecated feature
+              `${APP_ID}-writeGlobalArtifacts`,
+            ],
           },
         },
       };
