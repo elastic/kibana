@@ -530,7 +530,7 @@ components:
       example: This list tracks allowlisted values.
       type: string
     ExceptionListHumanId:
-      description: Exception list's human readable string identifier, e.g. `endpoint_list`.
+      description: The exception list's human readable string identifier, `endpoint_list`.
       example: simple_list
       format: nonempty
       minLength: 1
