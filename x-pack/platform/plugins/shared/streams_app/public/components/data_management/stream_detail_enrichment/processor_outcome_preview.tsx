@@ -14,6 +14,7 @@ import {
   EuiProgress,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
@@ -34,16 +35,35 @@ import { selectPreviewDocuments } from './state_management/simulation_state_mach
 import { isGrokProcessor } from './utils';
 import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
 import { WithUIAttributes } from './types';
+import { AssetImage } from '../../asset_image';
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(
     (snapshot) => snapshot.matches('debouncingChanges') || snapshot.matches('runningSimulation')
   );
-  const previewDocuments = useSimulatorSelector((snapshot) =>
-    selectPreviewDocuments(snapshot.context)
+
+  const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
+
+  const areDataSourcesLoading = useStreamEnrichmentSelector((state) =>
+    state.context.dataSourcesRefs.some((ref) => {
+      const snap = ref.getSnapshot();
+      return (
+        snap.matches({ enabled: 'loadingData' }) || snap.matches({ enabled: 'debouncingChanges' })
+      );
+    })
   );
 
-  if (isEmpty(previewDocuments)) {
+  if (isEmpty(samples)) {
+    if (areDataSourcesLoading) {
+      return (
+        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
     return (
       <EuiEmptyPrompt
         color="warning"
@@ -170,6 +190,9 @@ const OutcomePreviewTable = () => {
   const processors = useSimulatorSelector((state) => state.context.processors);
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
+  const previewColumnsSorting = useSimulatorSelector(
+    (state) => state.context.previewColumnsSorting
+  );
   const explicitlyEnabledPreviewColumns = useSimulatorSelector(
     (state) => state.context.explicitlyEnabledPreviewColumns
   );
@@ -185,6 +208,7 @@ const OutcomePreviewTable = () => {
     setExplicitlyEnabledPreviewColumns,
     setExplicitlyDisabledPreviewColumns,
     setPreviewColumnsOrder,
+    setPreviewColumnsSorting,
   } = useStreamEnrichmentEvents();
 
   const allColumns = useMemo(() => {
@@ -277,6 +301,33 @@ const OutcomePreviewTable = () => {
     setPreviewColumnsOrder(visibleColumns);
   };
 
+  if (isEmpty(previewDocuments)) {
+    return (
+      <EuiEmptyPrompt
+        icon={<AssetImage type="noResults" />}
+        titleSize="s"
+        title={
+          <h2>
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noFilteredDocumentsTitle',
+              { defaultMessage: 'No documents available' }
+            )}
+          </h2>
+        }
+        body={
+          <p>
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noFilteredDocumentsBody',
+              {
+                defaultMessage: 'The current filter settings do not match any documents.',
+              }
+            )}
+          </p>
+        }
+      />
+    );
+  }
+
   return (
     <PreviewTable
       documents={previewDocuments}
@@ -284,6 +335,8 @@ const OutcomePreviewTable = () => {
       rowHeightsOptions={grokMode ? { defaultHeight: 'auto' } : undefined}
       toolbarVisibility
       setVisibleColumns={setVisibleColumns}
+      sorting={previewColumnsSorting}
+      setSorting={setPreviewColumnsSorting}
       columnOrderHint={previewColumnsOrder}
       renderCellValue={
         grokMode

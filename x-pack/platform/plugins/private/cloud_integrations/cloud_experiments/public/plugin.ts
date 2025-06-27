@@ -100,7 +100,7 @@ export class CloudExperimentsPlugin
 
   /**
    * Sets up the OpenFeature LaunchDarkly provider
-   * @private
+   * @internal
    */
   private createOpenFeatureProvider(initialFeatureFlags: Record<string, unknown>) {
     const { launch_darkly: ldConfig } = this.initializerContext.config.get<{

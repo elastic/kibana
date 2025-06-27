@@ -18,6 +18,7 @@ import {
   SEARCH_AI_SEARCH,
   SEARCH_INDICES,
   SEARCH_INDICES_START,
+  SEARCH_INDEX_MANAGEMENT,
 } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
@@ -32,7 +33,7 @@ export const ENTERPRISE_SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSe
   defaultMessage: 'Enterprise Search',
 });
 
-export { SEARCH_INDICES_START, SEARCH_INDICES };
+export { SEARCH_INDICES_START, SEARCH_INDICES, SEARCH_INDEX_MANAGEMENT };
 
 export const ENTERPRISE_SEARCH_HOME_PLUGIN = {
   ID: ENTERPRISE_SEARCH_APP_ID,
@@ -50,8 +51,8 @@ export const ENTERPRISE_SEARCH_HOME_PLUGIN = {
 export const ENTERPRISE_SEARCH_DATA_PLUGIN = {
   ID: ENTERPRISE_SEARCH_CONTENT_APP_ID,
   NAME: SEARCH_PRODUCT_NAME,
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.data.navTitle', {
-    defaultMessage: 'Data',
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.build.navTitle', {
+    defaultMessage: 'Build',
   }),
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.data.description', {
     defaultMessage:

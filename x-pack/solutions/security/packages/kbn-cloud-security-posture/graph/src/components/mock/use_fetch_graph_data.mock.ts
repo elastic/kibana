@@ -34,7 +34,7 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
             label: 'projects/your-project-id/roles/customRole',
             color: 'primary',
             shape: 'hexagon',
-            icon: 'questionInCircle',
+            icon: 'question',
           },
           {
             id: 'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
