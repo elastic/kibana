@@ -89,7 +89,10 @@ export const registerPrivilegeMonitoringTask = ({
 
     const client = apiKey ? apiKeyManager.getClientFromApiKey(apiKey) : undefined;
 
-    if (!client) return;
+    if (!client) {
+      logger.error('[Privilege Monitoring] Unable to create Elasticsearch client from API key.');
+      return undefined;
+    }
 
     const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart: core, namespace });
 

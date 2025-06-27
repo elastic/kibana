@@ -55,11 +55,6 @@ const generate = async (deps: ApiKeyManagerDependencies) => {
       monitoringEntitySourceType.name,
     ]);
 
-    /* const soClient = core.savedObjects.getScopedClient(request, {
-      excludedExtensions: [SECURITY_EXTENSION_ID],
-      includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name],
-    });*/
-
     await soClient.create(PrivilegeMonitoringApiKeyType.name, apiKey, {
       id: getPrivmonEncryptedSavedObjectId(namespace),
       overwrite: true,
