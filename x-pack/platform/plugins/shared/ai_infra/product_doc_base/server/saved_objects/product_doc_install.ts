@@ -24,6 +24,16 @@ export interface ProductDocInstallStatusAttributes {
   index_name?: string;
   inference_id?: string;
 }
+const modelVersion1: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        inference_id: { type: 'keyword' },
+      },
+    },
+  ],
+};
 
 export const productDocInstallStatusSavedObjectType: SavedObjectsType<ProductDocInstallStatusAttributes> =
   {
@@ -44,5 +54,5 @@ export const productDocInstallStatusSavedObjectType: SavedObjectsType<ProductDoc
     management: {
       importableAndExportable: false,
     },
-    modelVersions: {},
+    modelVersions: { '1': modelVersion1 },
   };
