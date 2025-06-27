@@ -32,8 +32,7 @@ export const useDataView = (
     sourcererAdapterSelector(dataViewManagerScope)
   );
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const [localStatus, setLocalStatus] =
-    useState<SharedDataViewSelectionState['status']>('pristine');
+  const [localStatus, setLocalStatus] = useState<SharedDataViewSelectionState['status']>('loading');
   const [retrievedDataView, setRetrievedDataView] = useState<DataView>(
     () =>
       new DataView({
