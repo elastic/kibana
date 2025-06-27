@@ -33,6 +33,7 @@ import { getFixIssuesStep } from './fix_issues_step';
 import { getUpgradeStep } from './upgrade_step';
 import { getMigrateSystemIndicesStep } from './migrate_system_indices';
 import { getLogsStep } from './logs_step';
+import { MachineLearningDisabledCallout } from './ml_callout/ml_callout';
 
 type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues' | 'logs';
 
@@ -140,6 +141,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
               }}
             />
           </EuiText>
+          <MachineLearningDisabledCallout />
         </EuiPageHeader>
         <EuiSpacer size="l" />
         <EuiSteps
