@@ -77,49 +77,44 @@ export const getLiveQueryResultsRoute = (
           let integrationNamespaces: Record<string, string[]> = {};
           let spaceAwareIndexPatterns: string[] = [];
 
-          try {
-            const logger = osqueryContext.logFactory.get('get_live_query_results');
+          const logger = osqueryContext.logFactory.get('get_live_query_results');
+          logger.info(`Active space ID: ${spaceId}`);
 
-            if (osqueryContext?.service?.getIntegrationNamespaces) {
-              const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
-                osqueryContext,
-                request
-              );
-              integrationNamespaces = await osqueryContext.service.getIntegrationNamespaces(
-                [OSQUERY_INTEGRATION_NAME],
-                spaceScopedClient,
-                logger
-              );
+          if (osqueryContext?.service?.getIntegrationNamespaces) {
+            const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+              osqueryContext,
+              request
+            );
+            integrationNamespaces = await osqueryContext.service.getIntegrationNamespaces(
+              [OSQUERY_INTEGRATION_NAME],
+              spaceScopedClient,
+              logger
+            );
 
-              logger.debug(
-                `Retrieved integration namespaces: ${JSON.stringify(integrationNamespaces)}`
-              );
+            logger.debug(
+              `Retrieved integration namespaces: ${JSON.stringify(integrationNamespaces)}`
+            );
 
-              // Build space-aware index patterns using the retrieved namespaces
-              const baseIndexPatterns = [`logs-${OSQUERY_INTEGRATION_NAME}.result*`];
+            // Build space-aware index patterns using the retrieved namespaces
+            const baseIndexPatterns = [`logs-${OSQUERY_INTEGRATION_NAME}.result*`];
 
-              spaceAwareIndexPatterns = baseIndexPatterns.flatMap((pattern) => {
-                // Check if we have namespaces for osquery integration
-                const osqueryNamespaces = integrationNamespaces[OSQUERY_INTEGRATION_NAME];
+            spaceAwareIndexPatterns = baseIndexPatterns.flatMap((pattern) => {
+              // Check if we have namespaces for osquery integration
+              const osqueryNamespaces = integrationNamespaces[OSQUERY_INTEGRATION_NAME];
 
-                if (osqueryNamespaces && osqueryNamespaces.length > 0) {
-                  return osqueryNamespaces.map((namespace) =>
-                    buildIndexNameWithNamespace(pattern, namespace)
-                  );
-                }
+              if (osqueryNamespaces && osqueryNamespaces.length > 0) {
+                return osqueryNamespaces.map((namespace) =>
+                  buildIndexNameWithNamespace(pattern, namespace)
+                );
+              }
 
-                // If no specific namespaces found, return the original pattern
-                return [pattern];
-              });
+              // If no specific namespaces found, return the original pattern
+              return [pattern];
+            });
 
-              logger.debug(
-                `Built space-aware index patterns: ${JSON.stringify(spaceAwareIndexPatterns)}`
-              );
-            }
-          } catch (error) {
-            // Log error but don't fail the request - fallback to default behavior
-            const logger = osqueryContext.logFactory.get('get_live_query_results');
-            logger.warn(`Failed to retrieve integration namespaces: ${error.message}`);
+            logger.debug(
+              `Built space-aware index patterns: ${JSON.stringify(spaceAwareIndexPatterns)}`
+            );
           }
 
           const search = await context.search;
@@ -165,6 +160,9 @@ export const getLiveQueryResultsRoute = (
                     field: request.query.sort ?? '@timestamp',
                   },
                 ],
+                integrationNamespaces: spaceAwareIndexPatterns.length
+                  ? spaceAwareIndexPatterns.join(',')
+                  : undefined,
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }
             )

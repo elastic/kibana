@@ -19,6 +19,7 @@ export const buildResultsQuery = ({
   sort,
   startDate,
   pagination: { activePage, querySize },
+  integrationNamespaces,
 }: ResultsRequestOptions): ISearchRequestParams => {
   const actionIdQuery = `action_id: ${actionId}`;
   const agentQuery = agentId ? ` AND agent.id: ${agentId}` : '';
@@ -42,9 +43,12 @@ export const buildResultsQuery = ({
       : [];
   const filterQuery = [...timeRangeFilter, getQueryFilter({ filter })];
 
+  // Use integrationNamespaces if provided, otherwise fallback to default pattern
+  const indexPattern = integrationNamespaces || `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
+
   return {
     allow_no_indices: true,
-    index: `logs-${OSQUERY_INTEGRATION_NAME}.result*`,
+    index: indexPattern,
     ignore_unavailable: true,
     aggs: {
       count_by_agent_id: {
