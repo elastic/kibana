@@ -213,7 +213,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
     <EuiButtonEmpty
       href={services.documentation.getIngestNodeUrl()}
       target="_blank"
-      iconType="help"
+      iconType="question"
       data-test-subj="documentationLink"
     >
       <FormattedMessage

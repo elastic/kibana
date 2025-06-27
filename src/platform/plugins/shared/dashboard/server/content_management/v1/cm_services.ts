@@ -265,9 +265,6 @@ export const panelSchema = schema.object({
       unknowns: 'allow',
     }
   ),
-  id: schema.maybe(
-    schema.string({ meta: { description: 'The saved object id for by reference panels' } })
-  ),
   type: schema.string({ meta: { description: 'The embeddable type' } }),
   panelRefName: schema.maybe(schema.string()),
   gridData: panelGridDataSchema,
@@ -276,7 +273,6 @@ export const panelSchema = schema.object({
       meta: { description: 'The unique ID of the panel.' },
     })
   ),
-  title: schema.maybe(schema.string({ meta: { description: 'The title of the panel' } })),
   version: schema.maybe(
     schema.string({
       meta: {

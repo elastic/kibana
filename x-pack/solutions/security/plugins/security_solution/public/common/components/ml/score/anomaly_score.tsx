@@ -51,7 +51,7 @@ export const AnomalyScoreComponent = ({
           isOpen={isOpen}
           onClick={() => setIsOpen(!isOpen)}
           closePopover={() => setIsOpen(!isOpen)}
-          button={<Icon type="iInCircle" />}
+          button={<Icon type="info" />}
           repositionOnScroll
         >
           <EuiDescriptionList

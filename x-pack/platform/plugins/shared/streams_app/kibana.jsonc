@@ -16,17 +16,18 @@
       "dataViews",
       "discover",
       "discoverShared",
+      "fieldFormats",
       "fieldsMetadata",
       "licensing",
       "indexManagement",
       "ingestPipelines",
       "navigation",
-      "observabilityAIAssistant",
       "savedObjectsTagging",
       "share",
       "streams",
       "unifiedSearch"
     ],
-    "requiredBundles": ["kibanaReact"]
+    "optionalPlugins": ["observabilityAIAssistant"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils", "observabilityAIAssistant"]
   }
 }

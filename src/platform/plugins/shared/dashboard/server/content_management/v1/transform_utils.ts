@@ -63,7 +63,9 @@ export function dashboardAttributesOut(
       kibanaSavedObjectMeta: transformSearchSourceOut(kibanaSavedObjectMeta),
     }),
     ...(optionsJSON && { options: transformOptionsOut(optionsJSON) }),
-    ...((panelsJSON || sections) && { panels: transformPanelsOut(panelsJSON, sections) }),
+    ...((panelsJSON || sections) && {
+      panels: transformPanelsOut(panelsJSON, sections, references),
+    }),
     ...(refreshInterval && {
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),

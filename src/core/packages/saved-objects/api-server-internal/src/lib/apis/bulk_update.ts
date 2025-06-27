@@ -150,16 +150,10 @@ export const performBulkUpdate = async <T>(
     };
   }
 
-  // `objectNamespace` is a namespace string, while `namespace` is a namespace ID.
-  // The object namespace string, if defined, will supersede the operation's namespace ID.
-  const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
-
   const getNamespaceId = (objectNamespace?: string) =>
     objectNamespace !== undefined
       ? SavedObjectsUtils.namespaceStringToId(objectNamespace)
       : namespace;
-
-  const getNamespaceString = (objectNamespace?: string) => objectNamespace ?? namespaceString;
 
   const bulkGetDocs = validObjects.map(({ value: { type, id, objectNamespace } }) => ({
     _id: serializer.generateRawId(getNamespaceId(objectNamespace), type, id),
@@ -235,7 +229,6 @@ export const performBulkUpdate = async <T>(
         mergeAttributes,
       } = expectedBulkGetResult.value;
 
-      let namespaces: string[] | undefined;
       const versionProperties = getExpectedVersionProperties(version);
       const indexFound = bulkGetResponse?.statusCode !== 404;
       const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
@@ -258,15 +251,18 @@ export const performBulkUpdate = async <T>(
         });
       }
 
+      let savedObjectNamespace: string | undefined;
+      let savedObjectNamespaces: string[] | undefined;
+
       if (isMultiNS) {
         // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
-        namespaces = actualResult!._source.namespaces ?? [
+        savedObjectNamespaces = actualResult!._source.namespaces ?? [
           // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
           SavedObjectsUtils.namespaceIdToString(actualResult!._source.namespace),
         ];
       } else if (registry.isSingleNamespace(type)) {
         // if `objectNamespace` is undefined, fall back to `options.namespace`
-        namespaces = [getNamespaceString(objectNamespace)];
+        savedObjectNamespace = objectNamespace ?? namespace;
       }
 
       const document = getSavedObjectFromSource<T>(
@@ -310,8 +306,8 @@ export const performBulkUpdate = async <T>(
         ...migrated!,
         id,
         type,
-        namespace,
-        namespaces,
+        ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+        ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
         attributes: updatedAttributes,
         updated_at: time,
         updated_by: updatedBy,
@@ -320,6 +316,9 @@ export const performBulkUpdate = async <T>(
       const updatedMigratedDocumentToSave = serializer.savedObjectToRaw(
         migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc
       );
+
+      const namespaces =
+        savedObjectNamespaces ?? (savedObjectNamespace ? [savedObjectNamespace] : []);
 
       const expectedResult = {
         type,

@@ -19,6 +19,7 @@ import { setBreadcrumbs } from '../../../utils/breadcrumbs';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { SingleDocViewer } from './single_doc_viewer';
 import { createDataViewDataSource } from '../../../../common/data_sources';
+import { useScopedServices } from '../../../components/scoped_services_provider';
 
 export interface DocProps extends EsDocSearchProps {
   /**
@@ -29,23 +30,24 @@ export interface DocProps extends EsDocSearchProps {
 
 export function Doc(props: DocProps) {
   const { dataView } = props;
+  const { scopedProfilesManager } = useScopedServices();
   const services = useDiscoverServices();
-  const { locator, chrome, docLinks, profilesManager } = services;
+  const { locator, chrome, docLinks } = services;
   const indexExistsLink = docLinks.links.apis.indexExists;
 
   const onBeforeFetch = useCallback(async () => {
-    await profilesManager.resolveDataSourceProfile({
+    await scopedProfilesManager.resolveDataSourceProfile({
       dataSource: dataView?.id ? createDataViewDataSource({ dataViewId: dataView.id }) : undefined,
       dataView,
       query: { query: '', language: 'kuery' },
     });
-  }, [profilesManager, dataView]);
+  }, [scopedProfilesManager, dataView]);
 
   const onProcessRecord = useCallback(
     (record: DataTableRecord) => {
-      return profilesManager.resolveDocumentProfile({ record });
+      return scopedProfilesManager.resolveDocumentProfile({ record });
     },
-    [profilesManager]
+    [scopedProfilesManager]
   );
 
   const [reqState, record] = useEsDocSearch({

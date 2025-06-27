@@ -12,7 +12,7 @@ export interface CSPUIConfigType {
 export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };
 
 /**
- * A list of allowed values that can be used in `xpack.cloud_security_posture.enableExperimental`.
+ * A list of allowed values that can be used in `xpack.cloudSecurityPosture.enableExperimental`.
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
@@ -20,6 +20,10 @@ export const allowedExperimentalValues = Object.freeze({
    *  Enables cloud Connectors  for Cloud Security Posture
    */
   cloudConnectorsEnabled: false,
+  /**
+   * Enables Cloud Security Posture integration namespace support
+   */
+  cloudSecurityNamespaceSupportEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
@@ -28,7 +32,7 @@ type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<ExperimentalConfigKeys>;
 
 /**
- * Parses the string value used in `xpack.cloud_security_posture.enableExperimental` kibana configuration,
+ * Parses the string value used in `xpack.cloudSecurityPosture.enableExperimental` kibana configuration,
  * which should be a string of values delimited by a comma (`,`)
  *
  * @param configValue

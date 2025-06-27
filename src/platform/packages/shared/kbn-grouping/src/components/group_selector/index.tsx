@@ -11,13 +11,14 @@ import {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
   useEuiTheme,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { CustomFieldPanel } from './custom_field_panel';
 import * as i18n from '../translations';
-import { StyledContextMenu, StyledEuiButtonEmpty } from '../styles';
+import { StyledContextMenu } from '../styles';
 
 export interface GroupSelectorProps {
   'data-test-subj'?: string;
@@ -123,7 +124,7 @@ const GroupSelectorComponent = ({
           return optionsTitle ? [optionsTitle, selection.label].join(', ') : selection.label;
         }, '');
     return (
-      <StyledEuiButtonEmpty
+      <EuiButtonEmpty
         data-test-subj="group-selector-dropdown"
         flush="both"
         iconSide="right"
@@ -134,7 +135,7 @@ const GroupSelectorComponent = ({
         size="xs"
       >
         {`${title}: ${buttonLabel}`}
-      </StyledEuiButtonEmpty>
+      </EuiButtonEmpty>
     );
   }, [groupsSelected, isGroupSelected, onButtonClick, selectedOptions, title]);
 
