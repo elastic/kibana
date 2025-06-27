@@ -69,23 +69,19 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
       data-test-subj="fieldPopover"
       panelClassName="unifiedFieldList__fieldPopover__fieldPopoverPanel"
       panelProps={{
-        css: componentStyles.fieldPopoverPanel,
+        css: styles.fieldPopoverPanel,
       }}
       {...otherPopoverProps}
     >
       {isOpen && (
-        <EuiFlexGroup
-          gutterSize="none"
-          direction="column"
-          css={componentStyles.popoverContentContainer}
-        >
+        <EuiFlexGroup gutterSize="none" direction="column" css={styles.popoverContentContainer}>
           {Boolean(header) && (
             <EuiFlexItem grow={false}>
               {content ? <EuiPopoverTitle>{header}</EuiPopoverTitle> : header}
             </EuiFlexItem>
           )}
           {content ? (
-            <EuiFlexItem className="eui-yScrollWithShadows" css={componentStyles.popoverContent}>
+            <EuiFlexItem className="eui-yScrollWithShadows" css={styles.popoverContent}>
               {content}
             </EuiFlexItem>
           ) : (
@@ -98,9 +94,10 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
   );
 };
 
+// popover styles can't be memoized with `useMemoCss` because they are used conditionally (rules of hooks)
 /* `important` is to ensure that even if styles ordering is different (like for some reason on Developer Examples page),
   this one will be used instead of eui defaults */
-const componentStyles = {
+const styles = {
   fieldPopoverPanel: ({ euiTheme }: UseEuiTheme) =>
     css({
       minWidth: `calc(${euiTheme.size.xxl} * 6.5) !important`,
