@@ -412,8 +412,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           allTags={allTags ?? []}
           selectedTags={agentToAddRemoveTags?.tags ?? []}
           button={tagsPopoverButton!}
-          onTagsUpdated={() => {
-            refreshAgents();
+          onTagsUpdated={(tagsToAdd: string[]) => {
+            refreshAgents({ refreshTags: true });
+            // close popover if agent is going to disappear from view to prevent UI error
+            if (
+              tagsToAdd.length > 0 &&
+              (selectedTags[0] === 'No Tags' || kuery.includes('not tags:*'))
+            ) {
+              setShowTagsAddRemove(false);
+            }
           }}
           onClosePopover={() => {
             setShowTagsAddRemove(false);

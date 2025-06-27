@@ -38,7 +38,7 @@ import {
 } from './schema';
 import type { CasesClient } from '../../client';
 import { constructRequiredKibanaPrivileges } from './utils';
-import { groupAttackDiscoveryAlerts } from './attack_discovery';
+import { ATTACK_DISCOVERY_MAX_OPEN_CASES, groupAttackDiscoveryAlerts } from './attack_discovery';
 
 interface GetCasesConnectorTypeArgs {
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
@@ -109,10 +109,12 @@ export const getCasesConnectorAdapter = ({
        */
       let internallyManagedAlerts = false;
       let groupedAlerts: CasesGroupedAlerts[] | null = null;
+      let maximumCasesToOpen = DEFAULT_MAX_OPEN_CASES;
       if (rule.ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID) {
         try {
           groupedAlerts = groupAttackDiscoveryAlerts(caseAlerts);
           internallyManagedAlerts = true;
+          maximumCasesToOpen = ATTACK_DISCOVERY_MAX_OPEN_CASES;
         } catch (error) {
           logger.error(
             `Could not setup grouped Attack Discovery alerts, because of error: ${error}`
@@ -134,7 +136,7 @@ export const getCasesConnectorAdapter = ({
         owner,
         reopenClosedCases: params.subActionParams.reopenClosedCases,
         timeWindow: params.subActionParams.timeWindow,
-        maximumCasesToOpen: DEFAULT_MAX_OPEN_CASES,
+        maximumCasesToOpen,
         templateId: params.subActionParams.templateId,
         internallyManagedAlerts,
       };

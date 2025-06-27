@@ -27,7 +27,7 @@ export const FrozenCallOut: React.FunctionComponent = () => {
             defaultMessage="This index is frozen"
           />
         }
-        iconType="iInCircle"
+        iconType="info"
       >
         <FormattedMessage
           id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.frozenCallout.reindexFrozenIndex"
