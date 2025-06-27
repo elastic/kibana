@@ -25,6 +25,7 @@ import {
   postCommentUserReq,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/mock';
 import {
+  getCase,
   deleteAllCaseItems,
   deleteCasesByESQuery,
   deleteCasesUserActions,
