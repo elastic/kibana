@@ -9,6 +9,9 @@ import React, { type FC, type PropsWithChildren } from 'react';
 import { fallbackDataViews } from './constants';
 import { DefaultDataViewContext } from './context';
 
+/**
+ * Test-specific provider, should not be used in the real app
+ */
 export const TestDefaultDataViewProvider: FC<PropsWithChildren> = ({ children }) => (
   <DefaultDataViewContext.Provider value={fallbackDataViews}>
     {children}

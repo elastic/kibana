@@ -31,6 +31,9 @@ export const useDefaultDataViews = () => {
   return defaultDataViews;
 };
 
+/**
+ * Blocks security solution rendering until we have the initial data view instance ready
+ */
 export const DefaultDataViewProvider: FC<PropsWithChildren> = ({ children }) => {
   const { dataViews, uiSettings, spaces, application, http } = useKibana().services;
 
