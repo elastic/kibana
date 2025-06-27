@@ -43,7 +43,7 @@ export interface EditConnectorFlyoutProps {
   onClose: () => void;
   tab?: EditConnectorTabs;
   onConnectorUpdated?: (connector: ActionConnector) => void;
-  isServerless: boolean;
+  isServerless?: boolean;
 }
 
 const getConnectorWithoutSecrets = (

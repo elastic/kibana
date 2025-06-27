@@ -51,7 +51,7 @@ interface Props {
   setResetForm?: (value: ResetForm) => void;
 }
 
-interface ProviderConfig {
+interface InferenceConnectorProviderConfig {
   [key: string]: unknown;
   max_number_of_allocations?: number;
   adaptive_allocations?: { max_number_of_allocations?: number };
@@ -73,16 +73,18 @@ const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
   if (
     data.actionTypeId === '.inference' &&
     // explicit check to see if this field exists as it only exists in serverless
-    (data.config?.providerConfig as ProviderConfig)?.adaptive_allocations?.max_number_of_allocations
+    (data.config?.providerConfig as InferenceConnectorProviderConfig)?.adaptive_allocations
+      ?.max_number_of_allocations
   ) {
     return {
       ...data,
       config: {
         ...data.config,
         providerConfig: {
-          ...(data.config.providerConfig as ProviderConfig),
-          max_number_of_allocations: (data.config.providerConfig as ProviderConfig)
-            .adaptive_allocations?.max_number_of_allocations,
+          ...(data.config.providerConfig as InferenceConnectorProviderConfig),
+          max_number_of_allocations: (
+            data.config.providerConfig as InferenceConnectorProviderConfig
+          ).adaptive_allocations?.max_number_of_allocations,
           // remove the adaptive_allocations from the data config as form does not expect it
           adaptive_allocations: undefined,
         },
@@ -119,9 +121,10 @@ const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
   if (
     formData.actionTypeId === '.inference' &&
     // explicit check to see if this field exists as it only exists in serverless
-    (formData.config?.providerConfig as ProviderConfig)?.max_number_of_allocations !== undefined
+    (formData.config?.providerConfig as InferenceConnectorProviderConfig)
+      ?.max_number_of_allocations !== undefined
   ) {
-    const providerConfig = formData.config?.providerConfig as ProviderConfig;
+    const providerConfig = formData.config?.providerConfig as InferenceConnectorProviderConfig;
     const { max_number_of_allocations: maxAllocations, ...restProviderConfig } =
       providerConfig || {};
 

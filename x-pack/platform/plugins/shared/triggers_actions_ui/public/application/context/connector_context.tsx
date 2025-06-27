@@ -10,7 +10,7 @@ import { ConnectorServices } from '../../types';
 
 export interface ConnectorContextValue {
   services: ConnectorServices;
-  isServerless: boolean;
+  isServerless?: boolean;
 }
 
 export const ConnectorContext = React.createContext<ConnectorContextValue | undefined>(undefined);
