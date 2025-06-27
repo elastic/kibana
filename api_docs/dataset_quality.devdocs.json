@@ -89,7 +89,7 @@
             "label": "getDataStreamsStats",
             "description": [],
             "signature": [
-              "(params?: (({ types: (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[]; } | { datasetQuery: string; }) & { includeCreationDate?: boolean | undefined; }) | undefined) => Promise<{ datasetUserPrivileges: { canMonitor: boolean; canReadFailureStore: boolean; } & { canRead: boolean; canViewIntegrations: boolean; }; dataStreamsStats: ({ name: string; userPrivileges: { canMonitor: boolean; canReadFailureStore: boolean; }; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; totalDocs?: number | undefined; creationDate?: number | undefined; })[]; }>"
+              "(params?: (({ types: (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[]; } | { datasetQuery: string; }) & { includeCreationDate?: boolean | undefined; }) | undefined) => Promise<{ datasetUserPrivileges: { canMonitor: boolean; canReadFailureStore: boolean; } & { canRead: boolean; canViewIntegrations: boolean; }; dataStreamsStats: ({ name: string; userPrivileges: { canMonitor: boolean; canReadFailureStore: boolean; }; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; totalDocs?: number | undefined; creationDate?: number | undefined; hasFailureStore?: boolean | undefined; })[]; }>"
             ],
             "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
             "deprecated": false,
@@ -273,7 +273,7 @@
         "label": "DataStreamStatServiceResponse",
         "description": [],
         "signature": [
-          "{ datasetUserPrivileges: { canMonitor: boolean; canReadFailureStore: boolean; } & { canRead: boolean; canViewIntegrations: boolean; }; dataStreamsStats: ({ name: string; userPrivileges: { canMonitor: boolean; canReadFailureStore: boolean; }; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; totalDocs?: number | undefined; creationDate?: number | undefined; })[]; }"
+          "{ datasetUserPrivileges: { canMonitor: boolean; canReadFailureStore: boolean; } & { canRead: boolean; canViewIntegrations: boolean; }; dataStreamsStats: ({ name: string; userPrivileges: { canMonitor: boolean; canReadFailureStore: boolean; }; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; totalDocs?: number | undefined; creationDate?: number | undefined; hasFailureStore?: boolean | undefined; })[]; }"
         ],
         "path": "x-pack/platform/plugins/shared/dataset_quality/common/data_streams_stats/types.ts",
         "deprecated": false,
@@ -748,7 +748,7 @@
           "Type",
           "<number, string, unknown>; }>; }>, ",
           "DatasetQualityRouteHandlerResources",
-          ", { lastActivity?: number | undefined; degradedDocsCount?: number | undefined; failedDocsCount?: number | undefined; docsCount?: number | undefined; sizeBytes?: number | undefined; services?: { [x: string]: string[]; } | undefined; hosts?: { [x: string]: string[]; } | undefined; userPrivileges?: { canMonitor: boolean; canReadFailureStore: boolean; } | undefined; }, ",
+          ", { hasFailureStore?: boolean | undefined; lastActivity?: number | undefined; degradedDocsCount?: number | undefined; failedDocsCount?: number | undefined; docsCount?: number | undefined; sizeBytes?: number | undefined; services?: { [x: string]: string[]; } | undefined; hosts?: { [x: string]: string[]; } | undefined; userPrivileges?: { canMonitor: boolean; canReadFailureStore: boolean; } | undefined; }, ",
           "DatasetQualityRouteCreateOptions",
           ">; \"GET /internal/dataset_quality/data_streams/{dataStream}/degraded_field/{degradedField}/values\": ",
           {
@@ -938,7 +938,7 @@
           "Type",
           "<boolean, boolean, unknown>; }>]>; }>, ",
           "DatasetQualityRouteHandlerResources",
-          ", { datasetUserPrivileges: { canMonitor: boolean; canReadFailureStore: boolean; } & { canRead: boolean; canViewIntegrations: boolean; }; dataStreamsStats: ({ name: string; userPrivileges: { canMonitor: boolean; canReadFailureStore: boolean; }; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; totalDocs?: number | undefined; creationDate?: number | undefined; })[]; }, ",
+          ", { datasetUserPrivileges: { canMonitor: boolean; canReadFailureStore: boolean; } & { canRead: boolean; canViewIntegrations: boolean; }; dataStreamsStats: ({ name: string; userPrivileges: { canMonitor: boolean; canReadFailureStore: boolean; }; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; totalDocs?: number | undefined; creationDate?: number | undefined; hasFailureStore?: boolean | undefined; })[]; }, ",
           "DatasetQualityRouteCreateOptions",
           ">; }[TEndpoint] extends ",
           {
@@ -1243,7 +1243,7 @@
           "Type",
           "<number, string, unknown>; }>; }>, ",
           "DatasetQualityRouteHandlerResources",
-          ", { lastActivity?: number | undefined; degradedDocsCount?: number | undefined; failedDocsCount?: number | undefined; docsCount?: number | undefined; sizeBytes?: number | undefined; services?: { [x: string]: string[]; } | undefined; hosts?: { [x: string]: string[]; } | undefined; userPrivileges?: { canMonitor: boolean; canReadFailureStore: boolean; } | undefined; }, ",
+          ", { hasFailureStore?: boolean | undefined; lastActivity?: number | undefined; degradedDocsCount?: number | undefined; failedDocsCount?: number | undefined; docsCount?: number | undefined; sizeBytes?: number | undefined; services?: { [x: string]: string[]; } | undefined; hosts?: { [x: string]: string[]; } | undefined; userPrivileges?: { canMonitor: boolean; canReadFailureStore: boolean; } | undefined; }, ",
           "DatasetQualityRouteCreateOptions",
           ">; \"GET /internal/dataset_quality/data_streams/{dataStream}/degraded_field/{degradedField}/values\": ",
           {
@@ -1433,7 +1433,7 @@
           "Type",
           "<boolean, boolean, unknown>; }>]>; }>, ",
           "DatasetQualityRouteHandlerResources",
-          ", { datasetUserPrivileges: { canMonitor: boolean; canReadFailureStore: boolean; } & { canRead: boolean; canViewIntegrations: boolean; }; dataStreamsStats: ({ name: string; userPrivileges: { canMonitor: boolean; canReadFailureStore: boolean; }; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; totalDocs?: number | undefined; creationDate?: number | undefined; })[]; }, ",
+          ", { datasetUserPrivileges: { canMonitor: boolean; canReadFailureStore: boolean; } & { canRead: boolean; canViewIntegrations: boolean; }; dataStreamsStats: ({ name: string; userPrivileges: { canMonitor: boolean; canReadFailureStore: boolean; }; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; totalDocs?: number | undefined; creationDate?: number | undefined; hasFailureStore?: boolean | undefined; })[]; }, ",
           "DatasetQualityRouteCreateOptions",
           ">; }[TEndpoint] extends ",
           {

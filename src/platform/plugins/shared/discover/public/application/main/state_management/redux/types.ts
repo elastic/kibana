@@ -16,6 +16,7 @@ import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverAppState } from '../discover_app_state_container';
+import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
 
 export enum LoadingStatus {
   Uninitialized = 'uninitialized',
@@ -70,6 +71,7 @@ export interface TabState extends TabItem {
     columns: boolean;
     rowHeight: boolean;
     breakdownField: boolean;
+    hideChart: boolean;
   };
   documentsRequest: DocumentsRequest;
   totalHitsRequest: TotalHitsRequest;
@@ -77,6 +79,7 @@ export interface TabState extends TabItem {
   uiState: {
     dataGrid?: Partial<UnifiedDataTableRestorableState>;
     fieldList?: Partial<UnifiedFieldListRestorableState>;
+    layout?: Partial<DiscoverLayoutRestorableState>;
   };
 }
 

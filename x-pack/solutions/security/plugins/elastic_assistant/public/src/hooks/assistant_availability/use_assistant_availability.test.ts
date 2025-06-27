@@ -48,6 +48,9 @@ describe('useAssistantAvailability', () => {
             },
           },
         },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(true),
+        },
       },
     } as unknown as ReturnType<typeof useKibana>);
 
@@ -59,6 +62,7 @@ describe('useAssistantAvailability', () => {
       hasConnectorsAllPrivilege: true,
       hasConnectorsReadPrivilege: true,
       isAssistantEnabled: true,
+      isStarterPromptsEnabled: true,
       hasUpdateAIAssistantAnonymization: true,
       hasManageGlobalKnowledgeBase: true,
     });
@@ -89,6 +93,9 @@ describe('useAssistantAvailability', () => {
             },
           },
         },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(false),
+        },
       },
     } as unknown as ReturnType<typeof useKibana>);
 
@@ -100,6 +107,7 @@ describe('useAssistantAvailability', () => {
       hasConnectorsAllPrivilege: false,
       hasConnectorsReadPrivilege: false,
       isAssistantEnabled: false,
+      isStarterPromptsEnabled: false,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
     });
@@ -130,6 +138,9 @@ describe('useAssistantAvailability', () => {
             },
           },
         },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(true),
+        },
       },
     } as unknown as ReturnType<typeof useKibana>);
 
@@ -141,6 +152,7 @@ describe('useAssistantAvailability', () => {
       hasConnectorsAllPrivilege: false,
       hasConnectorsReadPrivilege: true,
       isAssistantEnabled: true,
+      isStarterPromptsEnabled: true,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
     });
@@ -156,6 +168,9 @@ describe('useAssistantAvailability', () => {
         application: {
           capabilities: {},
         },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(true),
+        },
       },
     } as unknown as ReturnType<typeof useKibana>);
 
@@ -167,6 +182,7 @@ describe('useAssistantAvailability', () => {
       hasConnectorsAllPrivilege: false,
       hasConnectorsReadPrivilege: false,
       isAssistantEnabled: true,
+      isStarterPromptsEnabled: true,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
     });
