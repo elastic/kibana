@@ -15,7 +15,6 @@ import type {
 } from '@elastic/eui';
 import {
   EuiCallOut,
-  EuiCode,
   EuiDataGrid,
   EuiPanel,
   EuiLink,
@@ -40,8 +39,7 @@ import {
   ViewResultsInLensAction,
   ViewResultsActionButtonType,
 } from '../packs/pack_queries_status_table';
-import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
-import { OSQUERY_INTEGRATION_NAME, PLUGIN_NAME as OSQUERY_PLUGIN_NAME } from '../../common';
+import { PLUGIN_NAME as OSQUERY_PLUGIN_NAME } from '../../common';
 import { AddToCaseWrapper } from '../cases/add_to_cases';
 
 const DataContext = createContext<ResultEdges>([]);
@@ -85,7 +83,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   error,
 }) => {
   const [isLive, setIsLive] = useState(true);
-  const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
+  // const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
 
   const {
     // @ts-expect-error update types
@@ -99,7 +97,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     direction: Direction.asc,
     sortField: '@timestamp',
     isLive,
-    skip: !hasActionResultsPrivileges,
+    skip: false,
   });
   const expired = useMemo(() => (!endDate ? false : new Date(endDate) < new Date()), [endDate]);
   const {
@@ -149,7 +147,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       field: sortedColumn.id,
       direction: sortedColumn.direction as Direction,
     })),
-    skip: !hasActionResultsPrivileges,
+    skip: false,
   });
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
@@ -406,32 +404,32 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     return <EuiSkeletonText lines={5} />;
   }
 
-  if (!hasActionResultsPrivileges) {
-    return (
-      <EuiCallOut
-        title={
-          <FormattedMessage
-            id="xpack.osquery.liveQuery.permissionDeniedPromptTitle"
-            defaultMessage="Permission denied"
-          />
-        }
-        color="danger"
-        iconType="warning"
-      >
-        <p>
-          <FormattedMessage
-            id="xpack.osquery.liveQuery.permissionDeniedPromptBody"
-            defaultMessage="To view query results, ask your administrator to update your user role to have index {read} privileges on the {logs} index."
-            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-            values={{
-              read: <EuiCode>read</EuiCode>,
-              logs: <EuiCode>logs-{OSQUERY_INTEGRATION_NAME}.result*</EuiCode>,
-            }}
-          />
-        </p>
-      </EuiCallOut>
-    );
-  }
+  // if (!hasActionResultsPrivileges) {
+  //   return (
+  //     <EuiCallOut
+  //       title={
+  //         <FormattedMessage
+  //           id="xpack.osquery.liveQuery.permissionDeniedPromptTitle"
+  //           defaultMessage="Permission denied"
+  //         />
+  //       }
+  //       color="danger"
+  //       iconType="warning"
+  //     >
+  //       <p>
+  //         <FormattedMessage
+  //           id="xpack.osquery.liveQuery.permissionDeniedPromptBody"
+  //           defaultMessage="To view query results, ask your administrator to update your user role to have index {read} privileges on the {logs} index."
+  //           // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+  //           values={{
+  //             read: <EuiCode>read</EuiCode>,
+  //             logs: <EuiCode>logs-{OSQUERY_INTEGRATION_NAME}.result*</EuiCode>,
+  //           }}
+  //         />
+  //       </p>
+  //     </EuiCallOut>
+  //   );
+  // }
 
   return (
     <>

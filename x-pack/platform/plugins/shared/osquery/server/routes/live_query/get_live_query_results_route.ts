@@ -7,8 +7,8 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { map } from 'lodash';
-import type { Observable } from 'rxjs';
 import { lastValueFrom, zip } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import type {
@@ -16,7 +16,7 @@ import type {
   GetLiveQueryResultsRequestParamsSchema,
 } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-import { API_VERSIONS } from '../../../common/constants';
+import { API_VERSIONS, OSQUERY_INTEGRATION_NAME } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import type {
   ActionDetailsRequestOptions,
@@ -32,6 +32,8 @@ import {
   getLiveQueryResultsRequestQuerySchema,
 } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { buildIndexNameWithNamespace } from '../../utils/build_index_name_with_namespace';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 
 export const getLiveQueryResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -70,6 +72,55 @@ export const getLiveQueryResultsRoute = (
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
+
+          // Get integration namespaces for space-aware querying
+          let integrationNamespaces: Record<string, string[]> = {};
+          let spaceAwareIndexPatterns: string[] = [];
+
+          try {
+            const logger = osqueryContext.logFactory.get('get_live_query_results');
+
+            if (osqueryContext?.service?.getIntegrationNamespaces) {
+              const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+                osqueryContext,
+                request
+              );
+              integrationNamespaces = await osqueryContext.service.getIntegrationNamespaces(
+                [OSQUERY_INTEGRATION_NAME],
+                spaceScopedClient,
+                logger
+              );
+
+              logger.debug(
+                `Retrieved integration namespaces: ${JSON.stringify(integrationNamespaces)}`
+              );
+
+              // Build space-aware index patterns using the retrieved namespaces
+              const baseIndexPatterns = [`logs-${OSQUERY_INTEGRATION_NAME}.result*`];
+
+              spaceAwareIndexPatterns = baseIndexPatterns.flatMap((pattern) => {
+                // Check if we have namespaces for osquery integration
+                const osqueryNamespaces = integrationNamespaces[OSQUERY_INTEGRATION_NAME];
+
+                if (osqueryNamespaces && osqueryNamespaces.length > 0) {
+                  return osqueryNamespaces.map((namespace) =>
+                    buildIndexNameWithNamespace(pattern, namespace)
+                  );
+                }
+
+                // If no specific namespaces found, return the original pattern
+                return [pattern];
+              });
+
+              logger.debug(
+                `Built space-aware index patterns: ${JSON.stringify(spaceAwareIndexPatterns)}`
+              );
+            }
+          } catch (error) {
+            // Log error but don't fail the request - fallback to default behavior
+            const logger = osqueryContext.logFactory.get('get_live_query_results');
+            logger.warn(`Failed to retrieve integration namespaces: ${error.message}`);
+          }
 
           const search = await context.search;
           const { actionDetails } = await lastValueFrom(
