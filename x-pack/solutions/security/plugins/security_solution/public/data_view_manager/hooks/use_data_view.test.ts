@@ -15,7 +15,10 @@ import { useSelector } from 'react-redux';
 
 jest.mock('../../common/hooks/use_experimental_features');
 jest.mock('../containers/data_view_provider', () => ({
-  useDefaultDataView: jest.fn().mockReturnValue({ id: '', title: '' }),
+  useDefaultDataViews: jest.fn().mockReturnValue({
+    defaultDataView: { id: '', title: '' },
+    alertDataView: { id: '', title: '' },
+  }),
 }));
 
 jest.mock('react-redux', () => ({

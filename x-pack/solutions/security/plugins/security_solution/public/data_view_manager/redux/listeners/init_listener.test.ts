@@ -51,7 +51,7 @@ describe('createInitListener', () => {
       dataViews: mockDataViewsService,
       defaultDataViews: {
         defaultDataView: { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } as DataView,
-        alertDataView: { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } as DataView,
+        alertDataView: { id: DEFAULT_ALERT_DATA_VIEW_ID } as DataView,
       },
     });
   });
