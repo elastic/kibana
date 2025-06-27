@@ -18,6 +18,11 @@ import type {
   GroupNodeDataModel,
   LabelNodeDataModel,
   NodeDataModel,
+  NodeDocumentDataModel,
+} from '@kbn/cloud-security-posture-common/types/graph/v1';
+import {
+  DOCUMENT_TYPE_ALERT,
+  DOCUMENT_TYPE_EVENT,
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import type { Writable } from '@kbn/utility-types';
@@ -26,6 +31,7 @@ type EsQuery = GraphRequest['query']['esQuery'];
 
 interface GraphEdge {
   badge: number;
+  docs: string[] | string;
   ips?: string[] | string;
   hosts?: string[] | string;
   users?: string[] | string;
@@ -153,8 +159,9 @@ const fetchGraph = async ({
   esQuery?: EsQuery;
 }): Promise<EsqlToRecords<GraphEdge>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
-  const query = `FROM logs-*
+  const query = `FROM logs-* METADATA _id, _index
 | WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
+// Origin event and alerts allow us to identify the start position of graph traversal
 | EVAL isOrigin = ${
     originEventIds.length > 0
       ? `event.id in (${originEventIds.map((_id, idx) => `?og_id${idx}`).join(', ')})`
@@ -165,7 +172,17 @@ const fetchGraph = async ({
       ? `event.id in (${originAlertIds.map((_id, idx) => `?og_alrt_id${idx}`).join(', ')})`
       : 'false'
   }
+// Aggregate document's data for popover expansion and metadata enhancements
+// We format it as JSON string, the best alternative so far. Tried to use tuple using MV_APPEND
+// but it flattens the data and we lose the structure
+| EVAL docType = CASE (_index LIKE "*.alerts-security.alerts-*", "${DOCUMENT_TYPE_ALERT}", "${DOCUMENT_TYPE_EVENT}")
+| EVAL docData = CONCAT("{",
+    "\\"id\\":\\"", _id, "\\"",
+    ",\\"type\\":\\"", docType, "\\"",
+    ",\\"index\\":\\"", _index, "\\"",
+  "}")
 | STATS badge = COUNT(*),
+  docs = VALUES(docData),
   ips = VALUES(related.ip),
   // hosts = VALUES(related.hosts),
   users = VALUES(related.user)
@@ -175,7 +192,7 @@ const fetchGraph = async ({
       isOrigin,
       isOriginAlert
 | LIMIT 1000
-| SORT isOrigin DESC`;
+| SORT isOrigin DESC, action`;
 
   logger.trace(`Executing query [${query}]`);
 
@@ -258,7 +275,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
       break;
     }
 
-    const { ips, hosts, users, actorIds, action, targetIds, isOriginAlert } = record;
+    const { docs, ips, hosts, users, actorIds, action, targetIds, isOriginAlert } = record;
     const actorIdsArray = castArray(actorIds);
     const targetIdsArray = castArray(targetIds);
     const unknownTargets: string[] = [];
@@ -302,6 +319,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
           label: action,
           color: isOriginAlert ? 'danger' : 'primary',
           shape: 'label',
+          documentsData: parseDocumentsData(docs),
         };
 
         nodesMap[labelNode.id] = labelNode;
@@ -452,4 +470,12 @@ const connectNodes = (
     color: colorOverride ?? color,
     type: edgeType,
   };
+};
+
+const parseDocumentsData = (docs: string[] | string): NodeDocumentDataModel[] => {
+  if (typeof docs === 'string') {
+    return [JSON.parse(docs)];
+  }
+
+  return docs.map((doc) => JSON.parse(doc));
 };
