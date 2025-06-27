@@ -18,7 +18,7 @@ export function parsePrimitive(value: unknown): string | number | boolean | unkn
   if (lower === 'false') return false;
 
   // numbers
-  if (trimmed !== '' && !isNaN(Number(trimmed) && isFinite(Number(trimmed)))) {
+  if (trimmed !== '' && !isNaN(Number(trimmed)) && isFinite(Number(trimmed))) {
     return Number(trimmed);
   }
   return value;
