@@ -10,21 +10,22 @@ import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   GroupingLicenseCtaMessageDetailsButton,
+  GroupingLicenseCtaMessageDetailsButtonProps,
   GroupingLicenseCtaMessageTrialButton,
   GroupingLicenseCtaMessageTrialButtonDependencies,
   groupingLicenseCtaMessageDescription,
   groupingLicenseCtaMessageTitle,
 } from './grouping_license_cta_shared';
 
-export interface GroupingLicenseCtaCalloutProps {
+export type GroupingLicenseCtaCalloutProps = GroupingLicenseCtaMessageDetailsButtonProps & {
   dependencies: GroupingLicenseCtaCalloutDependencies;
-}
+};
 
 export type GroupingLicenseCtaCalloutDependencies =
   GroupingLicenseCtaMessageTrialButtonDependencies;
 
 export const GroupingLicenseCtaCallout = React.memo<GroupingLicenseCtaCalloutProps>(
-  ({ dependencies }) => {
+  ({ dependencies, showDetails }) => {
     // Recording the time when the callout was dismissed in case we want to
     // introduce a timeout later to show it again after a certain period.
     const [groupingLicenseCtaCalloutDismissedAt, setGroupingLicenseCtaCalloutDismissedAt] =
@@ -51,7 +52,7 @@ export const GroupingLicenseCtaCallout = React.memo<GroupingLicenseCtaCalloutPro
             <GroupingLicenseCtaMessageTrialButton dependencies={dependencies} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <GroupingLicenseCtaMessageDetailsButton />
+            <GroupingLicenseCtaMessageDetailsButton showDetails={showDetails} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiCallOut>

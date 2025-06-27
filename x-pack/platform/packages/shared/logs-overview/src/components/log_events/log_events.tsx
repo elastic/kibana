@@ -9,10 +9,6 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ISearchGeneric } from '@kbn/search-types';
 import React from 'react';
 import {
-  GroupingLicenseCtaCallout,
-  GroupingLicenseCtaCalloutDependencies,
-} from '../shared/grouping_license_cta_callout';
-import {
   LogEventsControlBar,
   LogEventsControlBarDependencies,
   LogEventsControlBarProps,
@@ -28,9 +24,7 @@ export type LogEventsProps = LogEventsControlBarProps &
     dependencies: LogEventsDependencies;
   };
 
-export type LogEventsDependencies = LogEventsControlBarDependencies &
-  GroupingLicenseCtaCalloutDependencies &
-  LogEventsContentDependencies;
+export type LogEventsDependencies = LogEventsControlBarDependencies & LogEventsContentDependencies;
 
 export const LogEvents = React.memo<LogEventsProps>(
   ({
@@ -54,9 +48,6 @@ export const LogEvents = React.memo<LogEventsProps>(
             groupingCapabilities={groupingCapabilities}
             onChangeGrouping={onChangeGrouping}
           />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <GroupingLicenseCtaCallout dependencies={dependencies} />
         </EuiFlexItem>
         <EuiFlexItem grow>
           <LogEventsContent

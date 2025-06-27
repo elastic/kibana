@@ -9,11 +9,19 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { DiscoverLink, DiscoverLinkDependencies, DiscoverLinkProps } from '../discover_link';
-import { GroupingSelector, GroupingSelectorProps } from './grouping_selector';
+import {
+  GroupingLicenseCtaCallout,
+  GroupingLicenseCtaCalloutDependencies,
+} from './grouping_license_cta_callout';
 import {
   GroupingLicenseCtaPopover,
   GroupingLicenseCtaPopoverDependencies,
 } from './grouping_license_cta_popover';
+import {
+  GroupingLicenseDetailsModal,
+  GroupingLicenseDetailsModalDependencies,
+} from './grouping_license_details_modal';
+import { GroupingSelector, GroupingSelectorProps } from './grouping_selector';
 
 export type ControlBarProps = Pick<DiscoverLinkProps, 'logsSource' | 'timeRange'> &
   Pick<GroupingSelectorProps, 'grouping' | 'onChangeGrouping'> & {
@@ -23,7 +31,9 @@ export type ControlBarProps = Pick<DiscoverLinkProps, 'logsSource' | 'timeRange'
   };
 
 export type ControlBarDependencies = DiscoverLinkDependencies &
-  GroupingLicenseCtaPopoverDependencies;
+  GroupingLicenseCtaPopoverDependencies &
+  GroupingLicenseCtaCalloutDependencies &
+  GroupingLicenseDetailsModalDependencies;
 
 export type GroupingCapabilities =
   | {
@@ -44,30 +54,62 @@ export const ControlBar: React.FC<ControlBarProps> = React.memo(
     groupingCapabilities,
     onChangeGrouping,
   }) => {
+    const [areGroupingLicenseDetailsShown, setAreGroupingLicenseDetailsShown] =
+      React.useState(false);
+
+    const showGroupingLicenseDetails = React.useCallback(() => {
+      setAreGroupingLicenseDetailsShown(true);
+    }, []);
+
+    const hideGroupingLicenseDetails = React.useCallback(() => {
+      setAreGroupingLicenseDetailsShown(false);
+    }, []);
+
     const linkFilters = useMemo(
       () => documentFilters?.map((filter) => ({ filter })),
       [documentFilters]
     );
 
     return (
-      <EuiFlexGroup direction="row" justifyContent="flexEnd" alignItems="center" gutterSize="s">
+      <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
-          <DiscoverLink
-            dependencies={dependencies}
-            documentFilters={linkFilters}
-            logsSource={logsSource}
-            timeRange={timeRange}
-          />
+          <EuiFlexGroup direction="row" justifyContent="flexEnd" alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <DiscoverLink
+                dependencies={dependencies}
+                documentFilters={linkFilters}
+                logsSource={logsSource}
+                timeRange={timeRange}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {groupingCapabilities.status === 'unavailable' ? (
+                groupingCapabilities.reason === 'insufficientLicense' ? (
+                  <GroupingLicenseCtaPopover
+                    dependencies={dependencies}
+                    showDetails={showGroupingLicenseDetails}
+                  />
+                ) : null
+              ) : (
+                <GroupingSelector grouping={grouping} onChangeGrouping={onChangeGrouping} />
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {groupingCapabilities.status === 'unavailable' ? (
-            groupingCapabilities.reason === 'insufficientLicense' ? (
-              <GroupingLicenseCtaPopover dependencies={dependencies} />
-            ) : null
-          ) : (
-            <GroupingSelector grouping={grouping} onChangeGrouping={onChangeGrouping} />
-          )}
-        </EuiFlexItem>
+        {groupingCapabilities.status === 'unavailable' &&
+        groupingCapabilities.reason === 'insufficientLicense' ? (
+          <EuiFlexItem grow={false}>
+            <GroupingLicenseCtaCallout
+              dependencies={dependencies}
+              showDetails={showGroupingLicenseDetails}
+            />
+            <GroupingLicenseDetailsModal
+              dependencies={dependencies}
+              isOpen={areGroupingLicenseDetailsShown}
+              onClose={hideGroupingLicenseDetails}
+            />
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     );
   }

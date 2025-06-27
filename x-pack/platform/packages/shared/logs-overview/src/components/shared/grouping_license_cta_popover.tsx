@@ -18,21 +18,22 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
   GroupingLicenseCtaMessageDetailsButton,
+  GroupingLicenseCtaMessageDetailsButtonProps,
   GroupingLicenseCtaMessageTrialButton,
   GroupingLicenseCtaMessageTrialButtonDependencies,
   groupingLicenseCtaMessageDescription,
   groupingLicenseCtaMessageTitle,
 } from './grouping_license_cta_shared';
 
-export interface GroupingLicenseCtaPopoverProps {
+export type GroupingLicenseCtaPopoverProps = GroupingLicenseCtaMessageDetailsButtonProps & {
   dependencies: GroupingLicenseCtaPopoverDependencies;
-}
+};
 
 export type GroupingLicenseCtaPopoverDependencies =
   GroupingLicenseCtaMessageTrialButtonDependencies;
 
 export const GroupingLicenseCtaPopover = React.memo<GroupingLicenseCtaPopoverProps>(
-  ({ dependencies }) => {
+  ({ dependencies, showDetails }) => {
     const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
 
     const groupingCtaPopoverButton = React.useMemo(
@@ -69,7 +70,7 @@ export const GroupingLicenseCtaPopover = React.memo<GroupingLicenseCtaPopoverPro
               <GroupingLicenseCtaMessageTrialButton dependencies={dependencies} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <GroupingLicenseCtaMessageDetailsButton />
+              <GroupingLicenseCtaMessageDetailsButton showDetails={showDetails} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPopoverFooter>

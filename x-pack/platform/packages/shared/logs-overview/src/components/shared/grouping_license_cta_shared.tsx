@@ -11,12 +11,14 @@ import { i18n } from '@kbn/i18n';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import React from 'react';
 
-export type GroupingLicenseCtaMessageDetailsButtonProps = Pick<EuiButtonEmptyProps, 'size'>;
+export type GroupingLicenseCtaMessageDetailsButtonProps = Pick<EuiButtonEmptyProps, 'size'> & {
+  showDetails: () => void;
+};
 
 export const GroupingLicenseCtaMessageDetailsButton: React.FC<
   GroupingLicenseCtaMessageDetailsButtonProps
-> = (buttonProps) => (
-  <EuiButtonEmpty {...buttonProps} color="primary">
+> = ({ showDetails, ...buttonProps }) => (
+  <EuiButtonEmpty {...buttonProps} color="primary" onClick={showDetails}>
     {groupingLicenseCtaMessageDetailsButtonTitle}
   </EuiButtonEmpty>
 );

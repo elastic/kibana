@@ -5,26 +5,82 @@
  * 2.0.
  */
 
-import { EuiModal, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSpacer,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import {
+  GroupingLicenseCtaMessageTrialButton,
+  GroupingLicenseCtaMessageTrialButtonDependencies,
+} from './grouping_license_cta_shared';
+import { GroupingPreview, GroupingPreviewDependencies } from './grouping_preview';
 
 export interface GroupingLicenseDetailsModalProps {
+  dependencies: GroupingLicenseDetailsModalDependencies;
   isOpen: boolean;
   onClose: () => void;
 }
 
+export type GroupingLicenseDetailsModalDependencies =
+  GroupingLicenseCtaMessageTrialButtonDependencies & GroupingPreviewDependencies;
+
 export const GroupingLicenseDetailsModal = React.memo<GroupingLicenseDetailsModalProps>(
-  ({ isOpen, onClose }) => {
+  ({ dependencies, isOpen, onClose }) => {
+    const modalTitleId = useGeneratedHtmlId();
+
     if (!isOpen) {
       return null;
     }
 
     return (
-      <EuiModal onClose={onClose} data-test-subj="logsOverviewGroupingLicenseDetailsModal">
+      <EuiModal
+        aria-labelledby={modalTitleId}
+        onClose={onClose}
+        data-test-subj="logsOverviewGroupingLicenseDetailsModal"
+      >
         <EuiModalHeader>
-          <EuiModalHeaderTitle>{groupingLicenseDetailsModalTitle}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>
+            {groupingLicenseDetailsModalTitle}
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
+        <EuiModalBody>
+          <EuiText>
+            <p>{groupingLicenseDetailsModalDescription}</p>
+            <p>
+              <EuiLink
+                href={SUBSCRIPTION_URL}
+                target="_blank"
+                data-test-subj="logsOverviewGroupingLicenseDetailsModalSubscriptionsLink"
+              >
+                {groupingLicenseDetailsModalSubscriptionsLinkText}
+              </EuiLink>
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <GroupingPreview dependencies={dependencies} />
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onClose}>Cancel</EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <GroupingLicenseCtaMessageTrialButton dependencies={dependencies} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiModalFooter>
       </EuiModal>
     );
   }
@@ -33,6 +89,23 @@ export const GroupingLicenseDetailsModal = React.memo<GroupingLicenseDetailsModa
 const groupingLicenseDetailsModalTitle = i18n.translate(
   'xpack.logsOverview.groupingLicenseDetailsModal.title',
   {
-    defaultMessage: 'Make sense of your logs faster',
+    defaultMessage: 'Make sense of your logs, faster',
   }
 );
+
+const groupingLicenseDetailsModalDescription = i18n.translate(
+  'xpack.logsOverview.groupingLicenseDetailsModal.description',
+  {
+    defaultMessage:
+      "Advanced log insights organize your logs into clear, structured patterns so you don't have to sift through endless logs to find important information. Start a free trial to experience the difference.",
+  }
+);
+
+const groupingLicenseDetailsModalSubscriptionsLinkText = i18n.translate(
+  'xpack.logsOverview.groupingLicenseDetailsModal.subscriptionsLinkText',
+  {
+    defaultMessage: 'Explore commercial licenses',
+  }
+);
+
+const SUBSCRIPTION_URL = 'https://www.elastic.co/subscriptions';
