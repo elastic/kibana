@@ -7,7 +7,7 @@
 
 import { AgentMode } from '@kbn/onechat-common';
 import type { ConversationalAgentHandlerFn } from '@kbn/onechat-server';
-import { runAgent } from './run_agent';
+import { runAgent } from './modes';
 
 export interface CreateConversationalAgentHandlerParams {
   agentId: string;
