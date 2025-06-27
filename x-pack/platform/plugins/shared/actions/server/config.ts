@@ -177,15 +177,17 @@ export const configSchema = schema.object({
       max: schema.maybe(schema.number({ min: MIN_QUEUED_MAX, defaultValue: DEFAULT_QUEUED_MAX })),
     })
   ),
-  usage: schema.object({
-    url: schema.maybe(schema.string()),
-    enabled: schema.boolean({ defaultValue: false }),
-    ca: schema.maybe(
-      schema.object({
-        path: schema.string(),
-      })
-    ),
-  }),
+  usage: schema.maybe(
+    schema.object({
+      url: schema.maybe(schema.string()),
+      enabled: schema.maybe(schema.boolean()),
+      ca: schema.maybe(
+        schema.object({
+          path: schema.string(),
+        })
+      ),
+    })
+  ),
   webhook: schema.maybe(
     schema.object({
       ssl: schema.object({

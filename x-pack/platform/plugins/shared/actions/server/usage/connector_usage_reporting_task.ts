@@ -55,9 +55,9 @@ export class ConnectorUsageReportingTask {
     this.logger = logger;
     this.projectId = projectId;
     this.eventLogIndex = eventLogIndex;
-    this.usageApiUrl = config.url;
-    this.enabled = config.enabled ?? true;
-    const caCertificatePath = config.ca?.path;
+    this.usageApiUrl = config?.url;
+    this.enabled = config?.enabled ?? true;
+    const caCertificatePath = config?.ca?.path;
 
     if (caCertificatePath && caCertificatePath.length > 0) {
       try {
