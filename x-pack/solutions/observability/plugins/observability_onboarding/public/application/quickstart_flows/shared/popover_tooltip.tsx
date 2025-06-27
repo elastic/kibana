@@ -18,7 +18,7 @@ interface PopoverTooltipProps {
 
 export function PopoverTooltip({
   ariaLabel,
-  iconType = 'iInCircle',
+  iconType = 'info',
   title,
   children,
   dataTestSubj,

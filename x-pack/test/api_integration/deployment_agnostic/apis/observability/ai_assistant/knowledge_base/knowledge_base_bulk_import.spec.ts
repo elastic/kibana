@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
+import { ELSER_ON_ML_NODE_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/common/preconfigured_inference_ids';
 import {
   clearKnowledgeBase,
   getKnowledgeBaseEntriesFromEs,
@@ -12,8 +14,6 @@ import {
   waitForKnowledgeBaseReady,
 } from '../utils/knowledge_base';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import expect from '@kbn/expect';
-import { ELSER_ON_ML_NODE_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/common/preconfigured_inference_ids';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const es = getService('es');

@@ -495,6 +495,14 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'onechat:ui:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'onechat:tools:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'banners:placement': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
@@ -646,6 +654,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable the new logs overview component.',
+    },
+  },
+  'cases:incrementalIdDisplay:enabled': {
+    type: 'boolean',
+    _meta: {
+      description: 'Display the incremental id of a case in the relevant pages',
     },
   },
   'observability:enableStreamsUI': {
