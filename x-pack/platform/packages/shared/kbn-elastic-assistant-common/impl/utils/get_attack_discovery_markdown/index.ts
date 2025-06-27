@@ -77,3 +77,35 @@ ${getAttackChainMarkdown(attackDiscovery)}
     return markdown;
   }
 };
+
+export const getAttackDiscoveryMarkdownFields = ({
+  attackDiscovery,
+  replacements,
+}: {
+  attackDiscovery: AttackDiscovery;
+  replacements?: Replacements;
+}): {
+  detailsMarkdown: string;
+  entitySummaryMarkdown: string;
+  title: string;
+  summaryMarkdown: string;
+} => {
+  const title = getMarkdownFields(attackDiscovery.title);
+  const entitySummaryMarkdown = getMarkdownFields(attackDiscovery.entitySummaryMarkdown ?? '');
+  const summaryMarkdown = getMarkdownFields(attackDiscovery.summaryMarkdown);
+  const detailsMarkdown = getMarkdownFields(attackDiscovery.detailsMarkdown);
+
+  if (replacements != null) {
+    return {
+      detailsMarkdown: getMarkdownWithOriginalValues({ markdown: detailsMarkdown, replacements }),
+      entitySummaryMarkdown: getMarkdownWithOriginalValues({
+        markdown: entitySummaryMarkdown,
+        replacements,
+      }),
+      title: getMarkdownWithOriginalValues({ markdown: title, replacements }),
+      summaryMarkdown: getMarkdownWithOriginalValues({ markdown: summaryMarkdown, replacements }),
+    };
+  } else {
+    return { detailsMarkdown, entitySummaryMarkdown, title, summaryMarkdown };
+  }
+};
