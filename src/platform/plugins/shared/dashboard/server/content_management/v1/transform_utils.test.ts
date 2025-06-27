@@ -15,9 +15,6 @@ import {
   DEFAULT_CONTROL_LABEL_POSITION,
   DEFAULT_CONTROL_WIDTH,
   DEFAULT_IGNORE_PARENT_SETTINGS,
-  ControlLabelPosition,
-  ControlGroupChainingSystem,
-  ControlWidth,
 } from '@kbn/controls-plugin/common';
 
 import type {
@@ -28,7 +25,6 @@ import type { DashboardAttributes, DashboardItem } from './types';
 
 import {
   dashboardAttributesOut,
-  getResultV3ToV2,
   itemAttrsToSavedObject,
   savedObjectToItem,
 } from './transform_utils';
@@ -575,96 +571,5 @@ describe('savedObjectToItem', () => {
       });
       expect(item?.references).toBeUndefined();
     }
-  });
-});
-
-describe('getResultV3ToV2', () => {
-  const commonAttributes = {
-    description: 'description',
-    refreshInterval: { pause: true, value: 1000 },
-    timeFrom: 'now-15m',
-    timeRestore: true,
-    timeTo: 'now',
-    title: 'title',
-  };
-  it('should transform a v3 result to a v2 result with all attributes', () => {
-    const v3Result = {
-      meta: { outcome: 'exactMatch' as const },
-      item: {
-        id: '1',
-        type: 'dashboard',
-        attributes: {
-          ...commonAttributes,
-          controlGroupInput: {
-            chainingSystem: 'NONE' as ControlGroupChainingSystem,
-            labelPosition: 'twoLine' as ControlLabelPosition,
-            controls: [
-              {
-                controlConfig: { bizz: 'buzz' },
-                grow: false,
-                order: 0,
-                id: 'foo',
-                type: 'type1',
-                width: 'small' as ControlWidth,
-              },
-            ],
-            ignoreParentSettings: {
-              ignoreFilters: true,
-              ignoreQuery: true,
-              ignoreTimerange: true,
-              ignoreValidations: true,
-            },
-            autoApplySelections: false,
-          },
-          kibanaSavedObjectMeta: { searchSource: { query: { query: 'test', language: 'KQL' } } },
-          options: {
-            hidePanelTitles: true,
-            useMargins: false,
-            syncColors: false,
-            syncCursor: false,
-            syncTooltips: false,
-          },
-          panels: [
-            {
-              id: '1',
-              type: 'visualization',
-              panelConfig: { title: 'my panel' },
-              gridData: { x: 0, y: 0, w: 15, h: 15, i: 'foo' },
-              panelIndex: 'foo',
-            },
-          ],
-        },
-        references: [],
-      },
-    };
-
-    const output = getResultV3ToV2(v3Result);
-
-    // Common attributes should match between v2 and v3
-    expect(output.item.attributes).toMatchObject(commonAttributes);
-    expect(output.item.attributes.controlGroupInput).toMatchObject({
-      chainingSystem: 'NONE',
-      controlStyle: 'twoLine',
-      showApplySelections: true,
-    });
-
-    // Check transformed attributes
-    expect(output.item.attributes.controlGroupInput!.panelsJSON).toMatchInlineSnapshot(
-      `"{\\"foo\\":{\\"grow\\":false,\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"explicitInput\\":{\\"bizz\\":\\"buzz\\"}}}"`
-    );
-    expect(
-      output.item.attributes.controlGroupInput!.ignoreParentSettingsJSON
-    ).toMatchInlineSnapshot(
-      `"{\\"ignoreFilters\\":true,\\"ignoreQuery\\":true,\\"ignoreTimerange\\":true,\\"ignoreValidations\\":true}"`
-    );
-    expect(output.item.attributes.kibanaSavedObjectMeta.searchSourceJSON).toMatchInlineSnapshot(
-      `"{\\"query\\":{\\"query\\":\\"test\\",\\"language\\":\\"KQL\\"}}"`
-    );
-    expect(output.item.attributes.optionsJSON).toMatchInlineSnapshot(
-      `"{\\"hidePanelTitles\\":true,\\"useMargins\\":false,\\"syncColors\\":false,\\"syncCursor\\":false,\\"syncTooltips\\":false}"`
-    );
-    expect(output.item.attributes.panelsJSON).toMatchInlineSnapshot(
-      `"[{\\"id\\":\\"1\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{\\"title\\":\\"my panel\\"},\\"panelIndex\\":\\"foo\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":15,\\"h\\":15,\\"i\\":\\"foo\\"}}]"`
-    );
   });
 });
