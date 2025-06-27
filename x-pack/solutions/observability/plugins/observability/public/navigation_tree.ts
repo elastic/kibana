@@ -76,10 +76,6 @@ function createNavTree({
               defaultMessage: 'AI Assistant',
             }),
           },
-          {
-            link: 'inventory',
-            spaceBefore: 'm',
-          },
           ...(streamsAvailable
             ? [
                 {
@@ -97,6 +93,7 @@ function createNavTree({
             : []),
           {
             id: 'apm',
+            link: 'apm:services',
             title: i18n.translate('xpack.observability.obltNav.applications', {
               defaultMessage: 'Applications',
             }),
@@ -158,6 +155,7 @@ function createNavTree({
           },
           {
             id: 'metrics',
+            link: 'metrics:inventory',
             title: i18n.translate('xpack.observability.obltNav.infrastructure', {
               defaultMessage: 'Infrastructure',
             }),

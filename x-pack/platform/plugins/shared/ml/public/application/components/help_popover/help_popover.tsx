@@ -20,7 +20,7 @@ export const HelpPopoverButton: FC<{
   return (
     <EuiButtonIcon
       size="s"
-      iconType="help"
+      iconType="question"
       aria-label={i18n.translate('xpack.ml.helpPopover.ariaLabel', {
         defaultMessage: 'Help',
       })}

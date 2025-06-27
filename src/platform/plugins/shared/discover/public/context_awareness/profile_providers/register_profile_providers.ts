@@ -29,6 +29,7 @@ import { createTracesDataSourceProfileProvider } from './observability/traces_da
 import { createDeprecationLogsDataSourceProfileProvider } from './common/deprecation_logs';
 import { createClassicNavRootProfileProvider } from './common/classic_nav_root_profile';
 import { createObservabilityDocumentProfileProviders } from './observability/observability_profile_providers';
+import { createPatternDataSourceProfileProvider } from './common/patterns';
 import { createSecurityDocumentProfileProvider } from './security/security_document_profile';
 import { createMetricsDataSourceProfileProvider } from './observability/metrics_data_source_profile';
 
@@ -148,6 +149,7 @@ const createRootProfileProviders = (providerServices: ProfileProviderServices) =
  */
 const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleDataSourceProfileProvider(),
+  createPatternDataSourceProfileProvider(providerServices),
   createDeprecationLogsDataSourceProfileProvider(),
   createTracesDataSourceProfileProvider(providerServices),
   createMetricsDataSourceProfileProvider(providerServices),
