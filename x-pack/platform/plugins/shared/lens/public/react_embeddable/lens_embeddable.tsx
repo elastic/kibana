@@ -9,7 +9,7 @@ import React from 'react';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { merge } from 'rxjs';
+import { BehaviorSubject, merge } from 'rxjs';
 import { DOC_TYPE } from '../../common/constants';
 import {
   LensApi,
@@ -80,6 +80,10 @@ export const createLensEmbeddableFactory = (
         parentApi,
         titleManager,
         services
+      );
+
+      const defaultTitle$ = new BehaviorSubject<string | undefined>(
+        initialRuntimeState.attributes.title
       );
 
       /**
@@ -199,6 +203,7 @@ export const createLensEmbeddableFactory = (
           ...integrationsConfig.api,
           ...stateConfig.api,
           ...dashboardConfig.api,
+          defaultTitle$,
         }
       );
 
