@@ -3036,6 +3036,14 @@
       }
     }
   },
+  "privmon-api-key": {
+    "dynamic": false,
+    "properties": {
+      "apiKey": {
+        "type": "binary"
+      }
+    }
+  },
   "product-doc-install-status": {
     "dynamic": false,
     "properties": {
