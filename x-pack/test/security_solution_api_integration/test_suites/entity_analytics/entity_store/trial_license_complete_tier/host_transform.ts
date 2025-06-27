@@ -39,7 +39,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('Install Entity Store and test Host transform', () => {
       before(async () => {
-        await utils.cleanEngines();
+        await cleanUpEntityStore(providerContext);
         // Initialize security solution by creating a prerequisite index pattern.
         // Helps avoid "Error initializing entity store: Data view not found 'security-solution-default'"
         await dataView.create('security-solution');
@@ -48,7 +48,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       after(async () => {
-        await utils.cleanEngines();
+        await cleanUpEntityStore(providerContext);
         await es.indices.deleteDataStream({ name: DATASTREAM_NAME });
         await dataView.delete('security-solution');
       });
