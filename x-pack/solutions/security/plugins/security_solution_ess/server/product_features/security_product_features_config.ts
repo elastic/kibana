@@ -17,10 +17,6 @@ import {
   securityDefaultProductFeaturesConfig,
   createEnabledProductFeaturesConfigMap,
 } from '@kbn/security-solution-features/config';
-import {
-  ProductFeaturesPrivilegeId,
-  ProductFeaturesPrivileges,
-} from '@kbn/security-solution-features/privileges';
 import { SECURITY_FEATURE_ID_V3 } from '@kbn/security-solution-features/constants';
 import { APP_ID } from '@kbn/security-solution-plugin/common';
 
@@ -47,7 +43,16 @@ const securityProductFeaturesConfig: Record<
 > = {
   ...securityDefaultProductFeaturesConfig,
   [ProductFeatureSecurityKey.endpointExceptions]: {
-    privileges: ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions],
+    privileges: {
+      all: {
+        ui: ['showEndpointExceptions', 'crudEndpointExceptions'],
+        api: [`${APP_ID}-showEndpointExceptions`, `${APP_ID}-crudEndpointExceptions`],
+      },
+      read: {
+        ui: ['showEndpointExceptions'],
+        api: [`${APP_ID}-showEndpointExceptions`],
+      },
+    },
   },
 
   [ProductFeatureSecurityKey.endpointArtifactManagement]: {
