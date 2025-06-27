@@ -10,22 +10,23 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiForm, useEuiTheme, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
 import { KibanaContextExtra } from '../types';
 import { ValueInput } from './value_input';
 
 interface AddRowPanelProps {
-  columns: DatatableColumn[];
   onHide: () => void;
 }
 
-export const AddRowPanel: React.FC<AddRowPanelProps> = ({ columns, onHide }) => {
+export const AddRowPanel: React.FC<AddRowPanelProps> = ({ onHide }) => {
   const { euiTheme } = useEuiTheme();
   const {
     services: { indexUpdateService, notifications },
   } = useKibana<KibanaContextExtra>();
+
+  const columns = useObservable(indexUpdateService.dataTableColumns$, []);
 
   const [newRow, setNewRow] = useState<Record<string, unknown>>({});
 

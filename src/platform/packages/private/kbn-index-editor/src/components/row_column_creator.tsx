@@ -15,14 +15,13 @@ import {
   EuiPanel,
   useEuiTheme,
 } from '@elastic/eui';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AddColumnPanel } from './add_column_panel';
 import { AddRowPanel } from './add_row_panel';
 
 type ToggleMode = 'add-row' | 'add-column';
 
-export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) => {
+export const RowColumnCreator = () => {
   const [activeMode, setActiveMode] = useState<ToggleMode | null>(null);
   const { euiTheme } = useEuiTheme();
 
@@ -71,8 +70,8 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
             marginBottom: euiTheme.size.xs,
           }}
         >
-          {activeMode === 'add-row' && <AddRowPanel columns={columns} onHide={hidePanel} />}
-          {activeMode === 'add-column' && <AddColumnPanel columns={columns} onHide={hidePanel} />}
+          {activeMode === 'add-row' && <AddRowPanel onHide={hidePanel} />}
+          {activeMode === 'add-column' && <AddColumnPanel onHide={hidePanel} />}
         </EuiPanel>
       )}
     </>

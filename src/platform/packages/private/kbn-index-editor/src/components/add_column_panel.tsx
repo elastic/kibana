@@ -11,18 +11,19 @@ import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiForm, EuiButtonIcon, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import useObservable from 'react-use/lib/useObservable';
 import { KibanaContextExtra } from '../types';
 
 interface AddColumnPanelProps {
   onHide: () => void;
-  columns: DatatableColumn[];
 }
 
-export const AddColumnPanel: React.FC<AddColumnPanelProps> = ({ onHide, columns }) => {
+export const AddColumnPanel: React.FC<AddColumnPanelProps> = ({ onHide }) => {
   const {
     services: { indexUpdateService, notifications },
   } = useKibana<KibanaContextExtra>();
+
+  const columns = useObservable(indexUpdateService.dataTableColumns$, []);
 
   const [columnName, setColumnName] = useState('');
 
