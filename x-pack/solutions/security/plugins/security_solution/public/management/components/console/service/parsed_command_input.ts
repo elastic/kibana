@@ -100,7 +100,6 @@ export const parseCommandInput = (input: string): ParsedCommandInterface => {
 export const getCommandNameFromTextInput = (input: string): string => {
   const trimmedInput = input.trimStart();
 
-  console.log({ trimmedInput });
   if (!trimmedInput) {
     return '';
   }

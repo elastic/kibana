@@ -127,8 +127,6 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         leftOfCursorText: newTextEntered,
         rightOfCursorText: newRightOfCursor = '',
         argState: adjustedArgState,
-        // Restore argState from history if present in payload
-        historyArgState,
       } = typeof payload === 'function' ? payload(state.input) : payload;
 
       if (
@@ -144,14 +142,6 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
           enteredCommand = {
             ...enteredCommand,
             argState: adjustedArgState,
-          };
-        }
-
-        // If restoring from history, use the saved argState
-        if (historyArgState && enteredCommand) {
-          enteredCommand = {
-            ...enteredCommand,
-            argState: historyArgState,
           };
         }
 
@@ -179,7 +169,7 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
             }
 
             enteredCommand = {
-              argState: historyArgState || {},
+              argState: adjustedArgState || {},
               commandDefinition,
               argsWithValueSelectors,
             };
