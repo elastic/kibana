@@ -79,7 +79,7 @@ describe('getSerializedState', () => {
         "timeRestore": false,
         "timeTo": undefined,
         "title": "My Dashboard",
-        "version": 3,
+        "version": 1,
       }
     `);
     expect(result.references).toEqual([]);
