@@ -19,7 +19,7 @@ import apm from 'elastic-apm-node';
 import { AgentlessAgentCreateOverProvisionedError } from '../../../common/errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
 import type { AgentPolicy } from '../../types';
-import type { AgentlessApiDeploymentResponse } from '../../../common/types';
+import type { AgentlessApiDeploymentResponse, FleetServerHost } from '../../../common/types';
 import {
   AgentlessAgentConfigError,
   AgentlessAgentCreateError,
@@ -92,10 +92,9 @@ class AgentlessAgentService {
       );
     }
 
-    const policyId = agentlessAgentPolicy.id;
     const { fleetUrl, fleetToken } = await this.getFleetUrlAndTokenForAgentlessAgent(
       esClient,
-      policyId,
+      agentlessAgentPolicy,
       soClient
     );
 
@@ -105,7 +104,7 @@ class AgentlessAgentService {
 
     if (agentlessAgentPolicy.agentless?.cloud_connectors?.enabled) {
       logger.debug(
-        `[Agentless API] Creating agentless agent with ${agentlessAgentPolicy.agentless?.cloud_connectors?.target_csp} cloud connector enabled for agentless policy ${policyId}`
+        `[Agentless API] Creating agentless agent with ${agentlessAgentPolicy.agentless?.cloud_connectors?.target_csp} cloud connector enabled for agentless policy ${agentlessAgentPolicy.id}`
       );
     }
 
@@ -123,7 +122,7 @@ class AgentlessAgentService {
     const requestConfig: AxiosRequestConfig = {
       url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
       data: {
-        policy_id: policyId,
+        policy_id: agentlessAgentPolicy.id,
         fleet_url: fleetUrl,
         fleet_token: fleetToken,
         resources: agentlessAgentPolicy.agentless?.resources,
@@ -370,20 +369,24 @@ class AgentlessAgentService {
 
   private async getFleetUrlAndTokenForAgentlessAgent(
     esClient: ElasticsearchClient,
-    policyId: string,
+    policy: AgentPolicy,
     soClient: SavedObjectsClientContract
   ) {
     const { items: enrollmentApiKeys } = await listEnrollmentApiKeys(esClient, {
       perPage: SO_SEARCH_LIMIT,
       showInactive: true,
-      kuery: `policy_id:"${policyId}"`,
+      kuery: `policy_id:"${policy.id}"`,
     });
 
-    const { items: fleetHosts } = await fleetServerHostService.list(soClient);
-    // Tech Debt: change this when we add the internal fleet server config to use the internal fleet server host
-    // https://github.com/elastic/security-team/issues/9695
-    const defaultFleetHost =
-      fleetHosts.length === 1 ? fleetHosts[0] : fleetHosts.find((host) => host.is_default);
+    let defaultFleetHost: FleetServerHost | undefined;
+
+    if (policy.fleet_server_host_id) {
+      // Tech Debt: change this when we add the internal fleet server config to use the internal fleet server host
+      // https://github.com/elastic/security-team/issues/9695
+      defaultFleetHost = await fleetServerHostService.get(soClient, policy.fleet_server_host_id);
+    } else {
+      throw new AgentlessAgentConfigError('missing fleet_server_host_id');
+    }
 
     if (!defaultFleetHost) {
       throw new AgentlessAgentConfigError('missing default Fleet server host');
