@@ -15,13 +15,16 @@ import type {
   ESQLColumn,
   ESQLFunction,
   ESQLIdentifier,
+  ESQLInlineCast,
   ESQLIntegerLiteral,
   ESQLList,
   ESQLLiteral,
+  ESQLNumericLiteralType,
   ESQLParamLiteral,
   ESQLProperNode,
   ESQLSource,
   ESQLStringLiteral,
+  ESQLTimeInterval,
 } from '../types';
 import { BinaryExpressionGroup } from './constants';
 
@@ -67,6 +70,12 @@ export const isFieldExpression = (
 
 export const isLiteral = (node: unknown): node is ESQLLiteral =>
   isProperNode(node) && node.type === 'literal';
+
+export const isTimeInterval = (node: unknown): node is ESQLTimeInterval =>
+  isProperNode(node) && node.type === 'timeInterval';
+
+export const isInlineCast = (node: unknown): node is ESQLInlineCast =>
+  isProperNode(node) && node.type === 'inlineCast';
 
 export const isStringLiteral = (node: unknown): node is ESQLStringLiteral =>
   isLiteral(node) && node.literalType === 'keyword';
@@ -135,3 +144,27 @@ export const binaryExpressionGroup = (node: ESQLAstNode): BinaryExpressionGroup 
   }
   return BinaryExpressionGroup.unknown;
 };
+
+/**
+ * Handles numeric types in ES|QL.
+ */
+export const ESQL_NUMERIC_DECIMAL_TYPES = [
+  'double',
+  'unsigned_long',
+  'long',
+  'counter_long',
+  'counter_double',
+] as const;
+
+export const ESQL_NUMBER_TYPES = [
+  'integer',
+  'counter_integer',
+  ...ESQL_NUMERIC_DECIMAL_TYPES,
+] as const;
+
+export function isNumericType(type: unknown): type is ESQLNumericLiteralType {
+  return (
+    typeof type === 'string' &&
+    [...ESQL_NUMBER_TYPES, 'decimal'].includes(type as (typeof ESQL_NUMBER_TYPES)[number])
+  );
+}
