@@ -6,6 +6,9 @@ disabled:
   - x-pack/test_serverless/functional/test_suites/observability/cypress/config_headless.ts
   - x-pack/test_serverless/functional/test_suites/observability/cypress/config_runner.ts
 
+  #Observability AI Assistant bulk import config, only run locally
+  - x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.ai_assistant_local.serverless.config.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - x-pack/test_serverless/api_integration/test_suites/observability/config.ts

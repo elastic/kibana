@@ -22,7 +22,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   describe('Knowledge base: Bulk import operation with real ELSER model', function () {
     // This test is intentionally skipped in both serverless and stateful
     // since it is not meant to be run on CI but only as a manual test
-    this.tags(['skipCloud']);
     before(async () => {
       await setupKb(getService);
     });
