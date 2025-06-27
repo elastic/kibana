@@ -35,7 +35,7 @@ info:
 
     This documentation contains work-in-progress information for future Elastic Stack releases.
   title: Kibana APIs
-  version: 1.0.2
+  version: ''
   x-doc-license:
     name: Attribution-NonCommercial-NoDerivatives 4.0 International
     url: https://creativecommons.org/licenses/by-nc-nd/4.0/
