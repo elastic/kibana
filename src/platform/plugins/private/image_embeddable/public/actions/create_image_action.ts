@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CanAddNewPanel, mountDashboardFlyout } from '@kbn/presentation-containers';
+import { CanAddNewPanel, openDashboardFlyout } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
@@ -36,7 +36,7 @@ export const registerCreateImageAction = () => {
     execute: async ({ embeddable: parentApi }) => {
       const canAddNewPanelParent = await parentApiIsCompatible(parentApi);
       if (!canAddNewPanelParent) throw new IncompatibleActionError();
-      mountDashboardFlyout({
+      openDashboardFlyout({
         core: coreServices,
         api: parentApi,
         loadFlyout: async ({ closeFlyout }) => {

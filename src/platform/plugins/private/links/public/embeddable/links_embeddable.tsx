@@ -27,7 +27,7 @@ import { css } from '@emotion/react';
 import {
   apiIsPresentationContainer,
   initializeUnsavedChanges,
-  mountDashboardFlyout,
+  openDashboardFlyout,
 } from '@kbn/presentation-containers';
 import {
   CONTENT_ID,
@@ -231,7 +231,7 @@ export const getLinksEmbeddableFactory = () => {
           });
         },
         onEdit: async () => {
-          mountDashboardFlyout({
+          openDashboardFlyout({
             core: coreServices,
             api: api.parentApi,
             loadFlyout: async ({ closeFlyout })  => {

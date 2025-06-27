@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mountDashboardFlyout } from '@kbn/presentation-containers';
+import { openDashboardFlyout } from '@kbn/presentation-containers';
 import { DashboardApi } from '../dashboard_api/types';
 import { coreServices } from '../services/kibana_services';
 import { htmlIdGenerator } from '@elastic/eui';
@@ -18,7 +18,7 @@ const htmlId = htmlIdGenerator('modalTitleId');
 export async function addFromLibrary(dashboardApi: DashboardApi) {
   const modalTitleId = htmlId();
 
-  mountDashboardFlyout({
+  openDashboardFlyout({
     core: coreServices,
     api: dashboardApi,
     loadFlyout: async ({ closeFlyout })  => {

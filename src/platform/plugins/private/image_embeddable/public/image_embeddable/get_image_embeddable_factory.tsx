@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import {
   PresentationContainer,
   initializeUnsavedChanges,
-  mountDashboardFlyout,
+  openDashboardFlyout,
 } from '@kbn/presentation-containers';
 import { initializeTitleManager, titleComparators } from '@kbn/presentation-publishing';
 
@@ -95,7 +95,7 @@ export const getImageEmbeddableFactory = ({
         supportedTriggers: () => [IMAGE_CLICK_TRIGGER],
 
         onEdit: async () => {
-          await mountDashboardFlyout({
+          await openDashboardFlyout({
             core: coreServices,
             api: parentApi,
             loadFlyout: async ({ closeFlyout }) => {

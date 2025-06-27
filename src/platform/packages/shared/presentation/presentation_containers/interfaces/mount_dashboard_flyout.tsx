@@ -41,7 +41,7 @@ const EditPanelWrapper = ({
   loadFlyout,
 }: {
   closeFlyout: () => void;
-  loadFlyout: (({ closeFlyout }: { closeFlyout: () => void }) => Promise< JSX.Element | null>);
+  loadFlyout: (({ closeFlyout }: { closeFlyout: () => void }) => Promise< JSX.Element | void>);
 }) => {
   const [EditFlyoutPanel, setEditFlyoutPanel] = React.useState<React.JSX.Element | null>(null);
   useAsync(async () => {
@@ -58,7 +58,7 @@ const EditPanelWrapper = ({
   return EditFlyoutPanel ?? LoadingPanel;
 };
 
-export const mountDashboardFlyout = ({
+export const openDashboardFlyout = ({
   core,
   api,
   loadFlyout,
@@ -66,7 +66,7 @@ export const mountDashboardFlyout = ({
 }: {
   core: CoreStart;
   api?: EmbeddableApiContext['embeddable'];
-  loadFlyout: (({ closeFlyout }: { closeFlyout: () => void }) => Promise< JSX.Element | null>);
+  loadFlyout: (({ closeFlyout }: { closeFlyout: () => void }) => Promise< JSX.Element | void>);
   flyoutProps?: Partial<OverlayFlyoutOpenOptions>;
 }) => {
   const overlayTracker = tracksOverlays(api) ? api : undefined;

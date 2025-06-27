@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { apiIsPresentationContainer, mountDashboardFlyout } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer, openDashboardFlyout } from '@kbn/presentation-containers';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { ACTION_CREATE_ESQL_CHART } from './constants';
@@ -41,7 +41,7 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
   }
 
   public async execute({ embeddable: api }: EmbeddableApiContext) {
-    mountDashboardFlyout({
+    openDashboardFlyout({
       core: this.core,
       api,
       loadFlyout: async ({ closeFlyout })  => {
