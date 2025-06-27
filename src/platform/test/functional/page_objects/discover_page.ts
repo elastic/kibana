@@ -785,4 +785,16 @@ export class DiscoverPageObject extends FtrService {
     await this.browser.pressKeys(this.browser.keys.ENTER);
     await this.waitForDropToFinish();
   }
+
+  /**
+   * If the user has unsaved changes a modal will be shown asking if they want to leave without saving.
+   * This method will click the "Leave without saving" button.
+   */
+  public async leaveWithoutSaving() {
+    const hasUnsavedChangesModal = await this.testSubjects.exists('appLeaveConfirmModal');
+    if (hasUnsavedChangesModal) {
+      const button = await this.find.byButtonText('Confirm');
+      await button.click();
+    }
+  }
 }
