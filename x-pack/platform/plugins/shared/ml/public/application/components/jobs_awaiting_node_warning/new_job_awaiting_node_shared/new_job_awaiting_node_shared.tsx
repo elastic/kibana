@@ -113,7 +113,7 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
         <div>
           <FormattedMessage
             id="xpack.ml.jobsAwaitingNodeWarningShared.noMLNodesAvailableDescription"
-            defaultMessage="{jobCount, plural, one {# job} other {# jobs}} will start once Machine Learning capacity is available. This may take 5–10 minutes."
+            defaultMessage="{jobCount, plural, one {# job} other {# jobs}} will start after autoscaling has increased ML capacity. This may take several minutes."
             values={{
               jobCount: unassignedJobCount,
             }}
@@ -125,36 +125,26 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
               <>
                 <FormattedMessage
                   id="xpack.ml.jobsAwaitingNodeWarningShared.isCloud"
-                  defaultMessage="Elastic Cloud Hosted: Capacity scales automatically if autoscaling is enabled. {linkToAdminConsole}"
-                  values={{
-                    linkToAdminConsole: (
-                      <FormattedMessage
-                        id="xpack.ml.jobsAwaitingNodeWarningShared.isCloud.link"
-                        defaultMessage="You can enable autoscaling and monitor the progress in the {link}."
-                        values={{
-                          link: (
-                            <EuiLink
-                              href={
-                                cloudInfo.deploymentId === null
-                                  ? `https://cloud.elastic.co/deployments`
-                                  : `https://cloud.elastic.co/deployments?q=${cloudInfo.deploymentId}`
-                              }
-                            >
-                              <FormattedMessage
-                                id="xpack.ml.jobsAwaitingNodeWarningShared.linkToCloud.linkText"
-                                defaultMessage="admin console"
-                              />
-                            </EuiLink>
-                          ),
-                        }}
-                      />
-                    ),
-                  }}
+                  defaultMessage="Elastic Cloud deployments can autoscale to add more ML capacity. This may take 5-20 minutes. "
                 />
-                <FormattedMessage
-                  id="xpack.ml.jobsAwaitingNodeWarningShared.isCloud.serverless"
-                  defaultMessage="Elastic Cloud Serverless: Capacity scales automatically in the background."
-                />
+                {cloudInfo.deploymentId === null ? null : (
+                  <FormattedMessage
+                    id="xpack.ml.jobsAwaitingNodeWarningShared.isCloud.link"
+                    defaultMessage="You can monitor progress in the {link}."
+                    values={{
+                      link: (
+                        <EuiLink
+                          href={`https://cloud.elastic.co/deployments?q=${cloudInfo.deploymentId}`}
+                        >
+                          <FormattedMessage
+                            id="xpack.ml.jobsAwaitingNodeWarningShared.linkToCloud.linkText"
+                            defaultMessage="Elastic Cloud admin console"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                )}
               </>
             ) : (
               <FormattedMessage
