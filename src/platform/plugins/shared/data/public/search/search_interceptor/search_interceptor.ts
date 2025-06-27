@@ -61,6 +61,7 @@ import type {
 } from '@kbn/search-types';
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
+import { defaultFreeze } from '@kbn/kibana-utils-plugin/common';
 import {
   AsyncSearchGetResponse,
   ErrorResponseBase,
@@ -653,6 +654,8 @@ export class SearchInterceptor {
             ) {
               this.showRestoreWarning(sessionId);
             }
+
+            defaultFreeze(response);
           }),
           finalize(() => {
             this.pendingCount$.next(this.pendingCount$.getValue() - 1);
