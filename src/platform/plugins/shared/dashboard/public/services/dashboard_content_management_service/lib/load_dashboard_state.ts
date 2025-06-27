@@ -27,7 +27,6 @@ import type {
   LoadDashboardFromSavedObjectProps,
   LoadDashboardReturn,
 } from '../types';
-import { convertNumberToDashboardVersion } from './dashboard_versioning';
 
 export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
   // Lucene was the only option before, so language-less queries are all lucene
@@ -142,7 +141,6 @@ export const loadDashboardState = async ({
     options,
     panels,
     timeFrom,
-    version,
     timeTo,
     title,
   } = attributes;
@@ -176,8 +174,6 @@ export const loadDashboardState = async ({
         savedObjectsTaggingService?.getTaggingApi()?.ui.getTagIdsFromReferences(references) ?? [],
 
       controlGroupInput: attributes.controlGroupInput,
-
-      ...(version && { version: convertNumberToDashboardVersion(version) }),
     },
     dashboardFound: true,
     dashboardId: savedObjectId,

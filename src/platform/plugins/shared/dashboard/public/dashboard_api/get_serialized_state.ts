@@ -24,8 +24,6 @@ import { dataService, savedObjectsTaggingService } from '../services/kibana_serv
 import { DashboardApi } from './types';
 import { generateNewPanelIds } from './generate_new_panel_ids';
 
-const LATEST_DASHBOARD_CONTAINER_VERSION = convertNumberToDashboardVersion(LATEST_VERSION);
-
 export const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
   if (moment(time).isValid()) {
     return moment(time).utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
@@ -108,7 +106,7 @@ export const getSerializedState = ({
     : undefined;
 
   const attributes: DashboardAttributes = {
-    version: convertDashboardVersionToNumber(LATEST_DASHBOARD_CONTAINER_VERSION),
+    version: LATEST_VERSION,
     controlGroupInput: controlGroupInput as DashboardAttributes['controlGroupInput'],
     kibanaSavedObjectMeta: { searchSource },
     description: description ?? '',
