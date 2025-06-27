@@ -5,49 +5,151 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiLink, EuiText } from '@elastic/eui';
+import { isEmpty } from 'lodash';
 import {
   FIELD_TYPES,
   UseField,
   ComboBoxField,
-  fieldValidators,
+  FieldHook,
+  FieldConfig,
+  useFormContext,
 } from '../../../../../../shared_imports';
 
-import { FieldsConfig, to } from './shared';
+import { to } from './shared';
 
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 
-const { emptyField } = fieldValidators;
+interface RemoveFieldsTypes {
+  fields_to_remove: string[];
+  fields_to_keep: string[];
+}
 
-const fieldsConfig: FieldsConfig = {
-  field: {
-    type: FIELD_TYPES.COMBO_BOX,
-    deserializer: to.arrayOfStrings,
-    serializer: (v: string[]) => (v.length === 1 ? v[0] : v),
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.removeForm.fieldNameField', {
-      defaultMessage: 'Fields',
-    }),
-    helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.removeForm.fieldNameHelpText', {
-      defaultMessage: 'Fields to remove.',
-    }),
-    validations: [
-      {
-        validator: emptyField(
-          i18n.translate('xpack.ingestPipelines.pipelineEditor.removeForm.fieldNameRequiredError', {
-            defaultMessage: 'A value is required.',
-          })
-        ),
-      },
-    ],
-  },
+type RemoveFields = {
+  [K in keyof RemoveFieldsTypes]: FieldHook<RemoveFieldsTypes[K]>;
 };
 
+const getFieldConig = (
+  toggleField: () => void
+): Record<
+  keyof RemoveFields,
+  {
+    path: string;
+    config: FieldConfig<any>;
+    labelAppend: JSX.Element;
+  }
+> => ({
+  fields_to_remove: {
+    path: 'fields.field',
+    config: {
+      type: FIELD_TYPES.COMBO_BOX,
+      deserializer: to.arrayOfStrings,
+      serializer: (v: string[]) => (v.length === 1 ? v[0] : v),
+      label: i18n.translate('xpack.ingestPipelines.pipelineEditor.removeForm.fieldNameField', {
+        defaultMessage: 'Fields to remove',
+      }),
+      helpText: i18n.translate(
+        'xpack.ingestPipelines.pipelineEditor.removeForm.fieldNameHelpText',
+        {
+          defaultMessage: 'Fields to remove.',
+        }
+      ),
+      validations: [
+        {
+          validator: ({ value, path, formData }) => {
+            if (isEmpty(value) && isEmpty(formData['fields.keep'])) {
+              return {
+                path,
+                message: i18n.translate(
+                  'xpack.ingestPipelines.pipelineEditor.removeForm.fieldNameRequiredError',
+                  {
+                    defaultMessage: 'A value is required.',
+                  }
+                ),
+              };
+            }
+          },
+        },
+      ],
+    },
+    labelAppend: (
+      <EuiText size="xs">
+        <EuiLink onClick={toggleField} data-test-subj="toggleRemoveField">
+          <FormattedMessage
+            id="xpack.ingestPipelines.pipelineEditor.removeForm.defineFieldsToKeepLabel"
+            defaultMessage="Define fields to be kept"
+          />
+        </EuiLink>
+      </EuiText>
+    ),
+  },
+  fields_to_keep: {
+    path: 'fields.keep',
+    config: {
+      type: FIELD_TYPES.COMBO_BOX,
+      deserializer: to.arrayOfStrings,
+      serializer: (v: string[]) => (v.length === 1 ? v[0] : v),
+      label: i18n.translate('xpack.ingestPipelines.pipelineEditor.removeForm.keepNameField', {
+        defaultMessage: 'Fields to be kept',
+      }),
+      helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.removeForm.keepNameHelpText', {
+        defaultMessage: 'When set, all fields other than those specified will be removed.',
+      }),
+      validations: [
+        {
+          validator: ({ value, path, formData }) => {
+            if (isEmpty(value) && isEmpty(formData['fields.field'])) {
+              return {
+                path,
+                message: i18n.translate(
+                  'xpack.ingestPipelines.pipelineEditor.removeForm.keepNameRequiredError',
+                  {
+                    defaultMessage: 'A value is required.',
+                  }
+                ),
+              };
+            }
+          },
+        },
+      ],
+    },
+    labelAppend: (
+      <EuiText size="xs">
+        <EuiLink onClick={toggleField} data-test-subj="toggleRemoveField">
+          <FormattedMessage
+            id="xpack.ingestPipelines.pipelineEditor.removeForm.defineFieldsToRemoveLabel"
+            defaultMessage="Define fields to be removed"
+          />
+        </EuiLink>
+      </EuiText>
+    ),
+  },
+});
+
 export const Remove: FunctionComponent = () => {
+  const { getFieldDefaultValue } = useFormContext();
+  const isFieldsToKeepFieldDefined = getFieldDefaultValue('fields.keep') !== undefined;
+  const [isFieldsToKeep, setIsFieldsToKeep] = useState<boolean>(isFieldsToKeepFieldDefined);
+
+  const toggleRemoveField = useCallback(() => {
+    setIsFieldsToKeep((prev) => !prev);
+  }, []);
+
+  const FieldProps = useMemo(
+    () =>
+      isFieldsToKeep
+        ? getFieldConig(toggleRemoveField).fields_to_keep
+        : getFieldConig(toggleRemoveField).fields_to_remove,
+    [isFieldsToKeep, toggleRemoveField]
+  );
+
   return (
     <>
-      <UseField config={fieldsConfig.field} component={ComboBoxField} path="fields.field" />
+      <UseField {...FieldProps} component={ComboBoxField} data-test-subj="fieldNameField" />
 
       <IgnoreMissingField />
     </>
