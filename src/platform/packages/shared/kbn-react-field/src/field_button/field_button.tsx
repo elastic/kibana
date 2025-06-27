@@ -192,7 +192,6 @@ const componentStyles = {
     const { fontSize } = euiFontSize(themeContext, 'xs');
     return css({
       fontSize,
-      marginLeft: euiTheme.size.s,
     });
   },
   fieldButton: ({ euiTheme }: UseEuiTheme) =>
