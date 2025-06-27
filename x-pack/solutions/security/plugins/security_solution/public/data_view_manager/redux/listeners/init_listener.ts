@@ -11,7 +11,7 @@ import type { RootState } from '../reducer';
 import { sharedDataViewManagerSlice } from '../slices';
 import { DataViewManagerScopeName } from '../../constants';
 import { selectDataViewAsync } from '../actions';
-import type { DefaultDataViewsContextValue } from '../../containers/data_view_provider';
+import type { DefaultDataViewsContextValue } from '../../containers/context';
 
 /**
  * Creates a Redux listener for initializing the Data View Manager state.
