@@ -104,7 +104,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
 
                 {dataViewColumns ? (
                   <EuiFlexItem grow={false}>
-                    <RowColumnCreator columns={dataViewColumns} />
+                    <RowColumnCreator />
                   </EuiFlexItem>
                 ) : null}
 
