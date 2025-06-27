@@ -9,11 +9,15 @@ import { v4 as uuidV4 } from 'uuid';
 import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
+import {
+  legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorAttributes,
+  syntheticsMonitorSavedObjectType,
+} from '../../../../common/types/saved_objects';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import { parseMonitorLocations } from './utils';
 import { MonitorValidationError } from '../monitor_validation';
 import { getSavedObjectKqlFilter } from '../../common';
-import { monitorAttributes } from '../../../../common/types/saved_objects';
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { ConfigKey } from '../../../../common/constants/monitor_management';
 import {
@@ -57,9 +61,11 @@ export class AddEditMonitorAPI {
   async syncNewMonitor({
     id,
     normalizedMonitor,
+    savedObjectType,
   }: {
     id?: string;
     normalizedMonitor: SyntheticsMonitor;
+    savedObjectType?: string;
   }) {
     const { server, syntheticsMonitorClient, spaceId } = this.routeContext;
     const newMonitorId = id ?? uuidV4();
@@ -74,6 +80,8 @@ export class AddEditMonitorAPI {
       const newMonitorPromise = this.routeContext.monitorConfigRepository.create({
         normalizedMonitor: monitorWithNamespace,
         id: newMonitorId,
+        spaceId,
+        savedObjectType,
       });
 
       const syncErrorsPromise = syntheticsMonitorClient.addMonitors(
@@ -205,7 +213,9 @@ export class AddEditMonitorAPI {
     const kqlFilter = getSavedObjectKqlFilter({ field: 'name.keyword', values: name });
     const { total } = await monitorConfigRepository.find({
       perPage: 0,
-      filter: id ? `${kqlFilter} and not (${monitorAttributes}.config_id: ${id})` : kqlFilter,
+      filter: id
+        ? `${kqlFilter} and not (${syntheticsMonitorAttributes}.config_id: ${id})`
+        : kqlFilter,
     });
 
     if (total > 0) {
@@ -217,7 +227,12 @@ export class AddEditMonitorAPI {
   }
 
   initDefaultAlerts(name: string) {
-    const { server, savedObjectsClient, context } = this.routeContext;
+    const { server, savedObjectsClient, context, request } = this.routeContext;
+    const { gettingStarted } = request.query;
+    if (!gettingStarted) {
+      return;
+    }
+
     try {
       // we do this async, so we don't block the user, error handling will be done on the UI via separate api
       const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
@@ -305,7 +320,10 @@ export class AddEditMonitorAPI {
     try {
       const encryptedMonitor = await monitorConfigRepository.get(newMonitorId);
       if (encryptedMonitor) {
-        await monitorConfigRepository.delete(newMonitorId);
+        await monitorConfigRepository.bulkDelete([
+          { id: newMonitorId, type: syntheticsMonitorSavedObjectType },
+          { id: newMonitorId, type: legacySyntheticsMonitorTypeSingle },
+        ]);
 
         const deleteMonitorAPI = new DeleteMonitorAPI(this.routeContext);
         await deleteMonitorAPI.execute({
