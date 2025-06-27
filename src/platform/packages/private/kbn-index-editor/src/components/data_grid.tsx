@@ -19,7 +19,7 @@ import {
   UnifiedDataTable,
   type SortOrder,
 } from '@kbn/unified-data-table';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection } from 'lodash';
 import { KibanaContextExtra } from '../types';
@@ -81,6 +81,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const onSetColumns = useCallback(
     (columns: string[]) => {
       setActiveColumns(columns);
+
       const columnsDiff = props.columns
         .map((c) => c.name)
         .filter((name) => !columns.includes(name));
@@ -91,17 +92,24 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     [props.columns]
   );
 
-  // props.columns can change when a new column is added
-  useEffect(() => {
-    setActiveColumns((prevActiveColumns) => {
-      const currentColumnNames = props.columns
-        .map((c) => c.name)
-        .filter((name) => !hiddenColumns.current.includes(name));
-      const preservedOrder = intersection(prevActiveColumns, currentColumnNames);
-      const newColumns = difference(currentColumnNames, preservedOrder);
-      return [...newColumns, ...preservedOrder];
-    });
-  }, [props.columns, hiddenColumns]);
+  // Visible columns are calculated based on 3 sources:
+  // - The columns provided by the props, they provide the initial columns set, and any new column added by the user.
+  // - The activeColumns state, which is the list of columns that are currently visible in the grid. But most importantly, it preserves the order of the columns.
+  // - The hiddenColumns ref, which tracks the columns that are currently hidden.
+  // The visible columns are determined by:
+  // - Filter out hidden columns from the props.columns
+  // - Ensure the order is preserved based on activeColumns
+  // - Add any new columns that are not in the preserved order to the beginning
+  const visibleColumns = useMemo(() => {
+    const currentColumnNames = props.columns
+      .map((c) => c.name)
+      .filter((name) => !hiddenColumns.current.includes(name));
+
+    const preservedOrder = intersection(activeColumns, currentColumnNames);
+    const newColumns = difference(currentColumnNames, preservedOrder);
+
+    return [...newColumns, ...preservedOrder];
+  }, [props.columns, hiddenColumns, activeColumns]);
 
   const columnsMeta = useMemo(() => {
     return props.columns.reduce((acc, column) => {
@@ -159,7 +167,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   return (
     <>
       <MemoizedUnifiedDataTable
-        columns={activeColumns}
+        columns={visibleColumns}
         rows={rows}
         columnsMeta={columnsMeta}
         services={services}
