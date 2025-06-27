@@ -118,7 +118,7 @@ const NetworkDetailsComponent: React.FC = () => {
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView } = useDataView();
+  const { dataView, status } = useDataView();
   const { dataViewSpec } = useDataViewSpec();
   const experimentalSelectedPatterns = useSelectedPatterns();
 
@@ -192,6 +192,10 @@ const NetworkDetailsComponent: React.FC = () => {
   const indexPattern = useMemo(() => {
     return dataViewSpecToViewBase(sourcererDataView);
   }, [sourcererDataView]);
+
+  if (status !== 'ready' && newDataViewPickerEnabled) {
+    return null;
+  }
 
   return (
     <div data-test-subj="network-details-page">

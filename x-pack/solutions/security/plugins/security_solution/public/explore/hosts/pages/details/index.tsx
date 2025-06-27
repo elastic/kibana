@@ -131,7 +131,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView } = useDataView();
+  const { dataView, status } = useDataView();
   const { dataViewSpec } = useDataViewSpec();
   const experimentalSelectedPatterns = useSelectedPatterns();
 
@@ -213,6 +213,10 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     enabled: canReadAssetCriticality,
     onChange: calculateEntityRiskScore,
   });
+
+  if (status !== 'ready' && newDataViewPickerEnabled) {
+    return null;
+  }
 
   return (
     <>

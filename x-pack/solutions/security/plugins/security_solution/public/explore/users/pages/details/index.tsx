@@ -116,7 +116,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView } = useDataView();
+  const { dataView, status } = useDataView();
   const { dataViewSpec } = useDataViewSpec();
   const experimentalSelectedPatterns = useSelectedPatterns();
 
@@ -211,6 +211,10 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     enabled: canReadAssetCriticality,
     onChange: calculateEntityRiskScore,
   });
+
+  if (status !== 'ready' && newDataViewPickerEnabled) {
+    return null;
+  }
 
   return (
     <>

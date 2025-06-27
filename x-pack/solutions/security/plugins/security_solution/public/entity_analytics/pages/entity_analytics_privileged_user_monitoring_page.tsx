@@ -180,6 +180,10 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
     min-height: calc(100vh - 240px);
   `;
 
+  if (status !== 'ready' && newDataViewPickerEnabled) {
+    return null;
+  }
+
   if (!indicesExist) {
     return <EmptyPrompt />;
   }

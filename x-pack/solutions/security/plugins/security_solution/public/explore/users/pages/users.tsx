@@ -111,7 +111,7 @@ const UsersComponent = () => {
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView } = useDataView();
+  const { dataView, status } = useDataView();
   const { dataViewSpec } = useDataViewSpec();
   const experimentalSelectedPatterns = useSelectedPatterns();
 
@@ -179,6 +179,10 @@ const UsersComponent = () => {
 
   const capabilities = useMlCapabilities();
   const navTabs = useMemo(() => navTabsUsers(hasMlUserPermissions(capabilities)), [capabilities]);
+
+  if (status !== 'ready' && newDataViewPickerEnabled) {
+    return null;
+  }
 
   return (
     <>

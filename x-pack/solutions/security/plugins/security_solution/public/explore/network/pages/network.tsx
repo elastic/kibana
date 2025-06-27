@@ -93,7 +93,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
 
     const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-    const { dataView } = useDataView();
+    const { dataView, status } = useDataView();
     const { dataViewSpec } = useDataViewSpec();
     const experimentalSelectedPatterns = useSelectedPatterns();
 
@@ -144,6 +144,10 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     });
 
     useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
+
+    if (status !== 'ready' && newDataViewPickerEnabled) {
+      return null;
+    }
 
     return (
       <>

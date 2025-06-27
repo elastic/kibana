@@ -85,7 +85,7 @@ export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView } = useDataView();
+  const { dataView, status } = useDataView();
   const { dataViewSpec } = useDataViewSpec();
   const experimentalSelectedPatterns = useSelectedPatterns();
 
@@ -122,6 +122,10 @@ export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
     jobIds,
     aggregationInterval: 'auto',
   });
+
+  if (status !== 'ready' && newDataViewPickerEnabled) {
+    return null;
+  }
 
   return indicesExist ? (
     <IpOverview
