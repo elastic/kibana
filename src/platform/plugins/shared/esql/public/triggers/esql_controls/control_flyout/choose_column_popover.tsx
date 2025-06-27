@@ -36,7 +36,7 @@ export function ChooseColumnPopover({
       data-test-subj="chooseColumnBtn"
     >
       {i18n.translate('esql.flyout.chooseColumnBtn.label', {
-        defaultMessage: 'Choose a column',
+        defaultMessage: 'here',
       })}
     </EuiLink>
   );

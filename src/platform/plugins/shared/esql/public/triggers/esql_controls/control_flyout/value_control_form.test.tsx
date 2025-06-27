@@ -14,19 +14,27 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { monaco } from '@kbn/monaco';
 import { coreMock } from '@kbn/core/server/mocks';
 import { ESQLVariableType, EsqlControlType, ESQLControlState } from '@kbn/esql-types';
+import { getESQLResults } from '@kbn/esql-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ESQLControlsFlyout } from '.';
 
-const mockGetESQLSingleColumnValues = jest.fn().mockResolvedValue({
-  options: [],
-});
-
 jest.mock('@kbn/esql-utils', () => {
-  const getESQLSingleColumnValues = (...args: any[]) => mockGetESQLSingleColumnValues(...args);
-  getESQLSingleColumnValues.isSuccess = jest.fn().mockResolvedValue(true);
   return {
-    getESQLSingleColumnValues,
+    getESQLResults: jest.fn().mockResolvedValue({
+      response: {
+        columns: [
+          {
+            name: 'field',
+            id: 'field',
+            meta: {
+              type: 'keyword',
+            },
+          },
+        ],
+        values: [],
+      },
+    }),
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
     getLimitFromESQLQuery: jest.fn().mockReturnValue(1000),
     isQueryWrappedByPipes: jest.fn().mockReturnValue(false),
@@ -255,6 +263,9 @@ describe('ValueControlForm', () => {
         expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(
           `Values from a query`
         );
+
+        // values preview panel should be rendered
+        expect(await findByTestId('esqlValuesPreview')).toBeInTheDocument();
       });
 
       it('should be able to change in fields type', async () => {
@@ -304,8 +315,10 @@ describe('ValueControlForm', () => {
         );
 
         await waitFor(() => {
-          expect(mockGetESQLSingleColumnValues).toHaveBeenCalledWith(
-            expect.objectContaining({ timeRange: mockTimeRange })
+          expect(getESQLResults).toHaveBeenCalledWith(
+            expect.objectContaining({
+              timeRange: mockTimeRange,
+            })
           );
         });
       });

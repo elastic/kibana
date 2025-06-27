@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
-import { getESQLSingleColumnValues } from '@kbn/esql-utils';
 import { isEqual } from 'lodash';
 import {
   EuiComboBox,
@@ -30,7 +29,11 @@ import {
   type ESQLControlState,
   type ControlWidthOptions,
 } from '@kbn/esql-types';
-import { getIndexPatternFromESQLQuery, appendStatsByToQuery } from '@kbn/esql-utils';
+import {
+  getIndexPatternFromESQLQuery,
+  getESQLResults,
+  appendStatsByToQuery,
+} from '@kbn/esql-utils';
 import { ESQLLangEditor } from '../../../create_editor';
 import { ControlWidth, ControlLabel } from './shared_form_components';
 import { ChooseColumnPopover } from './choose_column_popover';
@@ -98,7 +101,9 @@ export function ValueControlForm({
       : ''
   );
   const [esqlQueryErrors, setEsqlQueryErrors] = useState<Error[] | undefined>();
-  const [queryColumns, setQueryColumns] = useState<string[]>([]);
+  const [queryColumns, setQueryColumns] = useState<string[]>(
+    valuesRetrieval ? [valuesRetrieval] : []
+  );
   const [label, setLabel] = useState(initialState?.title ?? '');
   const [minimumWidth, setMinimumWidth] = useState(initialState?.width ?? 'medium');
   const [grow, setGrow] = useState(initialState?.grow ?? false);
@@ -150,29 +155,40 @@ export function ValueControlForm({
 
   const onValuesQuerySubmit = useCallback(
     async (query: string) => {
-      setValuesQuery(query);
+      try {
+        getESQLResults({
+          esqlQuery: query,
+          search,
+          signal: undefined,
+          filter: undefined,
+          dropNullColumns: true,
+          timeRange,
+        }).then((results) => {
+          if (!isMounted()) {
+            return;
+          }
+          const columns = results.response.columns.map((col) => col.name);
+          setQueryColumns(columns);
 
-      const result = await getESQLSingleColumnValues({ query, search, timeRange });
-      if (!isMounted()) {
-        return;
-      }
-      if (getESQLSingleColumnValues.isSuccess(result)) {
-        const { options } = result;
-
-        setEsqlQueryErrors([]);
-        setQueryColumns([]);
-
-        const selectOptions = options.map((option) => ({
-          label: String(option),
-          key: String(option),
-          'data-test-subj': String(option),
-        }));
-        setSelectedValues(selectOptions);
-        setAvailableValuesOptions(selectOptions);
-      } else {
-        const { errors, columns } = result;
-        setEsqlQueryErrors(errors);
-        setQueryColumns(columns);
+          if (columns.length === 1) {
+            const valuesArray = results.response.values.map((value) => value[0]);
+            const options = valuesArray
+              .filter((v) => v)
+              .map((option) => {
+                return {
+                  label: String(option),
+                  key: String(option),
+                  'data-test-subj': String(option),
+                };
+              });
+            setSelectedValues(options);
+            setAvailableValuesOptions(options);
+            setEsqlQueryErrors([]);
+          }
+        });
+        setValuesQuery(query);
+      } catch (e) {
+        setEsqlQueryErrors([e]);
       }
     },
     [isMounted, search, timeRange]
@@ -239,13 +255,6 @@ export function ValueControlForm({
     [onValuesQuerySubmit, valuesQuery]
   );
 
-  const hasQueryExecutedSuccessfully = useMemo(
-    () =>
-      controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY &&
-      (selectedValues.length > 0 || queryColumns.length > 0),
-    [controlFlyoutType, selectedValues, queryColumns]
-  );
-
   return (
     <>
       {controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY && (
@@ -276,14 +285,14 @@ export function ValueControlForm({
               hasOutline
             />
           </EuiFormRow>
-          {hasQueryExecutedSuccessfully && (
+          {queryColumns.length > 0 && (
             <EuiFormRow
               label={i18n.translate('esql.flyout.previewValues.placeholder', {
                 defaultMessage: 'Values preview',
               })}
               fullWidth
             >
-              {!queryColumns.length ? (
+              {queryColumns.length === 1 ? (
                 <EuiPanel
                   paddingSize="s"
                   color="primary"
@@ -309,7 +318,7 @@ export function ValueControlForm({
                   <p>
                     <FormattedMessage
                       id="esql.flyout.displayMultipleColsCallout.description"
-                      defaultMessage="Your query is currently returning {totalColumns} columns. {chooseColumnPopover} or use {boldText}."
+                      defaultMessage="Your query is currently returning {totalColumns} columns. Choose column {chooseColumnPopover} or use {boldText}."
                       values={{
                         totalColumns: queryColumns.length,
                         boldText: <strong>STATS BY</strong>,
