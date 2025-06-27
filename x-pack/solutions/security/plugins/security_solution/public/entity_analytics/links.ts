@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { CoreStart } from '@kbn/core/public';
 import {
   SecurityPageName,
   SECURITY_FEATURE_ID,
@@ -17,6 +18,7 @@ import type { LinkItem } from '../common/links/types';
 import { ENTITY_ANALYTICS, ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING } from '../app/translations';
 import privilegedUserMonitoringPageImg from '../common/images/privileged_user_monitoring_page.png';
 import eaOverviewPageImg from '../common/images/ea_overview_page.png';
+import { isPrivMonTimelineEnabled } from './utils/privileged_user_monitoring';
 
 const privMonLinks: LinkItem = {
   isBeta: true,
@@ -89,4 +91,15 @@ export const entityAnalyticsLinks: LinkItem = {
   hideWhenExperimentalKey: 'privilegedUserMonitoringDisabled',
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
+};
+
+export const getEntityAnalyticsUpdatedLinks = async (core: CoreStart): Promise<LinkItem> => {
+  const showPrivMonTimeline = await isPrivMonTimelineEnabled(core.http);
+  if (showPrivMonTimeline) {
+    return entityAnalyticsLinks; // timeline is already enabled, return the original links reference
+  }
+  return {
+    ...entityAnalyticsLinks,
+    links: [eaOverviewLinks, { ...privMonLinks, hideTimeline: true }], // hide timeline for privileged user monitoring
+  };
 };

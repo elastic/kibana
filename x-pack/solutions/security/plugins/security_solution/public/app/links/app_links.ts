@@ -21,7 +21,7 @@ import { onboardingLinks } from '../../onboarding/links';
 import { findingsLinks } from '../../cloud_security_posture/links';
 import type { StartPlugins } from '../../types';
 import { dashboardsLinks } from '../../dashboards/links';
-import { entityAnalyticsLinks } from '../../entity_analytics/links';
+import { entityAnalyticsLinks, getEntityAnalyticsUpdatedLinks } from '../../entity_analytics/links';
 
 export const appLinks: AppLinkItems = Object.freeze([
   dashboardsLinks,
@@ -46,6 +46,7 @@ export const getFilteredLinks = async (
   plugins: StartPlugins
 ): Promise<AppLinkItems> => {
   const managementFilteredLinks = await getManagementFilteredLinks(core, plugins);
+  const entityAnalyticsUpdatedLinks = await getEntityAnalyticsUpdatedLinks(core);
 
   return Object.freeze([
     dashboardsLinks,
@@ -58,7 +59,7 @@ export const getFilteredLinks = async (
     timelinesLinks,
     indicatorsLinks,
     exploreLinks,
-    entityAnalyticsLinks,
+    entityAnalyticsUpdatedLinks,
     assetInventoryLinks,
     rulesLinks,
     onboardingLinks,
