@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { 
-  encodeQueryUrl, 
-  composeQueryFilters, 
-  encodeFlyout, 
-  decodeFlyout, 
-  encodeRisonParam, 
-  decodeRisonParam, 
-  encodeMultipleRisonParams, 
-  decodeMultipleRisonParams 
+import {
+  encodeQueryUrl,
+  composeQueryFilters,
+  encodeFlyout,
+  decodeFlyout,
+  encodeRisonParam,
+  decodeRisonParam,
+  encodeMultipleRisonParams,
+  decodeMultipleRisonParams,
 } from './query_utils';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
@@ -263,8 +263,8 @@ describe('encodeFlyout', () => {
     const result = encodeFlyout(flyout);
     expect(result).toContain('flyout=');
     expect(result).toContain('id:test-flyout');
-    expect(result).toContain('title:\'Test Flyout\'');
-    expect(result).toContain('content:\'This is a test flyout\'');
+    expect(result).toContain("title:'Test Flyout'");
+    expect(result).toContain("content:'This is a test flyout'");
   });
 
   it('Should return undefined for invalid flyout', () => {
@@ -274,7 +274,7 @@ describe('encodeFlyout', () => {
 
 describe('decodeFlyout', () => {
   it('Should return correct decoded flyout', () => {
-    const search = 'flyout=(id:test-flyout,title:\'Test Flyout\',content:\'This is a test flyout\')';
+    const search = "flyout=(id:test-flyout,title:'Test Flyout',content:'This is a test flyout')";
     const result = {
       id: 'test-flyout',
       title: 'Test Flyout',
@@ -323,12 +323,12 @@ describe('encodeMultipleRisonParams', () => {
     const params = {
       cspq: {
         filters: [],
-        query: { match_all: {} }
+        query: { match_all: {} },
       },
       flyout: {
         id: 'test-flyout',
-        title: 'Test Flyout'
-      }
+        title: 'Test Flyout',
+      },
     };
     const result = encodeMultipleRisonParams(params);
     expect(result).toContain('cspq=');
@@ -343,15 +343,16 @@ describe('encodeMultipleRisonParams', () => {
 
 describe('decodeMultipleRisonParams', () => {
   it('Should return correct decoded multiple Rison params', () => {
-    const search = 'cspq=(filters:!(),query:(match_all:()))&flyout=(id:test-flyout,title:\'Test Flyout\')';
+    const search =
+      "cspq=(filters:!(),query:(match_all:()))&flyout=(id:test-flyout,title:'Test Flyout')";
     const paramKeys = ['cspq', 'flyout'];
     const result = decodeMultipleRisonParams(search, paramKeys);
-    
+
     expect(result).toHaveProperty('cspq');
     expect(result).toHaveProperty('flyout');
     expect(result.flyout).toEqual({
       id: 'test-flyout',
-      title: 'Test Flyout'
+      title: 'Test Flyout',
     });
   });
 
