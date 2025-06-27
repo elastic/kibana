@@ -2,7 +2,7 @@
   "type": "shared-browser",
   "id": "@kbn/security-solution-upselling",
   "owner": [
-    "@elastic/security-threat-hunting-explore"
+    "@elastic/security-threat-hunting-investigations"
   ],
   "group": "security",
   "visibility": "private"
