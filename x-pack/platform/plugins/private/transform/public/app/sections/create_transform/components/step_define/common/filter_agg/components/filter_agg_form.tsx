@@ -92,12 +92,7 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
                   />
                 }
               >
-                <EuiIcon
-                  size="s"
-                  color="subdued"
-                  type="questionInCircle"
-                  className="eui-alignTop"
-                />
+                <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
               </EuiToolTip>
             </>
           }
