@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
   const browser = getService('browser');
 
-  describe.only('dashboard time', () => {
+  describe('dashboard time', () => {
     before(async function () {
       await dashboard.initTests();
       await dashboard.preserveCrossAppState();
