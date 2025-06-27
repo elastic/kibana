@@ -19,7 +19,7 @@ import { getFixtureJson } from './helpers/get_fixture_json';
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('LegacyAndMultiSpaceMonitorAPI', function () {
     // Fails on MKI, see https://github.com/elastic/kibana/issues/225431
-    this.tags(['failsOnMKI']);
+    this.tags(['skipCloud']);
 
     const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
