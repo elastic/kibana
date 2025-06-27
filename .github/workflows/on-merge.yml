@@ -21,7 +21,7 @@ jobs:
             github.event.label.name == 'auto-backport'
           )
         ) || (
-          github.event.action == 'labeled' && (
+          github.event.action == 'labeled' && contains(github.event.pull_request.labels.*.name, 'backport:version') && (
             startsWith(github.event.label.name,'v7') ||
             startsWith(github.event.label.name,'v8') ||
             startsWith(github.event.label.name,'v9')
