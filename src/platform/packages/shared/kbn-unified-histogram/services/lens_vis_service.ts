@@ -760,29 +760,29 @@ export class LensVisService {
         requestData,
         suggestionType,
       };
+    }
 
-      if (
-        table && // already fetched data
-        query &&
-        isTextBased &&
-        suggestionType === UnifiedHistogramSuggestionType.lensSuggestion &&
-        visContext?.attributes
-      ) {
-        visContext = {
-          ...visContext,
-          attributes: enrichLensAttributesWithTablesData({
-            attributes: visContext.attributes,
-            table,
-          }),
-        };
-      }
+    if (
+      table && // already fetched data
+      query &&
+      isTextBased &&
+      suggestionType === UnifiedHistogramSuggestionType.lensSuggestion &&
+      visContext?.attributes
+    ) {
+      visContext = {
+        ...visContext,
+        attributes: enrichLensAttributesWithTablesData({
+          attributes: visContext.attributes,
+          table,
+        }),
+      };
+    }
 
-      if (
-        externalVisContextStatus !== UnifiedHistogramExternalVisContextStatus.applied &&
-        getModifiedVisAttributes
-      ) {
-        visContext.attributes = getModifiedVisAttributes(visContext.attributes);
-      }
+    if (
+      externalVisContextStatus !== UnifiedHistogramExternalVisContextStatus.applied &&
+      getModifiedVisAttributes
+    ) {
+      visContext.attributes = getModifiedVisAttributes(visContext.attributes);
     }
 
     return {

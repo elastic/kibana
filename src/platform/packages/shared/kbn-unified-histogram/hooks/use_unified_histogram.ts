@@ -162,7 +162,7 @@ const EMPTY_SUGGESTION_CONTEXT: Observable<UnifiedHistogramSuggestionContext> = 
 
 export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnifiedHistogramResult => {
   const [stateService] = useState(() => {
-    const { services, initialState, localStorageKeyPrefix, getModifiedVisAttributes } = props;
+    const { services, initialState, localStorageKeyPrefix } = props;
     return createStateService({ services, initialState, localStorageKeyPrefix });
   });
   const [lensVisService, setLensVisService] = useState<LensVisService>();
