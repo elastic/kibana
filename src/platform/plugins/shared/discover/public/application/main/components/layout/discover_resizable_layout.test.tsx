@@ -16,20 +16,25 @@ import { findTestSubject } from '@kbn/test-jest-helpers';
 import { mount } from 'enzyme';
 import { isEqual as mockIsEqual } from 'lodash';
 import React from 'react';
-import { DiscoverResizableLayout, SIDEBAR_WIDTH_KEY } from './discover_resizable_layout';
+import {
+  DiscoverResizableLayout as OriginalDiscoverResizableLayout,
+  type DiscoverResizableLayoutProps,
+  SIDEBAR_WIDTH_KEY,
+} from './discover_resizable_layout';
 import { BehaviorSubject } from 'rxjs';
 import type { SidebarToggleState } from '../../../types';
+import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 
 const mockSidebarKey = SIDEBAR_WIDTH_KEY;
 let mockSidebarWidth: number | undefined;
 
-jest.mock('react-use/lib/useLocalStorage', () => {
-  return jest.fn((key: string, initialValue: number) => {
-    if (key !== mockSidebarKey) {
-      throw new Error(`Unexpected key: ${key}`);
-    }
-    return [mockSidebarWidth ?? initialValue, jest.fn()];
-  });
+const services = createDiscoverServicesMock();
+services.storage.get = jest.fn((key: string) => {
+  if (key === mockSidebarKey) {
+    return mockSidebarWidth;
+  }
+  throw new Error(`Unexpected key: ${key}`);
 });
 
 let mockIsMobile = false;
@@ -46,6 +51,14 @@ jest.mock('@elastic/eui', () => {
     }),
   };
 });
+
+const DiscoverResizableLayout: React.FC<DiscoverResizableLayoutProps> = (props) => {
+  return (
+    <DiscoverTestProvider services={services}>
+      <OriginalDiscoverResizableLayout {...props} />
+    </DiscoverTestProvider>
+  );
+};
 
 describe('DiscoverResizableLayout', () => {
   beforeEach(() => {
@@ -104,6 +117,27 @@ describe('DiscoverResizableLayout', () => {
       />
     );
     expect(wrapper.find(ResizableLayout).prop('fixedPanelSize')).toBe(400);
+  });
+
+  it('should use the restored sidebar width despite local storage value', () => {
+    mockSidebarWidth = 400;
+    const wrapper = mount(
+      <DiscoverResizableLayout
+        container={null}
+        sidebarToggleState$={
+          new BehaviorSubject<SidebarToggleState>({
+            isCollapsed: true,
+            toggle: () => {},
+          })
+        }
+        sidebarPanel={<div data-test-subj="sidebarPanel" />}
+        mainPanel={<div data-test-subj="mainPanel" />}
+        initialState={{
+          sidebarWidth: 450,
+        }}
+      />
+    );
+    expect(wrapper.find(ResizableLayout).prop('fixedPanelSize')).toBe(450);
   });
 
   it('should pass mode ResizableLayoutMode.Resizable when not mobile and sidebar is not collapsed', () => {
