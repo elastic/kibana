@@ -15,6 +15,7 @@ class ESDocLinks {
   public notebooksExamples: string = '';
   public customerEngineerRequestForm: string = '';
   public analyzeLogs: string = '';
+  public ingestDataToSecurity: string = '';
   constructor() {}
 
   setDocLinks(newDocLinks: DocLinks) {
