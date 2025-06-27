@@ -79,7 +79,9 @@ export class PackageInstaller {
     const inferenceEndpoints = await this.esClient.inference.get({
       inference_id: inferenceId,
     });
-    return inferenceEndpoints.endpoints[0];
+    return Array.isArray(inferenceEndpoints.endpoints) && inferenceEndpoints.endpoints.length > 0
+      ? inferenceEndpoints.endpoints[0]
+      : undefined;
   }
   /**
    * Make sure that the currently installed doc packages are up to date.

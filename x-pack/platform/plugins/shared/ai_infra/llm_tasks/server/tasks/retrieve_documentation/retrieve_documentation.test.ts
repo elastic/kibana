@@ -80,6 +80,7 @@ describe('retrieveDocumentation', () => {
       products: ['kibana'],
       max: 5,
       highlights: 4,
+      inferenceId: defaultInferenceEndpoints.ELSER,
     });
   });
 
@@ -94,7 +95,6 @@ describe('retrieveDocumentation', () => {
       max: 5,
       connectorId: '.my-connector',
       functionCalling: 'simulated',
-      inferenceId: defaultInferenceEndpoints.ELSER,
     });
 
     expect(searchDocAPI).toHaveBeenCalledTimes(1);
@@ -103,6 +103,7 @@ describe('retrieveDocumentation', () => {
       products: ['kibana'],
       max: 5,
       highlights: 0,
+      inferenceId: undefined,
     });
   });
 

@@ -52,7 +52,7 @@ export const overrideInferenceSettings = (
         current.model_settings = modelSettingsToOverride;
       }
     }
-    if ('properties' in current && current.properties) {
+    if (isPopulatedObject(current, ['properties'])) {
       for (const prop of Object.values(current.properties)) {
         recursiveOverride(prop);
       }
