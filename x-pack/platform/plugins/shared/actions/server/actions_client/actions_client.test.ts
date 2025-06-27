@@ -124,7 +124,7 @@ beforeEach(() => {
       new ActionExecutor({
         isESOCanEncrypt: true,
         connectorRateLimiter: new ConnectorRateLimiter({
-          config: { email: { limit: 100, lookbackWindow: moment.duration(1, 'm') } },
+          config: { email: { limit: 100, lookbackWindow: '1m' } },
         }),
       }),
       inMemoryMetrics
@@ -602,7 +602,7 @@ describe('create()', () => {
         new ActionExecutor({
           isESOCanEncrypt: true,
           connectorRateLimiter: new ConnectorRateLimiter({
-            config: { email: { limit: 100, lookbackWindow: moment.duration(1, 'm') } },
+            config: { email: { limit: 100, lookbackWindow: '1m' } },
           }),
         }),
         inMemoryMetrics

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { duration } from 'moment';
 import type { ConnectorRateLimiterConfig } from '../config';
+import { parseDuration } from './parse_date';
 
 export class ConnectorRateLimiter {
   private logsByConnectors: Map<string, number[]>;
@@ -51,7 +51,7 @@ export class ConnectorRateLimiter {
     const connectorConfig = this.config?.[connectorTypeId];
     if (connectorConfig) {
       const now = Date.now();
-      const cutoff = now - duration(connectorConfig.lookbackWindow).asMilliseconds();
+      const cutoff = now - parseDuration(connectorConfig.lookbackWindow);
       const filtered =
         this.logsByConnectors.get(connectorTypeId)?.filter((ts) => ts >= cutoff) || [];
       if (filtered.length > 0) {

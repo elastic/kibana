@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { ConnectorRateLimiter } from './connector_rate_limiter';
 
 describe('ConnectorRateLimiter', () => {
@@ -42,7 +41,7 @@ describe('ConnectorRateLimiter', () => {
     const config = {
       email: {
         limit: 100,
-        lookbackWindow: moment.duration(10, 's'),
+        lookbackWindow: '10s',
       },
     };
     const connectorRateLimiter = new ConnectorRateLimiter({ config });
@@ -72,7 +71,7 @@ describe('ConnectorRateLimiter', () => {
     const config = {
       email: {
         limit: 5,
-        lookbackWindow: moment.duration(10, 's'),
+        lookbackWindow: '10s',
       },
     };
     const connectorRateLimiter = new ConnectorRateLimiter({ config });
@@ -91,7 +90,7 @@ describe('ConnectorRateLimiter', () => {
     const config = {
       email: {
         limit: 5,
-        lookbackWindow: moment.duration(10, 's'),
+        lookbackWindow: '10s',
       },
     };
     const connectorRateLimiter = new ConnectorRateLimiter({ config });

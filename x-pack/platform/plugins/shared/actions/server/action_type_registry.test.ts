@@ -19,7 +19,6 @@ import type { ActionsConfigurationUtilities } from './actions_config';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
-import moment from 'moment';
 
 const mockTaskManager = taskManagerMock.createSetup();
 const inMemoryMetrics = inMemoryMetricsMock.create();
@@ -39,7 +38,7 @@ describe('actionTypeRegistry', () => {
         new ActionExecutor({
           isESOCanEncrypt: true,
           connectorRateLimiter: new ConnectorRateLimiter({
-            config: { email: { limit: 100, lookbackWindow: moment.duration(1, 'm') } },
+            config: { email: { limit: 100, lookbackWindow: '1m' } },
           }),
         }),
         inMemoryMetrics
