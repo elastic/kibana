@@ -19,7 +19,7 @@ import {
   UnifiedDataTable,
   type SortOrder,
 } from '@kbn/unified-data-table';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection } from 'lodash';
 import { KibanaContextExtra } from '../types';
@@ -66,7 +66,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const [activeColumns, setActiveColumns] = useState<string[]>(
     (props.initialColumns || props.columns).map((c) => c.name)
   );
-  const [hiddenColumns, setHiddenColumns] = useState<string[]>([]);
+  const hiddenColumns = useRef<string[]>([]);
   const [rowHeight, setRowHeight] = useState<number>(
     props.initialRowHeight ?? DEFAULT_INITIAL_ROW_HEIGHT
   );
@@ -81,15 +81,12 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const onSetColumns = useCallback(
     (columns: string[]) => {
       setActiveColumns(columns);
-      setHiddenColumns((prevState) => {
-        const columnsDiff = props.columns
-          .map((c) => c.name)
-          .filter((name) => !columns.includes(name));
-        if (columnsDiff.length !== prevState.length) {
-          return columnsDiff;
-        }
-        return prevState;
-      });
+      const columnsDiff = props.columns
+        .map((c) => c.name)
+        .filter((name) => !columns.includes(name));
+      if (columnsDiff.length !== hiddenColumns.current.length) {
+        hiddenColumns.current = columnsDiff;
+      }
     },
     [props.columns]
   );
@@ -99,7 +96,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     setActiveColumns((prevActiveColumns) => {
       const currentColumnNames = props.columns
         .map((c) => c.name)
-        .filter((name) => !hiddenColumns.includes(name));
+        .filter((name) => !hiddenColumns.current.includes(name));
       const preservedOrder = intersection(prevActiveColumns, currentColumnNames);
       const newColumns = difference(currentColumnNames, preservedOrder);
       return [...newColumns, ...preservedOrder];
