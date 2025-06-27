@@ -247,25 +247,22 @@ export class LensVisService {
 
           let suggestion = allSuggestions[0];
 
-          const categorizeField = getCategorizeField(queryParams.query.esql);
-          if (categorizeField) {
+          const categorizeFields = getCategorizeField(queryParams.query.esql);
+          if (categorizeFields.length) {
             const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
 
             if (
-              'layers' in suggestionVisualizationState &&
-              Array.isArray(suggestionVisualizationState.layers)
+              suggestion.visualizationId === 'lnsXY' &&
+              'tickLabelsVisibilitySettings' in suggestionVisualizationState
             ) {
               suggestion = {
                 ...suggestion,
                 visualizationState: {
                   ...(suggestionVisualizationState ?? {}),
-                  preferredSeriesType: 'horizontal_bar',
-                  layers: suggestionVisualizationState.layers.map((layer) => {
-                    return {
-                      ...layer,
-                      seriesType: 'bar_horizontal',
-                    };
-                  }),
+                  tickLabelsVisibilitySettings: {
+                    ...(suggestionVisualizationState.tickLabelsVisibilitySettings ?? {}),
+                    x: false,
+                  },
                 },
               };
             }
@@ -649,16 +646,12 @@ export class LensVisService {
       return [];
     }
 
-    let preferredChartType = preferredVisAttributes
+    const preferredChartType = preferredVisAttributes
       ? mapVisToChartType(preferredVisAttributes.visualizationType)
       : undefined;
 
     let visAttributes = preferredVisAttributes;
 
-    const categorizeField = getCategorizeField(query.esql);
-    if (categorizeField && !preferredVisAttributes && !preferredChartType) {
-      preferredChartType = ChartType.XY;
-    }
     if (preferredVisAttributes) {
       visAttributes = injectESQLQueryIntoLensLayers(preferredVisAttributes, query);
     }
