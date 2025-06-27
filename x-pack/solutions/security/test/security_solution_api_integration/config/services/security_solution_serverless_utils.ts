@@ -46,14 +46,16 @@ export function SecuritySolutionServerlessUtils({
 
   // Invalidate API keys when all tests have finished.
   lifecycle.cleanup.add(async () => {
-    rolesCredentials.forEach((credential, role) => {
-      log.debug(`Invalidating API key for role [${role}]`);
-      invalidateApiKey(credential);
-    });
+    await Promise.all(
+      Array.from(rolesCredentials.entries()).map(([role, credential]) => {
+        log.debug(`Invalidating API key for role [${role}]`);
+        return invalidateApiKey(credential);
+      })
+    );
   });
 
   const createSuperTest = async (role = 'admin') => {
-    cleanCredentials(role);
+    await cleanCredentials(role);
     const credentials = await svlUserManager.createM2mApiKeyWithRoleScope(role);
     rolesCredentials.set(role, credentials);
 
