@@ -21,7 +21,7 @@ jest.mock('@kbn/cloud-security-posture/src/utils/query_utils', () => ({
 }));
 
 jest.mock('@kbn/cloud-security-posture', () => ({
-  encodeQuery: jest.fn(() => `${QUERY_PARAM_KEY}=mocked-cspq-string`),
+  encodeQuery: jest.fn(() => `cspq=mocked-cspq-string`),
 }));
 
 const mockDecodeMultipleRisonParams = decodeMultipleRisonParams as jest.MockedFunction<
