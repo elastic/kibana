@@ -11,7 +11,9 @@ import { testSubjectIds } from '../constants/test_subject_ids';
 
 const {
   ALERT_TABLE_ROW_CSS_SELECTOR,
+  EVENT_PREVIEW_SECTION_TEST_ID,
   VISUALIZATIONS_SECTION_HEADER_TEST_ID,
+  VISUALIZATIONS_SECTION_CONTENT_TEST_ID,
   GRAPH_PREVIEW_CONTENT_TEST_ID,
   GRAPH_PREVIEW_LOADING_TEST_ID,
 } = testSubjectIds;
@@ -88,7 +90,12 @@ export class AlertsPageObject extends FtrService {
 
   flyout = {
     expandVisualizations: async (): Promise<void> => {
-      await this.testSubjects.click(VISUALIZATIONS_SECTION_HEADER_TEST_ID);
+      const contentEl = await this.testSubjects.find(VISUALIZATIONS_SECTION_CONTENT_TEST_ID);
+      const isVisualizationVisible = (await contentEl.getSize()).height > 0;
+
+      if (!isVisualizationVisible) {
+        await this.testSubjects.click(VISUALIZATIONS_SECTION_HEADER_TEST_ID);
+      }
     },
 
     assertGraphPreviewVisible: async () => {
@@ -105,6 +112,10 @@ export class AlertsPageObject extends FtrService {
 
     waitGraphIsLoaded: async () => {
       await this.testSubjects.missingOrFail(GRAPH_PREVIEW_LOADING_TEST_ID, { timeout: 10000 });
+    },
+
+    assertEventPreviewPanelIsOpen: async () => {
+      await this.testSubjects.existOrFail(EVENT_PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
     },
   };
 }

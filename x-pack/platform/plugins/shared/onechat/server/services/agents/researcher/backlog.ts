@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-export interface ActionResult {
+export interface SearchResult {
   researchGoal: string;
-  toolName: string;
-  arguments: any;
-  response: any;
+  output: string;
 }
 
 export interface ReflectionResult {
@@ -18,14 +16,23 @@ export interface ReflectionResult {
   reasoning: string;
 }
 
-export type BacklogItem = ActionResult | ReflectionResult;
+export interface ResearchGoalResult {
+  researchGoal: string;
+  reasoning: string;
+}
+
+export type BacklogItem = SearchResult | ReflectionResult | ResearchGoalResult;
+
+export const isResearchGoalResult = (item: BacklogItem): item is ResearchGoalResult => {
+  return 'researchGoal' in item && 'reasoning' in item;
+};
 
 export const isReflectionResult = (item: BacklogItem): item is ReflectionResult => {
   return 'isSufficient' in item;
 };
 
-export const isActionResult = (item: BacklogItem): item is ActionResult => {
-  return 'toolName' in item;
+export const isSearchResult = (item: BacklogItem): item is SearchResult => {
+  return 'researchGoal' in item && 'output' in item;
 };
 
 export const lastReflectionResult = (backlog: BacklogItem[]): ReflectionResult => {
@@ -36,4 +43,14 @@ export const lastReflectionResult = (backlog: BacklogItem[]): ReflectionResult =
     }
   }
   throw new Error('No reflection result found');
+};
+
+export const firstResearchGoalResult = (backlog: BacklogItem[]): ResearchGoalResult => {
+  for (let i = 0; i < backlog.length; i++) {
+    const current = backlog[i];
+    if (isResearchGoalResult(current)) {
+      return current;
+    }
+  }
+  throw new Error('No research goal result found');
 };
