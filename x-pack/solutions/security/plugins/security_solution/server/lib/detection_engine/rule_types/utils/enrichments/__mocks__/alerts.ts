@@ -51,7 +51,7 @@ import {
 } from '@kbn/rule-data-utils';
 
 import type { EventsForEnrichment } from '../types';
-import type { BaseFieldsLatest } from '../../../../../../../common/api/detection_engine/model/alerts';
+import type { BaseAlertLatest } from '../../../../../../../common/api/detection_engine/model/alerts';
 
 import {
   ALERT_ANCESTORS,
@@ -86,7 +86,7 @@ import {
 export const createAlert = (
   someUuid: string = '1',
   data?: object
-): EventsForEnrichment<BaseFieldsLatest> => ({
+): EventsForEnrichment<BaseAlertLatest> => ({
   _id: someUuid,
   _source: {
     someKey: 'someValue',

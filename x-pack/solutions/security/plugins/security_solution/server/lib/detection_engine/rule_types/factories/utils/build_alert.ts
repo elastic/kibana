@@ -97,7 +97,7 @@ import { commonParamsCamelToSnake, typeSpecificCamelToSnake } from '../../../rul
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
 import type {
   AncestorLatest,
-  BaseFieldsLatest,
+  BaseAlertLatest,
 } from '../../../../../../common/api/detection_engine/model/alerts';
 
 export interface BuildAlertFieldsProps {
@@ -117,7 +117,7 @@ export interface BuildAlertFieldsProps {
   intendedTimestamp: Date | undefined;
 }
 
-export const generateAlertId = (alert: BaseFieldsLatest) => {
+export const generateAlertId = (alert: BaseAlertLatest) => {
   return createHash('sha256')
     .update(
       alert[ALERT_ANCESTORS].reduce(
@@ -181,7 +181,7 @@ export const buildAlertFields = ({
   alertTimestampOverride,
   overrides,
   intendedTimestamp,
-}: BuildAlertFieldsProps): BaseFieldsLatest => {
+}: BuildAlertFieldsProps): BaseAlertLatest => {
   const parents = docs.map(buildParent);
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
   const ancestors = docs.reduce(

@@ -8,9 +8,9 @@
 import type { estypes } from '@elastic/elasticsearch';
 import objectHash from 'object-hash';
 import type {
-  BaseFieldsLatest,
-  NewTermsFieldsLatest,
-  WrappedFieldsLatest,
+  BaseAlertLatest,
+  NewTermsAlertLatest,
+  WrappedAlertLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { ALERT_NEW_TERMS } from '../../../../../common/field_maps/field_names';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
@@ -28,7 +28,7 @@ export const wrapNewTermsAlerts = ({
 }: {
   sharedParams: SecuritySharedParams;
   eventsAndTerms: EventsAndTerms[];
-}): Array<WrappedFieldsLatest<NewTermsFieldsLatest>> => {
+}): Array<WrappedAlertLatest<NewTermsAlertLatest>> => {
   return eventsAndTerms.map((eventAndTerms) => {
     const id = objectHash([
       eventAndTerms.event._index,
@@ -37,7 +37,7 @@ export const wrapNewTermsAlerts = ({
       `${sharedParams.spaceId}:${sharedParams.completeRule.alertId}`,
       eventAndTerms.newTerms,
     ]);
-    const baseAlert: BaseFieldsLatest = transformHitToAlert({
+    const baseAlert: BaseAlertLatest = transformHitToAlert({
       sharedParams,
       doc: eventAndTerms.event,
       applyOverrides: true,

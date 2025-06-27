@@ -45,17 +45,9 @@ import type {
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-// TODO: Create and import 8.0.0 versioned ListArray schema
-import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 // TODO: Create and import 8.0.0 versioned alerting-types schemas
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type {
-  RiskScoreMapping,
-  SeverityMapping,
-  Threats,
-  Type,
-} from '@kbn/securitysolution-io-ts-alerting-types';
-import type { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
-import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
   ALERT_ORIGINAL_TIME,
@@ -92,547 +84,62 @@ import {
 } from '../../../../field_maps/field_names';
 // TODO: Create and import 8.0.0 versioned RuleAlertAction type
 import type { SearchTypes } from '../../../../detection_engine/types';
-import type { RuleAction } from '../rule_schema';
 
-/* DO NOT MODIFY THIS SCHEMA TO ADD NEW FIELDS. These types represent the alerts that shipped in 8.0.0.
-Any changes to these types should be bug fixes so the types more accurately represent the alerts from 8.0.0.
+type Version800 = '8.0.0';
+type Version840 = '8.4.0';
+type Version860 = '8.6.0';
+type Version870 = '8.7.0';
+type Version880 = '8.8.0';
+type Version890 = '8.9.0';
+type Version8120 = '8.12.0';
+type Version8130 = '8.13.0';
+type Version8160 = '8.16.0';
+type Version8180 = '8.18.0';
+type Version8190 = '8.19.0';
 
-If you are adding new fields for a new release of Kibana, create a new sibling folder to this one
-for the version to be released and add the field(s) to the schema in that folder.
+type Version8190Plus = Version8190;
+type Version8180Plus = Version8180 | Version8190Plus;
+type Version8160Plus = Version8160 | Version8180Plus;
+type Version8130Plus = Version8130 | Version8160Plus;
+type Version8120Plus = Version8120 | Version8130Plus;
+type Version890Plus = Version890 | Version8120Plus;
+type Version880Plus = Version880 | Version890Plus;
+type Version870Plus = Version870 | Version880Plus;
+type Version860Plus = Version860 | Version870Plus;
+type Version840Plus = Version840 | Version860Plus;
+type Version800Plus = Version800 | Version840Plus;
 
-Then, update `../index.ts` to import from the new folder that has the latest schemas, add the
-new schemas to the union of all alert schemas, and re-export the new schemas as the `*Latest` schemas.
-*/
+type LatestVersion = Version8190;
 
-export interface Ancestor800 {
-  rule: string | undefined;
-  id: string;
-  type: string;
-  index: string;
-  depth: number;
-}
+type AllVersions =
+  | Version800
+  | Version840
+  | Version880
+  | Version890
+  | Version8120
+  | Version8130
+  | Version8160
+  | Version8180
+  | Version8190;
 
-export interface EqlBuildingBlockFields800 extends BaseFields800 {
-  [ALERT_GROUP_ID]: string;
-  [ALERT_GROUP_INDEX]: number;
-  [ALERT_BUILDING_BLOCK_TYPE]: 'default';
-}
+type NodeTypes =
+  | SchemaType
+  | SchemaType[]
+  | object
+  | object[]
+  | string
+  | string[]
+  | number
+  | boolean
+  | null
+  | undefined;
 
-export interface EqlShellFields800 extends BaseFields800 {
-  [ALERT_GROUP_ID]: string;
-  [ALERT_UUID]: string;
-}
-
-export type EqlBuildingBlockAlert800 = AlertWithCommonFields800<EqlBuildingBlockFields800>;
-
-export type EqlShellAlert800 = AlertWithCommonFields800<EqlShellFields800>;
-
-export type GenericAlert800 = AlertWithCommonFields800<BaseFields800>;
-
-// This is the type of the final generated alert including base fields, common fields
-// added by the alertWithPersistence function, and arbitrary fields copied from source documents
-export type DetectionAlert800 = GenericAlert800 | EqlShellAlert800 | EqlBuildingBlockAlert800;
-
-type ModelVersion1 = '8.0.0';
-type ModelVersion2 = '8.4.0' | ModelVersion1;
-type ModelVersion3 = '8.6.0' | ModelVersion2;
-
-interface SchemaNonObject {
-  type: string | string[] | number | boolean | null | undefined;
+interface SchemaNode {
+  type: NodeTypes;
   version: string;
 }
 
-interface SchemaObject {
-  type: object | object[] | undefined;
-  version: string;
-  fields?: SchemaType;
-}
-
-type SchemaType = Record<string, SchemaNonObject | SchemaObject>;
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type BaseAlertSchema = {
-  [TIMESTAMP]: {
-    type: string;
-    version: '8.0.0';
-  };
-  [SPACE_IDS]: {
-    type: string[];
-    version: '8.0.0';
-  };
-  [EVENT_KIND]: {
-    type: 'signal';
-    version: '8.0.0';
-  };
-  [ALERT_ORIGINAL_TIME]: {
-    type: string | undefined;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_CONSUMER]: {
-    type: string;
-    version: '8.0.0';
-  };
-  [ALERT_ANCESTORS]: {
-    type: object[];
-    version: '8.0.0';
-    fields: {
-      rule: {
-        type: string | undefined;
-        version: '8.0.0';
-      };
-      id: {
-        type: string;
-        version: '8.0.0';
-      };
-      type: {
-        type: string;
-        version: '8.0.0';
-      };
-      index: {
-        type: string;
-        version: '8.0.0';
-      };
-      depth: {
-        type: number;
-        version: '8.0.0';
-      };
-    };
-  };
-  [ALERT_STATUS]: {
-    type: string;
-    version: '8.0.0';
-  };
-  [ALERT_WORKFLOW_STATUS]: {
-    type: string;
-    version: '8.0.0';
-  };
-  [ALERT_DEPTH]: {
-    type: number;
-    version: '8.0.0';
-  };
-  [ALERT_REASON]: {
-    type: string;
-    version: '8.0.0';
-  };
-  [ALERT_BUILDING_BLOCK_TYPE]: {
-    type: string | undefined;
-    version: '8.0.0';
-  };
-  [ALERT_SEVERITY]: {
-    type: string;
-    version: '8.0.0';
-  };
-  [ALERT_RISK_SCORE]: {
-    type: number;
-    version: '8.0.0';
-  };
-  // TODO: version rule schemas and pull in 8.0.0 versioned rule schema to define alert rule parameters type
-  [ALERT_RULE_PARAMETERS]: {
-    type: object;
-    version: '8.0.0';
-    fields: {
-      [key: string]:
-        | {
-            type: string | string[] | number | boolean | undefined;
-            version: '8.0.0';
-          }
-        | {
-            type: object | object[];
-            version: '8.0.0';
-          };
-    };
-  };
-  [ALERT_RULE_ACTIONS]: {
-    type: object[];
-    version: '8.0.0';
-    fields: {
-      action_type_id: {
-        type: string;
-        version: '8.0.0';
-      };
-      group?: {
-        type: string | undefined;
-        version: '8.0.0';
-      };
-      id: {
-        type: string;
-        version: '8.0.0';
-      };
-      params: {
-        type: object;
-        version: '8.0.0';
-      };
-      uuid?: {
-        type: string | undefined;
-        version: '8.0.0';
-      };
-      alerts_filter?: {
-        type: object | undefined;
-        version: '8.0.0';
-      };
-      frequency?: {
-        type: object | undefined;
-        version: '8.0.0';
-        fields: {
-          summary: {
-            type: boolean;
-            version: '8.0.0';
-          };
-          notifyWhen: {
-            type: 'onActiveAlert' | 'onThrottleInterval' | 'onActionGroupChange';
-            version: '8.0.0';
-          };
-          throttle: {
-            type: string | null;
-            version: '8.0.0';
-          };
-        };
-      };
-    };
-  };
-  [ALERT_RULE_AUTHOR]: {
-    type: string[];
-    version: '8.0.0';
-  };
-  [ALERT_RULE_CREATED_AT]: {
-    type: string;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_CREATED_BY]: {
-    type: string;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_DESCRIPTION]: {
-    type: string;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_ENABLED]: {
-    type: boolean;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_EXCEPTIONS_LIST]: {
-    type: object[];
-    version: '8.0.0';
-    fields: {
-      id: {
-        type: string;
-        version: '8.0.0';
-      };
-      list_id: {
-        type: string;
-        version: '8.0.0';
-      };
-      type: {
-        type:
-          | 'detection'
-          | 'rule_default'
-          | 'endpoint'
-          | 'endpoint_trusted_apps'
-          | 'endpoint_events'
-          | 'endpoint_host_isolation_exceptions'
-          | 'endpoint_blocklists';
-        version: '8.0.0';
-      };
-    };
-  };
-  [ALERT_RULE_FALSE_POSITIVES]: {
-    type: string[];
-    version: '8.0.0';
-  };
-  [ALERT_RULE_FROM]: {
-    type: string;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_IMMUTABLE]: {
-    type: boolean;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_INTERVAL]: {
-    type: string;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_LICENSE]: {
-    type: string | undefined;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_MAX_SIGNALS]: {
-    type: number;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_NAME]: {
-    type: string;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_NAMESPACE_FIELD]: {
-    type: string | undefined;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_NOTE]: {
-    type: string | undefined;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_REFERENCES]: {
-    type: string[];
-    version: '8.0.0';
-  };
-  [ALERT_RULE_RISK_SCORE_MAPPING]: {
-    type: object[];
-    version: '8.0.0';
-    fields: {
-      field: {
-        type: string;
-        version: '8.0.0';
-      };
-      value: {
-        type: string;
-        version: '8.0.0';
-      };
-      operator: {
-        type: 'equals';
-        version: '8.0.0';
-      };
-      risk_score: {
-        type: number | undefined;
-        version: '8.0.0';
-      };
-    };
-  };
-  [ALERT_RULE_RULE_ID]: {
-    type: string;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_RULE_NAME_OVERRIDE]: {
-    type: string | undefined;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_SEVERITY_MAPPING]: {
-    type: object[];
-    version: '8.0.0';
-    fields: {
-      field: {
-        type: string;
-        version: '8.0.0';
-      };
-      value: {
-        type: string;
-        version: '8.0.0';
-      };
-      operator: {
-        type: 'equals';
-        version: '8.0.0';
-      };
-      severity: {
-        type: 'low' | 'medium' | 'high' | 'critical';
-        version: '8.0.0';
-      };
-    };
-  };
-  [ALERT_RULE_TAGS]: {
-    type: string[];
-    version: '8.0.0';
-  };
-  [ALERT_RULE_THREAT]: {
-    type: object[];
-    version: '8.0.0';
-    fields: {
-      framework: {
-        type: string;
-        version: '8.0.0';
-      };
-      tactic: {
-        type: object;
-        version: '8.0.0';
-        fields: {
-          id: {
-            type: string;
-            version: '8.0.0';
-          };
-          name: {
-            type: string;
-            version: '8.0.0';
-          };
-          reference: {
-            type: string;
-            version: '8.0.0';
-          };
-        };
-      };
-    };
-  };
-  [ALERT_RULE_THROTTLE]: {
-    type: string | undefined;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_TIMELINE_ID]: {
-    type: string | undefined;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_TIMELINE_TITLE]: {
-    type: string | undefined;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_TIMESTAMP_OVERRIDE]: {
-    type: string | undefined;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_TO]: {
-    type: string;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_TYPE]: {
-    type: Type;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_UPDATED_AT]: {
-    type: string;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_UPDATED_BY]: {
-    type: string;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_UUID]: {
-    type: string;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_VERSION]: {
-    type: number;
-    version: '8.0.0';
-  };
-  'kibana.alert.rule.risk_score': {
-    type: number;
-    version: '8.0.0';
-  };
-  'kibana.alert.rule.severity': {
-    type: string;
-    version: '8.0.0';
-  };
-  'kibana.alert.rule.building_block_type': {
-    type: string | undefined;
-    version: '8.0.0';
-  };
-  [ALERT_RULE_INDICES]: {
-    type: string[];
-    version: '8.4.0';
-  };
-  [ALERT_UUID]: {
-    type: string;
-    version: '8.4.0';
-  };
-  [ALERT_URL]: {
-    type: string | undefined;
-    version: '8.8.0';
-  };
-  [ALERT_WORKFLOW_TAGS]: {
-    type: string[];
-    version: '8.9.0';
-  };
-  [ALERT_WORKFLOW_ASSIGNEE_IDS]: {
-    type: string[] | undefined;
-    version: '8.12.0';
-  };
-  [LEGACY_ALERT_HOST_CRITICALITY]: {
-    type: string | undefined;
-    version: '8.13.0';
-  };
-  [LEGACY_ALERT_USER_CRITICALITY]: {
-    type: string | undefined;
-    version: '8.13.0';
-  };
-  [ALERT_HOST_CRITICALITY]: {
-    type: string | undefined;
-    version: '8.13.0';
-  };
-  [ALERT_USER_CRITICALITY]: {
-    type: string | undefined;
-    version: '8.13.0';
-  };
-  // TODO: risk score fields were actually added earlier, figure out when exactly
-  [ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL]: {
-    type: string | undefined;
-    version: '8.13.0';
-  };
-  [ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM]: {
-    type: number | undefined;
-    version: '8.13.0';
-  };
-  [ALERT_USER_RISK_SCORE_CALCULATED_LEVEL]: {
-    type: string | undefined;
-    version: '8.13.0';
-  };
-  [ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM]: {
-    type: number | undefined;
-    version: '8.13.0';
-  };
-  [ALERT_RULE_EXECUTION_TYPE]: {
-    type: string;
-    version: '8.16.0';
-  };
-  [ALERT_INTENDED_TIMESTAMP]: {
-    type: string;
-    version: '8.16.0';
-  };
-  [ALERT_SERVICE_CRITICALITY]: {
-    type: string | undefined;
-    version: '8.18.0';
-  };
-  [ALERT_SERVICE_RISK_SCORE_CALCULATED_LEVEL]: {
-    type: string | undefined;
-    version: '8.18.0';
-  };
-  [ALERT_SERVICE_RISK_SCORE_CALCULATED_SCORE_NORM]: {
-    type: number | undefined;
-    version: '8.18.0';
-  };
-  [ALERT_ORIGINAL_DATA_STREAM_DATASET]?: {
-    type: string | undefined;
-    version: '8.19.0';
-  };
-  [ALERT_ORIGINAL_DATA_STREAM_NAMESPACE]?: {
-    type: string | undefined;
-    version: '8.19.0';
-  };
-  [ALERT_ORIGINAL_DATA_STREAM_TYPE]?: {
-    type: string | undefined;
-    version: '8.19.0';
-  };
-};
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type EqlBuildingBlockAlertFields = {
-  [ALERT_GROUP_ID]: {
-    type: string;
-    version: '8.0.0';
-  };
-  [ALERT_GROUP_INDEX]: {
-    type: number;
-    version: '8.0.0';
-  };
-  [ALERT_BUILDING_BLOCK_TYPE]: {
-    type: 'default';
-    version: '8.0.0';
-  };
-};
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type EqlShellAlertFields = {
-  [ALERT_GROUP_ID]: {
-    type: string;
-    version: '8.0.0';
-  };
-  [ALERT_UUID]: {
-    type: string;
-    version: '8.0.0';
-  };
-};
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type NewTermsAlertFields = {
-  [ALERT_NEW_TERMS]: {
-    type: Array<string | number | null>;
-    version: '8.4.0';
-  };
-};
+type SchemaType = Record<string, SchemaNode>;
 
 /** 
  * This type is a no-op: Expand<T> evaluates to T. Its use is to force VSCode to evaluate type expressions
@@ -658,73 +165,576 @@ type NewTermsAlertFields = {
  * */
 type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;
 
-type Converter<ModelVersion extends string, Schema extends SchemaType> = Expand<{
+/**
+ * This forces TS to apply ConvertSchemaType to each ModelVersion when it's a union,
+ * e.g. `Version800 | Version840` will return `ConvertSchemaType<Version800, Schema> | ConvertSchemaType<Version840, Schema>`
+ *
+ * Without this type, `ConvertSchemaType<Version800 | Version840, Schema>` is equivalent to
+ * `ConvertSchemaType<Version800, Schema>` because the union type gets treated as a unit rather than distributed -
+ * and every field in 8.4.0 is also in 8.0.0 so the `Version840` part would be redundant.
+ */
+type Distribute<ModelVersion extends string, T extends SchemaType> = ModelVersion extends string
+  ? ConvertSchemaType<ModelVersion, T> & { [key: string]: SearchTypes }
+  : never;
+
+type ConvertSchemaType<ModelVersion extends string, Schema extends SchemaType> = Expand<{
   // Key remapping via `as` here filters out keys that are not in that schema version,
   // so instead of { key: undefined } the key is completely gone
   // https://www.typescriptlang.org/docs/handbook/2/mapped-types.html#key-remapping-via-as
-  [k in keyof Schema as Required<Schema>[k]['version'] extends ModelVersion
+  [k in keyof Schema as ModelVersion extends Required<Schema>[k]['version']
     ? k
-    : never]: Required<Schema>[k] extends SchemaObject // If the type of the property is object or object[] AND it has subfields defined,
-    ? Required<Schema>[k]['fields'] extends SchemaType //  we recursively parse those subfields. Otherwise, we just use the type of the property
-      ? undefined extends Required<Schema>[k]['type']
-        ? Required<Required<Schema>[k]['type']> extends object[]
-          ? Array<Expand<Converter<ModelVersion, Required<Schema>[k]['fields']>>> | undefined
-          : Expand<Converter<ModelVersion, Required<Schema>[k]['fields']>> | undefined
-        : Required<Required<Schema>[k]['type']> extends object[]
-        ? Array<Expand<Converter<ModelVersion, Required<Schema>[k]['fields']>>>
-        : Expand<Converter<ModelVersion, Required<Schema>[k]['fields']>>
-      : Required<Schema>[k]['type']
-    : Required<Schema>[k]['type'];
+    : never]: ConvertSchemaNode<ModelVersion, Required<Schema>[k]['type']>;
 }>;
 
-type ConvertSchemaFields<
-  ModelVersion extends string,
-  Schema extends SchemaType
-> = Schema extends object[]
-  ? Array<Expand<Converter<ModelVersion, Schema>>>
-  : Expand<Converter<ModelVersion, Schema>>;
+type ConvertSchemaNode<ModelVersion extends string, NodeType extends NodeTypes> = NodeType extends
+  | SchemaType
+  | SchemaType[]
+  ? NodeType extends SchemaType[]
+    ? Array<Expand<ConvertSchemaType<ModelVersion, NodeType[0]>>>
+    : NodeType extends SchemaType
+    ? Expand<ConvertSchemaType<ModelVersion, NodeType>>
+    : never
+  : NodeType;
 
-type Converted = Converter2<string, testSchema>;
-
-type CombineSchemas<
-  Schema1 extends Record<string, string | string[] | number | boolean | undefined>,
-  Schema2 extends Record<string, string | string[] | number | boolean | undefined>
-> = {
-  [k in keyof Schema1 | keyof Schema2]: k extends keyof Schema2
-    ? Schema2[k]
-    : k extends keyof Schema1
-    ? Schema1[k]
-    : never;
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+type AlertAncestorSchema = {
+  rule: {
+    type: string | undefined;
+    version: Version800Plus;
+  };
+  id: {
+    type: string;
+    version: Version800Plus;
+  };
+  type: {
+    type: string;
+    version: Version800Plus;
+  };
+  index: {
+    type: string;
+    version: Version800Plus;
+  };
+  depth: {
+    type: number;
+    version: Version800Plus;
+  };
 };
 
-export type BaseAlert<ModelVersion extends string> = Converter<ModelVersion, BaseAlertSchema>;
-export type EqlBuildingBlockAlert<ModelVersion extends string> = Converter<
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+type BaseAlertSchema = {
+  [TIMESTAMP]: {
+    type: string;
+    version: Version800Plus;
+  };
+  [SPACE_IDS]: {
+    type: string[];
+    version: Version800Plus;
+  };
+  [EVENT_KIND]: {
+    type: 'signal';
+    version: Version800Plus;
+  };
+  [ALERT_ORIGINAL_TIME]: {
+    type: string | undefined;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_CONSUMER]: {
+    type: string;
+    version: Version800Plus;
+  };
+  [ALERT_ANCESTORS]: {
+    type: AlertAncestorSchema[];
+    version: Version800Plus;
+  };
+  [ALERT_STATUS]: {
+    type: string;
+    version: Version800Plus;
+  };
+  [ALERT_WORKFLOW_STATUS]: {
+    type: string;
+    version: Version800Plus;
+  };
+  [ALERT_DEPTH]: {
+    type: number;
+    version: Version800Plus;
+  };
+  [ALERT_REASON]: {
+    type: string;
+    version: Version800Plus;
+  };
+  [ALERT_BUILDING_BLOCK_TYPE]: {
+    type: string | undefined;
+    version: Version800Plus;
+  };
+  [ALERT_SEVERITY]: {
+    type: string;
+    version: Version800Plus;
+  };
+  [ALERT_RISK_SCORE]: {
+    type: number;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_PARAMETERS]: {
+    type: {
+      [key: string]: {
+        type: object | object[] | string | string[] | number | boolean | undefined;
+        version: Version800Plus;
+      };
+    };
+    version: Version800Plus;
+  };
+  [ALERT_RULE_ACTIONS]: {
+    version: Version800Plus;
+    type: Array<{
+      action_type_id: {
+        type: string;
+        version: Version800Plus;
+      };
+      group?: {
+        type: string | undefined;
+        version: Version800Plus;
+      };
+      id: {
+        type: string;
+        version: Version800Plus;
+      };
+      params: {
+        type: object;
+        version: Version800Plus;
+      };
+      uuid?: {
+        type: string | undefined;
+        version: Version800Plus;
+      };
+      alerts_filter?: {
+        type: object | undefined;
+        version: Version800Plus;
+      };
+      frequency?: {
+        version: Version800Plus;
+        type: {
+          summary: {
+            type: boolean;
+            version: Version800Plus;
+          };
+          notifyWhen: {
+            type: 'onActiveAlert' | 'onThrottleInterval' | 'onActionGroupChange';
+            version: Version800Plus;
+          };
+          throttle: {
+            type: string | null;
+            version: Version800Plus;
+          };
+        };
+      };
+    }>;
+  };
+  [ALERT_RULE_AUTHOR]: {
+    type: string[];
+    version: Version800Plus;
+  };
+  [ALERT_RULE_CREATED_AT]: {
+    type: string;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_CREATED_BY]: {
+    type: string;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_DESCRIPTION]: {
+    type: string;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_ENABLED]: {
+    type: boolean;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_EXCEPTIONS_LIST]: {
+    type: Array<{
+      id: {
+        type: string;
+        version: Version800Plus;
+      };
+      list_id: {
+        type: string;
+        version: Version800Plus;
+      };
+      type: {
+        type:
+          | 'detection'
+          | 'rule_default'
+          | 'endpoint'
+          | 'endpoint_trusted_apps'
+          | 'endpoint_events'
+          | 'endpoint_host_isolation_exceptions'
+          | 'endpoint_blocklists';
+        version: Version800Plus;
+      };
+    }>;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_FALSE_POSITIVES]: {
+    type: string[];
+    version: Version800Plus;
+  };
+  [ALERT_RULE_FROM]: {
+    type: string;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_IMMUTABLE]: {
+    type: boolean;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_INTERVAL]: {
+    type: string;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_LICENSE]: {
+    type: string | undefined;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_MAX_SIGNALS]: {
+    type: number;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_NAME]: {
+    type: string;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_NAMESPACE_FIELD]: {
+    type: string | undefined;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_NOTE]: {
+    type: string | undefined;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_REFERENCES]: {
+    type: string[];
+    version: Version800Plus;
+  };
+  [ALERT_RULE_RISK_SCORE_MAPPING]: {
+    type: Array<{
+      field: {
+        type: string;
+        version: Version800Plus;
+      };
+      value: {
+        type: string;
+        version: Version800Plus;
+      };
+      operator: {
+        type: 'equals';
+        version: Version800Plus;
+      };
+      risk_score: {
+        type: number | undefined;
+        version: Version800Plus;
+      };
+    }>;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_RULE_ID]: {
+    type: string;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_RULE_NAME_OVERRIDE]: {
+    type: string | undefined;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_SEVERITY_MAPPING]: {
+    type: Array<{
+      field: {
+        type: string;
+        version: Version800Plus;
+      };
+      value: {
+        type: string;
+        version: Version800Plus;
+      };
+      operator: {
+        type: 'equals';
+        version: Version800Plus;
+      };
+      severity: {
+        type: 'low' | 'medium' | 'high' | 'critical';
+        version: Version800Plus;
+      };
+    }>;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_TAGS]: {
+    type: string[];
+    version: Version800Plus;
+  };
+  [ALERT_RULE_THREAT]: {
+    type: Array<{
+      framework: {
+        type: string;
+        version: Version800Plus;
+      };
+      tactic: {
+        type: {
+          id: {
+            type: string;
+            version: Version800Plus;
+          };
+          name: {
+            type: string;
+            version: Version800Plus;
+          };
+          reference: {
+            type: string;
+            version: Version800Plus;
+          };
+        };
+        version: Version800Plus;
+      };
+      technique?: {
+        type: Array<{
+          id: {
+            type: string;
+            version: Version800Plus;
+          };
+          name: {
+            type: string;
+            version: Version800Plus;
+          };
+          reference: {
+            type: string;
+            version: Version800Plus;
+          };
+          subtechnique?: {
+            type: Array<{
+              id: {
+                type: string;
+                version: Version800Plus;
+              };
+              name: {
+                type: string;
+                version: Version800Plus;
+              };
+              reference: {
+                type: string;
+                version: Version800Plus;
+              };
+            }>;
+            version: Version800Plus;
+          };
+        }>;
+        version: Version800Plus;
+      };
+    }>;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_THROTTLE]: {
+    type: string | undefined;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_TIMELINE_ID]: {
+    type: string | undefined;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_TIMELINE_TITLE]: {
+    type: string | undefined;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_TIMESTAMP_OVERRIDE]: {
+    type: string | undefined;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_TO]: {
+    type: string;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_TYPE]: {
+    type: Type;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_UPDATED_AT]: {
+    type: string;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_UPDATED_BY]: {
+    type: string;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_UUID]: {
+    type: string;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_VERSION]: {
+    type: number;
+    version: Version800Plus;
+  };
+  'kibana.alert.rule.risk_score': {
+    type: number;
+    version: Version800Plus;
+  };
+  'kibana.alert.rule.severity': {
+    type: string;
+    version: Version800Plus;
+  };
+  'kibana.alert.rule.building_block_type': {
+    type: string | undefined;
+    version: Version800Plus;
+  };
+  [ALERT_RULE_INDICES]: {
+    type: string[];
+    version: Version840Plus;
+  };
+  [ALERT_UUID]: {
+    type: string;
+    version: Version840Plus;
+  };
+  [ALERT_URL]: {
+    type: string | undefined;
+    version: Version880Plus;
+  };
+  [ALERT_WORKFLOW_TAGS]: {
+    type: string[];
+    version: Version890Plus;
+  };
+  [ALERT_WORKFLOW_ASSIGNEE_IDS]: {
+    type: string[] | undefined;
+    version: Version8120Plus;
+  };
+  [LEGACY_ALERT_HOST_CRITICALITY]: {
+    type: string | undefined;
+    version: Version8130Plus;
+  };
+  [LEGACY_ALERT_USER_CRITICALITY]: {
+    type: string | undefined;
+    version: Version8130Plus;
+  };
+  [ALERT_HOST_CRITICALITY]: {
+    type: string | undefined;
+    version: Version8130Plus;
+  };
+  [ALERT_USER_CRITICALITY]: {
+    type: string | undefined;
+    version: Version8130Plus;
+  };
+  // TODO: risk score fields were actually added earlier, figure out when exactly
+  [ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL]: {
+    type: string | undefined;
+    version: Version8130Plus;
+  };
+  [ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM]: {
+    type: number | undefined;
+    version: Version8130Plus;
+  };
+  [ALERT_USER_RISK_SCORE_CALCULATED_LEVEL]: {
+    type: string | undefined;
+    version: Version8130Plus;
+  };
+  [ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM]: {
+    type: number | undefined;
+    version: Version8130Plus;
+  };
+  [ALERT_RULE_EXECUTION_TYPE]: {
+    type: string;
+    version: Version8160Plus;
+  };
+  [ALERT_INTENDED_TIMESTAMP]: {
+    type: string;
+    version: Version8160Plus;
+  };
+  [ALERT_SERVICE_CRITICALITY]: {
+    type: string | undefined;
+    version: Version8180Plus;
+  };
+  [ALERT_SERVICE_RISK_SCORE_CALCULATED_LEVEL]: {
+    type: string | undefined;
+    version: Version8180Plus;
+  };
+  [ALERT_SERVICE_RISK_SCORE_CALCULATED_SCORE_NORM]: {
+    type: number | undefined;
+    version: Version8180Plus;
+  };
+  [ALERT_ORIGINAL_DATA_STREAM_DATASET]?: {
+    type: string | undefined;
+    version: Version8190Plus;
+  };
+  [ALERT_ORIGINAL_DATA_STREAM_NAMESPACE]?: {
+    type: string | undefined;
+    version: Version8190Plus;
+  };
+  [ALERT_ORIGINAL_DATA_STREAM_TYPE]?: {
+    type: string | undefined;
+    version: Version8190Plus;
+  };
+};
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+type EqlBuildingBlockAlertFields = {
+  [ALERT_GROUP_ID]: {
+    type: string;
+    version: Version800Plus;
+  };
+  [ALERT_GROUP_INDEX]: {
+    type: number;
+    version: Version800Plus;
+  };
+  [ALERT_BUILDING_BLOCK_TYPE]: {
+    type: 'default';
+    version: Version800Plus;
+  };
+};
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+type EqlShellAlertFields = {
+  [ALERT_GROUP_ID]: {
+    type: string;
+    version: Version800Plus;
+  };
+  [ALERT_UUID]: {
+    type: string;
+    version: Version800Plus;
+  };
+};
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+type NewTermsAlertFields = {
+  [ALERT_NEW_TERMS]: {
+    type: Array<string | number | null>;
+    version: Version840Plus;
+  };
+};
+
+export type BaseAlert<ModelVersion extends string> = Distribute<ModelVersion, BaseAlertSchema>;
+export type EqlBuildingBlockAlert<ModelVersion extends string> = Distribute<
   ModelVersion,
-  BaseAlertSchema
-> &
-  Converter<ModelVersion, EqlBuildingBlockAlertFields>;
-export type EqlShellAlert<ModelVersion extends string> = Converter<ModelVersion, BaseAlertSchema> &
-  Converter<ModelVersion, EqlShellAlertFields>;
-export type NewTermsAlert<ModelVersion extends string> = Converter<ModelVersion, BaseAlertSchema> &
-  Converter<ModelVersion, NewTermsAlertFields>;
+  BaseAlertSchema & EqlBuildingBlockAlertFields
+>;
+export type EqlShellAlert<ModelVersion extends string> = Distribute<
+  ModelVersion,
+  BaseAlertSchema & EqlShellAlertFields
+>;
+export type NewTermsAlert<ModelVersion extends string> = Distribute<
+  ModelVersion,
+  BaseAlertSchema & NewTermsAlertFields
+>;
 
-export type BaseAlertLatest = BaseAlert<string>;
-export type EqlBuildingBlockAlertLatest = EqlBuildingBlockAlert<string>;
-export type EqlShellAlertLatest = EqlShellAlert<string>;
-export type NewTermsAlertLatest = NewTermsAlert<string>;
+export type BaseAlertLatest = BaseAlert<LatestVersion>;
+export type EqlBuildingBlockAlertLatest = EqlBuildingBlockAlert<LatestVersion>;
+export type EqlShellAlertLatest = EqlShellAlert<LatestVersion>;
+export type NewTermsAlertLatest = NewTermsAlert<LatestVersion>;
 
-const test = (input: BaseAlertLatest) => {
-  const aaa = input[ALERT_RULE_ACTIONS];
-};
+export type AllBaseAlerts = BaseAlert<AllVersions>;
+export type AllEqlBuildingBlockAlerts = EqlBuildingBlockAlert<AllVersions>;
+export type AllEqlShellAlerts = EqlShellAlert<AllVersions>;
+export type AllNewTermsAlerts = NewTermsAlert<AllVersions>;
+
+export type DetectionAlert =
+  | (AllBaseAlerts | AllEqlBuildingBlockAlerts | AllEqlShellAlerts | AllNewTermsAlerts) & {
+      [key: string]: SearchTypes;
+    };
+
+export type AncestorLatest = ConvertSchemaType<LatestVersion, AlertAncestorSchema>;
 
 export interface WrappedAlertLatest<T> {
   _id: string;
   _index: string;
   _source: T;
 }
-
-const test: EqlBuildingBlockAlert<'8.0.0'> = {};
-
-type Test = BaseAlert<ModelVersion1>;
-type Test2 = BaseAlert<ModelVersion2>;
-type test5 = BaseAlert<ModelVersion3>;

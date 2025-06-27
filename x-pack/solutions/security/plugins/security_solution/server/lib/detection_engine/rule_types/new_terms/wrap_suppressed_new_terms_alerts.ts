@@ -10,9 +10,9 @@ import objectHash from 'object-hash';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type {
-  BaseFieldsLatest,
-  NewTermsFieldsLatest,
-  WrappedFieldsLatest,
+  BaseAlertLatest,
+  NewTermsAlertLatest,
+  WrappedAlertLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { ALERT_NEW_TERMS } from '../../../../../common/field_maps/field_names';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
@@ -32,7 +32,7 @@ export const wrapSuppressedNewTermsAlerts = ({
 }: {
   sharedParams: SecuritySharedParams<NewTermsRuleParams>;
   eventsAndTerms: EventsAndTerms[];
-}): Array<WrappedFieldsLatest<NewTermsFieldsLatest & SuppressionFieldsLatest>> => {
+}): Array<WrappedAlertLatest<NewTermsAlertLatest & SuppressionFieldsLatest>> => {
   return eventsAndTerms.map((eventAndTerms) => {
     const event = eventAndTerms.event;
     const { completeRule, spaceId } = sharedParams;
@@ -52,7 +52,7 @@ export const wrapSuppressedNewTermsAlerts = ({
       eventAndTerms.newTerms,
     ]);
 
-    const baseAlert: BaseFieldsLatest = transformHitToAlert({
+    const baseAlert: BaseAlertLatest = transformHitToAlert({
       sharedParams,
       doc: event,
       applyOverrides: true,
