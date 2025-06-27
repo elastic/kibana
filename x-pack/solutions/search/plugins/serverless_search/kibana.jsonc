@@ -28,10 +28,12 @@
       "searchprofiler",
       "security",
       "serverless",
+      "searchHomepage",
       "share",
-      "visualizations"
+      "visualizations",
     ],
     "optionalPlugins": [
+      "onechat",
       "indexManagement",
       "contentConnectors",
       "searchInferenceEndpoints",
