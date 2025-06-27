@@ -18,9 +18,16 @@ function getVisibility(
 ) {
   // The "Global assistant" stack management setting for the security assistant still needs to be developed.
   // In the meantime, while testing, show the Security assistant everywhere except in Observability.
+  if (preferredAssistantType === AIAssistantType.Never) {
+    return false;
+  }
 
   const categoryId =
     (appId && applications.get(appId)?.category?.id) || DEFAULT_APP_CATEGORIES.kibana.id;
+
+  if (preferredAssistantType === AIAssistantType.Security) {
+    return categoryId !== DEFAULT_APP_CATEGORIES.observability.id;
+  }
 
   return DEFAULT_APP_CATEGORIES.security.id === categoryId;
 }

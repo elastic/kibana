@@ -50,46 +50,46 @@ export class AIAssistantManagementSelectionPlugin
     core.uiSettings.register({
       [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
         name: i18n.translate('aiAssistantManagementSelection.preferredAIAssistantTypeSettingName', {
-          defaultMessage: 'AI Assistant for Observability and Search visibility',
+          defaultMessage: 'AI Assistant Visibility',
         }),
-        category: [DEFAULT_APP_CATEGORIES.observability.id],
         value: this.config.preferredAIAssistantType,
         description: i18n.translate(
           'aiAssistantManagementSelection.preferredAIAssistantTypeSettingDescription',
           {
             defaultMessage:
-              '<em>[technical preview]</em> Whether to show the AI Assistant menu item in Observability and Search, everywhere, or nowhere.',
-            values: {
-              em: (chunks) => `<em>${chunks}</em>`,
-            },
+              'Control whether the Search & Observability or Security AI assistants appear only in their own solutions, more widely across Kibana (but not in each other\'s solution), or not at all. Customize assistant availability to fit your workflow.',
           }
         ),
         schema: schema.oneOf(
           [
             schema.literal(AIAssistantType.Default),
             schema.literal(AIAssistantType.Observability),
+            schema.literal(AIAssistantType.Security),
             schema.literal(AIAssistantType.Never),
           ],
-          { defaultValue: this.config.preferredAIAssistantType }
+          { defaultValue: AIAssistantType.Default }
         ),
-        options: [AIAssistantType.Default, AIAssistantType.Observability, AIAssistantType.Never],
+        options: [AIAssistantType.Default, AIAssistantType.Observability,AIAssistantType.Security, AIAssistantType.Never],
         type: 'select',
         optionLabels: {
           [AIAssistantType.Default]: i18n.translate(
             'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueDefault',
-            { defaultMessage: 'Observability and Search only (default)' }
+            { defaultMessage: 'Only in their own solutions' }
           ),
           [AIAssistantType.Observability]: i18n.translate(
             'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueObservability',
-            { defaultMessage: 'Everywhere' }
+            { defaultMessage: 'Show Search & Observability assistant in other apps' }
+          ),
+          [AIAssistantType.Security]: i18n.translate(
+            'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueSecurity',
+            { defaultMessage: 'Show Security assistant in other apps' }
           ),
           [AIAssistantType.Never]: i18n.translate(
             'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueNever',
-            { defaultMessage: 'Nowhere' }
+            { defaultMessage: 'Hide all assistants' }
           ),
         },
         requiresPageReload: true,
-        solution: 'oblt',
       },
     });
 
