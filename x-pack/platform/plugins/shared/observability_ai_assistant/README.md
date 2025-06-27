@@ -128,7 +128,7 @@ observabilityAIAssistant?.register(async ({ registerRenderFunction }) => {
 });
 ```
 
-The user can also call these functions explicitly - if you don't want this, set `isInternal` on the function definition to `true`. In this case, the user cannot call it themselves.
+By default, all functions are available for the LLM to call, except those explicitly marked with `isInternal: true`, which remain inaccessible to the LLM.
 
 #### **2.2** Contextual insights
 
