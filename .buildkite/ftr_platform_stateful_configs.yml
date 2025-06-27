@@ -91,6 +91,7 @@ enabled:
   - src/platform/test/functional/apps/discover/group10/config.ts
   - src/platform/test/functional/apps/discover/context_awareness/config.ts
   - src/platform/test/functional/apps/discover/observability/config.ts
+  - src/platform/test/functional/apps/discover/tabs/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
   - src/platform/test/functional/apps/home/config.ts
   - src/platform/test/functional/apps/kibana_overview/config.ts
@@ -154,7 +155,6 @@ enabled:
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group4/config_with_schedule_circuit_breaker.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/actions/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/action_task_params/config.ts
-  - x-pack/test/api_integration_basic/config.ts
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/security/config.ts
   - x-pack/test/banners_functional/config.ts
@@ -201,13 +201,13 @@ enabled:
   - x-pack/test/functional/apps/advanced_settings/config.ts
   - x-pack/test/functional/apps/aiops/config.ts
   - x-pack/test/functional/apps/api_keys/config.ts
-  - x-pack/test/functional/apps/canvas/config.ts
+  - x-pack/platform/test/functional/apps/canvas/config.ts
   - x-pack/test/functional/apps/cross_cluster_replication/config.ts
   - x-pack/test/functional/apps/dashboard/group1/config.ts
   - x-pack/test/functional/apps/dashboard/group2/config.ts
   - x-pack/test/functional/apps/dashboard/group3/config.ts
   - x-pack/test/functional/apps/data_views/config.ts
-  - x-pack/test/functional/apps/dev_tools/config.ts
+  - x-pack/platform/test/functional/apps/dev_tools/config.ts
   - x-pack/test/functional/apps/discover/group1/config.ts
   - x-pack/test/functional/apps/discover/group2/config.ts
   - x-pack/test/functional/apps/discover/group3/config.ts
@@ -266,7 +266,7 @@ enabled:
   - x-pack/test/functional/apps/upgrade_assistant/config.ts
   - x-pack/test/functional/apps/user_profiles/config.ts
   - x-pack/test/functional/apps/visualize/config.ts
-  - x-pack/test/functional/apps/watcher/config.ts
+  - x-pack/platform/test/functional/apps/watcher/config.ts
   - x-pack/platform/test/functional/config_security_basic.ts
   - x-pack/test/functional/config.ccs.ts
   - x-pack/test/functional/config.firefox.js

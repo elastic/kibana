@@ -122,6 +122,13 @@ export const LayoutGlobalCSS = () => {
     --kbn-layout--footer-width: var(--kbn-layout--application-width);
   `;
 
+  // we want to place layout slots (like sidebar) on top of eui's flyouts (1000),
+  // so that when they are open, they are animating from under the sidebars
+  // this part of EUI flyout workaround and should be gone with https://github.com/elastic/eui/issues/8820
+  const common = css`
+    --kbn-layout--aboveFlyoutLevel: 1050;
+  `;
+
   const styles = css`
     :root {
       ${banner}
@@ -130,6 +137,7 @@ export const LayoutGlobalCSS = () => {
       ${sidebar}
       ${application}
       ${footer}
+      ${common}
     }
   `;
 
