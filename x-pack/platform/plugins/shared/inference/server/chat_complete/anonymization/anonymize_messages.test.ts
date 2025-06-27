@@ -202,6 +202,7 @@ describe('anonymize_messages', () => {
       expect(result.anonymizations.length).toBe(2);
     });
   });
+  
   it('should apply regex rules correctly', async () => {
     const messages: Message[] = [
       { role: MessageRole.User, content: 'My email is jorge21@gmail.com.' },

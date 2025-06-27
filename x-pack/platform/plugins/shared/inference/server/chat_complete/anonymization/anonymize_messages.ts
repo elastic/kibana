@@ -22,14 +22,15 @@ import pLimit from 'p-limit';
 import { getAnonymizableMessageParts } from './get_anonymizable_message_parts';
 
 const DEFAULT_MAX_CONCURRENT_REQUESTS = 5;
-const DEFAULT_BATCH_SIZE = 1000;
+const DEFAULT_BATCH_SIZE = 1_000;
+const DEFAULT_CHUNK_SIZE = 1_000;
 
 export interface InferenceChunk {
   chunkText: string;
   charStartOffset: number;
 }
 
-export function chunkText(text: string, maxChars = 1_000): InferenceChunk[] {
+export function chunkText(text: string, maxChars = DEFAULT_CHUNK_SIZE): InferenceChunk[] {
   const chunks: InferenceChunk[] = [];
   for (let i = 0; i < text.length; i += maxChars) {
     chunks.push({
@@ -57,10 +58,8 @@ async function anonymize({
   anonymizationRules: AnonymizationRule[];
   esClient: ElasticsearchClient;
 }): Promise<{ output: string; anonymizations: Anonymization[] }> {
-  const rules = anonymizationRules.filter((rule) => rule.enabled);
-
   const [regexRules, nerRules] = partition(
-    rules,
+    anonymizationRules,
     (rule): rule is RegexAnonymizationRule => rule.type === 'RegExp'
   );
 
@@ -114,22 +113,19 @@ async function anonymize({
     };
   }
 
-  // Maximum number of concurrent requests to the ML model
+  // Maximum number of concurrent requests
   const limiter = pLimit(DEFAULT_MAX_CONCURRENT_REQUESTS);
 
-  // Batch size - number of documents to send in each request
-  const chunks = chunkText(output);
-  // Create batches of chunks for the inference request
-  const batches = chunk(chunks, DEFAULT_BATCH_SIZE);
-
   for (const nerRule of nerRules) {
-    let offset: number = 0;
+    let offset = 0;
+    // Chunk the text due to token limit of model
+    const chunks = chunkText(output);
+    // Limit chunks into batches per request
+    const batches = chunk(chunks, DEFAULT_BATCH_SIZE);
 
-    // Process chunks with their correct offsets and ML results
     for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
       const batchChunks = batches[batchIndex];
 
-      // Get ML results for this batch
       const results = await limiter(async () =>
         withInferenceSpan('infer_ner', async () => {
           let response;
@@ -140,7 +136,9 @@ async function anonymize({
               docs,
             });
           } catch (error) {
-            throw new Error('Inference: NER inference failed', { cause: error });
+            throw new Error(`Inference failed for NER model '${nerRule.modelId}'`, {
+              cause: error,
+            });
           }
           return response?.inference_results || [];
         })
@@ -155,16 +153,16 @@ async function anonymize({
 
         // Process each entity in this chunk
         for (const entityMatch of result.entities) {
-          // Calculate the absolute position in the full text
+          // Calculate the positions in the chunk
           const from = batchChunk.charStartOffset + entityMatch.start_pos + offset;
           const to = batchChunk.charStartOffset + entityMatch.end_pos + offset;
 
           const before = output.slice(0, from);
           const after = output.slice(to);
 
-          // Use the actual text from the output rather than the entity name from ML model
-          // This preserves original case and exact text
+          // get the original entity text to avoid normalization from the model
           const entityText = output.slice(from, to);
+          // Create the entity object
           const entity = {
             class_name: entityMatch.class_name,
             value: entityText,
@@ -204,7 +202,8 @@ export async function anonymizeMessages({
   esClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<AnonymizationOutput> {
-  if (!anonymizationRules.length) {
+  const rules = anonymizationRules.filter((rule) => rule.enabled);
+  if (!rules.length) {
     return {
       messages,
       anonymizations: [],
@@ -214,7 +213,7 @@ export async function anonymizeMessages({
 
   const { output, anonymizations } = await anonymize({
     input: JSON.stringify(toAnonymize),
-    anonymizationRules,
+    anonymizationRules: rules,
     esClient,
   });
   try {
