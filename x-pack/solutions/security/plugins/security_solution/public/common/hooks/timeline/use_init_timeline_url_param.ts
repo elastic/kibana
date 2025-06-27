@@ -62,7 +62,6 @@ export const useInitTimelineFromUrlParam = () => {
   }, [onInitialize, activeTimeline]);
 
   useInitializeUrlParam(URL_PARAM_KEY.timeline, onInitialize);
-  useInitializeUrlParam(URL_PARAM_KEY.hideTimeline, () => {}); // No action needed for hideTimeline, the logic is handled by useShowTimeline hook
 };
 
 function hasTimelineStateChanged(

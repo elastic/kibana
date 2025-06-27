@@ -18,5 +18,4 @@ export const URL_PARAM_KEY = {
   timerange: 'timerange',
   pageFilter: 'pageFilters',
   rulesTable: 'rulesTable',
-  hideTimeline: 'hideTimeline',
 } as const;
