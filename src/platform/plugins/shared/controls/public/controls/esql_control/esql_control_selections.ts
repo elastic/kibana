@@ -77,7 +77,7 @@ export function initializeESQLControlSelections(
       timeRange: timeRange$?.getValue(),
     });
     if (getESQLSingleColumnValues.isSuccess(result)) {
-      availableOptions$.next(result.options);
+      availableOptions$.next(result.values);
     }
   }
   const fetchSubscription = controlFetch$.subscribe(updateAvailableOptions);

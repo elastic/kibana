@@ -157,12 +157,12 @@ export function ValueControlForm({
         return;
       }
       if (getESQLSingleColumnValues.isSuccess(result)) {
-        const { options } = result;
+        const { values } = result;
 
         setEsqlQueryErrors([]);
         setQueryColumns([]);
 
-        const selectOptions = options.map((option) => ({
+        const selectOptions = values.map((option) => ({
           label: String(option),
           key: String(option),
           'data-test-subj': String(option),
