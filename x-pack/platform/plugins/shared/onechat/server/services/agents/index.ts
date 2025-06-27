@@ -7,3 +7,4 @@
 
 export { AgentsService } from './agents_service';
 export type { AgentsServiceSetup, AgentsServiceStart, InternalAgentRegistry } from './types';
+export { runAgent } from './run_agent';
