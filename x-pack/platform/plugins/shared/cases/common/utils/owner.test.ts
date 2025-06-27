@@ -81,7 +81,7 @@ describe('owner utils', () => {
       expect(owner).toBe(OWNER_INFO.observability.id);
     });
 
-    describe('cloud projects', () => {
+    describe('serverless projects', () => {
       const cloudProjects = [
         [OWNER_INFO.observability.serverlessProjectType as string, OWNER_INFO.observability.id],
         [
