@@ -39,8 +39,7 @@ import { usePrivilegedMonitoringEngineStatus } from '../api/hooks/use_privileged
 import { PrivilegedUserMonitoringManageDataSources } from '../components/privileged_user_monitoring_manage_data_sources';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
-import { useUpdateUrlParam } from '../../common/utils/global_query_string';
-import { URL_PARAM_KEY } from '../../common/hooks/constants';
+import { useUpdateLinkConfig } from '../../common/links/links_hooks';
 
 type PageState =
   | { type: 'fetchingEngineStatus' }
@@ -101,7 +100,6 @@ function reducer(state: PageState, action: Action): PageState {
 }
 
 export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
-  const hideTimeline = useUpdateUrlParam<boolean>(URL_PARAM_KEY.hideTimeline);
   const { initPrivilegedMonitoringEngine } = useEntityAnalyticsRoutes();
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -179,10 +177,16 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
     engineStatus.isLoading,
   ]);
 
+  const updateLinkConfig = useUpdateLinkConfig();
+
   // Update UrlParam to add hideTimeline to the URL when the onboarding is loaded and removes it when dashboard is loaded
   useEffect(() => {
-    hideTimeline(['fetchingEngineStatus', 'onboarding', 'initializingEngine'].includes(state.type));
-  }, [state.type, hideTimeline]);
+    const hideTimeline = ['fetchingEngineStatus', 'onboarding', 'initializingEngine'].includes(
+      state.type
+    );
+    // update the hideTimeline property in the link config. This call triggers expensive operations, use with love
+    updateLinkConfig(SecurityPageName.entityAnalyticsPrivilegedUserMonitoring, { hideTimeline });
+  }, [state.type, updateLinkConfig]);
 
   const fullHeightCSS = css`
     min-height: calc(100vh - 240px);

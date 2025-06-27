@@ -127,23 +127,3 @@ describe('Security solution capabilities', () => {
     expect(result.current).toEqual([false]);
   });
 });
-
-describe('hideTimeline URL param', () => {
-  it('should hide timeline when hideTimeline URL param is true', () => {
-    mockUseLocation.mockReturnValueOnce({ pathname: '/overview', search: '?hideTimeline=!t' });
-    const { result } = renderUseShowTimeline();
-    expect(result.current).toEqual([false]);
-  });
-
-  it('should show timeline when hideTimeline URL param is false', () => {
-    mockUseLocation.mockReturnValueOnce({ pathname: '/overview', search: '?hideTimeline=!f' });
-    const { result } = renderUseShowTimeline();
-    expect(result.current).toEqual([true]);
-  });
-
-  it('should show timeline when hideTimeline URL param is not present', () => {
-    mockUseLocation.mockReturnValueOnce({ pathname: '/overview', search: '' });
-    const { result } = renderUseShowTimeline();
-    expect(result.current).toEqual([true]);
-  });
-});

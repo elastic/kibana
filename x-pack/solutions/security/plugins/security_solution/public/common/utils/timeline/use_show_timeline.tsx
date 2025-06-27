@@ -9,24 +9,17 @@ import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useShowTimelineForGivenPath } from './use_show_timeline_for_path';
 import { useUserPrivileges } from '../../components/user_privileges';
-import { getObjectFromQueryString } from '../global_query_string/helpers';
-import { URL_PARAM_KEY } from '../../hooks/constants';
 
 export const useShowTimeline = () => {
-  const { pathname, search } = useLocation();
+  const { pathname } = useLocation();
   const getIsTimelineVisible = useShowTimelineForGivenPath();
   const {
     timelinePrivileges: { read: canSeeTimeline },
   } = useUserPrivileges();
 
-  const hideTimeline = useMemo(
-    () => getObjectFromQueryString<boolean>(URL_PARAM_KEY.hideTimeline, search),
-    [search]
-  );
-
   const showTimeline = useMemo(
-    () => canSeeTimeline && getIsTimelineVisible(pathname) && !hideTimeline,
-    [canSeeTimeline, getIsTimelineVisible, pathname, hideTimeline]
+    () => canSeeTimeline && getIsTimelineVisible(pathname),
+    [pathname, canSeeTimeline, getIsTimelineVisible]
   );
   return [showTimeline];
 };
