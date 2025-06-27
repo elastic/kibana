@@ -9,6 +9,8 @@ import { expect } from '@kbn/scout';
 import { AnnotationDataService } from '../services/annotation_data_service';
 import { SLODataService } from '../services/slo_data_service';
 import { test } from '../fixtures';
+/* eslint-disable playwright/no-wait-for-selector */
+/* eslint-disable playwright/no-nth-methods */
 
 test.describe('Annotations List', { tag: ['@ess', '@svlOblt'] }, () => {
   let dataService: SLODataService;
