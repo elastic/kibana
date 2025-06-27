@@ -220,7 +220,13 @@
                     "text": "ToolResultEvent"
                   },
                   " | ",
-                  "ReasoningEvent",
+                  {
+                    "pluginId": "@kbn/onechat-common",
+                    "scope": "common",
+                    "docId": "kibKbnOnechatCommonPluginApi",
+                    "section": "def-common.ReasoningEvent",
+                    "text": "ReasoningEvent"
+                  },
                   " | ",
                   {
                     "pluginId": "@kbn/onechat-common",
@@ -381,6 +387,28 @@
                 "docId": "kibKbnOnechatServerPluginApi",
                 "section": "def-common.AgentEventEmitter",
                 "text": "AgentEventEmitter"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/agents/provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.AgentHandlerContext.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [
+              "\nLogger scoped to this execution"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
               }
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/agents/provider.ts",
@@ -919,11 +947,36 @@
         "children": [
           {
             "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.ConversationalAgentParams.agentMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "agentMode",
+            "description": [
+              "\nAgent mode to use for this round.\nDefaults to `normal`."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.AgentMode",
+                "text": "AgentMode"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/agents/provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-server",
             "id": "def-common.ConversationalAgentParams.conversation",
             "type": "Array",
             "tags": [],
             "label": "conversation",
-            "description": [],
+            "description": [
+              "\nPrevious rounds of conversation.\nDefaults to an empty list (new conversation)"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/onechat-common",
@@ -944,7 +997,9 @@
             "type": "Object",
             "tags": [],
             "label": "nextInput",
-            "description": [],
+            "description": [
+              "\nThe input triggering this round."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/onechat-common",
@@ -3600,7 +3655,13 @@
                 "text": "ToolResultEvent"
               },
               " | ",
-              "ReasoningEvent",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.ReasoningEvent",
+                "text": "ReasoningEvent"
+              },
               " | ",
               {
                 "pluginId": "@kbn/onechat-common",
