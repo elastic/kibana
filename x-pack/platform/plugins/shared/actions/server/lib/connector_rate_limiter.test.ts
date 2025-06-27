@@ -20,7 +20,7 @@ describe('ConnectorRateLimiter', () => {
     const config = {
       email: {
         limit: 5,
-        lookbackWindow: moment.duration(1, 'm'),
+        lookbackWindow: '1m',
       },
     };
     const connectorRateLimiter = new ConnectorRateLimiter({ config });

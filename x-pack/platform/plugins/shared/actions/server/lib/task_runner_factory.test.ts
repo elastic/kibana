@@ -34,7 +34,6 @@ import {
 } from '@kbn/task-manager-plugin/server/task_running';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { ConnectorRateLimiter } from './connector_rate_limiter';
-import moment from 'moment';
 
 const executeParamsFields = [
   'actionId',
@@ -125,7 +124,7 @@ describe('Task Runner Factory', () => {
       new ActionExecutor({
         isESOCanEncrypt: true,
         connectorRateLimiter: new ConnectorRateLimiter({
-          config: { email: { limit: 100, lookbackWindow: moment.duration(1, 'm') } },
+          config: { email: { limit: 100, lookbackWindow: '1m' } },
         }),
       }),
       inMemoryMetrics
@@ -142,7 +141,7 @@ describe('Task Runner Factory', () => {
       new ActionExecutor({
         isESOCanEncrypt: true,
         connectorRateLimiter: new ConnectorRateLimiter({
-          config: { email: { limit: 100, lookbackWindow: moment.duration(1, 'm') } },
+          config: { email: { limit: 100, lookbackWindow: '1m' } },
         }),
       }),
       inMemoryMetrics

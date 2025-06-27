@@ -13,6 +13,7 @@ import {
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
 } from '../common';
+import { validateDuration } from './lib/parse_date';
 
 export enum AllowedHosts {
   Any = '*',
@@ -27,6 +28,8 @@ const MIN_MAX_ATTEMPTS = 1;
 
 const MIN_QUEUED_MAX = 1;
 export const DEFAULT_QUEUED_MAX = 1000000;
+
+const validRateLimiterConnectorTypeIds = new Set(['email']);
 
 const preconfiguredActionSchema = schema.object({
   name: schema.string({ minLength: 1 }),
@@ -84,16 +87,15 @@ const enabledConnectorTypesSchema = schema.arrayOf(
 const rateLimiterSchema = schema.recordOf(
   schema.string({
     validate: (value) => {
-      const validConnectorTypeIds = new Set(['email']);
-      if (!validConnectorTypeIds.has(value)) {
+      if (!validRateLimiterConnectorTypeIds.has(value)) {
         return `Rate limiter configuration for connector type "${value}" is not supported. Supported types: ${Array.from(
-          validConnectorTypeIds
+          validRateLimiterConnectorTypeIds
         ).join(', ')}`;
       }
     },
   }),
   schema.object({
-    lookbackWindow: schema.duration({ defaultValue: '15m' }),
+    lookbackWindow: schema.string({ defaultValue: '15m', validate: validateDuration }),
     limit: schema.number({ defaultValue: 500, min: 1, max: 5000 }),
   })
 );

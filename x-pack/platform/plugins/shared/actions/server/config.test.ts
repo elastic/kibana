@@ -283,7 +283,7 @@ describe('config validation', () => {
         "rateLimiter": Object {
           "email": Object {
             "limit": 10,
-            "lookbackWindow": "PT1M",
+            "lookbackWindow": "1m",
           },
         },
         "responseTimeout": "PT1M",
