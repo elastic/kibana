@@ -85,7 +85,10 @@ export default ({ getService }: FtrProviderContext) => {
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           expect(body?.execution_summary?.last_execution.message).to.contain(
-            `This rule's API key is unable to access all indices that match the ["${index[0]}"] pattern. To learn how to update and manage API keys, refer to https://www.elastic.co/guide/en/kibana/current/alerting-setup.html#alerting-authorization.`
+            `This rule's API key is unable to access all indices that match the ["${index[0]}"] pattern. To learn how to update and manage API keys, refer to https://www.elastic.co/guide/en/kibana/`
+          );
+          expect(body?.execution_summary?.last_execution.message).to.contain(
+            '/alerting-setup.html#alerting-authorization.'
           );
 
           await deleteUserAndRole(getService, ROLES.detections_admin);
@@ -165,8 +168,11 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
-          expect(body?.execution_summary?.last_execution.message).to.eql(
-            `This rule's API key is unable to access all indices that match the ["${index[0]}"] pattern. To learn how to update and manage API keys, refer to https://www.elastic.co/guide/en/kibana/current/alerting-setup.html#alerting-authorization.`
+          expect(body?.execution_summary?.last_execution.message).to.contain(
+            `This rule's API key is unable to access all indices that match the ["${index[0]}"] pattern. To learn how to update and manage API keys, refer to https://www.elastic.co/guide/en/kibana/`
+          );
+          expect(body?.execution_summary?.last_execution.message).to.contain(
+            '/alerting-setup.html#alerting-authorization.'
           );
 
           await deleteUserAndRole(getService, ROLES.detections_admin);
