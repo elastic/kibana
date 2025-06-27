@@ -86,8 +86,6 @@ export interface Message {
       arguments?: string;
       trigger: MessageRole.Assistant | MessageRole.User | MessageRole.Elastic;
     };
-    deanonymization_input?: DeanonymizationInput;
-    deanonymization_output?: DeanonymizationOutput;
     data?: string;
   };
 }
