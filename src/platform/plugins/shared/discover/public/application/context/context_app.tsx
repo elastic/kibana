@@ -24,7 +24,6 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
@@ -41,6 +40,7 @@ import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
+import { useScopedServices } from '../../components/scoped_services_provider';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
@@ -54,8 +54,8 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
   const styles = useMemoCss(componentStyles);
 
   const services = useDiscoverServices();
+  const { scopedEBTManager } = useScopedServices();
   const {
-    analytics,
     locator,
     uiSettings,
     capabilities,
@@ -63,7 +63,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     navigation,
     filterManager,
     core,
-    ebtManager,
     fieldsMetadata,
   } = services;
 
@@ -136,7 +135,10 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
    */
   useEffect(() => {
     const doFetch = async () => {
-      const startTime = window.performance.now();
+      const surroundingDocsFetchTracker = scopedEBTManager.trackPerformanceEvent(
+        'discoverSurroundingDocsFetch'
+      );
+
       let fetchType = '';
       if (!prevAppState.current) {
         fetchType = 'all';
@@ -155,13 +157,8 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
         await fetchContextRows();
       }
 
-      if (analytics && fetchType) {
-        const fetchDuration = window.performance.now() - startTime;
-        reportPerformanceMetricEvent(analytics, {
-          eventName: 'discoverSurroundingDocsFetch',
-          duration: fetchDuration,
-          meta: { fetchType },
-        });
+      if (fetchType) {
+        surroundingDocsFetchTracker.reportEvent({ meta: { fetchType } });
       }
     };
 
@@ -170,7 +167,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     prevAppState.current = cloneDeep(appState);
     prevGlobalState.current = cloneDeep(globalState);
   }, [
-    analytics,
     appState,
     globalState,
     anchorId,
@@ -178,6 +174,7 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     fetchAllRows,
     fetchSurroundingRows,
     fetchedState.anchor.id,
+    scopedEBTManager,
   ]);
 
   const rows = useMemo(
@@ -209,30 +206,30 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
       if (dataViews) {
         const fieldName = typeof field === 'string' ? field : field.name;
         await popularizeField(dataView, fieldName, dataViews, capabilities);
-        void ebtManager.trackFilterAddition({
+        void scopedEBTManager.trackFilterAddition({
           fieldName: fieldName === '_exists_' ? String(values) : fieldName,
           filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
           fieldsMetadata,
         });
       }
     },
-    [filterManager, dataViews, dataView, capabilities, ebtManager, fieldsMetadata]
+    [filterManager, dataView, dataViews, capabilities, scopedEBTManager, fieldsMetadata]
   );
 
   const onAddColumnWithTracking = useCallback(
     (columnName: string) => {
       onAddColumn(columnName);
-      void ebtManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
     },
-    [onAddColumn, ebtManager, fieldsMetadata]
+    [onAddColumn, scopedEBTManager, fieldsMetadata]
   );
 
   const onRemoveColumnWithTracking = useCallback(
     (columnName: string) => {
       onRemoveColumn(columnName);
-      void ebtManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
     },
-    [onRemoveColumn, ebtManager, fieldsMetadata]
+    [onRemoveColumn, scopedEBTManager, fieldsMetadata]
   );
 
   const TopNavMenu = navigation.ui.AggregateQueryTopNavMenu;

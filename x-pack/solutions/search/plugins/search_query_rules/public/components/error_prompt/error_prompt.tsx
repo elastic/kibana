@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 const ERROR_MESSAGES = {
   notFound: {
@@ -19,6 +21,7 @@ const ERROR_MESSAGES = {
         defaultMessage="Requested resource was not found. Check if the URL is correct."
       />
     ),
+    analyticsEvent: AnalyticsEvents.notFoundErrorPromptLoaded,
   },
   generic: {
     title: <FormattedMessage id="xpack.queryRules.errorTitle" defaultMessage="An error occurred" />,
@@ -28,6 +31,7 @@ const ERROR_MESSAGES = {
         defaultMessage="An error occurred while fetching query rules. Check Kibana logs for more information."
       />
     ),
+    analyticsEvent: AnalyticsEvents.genericErrorPromptLoaded,
   },
   missingPermissions: {
     title: (
@@ -42,12 +46,17 @@ const ERROR_MESSAGES = {
         defaultMessage="You do not have the necessary permissions to manage query rules. Contact your system administrator."
       />
     ),
+    analyticsEvent: AnalyticsEvents.missingPermissionsErrorPromptLoaded,
   },
 };
 
 export const ErrorPrompt: React.FC<{
   errorType: 'missingPermissions' | 'generic' | 'notFound';
 }> = ({ errorType }) => {
+  const useTracker = useUsageTracker();
+  useEffect(() => {
+    useTracker?.load?.(ERROR_MESSAGES[errorType].analyticsEvent);
+  }, [errorType, useTracker]);
   return (
     <EuiEmptyPrompt
       iconType="logoElasticsearch"

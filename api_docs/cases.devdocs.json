@@ -178,7 +178,9 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; owner: string[]; permissions: ",
+          "> | undefined; settings?: ",
+          "CasesSettings",
+          " | undefined; owner: string[]; permissions: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -229,7 +231,9 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; owner: string[]; permissions: ",
+          "> | undefined; settings?: ",
+          "CasesSettings",
+          " | undefined; owner: string[]; permissions: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -372,7 +376,9 @@
         "signature": [
           "{ features?: Partial<",
           "CasesContextFeatures",
-          "> | undefined; owner: string[]; permissions: ",
+          "> | undefined; settings?: ",
+          "CasesSettings",
+          " | undefined; owner: string[]; permissions: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -481,7 +487,7 @@
               "section": "def-common.CaseSeverity",
               "text": "CaseSeverity"
             },
-            "[] | undefined; assignees?: string | string[] | undefined; reporters?: string | string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; from?: string | undefined; search?: string | undefined; searchFields?: \"title\" | \"description\" | (\"title\" | \"description\")[] | undefined; sortField?: \"title\" | \"createdAt\" | \"updatedAt\" | \"status\" | \"severity\" | \"category\" | \"closedAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; to?: string | undefined; owner?: string | string[] | undefined; category?: string | string[] | undefined; } & Partial<",
+            "[] | undefined; assignees?: string | string[] | undefined; reporters?: string | string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; from?: string | undefined; search?: string | undefined; searchFields?: \"title\" | \"description\" | \"incremental_id\" | (\"title\" | \"description\" | \"incremental_id\")[] | undefined; sortField?: \"title\" | \"createdAt\" | \"updatedAt\" | \"status\" | \"severity\" | \"category\" | \"closedAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; to?: string | undefined; owner?: string | string[] | undefined; category?: string | string[] | undefined; } & Partial<",
             "Pagination",
             ">, signal?: AbortSignal | undefined) => Promise<",
             {
@@ -3498,7 +3504,7 @@
         "tags": [],
         "label": "SAVED_OBJECT_TYPES",
         "description": [
-          "\nIf more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins"
+          "\nIf more values are added here please also add them here: x-pack/platform/test/cases_api_integration/common/plugins"
         ],
         "signature": [
           "(\"cases\" | \"cases-connector-mappings\" | \"cases-user-actions\" | \"cases-comments\" | \"cases-configure\")[]"
