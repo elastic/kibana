@@ -12,10 +12,13 @@ import type { TimeRange } from '@kbn/es-query';
 import { getESQLResults } from './run_query';
 
 export interface GetESQLSingleColumnValuesSuccess {
-  options: string[];
+  values: string[];
+  columns: [string];
+  errors: never[];
 }
 
 export interface GetESQLSingleColumnValuesFailure {
+  values: string[];
   columns: string[];
   errors: Error[];
 }
@@ -44,20 +47,20 @@ export const getESQLSingleColumnValues = async ({
     const columns = results.response.columns.map((col) => col.name);
 
     if (columns.length === 1) {
-      const options = results.response.values
+      const values = results.response.values
         .map((value) => value[0])
         .filter(Boolean)
-        .map((option) => String(option));
-      return { options };
+        .map((value) => String(value));
+      return { values, columns, errors: [] };
     }
 
-    return { columns, errors: [] };
+    return { values: [], columns, errors: [] };
   } catch (e) {
-    return { columns: [], errors: [e] };
+    return { values: [], columns: [], errors: [e] };
   }
 };
 
 getESQLSingleColumnValues.isSuccess = (
   result: unknown
 ): result is GetESQLSingleColumnValuesSuccess =>
-  'options' in (result as GetESQLSingleColumnValuesSuccess);
+  !!(result as GetESQLSingleColumnValuesSuccess).values.length;
