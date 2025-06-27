@@ -28,8 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const testSubjects = getService('testSubjects');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/225446
-  describe.skip('Search Homepage', function () {
+  describe('Search Homepage', function () {
     describe('as admin', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginAsAdmin();
@@ -39,7 +38,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await deleteAllTestIndices();
       });
 
-      it('goes to the start page if there exists no index', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/225446
+      it.skip('goes to the start page if there exists no index', async () => {
         await pageObjects.common.navigateToApp('searchHomepage');
         await pageObjects.svlSearchHomePage.expectToBeOnStartpage();
       });
@@ -60,7 +60,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await deleteAllTestIndices();
       });
 
-      it('goes to the start page if there exists no index', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/225446
+      it.skip('goes to the start page if there exists no index', async () => {
         await pageObjects.common.navigateToApp('searchHomepage');
         await pageObjects.svlSearchHomePage.expectToBeOnStartpage();
       });
