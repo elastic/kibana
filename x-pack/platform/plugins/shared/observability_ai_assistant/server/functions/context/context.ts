@@ -9,12 +9,12 @@ import type { Serializable } from '@kbn/utility-types';
 import { encode } from 'gpt-tokenizer';
 import { compact, last } from 'lodash';
 import { Observable } from 'rxjs';
-import { FunctionRegistrationParameters } from '.';
-import { MessageAddEvent } from '../../common/conversation_complete';
-import { FunctionVisibility } from '../../common/functions/types';
-import { MessageRole } from '../../common/types';
-import { createFunctionResponseMessage } from '../../common/utils/create_function_response_message';
-import { recallAndScore } from '../utils/recall/recall_and_score';
+import { FunctionRegistrationParameters } from '..';
+import { MessageAddEvent } from '../../../common/conversation_complete';
+import { FunctionVisibility } from '../../../common/functions/types';
+import { Message } from '../../../common/types';
+import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
+import { recallAndScore } from './utils/recall_and_score';
 
 const MAX_TOKEN_COUNT_FOR_DATA_ON_SCREEN = 1000;
 
@@ -61,21 +61,12 @@ export function registerContextFunction({
           return { content };
         }
 
-        const userMessage = last(
-          messages.filter((message) => message.message.role === MessageRole.User)
-        );
-
-        const userPrompt = userMessage?.message.content!;
-        const userMessageFunctionName = userMessage?.message.name;
-
         const { llmScores, relevantDocuments, suggestions } = await recallAndScore({
           recall: client.recall,
           chat,
           logger: resources.logger,
-          userPrompt,
-          userMessageFunctionName,
-          context: screenDescription,
-          messages,
+          screenDescription,
+          messages: removeContextToolRequest(messages),
           signal,
           analytics,
         });
@@ -122,4 +113,13 @@ export function registerContextFunction({
       });
     }
   );
+}
+
+export function removeContextToolRequest(messages: Message[]): Message[] {
+  const lastMessage = last(messages);
+  if (lastMessage?.message.function_call?.name === CONTEXT_FUNCTION_NAME) {
+    return messages.slice(0, -1);
+  }
+
+  return messages;
 }
