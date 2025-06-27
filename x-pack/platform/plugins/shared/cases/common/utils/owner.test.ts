@@ -83,11 +83,10 @@ describe('owner utils', () => {
 
     describe('serverless projects', () => {
       const cloudProjects = [
-        [OWNER_INFO.observability.serverlessProjectType as string, OWNER_INFO.observability.id],
-        [
-          OWNER_INFO.securitySolution.serverlessProjectType as string,
-          OWNER_INFO.securitySolution.id,
-        ],
+const cloudProjects: Array<[ServerlessProjectType, string]> = [
+        [OWNER_INFO.observability.serverlessProjectType!, OWNER_INFO.observability.id],
+        [OWNER_INFO.securitySolution.serverlessProjectType!, OWNER_INFO.securitySolution.id],
+        // @ts-expect-error - we need to test the unknown project type
         ['unknown-by-us', OWNER_INFO.cases.id],
       ];
 
