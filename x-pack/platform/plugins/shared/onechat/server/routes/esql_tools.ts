@@ -181,7 +181,7 @@ export function registerESQLToolsRoutes({
               message: 'Tool id must only contain letters, numbers, underscores, and hyphens.',
             },
           });
-         }
+        }
         const { esql: esqlToolService } = getInternalServices();
         const client = await esqlToolService.getScopedClient({ request });
         const now = new Date();
