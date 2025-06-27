@@ -491,7 +491,9 @@ describe('Discover flyout', function () {
             _source: { date: '2020-20-01T12:12:12.124', name: 'test2', extension: 'jpg' },
           },
         ];
-        const scopedProfilesManager = services.profilesManager.createScopedProfilesManager();
+        const scopedProfilesManager = services.profilesManager.createScopedProfilesManager({
+          scopedEbtManager: services.ebtManager.createScopedEBTManager(),
+        });
         const records = buildDataTableRecordList({
           records: hits as EsHitRecord[],
           dataView: dataViewMock,

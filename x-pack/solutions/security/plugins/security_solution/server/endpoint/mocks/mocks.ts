@@ -122,6 +122,7 @@ export const createMockEndpointAppContextService = (
   const featureUsageMock = createFeatureUsageServiceMock();
   const messageSigningService = createMessageSigningServiceMock();
   const licenseServiceMock = createLicenseServiceMock();
+  const telemetryServiceMock = analyticsServiceMock.createAnalyticsServiceSetup();
 
   return {
     start: jest.fn(),
@@ -144,7 +145,7 @@ export const createMockEndpointAppContextService = (
     getExceptionListsClient: jest.fn().mockReturnValue(exceptionListsClient!),
     getMessageSigningService: jest.fn().mockReturnValue(messageSigningService),
     getFleetActionsClient: jest.fn(async (_) => fleetActionsClientMock),
-    getTelemetryService: jest.fn(),
+    getTelemetryService: jest.fn().mockReturnValue(telemetryServiceMock),
     getInternalResponseActionsClient: jest.fn(() => {
       return responseActionsClientMock.create();
     }),
@@ -193,8 +194,8 @@ export const createMockEndpointAppContextServiceStartContract =
     const esClientMock = elasticsearchClientMock.createElasticsearchClient();
 
     // Mock some ES client methods that may be invoked through out most tests
-    esClientMock.indices.getFieldMapping.mockResolvedValue({
-      'some-index-name': { mappings: {} },
+    esClientMock.indices.getMapping.mockResolvedValue({
+      'some-index-name': { mappings: { properties: {} } },
     });
 
     esClientMock.cluster.existsComponentTemplate.mockResolvedValue(true);

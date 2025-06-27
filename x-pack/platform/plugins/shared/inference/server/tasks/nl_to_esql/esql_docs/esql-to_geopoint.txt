@@ -1,6 +1,6 @@
 # TO_GEOPOINT
 
-The TO_GEOPOINT function converts an input value into a `geo_point` value.
+Converts an input value to a `geo_point` value. A string will only be successfully converted if it adheres to the WKT Point format.
 
 ## Syntax
 
@@ -8,18 +8,19 @@ The TO_GEOPOINT function converts an input value into a `geo_point` value.
 
 ### Parameters
 
-#### field
+#### `field`
 
-This is the input value. It can be a single or multi-valued column or an expression.
+The input value to be converted. This can be a single- or multi-valued column or an expression.
 
 ## Examples
+
+Convert a WKT Point string to a `geo_point` value:
 
 ```esql
 ROW wkt = "POINT(42.97109630194 14.7552534413725)"
 | EVAL pt = TO_GEOPOINT(wkt)
 ```
 
-```esql
-ROW wkt = "POINT(34.052235 -118.243683)"
-| EVAL pt = TO_GEOPOINT(wkt)
-```
+## Limitations
+
+- The input string must strictly follow the WKT Point format for successful conversion.

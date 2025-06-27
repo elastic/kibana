@@ -26,7 +26,11 @@ import type {
 import { BinaryExpressionGroup } from './constants';
 
 export const isProperNode = (node: unknown): node is ESQLProperNode =>
-  !!node && typeof node === 'object' && !Array.isArray(node);
+  !!node &&
+  typeof node === 'object' &&
+  !Array.isArray(node) &&
+  typeof (node as ESQLProperNode).type === 'string' &&
+  !!(node as ESQLProperNode).type;
 
 export const isFunctionExpression = (node: unknown): node is ESQLFunction =>
   isProperNode(node) && node.type === 'function';
@@ -123,9 +127,9 @@ export const binaryExpressionGroup = (node: ESQLAstNode): BinaryExpressionGroup 
       case '>=':
         return BinaryExpressionGroup.comparison;
       case 'like':
-      case 'not_like':
+      case 'not like':
       case 'rlike':
-      case 'not_rlike':
+      case 'not rlike':
         return BinaryExpressionGroup.regex;
     }
   }
