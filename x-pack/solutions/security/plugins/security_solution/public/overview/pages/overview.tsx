@@ -95,7 +95,7 @@ const OverviewComponent = () => {
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
   const { tiDataSources: allTiDataSources, isInitiallyLoaded: isTiLoaded } = useAllTiDataSources();
 
-  if (status !== 'ready' && newDataViewPickerEnabled) {
+  if (newDataViewPickerEnabled && status !== 'ready') {
     return null;
   }
 

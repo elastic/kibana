@@ -58,7 +58,7 @@ const EntityAnalyticsComponent = () => {
   const showEmptyPrompt = !indicesExist && !skipEmptyPrompt;
   const entityTypes = useEntityAnalyticsTypes();
 
-  if (status !== 'ready' && newDataViewPickerEnabled) {
+  if (newDataViewPickerEnabled && status !== 'ready') {
     return null;
   }
 

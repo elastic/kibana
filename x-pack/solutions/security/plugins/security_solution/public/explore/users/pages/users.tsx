@@ -180,7 +180,7 @@ const UsersComponent = () => {
   const capabilities = useMlCapabilities();
   const navTabs = useMemo(() => navTabsUsers(hasMlUserPermissions(capabilities)), [capabilities]);
 
-  if (status !== 'ready' && newDataViewPickerEnabled) {
+  if (newDataViewPickerEnabled && status !== 'ready') {
     return null;
   }
 

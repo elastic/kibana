@@ -193,7 +193,7 @@ const NetworkDetailsComponent: React.FC = () => {
     return dataViewSpecToViewBase(sourcererDataView);
   }, [sourcererDataView]);
 
-  if (status !== 'ready' && newDataViewPickerEnabled) {
+  if (newDataViewPickerEnabled && status !== 'ready') {
     return null;
   }
 

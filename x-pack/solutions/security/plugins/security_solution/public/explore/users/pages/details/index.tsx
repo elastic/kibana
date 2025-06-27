@@ -212,7 +212,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     onChange: calculateEntityRiskScore,
   });
 
-  if (status !== 'ready' && newDataViewPickerEnabled) {
+  if (newDataViewPickerEnabled && status !== 'ready') {
     return null;
   }
 

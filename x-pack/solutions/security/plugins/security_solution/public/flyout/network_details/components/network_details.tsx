@@ -123,7 +123,7 @@ export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
     aggregationInterval: 'auto',
   });
 
-  if (status !== 'ready' && newDataViewPickerEnabled) {
+  if (newDataViewPickerEnabled && status !== 'ready') {
     return null;
   }
 
