@@ -10,14 +10,16 @@ import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { EuiButton, EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { FeedbackFlyout } from './feedback_flyout';
 
 interface Props {
   core: CoreStart;
   isServerless: boolean;
+  getLicense: LicensingPluginStart['getLicense'];
 }
 
-export const FeedbackButton = ({ core, isServerless }: Props) => {
+export const FeedbackButton = ({ core, isServerless, getLicense }: Props) => {
   let flyoutRef: OverlayRef | null = null;
 
   const closeFlyout = () => {
@@ -32,7 +34,10 @@ export const FeedbackButton = ({ core, isServerless }: Props) => {
     }
 
     flyoutRef = core.overlays.openFlyout(
-      toMountPoint(<FeedbackFlyout core={core} closeFlyout={closeFlyout} />, core.rendering),
+      toMountPoint(
+        <FeedbackFlyout core={core} closeFlyout={closeFlyout} getLicense={getLicense} />,
+        core.rendering
+      ),
       {
         'data-test-subj': 'feedbackFlyout',
         type: 'push',

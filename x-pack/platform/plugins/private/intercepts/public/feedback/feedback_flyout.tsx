@@ -15,6 +15,7 @@ import React, {
 import {
   EuiButton,
   EuiButtonIcon,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -34,22 +35,29 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+
+enum FeedbackType {
+  FeatureRequest = 'featureRequest',
+  BugReport = 'bugReport',
+  OtherFeedback = 'otherFeedback',
+}
 
 const feedbackTypes = [
   {
-    value: 'featureRequest',
+    value: FeedbackType.FeatureRequest,
     text: i18n.translate('xpack.intercept.feedbackFlyout.form.select.options.featureRequest', {
       defaultMessage: 'Request a feature',
     }),
   },
   {
-    value: 'bugReport',
+    value: FeedbackType.BugReport,
     text: i18n.translate('xpack.intercept.feedbackFlyout.form.select.options.bugReport', {
       defaultMessage: 'Report a bug',
     }),
   },
   {
-    value: 'otherFeedback',
+    value: FeedbackType.OtherFeedback,
     text: i18n.translate('xpack.intercept.feedbackFlyout.form.select.options.otherFeedback', {
       defaultMessage: 'Other feedback',
     }),
@@ -59,13 +67,18 @@ const feedbackTypes = [
 interface Props {
   core: CoreStart;
   closeFlyout: () => void;
+  getLicense: LicensingPluginStart['getLicense'];
 }
 
-export const FeedbackFlyout = ({ core, closeFlyout }: Props) => {
+export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [feedbackText, setFeedbackText] = useState('');
-  const [feedbackType, setFeedbackType] = useState(feedbackTypes[0].value);
+  const [feedbackType, setFeedbackType] = useState(FeedbackType.FeatureRequest);
   const [userEmail, setUserEmail] = useState('');
+  const [isPlatinumOrHigherLicense, setIsPlatinumOrHigherLicense] = useState(false);
+
+  const showPlatinumOrHigherCallout =
+    isPlatinumOrHigherLicense && feedbackType !== FeedbackType.OtherFeedback;
 
   const getEmail = useCallback(async () => {
     try {
@@ -76,10 +89,20 @@ export const FeedbackFlyout = ({ core, closeFlyout }: Props) => {
     }
   }, [core.security.authc]);
 
+  const checkIfLicenseIsPlatinum = useCallback(async () => {
+    const license = await getLicense();
+
+    const isPlatinum = license.hasAtLeast('platinum');
+    setIsPlatinumOrHigherLicense(isPlatinum);
+  }, [getLicense]);
+
   useEffect(() => {
-    // TODO: Check for platinum license
     getEmail();
   }, [getEmail]);
+
+  useEffect(() => {
+    checkIfLicenseIsPlatinum();
+  }, [checkIfLicenseIsPlatinum]);
 
   const boldTextCss = {
     fontWeight: euiTheme.font.weight.semiBold,
@@ -101,7 +124,7 @@ export const FeedbackFlyout = ({ core, closeFlyout }: Props) => {
   };
 
   const handleChangeFeedbackType = (e: ChangeEvent<HTMLSelectElement>) => {
-    setFeedbackType(e.target.value);
+    setFeedbackType(e.target.value as FeedbackType);
   };
 
   const handleChangeEmail = (e: ChangeEvent<HTMLInputElement>) => {
@@ -152,15 +175,17 @@ export const FeedbackFlyout = ({ core, closeFlyout }: Props) => {
               </Label>
             }
             helpText={
-              <>
-                <EuiSpacer size="s" />
-                <EuiText size="s">
-                  <FormattedMessage
-                    id="xpack.intercept.feedbackFlyout.form.select.helpText"
-                    defaultMessage="Share the functionality you're missing — it helps us to prioritize what's coming up next at Elastic."
-                  />
-                </EuiText>
-              </>
+              !showPlatinumOrHigherCallout && (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiText size="s">
+                    <FormattedMessage
+                      id="xpack.intercept.feedbackFlyout.form.select.helpText"
+                      defaultMessage="Share the functionality you're missing — it helps us to prioritize what's coming up next at Elastic."
+                    />
+                  </EuiText>
+                </>
+              )
             }
           >
             <EuiSelect
@@ -173,6 +198,26 @@ export const FeedbackFlyout = ({ core, closeFlyout }: Props) => {
               onChange={handleChangeFeedbackType}
             />
           </EuiFormRow>
+          {showPlatinumOrHigherCallout && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiCallOut
+                color="warning"
+                title={
+                  <FormattedMessage
+                    id="xpack.intercept.feedbackFlyout.platinumOrHigherCallout.title"
+                    defaultMessage="Use your Platinum license benefits instead"
+                  />
+                }
+              >
+                <FormattedMessage
+                  id="xpack.intercept.feedbackFlyout.platinumOrHigherCallout.content"
+                  defaultMessage="Please submit your improvement request in the dedicated support channel so we can get back to you faster."
+                />
+              </EuiCallOut>
+              <EuiSpacer size="s" />
+            </>
+          )}
           <EuiFormRow
             label={
               <Label>

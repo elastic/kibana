@@ -8,9 +8,14 @@
 import React from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { FeedbackButton } from './feedback';
 import { InterceptPrompter } from './prompter';
 import type { ServerConfigSchema } from '../common/config';
+
+export interface InterceptPublicStartDependencies {
+  licensing: LicensingPluginStart;
+}
 
 export class InterceptPublicPlugin implements Plugin {
   private readonly prompter?: InterceptPrompter;
@@ -35,7 +40,7 @@ export class InterceptPublicPlugin implements Plugin {
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, { licensing }: InterceptPublicStartDependencies) {
     this.interceptsTargetDomElement = document.createElement('div');
 
     const prompterStart = this.prompter?.start({
@@ -48,7 +53,11 @@ export class InterceptPublicPlugin implements Plugin {
     core.chrome.navControls.registerRight({
       order: this.isServerless ? 1 : 1002,
       mount: toMountPoint(
-        <FeedbackButton core={core} isServerless={this.isServerless} />,
+        <FeedbackButton
+          core={core}
+          isServerless={this.isServerless}
+          getLicense={licensing.getLicense}
+        />,
         core.rendering
       ),
     });
