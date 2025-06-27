@@ -14,7 +14,7 @@ import { CIS_AWS, CIS_GCP, CIS_AZURE, CIS_K8S, CIS_EKS } from '../../common/cons
 import { CISBenchmarkIcon } from './cis_benchmark_icon';
 import { CompactFormattedNumber } from './compact_formatted_number';
 import { BenchmarkData } from '../../common/types_old';
-import { FINDINGS_GROUPING_OPTIONS } from '../common/constants';
+import { FINDINGS_GROUPING_OPTIONS, FINDINGS_FILTER_OPTIONS } from '../common/constants';
 
 // order in array will determine order of appearance in the dashboard
 const benchmarks = [
@@ -67,11 +67,13 @@ export const AccountsEvaluatedWidget = ({
     navToFindings(
       activeNamespace
         ? {
-            'data_stream.namespace': activeNamespace,
-            'cloud.provider': provider,
-            'rule.benchmark.posture_type': CSPM_POLICY_TEMPLATE,
+            [FINDINGS_FILTER_OPTIONS.NAMESPACE]: activeNamespace,
+            [FINDINGS_FILTER_OPTIONS.CLOUD_PROVIDER]: provider,
           }
-        : { 'cloud.provider': provider, 'rule.benchmark.posture_type': CSPM_POLICY_TEMPLATE },
+        : {
+            [FINDINGS_FILTER_OPTIONS.CLOUD_PROVIDER]: provider,
+            [FINDINGS_FILTER_OPTIONS.RULE_BENCHMARK_POSTURE_TYPE]: CSPM_POLICY_TEMPLATE,
+          },
       [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID]
     );
   };
@@ -80,10 +82,10 @@ export const AccountsEvaluatedWidget = ({
     navToFindings(
       activeNamespace
         ? {
-            'data_stream.namespace': activeNamespace,
-            'rule.benchmark.id': cisBenchmark,
+            [FINDINGS_FILTER_OPTIONS.NAMESPACE]: activeNamespace,
+            [FINDINGS_FILTER_OPTIONS.RULE_BENCHMARK_ID]: cisBenchmark,
           }
-        : { 'rule.benchmark.id': cisBenchmark },
+        : { [FINDINGS_FILTER_OPTIONS.RULE_BENCHMARK_ID]: cisBenchmark },
       [FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_ID]
     );
   };

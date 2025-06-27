@@ -32,7 +32,7 @@ import type {
 import { RisksTable } from '../compliance_charts/risks_table';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import { AccountsEvaluatedWidget } from '../../../components/accounts_evaluated_widget';
-import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
+import { FINDINGS_GROUPING_OPTIONS, FINDINGS_FILTER_OPTIONS } from '../../../common/constants';
 
 export const dashboardColumnsGrow: Record<string, EuiFlexItemProps['grow']> = {
   first: 3,
@@ -46,11 +46,11 @@ export const getPolicyTemplateQuery = (
 ): NavFilter =>
   activeNamespace
     ? {
-        'rule.benchmark.posture_type': policyTemplate,
-        'data_stream.namespace': activeNamespace,
+        [FINDINGS_FILTER_OPTIONS.RULE_BENCHMARK_POSTURE_TYPE]: policyTemplate,
+        [FINDINGS_FILTER_OPTIONS.NAMESPACE]: activeNamespace,
       }
     : {
-        'rule.benchmark.posture_type': policyTemplate,
+        [FINDINGS_FILTER_OPTIONS.RULE_BENCHMARK_POSTURE_TYPE]: policyTemplate,
       };
 
 export const SummarySection = ({
