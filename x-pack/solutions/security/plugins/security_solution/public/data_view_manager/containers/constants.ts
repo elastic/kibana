@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/public';
+
+import type { DefaultDataViewsContextValue } from './context';
+
 export const fallbackDataView = {
   id: '',
   title: '',
   toSpec: () => ({ id: '', title: '' }),
-} as DataView;
+} as unknown as DataView;
 
 export const fallbackDataViews = {
   defaultDataView: fallbackDataView,
