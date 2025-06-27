@@ -1123,7 +1123,7 @@
     "deep-freeze-strict": "^1.1.1",
     "deepmerge": "^4.3.1",
     "del": "^6.1.0",
-    "diff": "^8.0.1",
+    "diff": "^8.0.2",
     "dotenv": "^16.4.5",
     "elastic-apm-node": "^4.13.0",
     "email-addresses": "^5.0.0",
@@ -1311,7 +1311,7 @@
     "zod": "^3.22.3"
   },
   "devDependencies": {
-    "@apidevtools/swagger-parser": "^10.1.1",
+    "@apidevtools/swagger-parser": "^12.0.0",
     "@babel/cli": "^7.24.7",
     "@babel/core": "^7.24.7",
     "@babel/eslint-parser": "^7.24.7",
