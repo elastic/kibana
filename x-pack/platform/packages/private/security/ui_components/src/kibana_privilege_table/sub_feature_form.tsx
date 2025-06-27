@@ -66,7 +66,7 @@ export const SubFeatureForm = (props: Props) => {
         iconProps={{
           className: 'eui-alignTop',
         }}
-        type="iInCircle"
+        type="info"
         color="subdued"
         content={tooltipContent}
         anchorProps={{ 'data-test-subj': getTestId('nameTooltip') }}

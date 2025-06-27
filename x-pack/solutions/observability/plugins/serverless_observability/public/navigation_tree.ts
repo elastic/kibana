@@ -10,8 +10,10 @@ import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 
 export const createNavigationTree = ({
   streamsAvailable,
+  overviewAvailable = true,
 }: {
   streamsAvailable?: boolean;
+  overviewAvailable?: boolean;
 }): NavigationTreeDefinition => {
   return {
     body: [
@@ -24,12 +26,16 @@ export const createNavigationTree = ({
         isCollapsible: false,
         breadcrumbStatus: 'hidden',
         children: [
-          {
-            title: i18n.translate('xpack.serverlessObservability.nav.overview', {
-              defaultMessage: 'Overview',
-            }),
-            link: 'observability-overview',
-          },
+          ...(overviewAvailable
+            ? [
+                {
+                  title: i18n.translate('xpack.serverlessObservability.nav.overview', {
+                    defaultMessage: 'Overview',
+                  }),
+                  link: 'observability-overview' as const,
+                },
+              ]
+            : []),
           {
             title: i18n.translate('xpack.serverlessObservability.nav.discover', {
               defaultMessage: 'Discover',
@@ -72,7 +78,6 @@ export const createNavigationTree = ({
               defaultMessage: 'AI Assistant',
             }),
           },
-          { link: 'inventory', spaceBefore: 'm' },
           ...(streamsAvailable
             ? [
                 {
@@ -93,6 +98,7 @@ export const createNavigationTree = ({
             : []),
           {
             id: 'apm',
+            link: 'apm:services',
             title: i18n.translate('xpack.serverlessObservability.nav.applications', {
               defaultMessage: 'Applications',
             }),
@@ -108,7 +114,7 @@ export const createNavigationTree = ({
                   },
                   { link: 'apm:traces' },
                   { link: 'apm:dependencies' },
-                  { link: 'apm:settings' },
+                  { link: 'apm:settings', sideNavStatus: 'hidden' },
                 ],
               },
               {
@@ -145,6 +151,7 @@ export const createNavigationTree = ({
           },
           {
             id: 'metrics',
+            link: 'metrics:inventory',
             title: i18n.translate('xpack.serverlessObservability.nav.infrastructure', {
               defaultMessage: 'Infrastructure',
             }),
@@ -162,7 +169,7 @@ export const createNavigationTree = ({
                     ),
                   },
                   { link: 'metrics:hosts' },
-                  { link: 'metrics:settings' },
+                  { link: 'metrics:settings', sideNavStatus: 'hidden' },
                 ],
               },
             ],
@@ -315,7 +322,17 @@ export const createNavigationTree = ({
                       defaultMessage: 'Access',
                     }),
                     breadcrumbStatus: 'hidden',
-                    children: [{ link: 'management:api_keys', breadcrumbStatus: 'hidden' }],
+                    children: [
+                      { link: 'management:api_keys', breadcrumbStatus: 'hidden' },
+                      { link: 'management:roles', breadcrumbStatus: 'hidden' },
+                      {
+                        cloudLink: 'userAndRoles',
+                        title: i18n.translate(
+                          'xpack.serverlessObservability.navLinks.projectSettings.mngt.usersAndRoles',
+                          { defaultMessage: 'Manage organization members' }
+                        ),
+                      },
+                    ],
                   },
                   {
                     title: i18n.translate(
@@ -373,10 +390,6 @@ export const createNavigationTree = ({
               },
               {
                 link: 'fleet',
-              },
-              {
-                id: 'cloudLinkUserAndRoles',
-                cloudLink: 'userAndRoles',
               },
               {
                 id: 'cloudLinkBilling',

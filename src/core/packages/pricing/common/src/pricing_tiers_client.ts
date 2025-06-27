@@ -36,7 +36,7 @@ export class PricingTiersClient implements IPricingTiersClient {
    * Checks if pricing tiers are enabled in the current configuration.
    *
    * @returns True if pricing tiers are enabled, false otherwise
-   * @private
+   * @internal
    */
   private isEnabled = () => {
     return this.tiers.enabled;

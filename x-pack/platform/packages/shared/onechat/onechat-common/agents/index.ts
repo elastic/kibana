@@ -7,6 +7,7 @@
 
 export {
   AgentType,
+  AgentMode,
   OneChatDefaultAgentId,
   OneChatDefaultAgentProviderId,
   type AgentDescriptor,
@@ -19,6 +20,8 @@ export {
   type ToolResultEventData,
   type ToolCallEvent,
   type ToolCallEventData,
+  type ReasoningEvent,
+  type ReasoningEventData,
   type MessageChunkEventData,
   type MessageChunkEvent,
   type MessageCompleteEventData,
@@ -27,6 +30,7 @@ export {
   type RoundCompleteEvent,
   isToolCallEvent,
   isToolResultEvent,
+  isReasoningEvent,
   isMessageChunkEvent,
   isMessageCompleteEvent,
   isRoundCompleteEvent,

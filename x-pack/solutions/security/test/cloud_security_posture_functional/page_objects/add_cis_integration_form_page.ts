@@ -403,6 +403,19 @@ export function AddCisIntegrationFormPageProvider({
     await textField.type(text);
   };
 
+  const fillInComboBox = async (selector: string, text: string) => {
+    const comboBox = await testSubjects.find(selector);
+    // Click to open the combobox
+    await comboBox.click();
+    // Find the input within the combobox
+    const input = await comboBox.findByCssSelector('input');
+    // Clear and type new value
+    await input.clearValueWithKeyboard();
+    await input.type(text);
+    // Press Enter to create the custom option
+    await input.pressKeys(browser.keys.ENTER);
+  };
+
   const chooseDropDown = async (selector: string, text: string) => {
     const credentialTypeBox = await testSubjects.find(selector);
     const chosenOption = await testSubjects.find(text);
@@ -682,5 +695,6 @@ export function AddCisIntegrationFormPageProvider({
     clickAwsPolicyOption,
     clickGcpPolicyOption,
     clickAzurePolicyOption,
+    fillInComboBox,
   };
 }
