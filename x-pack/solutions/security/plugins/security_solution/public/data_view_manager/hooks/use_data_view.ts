@@ -41,6 +41,10 @@ export const useDataView = (
 
   useEffect(() => {
     (async () => {
+      if (!newDataViewPickerEnabled) {
+        return;
+      }
+
       if (!dataViewId || internalStatus !== 'ready') {
         return;
       }
@@ -63,7 +67,7 @@ export const useDataView = (
         setLocalStatus('error');
       }
     })();
-  }, [dataViews, dataViewId, internalStatus, notifications]);
+  }, [dataViews, dataViewId, internalStatus, notifications, newDataViewPickerEnabled]);
 
   return useMemo(() => {
     if (!newDataViewPickerEnabled) {
