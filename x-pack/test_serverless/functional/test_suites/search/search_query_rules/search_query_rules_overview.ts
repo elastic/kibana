@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -15,7 +16,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'embeddedConsole',
     'common',
   ]);
+  const browser = getService('browser');
   const es = getService('es');
+  const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
 
   const createTestRuleset = async (rulesetId: string) => {
@@ -64,16 +67,40 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
   };
 
+  const createTestIndex = async (indexName: string, docId: string) => {
+    await es.transport.request({
+      path: `${indexName}/_doc/${docId}`,
+      method: 'PUT',
+      body: {
+        title: 'Pugs are the best',
+      },
+    });
+  };
+
+  const deleteTestIndex = async (indexName: string) => {
+    await es.transport.request({
+      path: indexName,
+      method: 'DELETE',
+    });
+  };
+
   describe('Serverless Query Rules Overview', function () {
     before(async () => {
-      await kibanaServer.uiSettings.update({ 'queryRules:queryRulesEnabled': 'true' });
+      try {
+        await deleteTestRuleset('my-test-ruleset');
+      } catch (error) {
+        // Ignore errors if ruleset doesn't exist or cannot be deleted
+      }
       await pageObjects.svlCommonPage.loginWithRole('developer');
+      await createTestIndex('my-index-000001', 'W08XfZcBY');
     });
+
     beforeEach(async () => {
       await pageObjects.svlCommonNavigation.sidenav.clickLink({
         deepLinkId: 'searchQueryRules',
       });
     });
+
     describe('Creating a query ruleset from an empty deployment', () => {
       it('is Empty State page loaded successfully', async () => {
         await pageObjects.searchQueryRules.QueryRulesEmptyPromptPage.expectQueryRulesEmptyPromptPageComponentsToExist();
@@ -88,13 +115,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'my-test-ruleset'
         );
         await pageObjects.searchQueryRules.QueryRulesRuleFlyout.expectRuleFlyoutToExist();
-        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.changeDocumentIndexField(
-          0,
-          'my-index-000001'
-        );
         await pageObjects.searchQueryRules.QueryRulesRuleFlyout.changeDocumentIdField(
           0,
           'W08XfZcBY'
+        );
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.changeDocumentIndexField(
+          0,
+          'my-index-000001'
         );
         await pageObjects.searchQueryRules.QueryRulesRuleFlyout.changeMetadataValues(0, 'pugs');
         await pageObjects.searchQueryRules.QueryRulesRuleFlyout.changeMetadataField(
@@ -105,19 +132,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageBackButtonToExist();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageSaveButtonToExist();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.clickQueryRulesDetailPageSaveButton();
-      });
-      after(async () => {
-        try {
-          await deleteTestRuleset('my-test-ruleset');
-        } catch (error) {
-          // Ignore errors if ruleset doesn't exist or cannot be deleted
-        }
+
+        // give time for the ruleset to be created
+        await pageObjects.common.sleep(400);
+        await pageObjects.svlCommonNavigation.sidenav.clickLink({
+          deepLinkId: 'searchQueryRules',
+        });
+        await pageObjects.searchQueryRules.QueryRulesManagementPage.expectQueryRulesTableToExist();
       });
     });
 
     describe('Adding a new ruleset in a non-empty deployment', () => {
       before(async () => {
-        await createTestRuleset('my-test-ruleset');
+        await pageObjects.svlCommonNavigation.sidenav.clickLink({
+          deepLinkId: 'searchQueryRules',
+        });
       });
       it('should be able to create a new ruleset on top of an existing one', async () => {
         await pageObjects.searchQueryRules.QueryRulesManagementPage.expectQueryRulesTableToExist();
@@ -147,13 +176,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageBackButtonToExist();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageSaveButtonToExist();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.clickQueryRulesDetailPageSaveButton();
+
+        // give time for the ruleset to be created
+        await pageObjects.common.sleep(400);
+        await pageObjects.svlCommonNavigation.sidenav.clickLink({
+          deepLinkId: 'searchQueryRules',
+        });
+        await pageObjects.searchQueryRules.QueryRulesManagementPage.expectQueryRulesTableToExist();
+        await retry.try(async () => {
+          const results =
+            await pageObjects.searchQueryRules.QueryRulesManagementPage.getQueryRulesRulesetsList();
+          await expect(results.length).to.equal(2);
+        });
       });
       after(async () => {
-        try {
-          await deleteTestRuleset('my-test-ruleset');
-        } catch (error) {
-          // Ignore errors if ruleset doesn't exist or cannot be deleted
-        }
         try {
           await deleteTestRuleset('my-test-ruleset-2');
         } catch (error) {
@@ -164,6 +200,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('Deleting a query ruleset from the ruleset details page', () => {
       before(async () => {
         await createTestRuleset('my-test-ruleset');
+        browser.refresh();
       });
       it('should be able to delete an existing ruleset and render the empty state', async () => {
         await pageObjects.searchQueryRules.QueryRulesManagementPage.expectQueryRulesTableToExist();
@@ -174,19 +211,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchQueryRules.QueryRulesDeleteRulesetModal.clickConfirmDeleteModal();
         await pageObjects.searchQueryRules.QueryRulesEmptyPromptPage.expectQueryRulesEmptyPromptPageComponentsToExist();
       });
-      after(async () => {
-        try {
-          await deleteTestRuleset('my-test-ruleset');
-        } catch (error) {
-          // Ignore errors if ruleset doesn't exist or cannot be deleted
-        }
-      });
     });
     describe('Deleting a query ruleset from the ruleset management page', () => {
       before(async () => {
         await createTestRuleset('my-test-ruleset');
+        await pageObjects.common.sleep(500);
+        await browser.navigateTo('about:blank');
+        await pageObjects.common.navigateToApp('searchQueryRules');
       });
       it('should be able to delete an existing ruleset and render the empty state', async () => {
+        await pageObjects.searchQueryRules.QueryRulesManagementPage.expectQueryRulesTableToExist();
         await pageObjects.searchQueryRules.QueryRulesManagementPage.clickDeleteRulesetRow(0);
         await pageObjects.searchQueryRules.QueryRulesDeleteRulesetModal.clickAcknowledgeButton();
         await pageObjects.searchQueryRules.QueryRulesDeleteRulesetModal.clickConfirmDeleteModal();
@@ -196,6 +230,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('Editing a query ruleset with document pinning/exclude', () => {
       before(async () => {
         await createTestRuleset('my-test-ruleset');
+        await pageObjects.common.sleep(500);
+        await browser.navigateTo('about:blank');
+        await pageObjects.common.navigateToApp('searchQueryRules');
       });
       it('should edit the document id and the criteria field', async () => {
         await pageObjects.searchQueryRules.QueryRulesManagementPage.expectQueryRulesTableToExist();
@@ -220,6 +257,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await deleteTestRuleset('my-test-ruleset');
         } catch (error) {
           // Ignore errors if ruleset doesn't exist or cannot be deleted
+        }
+        try {
+          await deleteTestIndex('my-index-000001');
+        } catch (error) {
+          // Ignore errors if index doesn't exist or cannot be deleted
         }
       });
     });

@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { Key } from 'selenium-webdriver';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext) {
+export function SearchQueryRulesPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
+  const { common } = getPageObjects(['common']);
+
   return {
     QueryRulesEmptyPromptPage: {
       TEST_IDS: {
@@ -213,7 +216,7 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
           this.TEST_IDS.RULE_FLYOUT_DOCUMENT_DRAGGABLE_ID
         );
         if (documentFields[id]) {
-          const targetField = await documentFields[id];
+          const targetField = documentFields[id];
           await targetField.click();
           await targetField.type(newValue);
         } else {
@@ -222,16 +225,21 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
         }
       },
       async changeDocumentIndexField(id: number, newValue: string = '') {
-        await comboBox.setCustom(this.TEST_IDS.RULE_FLYOUT_DOCUMENT_INDEX, newValue);
-        // Press tab to ensure the value is set correctly
-        await browser.pressKeys(['tab']);
+        const comboBoxes = await testSubjects.findAll(this.TEST_IDS.RULE_FLYOUT_DOCUMENT_INDEX);
+        if (comboBoxes[id]) {
+          const targetComboBox = comboBoxes[id];
+          await targetComboBox.click();
+          await comboBox.setCustom(this.TEST_IDS.RULE_FLYOUT_DOCUMENT_INDEX, newValue);
+          // Press tab to ensure the value is set correctly
+          await browser.pressKeys(Key.TAB);
+        }
       },
       async changeMetadataField(id: number, newValue: string = '') {
         const metadataFields = await testSubjects.findAll(
           this.TEST_IDS.RULE_FLYOUT_CRITERIA_METADATA_BLOCK
         );
         if (metadataFields[id]) {
-          const targetMetadataBlock = await metadataFields[id];
+          const targetMetadataBlock = metadataFields[id];
           const targetField = await targetMetadataBlock.findByTestSubject(
             this.TEST_IDS.RULE_FLYOUT_CRITERIA_METADATA_BLOCK_FIELD
           );
@@ -242,7 +250,7 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
           await this.changeMetadataField(id);
         }
       },
-      async changeMetadataValues(id: number, newValue: string = '') {
+      async changeMetadataValues(_: number, newValue: string = '') {
         await comboBox.setCustom(
           this.TEST_IDS.RULE_FLYOUT_CRITERIA_METADATA_BLOCK_VALUES,
           newValue

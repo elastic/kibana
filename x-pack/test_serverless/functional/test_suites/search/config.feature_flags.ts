@@ -21,6 +21,7 @@ export default createTestConfig({
   kbnServerArgs: [
     `--xpack.cloud.id=ES3_FTR_TESTS:ZmFrZS1kb21haW4uY2xkLmVsc3RjLmNvJGZha2Vwcm9qZWN0aWQuZXMkZmFrZXByb2plY3RpZC5rYg==`,
     `--uiSettings.overrides.searchPlayground:searchModeEnabled=true`,
+    `--uiSettings.overrides.queryRules:queryRulesEnabled=true`,
     '--xpack.searchQueryRules.enabled=true',
   ],
   // load tests in the index file
