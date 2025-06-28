@@ -19,7 +19,7 @@ export interface Options {
 }
 
 export interface SyncOptions extends Options {
-  /** the content of the .text grammar to transform */
+  /** the content of the .text file to transform */
   content: string;
 }
 

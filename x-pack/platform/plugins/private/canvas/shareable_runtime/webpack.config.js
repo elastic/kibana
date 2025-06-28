@@ -221,7 +221,7 @@ module.exports = {
         use: require.resolve('@kbn/peggy-loader'),
       },
       {
-        test: /\.dot-text$/,
+        test: /\.text$/,
         use: require.resolve('@kbn/dot-text-loader'),
       },
     ],
