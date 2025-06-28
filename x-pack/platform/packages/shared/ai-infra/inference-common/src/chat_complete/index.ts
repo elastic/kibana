@@ -77,4 +77,5 @@ export type {
   DeanonymizationOutput,
   DeanonymizedMessage,
   RegexAnonymizationRule,
+  NamedEntityRecognitionRule,
 } from './anonymization';
