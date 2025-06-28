@@ -95,6 +95,7 @@ describe('retrieveDocumentation', () => {
       max: 5,
       connectorId: '.my-connector',
       functionCalling: 'simulated',
+      inferenceId: defaultInferenceEndpoints.ELSER,
     });
 
     expect(searchDocAPI).toHaveBeenCalledTimes(1);

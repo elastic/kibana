@@ -53,7 +53,9 @@ export const overrideInferenceSettings = (
       }
     }
     if (isPopulatedObject(current, ['properties'])) {
-      for (const prop of Object.values(current.properties)) {
+      for (const prop of Object.values(
+        current.properties as Record<string, MappingTypeMapping | MappingProperty>
+      )) {
         recursiveOverride(prop);
       }
     }

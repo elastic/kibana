@@ -16,6 +16,7 @@ import {
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { cloneDeep } from 'lodash';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import { i18n } from '@kbn/i18n';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import {
   downloadToDisk,
@@ -245,7 +246,15 @@ export class PackageInstaller {
     } catch (e) {
       let message = e.message;
       if (message.includes('End of central directory record signature not found.')) {
-        message = `No artifact available for product [${productName}]/[${productVersion}] for Inference ID [${inferenceId}]. Please select a different model or contact your administrator.`;
+        message = i18n.translate('aiInfra.productDocBase.packageInstaller.noArtifactAvailable', {
+          values: {
+            productName,
+            productVersion,
+            inferenceId,
+          },
+          defaultMessage:
+            'No documentation artifact available for product [{productName}]/[{productVersion}] for Inference ID [{inferenceId}]. Please select a different model or contact your administrator.',
+        });
       }
       this.log.error(
         `Error during documentation installation of product [${productName}]/[${productVersion}] : ${message}`

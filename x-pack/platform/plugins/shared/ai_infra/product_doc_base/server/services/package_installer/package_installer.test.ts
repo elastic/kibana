@@ -29,6 +29,7 @@ import { installClientMock } from '../doc_install_status/service.mock';
 import type { ProductInstallState } from '../../../common/install_status';
 import { PackageInstaller } from './package_installer';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
 const artifactsFolder = '/lost';
 const artifactRepositoryUrl = 'https://repository.com';
@@ -182,7 +183,12 @@ describe('PackageInstaller', () => {
         packageInstaller.installPackage({
           productName: 'kibana',
           productVersion: '8.16',
-          inferenceId: defaultInferenceEndpoints.ELSER,
+          customInference: {
+            inference_id: defaultInferenceEndpoints.ELSER,
+            task_type: 'text_embedding' as InferenceTaskType,
+            service: 'elser',
+            service_settings: {},
+          },
         })
       ).rejects.toThrowError();
 

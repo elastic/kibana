@@ -7,6 +7,7 @@
 
 import type { SavedObjectsType } from '@kbn/core/server';
 import type { ProductName } from '@kbn/product-doc-common';
+import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { productDocInstallStatusSavedObjectTypeName } from '../../common/consts';
 import type { InstallationStatus } from '../../common/install_status';
 
