@@ -14,10 +14,6 @@ import { extractDashboardState } from './extract_dashboard_state';
 describe('extractDashboardState', () => {
   test('should extract all DashboardState fields', () => {
     const optionalState = {
-      timeRange: {
-        from: 'now-15m',
-        to: 'now',
-      },
       references: [],
       refreshInterval: {
         pause: false,

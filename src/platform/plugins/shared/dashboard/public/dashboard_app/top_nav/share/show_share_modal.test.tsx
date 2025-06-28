@@ -10,7 +10,7 @@
 import { Capabilities } from '@kbn/core/public';
 import { DashboardLocatorParams } from '../../../../common/types';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
-import { shareService } from '../../../services/kibana_services';
+import { dataService, shareService } from '../../../services/kibana_services';
 import { showPublicUrlSwitch, ShowShareModal } from './show_share_modal';
 
 describe('showPublicUrlSwitch', () => {
@@ -60,6 +60,9 @@ describe('ShowShareModal', () => {
     keyof DashboardLocatorParams
   >;
   const toggleShareMenuSpy = jest.spyOn(shareService!, 'toggleShareContextMenu');
+  jest
+    .spyOn(dataService.query.timefilter.timefilter, 'getTime')
+    .mockReturnValue({ from: 'now-15m', to: 'now' });
 
   afterEach(() => {
     jest.clearAllMocks();

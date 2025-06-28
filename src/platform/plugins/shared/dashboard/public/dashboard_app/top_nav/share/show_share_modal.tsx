@@ -132,6 +132,8 @@ export function ShowShareModal({
     refreshInterval: undefined, // We don't share refresh interval externally
     viewMode: 'view', // For share locators we always load the dashboard in view mode
     useHash: false,
+    // manually add timeRange to locator state because its not part of backup state created by unsaved changes manager
+    // TODO remove once unsaved changes manager backups time range
     timeFrom: timeRange.from,
     timeTo: timeRange.to,
     ...unsavedDashboardStateForLocator,
