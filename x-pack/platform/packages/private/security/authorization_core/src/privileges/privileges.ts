@@ -270,7 +270,7 @@ export function privilegesFactory(
   actions: Actions,
   featuresService: FeaturesPluginSetup,
   licenseService: Pick<SecurityLicense, 'getFeatures' | 'hasAtLeast'>,
-  getTypeRegistry: () => Promise<ISavedObjectTypeRegistry>
+  getTypeRegistry?: () => Promise<ISavedObjectTypeRegistry>
 ) {
   const featurePrivilegeBuilder = featurePrivilegeBuilderFactory(actions);
 
@@ -285,6 +285,9 @@ export function privilegesFactory(
       });
     },
     async getWithActions(respectLicenseLevel: boolean = true) {
+      if (!getTypeRegistry) {
+        throw new Error('getTypeRegistry is required for getWithActions');
+      }
       const typeRegistry = await getTypeRegistry();
       const typesSupportingAccessControl = typeRegistry
         .getAllTypes()

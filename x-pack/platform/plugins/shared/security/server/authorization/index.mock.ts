@@ -21,7 +21,7 @@ export const authorizationMock = {
     checkSavedObjectsPrivilegesWithRequest: jest.fn(),
     applicationName,
     mode: { useRbacForRequest: jest.fn() } as jest.Mocked<AuthorizationMode>,
-    privileges: { get: jest.fn() },
+    privileges: { get: jest.fn(), getWithActions: jest.fn() },
     registerPrivilegesWithCluster: jest.fn(),
     disableUnauthorizedCapabilities: jest.fn(),
   }),
