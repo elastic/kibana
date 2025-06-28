@@ -14,24 +14,21 @@ import {
   HandleStyleOverride,
   LabelShapeOnHover,
   NodeButton,
-  LABEL_PADDING_X,
-  LABEL_BORDER_WIDTH,
+  // LABEL_PADDING_X,
+  // LABEL_BORDER_WIDTH,
   LABEL_HEIGHT,
+  NODE_LABEL_WIDTH,
 } from './styles';
 import type { LabelNodeViewModel, NodeProps } from '../types';
 import { NodeExpandButton } from './node_expand_button';
-import { getTextWidth } from '../graph/utils';
 
-const LABEL_MIN_WIDTH = 100;
+// const LABEL_MIN_WIDTH = 100;
 
 export const LabelNode = memo<NodeProps>((props: NodeProps) => {
   const { id, color, label, interactive, nodeClick, expandButtonClick } =
     props.data as LabelNodeViewModel;
   const text = label ? label : id;
-  const labelWidth = Math.max(
-    LABEL_MIN_WIDTH,
-    getTextWidth(text ?? '') + LABEL_PADDING_X * 2 + LABEL_BORDER_WIDTH * 2
-  );
+  const labelWidth = NODE_LABEL_WIDTH;
 
   return (
     <LabelNodeContainer>

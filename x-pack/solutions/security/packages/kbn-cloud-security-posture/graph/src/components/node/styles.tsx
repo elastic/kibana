@@ -22,18 +22,19 @@ import { getSpanIcon } from './get_span_icon';
 import type { NodeExpandButtonProps } from './node_expand_button';
 import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
 
-export const LABEL_HEIGHT = 24;
+export const LABEL_HEIGHT = 20;
 export const LABEL_PADDING_X = 15;
 export const LABEL_BORDER_WIDTH = 1;
 export const NODE_WIDTH = 90;
-export const NODE_HEIGHT = 90;
-export const NODE_LABEL_WIDTH = 160;
+export const NODE_HEIGHT = 100;
+export const NODE_LABEL_WIDTH = 140;
 type NodeColor = EntityNodeViewModel['color'] | LabelNodeViewModel['color'];
 
 export const LabelNodeContainer = styled.div`
   position: relative;
   text-wrap: nowrap;
-  min-width: 100px;
+  width: ${NODE_LABEL_WIDTH}px;
+  max-width: ${NODE_LABEL_WIDTH}px;
   height: ${LABEL_HEIGHT}px;
 `;
 
@@ -43,6 +44,7 @@ interface LabelShapeProps extends EuiTextProps {
 
 export const LabelShape = styled(EuiText)<LabelShapeProps>`
   background: ${(props) => useNodeFillColor(props.color)};
+  max-width: ${NODE_LABEL_WIDTH - LABEL_PADDING_X * 2 - LABEL_BORDER_WIDTH * 2}px;
   border: ${(props) => {
     const { euiTheme } = useEuiTheme();
     return `solid ${
