@@ -168,6 +168,9 @@ export const updateObjectOwnership = async <T>(
   const authorizationResult = await securityExtension?.authorizeChangeOwnership({
     namespace,
     objects: authObjects,
+    accessControlOptions: {
+      newOwner: owner,
+    },
   });
 
   const time = new Date().toISOString();
@@ -194,7 +197,7 @@ export const updateObjectOwnership = async <T>(
       const error = SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       return left({ id, type, error });
     }
-    if (authorizationResult?.status !== 'fully_authorized') {
+    if (authorizationResult?.status === 'unauthorized') {
       const error = SavedObjectsErrorHelpers.decorateForbiddenError(
         new Error(`User is not authorized to change ownership of type "${type}".`)
       );
