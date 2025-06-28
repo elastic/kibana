@@ -49,7 +49,7 @@ export const useSignalHelpers = (): {
     ? experimentalSignalIndexName
     : signalIndexNameSourcerer;
 
-  const { dataView: experimentalDefaultDataView } = useDataView(SourcererScopeName.default);
+  const { dataView: experimentalDefaultDataView, status } = useDataView(SourcererScopeName.default);
   const dataViewId = newDataViewPickerEnabled
     ? experimentalDefaultDataView?.id ?? null
     : oldDataViewId;
@@ -58,10 +58,13 @@ export const useSignalHelpers = (): {
     ? experimentalDefaultDataView.getIndexPattern() ?? ''
     : oldDefaultDataView.title;
 
-  const signalIndexNeedsInit = useMemo(
-    () => !defaultDataViewPattern.includes(`${signalIndexName}`),
-    [defaultDataViewPattern, signalIndexName]
-  );
+  const signalIndexNeedsInit = useMemo(() => {
+    if (newDataViewPickerEnabled && status !== 'ready') {
+      return false;
+    }
+
+    return !defaultDataViewPattern.includes(`${signalIndexName}`);
+  }, [defaultDataViewPattern, newDataViewPickerEnabled, signalIndexName, status]);
   const shouldWePollForIndex = useMemo(
     () => !indicesExist && !signalIndexNeedsInit,
     [indicesExist, signalIndexNeedsInit]
