@@ -25,7 +25,7 @@ import { DiscoverMainProvider } from '../../state_management/discover_state_prov
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useDiscoverHistogram } from './use_discover_histogram';
-import { ScopedProfilesManagerProvider } from '../../../../context_awareness';
+import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
 
 export type ChartPortalNode = HtmlPortalNode;
 export type ChartPortalNodes = Record<string, ChartPortalNode>;
@@ -88,6 +88,7 @@ const UnifiedHistogramGuard = ({
   const currentScopedProfilesManager = useRuntimeState(
     currentTabRuntimeState.scopedProfilesManager$
   );
+  const currentScopedEbtManager = useRuntimeState(currentTabRuntimeState.scopedEbtManager$);
   const currentDataView = useRuntimeState(currentTabRuntimeState.currentDataView$);
   const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
   const isInitialized = useRef(false);
@@ -108,12 +109,15 @@ const UnifiedHistogramGuard = ({
       <DiscoverCustomizationProvider value={currentCustomizationService}>
         <DiscoverMainProvider value={currentStateContainer}>
           <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
-            <ScopedProfilesManagerProvider scopedProfilesManager={currentScopedProfilesManager}>
+            <ScopedServicesProvider
+              scopedProfilesManager={currentScopedProfilesManager}
+              scopedEBTManager={currentScopedEbtManager}
+            >
               <UnifiedHistogramChartWrapper
                 stateContainer={currentStateContainer}
                 panelsToggle={panelsToggle}
               />
-            </ScopedProfilesManagerProvider>
+            </ScopedServicesProvider>
           </RuntimeStateProvider>
         </DiscoverMainProvider>
       </DiscoverCustomizationProvider>

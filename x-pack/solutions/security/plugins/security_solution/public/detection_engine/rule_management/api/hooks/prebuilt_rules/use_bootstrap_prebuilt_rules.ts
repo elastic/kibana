@@ -14,6 +14,7 @@ import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './use_fetch_p
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
 import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './use_fetch_prebuilt_rules_upgrade_review_query';
 import { useInvalidateFindRulesQuery } from '../use_find_rules_query';
+import { useInvalidateFetchPrebuiltRuleBaseVersionQuery } from './use_fetch_prebuilt_rule_base_version_query';
 
 export const BOOTSTRAP_PREBUILT_RULES_KEY = ['POST', BOOTSTRAP_PREBUILT_RULES_URL];
 
@@ -24,6 +25,7 @@ export const useBootstrapPrebuiltRulesMutation = (
   const invalidatePrebuiltRulesInstallReview = useInvalidateFetchPrebuiltRulesInstallReviewQuery();
   const invalidatePrebuiltRulesUpdateReview = useInvalidateFetchPrebuiltRulesUpgradeReviewQuery();
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
+  const invalidateFetchPrebuiltRuleBaseVerison = useInvalidateFetchPrebuiltRuleBaseVersionQuery();
 
   return useMutation(() => bootstrapPrebuiltRules(), {
     ...options,
@@ -42,6 +44,7 @@ export const useBootstrapPrebuiltRulesMutation = (
         invalidatePrePackagedRulesStatus();
         invalidatePrebuiltRulesInstallReview();
         invalidatePrebuiltRulesUpdateReview();
+        invalidateFetchPrebuiltRuleBaseVerison();
       }
 
       const hasRuleUpdates =
