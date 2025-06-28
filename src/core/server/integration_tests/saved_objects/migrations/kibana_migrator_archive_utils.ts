@@ -25,27 +25,27 @@ import {
 import { delay } from './test_utils';
 import { baselineTypes, getBaselineDocuments } from './kibana_migrator_test_kit.fixtures';
 
-export const BASELINE_ELASTICSEARCH_VERSION = '9.1.0';
-export const BASELINE_DOCUMENTS_PER_TYPE_1K = 200;
-export const BASELINE_DOCUMENTS_PER_TYPE_500K = 100_000;
+export const BASELINE_ELASTICSEARCH_VERSION = '9.2.0';
+export const BASELINE_DOCUMENTS_PER_TYPE_SMALL = 200;
+export const BASELINE_DOCUMENTS_PER_TYPE_LARGE = 100_000;
 // we discard the second half with exclude on upgrade (firstHalf !== true)
 // then we discard half all multiples of 100 (1% of them)
-export const BASELINE_COMPLEX_DOCUMENTS_500K_AFTER =
-  BASELINE_DOCUMENTS_PER_TYPE_500K / 2 - BASELINE_DOCUMENTS_PER_TYPE_500K / 2 / 100;
+export const BASELINE_COMPLEX_DOCUMENTS_LARGE_AFTER =
+  BASELINE_DOCUMENTS_PER_TYPE_LARGE / 2 - BASELINE_DOCUMENTS_PER_TYPE_LARGE / 2 / 100;
 
-export const BASELINE_TEST_ARCHIVE_1K = join(
+export const BASELINE_TEST_ARCHIVE_SMALL = join(
   __dirname,
   'archives',
   `${BASELINE_ELASTICSEARCH_VERSION}_baseline_${
-    (BASELINE_DOCUMENTS_PER_TYPE_1K * baselineTypes.length) / 1000
+    (BASELINE_DOCUMENTS_PER_TYPE_SMALL * baselineTypes.length) / 1000
   }k_docs.zip`
 );
 
-export const BASELINE_TEST_ARCHIVE_500K = join(
+export const BASELINE_TEST_ARCHIVE_LARGE = join(
   __dirname,
   'archives',
   `${BASELINE_ELASTICSEARCH_VERSION}_baseline_${
-    (BASELINE_DOCUMENTS_PER_TYPE_500K * baselineTypes.length) / 1000
+    (BASELINE_DOCUMENTS_PER_TYPE_LARGE * baselineTypes.length) / 1000
   }k_docs.zip`
 );
 

@@ -19,6 +19,7 @@ export { getInspectResponse } from './utils/get_inspect_response';
 export { getAlertDetailsUrl, getAlertUrl } from './utils/alerting/alert_url';
 export { convertToBuiltInComparators } from './utils/convert_legacy_outside_comparator';
 export { ProcessorEvent } from './processor_event';
+export { ElapsedTimestampTooltip } from './components/elapsed_timestamp_tooltip';
 
 export {
   enableInspectEsQueries,
@@ -28,7 +29,6 @@ export {
   apmProgressiveLoading,
   apmServiceGroupMaxNumberOfServices,
   apmEnableTableSearchBar,
-  entityCentricExperience,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
   syntheticsThrottlingEnabled,

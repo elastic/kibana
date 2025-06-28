@@ -12,16 +12,10 @@ export * from './types';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
-  ui: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-  }),
 });
 
 export type SearchHomepageConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<SearchHomepageConfig> = {
-  exposeToBrowser: {
-    ui: true,
-  },
   schema: configSchema,
 };

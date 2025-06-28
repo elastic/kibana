@@ -36,6 +36,7 @@ import { ComplianceDashboardDataV2 } from '../../../common/types_old';
 import { cloudPosturePages } from '../../common/navigation/constants';
 import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
 jest.mock('../../common/api/use_stats_api');
@@ -43,6 +44,12 @@ jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('../../common/hooks/use_is_subscription_status_valid');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
 jest.mock('../../common/navigation/use_csp_integration_link');
+
+// jest.mock('../../common/experimental_features_service', () => ({
+//   ExperimentalFeaturesService: {
+//     get: jest.fn(() => ({ cloudSecurityNamespaceSupportEnabled: true })),
+//   },
+// }));
 
 describe('<ComplianceDashboard />', () => {
   beforeEach(() => {
@@ -72,6 +79,18 @@ describe('<ComplianceDashboard />', () => {
         status: 'success',
       })
     );
+    jest.mock('../../common/experimental_features_service', () => ({
+      ExperimentalFeaturesService: {
+        get: jest.fn(() => ({ cloudSecurityNamespaceSupportEnabled: true })),
+      },
+    }));
+
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockImplementation(() => {
+      return {
+        cloudSecurityNamespaceSupportEnabled: true,
+        cloudConnectorsEnabled: false,
+      };
+    });
   });
 
   const ComplianceDashboardWithTestProviders = (route: string) => {
@@ -111,7 +130,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'not-installed', healthyAgents: 0, installedPackagePolicies: 0 },
           isPluginInitialized: false,
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -152,7 +174,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'not-deployed', healthyAgents: 0, installedPackagePolicies: 1 },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -192,7 +217,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'indexing', healthyAgents: 1, installedPackagePolicies: 1 },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -232,7 +260,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'waiting_for_results', healthyAgents: 1, installedPackagePolicies: 1 },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -272,7 +303,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'index-timeout', healthyAgents: 1, installedPackagePolicies: 1 },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -312,7 +346,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'unprivileged', healthyAgents: 1, installedPackagePolicies: 1 },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -352,7 +389,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'indexed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'not-empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
@@ -391,7 +431,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'not-installed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'not-empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
@@ -430,7 +473,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'indexed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'not-empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
@@ -469,7 +515,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'indexed', healthyAgents: 0, installedPackagePolicies: 1 },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'not-empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
@@ -509,7 +558,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'not-installed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -549,7 +601,10 @@ describe('<ComplianceDashboard />', () => {
           kspm: { status: 'indexed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'not-empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
@@ -589,7 +644,10 @@ describe('<ComplianceDashboard />', () => {
           kspm: { status: 'indexed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'not-empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
@@ -629,7 +687,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'not-installed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -671,7 +732,10 @@ describe('<ComplianceDashboard />', () => {
           kspm: { status: 'not-installed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -793,3 +857,94 @@ describe('getDefaultTab', () => {
     expect(getDefaultTab(pluginStatus, undefined, undefined)).toEqual(undefined);
   });
 });
+
+// describe('Compliance Dashboard CSPM Namespace Selector', () => {
+//   (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+//     createReactQueryResponse({
+//       status: 'success',
+//       data: {
+//         cspm: { status: 'indexed' },
+//         kspm: { status: 'indexed' },
+//         installedPackageVersion: '1.2.13',
+//         indicesDetails: [
+//           {
+//             index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+//             status: 'not-empty',
+//           },
+//           { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
+//         ],
+//       },
+//     })
+//   );
+//   (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+//     isSuccess: true,
+//     isLoading: false,
+//     data: mockDashboardData,
+//   }));
+//   (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+//     isSuccess: true,
+//     isLoading: false,
+//     data: mockDashboardData,
+//   }));
+
+//   const renderComplianceDashboardPage = (route = cloudPosturePages.dashboard.path) => {
+//     return render(
+//       <TestProvider>
+//         <MemoryRouter initialEntries={[route]}>
+//           <ComplianceDashboard />
+//         </MemoryRouter>
+//       </TestProvider>
+//     );
+//   };
+
+//   it('should render namespace selector', () => {
+//     renderComplianceDashboardPage();
+
+//     expect(screen.getByTestId('namespace-selector')).toBeInTheDocument();
+//   });
+
+//   it('should render namespace selector with default value', () => {
+//     renderComplianceDashboardPage();
+
+//     expect(screen.getByTestId('namespace-selector')).toHaveTextContent('default');
+//   });
+
+//   it('should change namespace when a different namespace is selected', async () => {
+//     renderComplianceDashboardPage();
+
+//     const user = userEvent.setup();
+//     const namespaceSelector = screen.getByTestId('namespace-selector-dropdown-button');
+
+//     await user.click(namespaceSelector);
+//     await waitFor(() => {
+//       expect(screen.getByTestId('namespace-selector-menu')).toBeVisible();
+//       user.click(screen.getByTestId('namespace-selector-menu-item-namespace1'));
+//     });
+
+//     await waitFor(() => {
+//       expect(namespaceSelector).toHaveTextContent('namespace1');
+//     });
+//   });
+
+//   it('should reset the namespace when the active namespace does not exist', async () => {
+//     Object.defineProperty(window, 'localStorage', {
+//       value: {
+//         getItem: jest.fn((key) => {
+//           if (key === `${LOCAL_STORAGE_NAMESPACE_KEY}-cspm`) return 'non-existent-namespace';
+//           return null;
+//         }),
+//         setItem: jest.fn(),
+//         removeItem: jest.fn(),
+//         clear: jest.fn(),
+//       },
+//       writable: true,
+//     });
+//     renderComplianceDashboardPage();
+
+//     const namespaceSelector = screen.getByTestId('namespace-selector-dropdown-button');
+
+//     await waitFor(() => {
+//       expect(namespaceSelector).toHaveTextContent('default');
+//     });
+//   });
+// });

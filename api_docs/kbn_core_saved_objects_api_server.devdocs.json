@@ -1904,26 +1904,6 @@
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
               },
               {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/packages/get.test.ts"
               },
@@ -2264,6 +2244,22 @@
             "path": "x-pack/platform/plugins/private/canvas/server/routes/workpad/has_workpads.ts"
           },
           {
+            "plugin": "taskManager",
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
+          },
+          {
+            "plugin": "taskManager",
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
+          },
+          {
+            "plugin": "taskManager",
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
+          },
+          {
+            "plugin": "taskManager",
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
+          },
+          {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
           },
@@ -2278,18 +2274,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
-          },
-          {
-            "plugin": "taskManager",
-            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
-          },
-          {
-            "plugin": "taskManager",
-            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
-          },
-          {
-            "plugin": "taskManager",
-            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
           },
           {
             "plugin": "enterpriseSearch",

@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { getNewUserDefinedColumnSuggestion, TRIGGER_SUGGESTION_COMMAND } from '../../factories';
 import { CommandSuggestParams } from '../../../definitions/types';
 
 import type { SuggestionRawDefinition } from '../../types';
@@ -16,12 +17,26 @@ import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 export async function suggest({
   getColumnsByType,
   innerText,
+  getSuggestedUserDefinedColumnName,
+  columnExists,
 }: CommandSuggestParams<'rename'>): Promise<SuggestionRawDefinition[]> {
-  if (/(?:rename|,)\s+\S+\s+a?$/i.test(innerText)) {
+  if (/(?:rename|,)\s+\S+\s+a$/i.test(innerText)) {
     return [asCompletionItem];
   }
 
-  if (/rename(?:\s+\S+\s+as\s+\S+\s*,)*\s+\S+\s+as\s+[^\s,]+\s+$/i.test(innerText)) {
+  // If the left side of the rename is a column that exists, we suggest the 'AS' completion item.
+  // If it doesn't exist, we suggest the '=' completion item.
+  const match = innerText.match(/(?:rename|,)\s+(\S+)\s+a?$/i);
+  if (match) {
+    const leftSideOfRename = match[1];
+    return columnExists(leftSideOfRename) ? [asCompletionItem] : [assignCompletionItem];
+  }
+
+  if (/(?:rename|,)\s+\S+\s+a?$/i.test(innerText)) {
+    return [asCompletionItem, assignCompletionItem];
+  }
+
+  if (/rename(?:\s+\S+\s+(as|=)\s+\S+\s*,)*\s+\S+\s+(as|=)\s+[^\s,]+\s+$/i.test(innerText)) {
     return [pipeCompleteItem, { ...commaCompleteItem, text: ', ' }];
   }
 
@@ -29,7 +44,16 @@ export async function suggest({
     return [];
   }
 
-  return getColumnsByType('any', [], { advanceCursor: true, openSuggestions: true });
+  const suggestions = await getColumnsByType('any', [], {
+    advanceCursor: true,
+    openSuggestions: true,
+  });
+
+  if (!/=\s+$/i.test(innerText)) {
+    suggestions.push(getNewUserDefinedColumnSuggestion(getSuggestedUserDefinedColumnName()));
+  }
+
+  return suggestions;
 }
 
 const asCompletionItem: SuggestionRawDefinition = {
@@ -40,4 +64,15 @@ const asCompletionItem: SuggestionRawDefinition = {
   label: 'AS',
   sortText: '1',
   text: 'AS ',
+};
+
+const assignCompletionItem: SuggestionRawDefinition = {
+  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.assignDoc', {
+    defaultMessage: '=',
+  }),
+  kind: 'Reference',
+  label: '=',
+  sortText: '2',
+  text: '= ',
+  command: TRIGGER_SUGGESTION_COMMAND,
 };

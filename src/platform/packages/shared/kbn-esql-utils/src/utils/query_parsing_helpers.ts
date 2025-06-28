@@ -326,17 +326,61 @@ export const getCategorizeColumns = (esql: string): string[] => {
   if (!renameCommand) {
     return columns;
   }
-  const renameOptions: ESQLCommandOption[] = [];
+  const renameFunctions: ESQLFunction[] = [];
   walk(renameCommand, {
-    visitCommandOption: (node) => renameOptions.push(node),
+    visitFunction: (node) => renameFunctions.push(node),
   });
 
-  renameOptions.forEach(({ args }) => {
-    const oldColumn = (args[0] as ESQLColumn).name;
-    const newColumn = (args[1] as ESQLColumn).name;
+  renameFunctions.forEach((renameFunction) => {
+    const { original, renamed } = getArgsFromRenameFunction(renameFunction);
+    const oldColumn = original.name;
+    const newColumn = renamed.name;
     if (columns.includes(oldColumn)) {
       columns[columns.indexOf(oldColumn)] = newColumn;
     }
   });
+  return columns;
+};
+
+/**
+ * Extracts the original and renamed columns from a rename function.
+ * RENAME original AS renamed Vs RENAME renamed = original
+ * @param renameFunction
+ */
+export const getArgsFromRenameFunction = (
+  renameFunction: ESQLFunction
+): { original: ESQLColumn; renamed: ESQLColumn } => {
+  if (renameFunction.name === 'as') {
+    return {
+      original: renameFunction.args[0] as ESQLColumn,
+      renamed: renameFunction.args[1] as ESQLColumn,
+    };
+  }
+
+  return {
+    original: renameFunction.args[1] as ESQLColumn,
+    renamed: renameFunction.args[0] as ESQLColumn,
+  };
+};
+
+/**
+ * Extracts the fields used in the CATEGORIZE function from an ESQL query.
+ * @param esql: string - The ESQL query string
+ */
+export const getCategorizeField = (esql: string): string[] => {
+  const { root } = parse(esql);
+  const columns: string[] = [];
+  const functions = Walker.matchAll(root.commands, {
+    type: 'function',
+    name: 'categorize',
+  }) as ESQLFunction[];
+
+  if (functions.length) {
+    functions.forEach((func) => {
+      for (const arg of func.args) if (isColumn(arg)) columns.push(arg.name);
+    });
+    return columns;
+  }
+
   return columns;
 };

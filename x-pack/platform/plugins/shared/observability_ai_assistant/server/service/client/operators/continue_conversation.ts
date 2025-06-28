@@ -22,13 +22,12 @@ import {
   throwError,
 } from 'rxjs';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
-import { CONTEXT_FUNCTION_NAME } from '../../../functions/context';
+import { CONTEXT_FUNCTION_NAME } from '../../../functions/context/context';
 import { createFunctionNotFoundError, Message, MessageRole } from '../../../../common';
 import {
   createFunctionLimitExceededError,
   MessageOrChatEvent,
 } from '../../../../common/conversation_complete';
-import { FunctionVisibility } from '../../../../common/functions/types';
 import { Instruction } from '../../../../common/types';
 import { createFunctionResponseMessage } from '../../../../common/utils/create_function_response_message';
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';
@@ -140,11 +139,7 @@ function getFunctionDefinitions({
   const systemFunctions = functionClient
     .getFunctions()
     .map((fn) => fn.definition)
-    .filter(
-      (def) =>
-        !def.visibility ||
-        [FunctionVisibility.AssistantOnly, FunctionVisibility.All].includes(def.visibility)
-    );
+    .filter(({ isInternal }) => !isInternal);
 
   const actions = functionClient.getActions();
 
@@ -184,7 +179,7 @@ export function continueConversation({
 
   const functionLimitExceeded = functionCallsLeft <= 0;
 
-  const definitions = getFunctionDefinitions({
+  const functionDefinitions = getFunctionDefinitions({
     functionLimitExceeded,
     functionClient,
     disableFunctions,
@@ -204,7 +199,7 @@ export function continueConversation({
 
       return chat(operationName, {
         messages: initialMessages,
-        functions: definitions,
+        functions: functionDefinitions,
         connectorId,
         stream: true,
       }).pipe(emitWithConcatenatedMessage(), catchFunctionNotFoundError(functionLimitExceeded));
