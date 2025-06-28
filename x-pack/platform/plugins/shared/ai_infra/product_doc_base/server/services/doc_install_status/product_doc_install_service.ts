@@ -24,6 +24,20 @@ export class ProductDocInstallClient {
     this.log = log;
   }
 
+  async getPreviouslyInstalledInferenceIds(): Promise<string[]> {
+    const query = {
+      type: typeName,
+      perPage: 100,
+    };
+    const response = await this.soClient.find<TypeAttributes>(query);
+    const inferenceIds = new Set(
+      response?.saved_objects.map(
+        (so) => so.attributes?.inference_id ?? defaultInferenceEndpoints.ELSER
+      )
+    );
+    return Array.from(inferenceIds);
+  }
+
   async getInstallationStatus({
     inferenceId,
   }: {
@@ -40,10 +54,8 @@ export class ProductDocInstallClient {
     try {
       const response = await this.soClient.find<TypeAttributes>(query);
       const savedObjects = isDefaultElserInferenceId(inferenceId)
-        ? response?.saved_objects.filter(
-            (so) =>
-              !so.attributes.inference_id ||
-              so.attributes.inference_id === defaultInferenceEndpoints.ELSER
+        ? response?.saved_objects.filter((so) =>
+            isDefaultElserInferenceId(so.attributes.inference_id)
           )
         : response?.saved_objects.filter((so) => so.attributes.inference_id === inferenceId);
 
