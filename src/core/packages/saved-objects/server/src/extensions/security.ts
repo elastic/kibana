@@ -160,6 +160,10 @@ export interface AuthorizeChangeOwnershipObject extends AuthorizeObjectWithExist
 export interface AuthorizeBulkChangeOwnershipParams extends AuthorizeParams {
   /** The objects to authorize */
   objects: AuthorizeChangeOwnershipObject[];
+  accessControlOptions?: {
+    /** The new owner of the objects */
+    newOwner: string;
+  };
 }
 
 /**
@@ -282,6 +286,10 @@ export type AuthorizeOpenPointInTimeParams = AuthorizeFindParams;
 export interface AuthorizeChangeOwnershipParams extends AuthorizeParams {
   /** The object to authorize */
   objects: AuthorizeChangeOwnershipObject[];
+  accessControlOptions?: {
+    /** The new owner of the object */
+    newOwner: string;
+  };
 }
 /**
  * The AuthorizeAndRedactMultiNamespaceReferencesParams interface extends
