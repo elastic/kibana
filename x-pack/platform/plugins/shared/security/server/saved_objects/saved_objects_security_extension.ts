@@ -547,8 +547,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
     const result = await this.checkAccessControl({
       objects,
-      hasManageOwnershipPrivilege: hasAllRequested,
+      hasManageAccessControlPrivileges: hasAllRequested,
       typeRegistry,
+      typeMap,
     });
 
     if (hasAllRequested) {
@@ -614,42 +615,33 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
    */
   private async checkAccessControl<A extends string>({
     objects,
-    hasManageOwnershipPrivilege,
+    hasManageAccessControlPrivileges,
     typeRegistry,
+    typeMap,
   }: {
     objects: AuthorizeObject[];
-    hasManageOwnershipPrivilege: boolean;
+    hasManageAccessControlPrivileges: boolean;
     typeRegistry: ISavedObjectTypeRegistry;
+    typeMap: AuthorizationTypeMap<A>;
   }): Promise<{
     authorizedObjects: AuthorizeObject[];
     unauthorizedObjects: AuthorizeObject[];
   }> {
-    const results = await Promise.all(
-      objects.map(async (obj) => {
-        return this.accessControlService.canModifyObject({
-          type: obj.type,
-          object: obj,
-          hasManageOwnershipPrivilege,
-          typeSupportsAccessControl: typeRegistry.supportsAccessControl(obj.type),
-        });
-      })
-    );
-    const filteredObjects = objects.reduce<{
-      authorizedObjects: AuthorizeObject[];
-      unauthorizedObjects: AuthorizeObject[];
-    }>(
-      (result, obj, index) => {
-        if (results[index]) {
-          result.authorizedObjects.push(obj);
-        } else {
-          result.unauthorizedObjects.push(obj);
-        }
-        return result;
-      },
-      { authorizedObjects: [], unauthorizedObjects: [] }
-    );
-
-    return filteredObjects;
+    const results = await this.accessControlService.checkObjectPermissions({
+      objects,
+      hasManageAccessControlPrivileges,
+      typeRegistry,
+      typeMap,
+    });
+    if (results.errors.size > 0) {
+      const errorMessages = Array.from(results.errors.values())
+        .map((error) => error.message)
+        .join(', ');
+      throw this.errors.decorateForbiddenError(
+        new Error(`Unauthorized to update objects: ${errorMessages}`)
+      );
+    }
+    return results;
   }
 
   /*

@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_savedobjects_editor']);
     });
     after(async () => {
-      await security.testUser.restoreDefaults();
+      // await security.testUser.restoreDefaults();
     });
     describe('create and access read only objects', () => {
       it('should create a read only object', async () => {
