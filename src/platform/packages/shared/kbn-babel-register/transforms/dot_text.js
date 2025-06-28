@@ -7,14 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { peggyTransform } = require('./peggy');
-const { dotTextTransform } = require('./dot_text');
-const { babelTransform } = require('./babel');
+const DotText = require('@kbn/dot-text');
 
-module.exports = {
-  TRANSFORMS: {
-    '.peggy': peggyTransform,
-    '.text': dotTextTransform,
-    default: babelTransform,
-  },
+/** @type {import('./types').Transform} */
+const dotTextTransform = (path, source, cache) => {
+  const key = cache.getKey(path, source);
+
+  const cached = cache.getCode(key);
+  if (cached) {
+    return cached;
+  }
+
+  const code = DotText.getJsSourceSync({
+    content: source,
+    path,
+  }).source;
+
+  cache.update(key, {
+    code,
+  });
+
+  return code;
 };
+
+module.exports = { dotTextTransform };

@@ -7,14 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { peggyTransform } = require('./peggy');
-const { dotTextTransform } = require('./dot_text');
-const { babelTransform } = require('./babel');
+export interface Options {
+  /**
+   * The path to the .text file if available.
+   */
+  path?: string;
+  /**
+   * The content of the .text file if available.
+   */
+  content?: string;
+}
 
-module.exports = {
-  TRANSFORMS: {
-    '.peggy': peggyTransform,
-    '.text': dotTextTransform,
-    default: babelTransform,
-  },
-};
+export interface SyncOptions extends Options {
+  /** the content of the .text grammar to transform */
+  content: string;
+}
+
+export interface Result {
+  /**
+   * The output of the .text-to-CommonJS transform
+   */
+  source: string;
+}

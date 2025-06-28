@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { peggyTransform } = require('./peggy');
-const { dotTextTransform } = require('./dot_text');
-const { babelTransform } = require('./babel');
-
 module.exports = {
-  TRANSFORMS: {
-    '.peggy': peggyTransform,
-    '.text': dotTextTransform,
-    default: babelTransform,
-  },
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/kbn-dot-text'],
 };

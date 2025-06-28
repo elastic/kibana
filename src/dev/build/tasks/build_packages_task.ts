@@ -12,6 +12,7 @@ import * as Fsp from 'fs/promises';
 
 import { runBazel } from '@kbn/bazel-runner';
 import * as Peggy from '@kbn/peggy';
+import * as DotText from '@kbn/dot-text';
 import { asyncForEach } from '@kbn/std';
 import { withFastAsyncTransform, TransformConfig } from '@kbn/babel-transform';
 import { makeMatcher } from '@kbn/picomatcher';
@@ -205,14 +206,14 @@ export const BuildPackages: Task = {
                 }
 
                 case '.text': {
-                  const source = await Fsp.readFile(rec.source.abs, 'utf8');
-                  const result = await transform(rec.source.abs, source);
+                  const result = await DotText.getJsSource({
+                    path: rec.source.abs,
+                  });
+
                   return {
                     ...rec,
-                    // Append .js instead of replacing it - this prevents us
-                    // from having to rewrite the import statement
                     dest: rec.dest.withName(rec.dest.name + '.js'),
-                    content: result.code,
+                    content: result.source,
                   };
                 }
 

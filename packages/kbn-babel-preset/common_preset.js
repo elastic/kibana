@@ -8,13 +8,6 @@
  */
 
 module.exports = () => ({
-  overrides: [
-    {
-      // translate .text files to Common JS
-      test: /\.text$/,
-      plugins: [require('./text_to_cjs')],
-    },
-  ],
   presets: [
     // plugins always run before presets, but in this case we need the
     // @babel/preset-typescript preset to run first so we have to move

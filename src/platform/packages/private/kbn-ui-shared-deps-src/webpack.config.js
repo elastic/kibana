@@ -65,11 +65,15 @@ module.exports = {
         use: [require.resolve('@kbn/peggy-loader')],
       },
       {
+        test: /\.text$/,
+        use: [require.resolve('@kbn/dot-text-loader')],
+      },
+      {
         test: /\.css$/,
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
-        test: /\.(text|js|tsx?)$/,
+        test: /\.(js|tsx?)$/,
         exclude: /[\/\\]node_modules[\/\\](?!@kbn)([^\/\\]+)[\/\\]/,
         loader: 'babel-loader',
         options: {
