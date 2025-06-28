@@ -17,6 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { docLinks } from '../../../common/doc_links';
 
 export const Security: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -70,9 +71,32 @@ export const Security: React.FC = () => {
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiLink data-test-subj="setupSiemLink">
+                    <EuiLink data-test-subj="setupSiemLink" href={docLinks.ingestDataToSecurity}>
                       {i18n.translate('xpack.searchHomepage.security.setupSiem', {
                         defaultMessage: 'Setup your SIEM',
+                      })}
+                    </EuiLink>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" direction="column">
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="xxs">
+                      <span>
+                        {i18n.translate('xpack.searchHomepage.security.secureEndpointTitle', {
+                          defaultMessage: 'Secure your endpoints',
+                        })}
+                      </span>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiLink
+                      data-test-subj="setupElasticDefendLink"
+                      href={docLinks.installElasticDefend}
+                    >
+                      {i18n.translate('xpack.searchHomepage.security.setupElasticDefend', {
+                        defaultMessage: 'Setup Elastic Defend',
                       })}
                     </EuiLink>
                   </EuiFlexItem>
@@ -90,7 +114,10 @@ export const Security: React.FC = () => {
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiLink data-test-subj="cloudSecurityPostureManagementLink">
+                    <EuiLink
+                      data-test-subj="cloudSecurityPostureManagementLink"
+                      href={docLinks.cloudSecurityPosture}
+                    >
                       {i18n.translate(
                         'xpack.searchHomepage.security.cloudSecurityPostureManagementLink',
                         {
