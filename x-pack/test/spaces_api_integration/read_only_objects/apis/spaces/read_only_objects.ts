@@ -47,9 +47,9 @@ export default function ({ getService }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_savedobjects_editor']);
     });
     after(async () => {
-      // await security.testUser.restoreDefaults();
+      await security.testUser.restoreDefaults();
     });
-    describe.only('create and access read only objects', () => {
+    describe('create and access read only objects', () => {
       it('should create a read only object', async () => {
         const { cookie: adminCookie, profileUid } = await login(
           adminTestUser.username,
