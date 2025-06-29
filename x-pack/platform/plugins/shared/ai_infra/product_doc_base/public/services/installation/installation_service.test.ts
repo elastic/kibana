@@ -27,7 +27,7 @@ describe('InstallationService', () => {
 
   describe('#getInstallationStatus', () => {
     it('calls the endpoint with the right parameters', async () => {
-      await service.getInstallationStatus();
+      await service.getInstallationStatus({ inferenceId });
       expect(http.get).toHaveBeenCalledTimes(1);
       expect(http.get).toHaveBeenCalledWith(INSTALLATION_STATUS_API_PATH, {
         query: {
@@ -39,7 +39,7 @@ describe('InstallationService', () => {
       const expected = { stubbed: true };
       http.get.mockResolvedValue(expected);
 
-      const response = await service.getInstallationStatus();
+      const response = await service.getInstallationStatus({ inferenceId });
       expect(response).toEqual(expected);
     });
     it('calls the endpoint with the right parameters for different inference IDs', async () => {
@@ -60,7 +60,7 @@ describe('InstallationService', () => {
     });
 
     it('calls the endpoint with the right parameters', async () => {
-      await service.install();
+      await service.install({ inferenceId });
       expect(http.post).toHaveBeenCalledTimes(1);
       expect(http.post).toHaveBeenCalledWith(INSTALL_ALL_API_PATH, {
         body: JSON.stringify({
@@ -83,21 +83,21 @@ describe('InstallationService', () => {
       const expected = { installed: true };
       http.post.mockResolvedValue(expected);
 
-      const response = await service.install();
+      const response = await service.install({ inferenceId });
       expect(response).toEqual(expected);
     });
     it('throws when the server returns installed: false', async () => {
       const expected = { installed: false };
       http.post.mockResolvedValue(expected);
 
-      await expect(service.install()).rejects.toThrowErrorMatchingInlineSnapshot(
+      await expect(service.install({ inferenceId })).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Installation did not complete successfully."`
       );
     });
   });
   describe('#uninstall', () => {
     it('calls the endpoint with the right parameters', async () => {
-      await service.uninstall();
+      await service.uninstall({ inferenceId });
       expect(http.post).toHaveBeenCalledTimes(1);
       expect(http.post).toHaveBeenCalledWith(UNINSTALL_ALL_API_PATH, {
         body: JSON.stringify({
@@ -121,7 +121,7 @@ describe('InstallationService', () => {
       const expected = { stubbed: true };
       http.post.mockResolvedValue(expected);
 
-      const response = await service.uninstall();
+      const response = await service.uninstall({ inferenceId });
       expect(response).toEqual(expected);
     });
   });

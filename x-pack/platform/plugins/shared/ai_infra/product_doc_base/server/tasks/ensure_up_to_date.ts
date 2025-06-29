@@ -52,7 +52,7 @@ export const scheduleEnsureUpToDateTask = async ({
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
-  inferenceId?: string;
+  inferenceId: string;
 }) => {
   const taskId = isDefaultElserInferenceId(inferenceId)
     ? ENSURE_DOC_UP_TO_DATE_TASK_ID

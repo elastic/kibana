@@ -20,6 +20,7 @@ import {
   getTaskStatus,
   waitUntilTaskCompleted,
 } from '../../tasks';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 const scheduleInstallAllTaskMock = scheduleInstallAllTask as jest.MockedFn<
   typeof scheduleInstallAllTask
@@ -35,7 +36,7 @@ const waitUntilTaskCompletedMock = waitUntilTaskCompleted as jest.MockedFn<
 >;
 const getTaskStatusMock = getTaskStatus as jest.MockedFn<typeof getTaskStatus>;
 
-const DEFAULT_INFERENCE_ID = '.elser-2-elasticsearch';
+const DEFAULT_INFERENCE_ID = defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL;
 describe('DocumentationManager', () => {
   let logger: MockedLogger;
   let taskManager: ReturnType<typeof taskManagerMock.createStart>;

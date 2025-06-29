@@ -23,9 +23,9 @@ export class InstallationService {
     this.http = http;
   }
 
-  async getInstallationStatus(
-    params: { inferenceId?: string } = {}
-  ): Promise<InstallationStatusResponse> {
+  async getInstallationStatus(params: {
+    inferenceId: string;
+  }): Promise<InstallationStatusResponse> {
     const inferenceId = params?.inferenceId ?? defaultInferenceEndpoints.ELSER;
 
     const response = await this.http.get<InstallationStatusResponse>(INSTALLATION_STATUS_API_PATH, {
@@ -35,7 +35,7 @@ export class InstallationService {
     return response;
   }
 
-  async install(params: { inferenceId?: string } = {}): Promise<PerformInstallResponse> {
+  async install(params: { inferenceId: string }): Promise<PerformInstallResponse> {
     const inferenceId = params?.inferenceId ?? defaultInferenceEndpoints.ELSER;
 
     const response = await this.http.post<PerformInstallResponse>(INSTALL_ALL_API_PATH, {
@@ -52,7 +52,7 @@ export class InstallationService {
     return response;
   }
 
-  async uninstall(params: { inferenceId?: string } = {}): Promise<UninstallResponse> {
+  async uninstall(params: { inferenceId: string }): Promise<UninstallResponse> {
     const inferenceId = params?.inferenceId ?? defaultInferenceEndpoints.ELSER;
 
     const response = await this.http.post<UninstallResponse>(UNINSTALL_ALL_API_PATH, {

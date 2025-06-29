@@ -52,7 +52,7 @@ export const scheduleUninstallAllTask = async ({
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
-  inferenceId?: string;
+  inferenceId: string;
 }) => {
   // To avoid conflicts between the default ELSER model and small E5 inference IDs running at the same time,
   // we use different task IDs for each inference ID.

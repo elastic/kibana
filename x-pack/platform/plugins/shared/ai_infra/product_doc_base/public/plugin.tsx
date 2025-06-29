@@ -17,7 +17,7 @@ import type {
 import { InstallationService } from './services/installation';
 
 interface ProductDocInstallServiceParams {
-  inferenceId?: string;
+  inferenceId: string;
 }
 
 export class ProductDocBasePlugin
@@ -46,10 +46,10 @@ export class ProductDocBasePlugin
 
     return {
       installation: {
-        getStatus: (params?: ProductDocInstallServiceParams) =>
+        getStatus: (params: ProductDocInstallServiceParams) =>
           installationService.getInstallationStatus(params),
-        install: (params?: ProductDocInstallServiceParams) => installationService.install(params),
-        uninstall: (params?: ProductDocInstallServiceParams) =>
+        install: (params: ProductDocInstallServiceParams) => installationService.install(params),
+        uninstall: (params: ProductDocInstallServiceParams) =>
           installationService.uninstall(params),
       },
     };

@@ -41,7 +41,7 @@ export class ProductDocInstallClient {
   async getInstallationStatus({
     inferenceId,
   }: {
-    inferenceId?: string;
+    inferenceId: string;
   }): Promise<Record<ProductName, ProductInstallState>> {
     const query = {
       type: typeName,

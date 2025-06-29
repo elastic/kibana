@@ -51,7 +51,7 @@ export const scheduleInstallAllTask = async ({
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
-  inferenceId?: string;
+  inferenceId: string;
 }) => {
   const taskId = isDefaultElserInferenceId(inferenceId)
     ? INSTALL_ALL_TASK_ID

@@ -88,7 +88,7 @@ export class PackageInstaller {
    * Make sure that the currently installed doc packages are up to date.
    * Will not upgrade products that are not already installed
    */
-  async ensureUpToDate(params: { inferenceId?: string } = {}) {
+  async ensureUpToDate(params: { inferenceId: string }) {
     const { inferenceId } = params;
     const inferenceInfo = await this.getInferenceInfo(inferenceId);
     const [repositoryVersions, installStatuses] = await Promise.all([

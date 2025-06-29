@@ -7,9 +7,8 @@
 
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
-export const isDefaultElserInferenceId = (inferenceId?: string | null) => {
+export const isDefaultElserInferenceId = (inferenceId: string | null | undefined) => {
   return (
-    !inferenceId ||
     inferenceId === defaultInferenceEndpoints.ELSER ||
     inferenceId === defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID
   );

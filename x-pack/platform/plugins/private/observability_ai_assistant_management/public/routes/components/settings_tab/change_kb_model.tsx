@@ -148,6 +148,8 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
             if (isConfirmed) {
               setIsUpdatingModel(true);
               knowledgeBase.install(selectedInferenceId);
+              // @TODO: FOR OBS ASSISTANT TEAM
+              // CHECK IF THIS IS THE RIGHT SPOT TO UPDATE PRODUCT DOC
               installProductDoc(selectedInferenceId);
             }
           });
