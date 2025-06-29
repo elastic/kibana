@@ -37,7 +37,6 @@ import { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { css } from '@emotion/react';
-import type { OnIsLockedUpdate } from './types';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
@@ -53,7 +52,7 @@ import { ScreenReaderRouteAnnouncements, SkipToMainContent } from './screen_read
 export interface HeaderProps {
   kibanaVersion: string;
   application: InternalApplicationStart;
-  headerBanner$: Observable<ChromeUserBanner | undefined>;
+  headerBanner$?: Observable<ChromeUserBanner | undefined> | null;
   badge$: Observable<ChromeBadge | undefined>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   breadcrumbsAppendExtensions$: Observable<ChromeBreadcrumbsAppendExtension[]>;
@@ -73,11 +72,11 @@ export interface HeaderProps {
   navControlsRight$: Observable<readonly ChromeNavControl[]>;
   navControlsExtension$: Observable<readonly ChromeNavControl[]>;
   basePath: HttpStart['basePath'];
-  isLocked$: Observable<boolean>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
-  onIsLockedUpdate: OnIsLockedUpdate;
   customBranding$: Observable<CustomBranding>;
   isServerless: boolean;
+  isFixed: boolean;
+  as?: 'div' | 'header';
 }
 
 export function Header({
@@ -86,12 +85,13 @@ export function Header({
   docLinks,
   application,
   basePath,
-  onIsLockedUpdate,
   homeHref,
   breadcrumbsAppendExtensions$,
   globalHelpExtensionMenuLinks$,
   customBranding$,
   isServerless,
+  isFixed,
+  as = 'header',
   ...observables
 }: HeaderProps) {
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -102,6 +102,7 @@ export function Header({
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
 
   const Breadcrumbs = <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />;
+  const HeaderElement = as === 'header' ? 'header' : 'div';
 
   return (
     <>
@@ -112,12 +113,12 @@ export function Header({
       />
       <SkipToMainContent />
 
-      <HeaderTopBanner headerBanner$={observables.headerBanner$} />
-      <header className={className} data-test-subj="headerGlobalNav">
+      {observables.headerBanner$ && <HeaderTopBanner headerBanner$={observables.headerBanner$} />}
+      <HeaderElement className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars" className="header__bars">
           <EuiHeader
             theme="dark"
-            position="fixed"
+            position={isFixed ? 'fixed' : 'static'}
             className="header__firstBar"
             sections={[
               {
@@ -169,7 +170,7 @@ export function Header({
             ]}
           />
 
-          <EuiHeader position="fixed" className="header__secondBar">
+          <EuiHeader position={isFixed ? 'fixed' : 'static'} className="header__secondBar">
             <EuiHeaderSection grow={false}>
               <EuiHeaderSectionItem className="header__toggleNavButtonSection">
                 <CollapsibleNav
@@ -182,7 +183,6 @@ export function Header({
                   basePath={basePath}
                   navigateToApp={application.navigateToApp}
                   navigateToUrl={application.navigateToUrl}
-                  onIsLockedUpdate={onIsLockedUpdate}
                   closeNav={() => {
                     setIsNavOpen(false);
                   }}
@@ -227,7 +227,7 @@ export function Header({
             </EuiHeaderSection>
           </EuiHeader>
         </div>
-      </header>
+      </HeaderElement>
     </>
   );
 }

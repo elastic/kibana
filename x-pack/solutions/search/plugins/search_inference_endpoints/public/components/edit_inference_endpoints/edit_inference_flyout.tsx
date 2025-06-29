@@ -25,6 +25,7 @@ export const EditInferenceFlyout: React.FC<EditInterfaceFlyoutProps> = ({
     services: {
       http,
       notifications: { toasts },
+      serverless,
     },
   } = useKibana();
   const { refetch } = useQueryInferenceEndpoints();
@@ -49,6 +50,7 @@ export const EditInferenceFlyout: React.FC<EditInterfaceFlyoutProps> = ({
       http={http}
       toasts={toasts}
       isEdit={true}
+      enforceAdaptiveAllocations={!!serverless}
       onSubmitSuccess={onEditSuccess}
       inferenceEndpoint={inferenceEndpoint}
     />

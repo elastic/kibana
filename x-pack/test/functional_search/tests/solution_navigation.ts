@@ -64,7 +64,7 @@ export default function searchSolutionNavigation({
       // check side nav links
       await solutionNavigation.sidenav.expectSectionExists('search_project_nav');
       await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'enterpriseSearch',
+        deepLinkId: 'searchHomepage',
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
@@ -167,7 +167,7 @@ export default function searchSolutionNavigation({
       );
       await solutionNavigation.sidenav.expectOnlyDefinedLinks([
         'search_project_nav',
-        'enterpriseSearch',
+        'searchHomepage',
         'discover',
         'dashboards',
         'build',

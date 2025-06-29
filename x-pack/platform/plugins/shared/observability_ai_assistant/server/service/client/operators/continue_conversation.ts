@@ -28,7 +28,6 @@ import {
   createFunctionLimitExceededError,
   MessageOrChatEvent,
 } from '../../../../common/conversation_complete';
-import { FunctionVisibility } from '../../../../common/functions/types';
 import { Instruction } from '../../../../common/types';
 import { createFunctionResponseMessage } from '../../../../common/utils/create_function_response_message';
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';
@@ -140,7 +139,7 @@ function getFunctionDefinitions({
   const systemFunctions = functionClient
     .getFunctions()
     .map((fn) => fn.definition)
-    .filter(({ visibility }) => visibility !== FunctionVisibility.Internal);
+    .filter(({ isInternal }) => !isInternal);
 
   const actions = functionClient.getActions();
 

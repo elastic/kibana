@@ -1601,7 +1601,7 @@
         "label": "DataGridPaginationMode",
         "description": [],
         "signature": [
-          "\"multiPage\" | \"singlePage\" | \"infinite\""
+          "\"infinite\" | \"multiPage\" | \"singlePage\""
         ],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/types.ts",
         "deprecated": false,

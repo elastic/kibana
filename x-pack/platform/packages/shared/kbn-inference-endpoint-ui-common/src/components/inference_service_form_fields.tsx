@@ -30,7 +30,7 @@ import { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
 import { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
 import { SERVICE_PROVIDERS } from './providers/render_service_provider/service_provider';
-import { DEFAULT_TASK_TYPE, ServiceProviderKeys } from '../constants';
+import { DEFAULT_TASK_TYPE, ServiceProviderKeys, INTERNAL_OVERRIDE_FIELDS } from '../constants';
 import { SelectableProvider } from './providers/selectable';
 import {
   TaskTypeOption,
@@ -48,6 +48,7 @@ interface InferenceServicesProps {
   http: HttpSetup;
   toasts: IToasts;
   isEdit?: boolean;
+  enforceAdaptiveAllocations?: boolean;
   isPreconfigured?: boolean;
 }
 
@@ -55,6 +56,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   http,
   toasts,
   isEdit,
+  enforceAdaptiveAllocations,
   isPreconfigured,
 }) => {
   const { data: providers, isLoading } = useProviders(http, toasts);
@@ -118,7 +120,11 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         (p) => p.service === (config.provider === '' ? providerSelected : config.provider)
       );
       if (newProvider) {
-        const newProviderSchema: ConfigEntryView[] = mapProviderFields(taskType, newProvider);
+        const newProviderSchema: ConfigEntryView[] = mapProviderFields(
+          taskType,
+          newProvider,
+          enforceAdaptiveAllocations ? INTERNAL_OVERRIDE_FIELDS[newProvider.service] : undefined
+        );
         setProviderSchema(newProviderSchema);
       }
 
@@ -155,7 +161,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         },
       });
     },
-    [config, secrets, updateFieldValues, updatedProviders]
+    [config, enforceAdaptiveAllocations, secrets, updateFieldValues, updatedProviders]
   );
 
   const onProviderChange = useCallback(
@@ -171,7 +177,11 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       const defaultProviderSecrets: Record<string, unknown> = {};
 
       const newProviderSchema: ConfigEntryView[] = newProvider
-        ? mapProviderFields(newProvider.task_types[0], newProvider)
+        ? mapProviderFields(
+            newProvider.task_types[0],
+            newProvider,
+            enforceAdaptiveAllocations ? INTERNAL_OVERRIDE_FIELDS[newProvider.service] : undefined
+          )
         : [];
       if (newProvider) {
         setProviderSchema(newProviderSchema);
@@ -205,7 +215,13 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         },
       });
     },
-    [config, onTaskTypeOptionsSelect, updateFieldValues, updatedProviders]
+    [
+      config,
+      enforceAdaptiveAllocations,
+      onTaskTypeOptionsSelect,
+      updateFieldValues,
+      updatedProviders,
+    ]
   );
 
   const onSetProviderConfigEntry = useCallback(
@@ -303,14 +319,26 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       // Update connector providerSchema
 
       const newProviderSchema: ConfigEntryView[] = newProvider
-        ? mapProviderFields(config.taskType, newProvider)
+        ? mapProviderFields(
+            config.taskType,
+            newProvider,
+            enforceAdaptiveAllocations ? INTERNAL_OVERRIDE_FIELDS[newProvider.service] : undefined
+          )
         : [];
       if (newProvider) {
         setProviderSchema(newProviderSchema);
       }
       setSelectedTaskType(config.taskType);
     }
-  }, [config, config?.provider, config?.taskType, isEdit, selectedTaskType, updatedProviders]);
+  }, [
+    config,
+    config?.provider,
+    config?.taskType,
+    isEdit,
+    enforceAdaptiveAllocations,
+    selectedTaskType,
+    updatedProviders,
+  ]);
 
   useEffect(() => {
     if (isSubmitting) {

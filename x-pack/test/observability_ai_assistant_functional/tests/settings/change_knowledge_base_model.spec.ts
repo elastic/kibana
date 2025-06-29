@@ -12,7 +12,7 @@ import { createConnector, deleteConnectors } from '../../common/connectors';
 import {
   LlmProxy,
   createLlmProxy,
-} from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+} from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/create_llm_proxy';
 import {
   deployTinyElserAndSetupKb,
   stopTinyElserModel,

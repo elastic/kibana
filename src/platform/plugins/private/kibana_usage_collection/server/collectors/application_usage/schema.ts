@@ -150,6 +150,7 @@ export const applicationUsageSchema = {
   enterpriseSearchVectorSearch: commonSchema,
   enterpriseSearchElasticsearch: commonSchema,
   searchExperiences: commonSchema,
+  searchHomepage: commonSchema,
   graph: commonSchema,
   logs: commonSchema,
   metrics: commonSchema,

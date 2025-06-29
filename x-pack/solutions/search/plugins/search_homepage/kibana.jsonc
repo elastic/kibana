@@ -18,6 +18,7 @@
     "optionalPlugins": [
       "cloud",
       "console",
+      "searchNavigation",
       "usageCollection",
     ],
     "requiredBundles": [

@@ -29,6 +29,7 @@
     "@kbn/cloud-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/core-http-server",
+    "@kbn/search-navigation",
     "@kbn/logging",
     "@kbn/core-elasticsearch-server"
   ],

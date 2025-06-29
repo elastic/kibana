@@ -15,6 +15,9 @@ class ESDocLinks {
   public notebooksExamples: string = '';
   public customerEngineerRequestForm: string = '';
   public analyzeLogs: string = '';
+  public ingestDataToSecurity: string = '';
+  public cloudSecurityPosture: string = '';
+  public installElasticDefend: string = '';
   constructor() {}
 
   setDocLinks(newDocLinks: DocLinks) {
@@ -25,6 +28,9 @@ class ESDocLinks {
     this.notebooksExamples = newDocLinks.searchHomepage.notebooksExamples;
     this.analyzeLogs = newDocLinks.serverlessSearch.integrations;
     this.customerEngineerRequestForm = newDocLinks.searchHomepage.customerEngineerRequestForm;
+    this.ingestDataToSecurity = newDocLinks.siem.ingestDataToSecurity;
+    this.cloudSecurityPosture = newDocLinks.securitySolution.cloudSecurityPosture;
+    this.installElasticDefend = newDocLinks.securitySolution.installElasticDefend;
   }
 }
 

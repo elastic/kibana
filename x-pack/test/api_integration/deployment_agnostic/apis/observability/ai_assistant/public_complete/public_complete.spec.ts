@@ -10,17 +10,9 @@ import {
   MessageRole,
   type Message,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import {
-  MessageAddEvent,
-  type StreamingChatResponseEvent,
-} from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 import { type Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
-import {
-  createLlmProxy,
-  LlmProxy,
-} from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { createLlmProxy, LlmProxy } from '../utils/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { decodeEvents } from '../utils/conversation';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
@@ -45,18 +37,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     async function callPublicChatComplete({
       actions,
       instructions,
-      format = 'default',
       persist = true,
     }: {
       actions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
       instructions?: Array<string | Instruction>;
-      format?: 'openai' | 'default';
       persist?: boolean;
     }) {
       const response = await observabilityAIAssistantAPIClient.admin({
         endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
         params: {
-          query: { format },
           body: {
             messages,
             connectorId,
@@ -101,37 +90,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       llmProxy.clear();
     });
 
-    describe('after executing an action and closing the stream', () => {
-      let events: StreamingChatResponseEvent[];
-
-      before(async () => {
-        void llmProxy.interceptTitle('My Title');
-        void llmProxy.interceptWithFunctionRequest({
-          name: 'my_action',
-          arguments: () => JSON.stringify({ foo: 'bar' }),
-        });
-
-        const responseBody = await callPublicChatComplete({
-          actions: [action],
-        });
-
-        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-
-        events = decodeEvents(responseBody);
-      });
-
-      it('does not persist the conversation (the last event is not a conversationUpdated event)', () => {
-        const lastEvent = events[events.length - 1] as MessageAddEvent;
-        expect(lastEvent.type).to.not.be('conversationUpdate');
-        expect(lastEvent.type).to.be('messageAdd');
-        expect(lastEvent.message.message.function_call).to.eql({
-          name: 'my_action',
-          arguments: JSON.stringify({ foo: 'bar' }),
-          trigger: MessageRole.Assistant,
-        });
-      });
-    });
-
     describe('after adding an instruction', () => {
       before(async () => {
         void llmProxy.interceptWithFunctionRequest({
@@ -161,7 +119,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void llmProxy.interceptTitle('My Title');
         void llmProxy.interceptWithResponse('Hello');
 
-        responseBody = await callPublicChatComplete({ format: 'openai' });
+        responseBody = await callPublicChatComplete({});
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
       });
@@ -179,7 +137,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         return str.split('\n\n').filter(Boolean);
       }
 
-      it('outputs each line an SSE-compatible format (data: ...)', () => {
+      it('outputs each line in an SSE-compatible format (data: ...)', () => {
         const lines = getLines(responseBody);
 
         lines.forEach((line) => {
