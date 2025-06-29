@@ -30,10 +30,10 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {
-      await esArchiver.loadIfNeeded(
+      await esArchiver.load(
         'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/security_alerts'
       );
-      await esArchiver.loadIfNeeded(
+      await esArchiver.load(
         'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
       );
 

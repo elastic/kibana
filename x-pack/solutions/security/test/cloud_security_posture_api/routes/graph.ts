@@ -181,27 +181,27 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('Happy flows', () => {
       before(async () => {
+        await esArchiver.load(
+          'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts'
+        );
+        await esArchiver.load(
+          'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
+        );
         await spacesService.create({
           id: 'foo',
           name: 'foo',
           disabledFeatures: [],
         });
-        await esArchiver.loadIfNeeded(
-          'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts'
-        );
-        await esArchiver.loadIfNeeded(
-          'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
-        );
       });
 
       after(async () => {
-        await spacesService.delete('foo');
         await esArchiver.unload(
           'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts'
         );
         await esArchiver.unload(
           'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
         );
+        await spacesService.delete('foo');
       });
 
       it('should return an empty graph / should return 200 when missing `esQuery` field', async () => {
