@@ -8,12 +8,11 @@
 import { Key } from 'selenium-webdriver';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function SearchQueryRulesPageProvider({ getService, getPageObjects }: FtrProviderContext) {
+export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
-  const { common } = getPageObjects(['common']);
 
   return {
     QueryRulesEmptyPromptPage: {

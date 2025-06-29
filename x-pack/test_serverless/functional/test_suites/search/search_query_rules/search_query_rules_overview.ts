@@ -200,7 +200,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('Deleting a query ruleset from the ruleset details page', () => {
       before(async () => {
         await createTestRuleset('my-test-ruleset');
-        browser.refresh();
+        await browser.refresh();
       });
       it('should be able to delete an existing ruleset and render the empty state', async () => {
         await pageObjects.searchQueryRules.QueryRulesManagementPage.expectQueryRulesTableToExist();
