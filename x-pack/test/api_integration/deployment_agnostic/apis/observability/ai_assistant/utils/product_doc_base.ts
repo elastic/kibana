@@ -24,10 +24,7 @@ export async function installProductDoc(supertest: SuperTest.Agent, inferenceId:
     .expect(200);
 }
 
-export async function uninstallProductDoc(
-  supertest: SuperTest.Agent,
-  inferenceId: string = '.elser-2-elasticsearch'
-) {
+export async function uninstallProductDoc(supertest: SuperTest.Agent, inferenceId: string) {
   return supertest
     .post('/internal/product_doc_base/uninstall')
     .set(ELASTIC_HTTP_VERSION_HEADER, '1')
