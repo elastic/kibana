@@ -13,6 +13,7 @@ import {
   PerformInstallResponse,
   UninstallResponse,
 } from '@kbn/product-doc-base-plugin/common/http_api/installation';
+import { ELSER_IN_EIS_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/common/preconfigured_inference_ids';
 import { RETRIEVE_DOCUMENTATION_NAME } from '../../../../server/functions/documentation';
 import { chatClient, kibanaClient, logger } from '../../services';
 
@@ -20,10 +21,14 @@ const ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH = '/internal/product_doc_base/st
 const ELASTIC_DOCS_INSTALL_ALL_API_PATH = '/internal/product_doc_base/install';
 const ELASTIC_DOCS_UNINSTALL_ALL_API_PATH = '/internal/product_doc_base/uninstall';
 
+const inferenceId = ELSER_IN_EIS_INFERENCE_ID;
 describe('Retrieve documentation function', () => {
   before(async () => {
     let statusResponse = await kibanaClient.callKibana<InstallationStatusResponse>('get', {
       pathname: ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH,
+      query: {
+        inferenceId,
+      },
     });
 
     if (statusResponse.data.overall === 'installed') {
@@ -32,6 +37,9 @@ describe('Retrieve documentation function', () => {
       logger.info('Installing Elastic documentation');
       const installResponse = await kibanaClient.callKibana<PerformInstallResponse>('post', {
         pathname: ELASTIC_DOCS_INSTALL_ALL_API_PATH,
+        body: {
+          inferenceId,
+        },
       });
 
       if (!installResponse.data.installed) {
@@ -41,6 +49,9 @@ describe('Retrieve documentation function', () => {
 
       statusResponse = await kibanaClient.callKibana<InstallationStatusResponse>('get', {
         pathname: ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH,
+        query: {
+          inferenceId,
+        },
       });
 
       if (statusResponse.data.overall !== 'installed') {
@@ -74,7 +85,6 @@ describe('Retrieve documentation function', () => {
       'Accurately explains what Kibana Lens is and provides doc-based steps for creating a bar chart visualization',
       `Does not invent unsupported instructions, answers should reference what's found in the Kibana docs`,
     ]);
-
     expect(result.passed).to.be(true);
   });
 
@@ -98,6 +108,9 @@ describe('Retrieve documentation function', () => {
     logger.info('Uninstalling Elastic documentation');
     const uninstallResponse = await kibanaClient.callKibana<UninstallResponse>('post', {
       pathname: ELASTIC_DOCS_UNINSTALL_ALL_API_PATH,
+      body: {
+        inferenceId,
+      },
     });
 
     if (uninstallResponse.data.success) {

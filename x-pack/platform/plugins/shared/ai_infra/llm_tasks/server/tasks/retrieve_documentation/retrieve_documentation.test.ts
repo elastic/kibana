@@ -104,7 +104,7 @@ describe('retrieveDocumentation', () => {
       products: ['kibana'],
       max: 5,
       highlights: 0,
-      inferenceId: undefined,
+      inferenceId: defaultInferenceEndpoints.ELSER,
     });
   });
 
