@@ -35,12 +35,17 @@ describe('Retrieve documentation function', () => {
       logger.success('Elastic documentation is already installed');
     } else {
       logger.info('Installing Elastic documentation');
-      const installResponse = await kibanaClient.callKibana<PerformInstallResponse>('post', {
-        pathname: ELASTIC_DOCS_INSTALL_ALL_API_PATH,
-        body: {
-          inferenceId,
+      const installResponse = await kibanaClient.callKibana<PerformInstallResponse>(
+        'post',
+        {
+          pathname: ELASTIC_DOCS_INSTALL_ALL_API_PATH,
         },
-      });
+        {
+          body: {
+            inferenceId,
+          },
+        }
+      );
 
       if (!installResponse.data.installed) {
         logger.error('Could not install Elastic documentation');
@@ -106,12 +111,17 @@ describe('Retrieve documentation function', () => {
   after(async () => {
     // Uninstall all installed documentation
     logger.info('Uninstalling Elastic documentation');
-    const uninstallResponse = await kibanaClient.callKibana<UninstallResponse>('post', {
-      pathname: ELASTIC_DOCS_UNINSTALL_ALL_API_PATH,
-      body: {
-        inferenceId,
+    const uninstallResponse = await kibanaClient.callKibana<UninstallResponse>(
+      'post',
+      {
+        pathname: ELASTIC_DOCS_UNINSTALL_ALL_API_PATH,
       },
-    });
+      {
+        body: {
+          inferenceId,
+        },
+      }
+    );
 
     if (uninstallResponse.data.success) {
       logger.success('Uninstalled Elastic documentation');
