@@ -169,14 +169,7 @@ export class PackageInstaller {
 
     productVersion = majorMinor(productVersion);
 
-    const inferenceIdsToUninstall =
-      await this.productDocClient.getPreviouslyInstalledInferenceIds();
-
-    await Promise.allSettled(
-      inferenceIdsToUninstall.map((previousInferenceId) =>
-        this.uninstallPackage({ productName, inferenceId: previousInferenceId })
-      )
-    );
+    await this.uninstallPackage({ productName, inferenceId });
 
     let zipArchive: ZipArchive | undefined;
     try {
