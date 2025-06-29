@@ -34,7 +34,7 @@ describe('fetchGraph', () => {
     jest.resetAllMocks();
   });
 
-  it('should throw an error for an invalid index pattern', () => {
+  it('should throw an error for an invalid index pattern', async () => {
     const invalidIndexPatterns = ['invalid pattern']; // space is not allowed
     const params = {
       esClient,
@@ -47,7 +47,7 @@ describe('fetchGraph', () => {
       esQuery: undefined,
     };
 
-    expect(async () => await fetchGraph(params)).rejects.toThrowError(/Invalid index pattern/);
+    await expect(() => fetchGraph(params)).rejects.toThrowError(/Invalid index pattern/);
   });
 
   it('should execute the esql query and return records for valid inputs with no origin events', async () => {
