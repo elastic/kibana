@@ -68,6 +68,7 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
               columnName={column.name}
               onChange={updateRow(column.id)}
               autoFocus={index === 0}
+              columns={columns}
               css={css`
                 min-width: ${180}px;
               `}
