@@ -220,7 +220,7 @@ const alignNodesCenterInPlace = (
 ) => {
   /* ---------- util ------------ */
   // const Y = (id: string) => nodesById[id].position.y;
-  const height = (id: string) => g.node(id).height ?? NODE_HEIGHT;
+  // const height = (id: string) => g.node(id).height ?? NODE_HEIGHT;
   // const setY = (id: string, y: number) => (nodesById[id].position.y = y);
   const Y = useNodesById
     ? (id: string) => nodesById[id].position.y

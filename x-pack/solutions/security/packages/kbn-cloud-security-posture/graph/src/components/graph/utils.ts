@@ -6,10 +6,10 @@
  */
 
 import { EdgeLabelHeight /* , EdgeLabelWidth */ } from '../edge/styles';
-import { LABEL_BORDER_WIDTH, LABEL_PADDING_X, NODE_LABEL_WIDTH } from '../node/styles';
+import { /* LABEL_BORDER_WIDTH, LABEL_PADDING_X,  */ NODE_LABEL_WIDTH } from '../node/styles';
 
 const LABEL_FONT = `600 7.875px Inter, "system-ui", Helvetica, Arial, sans-serif`;
-const LABEL_PADDING = (LABEL_PADDING_X + LABEL_BORDER_WIDTH) * 2;
+// const LABEL_PADDING = (LABEL_PADDING_X + LABEL_BORDER_WIDTH) * 2;
 
 export const calcLabelSize = (label?: string) => {
   // const currLblWidth = Math.max(EdgeLabelWidth, LABEL_PADDING + getTextWidth(label ?? ''));
