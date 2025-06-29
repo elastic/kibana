@@ -10,7 +10,7 @@ import type { CoreAuditService } from '@kbn/core/server';
 import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { isDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
+import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { InstallationStatus } from '../../../common/install_status';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import {
@@ -174,7 +174,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
    * @param inferenceId - The inference ID to get the status for. If not provided, the default ELSER inference ID will be used.
    */
   async getStatus({ inferenceId }: { inferenceId: string }): Promise<DocGetStatusResponse> {
-    const taskId = isDefaultElserInferenceId(inferenceId)
+    const taskId = isImpliedDefaultElserInferenceId(inferenceId)
       ? INSTALL_ALL_TASK_ID
       : INSTALL_ALL_TASK_ID_MULTILINGUAL;
     const taskStatus = await getTaskStatus({

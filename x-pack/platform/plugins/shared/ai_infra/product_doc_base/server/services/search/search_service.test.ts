@@ -46,11 +46,11 @@ describe('SearchService', () => {
         searchQuery: 'What is Kibana?',
         size: 42,
         highlights: 3,
-        index: getIndicesForProductNames(['kibana']),
+        index: getIndicesForProductNames(['kibana'], undefined),
         client: esClient,
       });
     });
-    it('calls `performSearch` with the right default ELSER inference', async () => {
+    it('calls `performSearch` with the right default index name for ELSER inference', async () => {
       await service.search({
         query: 'What is Kibana?',
         products: ['kibana'],
@@ -64,12 +64,12 @@ describe('SearchService', () => {
         searchQuery: 'What is Kibana?',
         size: 42,
         highlights: 3,
-        index: getIndicesForProductNames(['kibana']),
+        index: [`.kibana_ai_product_doc_kibana`],
         client: esClient,
       });
     });
 
-    it('calls `performSearch` with the right ELSER EIS inference ID', async () => {
+    it('calls `performSearch` with the right default index name for ELSER EIS inference ID', async () => {
       await service.search({
         query: 'What is Kibana?',
         products: ['kibana'],
@@ -83,7 +83,7 @@ describe('SearchService', () => {
         searchQuery: 'What is Kibana?',
         size: 42,
         highlights: 3,
-        index: getIndicesForProductNames(['kibana']),
+        index: [`.kibana_ai_product_doc_kibana`],
         client: esClient,
       });
     });
@@ -101,10 +101,7 @@ describe('SearchService', () => {
         searchQuery: 'What is Kibana?',
         size: 42,
         highlights: 3,
-        index: getIndicesForProductNames(
-          ['kibana'],
-          defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL
-        ),
+        index: [`.kibana_ai_product_doc_kibana-${defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL}`],
         client: esClient,
       });
     });

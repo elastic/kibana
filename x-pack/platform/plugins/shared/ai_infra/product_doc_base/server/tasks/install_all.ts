@@ -10,7 +10,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { isDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
+import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { InternalServices } from '../types';
 import { isTaskCurrentlyRunningError } from './utils';
 
@@ -53,7 +53,7 @@ export const scheduleInstallAllTask = async ({
   logger: Logger;
   inferenceId: string;
 }) => {
-  const taskId = isDefaultElserInferenceId(inferenceId)
+  const taskId = isImpliedDefaultElserInferenceId(inferenceId)
     ? INSTALL_ALL_TASK_ID
     : INSTALL_ALL_TASK_ID_MULTILINGUAL;
   try {

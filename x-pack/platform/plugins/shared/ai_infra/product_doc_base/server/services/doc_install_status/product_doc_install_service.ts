@@ -10,7 +10,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { ProductName, DocumentationProduct } from '@kbn/product-doc-common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
-import { isDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
+import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { ProductInstallState } from '../../../common/install_status';
 import { productDocInstallStatusSavedObjectTypeName as typeName } from '../../../common/consts';
 import type { ProductDocInstallStatusAttributes as TypeAttributes } from '../../saved_objects';
@@ -53,9 +53,9 @@ export class ProductDocInstallClient {
     }, {} as Record<ProductName, ProductInstallState>);
     try {
       const response = await this.soClient.find<TypeAttributes>(query);
-      const savedObjects = isDefaultElserInferenceId(inferenceId)
+      const savedObjects = isImpliedDefaultElserInferenceId(inferenceId)
         ? response?.saved_objects.filter((so) =>
-            isDefaultElserInferenceId(so.attributes.inference_id)
+            isImpliedDefaultElserInferenceId(so.attributes.inference_id)
           )
         : response?.saved_objects.filter((so) => so.attributes.inference_id === inferenceId);
 
@@ -142,6 +142,6 @@ export class ProductDocInstallClient {
 }
 
 const getObjectIdFromProductName = (productName: ProductName, inferenceId: string | undefined) => {
-  const inferenceIdPart = !isDefaultElserInferenceId(inferenceId) ? `-${inferenceId}` : '';
+  const inferenceIdPart = !isImpliedDefaultElserInferenceId(inferenceId) ? `-${inferenceId}` : '';
   return `kb-product-doc-${productName}${inferenceIdPart}-status`.toLowerCase();
 };

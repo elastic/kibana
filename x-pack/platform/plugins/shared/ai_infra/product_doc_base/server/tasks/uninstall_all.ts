@@ -10,7 +10,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { isDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
+import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { InternalServices } from '../types';
 import { isTaskCurrentlyRunningError } from './utils';
 
@@ -56,7 +56,7 @@ export const scheduleUninstallAllTask = async ({
 }) => {
   // To avoid conflicts between the default ELSER model and small E5 inference IDs running at the same time,
   // we use different task IDs for each inference ID.
-  const taskId = isDefaultElserInferenceId(inferenceId)
+  const taskId = isImpliedDefaultElserInferenceId(inferenceId)
     ? UNINSTALL_ALL_TASK_ID
     : UNINSTALL_ALL_TASK_ID_MULTILINGUAL;
 

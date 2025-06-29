@@ -11,8 +11,8 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 describe('getIndicesForProductNames', () => {
   it('returns the index pattern when product names are not specified', () => {
-    expect(getIndicesForProductNames(undefined)).toEqual(productDocIndexPattern);
-    expect(getIndicesForProductNames([])).toEqual(productDocIndexPattern);
+    expect(getIndicesForProductNames(undefined, undefined)).toEqual(productDocIndexPattern);
+    expect(getIndicesForProductNames([], undefined)).toEqual(productDocIndexPattern);
   });
   it('returns individual index names when product names are specified', () => {
     expect(getIndicesForProductNames(['kibana', 'elasticsearch'])).toEqual([
