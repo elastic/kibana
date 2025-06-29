@@ -15,6 +15,18 @@ export const isEntityNode = (node: NodeViewModel) =>
   node.shape === 'hexagon';
 
 /**
+ * Type guard: Returns true if node.documentsData is a non-empty array.
+ * This only narrows node.documentsData to a non-empty array, not to a specific document type.
+ */
+export const hasNodeDocumentsData = (
+  node: NodeViewModel
+): node is NodeViewModel & {
+  documentsData: [NodeDocumentDataViewModel, ...NodeDocumentDataViewModel[]];
+} => {
+  return Array.isArray(node.documentsData) && node.documentsData.length > 0;
+};
+
+/**
  * Returns the node document mode, or 'na' if documentsData is missing or empty.
  * When this function returns a value other than 'na', documentsData is guaranteed to be a non-empty array.
  */
@@ -32,7 +44,7 @@ export const getNodeDocumentMode = (
   }
 
   // Single alert contains both event's document data and alert's document data.
-  if (node.documentsData.find((doc) => doc.type === 'alert') && node.documentsData.length < 2) {
+  if (node.documentsData.find((doc) => doc.type === 'alert') && node.documentsData.length <= 2) {
     return 'single-alert';
   } else if (node.documentsData.length === 1 && node.documentsData[0].type === 'event') {
     return 'single-event';
@@ -48,11 +60,21 @@ export const getNodeDocumentMode = (
 };
 
 /**
- * Type guard: Returns true if node.documentsData is a non-empty array.
- * This only narrows node.documentsData to a non-empty array, not to a specific document type.
+ * Returns the single document data for a node if it is in single-* mode.
+ * If the node is not in one of these modes, or if it has no documentsData, it returns undefined.
  */
-export function hasNodeDocumentsData(node: NodeViewModel): node is NodeViewModel & {
-  documentsData: [NodeDocumentDataViewModel, ...NodeDocumentDataViewModel[]];
-} {
-  return Array.isArray(node.documentsData) && node.documentsData.length > 0;
-}
+export const getSingleDocumentData = (
+  node: NodeViewModel
+): NodeDocumentDataViewModel | undefined => {
+  const mode = getNodeDocumentMode(node);
+  if (!hasNodeDocumentsData(node) || (mode !== 'single-alert' && mode !== 'single-event')) {
+    return undefined;
+  }
+
+  // For single-alert we might have both event and alert documents. We prefer to return the alert document if it exists.
+  const documentData =
+    node.documentsData.find((doc) => doc.type === 'alert') ??
+    node.documentsData.find((doc) => doc.type === 'event');
+
+  return documentData;
+};

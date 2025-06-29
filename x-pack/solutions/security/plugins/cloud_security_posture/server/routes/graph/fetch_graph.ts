@@ -45,6 +45,11 @@ export const fetchGraph = async ({
     }
   });
 
+  const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
+  const alertsMappingsIncluded = indexPatterns.some((indexPattern) =>
+    indexPattern.includes(SECURITY_ALERTS_PARTIAL_IDENTIFIER)
+  );
+
   const query = `FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
     .join(',')} METADATA _id, _index
@@ -60,7 +65,7 @@ export const fetchGraph = async ({
       ? `event.id in (${originAlertIds.map((_id, idx) => `?og_alrt_id${idx}`).join(', ')})`
       : 'false'
   }
-| EVAL isAlert = _index LIKE "*.alerts-security.alerts-*"
+| EVAL isAlert = _index LIKE "*${SECURITY_ALERTS_PARTIAL_IDENTIFIER}*"
 // Aggregate document's data for popover expansion and metadata enhancements
 // We format it as JSON string, the best alternative so far. Tried to use tuple using MV_APPEND
 // but it flattens the data and we lose the structure
@@ -69,6 +74,14 @@ export const fetchGraph = async ({
     "\\"id\\":\\"", _id, "\\"",
     ",\\"type\\":\\"", docType, "\\"",
     ",\\"index\\":\\"", _index, "\\"",
+    ${
+      // Incase we don't fetch from alerts index, ESQL will complain about missing field's mapping
+      alertsMappingsIncluded
+        ? `CASE (isAlert, CONCAT(",\\"alert\\":", "{",
+      "\\"ruleName\\":\\"", kibana.alert.rule.name, "\\"",
+    "}"), ""),`
+        : ''
+    }
   "}")
 | STATS badge = COUNT(*),
   docs = VALUES(docData),
@@ -82,7 +95,7 @@ export const fetchGraph = async ({
       isOrigin,
       isOriginAlert
 | LIMIT 1000
-| SORT isOrigin DESC, action`;
+| SORT isOrigin DESC, action, actorIds`;
 
   logger.trace(`Executing query [${query}]`);
 

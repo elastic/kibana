@@ -11,12 +11,12 @@ import { fetchGraph } from './fetch_graph';
 import type { EsQuery, OriginEventId } from './types';
 import { parseRecords } from './parse_records';
 
-interface GraphContextServices {
+export interface GraphContextServices {
   logger: Logger;
   esClient: IScopedClusterClient;
 }
 
-interface GetGraphParams {
+export interface GetGraphParams {
   services: GraphContextServices;
   query: {
     originEventIds: OriginEventId[];

@@ -31,6 +31,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
     before(async () => {
       await esArchiver.load(
+        'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/security_alerts'
+      );
+      await esArchiver.load(
         'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
       );
 
@@ -38,7 +41,16 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
     });
 
-    beforeEach(async () => {
+    after(async () => {
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/security_alerts'
+      );
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
+      );
+    });
+
+    it('expanded flyout - filter by node', async () => {
       // Setting the timerange to fit the data and open the flyout for a specific alert
       await networkEventsPage.navigateToNetworkEventsPage(
         `${networkEventsPage.getAbsoluteTimerangeFilter(
@@ -46,17 +58,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           '2024-09-02T00:00:00.000Z'
         )}&${networkEventsPage.getFlyoutFilter('1')}`
       );
-
       await networkEventsPage.waitForListToHaveEvents();
-    });
 
-    after(async () => {
-      await esArchiver.unload(
-        'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
-      );
-    });
-
-    it('expanded flyout - filter by node', async () => {
       await networkEventsPage.flyout.expandVisualizations();
       await networkEventsPage.flyout.assertGraphPreviewVisible();
       await networkEventsPage.flyout.assertGraphNodesNumber(3);
@@ -156,6 +159,15 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     });
 
     it('expanded flyout - show event details', async () => {
+      // Setting the timerange to fit the data and open the flyout for a specific alert
+      await networkEventsPage.navigateToNetworkEventsPage(
+        `${networkEventsPage.getAbsoluteTimerangeFilter(
+          '2024-09-01T00:00:00.000Z',
+          '2024-09-02T00:00:00.000Z'
+        )}&${networkEventsPage.getFlyoutFilter('1')}`
+      );
+      await networkEventsPage.waitForListToHaveEvents();
+
       await networkEventsPage.flyout.expandVisualizations();
       await networkEventsPage.flyout.assertGraphPreviewVisible();
       await networkEventsPage.flyout.assertGraphNodesNumber(3);
@@ -167,7 +179,31 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.showEventOrAlertDetails(
         'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)'
       );
-      await networkEventsPage.flyout.assertEventPreviewPanelIsOpen();
+      await networkEventsPage.flyout.assertPreviewPanelIsOpen('event');
+    });
+
+    it('show show related alerts', async () => {
+      // Setting the timerange to fit the data and open the flyout for a specific alert
+      await networkEventsPage.navigateToNetworkEventsPage(
+        `${networkEventsPage.getAbsoluteTimerangeFilter(
+          '2024-09-01T00:00:00.000Z',
+          '2024-09-02T00:00:00.000Z'
+        )}&${networkEventsPage.getFlyoutFilter('6')}`
+      );
+      await networkEventsPage.waitForListToHaveEvents();
+
+      await networkEventsPage.flyout.expandVisualizations();
+      await networkEventsPage.flyout.assertGraphPreviewVisible();
+      await networkEventsPage.flyout.assertGraphNodesNumber(3);
+
+      await expandedFlyoutGraph.expandGraph();
+      await expandedFlyoutGraph.waitGraphIsLoaded();
+      await expandedFlyoutGraph.assertGraphNodesNumber(3);
+
+      await expandedFlyoutGraph.showEventOrAlertDetails(
+        'a(admin6@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole2)'
+      );
+      await networkEventsPage.flyout.assertPreviewPanelIsOpen('alert');
     });
   });
 }

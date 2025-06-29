@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { ApiMessageCode } from '../../types/graph/v1';
 
-export const INDEX_PATTERN_REGEX = /^[^A-Z^\\/?"<>| #,]+$/;
+export const INDEX_PATTERN_REGEX = /^[^A-Z^\\/?"<>|\s#,]+$/;
 
 export const graphRequestSchema = schema.object({
   nodesLimit: schema.maybe(schema.number()),
@@ -53,6 +53,11 @@ export const nodeDocumentDataSchema = schema.object({
   id: schema.string(),
   type: schema.oneOf([schema.literal(DOCUMENT_TYPE_EVENT), schema.literal(DOCUMENT_TYPE_ALERT)]),
   index: schema.maybe(schema.string()),
+  alert: schema.maybe(
+    schema.object({
+      ruleName: schema.maybe(schema.string()),
+    })
+  ),
 });
 
 export const graphResponseSchema = () =>
