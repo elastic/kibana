@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export { FeedbackFlyout } from './feedback_flyout';
-export { FeedbackButton } from './feedback_button';
-export { BenefitsCallout } from './benefits_callout';
-export { ELASTIC_SUPPORT_LINK } from './constants';
+export const ELASTIC_SUPPORT_LINK = 'https://support.elastic.co/';

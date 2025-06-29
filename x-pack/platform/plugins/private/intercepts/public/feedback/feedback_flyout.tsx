@@ -24,6 +24,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiIconTip,
+  EuiLink,
   EuiSelect,
   EuiSpacer,
   EuiText,
@@ -34,12 +35,13 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { ILicense, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { ELASTIC_SUPPORT_LINK } from './constants';
 import { BenefitsCallout } from './benefits_callout';
 
 enum FeedbackType {
   FeatureRequest = 'featureRequest',
-  BugReport = 'bugReport',
+  IssueReport = 'issueReport',
   OtherFeedback = 'otherFeedback',
 }
 
@@ -51,9 +53,9 @@ const feedbackTypes = [
     }),
   },
   {
-    value: FeedbackType.BugReport,
-    text: i18n.translate('xpack.intercept.feedbackFlyout.form.select.options.bugReport', {
-      defaultMessage: 'Report a bug',
+    value: FeedbackType.IssueReport,
+    text: i18n.translate('xpack.intercept.feedbackFlyout.form.select.options.issueReport', {
+      defaultMessage: 'Report an issue',
     }),
   },
   {
@@ -63,6 +65,31 @@ const feedbackTypes = [
     }),
   },
 ];
+
+const getTextAreaLabel = (feedbackType: FeedbackType) => {
+  if (feedbackType === FeedbackType.FeatureRequest) {
+    return (
+      <FormattedMessage
+        id="xpack.intercept.feedbackFlyout.form.textArea.featureRequestLabel"
+        defaultMessage="Describe your idea"
+      />
+    );
+  }
+  if (feedbackType === FeedbackType.IssueReport) {
+    return (
+      <FormattedMessage
+        id="xpack.intercept.feedbackFlyout.form.textArea.issueReportLabel"
+        defaultMessage="Describe your issue"
+      />
+    );
+  }
+  return (
+    <FormattedMessage
+      id="xpack.intercept.feedbackFlyout.form.textArea.otherFeedbackLabel"
+      defaultMessage="Share your feedback"
+    />
+  );
+};
 
 interface Props {
   core: CoreStart;
@@ -75,11 +102,14 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
   const [feedbackText, setFeedbackText] = useState('');
   const [feedbackType, setFeedbackType] = useState(FeedbackType.FeatureRequest);
   const [userEmail, setUserEmail] = useState('');
-  const [isPlatinumOrHigherExcludingTrialLicense, setIsPlatinumOrHigherExcludingTrialLicense] =
-    useState(false);
+  const [license, setLicense] = useState<ILicense | undefined>(undefined);
 
   const showBenefitsCallout =
-    isPlatinumOrHigherExcludingTrialLicense && feedbackType !== FeedbackType.OtherFeedback;
+    license?.hasAtLeast('platinum') &&
+    license?.type !== 'trial' &&
+    feedbackType !== FeedbackType.OtherFeedback;
+
+  const showSelectHelpText = !showBenefitsCallout && feedbackType === FeedbackType.IssueReport;
 
   const isSendFeedbackButtonDisabled = !feedbackText.trim().length;
 
@@ -92,15 +122,12 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
     }
   }, [core.security.authc]);
 
-  const checkIfLicenseIsPlatinumOrHigherExcludingTrial = useCallback(async () => {
+  const fetchLicense = useCallback(async () => {
     try {
-      const license = await getLicense();
-      const isPlatinumOrHigherExcludingTrial =
-        license.hasAtLeast('platinum') && license.type !== 'trial';
-
-      setIsPlatinumOrHigherExcludingTrialLicense(isPlatinumOrHigherExcludingTrial);
+      const licenseObject = await getLicense();
+      setLicense(licenseObject);
     } catch (_) {
-      setIsPlatinumOrHigherExcludingTrialLicense(false);
+      setLicense(undefined);
     }
   }, [getLicense]);
 
@@ -109,8 +136,8 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
   }, [getEmail]);
 
   useEffect(() => {
-    checkIfLicenseIsPlatinumOrHigherExcludingTrial();
-  }, [checkIfLicenseIsPlatinumOrHigherExcludingTrial]);
+    fetchLicense();
+  }, [fetchLicense]);
 
   const boldTextCss = {
     fontWeight: euiTheme.font.weight.semiBold,
@@ -175,13 +202,23 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
         <EuiForm component="form">
           <EuiFormRow
             helpText={
-              !showBenefitsCallout && (
+              showSelectHelpText && (
                 <>
                   <EuiSpacer size="s" />
                   <EuiText size="s">
                     <FormattedMessage
-                      id="xpack.intercept.feedbackFlyout.form.select.helpText"
-                      defaultMessage="Share the functionality you're missing — it helps us to prioritize what's coming up next at Elastic."
+                      id="xpack.intercept.feedbackFlyout.form.select.issueReport.helpText.text"
+                      defaultMessage="This form helps us collect general feedback about our products. If you need assistance, {supportLink} instead."
+                      values={{
+                        supportLink: (
+                          <EuiLink href={ELASTIC_SUPPORT_LINK} target="_blank" external={true}>
+                            <FormattedMessage
+                              id="xpack.intercept.feedbackFlyout.issueReport.helpText.supportLink"
+                              defaultMessage="submit a support request"
+                            />
+                          </EuiLink>
+                        ),
+                      }}
                     />
                   </EuiText>
                 </>
@@ -198,17 +235,8 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
               onChange={handleChangeFeedbackType}
             />
           </EuiFormRow>
-          {showBenefitsCallout && <BenefitsCallout />}
-          <EuiFormRow
-            label={
-              <Label>
-                <FormattedMessage
-                  id="xpack.intercept.feedbackFlyout.form.textArea.label"
-                  defaultMessage="Describe your request"
-                />
-              </Label>
-            }
-          >
+          {showBenefitsCallout && <BenefitsCallout licenseType={license?.type ?? ''} />}
+          <EuiFormRow label={<Label>{getTextAreaLabel(feedbackType)}</Label>}>
             <EuiTextArea
               value={feedbackText}
               aria-label={i18n.translate('xpack.intercept.feedbackFlyout.form.textArea.ariaLabel', {
