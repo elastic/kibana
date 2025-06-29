@@ -13,7 +13,7 @@ import {
   PerformInstallResponse,
   UninstallResponse,
 } from '@kbn/product-doc-base-plugin/common/http_api/installation';
-import { ELSER_IN_EIS_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/common/preconfigured_inference_ids';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { RETRIEVE_DOCUMENTATION_NAME } from '../../../../server/functions/documentation';
 import { chatClient, kibanaClient, logger } from '../../services';
 
@@ -21,7 +21,7 @@ const ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH = '/internal/product_doc_base/st
 const ELASTIC_DOCS_INSTALL_ALL_API_PATH = '/internal/product_doc_base/install';
 const ELASTIC_DOCS_UNINSTALL_ALL_API_PATH = '/internal/product_doc_base/uninstall';
 
-const inferenceId = ELSER_IN_EIS_INFERENCE_ID;
+const inferenceId = defaultInferenceEndpoints.ELSER;
 describe('Retrieve documentation function', () => {
   before(async () => {
     let statusResponse = await kibanaClient.callKibana<InstallationStatusResponse>('get', {
@@ -41,9 +41,7 @@ describe('Retrieve documentation function', () => {
           pathname: ELASTIC_DOCS_INSTALL_ALL_API_PATH,
         },
         {
-          body: {
-            inferenceId,
-          },
+          inferenceId,
         }
       );
 
@@ -117,9 +115,7 @@ describe('Retrieve documentation function', () => {
         pathname: ELASTIC_DOCS_UNINSTALL_ALL_API_PATH,
       },
       {
-        body: {
-          inferenceId,
-        },
+        inferenceId,
       }
     );
 
