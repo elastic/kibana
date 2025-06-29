@@ -1276,6 +1276,8 @@
       "@kbn/maps-plugin/*": ["x-pack/platform/plugins/shared/maps/*"],
       "@kbn/maps-vector-tile-utils": ["x-pack/platform/packages/private/maps/vector_tile_utils"],
       "@kbn/maps-vector-tile-utils/*": ["x-pack/platform/packages/private/maps/vector_tile_utils/*"],
+      "@kbn/mcp-dev-server": ["src/platform/packages/shared/kbn-mcp-dev-server"],
+      "@kbn/mcp-dev-server/*": ["src/platform/packages/shared/kbn-mcp-dev-server/*"],
       "@kbn/metrics-data-access-plugin": ["x-pack/solutions/observability/plugins/metrics_data_access"],
       "@kbn/metrics-data-access-plugin/*": ["x-pack/solutions/observability/plugins/metrics_data_access/*"],
       "@kbn/ml-agg-utils": ["x-pack/platform/packages/private/ml/agg_utils"],
