@@ -177,14 +177,12 @@ export default function ({ getService }: FtrProviderContext) {
           .put('/read_only_objects/transfer')
           .set('kbn-xsrf', 'true')
           .set('cookie', testUserCookie.cookieString())
-          .send({ objectId, type: 'read_only_type', newOwner: 'new_owner' });
+          .send({ objectId, type: 'read_only_type', newOwner: 'new_owner' })
+          .expect(403);
 
-        expect(transferResponse.body).to.have.property('objects');
-        expect(transferResponse.body.objects[0]).to.have.property('error');
-        expect(transferResponse.body.objects[0].error.output).to.have.property('statusCode', 403);
-        expect(transferResponse.body.objects[0].error.output.payload).to.have.property(
-          'message',
-          'User is not authorized to change ownership of type "read_only_type".'
+        expect(transferResponse.body).to.have.property('message');
+        expect(transferResponse.body.message).to.contain(
+          `Unable to manage_access_control read_only_type`
         );
       });
 
