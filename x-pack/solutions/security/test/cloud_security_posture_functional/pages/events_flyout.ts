@@ -182,7 +182,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await networkEventsPage.flyout.assertPreviewPanelIsOpen('event');
     });
 
-    it('show show related alerts', async () => {
+    it('show related alerts', async () => {
       // Setting the timerange to fit the data and open the flyout for a specific alert
       await networkEventsPage.navigateToNetworkEventsPage(
         `${networkEventsPage.getAbsoluteTimerangeFilter(

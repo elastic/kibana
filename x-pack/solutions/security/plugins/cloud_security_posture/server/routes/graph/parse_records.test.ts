@@ -33,6 +33,7 @@ describe('parseRecords', () => {
         actorIds: 'actor1',
         badge: 1,
         docs: ['{"foo":"bar"}'],
+        isAlert: false,
         isOrigin: true,
         isOriginAlert: false,
         targetIds: 'target1',
@@ -70,6 +71,7 @@ describe('parseRecords', () => {
         actorIds: 'actor1',
         badge: 1,
         docs: '{"a":1}',
+        isAlert: false,
         isOrigin: true,
         isOriginAlert: false,
         targetIds: 'target1',
@@ -88,6 +90,7 @@ describe('parseRecords', () => {
         actorIds: 'actor1',
         badge: 1,
         docs: ['{"foo":"bar"}'],
+        isAlert: false,
         isOrigin: true,
         isOriginAlert: false,
         targetIds: 'target1',
@@ -97,6 +100,7 @@ describe('parseRecords', () => {
         actorIds: 'actor1',
         badge: 1,
         docs: ['{"baz":2}'],
+        isAlert: false,
         isOrigin: true,
         isOriginAlert: false,
         targetIds: 'target1',
@@ -150,8 +154,28 @@ describe('parseRecords', () => {
         action: 'alert',
         docs: ['{"foo":"bar"}'],
         badge: 1,
+        isAlert: false,
         isOrigin: true,
         isOriginAlert: true,
+      },
+    ];
+    const result = parseRecords(mockLogger, records);
+    const labelNode = result.nodes.find((n) => n.id.includes('label(alert)'));
+    expect(labelNode).toBeDefined();
+    expect(labelNode).toHaveProperty('color', 'danger');
+  });
+
+  it('sets color to danger for isAlert', () => {
+    const records: GraphEdge[] = [
+      {
+        actorIds: 'actor1',
+        targetIds: 'target1',
+        action: 'alert',
+        docs: ['{"foo":"bar"}'],
+        badge: 1,
+        isAlert: true,
+        isOrigin: true,
+        isOriginAlert: false,
       },
     ];
     const result = parseRecords(mockLogger, records);
@@ -169,6 +193,7 @@ describe('parseRecords', () => {
         docs: ['{"foo":"bar"}'],
         hosts: [],
         ips: [],
+        isAlert: false,
         isOrigin: true,
         isOriginAlert: false,
         targetIds: [null, 'target1'],
@@ -189,6 +214,7 @@ describe('parseRecords', () => {
         actorIds: ['a1', 'a2'],
         badge: 1,
         docs: ['{"foo":"bar"}'],
+        isAlert: false,
         isOrigin: true,
         isOriginAlert: false,
         targetIds: ['t1'],
@@ -198,6 +224,7 @@ describe('parseRecords', () => {
         actorIds: ['a3'],
         badge: 1,
         docs: ['{"foo":"bar"}'],
+        isAlert: false,
         isOrigin: true,
         isOriginAlert: false,
         targetIds: ['t2', 't3'],
@@ -220,6 +247,7 @@ describe('parseRecords', () => {
         docs: ['{"foo":"bar"}'],
         hosts: ['host1'],
         ips: ['ip1'],
+        isAlert: false,
         isOrigin: true,
         isOriginAlert: false,
         targetIds: [],

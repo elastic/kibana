@@ -47,7 +47,7 @@ describe('fetchGraph', () => {
       esQuery: undefined,
     };
 
-    expect(() => fetchGraph(params)).rejects.toThrowError(/Invalid index pattern/);
+    expect(async () => await fetchGraph(params)).rejects.toThrowError(/Invalid index pattern/);
   });
 
   it('should execute the esql query and return records for valid inputs with no origin events', async () => {
