@@ -11,10 +11,10 @@ import {
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   fields as TECHNICAL_ALERT_FIELDS,
 } from '@kbn/rule-data-utils';
 import { CustomThresholdParams } from '@kbn/response-ops-rule-params/custom_threshold';
-import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { DataViewSpec } from '@kbn/response-ops-rule-params/common';
 import {
   isSuggestedDashboardsValidRuleTypeId,
