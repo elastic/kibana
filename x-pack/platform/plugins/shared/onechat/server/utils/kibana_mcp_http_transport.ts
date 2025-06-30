@@ -6,19 +6,24 @@
  */
 
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
-import type { JSONRPCMessage, RequestId } from '@modelcontextprotocol/sdk/types.js';
-import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
-import type { KibanaResponseFactory, KibanaRequest } from '@kbn/core-http-server';
 import {
+  MessageExtraInfo,
+  ErrorCode,
+  RequestInfo,
+  isInitializeRequest,
+  isJSONRPCError,
   isJSONRPCRequest,
   isJSONRPCResponse,
-  isJSONRPCError,
+  JSONRPCMessage,
   JSONRPCMessageSchema,
-  isInitializeRequest,
+  RequestId,
+  SUPPORTED_PROTOCOL_VERSIONS,
+  DEFAULT_NEGOTIATED_PROTOCOL_VERSION,
 } from '@modelcontextprotocol/sdk/types.js';
-import { Logger } from '@kbn/logging';
-import { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types';
 import { randomUUID } from 'node:crypto';
+
+import type { KibanaResponseFactory, KibanaRequest } from '@kbn/core-http-server';
+import { Logger } from '@kbn/logging';
 import type { IKibanaResponse } from '@kbn/core/server';
 
 /**
@@ -50,10 +55,10 @@ export class KibanaMcpHttpTransport implements Transport {
   private _logger: Logger;
   private _responseCallbacks: Map<string, (response: IKibanaResponse) => void> = new Map();
 
-  sessionId?: string | undefined;
+  sessionId?: string;
   onclose?: () => void;
   onerror?: (error: Error) => void;
-  onmessage?: (message: JSONRPCMessage, extra?: { authInfo?: AuthInfo }) => void;
+  onmessage?: (message: JSONRPCMessage, extra?: MessageExtraInfo) => void;
 
   constructor(options: { sessionIdGenerator?: () => string; logger: Logger }) {
     this.sessionIdGenerator = options.sessionIdGenerator;
@@ -117,8 +122,6 @@ export class KibanaMcpHttpTransport implements Transport {
     responseFactory: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
     try {
-      this._logger.debug('Processing POST request');
-
       // Validate the Accept header
       const acceptHeader = request.headers.accept;
 
@@ -156,6 +159,7 @@ export class KibanaMcpHttpTransport implements Transport {
       }
 
       const rawMessage = request.body;
+      const requestInfo: RequestInfo = { headers: request.headers };
       let messages: JSONRPCMessage[];
 
       // handle batch and single messages
@@ -201,6 +205,12 @@ export class KibanaMcpHttpTransport implements Transport {
         this._initialized = true;
         this._logger.debug(`Session initialized: ${this.sessionId}`);
       }
+      if (!isInitializationRequest) {
+        // Mcp-Protocol-Version header is required for all requests after initialization.
+        if (!this.validateProtocolVersion(request)) {
+          return this.generateProtocolVersionErrorResponse(request, responseFactory);
+        }
+      }
 
       // check if it contains requests
       const hasRequests = messages.some(isJSONRPCRequest);
@@ -212,7 +222,7 @@ export class KibanaMcpHttpTransport implements Transport {
 
         // handle each message
         for (const message of messages) {
-          this.onmessage?.(message);
+          this.onmessage?.(message, { requestInfo });
         }
         return response;
       } else {
@@ -242,7 +252,7 @@ export class KibanaMcpHttpTransport implements Transport {
 
         // handle each message
         for (const message of messages) {
-          this.onmessage?.(message);
+          this.onmessage?.(message, { requestInfo });
         }
 
         // Wait for the response to be ready
@@ -360,6 +370,40 @@ export class KibanaMcpHttpTransport implements Transport {
         error: {
           code: ErrorCode.InvalidRequest,
           message: 'Method not allowed.',
+        },
+        id: null,
+      }),
+    });
+  }
+
+  private getProtocolVersion(req: KibanaRequest): string {
+    let protocolVersion =
+      req.headers['mcp-protocol-version'] ?? DEFAULT_NEGOTIATED_PROTOCOL_VERSION;
+    if (Array.isArray(protocolVersion)) {
+      protocolVersion = protocolVersion[protocolVersion.length - 1];
+    }
+    return protocolVersion;
+  }
+
+  private validateProtocolVersion(req: KibanaRequest): boolean {
+    const protocolVersion = this.getProtocolVersion(req);
+    return SUPPORTED_PROTOCOL_VERSIONS.includes(protocolVersion);
+  }
+
+  private generateProtocolVersionErrorResponse(
+    req: KibanaRequest,
+    res: KibanaResponseFactory
+  ): IKibanaResponse {
+    const protocolVersion = this.getProtocolVersion(req);
+
+    return res.badRequest({
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        error: {
+          code: ErrorCode.InvalidRequest,
+          message: `Bad Request: Unsupported protocol version [${protocolVersion}] (supported versions: ${SUPPORTED_PROTOCOL_VERSIONS.join(
+            ', '
+          )})`,
         },
         id: null,
       }),
