@@ -17,6 +17,9 @@ const root: EmotionFn = ({ euiTheme }) =>
     position: relative;
     width: 100%;
     z-index: ${euiTheme.levels.content};
+
+    display: flex;
+    flex-direction: column;
   `;
 
 export const styles = {
