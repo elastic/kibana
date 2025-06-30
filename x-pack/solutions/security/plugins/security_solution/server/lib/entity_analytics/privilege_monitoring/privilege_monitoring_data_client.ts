@@ -442,23 +442,13 @@ export class PrivilegeMonitoringDataClient {
       } else {
         const index: string = source.indexPattern;
         const syncedUsernames = await this.ingestUsersFromIndexSource(source, index);
-        this.log(
-          'info',
-          `Synced users from index source "${source.name}" (${index}): ${
-            syncedUsernames?.length ?? 0
-          }`
-        );
+
         if (syncedUsernames != null) {
-          this.log(
-            'info',
-            `Synced ${syncedUsernames.length} users from index source "${source.name}" (${index})`
-          );
           const staleUsers = await this.findStaleUsersForIndex(index, syncedUsernames);
           allStaleUsers.push(...staleUsers);
         }
       }
     }
-    this.log('debug', `Found ${allStaleUsers.length} stale users across all index sources.`);
     if (allStaleUsers.length > 0) {
       const ops = this.bulkOperationsForSoftDeleteUsers(allStaleUsers, this.getIndex());
       await this.esClient.bulk({ body: ops });
@@ -475,20 +465,28 @@ export class PrivilegeMonitoringDataClient {
         kuery: source.filter?.kuery,
       });
 
-      return await this.bulkUpsertMonitoredUsers({
+      const result = await this.bulkUpsertMonitoredUsers({
         usernames,
         indexName: index,
       });
+
+      if (!result) {
+        this.log('debug', `No monitored users ingested for index "${index}"`);
+        return null;
+      }
+
+      return result;
     } catch (error) {
       const isIndexNotFound =
         error?.meta?.body?.error?.type === 'index_not_found_exception' ||
         error?.message?.includes('index_not_found_exception');
 
+      const level = isIndexNotFound ? 'warn' : 'error';
       const msg = isIndexNotFound
         ? `Index "${index}" not found — skipping.`
         : `Unexpected error during sync for index "${index}": ${error.message}`;
 
-      this.log(isIndexNotFound ? 'warn' : 'error', msg);
+      this.log(level, msg);
       return null;
     }
   }
@@ -553,7 +551,7 @@ export class PrivilegeMonitoringDataClient {
   }): Promise<string[]> {
     if (usernames.length === 0) {
       this.log('debug', 'No usernames to sync');
-      return []; // TODO: handle this case better
+      return null; // TODO: handle this case better
     }
 
     const existingUserRes = await this.getMonitoredUsers(usernames);
