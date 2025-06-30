@@ -16,7 +16,7 @@ import type { AgentProviderWithId, AgentsServiceStart } from '../types';
 import { createHandler } from './handler';
 
 /**
- * Returns an agent provider exposing the default onechat agent.
+ * Returns an agent provider exposing profile-based agents.
  */
 export const creatProfileProvider = ({
   getProfileClient,
