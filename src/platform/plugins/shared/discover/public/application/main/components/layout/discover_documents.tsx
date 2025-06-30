@@ -89,6 +89,10 @@ import { DataGrouping } from '../../../context/components/grouping/data_grouping
 import type { DataByGroupingAgg } from '../../../context/components/grouping/types';
 import { getDefaultGroupingOptionsPerDataView } from '../../../context/components/grouping/constants';
 import { getGroupingSettingsSelectorHook } from '../../../context/components/grouping/get_grouping_settings_selector';
+import {
+  ESQLDataCascade,
+  getESQLStatsQueryMeta,
+} from '../../../context/components/grouping/esql_data_cascade';
 
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
@@ -434,6 +438,12 @@ function DiscoverDocumentsComponent({
     [viewModeToggle, callouts, loadingIndicator]
   );
 
+  const cascadeGroups = useMemo(() => {
+    if (!isEsqlMode) return [];
+    // @ts-expect-error - query type is a non-discriminating union type, so we need to narrow it down
+    return getESQLStatsQueryMeta(query.esql || '').groupByFields;
+  }, [isEsqlMode, query]);
+
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       // class is used in tests
@@ -447,9 +457,6 @@ function DiscoverDocumentsComponent({
     );
   }
 
-  console.log('document state:: %o \n', documentState);
-  console.log('document rows:: %o \n', rows);
-
   return (
     // class is used in tests
     <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={styles.container}>
@@ -460,91 +467,111 @@ function DiscoverDocumentsComponent({
       </EuiScreenReaderOnly>
       <div className="unifiedDataTable" css={styles.dataTable}>
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
-          <DataGrouping<DataByGroupingAgg>
-            dataView={dataView}
-            stateContainer={stateContainer}
-            groupingId={`DISCOVER_TABLE_CONFIG_ID_${dataView.id}`}
-            defaultGroupingOptions={defaultGroupingOptions}
-            onGroupClose={() => {
-              services.filterManager.setAppFilters([]);
-            }}
-            services={{
-              notifications: services.notifications,
-              http: services.http,
-              data: services.data,
-            }}
-          >
-            {(groupingFilters) => {
-              services.filterManager.setAppFilters(
-                groupingFilters.filter((q) => q.meta.type === 'phrase')
-              );
-              return (
-                <DiscoverGridMemoized
-                  ariaLabelledBy="documentsAriaLabel"
-                  columns={currentColumns}
-                  columnsMeta={columnsMeta}
-                  expandedDoc={expandedDoc}
-                  dataView={dataView}
-                  loadingState={
-                    isDataLoading
-                      ? DataLoadingState.loading
-                      : isMoreDataLoading
-                      ? DataLoadingState.loadingMore
-                      : DataLoadingState.loaded
-                  }
-                  rows={rows}
-                  sort={(sort as SortOrder[]) || []}
-                  searchDescription={savedSearch.description}
-                  searchTitle={savedSearch.title}
-                  setExpandedDoc={setExpandedDoc}
-                  showTimeCol={showTimeCol}
-                  settings={grid}
-                  onFilter={onAddFilter as DocViewFilterFn}
-                  onSetColumns={onSetColumns}
-                  onSort={onSort}
-                  onResize={onResizeDataGrid}
-                  configHeaderRowHeight={3}
-                  headerRowHeightState={headerRowHeight}
-                  onUpdateHeaderRowHeight={onUpdateHeaderRowHeight}
-                  rowHeightState={rowHeight}
-                  onUpdateRowHeight={onUpdateRowHeight}
-                  isSortEnabled={true}
-                  isPlainRecord={isEsqlMode}
-                  isPaginationEnabled={!isEsqlMode}
-                  rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
-                  onUpdateRowsPerPage={onUpdateRowsPerPage}
-                  maxAllowedSampleSize={getMaxAllowedSampleSize(services.uiSettings)}
-                  sampleSizeState={getAllowedSampleSize(sampleSizeState, services.uiSettings)}
-                  onUpdateSampleSize={!isEsqlMode ? onUpdateSampleSize : undefined}
-                  onFieldEdited={onFieldEdited}
-                  configRowHeight={configRowHeight}
-                  showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
-                  maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
-                  renderDocumentView={renderDocumentView}
-                  renderCustomToolbar={renderCustomToolbarWithElements}
-                  services={services}
-                  totalHits={totalHits}
-                  onFetchMoreRecords={onFetchMoreRecords}
-                  externalCustomRenderers={cellRenderers}
-                  rowAdditionalLeadingControls={rowAdditionalLeadingControls}
-                  dataGridDensityState={density}
-                  onUpdateDataGridDensity={onUpdateDensity}
-                  onUpdateESQLQuery={stateContainer.actions.updateESQLQuery}
-                  query={query}
-                  cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
-                  cellActionsMetadata={cellActionsMetadata}
-                  cellActionsHandling="append"
-                  initialState={dataGridUiState}
-                  onInitialStateChange={onInitialStateChange}
-                  externalAdditionalControls={
-                    !groupingFilters || groupingFilters.length === 0 ? (
-                      <>{groupSelector()}</>
-                    ) : undefined
-                  }
-                />
-              );
-            }}
-          </DataGrouping>
+          <React.Fragment>
+            {Boolean(cascadeGroups.length) ? (
+              <ESQLDataCascade
+                initialData={rows}
+                cascadeGroups={cascadeGroups}
+                dataView={dataView}
+                defaultFilters={stateContainer.appState.getState().filters}
+                onGroupClose={() => {
+                  services.filterManager.setAppFilters([]);
+                }}
+                stateContainer={stateContainer}
+                services={{
+                  notifications: services.notifications,
+                  http: services.http,
+                  data: services.data,
+                }}
+              />
+            ) : (
+              <DataGrouping<DataByGroupingAgg>
+                dataView={dataView}
+                stateContainer={stateContainer}
+                groupingId={`DISCOVER_TABLE_CONFIG_ID_${dataView.id}`}
+                defaultGroupingOptions={defaultGroupingOptions}
+                onGroupClose={() => {
+                  services.filterManager.setAppFilters([]);
+                }}
+                services={{
+                  notifications: services.notifications,
+                  http: services.http,
+                  data: services.data,
+                }}
+              >
+                {(groupingFilters) => {
+                  services.filterManager.setAppFilters(
+                    groupingFilters.filter((q) => q.meta.type === 'phrase')
+                  );
+                  return (
+                    <DiscoverGridMemoized
+                      ariaLabelledBy="documentsAriaLabel"
+                      columns={currentColumns}
+                      columnsMeta={columnsMeta}
+                      expandedDoc={expandedDoc}
+                      dataView={dataView}
+                      loadingState={
+                        isDataLoading
+                          ? DataLoadingState.loading
+                          : isMoreDataLoading
+                          ? DataLoadingState.loadingMore
+                          : DataLoadingState.loaded
+                      }
+                      rows={rows}
+                      sort={(sort as SortOrder[]) || []}
+                      searchDescription={savedSearch.description}
+                      searchTitle={savedSearch.title}
+                      setExpandedDoc={setExpandedDoc}
+                      showTimeCol={showTimeCol}
+                      settings={grid}
+                      onFilter={onAddFilter as DocViewFilterFn}
+                      onSetColumns={onSetColumns}
+                      onSort={onSort}
+                      onResize={onResizeDataGrid}
+                      configHeaderRowHeight={3}
+                      headerRowHeightState={headerRowHeight}
+                      onUpdateHeaderRowHeight={onUpdateHeaderRowHeight}
+                      rowHeightState={rowHeight}
+                      onUpdateRowHeight={onUpdateRowHeight}
+                      isSortEnabled={true}
+                      isPlainRecord={isEsqlMode}
+                      isPaginationEnabled={!isEsqlMode}
+                      rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
+                      onUpdateRowsPerPage={onUpdateRowsPerPage}
+                      maxAllowedSampleSize={getMaxAllowedSampleSize(services.uiSettings)}
+                      sampleSizeState={getAllowedSampleSize(sampleSizeState, services.uiSettings)}
+                      onUpdateSampleSize={!isEsqlMode ? onUpdateSampleSize : undefined}
+                      onFieldEdited={onFieldEdited}
+                      configRowHeight={configRowHeight}
+                      showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
+                      maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
+                      renderDocumentView={renderDocumentView}
+                      renderCustomToolbar={renderCustomToolbarWithElements}
+                      services={services}
+                      totalHits={totalHits}
+                      onFetchMoreRecords={onFetchMoreRecords}
+                      externalCustomRenderers={cellRenderers}
+                      rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+                      dataGridDensityState={density}
+                      onUpdateDataGridDensity={onUpdateDensity}
+                      onUpdateESQLQuery={stateContainer.actions.updateESQLQuery}
+                      query={query}
+                      cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
+                      cellActionsMetadata={cellActionsMetadata}
+                      cellActionsHandling="append"
+                      initialState={dataGridUiState}
+                      onInitialStateChange={onInitialStateChange}
+                      externalAdditionalControls={
+                        !groupingFilters || groupingFilters.length === 0 ? (
+                          <>{groupSelector()}</>
+                        ) : undefined
+                      }
+                    />
+                  );
+                }}
+              </DataGrouping>
+            )}
+          </React.Fragment>
         </CellActionsProvider>
       </div>
     </EuiFlexItem>
