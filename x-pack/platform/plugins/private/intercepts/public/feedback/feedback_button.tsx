@@ -8,9 +8,10 @@
 import React from 'react';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
+import { EuiHeaderSectionItemButton, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FeedbackFlyout } from './feedback_flyout';
 
 interface Props {
@@ -55,12 +56,16 @@ export const FeedbackButton = ({ core, getLicense }: Props) => {
       data-test-subj="feedbackButton"
       aria-controls="keyPadMenu"
       aria-haspopup="true"
-      aria-label={i18n.translate('xpack.intercept.giveFeedbackButton.label', {
+      aria-label={i18n.translate('xpack.intercept.feedbackButton.ariaLabel', {
         defaultMessage: 'Give feedback',
       })}
+      iconType="comment"
+      textProps={false}
       onClick={toogleFlyout}
     >
-      <EuiIcon type="comment" />
+      <EuiText size="s">
+        <FormattedMessage id="xpack.intercept.feedbackButton.text" defaultMessage="Feedback" />
+      </EuiText>
     </EuiHeaderSectionItemButton>
   );
 };
