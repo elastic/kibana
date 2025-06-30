@@ -570,12 +570,6 @@
                             }
                           }
                         },
-                        "has_exceptions": {
-                          "type": "long",
-                          "_meta": {
-                            "description": "Number of query rules with exceptions"
-                          }
-                        },
                         "response_actions": {
                           "properties": {
                             "enabled": {
@@ -606,6 +600,12 @@
                                 }
                               }
                             }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of query rules with exceptions"
                           }
                         }
                       }
@@ -759,6 +759,12 @@
                               }
                             }
                           }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom query rules with exceptions"
+                          }
                         }
                       }
                     },
@@ -880,12 +886,6 @@
                             }
                           }
                         },
-                        "has_exceptions": {
-                          "type": "long",
-                          "_meta": {
-                            "description": "Number of threshold rules with exceptions"
-                          }
-                        },
                         "response_actions": {
                           "properties": {
                             "enabled": {
@@ -916,6 +916,12 @@
                                 }
                               }
                             }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of threshold rules with exceptions"
                           }
                         }
                       }
@@ -1069,6 +1075,12 @@
                               }
                             }
                           }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom threshold rules with exceptions"
+                          }
                         }
                       }
                     },
@@ -1190,12 +1202,6 @@
                             }
                           }
                         },
-                        "has_exceptions": {
-                          "type": "long",
-                          "_meta": {
-                            "description": "Number of eql rules with exceptions"
-                          }
-                        },
                         "response_actions": {
                           "properties": {
                             "enabled": {
@@ -1226,6 +1232,12 @@
                                 }
                               }
                             }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of EQL rules with exceptions"
                           }
                         }
                       }
@@ -1379,6 +1391,12 @@
                               }
                             }
                           }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom EQL rules with exceptions"
+                          }
                         }
                       }
                     },
@@ -1500,12 +1518,6 @@
                             }
                           }
                         },
-                        "has_exceptions": {
-                          "type": "long",
-                          "_meta": {
-                            "description": "Number of machine_learning rules with exceptions"
-                          }
-                        },
                         "response_actions": {
                           "properties": {
                             "enabled": {
@@ -1536,6 +1548,12 @@
                                 }
                               }
                             }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of ML rules with exceptions"
                           }
                         }
                       }
@@ -1689,6 +1707,12 @@
                               }
                             }
                           }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom ML rules with exceptions"
+                          }
                         }
                       }
                     },
@@ -1810,12 +1834,6 @@
                             }
                           }
                         },
-                        "has_exceptions": {
-                          "type": "long",
-                          "_meta": {
-                            "description": "Number of threat_match rules with exceptions"
-                          }
-                        },
                         "response_actions": {
                           "properties": {
                             "enabled": {
@@ -1846,6 +1864,12 @@
                                 }
                               }
                             }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of threat match rules with exceptions"
                           }
                         }
                       }
@@ -1999,6 +2023,12 @@
                               }
                             }
                           }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom threat match rules with exceptions"
+                          }
                         }
                       }
                     },
@@ -2120,12 +2150,6 @@
                             }
                           }
                         },
-                        "has_exceptions": {
-                          "type": "long",
-                          "_meta": {
-                            "description": "Number of new_terms rules with exceptions"
-                          }
-                        },
                         "response_actions": {
                           "properties": {
                             "enabled": {
@@ -2156,6 +2180,12 @@
                                 }
                               }
                             }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of New Terms rules with exceptions"
                           }
                         }
                       }
@@ -2309,6 +2339,12 @@
                               }
                             }
                           }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom New Terms rules with exceptions"
+                          }
                         }
                       }
                     },
@@ -2430,12 +2466,6 @@
                             }
                           }
                         },
-                        "has_exceptions": {
-                          "type": "long",
-                          "_meta": {
-                            "description": "Number of esql rules with exceptions"
-                          }
-                        },
                         "response_actions": {
                           "properties": {
                             "enabled": {
@@ -2466,6 +2496,12 @@
                                 }
                               }
                             }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of ES|QL rules with exceptions"
                           }
                         }
                       }
@@ -2619,6 +2655,12 @@
                               }
                             }
                           }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom ES|QL rules with exceptions"
+                          }
                         }
                       }
                     },
@@ -2740,12 +2782,6 @@
                             }
                           }
                         },
-                        "has_exceptions": {
-                          "type": "long",
-                          "_meta": {
-                            "description": "Number of elastic rules with exceptions"
-                          }
-                        },
                         "response_actions": {
                           "properties": {
                             "enabled": {
@@ -2776,6 +2812,12 @@
                                 }
                               }
                             }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of prebuilt rules with exceptions"
                           }
                         }
                       }
@@ -2898,12 +2940,6 @@
                             }
                           }
                         },
-                        "has_exceptions": {
-                          "type": "long",
-                          "_meta": {
-                            "description": "Number of custom rules with exceptions"
-                          }
-                        },
                         "response_actions": {
                           "properties": {
                             "enabled": {
@@ -2934,6 +2970,12 @@
                                 }
                               }
                             }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom rules with exceptions"
                           }
                         }
                       }
