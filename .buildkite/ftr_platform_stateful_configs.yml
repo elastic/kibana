@@ -245,9 +245,9 @@ enabled:
   - x-pack/test/functional/apps/ml/stack_management_jobs/config.ts
   - x-pack/test/functional/apps/ml/memory_usage/config.ts
   - x-pack/test/functional/apps/monitoring/config.ts
-  - x-pack/test/functional/apps/painless_lab/config.ts
+  - x-pack/platform/test/functional/apps/painless_lab/config.ts
   - x-pack/test/functional/apps/remote_clusters/config.ts
-  - x-pack/test/functional/apps/reporting_management/config.ts
+  - x-pack/platform/test/functional/apps/reporting_management/config.ts
   - x-pack/test/functional/apps/rollup_job/config.ts
   - x-pack/test/functional/apps/saved_objects_management/config.ts
   - x-pack/test/functional/apps/saved_query_management/config.ts
@@ -262,7 +262,7 @@ enabled:
   - x-pack/test/functional/apps/transform/edit_clone/config.ts
   - x-pack/test/functional/apps/transform/permissions/config.ts
   - x-pack/test/functional/apps/transform/feature_controls/config.ts
-  - x-pack/test/functional/apps/upgrade_assistant/config.ts
+  - x-pack/platform/test/functional/apps/upgrade_assistant/config.ts
   - x-pack/test/functional/apps/user_profiles/config.ts
   - x-pack/test/functional/apps/visualize/config.ts
   - x-pack/platform/test/functional/apps/watcher/config.ts
@@ -270,7 +270,7 @@ enabled:
   - x-pack/test/functional/config.ccs.ts
   - x-pack/test/functional/config.firefox.js
   - x-pack/platform/test/functional/config.firefox.ts
-  - x-pack/test/functional/config.upgrade_assistant.ts
+  - x-pack/platform/test/functional/config.upgrade_assistant.ts
   - x-pack/test/functional_cloud/config.ts
   - x-pack/test/functional_cloud/saml.config.ts
   - x-pack/test/functional_solution_sidenav/config.ts
