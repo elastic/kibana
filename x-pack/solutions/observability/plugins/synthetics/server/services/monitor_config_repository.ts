@@ -32,6 +32,7 @@ import {
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../common/runtime_types';
+import { sortSavedObjectsByField } from './monitor_config_utils';
 
 const getSuccessfulResult = <T>(
   results: Array<PromiseSettledResult<T>>
@@ -204,19 +205,42 @@ export class MonitorConfigRepository {
     types: string[] = syntheticsMonitorSOTypes,
     soClient: SavedObjectsClientContract = this.soClient
   ): Promise<SavedObjectsFindResponse<T>> {
+    const { page = 1, perPage = 20, sortField, sortOrder = 'asc' } = options;
+
+    // To correctly paginate from two sources, we need to fetch enough items
+    // from both to cover all items up to the current page.
+    const limit = page * perPage;
+
     const promises: Array<Promise<SavedObjectsFindResponse<T>>> = types.map((type) => {
       const opts = {
-        type,
         ...options,
-        perPage: options.perPage ?? 5000,
+        type,
+        // We don't use pages here, we fetch all items up to the current page limit
+        page: 1,
+        perPage: limit,
       };
       return soClient.find<T>(this.handleLegacyOptions(opts, type));
     });
-    const [result, legacyResult] = await Promise.all(promises);
+
+    const results = await Promise.all(promises);
+
+    // Combine all results from all types
+    const combinedObjects = results.flatMap((r) => r.saved_objects);
+
+    // Sort the combined results if a sortField is provided
+    if (sortField) {
+      sortSavedObjectsByField(combinedObjects, sortField, sortOrder);
+    }
+
+    const total = results.reduce((sum, r) => sum + r.total, 0);
+    const start = (page - 1) * perPage;
+    const paginatedObjects = combinedObjects.slice(start, start + perPage);
+
     return {
-      ...result,
-      total: result.total + legacyResult.total,
-      saved_objects: [...result.saved_objects, ...legacyResult.saved_objects],
+      page,
+      per_page: perPage,
+      total,
+      saved_objects: paginatedObjects,
     };
   }
 
@@ -343,4 +367,6 @@ export class MonitorConfigRepository {
       return options;
     }
   }
+
+  getAggs = () => {};
 }
