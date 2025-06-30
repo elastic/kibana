@@ -59,6 +59,7 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     notifications_disabled: 0,
     legacy_investigation_fields: 0,
     alert_suppression: initialAlertSuppression,
+    has_exceptions: 0,
     response_actions: initialResponseActionsUsage,
   },
   threshold: {
@@ -72,6 +73,7 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     notifications_disabled: 0,
     legacy_investigation_fields: 0,
     alert_suppression: initialAlertSuppression,
+    has_exceptions: 0,
     response_actions: initialResponseActionsUsage,
   },
   eql: {
@@ -85,6 +87,7 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     notifications_disabled: 0,
     legacy_investigation_fields: 0,
     alert_suppression: initialAlertSuppression,
+    has_exceptions: 0,
     response_actions: initialResponseActionsUsage,
   },
   machine_learning: {
@@ -98,6 +101,7 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     notifications_disabled: 0,
     legacy_investigation_fields: 0,
     alert_suppression: initialAlertSuppression,
+    has_exceptions: 0,
     response_actions: initialResponseActionsUsage,
   },
   threat_match: {
@@ -111,6 +115,7 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     notifications_disabled: 0,
     legacy_investigation_fields: 0,
     alert_suppression: initialAlertSuppression,
+    has_exceptions: 0,
     response_actions: initialResponseActionsUsage,
   },
   new_terms: {
@@ -124,6 +129,7 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     notifications_disabled: 0,
     legacy_investigation_fields: 0,
     alert_suppression: initialAlertSuppression,
+    has_exceptions: 0,
     response_actions: initialResponseActionsUsage,
   },
   esql: {
@@ -137,6 +143,7 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     notifications_disabled: 0,
     legacy_investigation_fields: 0,
     alert_suppression: initialAlertSuppression,
+    has_exceptions: 0,
     response_actions: initialResponseActionsUsage,
   },
   elastic_total: {
@@ -150,6 +157,7 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     notifications_disabled: 0,
     legacy_investigation_fields: 0,
     alert_suppression: initialAlertSuppression,
+    has_exceptions: 0,
     response_actions: initialResponseActionsUsage,
   },
   custom_total: {
@@ -163,6 +171,7 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     notifications_disabled: 0,
     legacy_investigation_fields: 0,
     alert_suppression: initialAlertSuppression,
+    has_exceptions: 0,
     response_actions: initialResponseActionsUsage,
   },
 });

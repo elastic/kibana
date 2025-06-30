@@ -94,6 +94,7 @@ export const UnsavedFormProvider: React.FC<React.PropsWithChildren<UnsavedFormPr
   }, [form, storage, setLocalSessionDebounce]);
 
   useEffect(() => {
+    if (models.length === 0) return; // don't continue if there are no models
     const defaultModel = models.find((model) => !model.disabled);
     const currentModel = form.getValues(PlaygroundFormFields.summarizationModel);
 
