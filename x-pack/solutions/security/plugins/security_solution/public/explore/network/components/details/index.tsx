@@ -57,7 +57,7 @@ export interface IpOverviewProps {
   type: networkModel.NetworkType;
   indexPatterns: string[];
   jobNameById: Record<string, string | undefined>;
-  isFlyoutOpen: boolean;
+  isFlyoutOpen?: boolean;
 }
 
 export const IpOverview = React.memo<IpOverviewProps>(
@@ -77,7 +77,7 @@ export const IpOverview = React.memo<IpOverviewProps>(
     scopeId,
     indexPatterns,
     jobNameById,
-    isFlyoutOpen,
+    isFlyoutOpen = false,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);

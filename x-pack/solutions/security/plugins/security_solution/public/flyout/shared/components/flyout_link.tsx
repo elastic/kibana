@@ -29,7 +29,7 @@ interface FlyoutLinkProps {
    */
   scopeId: string;
   /**
-   * Whether the flyout is open
+   * Optional override to determine if the flyout is open
    */
   isFlyoutOpen?: boolean;
   /**
@@ -48,15 +48,18 @@ interface FlyoutLinkProps {
 
 /**
  * Renders a link that opens the right panel or preview panel
- * If a flyout is open, the link will open the preview panel
+ * If a flyout is open, it returns the PreviewLink component
  * If a flyout is not open, the link will open the right panel
  * If the field does not have flyout, the link will not be rendered
+ *
+ * The flyout open determination is done via url, for expandable
+ * flyout that uses in memory state, use the `isFlyoutOpen` prop.
  */
 export const FlyoutLink: FC<FlyoutLinkProps> = ({
   field,
   value,
   scopeId,
-  isFlyoutOpen,
+  isFlyoutOpen = false,
   ruleId,
   children,
   'data-test-subj': dataTestSubj,

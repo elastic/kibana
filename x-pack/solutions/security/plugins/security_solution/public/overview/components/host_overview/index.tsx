@@ -55,7 +55,7 @@ interface HostSummaryProps {
   narrowDateRange: NarrowDateRange;
   hostName: string;
   jobNameById: Record<string, string | undefined>;
-  isFlyoutOpen: boolean;
+  isFlyoutOpen?: boolean;
 }
 
 const HostRiskOverviewWrapper = styled(EuiFlexGroup, {
@@ -83,7 +83,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     startDate,
     hostName,
     jobNameById,
-    isFlyoutOpen,
+    isFlyoutOpen = false,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);

@@ -265,7 +265,6 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                   indexPatterns={selectedPatterns}
                   jobNameById={jobNameById}
                   scopeId={SourcererScopeName.default}
-                  isFlyoutOpen={false}
                 />
               )}
             </AnomalyTableProvider>

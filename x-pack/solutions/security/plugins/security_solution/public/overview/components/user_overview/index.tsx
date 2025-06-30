@@ -56,7 +56,7 @@ export interface UserSummaryProps {
   userName: string;
   indexPatterns: string[];
   jobNameById: Record<string, string | undefined>;
-  isFlyoutOpen: boolean;
+  isFlyoutOpen?: boolean;
 }
 
 const UserRiskOverviewWrapper = styled(EuiFlexGroup, {
@@ -84,7 +84,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
     userName,
     indexPatterns,
     jobNameById,
-    isFlyoutOpen,
+    isFlyoutOpen = false,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
