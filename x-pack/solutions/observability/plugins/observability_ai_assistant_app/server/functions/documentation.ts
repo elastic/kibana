@@ -65,8 +65,11 @@ export async function registerDocumentationFunction({
       } as const,
     },
     async ({ arguments: { query, product }, connectorId, simulateFunctionCalling }) => {
+      const esClient = (await resources.context.core).elasticsearch.client;
+
       const inferenceId =
-        (await getInferenceIdFromWriteIndex(esClient, logger)) ?? defaultInferenceEndpoints.ELSER;
+        (await getInferenceIdFromWriteIndex(esClient, resources.logger)) ??
+        defaultInferenceEndpoints.ELSER;
 
       const response = await llmTasks!.retrieveDocumentation({
         searchTerm: query,
