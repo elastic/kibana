@@ -278,9 +278,6 @@ describe('config validation', () => {
           },
         },
         "responseTimeout": "PT1M",
-        "usage": Object {
-          "url": "https://usage-api.usage-api/api/v1/usage",
-        },
       }
     `);
   });
