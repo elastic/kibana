@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
+import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
 import type { BoolQuery } from '@kbn/es-query';
 import type { NamedAggregation } from '@kbn/grouping';
 import { isNoneGroup, getGroupingQuery } from '@kbn/grouping';
