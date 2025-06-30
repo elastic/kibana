@@ -214,7 +214,7 @@ describe('RuleDashboards', () => {
       expect(searchInput).toHaveValue('Dashboard 1');
 
       expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalledWith(
-        expect.objectContaining({ query: { limit: 100, text: '*' }, spaces: ['*'] })
+        expect.objectContaining({ query: { limit: 100, text: 'Dashboard 1*' }, spaces: ['*'] })
       );
 
       expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
