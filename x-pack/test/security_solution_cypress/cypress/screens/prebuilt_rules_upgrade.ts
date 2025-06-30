@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export function ruleEditUrl(ruleId: string): string {
-  return `/app/security/rules/id/${ruleId}/edit`;
-}
+export const PREBUILT_RULES_UPGRADE_REMINDER_CALLOUT =
+  '[data-test-subj="prebuilt-rules-update-callout"]';
+
+export const SINGLE_PREBUILT_RULE_UPGRADE_REMINDER_CALLOUT =
+  '[data-test-subj="single-prebuilt-rule-upgrade-callout"]';
