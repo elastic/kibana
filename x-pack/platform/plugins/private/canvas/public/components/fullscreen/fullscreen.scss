@@ -5,11 +5,6 @@ body.canvas-isFullscreen {
     padding-top: 0;
   }
 
-  // following rule is for docked navigation
-  &.euiBody--collapsibleNavIsDocked {
-    padding-left: 0 !important; // sass-lint:disable-line no-important
-  }
-
   // hide global loading indicator
   .kbnLoadingIndicator {
     display: none;
