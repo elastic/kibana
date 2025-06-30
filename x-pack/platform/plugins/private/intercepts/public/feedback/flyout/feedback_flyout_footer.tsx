@@ -37,7 +37,7 @@ export const FeedbackFlyoutFooter = ({ isSendFeedbackButtonDisabled, submitFeedb
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
                 <FormattedMessage
-                  id="xpack.intercept.feedbackFlyout.form.infoText"
+                  id="xpack.intercepts.feedbackFlyout.form.infoText"
                   defaultMessage="Session data included"
                 />
               </EuiText>
@@ -48,7 +48,7 @@ export const FeedbackFlyoutFooter = ({ isSendFeedbackButtonDisabled, submitFeedb
                 color="subdued"
                 content={
                   <FormattedMessage
-                    id="xpack.intercept.feedbackFlyout.form.infoTooltip"
+                    id="xpack.intercepts.feedbackFlyout.form.infoTooltip"
                     defaultMessage="By sending feedback, you acknowledge that session information is collected along with your input to help us better understand your experience. Please do not include any sensitive, personal, or confidential information in this form."
                   />
                 }
@@ -67,7 +67,7 @@ export const FeedbackFlyoutFooter = ({ isSendFeedbackButtonDisabled, submitFeedb
             onClick={submitFeedback}
           >
             <FormattedMessage
-              id="xpack.intercept.feedbackFlyout.form.sendButton.text"
+              id="xpack.intercepts.feedbackFlyout.form.sendButton.text"
               defaultMessage="Send"
             />
           </EuiButton>

@@ -62,7 +62,7 @@ export const FeedbackButton = ({ core, isServerless, getLicense }: Props) => {
       data-test-subj="feedbackButton"
       aria-controls="keyPadMenu"
       aria-haspopup={!isServerless}
-      aria-label={i18n.translate('xpack.intercept.feedbackButton.ariaLabel', {
+      aria-label={i18n.translate('xpack.intercepts.feedbackButton.ariaLabel', {
         defaultMessage: 'Give feedback',
       })}
       iconType="comment"
@@ -72,7 +72,7 @@ export const FeedbackButton = ({ core, isServerless, getLicense }: Props) => {
       target={isServerless ? '_blank' : undefined}
     >
       <EuiText size="s">
-        <FormattedMessage id="xpack.intercept.feedbackButton.text" defaultMessage="Feedback" />
+        <FormattedMessage id="xpack.intercepts.feedbackButton.text" defaultMessage="Feedback" />
       </EuiText>
     </EuiHeaderSectionItemButton>
   );

@@ -35,7 +35,7 @@ const feedbackTypes = [
     value: FEEDBACK_TYPE.FEATURE_REQUEST,
     text: (
       <FormattedMessage
-        id="xpack.intercept.feedbackFlyout.form.select.options.featureRequest"
+        id="xpack.intercepts.feedbackFlyout.form.select.options.featureRequest"
         defaultMessage="Request a feature"
       />
     ),
@@ -44,7 +44,7 @@ const feedbackTypes = [
     value: FEEDBACK_TYPE.ISSUE_REPORT,
     text: (
       <FormattedMessage
-        id="xpack.intercept.feedbackFlyout.form.select.options.issueReport"
+        id="xpack.intercepts.feedbackFlyout.form.select.options.issueReport"
         defaultMessage="Report an issue"
       />
     ),
@@ -53,7 +53,7 @@ const feedbackTypes = [
     value: FEEDBACK_TYPE.OTHER_FEEDBACK,
     text: (
       <FormattedMessage
-        id="xpack.intercept.feedbackFlyout.form.select.options.otherFeedback"
+        id="xpack.intercepts.feedbackFlyout.form.select.options.otherFeedback"
         defaultMessage="Other feedback"
       />
     ),
@@ -64,7 +64,7 @@ const getTextAreaLabel = (feedbackType: FEEDBACK_TYPE) => {
   if (feedbackType === FEEDBACK_TYPE.FEATURE_REQUEST) {
     return (
       <FormattedMessage
-        id="xpack.intercept.feedbackFlyout.form.textArea.featureRequestLabel"
+        id="xpack.intercepts.feedbackFlyout.form.textArea.featureRequestLabel"
         defaultMessage="Describe your idea"
       />
     );
@@ -72,14 +72,14 @@ const getTextAreaLabel = (feedbackType: FEEDBACK_TYPE) => {
   if (feedbackType === FEEDBACK_TYPE.ISSUE_REPORT) {
     return (
       <FormattedMessage
-        id="xpack.intercept.feedbackFlyout.form.textArea.issueReportLabel"
+        id="xpack.intercepts.feedbackFlyout.form.textArea.issueReportLabel"
         defaultMessage="Describe your issue"
       />
     );
   }
   return (
     <FormattedMessage
-      id="xpack.intercept.feedbackFlyout.form.textArea.otherFeedbackLabel"
+      id="xpack.intercepts.feedbackFlyout.form.textArea.otherFeedbackLabel"
       defaultMessage="Share your feedback"
     />
   );
@@ -145,13 +145,13 @@ export const FeedbackFlyoutBody = ({
                 <EuiSpacer size="s" />
                 <EuiText size="s">
                   <FormattedMessage
-                    id="xpack.intercept.feedbackFlyout.form.select.issueReport.helpText.text"
+                    id="xpack.intercepts.feedbackFlyout.form.select.issueReport.helpText.text"
                     defaultMessage="This form helps us collect general feedback about our products. If you need assistance, {supportLink} instead."
                     values={{
                       supportLink: (
                         <EuiLink href={ELASTIC_SUPPORT_LINK} target="_blank" external={true}>
                           <FormattedMessage
-                            id="xpack.intercept.feedbackFlyout.issueReport.helpText.supportLink"
+                            id="xpack.intercepts.feedbackFlyout.issueReport.helpText.supportLink"
                             defaultMessage="submit a support request"
                           />
                         </EuiLink>
@@ -166,7 +166,7 @@ export const FeedbackFlyoutBody = ({
           <EuiSelect
             options={feedbackTypes}
             value={feedbackType}
-            aria-label={i18n.translate('xpack.intercept.feedbackFlyout.form.select.ariaLabel', {
+            aria-label={i18n.translate('xpack.intercepts.feedbackFlyout.form.select.ariaLabel', {
               defaultMessage: 'Select feedback type',
             })}
             data-test-subj="feedbackTypeSelect"
@@ -181,7 +181,7 @@ export const FeedbackFlyoutBody = ({
               <EuiSpacer size="s" />
               <EuiText size="s">
                 <FormattedMessage
-                  id="xpack.intercept.feedbackFlyout.form.textArea.helpText"
+                  id="xpack.intercepts.feedbackFlyout.form.textArea.helpText"
                   defaultMessage="Please share your email so we can get in touch for possible follow-up questions:"
                 />
               </EuiText>
@@ -190,7 +190,7 @@ export const FeedbackFlyoutBody = ({
         >
           <EuiTextArea
             value={feedbackText}
-            aria-label={i18n.translate('xpack.intercept.feedbackFlyout.form.textArea.ariaLabel', {
+            aria-label={i18n.translate('xpack.intercepts.feedbackFlyout.form.textArea.ariaLabel', {
               defaultMessage: 'Enter your feedback here',
             })}
             data-test-subj="feedbackTextArea"
@@ -201,7 +201,7 @@ export const FeedbackFlyoutBody = ({
           label={
             <Label>
               <FormattedMessage
-                id="xpack.intercept.feedbackFlyout.form.emailInput.label"
+                id="xpack.intercepts.feedbackFlyout.form.emailInput.label"
                 defaultMessage="Your email"
               />
             </Label>
@@ -209,7 +209,7 @@ export const FeedbackFlyoutBody = ({
           labelAppend={
             <EuiText size="xs" color="subdued">
               <FormattedMessage
-                id="xpack.intercept.feedbackFlyout.form.emailInput.optionalText"
+                id="xpack.intercepts.feedbackFlyout.form.emailInput.optionalText"
                 defaultMessage="Optional"
               />
             </EuiText>
@@ -217,9 +217,12 @@ export const FeedbackFlyoutBody = ({
         >
           <EuiFieldText
             value={userEmail}
-            aria-label={i18n.translate('xpack.intercept.feedbackFlyout.form.emailInput.ariaLabel', {
-              defaultMessage: 'Enter your email here',
-            })}
+            aria-label={i18n.translate(
+              'xpack.intercepts.feedbackFlyout.form.emailInput.ariaLabel',
+              {
+                defaultMessage: 'Enter your email here',
+              }
+            )}
             data-test-subj="feedbackEmail"
             type="email"
             onChange={handleChangeEmail}
