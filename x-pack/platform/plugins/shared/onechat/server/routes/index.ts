@@ -10,6 +10,7 @@ import { registerToolsRoutes } from './tools';
 import { registerAgentRoutes } from './agents';
 import { registerChatRoutes } from './chat';
 import { registerConversationRoutes } from './conversations';
+import { registerESQLToolsRoutes } from './esql_tools';
 import { registerMCPRoutes } from './mcp';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
@@ -17,5 +18,6 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerAgentRoutes(dependencies);
   registerChatRoutes(dependencies);
   registerConversationRoutes(dependencies);
+  registerESQLToolsRoutes(dependencies);
   registerMCPRoutes(dependencies);
 };
