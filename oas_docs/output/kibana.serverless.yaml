@@ -29,7 +29,7 @@ info:
     This documentation is derived from the `main` branch of the [kibana](https://github.com/elastic/kibana) repository.
     It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/).
   title: Kibana Serverless APIs
-  version: 1.0.2
+  version: ''
   x-doc-license:
     name: Attribution-NonCommercial-NoDerivatives 4.0 International
     url: https://creativecommons.org/licenses/by-nc-nd/4.0/
@@ -11417,6 +11417,7 @@ paths:
                   pattern: '[smdh]$'
                   type: string
                 docsPerSecond:
+                  default: -1
                   description: The number of documents per second to process.
                   type: integer
                 enrichPolicyExecutionInterval:
@@ -11439,10 +11440,14 @@ paths:
                 indexPattern:
                   $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
                 lookbackPeriod:
-                  default: 24h
+                  default: 3h
                   description: The amount of time the transform looks back to calculate the aggregations.
                   pattern: '[smdh]$'
                   type: string
+                maxPageSearchSize:
+                  default: 500
+                  description: The initial page size to use for the composite aggregation of each checkpoint.
+                  type: integer
                 timeout:
                   default: 180s
                   description: The timeout for initializing the aggregating transform.
@@ -11545,7 +11550,7 @@ paths:
     post:
       operationId: InitEntityEngine
       parameters:
-        - description: The entity type of the engine (either 'user' or 'host').
+        - description: The entity type of the engine.
           in: path
           name: entityType
           required: true
@@ -11563,6 +11568,7 @@ paths:
                   pattern: '[smdh]$'
                   type: string
                 docsPerSecond:
+                  default: -1
                   description: The number of documents per second to process.
                   type: integer
                 enrichPolicyExecutionInterval:
@@ -11581,10 +11587,14 @@ paths:
                 indexPattern:
                   $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
                 lookbackPeriod:
-                  default: 24h
+                  default: 3h
                   description: The amount of time the transform looks back to calculate the aggregations.
                   pattern: '[smdh]$'
                   type: string
+                maxPageSearchSize:
+                  default: 500
+                  description: The initial page size to use for the composite aggregation of each checkpoint.
+                  type: integer
                 timeout:
                   default: 180s
                   description: The timeout for initializing the aggregating transform.
