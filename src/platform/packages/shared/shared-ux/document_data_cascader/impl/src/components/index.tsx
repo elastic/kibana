@@ -11,6 +11,8 @@ import React, { type ComponentProps } from 'react';
 import { DataCascadeImpl, DataCascadeImplProps } from './data_cascade_impl';
 import { DataCascadeProvider, type GroupNode, type LeafNode } from './data_cascade_provider';
 
+export type { GroupNode } from './data_cascade_provider';
+
 export function DataCascade<N extends GroupNode = GroupNode, L extends LeafNode = LeafNode>({
   cascadeGroups,
   ...props
