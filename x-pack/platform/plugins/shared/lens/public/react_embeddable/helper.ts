@@ -85,6 +85,7 @@ export async function deserializeState(
       return { ...rawState, attributes: fallbackAttributes };
     }
   }
+  debugger;
   // Inject applied only to by-value SOs
   const newState = attributeService.injectReferences(
     ('attributes' in rawState ? rawState : { attributes: rawState }) as LensRuntimeState,
