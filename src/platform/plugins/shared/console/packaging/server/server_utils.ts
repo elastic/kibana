@@ -17,6 +17,9 @@ import {
   SpecDefinitionsResult,
 } from './types';
 
+// Webpack's non-bundled require function
+declare const __non_webpack_require__: typeof require;
+
 /**
  * Server-side utility for loading Console spec definitions
  * This allows external consumers to generate spec definitions on their server
@@ -189,30 +192,22 @@ export class ConsoleSpecDefinitionsLoader {
     try {
       const { fs, definitionsPath, stackVersion } = this.config;
       
-      // Try TypeScript files first (most common case), then compiled JS
-      const tsIndexPath = fs.join(definitionsPath, stackVersion, 'js', 'index.ts');
+      // Look for compiled JavaScript files (TypeScript files are compiled during webpack build)
       const jsIndexPath = fs.join(definitionsPath, stackVersion, 'js', 'index.js');
       
-      let jsLoaders: any;
-      let indexPath: string;
-      
-      // Check if TypeScript file exists
+      // Check if compiled JS file exists
       try {
-        fs.readFileSync(tsIndexPath, 'utf8');
-        indexPath = tsIndexPath;
-      } catch (tsError) {
-        // If no TypeScript file, try JavaScript
-        try {
-          fs.readFileSync(jsIndexPath, 'utf8');
-          indexPath = jsIndexPath;
-        } catch (jsError) {
-          console.warn(`No JS definitions found for stack version ${stackVersion}`);
-          return;
-        }
+        fs.readFileSync(jsIndexPath, 'utf8');
+      } catch (jsError) {
+        console.warn(`No compiled JS definitions found for stack version ${stackVersion}`);
+        console.warn(`Expected: ${jsIndexPath}`);
+        console.warn('Make sure the webpack build process compiled TypeScript definitions to JavaScript.');
+        return;
       }
 
-      // Require the definitions file
-      jsLoaders = require(indexPath);
+      // Require the compiled JS definitions file
+      // Use __non_webpack_require__ to bypass webpack bundling for dynamic requires
+      const jsLoaders = __non_webpack_require__(jsIndexPath);
       const specLoaders = jsLoaders.jsSpecLoaders;
 
       if (Array.isArray(specLoaders)) {

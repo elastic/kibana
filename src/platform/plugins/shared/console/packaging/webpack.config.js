@@ -9,11 +9,11 @@
 
 require('@kbn/babel-register').install();
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
 // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 // const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+const ConsoleDefinitionsPlugin = require('./console-definitions-plugin');
 
 const KIBANA_ROOT = path.resolve(__dirname, '../../../../../..');
 const isProd = process.env.NODE_ENV === 'production';
@@ -276,13 +276,9 @@ module.exports = [
       new CleanWebpackPlugin({
         cleanOnceBeforeBuildPatterns: [path.resolve(__dirname, '../target/server/**/*')],
       }),
-      new CopyWebpackPlugin({
-        patterns: [
-          {
-            from: path.resolve(__dirname, 'server/console_definitions'),
-            to: path.resolve(__dirname, '../target/server/console_definitions'),
-          },
-        ],
+      new ConsoleDefinitionsPlugin({
+        from: path.resolve(__dirname, 'server/console_definitions'),
+        to: path.resolve(__dirname, '../target/server/console_definitions'),
       }),
     ],
   },
