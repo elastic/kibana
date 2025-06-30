@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useCallback, ChangeEventHandler } from 'react';
-import { EuiFieldText, EuiFormRow, UseEuiTheme } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, type UseEuiTheme } from '@elastic/eui';
 
 import { css } from '@emotion/react';
 import { AggParamEditorProps } from '../agg_param_props';

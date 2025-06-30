@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UseEuiTheme, COLOR_MODES_STANDARD, euiFontSize } from '@elastic/eui';
+import { type UseEuiTheme, COLOR_MODES_STANDARD, euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const visEditorSidebarStyles = {

@@ -22,7 +22,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  UseEuiTheme,
+  type UseEuiTheme,
   euiBreakpoint,
   euiScrollBarStyles,
 } from '@elastic/eui';
