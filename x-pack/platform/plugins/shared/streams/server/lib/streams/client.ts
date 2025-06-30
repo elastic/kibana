@@ -78,19 +78,31 @@ export class StreamsClient {
    * - it is a wired stream (as opposed to an ingest stream)
    */
   async isStreamsEnabled(): Promise<boolean> {
-    const isEnabledOnElasticsearch = await this.checkElasticsearchStreamStatus();
-    const rootLogsStreamExists = await this.checkRootLogsStreamExists();
+    const streamsStatus = await this.checkStreamStatus();
 
-    if (isEnabledOnElasticsearch !== rootLogsStreamExists) {
+    if (streamsStatus === 'conflict') {
       throw new StreamsStatusConflictError(
         'Streams status conflict: Elasticsearch and root stream status do not match, enable/disable streams again'
       );
     }
 
+    return streamsStatus;
+  }
+
+  public async checkStreamStatus(): Promise<boolean | 'conflict'> {
+    const rootLogsStreamExists = await this.checkRootLogsStreamExists();
+    if (this.dependencies.isServerless) {
+      // in serverless, Elasticsearch doesn't natively support streams yet
+      return rootLogsStreamExists;
+    }
+    const isEnabledOnElasticsearch = await this.checkElasticsearchStreamStatus();
+    if (isEnabledOnElasticsearch !== rootLogsStreamExists) {
+      return 'conflict';
+    }
     return rootLogsStreamExists;
   }
 
-  async checkRootLogsStreamExists() {
+  private async checkRootLogsStreamExists() {
     return await this.getStream(LOGS_ROOT_STREAM_NAME)
       .then((definition) => Streams.WiredStream.Definition.is(definition))
       .catch((error) => {
@@ -119,7 +131,6 @@ export class StreamsClient {
     }
 
     const rootStreamExists = await this.checkRootLogsStreamExists();
-    const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
 
     if (!rootStreamExists) {
       const result = await State.attemptChanges(
@@ -140,11 +151,16 @@ export class StreamsClient {
       }
     }
 
-    if (!elasticsearchStreamsEnabled) {
-      await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
-        method: 'POST',
-        path: '_streams/logs/_enable',
-      });
+    if (!this.dependencies.isServerless) {
+      // in serverless, Elasticsearch doesn't natively support streams yet
+      const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
+
+      if (!elasticsearchStreamsEnabled) {
+        await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
+          method: 'POST',
+          path: '_streams/logs/_enable',
+        });
+      }
     }
 
     return { acknowledged: true, result: 'created' };
@@ -636,7 +652,11 @@ export class StreamsClient {
     });
   }
 
-  async checkElasticsearchStreamStatus(): Promise<boolean> {
+  private async checkElasticsearchStreamStatus(): Promise<boolean> {
+    if (this.dependencies.isServerless) {
+      // in serverless, Elasticsearch doesn't natively support streams yet
+      return false;
+    }
     const response = (await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
       method: 'GET',
       path: '/_streams/status',
