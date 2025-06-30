@@ -8,19 +8,25 @@
  */
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
+import { ESQLControlVariable, ESQLVariableType, RecommendedField } from '@kbn/esql-types';
 import {
   type FunctionDefinition,
   type FunctionFilterPredicates,
   type FunctionParameterType,
   FunctionDefinitionTypes,
+  type SupportedDataType,
 } from './types';
 import { operatorsDefinitions } from './all_operators';
 import { aggFunctionDefinitions } from './generated/aggregation_functions';
 import { groupingFunctionDefinitions } from './generated/grouping_functions';
 import { scalarFunctionDefinitions } from './generated/scalar_functions';
-import { ISuggestionItem } from '../commands_registry/types';
+import { ESQLFieldWithMetadata, ISuggestionItem } from '../commands_registry/types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../commands_registry/constants';
 import { buildFunctionDocumentation } from './documentation_util';
+import { getSafeInsertText, getControlSuggestion } from '../commands_registry/utils/autocomplete';
+import { ESQLAstItem, ESQLFunction } from '../types';
+import { isParamExpressionType } from '../commands_registry/utils/validate';
+import { removeFinalUnknownIdentiferArg } from './shared';
 
 const techPreviewLabel = i18n.translate(
   'kbn-esql-validation-autocomplete.esql.autocomplete.techPreviewLabel',
@@ -48,6 +54,22 @@ function buildFunctionLookup() {
   }
   return fnLookups;
 }
+
+export const buildFieldsDefinitions = (
+  fields: string[],
+  openSuggestions = true
+): ISuggestionItem[] => {
+  return fields.map((label) => ({
+    label,
+    text: getSafeInsertText(label),
+    kind: 'Variable',
+    detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.fieldDefinition', {
+      defaultMessage: `Field specified by the input table`,
+    }),
+    sortText: 'D',
+    command: openSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
+  }));
+};
 
 export function getFunctionDefinition(name: string) {
   return buildFunctionLookup().get(name.toLowerCase());
@@ -190,4 +212,133 @@ export const getFunctionSuggestions = (
   predicates?: FunctionFilterPredicates
 ): ISuggestionItem[] => {
   return filterFunctionDefinitions(allFunctions(), predicates).map(getFunctionSuggestion);
+};
+
+export function checkFunctionInvocationComplete(
+  func: ESQLFunction,
+  getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
+): {
+  complete: boolean;
+  reason?: 'tooFewArgs' | 'wrongTypes';
+} {
+  const fnDefinition = getFunctionDefinition(func.name);
+  if (!fnDefinition) {
+    return { complete: false };
+  }
+
+  const cleanedArgs = removeFinalUnknownIdentiferArg(func.args, getExpressionType);
+
+  const argLengthCheck = fnDefinition.signatures.some((def) => {
+    if (def.minParams && cleanedArgs.length >= def.minParams) {
+      return true;
+    }
+    if (cleanedArgs.length === def.params.length) {
+      return true;
+    }
+    return cleanedArgs.length >= def.params.filter(({ optional }) => !optional).length;
+  });
+  if (!argLengthCheck) {
+    return { complete: false, reason: 'tooFewArgs' };
+  }
+  if (
+    (fnDefinition.name === 'in' || fnDefinition.name === 'not in') &&
+    Array.isArray(func.args[1]) &&
+    !func.args[1].length
+  ) {
+    return { complete: false, reason: 'tooFewArgs' };
+  }
+
+  // If the function is complete, check that the types of the arguments match the function definition
+  const hasCorrectTypes = fnDefinition.signatures.some((def) => {
+    return func.args.every((a, index) => {
+      return (
+        fnDefinition.name.endsWith('null') ||
+        def.params[index].type === 'any' ||
+        def.params[index].type === getExpressionType(a) ||
+        // this is a special case for expressions with named parameters
+        // e.g. "WHERE field == ?value"
+        isParamExpressionType(getExpressionType(a))
+      );
+    });
+  });
+  if (!hasCorrectTypes) {
+    return { complete: false, reason: 'wrongTypes' };
+  }
+  return { complete: true };
+}
+
+/**
+ * Generates a sort key for field suggestions based on their categorization.
+ * Recommended fields are prioritized, followed by ECS fields.
+ *
+ * @param isEcs - True if the field is an Elastic Common Schema (ECS) field.
+ * @param isRecommended - True if the field is a recommended field from the registry.
+ * @returns A string representing the sort key ('1C' for recommended, '1D' for ECS, 'D' for others).
+ */
+const getFieldsSortText = (isEcs: boolean, isRecommended: boolean) => {
+  if (isRecommended) {
+    return '1C';
+  }
+  if (isEcs) {
+    return '1D';
+  }
+  return 'D';
+};
+
+const getVariablePrefix = (variableType: ESQLVariableType) =>
+  variableType === ESQLVariableType.FIELDS || variableType === ESQLVariableType.FUNCTIONS
+    ? '??'
+    : '?';
+
+export const buildFieldsDefinitionsWithMetadata = (
+  fields: ESQLFieldWithMetadata[],
+  recommendedFieldsFromExtensions: RecommendedField[] = [],
+  options?: {
+    advanceCursor?: boolean;
+    openSuggestions?: boolean;
+    addComma?: boolean;
+    variableType?: ESQLVariableType;
+    supportsControls?: boolean;
+  },
+  variables?: ESQLControlVariable[]
+): ISuggestionItem[] => {
+  const fieldsSuggestions = fields.map((field) => {
+    const fieldType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
+    const titleCaseType = `${field.name} (${fieldType})`;
+    // Check if the field is in the recommended fields from extensions list
+    // and if so, mark it as recommended. This also ensures that recommended fields
+    // that are registered wrongly, won't be shown as suggestions.
+    const fieldIsRecommended = recommendedFieldsFromExtensions.some(
+      (recommendedField) => recommendedField.name === field.name
+    );
+    const sortText = getFieldsSortText(Boolean(field.isEcs), Boolean(fieldIsRecommended));
+    return {
+      label: field.name,
+      text:
+        getSafeInsertText(field.name) +
+        (options?.addComma ? ',' : '') +
+        (options?.advanceCursor ? ' ' : ''),
+      kind: 'Variable',
+      detail: titleCaseType,
+      sortText,
+      command: options?.openSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
+    };
+  }) as ISuggestionItem[];
+
+  const suggestions = [...fieldsSuggestions];
+  if (options?.supportsControls) {
+    const variableType = options?.variableType ?? ESQLVariableType.FIELDS;
+    const userDefinedColumns =
+      variables?.filter((variable) => variable.type === variableType) ?? [];
+
+    const controlSuggestions = fields.length
+      ? getControlSuggestion(
+          variableType,
+          userDefinedColumns?.map((v) => `${getVariablePrefix(variableType)}${v.key}`)
+        )
+      : [];
+    suggestions.push(...controlSuggestions);
+  }
+
+  return [...suggestions];
 };

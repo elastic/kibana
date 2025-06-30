@@ -7,12 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { ESQLVariableType } from '@kbn/esql-types';
-import type { ISuggestionItem, GetColumnsByTypeFn, ESQLUserDefinedColumn } from '../../types';
+import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLSingleAstItem, ESQLFunction, ESQLCommand } from '../../../types';
+import type {
+  ISuggestionItem,
+  GetColumnsByTypeFn,
+  ESQLUserDefinedColumn,
+  ICommandContext,
+} from '../../types';
 import { SINGLE_TICK_REGEX, DOUBLE_BACKTICK } from '../../constants';
 import { Location } from '../../types';
-import { getDateLiterals, getCompatibleLiterals } from '../../../definitions/literats';
-import { getFunctionSuggestions } from '../../../definitions/functions';
+import {
+  getDateLiterals,
+  getCompatibleLiterals,
+  buildConstantsDefinitions,
+} from '../../../definitions/literats';
+import { type SupportedDataType, isParameterType } from '../../../definitions/types';
+import { getOverlapRange } from '../../../definitions/shared';
+import {
+  UNSUPPORTED_COMMANDS_BEFORE_MATCH,
+  UNSUPPORTED_COMMANDS_BEFORE_QSTR,
+} from '../../../definitions/constants';
+import { EDITOR_MARKER } from '../../constants';
+import { getExpressionType, getColumnByName, isParamExpressionType } from '../validate';
+import { getFunctionSuggestions } from '../../../definitions/functions_helpers';
+import { logicalOperators } from '../../../definitions/all_operators';
+import {
+  getOperatorSuggestion,
+  getOperatorSuggestions,
+  getOperatorsSuggestionsAfterNot,
+  getSuggestionsToRightOfOperatorExpression,
+} from '../../../definitions/operators_helpers';
+import { isColumn, isFunctionExpression, isLiteral, isTimeInterval } from '../../../ast/helpers';
+import { Walker } from '../../../walker';
 
 export const shouldBeQuotedText = (
   text: string,
@@ -57,6 +84,16 @@ export const findFinalWord = (text: string) => {
   const words = text.split(/\s+/);
   return words[words.length - 1];
 };
+
+export function findPreviousWord(text: string) {
+  const words = text.split(/\s+/);
+  return words[words.length - 2];
+}
+
+export function withinQuotes(text: string) {
+  const quoteCount = (text.match(/"/g) || []).length;
+  return quoteCount % 2 === 1;
+}
 
 /**
  * This function handles the logic to suggest completions
@@ -201,4 +238,328 @@ export async function getFieldsOrFunctionsSuggestions(
   );
 
   return suggestions;
+}
+
+export function getLastNonWhitespaceChar(text: string) {
+  return text[text.trimEnd().length - 1];
+}
+
+export const columnExists = (col: string, context?: ICommandContext) =>
+  Boolean(context ? getColumnByName(col, context) : undefined);
+
+/**
+ * The position of the cursor within an expression.
+ */
+type ExpressionPosition =
+  | 'after_column'
+  | 'after_function'
+  | 'after_not'
+  | 'after_operator'
+  | 'after_literal'
+  | 'empty_expression';
+
+/**
+ * Escapes special characters in a string to be used as a literal match in a regular expression.
+ * @param {string} text The input string to escape.
+ * @returns {string} The escaped string.
+ */
+function escapeRegExp(text: string): string {
+  // Characters with special meaning in regex: . * + ? ^ $ { } ( ) | [ ] \
+  // We need to escape all of them. The `$&` in the replacement string means "the matched substring".
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Determines the position of the cursor within an expression.
+ * @param innerText
+ * @param expressionRoot
+ * @returns
+ */
+export const getExpressionPosition = (
+  innerText: string,
+  expressionRoot: ESQLSingleAstItem | undefined
+): ExpressionPosition => {
+  const endsWithNot = / not$/i.test(innerText.trimEnd());
+  if (
+    endsWithNot &&
+    !(
+      expressionRoot &&
+      isFunctionExpression(expressionRoot) &&
+      // See https://github.com/elastic/kibana/issues/199401
+      // for more information on this check...
+      ['is null', 'is not null'].includes(expressionRoot.name)
+    )
+  ) {
+    return 'after_not';
+  }
+
+  if (expressionRoot) {
+    if (
+      isColumn(expressionRoot) &&
+      // and not directly after the column name or prefix e.g. "colu/"
+      // we are escaping the column name here as it may contain special characters such as ??
+      !new RegExp(`${escapeRegExp(expressionRoot.parts.join('\\.'))}$`).test(innerText)
+    ) {
+      return 'after_column';
+    }
+
+    if (isFunctionExpression(expressionRoot) && expressionRoot.subtype === 'variadic-call') {
+      return 'after_function';
+    }
+
+    if (isFunctionExpression(expressionRoot) && expressionRoot.subtype !== 'variadic-call') {
+      return 'after_operator';
+    }
+
+    if (isLiteral(expressionRoot) || isTimeInterval(expressionRoot)) {
+      return 'after_literal';
+    }
+  }
+
+  return 'empty_expression';
+};
+
+/**
+ * Creates suggestion within an expression.
+ *
+ * TODO — should this function know about the command context
+ * or would we prefer a set of generic configuration options?
+ *
+ * @param param0
+ * @returns
+ */
+export async function suggestForExpression({
+  expressionRoot,
+  innerText,
+  getColumnsByType,
+  previousCommands,
+  location,
+  preferredExpressionType,
+}: {
+  expressionRoot: ESQLSingleAstItem | undefined;
+  location: Location;
+  preferredExpressionType?: SupportedDataType;
+  innerText: string;
+  getColumnsByType: GetColumnsByTypeFn;
+  /**
+   * The AST for the query behind the cursor.
+   */
+  previousCommands?: ESQLCommand[];
+}): Promise<ISuggestionItem[]> {
+  const suggestions: ISuggestionItem[] = [];
+
+  const position = getExpressionPosition(innerText, expressionRoot);
+  switch (position) {
+    /**
+     * After a literal, column, or complete (non-operator) function call
+     */
+    case 'after_literal':
+    case 'after_column':
+    case 'after_function':
+      const expressionType = getExpressionType(expressionRoot);
+
+      if (!isParameterType(expressionType)) {
+        break;
+      }
+
+      suggestions.push(
+        ...getOperatorSuggestions({
+          location,
+          // In case of a param literal, we don't know the type of the left operand
+          // so we can only suggest operators that accept any type as a left operand
+          leftParamType: isParamExpressionType(expressionType) ? undefined : expressionType,
+          ignored: ['='],
+        })
+      );
+
+      break;
+
+    /**
+     * After a NOT keyword
+     *
+     * the NOT function is a special operator that can be used in different ways,
+     * and not all these are mapped within the AST data structure: in particular
+     * <COMMAND> <field> NOT <here>
+     * is an incomplete statement and it results in a missing AST node, so we need to detect
+     * from the query string itself
+     *
+     * (this comment was copied but seems to still apply)
+     */
+    case 'after_not':
+      if (expressionRoot && isFunctionExpression(expressionRoot) && expressionRoot.name === 'not') {
+        suggestions.push(
+          ...getFunctionSuggestions({ location, returnTypes: ['boolean'] }),
+          ...(await getColumnsByType('boolean', [], { advanceCursor: true, openSuggestions: true }))
+        );
+      } else {
+        suggestions.push(...getOperatorsSuggestionsAfterNot());
+      }
+
+      break;
+
+    /**
+     * After an operator (e.g. AND, OR, IS NULL, +, etc.)
+     */
+    case 'after_operator':
+      if (!expressionRoot) {
+        break;
+      }
+
+      if (!isFunctionExpression(expressionRoot) || expressionRoot.subtype === 'variadic-call') {
+        // this is already guaranteed in the getPosition function, but TypeScript doesn't know
+        break;
+      }
+
+      let rightmostOperator = expressionRoot;
+      // get rightmost function
+      const walker = new Walker({
+        visitFunction: (fn: ESQLFunction) => {
+          if (fn.location.min > rightmostOperator.location.min && fn.subtype !== 'variadic-call')
+            rightmostOperator = fn;
+        },
+      });
+      walker.walkFunction(expressionRoot);
+
+      // See https://github.com/elastic/kibana/issues/199401 for an explanation of
+      // why this check has to be so convoluted
+      if (rightmostOperator.text.toLowerCase().trim().endsWith('null')) {
+        suggestions.push(...logicalOperators.map(getOperatorSuggestion));
+        break;
+      }
+
+      suggestions.push(
+        ...(await getSuggestionsToRightOfOperatorExpression({
+          queryText: innerText,
+          location,
+          rootOperator: rightmostOperator,
+          preferredExpressionType,
+          getExpressionType,
+          getColumnsByType,
+        }))
+      );
+
+      break;
+
+    case 'empty_expression':
+      // Don't suggest MATCH, QSTR or KQL after unsupported commands
+      const priorCommands = previousCommands?.map((a) => a.name) ?? [];
+      const ignored = [];
+      if (priorCommands.some((c) => UNSUPPORTED_COMMANDS_BEFORE_MATCH.has(c))) {
+        ignored.push('match');
+      }
+      if (priorCommands.some((c) => UNSUPPORTED_COMMANDS_BEFORE_QSTR.has(c))) {
+        ignored.push('kql', 'qstr');
+      }
+      const last = previousCommands?.[previousCommands.length - 1];
+      let columnSuggestions: ISuggestionItem[] = [];
+      if (!last?.text?.endsWith(`:${EDITOR_MARKER}`)) {
+        columnSuggestions = await getColumnsByType('any', [], {
+          advanceCursor: true,
+          openSuggestions: true,
+        });
+      }
+      suggestions.push(
+        ...pushItUpInTheList(columnSuggestions, true),
+        ...getFunctionSuggestions({ location, ignored })
+      );
+
+      break;
+  }
+
+  /**
+   * Attach replacement ranges if there's a prefix.
+   *
+   * Can't rely on Monaco because
+   * - it counts "." as a word separator
+   * - it doesn't handle multi-word completions (like "is null")
+   *
+   * TODO - think about how to generalize this — issue: https://github.com/elastic/kibana/issues/209905
+   */
+  const hasNonWhitespacePrefix = !/\s/.test(innerText[innerText.length - 1]);
+  suggestions.forEach((s) => {
+    if (['IS NULL', 'IS NOT NULL'].includes(s.text)) {
+      // this suggestion has spaces in it (e.g. "IS NOT NULL")
+      // so we need to see if there's an overlap
+      s.rangeToReplace = getOverlapRange(innerText, s.text);
+      return;
+    } else if (hasNonWhitespacePrefix) {
+      // get index of first char of final word
+      const lastNonWhitespaceIndex = innerText.search(/\S(?=\S*$)/);
+      s.rangeToReplace = {
+        start: lastNonWhitespaceIndex,
+        end: innerText.length,
+      };
+    }
+  });
+
+  return suggestions;
+}
+
+export function getControlSuggestion(
+  type: ESQLVariableType,
+  variables?: string[]
+): ISuggestionItem[] {
+  return [
+    {
+      label: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.autocomplete.createControlLabel',
+        {
+          defaultMessage: 'Create control',
+        }
+      ),
+      text: '',
+      kind: 'Issue',
+      detail: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.autocomplete.createControlDetailLabel',
+        {
+          defaultMessage: 'Click to create',
+        }
+      ),
+      sortText: '1',
+      command: {
+        id: `esql.control.${type}.create`,
+        title: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.autocomplete.createControlDetailLabel',
+          {
+            defaultMessage: 'Click to create',
+          }
+        ),
+      },
+    } as ISuggestionItem,
+    ...(variables?.length
+      ? buildConstantsDefinitions(
+          variables,
+          i18n.translate(
+            'kbn-esql-validation-autocomplete.esql.autocomplete.namedParamDefinition',
+            {
+              defaultMessage: 'Named parameter',
+            }
+          ),
+          '1A'
+        )
+      : []),
+  ];
+}
+
+const getVariablePrefix = (variableType: ESQLVariableType) =>
+  variableType === ESQLVariableType.FIELDS || variableType === ESQLVariableType.FUNCTIONS
+    ? '??'
+    : '?';
+
+export function getControlSuggestionIfSupported(
+  supportsControls: boolean,
+  type: ESQLVariableType,
+  variables?: ESQLControlVariable[],
+  shouldBePrefixed = true
+) {
+  if (!supportsControls) {
+    return [];
+  }
+  const prefix = shouldBePrefixed ? getVariablePrefix(type) : '';
+  const filteredVariables = variables?.filter((variable) => variable.type === type) ?? [];
+  const controlSuggestion = getControlSuggestion(
+    type,
+    filteredVariables?.map((v) => `${prefix}${v.key}`)
+  );
+  return controlSuggestion;
 }

@@ -6,3 +6,24 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { i18n } from '@kbn/i18n';
+import type { ICommandMethods } from '../..';
+import { autocomplete } from './autocomplete';
+import type { ICommandContext } from '../../types';
+
+const fromCommandMethods: ICommandMethods<ICommandContext> = {
+  autocomplete,
+};
+
+export const fromCommand = {
+  name: 'from',
+  methods: fromCommandMethods,
+  metadata: {
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.fromDoc', {
+      defaultMessage:
+        'Retrieves data from one or more data streams, indices, or aliases. In a query or subquery, you must use the from command first and it does not need a leading pipe. For example, to retrieve data from an index:',
+    }),
+    declaration: 'FROM index_pattern [METADATA fields]',
+    examples: ['FROM logs', 'FROM logs-*', 'FROM logs_*, events-*'],
+  },
+};

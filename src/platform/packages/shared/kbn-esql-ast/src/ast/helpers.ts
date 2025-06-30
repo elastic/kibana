@@ -168,3 +168,5 @@ export function isNumericType(type: unknown): type is ESQLNumericLiteralType {
     [...ESQL_NUMBER_TYPES, 'decimal'].includes(type as (typeof ESQL_NUMBER_TYPES)[number])
   );
 }
+
+export const ESQL_STRING_TYPES = ['keyword', 'text'] as const;

@@ -13,6 +13,34 @@ import { Location } from '../commands_registry/types';
  * All supported field types in ES|QL. This is all the types
  * that can come back in the table from a query.
  */
+export const fieldTypes = [
+  'boolean',
+  'date',
+  'double',
+  'ip',
+  'keyword',
+  'integer',
+  'long',
+  'text',
+  'unsigned_long',
+  'version',
+  'cartesian_point',
+  'cartesian_shape',
+  'geo_point',
+  'geo_shape',
+  'counter_integer',
+  'counter_long',
+  'counter_double',
+  'unsupported',
+  'date_nanos',
+  'function_named_parameters',
+] as const;
+
+export type FieldType = (typeof fieldTypes)[number];
+/**
+ * All supported field types in ES|QL. This is all the types
+ * that can come back in the table from a query.
+ */
 export const userDefinedTypes = [
   'boolean',
   'date',
@@ -40,7 +68,25 @@ export const userDefinedTypes = [
   'param', // Defines a named param such as ?value or ??field
 ] as const;
 
-export type SupportedDataType = (typeof userDefinedTypes)[number];
+/**
+ * This is the list of all data types that are supported in ES|QL.
+ *
+ * Not all of these can be used as field types. Some can only be literals,
+ * others may be the value of a field, but cannot be used in the index mapping.
+ *
+ * This is a partial list. The full list is here and we may need to expand this type as
+ * the capabilities of the client-side engines grow.
+ * https://github.com/elastic/elasticsearch/blob/main/x-pack/plugin/esql-core/src/main/java/org/elasticsearch/xpack/esql/core/type/DataType.java
+ */
+export const dataTypes = [
+  ...fieldTypes,
+  'null',
+  'time_duration',
+  'date_period',
+  'param', // Defines a named param such as ?value or ??field
+] as const;
+
+export type SupportedDataType = (typeof dataTypes)[number];
 
 /**
  * This is a set of array types. These aren't official ES|QL types, but they are
@@ -84,6 +130,15 @@ export enum FunctionDefinitionTypes {
  * This is the type of a parameter in a function definition.
  */
 export type FunctionParameterType = Exclude<SupportedDataType, 'unsupported'> | ArrayType | 'any';
+
+export const isParameterType = (str: string | undefined): str is FunctionParameterType =>
+  typeof str !== undefined &&
+  str !== 'unsupported' &&
+  ([...dataTypes, ...arrayTypes, 'any'] as string[]).includes(str as string);
+
+export const isReturnType = (str: string | FunctionParameterType): str is FunctionReturnType =>
+  str !== 'unsupported' &&
+  (dataTypes.includes(str as SupportedDataType) || str === 'unknown' || str === 'any');
 
 export interface FunctionParameter {
   name: string;
@@ -170,3 +225,172 @@ export interface Literals {
   name: string;
   description: string;
 }
+
+export interface ValidationErrors {
+  wrongArgumentType: {
+    message: string;
+    type: {
+      name: string;
+      argType: string;
+      value: string | number | Date;
+      givenType: string;
+    };
+  };
+  wrongArgumentNumber: {
+    message: string;
+    type: {
+      fn: string;
+      numArgs: number;
+      passedArgs: number;
+    };
+  };
+  wrongArgumentNumberTooMany: {
+    message: string;
+    type: {
+      fn: string;
+      numArgs: number;
+      passedArgs: number;
+      extraArgs: number;
+    };
+  };
+  wrongArgumentNumberTooFew: {
+    message: string;
+    type: {
+      fn: string;
+      numArgs: number;
+      passedArgs: number;
+      missingArgs: number;
+    };
+  };
+  unknownColumn: {
+    message: string;
+    type: { name: string | number };
+  };
+  unknownFunction: {
+    message: string;
+    type: { name: string };
+  };
+  unknownIndex: {
+    message: string;
+    type: { name: string };
+  };
+  noNestedArgumentSupport: {
+    message: string;
+    type: { name: string; argType: string };
+  };
+  unsupportedFunctionForCommand: {
+    message: string;
+    type: { name: string; command: string };
+  };
+  unsupportedFunctionForCommandOption: {
+    message: string;
+    type: { name: string; command: string; option: string };
+  };
+  unsupportedLiteralOption: {
+    message: string;
+    type: { name: string; value: string; supportedOptions: string };
+  };
+  shadowFieldType: {
+    message: string;
+    type: { field: string; fieldType: string; newType: string };
+  };
+  unsupportedColumnTypeForCommand: {
+    message: string;
+    type: { command: string; type: string; givenType: string; column: string };
+  };
+  unknownDissectKeyword: {
+    message: string;
+    type: { keyword: string };
+  };
+  wrongOptionArgumentType: {
+    message: string;
+    type: { command: string; option: string; type: string; givenValue: string };
+  };
+  unknownInterval: {
+    message: string;
+    type: { value: string };
+  };
+  unsupportedTypeForCommand: {
+    message: string;
+    type: { command: string; value: string; type: string };
+  };
+  unknownPolicy: {
+    message: string;
+    type: { name: string };
+  };
+  unknownAggregateFunction: {
+    message: string;
+    type: { type: string; value: string };
+  };
+  wildcardNotSupportedForCommand: {
+    message: string;
+    type: { command: string; value: string };
+  };
+  noWildcardSupportAsArg: {
+    message: string;
+    type: { name: string };
+  };
+  unsupportedFieldType: {
+    message: string;
+    type: { field: string };
+  };
+  unsupportedMode: {
+    message: string;
+    type: { command: string; value: string; expected: string };
+  };
+  fnUnsupportedAfterCommand: {
+    message: string;
+    type: { function: string; command: string };
+  };
+  expectedConstant: {
+    message: string;
+    type: { fn: string; given: string };
+  };
+  metadataBracketsDeprecation: {
+    message: string;
+    type: {};
+  };
+  unknownMetadataField: {
+    message: string;
+    type: { value: string; availableFields: string };
+  };
+  wrongDissectOptionArgumentType: {
+    message: string;
+    type: { value: string | number };
+  };
+  noAggFunction: {
+    message: string;
+    type: {
+      commandName: string;
+      expression: string;
+    };
+  };
+  expressionNotAggClosed: {
+    message: string;
+    type: {
+      commandName: string;
+      expression: string;
+    };
+  };
+  aggInAggFunction: {
+    message: string;
+    type: {
+      nestedAgg: string;
+    };
+  };
+  onlyWhereCommandSupported: {
+    message: string;
+    type: { fn: string };
+  };
+  invalidJoinIndex: {
+    message: string;
+    type: { identifier: string };
+  };
+  tooManyForks: {
+    message: string;
+    type: {};
+  };
+}
+
+export type ErrorTypes = keyof ValidationErrors;
+export type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];

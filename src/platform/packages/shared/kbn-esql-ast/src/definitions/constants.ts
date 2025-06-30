@@ -221,3 +221,19 @@ export const chronoLiterals: Literals[] = [
   'YEAR',
   'YEAR_OF_ERA',
 ].map((name) => ({ name: `"${name}"`, description: '' }));
+
+export const FULL_TEXT_SEARCH_FUNCTIONS = ['match', 'match_operator', 'qstr', 'kql'];
+export const UNSUPPORTED_COMMANDS_BEFORE_QSTR = new Set([
+  'show',
+  'row',
+  'dissect',
+  'enrich',
+  'eval',
+  'grok',
+  'keep',
+  'mv_expand',
+  'rename',
+  'stats',
+  'limit',
+]);
+export const UNSUPPORTED_COMMANDS_BEFORE_MATCH = new Set(['limit']);

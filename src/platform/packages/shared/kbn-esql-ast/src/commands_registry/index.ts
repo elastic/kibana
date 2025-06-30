@@ -39,8 +39,8 @@ export interface ICommandMethods<TContext = any> {
     query: string,
     ast: ESQLCommand,
     getByType: GetColumnsByTypeFn,
-    columnExists: (column: string) => boolean,
     getSuggestedUserDefinedColumnName: (extraFieldNames?: string[] | undefined) => string,
+    getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>,
     context?: TContext
   ) => Promise<ISuggestionItem[]>;
 
@@ -60,12 +60,22 @@ export interface ICommandMethods<TContext = any> {
   ) => ESQLFieldWithMetadata[];
 }
 
+interface ICommandMetadata {
+  preview?: boolean; // Optional property to indicate if the command is in preview mode
+  description: string; // Optional property for a brief description of the command
+  declaration: string; // The pattern for declaring this command statement. Displayed in the autocomplete.
+  examples: string[]; // A list of examples of how to use the command. Displayed in the autocomplete.
+  hidden?: boolean; // Optional property to indicate if the command should be hidden in UI
+  types?: Array<{ name: string; description: string }>; // Optional property for command-specific types
+}
+
 /**
  * Interface defining the structure of a single registered command.
  */
 export interface ICommand {
   name: string;
   methods: ICommandMethods;
+  metadata: ICommandMetadata;
 }
 
 /**
@@ -90,6 +100,12 @@ export interface ICommandRegistry {
    * @returns An array of strings representing the names of all registered commands.
    */
   getAllCommandNames(): string[];
+  /**
+   * Retrieves a command by its name, including its methods and optional metadata.
+   * @param commandName The name of the command to retrieve.
+   * @returns The ICommand object if found, otherwise undefined.
+   */
+  getCommandByName(commandName: string): ICommand | undefined;
 }
 
 /**
@@ -97,10 +113,22 @@ export interface ICommandRegistry {
  * This class manages the registration, storage, and retrieval of ESQL command methods.
  */
 export class CommandRegistry implements ICommandRegistry {
-  private commands: Map<string, ICommandMethods>;
+  private commands: Map<
+    string,
+    {
+      methods: ICommandMethods;
+      metadata: ICommandMetadata; // Optional metadata for the command
+    }
+  > = new Map();
 
   constructor() {
-    this.commands = new Map<string, ICommandMethods>();
+    this.commands = new Map<
+      string,
+      {
+        methods: ICommandMethods;
+        metadata: ICommandMetadata; // Optional metadata for the command
+      }
+    >();
   }
 
   /**
@@ -109,7 +137,7 @@ export class CommandRegistry implements ICommandRegistry {
    */
   public registerCommand(command: ICommand): void {
     if (!this.commands.has(command.name)) {
-      this.commands.set(command.name, command.methods);
+      this.commands.set(command.name, { methods: command.methods, metadata: command.metadata });
     }
   }
 
@@ -119,7 +147,7 @@ export class CommandRegistry implements ICommandRegistry {
    * @returns The ICommandMethods object if the command is found, otherwise undefined.
    */
   public getCommandMethods(commandName: string): ICommandMethods | undefined {
-    return this.commands.get(commandName);
+    return this.commands.get(commandName)?.methods;
   }
 
   /**
@@ -128,5 +156,16 @@ export class CommandRegistry implements ICommandRegistry {
    */
   public getAllCommandNames(): string[] {
     return Array.from(this.commands.keys());
+  }
+
+  public getCommandByName(commandName: string): ICommand | undefined {
+    const command = this.commands.get(commandName);
+    return command
+      ? {
+          name: commandName,
+          methods: command.methods,
+          metadata: command.metadata,
+        }
+      : undefined;
   }
 }

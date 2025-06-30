@@ -19,7 +19,7 @@ import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn, ICommandContext } fr
 import type { SupportedDataType, FunctionDefinition } from '../../../definitions/types';
 import { SINGLE_BACKTICK, DOUBLE_TICKS_REGEX } from '../../constants';
 import { lastItem } from '../../../visitor/utils';
-import { getFunctionDefinition } from '../../../definitions/functions';
+import { getFunctionDefinition } from '../../../definitions/functions_helpers';
 /**
  * Take a column name like "`my``column`"" and return "my`column"
  */

@@ -6,9 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLVariableType, InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
+import type {
+  ESQLVariableType,
+  IndexAutocompleteItem,
+  InferenceEndpointAutocompleteItem,
+  ESQLControlVariable,
+} from '@kbn/esql-types';
 import type { ESQLLocation } from '../types';
-import type { SupportedDataType } from '../definitions/types';
+import type { FieldType, SupportedDataType } from '../definitions/types';
+import type { EditorExtensions } from './options/recommended_queries';
 
 // This is a subset of the Monaco's editor CompletitionItemKind type
 export type ItemKind =
@@ -90,7 +96,7 @@ export type GetColumnsByTypeFn = (
 
 export interface ESQLFieldWithMetadata {
   name: string;
-  type: SupportedDataType;
+  type: FieldType;
   isEcs?: boolean;
   hasConflict?: boolean;
   metadata?: {
@@ -107,10 +113,25 @@ export interface ESQLUserDefinedColumn {
   location: ESQLLocation;
 }
 
+export interface ESQLPolicy {
+  name: string;
+  sourceIndices: string[];
+  matchField: string;
+  enrichFields: string[];
+}
+
 export interface ICommandContext {
   userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
   fields: Map<string, ESQLFieldWithMetadata>;
-  inferenceEndpoints: InferenceEndpointAutocompleteItem[];
+  sources?: ESQLSourceResult[];
+  joinSources?: IndexAutocompleteItem[];
+  timeSeriesSources?: IndexAutocompleteItem[];
+  inferenceEndpoints?: InferenceEndpointAutocompleteItem[];
+  policies?: Map<string, ESQLPolicy>;
+  editorExtensions?: EditorExtensions;
+  variables?: ESQLControlVariable[];
+  supportsControls?: boolean;
+  histogramBarTarget?: number;
 }
 
 /**
@@ -190,4 +211,12 @@ export enum Location {
    * In the COMPLETION command
    */
   COMPLETION = 'completion',
+}
+
+export interface ESQLSourceResult {
+  name: string;
+  hidden: boolean;
+  title?: string;
+  dataStreams?: Array<{ name: string; title?: string }>;
+  type?: string;
 }

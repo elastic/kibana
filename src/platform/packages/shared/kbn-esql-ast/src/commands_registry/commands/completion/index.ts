@@ -6,13 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { i18n } from '@kbn/i18n';
 import type { ICommandMethods } from '../..';
 import { autocomplete } from './autocomplete';
 import { columnsAfter } from './columns_after';
 import { validate } from './validate';
 import type { ICommandContext } from '../../types';
 
-const selectCommandMethods: ICommandMethods<ICommandContext> = {
+const completionCommandMethods: ICommandMethods<ICommandContext> = {
   validate,
   autocomplete,
   columnsAfter,
@@ -20,5 +21,14 @@ const selectCommandMethods: ICommandMethods<ICommandContext> = {
 
 export const completionCommand = {
   name: 'completion',
-  methods: selectCommandMethods,
+  methods: completionCommandMethods,
+  metadata: {
+    preview: true,
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.completionDoc', {
+      defaultMessage:
+        'Send prompts to an LLM. Requires an inference endpoint set up for `completion` tasks.',
+    }),
+    declaration: `COMPLETION <prompt> WITH <inferenceId> (AS <targetField>)`,
+    examples: [],
+  },
 };

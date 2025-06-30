@@ -19,16 +19,18 @@ import {
   getFieldsOrFunctionsSuggestions,
   findFinalWord,
   handleFragment,
+  columnExists,
 } from '../../utils/autocomplete';
 import {
   type ISuggestionItem,
   type GetColumnsByTypeFn,
   Location,
   type ICommandContext,
+  ESQLFieldWithMetadata,
 } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND, EDITOR_MARKER, ESQL_VARIABLES_PREFIX } from '../../constants';
 import { getExpressionType, isExpressionComplete } from '../../utils/validate';
-import { getFunctionDefinition } from '../../../definitions/functions';
+import { getFunctionDefinition } from '../../../definitions/functions_helpers';
 
 export enum CompletionPosition {
   AFTER_COMPLETION = 'after_completion',
@@ -116,8 +118,8 @@ export async function autocomplete(
   query: string,
   command: ESQLCommand,
   getColumnsByType: GetColumnsByTypeFn,
-  columnExists: (column: string) => boolean,
   getSuggestedUserDefinedColumnName: (extraFieldNames?: string[] | undefined) => string,
+  getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
   const { prompt } = command as ESQLAstCompletionCommand;
@@ -143,7 +145,7 @@ export async function autocomplete(
 
       const suggestions = await handleFragment(
         query,
-        (fragment) => Boolean(columnExists(fragment) || getFunctionDefinition(fragment)),
+        (fragment) => Boolean(columnExists(fragment, context) || getFunctionDefinition(fragment)),
         (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
           return fieldsAndFunctionsSuggestions.map((suggestion) => {
             return {
