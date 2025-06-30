@@ -9,9 +9,10 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { SerializedStyles } from '@emotion/react';
+import useLatest from 'react-use/lib/useLatest';
 import { EuiDataGridProps, EuiDataGridRefProps, useEuiTheme } from '@elastic/eui';
 import { InTableSearchControl, InTableSearchControlProps } from './in_table_search_control';
-import { RenderCellValueWrapper } from './types';
+import { InTableSearchRestorableState, RenderCellValueWrapper } from './types';
 import { wrapRenderCellValueWithInTableSearchSupport } from './wrap_render_cell_value';
 import { clearSearchTermRegExpCache } from './in_table_search_highlights_wrapper';
 import { getHighlightColors } from './get_highlight_colors';
@@ -19,12 +20,13 @@ import { getHighlightColors } from './get_highlight_colors';
 export interface UseDataGridInTableSearchProps
   extends Pick<InTableSearchControlProps, 'rows' | 'visibleColumns'> {
   enableInTableSearch?: boolean;
-  initialInTableSearchTerm?: string;
   dataGridWrapper: HTMLElement | null;
   dataGridRef: React.RefObject<EuiDataGridRefProps | null>;
   cellContext: EuiDataGridProps['cellContext'] | undefined;
   pagination: EuiDataGridProps['pagination'] | undefined;
   renderCellValue: EuiDataGridProps['renderCellValue'];
+  initialState?: InTableSearchRestorableState;
+  onInitialStateChange?: (initialState: InTableSearchRestorableState) => void;
 }
 
 export interface UseDataGridInTableSearchState {
@@ -33,7 +35,6 @@ export interface UseDataGridInTableSearchState {
 }
 
 export interface UseDataGridInTableSearchReturn {
-  inTableSearchTerm: UseDataGridInTableSearchState['inTableSearchTerm'];
   inTableSearchTermCss?: UseDataGridInTableSearchState['inTableSearchTermCss'];
   inTableSearchControl: React.JSX.Element | undefined;
   cellContextWithInTableSearchSupport: EuiDataGridProps['cellContext'];
@@ -45,7 +46,6 @@ export const useDataGridInTableSearch = (
 ): UseDataGridInTableSearchReturn => {
   const {
     enableInTableSearch = true,
-    initialInTableSearchTerm = '',
     dataGridWrapper,
     dataGridRef,
     visibleColumns,
@@ -53,6 +53,8 @@ export const useDataGridInTableSearch = (
     renderCellValue,
     pagination,
     cellContext,
+    initialState: currentInitialState,
+    onInitialStateChange: currentOnInitialStateChange,
   } = props;
   const { euiTheme } = useEuiTheme();
   const isPaginationEnabled = Boolean(pagination);
@@ -60,6 +62,11 @@ export const useDataGridInTableSearch = (
   const onChangePage = pagination?.onChangePage;
   const pageIndexRef = useRef<number>();
   pageIndexRef.current = pagination?.pageIndex ?? 0;
+  const [initialState] = useState<InTableSearchRestorableState | undefined>(
+    () => currentInitialState
+  );
+  const onInitialStateChangeRef = useLatest(currentOnInitialStateChange);
+  const [onInitialStateChange] = useState(() => onInitialStateChangeRef.current);
 
   const renderCellValueWithInTableSearchSupport = useMemo(() => {
     const colors = getHighlightColors(euiTheme);
@@ -74,7 +81,7 @@ export const useDataGridInTableSearch = (
 
   const [{ inTableSearchTerm, inTableSearchTermCss }, setInTableSearchState] =
     useState<UseDataGridInTableSearchState>(() => ({
-      inTableSearchTerm: initialInTableSearchTerm,
+      inTableSearchTerm: initialState?.searchTerm || '',
     }));
 
   const inTableSearchControl = useMemo(() => {
@@ -86,7 +93,8 @@ export const useDataGridInTableSearch = (
       : 0;
     return (
       <InTableSearchControl
-        initialInTableSearchTerm={initialInTableSearchTerm}
+        initialState={initialState}
+        onInitialStateChange={onInitialStateChange}
         inTableSearchTerm={inTableSearchTerm}
         visibleColumns={visibleColumns}
         rows={rows}
@@ -121,7 +129,6 @@ export const useDataGridInTableSearch = (
     );
   }, [
     enableInTableSearch,
-    initialInTableSearchTerm,
     setInTableSearchState,
     visibleColumns,
     rows,
@@ -132,6 +139,8 @@ export const useDataGridInTableSearch = (
     isPaginationEnabled,
     pageSize,
     onChangePage,
+    initialState,
+    onInitialStateChange,
   ]);
 
   const cellContextWithInTableSearchSupport: EuiDataGridProps['cellContext'] = useMemo(() => {
@@ -153,14 +162,12 @@ export const useDataGridInTableSearch = (
 
   return useMemo(
     () => ({
-      inTableSearchTerm,
       inTableSearchTermCss,
       inTableSearchControl,
       cellContextWithInTableSearchSupport,
       renderCellValueWithInTableSearchSupport,
     }),
     [
-      inTableSearchTerm,
       inTableSearchTermCss,
       inTableSearchControl,
       cellContextWithInTableSearchSupport,

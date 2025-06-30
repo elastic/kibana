@@ -27,8 +27,23 @@ const INITIAL_STATE: UseFindMatchesState = {
   renderCellsShadowPortal: null,
 };
 
+const FIRST_ACTIVE_MATCH_POSITION = 1;
+
 export const useFindMatches = (props: UseFindMatchesProps): UseFindMatchesReturn => {
-  const { inTableSearchTerm, visibleColumns, rows, renderCellValue, onScrollToActiveMatch } = props;
+  const {
+    initialState,
+    onInitialStateChange,
+    inTableSearchTerm,
+    visibleColumns,
+    rows,
+    renderCellValue,
+    onScrollToActiveMatch,
+  } = props;
+  const initialActiveMatchPositionRef = useRef<number | undefined>(
+    initialState?.activeMatchPosition && initialState?.searchTerm === inTableSearchTerm
+      ? initialState.activeMatchPosition
+      : undefined
+  );
   const [state, setState] = useState<UseFindMatchesState>(INITIAL_STATE);
   const { matchesCount, activeMatchPosition, isProcessing, renderCellsShadowPortal } = state;
   const numberOfRunsRef = useRef<number>(0);
@@ -53,7 +68,12 @@ export const useFindMatches = (props: UseFindMatchesProps): UseFindMatchesReturn
         return;
       }
 
-      const nextActiveMatchPosition = totalMatchesCount > 0 ? 1 : null;
+      const initialActiveMatchPosition = initialActiveMatchPositionRef.current;
+      initialActiveMatchPositionRef.current = undefined;
+
+      const nextActiveMatchPosition =
+        totalMatchesCount > 0 ? initialActiveMatchPosition ?? FIRST_ACTIVE_MATCH_POSITION : null;
+
       setState({
         matchesList: nextMatchesList,
         matchesCount: totalMatchesCount,
@@ -65,12 +85,18 @@ export const useFindMatches = (props: UseFindMatchesProps): UseFindMatchesReturn
 
       if (totalMatchesCount > 0) {
         updateActiveMatchPosition({
+          animate: !initialActiveMatchPosition,
           matchPosition: nextActiveMatchPosition,
           matchesList: nextMatchesList,
           columns: visibleColumns,
           onScrollToActiveMatch,
         });
       }
+
+      onInitialStateChange?.({
+        searchTerm: inTableSearchTerm || undefined,
+        activeMatchPosition: nextActiveMatchPosition || undefined,
+      });
 
       // const duration = window.performance.now() - startTime;
       // console.log(duration);
@@ -92,7 +118,15 @@ export const useFindMatches = (props: UseFindMatchesProps): UseFindMatchesReturn
       isProcessing: true,
       renderCellsShadowPortal: RenderCellsShadowPortal,
     }));
-  }, [setState, renderCellValue, visibleColumns, rows, inTableSearchTerm, onScrollToActiveMatch]);
+  }, [
+    setState,
+    renderCellValue,
+    visibleColumns,
+    rows,
+    inTableSearchTerm,
+    onScrollToActiveMatch,
+    onInitialStateChange,
+  ]);
 
   const goToPrevMatch = useCallback(() => {
     setState((prevState) => changeActiveMatchInState(prevState, 'prev', onScrollToActiveMatch));
@@ -104,7 +138,11 @@ export const useFindMatches = (props: UseFindMatchesProps): UseFindMatchesReturn
 
   const resetState = useCallback(() => {
     setState(INITIAL_STATE);
-  }, [setState]);
+    onInitialStateChange?.({
+      searchTerm: undefined,
+      activeMatchPosition: undefined,
+    });
+  }, [setState, onInitialStateChange]);
 
   return useMemo(
     () => ({
@@ -163,6 +201,7 @@ function getActiveMatchForPosition({
           rowIndex: Number(rowIndex),
           columnId,
           matchIndexWithinCell: matchPosition - traversedMatchesCount - 1,
+          matchPosition,
         };
       }
 
@@ -177,15 +216,17 @@ function getActiveMatchForPosition({
 let prevJumpTimer: NodeJS.Timeout | null = null;
 
 function updateActiveMatchPosition({
+  animate = true,
   matchPosition,
   matchesList,
   columns,
   onScrollToActiveMatch,
 }: {
+  animate?: boolean;
   matchPosition: number | null;
   matchesList: RowMatches[];
   columns: string[];
-  onScrollToActiveMatch: (activeMatch: ActiveMatch) => void;
+  onScrollToActiveMatch: UseFindMatchesProps['onScrollToActiveMatch'];
 }) {
   if (typeof matchPosition !== 'number') {
     return;
@@ -203,7 +244,7 @@ function updateActiveMatchPosition({
     });
 
     if (activeMatch) {
-      onScrollToActiveMatch(activeMatch);
+      onScrollToActiveMatch(activeMatch, animate);
     }
   }, 0);
 }
@@ -211,7 +252,7 @@ function updateActiveMatchPosition({
 function changeActiveMatchInState(
   prevState: UseFindMatchesState,
   direction: 'prev' | 'next',
-  onScrollToActiveMatch: (activeMatch: ActiveMatch) => void
+  onScrollToActiveMatch: UseFindMatchesProps['onScrollToActiveMatch']
 ): UseFindMatchesState {
   if (
     typeof prevState.matchesCount !== 'number' ||

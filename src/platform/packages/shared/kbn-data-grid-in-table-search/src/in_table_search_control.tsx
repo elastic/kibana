@@ -49,7 +49,6 @@ const innerCss = css`
 
 export interface InTableSearchControlProps
   extends Omit<UseFindMatchesProps, 'onScrollToActiveMatch'> {
-  initialInTableSearchTerm?: string;
   pageSize: number | null; // null when the pagination is disabled
   getColumnIndexFromId: (columnId: string) => number;
   scrollToCell: (params: { rowIndex: number; columnIndex: number; align: 'center' }) => void;
@@ -60,7 +59,7 @@ export interface InTableSearchControlProps
 }
 
 export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
-  initialInTableSearchTerm,
+  initialState,
   pageSize,
   getColumnIndexFromId,
   scrollToCell,
@@ -78,40 +77,46 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   const [isInputVisible, setIsInputVisible] = useState<boolean>(Boolean(props.inTableSearchTerm));
 
   const onScrollToActiveMatch: UseFindMatchesProps['onScrollToActiveMatch'] = useCallback(
-    ({ rowIndex, columnId, matchIndexWithinCell }) => {
-      if (typeof pageSize === 'number') {
+    (activeMatch, animate) => {
+      const { rowIndex, columnId, matchIndexWithinCell } = activeMatch;
+
+      if (typeof pageSize === 'number' && animate) {
         const expectedPageIndex = Math.floor(rowIndex / pageSize);
         onChangeToExpectedPage(expectedPageIndex);
       }
 
       // Defines highlight styles for the active match.
       // The cell border is useful when the active match is not visible due to the limited cell boundaries.
-      onChangeCss(css`
-        .euiDataGridRowCell[data-gridcell-row-index='${rowIndex}'][data-gridcell-column-id='${columnId}'] {
-          &:after {
-            content: '';
-            z-index: 2;
-            pointer-events: none;
-            position: absolute;
-            inset: 0;
-            border: 2px solid ${colors.activeHighlightBorderColor} !important;
-            border-radius: 3px;
+      onChangeCss(
+        css`
+          .euiDataGridRowCell[data-gridcell-row-index='${rowIndex}'][data-gridcell-column-id='${columnId}'] {
+            &:after {
+              content: '';
+              z-index: 2;
+              pointer-events: none;
+              position: absolute;
+              inset: 0;
+              border: 2px solid ${colors.activeHighlightBorderColor} !important;
+              border-radius: 3px;
+            }
+            .${HIGHLIGHT_CLASS_NAME}[${CELL_MATCH_INDEX_ATTRIBUTE}='${matchIndexWithinCell}'] {
+              color: ${colors.activeHighlightColor} !important;
+              background-color: ${colors.activeHighlightBackgroundColor} !important;
+            }
           }
-          .${HIGHLIGHT_CLASS_NAME}[${CELL_MATCH_INDEX_ATTRIBUTE}='${matchIndexWithinCell}'] {
-            color: ${colors.activeHighlightColor} !important;
-            background-color: ${colors.activeHighlightBackgroundColor} !important;
-          }
-        }
-      `);
+        `
+      );
 
-      // getting rowIndex for the visible page
-      const visibleRowIndex = typeof pageSize === 'number' ? rowIndex % pageSize : rowIndex;
+      if (animate) {
+        // getting rowIndex for the visible page
+        const visibleRowIndex = typeof pageSize === 'number' ? rowIndex % pageSize : rowIndex;
 
-      scrollToCell({
-        rowIndex: visibleRowIndex,
-        columnIndex: getColumnIndexFromId(columnId),
-        align: 'center',
-      });
+        scrollToCell({
+          rowIndex: visibleRowIndex,
+          columnIndex: getColumnIndexFromId(columnId),
+          align: 'center',
+        });
+      }
     },
     [getColumnIndexFromId, scrollToCell, onChangeCss, onChangeToExpectedPage, pageSize, colors]
   );
@@ -124,7 +129,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
     goToNextMatch,
     renderCellsShadowPortal,
     resetState,
-  } = useFindMatches({ ...props, onScrollToActiveMatch });
+  } = useFindMatches({ ...props, initialState, onScrollToActiveMatch });
 
   const showInput = useCallback(() => {
     setIsInputVisible(true);
@@ -176,7 +181,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
       {isInputVisible ? (
         <>
           <InTableSearchInput
-            initialInTableSearchTerm={initialInTableSearchTerm}
+            initialInTableSearchTerm={initialState?.searchTerm}
             matchesCount={matchesCount}
             activeMatchPosition={activeMatchPosition}
             isProcessing={isProcessing}

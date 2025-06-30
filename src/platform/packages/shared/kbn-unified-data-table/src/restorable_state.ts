@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { InTableSearchRestorableState } from '@kbn/data-grid-in-table-search/src/types';
 import { createRestorableStateProvider } from '@kbn/restorable-state';
 
 type SelectedDocId = string;
 
 export interface UnifiedDataTableRestorableState {
-  inTableSearchTerm: string;
   selectedDocsMap: Record<SelectedDocId, boolean>;
   isFilterActive: boolean;
   isCompareActive: boolean;
   pageIndex: number;
+  inTableSearch?: InTableSearchRestorableState;
 }
 
 export const { withRestorableState, useRestorableState, useRestorableRef } =

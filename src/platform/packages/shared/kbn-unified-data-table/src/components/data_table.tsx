@@ -48,7 +48,10 @@ import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
-import { useDataGridInTableSearch } from '@kbn/data-grid-in-table-search';
+import {
+  type InTableSearchRestorableState,
+  useDataGridInTableSearch,
+} from '@kbn/data-grid-in-table-search';
 import { useThrottleFn } from '@kbn/react-hooks';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
@@ -760,16 +763,21 @@ const InternalUnifiedDataTable = ({
 
   const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
 
-  const inTableSearchTermRef = useRestorableRef('inTableSearchTerm', '');
+  const inTableSearchLatestStateRef = useRestorableRef('inTableSearch', {});
+  const onInTableSearchInitialStateChange = useCallback(
+    (newState: InTableSearchRestorableState) => {
+      inTableSearchLatestStateRef.current = newState;
+    },
+    [inTableSearchLatestStateRef]
+  );
+
   const {
-    inTableSearchTerm,
     inTableSearchTermCss,
     inTableSearchControl,
     cellContextWithInTableSearchSupport,
     renderCellValueWithInTableSearchSupport,
   } = useDataGridInTableSearch({
     enableInTableSearch,
-    initialInTableSearchTerm: inTableSearchTermRef.current,
     dataGridWrapper,
     dataGridRef,
     visibleColumns,
@@ -777,8 +785,9 @@ const InternalUnifiedDataTable = ({
     renderCellValue,
     cellContext,
     pagination: paginationObj,
+    initialState: inTableSearchLatestStateRef.current,
+    onInitialStateChange: onInTableSearchInitialStateChange,
   });
-  inTableSearchTermRef.current = inTableSearchTerm;
 
   const renderCustomPopover = useMemo(
     () => renderCellPopover ?? getCustomCellPopoverRenderer(),

@@ -20,6 +20,7 @@ export interface ActiveMatch {
   rowIndex: number;
   columnId: string;
   matchIndexWithinCell: number;
+  matchPosition: number;
 }
 
 export interface InTableSearchHighlightsWrapperProps {
@@ -35,12 +36,19 @@ export type RenderCellValuePropsWithInTableSearch = EuiDataGridCellValueElementP
 
 export type RenderCellValueWrapper = (props: RenderCellValuePropsWithInTableSearch) => ReactNode;
 
+export interface InTableSearchRestorableState {
+  searchTerm?: string;
+  activeMatchPosition?: number;
+}
+
 export interface UseFindMatchesProps {
+  initialState: InTableSearchRestorableState | undefined;
+  onInitialStateChange: ((state: InTableSearchRestorableState) => void) | undefined;
   inTableSearchTerm: string;
   visibleColumns: string[];
   rows: unknown[];
   renderCellValue: RenderCellValueWrapper;
-  onScrollToActiveMatch: (activeMatch: ActiveMatch) => void;
+  onScrollToActiveMatch: (activeMatch: ActiveMatch, animate: boolean) => void;
 }
 
 export interface UseFindMatchesState {
