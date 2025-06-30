@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export enum FunctionVisibility {
-  Internal = 'internal',
-  All = 'all',
-}
+import { createTestConfig } from '../common/config';
+
+// eslint-disable-next-line import/no-default-export
+export default createTestConfig('low-level', { license: 'basic' });
