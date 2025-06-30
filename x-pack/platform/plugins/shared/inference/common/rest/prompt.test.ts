@@ -158,12 +158,14 @@ describe('createPromptRestApi', () => {
       modelName: 'test-model-invalid-stream',
       prompt,
       stream: false,
-      input: { anotherWrongKey: 'invalid stream input' },
-    } satisfies PromptOptions;
+    } as const;
 
-    // @ts-expect-error input type doesn't match schema type
     const response = await promptApi({
       ...params,
+      // @ts-expect-error input type doesn't match schema type
+      input: {
+        anotherWrongKey: 'foo',
+      },
     }).catch((error) => {
       return error;
     });
