@@ -428,47 +428,71 @@ export class PrivilegeMonitoringDataClient {
    */
   public async plainIndexSync() {
     // get all monitoring index source saved objects of type 'index'
-    const indexSources: MonitoringEntitySourceDescriptor[] =
+    const monitoringIndexSources: MonitoringEntitySourceDescriptor[] =
       await this.monitoringIndexSourceClient.findByIndex();
-    if (indexSources.length === 0) {
+    if (monitoringIndexSources.length === 0) {
       this.log('debug', 'No monitoring index sources found. Skipping sync.');
       return;
     }
     const allStaleUsers: PrivMonBulkUser[] = [];
 
-    for (const source of indexSources) {
-      // eslint-disable-next-line no-continue
-      if (!source.indexPattern) continue; // if no index pattern, skip this source
-      const index: string = source.indexPattern;
-
-      try {
-        const usernames = await this.fetchUsernamesFromIndex({
-          indexName: index,
-          kuery: source.filter?.kuery,
-        });
-        const batchUsernames = await this.syncMonitoredUsers({ usernames, indexName: index });
-        // collect stale users
-        const staleUsers = await this.findStaleUsersForIndex(index, batchUsernames);
-        allStaleUsers.push(...staleUsers);
-      } catch (error) {
-        if (
-          error?.meta?.body?.error?.type === 'index_not_found_exception' ||
-          error?.message?.includes('index_not_found_exception')
-        ) {
-          this.log('warn', `Index "${index}" not found — skipping.`);
-          // eslint-disable-next-line no-continue
-          continue;
+    for (const source of monitoringIndexSources) {
+      if (!source.indexPattern) {
+        this.log('debug', `Skipping source "${source.name}" with no index pattern.`);
+      } else {
+        const index: string = source.indexPattern;
+        const syncedUsernames = await this.ingestUsersFromIndexSource(source, index);
+        this.log(
+          'info',
+          `Synced users from index source "${source.name}" (${index}): ${
+            syncedUsernames?.length ?? 0
+          }`
+        );
+        if (syncedUsernames != null) {
+          this.log(
+            'info',
+            `Synced ${syncedUsernames.length} users from index source "${source.name}" (${index})`
+          );
+          const staleUsers = await this.findStaleUsersForIndex(index, syncedUsernames);
+          allStaleUsers.push(...staleUsers);
         }
-        this.log('error', `Unexpected error during sync for index "${index}": ${error.message}`);
       }
     }
-    // Soft delete stale users
     this.log('debug', `Found ${allStaleUsers.length} stale users across all index sources.`);
     if (allStaleUsers.length > 0) {
       const ops = this.bulkOperationsForSoftDeleteUsers(allStaleUsers, this.getIndex());
       await this.esClient.bulk({ body: ops });
     }
   }
+
+  private async ingestUsersFromIndexSource(
+    source: MonitoringEntitySourceDescriptor,
+    index: string
+  ): Promise<string[] | null> {
+    try {
+      const usernames = await this.fetchUsernamesFromIndex({
+        indexName: index,
+        kuery: source.filter?.kuery,
+      });
+
+      return await this.bulkUpsertMonitoredUsers({
+        usernames,
+        indexName: index,
+      });
+    } catch (error) {
+      const isIndexNotFound =
+        error?.meta?.body?.error?.type === 'index_not_found_exception' ||
+        error?.message?.includes('index_not_found_exception');
+
+      const msg = isIndexNotFound
+        ? `Index "${index}" not found — skipping.`
+        : `Unexpected error during sync for index "${index}": ${error.message}`;
+
+      this.log(isIndexNotFound ? 'warn' : 'error', msg);
+      return null;
+    }
+  }
+
   /**
    * Fetches usernames from a specified index using a query.
    * It retrieves usernames in batches, handling pagination with `search_after`.
@@ -520,7 +544,7 @@ export class PrivilegeMonitoringDataClient {
    * @param indexName - The name of the index to associate with the users.
    * @returns A promise that resolves to an array of usernames that were synced.
    */
-  public async syncMonitoredUsers({
+  public async bulkUpsertMonitoredUsers({
     usernames,
     indexName,
   }: {
@@ -564,7 +588,7 @@ export class PrivilegeMonitoringDataClient {
   ): Promise<PrivMonBulkUser[]> {
     const response = await this.esClient.search<MonitoredUserDoc>({
       index: this.getIndex(),
-      size: 10, // check this
+      size: 10,
       _source: ['user.name', 'labels.source_indices'],
       query: {
         bool: {
