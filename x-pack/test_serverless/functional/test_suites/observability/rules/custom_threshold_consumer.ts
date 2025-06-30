@@ -58,7 +58,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
   }
 
-  describe('Custom threshold rule - consumers', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/225800
+  describe.skip('Custom threshold rule - consumers', function () {
     // custom roles are not yet supported in MKI
     this.tags(['skipMKI']);
     const ruleIdList: string[] = [];

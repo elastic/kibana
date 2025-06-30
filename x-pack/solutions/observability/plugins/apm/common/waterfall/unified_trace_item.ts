@@ -7,7 +7,7 @@
 
 export interface TraceItem {
   id: string;
-  timestamp: string;
+  timestampUs: number;
   name: string;
   traceId: string;
   duration: number;
