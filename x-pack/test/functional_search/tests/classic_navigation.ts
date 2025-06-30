@@ -32,7 +32,7 @@ export default function searchSolutionNavigation({
         solution: 'classic',
       }));
       await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
-      await common.navigateToApp('enterpriseSearch');
+      await common.navigateToApp('searchHomepage');
     });
 
     after(async () => {
