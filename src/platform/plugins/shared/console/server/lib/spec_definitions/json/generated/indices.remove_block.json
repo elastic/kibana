@@ -1,0 +1,15 @@
+{
+  "indices.remove_block": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "{index}/_block/{block}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/index-modules-blocks.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}
