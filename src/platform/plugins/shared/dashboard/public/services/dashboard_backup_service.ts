@@ -161,8 +161,10 @@ class DashboardBackupService implements DashboardBackupServiceType {
   }
 }
 
-function hasUnsavedChanges(unsavedChanges: Partial<DashboardState>) {
-  return Object.keys(unsavedChanges).some((stateKey) => stateKey !== 'references');
+function hasUnsavedChanges(unsavedChanges?: Partial<DashboardState>) {
+  return unsavedChanges
+    ? Object.keys(unsavedChanges).some((stateKey) => stateKey !== 'references')
+    : false;
 }
 
 let dashboardBackupService: DashboardBackupService;
