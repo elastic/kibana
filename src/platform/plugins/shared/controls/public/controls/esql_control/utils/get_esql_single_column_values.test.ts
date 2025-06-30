@@ -36,7 +36,6 @@ describe('getESQLSingleColumnValues', () => {
       search: searchMock,
     })) as GetESQLSingleColumnValuesSuccess;
     expect(getESQLSingleColumnValues.isSuccess(result)).toBe(true);
-    expect('columns' in result).toBe(false);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "values": Array [
@@ -46,7 +45,7 @@ describe('getESQLSingleColumnValues', () => {
       }
     `);
   });
-  it('returns columns and empty error on successful query that returns multiple columns', async () => {
+  it('returns an error when query returns multiple columns', async () => {
     mockGetESQLResults.mockResolvedValueOnce({
       response: {
         columns: [{ name: 'column1' }, { name: 'column2' }],
