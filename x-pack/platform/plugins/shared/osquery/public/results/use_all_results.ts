@@ -8,18 +8,15 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
-import type { InspectResponse } from '../common/helpers';
-import { getInspectResponse } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import type { ResultEdges, Direction, ResultsStrategyResponse } from '../../common/search_strategy';
 import { API_VERSIONS } from '../../common/constants';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
-export interface ResultsArgs {
+interface ResultsArgs {
   edges: ResultEdges;
   id: string;
-  inspect: InspectResponse;
   total: number;
   columns: string[];
 }
@@ -32,7 +29,6 @@ interface UseAllResults {
   limit: number;
   sort: Array<{ field: string; direction: Direction }>;
   kuery?: string;
-  skip?: boolean;
   isLive?: boolean;
 }
 
@@ -44,7 +40,6 @@ export const useAllResults = ({
   limit,
   sort,
   kuery,
-  skip = false,
   isLive = false,
 }: UseAllResults) => {
   const { http } = useKibana().services;
@@ -70,29 +65,16 @@ export const useAllResults = ({
         }
       ),
     {
-      select: (response) => {
-        const strategyResponse: Partial<ResultsStrategyResponse> = {
-          edges: response.data.edges,
-          inspect: response.data.inspect,
-          rawResponse: response.data.rawResponse || { hits: { hits: response.data.edges || [] } },
-        };
-
-        return {
-          id: actionId,
-          inspect: getInspectResponse(
-            strategyResponse as ResultsStrategyResponse,
-            {} as InspectResponse
-          ),
-          total: response.data.total ?? 0,
-          edges: response.data.edges ?? [],
-          columns: Object.keys(
-            (response.data.edges?.length && response.data.edges[0].fields) || {}
-          ).sort(),
-        };
-      },
+      select: (response) => ({
+        id: actionId,
+        total: response.data.total ?? 0,
+        edges: response.data.edges ?? [],
+        columns: Object.keys(
+          (response.data.edges?.length && response.data.edges[0].fields) || {}
+        ).sort(),
+      }),
       keepPreviousData: true,
       refetchInterval: isLive ? 5000 : false,
-      enabled: !skip,
       onSuccess: () => setErrorToast(),
       onError: (error: Error) =>
         setErrorToast(error, {

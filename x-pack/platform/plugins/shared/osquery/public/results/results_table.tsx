@@ -83,10 +83,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   error,
 }) => {
   const [isLive, setIsLive] = useState(true);
-  // const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
 
   const {
-    // @ts-expect-error update types
     data: { aggregations },
   } = useActionResults({
     actionId,
@@ -97,7 +95,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     direction: Direction.asc,
     sortField: '@timestamp',
     isLive,
-    skip: false,
   });
   const expired = useMemo(() => (!endDate ? false : new Date(endDate) < new Date()), [endDate]);
   const {
@@ -148,7 +145,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       field: sortedColumn.id,
       direction: sortedColumn.direction as Direction,
     })),
-    skip: false,
   });
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
@@ -404,33 +400,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   if (isLoading) {
     return <EuiSkeletonText lines={5} />;
   }
-
-  // if (!hasActionResultsPrivileges) {
-  //   return (
-  //     <EuiCallOut
-  //       title={
-  //         <FormattedMessage
-  //           id="xpack.osquery.liveQuery.permissionDeniedPromptTitle"
-  //           defaultMessage="Permission denied"
-  //         />
-  //       }
-  //       color="danger"
-  //       iconType="warning"
-  //     >
-  //       <p>
-  //         <FormattedMessage
-  //           id="xpack.osquery.liveQuery.permissionDeniedPromptBody"
-  //           defaultMessage="To view query results, ask your administrator to update your user role to have index {read} privileges on the {logs} index."
-  //           // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-  //           values={{
-  //             read: <EuiCode>read</EuiCode>,
-  //             logs: <EuiCode>logs-{OSQUERY_INTEGRATION_NAME}.result*</EuiCode>,
-  //           }}
-  //         />
-  //       </p>
-  //     </EuiCallOut>
-  //   );
-  // }
 
   return (
     <>

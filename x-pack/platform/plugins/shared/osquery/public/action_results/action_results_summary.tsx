@@ -41,9 +41,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     [expirationDate]
   );
   const [isLive, setIsLive] = useState(true);
-  // const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
   const {
-    // @ts-expect-error update types
     data: { aggregations, edges },
   } = useActionResults({
     actionId,
@@ -54,7 +52,6 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     direction: Direction.asc,
     sortField: '@timestamp',
     isLive,
-    skip: false,
   });
 
   useEffect(() => {
