@@ -8,13 +8,15 @@
  */
 
 import { ViewMode } from '@kbn/presentation-publishing';
+import { DashboardCreationOptions } from '../../../dashboard_api/types';
 import { extractControlGroupState } from './extract_control_group_state';
 import { extractSettings } from './extract_dashboard_settings';
 import { extractPanelsState } from './extract_panels_state';
 import { extractSearchState } from './extract_search_state';
-import { DashboardCreationOptions } from '@kbn/dashboard-plugin/public/dashboard_api/types';
 
-export function extractDashboardState(state?: unknown): ReturnType<NonNullable<DashboardCreationOptions['getInitialInput']>> {
+export function extractDashboardState(
+  state?: unknown
+): ReturnType<NonNullable<DashboardCreationOptions['getInitialInput']>> {
   let dashboardState: ReturnType<NonNullable<DashboardCreationOptions['getInitialInput']>> = {};
   if (state && typeof state === 'object') {
     const stateAsObject = state as { [key: string]: unknown };
