@@ -10,18 +10,6 @@ import { createStatefulTestConfig } from '../../default_configs/stateful.config.
 export default createStatefulTestConfig({
   testFiles: [require.resolve('./oblt.ai_assistant_local.index.ts')],
   junit: {
-    reportName: 'Stateful Observability - Deployment-agnostic API Integration Tests',
-  },
-  // @ts-expect-error
-  kbnTestServer: {
-    serverArgs: [
-      `--logging.loggers=${JSON.stringify([
-        {
-          name: 'plugins.observabilityAIAssistant',
-          level: 'all',
-          appenders: ['default'],
-        },
-      ])}`,
-    ],
+    reportName: 'Stateful Observability - Deployment-agnostic AI Assistant local-only tests',
   },
 });

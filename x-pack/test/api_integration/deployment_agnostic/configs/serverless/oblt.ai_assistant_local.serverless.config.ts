@@ -11,6 +11,6 @@ export default createServerlessTestConfig({
   serverlessProject: 'oblt',
   testFiles: [require.resolve('./oblt.ai_assistant_local.index.ts')],
   junit: {
-    reportName: 'Serverless Observability - Deployment-agnostic API Integration Tests',
+    reportName: 'Serverless Observability - Deployment-agnostic AI Assistant local-only tests',
   },
 });

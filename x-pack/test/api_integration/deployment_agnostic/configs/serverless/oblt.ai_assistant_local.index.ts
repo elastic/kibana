@@ -7,9 +7,9 @@
 import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('Serverless Observability - Deployment-agnostic AI Assistant API integration tests', function () {
+  describe('Serverless Observability - Deployment-agnostic AI Assistant local-only tests', function () {
     this.tags(['esGate']);
 
-    loadTestFile(require.resolve('../../apis/observability/ai_assistant/local'));
+    loadTestFile(require.resolve('../../apis/observability/ai_assistant'));
   });
 }

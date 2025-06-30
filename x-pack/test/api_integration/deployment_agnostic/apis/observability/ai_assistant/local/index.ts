@@ -10,7 +10,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provi
 export default function aiAssistantApiIntegrationTests({
   loadTestFile,
 }: DeploymentAgnosticFtrProviderContext) {
-  describe('observability AI Assistant', function () {
+  describe('observability AI Assistant local-only tests', function () {
     loadTestFile(require.resolve('../knowledge_base/knowledge_base_bulk_import.spec.ts'));
   });
 }

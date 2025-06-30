@@ -7,7 +7,7 @@
 import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('Stateful Observability - Deployment-agnostic AI Assistant API integration tests', function () {
+  describe('Stateful Observability - Deployment-agnostic AI Assistant local-only tests', function () {
     loadTestFile(require.resolve('../../apis/observability/ai_assistant/local'));
   });
 }

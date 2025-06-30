@@ -19,7 +19,7 @@ disabled:
   - x-pack/solutions/observability/plugins/ux/e2e/synthetics_run.ts
   - x-pack/solutions/observability/plugins/slo/e2e/synthetics_run.ts
 
-  #Observability AI Assistant bulk import config, only run locally
+  # Observability AI Assistant local-only tests
   - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.ai_assistant_local.stateful.config.ts
 
 defaultQueue: 'n2-4-spot'

@@ -23,7 +23,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     // This test is intentionally skipped in both serverless and stateful
     // since it is not meant to be run on CI but only as a manual test
     before(async () => {
-      await setupKb(getService);
+      await setupKnowledgeBase(getService, ELSER_ON_ML_NODE_INFERENCE_ID);
+      await waitForKnowledgeBaseReady(getService);
     });
 
     after(async () => {
@@ -54,11 +55,4 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
   });
-}
-
-export async function setupKb(getService: DeploymentAgnosticFtrProviderContext['getService']) {
-  const { status, body } = await setupKnowledgeBase(getService, ELSER_ON_ML_NODE_INFERENCE_ID);
-  await waitForKnowledgeBaseReady(getService);
-
-  return { status, body };
 }
