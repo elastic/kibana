@@ -46,8 +46,8 @@ import { ElasticsearchCircuitBreaker } from './circuit_breakers/elastic_search_c
 
 const TASK_TYPE = 'security:health-diagnostic';
 const TASK_ID = `${TASK_TYPE}:1.0.0`;
-const INTERVAL = '60m';
-const TIMEOUT = '5m';
+const INTERVAL = '5m'; // TODO only for testing
+const TIMEOUT = '3m'; // TODO only for testing
 const QUERY_ARTIFACT_ID = 'health-diagnostic-query';
 
 export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
