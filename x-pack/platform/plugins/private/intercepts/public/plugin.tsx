@@ -51,7 +51,7 @@ export class InterceptPublicPlugin implements Plugin {
     });
 
     core.chrome.navControls.registerRight({
-      order: this.isServerless ? 1 : 1002,
+      order: this.isServerless ? 1 : 1001,
       mount: toMountPoint(
         <FeedbackButton
           core={core}
