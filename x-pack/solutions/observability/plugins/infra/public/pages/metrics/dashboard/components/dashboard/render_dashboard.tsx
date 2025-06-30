@@ -9,61 +9,71 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
-import { KUBERNETES_DASHBOARD_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
-import type { SerializableRecord } from '@kbn/utility-types';
+import { INFRA_DASHBOARD_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
 import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import { useHistory } from 'react-router-dom';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
-import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { AddKubernetesDataLink } from '../add_kubernetes_data/add_kubernetes_data';
 import { useFetchDashboardById } from '../../hooks/use_fetch_dashboard_by_id';
 
-export const RenderDashboard = ({ dashboardId }: { dashboardId: string }) => {
+export const RenderDashboard = ({
+  dashboardId,
+  kuery,
+}: {
+  dashboardId: string;
+  kuery?: string;
+}) => {
   const {
-    services: { share },
+    services: { share, notifications },
   } = useKibanaContextForPlugin();
 
-  const { dateRange } = useDatePickerContext();
-  const { from, to } = dateRange;
+  const history = useHistory();
+
+  const kbnUrlStateStorage = useMemo(
+    () =>
+      createKbnUrlStateStorage({
+        history,
+        useHash: false,
+        useHashQuery: false,
+        ...withNotifyOnErrors(notifications.toasts),
+      }),
+    [history, notifications.toasts]
+  );
+
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
     const getInitialInput = (): Partial<DashboardState> => ({
       viewMode: 'view' as ViewMode,
-      timeRange: { from, to },
+      query: { query: kuery ?? '', language: 'kuery' },
     });
+
     return Promise.resolve<DashboardCreationOptions>({
       getInitialInput,
+      useUnifiedSearchIntegration: true,
+      unifiedSearchSettings: {
+        kbnUrlStateStorage,
+      },
+      useSearchSessionsIntegration: true,
     });
-  }, [from, to]);
-
-  const getLocatorParams = useCallback(
-    (params: SerializableRecord) => {
-      return {
-        dashboardId: params?.dashboardId ?? dashboardId,
-      };
-    },
-    [dashboardId]
-  );
+  }, [kbnUrlStateStorage, kuery]);
 
   const locator = useMemo(() => {
-    const baseLocator = share.url.locators.get(KUBERNETES_DASHBOARD_LOCATOR_ID);
+    const baseLocator = share.url.locators.get(INFRA_DASHBOARD_LOCATOR_ID);
     if (!baseLocator) return;
 
     return {
       ...baseLocator,
-      getRedirectUrl: (params: SerializableRecord) =>
-        baseLocator.getRedirectUrl(getLocatorParams(params)),
-      navigate: (params: SerializableRecord) => baseLocator.navigate(getLocatorParams(params)),
     };
-  }, [share, getLocatorParams]);
+  }, [share]);
 
   const [dashboard, setDashboard] = useState<DashboardApi | undefined>(undefined);
 
   useEffect(() => {
     if (!dashboard) return;
-    dashboard.setTimeRange({ from, to });
-    dashboard.setQuery({ query: '', language: 'kuery' });
-  }, [dashboard, dashboardId, from, to]);
+    dashboard.setQuery({ query: kuery ?? '', language: 'kuery' });
+  }, [dashboard, dashboardId, kuery]);
 
   const { data: dashboardData, status } = useFetchDashboardById(dashboardId);
 
@@ -80,6 +90,7 @@ export const RenderDashboard = ({ dashboardId }: { dashboardId: string }) => {
       savedObjectId={dashboardId}
       getCreationOptions={getCreationOptions}
       onApiAvailable={setDashboard}
+      showPlainSpinner
     />
   );
 };

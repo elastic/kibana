@@ -21,6 +21,7 @@ export const LensWrapper = ({
   onLoad,
   query,
   lastReloadRequestTime,
+  extraActions = [],
   ...props
 }: LensWrapperProps) => {
   const { euiTheme } = useEuiTheme();

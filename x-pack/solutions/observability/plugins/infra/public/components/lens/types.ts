@@ -16,7 +16,7 @@ export type LensWrapperProps = Omit<
 > & {
   attributes: LensAttributes | null;
   dateRange: TimeRange;
-  extraActions: Action[];
+  extraActions?: Action[];
   loading?: boolean;
 };
 

@@ -6,26 +6,63 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useMetricsDataView } from '../../../../../containers/metrics_source';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_timerange_metadata';
 import { RenderDashboard } from '../dashboard/render_dashboard';
+import { EntityTable } from '../entity_table/entity_table';
 
 export const PageContent = ({
   dashboardId,
-  enitiyId,
+  entityId,
+  kuery,
 }: {
   dashboardId: string;
-  enitiyId?: string | null;
+  entityId?: string | null;
+  kuery?: string;
 }) => {
-  const { data, status } = useTimeRangeMetadataContext();
+  const {
+    services: { unifiedSearch },
+  } = useKibanaContextForPlugin();
 
-  if (status === 'loading') {
-    return <EuiLoadingSpinner size="xl" />;
-  }
+  const { SearchBar } = unifiedSearch.ui;
+
+  const { metricsView } = useMetricsDataView();
+  const { data, status } = useTimeRangeMetadataContext();
 
   if (data?.schemas === undefined) {
     return null;
   }
 
-  return <RenderDashboard dashboardId={dashboardId} />;
+  return (
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem>
+        <SearchBar
+          appName="infraMetrics"
+          displayStyle="inPage"
+          indexPatterns={metricsView && [metricsView.dataViewReference]}
+          placeholder={i18n.translate('xpack.infra.hosts.searchPlaceholder', {
+            defaultMessage: 'Search',
+          })}
+          showDatePicker
+          showFilterBar
+          showQueryInput
+          showQueryMenu
+          useDefaultBehaviors
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        {status === 'loading' ? (
+          <EuiLoadingSpinner size="xl" />
+        ) : (
+          <>
+            {entityId ? <EntityTable entityId={entityId} /> : null}
+            <RenderDashboard dashboardId={dashboardId} kuery={kuery} />
+          </>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };

@@ -52,9 +52,7 @@ const NodeDetail = dynamic(() =>
   import('./metric_detail').then((mod) => ({ default: mod.NodeDetail }))
 );
 const HostsPage = dynamic(() => import('./hosts').then((mod) => ({ default: mod.HostsPage })));
-const Kubernetes = dynamic(() =>
-  import('./kubernetes').then((mod) => ({ default: mod.Kubernetes }))
-);
+
 const Dashboard = dynamic(() => import('./dashboard').then((mod) => ({ default: mod.Dashboard })));
 
 export const InfrastructurePage = () => {
@@ -130,10 +128,8 @@ export const InfrastructurePage = () => {
                 <Route path="/detail/:type/:node" component={NodeDetail} />
                 <Route path="/hosts" component={HostsPage} />
                 <Route path="/settings" component={MetricsSettingsPage} />
-                <Route path="/entity/:namespace/:name" component={Dashboard} />
-                <Route path="/entity/:namespace" component={Dashboard} />
-
-                <Route path="/kubernetes" component={Kubernetes} />
+                <Route path="/:namespace/:name" component={Dashboard} />
+                <Route path="/:namespace" component={Dashboard} />
 
                 <RedirectWithQueryParams from="/snapshot" exact to="/inventory" />
                 <RedirectWithQueryParams from="/snapshot" exact to="/inventory" />

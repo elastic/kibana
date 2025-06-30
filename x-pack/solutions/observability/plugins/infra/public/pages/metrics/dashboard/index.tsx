@@ -10,12 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiErrorBoundary, EuiLoadingSpinner } from '@elastic/eui';
 import { useLocation, useParams } from 'react-router-dom';
 import { FETCH_STATUS, useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { TimeRangeMetadataProvider } from '../../../hooks/use_timerange_metadata';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useFetchDashboardById } from './hooks/use_fetch_dashboard_by_id';
-import { DatePicker } from './components/date_picker/date_picker';
-import { DatePickerProvider } from './hooks/use_date_picker';
-import { KubernetesTimeRangeMetadataProvider } from './hooks/use_kubernetes_timerange_metadata';
 import { PageContent } from './components/page_content/page_content';
 
 export const Dashboard = () => {
@@ -24,17 +23,27 @@ export const Dashboard = () => {
       observabilityShared: {
         navigation: { PageTemplate },
       },
+      data: {
+        query: { timefilter },
+      },
     },
   } = useKibanaContextForPlugin();
 
+  const { from, to } = timefilter.timefilter.getTime();
+
+  const parsedDateRange = useTimeRange({
+    rangeFrom: from,
+    rangeTo: to,
+  });
+
   const { search } = useLocation();
   const { namespace, name } = useParams<{ namespace: string; name?: string }>();
-
-  const { dashboardId, entityId } = useMemo(() => {
+  const { dashboardId, entityId, kuery } = useMemo(() => {
     const query = new URLSearchParams(search);
     return {
       dashboardId: query.get('dashboardId') ?? '',
       entityId: query.get('entityId'),
+      kuery: query.get('kuery') ? decodeURIComponent(query.get('kuery')!) : undefined,
     };
   }, [search]);
 
@@ -67,20 +76,22 @@ export const Dashboard = () => {
   }
 
   return (
-    <DatePickerProvider dateRange={undefined}>
-      <EuiErrorBoundary>
-        <PageTemplate
-          pageHeader={{
-            pageTitle,
-            rightSideItems: [<DatePicker />],
-          }}
-          data-test-subj="infraKubernetesPage"
+    <EuiErrorBoundary>
+      <PageTemplate
+        pageHeader={{
+          pageTitle,
+        }}
+        data-test-subj="infraKubernetesPage"
+      >
+        <TimeRangeMetadataProvider
+          kuery=""
+          dataSource="kubernetes"
+          start={parsedDateRange.from}
+          end={parsedDateRange.to}
         >
-          <KubernetesTimeRangeMetadataProvider>
-            <PageContent dashboardId={dashboardId} enitiyId={entityId} />
-          </KubernetesTimeRangeMetadataProvider>
-        </PageTemplate>
-      </EuiErrorBoundary>
-    </DatePickerProvider>
+          <PageContent dashboardId={dashboardId} entityId={entityId} kuery={kuery} />
+        </TimeRangeMetadataProvider>
+      </PageTemplate>
+    </EuiErrorBoundary>
   );
 };

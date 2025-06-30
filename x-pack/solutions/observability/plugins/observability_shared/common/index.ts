@@ -175,8 +175,6 @@ export type {
   HostsLocator,
   HostsLocatorParams,
   InventoryLocator,
-  KubernetesDashboardLocator,
-  KubernetesDashboardLocatorParams,
   InventoryLocatorParams,
   MetricsExplorerLocator,
   MetricsExplorerLocatorParams,
@@ -188,6 +186,8 @@ export type {
   TopNFunctionsLocator,
   TransactionDetailsByTraceIdLocator,
   TransactionDetailsByTraceIdLocatorParams,
+  InfraDashboardLocator,
+  InfraDashboardLocatorParams,
 } from './locators';
 
 export {
@@ -203,8 +203,6 @@ export {
   HostsLocatorDefinition,
   INVENTORY_LOCATOR_ID,
   InventoryLocatorDefinition,
-  KubernetesDashboardLocatorDefinition,
-  KUBERNETES_DASHBOARD_LOCATOR_ID,
   METRICS_EXPLORER_LOCATOR_ID,
   MetricsExplorerLocatorDefinition,
   FlamegraphLocatorDefinition,
@@ -213,6 +211,8 @@ export {
   HOSTS_LOCATOR_ID,
   TransactionDetailsByTraceIdLocatorDefinition,
   TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR,
+  InfraDashboardLocatorDefinition,
+  INFRA_DASHBOARD_LOCATOR_ID,
 } from './locators';
 
 export { COMMON_OBSERVABILITY_GROUPING } from './embeddable_grouping';
