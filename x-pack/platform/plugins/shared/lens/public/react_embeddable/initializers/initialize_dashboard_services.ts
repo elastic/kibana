@@ -79,7 +79,7 @@ export function initializeDashboardServices(
   // For some legacy reason the title and description default value is picked differently
   // ( based on existing FTR tests ).
   const defaultTitle$ = new BehaviorSubject<string | undefined>(
-    initialState.title || internalApi.attributes$.getValue().title
+    internalApi.attributes$.getValue().title
   );
   const defaultDescription$ = new BehaviorSubject<string | undefined>(
     initialState.savedObjectId

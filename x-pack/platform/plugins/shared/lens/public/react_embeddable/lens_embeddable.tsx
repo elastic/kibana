@@ -82,10 +82,6 @@ export const createLensEmbeddableFactory = (
         services
       );
 
-      const defaultTitle$ = new BehaviorSubject<string | undefined>(
-        initialRuntimeState.attributes.title
-      );
-
       /**
        * Initialize various configurations required to build all the required
        * parts for the Lens embeddable.
@@ -203,7 +199,6 @@ export const createLensEmbeddableFactory = (
           ...integrationsConfig.api,
           ...stateConfig.api,
           ...dashboardConfig.api,
-          defaultTitle$,
         }
       );
 
