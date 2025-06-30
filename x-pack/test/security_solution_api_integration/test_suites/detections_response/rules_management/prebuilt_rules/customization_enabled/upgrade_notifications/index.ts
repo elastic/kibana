@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export function ruleEditUrl(ruleId: string): string {
-  return `/app/security/rules/id/${ruleId}/edit`;
-}
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+
+export default ({ loadTestFile }: FtrProviderContext): void => {
+  loadTestFile(require.resolve('./get_prebuilt_rules_status'));
+};
