@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, Type, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
+import { KIBANA_SOLUTIONS, KibanaSolution } from '@kbn/projects-solutions-groups';
 
 const apmConfigSchema = schema.object({
   url: schema.maybe(schema.string()),
@@ -45,7 +46,13 @@ const configSchema = schema.object({
       {
         project_id: schema.maybe(schema.string()),
         project_name: schema.maybe(schema.string()),
-        project_type: schema.maybe(schema.string()),
+        project_type: schema.maybe(
+          schema.oneOf(
+            KIBANA_SOLUTIONS.map((solution) => schema.literal(solution)) as [
+              Type<KibanaSolution> // This cast is needed because it's different to Type<T>[] :sight:
+            ]
+          )
+        ),
         orchestrator_target: schema.maybe(schema.string()),
       },
       // avoid future chicken-and-egg situation with the component populating the config
