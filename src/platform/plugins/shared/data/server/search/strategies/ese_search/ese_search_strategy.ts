@@ -79,6 +79,8 @@ export const enhancedEsSearchStrategyProvider = (
         ? { wait_for_completion_timeout: request.params.wait_for_completion_timeout }
         : {}),
     };
+    // console.log('getAsyncSearch ese params', params);
+
     const { body, headers, meta } = await client.asyncSearch.get(
       { ...params, id: id! },
       {
@@ -108,6 +110,7 @@ export const enhancedEsSearchStrategyProvider = (
       meta: true,
       asStream: options.stream,
     });
+    // console.log('submitAsyncSearch ese params', body, headers, meta);
 
     return toAsyncKibanaSearchResponse(body, headers, meta?.request?.params, options);
   }

@@ -32,7 +32,7 @@ export async function getSessionStatus(
   const searches = Object.values(session.idMapping);
   const searchStatuses = await Promise.all(
     searches.map(async (s) => {
-      const status = await getSearchStatus(deps.internalClient, s.id);
+      const status = await getSearchStatus(deps.internalClient, s.id, s);
       return {
         ...s,
         ...status,

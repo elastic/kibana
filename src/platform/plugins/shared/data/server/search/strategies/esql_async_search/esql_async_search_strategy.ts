@@ -86,6 +86,7 @@ export const esqlAsyncSearchStrategyProvider = (
         ? { wait_for_completion_timeout: request.params.wait_for_completion_timeout }
         : {}),
     };
+    // console.log('getEsqlAsyncSearch params', params);
 
     return esClient.asCurrentUser.transport.request<SqlGetAsyncResponse>(
       {
@@ -113,6 +114,7 @@ export const esqlAsyncSearchStrategyProvider = (
       ...(await getCommonDefaultAsyncSubmitParams(searchConfig, options)),
       ...requestParams,
     };
+    // console.log('submitEsqlSearch params', params);
 
     return esClient.asCurrentUser.transport.request<SqlGetAsyncResponse>(
       {
@@ -138,9 +140,7 @@ export const esqlAsyncSearchStrategyProvider = (
     // This abortSignal comes from getRequestAbortedSignal and fires if the HTTP request is aborted;
     // in the case of these async APIs, we  don't want to cancel the async request if the HTTP
     // request is aborted
-    console.log('id', id);
-    console.log('request', request);
-    console.log('searchOptions', searchOptions);
+    // console.log('esqlAsyncSearch', {id, request, searchOptions});
     const { abortSignal, ...options } = searchOptions;
     const search = async () => {
       const response = await (!id
