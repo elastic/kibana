@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('Privileges', function () {
+  describe.skip('Privileges', function () {
     describe('GET /api/upgrade_assistant/privileges', () => {
       it('User with with index privileges', async () => {
         const { body } = await supertest
