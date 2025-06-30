@@ -542,7 +542,7 @@ const InternalUnifiedDataTable = ({
     docIdsInSelectionOrder,
   } = selectedDocsState;
 
-  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [currentPageIndex, setCurrentPageIndex] = useRestorableState('pageIndex', 0);
 
   const changeCurrentPageIndex = useCallback(
     (value: number) => {
@@ -652,7 +652,7 @@ const InternalUnifiedDataTable = ({
       }
       return calculatedPageIndex;
     });
-  }, [onUpdatePageIndex, pageCount]);
+  }, [onUpdatePageIndex, pageCount, setCurrentPageIndex]);
 
   const paginationObj = useMemo(() => {
     const onChangeItemsPerPage = (pageSize: number) => {

@@ -16,6 +16,7 @@ export interface UnifiedDataTableRestorableState {
   selectedDocsMap: Record<SelectedDocId, boolean>;
   isFilterActive: boolean;
   isCompareActive: boolean;
+  pageIndex: number;
 }
 
 export const { withRestorableState, useRestorableState, useRestorableRef } =
