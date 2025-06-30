@@ -11,8 +11,8 @@ export const DEFAULT_ROUTE_UI_SETTING_ID = 'defaultRoute';
 
 export const DEFAULT_ROUTES = {
   classic: '/app/home',
-  es: '/app/elasticsearch/overview',
-  search: '/app/elasticsearch/overview',
+  es: '/app/elasticsearch/home',
+  search: '/app/elasticsearch/home',
   // O11y aliases
   oblt: '/app/observability/landing',
   observability: '/app/observability/landing',

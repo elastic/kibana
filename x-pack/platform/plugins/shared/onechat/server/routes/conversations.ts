@@ -44,4 +44,29 @@ export function registerConversationRoutes({
       });
     })
   );
+
+  router.get(
+    {
+      path: '/internal/onechat/conversations/{conversationId}',
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+      validate: {
+        params: schema.object({
+          conversationId: schema.string(),
+        }),
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { conversationId } = request.params;
+
+      const client = await conversationsService.getScopedClient({ request });
+      const conversation = await client.get(conversationId);
+
+      return response.ok({
+        body: conversation,
+      });
+    })
+  );
 }
