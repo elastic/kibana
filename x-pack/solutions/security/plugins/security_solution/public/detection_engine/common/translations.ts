@@ -391,10 +391,17 @@ export const BULK_FILL_RULE_GAPS_CONFIRMATION_CONFIRM = i18n.translate(
   }
 );
 
-export const BULK_MANUAL_RULE_RUN_LIMIT_ERROR_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunLimitErrorMessage',
+export const BULK_ACTION_LIMIT_ERROR_MODAL_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkActionErrorModalMessage',
   {
     defaultMessage: 'Cannot execute the bulk action',
+  }
+);
+
+export const BULK_ACTION_ERROR_MODAL_CLOSE_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkActionErrorModalCloseButton',
+  {
+    defaultMessage: 'Close',
   }
 );
 
@@ -404,23 +411,9 @@ export const BULK_MANUAL_RULE_RUN_LIMIT_ERROR_MESSAGE = (rulesCount: number) =>
     {
       values: { rulesCount },
       defaultMessage:
-        'Manual rule run cannot be scheduled for more than {rulesCount, plural, =1 {# rule} other {# rules}}',
+        'Manual rule run cannot be scheduled for more than {rulesCount, plural, =1 {# rule} other {# rules}}.',
     }
   );
-
-export const BULK_MANUAL_RULE_RUN_LIMIT_ERROR_CLOSE_BUTTON = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunLimitErrorCloseButton',
-  {
-    defaultMessage: 'Close',
-  }
-);
-
-export const BULK_FILL_RULE_GAPS_LIMIT_ERROR_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkFillRuleGapsRuleLimitErrorMessage',
-  {
-    defaultMessage: 'Cannot execute the bulk action',
-  }
-);
 
 export const BULK_FILL_RULE_GAPS_LIMIT_ERROR_MESSAGE = (rulesCount: number) =>
   i18n.translate(
@@ -431,13 +424,6 @@ export const BULK_FILL_RULE_GAPS_LIMIT_ERROR_MESSAGE = (rulesCount: number) =>
         'Cannot schedule gap fills for more than {rulesCount, plural, =1 {# rule} other {# rules}}.',
     }
   );
-
-export const BULK_FILL_RULE_GAPS_LIMIT_ERROR_CLOSE_BUTTON = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkFillRuleGapsRuleLimitErrorCloseButton',
-  {
-    defaultMessage: 'Close',
-  }
-);
 
 export const BULK_EDIT_FLYOUT_FORM_SAVE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.saveButtonLabel',
@@ -721,6 +707,28 @@ export const EXPORT_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.exportRuleDescription',
   {
     defaultMessage: 'Export rule',
+  }
+);
+
+export const REVERT_RULE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.revertRuleDescription',
+  {
+    defaultMessage: 'Revert to Elastic version',
+  }
+);
+
+export const REVERT_RULE_TOOLTIP_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.revertRuleTooltipTitle',
+  {
+    defaultMessage: 'Unable to revert rule',
+  }
+);
+
+export const REVERT_RULE_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.revertRuleTooltipContent',
+  {
+    defaultMessage:
+      "This rule hasn't been updated in a while and there's no available version to revert to. We recommend updating this rule instead.",
   }
 );
 
