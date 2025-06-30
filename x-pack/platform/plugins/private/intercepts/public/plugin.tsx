@@ -20,11 +20,9 @@ export interface InterceptPublicStartDependencies {
 export class InterceptPublicPlugin implements Plugin {
   private readonly prompter?: InterceptPrompter;
   private interceptsTargetDomElement?: HTMLDivElement;
-  private isServerless: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     const { enabled } = initializerContext.config.get<ServerConfigSchema>();
-    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
 
     if (enabled) {
       this.prompter = new InterceptPrompter();
@@ -51,13 +49,9 @@ export class InterceptPublicPlugin implements Plugin {
     });
 
     core.chrome.navControls.registerRight({
-      order: this.isServerless ? 1 : 1001,
+      order: 1002,
       mount: toMountPoint(
-        <FeedbackButton
-          core={core}
-          isServerless={this.isServerless}
-          getLicense={licensing.getLicense}
-        />,
+        <FeedbackButton core={core} getLicense={licensing.getLicense} />,
         core.rendering
       ),
     });

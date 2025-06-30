@@ -8,18 +8,17 @@
 import React from 'react';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { EuiButton, EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
+import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { FeedbackFlyout } from './feedback_flyout';
 
 interface Props {
   core: CoreStart;
-  isServerless: boolean;
   getLicense: LicensingPluginStart['getLicense'];
 }
 
-export const FeedbackButton = ({ core, isServerless, getLicense }: Props) => {
+export const FeedbackButton = ({ core, getLicense }: Props) => {
   let flyoutRef: OverlayRef | null = null;
 
   const closeFlyout = () => {
@@ -50,24 +49,6 @@ export const FeedbackButton = ({ core, isServerless, getLicense }: Props) => {
       flyoutRef = null;
     });
   };
-
-  if (isServerless) {
-    return (
-      <EuiButton
-        size="s"
-        color="warning"
-        iconType="popout"
-        iconSide="right"
-        target="_blank"
-        data-test-subj="serverlessFeedbackButton"
-        onClick={toogleFlyout}
-      >
-        {i18n.translate('xpack.intercept.giveFeedbackButton.label', {
-          defaultMessage: 'Give feedback',
-        })}
-      </EuiButton>
-    );
-  }
 
   return (
     <EuiHeaderSectionItemButton
