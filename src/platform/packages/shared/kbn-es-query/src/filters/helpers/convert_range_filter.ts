@@ -9,8 +9,8 @@
 
 import moment from 'moment';
 import { keys } from 'lodash';
+import type { TimeRange } from '@kbn/es-query-server';
 import type { RangeFilter } from '../build_filters';
-import type { TimeRange } from './types';
 
 const isRelativeTime = (value: string | number | undefined): boolean => {
   return typeof value === 'string' && !moment(value).isValid();

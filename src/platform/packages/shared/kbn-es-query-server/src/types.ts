@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TimeRange, AbsoluteTimeRange } from '@kbn/es-query-server';
+import { TypeOf } from '@kbn/config-schema';
+import { timeRangeSchema, absoluteTimeRangeSchema, relativeTimeRangeSchema } from './time_range';
 
-export interface TimeState {
-  timeRange: TimeRange;
-  asAbsoluteTimeRange: AbsoluteTimeRange;
-  start: number;
-  end: number;
-}
+export type TimeRange = TypeOf<typeof timeRangeSchema>;
+export type AbsoluteTimeRange = TypeOf<typeof absoluteTimeRangeSchema>;
+export type RelativeTimeRange = TypeOf<typeof relativeTimeRangeSchema>;
