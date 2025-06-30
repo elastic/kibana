@@ -32,6 +32,10 @@ import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '@kbn/stack-connectors-pl
 import { MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import { MicrosoftDefenderDataGenerator } from '../../../../../../../../common/endpoint/data_generators/microsoft_defender_data_generator';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
+import {
+  ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
+  ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
+} from '../../../../../../../lib/telemetry/event_based/events';
 
 jest.mock('../../../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../../../action_details_by_id');
@@ -183,6 +187,22 @@ describe('MS Defender response actions client', () => {
       );
 
       expect(clientConstructorOptionsMock.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
+    });
+
+    describe('telemetry events', () => {
+      it(`should send ${responseActionMethod} action creation telemetry event`, async () => {
+        await msClientMock[responseActionMethod](responseActionsClientMock.createIsolateOptions());
+        expect(
+          clientConstructorOptionsMock.endpointService.getTelemetryService().reportEvent
+        ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
+          responseActions: {
+            actionId: expect.any(String),
+            agentType: 'microsoft_defender_endpoint',
+            command: responseActionMethod === 'release' ? 'unisolate' : responseActionMethod,
+            isAutomated: false,
+          },
+        });
+      });
     });
   });
 
@@ -360,6 +380,26 @@ describe('MS Defender response actions client', () => {
           }),
         })
       );
+    });
+
+    describe('telemetry event', () => {
+      it('should send runscript action creation telemetry event', async () => {
+        await msClientMock.runscript(
+          responseActionsClientMock.createRunScriptOptions({
+            parameters: { scriptName: 'test-script.ps1', args: 'arg1 arg2' },
+          })
+        );
+        expect(
+          clientConstructorOptionsMock.endpointService.getTelemetryService().reportEvent
+        ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
+          responseActions: {
+            actionId: expect.any(String),
+            agentType: 'microsoft_defender_endpoint',
+            command: 'runscript',
+            isAutomated: false,
+          },
+        });
+      });
     });
   });
 
@@ -1060,6 +1100,183 @@ describe('MS Defender response actions client', () => {
           expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith(expectedResult);
         }
       );
+    });
+
+    describe('telemetry events', () => {
+      describe('for Isolate and Release', () => {
+        let msMachineActionsApiResponse: MicrosoftDefenderEndpointGetActionsResponse;
+
+        beforeEach(() => {
+          const generator = new EndpointActionGenerator('seed');
+
+          const actionRequestsSearchResponse = generator.toEsSearchResponse([
+            generator.generateActionEsHit<
+              undefined,
+              {},
+              MicrosoftDefenderEndpointActionRequestCommonMeta
+            >({
+              agent: { id: 'agent-uuid-1' },
+              EndpointActions: {
+                data: { command: 'isolate' },
+                input_type: 'microsoft_defender_endpoint',
+              },
+              meta: { machineActionId: '5382f7ea-7557-4ab7-9782-d50480024a4e' },
+            }),
+          ]);
+
+          applyEsClientSearchMock({
+            esClientMock: clientConstructorOptionsMock.esClient,
+            index: ENDPOINT_ACTIONS_INDEX,
+            response: jest
+              .fn(() => generator.toEsSearchResponse([]))
+              .mockReturnValueOnce(actionRequestsSearchResponse),
+            pitUsage: true,
+          });
+
+          msMachineActionsApiResponse = microsoftDefenderMock.createGetActionsApiResponse();
+          responseActionsClientMock.setConnectorActionsClientExecuteResponse(
+            connectorActionsMock,
+            MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS,
+            msMachineActionsApiResponse
+          );
+
+          const msGetActionResultsApiResponse =
+            microsoftDefenderMock.createGetActionResultsApiResponse();
+
+          // Set the mock response for GET_ACTION_RESULTS
+          responseActionsClientMock.setConnectorActionsClientExecuteResponse(
+            connectorActionsMock,
+            MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
+            msGetActionResultsApiResponse
+          );
+        });
+
+        it.each`
+          msStatusValue  | responseState
+          ${'Failed'}    | ${'failed'}
+          ${'TimeOut'}   | ${'failed'}
+          ${'Cancelled'} | ${'failed'}
+          ${'Succeeded'} | ${'successful'}
+        `(
+          'should send telemetry for $responseState action response if MS machine action status is $msStatusValue',
+          async ({ msStatusValue, responseState }) => {
+            msMachineActionsApiResponse.value[0].status = msStatusValue;
+
+            await msClientMock.processPendingActions(processPendingActionsOptions);
+            expect(
+              clientConstructorOptionsMock.endpointService.getTelemetryService().reportEvent
+            ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT.eventType, {
+              responseActions: {
+                actionId: expect.any(String),
+                actionStatus: responseState,
+                agentType: 'microsoft_defender_endpoint',
+                command: 'isolate',
+              },
+            });
+          }
+        );
+      });
+
+      describe('for Runscript', () => {
+        let msMachineActionsApiResponse: MicrosoftDefenderEndpointGetActionsResponse;
+
+        beforeEach(() => {
+          // @ts-expect-error assign to readonly property
+          clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled =
+            true;
+
+          const generator = new EndpointActionGenerator('seed');
+
+          const actionRequestsSearchResponse = generator.toEsSearchResponse([
+            generator.generateActionEsHit<
+              { scriptName: string },
+              {},
+              MicrosoftDefenderEndpointActionRequestCommonMeta
+            >({
+              agent: { id: 'agent-uuid-1' },
+              EndpointActions: {
+                data: { command: 'runscript', parameters: { scriptName: 'test-script.ps1' } },
+                input_type: 'microsoft_defender_endpoint',
+              },
+              meta: { machineActionId: '5382f7ea-7557-4ab7-9782-d50480024a4e' },
+            }),
+          ]);
+
+          applyEsClientSearchMock({
+            esClientMock: clientConstructorOptionsMock.esClient,
+            index: ENDPOINT_ACTIONS_INDEX,
+            response: jest
+              .fn(() => generator.toEsSearchResponse([]))
+              .mockReturnValueOnce(actionRequestsSearchResponse),
+            pitUsage: true,
+          });
+
+          msMachineActionsApiResponse = microsoftDefenderMock.createGetActionsApiResponse();
+          // Override the default machine action to be runscript-specific
+          msMachineActionsApiResponse.value[0] = {
+            ...msMachineActionsApiResponse.value[0],
+            type: 'LiveResponse',
+            commands: ['RunScript'],
+          };
+
+          responseActionsClientMock.setConnectorActionsClientExecuteResponse(
+            connectorActionsMock,
+            MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS,
+            msMachineActionsApiResponse
+          );
+
+          const msGetActionResultsApiResponse =
+            microsoftDefenderMock.createGetActionResultsApiResponse();
+
+          // Set the mock response for GET_ACTION_RESULTS
+          responseActionsClientMock.setConnectorActionsClientExecuteResponse(
+            connectorActionsMock,
+            MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
+            msGetActionResultsApiResponse
+          );
+        });
+
+        it('should send telemetry for completed runscript actions', async () => {
+          await msClientMock.processPendingActions(processPendingActionsOptions);
+
+          expect(
+            clientConstructorOptionsMock.endpointService.getTelemetryService().reportEvent
+          ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT.eventType, {
+            responseActions: {
+              actionId: expect.any(String),
+              actionStatus: 'successful',
+              agentType: 'microsoft_defender_endpoint',
+              command: 'runscript',
+            },
+          });
+        });
+
+        it.each`
+          msStatusValue  | responseState
+          ${'Failed'}    | ${'failed'}
+          ${'TimeOut'}   | ${'failed'}
+          ${'Cancelled'} | ${'failed'}
+          ${'Succeeded'} | ${'successful'}
+        `(
+          'should generate $responseState action response if MS runscript machine action status is $msStatusValue',
+          async ({ msStatusValue, responseState }) => {
+            msMachineActionsApiResponse.value[0].status = msStatusValue;
+
+            await msClientMock.processPendingActions(processPendingActionsOptions);
+
+            expect(
+              clientConstructorOptionsMock.endpointService.getTelemetryService().reportEvent
+            ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT.eventType, {
+              responseActions: {
+                actionId: expect.any(String),
+                actionStatus: responseState,
+                agentType: 'microsoft_defender_endpoint',
+                command: 'runscript',
+              },
+            });
+          }
+        );
+      });
     });
   });
 
