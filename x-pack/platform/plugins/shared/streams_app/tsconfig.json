@@ -72,5 +72,6 @@
     "@kbn/saved-objects-tagging-plugin",
     "@kbn/config-schema",
     "@kbn/scout",
+    "@kbn/management-settings-ids",
   ]
 }
