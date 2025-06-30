@@ -71,6 +71,7 @@ jest.doMock('@kbn/core-ui-settings-server-internal', () => ({
 
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
+import { pricingServiceMock } from '@kbn/core-pricing-server-mocks';
 
 export const mockCustomBrandingService = customBrandingServiceMock.create();
 jest.doMock('@kbn/core-custom-branding-server-internal', () => ({
@@ -150,4 +151,9 @@ jest.doMock('@kbn/core-user-profile-server-internal', () => ({
 export const mockUsageDataService = coreUsageDataServiceMock.create();
 jest.doMock('@kbn/core-usage-data-server-internal', () => ({
   CoreUsageDataService: jest.fn(() => mockUsageDataService),
+}));
+
+export const mockPricingService = pricingServiceMock.create();
+jest.doMock('@kbn/core-pricing-server-internal', () => ({
+  PricingService: jest.fn(() => mockPricingService),
 }));
