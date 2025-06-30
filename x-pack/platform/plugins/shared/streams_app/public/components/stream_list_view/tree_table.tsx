@@ -102,10 +102,6 @@ export function StreamsTreeTable({
                 <EuiLink
                   data-test-subj="streamsAppStreamNodeLink"
                   href={router.link('/{key}', { path: { key: item.name } })}
-                  aria-label={i18n.translate('xpack.streams.streamsTreeTable.streamLinkAriaLabel', {
-                    defaultMessage: 'View details for stream {name}',
-                    values: { name: item.name },
-                  })}
                 >
                   {item.name}
                 </EuiLink>
