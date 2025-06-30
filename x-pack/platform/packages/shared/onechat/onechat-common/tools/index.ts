@@ -26,9 +26,9 @@ export {
 export { BuiltinToolIds, BuiltinTags } from './constants';
 export {
   ToolSelectionType,
-  type ByIdToolSelection,
+  type ByIdsToolSelection,
   type ByProviderSelection,
   type ToolSelection,
-  isByIdToolSelection,
+  isByIdsToolSelection,
   isByProviderToolSelection,
 } from './tool_selection';

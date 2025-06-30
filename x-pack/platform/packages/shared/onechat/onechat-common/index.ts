@@ -27,9 +27,9 @@ export {
   BuiltinTags,
   ToolSelectionType,
   type ByProviderSelection,
-  type ByIdToolSelection,
+  type ByIdsToolSelection,
   type ToolSelection,
-  isByIdToolSelection,
+  isByIdsToolSelection,
   isByProviderToolSelection,
 } from './tools';
 export {
@@ -57,7 +57,7 @@ export {
 export { type UserIdAndName } from './base/users';
 export {
   OneChatDefaultAgentId,
-  OneChatDefaultAgentProviderId,
+  OneChatAgentProviderIds,
   AgentType,
   AgentMode,
   type AgentDescriptor,

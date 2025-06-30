@@ -7,11 +7,10 @@
 
 import type { AgentProfile } from '@kbn/onechat-common';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentProfileListOptions {}
 
-export type AgentProfileCreateRequest = Omit<AgentProfile, 'id' | 'createdAt' | 'updatedAt'> & {
-  id?: string;
-};
+export type AgentProfileCreateRequest = Omit<AgentProfile, 'createdAt' | 'updatedAt'>;
 
 export type AgentProfileUpdateRequest = Pick<AgentProfile, 'id'> &
   Partial<Pick<AgentProfile, 'name' | 'description' | 'customInstructions' | 'toolSelections'>>;

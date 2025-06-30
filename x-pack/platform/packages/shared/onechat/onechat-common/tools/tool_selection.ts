@@ -8,30 +8,46 @@
 import type { ToolProviderId, PlainIdToolIdentifier } from './tools';
 
 export enum ToolSelectionType {
-  byId = 'by_id',
+  byIds = 'by_ids',
   byProvider = 'by_provider',
 }
 
-export interface ByIdToolSelection {
-  type: ToolSelectionType.byId;
+/**
+ * Represents a tool selection based on individual IDs.
+ */
+export interface ByIdsToolSelection {
+  type: ToolSelectionType.byIds;
   /**
-   * The id of the
+   * The id of the provider to select tools from
    */
   providerId: ToolProviderId;
+  /**
+   * List of individual tool ids to select from the provider
+   */
   toolIds: PlainIdToolIdentifier[];
 }
 
+/**
+ * A provider-based tool selection.
+ * Selects **all** tools from the specified provider
+ */
 export interface ByProviderSelection {
   type: ToolSelectionType.byProvider;
+  /**
+   * The provider to select all tools from.
+   */
   providerId: ToolProviderId;
 }
 
-export type ToolSelection = ByIdToolSelection | ByProviderSelection;
+/**
+ * All possible choices for tool selection
+ */
+export type ToolSelection = ByIdsToolSelection | ByProviderSelection;
 
-export const isByIdToolSelection = (
+export const isByIdsToolSelection = (
   toolSelection: ToolSelection
-): toolSelection is ByIdToolSelection => {
-  return toolSelection.type === ToolSelectionType.byId;
+): toolSelection is ByIdsToolSelection => {
+  return toolSelection.type === ToolSelectionType.byIds;
 };
 
 export const isByProviderToolSelection = (

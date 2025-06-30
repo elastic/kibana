@@ -6,12 +6,12 @@
  */
 
 import { errors as esErrors } from '@elastic/elasticsearch';
-import { v4 as uuidv4 } from 'uuid';
 import {
   type UserIdAndName,
   type AgentProfile,
   createAgentNotFoundError,
   createBadRequestError,
+  isAgentNotFoundError,
   OneChatDefaultAgentId,
 } from '@kbn/onechat-common';
 import type {
@@ -21,8 +21,10 @@ import type {
 } from '../../../../common/agent_profiles';
 import { AgentProfileStorage } from './storage';
 import { fromEs, toEs, createRequestToEs, updateProfile, type Document } from './converters';
+import { ensureValidId } from './utils';
 
 export interface AgentProfileClient {
+  has(agentId: string): Promise<boolean>;
   get(agentId: string): Promise<AgentProfile>;
   create(profile: AgentProfileCreateRequest): Promise<AgentProfile>;
   update(profile: AgentProfileUpdateRequest): Promise<AgentProfile>;
@@ -49,13 +51,34 @@ class AgentProfileClientImpl implements AgentProfileClient {
   }
 
   async get(agentId: string): Promise<AgentProfile> {
-    const document = await this.storage.getClient().get({ id: agentId });
+    let document: Document;
+    try {
+      document = await this.storage.getClient().get({ id: agentId });
+    } catch (e) {
+      if (e instanceof esErrors.ResponseError && e.statusCode === 404) {
+        throw createAgentNotFoundError({ agentId });
+      } else {
+        throw e;
+      }
+    }
 
     if (!hasAccess({ profile: document, user: this.user })) {
       throw createAgentNotFoundError({ agentId });
     }
 
     return fromEs(document);
+  }
+
+  async has(agentId: string): Promise<boolean> {
+    try {
+      await this.get(agentId);
+      return true;
+    } catch (e) {
+      if (isAgentNotFoundError(e)) {
+        return false;
+      }
+      throw e;
+    }
   }
 
   async list(options: AgentProfileListOptions = {}): Promise<AgentProfile[]> {
@@ -71,9 +94,10 @@ class AgentProfileClientImpl implements AgentProfileClient {
 
   async create(profile: AgentProfileCreateRequest): Promise<AgentProfile> {
     const now = new Date();
-    const id = profile.id ?? uuidv4();
 
-    if (profile.id && (await this.exists(profile.id))) {
+    ensureValidId(profile.id);
+
+    if (await this.exists(profile.id)) {
       throw createBadRequestError(`Agent with id ${profile.id} already exists.`);
     }
 
@@ -83,11 +107,11 @@ class AgentProfileClientImpl implements AgentProfileClient {
     });
 
     await this.storage.getClient().index({
-      id,
+      id: profile.id,
       document: attributes,
     });
 
-    return this.get(id);
+    return this.get(profile.id);
   }
 
   async update(profileUpdate: AgentProfileUpdateRequest): Promise<AgentProfile> {

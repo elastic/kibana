@@ -67,6 +67,8 @@ export class ServiceManager {
     });
 
     const agents = this.services.agents.start({
+      security,
+      elasticsearch,
       getRunner,
     });
 
