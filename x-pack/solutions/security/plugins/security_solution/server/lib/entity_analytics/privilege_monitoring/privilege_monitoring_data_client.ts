@@ -248,7 +248,7 @@ export class PrivilegeMonitoringDataClient {
       filters: '-parent',
     });
 
-    const indicesWithUserName = fields['user.name.keyword']?.keyword?.indices ?? indices;
+    const indicesWithUserName = fields['user.name']?.keyword?.indices ?? indices;
 
     if (!Array.isArray(indicesWithUserName) || indicesWithUserName.length === 0) {
       return [];
