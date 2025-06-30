@@ -13,4 +13,4 @@ export interface AgentProfileListOptions {}
 export type AgentProfileCreateRequest = Omit<AgentProfile, 'createdAt' | 'updatedAt'>;
 
 export type AgentProfileUpdateRequest = Pick<AgentProfile, 'id'> &
-  Partial<Pick<AgentProfile, 'name' | 'description' | 'customInstructions' | 'toolSelections'>>;
+  Partial<Pick<AgentProfile, 'name' | 'description' | 'customInstructions' | 'toolSelection'>>;

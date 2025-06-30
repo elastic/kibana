@@ -28,7 +28,7 @@ export interface AgentProfile {
   /**
    * Tool selection for this profile, using the {@link ToolSelection} format.
    */
-  toolSelections: ToolSelection[];
+  toolSelection: ToolSelection[];
   /**
    * Creation date
    */

@@ -31,7 +31,7 @@ export interface AgentProfileProperties {
   description: string;
   configuration: {
     custom_instructions: string;
-    tool_selections: ToolSelection[];
+    tool_selection: ToolSelection[];
   };
   created_at: string;
   updated_at: string;

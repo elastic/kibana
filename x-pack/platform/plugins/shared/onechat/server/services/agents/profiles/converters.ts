@@ -25,7 +25,7 @@ export const fromEs = (document: Document): AgentProfile => {
     name: document._source.name,
     description: document._source.description,
     customInstructions: document._source.configuration.custom_instructions,
-    toolSelections: document._source.configuration.tool_selections,
+    toolSelection: document._source.configuration.tool_selection,
     createdAt: document._source.created_at,
     updatedAt: document._source.updated_at,
   };
@@ -38,7 +38,7 @@ export const toEs = (profile: AgentProfile): AgentProfileProperties => {
     description: profile.description,
     configuration: {
       custom_instructions: profile.customInstructions,
-      tool_selections: profile.toolSelections,
+      tool_selection: profile.toolSelection,
     },
     created_at: profile.createdAt,
     updated_at: profile.updatedAt,
@@ -58,7 +58,7 @@ export const createRequestToEs = ({
     description: profile.description,
     configuration: {
       custom_instructions: profile.customInstructions,
-      tool_selections: profile.toolSelections,
+      tool_selection: profile.toolSelection,
     },
     created_at: creationDate.toISOString(),
     updated_at: creationDate.toISOString(),
