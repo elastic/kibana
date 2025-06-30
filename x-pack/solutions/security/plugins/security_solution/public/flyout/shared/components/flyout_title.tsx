@@ -67,7 +67,7 @@ export const FlyoutTitle: FC<FlyoutTitleProps> = memo(
 
     const titleComponent = useMemo(() => {
       return (
-        <EuiTitle size="s" data-test-subj={`${dataTestSubj}Text`}>
+        <EuiTitle size="m" data-test-subj={`${dataTestSubj}Text`}>
           <EuiTextColor color={isLink ? euiTheme.colors.textPrimary : undefined}>
             <span>{title}</span>
           </EuiTextColor>
