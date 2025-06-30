@@ -51,8 +51,7 @@ export const createInject = (
 
       for (const [key, panel] of Object.entries(workingState.panels)) {
         workingState.panels[key] = { ...panel };
-        const filteredReferences = getReferencesForPanelId(key, references);
-        const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
+        const panelReferences = getReferencesForPanelId(key, references) ?? [];
 
         /**
          * Inject saved object ID back into the explicit input.
