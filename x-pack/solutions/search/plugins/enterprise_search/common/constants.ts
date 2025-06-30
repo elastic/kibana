@@ -12,6 +12,7 @@ import {
   ENTERPRISE_SEARCH_CONTENT_APP_ID,
   ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
+  SEARCH_HOMEPAGE,
   SEARCH_INDICES,
   SEARCH_INDICES_START,
   SEARCH_INDEX_MANAGEMENT,
@@ -29,7 +30,7 @@ export const ENTERPRISE_SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSe
   defaultMessage: 'Enterprise Search',
 });
 
-export { SEARCH_INDICES_START, SEARCH_INDICES, SEARCH_INDEX_MANAGEMENT };
+export { SEARCH_INDICES_START, SEARCH_INDICES, SEARCH_INDEX_MANAGEMENT, SEARCH_HOMEPAGE };
 
 export const ENTERPRISE_SEARCH_HOME_PLUGIN = {
   ID: ENTERPRISE_SEARCH_APP_ID,
@@ -135,6 +136,7 @@ export const ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID = 'ent-search-analytics-
 
 export const CREATE_NEW_INDEX_URL = '/search_indices/new_index';
 export const PLAYGROUND_URL = '/playground';
+export const SEARCH_HOMEPAGE_URL = '/app/elasticsearch/home';
 
 export const MANAGE_API_KEYS_URL = '/app/management/security/api_keys';
 

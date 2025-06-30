@@ -11,6 +11,7 @@ import {
   EuiAccordion,
   EuiFieldText,
   EuiFieldPassword,
+  EuiFormControlLayout,
   EuiSwitch,
   EuiTextArea,
   EuiFieldNumber,
@@ -127,18 +128,29 @@ export const ConfigNumberField: React.FC<ConfigInputFieldProps> = ({
     setInnerValue(!value || value.toString().length === 0 ? defaultValue : value);
   }, [defaultValue, value]);
   return (
-    <EuiFieldNumber
+    <EuiFormControlLayout
       fullWidth
-      disabled={isLoading || (isEdit && !updatable) || isPreconfigured}
-      data-test-subj={`${key}-number`}
-      value={innerValue as number}
-      isInvalid={!isValid}
-      onChange={(event) => {
-        const newValue = isEmpty(event.target.value) ? '0' : event.target.value;
-        setInnerValue(newValue);
-        validateAndSetConfigValue(newValue);
+      clear={{
+        onClick: (e) => {
+          validateAndSetConfigValue('');
+          setInnerValue('');
+        },
       }}
-    />
+    >
+      <EuiFieldNumber
+        min={0}
+        fullWidth
+        disabled={isLoading || (isEdit && !updatable) || isPreconfigured}
+        data-test-subj={`${key}-number`}
+        value={innerValue as number}
+        isInvalid={!isValid}
+        onChange={(event) => {
+          const newValue = isEmpty(event.target.value) ? '0' : event.target.value;
+          setInnerValue(newValue);
+          validateAndSetConfigValue(newValue);
+        }}
+      />
+    </EuiFormControlLayout>
   );
 };
 
