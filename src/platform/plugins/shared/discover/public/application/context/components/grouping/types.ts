@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpSetup, NotificationsStart } from '@kbn/core/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import { GroupingProps, GroupOption } from '@kbn/grouping/src';
-import { ReactElement } from 'react';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DiscoverStateContainer } from '../../../main/state_management/discover_state';
+import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import type { GroupingProps, GroupOption } from '@kbn/grouping/src';
+import type { ReactElement } from 'react';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DiscoverStateContainer } from '../../../main/state_management/discover_state';
 
 export interface BucketItem {
   key: string;

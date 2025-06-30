@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { memo, ReactElement, useMemo } from 'react';
+import type { ReactElement } from 'react';
+import { memo, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
@@ -15,11 +16,11 @@ import { type GroupingAggregation } from '@kbn/grouping';
 import { isNoneGroup } from '@kbn/grouping';
 import type { DynamicGroupingProps, ParsedGroupingAggregation } from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
-import {
+import type {
   AggregationsAggregate,
   AggregationsLongRareTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/types';
-import { BaseDataGroupAggregations, DataGroupingProps } from './types';
+import type { BaseDataGroupAggregations, DataGroupingProps } from './types';
 import { useGetDataGroupAggregationsQuery } from './hooks/use_get_alerts_group_aggregations_query';
 import { getDataGroupingQuery } from './query_builder';
 
@@ -70,8 +71,6 @@ export const DataGroupingLevel = typedMemo(
     const to = globalState?.time?.to;
     const from = globalState?.time?.from;
     const globalQuery = globalState?.query;
-
-    console.log('global query:: %o \n', globalQuery);
 
     const filters = useMemo(() => {
       try {

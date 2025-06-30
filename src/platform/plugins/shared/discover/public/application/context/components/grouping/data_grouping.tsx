@@ -7,23 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  Dispatch,
-  memo,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Filter } from '@kbn/es-query';
-import { GroupOption, isNoneGroup, useGrouping } from '@kbn/grouping';
+import type { GroupOption } from '@kbn/grouping';
+import { isNoneGroup, useGrouping } from '@kbn/grouping';
 import { isEqual } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { DataGroupingLevel, DataGroupingLevelProps } from './data_grouping_level';
+import type { DataGroupingLevelProps } from './data_grouping_level';
+import { DataGroupingLevel } from './data_grouping_level';
 import type { DataGroupingProps, BaseDataGroupAggregations, DataByGroupingAgg } from './types';
 import { DEFAULT_PAGE_INDEX, DEFAULT_PAGE_SIZE, MAX_GROUPING_LEVELS } from './constants';
 import { DataGroupingContextProvider, useDataGroupingState } from './data_grouping_context';

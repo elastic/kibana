@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { NamedAggregation } from '@kbn/grouping';
+import type { NamedAggregation } from '@kbn/grouping';
 import { ALERT_INSTANCE_ID, ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
 /**

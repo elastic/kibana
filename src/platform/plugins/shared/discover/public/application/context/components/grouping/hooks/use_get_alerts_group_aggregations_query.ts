@@ -9,11 +9,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { lastValueFrom } from 'rxjs';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { GroupingQuery } from '@kbn/grouping/src';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { GroupingQuery } from '@kbn/grouping/src';
 
 export interface UseGetDataGroupAggregationsQueryProps {
   data: DataPublicPluginStart;
