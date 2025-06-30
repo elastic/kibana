@@ -427,6 +427,7 @@ describe('Detections Usage and Metrics', () => {
               osquery: 0,
             },
           },
+          has_exceptions: 1,
         },
         query: {
           alerts: 10,
@@ -492,6 +493,7 @@ describe('Detections Usage and Metrics', () => {
               osquery: 0,
             },
           },
+          has_exceptions: 1,
         },
       });
     });

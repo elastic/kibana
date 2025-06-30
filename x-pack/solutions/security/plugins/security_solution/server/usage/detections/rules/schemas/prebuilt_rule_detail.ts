@@ -89,4 +89,8 @@ export const ruleMetricsSchema: MakeSchemaFrom<RuleMetric> = {
     type: 'boolean',
     _meta: { description: 'True if this rule has osquery response actions' },
   },
+  has_exceptions: {
+    type: 'boolean',
+    _meta: { description: 'True if this rule has exceptions' },
+  },
 };
