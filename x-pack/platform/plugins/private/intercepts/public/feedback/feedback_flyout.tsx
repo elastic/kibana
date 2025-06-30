@@ -329,7 +329,7 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
               onClick={submitFeedback}
             >
               <FormattedMessage
-                id="xpack.intercept.feedbackFlyout.form.send"
+                id="xpack.intercept.feedbackFlyout.form.sendButton.text"
                 defaultMessage="Send"
               />
             </EuiButton>
