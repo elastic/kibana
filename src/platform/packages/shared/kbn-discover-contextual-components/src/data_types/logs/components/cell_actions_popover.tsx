@@ -60,8 +60,9 @@ interface CellActionsPopoverProps {
   }) => ReactElement;
 }
 
+// Ideally this should be deleted after the PoC
 const INFRA_K8S_DEFAULT_ROUTE = {
-  href: 'metrics/entity/cluster?dashboardId=kubernetes_otel-cluster-overview&entityId',
+  href: 'metrics/kubernetes/cluster?dashboardId=kubernetes_otel-cluster-overview&entityId',
   title: 'Overview',
 };
 
