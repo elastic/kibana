@@ -6,37 +6,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { PlainIdToolIdentifier, ToolProviderId, ToolDescriptor } from '@kbn/onechat-common';
+import { filterToolsBySelection, ToolSelection } from '@kbn/onechat-common';
 import type { ToolProvider, ExecutableTool } from '@kbn/onechat-server';
-
-// TODO: use stuff from x-pack/platform/packages/shared/onechat/onechat-common/agents/profiles.ts instead
-
-export interface ByToolIdRule {
-  type: 'by_tool_id';
-  providerId: ToolProviderId;
-  toolIds: PlainIdToolIdentifier[];
-}
-
-export interface ByProviderIdRule {
-  type: 'by_provider_id';
-  providerId: ToolProviderId;
-}
-
-export type ToolFilterRule = ByToolIdRule | ByProviderIdRule;
-
-const matches = (rule: ToolFilterRule, tool: ToolDescriptor): boolean => {
-  if (rule.type === 'by_tool_id') {
-    return tool.meta.providerId === rule.providerId && rule.toolIds.includes(tool.id);
-  } else if (rule.type === 'by_provider_id') {
-    return tool.meta.providerId === rule.providerId;
-  } else {
-    throw new Error('Unknown rule type');
-  }
-};
-
-const anyMatch = (rules: ToolFilterRule[], tool: ToolDescriptor): boolean => {
-  return rules.some((rule) => matches(rule, tool));
-};
 
 export const filterProviderTools = async ({
   provider,
@@ -44,9 +15,9 @@ export const filterProviderTools = async ({
   request,
 }: {
   provider: ToolProvider;
-  rules: ToolFilterRule[];
+  rules: ToolSelection[];
   request: KibanaRequest;
 }): Promise<ExecutableTool[]> => {
   const tools = await provider.list({ request });
-  return tools.filter((tool) => anyMatch(rules, tool));
+  return filterToolsBySelection(tools, rules);
 };

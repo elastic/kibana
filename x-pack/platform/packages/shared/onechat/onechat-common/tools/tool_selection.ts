@@ -60,10 +60,10 @@ export const isByIdsToolSelection = (
 /**
  * Returns all tools matching ay least one of the provided tool selection.
  */
-export const filterToolsBySelection = (
-  tools: ToolDescriptor[],
+export const filterToolsBySelection = <TType extends ToolDescriptor>(
+  tools: TType[],
   toolSelection: ToolSelection[]
-): ToolDescriptor[] => {
+): TType[] => {
   return tools.filter((tool) =>
     toolSelection.some((selection) => toolMatchSelection(tool, selection))
   );
