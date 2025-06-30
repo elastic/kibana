@@ -28,6 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const testSubjects = getService('testSubjects');
 
+  // FLAKY: https://github.com/elastic/kibana/issues/225446
   describe.skip('Search Homepage', function () {
     describe('as admin', function () {
       before(async () => {
