@@ -165,9 +165,8 @@ class DashboardBackupService implements DashboardBackupServiceType {
 
       Object.keys(dashboardStatesInSpace).map((dashboardId) => {
         if (
-          dashboardStatesInSpace[dashboardId].viewMode === 'edit' &&
           Object.keys(dashboardStatesInSpace[dashboardId]).some(
-            (stateKey) => stateKey !== 'viewMode' && stateKey !== 'references'
+            (stateKey) => stateKey !== 'references'
           )
         ) {
           dashboardsSet.add(dashboardId);
