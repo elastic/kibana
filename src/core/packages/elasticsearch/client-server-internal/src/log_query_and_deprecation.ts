@@ -201,10 +201,6 @@ export const instrumentEsQueryAndDeprecationLogger = ({
     const customLoggerName = event?.meta?.request?.options?.context?.requesterPlugin as
       | string
       | undefined;
-    // if (event?.meta.request.params.path.includes('/_count')) {
-    //   console.log(JSON.stringify(event, null, 2));
-    //   console.log(customLoggerName);
-    // }
 
     const customLogger = customLoggerName ? queryLogger.get(customLoggerName) : queryLogger;
     const level = customLoggerName ? 'info' : 'debug';
