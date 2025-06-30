@@ -19,7 +19,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const es = getService('es');
   const retry = getService('retry');
-  const kibanaServer = getService('kibanaServer');
 
   const createTestRuleset = async (rulesetId: string) => {
     await es.transport.request({
