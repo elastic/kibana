@@ -161,7 +161,7 @@ export * from './impl/assistant/api/conversations/bulk_update_actions_conversati
 export { getConversationById } from './impl/assistant/api/conversations/conversations';
 
 export { UpgradeButtons } from './impl/upgrade/upgrade_buttons';
-export { getUserConversationsExist, getPrompts, bulkUpdatePrompts } from './impl/assistant/api';
+export { getUserConversationsExist, bulkUpdatePrompts } from './impl/assistant/api';
 
 export {
   /** A range slider component, typically used to configure the number of alerts sent as context */
