@@ -94,7 +94,7 @@ export function FilterQueryInput({
               }}
               position="top"
               size="s"
-              type="questionInCircle"
+              type="question"
             />
           </>
         ) : (

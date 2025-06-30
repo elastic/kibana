@@ -77,7 +77,7 @@ export const LastValueModeIndicator = ({
   return (
     <EuiToolTip position="top" display="inlineBlock" content={tooltipContent}>
       <EuiBadge
-        iconType="iInCircle"
+        iconType="info"
         iconSide="right"
         onClick={() => {}}
         onClickAriaLabel={i18n.translate(
