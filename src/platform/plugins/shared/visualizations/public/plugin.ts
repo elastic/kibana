@@ -67,6 +67,7 @@ import {
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 
+import { css } from '@emotion/css';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import {
@@ -177,6 +178,14 @@ export interface VisualizationsStartDeps {
   noDataPage?: NoDataPagePluginStart;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
 }
+
+const styles = {
+  visAppWrapper: css({
+    display: 'flex',
+    flexDirection: 'column',
+    flexGrow: 1,
+  }),
+};
 
 /**
  * Visualizations Plugin - public
@@ -349,7 +358,7 @@ export class VisualizationsPlugin
           contentManagement: pluginsStart.contentManagement,
         };
 
-        params.element.classList.add('visAppWrapper');
+        params.element.classList.add(styles.visAppWrapper);
         if (pluginsStart.screenshotMode.isScreenshotMode()) {
           params.element.classList.add('visEditorScreenshotModeActive');
           // @ts-expect-error TS error, cannot find type declaration for scss
@@ -358,7 +367,7 @@ export class VisualizationsPlugin
         const unmount = renderApp(params, services);
         return () => {
           data.search.session.clear();
-          params.element.classList.remove('visAppWrapper');
+          params.element.classList.remove(styles.visAppWrapper);
           unlistenParentHistory();
           unmount();
           appUnMounted();
