@@ -118,6 +118,13 @@ export const generateAPIKey = async (
   deps.logger.info('Generating Privmon API key');
   const apiKey = await deps.security.authc.apiKeys.grantAsInternalUser(req, {
     name: 'Privilege Monitoring API key',
+    /**
+     * Intentionally passing empty array - generates a snapshot (empty object).
+     * Due to not knowing what index pattern changes customer may make to index list.
+     *
+     * - If the customer later adds new indices they *do* have access to, the key will still function.
+     * - If they add indices they *don't* have access to, they will need to reinitialize once their access is elevated.
+     */
     role_descriptors: {},
     metadata: {
       description: 'API key used to manage the resources in the privilege monitoring engine',
