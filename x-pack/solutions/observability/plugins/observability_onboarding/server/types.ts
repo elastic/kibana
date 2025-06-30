@@ -27,7 +27,7 @@ export interface ObservabilityOnboardingPluginSetupDependencies {
   usageCollection: UsageCollectionSetup;
   fleet: FleetSetupContract;
   customIntegrations: CustomIntegrationsPluginSetup;
-  apm: APMPluginSetup;
+  apm?: APMPluginSetup;
 }
 
 export interface ObservabilityOnboardingPluginStartDependencies {
@@ -37,7 +37,7 @@ export interface ObservabilityOnboardingPluginStartDependencies {
   usageCollection: undefined;
   fleet: FleetStartContract;
   customIntegrations: CustomIntegrationsPluginStart;
-  apm: APMPluginSetup;
+  apm?: APMPluginSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
