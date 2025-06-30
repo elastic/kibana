@@ -84,6 +84,7 @@ export const FormProvider: React.FC<React.PropsWithChildren<FormProviderProps>> 
   }, [form, storage]);
 
   useEffect(() => {
+    if (models.length === 0) return; // don't continue if there are no models
     const defaultModel = models.find((model) => !model.disabled);
     const currentModel = form.getValues(ChatFormFields.summarizationModel);
 
