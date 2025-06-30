@@ -60,6 +60,7 @@ import { SearchStartProvider } from './search_start';
 import { SearchApiKeysProvider } from './search_api_keys';
 import { SearchIndexDetailPageProvider } from './search_index_details_page';
 import { SearchOverviewProvider } from './search_overview_page';
+import { SearchHomePageProvider } from './search_homepage';
 import { SearchNavigationProvider } from './search_navigation';
 
 // just like services, PageObjects are defined as a map of
@@ -106,6 +107,7 @@ export const pageObjects = {
   searchIndexDetailsPage: SearchIndexDetailPageProvider,
   searchNavigation: SearchNavigationProvider,
   searchOverview: SearchOverviewProvider,
+  searchHomePage: SearchHomePageProvider,
   searchProfiler: SearchProfilerPageProvider,
   searchPlayground: SearchPlaygroundPageProvider,
   searchSynonyms: SearchSynonymsPageProvider,
