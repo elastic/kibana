@@ -337,6 +337,7 @@ export interface DocLinks {
       readonly riskScorePrerequisites: string;
       readonly entityRiskScoring: string;
       readonly assetCriticality: string;
+      readonly privilegedUserMonitoring: string;
     };
     readonly detectionEngineOverview: string;
     readonly signalsMigrationApi: string;
