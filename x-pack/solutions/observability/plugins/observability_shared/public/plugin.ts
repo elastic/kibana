@@ -26,6 +26,7 @@ import {
   HostsLocatorDefinition,
   InventoryLocatorDefinition,
   MetricsExplorerLocatorDefinition,
+  KubernetesDashboardLocatorDefinition,
   FlamegraphLocatorDefinition,
   StacktracesLocatorDefinition,
   TopNFunctionsLocatorDefinition,
@@ -35,6 +36,7 @@ import {
   type AssetDetailsFlyoutLocator,
   type AssetDetailsLocator,
   type InventoryLocator,
+  type KubernetesDashboardLocator,
   type HostsLocator,
   type FlamegraphLocator,
   type StacktracesLocator,
@@ -72,6 +74,7 @@ interface ObservabilitySharedLocators {
     hostsLocator: HostsLocator;
     inventoryLocator: InventoryLocator;
     metricsExplorerLocator: MetricsExplorerLocator;
+    kuberbetesDashboardLocator: KubernetesDashboardLocator;
   };
   profiling: {
     flamegraphLocator: FlamegraphLocator;
@@ -145,6 +148,9 @@ export class ObservabilitySharedPlugin implements Plugin {
         hostsLocator: urlService.locators.create(new HostsLocatorDefinition()),
         inventoryLocator: urlService.locators.create(new InventoryLocatorDefinition()),
         metricsExplorerLocator: urlService.locators.create(new MetricsExplorerLocatorDefinition()),
+        kuberbetesDashboardLocator: urlService.locators.create(
+          new KubernetesDashboardLocatorDefinition()
+        ),
       },
       profiling: {
         flamegraphLocator: urlService.locators.create(new FlamegraphLocatorDefinition()),

@@ -46,7 +46,7 @@ import type {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { BehaviorSubject, from, map, mergeMap } from 'rxjs';
-
+import type { ObservabilityNavigationPluginStart } from '@kbn/observability-navigation-plugin/public';
 import type { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
@@ -145,6 +145,7 @@ export interface ObservabilityPublicPluginsStart {
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
   exploratoryView?: ExploratoryViewPublicStart;
+  observabilityNavigation?: ObservabilityNavigationPluginStart;
   fieldFormats: FieldFormatsStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
   lens: LensPublicStart;

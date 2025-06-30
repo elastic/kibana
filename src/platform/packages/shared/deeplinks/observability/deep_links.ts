@@ -71,7 +71,8 @@ export type MetricsLinkId =
   | 'metrics-explorer'
   | 'hosts'
   | 'settings'
-  | 'assetDetails';
+  | 'assetDetails'
+  | `dynamic_${string}`;
 
 export type ApmLinkId =
   | 'services'

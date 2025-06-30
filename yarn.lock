@@ -6565,6 +6565,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-navigation-plugin@link:x-pack/platform/plugins/shared/observability_navigation":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-onboarding-plugin@link:x-pack/solutions/observability/plugins/observability_onboarding":
   version "0.0.0"
   uid ""

@@ -31,6 +31,7 @@ import { createClassicNavRootProfileProvider } from './common/classic_nav_root_p
 import { createObservabilityDocumentProfileProviders } from './observability/observability_profile_providers';
 import { createPatternDataSourceProfileProvider } from './common/patterns';
 import { createSecurityDocumentProfileProvider } from './security/security_document_profile';
+import { createMetricsDataSourceProfileProvider } from './observability/metrics_data_source_profile';
 
 /**
  * Register profile providers for root, data source, and document contexts to the profile profile services
@@ -151,6 +152,7 @@ const createDataSourceProfileProviders = (providerServices: ProfileProviderServi
   createPatternDataSourceProfileProvider(providerServices),
   createDeprecationLogsDataSourceProfileProvider(),
   createTracesDataSourceProfileProvider(providerServices),
+  createMetricsDataSourceProfileProvider(providerServices),
   ...createObservabilityLogsDataSourceProfileProviders(providerServices),
 ];
 

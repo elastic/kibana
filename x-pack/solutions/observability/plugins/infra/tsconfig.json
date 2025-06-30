@@ -117,6 +117,7 @@
     "@kbn/presentation-containers",
     "@kbn/object-utils",
     "@kbn/coloring",
+    "@kbn/observability-navigation-plugin",
     "@kbn/saved-search-component",
     "@kbn/core-saved-objects-server"
   ],

@@ -731,6 +731,7 @@
     "@kbn/observability-fixtures-plugin": "link:x-pack/platform/test/cases_api_integration/common/plugins/observability",
     "@kbn/observability-get-padded-alert-time-range-util": "link:x-pack/solutions/observability/packages/get-padded-alert-time-range-util",
     "@kbn/observability-logs-explorer-plugin": "link:x-pack/solutions/observability/plugins/observability_logs_explorer",
+    "@kbn/observability-navigation-plugin": "link:x-pack/platform/plugins/shared/observability_navigation",
     "@kbn/observability-onboarding-plugin": "link:x-pack/solutions/observability/plugins/observability_onboarding",
     "@kbn/observability-plugin": "link:x-pack/solutions/observability/plugins/observability",
     "@kbn/observability-schema": "link:x-pack/solutions/observability/packages/kbn-observability-schema",
