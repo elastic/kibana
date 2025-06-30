@@ -72,8 +72,6 @@ export const DataGroupingLevel = typedMemo(
     const from = globalState?.time?.from;
     const globalQuery = globalState?.query;
 
-    console.log('global query:: %o \n', globalQuery);
-
     const filters = useMemo(() => {
       try {
         return [
