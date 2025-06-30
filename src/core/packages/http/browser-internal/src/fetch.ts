@@ -22,6 +22,7 @@ import type {
 } from '@kbn/core-http-browser';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
+  ELASTIC_PUBLIC_FILTER_PATH_QUERY_PARAM,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
@@ -118,7 +119,7 @@ export class Fetch {
 
   private createRequest(options: HttpFetchOptionsWithPath): Request {
     const context = this.params.executionContext.withGlobalContext(options.context);
-    const { version } = options;
+    const { version, filterPath } = options;
 
     // Merge and destructure options out that are not applicable to the Fetch API.
     const {
@@ -147,7 +148,10 @@ export class Fetch {
 
     const url = format({
       pathname: shouldPrependBasePath ? this.params.basePath.prepend(options.path) : options.path,
-      query: removedUndefined(query),
+      query: removedUndefined({
+        ...query,
+        [ELASTIC_PUBLIC_FILTER_PATH_QUERY_PARAM]: filterPath,
+      }),
     });
 
     // Make sure the system request header is only present if `asSystemRequest` is true.

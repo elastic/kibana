@@ -37,6 +37,7 @@ import {
 } from '@kbn/core-http-server';
 import {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
+  ELASTIC_PUBLIC_FILTER_PATH_QUERY_PARAM,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { RouteValidator } from './validator';
@@ -413,7 +414,11 @@ function isCompleted(request: Request) {
  * internal values.
  */
 function sanitizeRequest(req: Request): { query: unknown; params: unknown; body: unknown } {
-  const { [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: __, ...query } = req.query ?? {};
+  const {
+    [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: __,
+    [ELASTIC_PUBLIC_FILTER_PATH_QUERY_PARAM]: ___,
+    ...query
+  } = req.query ?? {};
 
   return {
     query,

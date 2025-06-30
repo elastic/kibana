@@ -33,12 +33,13 @@ import type { RouteSecurityGetter } from '@kbn/core-http-server';
 import { Env } from '@kbn/config';
 import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest, getProtocolFromRequest } from './request';
-import { kibanaResponseFactory } from './response';
+import { filterResponseBody, kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
 import { wrapErrors } from './error_wrapper';
 import { formatErrorMeta } from './util';
 import { stripIllegalHttp2Headers } from './strip_illegal_http2_headers';
 import { InternalRouteConfig, buildRoute } from './route';
+import { validateGlobalApiOpts } from './validate_global_api_options';
 
 export type ContextEnhancer<
   P,
@@ -184,7 +185,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     this.routes.push({
       ...route,
       handler: async (request, responseToolkit) =>
-        await this.handle({ request, responseToolkit, handler: route.handler }),
+        await this.handle({ request, responseToolkit, handler: route.handler, route }),
     });
   }
 
@@ -192,13 +193,19 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     request,
     responseToolkit,
     handler,
+    route,
   }: {
     request: Request;
     responseToolkit: ResponseToolkit;
     handler: InternalRouteHandler;
+    route: InternalRouterRoute;
   }) {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
+      let filterPath: undefined | string[];
+      if (!route.options.httpResource) {
+        ({ filterPath } = validateGlobalApiOpts(request));
+      }
       const kibanaResponse = await handler(request);
       if (getProtocolFromRequest(request) === 'http2' && kibanaResponse.options.headers) {
         kibanaResponse.options.headers = stripIllegalHttp2Headers({
@@ -208,6 +215,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
           requestContext: `${request.route.method} ${request.route.path}`,
         });
       }
+      if (filterPath?.length) filterResponseBody(filterPath, kibanaResponse);
       return hapiResponseAdapter.handle(kibanaResponse);
     } catch (error) {
       // capture error
