@@ -12,8 +12,8 @@ import { EuiHeaderSectionItemButton, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FeedbackFlyout } from './flyout';
 import { SERVERLESS_FEEDBACK_FORM_LINK } from './constants';
-import { FeedbackFlyout } from './feedback_flyout';
 
 interface Props {
   core: CoreStart;
@@ -37,7 +37,11 @@ export const FeedbackButton = ({ core, isServerless, getLicense }: Props) => {
 
     flyoutRef = core.overlays.openFlyout(
       toMountPoint(
-        <FeedbackFlyout core={core} closeFlyout={closeFlyout} getLicense={getLicense} />,
+        <FeedbackFlyout
+          getCurrentUser={core.security.authc.getCurrentUser}
+          closeFlyout={closeFlyout}
+          getLicense={getLicense}
+        />,
         core.rendering
       ),
       {

@@ -1,0 +1,76 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { type ChangeEvent, useState, useEffect, useCallback } from 'react';
+import type { CoreAuthenticationService } from '@kbn/core/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { FeedbackFlyoutBody, FeedbackFlyoutFooter, FeedbackFlyoutHeader } from '.';
+import { FEEDBACK_TYPE } from '../constants';
+
+interface Props {
+  getCurrentUser: CoreAuthenticationService['getCurrentUser'];
+  closeFlyout: () => void;
+  getLicense: LicensingPluginStart['getLicense'];
+}
+
+export const FeedbackFlyout = ({ getCurrentUser, closeFlyout, getLicense }: Props) => {
+  const [feedbackType, setFeedbackType] = useState(FEEDBACK_TYPE.FEATURE_REQUEST);
+  const [feedbackText, setFeedbackText] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+
+  const isSendFeedbackButtonDisabled = !feedbackText.trim().length;
+
+  const getEmail = useCallback(async () => {
+    try {
+      const user = await getCurrentUser();
+      if (user?.email) {
+        setUserEmail(user.email);
+      }
+    } catch (_) {
+      setUserEmail('');
+    }
+  }, [getCurrentUser]);
+
+  useEffect(() => {
+    getEmail();
+  }, [getEmail]);
+
+  const handleChangeFeedbackText = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setFeedbackText(e.target.value);
+  };
+
+  const handleChangeFeedbackType = (e: ChangeEvent<HTMLSelectElement>) => {
+    setFeedbackType(e.target.value as FEEDBACK_TYPE);
+  };
+
+  const handleChangeEmail = (e: ChangeEvent<HTMLInputElement>) => {
+    setUserEmail(e.target.value);
+  };
+
+  const submitFeedback = () => {
+    // TODO
+  };
+
+  return (
+    <>
+      <FeedbackFlyoutHeader closeFlyout={closeFlyout} />
+      <FeedbackFlyoutBody
+        feedbackType={feedbackType}
+        feedbackText={feedbackText}
+        userEmail={userEmail}
+        handleChangeFeedbackType={handleChangeFeedbackType}
+        handleChangeFeedbackText={handleChangeFeedbackText}
+        handleChangeEmail={handleChangeEmail}
+        getLicense={getLicense}
+      />
+      <FeedbackFlyoutFooter
+        isSendFeedbackButtonDisabled={isSendFeedbackButtonDisabled}
+        submitFeedback={submitFeedback}
+      />
+    </>
+  );
+};

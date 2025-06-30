@@ -1,0 +1,59 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutHeader,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+
+interface Props {
+  closeFlyout: () => void;
+}
+
+export const FeedbackFlyoutHeader = ({ closeFlyout }: Props) => {
+  const { euiTheme } = useEuiTheme();
+
+  const boldTextCss = {
+    fontWeight: euiTheme.font.weight.semiBold,
+  };
+
+  return (
+    <EuiFlyoutHeader hasBorder>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h2>
+              <FormattedMessage
+                id="xpack.intercept.feedbackFlyout.title"
+                defaultMessage="Feedback"
+              />
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="cross"
+            color="neutral"
+            size="xs"
+            css={boldTextCss}
+            aria-label={i18n.translate('xpack.intercept.feedbackFlyout.closeButton.ariaLabel', {
+              defaultMessage: 'Close flyout',
+            })}
+            onClick={closeFlyout}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlyoutHeader>
+  );
+};
