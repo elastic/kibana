@@ -8,8 +8,8 @@
 export {
   AgentType,
   AgentMode,
-  OneChatDefaultAgentId,
-  OneChatAgentProviderIds,
+  oneChatDefaultAgentId,
+  oneChatAgentProviderIds,
   type AgentDescriptor,
 } from './descriptor';
 export {

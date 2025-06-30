@@ -76,8 +76,8 @@ export const isBadRequestError = (err: unknown): err is OnechatBadRequestError =
 export const createBadRequestError = (
   message: string,
   meta: Record<string, any> = {}
-): OnechatInternalError => {
-  return new OnechatError(OnechatErrorCode.internalError, message, { ...meta, statusCode: 400 });
+): OnechatBadRequestError => {
+  return new OnechatError(OnechatErrorCode.badRequest, message, { ...meta, statusCode: 400 });
 };
 
 /**

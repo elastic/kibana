@@ -12,7 +12,7 @@ import {
   createAgentNotFoundError,
   createBadRequestError,
   isAgentNotFoundError,
-  OneChatDefaultAgentId,
+  oneChatDefaultAgentId,
 } from '@kbn/onechat-common';
 import type {
   AgentProfileListOptions,
@@ -139,7 +139,7 @@ class AgentProfileClientImpl implements AgentProfileClient {
   }
 
   private async exists(agentId: string): Promise<boolean> {
-    if (agentId === OneChatDefaultAgentId) {
+    if (agentId === oneChatDefaultAgentId) {
       return true;
     }
     try {

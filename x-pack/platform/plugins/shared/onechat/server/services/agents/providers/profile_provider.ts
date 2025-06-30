@@ -9,7 +9,7 @@ import {
   AgentType,
   toStructuredAgentIdentifier,
   AgentProfile,
-  OneChatAgentProviderIds,
+  oneChatAgentProviderIds,
 } from '@kbn/onechat-common';
 import type { ConversationalAgentDefinition } from '@kbn/onechat-server';
 import type { AgentProviderWithId, AgentsServiceStart } from '../types';
@@ -24,7 +24,7 @@ export const creatProfileProvider = ({
   getProfileClient: AgentsServiceStart['getProfileClient'];
 }): AgentProviderWithId => {
   const provider: AgentProviderWithId = {
-    id: OneChatAgentProviderIds.profile,
+    id: oneChatAgentProviderIds.profile,
     has: async (options) => {
       const profileClient = await getProfileClient(options.request);
       const { agentId } = toStructuredAgentIdentifier(options.agentId);

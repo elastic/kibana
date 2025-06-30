@@ -58,8 +58,8 @@ export {
 } from './base/errors';
 export { type UserIdAndName } from './base/users';
 export {
-  OneChatDefaultAgentId,
-  OneChatAgentProviderIds,
+  oneChatDefaultAgentId,
+  oneChatAgentProviderIds,
   AgentType,
   AgentMode,
   type AgentDescriptor,
