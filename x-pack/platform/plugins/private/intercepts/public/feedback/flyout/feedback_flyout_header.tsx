@@ -35,7 +35,7 @@ export const FeedbackFlyoutHeader = ({ closeFlyout }: Props) => {
           <EuiTitle size="xs">
             <h2>
               <FormattedMessage
-                id="xpack.intercept.feedbackFlyout.title"
+                id="xpack.intercepts.feedbackFlyout.title"
                 defaultMessage="Feedback"
               />
             </h2>
@@ -47,7 +47,7 @@ export const FeedbackFlyoutHeader = ({ closeFlyout }: Props) => {
             color="neutral"
             size="xs"
             css={boldTextCss}
-            aria-label={i18n.translate('xpack.intercept.feedbackFlyout.closeButton.ariaLabel', {
+            aria-label={i18n.translate('xpack.intercepts.feedbackFlyout.closeButton.ariaLabel', {
               defaultMessage: 'Close flyout',
             })}
             onClick={closeFlyout}
