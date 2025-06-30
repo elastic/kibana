@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BaseMessage, BaseMessageLike } from '@langchain/core/messages';
+import type { BaseMessageLike } from '@langchain/core/messages';
 import { BuiltinToolIds } from '@kbn/onechat-common';
 
 export const defaultSystemPrompt = `
@@ -41,7 +41,7 @@ export const withSystemPrompt = ({
   messages,
 }: {
   systemPrompt: string;
-  messages: BaseMessage[];
+  messages: BaseMessageLike[];
 }): BaseMessageLike[] => {
   return [['system', getFullSystemPrompt(systemPrompt)], ...messages];
 };
