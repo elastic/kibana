@@ -11,6 +11,7 @@ import {
   KibanaRequest,
   CoreRequestHandlerContext,
   SavedObjectsErrorHelpers,
+  type ElasticsearchRequestLoggingOptions,
 } from '@kbn/core/server';
 import chalk from 'chalk';
 import type { estypes } from '@elastic/elasticsearch';
@@ -112,7 +113,7 @@ export class UptimeEsClient {
       res = await this.baseESClient.search(esParams, {
         meta: true,
         context: {
-          requesterPlugin: isInspectorEnabled ? 'synthetics' : undefined,
+          loggingOptions: getElasticsearchRequestLoggingOptions(isInspectorEnabled),
         },
       });
       esRequestStatus = RequestStatus.OK;
@@ -164,7 +165,7 @@ export class UptimeEsClient {
       res = await this.baseESClient.count(esParams, {
         meta: true,
         context: {
-          requesterPlugin: isInspectorEnabled ? 'synthetics' : undefined,
+          loggingOptions: getElasticsearchRequestLoggingOptions(isInspectorEnabled),
         },
       });
     } catch (e) {
@@ -296,4 +297,13 @@ export function debugESCall({
     console.log(formatObj(params));
   }
   console.log(`\n`);
+}
+
+function getElasticsearchRequestLoggingOptions(
+  isInspectorEnabled?: boolean
+): ElasticsearchRequestLoggingOptions {
+  return {
+    loggerName: 'synthetics',
+    level: isInspectorEnabled ? 'info' : 'debug',
+  };
 }

@@ -15,6 +15,7 @@ import numeral from '@elastic/numeral';
 import type { Logger } from '@kbn/logging';
 import { isMaximumResponseSizeExceededError, type ElasticsearchErrorDetails } from '@kbn/es-errors';
 import type { ElasticsearchApiToRedactInLogs } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchRequestLoggingOptions } from '@kbn/core-elasticsearch-server/src/client/client';
 import { getEcsResponseLog } from './get_ecs_response_log';
 
 /**
@@ -198,12 +199,12 @@ export const instrumentEsQueryAndDeprecationLogger = ({
   const warningLogger = logger.get('warnings'); // elasticsearch.warnings
 
   client.diagnostic.on('response', (error, event) => {
-    const customLoggerName = event?.meta?.request?.options?.context?.requesterPlugin as
-      | string
+    const requestLoggingOptions = event?.meta?.request?.options?.context?.loggingOptions as
+      | ElasticsearchRequestLoggingOptions
       | undefined;
 
-    const customLogger = customLoggerName ? queryLogger.get(customLoggerName) : queryLogger;
-    const level = customLoggerName ? 'info' : 'debug';
+    const { loggerName, level = 'debug' } = requestLoggingOptions || {};
+    const customLogger = loggerName ? logger.get('query', loggerName) : queryLogger;
 
     // we could check this once and not subscribe to response events if both are disabled,
     // but then we would not be supporting hot reload of the logging configuration.

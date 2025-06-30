@@ -9,8 +9,9 @@ import {
   SearchSearchRequestBody,
   MsearchMultisearchHeader,
 } from '@elastic/elasticsearch/lib/api/types';
-import {
+import type {
   ElasticsearchClient,
+  ElasticsearchRequestLoggingOptions,
   SavedObjectsClientContract,
   KibanaRequest,
   CoreRequestHandlerContext,
@@ -87,7 +88,7 @@ export class SyntheticsEsClient {
       res = await this.baseESClient.search(esParams, {
         meta: true,
         context: {
-          requesterPlugin: isInspectorEnabled ? 'synthetics' : undefined,
+          loggingOptions: getElasticsearchRequestLoggingOptions(isInspectorEnabled),
         },
       });
       esRequestStatus = RequestStatus.OK;
@@ -193,7 +194,7 @@ export class SyntheticsEsClient {
       res = await this.baseESClient.count(esParams, {
         meta: true,
         context: {
-          requesterPlugin: isInspectorEnabled ? 'synthetics' : undefined,
+          loggingOptions: getElasticsearchRequestLoggingOptions(isInspectorEnabled),
         },
       });
     } catch (e) {
@@ -287,3 +288,12 @@ export function debugESCall({
 export const isTestUser = (server: SyntheticsServerSetup) => {
   return server.config.service?.username === 'localKibanaIntegrationTestsUser';
 };
+
+function getElasticsearchRequestLoggingOptions(
+  isInspectorEnabled?: boolean
+): ElasticsearchRequestLoggingOptions {
+  return {
+    loggerName: 'synthetics',
+    level: isInspectorEnabled ? 'info' : 'debug',
+  };
+}
