@@ -79,9 +79,11 @@ export class PricingService {
   }
 
   public start() {
-    this.logger.debug(
-      `Starting pricing service with config: ${JSON.stringify(this.pricingConfig.tiers)}`
-    );
+    if (this.logger.isLevelEnabled('debug')) {
+      this.logger.debug(
+        `Starting pricing service with config: ${JSON.stringify(this.pricingConfig.tiers)}`
+      );
+    }
 
     const tiersClient = new PricingTiersClient(
       this.pricingConfig.tiers,
