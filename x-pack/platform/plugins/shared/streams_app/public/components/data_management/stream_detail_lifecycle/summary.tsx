@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { EuiFlexGroup, EuiStat, formatNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
@@ -35,6 +36,15 @@ export function RetentionSummary({
         css={statCss}
         isLoading={isLoadingStats || !stats}
         titleSize="m"
+        tabIndex={0}
+        role="region"
+        aria-busy={isLoadingStats || !stats}
+        aria-label={i18n.translate('xpack.streams.stat.storageSize', {
+          defaultMessage: 'Storage size – {value}',
+          values: {
+            value: statsError || !stats || !stats.sizeBytes ? '-' : formatBytes(stats.sizeBytes),
+          },
+        })}
         title={
           <PrivilegesWarningIconWrapper
             hasPrivileges={definition.privileges.monitor}
@@ -51,6 +61,16 @@ export function RetentionSummary({
         css={statCss}
         isLoading={isLoadingStats || !stats}
         titleSize="m"
+        tabIndex={0}
+        role="region"
+        aria-busy={isLoadingStats || !stats}
+        aria-label={i18n.translate('xpack.streams.stat.totalDocs', {
+          defaultMessage: 'Total document count – {value}',
+          values: {
+            value:
+              statsError || !stats || !stats.totalDocs ? '-' : formatNumber(stats.totalDocs, '0,0'),
+          },
+        })}
         title={
           <PrivilegesWarningIconWrapper
             hasPrivileges={definition.privileges.monitor}
