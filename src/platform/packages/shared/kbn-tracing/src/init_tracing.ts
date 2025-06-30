@@ -25,11 +25,8 @@ import {
 import type { AgentConfigOptions } from 'elastic-apm-node';
 import { castArray, once } from 'lodash';
 import { resourceFromAttributes } from '@opentelemetry/resources';
-import {
-  RESOURCE_ATTR_SERVICE_ENVIRONMENT,
-  RESOURCE_ATTR_SERVICE_NAME,
-  RESOURCE_ATTR_SERVICE_NODE_NAME,
-} from '@kbn/opentelemetry-attributes';
+import { ATTR_SERVICE_INSTANCE_ID, ATTR_SERVICE_NAMESPACE } from '@kbn/opentelemetry-attributes';
+import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 import { LateBindingSpanProcessor } from '..';
 
 export function initTracing({
@@ -44,9 +41,9 @@ export function initTracing({
   contextManager.enable();
 
   const resource = resourceFromAttributes({
-    [RESOURCE_ATTR_SERVICE_NAME]: apmConfig?.serviceName,
-    [RESOURCE_ATTR_SERVICE_NODE_NAME]: apmConfig?.serviceNodeName,
-    [RESOURCE_ATTR_SERVICE_ENVIRONMENT]: apmConfig?.environment,
+    [ATTR_SERVICE_NAME]: apmConfig?.serviceName,
+    [ATTR_SERVICE_INSTANCE_ID]: apmConfig?.serviceNodeName,
+    [ATTR_SERVICE_NAMESPACE]: apmConfig?.environment,
   });
 
   // this is used for late-binding of span processors

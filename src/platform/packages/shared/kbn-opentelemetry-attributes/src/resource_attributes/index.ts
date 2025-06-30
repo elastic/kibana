@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const RESOURCE_ATTR_SERVICE_NAME = 'service.name';
-export const RESOURCE_ATTR_SERVICE_NODE_NAME = 'service.node.name';
-export const RESOURCE_ATTR_SERVICE_ENVIRONMENT = 'service.environment';
+export const ATTR_SERVICE_INSTANCE_ID = 'service.instance.id';
+export const ATTR_SERVICE_NAMESPACE = 'service.namespace';
