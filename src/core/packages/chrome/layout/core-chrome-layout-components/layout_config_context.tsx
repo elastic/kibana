@@ -23,6 +23,8 @@ export type LayoutConfig = Pick<
   | 'navigationPanelWidth'
   | 'sidebarWidth'
   | 'sidebarPanelWidth'
+  | 'applicationTopBarHeight'
+  | 'applicationBottomBarHeight'
 >;
 
 const LayoutConfigContext = createContext<LayoutConfig | undefined>(undefined);

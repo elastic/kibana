@@ -57,7 +57,7 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     padding-top: var(--euiFixedHeadersOffset, 0);
 
     // forward compatibility with new grid layout variables,
-    --kbn-layout--application-height: calc(
+    --kbn-layout--application-content-height: calc(
       100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0))
     );
   }
