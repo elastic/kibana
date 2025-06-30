@@ -22,7 +22,7 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
   private readonly logger: TelemetryLogger;
 
   constructor(private client: ElasticsearchClient, logger: Logger) {
-    this.logger = newTelemetryLogger(logger.get('health_diagnostic.receiver'));
+    this.logger = newTelemetryLogger(logger.get('circuit-breaking-query-executor'));
   }
 
   async search<T>(queryConfig: QueryConfig): Promise<T[]> {
