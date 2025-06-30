@@ -29,6 +29,22 @@ jest.mock('.', () => ({
                   inputs: [],
                   policy_ids: ['agent_policy_1'],
                   supports_agentless: false,
+                  package: {
+                    name: 'cloud_asset_inventory',
+                    version: '0.19.0',
+                  },
+                },
+              },
+              {
+                id: 'package_policy_2',
+                attributes: {
+                  inputs: [],
+                  policy_ids: ['agent_policy_1'],
+                  supports_agentless: false,
+                  package: {
+                    name: 'system',
+                    version: '0.19.0',
+                  },
                 },
               },
             ],
@@ -44,6 +60,34 @@ jest.mock('./package_policy', () => ({
     update: jest.fn(),
   },
   getPackagePolicySavedObjectType: jest.fn().mockResolvedValue('ingest-package-policies'),
+}));
+
+jest.mock('./epm/packages/get', () => ({
+  getPackageInfo: jest.fn().mockImplementation(({ pkgName }: { pkgName: string }) => {
+    if (pkgName === 'cloud_asset_inventory') {
+      return {
+        policy_templates: [
+          {
+            name: 'cloud_asset_inventory',
+            deployment_modes: {
+              agentless: { enabled: true },
+            },
+          },
+        ],
+      };
+    } else if (pkgName === 'system') {
+      return {
+        policy_templates: [
+          {
+            name: 'system',
+            deployment_modes: {
+              agentless: { enabled: false },
+            },
+          },
+        ],
+      };
+    }
+  }),
 }));
 
 describe('backfill agentless package policies', () => {
