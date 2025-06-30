@@ -2316,6 +2316,82 @@ module.exports = {
         ],
       },
     },
+    {
+      files: ['src/platform/**/ui_tests/**/*', 'x-pack/platform/**/ui_tests/**/*'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: '@playwright/test',
+                message: "Importing from '@playwright/test' is not allowed in these test files.",
+              },
+              {
+                name: 'playwright',
+                message: "Importing from 'playwright' is not allowed in these test files.",
+              },
+              {
+                name: 'kbn/scout-oblt',
+                message: "Please use 'kbn/scout' instead of 'kbn/scout-oblt' in test files.",
+              },
+              {
+                name: 'kbn/scout-security',
+                message: "Please use 'kbn/scout' instead of 'kbn/scout-security' in test files.",
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: ['x-pack/solutions/observability/**/ui_tests/**/*'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: '@playwright/test',
+                message: "Importing from '@playwright/test' is not allowed in these test files.",
+              },
+              {
+                name: 'playwright',
+                message: "Importing from 'playwright' is not allowed in these test files.",
+              },
+              {
+                name: 'kbn/scout',
+                message: "Please use 'kbn/scout-oblt' instead of 'kbn/scout' in test files.",
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: ['x-pack/solutions/security/**/ui_tests/**/*'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: '@playwright/test',
+                message: "Importing from '@playwright/test' is not allowed in these test files.",
+              },
+              {
+                name: 'playwright',
+                message: "Importing from 'playwright' is not allowed in these test files.",
+              },
+              {
+                name: 'kbn/scout',
+                message: "Please use 'kbn/scout-security' instead of 'kbn/scout' in test files.",
+              },
+            ],
+          },
+        ],
+      },
+    },
   ],
 };
 
