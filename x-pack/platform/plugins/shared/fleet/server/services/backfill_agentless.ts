@@ -73,8 +73,8 @@ export async function backfillPackagePolicySupportsAgentless(esClient: Elasticse
       );
       const pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
-        pkgName: packagePolicy.package?.name,
-        pkgVersion: packagePolicy.package?.version,
+        pkgName: packagePolicy.package?.name ?? '',
+        pkgVersion: packagePolicy.package?.version ?? '',
         prerelease: true,
       });
       if (isAgentlessIntegration(pkgInfo)) {
