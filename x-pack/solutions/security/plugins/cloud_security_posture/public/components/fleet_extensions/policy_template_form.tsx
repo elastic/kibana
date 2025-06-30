@@ -56,7 +56,6 @@ import {
   type NewPackagePolicyPostureInput,
   hasErrors,
   POLICY_TEMPLATE_FORM_DTS,
-  POSTURE_NAMESPACE,
   getCloudDefaultAwsCredentialConfig,
   getCloudConnectorRemoteRoleTemplate,
 } from './utils';
@@ -546,25 +545,6 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
   </div>
 );
 
-const useEnsureDefaultNamespace = ({
-  newPolicy,
-  input,
-  updatePolicy,
-}: {
-  newPolicy: NewPackagePolicy;
-  input: NewPackagePolicyPostureInput;
-  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
-}) => {
-  useEffect(() => {
-    // If the namespace support is enabled, we don't need to set the default namespace
-    if (input.type.includes('vuln_mgmt')) return;
-    if (newPolicy.namespace === POSTURE_NAMESPACE) return;
-
-    const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: POSTURE_NAMESPACE };
-    updatePolicy(policy);
-  }, [newPolicy, input, updatePolicy]);
-};
-
 const usePolicyTemplateInitialName = ({
   isEditPage,
   integration,
@@ -847,12 +827,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       setIntegrationToEnable?.(input.policy_template);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setupTechnology]);
-
-    useEnsureDefaultNamespace({
-      newPolicy,
-      input,
-      updatePolicy,
-    });
 
     useCloudFormationTemplate({
       packageInfo,
