@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-export default ({ loadTestFile }) => {
-  describe('reporting management app', function () {
-    loadTestFile(require.resolve('./report_listing'));
-  });
-};
+import { createPlaywrightConfig } from '@kbn/scout-oblt';
+
+// eslint-disable-next-line import/no-default-export
+export default createPlaywrightConfig({
+  testDir: './tests',
+});

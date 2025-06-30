@@ -9,9 +9,9 @@
 
 import { css } from '@emotion/react';
 
-// The `--kbn-layout--application-height` CSS variable is automatically updated by chrome's layout system
+// The `--kbn-application--content-height` CSS variable is automatically updated by chrome's layout system
 // to reflect the height of the application container, minus any fixed headers or footers.
 export const kbnFullBodyHeightCss = (additionalOffset = '0px') =>
   css({
-    height: `calc(var(--kbn-layout--application-height) - ${additionalOffset})`,
+    height: `calc(var(--kbn-application--content-height) - ${additionalOffset})`,
   });

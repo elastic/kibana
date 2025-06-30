@@ -72,7 +72,14 @@ export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutCompon
     <LayoutNavigation>{renderSlot(props.navigation)}</LayoutNavigation>
   ) : null;
 
-  const application = <LayoutApplication>{renderSlot(children)}</LayoutApplication>;
+  const application = (
+    <LayoutApplication
+      topBar={renderSlot(props.applicationTopBar)}
+      bottomBar={renderSlot(props.applicationBottomBar)}
+    >
+      {renderSlot(children)}
+    </LayoutApplication>
+  );
 
   return (
     <div css={styles.css} style={styles.style}>

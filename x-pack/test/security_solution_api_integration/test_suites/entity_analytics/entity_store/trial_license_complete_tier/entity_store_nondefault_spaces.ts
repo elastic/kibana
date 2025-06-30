@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { defaultOptions } from '@kbn/security-solution-plugin/server/lib/entity_analytics/entity_store/constants';
-import { omit } from 'lodash/fp';
 import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import { EntityStoreUtils } from '../../utils';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
@@ -23,7 +22,6 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
   describe('@ess Entity Store Engine APIs in non-default space', () => {
     const dataView = dataViewRouteHelpersFactory(supertest, namespace);
 
-    const defaults = omit('docsPerSecond', defaultOptions);
     before(async () => {
       await utils.cleanEngines();
       await spaces.create({
@@ -76,7 +74,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
             .expect(200);
 
           expect(getResponse.body).to.eql({
-            ...defaults,
+            ...defaultOptions,
             status: 'started',
             type: 'host',
           });
@@ -93,7 +91,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
             .expect(200);
 
           expect(getResponse.body).to.eql({
-            ...defaults,
+            ...defaultOptions,
             status: 'started',
             type: 'user',
           });
@@ -109,12 +107,12 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
 
           expect(sortedEngines).to.eql([
             {
-              ...defaults,
+              ...defaultOptions,
               status: 'started',
               type: 'host',
             },
             {
-              ...defaults,
+              ...defaultOptions,
               status: 'started',
               type: 'user',
             },

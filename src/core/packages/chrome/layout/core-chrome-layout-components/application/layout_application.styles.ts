@@ -22,6 +22,31 @@ const root: EmotionFn = ({ euiTheme }) =>
     flex-direction: column;
   `;
 
+const content: EmotionFn = ({ euiTheme }) => css`
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+`;
+
+const topBar: EmotionFn = ({ euiTheme }) => css`
+  position: sticky;
+  top: 0;
+  z-index: ${euiTheme.levels.header};
+  height: var(--kbn-application--top-bar-height);
+  flex-shrink: 0;
+`;
+
+const bottomBar: EmotionFn = ({ euiTheme }) => css`
+  position: sticky;
+  bottom: 0;
+  z-index: ${euiTheme.levels.header};
+  height: var(--kbn-application--bottom-bar-height);
+  flex-shrink: 0;
+`;
+
 export const styles = {
   root,
+  content,
+  topBar,
+  bottomBar,
 };

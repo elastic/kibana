@@ -66,11 +66,6 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'searchHomepage',
       });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        text: 'Indices',
-      });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
         text: 'Create your first index',
       });

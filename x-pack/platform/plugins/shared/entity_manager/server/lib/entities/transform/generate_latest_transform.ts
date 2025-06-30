@@ -15,6 +15,7 @@ import { generateLatestMetricAggregations } from './generate_metric_aggregations
 import {
   ENTITY_DEFAULT_LATEST_FREQUENCY,
   ENTITY_DEFAULT_LATEST_SYNC_DELAY,
+  ENTITY_DEFAULT_MAX_PAGE_SEARCH_SIZE,
 } from '../../../../common/constants_entities';
 import {
   generateLatestTransformId,
@@ -51,6 +52,8 @@ export function generateLatestTransform(
     frequency: definition.latest.settings?.frequency ?? ENTITY_DEFAULT_LATEST_FREQUENCY,
     syncDelay: definition.latest.settings?.syncDelay ?? ENTITY_DEFAULT_LATEST_SYNC_DELAY,
     docsPerSecond: definition.latest.settings?.docsPerSecond,
+    maxPageSearchSize:
+      definition.latest.settings?.maxPageSearchSize ?? ENTITY_DEFAULT_MAX_PAGE_SEARCH_SIZE,
   });
 }
 
@@ -61,6 +64,7 @@ const generateTransformPutRequest = ({
   frequency,
   syncDelay,
   docsPerSecond,
+  maxPageSearchSize,
 }: {
   definition: EntityDefinition;
   transformId: string;
@@ -68,6 +72,7 @@ const generateTransformPutRequest = ({
   frequency: string;
   syncDelay: string;
   docsPerSecond?: number;
+  maxPageSearchSize?: number;
 }): TransformPutTransformRequest => {
   return {
     transform_id: transformId,
@@ -102,6 +107,7 @@ const generateTransformPutRequest = ({
       deduce_mappings: false,
       unattended: true,
       docs_per_second: docsPerSecond,
+      max_page_search_size: maxPageSearchSize,
     },
     pivot: {
       group_by: {

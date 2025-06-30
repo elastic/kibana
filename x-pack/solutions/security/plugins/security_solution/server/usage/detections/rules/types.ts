@@ -39,6 +39,7 @@ export interface FeatureTypeUsage {
   notifications_disabled: number;
   legacy_investigation_fields: number;
   alert_suppression: AlertSuppressionUsage;
+  has_exceptions: number;
   response_actions: ResponseActionsUsage;
 }
 
@@ -84,6 +85,7 @@ export interface RuleMetric {
   has_alert_suppression_per_time_period: boolean;
   has_alert_suppression_missing_fields_strategy_do_not_suppress: boolean;
   alert_suppression_fields_count: number;
+  has_exceptions: boolean;
   has_response_actions: boolean;
   has_response_actions_endpoint: boolean;
   has_response_actions_osquery: boolean;

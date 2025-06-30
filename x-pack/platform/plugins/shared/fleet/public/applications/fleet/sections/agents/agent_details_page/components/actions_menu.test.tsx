@@ -33,6 +33,7 @@ function renderActions({ agent, agentPolicy }: { agent: Agent; agentPolicy?: Age
       agentPolicy={agentPolicy}
       assignFlyoutOpenByDefault={false}
       onCancelReassign={jest.fn()}
+      onAddRemoveTagsClick={jest.fn()}
     />
   );
 

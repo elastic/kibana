@@ -511,14 +511,6 @@ export const MAX_BULK_FILL_RULE_GAPS_BULK_SIZE = 100;
  */
 export const JEST_ENVIRONMENT = typeof jest !== 'undefined';
 
-export const AI_FOR_SOC_INTEGRATIONS = [
-  'splunk',
-  'google_secops',
-  'microsoft_sentinel',
-  'sentinel_one',
-  'crowdstrike',
-];
-
 /*
  * The tag to mark promotion rules that are related to the AI for SOC integrations
  */
