@@ -5,7 +5,12 @@
  * 2.0.
  */
 
+import { MAX_QUERIES } from './constants';
 import { injectAnalyzeWildcard } from './inject_analyze_wildcard';
+
+jest.mock('./constants', () => ({
+  MAX_QUERIES: 25,
+}));
 
 const getQuery = (query?: string) => {
   return {
@@ -55,6 +60,28 @@ const getQuery = (query?: string) => {
     },
   };
 };
+
+const getDeepQuery = (extraLength: number) => {
+  const query = getQuery();
+
+  const deepNode = { bool: { filter: [] } };
+  let currentNode = deepNode;
+  for (let i = 0; i < extraLength; i++) {
+    const nextNode = { bool: { filter: [] } };
+    currentNode.bool.filter.push(nextNode);
+    currentNode = nextNode;
+  }
+
+  currentNode.bool.filter.push({
+    query_string: {
+      fields: ['kibana.alert.instance.id'],
+      query: '*elastic*',
+    },
+  });
+  query.bool.filter.push(deepNode);
+  return query;
+};
+
 describe('injectAnalyzeWildcard', () => {
   test('should inject analyze_wildcard field', () => {
     const query = getQuery();
@@ -168,16 +195,8 @@ describe('injectAnalyzeWildcard', () => {
   });
 
   test('should throw error if the query is too deeply nested', async () => {
-    jest.resetModules();
-    jest.doMock('./constants', () => ({
-      MAX_QUERIES: 5,
-    }));
+    const query = getDeepQuery(MAX_QUERIES + 1);
 
-    const { injectAnalyzeWildcard: injectAnalyzeWildcardMocked } = await import(
-      './inject_analyze_wildcard'
-    );
-    const query = getQuery();
-
-    expect(() => injectAnalyzeWildcardMocked(query)).toThrow('Query is too deeply nested');
+    expect(() => injectAnalyzeWildcard(query)).toThrow('Query is too deeply nested');
   });
 });
