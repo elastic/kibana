@@ -10,4 +10,9 @@ cmd="node scripts/yarn_deduplicate.js && yarn kbn bootstrap && node scripts/yarn
 eval "$cmd"
 check_for_changed_files "$cmd" true
 
-#TODO: add label helper
+echo --- Additional helpers
+# We only want the deploy label on the main branch instead of all branches in the Renovate group
+if [ "$GITHUB_PR_BRANCH" = "renovate/main-chainguard" ] && ! is_pr_with_label "ci:cloud-deploy"; then
+  echo "Adding deploy label to main chainguard PR"
+  gh pr edit "${GITHUB_PR_NUMBER}" --add-label "ci:cloud-deploy"
+fi
