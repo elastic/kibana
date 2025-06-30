@@ -37,7 +37,7 @@ import { css } from '@emotion/react';
 import { omit } from 'lodash';
 import { usePageReady } from '@kbn/ebt-tools';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
-import { AlertDetailsSource } from './types';
+import { AlertDetailsSource, TAB_IDS, TabId } from './types';
 import { SourceBar } from './components';
 import { InvestigationGuide } from './components/investigation_guide';
 import { StatusBar } from './components/status_bar';
@@ -76,16 +76,6 @@ const defaultBreadcrumb = i18n.translate('xpack.observability.breadcrumbs.alertD
 export const LOG_DOCUMENT_COUNT_RULE_TYPE_ID = 'logs.alert.document.count';
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
-
-const TAB_IDS = [
-  'overview',
-  'metadata',
-  'related_alerts',
-  'investigation_guide',
-  'related_dashboards',
-] as const;
-
-type TabId = (typeof TAB_IDS)[number];
 
 const isTabId = (value: string): value is TabId => {
   return Object.values<string>(TAB_IDS).includes(value);
@@ -137,13 +127,11 @@ export function AlertDetails() {
   const [sources, setSources] = useState<AlertDetailsSource[]>();
   const [activeTabId, setActiveTabId] = useState<TabId>();
 
-  const handleSetTabId = async (tabId: TabId) => {
+  const handleSetTabId = async (tabId: TabId, newUrlState?: Record<string, string>) => {
     setActiveTabId(tabId);
 
-    if (tabId === 'related_alerts') {
-      setUrlTabId(tabId, true, {
-        filterProximal: 'true',
-      });
+    if (newUrlState) {
+      setUrlTabId(tabId, true, newUrlState);
     } else {
       setUrlTabId(tabId, true);
     }
@@ -199,12 +187,18 @@ export function AlertDetails() {
   }, []);
 
   const showRelatedAlertsFromCallout = () => {
-    handleSetTabId('related_alerts');
+    handleSetTabId('related_alerts', {
+      filterProximal: 'true',
+    });
   };
 
   usePageReady({
     isRefreshing: isLoading,
     isReady: !isLoading && !!alertDetail && activeTabId === 'overview',
+    meta: {
+      description:
+        '[ttfmp_alert_details] The Observability Alert Details overview page has loaded successfully.',
+    },
   });
 
   if (isLoading) {
