@@ -167,11 +167,11 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
     this.telemetryStart = telemetryStart;
     this.receiver = receiver;
     if (taskManager && this.telemetryTasks) {
-      this.logger.l('Starting security telemetry tasks');
+      this.logger.debug('Starting security telemetry tasks');
       this.telemetryTasks.forEach((task) => task.start(taskManager));
     }
 
-    this.logger.l('Starting local task');
+    this.logger.debug('Starting local task');
     timer(this.initialCheckDelayMs, this.checkIntervalMs)
       .pipe(
         takeUntil(this.stop$),
@@ -191,20 +191,20 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
       events: events.length,
     } as LogMeta);
     if (events.length === 0) {
-      this.logger.l('No events to queue');
+      this.logger.debug('No events to queue');
       return;
     }
 
     if (qlength >= this.maxQueueSize) {
       // we're full already
-      this.logger.l('Queue length is greater than max queue size');
+      this.logger.debug('Queue length is greater than max queue size');
       return;
     }
     if (events.length > this.maxQueueSize - qlength) {
-      this.logger.l('Events exceed remaining queue size', {
+      this.logger.info('Events exceed remaining queue size', {
         max_queue_size: this.maxQueueSize,
         queue_length: qlength,
-      });
+      } as LogMeta);
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(usageLabelPrefix.concat(['queue_stats'])),
         counterType: 'docs_lost',
@@ -283,10 +283,8 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
       }
 
       return false;
-    } catch (e) {
-      this.logger.warn('Error pinging telemetry services', {
-        error: e.message,
-      } as LogMeta);
+    } catch (error) {
+      this.logger.warn('Error pinging telemetry services', { error });
 
       return false;
     }
@@ -306,7 +304,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
 
       this.isOptedIn = await this.isTelemetryOptedIn();
       if (!this.isOptedIn) {
-        this.logger.l('Telemetry is not opted-in.');
+        this.logger.debug('Telemetry is not opted-in.');
         this.queue = [];
         this.isSending = false;
         return;
@@ -314,7 +312,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
 
       this.isElasticTelemetryReachable = await this.isTelemetryServicesReachable();
       if (!this.isElasticTelemetryReachable) {
-        this.logger.l('Telemetry Services are not reachable.');
+        this.logger.debug('Telemetry Services are not reachable.');
         this.queue = [];
         this.isSending = false;
         return;
@@ -382,9 +380,9 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
         this.receiver?.fetchLicenseInfo(),
       ]);
 
-      this.logger.l('Telemetry URL', {
+      this.logger.debug('Telemetry URL', {
         url: telemetryUrl,
-      });
+      } as LogMeta);
 
       await this.sendEvents(
         toSend,
@@ -496,10 +494,10 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
         counterType: 'docs_sent',
         incrementBy: events.length,
       });
-      this.logger.l('Events sent!. Response', { status: resp.status });
-    } catch (err) {
-      this.logger.l('Error sending events', { error: JSON.stringify(err) });
-      const errorStatus = err?.response?.status;
+      this.logger.debug('Events sent!. Response', { status: resp.status } as LogMeta);
+    } catch (error) {
+      this.logger.warn('Error sending events', { error });
+      const errorStatus = error?.response?.status;
       if (errorStatus !== undefined && errorStatus !== null) {
         this.telemetryUsageCounter?.incrementCounter({
           counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
