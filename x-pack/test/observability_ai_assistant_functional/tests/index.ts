@@ -7,8 +7,8 @@
 
 import globby from 'globby';
 import path from 'path';
-import { createUsersAndRoles } from '../../observability_ai_assistant_api_integration/common/users/create_users_and_roles';
-import { FtrProviderContext } from '../../observability_ai_assistant_api_integration/common/ftr_provider_context';
+import { createUsersAndRoles } from '../common/users/create_users_and_roles';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const cwd = path.join(__dirname);
 
