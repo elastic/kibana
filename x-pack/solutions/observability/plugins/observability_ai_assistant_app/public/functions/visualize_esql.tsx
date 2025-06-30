@@ -49,7 +49,7 @@ import {
 
 import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
-const VISUALIZE_QUERY_NAME = 'visualize_query';
+const VISUALIZE_QUERY_FUNCTION_NAME = 'visualize_query';
 
 interface VisualizeESQLProps {
   /** Lens start contract, get the ES|QL charts suggestions api */
@@ -394,7 +394,7 @@ export function registerVisualizeQueryRenderFunction({
   pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
 }) {
   registerRenderFunction(
-    VISUALIZE_QUERY_NAME,
+    VISUALIZE_QUERY_FUNCTION_NAME,
     ({
       arguments: { query, userOverrides, intention },
       response,

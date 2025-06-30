@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { map } from 'rxjs';
+import { v4 } from 'uuid';
 import { ToolDefinition, isChatCompletionChunkEvent, isOutputEvent } from '@kbn/inference-common';
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
@@ -12,17 +14,14 @@ import {
   MessageAddEvent,
   MessageRole,
   StreamingChatResponseEventType,
+  EXECUTE_QUERY_FUNCTION_NAME,
+  QUERY_FUNCTION_NAME,
+  VISUALIZE_QUERY_FUNCTION_NAME,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/create_function_response_message';
 import { convertMessagesForInference } from '@kbn/observability-ai-assistant-plugin/common/convert_messages_for_inference';
-import { map } from 'rxjs';
-import { v4 } from 'uuid';
-import { VISUALIZE_QUERY_NAME } from '../../../common/functions/visualize_esql';
-import type { FunctionRegistrationParameters } from '..';
 import { runAndValidateEsqlQuery } from './validate_esql_query';
-
-export const QUERY_FUNCTION_NAME = 'query';
-export const EXECUTE_QUERY_NAME = 'execute_query';
+import type { FunctionRegistrationParameters } from '..';
 
 export function registerQueryFunction({
   functions,
@@ -32,15 +31,15 @@ export function registerQueryFunction({
 }: FunctionRegistrationParameters) {
   functions.registerFunction(
     {
-      name: EXECUTE_QUERY_NAME,
+      name: EXECUTE_QUERY_FUNCTION_NAME,
       isInternal: true,
       description: `Execute a generated ES|QL query on behalf of the user. The results
         will be returned to you.
 
-        You must use this function if the user is asking for the result of a query,
+        You must use this tool if the user is asking for the result of a query,
         such as a metric or list of things, but does not want to visualize it in
         a table or chart. You do NOT need to ask permission to execute the query
-        after generating it, use the "${EXECUTE_QUERY_NAME}" function directly instead.
+        after generating it, use the "${EXECUTE_QUERY_FUNCTION_NAME}" tool directly instead.
 
         Do not use when the user just asks for an example.`,
       parameters: {
@@ -85,18 +84,19 @@ export function registerQueryFunction({
   functions.registerFunction(
     {
       name: QUERY_FUNCTION_NAME,
-      description: `This function generates, executes and/or visualizes a query
+      description: `This tool generates, executes and/or visualizes a query
       based on the user's request. It also explains how ES|QL works and how to
       convert queries from one language to another. Make sure you call one of
       the get_dataset functions first if you need index or field names. This
-      function takes no input.`,
+      tool takes no input.`,
     },
     async ({ messages, connectorId, simulateFunctionCalling }) => {
       const esqlFunctions = functions
         .getFunctions()
         .filter(
           (fn) =>
-            fn.definition.name === EXECUTE_QUERY_NAME || fn.definition.name === VISUALIZE_QUERY_NAME
+            fn.definition.name === EXECUTE_QUERY_FUNCTION_NAME ||
+            fn.definition.name === VISUALIZE_QUERY_FUNCTION_NAME
         )
         .map((fn) => fn.definition);
 

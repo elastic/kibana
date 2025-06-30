@@ -6,8 +6,7 @@
  */
 
 import { FunctionRegistrationParameters } from '.';
-
-export const EXECUTE_CONNECTOR_FUNCTION_NAME = 'execute_connector';
+import { EXECUTE_CONNECTOR_FUNCTION_NAME } from '..';
 
 export function registerExecuteConnectorFunction({
   functions,

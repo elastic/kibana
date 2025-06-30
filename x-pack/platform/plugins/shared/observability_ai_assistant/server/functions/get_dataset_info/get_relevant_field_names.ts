@@ -9,11 +9,15 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { castArray, chunk, groupBy, uniq } from 'lodash';
 import { lastValueFrom } from 'rxjs';
-import { MessageRole, ShortIdTable, type Message } from '../../../common';
+import {
+  MessageRole,
+  ShortIdTable,
+  type Message,
+  SELECT_RELEVANT_FIELDS_NAME,
+} from '../../../common';
 import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
 import { FunctionCallChatFunction } from '../../service/types';
 
-export const SELECT_RELEVANT_FIELDS_NAME = 'select_relevant_fields';
 export const GET_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE = `You are a helpful assistant for Elastic Observability. 
 Your task is to determine which fields are relevant to the conversation by selecting only the field IDs from the provided list. 
 The list in the user message consists of JSON objects that map a human-readable field "name" to its unique "id". 

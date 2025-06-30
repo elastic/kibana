@@ -13,7 +13,7 @@ import {
   PerformInstallResponse,
   UninstallResponse,
 } from '@kbn/product-doc-base-plugin/common/http_api/installation';
-import { RETRIEVE_DOCUMENTATION_NAME } from '../../../../server/functions/documentation';
+import { RETRIEVE_DOCUMENTATION_NAME } from '@kbn/observability-ai-assistant-plugin/server';
 import { chatClient, kibanaClient, logger } from '../../services';
 
 const ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH = '/internal/product_doc_base/status';
@@ -71,7 +71,7 @@ describe('Retrieve documentation function', () => {
 
     const result = await chatClient.evaluate(conversation, [
       `Uses the ${RETRIEVE_DOCUMENTATION_NAME} function before answering the question about Kibana`,
-      'Accurately explains what Kibana Lens is and provides doc-based steps for creating a bar chart visualization',
+      'Accurately explains what Kibana Lens is and provides steps for creating a visualization',
       `Does not invent unsupported instructions, answers should reference what's found in the Kibana docs`,
     ]);
 

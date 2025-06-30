@@ -6,9 +6,8 @@
  */
 
 import { DocumentationProduct } from '@kbn/product-doc-common';
+import { RETRIEVE_DOCUMENTATION_NAME } from '@kbn/observability-ai-assistant-plugin/server';
 import type { FunctionRegistrationParameters } from '.';
-
-export const RETRIEVE_DOCUMENTATION_NAME = 'retrieve_elastic_doc';
 
 export async function registerDocumentationFunction({
   functions,
