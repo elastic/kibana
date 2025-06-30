@@ -820,7 +820,7 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 
         return dataStreamStatsClient.getNonAggregatableDatasets({
-          types: [type],
+          types: [/* type */ 'logs'],
           start,
           end,
           dataStream: context.dataStream,

@@ -15,8 +15,15 @@ import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { Wrapper } from './wrapper';
+import { StreamDetailDataQuality } from '../stream_data_quality';
 
-const wiredStreamManagementSubTabs = ['route', 'enrich', 'schemaEditor', 'lifecycle'] as const;
+const wiredStreamManagementSubTabs = [
+  'route',
+  'enrich',
+  'schemaEditor',
+  'lifecycle',
+  'dataQuality',
+] as const;
 
 type WiredStreamManagementSubTab = (typeof wiredStreamManagementSubTabs)[number];
 
@@ -79,6 +86,24 @@ export function WiredStreamDetailManagement({
       label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
         defaultMessage: 'Schema editor',
       }),
+    },
+    dataQuality: {
+      content: (
+        <StreamDetailDataQuality definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: (
+        <EuiToolTip
+          content={i18n.translate('xpack.streams.managementTab.advanced.tooltip', {
+            defaultMessage: 'View details about this classic stream’s data quality',
+          })}
+        >
+          <span>
+            {i18n.translate('xpack.streams.streamDetailView.advancedTab', {
+              defaultMessage: 'Data quality',
+            })}
+          </span>
+        </EuiToolTip>
+      ),
     },
   };
 
