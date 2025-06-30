@@ -10,7 +10,7 @@
 import type { Reference } from '@kbn/content-management-utils';
 import type { SerializableRecord, Writable } from '@kbn/utility-types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 
 import { ControlGroupSerializedState } from '@kbn/controls-plugin/common';
