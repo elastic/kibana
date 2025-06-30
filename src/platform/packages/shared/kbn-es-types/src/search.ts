@@ -682,6 +682,7 @@ export interface ESQLSearchParams {
   filter?: unknown;
   locale?: string;
   include_ccs_metadata?: boolean;
+  session_id?: string;
   dropNullColumns?: boolean;
   params?:
     | estypes.ScalarValue[]

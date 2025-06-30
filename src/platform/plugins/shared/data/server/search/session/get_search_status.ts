@@ -49,6 +49,7 @@ export async function getSearchStatus(
       };
     }
   } catch (e) {
+    console.log('error', asyncId, e);
     return {
       status: SearchStatus.ERROR,
       error: i18n.translate('data.search.statusThrow', {

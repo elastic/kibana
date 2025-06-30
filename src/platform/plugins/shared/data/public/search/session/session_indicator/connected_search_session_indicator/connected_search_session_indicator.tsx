@@ -46,6 +46,7 @@ export const createConnectedSearchSessionIndicator = ({
 
   return () => {
     const state = useObservable(debouncedSessionServiceState$, SearchSessionState.None);
+    console.log(state);
     const isSaveDisabledByApp = sessionService.getSearchSessionIndicatorUiConfig().isDisabled();
     const disableSaveAfterSearchesExpire = useObservable(
       sessionService.disableSaveAfterSearchesExpire$,

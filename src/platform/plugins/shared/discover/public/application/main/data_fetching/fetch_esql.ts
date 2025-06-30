@@ -40,6 +40,7 @@ export function fetchEsql({
   data,
   expressions,
   scopedProfilesManager,
+  searchSessionId,
 }: {
   query: Query | AggregateQuery;
   inputQuery?: Query;
@@ -51,6 +52,7 @@ export function fetchEsql({
   data: DataPublicPluginStart;
   expressions: ExpressionsStart;
   scopedProfilesManager: ScopedProfilesManager;
+  searchSessionId?: string;
 }): Promise<RecordsFetchResponse> {
   const props = getTextBasedQueryStateToAstProps({
     query,
@@ -63,8 +65,10 @@ export function fetchEsql({
   return textBasedQueryStateToAstWithValidation(props)
     .then((ast) => {
       if (ast) {
+        console.log('searchSessionId', searchSessionId);
         const contract = expressions.execute(ast, null, {
           inspectorAdapters,
+          searchSessionId,
         });
         abortSignal?.addEventListener('abort', contract.cancel);
         const execution = contract.getData();
