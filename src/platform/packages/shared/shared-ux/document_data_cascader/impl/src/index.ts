@@ -8,3 +8,5 @@
  */
 
 export { DataCascade } from './components';
+export type { GroupNode } from './components';
+export { getESQLStatsGroupByColumnsFromQuery } from './lib';
