@@ -93,12 +93,6 @@ const defaultEditorStyles = {
       overflow: 'auto',
       flexShrink: 1,
       flexBasis: '100%',
-
-      '&:embedded': {
-        flexShrink: 1,
-        flexBasis: '100%',
-      },
-
       '.visChart': {
         position: 'relative',
       },
