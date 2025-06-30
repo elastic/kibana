@@ -206,8 +206,6 @@ interface InternalAuthorizeParams {
   };
   /** auditOptions - options for audit logging */
   auditOptions?: AuditOptions;
-
-  enforceAccessControl?: boolean;
 }
 
 /**
@@ -228,13 +226,6 @@ interface EnforceAuthorizationParams<A extends string> {
   typeMap: AuthorizationTypeMap<A>;
   /** auditOptions - options for audit logging */
   auditOptions?: AuditOptions;
-}
-
-interface EnforceAccessControlParams<A extends string>
-  extends Omit<EnforceAuthorizationParams<A>, 'typesAndSpaces'> {
-  accessControlOptions?: AccessControlOptions;
-
-  checkResult: CheckAuthorizationResult<A>;
 }
 
 /**
@@ -297,11 +288,6 @@ interface AuditOptions {
   deleteFromSpaces?: string[];
 }
 
-interface AccessControlOptions {
-  owner?: string;
-  accessMode?: SavedObjectAccessControl['accessMode'];
-}
-
 /**
  * The CheckAuthorizationParams interface contains settings for checking
  * authorization via the ISavedObjectsSecurityExtension.
@@ -320,6 +306,7 @@ interface CheckAuthorizationParams<A extends string> {
      */
     allowGlobalResource: boolean;
   };
+  accessControlObjects?: SavedObjectAudit[];
 }
 
 type SavedObjectWithName<T = unknown> = SavedObject<T> & Pick<SavedObjectAudit, 'name'>;
@@ -418,7 +405,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         { authzAction: 'share_to_space', auditAction: AuditAction.UPDATE_OBJECTS_SPACES },
       ],
       [
-        SecurityAction.MANAGE_ACCESS_CONTROL,
+        SecurityAction.MANAGE_ACCESS_CONTROL, // TODO: specify operation
         { authzAction: 'manage_access_control', auditAction: undefined },
       ],
     ]);
@@ -471,17 +458,28 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     }
     const typesArray = [...types];
     const actionsArray = [...actions];
+    const { accessControlObjects } = params;
 
     const typeRegistry = await this.typeRegistryFunc();
 
-    const ownershipActionsMap = new Map(
-      Array.from(params.types.values())
-        .filter((type) => typeRegistry.supportsAccessControl(type))
-        .map((type) => [
-          this.actions.savedObject.get(type, 'manage_access_control'),
-          { type, action: 'manage_access_control' as A },
-        ])
-    );
+    const objectsToCheckAccessControl = accessControlObjects
+      ?.filter(({ type }) => typeRegistry.supportsAccessControl(type))
+      .filter((object) => !this.accessControlService.isObjectOwner(object));
+
+    const ownershipActionsMap: Map<string, { type: string; action: A }> = new Map();
+    if (objectsToCheckAccessControl && objectsToCheckAccessControl?.length > 0) {
+      objectsToCheckAccessControl
+        .filter(({ type }) => typeRegistry.supportsAccessControl(type))
+        .forEach((type) =>
+          ownershipActionsMap.set(
+            this.actions.savedObject.get(type.type, 'manage_access_control'),
+            {
+              type: type.type,
+              action: 'manage_access_control' as A,
+            }
+          )
+        );
+    }
 
     const privilegeActionsMap = new Map(
       typesArray.flatMap((type) =>
@@ -595,64 +593,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     }
   }
 
-  private async enforceAccessControl<A extends string>(
-    params: EnforceAccessControlParams<A>
-  ): Promise<void> {
-    const { auditOptions, action, checkResult } = params;
-    const {
-      objects: auditObjects,
-      bypass = 'never', // default for bypass
-      useSuccessOutcome,
-    } = (auditOptions as AuditOptions) ?? {};
-    const typeRegistry = await this.typeRegistryFunc();
-    const { authzAction, auditAction } = this.decodeSecurityAction(action);
-
-    if (!auditObjects || auditObjects.length === 0) {
-      throw new Error(`No objects specified for ${authzAction} authorization`);
-    }
-
-    const unauthorizedTypes = new Set<string>();
-    if (authzAction) {
-      for (const object of auditObjects) {
-        const hasManageAccessControlPrivilege = !!(
-          checkResult.status === 'fully_authorized' ||
-          checkResult.typeMap.get(object.type)?.['manage_access_control' as A]?.isGloballyAuthorized
-        );
-        const result = await this.accessControlService.checkObjectLevelPermissions({
-          object,
-          typeSupportsAccessControl: typeRegistry.supportsAccessControl(object.type),
-          hasManageAccessControlPrivilege,
-        });
-
-        if (result === false) {
-          unauthorizedTypes.add(object.type);
-        }
-      }
-    }
-
-    if (unauthorizedTypes.size > 0) {
-      const targetTypes = [...unauthorizedTypes].sort().join(',');
-      const msg = `Unable to ${authzAction} ${targetTypes}`;
-      const error = this.errors.decorateForbiddenError(new Error(msg));
-      if (auditAction && bypass !== 'always' && bypass !== 'on_failure') {
-        this.auditHelper({
-          action: auditAction,
-          objects: auditObjects,
-          useSuccessOutcome,
-          error,
-        });
-      }
-      throw error;
-    }
-
-    if (auditAction && bypass !== 'always' && bypass !== 'on_success') {
-      this.auditHelper({
-        action: auditAction,
-        objects: auditObjects,
-        useSuccessOutcome,
-      });
-    }
-  }
   /*
    * The enforce method uses the result of an authorization check authorization map) and a map
    * of types to spaces (type map) to determine if the action is authorized for all types and spaces
@@ -739,14 +679,20 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
     const currentUser = this.getCurrentUserFunc();
     this.accessControlService.setUserForOperation(currentUser);
+    const typeRegistry = await this.typeRegistryFunc();
 
     const { authzActions } = this.translateActions(params.actions);
+
+    const accessControlObjects = params.auditOptions?.objects?.filter(({ type }) =>
+      typeRegistry.supportsAccessControl(type)
+    );
 
     const checkResult: CheckAuthorizationResult<A> = await this.checkAuthorization({
       types: params.types,
       spaces: params.spaces,
       actions: authzActions,
       options: { allowGlobalResource: params.options?.allowGlobalResource === true },
+      accessControlObjects,
     });
 
     const typesAndSpaces = params.enforceMap;
@@ -761,18 +707,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       );
 
       await Promise.all(authorizationPromises);
-    }
-
-    if (params.enforceAccessControl) {
-      const accessControlResults = Array.from(params.actions).map((action) =>
-        this.enforceAccessControl({
-          action,
-          typeMap: checkResult.typeMap,
-          auditOptions: params.auditOptions,
-          checkResult,
-        })
-      );
-      await Promise.all(accessControlResults);
     }
 
     return checkResult;
@@ -950,7 +884,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       spaces: spacesToAuthorize,
       enforceMap,
       auditOptions: { objects },
-      enforceAccessControl: true,
     });
 
     return authorizationResult;
@@ -1007,7 +940,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       auditOptions: {
         objects,
       },
-      enforceAccessControl: true,
     });
     return authorizationResult;
   }
@@ -1184,7 +1116,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       types: new Set(objects.map((obj) => obj.type)),
       spaces: spacesToAuthorize,
       auditOptions: { objects },
-      enforceAccessControl: true,
     });
 
     return authorizationResult;

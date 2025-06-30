@@ -169,7 +169,7 @@ export const updateObjectOwnership = async <T>(
     namespace,
     objects: authObjects,
     accessControlOptions: {
-      newOwner: owner,
+      newOwner: owner, // TODO: Remove as we don't need to persist inside
     },
   });
 
