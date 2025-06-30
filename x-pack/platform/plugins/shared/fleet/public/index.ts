@@ -70,7 +70,7 @@ export type { PackagePolicyEditorDatastreamMappingsProps } from './applications/
 export type { DynamicPagePathValues } from './constants';
 
 // This Type export is added to prevent error TS4023
-export type { InputFieldProps } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field';
+export type { InputFieldProps } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/types';
 
 export const LazyPackagePolicyInputVarField = lazy(() =>
   import(
@@ -102,3 +102,9 @@ export { useGetPackagesQuery, useGetPackageInfoByKeyQuery } from './hooks/use_re
 export { useGetSettingsQuery } from './hooks/use_request/settings';
 export { useLink } from './hooks/use_link';
 export { NamespaceComboBox } from './components/namespace_combo_box';
+
+export {
+  SecretFieldLabel,
+  SecretFieldWrapper,
+  SecretInputField,
+} from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/secret_input_field';
