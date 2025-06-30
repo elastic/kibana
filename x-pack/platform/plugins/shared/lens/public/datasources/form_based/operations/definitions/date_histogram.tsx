@@ -146,7 +146,7 @@ export const dateHistogramOperation: OperationDefinition<
   }),
   input: 'field',
   priority: 5, // Highest priority level used
-  scale: 'interval',
+  scale: () => 'interval',
   operationParams: [{ name: 'interval', type: 'string', required: false }],
   getErrorMessage: (layer, columnId, indexPattern) => [
     ...getInvalidFieldMessage(layer, columnId, indexPattern),
