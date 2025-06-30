@@ -27,12 +27,12 @@ export {
   unknownToolProviderId,
   BuiltinToolIds,
   BuiltinTags,
-  ToolSelectionType,
-  type ByProviderSelection,
   type ByIdsToolSelection,
   type ToolSelection,
   isByIdsToolSelection,
-  isByProviderToolSelection,
+  toolMatchSelection,
+  filterToolsBySelection,
+  allToolsSelectionWildcard,
 } from './tools';
 export {
   OnechatErrorCode,

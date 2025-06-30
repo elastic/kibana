@@ -10,7 +10,7 @@ import {
   OneChatDefaultAgentId,
   toSerializedAgentIdentifier,
   type SerializedAgentIdentifier,
-  OneChatDefaultAgentProviderId,
+  OneChatAgentProviderIds,
 } from '../agents';
 import type { UserIdAndName } from '../base/users';
 
@@ -133,7 +133,7 @@ export const createEmptyConversation = (): Conversation => {
     id: 'new',
     agentId: toSerializedAgentIdentifier({
       agentId: OneChatDefaultAgentId,
-      providerId: OneChatDefaultAgentProviderId,
+      providerId: OneChatAgentProviderIds.default,
     }),
     user: { id: '', username: '' },
     title: '',

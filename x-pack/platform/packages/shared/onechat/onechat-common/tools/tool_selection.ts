@@ -5,53 +5,82 @@
  * 2.0.
  */
 
-import type { ToolProviderId, PlainIdToolIdentifier } from './tools';
-
-export enum ToolSelectionType {
-  byIds = 'by_ids',
-  byProvider = 'by_provider',
-}
+import type { ToolProviderId, PlainIdToolIdentifier, ToolDescriptor } from './tools';
 
 /**
- * Represents a tool selection based on individual IDs.
+ * "all tools" wildcard which can be used for {@link ByIdsToolSelection}
+ */
+export const allToolsSelectionWildcard = '*';
+
+/**
+ * Represents a tool selection based on individual tool IDs, and optionally a provider ID.
+ *
+ * The '*' wildcard can be used for ID selection, to inform that all tools should be selected.
+ *
+ * @example
+ * ```ts
+ * // select all available tools
+ * const allTools: ByIdsToolSelection = { toolIds: ['*'] }
+ *
+ * // select all tools from provider "dolly"
+ * const allTools: ByIdsToolSelection = { provider: 'dolly', toolIds: ['*'] }
+ *
+ * // select toolA and toolB, regardless of the provider
+ * const toolAB: ByIdsToolSelection = { toolIds: ['toolA', 'toolB'] }
+ *
+ * // select foo from provider 'custom'
+ * const toolAB: ByIdsToolSelection = { provider: 'custom', toolIds: ['foo'] }
+ * ```
  */
 export interface ByIdsToolSelection {
-  type: ToolSelectionType.byIds;
   /**
    * The id of the provider to select tools from
    */
-  providerId: ToolProviderId;
+  provider?: ToolProviderId;
   /**
-   * List of individual tool ids to select from the provider
+   * List of individual tool ids to select.
    */
   toolIds: PlainIdToolIdentifier[];
 }
 
 /**
- * A provider-based tool selection.
- * Selects **all** tools from the specified provider
+ * All possible subtypes for tool selection - for now there is only one.
  */
-export interface ByProviderSelection {
-  type: ToolSelectionType.byProvider;
-  /**
-   * The provider to select all tools from.
-   */
-  providerId: ToolProviderId;
-}
+export type ToolSelection = ByIdsToolSelection;
 
 /**
- * All possible choices for tool selection
+ * Check if a given {@link ToolSelection} is a {@link ByIdsToolSelection}
  */
-export type ToolSelection = ByIdsToolSelection | ByProviderSelection;
-
 export const isByIdsToolSelection = (
   toolSelection: ToolSelection
 ): toolSelection is ByIdsToolSelection => {
-  return toolSelection.type === ToolSelectionType.byIds;
+  return 'toolIds' in toolSelection && Array.isArray(toolSelection.toolIds);
 };
 
-export const isByProviderToolSelection = (
-  toolSelection: ToolSelection
-): toolSelection is ByProviderSelection => {
-  return toolSelection.type === ToolSelectionType.byProvider;
+/**
+ * Returns all tools matching ay least one of the provided tool selection.
+ */
+export const filterToolsBySelection = (
+  tools: ToolDescriptor[],
+  toolSelection: ToolSelection[]
+): ToolDescriptor[] => {
+  return tools.filter((tool) =>
+    toolSelection.some((selection) => toolMatchSelection(tool, selection))
+  );
+};
+
+/**
+ * Returns true if the given tool descriptor matches the provided tool selection.
+ */
+export const toolMatchSelection = (tool: ToolDescriptor, toolSelection: ToolSelection): boolean => {
+  if (isByIdsToolSelection(toolSelection)) {
+    if (toolSelection.provider && toolSelection.provider !== tool.meta.providerId) {
+      return false;
+    }
+    if (toolSelection.toolIds.includes(allToolsSelectionWildcard)) {
+      return true;
+    }
+    return toolSelection.toolIds.includes(tool.id);
+  }
+  throw new Error(`Invalid tool selection : ${JSON.stringify(toolSelection)}`);
 };

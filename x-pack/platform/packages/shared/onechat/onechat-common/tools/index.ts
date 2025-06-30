@@ -26,10 +26,10 @@ export {
 } from './tools';
 export { type FieldTypes, BuiltinToolIds, BuiltinTags } from './constants';
 export {
-  ToolSelectionType,
   type ByIdsToolSelection,
-  type ByProviderSelection,
   type ToolSelection,
   isByIdsToolSelection,
-  isByProviderToolSelection,
+  toolMatchSelection,
+  filterToolsBySelection,
+  allToolsSelectionWildcard,
 } from './tool_selection';
