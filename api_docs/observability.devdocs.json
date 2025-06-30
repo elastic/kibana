@@ -8132,7 +8132,7 @@
                 "section": "def-public.ExploratoryEmbeddableProps",
                 "text": "ExploratoryEmbeddableProps"
               },
-              ") => React.JSX.Element | null; }"
+              ") => React.JSX.Element | null; } | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -23588,6 +23588,39 @@
               "LegacyComparator"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/common/utils/convert_legacy_outside_comparator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.ElapsedTimestampTooltip",
+        "type": "Function",
+        "tags": [],
+        "label": "ElapsedTimestampTooltip",
+        "description": [],
+        "signature": [
+          "({ time }: Props) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/components/elapsed_timestamp_tooltip.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.ElapsedTimestampTooltip.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ time }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/common/components/elapsed_timestamp_tooltip.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
