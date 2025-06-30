@@ -197,7 +197,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
               />
               <EuiCallOut
                 color="warning"
-                iconType="help"
+                iconType="question"
                 title={
                   <EuiText>
                     <Memo(MemoizedFormattedMessage)
@@ -263,7 +263,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
               />
               <EuiCallOut
                 color="warning"
-                iconType="help"
+                iconType="question"
                 title={
                   <EuiText>
                     <Memo(MemoizedFormattedMessage)
@@ -526,7 +526,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
             />
             <EuiCallOut
               color="warning"
-              iconType="help"
+              iconType="question"
               title={
                 <EuiText>
                   <p>
@@ -562,7 +562,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
               />
               <EuiCallOut
                 color="warning"
-                iconType="help"
+                iconType="question"
                 title={
                   <EuiText>
                     <Memo(MemoizedFormattedMessage)
@@ -628,7 +628,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
               />
               <EuiCallOut
                 color="warning"
-                iconType="help"
+                iconType="question"
                 title={
                   <EuiText>
                     <Memo(MemoizedFormattedMessage)
@@ -888,7 +888,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
               />
               <EuiCallOut
                 color="warning"
-                iconType="help"
+                iconType="question"
                 title={
                   <EuiText>
                     <Memo(MemoizedFormattedMessage)
@@ -954,7 +954,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
               />
               <EuiCallOut
                 color="warning"
-                iconType="help"
+                iconType="question"
                 title={
                   <EuiText>
                     <Memo(MemoizedFormattedMessage)
@@ -1221,7 +1221,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
               />
               <EuiCallOut
                 color="warning"
-                iconType="help"
+                iconType="question"
                 title={
                   <EuiText>
                     <Memo(MemoizedFormattedMessage)
@@ -1287,7 +1287,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
               />
               <EuiCallOut
                 color="warning"
-                iconType="help"
+                iconType="question"
                 title={
                   <EuiText>
                     <Memo(MemoizedFormattedMessage)
@@ -1544,7 +1544,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
               />
               <EuiCallOut
                 color="warning"
-                iconType="help"
+                iconType="question"
                 title={
                   <EuiText>
                     <Memo(MemoizedFormattedMessage)
@@ -1609,7 +1609,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
               />
               <EuiCallOut
                 color="warning"
-                iconType="help"
+                iconType="question"
                 title={
                   <EuiText>
                     <Memo(MemoizedFormattedMessage)
@@ -1814,7 +1814,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
             />
             <EuiCallOut
               color="warning"
-              iconType="help"
+              iconType="question"
               title={
                 <EuiText>
                   <p>
@@ -1850,7 +1850,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
               />
               <EuiCallOut
                 color="warning"
-                iconType="help"
+                iconType="question"
                 title={
                   <EuiText>
                     <Memo(MemoizedFormattedMessage)
@@ -1916,7 +1916,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
               />
               <EuiCallOut
                 color="warning"
-                iconType="help"
+                iconType="question"
                 title={
                   <EuiText>
                     <Memo(MemoizedFormattedMessage)
@@ -2034,7 +2034,7 @@ exports[`Flyout should show a restart warning for restarting the primary Kibana 
               />
               <EuiCallOut
                 color="warning"
-                iconType="help"
+                iconType="question"
                 title="This step requires you to restart the Kibana server"
               >
                 <EuiText>

@@ -15,13 +15,10 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import type { ServerlessProjectType } from '../../../common/constants/types';
 import { CasesConnector } from './cases_connector';
 import { DEFAULT_MAX_OPEN_CASES } from './constants';
-import {
-  CASES_CONNECTOR_ID,
-  CASES_CONNECTOR_TITLE,
-  SECURITY_SOLUTION_OWNER,
-} from '../../../common/constants';
+import { CASES_CONNECTOR_ID, CASES_CONNECTOR_TITLE, OWNER_INFO } from '../../../common/constants';
 import { getOwnerFromRuleConsumerProducer } from '../../../common/utils/owner';
 
 import type {
@@ -38,7 +35,7 @@ import {
 } from './schema';
 import type { CasesClient } from '../../client';
 import { constructRequiredKibanaPrivileges } from './utils';
-import { groupAttackDiscoveryAlerts } from './attack_discovery';
+import { ATTACK_DISCOVERY_MAX_OPEN_CASES, groupAttackDiscoveryAlerts } from './attack_discovery';
 
 interface GetCasesConnectorTypeArgs {
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
@@ -47,14 +44,14 @@ interface GetCasesConnectorTypeArgs {
     savedObjectTypes: string[]
   ) => Promise<SavedObjectsClientContract>;
   getSpaceId: (request?: KibanaRequest) => string;
-  isServerlessSecurity?: boolean;
+  serverlessProjectType?: string;
 }
 
 export const getCasesConnectorType = ({
   getCasesClient,
   getSpaceId,
   getUnsecuredSavedObjectsClient,
-  isServerlessSecurity,
+  serverlessProjectType,
 }: GetCasesConnectorTypeArgs): SubActionConnectorType<
   CasesConnectorConfig,
   CasesConnectorSecrets
@@ -82,18 +79,26 @@ export const getCasesConnectorType = ({
       throw new Error('Cannot authorize cases. Owner is not defined in the subActionParams.');
     }
 
-    const owner = isServerlessSecurity
-      ? SECURITY_SOLUTION_OWNER
-      : (params?.subActionParams?.owner as string);
+    let owner: string;
+    if (serverlessProjectType) {
+      const foundOwner = Object.entries(OWNER_INFO).find(([, info]) => {
+        return info.serverlessProjectType === serverlessProjectType;
+      });
+
+      owner = foundOwner ? foundOwner[1].id : OWNER_INFO.cases.id;
+    } else {
+      owner = params?.subActionParams?.owner as string;
+    }
 
     return constructRequiredKibanaPrivileges(owner);
   },
 });
 
 export const getCasesConnectorAdapter = ({
-  isServerlessSecurity,
+  serverlessProjectType,
   logger,
 }: {
+  serverlessProjectType?: ServerlessProjectType;
   isServerlessSecurity?: boolean;
   logger: Logger;
 }): ConnectorAdapter<CasesConnectorRuleActionParams, CasesConnectorParams> => {
@@ -109,10 +114,12 @@ export const getCasesConnectorAdapter = ({
        */
       let internallyManagedAlerts = false;
       let groupedAlerts: CasesGroupedAlerts[] | null = null;
+      let maximumCasesToOpen = DEFAULT_MAX_OPEN_CASES;
       if (rule.ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID) {
         try {
           groupedAlerts = groupAttackDiscoveryAlerts(caseAlerts);
           internallyManagedAlerts = true;
+          maximumCasesToOpen = ATTACK_DISCOVERY_MAX_OPEN_CASES;
         } catch (error) {
           logger.error(
             `Could not setup grouped Attack Discovery alerts, because of error: ${error}`
@@ -123,7 +130,7 @@ export const getCasesConnectorAdapter = ({
       const owner = getOwnerFromRuleConsumerProducer({
         consumer: rule.consumer,
         producer: rule.producer,
-        isServerlessSecurity,
+        serverlessProjectType,
       });
 
       const subActionParams = {
@@ -134,7 +141,7 @@ export const getCasesConnectorAdapter = ({
         owner,
         reopenClosedCases: params.subActionParams.reopenClosedCases,
         timeWindow: params.subActionParams.timeWindow,
-        maximumCasesToOpen: DEFAULT_MAX_OPEN_CASES,
+        maximumCasesToOpen,
         templateId: params.subActionParams.templateId,
         internallyManagedAlerts,
       };
@@ -142,7 +149,7 @@ export const getCasesConnectorAdapter = ({
       return { subAction: 'run', subActionParams };
     },
     getKibanaPrivileges: ({ consumer, producer }) => {
-      const owner = getOwnerFromRuleConsumerProducer({ consumer, producer, isServerlessSecurity });
+      const owner = getOwnerFromRuleConsumerProducer({ consumer, producer, serverlessProjectType });
       return constructRequiredKibanaPrivileges(owner);
     },
   };
