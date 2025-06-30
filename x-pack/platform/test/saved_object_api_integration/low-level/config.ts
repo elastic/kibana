@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { configs } from '../configs';
+import { createTestConfig } from '../common/config';
 
 // eslint-disable-next-line import/no-default-export
-export default configs.enterprise;
+export default createTestConfig('low-level', { license: 'basic' });
