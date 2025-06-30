@@ -12,7 +12,7 @@ import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 
 import type {
-  BaseAlertLatest,
+  DetectionAlertLatest,
   WrappedAlertLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { EsqlRuleParams } from '../../rule_schema';
@@ -32,9 +32,9 @@ export const wrapSuppressedEsqlAlerts = ({
   isRuleAggregating: boolean;
   events: Array<estypes.SearchHit<SignalSource>>;
   expandedFields: string[] | undefined;
-}): Array<WrappedAlertLatest<BaseAlertLatest & SuppressionFieldsLatest>> => {
+}): Array<WrappedAlertLatest<DetectionAlertLatest & SuppressionFieldsLatest>> => {
   const { spaceId, completeRule, tuple, primaryTimestamp, secondaryTimestamp } = sharedParams;
-  const wrapped = events.map<WrappedAlertLatest<BaseAlertLatest & SuppressionFieldsLatest>>(
+  const wrapped = events.map<WrappedAlertLatest<DetectionAlertLatest & SuppressionFieldsLatest>>(
     (event, i) => {
       const combinedFields = { ...event?.fields, ...event._source };
 
@@ -55,7 +55,7 @@ export const wrapSuppressedEsqlAlerts = ({
 
       const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
 
-      const baseAlert: BaseAlertLatest = transformHitToAlert({
+      const baseAlert: DetectionAlertLatest = transformHitToAlert({
         sharedParams,
         doc: event,
         applyOverrides: true,

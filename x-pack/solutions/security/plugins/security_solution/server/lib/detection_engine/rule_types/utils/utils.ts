@@ -68,7 +68,7 @@ import type { BaseHit, SearchTypes } from '../../../../../common/detection_engin
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type {
-  BaseAlertLatest,
+  DetectionAlertLatest,
   DetectionAlert,
   EqlBuildingBlockAlertLatest,
   EqlShellAlertLatest,
@@ -672,7 +672,7 @@ export const addToSearchAfterReturn = ({
   next,
 }: {
   current: SearchAfterAndBulkCreateReturnType;
-  next: Omit<GenericBulkCreateResponse<BaseAlertLatest>, 'alertsWereTruncated'>;
+  next: Omit<GenericBulkCreateResponse<DetectionAlertLatest>, 'alertsWereTruncated'>;
 }) => {
   current.success = current.success && next.success;
   current.createdSignalsCount += next.createdItemsCount;

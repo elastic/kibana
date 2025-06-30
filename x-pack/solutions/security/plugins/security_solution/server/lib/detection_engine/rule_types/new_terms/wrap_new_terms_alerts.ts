@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import objectHash from 'object-hash';
 import type {
-  BaseAlertLatest,
+  DetectionAlertLatest,
   NewTermsAlertLatest,
   WrappedAlertLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
@@ -37,7 +37,7 @@ export const wrapNewTermsAlerts = ({
       `${sharedParams.spaceId}:${sharedParams.completeRule.alertId}`,
       eventAndTerms.newTerms,
     ]);
-    const baseAlert: BaseAlertLatest = transformHitToAlert({
+    const baseAlert: DetectionAlertLatest = transformHitToAlert({
       sharedParams,
       doc: eventAndTerms.event,
       applyOverrides: true,

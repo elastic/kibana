@@ -16,7 +16,7 @@ import type {
 import { isQueryRule } from '../../../../../common/detection_engine/utils';
 import { makeFloatString } from './utils';
 import type {
-  BaseAlertLatest,
+  DetectionAlertLatest,
   WrappedAlertLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';
@@ -24,7 +24,7 @@ import { getNumberOfSuppressedAlerts } from './get_number_of_suppressed_alerts';
 import type { EnrichEventsWrapper } from './enrichments/types';
 import { enrichEvents } from './enrichments';
 
-export interface GenericBulkCreateResponse<T extends BaseAlertLatest> {
+export interface GenericBulkCreateResponse<T extends DetectionAlertLatest> {
   success: boolean;
   bulkCreateDuration: string;
   enrichmentDuration: string;
@@ -36,7 +36,7 @@ export interface GenericBulkCreateResponse<T extends BaseAlertLatest> {
 }
 
 export const bulkCreateWithSuppression = async <
-  T extends SuppressionFieldsLatest & BaseAlertLatest
+  T extends SuppressionFieldsLatest & DetectionAlertLatest
 >({
   sharedParams,
   wrappedDocs,

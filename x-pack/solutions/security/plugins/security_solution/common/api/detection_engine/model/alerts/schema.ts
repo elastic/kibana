@@ -6,6 +6,10 @@
  */
 
 import type {
+  ConvertSchemaType,
+  SchemaType,
+} from '@kbn/rule-registry-plugin/common/schemas/schema';
+import type {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_INTENDED_TIMESTAMP,
   ALERT_REASON,
@@ -54,8 +58,6 @@ import type {
   ALERT_RULE_ACTIONS,
   ALERT_RULE_EXCEPTIONS_LIST,
   ALERT_RULE_FALSE_POSITIVES,
-  ALERT_GROUP_ID,
-  ALERT_GROUP_INDEX,
   ALERT_RULE_IMMUTABLE,
   ALERT_RULE_MAX_SIGNALS,
   ALERT_RULE_RISK_SCORE_MAPPING,
@@ -66,7 +68,6 @@ import type {
   ALERT_RULE_TIMELINE_TITLE,
   ALERT_RULE_TIMESTAMP_OVERRIDE,
   ALERT_RULE_INDICES,
-  ALERT_NEW_TERMS,
   LEGACY_ALERT_HOST_CRITICALITY,
   LEGACY_ALERT_USER_CRITICALITY,
   ALERT_HOST_CRITICALITY,
@@ -87,8 +88,6 @@ import type { SearchTypes } from '../../../../detection_engine/types';
 
 type Version800 = '8.0.0';
 type Version840 = '8.4.0';
-type Version860 = '8.6.0';
-type Version870 = '8.7.0';
 type Version880 = '8.8.0';
 type Version890 = '8.9.0';
 type Version8120 = '8.12.0';
@@ -97,267 +96,170 @@ type Version8160 = '8.16.0';
 type Version8180 = '8.18.0';
 type Version8190 = '8.19.0';
 
-type Version8190Plus = Version8190;
-type Version8180Plus = Version8180 | Version8190Plus;
-type Version8160Plus = Version8160 | Version8180Plus;
-type Version8130Plus = Version8130 | Version8160Plus;
-type Version8120Plus = Version8120 | Version8130Plus;
-type Version890Plus = Version890 | Version8120Plus;
-type Version880Plus = Version880 | Version890Plus;
-type Version870Plus = Version870 | Version880Plus;
-type Version860Plus = Version860 | Version870Plus;
-type Version840Plus = Version840 | Version860Plus;
-type Version800Plus = Version800 | Version840Plus;
-
-type LatestVersion = Version8190;
-
-type AllVersions =
-  | Version800
-  | Version840
-  | Version880
-  | Version890
-  | Version8120
-  | Version8130
-  | Version8160
-  | Version8180
-  | Version8190;
-
-type NodeTypes =
-  | SchemaType
-  | SchemaType[]
-  | object
-  | object[]
-  | string
-  | string[]
-  | number
-  | boolean
-  | null
-  | undefined;
-
-interface SchemaNode {
-  type: NodeTypes;
-  version: string;
-}
-
-type SchemaType = Record<string, SchemaNode>;
-
-/** 
- * This type is a no-op: Expand<T> evaluates to T. Its use is to force VSCode to evaluate type expressions
- * and show the expanded form, e.g.
- * type test5 = {
-        "@timestamp": string;
-        newField: string;
-        newFieldWithSubfields: {
-            subfield: string;
-        };
-    }
- * instead of
- *  type test5 = {
-        "@timestamp": string;
-        newField: string;
-        newFieldWithSubfields: Converter<ModelVersion3, {
-            subfield: {
-                type: string;
-                version: 3;
-            };
-        }>;
-    }
- * */
-type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;
-
-/**
- * This forces TS to apply ConvertSchemaType to each ModelVersion when it's a union,
- * e.g. `Version800 | Version840` will return `ConvertSchemaType<Version800, Schema> | ConvertSchemaType<Version840, Schema>`
- *
- * Without this type, `ConvertSchemaType<Version800 | Version840, Schema>` is equivalent to
- * `ConvertSchemaType<Version800, Schema>` because the union type gets treated as a unit rather than distributed -
- * and every field in 8.4.0 is also in 8.0.0 so the `Version840` part would be redundant.
- */
-type Distribute<ModelVersion extends string, T extends SchemaType> = ModelVersion extends string
-  ? ConvertSchemaType<ModelVersion, T> & { [key: string]: SearchTypes }
-  : never;
-
-type ConvertSchemaType<ModelVersion extends string, Schema extends SchemaType> = Expand<{
-  // Key remapping via `as` here filters out keys that are not in that schema version,
-  // so instead of { key: undefined } the key is completely gone
-  // https://www.typescriptlang.org/docs/handbook/2/mapped-types.html#key-remapping-via-as
-  [k in keyof Schema as ModelVersion extends Required<Schema>[k]['version']
-    ? k
-    : never]: ConvertSchemaNode<ModelVersion, Required<Schema>[k]['type']>;
-}>;
-
-type ConvertSchemaNode<ModelVersion extends string, NodeType extends NodeTypes> = NodeType extends
-  | SchemaType
-  | SchemaType[]
-  ? NodeType extends SchemaType[]
-    ? Array<Expand<ConvertSchemaType<ModelVersion, NodeType[0]>>>
-    : NodeType extends SchemaType
-    ? Expand<ConvertSchemaType<ModelVersion, NodeType>>
-    : never
-  : NodeType;
-
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type AlertAncestorSchema = {
   rule: {
     type: string | undefined;
-    version: Version800Plus;
+    version: Version800;
   };
   id: {
     type: string;
-    version: Version800Plus;
+    version: Version800;
   };
   type: {
     type: string;
-    version: Version800Plus;
+    version: Version800;
   };
   index: {
     type: string;
-    version: Version800Plus;
+    version: Version800;
   };
   depth: {
     type: number;
-    version: Version800Plus;
+    version: Version800;
   };
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type BaseAlertSchema = {
+type DetectionAlertSchema = {
   [TIMESTAMP]: {
     type: string;
-    version: Version800Plus;
+    version: Version800;
   };
   [SPACE_IDS]: {
     type: string[];
-    version: Version800Plus;
+    version: Version800;
   };
   [EVENT_KIND]: {
     type: 'signal';
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_ORIGINAL_TIME]: {
     type: string | undefined;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_CONSUMER]: {
     type: string;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_ANCESTORS]: {
-    type: AlertAncestorSchema[];
-    version: Version800Plus;
+    type: object[];
+    version: Version800;
+    fields: AlertAncestorSchema;
   };
   [ALERT_STATUS]: {
     type: string;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_WORKFLOW_STATUS]: {
     type: string;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_DEPTH]: {
     type: number;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_REASON]: {
     type: string;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_BUILDING_BLOCK_TYPE]: {
     type: string | undefined;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_SEVERITY]: {
     type: string;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RISK_SCORE]: {
     type: number;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_PARAMETERS]: {
     type: {
-      [key: string]: {
-        type: object | object[] | string | string[] | number | boolean | undefined;
-        version: Version800Plus;
-      };
+      [key: string]: SearchTypes;
     };
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_ACTIONS]: {
-    version: Version800Plus;
-    type: Array<{
+    type: object[];
+    version: Version800;
+    fields: {
       action_type_id: {
         type: string;
-        version: Version800Plus;
+        version: Version800;
       };
       group?: {
         type: string | undefined;
-        version: Version800Plus;
+        version: Version800;
       };
       id: {
         type: string;
-        version: Version800Plus;
+        version: Version800;
       };
       params: {
         type: object;
-        version: Version800Plus;
+        version: Version800;
       };
       uuid?: {
         type: string | undefined;
-        version: Version800Plus;
+        version: Version800;
       };
       alerts_filter?: {
         type: object | undefined;
-        version: Version800Plus;
+        version: Version800;
       };
       frequency?: {
-        version: Version800Plus;
-        type: {
+        type: object;
+        version: Version800;
+        fields: {
           summary: {
             type: boolean;
-            version: Version800Plus;
+            version: Version800;
           };
           notifyWhen: {
             type: 'onActiveAlert' | 'onThrottleInterval' | 'onActionGroupChange';
-            version: Version800Plus;
+            version: Version800;
           };
           throttle: {
             type: string | null;
-            version: Version800Plus;
+            version: Version800;
           };
         };
       };
-    }>;
+    };
   };
   [ALERT_RULE_AUTHOR]: {
     type: string[];
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_CREATED_AT]: {
     type: string;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_CREATED_BY]: {
     type: string;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_DESCRIPTION]: {
     type: string;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_ENABLED]: {
     type: boolean;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_EXCEPTIONS_LIST]: {
-    type: Array<{
+    type: object[];
+    version: Version800;
+    fields: {
       id: {
         type: string;
-        version: Version800Plus;
+        version: Version800;
       };
       list_id: {
         type: string;
-        version: Version800Plus;
+        version: Version800;
       };
       type: {
         type:
@@ -368,370 +270,347 @@ type BaseAlertSchema = {
           | 'endpoint_events'
           | 'endpoint_host_isolation_exceptions'
           | 'endpoint_blocklists';
-        version: Version800Plus;
+        version: Version800;
       };
-    }>;
-    version: Version800Plus;
+    };
   };
   [ALERT_RULE_FALSE_POSITIVES]: {
     type: string[];
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_FROM]: {
     type: string;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_IMMUTABLE]: {
     type: boolean;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_INTERVAL]: {
     type: string;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_LICENSE]: {
     type: string | undefined;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_MAX_SIGNALS]: {
     type: number;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_NAME]: {
     type: string;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_NAMESPACE_FIELD]: {
     type: string | undefined;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_NOTE]: {
     type: string | undefined;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_REFERENCES]: {
     type: string[];
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_RISK_SCORE_MAPPING]: {
-    type: Array<{
+    type: object[];
+    version: Version800;
+    fields: {
       field: {
         type: string;
-        version: Version800Plus;
+        version: Version800;
       };
       value: {
         type: string;
-        version: Version800Plus;
+        version: Version800;
       };
       operator: {
         type: 'equals';
-        version: Version800Plus;
+        version: Version800;
       };
       risk_score: {
         type: number | undefined;
-        version: Version800Plus;
+        version: Version800;
       };
-    }>;
-    version: Version800Plus;
+    };
   };
   [ALERT_RULE_RULE_ID]: {
     type: string;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_RULE_NAME_OVERRIDE]: {
     type: string | undefined;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_SEVERITY_MAPPING]: {
-    type: Array<{
+    type: object[];
+    version: Version800;
+    fields: {
       field: {
         type: string;
-        version: Version800Plus;
+        version: Version800;
       };
       value: {
         type: string;
-        version: Version800Plus;
+        version: Version800;
       };
       operator: {
         type: 'equals';
-        version: Version800Plus;
+        version: Version800;
       };
       severity: {
         type: 'low' | 'medium' | 'high' | 'critical';
-        version: Version800Plus;
+        version: Version800;
       };
-    }>;
-    version: Version800Plus;
+    };
   };
   [ALERT_RULE_TAGS]: {
     type: string[];
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_THREAT]: {
-    type: Array<{
+    type: object[];
+    version: Version800;
+    fields: {
       framework: {
         type: string;
-        version: Version800Plus;
+        version: Version800;
       };
       tactic: {
-        type: {
+        type: object;
+        version: Version800;
+        fields: {
           id: {
             type: string;
-            version: Version800Plus;
+            version: Version800;
           };
           name: {
             type: string;
-            version: Version800Plus;
+            version: Version800;
           };
           reference: {
             type: string;
-            version: Version800Plus;
+            version: Version800;
           };
         };
-        version: Version800Plus;
       };
       technique?: {
-        type: Array<{
+        type: object[];
+        version: Version800;
+        fields: {
           id: {
             type: string;
-            version: Version800Plus;
+            version: Version800;
           };
           name: {
             type: string;
-            version: Version800Plus;
+            version: Version800;
           };
           reference: {
             type: string;
-            version: Version800Plus;
+            version: Version800;
           };
           subtechnique?: {
-            type: Array<{
+            type: object[];
+            version: Version800;
+            fields: {
               id: {
                 type: string;
-                version: Version800Plus;
+                version: Version800;
               };
               name: {
                 type: string;
-                version: Version800Plus;
+                version: Version800;
               };
               reference: {
                 type: string;
-                version: Version800Plus;
+                version: Version800;
               };
-            }>;
-            version: Version800Plus;
+            };
           };
-        }>;
-        version: Version800Plus;
+        };
       };
-    }>;
-    version: Version800Plus;
+    };
   };
   [ALERT_RULE_THROTTLE]: {
     type: string | undefined;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_TIMELINE_ID]: {
     type: string | undefined;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_TIMELINE_TITLE]: {
     type: string | undefined;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_TIMESTAMP_OVERRIDE]: {
     type: string | undefined;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_TO]: {
     type: string;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_TYPE]: {
     type: Type;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_UPDATED_AT]: {
     type: string;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_UPDATED_BY]: {
     type: string;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_UUID]: {
     type: string;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_VERSION]: {
     type: number;
-    version: Version800Plus;
+    version: Version800;
   };
   'kibana.alert.rule.risk_score': {
     type: number;
-    version: Version800Plus;
+    version: Version800;
   };
   'kibana.alert.rule.severity': {
     type: string;
-    version: Version800Plus;
+    version: Version800;
   };
   'kibana.alert.rule.building_block_type': {
     type: string | undefined;
-    version: Version800Plus;
+    version: Version800;
   };
   [ALERT_RULE_INDICES]: {
     type: string[];
-    version: Version840Plus;
+    version: Version840;
   };
   [ALERT_UUID]: {
     type: string;
-    version: Version840Plus;
+    version: Version800;
   };
   [ALERT_URL]: {
     type: string | undefined;
-    version: Version880Plus;
+    version: Version880;
   };
   [ALERT_WORKFLOW_TAGS]: {
     type: string[];
-    version: Version890Plus;
+    version: Version890;
   };
   [ALERT_WORKFLOW_ASSIGNEE_IDS]: {
     type: string[] | undefined;
-    version: Version8120Plus;
+    version: Version8120;
   };
   [LEGACY_ALERT_HOST_CRITICALITY]: {
     type: string | undefined;
-    version: Version8130Plus;
+    version: Version8130;
   };
   [LEGACY_ALERT_USER_CRITICALITY]: {
     type: string | undefined;
-    version: Version8130Plus;
+    version: Version8130;
   };
   [ALERT_HOST_CRITICALITY]: {
     type: string | undefined;
-    version: Version8130Plus;
+    version: Version8130;
   };
   [ALERT_USER_CRITICALITY]: {
     type: string | undefined;
-    version: Version8130Plus;
+    version: Version8130;
   };
   // TODO: risk score fields were actually added earlier, figure out when exactly
   [ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL]: {
     type: string | undefined;
-    version: Version8130Plus;
+    version: Version8130;
   };
   [ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM]: {
     type: number | undefined;
-    version: Version8130Plus;
+    version: Version8130;
   };
   [ALERT_USER_RISK_SCORE_CALCULATED_LEVEL]: {
     type: string | undefined;
-    version: Version8130Plus;
+    version: Version8130;
   };
   [ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM]: {
     type: number | undefined;
-    version: Version8130Plus;
+    version: Version8130;
   };
   [ALERT_RULE_EXECUTION_TYPE]: {
     type: string;
-    version: Version8160Plus;
+    version: Version8160;
   };
   [ALERT_INTENDED_TIMESTAMP]: {
     type: string;
-    version: Version8160Plus;
+    version: Version8160;
   };
   [ALERT_SERVICE_CRITICALITY]: {
     type: string | undefined;
-    version: Version8180Plus;
+    version: Version8180;
   };
   [ALERT_SERVICE_RISK_SCORE_CALCULATED_LEVEL]: {
     type: string | undefined;
-    version: Version8180Plus;
+    version: Version8180;
   };
   [ALERT_SERVICE_RISK_SCORE_CALCULATED_SCORE_NORM]: {
     type: number | undefined;
-    version: Version8180Plus;
+    version: Version8180;
   };
   [ALERT_ORIGINAL_DATA_STREAM_DATASET]?: {
     type: string | undefined;
-    version: Version8190Plus;
+    version: Version8190;
   };
   [ALERT_ORIGINAL_DATA_STREAM_NAMESPACE]?: {
     type: string | undefined;
-    version: Version8190Plus;
+    version: Version8190;
   };
   [ALERT_ORIGINAL_DATA_STREAM_TYPE]?: {
     type: string | undefined;
-    version: Version8190Plus;
+    version: Version8190;
   };
 };
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type EqlBuildingBlockAlertFields = {
-  [ALERT_GROUP_ID]: {
-    type: string;
-    version: Version800Plus;
-  };
-  [ALERT_GROUP_INDEX]: {
-    type: number;
-    version: Version800Plus;
-  };
-  [ALERT_BUILDING_BLOCK_TYPE]: {
-    type: 'default';
-    version: Version800Plus;
-  };
-};
+type Version840Union = Version840 | Version800;
+type Version880Union = Version880 | Version840Union;
+type Version890Union = Version890 | Version880Union;
+type Version8120Union = Version8120 | Version890Union;
+type Version8130Union = Version8130 | Version8120Union;
+type Version8160Union = Version8160 | Version8130Union;
+type Version8180Union = Version8180 | Version8160Union;
+type Version8190Union = Version8190 | Version8180Union;
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type EqlShellAlertFields = {
-  [ALERT_GROUP_ID]: {
-    type: string;
-    version: Version800Plus;
-  };
-  [ALERT_UUID]: {
-    type: string;
-    version: Version800Plus;
-  };
-};
+type ConvertDetectionAlertSchema<
+  ModelVersion extends string,
+  Schema extends SchemaType
+> = ConvertSchemaType<ModelVersion, Schema> & { [key: string]: SearchTypes };
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type NewTermsAlertFields = {
-  [ALERT_NEW_TERMS]: {
-    type: Array<string | number | null>;
-    version: Version840Plus;
-  };
-};
-
-export type BaseAlert<ModelVersion extends string> = Distribute<ModelVersion, BaseAlertSchema>;
-export type EqlBuildingBlockAlert<ModelVersion extends string> = Distribute<
-  ModelVersion,
-  BaseAlertSchema & EqlBuildingBlockAlertFields
->;
-export type EqlShellAlert<ModelVersion extends string> = Distribute<
-  ModelVersion,
-  BaseAlertSchema & EqlShellAlertFields
->;
-export type NewTermsAlert<ModelVersion extends string> = Distribute<
-  ModelVersion,
-  BaseAlertSchema & NewTermsAlertFields
->;
-
-export type BaseAlertLatest = BaseAlert<LatestVersion>;
-export type EqlBuildingBlockAlertLatest = EqlBuildingBlockAlert<LatestVersion>;
-export type EqlShellAlertLatest = EqlShellAlert<LatestVersion>;
-export type NewTermsAlertLatest = NewTermsAlert<LatestVersion>;
-
-export type AllBaseAlerts = BaseAlert<AllVersions>;
-export type AllEqlBuildingBlockAlerts = EqlBuildingBlockAlert<AllVersions>;
-export type AllEqlShellAlerts = EqlShellAlert<AllVersions>;
-export type AllNewTermsAlerts = NewTermsAlert<AllVersions>;
+type DetectionAlert800 = ConvertDetectionAlertSchema<Version800, DetectionAlertSchema>;
+type DetectionAlert840 = ConvertDetectionAlertSchema<Version840Union, DetectionAlertSchema>;
+type DetectionAlert880 = ConvertDetectionAlertSchema<Version880Union, DetectionAlertSchema>;
+type DetectionAlert890 = ConvertDetectionAlertSchema<Version890Union, DetectionAlertSchema>;
+type DetectionAlert8120 = ConvertDetectionAlertSchema<Version8120Union, DetectionAlertSchema>;
+type DetectionAlert8130 = ConvertDetectionAlertSchema<Version8130Union, DetectionAlertSchema>;
+type DetectionAlert8160 = ConvertDetectionAlertSchema<Version8160Union, DetectionAlertSchema>;
+type DetectionAlert8180 = ConvertDetectionAlertSchema<Version8180Union, DetectionAlertSchema>;
+type DetectionAlert8190 = ConvertDetectionAlertSchema<Version8190Union, DetectionAlertSchema>;
 
 export type DetectionAlert =
-  | (AllBaseAlerts | AllEqlBuildingBlockAlerts | AllEqlShellAlerts | AllNewTermsAlerts) & {
-      [key: string]: SearchTypes;
-    };
+  | DetectionAlert800
+  | DetectionAlert840
+  | DetectionAlert880
+  | DetectionAlert890
+  | DetectionAlert8120
+  | DetectionAlert8130
+  | DetectionAlert8160
+  | DetectionAlert8180
+  | DetectionAlert8190;
 
-export type AncestorLatest = ConvertSchemaType<LatestVersion, AlertAncestorSchema>;
+export type DetectionAlertLatest = ConvertDetectionAlertSchema<string, DetectionAlertSchema>;
+
+export type AncestorLatest = ConvertSchemaType<string, AlertAncestorSchema>;
 
 export interface WrappedAlertLatest<T> {
   _id: string;

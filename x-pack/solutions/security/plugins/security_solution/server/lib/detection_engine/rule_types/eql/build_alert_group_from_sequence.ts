@@ -30,7 +30,7 @@ import {
   ALERT_GROUP_INDEX,
 } from '../../../../../common/field_maps/field_names';
 import type {
-  BaseAlertLatest,
+  DetectionAlertLatest,
   EqlBuildingBlockAlertLatest,
   EqlShellAlertLatest,
   WrappedAlertLatest,
@@ -91,7 +91,7 @@ export const buildAlertGroupFromSequence = ({
   // We'll add the group ID and index fields
   // after creating the shell alert later on
   // since that's when the group ID is determined.
-  let baseAlerts: BaseAlertLatest[] = [];
+  let baseAlerts: DetectionAlertLatest[] = [];
   try {
     baseAlerts = sequence.events.map((event) =>
       transformHitToAlert({
@@ -110,8 +110,8 @@ export const buildAlertGroupFromSequence = ({
   // The ID of each building block alert depends on all of the other building blocks as well,
   // so we generate the IDs after making all the BaseFields
   const buildingBlockIds = generateBuildingBlockIds(baseAlerts);
-  const wrappedBaseFields: Array<WrappedAlertLatest<BaseAlertLatest>> = baseAlerts.map(
-    (block, i): WrappedAlertLatest<BaseAlertLatest> => ({
+  const wrappedBaseFields: Array<WrappedAlertLatest<DetectionAlertLatest>> = baseAlerts.map(
+    (block, i): WrappedAlertLatest<DetectionAlertLatest> => ({
       _id: buildingBlockIds[i],
       _index: '',
       _source: {
@@ -168,7 +168,7 @@ export const buildAlertGroupFromSequence = ({
 };
 
 export interface BuildAlertRootParams {
-  wrappedBuildingBlocks: Array<WrappedAlertLatest<BaseAlertLatest>>;
+  wrappedBuildingBlocks: Array<WrappedAlertLatest<DetectionAlertLatest>>;
   completeRule: CompleteRule<RuleParams>;
   spaceId: string | null | undefined;
   buildReasonMessage: BuildReasonMessage;

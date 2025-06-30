@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { uniqBy } from 'lodash';
 
 import type {
-  BaseAlertLatest,
+  DetectionAlertLatest,
   WrappedAlertLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { EsqlRuleParams } from '../../rule_schema';
@@ -28,8 +28,8 @@ export const wrapEsqlAlerts = ({
   isRuleAggregating: boolean;
   events: Array<estypes.SearchHit<SignalSource>>;
   expandedFields: string[] | undefined;
-}): Array<WrappedAlertLatest<BaseAlertLatest>> => {
-  const wrapped = events.map<WrappedAlertLatest<BaseAlertLatest>>((event, i) => {
+}): Array<WrappedAlertLatest<DetectionAlertLatest>> => {
+  const wrapped = events.map<WrappedAlertLatest<DetectionAlertLatest>>((event, i) => {
     const id = generateAlertId({
       event,
       spaceId: sharedParams.spaceId,
@@ -40,7 +40,7 @@ export const wrapEsqlAlerts = ({
       expandedFields,
     });
 
-    const baseAlert: BaseAlertLatest = transformHitToAlert({
+    const baseAlert: DetectionAlertLatest = transformHitToAlert({
       sharedParams,
       doc: event,
       applyOverrides: true,

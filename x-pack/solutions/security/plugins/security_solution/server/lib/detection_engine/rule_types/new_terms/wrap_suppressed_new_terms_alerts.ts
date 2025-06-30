@@ -10,7 +10,7 @@ import objectHash from 'object-hash';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type {
-  BaseAlertLatest,
+  DetectionAlertLatest,
   NewTermsAlertLatest,
   WrappedAlertLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
@@ -52,7 +52,7 @@ export const wrapSuppressedNewTermsAlerts = ({
       eventAndTerms.newTerms,
     ]);
 
-    const baseAlert: BaseAlertLatest = transformHitToAlert({
+    const baseAlert: DetectionAlertLatest = transformHitToAlert({
       sharedParams,
       doc: event,
       applyOverrides: true,

@@ -7,17 +7,18 @@
 
 import type {
   AncestorLatest,
-  BaseAlertLatest,
-  EqlBuildingBlockAlertLatest,
-  EqlShellAlertLatest,
-  NewTermsAlertLatest,
+  DetectionAlertLatest,
   WrappedAlertLatest,
   DetectionAlert,
 } from './schema';
 
+import type { NewTermsAlertLatest } from './new_terms_alert_schema';
+
+import type { EqlBuildingBlockAlertLatest, EqlShellAlertLatest } from './eql_alert_schema';
+
 export type {
   AncestorLatest,
-  BaseAlertLatest,
+  DetectionAlertLatest,
   DetectionAlert,
   EqlBuildingBlockAlertLatest,
   EqlShellAlertLatest,

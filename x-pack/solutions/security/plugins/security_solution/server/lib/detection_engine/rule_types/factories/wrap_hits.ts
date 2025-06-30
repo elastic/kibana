@@ -11,7 +11,7 @@ import { generateId } from '../utils/utils';
 import { transformHitToAlert } from './utils/transform_hit_to_alert';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 import type {
-  BaseAlertLatest,
+  DetectionAlertLatest,
   WrappedAlertLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 
@@ -28,8 +28,8 @@ export const wrapHits = (
   sharedParams: SecuritySharedParams,
   events: Array<estypes.SearchHit<SignalSource>>,
   buildReasonMessage: BuildReasonMessage
-): Array<WrappedAlertLatest<BaseAlertLatest>> => {
-  const wrappedDocs = events.map((event): WrappedAlertLatest<BaseAlertLatest> => {
+): Array<WrappedAlertLatest<DetectionAlertLatest>> => {
+  const wrappedDocs = events.map((event): WrappedAlertLatest<DetectionAlertLatest> => {
     const id = generateId(
       event._index,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

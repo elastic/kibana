@@ -11,21 +11,21 @@ import { isEmpty } from 'lodash';
 import type { AlertWithCommonFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import { makeFloatString } from '../utils/utils';
 import type {
-  BaseAlertLatest,
+  DetectionAlertLatest,
   WrappedAlertLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { EnrichEventsWrapper } from '../utils/enrichments/types';
 import { enrichEvents } from '../utils/enrichments';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 
-export interface BulkCreateParams<T extends BaseAlertLatest> {
+export interface BulkCreateParams<T extends DetectionAlertLatest> {
   wrappedAlerts: Array<WrappedAlertLatest<T>>;
   services: SecurityRuleServices;
   sharedParams: SecuritySharedParams;
   maxAlerts?: number;
 }
 
-export interface GenericBulkCreateResponse<T extends BaseAlertLatest> {
+export interface GenericBulkCreateResponse<T extends DetectionAlertLatest> {
   success: boolean;
   bulkCreateDuration: string;
   enrichmentDuration: string;
@@ -36,7 +36,7 @@ export interface GenericBulkCreateResponse<T extends BaseAlertLatest> {
   suppressedItemsCount?: number;
 }
 
-export const bulkCreate = async <T extends BaseAlertLatest>({
+export const bulkCreate = async <T extends DetectionAlertLatest>({
   wrappedAlerts,
   services,
   sharedParams,

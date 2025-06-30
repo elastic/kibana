@@ -46,7 +46,7 @@ import type { Status } from '../../../../common/api/detection_engine';
 import type { BaseHit, SearchTypes } from '../../../../common/detection_engine/types';
 import type { BuildReasonMessage } from './utils/reason_formatters';
 import type {
-  BaseAlertLatest,
+  DetectionAlertLatest,
   DetectionAlert,
   WrappedAlertLatest,
 } from '../../../../common/api/detection_engine/model/alerts';
@@ -304,7 +304,7 @@ export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
 export type WrapSuppressedHits = (
   hits: Array<estypes.SearchHit<SignalSource>>,
   buildReasonMessage: BuildReasonMessage
-) => Array<WrappedAlertLatest<BaseAlertLatest & SuppressionFieldsLatest>>;
+) => Array<WrappedAlertLatest<DetectionAlertLatest & SuppressionFieldsLatest>>;
 
 export type SecurityRuleServices = RuleExecutorServices<
   AlertInstanceState,
