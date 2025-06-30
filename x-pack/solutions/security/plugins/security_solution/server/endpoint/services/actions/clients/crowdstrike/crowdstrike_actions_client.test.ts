@@ -23,6 +23,7 @@ import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
 import { CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../common/endpoint/service/response_actions/crowdstrike';
 import { BaseDataGenerator } from '../../../../../../common/endpoint/data_generators/base_data_generator';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
+import { ENDPOINT_RESPONSE_ACTION_SENT_EVENT } from '../../../../../lib/telemetry/event_based/events';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -232,6 +233,23 @@ describe('CrowdstrikeActionsClient class', () => {
 
       expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
     });
+
+    describe('telemetry events', () => {
+      it('should send `isolate` action creation telemetry event', async () => {
+        await crowdstrikeActionsClient.isolate(createCrowdstrikeIsolationOptions());
+
+        expect(
+          classConstructorOptions.endpointService.getTelemetryService().reportEvent
+        ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
+          responseActions: {
+            actionId: expect.any(String),
+            agentType: 'crowdstrike',
+            command: 'isolate',
+            isAutomated: false,
+          },
+        });
+      });
+    });
   });
 
   describe('#release()', () => {
@@ -327,6 +345,23 @@ describe('CrowdstrikeActionsClient class', () => {
       );
 
       expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
+    });
+
+    describe('telemetry events', () => {
+      it('should send `release` action creation telemetry event', async () => {
+        await crowdstrikeActionsClient.release(createCrowdstrikeIsolationOptions());
+
+        expect(
+          classConstructorOptions.endpointService.getTelemetryService().reportEvent
+        ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
+          responseActions: {
+            actionId: expect.any(String),
+            agentType: 'crowdstrike',
+            command: 'unisolate',
+            isAutomated: false,
+          },
+        });
+      });
     });
   });
 
