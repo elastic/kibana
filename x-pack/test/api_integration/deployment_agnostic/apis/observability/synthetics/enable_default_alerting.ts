@@ -18,7 +18,8 @@ import { addMonitorAPIHelper, omitMonitorKeys } from './create_monitor';
 import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  describe('EnableDefaultAlerting', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/225448
+  describe.skip('EnableDefaultAlerting', function () {
     const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const retry = getService('retry');
@@ -31,8 +32,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     const privateLocationTestService = new PrivateLocationTestService(getService);
 
-    const addMonitorAPI = async (monitor: any, statusCode = 200) => {
-      return addMonitorAPIHelper(supertest, monitor, statusCode, editorUser, samlAuth);
+    const addMonitorAPI = async (monitor: any, gettingStarted?: boolean) => {
+      return addMonitorAPIHelper(supertest, monitor, 200, editorUser, samlAuth, gettingStarted);
     };
 
     after(async () => {
@@ -96,7 +97,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('enables alert when new monitor is added', async () => {
       const newMonitor = httpMonitorJson;
 
-      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+      const { body: apiResponse } = await addMonitorAPI(newMonitor, true);
 
       expect(apiResponse).eql(omitMonitorKeys({ ...newMonitor, spaceId: 'default' }));
 
@@ -115,7 +116,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('deletes (and recreates) the default rule when settings are updated', async () => {
       const newMonitor = httpMonitorJson;
 
-      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+      const { body: apiResponse } = await addMonitorAPI(newMonitor, true);
 
       expect(apiResponse).eql(omitMonitorKeys(newMonitor));
 
@@ -194,7 +195,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('doesnt throw errors when rule has already been deleted', async () => {
       const newMonitor = httpMonitorJson;
 
-      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+      const { body: apiResponse } = await addMonitorAPI(newMonitor, true);
 
       expect(apiResponse).eql(omitMonitorKeys(newMonitor));
 

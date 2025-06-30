@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { EuiHorizontalRule } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { EuiPageTemplate } from '@elastic/eui';
-
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useKibana } from '../hooks/use_kibana';
+import { useSearchHomePageRedirect } from '../hooks/use_search_home_page_redirect';
 import { SearchHomepageBody } from './search_homepage_body';
 import { SearchHomepageHeader } from './search_homepage_header';
 
 export const SearchHomepagePage = () => {
   const {
-    services: { console: consolePlugin },
+    services: { console: consolePlugin, history, searchNavigation },
   } = useKibana();
+
+  useSearchHomePageRedirect();
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
@@ -23,10 +26,17 @@ export const SearchHomepagePage = () => {
   );
 
   return (
-    <EuiPageTemplate offset={0} restrictWidth={false} data-test-subj="search-homepage" grow={false}>
-      <SearchHomepageHeader showEndpointsAPIKeys />
+    <KibanaPageTemplate
+      offset={0}
+      restrictWidth={false}
+      data-test-subj="search-homepage"
+      grow={false}
+      solutionNav={searchNavigation?.useClassicNavigation(history)}
+    >
+      <SearchHomepageHeader />
+      <EuiHorizontalRule margin="none" />
       <SearchHomepageBody />
       {embeddableConsole}
-    </EuiPageTemplate>
+    </KibanaPageTemplate>
   );
 };

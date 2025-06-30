@@ -14,7 +14,6 @@ import {
   EuiText,
   EuiLink,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, sortBy } from 'lodash';
 import React, { useState, useCallback } from 'react';
@@ -24,15 +23,10 @@ import { Sort } from './sort';
 import { RefreshServiceGroupsSubscriber } from '../refresh_service_groups_subscriber';
 import { ServiceGroupSaveButton } from '../service_group_save';
 import { BetaBadge } from '../../../shared/beta_badge';
-import { useEntityCentricExperienceSetting } from '../../../../hooks/use_entity_centric_experience_setting';
 
 export type ServiceGroupsSortType = 'recently_added' | 'alphabetical';
 
-const GET_STARTED_URL = 'https://www.elastic.co/guide/en/apm/get-started/current/index.html';
-
 export function ServiceGroupsList() {
-  const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
-
   const [filter, setFilter] = useState('');
 
   const [apmServiceGroupsSortType, setServiceGroupsSortType] =
@@ -137,25 +131,6 @@ export function ServiceGroupsList() {
                         {i18n.translate('xpack.apm.serviceGroups.listDescription', {
                           defaultMessage: 'Displayed service counts reflect the last 24 hours.',
                         })}
-                        {isEntityCentricExperienceEnabled && (
-                          <FormattedMessage
-                            id="xpack.apm.serviceGroups.onlyApm"
-                            defaultMessage="Only showing services {link}"
-                            values={{
-                              link: (
-                                <EuiLink
-                                  data-test-subj="apmServiceGroupsApmInstrumentedLink"
-                                  href={GET_STARTED_URL}
-                                  target="_blank"
-                                >
-                                  {i18n.translate('xpack.apm.serviceGroups.onlyApmLink', {
-                                    defaultMessage: 'instrumented with APM.',
-                                  })}
-                                </EuiLink>
-                              ),
-                            }}
-                          />
-                        )}
                       </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>

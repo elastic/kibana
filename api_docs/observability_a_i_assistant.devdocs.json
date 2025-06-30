@@ -1517,20 +1517,13 @@
           },
           {
             "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.FunctionDefinition.visibility",
+            "id": "def-public.FunctionDefinition.isInternal",
             "type": "CompoundType",
             "tags": [],
-            "label": "visibility",
+            "label": "isInternal",
             "description": [],
             "signature": [
-              {
-                "pluginId": "observabilityAIAssistant",
-                "scope": "common",
-                "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-common.FunctionVisibility",
-                "text": "FunctionVisibility"
-              },
-              " | undefined"
+              "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/functions/types.ts",
             "deprecated": false,
@@ -3462,15 +3455,7 @@
               "PartialC",
               "<{ parameters: ",
               "AnyC",
-              "; }>]>>; }>; query: ",
-              "PartialC",
-              "<{ format: ",
-              "UnionC",
-              "<[",
-              "LiteralC",
-              "<\"default\">, ",
-              "LiteralC",
-              "<\"openai\">]>; }>; }>]>, ",
+              "; }>]>>; }>; }>]>, ",
               "ObservabilityAIAssistantRouteHandlerResources",
               ", ",
               "Readable",
@@ -3576,9 +3561,7 @@
               "TypeC",
               "<{ body: ",
               "TypeC",
-              "<{ prompt: ",
-              "StringC",
-              "; context: ",
+              "<{ screenDescription: ",
               "StringC",
               "; connectorId: ",
               "StringC",
@@ -3592,7 +3575,27 @@
               "LiteralC",
               "<\"search\">, ",
               "LiteralC",
-              "<\"all\">]>>; }>; }>, ",
+              "<\"all\">]>>; messages: ",
+              "ArrayC",
+              "<",
+              "Type",
+              "<",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              ", ",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              ", unknown>>; }>; }>, ",
               "ObservabilityAIAssistantRouteHandlerResources",
               ", ",
               "Readable",
@@ -4498,15 +4501,7 @@
               "PartialC",
               "<{ parameters: ",
               "AnyC",
-              "; }>]>>; }>; query: ",
-              "PartialC",
-              "<{ format: ",
-              "UnionC",
-              "<[",
-              "LiteralC",
-              "<\"default\">, ",
-              "LiteralC",
-              "<\"openai\">]>; }>; }>]>, ",
+              "; }>]>>; }>; }>]>, ",
               "ObservabilityAIAssistantRouteHandlerResources",
               ", ",
               "Readable",
@@ -4612,9 +4607,7 @@
               "TypeC",
               "<{ body: ",
               "TypeC",
-              "<{ prompt: ",
-              "StringC",
-              "; context: ",
+              "<{ screenDescription: ",
               "StringC",
               "; connectorId: ",
               "StringC",
@@ -4628,7 +4621,27 @@
               "LiteralC",
               "<\"search\">, ",
               "LiteralC",
-              "<\"all\">]>>; }>; }>, ",
+              "<\"all\">]>>; messages: ",
+              "ArrayC",
+              "<",
+              "Type",
+              "<",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              ", ",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              ", unknown>>; }>; }>, ",
               "ObservabilityAIAssistantRouteHandlerResources",
               ", ",
               "Readable",
@@ -5335,18 +5348,6 @@
         "label": "ElasticLlmCalloutKey",
         "description": [],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_elastic_llm_callout_dismissed.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.FunctionVisibility",
-        "type": "Enum",
-        "tags": [],
-        "label": "FunctionVisibility",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/functions/function_visibility.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6333,15 +6334,7 @@
           "PartialC",
           "<{ parameters: ",
           "AnyC",
-          "; }>]>>; }>; query: ",
-          "PartialC",
-          "<{ format: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"default\">, ",
-          "LiteralC",
-          "<\"openai\">]>; }>; }>]>, ",
+          "; }>]>>; }>; }>]>, ",
           "ObservabilityAIAssistantRouteHandlerResources",
           ", ",
           "Readable",
@@ -6447,9 +6440,7 @@
           "TypeC",
           "<{ body: ",
           "TypeC",
-          "<{ prompt: ",
-          "StringC",
-          "; context: ",
+          "<{ screenDescription: ",
           "StringC",
           "; connectorId: ",
           "StringC",
@@ -6463,7 +6454,27 @@
           "LiteralC",
           "<\"search\">, ",
           "LiteralC",
-          "<\"all\">]>>; }>; }>, ",
+          "<\"all\">]>>; messages: ",
+          "ArrayC",
+          "<",
+          "Type",
+          "<",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          ", ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          ", unknown>>; }>; }>, ",
           "ObservabilityAIAssistantRouteHandlerResources",
           ", ",
           "Readable",
@@ -6870,6 +6881,23 @@
           "\".inference\""
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/utils/get_elastic_managed_llm_connector.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.NER_MODEL_ID",
+        "type": "string",
+        "tags": [],
+        "label": "NER_MODEL_ID",
+        "description": [
+          "Default model ID for named entity recognition"
+        ],
+        "signature": [
+          "\"elastic__distilbert-base-uncased-finetuned-conll03-english\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7680,15 +7708,7 @@
           "PartialC",
           "<{ parameters: ",
           "AnyC",
-          "; }>]>>; }>; query: ",
-          "PartialC",
-          "<{ format: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"default\">, ",
-          "LiteralC",
-          "<\"openai\">]>; }>; }>]>, ",
+          "; }>]>>; }>; }>]>, ",
           "ObservabilityAIAssistantRouteHandlerResources",
           ", ",
           "Readable",
@@ -7794,9 +7814,7 @@
           "TypeC",
           "<{ body: ",
           "TypeC",
-          "<{ prompt: ",
-          "StringC",
-          "; context: ",
+          "<{ screenDescription: ",
           "StringC",
           "; connectorId: ",
           "StringC",
@@ -7810,7 +7828,27 @@
           "LiteralC",
           "<\"search\">, ",
           "LiteralC",
-          "<\"all\">]>>; }>; }>, ",
+          "<\"all\">]>>; messages: ",
+          "ArrayC",
+          "<",
+          "Type",
+          "<",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          ", ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          ", unknown>>; }>; }>, ",
           "ObservabilityAIAssistantRouteHandlerResources",
           ", ",
           "Readable",
@@ -10226,6 +10264,23 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-server.ObservabilityAIAssistantClient.getAnonymizationService",
+            "type": "Function",
+            "tags": [],
+            "label": "getAnonymizationService",
+            "description": [],
+            "signature": [
+              "() => ",
+              "AnonymizationService"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -11282,15 +11337,7 @@
           "PartialC",
           "<{ parameters: ",
           "AnyC",
-          "; }>]>>; }>; query: ",
-          "PartialC",
-          "<{ format: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"default\">, ",
-          "LiteralC",
-          "<\"openai\">]>; }>; }>]>, ",
+          "; }>]>>; }>; }>]>, ",
           "ObservabilityAIAssistantRouteHandlerResources",
           ", ",
           "Readable",
@@ -11396,9 +11443,7 @@
           "TypeC",
           "<{ body: ",
           "TypeC",
-          "<{ prompt: ",
-          "StringC",
-          "; context: ",
+          "<{ screenDescription: ",
           "StringC",
           "; connectorId: ",
           "StringC",
@@ -11412,7 +11457,27 @@
           "LiteralC",
           "<\"search\">, ",
           "LiteralC",
-          "<\"all\">]>>; }>; }>, ",
+          "<\"all\">]>>; messages: ",
+          "ArrayC",
+          "<",
+          "Type",
+          "<",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          ", ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          ", unknown>>; }>; }>, ",
           "ObservabilityAIAssistantRouteHandlerResources",
           ", ",
           "Readable",
@@ -12128,120 +12193,6 @@
     "interfaces": [
       {
         "parentPluginId": "observabilityAIAssistant",
-        "id": "def-common.AnonymizationRule",
-        "type": "Interface",
-        "tags": [],
-        "label": "AnonymizationRule",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-common.AnonymizationRule.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-common.AnonymizationRule.entityClass",
-            "type": "string",
-            "tags": [],
-            "label": "entityClass",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-common.AnonymizationRule.type",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "\"regex\" | \"ner\""
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-common.AnonymizationRule.pattern",
-            "type": "string",
-            "tags": [],
-            "label": "pattern",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-common.AnonymizationRule.enabled",
-            "type": "boolean",
-            "tags": [],
-            "label": "enabled",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-common.AnonymizationRule.builtIn",
-            "type": "boolean",
-            "tags": [],
-            "label": "builtIn",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-common.AnonymizationRule.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-common.AnonymizationRule.normalize",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "normalize",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
         "id": "def-common.Conversation",
         "type": "Interface",
         "tags": [],
@@ -12437,20 +12388,13 @@
           },
           {
             "parentPluginId": "observabilityAIAssistant",
-            "id": "def-common.FunctionDefinition.visibility",
+            "id": "def-common.FunctionDefinition.isInternal",
             "type": "CompoundType",
             "tags": [],
-            "label": "visibility",
+            "label": "isInternal",
             "description": [],
             "signature": [
-              {
-                "pluginId": "observabilityAIAssistant",
-                "scope": "common",
-                "docId": "kibObservabilityAIAssistantPluginApi",
-                "section": "def-common.FunctionVisibility",
-                "text": "FunctionVisibility"
-              },
-              " | undefined"
+              "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/functions/types.ts",
             "deprecated": false,
@@ -12750,18 +12694,6 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
-        "id": "def-common.FunctionVisibility",
-        "type": "Enum",
-        "tags": [],
-        "label": "FunctionVisibility",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/functions/function_visibility.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
         "id": "def-common.KnowledgeBaseEntryRole",
         "type": "Enum",
         "tags": [],
@@ -12890,6 +12822,23 @@
           "\"observability:aiAssistantSimulatedFunctionCalling\""
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/ui_settings/settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.AnonymizationRule",
+        "type": "Type",
+        "tags": [],
+        "label": "AnonymizationRule",
+        "description": [],
+        "signature": [
+          "NerAnonymizationRule",
+          " | ",
+          "RegexAnonymizationRule"
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13254,6 +13203,23 @@
           ".MessageAdd; }"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.NER_MODEL_ID",
+        "type": "string",
+        "tags": [],
+        "label": "NER_MODEL_ID",
+        "description": [
+          "Default model ID for named entity recognition"
+        ],
+        "signature": [
+          "\"elastic__distilbert-base-uncased-finetuned-conll03-english\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

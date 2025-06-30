@@ -151,7 +151,7 @@ export const RemoteClusterEdit: React.FC<Props> = ({
                 />
               }
               color="warning"
-              iconType="help"
+              iconType="question"
             >
               <FormattedMessage
                 id="xpack.remoteClusters.edit.deprecatedSettingsMessage"

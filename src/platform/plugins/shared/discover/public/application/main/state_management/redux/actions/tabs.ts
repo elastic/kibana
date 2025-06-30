@@ -35,7 +35,7 @@ export const setTabs: InternalStateThunkActionCreator<
   (
     dispatch,
     getState,
-    { runtimeStateManager, tabsStorageManager, services: { profilesManager } }
+    { runtimeStateManager, tabsStorageManager, services: { profilesManager, ebtManager } }
   ) => {
     const previousState = getState();
     const previousTabs = selectAllTabs(previousState);
@@ -48,7 +48,19 @@ export const setTabs: InternalStateThunkActionCreator<
     }
 
     for (const tab of addedTabs) {
-      runtimeStateManager.tabs.byId[tab.id] = createTabRuntimeState({ profilesManager });
+      runtimeStateManager.tabs.byId[tab.id] = createTabRuntimeState({
+        profilesManager,
+        ebtManager,
+      });
+    }
+
+    const selectedTabRuntimeState = selectTabRuntimeState(
+      runtimeStateManager,
+      params.selectedTabId
+    );
+
+    if (selectedTabRuntimeState) {
+      selectedTabRuntimeState.scopedEbtManager$.getValue().setAsActiveManager();
     }
 
     dispatch(
@@ -70,11 +82,24 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
     const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
     const updatedTabs = items.map<TabState>((item) => {
       const existingTab = selectTab(currentState, item.id);
-      return {
+
+      const tab: TabState = {
         ...defaultTabState,
         ...existingTab,
         ...pick(item, 'id', 'label'),
       };
+
+      if (item.duplicatedFromId) {
+        const existingTabToDuplicate = selectTab(currentState, item.duplicatedFromId);
+        tab.initialAppState =
+          selectTabRuntimeAppState(runtimeStateManager, item.duplicatedFromId) ??
+          cloneDeep(existingTabToDuplicate.initialAppState);
+        tab.initialGlobalState =
+          selectTabRuntimeGlobalState(runtimeStateManager, item.duplicatedFromId) ??
+          cloneDeep(existingTabToDuplicate.initialGlobalState);
+      }
+
+      return tab;
     });
 
     if (selectedItem?.id !== currentTab.id) {

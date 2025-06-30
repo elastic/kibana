@@ -152,79 +152,85 @@
   "testCases": [
     {
       "query": "",
-      "error": [],
+      "error": [
+        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}"
+      ],
       "warning": []
     },
     {
       "query": " ",
-      "error": [],
+      "error": [
+        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}"
+      ],
       "warning": []
     },
     {
       "query": "     ",
-      "error": [],
+      "error": [
+        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}"
+      ],
       "warning": []
     },
     {
       "query": "eval",
       "error": [
-        "SyntaxError: mismatched input 'eval' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'eval' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "stats",
       "error": [
-        "SyntaxError: mismatched input 'stats' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'stats' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "rename",
       "error": [
-        "SyntaxError: mismatched input 'rename' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'rename' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "limit",
       "error": [
-        "SyntaxError: mismatched input 'limit' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'limit' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "keep",
       "error": [
-        "SyntaxError: mismatched input 'keep' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'keep' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "drop",
       "error": [
-        "SyntaxError: mismatched input 'drop' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'drop' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "mv_expand",
       "error": [
-        "SyntaxError: mismatched input 'mv_expand' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'mv_expand' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "dissect",
       "error": [
-        "SyntaxError: mismatched input 'dissect' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'dissect' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "grok",
       "error": [
-        "SyntaxError: mismatched input 'grok' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'grok' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
@@ -327,91 +333,6 @@
     {
       "query": "row NOT false",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = 1 in ",
-      "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting '('"
-      ],
-      "warning": []
-    },
-    {
-      "query": "row var = 1 in (",
-      "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-        "Error: [in] function expects at least 2 arguments, got 1."
-      ],
-      "warning": []
-    },
-    {
-      "query": "row var = 1 not in ",
-      "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting '('"
-      ],
-      "warning": []
-    },
-    {
-      "query": "row var = 1 in (1, 2, 3)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = 5 in (1, 2, 3)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = 5 not in (1, 2, 3)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = 1 in (1, 2, 3, round(5))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = \"a\" in (\"a\", \"b\", \"c\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = \"a\" in (\"a\", \"b\", \"c\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = \"a\" not in (\"a\", \"b\", \"c\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = 1 in (\"a\", \"b\", \"c\")",
-      "error": [
-        "Argument of [in] must be [integer[]], found value [(\"a\", \"b\", \"c\")] type [(keyword, keyword, keyword)]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "row var = 5 in (\"a\", \"b\", \"c\")",
-      "error": [
-        "Argument of [in] must be [integer[]], found value [(\"a\", \"b\", \"c\")] type [(keyword, keyword, keyword)]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "row var = 5 not in (\"a\", \"b\", \"c\")",
-      "error": [
-        "Argument of [not_in] must be [integer[]], found value [(\"a\", \"b\", \"c\")] type [(keyword, keyword, keyword)]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "row var = 5 not in (1, 2, 3, \"a\")",
-      "error": [
-        "Argument of [not_in] must be [integer[]], found value [(1, 2, 3, \"a\")] type [(integer, integer, integer, keyword)]"
-      ],
       "warning": []
     },
     {
@@ -866,7 +787,7 @@
     {
       "query": "row var = 5 NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [5] type [integer]"
+        "Argument of [not like] must be [keyword], found value [5] type [integer]"
       ],
       "warning": []
     },
@@ -880,7 +801,7 @@
     {
       "query": "row var = NOT 5 NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [5] type [integer]"
+        "Argument of [not like] must be [keyword], found value [5] type [integer]"
       ],
       "warning": []
     },
@@ -914,7 +835,7 @@
     {
       "query": "row var = 5 NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [5] type [integer]"
+        "Argument of [not rlike] must be [keyword], found value [5] type [integer]"
       ],
       "warning": []
     },
@@ -928,7 +849,7 @@
     {
       "query": "row var = NOT 5 NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [5] type [integer]"
+        "Argument of [not rlike] must be [keyword], found value [5] type [integer]"
       ],
       "warning": []
     },
@@ -2228,28 +2149,28 @@
     {
       "query": "from index | project ",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sample', 'sort', 'stats', 'where', 'fork', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sample', 'sort', 'stats', 'where', 'fork', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | PROJECT textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'PROJECT' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sample', 'sort', 'stats', 'where', 'fork', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project missingField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sample', 'sort', 'stats', 'where', 'fork', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
@@ -2515,22 +2436,22 @@
     {
       "query": "from a_index | rename textField",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting 'as'"
+        "SyntaxError: no viable alternative at input 'textField'"
       ],
       "warning": []
     },
     {
       "query": "from a_index | rename a",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting 'as'",
-        "Unknown column [a]"
+        "SyntaxError: no viable alternative at input 'a'"
       ],
       "warning": []
     },
     {
       "query": "from a_index | rename textField as",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        "Error: [as] function expects exactly 2 arguments, got 1."
       ],
       "warning": []
     },
@@ -2538,7 +2459,7 @@
       "query": "from a_index | rename missingField as",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        "Unknown column [missingField]"
+        "Error: [as] function expects exactly 2 arguments, got 1."
       ],
       "warning": []
     },
@@ -2563,12 +2484,28 @@
       "warning": []
     },
     {
+      "query": "from a_index | rename b = textField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | rename b = textField, b AS c",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | rename textField = a",
+      "error": [
+        "Unknown column [a]"
+      ],
+      "warning": [
+        "Column [textField] of type text has been overwritten as new type: unknown"
+      ]
+    },
+    {
       "query": "from a_index | rename fn() as a",
       "error": [
-        "SyntaxError: token recognition error at: '('",
-        "SyntaxError: token recognition error at: ')'",
-        "Unknown column [fn]",
-        "Unknown column [a]"
+        "Invalid query [from a_index | rename fn() as a]"
       ],
       "warning": []
     },
@@ -2585,7 +2522,8 @@
     {
       "query": "from a_index |eval doubleField + 1 | rename `doubleField + 1` as ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        "Error: [as] function expects exactly 2 arguments, got 1."
       ],
       "warning": []
     },
@@ -3617,7 +3555,7 @@
     {
       "query": "from a_index | where doubleField NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not like] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -3631,7 +3569,7 @@
     {
       "query": "from a_index | where NOT doubleField NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not like] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -3665,7 +3603,7 @@
     {
       "query": "from a_index | where doubleField NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not rlike] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -3679,7 +3617,7 @@
     {
       "query": "from a_index | where NOT doubleField NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not rlike] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6566,7 +6504,7 @@
     {
       "query": "from a_index | eval doubleField NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not like] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6580,7 +6518,7 @@
     {
       "query": "from a_index | eval NOT doubleField NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not like] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6614,7 +6552,7 @@
     {
       "query": "from a_index | eval doubleField NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not rlike] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6628,7 +6566,7 @@
     {
       "query": "from a_index | eval NOT doubleField NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not rlike] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -9402,7 +9340,7 @@
     {
       "query": "f",
       "error": [
-        "SyntaxError: mismatched input 'f' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'f' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },

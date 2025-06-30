@@ -14,7 +14,7 @@ import { SERVICE_NOT_ALLOWED } from '../../monitors_page/management/disabled_cal
 
 export const FleetPermissionsCallout = () => {
   return (
-    <EuiCallOut title={NEED_PERMISSIONS_PRIVATE_LOCATIONS} color="warning" iconType="help">
+    <EuiCallOut title={NEED_PERMISSIONS_PRIVATE_LOCATIONS} color="warning" iconType="question">
       <p>{NEED_PRIVATE_LOCATIONS_PERMISSION}</p>
       <p>
         <FormattedMessage
