@@ -8,7 +8,7 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: DeleteEndpointListItem
-      summary: Delete an endpoint exception list item
+      summary: Delete an Elastic Endpoint exception list item
       description: Delete an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
       parameters:
         - name: id

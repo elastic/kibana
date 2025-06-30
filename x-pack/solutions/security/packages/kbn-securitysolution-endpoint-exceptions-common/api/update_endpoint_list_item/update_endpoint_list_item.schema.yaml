@@ -8,7 +8,7 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: UpdateEndpointListItem
-      summary: Update an endpoint exception list item
+      summary: Update an Elastic Endpoint rule exception list item
       description: Update an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
       requestBody:
         description: Exception list item's properties

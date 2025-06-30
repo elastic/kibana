@@ -8,7 +8,7 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: FindEndpointListItems
-      summary: Get endpoint exception list items
+      summary: Get Elastic Endpoint exception list items
       description: Get a list of all Elastic Endpoint exception list items.
       parameters:
         - name: filter
