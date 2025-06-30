@@ -30,6 +30,10 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
 
     // the total height of all app-area headers
     --kbnAppHeadersOffset: 0px;
+
+    // height of the project header app action menu which is part of the application area
+    // will be updated by the AppMenuBar component when the menu is actually mounted
+    --kbnProjectHeaderAppActionMenuHeight: 0px;
   }
 
   #kibana-body {

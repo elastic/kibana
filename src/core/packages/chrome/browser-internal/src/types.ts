@@ -85,6 +85,14 @@ export interface InternalChromeStart extends ChromeStart {
   getChromelessHeader(): JSX.Element;
 
   /**
+   * Used only by the rendering service to render the project app menu UI
+   * @internal
+   *
+   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
+   */
+  getProjectAppMenuComponent(): JSX.Element;
+
+  /**
    * Used only by the rendering service to retrieve the set of classNames
    * that will be set on the body element.
    * @internal

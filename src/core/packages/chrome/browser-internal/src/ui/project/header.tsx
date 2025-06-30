@@ -36,10 +36,9 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Router } from '@kbn/shared-ux-router';
 import React, { type ComponentProps, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { debounceTime, Observable, EMPTY } from 'rxjs';
+import { debounceTime, Observable } from 'rxjs';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
-import { useHeaderActionMenuMounter } from '../header/header_action_menu';
 import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
 import { HeaderNavControls } from '../header/header_nav_controls';
@@ -238,7 +237,6 @@ export const ProjectHeader = ({
   as = 'header',
   ...observables
 }: Props) => {
-  const headerActionMenuMounter = useHeaderActionMenuMounter(observables.actionMenu$ ?? EMPTY);
   const { euiTheme } = useEuiTheme();
   const headerCss = getHeaderCss(euiTheme);
   const { logo: logoCss } = headerCss;
@@ -334,9 +332,7 @@ export const ProjectHeader = ({
         </div>
       </HeaderElement>
 
-      {observables.actionMenu$ && headerActionMenuMounter.mount && (
-        <AppMenuBar headerActionMenuMounter={headerActionMenuMounter} />
-      )}
+      {observables.actionMenu$ && <AppMenuBar appMenuActions$={observables.actionMenu$} />}
     </>
   );
 };

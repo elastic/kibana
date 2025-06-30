@@ -74,12 +74,15 @@ export class GridLayout implements LayoutService {
     // chromeless header is used when chrome is not visible and responsible for displaying the data-test-subj and fixed loading bar
     const chromelessHeader = chrome.getChromelessHeader();
 
+    // in project style, the project app menu is displayed at the top of application area
+    const projectAppMenu = chrome.getProjectAppMenuComponent();
+
     return React.memo(() => {
       // TODO: Get rid of observables https://github.com/elastic/kibana/issues/225265
       const chromeVisible = useObservable(chromeVisible$, false);
       const hasHeaderBanner = useObservable(hasHeaderBanner$, false);
-      const headerStyle = useObservable(chromeStyle$, 'classic');
-      const layoutConfig = layoutConfigs[headerStyle];
+      const chromeStyle = useObservable(chromeStyle$, 'classic');
+      const layoutConfig = layoutConfigs[chromeStyle];
 
       // Assign main layout parts first
       let header: ReactNode;
@@ -90,7 +93,7 @@ export class GridLayout implements LayoutService {
       let footer: ReactNode;
 
       if (chromeVisible) {
-        if (headerStyle === 'classic') {
+        if (chromeStyle === 'classic') {
           // If classic style, we use the classic header and no navigation, since it is part of the header
           header = classicChromeHeader;
         } else {
@@ -134,6 +137,9 @@ export class GridLayout implements LayoutService {
                 {/* If chrome is not visible, we use the chromeless header to display the*/}
                 {/* data-test-subj and fixed loading bar*/}
                 {!chromeVisible && chromelessHeader}
+
+                {/* in project style, the project app menu is displayed at the top of application area */}
+                {chromeStyle === 'project' && projectAppMenu}
 
                 <div id="globalBannerList">{appBannerComponent}</div>
                 <AppWrapper chromeVisible={chromeVisible}>

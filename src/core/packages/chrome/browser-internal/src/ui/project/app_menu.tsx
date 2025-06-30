@@ -7,21 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { Observable } from 'rxjs';
+import { useEuiTheme, useEuiThemeCSSVariables } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
-import React from 'react';
-import { HeaderActionMenu } from '../header/header_action_menu';
+import React, { useEffect } from 'react';
+import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_action_menu';
 
 interface AppMenuBarProps {
-  headerActionMenuMounter: { mount: MountPoint<HTMLElement> | undefined };
+  // TODO: get rid of observable
+  appMenuActions$: Observable<MountPoint | undefined>;
 }
-export const AppMenuBar = ({ headerActionMenuMounter }: AppMenuBarProps) => {
+
+export const AppMenuBar = ({ appMenuActions$ }: AppMenuBarProps) => {
+  const headerActionMenuMounter = useHeaderActionMenuMounter(appMenuActions$);
   const { euiTheme } = useEuiTheme();
+  const { setGlobalCSSVariables } = useEuiThemeCSSVariables();
   const zIndex =
     typeof euiTheme.levels.header === 'number'
       ? euiTheme.levels.header - 10 // We want it to appear right below the header
       : euiTheme.levels.header;
+
+  useEffect(() => {
+    if (headerActionMenuMounter.mount) {
+      setGlobalCSSVariables({
+        '--kbnProjectHeaderAppActionMenuHeight': euiTheme.size.xxxl,
+      });
+    } else {
+      setGlobalCSSVariables({
+        '--kbnProjectHeaderAppActionMenuHeight': null,
+      });
+    }
+  }, [setGlobalCSSVariables, headerActionMenuMounter.mount, euiTheme.size.xxxl]);
 
   return (
     <div
@@ -41,6 +58,7 @@ export const AppMenuBar = ({ headerActionMenuMounter }: AppMenuBarProps) => {
         position: sticky;
         /* position below the primary fixed EuiHeader in the viewport */
         top: var(--euiFixedHeadersOffset, 0);
+        flex-shrink: 0;
       `}
     >
       <HeaderActionMenu mounter={headerActionMenuMounter} />

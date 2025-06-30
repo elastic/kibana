@@ -59,6 +59,7 @@ import { registerAnalyticsContextProvider } from './register_analytics_context_p
 import type { InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
 import { handleSystemColorModeChange } from './handle_system_colormode_change';
+import { AppMenuBar } from './ui/project/app_menu';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
 const SNAPSHOT_REGEX = /-snapshot/i;
@@ -630,6 +631,9 @@ export class ChromeService {
             <LoadingIndicator loadingCount$={http.getLoadingCount$()} showAsBar />
           </div>
         );
+      },
+      getProjectAppMenuComponent: () => {
+        return <AppMenuBar appMenuActions$={application.currentActionMenu$} />;
       },
 
       // chrome APIs
