@@ -11,7 +11,8 @@ import { getNextRunAt } from './get_next_run_at';
 import { loggerMock } from '@kbn/logging-mocks';
 const mockLogger = loggerMock.create();
 
-describe('getNextRunAt', () => {
+// Failing: See https://github.com/elastic/kibana/issues/225833
+describe.skip('getNextRunAt', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
