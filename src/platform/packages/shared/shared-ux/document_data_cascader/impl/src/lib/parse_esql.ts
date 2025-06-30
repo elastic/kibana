@@ -7,25 +7,54 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse } from '@kbn/esql-ast';
+import { Parser } from '@kbn/esql-ast';
 
-export const getESQLStatsGroupByColumnsFromQuery = (queryString: string) => {
+export const getESQLStatsQueryMeta = (queryString: string) => {
   const groupByFields: string[] = [];
-  const result = parse(queryString, { withFormatting: false });
+  interface AppliedStatsFunction {
+    identifier: string;
+    operator: string;
+  }
+  const appliedFunctions: AppliedStatsFunction[] = [];
 
-  const statsNode = result.root.commands.find((command) => command.name === 'stats');
+  const parser = new Parser(queryString, { withFormatting: false });
+
+  const statsNode = parser.parse().root.commands.find((command) => command.name === 'stats');
 
   if (!statsNode) {
-    return groupByFields;
+    return { groupByFields, appliedFunctions };
   }
 
-  (
-    statsNode.args.find((arg) => arg.type === 'option' && arg.name === 'by') ?? { args: [] }
-  ).args?.forEach((byNode) => {
-    if (byNode.type === 'column') {
-      groupByFields.push(byNode.text);
+  statsNode.args.forEach((statsArgNode) => {
+    if (statsArgNode.type === 'function') {
+      const appliedFunctionMeta: AppliedStatsFunction = {};
+
+      statsArgNode.args.forEach((argNode) => {
+        if (
+          Object.prototype.toString.call(argNode) === '[object Object]' &&
+          argNode.type === 'column'
+        ) {
+          appliedFunctionMeta.identifier = argNode.text;
+        } else if (Array.isArray(argNode)) {
+          argNode.forEach((node) => {
+            if (node.type === 'function') {
+              appliedFunctionMeta.operator = node.operator?.name;
+            }
+          });
+        }
+
+        if (Object.values(appliedFunctionMeta).length === 2) {
+          appliedFunctions.push(appliedFunctionMeta);
+        }
+      });
+    } else if (statsArgNode.type === 'option' && statsArgNode.name === 'by') {
+      statsArgNode.args.forEach((byOptionNode) => {
+        if (byOptionNode.type === 'column') {
+          groupByFields.push(byOptionNode.text);
+        }
+      });
     }
   });
 
-  return groupByFields;
+  return { groupByFields, appliedFunctions };
 };
