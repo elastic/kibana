@@ -8,6 +8,7 @@
  */
 
 import React, { ReactNode } from 'react';
+import { map } from 'rxjs';
 import {
   ChromeLayout,
   ChromeLayoutConfigProvider,
@@ -37,6 +38,10 @@ const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig 
   project: {
     headerHeight: 48,
     bannerHeight: 32,
+
+    /** The application top bar renders the app specific menu */
+    /** we use it only in project style, because in classic it is included as part of the global header */
+    applicationTopBarHeight: 48,
 
     /** for debug for now */
     sidebarWidth: 48,
@@ -76,18 +81,22 @@ export class GridLayout implements LayoutService {
 
     // in project style, the project app menu is displayed at the top of application area
     const projectAppMenu = chrome.getProjectAppMenuComponent();
+    const hasAppMenu$ = application.currentActionMenu$.pipe(map((menu) => !!menu));
 
     return React.memo(() => {
       // TODO: Get rid of observables https://github.com/elastic/kibana/issues/225265
       const chromeVisible = useObservable(chromeVisible$, false);
       const hasHeaderBanner = useObservable(hasHeaderBanner$, false);
       const chromeStyle = useObservable(chromeStyle$, 'classic');
+      const hasAppMenu = useObservable(hasAppMenu$, false);
+
       const layoutConfig = layoutConfigs[chromeStyle];
 
       // Assign main layout parts first
       let header: ReactNode;
       let navigation: ReactNode;
       let banner: ReactNode;
+      let applicationTopBar: ReactNode;
       // not implemented, just for debug
       let sidebar: ReactNode;
       let footer: ReactNode;
@@ -99,6 +108,10 @@ export class GridLayout implements LayoutService {
         } else {
           // If project style, we use the project header and navigation
           header = projectChromeHeader;
+          if (hasAppMenu) {
+            // If project app menu is present, we use it as the application top bar
+            applicationTopBar = projectAppMenu;
+          }
         }
       }
 
@@ -132,14 +145,12 @@ export class GridLayout implements LayoutService {
               footer={footer}
               navigation={navigation}
               banner={banner}
+              applicationTopBar={applicationTopBar}
             >
               <>
                 {/* If chrome is not visible, we use the chromeless header to display the*/}
                 {/* data-test-subj and fixed loading bar*/}
                 {!chromeVisible && chromelessHeader}
-
-                {/* in project style, the project app menu is displayed at the top of application area */}
-                {chromeStyle === 'project' && projectAppMenu}
 
                 <div id="globalBannerList">{appBannerComponent}</div>
                 <AppWrapper chromeVisible={chromeVisible}>

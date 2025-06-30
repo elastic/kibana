@@ -332,7 +332,9 @@ export const ProjectHeader = ({
         </div>
       </HeaderElement>
 
-      {observables.actionMenu$ && <AppMenuBar appMenuActions$={observables.actionMenu$} />}
+      {observables.actionMenu$ && (
+        <AppMenuBar appMenuActions$={observables.actionMenu$} isFixed={true} />
+      )}
     </>
   );
 };

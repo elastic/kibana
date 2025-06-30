@@ -633,7 +633,7 @@ export class ChromeService {
         );
       },
       getProjectAppMenuComponent: () => {
-        return <AppMenuBar appMenuActions$={application.currentActionMenu$} />;
+        return <AppMenuBar appMenuActions$={application.currentActionMenu$} isFixed={false} />;
       },
 
       // chrome APIs
