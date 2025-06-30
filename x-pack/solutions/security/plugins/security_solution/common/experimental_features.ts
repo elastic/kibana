@@ -166,7 +166,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Response actions telemetry collection
    * Should be enabled in 8.17.0
    */
-  responseActionsTelemetryEnabled: false,
+  responseActionsTelemetryEnabled: true,
 
   /**
    * Enables experimental JAMF integration data to be available in Analyzer
