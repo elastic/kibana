@@ -48,18 +48,28 @@ export const DEBOUNCE_OPTIONS = { wait: 300 };
 export const IndexSelectorModal = ({
   onClose,
   onImport,
+  editDataSource,
 }: {
   onClose: () => void;
   onImport: (userCount: number) => void;
+  editDataSource?: {
+    id: string;
+    indexPattern?: string;
+  };
 }) => {
+  const [selectedOptions, setSelected] = useState<Array<EuiComboBoxOptionOption<string>>>(
+    editDataSource?.indexPattern?.split(',').map((index) => ({ label: index })) ?? []
+  );
+  const editMode = !!editDataSource; // If monitoredIndices is provided, we are in edit mode
+
   const [isCreateIndexModalOpen, { on: showCreateIndexModal, off: hideCreateIndexModal }] =
     useBoolean(false);
   const { addError } = useAppToasts();
   const [searchQuery, setSearchQuery] = useState<string | undefined>(undefined);
   const { data: indices, isFetching, error, refetch } = useFetchPrivilegedUserIndices(searchQuery);
-  const [selectedOptions, setSelected] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const debouncedSetSearchQuery = useDebounceFn(setSearchQuery, DEBOUNCE_OPTIONS);
-  const { registerPrivMonMonitoredIndices } = useEntityAnalyticsRoutes();
+  const { registerPrivMonMonitoredIndices, updatePrivMonMonitoredIndices } =
+    useEntityAnalyticsRoutes();
   const options = useMemo(
     () =>
       indices?.map((index) => ({
@@ -76,11 +86,25 @@ export const IndexSelectorModal = ({
 
   const addPrivilegedUsers = useCallback(async () => {
     if (selectedOptions.length > 0) {
-      await registerPrivMonMonitoredIndices(selectedOptions.map(({ label }) => label).join(','));
+      if (editMode) {
+        await updatePrivMonMonitoredIndices(
+          editDataSource.id,
+          selectedOptions.map(({ label }) => label).join(',')
+        );
+      } else {
+        await registerPrivMonMonitoredIndices(selectedOptions.map(({ label }) => label).join(','));
+      }
 
       onImport(0); // The API does not return the user count because it is not available at this point.
     }
-  }, [onImport, registerPrivMonMonitoredIndices, selectedOptions]);
+  }, [
+    editDataSource?.id,
+    editMode,
+    onImport,
+    registerPrivMonMonitoredIndices,
+    selectedOptions,
+    updatePrivMonMonitoredIndices,
+  ]);
 
   const onCreateIndex = useCallback(
     (indexName: string) => {
@@ -88,7 +112,7 @@ export const IndexSelectorModal = ({
       setSelected(selectedOptions.concat({ label: indexName }));
       refetch();
     },
-    [hideCreateIndexModal, refetch, selectedOptions]
+    [hideCreateIndexModal, refetch, selectedOptions, setSelected]
   );
 
   return isCreateIndexModalOpen ? (
