@@ -236,7 +236,20 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
             />
           </EuiFormRow>
           {showBenefitsCallout && <BenefitsCallout licenseType={license?.type ?? ''} />}
-          <EuiFormRow label={<Label>{getTextAreaLabel(feedbackType)}</Label>}>
+          <EuiFormRow
+            label={<Label>{getTextAreaLabel(feedbackType)}</Label>}
+            helpText={
+              <>
+                <EuiSpacer size="s" />
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.intercept.feedbackFlyout.form.textArea.helpText"
+                    defaultMessage="Please share your email so we can get in touch for possible follow-up questions:"
+                  />
+                </EuiText>
+              </>
+            }
+          >
             <EuiTextArea
               value={feedbackText}
               aria-label={i18n.translate('xpack.intercept.feedbackFlyout.form.textArea.ariaLabel', {
@@ -254,17 +267,6 @@ export const FeedbackFlyout = ({ core, closeFlyout, getLicense }: Props) => {
                   defaultMessage="Your email"
                 />
               </Label>
-            }
-            helpText={
-              <>
-                <EuiSpacer size="s" />
-                <EuiText size="s">
-                  <FormattedMessage
-                    id="xpack.intercept.feedbackFlyout.form.emailInput.helpText"
-                    defaultMessage="We might get in touch with a few follow-up questions about your experience — really appreciate your help!"
-                  />
-                </EuiText>
-              </>
             }
             labelAppend={
               <EuiText size="xs" color="subdued">

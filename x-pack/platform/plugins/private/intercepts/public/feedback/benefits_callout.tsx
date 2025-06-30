@@ -33,16 +33,13 @@ export const BenefitsCallout = ({ licenseType }: Props) => (
       <EuiText component="p" size="s">
         <FormattedMessage
           id="xpack.intercept.feedbackFlyout.platinumOrHigherCallout.content"
-          defaultMessage="Your {licenseType} license gives you access to a dedicated support channel where you can submit issues and enhancement requests with a faster response time. If your feedback is not urgent, you may still use this form."
-          values={{
-            licenseType: capitalize(licenseType),
-          }}
+          defaultMessage="You have an access to a dedicated support channel where you can submit issues and enhancement requests with a faster response time. If your feedback is not urgent, you may still use this form."
         />
       </EuiText>
       <EuiButton href={ELASTIC_SUPPORT_LINK} color="warning" fill target="_blank">
         <FormattedMessage
           id="xpack.intercept.feedbackFlyout.platinumOrHigherCallout.supportButton"
-          defaultMessage="Access support channel"
+          defaultMessage="Submit a request"
         />
       </EuiButton>
     </EuiCallOut>
