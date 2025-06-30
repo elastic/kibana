@@ -133,7 +133,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
       const dashboards = this.getDashboards();
 
       const dashboardIdsWithUnsavedChanges = Object.keys(dashboards).filter((dashboardId) => {
-        return hasUnsavedChanges(dashboards[dashboardId]);
+        return hasUnsavedEdits(dashboards[dashboardId]);
       });
 
       /**
@@ -157,7 +157,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
 
   public dashboardHasUnsavedEdits(id = DASHBOARD_PANELS_UNSAVED_ID) {
     const dashboards = this.getDashboards();
-    return hasUnsavedChanges(dashboards[id]);
+    return hasUnsavedEdits(dashboards[id]);
   }
 
   private getDashboards(): { [key: string]: DASHBOARD_BACKUP_STATE } {
@@ -165,7 +165,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
   }
 }
 
-function hasUnsavedChanges(backupState?: DASHBOARD_BACKUP_STATE) {
+function hasUnsavedEdits(backupState?: DASHBOARD_BACKUP_STATE) {
   return backupState
     ? backupState.viewMode === 'edit' &&
         Object.keys(backupState).some(
