@@ -30,16 +30,8 @@ const createPackagingParsedRequestsProvider = () => {
   };
 };
 
-// Register console language manually (simplified version)
-setTimeout(() => {
-  try {
-    // Register the console language with Monaco
-    (window as any).monaco?.languages?.register({ id: 'console' });
-    (window as any).monaco?.languages?.register({ id: 'console-output' });
-  } catch (error) {
-    console.error('Failed to register console language:', error);
-  }
-}, 100);
+// Let @kbn/monaco handle the Console language setup automatically
+// No manual registration needed - the Monaco Console integration will handle it
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
@@ -209,7 +201,11 @@ export const OneConsole = ({ lang = 'en', http: customHttp }: OneConsoleProps) =
 
   useEffect(() => {
     const loadApi = async () => {
-      await loadActiveApi(http);
+      try {
+        await loadActiveApi(http);
+      } catch (error) {
+        console.error('[DEBUG] Error loading active API:', error);
+      }
     };
 
     loadApi();
@@ -231,7 +227,7 @@ export const OneConsole = ({ lang = 'en', http: customHttp }: OneConsoleProps) =
   const autocompleteInfo = new AutocompleteInfo();
   autocompleteInfo.setup(http);
   autocompleteInfo.mapping.setup(http, settings);
-  
+
   // IMPORTANT: Set the global autocompleteInfo so getAutocompleteInfo() works
   setAutocompleteInfo(autocompleteInfo);
 

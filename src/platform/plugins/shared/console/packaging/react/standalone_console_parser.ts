@@ -75,7 +75,7 @@ export class StandaloneConsoleParsedRequestsProvider implements ConsoleParsedReq
   }
 
   public async getRequests(): Promise<ParsedRequest[]> {
-    if (!this.model) {
+    if (!this.model || this.model.isDisposed()) {
       return [];
     }
 
@@ -90,7 +90,7 @@ export class StandaloneConsoleParsedRequestsProvider implements ConsoleParsedReq
   }
 
   public async getErrors(): Promise<ParseError[]> {
-    if (!this.model) {
+    if (!this.model || this.model.isDisposed()) {
       return [];
     }
 
