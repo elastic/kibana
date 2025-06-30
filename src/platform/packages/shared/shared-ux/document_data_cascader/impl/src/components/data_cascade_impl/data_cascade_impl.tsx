@@ -18,7 +18,7 @@ import {
   type Row,
   type ExpandedState,
 } from '@tanstack/react-table';
-import { useVirtualizer } from '@tanstack/react-virtual';
+import { useVirtualizer, type VirtualizerOptions } from '@tanstack/react-virtual';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { SelectionDropdown } from './group_selection_combobox/selection_dropdown';
 import {
@@ -59,9 +59,10 @@ interface OnCascadeLeafExpandedArgs<G extends GroupNode> {
 
 export interface DataCascadeImplProps<G extends GroupNode, L extends LeafNode>
   extends Pick<
-    CascadeRowCellProps<G, L>,
-    'rowHeaderTitleSlot' | 'rowHeaderMetaSlots' | 'leafContentSlot'
-  > {
+      CascadeRowCellProps<G, L>,
+      'rowHeaderTitleSlot' | 'rowHeaderMetaSlots' | 'leafContentSlot'
+    >,
+    Pick<VirtualizerOptions<HTMLElement, HTMLElement>, 'overscan'> {
   /**
    * @description The data to be displayed in the cascade. It should be an array of group nodes.
    */
@@ -95,6 +96,7 @@ export function DataCascadeImpl<T extends GroupNode, L extends LeafNode>({
   leafContentSlot,
   size = 'm',
   tableTitleSlot: TableTitleSlot,
+  overscan = 10,
 }: DataCascadeImplProps<T, L>) {
   // The scrollable element for your list
   const parentRef = React.useRef(null);
@@ -232,7 +234,7 @@ export function DataCascadeImpl<T extends GroupNode, L extends LeafNode>({
     count: rows.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 0,
-    overscan: 5,
+    overscan,
     // onChange: (rowVirtualizerInstance) => {
     // },
   });
@@ -247,7 +249,7 @@ export function DataCascadeImpl<T extends GroupNode, L extends LeafNode>({
                 <EuiFlexItem
                   css={{
                     position: 'sticky',
-                    top: -rowVirtualizer.measurementsCache[0].size,
+                    top: -(rowVirtualizer.measurementsCache[0] || {}).size,
                     zIndex: 1,
                     willChange: 'transform',
                   }}
