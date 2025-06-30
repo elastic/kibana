@@ -172,6 +172,4 @@ export interface UsageStats {
   'securitySolution:maxUnassociatedNotes': number;
   'observability:searchExcludedDataTiers': string[];
   'cases:incrementalIdDisplay:enabled': boolean;
-  'observability:enableStreamsUI': boolean;
-  'observability:streamsEnableSignificantEvents': boolean;
 }

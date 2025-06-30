@@ -19,7 +19,7 @@ export const getExplorePartialIndexMappingAgent = async ({
   createLlmInstance: CreateLlmInstance;
   esClient: ElasticsearchClient;
 }) => {
-  const llm = createLlmInstance();
+  const llm = await createLlmInstance();
   const tool = getInspectIndexMappingTool({
     esClient,
     indexPattern: 'placeholder',
