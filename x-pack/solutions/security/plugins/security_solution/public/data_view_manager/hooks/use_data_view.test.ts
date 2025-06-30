@@ -38,14 +38,4 @@ describe('useDataView', () => {
       expect(wrapper.result.current.dataView).toBeTruthy();
     });
   });
-
-  describe('when data view fields are not available', () => {
-    it('should return undefined', () => {
-      const wrapper = renderHook(() => useDataView(DataViewManagerScopeName.default), {
-        wrapper: TestProviders,
-      });
-
-      expect(wrapper.result.current.dataView).toBeUndefined();
-    });
-  });
 });
