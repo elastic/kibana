@@ -20,7 +20,6 @@ export interface ActiveMatch {
   rowIndex: number;
   columnId: string;
   matchIndexWithinCell: number;
-  matchPosition: number;
 }
 
 export interface InTableSearchHighlightsWrapperProps {
@@ -52,6 +51,7 @@ export interface UseFindMatchesProps {
 }
 
 export interface UseFindMatchesState {
+  term: string;
   matchesList: RowMatches[];
   matchesCount: number | null;
   activeMatchPosition: number | null;
@@ -60,7 +60,8 @@ export interface UseFindMatchesState {
   renderCellsShadowPortal: (() => ReactNode) | null;
 }
 
-export interface UseFindMatchesReturn extends Omit<UseFindMatchesState, 'matchesList' | 'columns'> {
+export interface UseFindMatchesReturn
+  extends Omit<UseFindMatchesState, 'matchesList' | 'columns' | 'term'> {
   goToPrevMatch: () => void;
   goToNextMatch: () => void;
   resetState: () => void;
@@ -71,5 +72,9 @@ export type AllCellsProps = Pick<
   'renderCellValue' | 'visibleColumns' | 'inTableSearchTerm'
 > & {
   rowsCount: number;
-  onFinish: (params: { matchesList: RowMatches[]; totalMatchesCount: number }) => void;
+  onFinish: (params: {
+    term: string;
+    matchesList: RowMatches[];
+    totalMatchesCount: number;
+  }) => void;
 };

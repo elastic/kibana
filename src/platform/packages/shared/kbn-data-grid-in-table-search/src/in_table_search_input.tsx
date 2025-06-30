@@ -47,10 +47,15 @@ export const InTableSearchInput: React.FC<InTableSearchInputProps> = React.memo(
     onChangeSearchTerm,
     onHideInput,
   }) => {
-    const { inputValue, handleInputChange } = useDebouncedValue({
-      onChange: onChangeSearchTerm,
-      value: initialInTableSearchTerm || '',
-    });
+    const { inputValue, handleInputChange } = useDebouncedValue(
+      {
+        onChange: onChangeSearchTerm,
+        value: initialInTableSearchTerm || '',
+      },
+      {
+        allowFalsyValue: true,
+      }
+    );
 
     const onInputChange = useCallback(
       (event: ChangeEvent<HTMLInputElement>) => {
