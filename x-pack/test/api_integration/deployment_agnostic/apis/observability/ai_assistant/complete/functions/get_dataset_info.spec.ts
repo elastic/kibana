@@ -25,7 +25,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const synthtrace = getService('synthtrace');
 
-  describe('get_dataset_info', function () {
+  describe('tool: get_dataset_info', function () {
     this.tags(['failsOnMKI']);
     let llmProxy: LlmProxy;
     let connectorId: string;

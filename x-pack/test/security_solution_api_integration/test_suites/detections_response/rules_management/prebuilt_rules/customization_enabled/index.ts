@@ -14,5 +14,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./install_prebuilt_rules'));
     loadTestFile(require.resolve('./status'));
     loadTestFile(require.resolve('./upgrade_prebuilt_rules'));
+    loadTestFile(require.resolve('./revert_prebuilt_rules'));
   });
 };

@@ -231,7 +231,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const allMonitors = [...monitors, ...monitors];
         for (const mon of allMonitors) {
           await saveMonitor(
-            { ...mon, name: mon.name + Date.now(), locations: [spaceScopedPrivateLocation] },
+            {
+              ...mon,
+              name: mon.name + Date.now(),
+              locations: [spaceScopedPrivateLocation],
+              spaces: [],
+            },
             SPACE_ID
           );
         }
@@ -290,6 +295,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             revision: 1,
             locations: [privateLocation],
             name: `${monitors[0].name}-${uuid}-0`,
+            spaces: ['default'],
           })
         );
       });
@@ -321,6 +327,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               max_attempts: 2,
               labels: {},
               maintenance_windows: [],
+              spaces: ['default'],
             },
             ['config_id', 'id', 'form_monitor_type']
           )

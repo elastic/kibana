@@ -143,6 +143,7 @@ const previouslyRegisteredTypes = [
   'space',
   'spaces-usage-stats',
   'synthetics-monitor',
+  'synthetics-monitor-multi-space',
   'synthetics-param',
   'synthetics-privates-locations',
   'synthetics-private-location',
