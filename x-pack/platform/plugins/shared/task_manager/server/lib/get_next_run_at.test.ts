@@ -67,7 +67,7 @@ describe('getNextRunAt', () => {
   test('should use the rrule with a fixed time when it is given to calculate the next runAt (same day)', () => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2025-06-30T10:00:00.000Z'));
-    const now = new Date('2025-06-30T10:00:00.000Z');
+    const now = new Date();
     const testStart = new Date(now.getTime() - 500);
     const testRunAt = new Date(now.getTime() - 1000);
     const nextRunAt = getNextRunAt(
@@ -94,8 +94,8 @@ describe('getNextRunAt', () => {
 
   test('should use the rrule with a fixed time when it is given to calculate the next runAt (next day)', () => {
     jest.useFakeTimers();
-    jest.setSystemTime(new Date('2025-06-30T10:00:00.000Z'));
-    const now = new Date('2025-06-30T13:00:00.000Z');
+    jest.setSystemTime(new Date('2025-06-30T13:00:00.000Z'));
+    const now = new Date();
     const testStart = new Date(now.getTime() - 500);
     const testRunAt = new Date(now.getTime() - 1000);
     const nextRunAt = getNextRunAt(
