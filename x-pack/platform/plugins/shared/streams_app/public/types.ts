@@ -11,6 +11,7 @@ import type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
+import { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import {
   DiscoverSharedPublicSetup,
@@ -53,6 +54,7 @@ export interface StreamsAppSetupDependencies {
 export interface StreamsAppStartDependencies {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
+  datasetQuality: DatasetQualityPluginStart;
   dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;
   discoverShared: DiscoverSharedPublicStart;

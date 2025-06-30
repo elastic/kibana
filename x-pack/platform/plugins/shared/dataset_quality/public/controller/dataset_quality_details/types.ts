@@ -22,6 +22,8 @@ export type DatasetQualityIssuesTableOptions = Partial<
   }
 >;
 
+export type DatasetQualityView = 'classic' | 'new';
+
 export type DatasetQualityDetailsPublicState = WithDefaultControllerState;
 
 // This type is used by external consumers where it enforces datastream to be
@@ -42,6 +44,8 @@ export type DatasetQualityDetailsPublicStateUpdate = Partial<
   qualityIssues?: {
     table?: DatasetQualityIssuesTableOptions;
   };
+} & {
+  view: DatasetQualityView;
 };
 
 export interface DatasetQualityDetailsController {

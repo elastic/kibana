@@ -18,7 +18,7 @@ const QualityIssueFlyout = dynamic(() => import('./quality_issue_flyout'));
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function DatasetQualityDetails() {
-  const { isIndexNotFoundError, dataStream, isQualityIssueFlyoutOpen } =
+  const { isIndexNotFoundError, dataStream, isQualityIssueFlyoutOpen, view } =
     useDatasetQualityDetailsState();
   const { startTracking } = useDatasetDetailsTelemetry();
 
@@ -31,11 +31,19 @@ export default function DatasetQualityDetails() {
     <>
       <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="datasetDetailsContainer">
         <EuiFlexItem grow={false}>
-          <Header />
-          <EuiHorizontalRule />
+          {view === 'classic' && (
+            <>
+              <Header />
+              <EuiHorizontalRule />
+            </>
+          )}
           <Overview />
-          <EuiHorizontalRule />
-          <Details />
+          {view === 'classic' && (
+            <>
+              <EuiHorizontalRule />
+              <Details />
+            </>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
       {isQualityIssueFlyoutOpen && <QualityIssueFlyout />}

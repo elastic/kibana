@@ -25,6 +25,7 @@ export const getPublicStateFromContext = (
     integration: context.integration,
     expandedQualityIssue: context.expandedQualityIssue,
     showCurrentQualityIssues: context.showCurrentQualityIssues,
+    view: context.view,
   };
 };
 
@@ -58,4 +59,5 @@ export const getContextFromPublicState = (
   expandedQualityIssue: publicState.expandedQualityIssue,
   showCurrentQualityIssues:
     publicState.showCurrentQualityIssues ?? DEFAULT_CONTEXT.showCurrentQualityIssues,
+  view: publicState.view ?? DEFAULT_CONTEXT.view,
 });
