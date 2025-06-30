@@ -59,6 +59,14 @@ export const createLensEmbeddableFactory = (
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const titleManager = initializeTitleManager(initialState.rawState);
 
+      titleManager.api.title$?.subscribe((newTitle) => {
+        if (newTitle === undefined) {
+          delete initialState.rawState.title;
+        } else {
+          initialState.rawState.title = newTitle;
+        }
+      });
+
       const dynamicActionsManager = services.embeddableEnhanced?.initializeEmbeddableDynamicActions(
         uuid,
         () => titleManager.api.title$.getValue(),
