@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiDescriptionList } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
 import { DataCascade } from '.';
-import { getESQLStatsGroupByColumnsFromQuery } from '../lib/parse_esql';
+import { getESQLStatsQueryMeta } from '../lib/parse_esql';
 
 /**
  * @description story for dropdown component which allows selecting options based of provided ES|QL query',
@@ -45,7 +45,7 @@ export const GridImplementation: StoryObj<{ query: string }> = {
         <EuiFlexItem>
           <DataCascade
             data={initData}
-            cascadeGroups={getESQLStatsGroupByColumnsFromQuery(args.query)}
+            cascadeGroups={getESQLStatsQueryMeta(args.query).groupByFields}
             tableTitleSlot={({ rows }) => (
               <EuiText>
                 {i18n.translate('sharedUXPackages.data_cascade.toolbar.query_string', {

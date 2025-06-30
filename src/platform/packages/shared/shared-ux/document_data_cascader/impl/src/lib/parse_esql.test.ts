@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getESQLStatsGroupByColumnsFromQuery } from './parse_esql';
+import { getESQLStatsQueryMeta } from './parse_esql';
 
 describe('esql query utils', () => {
   describe('getStatsGroupByColumnsFromQuery', () => {
@@ -22,8 +22,14 @@ describe('esql query utils', () => {
     | DROP count_4xx, count_rest, total_records
     | LIMIT 123`;
 
-      const result = getESQLStatsGroupByColumnsFromQuery(queryString);
-      expect(result).toEqual(['type', 'url.keyword']);
+      const result = getESQLStatsQueryMeta(queryString);
+      expect(result.groupByFields).toEqual(['type', 'url.keyword']);
+      expect(result.appliedFunctions).toEqual([
+        { identifier: 'Visits', operator: 'COUNT' },
+        { identifier: 'Unique', operator: 'COUNT_DISTINCT' },
+        { identifier: 'p95', operator: 'PERCENTILE' },
+        { identifier: 'median', operator: 'MEDIAN' },
+      ]);
     });
   });
 });
