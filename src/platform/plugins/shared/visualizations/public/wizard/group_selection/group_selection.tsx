@@ -27,7 +27,7 @@ import {
   EuiTabs,
   EuiTab,
   EuiIconTip,
-  UseEuiTheme,
+  type UseEuiTheme,
   euiBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

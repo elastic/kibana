@@ -15,7 +15,7 @@ import React, {
   MouseEvent,
   MutableRefObject,
 } from 'react';
-import { EuiCallOut, EuiLink, EuiSpacer, UseEuiTheme, logicalSizeCSS } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer, type UseEuiTheme, logicalSizeCSS } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useUnmount from 'react-use/lib/useUnmount';

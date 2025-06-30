@@ -12,7 +12,7 @@ import React from 'react';
 import {
   EuiModal,
   mathWithUnits,
-  UseEuiTheme,
+  type UseEuiTheme,
   euiBreakpoint,
   COLOR_MODES_STANDARD,
 } from '@elastic/eui';

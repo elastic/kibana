@@ -18,7 +18,7 @@ import { switchMap } from 'rxjs';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { euiBreakpoint, UseEuiTheme } from '@elastic/eui';
+import { euiBreakpoint, type UseEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type {
   VisualizeServices,
