@@ -157,7 +157,7 @@ const DataQualityComponent: React.FC = () => {
     return <EuiLoadingSpinner size="l" data-test-subj="ecsDataQualityDashboardLoader" />;
   }
 
-  if (newDataViewPickerEnabled && status !== 'ready') {
+  if (newDataViewPickerEnabled && status === 'pristine') {
     return null;
   }
 

@@ -49,7 +49,9 @@ export const useSignalHelpers = (): {
     ? experimentalSignalIndexName
     : signalIndexNameSourcerer;
 
-  const { dataView: experimentalDefaultDataView, status } = useDataView(SourcererScopeName.default);
+  const { dataView: experimentalDefaultDataView, status } = useDataView(
+    SourcererScopeName.detections
+  );
   const dataViewId = newDataViewPickerEnabled
     ? experimentalDefaultDataView?.id ?? null
     : oldDataViewId;
@@ -59,7 +61,7 @@ export const useSignalHelpers = (): {
     : oldDefaultDataView.title;
 
   const signalIndexNeedsInit = useMemo(() => {
-    if (newDataViewPickerEnabled && status !== 'ready') {
+    if (newDataViewPickerEnabled && status === 'pristine') {
       return false;
     }
 
