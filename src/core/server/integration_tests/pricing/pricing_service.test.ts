@@ -11,6 +11,7 @@ import supertest from 'supertest';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
@@ -52,7 +53,10 @@ describe('PricingService', () => {
       configService,
     });
     await service.preboot({ http: httpPreboot });
-    serviceSetup = await service.setup({ http: httpSetup });
+    serviceSetup = await service.setup({
+      analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
+      http: httpSetup,
+    });
     await server.start();
   });
 
