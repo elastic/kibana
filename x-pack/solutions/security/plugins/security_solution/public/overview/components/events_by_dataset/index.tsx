@@ -12,7 +12,7 @@ import React, { useEffect, useMemo, useCallback } from 'react';
 import type { Filter, Query } from '@kbn/es-query';
 import styled from '@emotion/styled';
 import { EuiButton } from '@elastic/eui';
-import type { DataViewSpec } from '@kbn/data-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-plugin/common';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
@@ -48,6 +48,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery'> {
   filters: Filter[];
   headerChildren?: React.ReactNode;
   dataViewSpec?: DataViewSpec;
+  newDataViewPickerEnabledDataView?: DataView;
   onlyField?: string;
   paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
@@ -78,6 +79,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   from,
   headerChildren,
   dataViewSpec,
+  newDataViewPickerEnabledDataView,
   onlyField,
   paddingSize,
   query,
@@ -131,12 +133,20 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       return convertToBuildEsQuery({
         config: getEsQueryConfig(kibana.services.uiSettings),
         dataViewSpec,
+        newDataViewPickerEnabledDataView,
         queries: [query],
         filters,
       });
     }
     return [filterQueryFromProps];
-  }, [filterQueryFromProps, kibana.services.uiSettings, dataViewSpec, query, filters]);
+  }, [
+    filterQueryFromProps,
+    kibana.services.uiSettings,
+    dataViewSpec,
+    newDataViewPickerEnabledDataView,
+    query,
+    filters,
+  ]);
 
   useInvalidFilterQuery({
     id: uniqueQueryId,

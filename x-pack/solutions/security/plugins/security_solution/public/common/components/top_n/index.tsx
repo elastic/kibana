@@ -10,7 +10,7 @@ import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 
 import type { Filter, Query } from '@kbn/es-query';
-import { type DataViewSpec, getEsQueryConfig } from '@kbn/data-plugin/common';
+import { type DataViewSpec, type DataView, getEsQueryConfig } from '@kbn/data-plugin/common';
 import { isActiveTimeline } from '../../../helpers';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useGlobalTime } from '../../containers/use_global_time';
@@ -78,6 +78,7 @@ export interface OwnProps {
   browserFields: BrowserFields;
   field: string;
   dataViewSpec?: DataViewSpec;
+  newDataViewPickerEnabledDataView?: DataView;
   scopeId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
@@ -97,6 +98,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
   dataProviders,
   field,
   dataViewSpec,
+  newDataViewPickerEnabledDataView,
   globalFilters = EMPTY_FILTERS,
   globalQuery = EMPTY_QUERY,
   kqlMode,
@@ -120,6 +122,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
             dataProviders,
             filters: activeTimelineFilters,
             dataViewSpec,
+            newDataViewPickerEnabledDataView,
             kqlMode,
             kqlQuery: {
               language: 'kuery',
@@ -134,6 +137,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
       dataProviders,
       activeTimelineFilters,
       dataViewSpec,
+      newDataViewPickerEnabledDataView,
       kqlMode,
       activeTimelineKqlQueryExpression,
     ]
