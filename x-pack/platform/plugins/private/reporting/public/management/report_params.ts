@@ -18,6 +18,7 @@ const reportParamsProviders = {
   pngV2: getPngReportParams,
   printablePdfV2: getPdfReportParams,
   csv_searchsource: getCsvReportParams,
+  csv_v2: getCsvReportParams,
 } as const;
 
 export const supportedReportTypes = Object.keys(reportParamsProviders) as ReportTypeId[];
