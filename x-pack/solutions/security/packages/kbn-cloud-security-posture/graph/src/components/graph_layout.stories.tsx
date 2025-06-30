@@ -199,7 +199,7 @@ export const SimpleAPIMock: Story = {
         label: 'projects/your-project-id/roles/customRole',
         color: 'primary',
         shape: 'hexagon',
-        icon: 'questionInCircle',
+        icon: 'question',
       },
       {
         id: 'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
@@ -253,7 +253,7 @@ export const GroupWithWarningAPIMock: Story = {
         label: 'projects/your-project-id/roles/customRole',
         color: 'primary',
         shape: 'hexagon',
-        icon: 'questionInCircle',
+        icon: 'question',
       },
       {
         id: 'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed)',

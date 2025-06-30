@@ -8,13 +8,7 @@
 import React from 'react';
 
 import { EuiText } from '@elastic/eui';
-import {
-  ENTERPRISE_SEARCH_APP_ID,
-  SEARCH_ELASTICSEARCH,
-  SEARCH_VECTOR_SEARCH,
-  SEARCH_SEMANTIC_SEARCH,
-  SEARCH_AI_SEARCH,
-} from '@kbn/deeplinks-search';
+import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
 import type { ClassicNavItem } from './types';
@@ -23,7 +17,7 @@ export const BaseClassicNavItems: ClassicNavItem[] = [
   {
     'data-test-subj': 'searchSideNav-Home',
     deepLink: {
-      link: ENTERPRISE_SEARCH_APP_ID,
+      link: SEARCH_HOMEPAGE,
       shouldShowActiveForSubroutes: true,
     },
     id: 'home',
@@ -36,8 +30,8 @@ export const BaseClassicNavItems: ClassicNavItem[] = [
     ),
   },
   {
-    'data-test-subj': 'searchSideNav-Data',
-    id: 'data',
+    'data-test-subj': 'searchSideNav-Build',
+    id: 'build',
     items: [
       {
         'data-test-subj': 'searchSideNav-Indices',
@@ -47,37 +41,20 @@ export const BaseClassicNavItems: ClassicNavItem[] = [
         id: 'search_indices',
       },
       {
-        'data-test-subj': 'searchSideNav-Connectors',
-        deepLink: {
-          link: 'enterpriseSearchContent:connectors',
-          shouldShowActiveForSubroutes: true,
-        },
-        id: 'connectors',
-      },
-      {
-        'data-test-subj': 'searchSideNav-Crawlers',
-        deepLink: {
-          link: 'enterpriseSearchContent:webCrawlers',
-          shouldShowActiveForSubroutes: true,
-        },
-        id: 'crawlers',
-      },
-    ],
-    name: i18n.translate('xpack.searchNavigation.classicNav.dataTitle', {
-      defaultMessage: 'Data',
-    }),
-  },
-  {
-    'data-test-subj': 'searchSideNav-Build',
-    id: 'build',
-    items: [
-      {
         'data-test-subj': 'searchSideNav-Playground',
         deepLink: {
           link: 'searchPlayground',
           shouldShowActiveForSubroutes: true,
         },
         id: 'playground',
+      },
+      {
+        'data-test-subj': 'searchSideNav-Connectors',
+        deepLink: {
+          link: 'enterpriseSearchContent:connectors',
+          shouldShowActiveForSubroutes: true,
+        },
+        id: 'connectors',
       },
       {
         'data-test-subj': 'searchSideNav-SearchApplications',
@@ -96,14 +73,6 @@ export const BaseClassicNavItems: ClassicNavItem[] = [
     id: 'relevance',
     items: [
       {
-        'data-test-subj': 'searchSideNav-InferenceEndpoints',
-        deepLink: {
-          link: 'searchInferenceEndpoints:inferenceEndpoints',
-          shouldShowActiveForSubroutes: true,
-        },
-        id: 'inference_endpoints',
-      },
-      {
         'data-test-subj': 'searchSideNav-Synonyms',
         deepLink: {
           link: 'searchSynonyms:synonyms',
@@ -119,46 +88,17 @@ export const BaseClassicNavItems: ClassicNavItem[] = [
         },
         id: 'searchQueryRules',
       },
+      {
+        'data-test-subj': 'searchSideNav-InferenceEndpoints',
+        deepLink: {
+          link: 'searchInferenceEndpoints:inferenceEndpoints',
+          shouldShowActiveForSubroutes: true,
+        },
+        id: 'inference_endpoints',
+      },
     ],
     name: i18n.translate('xpack.searchNavigation.classicNav.relevanceTitle', {
       defaultMessage: 'Relevance',
-    }),
-  },
-  {
-    'data-test-subj': 'searchSideNav-GettingStarted',
-    id: 'es_getting_started',
-    items: [
-      {
-        'data-test-subj': 'searchSideNav-Elasticsearch',
-        deepLink: {
-          link: SEARCH_ELASTICSEARCH,
-        },
-        id: 'elasticsearch',
-      },
-      {
-        'data-test-subj': 'searchSideNav-VectorSearch',
-        deepLink: {
-          link: SEARCH_VECTOR_SEARCH,
-        },
-        id: 'vectorSearch',
-      },
-      {
-        'data-test-subj': 'searchSideNav-SemanticSearch',
-        deepLink: {
-          link: SEARCH_SEMANTIC_SEARCH,
-        },
-        id: 'semanticSearch',
-      },
-      {
-        'data-test-subj': 'searchSideNav-AISearch',
-        deepLink: {
-          link: SEARCH_AI_SEARCH,
-        },
-        id: 'aiSearch',
-      },
-    ],
-    name: i18n.translate('xpack.searchNavigation.classicNav.gettingStartedTitle', {
-      defaultMessage: 'Getting started',
     }),
   },
 ];

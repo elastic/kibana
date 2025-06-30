@@ -96,7 +96,7 @@ export const StepMappings: React.FunctionComponent<Props> = React.memo(
                   flush="right"
                   href={documentationService.getMappingDocumentationLink()}
                   target="_blank"
-                  iconType="help"
+                  iconType="question"
                 >
                   <FormattedMessage
                     id="xpack.idxMgmt.formWizard.stepMappings.docsButtonLabel"
