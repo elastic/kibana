@@ -1299,7 +1299,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 ### Reporting
 /x-pack/test/functional/apps/dashboard/reporting/ @elastic/response-ops
 /x-pack/test/functional/apps/reporting/ @elastic/response-ops
-/x-pack/test/functional/apps/reporting_management/ @elastic/response-ops
+/x-pack/platform/test/functional/apps/reporting_management/ @elastic/response-ops
 /x-pack/test/examples/screenshotting/ @elastic/response-ops
 /x-pack/test/functional/es_archives/lens/reporting/ @elastic/response-ops
 /x-pack/test/functional/es_archives/reporting/ @elastic/response-ops
@@ -2209,7 +2209,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/test/stack_functional_integration/apps/ccs @elastic/kibana-management
 /x-pack/test/functional/services/data_stream.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/watcher_page.ts @elastic/kibana-management
-/x-pack/test/functional/page_objects/upgrade_assistant_page.ts @elastic/kibana-management
+/x-pack/platform/test/functional/page_objects/upgrade_assistant_page.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/snapshot_restore_page.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/rollup_page.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/ingest_pipelines_page.ts @elastic/kibana-management
@@ -2217,7 +2217,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/test/functional/page_objects/cross_cluster_replication_page.ts @elastic/kibana-management
 /x-pack/test/functional/fixtures/ingest_pipeline_example_mapping.csv @elastic/kibana-management
 /x-pack/test/functional/apps/snapshot_restore @elastic/kibana-management
-/x-pack/test/functional/apps/painless_lab @elastic/kibana-management
+/x-pack/platform/test/functional/apps/painless_lab @elastic/kibana-management
 /x-pack/test_serverless/functional/test_suites/common/spaces/spaces_management.ts @elastic/kibana-management
 /x-pack/test/stack_functional_integration/apps/management @elastic/kibana-management
 /x-pack/test/functional/page_objects/*_management_page.ts @elastic/kibana-management
@@ -2229,7 +2229,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/test/functional/apps/license_management @elastic/kibana-management
 /x-pack/test/functional/apps/management @elastic/kibana-management
 /x-pack/test/functional/apps/remote_clusters @elastic/kibana-management
-/x-pack/test/functional/apps/upgrade_assistant @elastic/kibana-management
+/x-pack/platform/test/functional/apps/upgrade_assistant @elastic/kibana-management
 /x-pack/platform/test/functional/apps/dev_tools @elastic/kibana-management
 /src/platform/test/plugin_functional/test_suites/management @elastic/kibana-management
 /x-pack/test/upgrade_assistant_integration @elastic/kibana-management
