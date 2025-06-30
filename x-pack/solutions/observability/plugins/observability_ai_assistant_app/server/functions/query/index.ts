@@ -9,7 +9,6 @@ import { ToolDefinition, isChatCompletionChunkEvent, isOutputEvent } from '@kbn/
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import {
-  FunctionVisibility,
   MessageAddEvent,
   MessageRole,
   StreamingChatResponseEventType,
@@ -34,7 +33,7 @@ export function registerQueryFunction({
   functions.registerFunction(
     {
       name: EXECUTE_QUERY_NAME,
-      visibility: FunctionVisibility.Internal,
+      isInternal: true,
       description: `Execute a generated ES|QL query on behalf of the user. The results
         will be returned to you.
 
@@ -91,7 +90,6 @@ export function registerQueryFunction({
       convert queries from one language to another. Make sure you call one of
       the get_dataset functions first if you need index or field names. This
       function takes no input.`,
-      visibility: FunctionVisibility.All,
     },
     async ({ messages, connectorId, simulateFunctionCalling }) => {
       const esqlFunctions = functions

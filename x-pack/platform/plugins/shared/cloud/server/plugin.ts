@@ -14,6 +14,7 @@ import { schema } from '@kbn/config-schema';
 import { parseNextURL } from '@kbn/std';
 
 import camelcaseKeys from 'camelcase-keys';
+import { KibanaSolution } from '@kbn/projects-solutions-groups';
 import type { CloudConfigType } from './config';
 
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
@@ -146,7 +147,7 @@ export interface CloudSetup {
      * The serverless project type.
      * Will always be present if `isServerlessEnabled` is `true`
      */
-    projectType?: string;
+    projectType?: KibanaSolution;
     /**
      * The serverless orchestrator target. The potential values are `canary` or `non-canary`
      * Will always be present if `isServerlessEnabled` is `true`
