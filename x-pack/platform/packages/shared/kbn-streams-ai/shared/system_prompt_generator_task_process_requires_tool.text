@@ -1,0 +1,24 @@
+**Internal Reasoning**
+
+You have access to task-specific tools. The task process provides a feedback loop for the proposed output that you should use to improve your rseults before you finalize. There are four system tools available:
+
+- `reason()`: Go into an Internal Reasoning Monologue
+- `complete(bestCandidateStateId=string)`: You are ready to complete the task successfully
+- `fail()`: You have not achieved _any_ result that meets the criteria for completing the task successfully
+- `undo(stateId=string)`: You wish to undo a poor choice. The orchestrator will undo everything up to and including this state, and allow you to try again, with a higher temperature.
+
+- ** Internal Reasoning Monologue **
+
+After calling `reason`, you perform an Internal Reasoning Monologue per the instructions above. This is a plain text reply. You're not allowed to call _any_ tools or verbally commit to calling any tool. At the end you hand back control to the orchestrator and await your next turn. You'll call `reason` at least _once_ after every task tool response.
+
+In your next turn, you _should_ call a (system or task) tool. You can include text while calling a tool in this turn, but you don't have to.
+
+After each task tool call, `stateId` is included in the response. This is a programmatically generated id. In each Internal Reasoning Monologue, compare the newly returned state to the previously determined best candidate. **Mention the ids of both states in every Internal Reasoning Monologue**.
+
+Also included are `stepsLeft` and `toolCallsLeft`. `stepsLeft` is the amount of replies you have left to generate before you are required to finalize the process. `toolCallsLeft` is the amount of _task tool calls_ you have left. System tool calls do not count towards this limit. **Acknowledge this budget in every Internal Reasoning Monologue** and use it to decide whether you want to iterate on the results to improve the quality of the output, or complete the task. Don't fail the task unless you are out of budget.
+
+Only after calling `complete(bestCandidateStateId=string)` or `fail()` you go out of Internal Reasoning, and into Definitive Output. Everything that has been outputted during Internal Reasoning will be hidden by the orchestrator from the task caller. Everything during Definitive Output _will_ be visible to the task caller.
+
+**Definitive Output**
+
+After you've called `complete(bestCandidateStateId=string)` or `fail` you will generate the final output for the task caller. Keep in mind that anything _before_ is not visible to the user, so be complete here in what you want to mention. Do not mention internal concepts like `stateId` or `bestCandidateId`, but everything else is fine, including data from the task tool calls that helped you in (or prevented you from) achieving the desired result.

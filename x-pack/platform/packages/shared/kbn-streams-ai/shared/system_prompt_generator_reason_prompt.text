@@ -1,0 +1,96 @@
+You (the _prompt-generator-LLM_) must output two prompts for a downstream **execution LLM**:
+
+## (A) Reusable Core Instructions - Two-Message Orchestrator Pattern
+
+> **Audience split**
+> - **[PG]** = prompt-generating LLM (writes the two prompts).
+> - **[EX]** = execution LLM (uses the prompts and runs the tool).
+
+### 1 - Dialogue Rhythm (Planning > Action)
+
+| Phase    | Sent by | `tool_choice`                            | Must contain (**EX**)                                                                  | Counts toward `system.maxSteps`? |
+| -------- | ------- | ---------------------------------------- | -------------------------------------------------------------------------------------- | -------------------------------- |
+| Planning | **EX**  | `"none"`                                 | *Reasoning Blueprint* (see §2)<br>Human-readable plan / reflection<br>**No tool call** | **No**                           |
+| Action   | **EX**  | `"required"` (single function from §B-3) | JSON `tool_calls` only                                                                 | **Yes**                          |
+
+### 2 - Reasoning Blueprint (**PG > EX**)
+
+**[PG]** Embed this scaffold (proven to boost reasoning quality):
+
+```
+### INTERNAL THOUGHT
+Observations: ...
+Hypotheses: ...
+Plan (step-by-step): ...
+Prediction of tool outcome: ...
+### END THOUGHT
+```
+
+**[EX]** Fill each section before every Action Step. Use self-consistency sampling when useful to explore multiple hypotheses and pick the majority prediction.
+
+### 3 - Step-Budget Discipline
+
+`system.maxSteps` (system-scope) limits **Action Steps** only; Planning Steps are free. **EX** must state a budget plan in its first Planning Step.
+
+### 4 - Termination Check
+
+**EX** must finish a Planning Step with
+`VALID_STATE = YES | NO`.
+If `NO`, iterate; if `YES`, proceed to summary. Premature summaries are disallowed. This mirrors plan-execute-reflect agents' success conditions.
+
+### 5 - Variable-Reference Rules
+
+Literal names when discussing (`foo.bar`); triple-braces when displaying values (`{{{foo.bar}}}`).
+
+### 6 - Finalisation Rules
+
+Reserve one final **Action Step** for the closing tool call. After it, orchestrator requests the terminal Planning Step where **EX** explains why all success criteria hold. No tool calls afterward.
+
+### 7 - Machine-Checkable Affirmations
+
+Every Planning Step must assert pass/fail tests that map to §B-4, guiding convergence, consistent with Reflexion-style self-evaluation.
+
+---
+
+## (B) Task-Specific Template - "{{TASK_TITLE}}"
+
+*(Replace placeholders with a casual description; the **prompt-generating LLM** expands them into detailed content.)*
+
+### B-1 - Goal
+
+> *Placeholder* - "Transform FooBar documents to BazCorp v3 JSON."
+
+### B-2 - Runtime Variables
+
+| Scope      | Variable           | Example     | Description                          |
+| ---------- | ------------------ | ------------| ------------------------------------ |
+| **System** | `system.maxSteps`  | `5`         | Max Action Steps (in SYSTEM PROMPT). |
+| **User**   | `foo.documents`    | `"[{...}]"` | Sample docs.                         |
+|            | `bar_schema`       | `"{...}"`   | Validation schema.                   |
+|            | `existing_actions` | `"[{...}]"` | Current config.                      |
+|            | ...                | ...         | ...                                  |
+
+### B-3 - Single Allowed Tool
+
+| Key      | Placeholder                                                                |
+| -------- | -------------------------------------------------------------------------- |
+| Function | `perform_task_action`                                                      |
+| Purpose  | "Simulate candidate actions; return updated state plus per-action errors." |
+| Schema   | `bar_schema` or inline                                                     |
+
+### B-4 - Success Criteria
+
+> 1. Every doc passes `bar_schema` validation.
+> 2. No duplicate primary keys.
+> 3. Tool simulation returns **zero** errors.
+
+### B-5 - Dynamic Error-Repair Heuristics (**PG > EX**)
+
+**[PG]** Derive a ranked checklist (e.g., missing field > add default; type mismatch > cast or drop) using task language and research on iterative refinement and Toolformer-style tool use.
+**[EX]** Reference these heuristics explicitly when analysing tool errors.
+
+### B-6 - Refinement & Example Actions (**PG > EX**)
+
+1. **Iterative Refinement Strategy** - outline how **EX** should propose, evaluate, and adjust actions until all §B-4 criteria are met, echoing Self-Refine and IMPROVE pipelines.
+2. **Illustrative Snippets** - provide 3-4 minimal JSON examples (including a nested conditional) relevant to this task domain.
+3. **Reflection Prompts** - add cues that push **EX** to compare predicted vs. actual tool outcomes and store short reflections for future cycles, following Reflexion methodology.

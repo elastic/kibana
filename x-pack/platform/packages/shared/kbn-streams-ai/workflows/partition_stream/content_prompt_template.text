@@ -1,0 +1,7 @@
+`index`:
+{{stream.name}}
+
+`initial_clustering`:
+```json
+{{{initial_clustering}}}
+```
