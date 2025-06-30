@@ -48,20 +48,32 @@ export async function hasTestsInPlaywrightConfig(
   cmd: string,
   cmdArgs: string[],
   configPath: string
-): Promise<boolean> {
+): Promise<number> {
   log.info(`scout: Validate Playwright config has tests`);
   try {
-    const validationCmd = `SCOUT_REPORTER_ENABLED=false ${cmd} ${cmdArgs.join(' ')} --list`;
+    const validationCmd = ['SCOUT_REPORTER_ENABLED=false', cmd, ...cmdArgs, '--list'].join(' ');
     log.debug(`scout: running '${validationCmd}'`);
 
     const result = await execPromise(validationCmd);
     const lastLine = result.stdout.trim().split('\n').pop() || '';
 
     log.info(`scout: ${lastLine}`);
-    return true; // success
+    return 0; // success
   } catch (err) {
-    log.error(`scout: No tests found in [${configPath}]`);
-    return false; // failure
+    const errorMessage = (err as Error).message || String(err);
+
+    if (errorMessage.includes('No tests found')) {
+      log.error(`scout: No tests found in [${configPath}]`);
+      return 2; // "no tests" code, no hard failure on CI
+    }
+
+    if (errorMessage.includes(`unknown command 'test'`)) {
+      log.error(`scout: Playwright CLI is probably broken.\n${errorMessage}`);
+      return 1;
+    }
+
+    log.error(`scout: Unknown error occurred.\n${errorMessage}`);
+    return 1;
   }
 }
 
@@ -132,10 +144,10 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   ];
 
   await withProcRunner(log, async (procs) => {
-    const hasTests = await hasTestsInPlaywrightConfig(log, pwBinPath, pwCmdArgs, pwConfigPath);
+    const exitCode = await hasTestsInPlaywrightConfig(log, pwBinPath, pwCmdArgs, pwConfigPath);
 
-    if (!hasTests) {
-      process.exit(2); // code "2" means no tests found
+    if (exitCode !== 0) {
+      process.exit(exitCode);
     }
 
     if (pwProject === 'local') {
@@ -147,6 +159,27 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     reportTime(runStartTime, 'ready', {
       success: true,
       ...options,
+    });
+  });
+}
+
+export async function runPlaywrightTestCheck(log: ToolingLog) {
+  const runStartTime = Date.now();
+  const reportTime = getTimeReporter(log, 'scripts/scout run-playwright-test-check');
+  log.info(`scout: Validate 'playwright test' command can run successfully`);
+
+  const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
+  const pwCmdArgs = [
+    'test',
+    `--config=x-pack/platform/plugins/private/discover_enhanced/ui_tests/playwright.config.ts`,
+    `--list`,
+  ];
+
+  await withProcRunner(log, async (procs) => {
+    await runPlaywrightTest(procs, pwBinPath, pwCmdArgs);
+
+    reportTime(runStartTime, 'ready', {
+      success: true,
     });
   });
 }
