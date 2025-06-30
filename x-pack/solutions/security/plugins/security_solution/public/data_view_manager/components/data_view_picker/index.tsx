@@ -23,6 +23,7 @@ import { useSavedDataViews } from '../../hooks/use_saved_data_views';
 import { DEFAULT_SECURITY_DATA_VIEW, LOADING } from './translations';
 import { DATA_VIEW_PICKER_TEST_ID } from './constants';
 import { useDataView } from '../../hooks/use_data_view';
+import { browserFieldsManager } from '../../utils/security_browser_fields_manager';
 
 interface DataViewPickerProps {
   /**
@@ -111,6 +112,9 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
       }
 
       const dataViewInstance = await data.dataViews.get(dataViewId);
+      // Modifications to the fields do not trigger cache invalidation, but should as `fields` will be stale.
+      data.dataViews.clearInstanceCache(dataViewId);
+      browserFieldsManager.removeFromCache(scope);
 
       closeFieldEditor.current = await dataViewFieldEditor.openEditor({
         ctx: {
