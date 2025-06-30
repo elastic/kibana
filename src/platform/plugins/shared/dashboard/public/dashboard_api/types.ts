@@ -59,7 +59,7 @@ export const DASHBOARD_API_TYPE = 'dashboard';
 export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
 
 export interface DashboardCreationOptions {
-  getInitialInput?: () => Partial<DashboardState & { viewMode: ViewMode }>;
+  getInitialInput?: () => Partial<DashboardState & { viewMode?: ViewMode }>;
 
   getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
 

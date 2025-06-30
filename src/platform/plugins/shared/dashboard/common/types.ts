@@ -61,7 +61,7 @@ export type DashboardLocatorParams = Partial<
 
     references?: DashboardState['references'] & SerializableRecord;
 
-    viewMode: ViewMode;
+    viewMode?: ViewMode;
 
     /**
      * If provided, the dashboard with this id will be loaded. If not given, new, unsaved dashboard will be loaded.
