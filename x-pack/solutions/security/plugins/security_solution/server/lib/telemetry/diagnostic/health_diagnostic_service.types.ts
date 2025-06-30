@@ -26,7 +26,6 @@ export enum Action {
    * Represents an action to keep information as is, without masking.
    */
   KEEP = 'keep',
-  Action = 'Action',
 }
 
 /**
@@ -55,44 +54,6 @@ export interface HealthDiagnosticServiceStart {
   taskManager: TaskManagerStartContract;
   esClient: ElasticsearchClient;
   analytics: AnalyticsServiceStart;
-}
-
-/**
- * Defines a health diagnostic query configuration with scheduling and filtering options.
- */
-export interface HealthDiagnosticQuery {
-  /**
-   * A unique identifier for this query.
-   */
-  id: string;
-  /**
-   * A descriptive name for this query.
-   */
-  name: string;
-  /**
-   * The index pattern on which this query will be executed.
-   */
-  index: string;
-  /**
-   * Specifies the query type, as defined by the QueryType enum.
-   */
-  type: QueryType;
-  /**
-   * The query string to be executed against the data store.
-   */
-  query: string;
-  /**
-   * A cron expression that schedules when the query should be run.
-   */
-  scheduleCron: string;
-  /**
-   * Optional mapping of dot-separated paths to associated actions for filtering results.
-   */
-  filterlist?: Record<string, Action>;
-  /**
-   * Optional flag indicating whether this query is active and should be executed.
-   */
-  enabled?: boolean;
 }
 
 export interface HealthDiagnosticService {
