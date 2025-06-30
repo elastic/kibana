@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const ELASTIC_SUPPORT_LINK = 'https://support.elastic.co/';
+export const ELASTIC_SUPPORT_LINK = 'https://support.elastic.co/home';
