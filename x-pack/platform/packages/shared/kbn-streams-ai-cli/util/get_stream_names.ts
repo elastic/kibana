@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export { cli } from './cli';
-export { SampleParserClient } from './client';
-export type { StreamLogGenerator } from './client/types';
-export { type LoghubQuery, createQueryMatcher, tokenize } from './src/validate_queries';
+import { castArray } from 'lodash';
+import { Flags } from '@kbn/dev-cli-runner';
+
+export function getStreamNames(flags: Flags) {
+  return castArray(flags.stream ?? []).flatMap((val) => String(val).split(','));
+}

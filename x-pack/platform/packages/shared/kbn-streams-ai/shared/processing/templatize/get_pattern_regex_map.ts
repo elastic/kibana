@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export { cli } from './cli';
-export { SampleParserClient } from './client';
-export type { StreamLogGenerator } from './client/types';
-export { type LoghubQuery, createQueryMatcher, tokenize } from './src/validate_queries';
+import { buildGrokRegexMap } from '../grok/parse_patterns';
+import { PATTERN_OVERRIDES } from './pattern_precedence';
+
+const GROK_REGEX_MAP = buildGrokRegexMap(PATTERN_OVERRIDES);
+
+export { GROK_REGEX_MAP };
