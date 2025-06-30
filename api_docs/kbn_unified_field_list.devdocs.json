@@ -5765,6 +5765,19 @@
         "children": [
           {
             "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.UnifiedFieldListRestorableState.isCollapsed",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCollapsed",
+            "description": [
+              "\nWhether the field list is collapsed or expanded"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/restorable_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
             "id": "def-public.UnifiedFieldListRestorableState.nameFilter",
             "type": "string",
             "tags": [],
