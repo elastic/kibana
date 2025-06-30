@@ -30,7 +30,7 @@ if (process.argv.includes('--help') || process.argv.includes('-h')) {
         process.argv.push('--quiet');
       }
 
-      if (!flags._.cache) {
+      if (!flags.cache) {
         process.argv.push('--cache');
       }
 
