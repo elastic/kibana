@@ -35,6 +35,8 @@ export const LayoutStateProvider = ({ children, ...props }: LayoutStateProps) =>
     Footer: props.footer || null,
     SidebarPanel: props.sidebarPanel || null,
     Sidebar: props.sidebar || null,
+    ApplicationTopBar: props.applicationTopBar || null,
+    ApplicationBottomBar: props.applicationBottomBar || null,
   };
 
   const hasBanner = !!slots.Banner;
@@ -44,6 +46,8 @@ export const LayoutStateProvider = ({ children, ...props }: LayoutStateProps) =>
   const hasNavigationPanel = !!slots.NavigationPanel;
   const hasHeader = !!slots.Header;
   const hasNavigation = !!slots.Navigation;
+  const hasApplicationTopBar = !!slots.ApplicationTopBar;
+  const hasApplicationBottomBar = !!slots.ApplicationBottomBar;
 
   const layoutState: LayoutState = {
     hasBanner,
@@ -60,6 +64,12 @@ export const LayoutStateProvider = ({ children, ...props }: LayoutStateProps) =>
     sidebarWidth: hasSidebar ? layoutConfig.sidebarWidth ?? 0 : 0,
     hasSidebarPanel,
     sidebarPanelWidth: hasSidebar && hasSidebarPanel ? layoutConfig.sidebarPanelWidth ?? 0 : 0,
+    hasApplicationTopBar,
+    applicationTopBarHeight: hasApplicationTopBar ? layoutConfig.applicationTopBarHeight ?? 0 : 0,
+    hasApplicationBottomBar,
+    applicationBottomBarHeight: hasApplicationBottomBar
+      ? layoutConfig.applicationBottomBarHeight ?? 0
+      : 0,
   };
 
   return <LayoutStateContext.Provider value={layoutState}>{children}</LayoutStateContext.Provider>;
