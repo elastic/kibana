@@ -6,13 +6,9 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { SeverityThreshold } from '@kbn/ml-plugin/common/types/anomalies';
 import type { Anomalies, InfluencerInput, CriteriaFields } from '../types';
 import { KibanaServices } from '../../../lib/kibana';
-
-export interface SeverityThreshold {
-  min: number;
-  max?: number;
-}
 
 export interface Body {
   jobIds: string[];
