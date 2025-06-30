@@ -68,7 +68,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // Redirected to Onboarding Page to Create Index
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: 'Build',
+          text: 'Create your first index',
         });
 
         await expectNoPageReload();
