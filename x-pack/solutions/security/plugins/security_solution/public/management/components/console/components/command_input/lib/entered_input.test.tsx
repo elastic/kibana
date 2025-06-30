@@ -451,7 +451,7 @@ describe('When using `EnteredInput` class with Argument-Based Bare Flags', () =>
         ScriptName: [{ value: '', valueText: '', store: undefined }],
       });
 
-      expect(input.getFullText()).toEqual('runscript --ScriptName=""');
+      expect(input.getFullText()).toEqual('runscript --ScriptName');
     });
   });
 });

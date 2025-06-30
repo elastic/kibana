@@ -59,7 +59,14 @@ const toInputCharacterDisplayString = (
   let response = item.value;
 
   if (includeArgSelectorValues && item.isArgSelector) {
-    response += `="${item.argState?.valueText ?? ''}"`;
+    // For file selectors (File objects), don't add valueText to prevent duplication
+    // For string selectors, only add valueText if it exists
+    const hasFileValue = item.argState?.value instanceof File;
+    const hasStringValue = item.argState?.valueText && !hasFileValue;
+
+    if (hasStringValue) {
+      response += `="${item.argState.valueText}"`;
+    }
   }
 
   return response;
@@ -138,25 +145,28 @@ export class EnteredInput {
                 let replacementLength = argChrLength; // Default: just replace argument name
                 const selectorValue = argState?.valueText || '';
 
-                // If there's a value after the argument name, check for exact match
-                if ((charAfterArgName === '=' || charAfterArgName === ' ') && selectorValue) {
-                  const valueStart = startSearchIndexForNextArg + 1;
-                  const remainingText = input.substring(valueStart);
+                // Only apply complex deduplication logic for runscript command (string selectors)
+                if (parsedInput.name === 'runscript') {
+                  // If there's a value after the argument name, check for exact match
+                  if ((charAfterArgName === '=' || charAfterArgName === ' ') && selectorValue) {
+                    const valueStart = startSearchIndexForNextArg + 1;
+                    const remainingText = input.substring(valueStart);
 
-                  // Check for exact match (quoted or unquoted)
-                  const firstChar = remainingText.charAt(0);
-                  if (
-                    (firstChar === '"' || firstChar === "'") &&
-                    remainingText.startsWith(`${firstChar}${selectorValue}${firstChar}`)
-                  ) {
-                    // Quoted value: --arg="value" or --arg='value'
-                    replacementLength = argChrLength + 1 + selectorValue.length + 2; // arg + = + "value"
-                  } else if (
-                    remainingText.startsWith(`${selectorValue} `) ||
-                    remainingText === selectorValue
-                  ) {
-                    // Unquoted value: --arg=value
-                    replacementLength = argChrLength + 1 + selectorValue.length; // arg + = + value
+                    // Check for exact match (quoted or unquoted)
+                    const firstChar = remainingText.charAt(0);
+                    if (
+                      (firstChar === '"' || firstChar === "'") &&
+                      remainingText.startsWith(`${firstChar}${selectorValue}${firstChar}`)
+                    ) {
+                      // Quoted value: --arg="value" or --arg='value'
+                      replacementLength = argChrLength + 1 + selectorValue.length + 2; // arg + = + "value"
+                    } else if (
+                      remainingText.startsWith(`${selectorValue} `) ||
+                      remainingText === selectorValue
+                    ) {
+                      // Unquoted value: --arg=value
+                      replacementLength = argChrLength + 1 + selectorValue.length; // arg + = + value
+                    }
                   }
                 }
 

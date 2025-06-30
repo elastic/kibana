@@ -32,7 +32,7 @@ const setArgSelectorValueToParsedArgs = (
       if (parsedInput.hasArg(argName)) {
         const argumentValues = enteredCommand.argState[argName] ?? [];
         // Always set selector values using valueText for proper command reconstruction
-        parsedInput.args[argName] = argumentValues.map((itemState) => itemState.valueText);
+        parsedInput.args[argName] = argumentValues.map((itemState) => itemState.value);
       }
     }
   }
@@ -176,7 +176,7 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
 
         // Initialize argument selectors with values from parsed input
         // but only if selector state doesn't already exist
-        if (enteredCommand) {
+        if (enteredCommand && parsedInput.name === 'runscript') {
           initializeArgSelectorStateFromParsedArgs(parsedInput, enteredCommand);
         }
 
@@ -244,29 +244,43 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         // Reconstruct the complete input text including the updated selector values
         let completeInputText = updatedParsedInput.name;
 
-        // Add arguments with their values including updated selector values
-        for (const [parsedInputArgName, argValues] of Object.entries(updatedParsedInput.args)) {
-          for (const value of argValues) {
-            if (typeof value === 'boolean' && value) {
-              completeInputText += ` --${parsedInputArgName}`;
-            } else if (typeof value === 'string') {
-              // Add quotes if the value contains spaces
-              const quotedValue = value.includes(' ') ? `"${value}"` : value;
-              completeInputText += ` --${parsedInputArgName}=${quotedValue}`;
+        let configuration = {
+          parsedInput: updatedParsedInput,
+        };
+        // TODO HERE
+        if (updatedParsedInput.name === 'runscript') {
+          // Add arguments with their values including updated selector values
+          for (const [parsedInputArgName, argValues] of Object.entries(updatedParsedInput.args)) {
+            for (const value of argValues) {
+              if (typeof value === 'boolean' && value) {
+                completeInputText += ` --${parsedInputArgName}`;
+              } else if (typeof value === 'string') {
+                // Add quotes if the value contains spaces
+                const quotedValue = value.includes(' ') ? `"${value}"` : value;
+                completeInputText += ` --${parsedInputArgName}=${quotedValue}`;
+              } else if (value instanceof File) {
+                // For File objects, use the filename for display in command text
+                const quotedValue = value.name.includes(' ') ? `"${value.name}"` : value.name;
+                completeInputText += ` --${parsedInputArgName}=${quotedValue}`;
+              }
             }
           }
+          const updatedFullParsedInput = parseCommandInput(completeInputText);
+
+          configuration = {
+            leftOfCursorText: completeInputText,
+            rightOfCursorText: '',
+            parsedInput: updatedFullParsedInput,
+          };
         }
 
         // Update the raw input text to include selector values
-        const updatedFullParsedInput = parseCommandInput(completeInputText);
 
         return {
           ...state,
           input: {
             ...state.input,
-            leftOfCursorText: completeInputText,
-            rightOfCursorText: '',
-            parsedInput: updatedFullParsedInput,
+            ...configuration,
             enteredCommand: updatedEnteredCommand,
           },
         };

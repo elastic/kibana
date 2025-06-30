@@ -17,7 +17,9 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
 
   // Arguments that should use empty strings for bare flags instead of boolean true
   // These are typically selector arguments that can have values
-  const EMPTY_STRING_BARE_FLAGS_ARGS = ['ScriptName', 'file', 'CloudFile'];
+  const COMMAND_ARG_EMPTY_STRING_COMBINATIONS: Record<string, string[]> = {
+    runscript: ['ScriptName', 'CloudFile'],
+  };
 
   if (!input) {
     return response;
@@ -32,6 +34,7 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
   for (const rawArg of rawArguments) {
     const argNameAndValueTrimmedString = rawArg.trim();
 
+    console.log({ argNameAndValueTrimmedString });
     if (argNameAndValueTrimmedString) {
       // rawArgument possible values here are:
       //    'option=something'
@@ -72,7 +75,8 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
         } else {
           // Argument has no value (bare flag)
           // Use empty string for whitelisted arguments, boolean true for others
-          const useStringValue = EMPTY_STRING_BARE_FLAGS_ARGS.includes(argName);
+          const useStringValue =
+            COMMAND_ARG_EMPTY_STRING_COMBINATIONS[response.name]?.includes(argName);
           response.args[argName].push(useStringValue ? '' : true);
         }
       }
