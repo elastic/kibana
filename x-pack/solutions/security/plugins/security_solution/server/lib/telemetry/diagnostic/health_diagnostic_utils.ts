@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import * as YAML from 'yaml';
 import { type Interval, intervalFromDate } from '@kbn/task-manager-plugin/server/lib/intervals';
-import type { Action, HealthDiagnosticQuery } from './health_diagnostic_service.types';
+import type { HealthDiagnosticQuery } from './health_diagnostic_service.types';
 
 export function nextExecution(
   startDate: Date,
@@ -18,14 +19,7 @@ export function nextExecution(
 }
 
 export function parseDiagnosticQueries(input: unknown): HealthDiagnosticQuery[] {
-  return Object.values(input as Record<string, unknown>).map((entry) => {
-    const query = entry as Record<string, unknown>;
-    return {
-      name: query.name,
-      esQuery: query.esQuery,
-      scheduleInterval: query.scheduleInterval,
-      isEnabled: query.isEnabled,
-      filterlist: query.filterlist as Record<string, Action>,
-    } as HealthDiagnosticQuery;
+  return YAML.parseAllDocuments(input as string).map((doc) => {
+    return doc.toJSON() as HealthDiagnosticQuery;
   });
 }

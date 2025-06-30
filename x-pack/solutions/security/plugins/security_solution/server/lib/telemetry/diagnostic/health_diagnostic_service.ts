@@ -12,29 +12,37 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { schema } from '@kbn/config-schema';
-import type { LogMeta, Logger, EventTypeOpts, AnalyticsServiceStart } from '@kbn/core/server';
 import type {
+  ElasticsearchClient,
+  LogMeta,
+  Logger,
+  EventTypeOpts,
+  AnalyticsServiceStart,
+} from '@kbn/core/server';
+import {
   Action,
-  HealthDiagnosticQuery,
-  HealthDiagnosticQueryResult,
-  HealthDiagnosticQueryStats,
-  HealthDiagnosticService,
-  HealthDiagnosticServiceSetup,
-  HealthDiagnosticServiceStart,
+  type HealthDiagnosticQuery,
+  type HealthDiagnosticQueryResult,
+  type HealthDiagnosticQueryStats,
+  type HealthDiagnosticService,
+  type HealthDiagnosticServiceSetup,
+  type HealthDiagnosticServiceStart,
 } from './health_diagnostic_service.types';
 import { nextExecution, parseDiagnosticQueries } from './health_diagnostic_utils';
 import type { CircuitBreaker } from './health_diagnostic_circuit_breakers.types';
 import type { CircuitBreakingQueryExecutor } from './health_diagnostic_receiver.types';
 import { CircuitBreakingQueryExecutorImpl } from './health_diagnostic_receiver';
-import { RssGrouthCircuitBreaker } from './circuit_breakers/rss_grouth_circuit_breakers';
-import { TimeoutCircuitBreaker } from './circuit_breakers/timeout_circuit_breakers';
-import { EventLoopUtilizationCircuitBreaker } from './circuit_breakers/event_loop_utilization_circuit_breakers';
 import {
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT,
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT,
 } from '../event_based/events';
 import { artifactService } from '../artifact';
 import { newTelemetryLogger } from '../helpers';
+import { RssGrouthCircuitBreaker } from './circuit_breakers/rss_grouth_circuit_breaker';
+import { TimeoutCircuitBreaker } from './circuit_breakers/timeout_circuit_breaker';
+import { EventLoopUtilizationCircuitBreaker } from './circuit_breakers/event_loop_utilization_circuit_breaker';
+import { EventLoopDelayCircuitBreaker } from './circuit_breakers/event_loop_delay_circuit_breaker';
+import { ElasticsearchCircuitBreaker } from './circuit_breakers/elastic_search_circuit_breaker';
 
 const TASK_TYPE = 'security:health-diagnostic';
 const TASK_ID = `${TASK_TYPE}:1.0.0`;
@@ -48,6 +56,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   private readonly logger: Logger;
   private queryExecutor?: CircuitBreakingQueryExecutor;
   private analytics?: AnalyticsServiceStart;
+  private _esClient?: ElasticsearchClient;
 
   // TODO: allow external configuration
   private readonly circuitBreakersConfig = {
@@ -56,12 +65,22 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       validationIntervalMs: 200,
     },
     timeout: {
-      timeoutMillis: 180,
+      timeoutMillis: 1000,
       validationIntervalMs: 50,
     },
     eventLoopUtilization: {
-      thresholdMillis: 1000,
-      validationIntervalMs: 1000,
+      thresholdMillis: 500,
+      validationIntervalMs: 50,
+    },
+    eventLoopDelay: {
+      thresholdMillis: 100,
+      validationIntervalMs: 10,
+    },
+    elasticsearch: {
+      maxJvmHeapUsedPercent: 80,
+      maxCpuPercent: 80,
+      expectedClusterHealth: ['green', 'yellow'],
+      validationIntervalMs: 30,
     },
   };
 
@@ -79,8 +98,9 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   public async start(start: HealthDiagnosticServiceStart) {
     this.logger.info('Starting health diagnostic service');
 
-    this.queryExecutor = new CircuitBreakingQueryExecutorImpl(start.esClient);
+    this.queryExecutor = new CircuitBreakingQueryExecutorImpl(start.esClient, this.logger);
     this.analytics = start.analytics;
+    this._esClient = start?.esClient;
 
     await this.scheduleTask(start.taskManager);
   }
@@ -99,13 +119,12 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     }
 
     const healthQueries = await this.healthQueries();
+
     const queriesToRun = healthQueries.filter((query) => {
-      const { name, scheduleInterval, isEnabled } = query;
+      const { name, scheduleCron, enabled } = query;
       const lastExecution = new Date(lastExecutionByQuery[name] ?? 0);
 
-      return (
-        nextExecution(lastExecution, toDate, scheduleInterval) !== undefined && (isEnabled ?? true)
-      );
+      return nextExecution(lastExecution, toDate, scheduleCron) !== undefined && (enabled ?? true);
     });
 
     this.logger.info('About to run health diagnostic queries', {
@@ -115,8 +134,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
 
     for (const query of queriesToRun) {
       const circuitBreakers = this.buildCircuitBreakers();
-      const options = { query: query.esQuery, circuitBreakers };
-      let currentPage = 1;
+      const options = { query, circuitBreakers };
 
       const queryStats: HealthDiagnosticQueryStats = {
         name: query.name,
@@ -128,29 +146,28 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       };
 
       try {
-        for await (const data of this.queryExecutor.search<unknown[]>(options)) {
-          queryStats.numDocs += data.length;
-          const queryResult: HealthDiagnosticQueryResult = {
-            name: query.name,
-            traceId: queryStats.traceId,
-            page: currentPage,
-            data,
-          };
+        const data: unknown[] = await this.queryExecutor.search(options);
 
-          this.logger.info('Sending query result EBT', {
-            name: query.name,
-            traceId: queryStats.traceId,
-            currentPage,
-          } as LogMeta);
+        queryStats.numDocs += data.length;
+        const queryResult: HealthDiagnosticQueryResult = {
+          name: query.name,
+          queryId: query.id,
+          traceId: queryStats.traceId,
+          page: 0,
+          data,
+        };
 
-          const filtered = query.filterlist
-            ? await this.applyFilterlist(queryResult, query.filterlist)
-            : queryResult;
+        this.logger.info('Sending query result EBT', {
+          name: query.name,
+          traceId: queryStats.traceId,
+        } as LogMeta);
 
-          this.reportEBT(TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT, filtered);
+        const filtered = query.filterlist
+          ? await this.applyFilterlist(queryResult, query.filterlist)
+          : queryResult;
 
-          currentPage++;
-        }
+        this.reportEBT(TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT, filtered);
+
         queryStats.passed = true;
       } catch (err) {
         queryStats.failure = err.message;
@@ -252,7 +269,16 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       new RssGrouthCircuitBreaker(this.circuitBreakersConfig.rssGrowth),
       new TimeoutCircuitBreaker(this.circuitBreakersConfig.timeout),
       new EventLoopUtilizationCircuitBreaker(this.circuitBreakersConfig.eventLoopUtilization),
+      new EventLoopDelayCircuitBreaker(this.circuitBreakersConfig.eventLoopDelay),
+      new ElasticsearchCircuitBreaker(this.circuitBreakersConfig.elasticsearch, this.esClient()),
     ];
+  }
+
+  private esClient(): ElasticsearchClient {
+    if (this._esClient === undefined || this._esClient === null) {
+      throw Error('elasticsearch client is unavailable');
+    }
+    return this._esClient;
   }
 
   private reportEBT<T>(eventTypeOpts: EventTypeOpts<T>, eventData: T): void {
@@ -275,19 +301,18 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   }
 
   private async applyFilterlist(
-    result: HealthDiagnosticQueryResult,
+    queryResult: HealthDiagnosticQueryResult,
     rules: Record<string, Action>
   ): Promise<HealthDiagnosticQueryResult> {
-    const documents: Array<Record<string, unknown>> = result.data as Array<Record<string, unknown>>;
-    const filtered: Array<Record<string, unknown>> = [];
+    const filteredResult: unknown[] = [];
+    const documents = queryResult.data;
 
-    for (const doc of documents) {
-      const newDoc: Record<string, unknown> = {};
-
+    const applyFilterToDoc = async (doc: unknown): Promise<Record<string, unknown>> => {
+      const filteredDoc: Record<string, unknown> = {};
       for (const path of Object.keys(rules)) {
         const keys = path.split('.');
-        let src = doc;
-        let dst = newDoc;
+        let src = doc as Record<string, unknown>;
+        let dst = filteredDoc;
 
         for (let i = 0; i < keys.length; i++) {
           const key = keys[i];
@@ -296,7 +321,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
 
           if (i === keys.length - 1) {
             const value = src[key];
-            dst[key] = rules[path] === 'mask' ? await this.hashField(String(value)) : value;
+            dst[key] = rules[path] === Action.MASK ? await this.maskValue(String(value)) : value;
           } else {
             dst[key] ??= {};
             src = src[key] as Record<string, unknown>;
@@ -304,17 +329,31 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
           }
         }
       }
+      return filteredDoc;
+    };
 
-      filtered.push(newDoc);
+    for (const doc of documents) {
+      if (Array.isArray(doc)) {
+        const docs = doc as unknown[];
+        const result = await Promise.all(
+          docs.map((d) => {
+            const a = applyFilterToDoc(d);
+            return a;
+          })
+        );
+        filteredResult.push(result);
+      } else {
+        filteredResult.push(await applyFilterToDoc(doc));
+      }
     }
 
     return {
-      ...result,
-      data: filtered as unknown[],
+      ...queryResult,
+      data: filteredResult as unknown[],
     };
   }
 
-  private async hashField(value: string): Promise<string> {
+  private async maskValue(value: string): Promise<string> {
     const encoder = new TextEncoder();
     const data = encoder.encode(this.salt + value);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);

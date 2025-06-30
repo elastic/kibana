@@ -6,16 +6,12 @@
  */
 
 import { type EventLoopUtilization, performance } from 'perf_hooks';
-
 import type {
   CircuitBreaker,
   CircuitBreakerResult,
 } from '../health_diagnostic_circuit_breakers.types';
 import { failure, success } from './utils';
 
-/**
- *
- */
 export class EventLoopUtilizationCircuitBreaker implements CircuitBreaker {
   private readonly startUtilization: EventLoopUtilization;
 
@@ -23,7 +19,7 @@ export class EventLoopUtilizationCircuitBreaker implements CircuitBreaker {
     this.startUtilization = performance.eventLoopUtilization();
   }
 
-  validate(): CircuitBreakerResult {
+  async validate(): Promise<CircuitBreakerResult> {
     const eventLoop = performance.eventLoopUtilization(this.startUtilization);
 
     const exceeded = eventLoop.active > this.config.thresholdMillis;

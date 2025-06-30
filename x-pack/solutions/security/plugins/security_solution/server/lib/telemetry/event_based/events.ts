@@ -886,6 +886,10 @@ export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT: EventTypeOpts<Healt
         type: 'keyword',
         _meta: { description: 'Identifier for the executed query.' },
       },
+      queryId: {
+        type: 'keyword',
+        _meta: { description: 'Unique identifier for the specific query.' },
+      },
       traceId: {
         type: 'keyword',
         _meta: { description: 'Unique trace ID for correlating a single query execution.' },
@@ -900,7 +904,6 @@ export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT: EventTypeOpts<Healt
       },
     },
   };
-
 export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT: EventTypeOpts<HealthDiagnosticQueryStats> =
   {
     eventType: 'telemetry_health_diagnostic_query_stats_event',

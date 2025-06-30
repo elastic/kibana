@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { CircuitBreaker } from './health_diagnostic_circuit_breakers.types';
+import { type HealthDiagnosticQuery } from './health_diagnostic_service.types';
 
 /**
  * Configuration for executing a search query, including any associated circuit breakers.
@@ -15,7 +15,7 @@ export interface QueryConfig {
   /**
    * The Elasticsearch query to execute.
    */
-  query: SearchRequest;
+  query: HealthDiagnosticQuery;
 
   /**
    * A list of circuit breakers that must pass validation while the query is executed.
@@ -33,5 +33,5 @@ export interface CircuitBreakingQueryExecutor {
    * @param queryConfig - Configuration including the query and circuit breakers.
    * @returns An async iterable of results matching the query.
    */
-  search<T>(queryConfig: QueryConfig): AsyncIterable<T>;
+  search<T>(queryConfig: QueryConfig): Promise<T[]>;
 }

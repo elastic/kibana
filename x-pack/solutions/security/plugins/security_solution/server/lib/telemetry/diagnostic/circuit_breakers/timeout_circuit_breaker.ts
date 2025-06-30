@@ -14,9 +14,6 @@ import type {
 
 import { failure, success } from './utils';
 
-/**
- *
- */
 export class TimeoutCircuitBreaker implements CircuitBreaker {
   private readonly started: number;
 
@@ -24,7 +21,7 @@ export class TimeoutCircuitBreaker implements CircuitBreaker {
     this.started = performance.now();
   }
 
-  validate(): CircuitBreakerResult {
+  async validate(): Promise<CircuitBreakerResult> {
     const now = performance.now();
 
     if (now > this.started + this.config.timeoutMillis) {

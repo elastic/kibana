@@ -15,7 +15,7 @@ export interface CircuitBreaker {
    *
    * @returns Circuit breaker validation result
    */
-  validate(): CircuitBreakerResult;
+  validate(): Promise<CircuitBreakerResult>;
 
   /**
    * Returns statistics related to the circuit breaker.

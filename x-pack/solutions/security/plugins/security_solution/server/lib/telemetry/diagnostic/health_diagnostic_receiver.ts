@@ -5,262 +5,179 @@
  * 2.0.
  */
 
-import {
-  filter,
-  finalize,
-  map,
-  merge,
-  type Observable,
-  Subject,
-  type Subscription,
-  takeUntil,
-  tap,
-  timer,
-} from 'rxjs';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type {
-  Duration,
-  ExpandWildcards,
-  Indices,
-  SearchPointInTimeReference,
-  SearchRequest,
-} from '@elastic/elasticsearch/lib/api/types';
-import { cloneDeep } from 'lodash';
+import { filter, finalize, merge, type Observable, Subject, takeUntil, tap, timer } from 'rxjs';
+import * as rx from 'rxjs';
+import type { ElasticsearchClient, LogMeta, Logger } from '@kbn/core/server';
+import type { EqlSearchRequest, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { QueryConfig, CircuitBreakingQueryExecutor } from './health_diagnostic_receiver.types';
 import type {
   CircuitBreaker,
   CircuitBreakerResult,
 } from './health_diagnostic_circuit_breakers.types';
+import { type HealthDiagnosticQuery, QueryType } from './health_diagnostic_service.types';
+import type { TelemetryLogger } from '../telemetry_logger';
+import { newTelemetryLogger } from '../helpers';
 
 export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExecutor {
-  constructor(private client: ElasticsearchClient) {}
+  private readonly logger: TelemetryLogger;
 
-  public search<T>(queryConfig: QueryConfig): AsyncIterable<T> {
+  constructor(private client: ElasticsearchClient, logger: Logger) {
+    this.logger = newTelemetryLogger(logger.get('health_diagnostic.receiver'));
+  }
+
+  async search<T>(queryConfig: QueryConfig): Promise<T[]> {
     const { query, circuitBreakers } = queryConfig;
 
-    const upstream$ = new Subject<unknown[]>();
+    const upstream$ = new Subject<T[]>();
     const stop$ = new Subject<void>();
 
-    if (query.aggs) {
-      this.streamSearchAggrs(query, upstream$, stop$).catch((err: unknown) => {
-        upstream$.error(err);
-      });
-    } else {
-      this.streamSearchDocs(query, upstream$, stop$).catch((err: unknown) => {
-        upstream$.error(err);
-      });
+    switch (query.type) {
+      case QueryType.DSL:
+        this.streamDsl(query, upstream$, stop$).catch((err: unknown) => {
+          upstream$.error(err);
+        });
+        break;
+      case QueryType.EQL:
+        this.streamEql(query, upstream$, stop$).catch((err: unknown) => {
+          upstream$.error(err);
+        });
+        break;
+      case QueryType.ESQL:
+        this.streamEsql(query, upstream$, stop$).catch((err: unknown) => {
+          upstream$.error(err);
+        });
+        break;
+      default: {
+        const exhaustiveCheck: never = query.type;
+        throw new Error(`Unhandled QueryType: ${exhaustiveCheck}`);
+      }
     }
 
-    const circuitBreakers$ = this.configureCircuitBreakers(circuitBreakers);
-    return {
-      [Symbol.asyncIterator]() {
-        const queue: T[] = [];
-        const resolvers: Array<(value: IteratorResult<T>) => void> = [];
-        let isDone = false;
-
-        const sub = upstream$
-          .pipe(
-            takeUntil(circuitBreakers$),
-            finalize(() => {
-              stop$.next();
-            })
-          )
-          .subscribe({
-            next: (value) => {
-              if (resolvers.length) {
-                const resolve = resolvers.shift();
-                if (resolve) {
-                  resolve({ value: value as T, done: false });
-                } else {
-                  queue.push(value as T);
-                }
-              } else {
-                queue.push(value as T);
-              }
-            },
-            complete: () => {
-              isDone = true;
-              resolvers.forEach((r) => {
-                r({ value: undefined as T, done: true });
-              });
-              resolvers.length = 0;
-            },
-            error: (err: unknown) => {
-              resolvers.forEach((r) => {
-                r(Promise.reject(err) as unknown as IteratorResult<T>);
-              });
-              resolvers.length = 0;
-            },
-          });
-
-        return {
-          async next(): Promise<IteratorResult<T>> {
-            if (queue.length) {
-              const value = queue.shift();
-              if (value) {
-                return { value, done: true };
-              }
-            }
-            if (isDone) {
-              return { value: undefined as T, done: true };
-            }
-            return new Promise((resolve) => resolvers.push(resolve));
-          },
-          async return(): Promise<IteratorResult<T>> {
-            sub.unsubscribe();
-            return Promise.resolve({ value: undefined as T, done: true });
-          },
-          async throw(error: Error): Promise<IteratorResult<T>> {
-            sub.unsubscribe();
-            return Promise.reject(error);
-          },
-        };
-      },
-    };
+    return rx.firstValueFrom(
+      upstream$.pipe(
+        takeUntil(this.configureCircuitBreakers(circuitBreakers)),
+        finalize(() => {
+          stop$.next();
+        })
+      )
+    );
   }
 
-  async streamSearchDocs<T>(
-    query: SearchRequest,
-    collector$: Subject<T[]>,
-    stop$: Subject<void>,
-    keepAlive: Duration = '5m'
-  ): Promise<void> {
-    if (!query.sort) {
-      throw Error('Not possible to paginate a query without a sort attribute');
-    }
-
-    if (!query.index) {
-      throw Error('query must have index attribute');
-    }
-
-    const controller = new AbortController();
-    const abortSignal = controller.signal;
-
-    let hasMore = true;
-    let cancelled = false;
-
-    let stopSub: Subscription | undefined;
-    let pit: SearchPointInTimeReference | undefined;
-
-    try {
-      stopSub = stop$.subscribe(() => {
-        controller.abort();
-        cancelled = true;
-      });
-
-      pit = await this.openPointInTime(query.index, abortSignal, keepAlive);
-
-      const esQuery: SearchRequest = {
-        ...cloneDeep(query),
-        pit,
-      };
-
-      delete esQuery.index;
-
-      while (hasMore && !cancelled) {
-        const response = await this.client.search(esQuery, { signal: abortSignal });
-
-        const hits = response.hits.hits;
-
-        esQuery.search_after = response.hits.hits[hits.length - 1]?.sort;
-
-        const data = hits.flatMap((h) => (h._source != null ? ([h._source] as T[]) : []));
-
-        hasMore = hits.length > 0;
-        if (hasMore) {
-          collector$.next(data);
-        }
-      }
-      collector$.complete();
-    } catch (err: unknown) {
-      collector$.error(err);
-    } finally {
-      if (stopSub) {
-        stopSub.unsubscribe();
-      }
-      if (pit) {
-        await this.closePointInTime(pit.id, abortSignal);
-      }
-    }
-  }
-
-  async streamSearchAggrs<T>(
-    query: SearchRequest,
+  async streamDsl<T>(
+    diagnosticQuery: HealthDiagnosticQuery,
     collector$: Subject<T[]>,
     stop$: Subject<void>
   ): Promise<void> {
-    if (!query.aggs) {
-      throw Error('query must have aggs attribute');
-    }
-
-    if (!query.index) {
-      throw Error('query must have index attribute');
-    }
-
     const controller = new AbortController();
     const abortSignal = controller.signal;
 
-    let stopSub: Subscription | undefined;
+    const stopSub: rx.Subscription = stop$.subscribe(() => {
+      controller.abort();
+    });
 
+    const request: SearchRequest = JSON.parse(diagnosticQuery.query) as SearchRequest;
     try {
-      stopSub = stop$.subscribe(() => {
-        controller.abort();
-      });
-
-      const esQuery: SearchRequest = {
-        ...cloneDeep(query),
-        size: 0,
-      };
-
-      const response = await this.client.search(esQuery, { signal: abortSignal });
+      const response = await this.client.search(
+        {
+          index: diagnosticQuery.index,
+          ...request,
+        },
+        { signal: abortSignal }
+      );
 
       if (response.aggregations) {
         collector$.next([response.aggregations as T]);
+      } else if (response.hits.hits.length > 0) {
+        const hits = response.hits.hits;
+        const data = hits.flatMap((h) => (h._source != null ? ([h._source] as T[]) : []));
+        collector$.next(data);
       } else {
-        throw new Error('No aggregations found in the response');
+        this.logger.warn('Neither aggregations nor hits found in the response for query', {
+          query: diagnosticQuery.name,
+        } as LogMeta);
+        collector$.next([]);
       }
-      collector$.complete();
-    } catch (err: unknown) {
-      collector$.error(err);
     } finally {
-      if (stopSub) {
-        stopSub.unsubscribe();
-      }
+      stopSub.unsubscribe();
     }
   }
 
-  async openPointInTime(
-    index: Indices,
-    abortSignal: AbortSignal,
-    keepAlive: Duration = '5m',
-    expandWildcards: ExpandWildcards = ['open', 'hidden']
-  ): Promise<SearchPointInTimeReference> {
-    return this.client
-      .openPointInTime(
-        {
-          index,
-          keep_alive: keepAlive,
-          expand_wildcards: expandWildcards,
-        },
-        { signal: abortSignal }
-      )
-      .then((response) => {
-        return {
-          id: response.id,
-          keep_alive: keepAlive,
-        };
-      });
+  async streamEsql<T>(
+    diagnosticQuery: HealthDiagnosticQuery,
+    collector$: Subject<T[]>,
+    stop$: Subject<void>
+  ): Promise<void> {
+    const controller = new AbortController();
+    const abortSignal = controller.signal;
+    const regex = /^[\s\r\n]*FROM/;
+
+    const stopSub: rx.Subscription = stop$.subscribe(() => {
+      controller.abort();
+    });
+
+    const query = regex.test(diagnosticQuery.query)
+      ? diagnosticQuery.query
+      : `FROM ${diagnosticQuery.index} | ${diagnosticQuery.query}`;
+
+    try {
+      const response = await this.client.helpers
+        .esql({ query }, { signal: abortSignal })
+        .toRecords();
+
+      collector$.next(response.records as T[]);
+    } finally {
+      stopSub.unsubscribe();
+    }
   }
 
-  async closePointInTime(pitId: string, abortSignal: AbortSignal) {
-    await this.client.closePointInTime({ id: pitId }, { signal: abortSignal });
+  async streamEql<T>(
+    diagnosticQuery: HealthDiagnosticQuery,
+    collector$: Subject<T[]>,
+    stop$: Subject<void>
+  ): Promise<void> {
+    const controller = new AbortController();
+    const abortSignal = controller.signal;
+
+    const stopSub: rx.Subscription = stop$.subscribe(() => {
+      controller.abort();
+    });
+    try {
+      const request: EqlSearchRequest = {
+        index: diagnosticQuery.index,
+        query: diagnosticQuery.query,
+      };
+
+      const response = await this.client.eql.search(request, { signal: abortSignal });
+
+      if (response.hits.events) {
+        const data = response.hits.events.flatMap((h) =>
+          h._source != null ? ([h._source] as T[]) : []
+        );
+        collector$.next(data);
+      } else if (response.hits.sequences) {
+        const data = response.hits.sequences.map((seq) => {
+          return seq.events.flatMap((h) =>
+            h._source != null ? ([h._source] as unknown[]) : []
+          ) as T;
+        });
+        collector$.next(data);
+      } else {
+        this.logger.warn(
+          '>> Neither hits.events nor hits.sequences found in the response for query',
+          { query: diagnosticQuery.name } as LogMeta
+        );
+        collector$.next([]);
+      }
+    } finally {
+      stopSub.unsubscribe();
+    }
   }
 
   configureCircuitBreakers(circuitBreakers: CircuitBreaker[]): Observable<CircuitBreakerResult> {
     return merge(
       ...circuitBreakers.map((cb) =>
         timer(0, cb.validationIntervalMs()).pipe(
-          map(() => cb.validate()),
+          rx.mergeMap(() => rx.from(cb.validate())),
           filter((result) => !result.valid)
         )
       )

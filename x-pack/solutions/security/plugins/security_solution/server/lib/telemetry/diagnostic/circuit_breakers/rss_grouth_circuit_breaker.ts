@@ -11,11 +11,10 @@ import type {
 } from '../health_diagnostic_circuit_breakers.types';
 import { failure, success } from './utils';
 
-/**
- *
- */
 export class RssGrouthCircuitBreaker implements CircuitBreaker {
-  private readonly initialRss;
+  private readonly initialRss: number;
+  private maxRss: number;
+  private maxPercentGrowth: number;
 
   constructor(
     private readonly config: {
@@ -28,11 +27,16 @@ export class RssGrouthCircuitBreaker implements CircuitBreaker {
     }
 
     this.initialRss = process.memoryUsage().rss;
+    this.maxRss = this.initialRss;
+    this.maxPercentGrowth = 0;
   }
 
-  validate(): CircuitBreakerResult {
+  async validate(): Promise<CircuitBreakerResult> {
     const currentRss = process.memoryUsage().rss;
     const percentGrowth = (currentRss - this.initialRss) / this.initialRss;
+
+    this.maxRss = Math.max(this.maxRss, currentRss);
+    this.maxPercentGrowth = Math.max(this.maxPercentGrowth, percentGrowth);
 
     if (percentGrowth > this.config.maxRssGrowthPercent) {
       return failure(
@@ -47,6 +51,8 @@ export class RssGrouthCircuitBreaker implements CircuitBreaker {
   stats(): unknown {
     return {
       initialRss: this.initialRss,
+      maxRss: this.maxRss,
+      maxPercentGrowth: this.maxPercentGrowth,
     };
   }
 
