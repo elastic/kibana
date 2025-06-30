@@ -18,6 +18,7 @@ import { SearchProfilerPageProvider } from '@kbn/test-suites-xpack-platform/func
 import { CanvasPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/canvas_page';
 import { GisPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/gis_page';
 import { LensPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/lens_page';
+import { UpgradeAssistantFlyoutObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/upgrade_assistant_page';
 import { ApiKeysPageProvider } from './api_keys_page';
 import { AssetDetailsProvider } from './asset_details';
 import { BannersPageObject } from './banners_page';
@@ -117,6 +118,7 @@ export const pageObjects = {
   spaceSelector: SpaceSelectorPageObject,
   statusPage: StatusPageObject,
   tagManagement: TagManagementPageObject,
+  upgradeAssistant: UpgradeAssistantFlyoutObject,
   uptime: UptimePageObject,
   userProfiles: UserProfilePageProvider,
   watcher: WatcherPageObject,
