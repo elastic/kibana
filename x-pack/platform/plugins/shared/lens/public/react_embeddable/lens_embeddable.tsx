@@ -9,7 +9,7 @@ import React from 'react';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { BehaviorSubject, merge } from 'rxjs';
+import { merge } from 'rxjs';
 import { DOC_TYPE } from '../../common/constants';
 import {
   LensApi,
