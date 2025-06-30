@@ -64,7 +64,7 @@ export async function backfillPackagePolicySupportsAgentless(esClient: Elasticse
       })
   ).saved_objects.map((so) => mapPackagePolicySavedObjectToPackagePolicy(so));
 
-  const agentlessPackagePoliciesToUpdate: any = [];
+  const agentlessPackagePoliciesToUpdate: PackagePolicy[] = [];
   await pMap(
     packagePoliciesToUpdate,
     async (packagePolicy) => {
@@ -73,8 +73,8 @@ export async function backfillPackagePolicySupportsAgentless(esClient: Elasticse
       );
       const pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
-        pkgName: packagePolicy.package.name,
-        pkgVersion: packagePolicy.package.version,
+        pkgName: packagePolicy.package?.name,
+        pkgVersion: packagePolicy.package?.version,
         prerelease: true,
       });
       if (isAgentlessIntegration(pkgInfo)) {
@@ -90,7 +90,7 @@ export async function backfillPackagePolicySupportsAgentless(esClient: Elasticse
     .getLogger()
     .debug(
       `Backfilling supports_agentless on package policies: ${agentlessPackagePoliciesToUpdate.map(
-        (policy) => policy.id
+        (policy: PackagePolicy) => policy.id
       )}`
     );
 
@@ -105,7 +105,7 @@ export async function backfillPackagePolicySupportsAgentless(esClient: Elasticse
 
     await pMap(
       agentlessPackagePoliciesToUpdate,
-      (packagePolicy) => {
+      (packagePolicy: PackagePolicy) => {
         const soClient = appContextService.getInternalUserSOClientForSpaceId(
           packagePolicy.spaceIds?.[0]
         );
