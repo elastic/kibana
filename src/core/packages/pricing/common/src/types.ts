@@ -15,11 +15,11 @@ import { PricingProduct } from './pricing_tiers_config';
  * @public
  */
 export interface PricingProductFeature {
-  /* Unique identifier for the feature. */
+  /** Unique identifier for the feature. */
   id: string;
-  /* Human-readable description of the feature. */
+  /** Human-readable description of the feature. */
   description: string;
-  /* List of products and tiers where this feature is available. */
+  /** List of products and tiers where this feature is available. */
   products: PricingProduct[];
 }
 

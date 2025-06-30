@@ -12,6 +12,12 @@ import type { AnalyticsServiceSetup as AnalyticsServiceSetupFromBrowser } from '
 import { map, type Observable } from 'rxjs';
 import type { TiersConfig } from './pricing_tiers_config';
 
+/**
+ * Common function to register the EBT context provider for both server and browser environments.
+ * @internal
+ * @param analytics {@link AnalyticsServiceSetupFromServer} {@link AnalyticsServiceSetupFromBrowser}
+ * @param pricingTiers$ Observable of {@link TiersConfig} that contains the configuration for pricing tiers.
+ */
 export function registerAnalyticsContextProvider(
   analytics: AnalyticsServiceSetupFromServer | AnalyticsServiceSetupFromBrowser,
   pricingTiers$: Observable<TiersConfig>
