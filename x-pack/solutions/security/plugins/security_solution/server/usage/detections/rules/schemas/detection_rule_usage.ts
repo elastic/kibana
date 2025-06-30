@@ -128,6 +128,10 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         },
       },
     },
+    has_exceptions: {
+      type: 'long',
+      _meta: { description: 'Number of query rules with exceptions' },
+    },
   },
   query_custom: {
     enabled: { type: 'long', _meta: { description: 'Number of custom query rules enabled' } },
@@ -258,6 +262,10 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         },
       },
     },
+    has_exceptions: {
+      type: 'long',
+      _meta: { description: 'Number of custom query rules with exceptions' },
+    },
   },
   threshold: {
     enabled: {
@@ -386,6 +394,10 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
           _meta: { description: 'Number of osquery response actions within threshold rules' },
         },
       },
+    },
+    has_exceptions: {
+      type: 'long',
+      _meta: { description: 'Number of threshold rules with exceptions' },
     },
   },
   threshold_custom: {
@@ -520,6 +532,10 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         },
       },
     },
+    has_exceptions: {
+      type: 'long',
+      _meta: { description: 'Number of custom threshold rules with exceptions' },
+    },
   },
   eql: {
     enabled: { type: 'long', _meta: { description: 'Number of eql rules enabled' } },
@@ -638,6 +654,10 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
           _meta: { description: 'Number of osquery response actions within eql rules' },
         },
       },
+    },
+    has_exceptions: {
+      type: 'long',
+      _meta: { description: 'Number of EQL rules with exceptions' },
     },
   },
   eql_custom: {
@@ -759,6 +779,10 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
           _meta: { description: 'Number of osquery response actions within custom EQL rules' },
         },
       },
+    },
+    has_exceptions: {
+      type: 'long',
+      _meta: { description: 'Number of custom EQL rules with exceptions' },
     },
   },
   machine_learning: {
@@ -890,6 +914,10 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
           _meta: { description: 'Number of osquery response actions within ML rules' },
         },
       },
+    },
+    has_exceptions: {
+      type: 'long',
+      _meta: { description: 'Number of ML rules with exceptions' },
     },
   },
   machine_learning_custom: {
@@ -1027,6 +1055,10 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         },
       },
     },
+    has_exceptions: {
+      type: 'long',
+      _meta: { description: 'Number of custom ML rules with exceptions' },
+    },
   },
   threat_match: {
     enabled: {
@@ -1156,6 +1188,10 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
           _meta: { description: 'Number of osquery response actions within threat match rules' },
         },
       },
+    },
+    has_exceptions: {
+      type: 'long',
+      _meta: { description: 'Number of threat match rules with exceptions' },
     },
   },
   threat_match_custom: {
@@ -1295,6 +1331,10 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         },
       },
     },
+    has_exceptions: {
+      type: 'long',
+      _meta: { description: 'Number of custom threat match rules with exceptions' },
+    },
   },
   new_terms: {
     enabled: {
@@ -1423,6 +1463,10 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
           _meta: { description: 'Number of osquery response actions within new terms rules' },
         },
       },
+    },
+    has_exceptions: {
+      type: 'long',
+      _meta: { description: 'Number of New Terms rules with exceptions' },
     },
   },
   new_terms_custom: {
@@ -1557,6 +1601,10 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         },
       },
     },
+    has_exceptions: {
+      type: 'long',
+      _meta: { description: 'Number of custom New Terms rules with exceptions' },
+    },
   },
   esql: {
     enabled: {
@@ -1683,6 +1731,10 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
           _meta: { description: 'Number of osquery response actions within ES|QL rules' },
         },
       },
+    },
+    has_exceptions: {
+      type: 'long',
+      _meta: { description: 'Number of ES|QL rules with exceptions' },
     },
   },
   esql_custom: {
@@ -1813,6 +1865,10 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         },
       },
     },
+    has_exceptions: {
+      type: 'long',
+      _meta: { description: 'Number of custom ES|QL rules with exceptions' },
+    },
   },
   elastic_total: {
     enabled: { type: 'long', _meta: { description: 'Number of elastic rules enabled' } },
@@ -1936,6 +1992,10 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
         },
       },
     },
+    has_exceptions: {
+      type: 'long',
+      _meta: { description: 'Number of prebuilt rules with exceptions' },
+    },
   },
   custom_total: {
     enabled: { type: 'long', _meta: { description: 'Number of custom rules enabled' } },
@@ -2055,6 +2115,10 @@ export const ruleTypeUsageSchema: MakeSchemaFrom<RulesTypeUsage> = {
           _meta: { description: 'Number of osquery response actions within custom rules' },
         },
       },
+    },
+    has_exceptions: {
+      type: 'long',
+      _meta: { description: 'Number of custom rules with exceptions' },
     },
   },
 };

@@ -57,6 +57,7 @@ export const getInitialFeatureTypeUsage = (): FeatureTypeUsage => ({
   legacy_investigation_fields: 0,
   alert_suppression: initialAlertSuppression,
   response_actions: initialResponseActionsUsage,
+  has_exceptions: 0,
 });
 
 /**
