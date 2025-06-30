@@ -19,7 +19,7 @@ export function PageAttachmentChildren({
   persistableStateAttachmentState,
 }: AttachmentChildrenProps) {
   const pageState = persistableStateAttachmentState as PageAttachmentPersistedState;
-  const { url } = pageState;
+  const { url, summary } = pageState;
 
   if (!url) {
     return (
@@ -57,6 +57,7 @@ export function PageAttachmentChildren({
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {summary && <EuiText size="s">{summary}</EuiText>}
     </>
   );
 }
