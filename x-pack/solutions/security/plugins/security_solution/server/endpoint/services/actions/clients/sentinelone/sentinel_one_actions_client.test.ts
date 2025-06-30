@@ -980,11 +980,6 @@ describe('SentinelOneActionsClient class', () => {
     });
 
     describe('Telemetry', () => {
-      beforeEach(() => {
-        // @ts-expect-error
-        classConstructorOptions.endpointService.experimentalFeatures.responseActionsTelemetryEnabled =
-          true;
-      });
       describe('for Isolate and Release', () => {
         let s1ActivityHits: Array<SearchHit<SentinelOneActivityEsDoc>>;
 
