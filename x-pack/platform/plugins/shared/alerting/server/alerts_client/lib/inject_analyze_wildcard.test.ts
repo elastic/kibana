@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { MAX_QUERIES } from './constants';
 import { injectAnalyzeWildcard } from './inject_analyze_wildcard';
 
 jest.mock('./constants', () => ({
@@ -59,27 +58,6 @@ const getQuery = (query?: string) => {
       ],
     },
   };
-};
-
-const getDeepQuery = (extraLength: number) => {
-  const query = getQuery();
-
-  const deepNode = { bool: { filter: [] } };
-  let currentNode = deepNode;
-  for (let i = 0; i < extraLength; i++) {
-    const nextNode = { bool: { filter: [] } };
-    currentNode.bool.filter.push(nextNode);
-    currentNode = nextNode;
-  }
-
-  currentNode.bool.filter.push({
-    query_string: {
-      fields: ['kibana.alert.instance.id'],
-      query: '*elastic*',
-    },
-  });
-  query.bool.filter.push(deepNode);
-  return query;
 };
 
 describe('injectAnalyzeWildcard', () => {
@@ -195,8 +173,59 @@ describe('injectAnalyzeWildcard', () => {
   });
 
   test('should throw error if the query is too deeply nested', async () => {
-    const query = getDeepQuery(MAX_QUERIES + 1);
+    const mockedQuery = {
+      bool: {
+        must: [],
+        filter: [
+          {
+            bool: {
+              filter: [
+                {
+                  bool: {
+                    filter: [
+                      {
+                        bool: {
+                          should: [
+                            {
+                              query_string: {
+                                fields: ['kibana.alert.instance.id'],
+                                query: '*elastic*',
+                              },
+                            },
+                          ],
+                          minimum_should_match: 1,
+                        },
+                      },
+                      {
+                        bool: {
+                          should: [
+                            {
+                              match: {
+                                'kibana.alert.action_group': 'test',
+                              },
+                            },
+                          ],
+                          minimum_should_match: 1,
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+        should: [],
+        must_not: [
+          {
+            match_phrase: {
+              _id: 'assdasdasd',
+            },
+          },
+        ],
+      },
+    };
 
-    expect(() => injectAnalyzeWildcard(query)).toThrow('Query is too deeply nested');
+    expect(() => injectAnalyzeWildcard(mockedQuery)).toThrow('Query is too deeply nested');
   });
 });
