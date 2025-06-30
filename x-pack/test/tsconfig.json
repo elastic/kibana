@@ -98,7 +98,6 @@
     "@kbn/observability-shared-plugin",
     "@kbn/server-route-repository",
     "@kbn/core-http-common",
-    "@kbn/lens-plugin",
     "@kbn/logs-shared-plugin",
     "@kbn/observability-onboarding-plugin",
     "@kbn/uptime-plugin",
