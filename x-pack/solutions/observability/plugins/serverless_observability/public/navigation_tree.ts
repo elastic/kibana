@@ -265,6 +265,33 @@ export const createNavigationTree = ({
               },
             ],
           },
+          {
+            id: 'otherTools',
+            title: i18n.translate('xpack.serverlessObservability.nav.otherTools', {
+              defaultMessage: 'Other tools',
+            }),
+            renderAs: 'panelOpener',
+            children: [
+              {
+                link: 'logs:anomalies',
+                title: i18n.translate(
+                  'xpack.serverlessObservability.nav.otherTools.logsAnomalies',
+                  {
+                    defaultMessage: 'Logs anomalies',
+                  }
+                ),
+              },
+              {
+                link: 'logs:log-categories',
+                title: i18n.translate(
+                  'xpack.serverlessObservability.nav.otherTools.logsCategories',
+                  {
+                    defaultMessage: 'Logs categories',
+                  }
+                ),
+              },
+            ],
+          },
         ],
       },
     ],
