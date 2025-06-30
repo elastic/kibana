@@ -226,6 +226,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cases.files.maxSize (number?)',
         'xpack.cases.markdownPlugins.lens (boolean?)',
         'xpack.cases.stack.enabled (boolean?)',
+        'xpack.cases.incrementalId.enabled (boolean?)',
         'xpack.ccr.ui.enabled (boolean?)',
         'xpack.cloud.base_url (string?)',
         'xpack.cloud.cname (string?)',
@@ -255,7 +256,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string?)',
         'xpack.cloud.serverless.project_name (string?)',
-        'xpack.cloud.serverless.project_type (string?)',
+        'xpack.cloud.serverless.project_type (observability?|security?|search?|chat?)',
         'xpack.cloud.serverless.orchestrator_target (string?)',
         'xpack.cloud.onboarding.default_solution (string?)',
         'xpack.contentConnectors.ui.enabled (boolean?)',

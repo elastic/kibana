@@ -10,8 +10,8 @@
 import { useEffect } from 'react';
 import { useEuiThemeCSSVariables } from '@elastic/eui';
 
-export const hackEuiPushFlyoutPaddingInlineStart = '--eui-push-flyout-padding-inline-start';
 export const hackEuiPushFlyoutPaddingInlineEnd = '--eui-push-flyout-padding-inline-end';
+export const hackEuiPushFlyoutPaddingInlineStart = '--eui-push-flyout-padding-inline-start';
 
 /**
  * This is definitely a hack for experimental purposes.

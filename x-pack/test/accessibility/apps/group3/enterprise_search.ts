@@ -26,21 +26,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe('Overview', () => {
+    describe('Home', () => {
       before(async () => {
-        await common.navigateToApp('elasticsearch/overview');
+        await common.navigateToApp('elasticsearch/home');
       });
 
-      it('loads a landing page with product cards', async function () {
-        await retry.waitFor(
-          'Elasticsearch product card visible',
-          async () => await testSubjects.exists('enterpriseSearchElasticsearchProductCard')
-        );
-        await retry.waitFor(
-          'Search Applications product card visible',
-          async () => await testSubjects.exists('enterpriseSearchApplicationsProductCard')
-        );
-        await a11y.testAppSnapshot();
+      it('loads the search home page', async function () {
+        await testSubjects.exists('search-homepage');
       });
     });
 

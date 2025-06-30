@@ -86,7 +86,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
         {!!helpTooltip && (
           <EuiIconTip
             aria-label={helpTooltip}
-            type="questionInCircle"
+            type="question"
             color="subdued"
             size="s"
             position="right"

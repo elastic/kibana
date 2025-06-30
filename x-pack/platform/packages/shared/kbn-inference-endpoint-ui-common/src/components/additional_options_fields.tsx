@@ -34,7 +34,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { ConfigurationFormItems } from './configuration/configuration_form_items';
 import * as LABELS from '../translations';
-import { DEFAULT_TASK_TYPE } from '../constants';
+import { DEFAULT_TASK_TYPE, internalProviderKeys } from '../constants';
 import { Config, ConfigEntryView } from '../types/types';
 import { TaskTypeOption } from '../utils/helpers';
 
@@ -183,26 +183,25 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
       <EuiPanel hasBorder={true}>
         {optionalProviderFormFields.length > 0 ? (
           <>
-            <EuiTitle size="xxs" data-test-subj="provider-optional-settings-label">
-              <h4>
-                <FormattedMessage
-                  id="xpack.inferenceEndpointUICommon.components.additionalInfo.providerOptionalSettingsLabel"
-                  defaultMessage="Service settings"
-                />
-              </h4>
-            </EuiTitle>
-            <EuiText
-              css={css`
-                font-size: ${xsFontSize};
-                color: ${euiTheme.colors.textSubdued};
-              `}
-            >
-              <FormattedMessage
-                id="xpack.inferenceEndpointUICommon.components.additionalInfo.providerOptionalSettingsHelpLabel"
-                defaultMessage="Configure the inference provider. These settings are optional provider settings."
-              />
-            </EuiText>
-            <EuiSpacer size="m" />
+            {internalProviderKeys.includes(config.provider) ? null : (
+              <>
+                <EuiTitle size="xxs" data-test-subj="provider-optional-settings-label">
+                  <h4>
+                    <FormattedMessage
+                      id="xpack.inferenceEndpointUICommon.components.additionalInfo.providerOptionalSettingsLabel"
+                      defaultMessage="Service settings"
+                    />
+                  </h4>
+                </EuiTitle>
+                <EuiText color="subdued" size="xs">
+                  <FormattedMessage
+                    id="xpack.inferenceEndpointUICommon.components.additionalInfo.providerOptionalSettingsHelpLabel"
+                    defaultMessage="Configure the inference provider. These settings are optional provider settings."
+                  />
+                </EuiText>
+                <EuiSpacer size="m" />
+              </>
+            )}
             <ConfigurationFormItems
               isLoading={false}
               direction="column"

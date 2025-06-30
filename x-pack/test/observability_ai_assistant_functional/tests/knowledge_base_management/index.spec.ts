@@ -15,7 +15,7 @@ import {
   teardownTinyElserModelAndInferenceEndpoint,
 } from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/model_and_inference';
 import { clearKnowledgeBase } from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/knowledge_base';
-import { ObservabilityAIAssistantApiClient } from '../../../observability_ai_assistant_api_integration/common/observability_ai_assistant_api_client';
+import { ObservabilityAIAssistantApiClient } from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/observability_ai_assistant_api_client';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {
