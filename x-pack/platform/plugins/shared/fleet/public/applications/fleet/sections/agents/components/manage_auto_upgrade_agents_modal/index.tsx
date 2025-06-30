@@ -247,7 +247,7 @@ const TargetVersionsRow: React.FunctionComponent<{
                 defaultMessage="Target agent version"
               />
               <EuiIconTip
-                type="iInCircle"
+                type="info"
                 content={
                   <FormattedMessage
                     data-test-subj="targetVersionTooltip"
@@ -278,7 +278,7 @@ const TargetVersionsRow: React.FunctionComponent<{
                 defaultMessage="% of agents to upgrade"
               />
               <EuiIconTip
-                type="iInCircle"
+                type="info"
                 title={'Rounding Applied'}
                 content={
                   <FormattedMessage

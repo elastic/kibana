@@ -8,9 +8,10 @@
 import { useAssistantAvailability } from './use_assistant_availability';
 import { useLicense } from '../licence/use_licence';
 import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
-import { ASSISTANT_FEATURE_ID, SECURITY_FEATURE_ID } from '../../common/constants';
 import { LicenseService } from '../licence/license_service';
 import { renderHook } from '@testing-library/react';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
+import { ASSISTANT_FEATURE_ID } from '@kbn/security-solution-features/constants';
 jest.mock('../licence/use_licence');
 jest.mock('../../context/typed_kibana_context/typed_kibana_context');
 

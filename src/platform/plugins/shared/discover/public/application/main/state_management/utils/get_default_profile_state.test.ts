@@ -17,8 +17,10 @@ const emptyDataView = buildDataViewMock({
   name: 'emptyDataView',
   fields: fieldList(),
 });
-const { profilesManagerMock } = createContextAwarenessMocks();
-const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager();
+const { profilesManagerMock, scopedEbtManagerMock } = createContextAwarenessMocks();
+const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager({
+  scopedEbtManager: scopedEbtManagerMock,
+});
 
 scopedProfilesManager.resolveDataSourceProfile({});
 
