@@ -127,8 +127,6 @@ export function initializeUnsavedChangesManager({
           'refreshInterval',
         ]);
 
-        // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.
-        dashboardStateToBackup.viewMode = viewMode;
         // Backup latest state from children that have unsaved changes
         if (hasPanelChanges || hasControlGroupChanges) {
           const { panels, references } = layoutManager.internalApi.serializeLayout();

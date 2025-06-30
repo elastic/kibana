@@ -10,9 +10,8 @@
 import type { Reference } from '@kbn/content-management-utils';
 import type { SerializableRecord, Writable } from '@kbn/utility-types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { ViewMode } from '@kbn/presentation-publishing';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
-
+import { ViewMode } from '@kbn/presentation-publishing';
 import { ControlGroupSerializedState } from '@kbn/controls-plugin/common';
 import type { DashboardAttributes, DashboardOptions } from '../server/content_management';
 
@@ -40,7 +39,6 @@ export interface DashboardState extends DashboardSettings {
   filters: Filter[];
   timeRange?: TimeRange;
   refreshInterval?: RefreshInterval;
-  viewMode: ViewMode;
   panels: DashboardAttributes['panels'];
 
   /**
@@ -61,6 +59,8 @@ export type DashboardLocatorParams = Partial<
     controlGroupInput?: DashboardState['controlGroupInput'] & SerializableRecord;
 
     references?: DashboardState['references'] & SerializableRecord;
+
+    viewMode: ViewMode;
 
     /**
      * If provided, the dashboard with this id will be loaded. If not given, new, unsaved dashboard will be loaded.
