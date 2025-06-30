@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Plugin,
-  CoreSetup,
-  CoreStart,
-  PluginInitializerContext,
-  Logger,
-} from '@kbn/core/server';
+import type { Plugin, CoreSetup, PluginInitializerContext, Logger } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -20,10 +14,6 @@ import type { FilesSetup } from '@kbn/files-plugin/server';
 import type { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server/plugin';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import {
-  createCasesAnalyticsIndexes,
-  scheduleCasesAnalyticsSyncTasks,
-} from '@kbn/cases-plugin/server/cases_analytics';
 import { getPersistableStateAttachment } from './attachments/persistable_state';
 import { getExternalReferenceAttachment } from './attachments/external_reference';
 import { registerRoutes } from './routes';
@@ -97,14 +87,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     });
   }
 
-  public start(core: CoreStart, plugins: FixtureStartDeps) {
-    // scheduleCasesAnalyticsSyncTasks({ taskManager: plugins.taskManager, logger: this.log });
-    // createCasesAnalyticsIndexes({
-    //   esClient: core.elasticsearch.client.asInternalUser,
-    //   logger: this.log,
-    //   isServerless: false,
-    //   taskManager: plugins.taskManager,
-    // }).catch(() => {});
-  }
+  public start() {}
+
   public stop() {}
 }

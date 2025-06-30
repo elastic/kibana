@@ -13,7 +13,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const esClient = getService('es');
   const retry = getService('retry');
 
-  describe.only('analytics indexes creation', () => {
+  describe('analytics indexes creation', () => {
     const indexVersion = 1;
 
     it('cases index should be created with the correct mappings and scripts on startup', async () => {
