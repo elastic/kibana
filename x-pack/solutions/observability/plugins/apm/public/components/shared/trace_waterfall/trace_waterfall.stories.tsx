@@ -110,7 +110,6 @@ export const Example: StoryFn<{}> = () => {
         {
           id: '2b18312dfedbf16a',
           timestampUs: new Date('2025-05-27T12:15:04.974Z').getTime() * 1000,
-          // timestamp: '2025-05-27T12:15:04.973Z',
           name: 'executing api route (pages) /api/checkout',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 51298750,
@@ -121,7 +120,6 @@ export const Example: StoryFn<{}> = () => {
         {
           id: '41b39c13ec0166a8',
           timestampUs: new Date('2025-05-27T12:15:06.024Z').getTime() * 1000,
-          // timestamp: '2025-05-27T12:15:04.973Z',
           name: 'grpc.oteldemo.ProductCatalogService/GetProduct',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 1187042,
@@ -132,7 +130,6 @@ export const Example: StoryFn<{}> = () => {
         {
           id: '255547a7b6b19871',
           timestampUs: new Date('2025-05-27T12:15:06.500Z').getTime() * 1000,
-          // timestamp: '2025-05-27T12:15:04.973Z',
           name: 'oteldemo.ProductCatalogService/GetProduct',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 90416,

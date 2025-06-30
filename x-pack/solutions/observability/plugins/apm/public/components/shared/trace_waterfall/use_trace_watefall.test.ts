@@ -318,7 +318,7 @@ describe('getclockSkew', () => {
     jest.clearAllMocks();
   });
   const parent = {
-    timestamp: '2024-01-01T00:00:00.000Z',
+    timestampUs: new Date('2024-01-01T00:00:00.000Z').getTime() * 1000,
     duration: 1000,
     skew: 0,
   } as unknown as TraceWaterfallItem;
