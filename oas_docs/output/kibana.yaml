@@ -174,7 +174,7 @@ tags:
     x-displayName: Security detections
   - description: Endpoint Exceptions API allows you to manage detection rule endpoint exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.
     name: Security Endpoint Exceptions API
-    x-displayName: Security endpoint exceptions
+    x-displayName: Security Elastic Endpoint exceptions
   - description: Interact with and manage endpoints running the Elastic Defend integration.
     name: Security Endpoint Management API
     x-displayName: Security endpoint management
@@ -12342,7 +12342,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Create an endpoint exception list
+      summary: Create an Elastic Endpoint rule exception list
       tags:
         - Security Endpoint Exceptions API
   /api/endpoint_list/items:
@@ -12401,7 +12401,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Delete an endpoint exception list item
+      summary: Delete an Elastic Endpoint exception list item
       tags:
         - Security Endpoint Exceptions API
     get:
@@ -12461,7 +12461,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Get an endpoint exception list item
+      summary: Get an Elastic Endpoint rule exception list item
       tags:
         - Security Endpoint Exceptions API
     post:
@@ -12540,7 +12540,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Create an endpoint exception list item
+      summary: Create an Elastic Endpoint rule exception list item
       tags:
         - Security Endpoint Exceptions API
     put:
@@ -12624,7 +12624,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Update an endpoint exception list item
+      summary: Update an Elastic Endpoint rule exception list item
       tags:
         - Security Endpoint Exceptions API
   /api/endpoint_list/items/_find:
@@ -12729,7 +12729,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Get endpoint exception list items
+      summary: Get Elastic Endpoint exception list items
       tags:
         - Security Endpoint Exceptions API
   /api/endpoint/action:
