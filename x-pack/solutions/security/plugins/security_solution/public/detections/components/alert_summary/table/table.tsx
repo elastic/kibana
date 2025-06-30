@@ -218,6 +218,7 @@ export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }
       config: getEsQueryConfig(uiSettings),
       dataProviders: [],
       dataViewSpec,
+      newDataViewPickerEnabledDataView: dataView,
       browserFields,
       filters,
       kqlQuery: globalQuery,
@@ -234,7 +235,7 @@ export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }
     } catch {
       return { bool: {} };
     }
-  }, [browserFields, dataViewSpec, filters, globalQuery, uiSettings]);
+  }, [browserFields, dataView, dataViewSpec, filters, globalQuery, uiSettings]);
 
   const renderAdditionalToolbarControls = useCallback(
     () => <AdditionalToolbarControls dataView={dataView} />,

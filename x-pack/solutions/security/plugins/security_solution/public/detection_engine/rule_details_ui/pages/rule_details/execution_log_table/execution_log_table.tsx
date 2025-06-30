@@ -87,7 +87,7 @@ import {
 } from './execution_log_columns';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
 import { EventLogEventTypes } from '../../../../../common/lib/telemetry';
-import { useDataViewSpec } from '../../../../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 
 const EXECUTION_UUID_FIELD_NAME = 'kibana.alert.rule.execution.uuid';
 
@@ -168,8 +168,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   );
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
 
   const { addError, addSuccess, remove } = useAppToasts();
 
@@ -244,8 +243,10 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
   // Cache UUID field from data view as it can be expensive to iterate all data view fields
   const uuidDataViewField = useMemo(
-    () => sourcererDataView.fields?.[EXECUTION_UUID_FIELD_NAME],
-    [sourcererDataView]
+    () =>
+      experimentalDataView?.fields?.getByName(EXECUTION_UUID_FIELD_NAME) ||
+      oldSourcererDataView.fields?.[EXECUTION_UUID_FIELD_NAME],
+    [experimentalDataView, oldSourcererDataView]
   );
 
   // Callbacks
@@ -311,7 +312,9 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
   const onFilterByExecutionIdCallback = useCallback(
     (executionId: string, executionStart: string) => {
-      const dataViewAsViewBase = dataViewSpecToViewBase(sourcererDataView);
+      const dataViewAsViewBase = newDataViewPickerEnabled
+        ? experimentalDataView
+        : dataViewSpecToViewBase(oldSourcererDataView);
 
       if (
         uuidDataViewField != null &&
@@ -368,11 +371,13 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
       }
     },
     [
+      newDataViewPickerEnabled,
+      experimentalDataView,
+      oldSourcererDataView,
       uuidDataViewField,
       filters,
       query,
       timerange,
-      sourcererDataView,
       dispatch,
       filterManager,
       selectAlertsTab,
