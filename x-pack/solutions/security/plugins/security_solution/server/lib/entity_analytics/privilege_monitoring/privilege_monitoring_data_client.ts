@@ -548,10 +548,10 @@ export class PrivilegeMonitoringDataClient {
   }: {
     usernames: string[];
     indexName: string;
-  }): Promise<string[]> {
+  }): Promise<string[] | null> {
     if (usernames.length === 0) {
       this.log('debug', 'No usernames to sync');
-      return null; // TODO: handle this case better
+      return null;
     }
 
     const existingUserRes = await this.getMonitoredUsers(usernames);
