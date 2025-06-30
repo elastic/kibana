@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './flyout';
-export { FeedbackButton } from './feedback_button';
-export { BenefitsCallout } from './benefits_callout';
-export { ELASTIC_SUPPORT_LINK, SERVERLESS_FEEDBACK_FORM_LINK, FEEDBACK_TYPE } from './constants';
+export { FeedbackFlyoutHeader } from './feedback_flyout_header';
+export { FeedbackFlyoutBody } from './feedback_flyout_body';
+export { FeedbackFlyoutFooter } from './feedback_flyout_footer';
+export { FeedbackFlyout } from './feedback_flyout';
