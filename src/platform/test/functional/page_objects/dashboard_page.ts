@@ -245,6 +245,8 @@ export class DashboardPageObject extends FtrService {
 
     if (dashboardNameOverride) {
       this.log.debug('entering dashboard duplicate override title');
+      // Wait for the title input to be enabled before setting the value to avoid flakiness
+      await this.testSubjects.waitForEnabled('savedObjectTitle');
       await this.testSubjects.setValue('savedObjectTitle', dashboardNameOverride);
     }
 
@@ -478,6 +480,8 @@ export class DashboardPageObject extends FtrService {
   public async renameDashboard(dashboardName: string) {
     this.log.debug(`Naming dashboard ` + dashboardName);
     await this.testSubjects.click('dashboardRenameButton');
+    // Wait for the title input to be enabled before setting the value to avoid flakiness
+    await this.testSubjects.waitForEnabled('savedObjectTitle');
     await this.testSubjects.setValue('savedObjectTitle', dashboardName);
   }
 
@@ -593,6 +597,8 @@ export class DashboardPageObject extends FtrService {
     const modalDialog = await this.testSubjects.find('savedObjectSaveModal');
 
     this.log.debug('entering new title');
+    // Wait for the title input to be enabled before setting the value to avoid flakiness
+    await this.testSubjects.waitForEnabled('savedObjectTitle');
     await this.testSubjects.setValue('savedObjectTitle', dashboardTitle);
 
     if (saveOptions.storeTimeWithDashboard !== undefined) {
@@ -629,6 +635,8 @@ export class DashboardPageObject extends FtrService {
     const modalDialog = await this.testSubjects.find('savedObjectSaveModal');
 
     this.log.debug('entering new title');
+    // Wait for the title input to be enabled before setting the value to avoid flakiness
+    await this.testSubjects.waitForEnabled('savedObjectTitle');
     await this.testSubjects.setValue('savedObjectTitle', dashboardTitle);
 
     await this.common.pressEnterKey();

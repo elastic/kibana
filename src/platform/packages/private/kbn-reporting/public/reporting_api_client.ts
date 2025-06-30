@@ -18,7 +18,13 @@ import {
   buildKibanaPath,
   REPORTING_REDIRECT_APP,
 } from '@kbn/reporting-common';
-import { BaseParams, JobId, ManagementLinkFn, ReportApiJSON } from '@kbn/reporting-common/types';
+import {
+  BaseParams,
+  JobId,
+  ManagementLinkFn,
+  ReportApiJSON,
+  ScheduledReportApiJSON,
+} from '@kbn/reporting-common/types';
 import rison from '@kbn/rison';
 import moment from 'moment';
 import { stringify } from 'query-string';
@@ -83,7 +89,10 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public getKibanaAppHref(job: Job): string {
-    const searchParams = stringify({ jobId: job.id });
+    const searchParams = stringify({
+      jobId: job.id,
+      ...(job.scheduled_report_id ? { scheduledReportId: job.scheduled_report_id } : {}),
+    });
 
     const path = buildKibanaPath({
       basePath: this.http.basePath.serverBasePath,
@@ -156,6 +165,15 @@ export class ReportingAPIClient implements IReportingAPI {
       `${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/${jobId}`
     );
     return new Job(report);
+  }
+
+  public async getScheduledReportInfo(id: string) {
+    const { data: reportList = [] }: { data: ScheduledReportApiJSON[] } = await this.http.get(
+      `${INTERNAL_ROUTES.SCHEDULED.LIST}`
+    );
+
+    const report = reportList.find((item) => item.id === id);
+    return report;
   }
 
   public async findForJobIds(jobIds: JobId[]) {
