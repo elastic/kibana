@@ -10,6 +10,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
   describe('Serverless Observability - Deployment-agnostic AI Assistant local-only tests', function () {
     this.tags(['esGate']);
 
-    loadTestFile(require.resolve('../../apis/observability/ai_assistant'));
+    loadTestFile(require.resolve('../../apis/observability/ai_assistant/local'));
   });
 }
