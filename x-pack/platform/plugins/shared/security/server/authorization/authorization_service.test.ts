@@ -118,7 +118,12 @@ it(`#setup returns exposed services`, () => {
   );
 
   expect(authz.privileges).toBe(mockPrivilegesService);
-  expect(privilegesFactory).toHaveBeenCalledWith(authz.actions, mockFeaturesSetup, mockLicense);
+  expect(privilegesFactory).toHaveBeenCalledWith(
+    authz.actions,
+    mockFeaturesSetup,
+    mockLicense,
+    jest.fn().mockResolvedValue(mockTypeRegistry)
+  );
 
   expect(authz.mode).toBe(mockAuthorizationMode);
   expect(authorizationModeFactory).toHaveBeenCalledWith(mockLicense);

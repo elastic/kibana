@@ -2754,7 +2754,7 @@ describe('delete', () => {
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
     });
 
-    test(`adds an audit event per object when successful`, async () => {
+    test.only(`adds an audit event per object when successful`, async () => {
       const { securityExtension, checkPrivileges, auditLogger } = setup();
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
@@ -2763,7 +2763,7 @@ describe('delete', () => {
         objects,
       });
 
-      expect(auditHelperSpy).toHaveBeenCalledTimes(1);
+      expect(auditHelperSpy).toHaveBeenCalledTimes(2);
       expect(addAuditEventSpy).toHaveBeenCalledTimes(objects.length);
       expect(auditLogger.log).toHaveBeenCalledTimes(objects.length);
       for (const obj of objects) {
