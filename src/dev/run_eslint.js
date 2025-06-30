@@ -20,7 +20,7 @@ if (process.argv.includes('--help') || process.argv.includes('-h')) {
   require(eslintBinPath); // eslint-disable-line import/no-dynamic-require
 } else {
   run(
-    ({ flags, log }) => {
+    ({ flags }) => {
       flags._ = flags._ || [];
 
       // verbose is only a flag for our CLI runner, not for ESLint
@@ -44,7 +44,7 @@ if (process.argv.includes('--help') || process.argv.includes('-h')) {
 
       process.on('exit', (code) => {
         if (!code) {
-          log.info('✅ no eslint errors found');
+          console.log('✅ no eslint errors found');
         }
       });
     },
