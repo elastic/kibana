@@ -58,7 +58,7 @@ function FilterWarningToolTip({ values = [], label }: FilterWarningToolTipProps)
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip content={renderTooltipOptions()}>
-          <EuiIcon type="questionInCircle" />
+          <EuiIcon type="question" />
         </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -14,6 +14,7 @@ import nodePath from 'path';
 
 import { groupFilesByOwners } from '../../lib/group_by_owners.ts';
 import { groupBySource } from '../../lib/group_by_source.ts';
+import { groupByPackage } from '../../lib/group_by_package.ts';
 import { createCollapseRegexWithDepth } from '../../lib/collapse_with_depth.ts';
 import { aggregationGroups, excludePaths } from '../common/constants.ts';
 
@@ -114,6 +115,10 @@ export async function identifyDependencyUsageWithCruiser(
 
   if (groupBy === 'owner') {
     return groupFilesByOwners(violations);
+  }
+
+  if (groupBy === 'package') {
+    return groupByPackage(violations);
   }
 
   if (dependencyName) {

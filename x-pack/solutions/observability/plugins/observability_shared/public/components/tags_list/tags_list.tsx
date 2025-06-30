@@ -52,7 +52,7 @@ const TagsList = ({
   const tagsToDisplay = tags.slice(0, toDisplay);
 
   return (
-    <EuiFlexGroup wrap gutterSize="m" css={{ maxWidth: 400 }} alignItems="baseline">
+    <EuiFlexGroup wrap gutterSize="xs" css={{ maxWidth: 400 }} alignItems="baseline">
       {tagsToDisplay.map((tag) => (
         // filtering only makes sense in monitor list, where we have summary
         <EuiFlexItem key={tag} grow={false}>
