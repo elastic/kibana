@@ -19,6 +19,7 @@ import {
   apiHasExecutionContext,
   apiHasParentApi,
   apiPublishesTimeRange,
+  apiPublishesTimeslice,
   fetch$,
   initializeTimeRangeManager,
   initializeTitleManager,
@@ -118,11 +119,10 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         ? new BehaviorSubject(initialState.rawState.query)
         : (parentApi as Partial<PublishesUnifiedSearch>)?.query$) ??
         new BehaviorSubject(undefined)) as PublishesUnifiedSearch['query$'];
-      const filters$ =
-        (initialState.rawState.query
-          ? new BehaviorSubject(initialState.rawState.filters)
-          : (parentApi as Partial<PublishesUnifiedSearch>)?.filters$) ??
-        (new BehaviorSubject(undefined) as PublishesUnifiedSearch['filters$']);
+      const filters$ = ((initialState.rawState.filters
+        ? new BehaviorSubject(initialState.rawState.filters)
+        : (parentApi as Partial<PublishesUnifiedSearch>)?.filters$) ??
+        new BehaviorSubject(undefined)) as PublishesUnifiedSearch['filters$'];
 
       const refresh$ = new BehaviorSubject<void>(undefined);
 
@@ -223,7 +223,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)
           ? api.parentApi.timeRange$
           : of(null),
-        apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)
+        apiHasParentApi(api) && apiPublishesTimeslice(api.parentApi)
           ? api.parentApi.timeslice$
           : of(null),
       ]).pipe(
@@ -236,7 +236,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             return parentTimeRange;
           }
           if (parentTimeslice) {
-            return parentTimeRange;
+            return parentTimeslice;
           }
           return undefined;
         })
