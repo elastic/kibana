@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiHorizontalRule,
-} from '@elastic/eui';
-import { EuiPopover } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+// We now need EuiFlexGroup, EuiFlexItem, and EuiText
+import { EuiSuperSelect, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface NamespaceSelectorProps {
@@ -26,79 +21,54 @@ export const NamespaceSelector = ({
   namespaces,
   onNamespaceChange,
 }: NamespaceSelectorProps) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
   const onSelectedNamespaceChange = useCallback(
-    (namespaceKey: string) => {
-      if (namespaceKey !== activeNamespace) {
-        onNamespaceChange(namespaceKey);
-      }
-      setIsPopoverOpen(false);
+    (newNamespace: string) => {
+      onNamespaceChange(newNamespace);
     },
-    [activeNamespace, onNamespaceChange]
+    [onNamespaceChange]
   );
 
-  const onButtonClick = useCallback(() => setIsPopoverOpen((currentVal) => !currentVal), []);
-  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-  const isSelectedProps = useCallback(
-    (namespace: string) => {
-      return namespace === activeNamespace
-        ? { icon: 'check', 'aria-current': true }
-        : { icon: 'empty', 'aria-current': undefined };
-    },
-    [activeNamespace]
-  );
+  const namespaceOptions = useMemo(() => {
+    return namespaces.map((namespace) => ({
+      value: namespace,
+      inputDisplay: <>{namespace}</>,
 
-  const menuItems = useMemo(() => {
-    return namespaces.map((namespace, index) => (
-      <React.Fragment key={`namespace-selector-${namespace}`}>
-        <EuiContextMenuItem
-          {...isSelectedProps(namespace)}
-          key={namespace}
-          data-test-subj={`namespace-selector-menu-item-${namespace}`}
-          onClick={() => {
-            onSelectedNamespaceChange(namespace);
-          }}
-        >
-          {namespace}
-        </EuiContextMenuItem>
-        {index < namespaces.length - 1 && (
-          <EuiHorizontalRule margin="none" key={`rule-${namespace}`} />
-        )}
-      </React.Fragment>
-    ));
-  }, [namespaces, isSelectedProps, onSelectedNamespaceChange]);
+      dropdownDisplay: (
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem>
+            <EuiText size="s">{namespace}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+      'data-test-subj': `namespace-selector-option-${namespace}`,
+    }));
+  }, [namespaces]);
 
-  const button = useMemo(() => {
-    const title = i18n.translate('xpack.csp.namespaceSelector.title', {
-      defaultMessage: 'Namespace',
-    });
-    return (
-      <EuiButtonEmpty
-        data-test-subj="namespace-selector-dropdown-button"
-        flush="both"
-        iconSide="right"
-        iconSize="s"
-        iconType="arrowDown"
-        onClick={onButtonClick}
-        title={activeNamespace}
-        size="xs"
-        disabled={namespaces.length < 2}
-      >
-        {`${title}: ${activeNamespace}`}
-      </EuiButtonEmpty>
-    );
-  }, [onButtonClick, activeNamespace, namespaces.length]);
+  const label = i18n.translate('xpack.csp.namespaceSelector.title', {
+    defaultMessage: 'Namespace',
+  });
 
   return (
-    <EuiPopover
-      data-test-subj="namespace-selector"
-      button={button}
-      closePopover={closePopover}
-      isOpen={isPopoverOpen}
-      panelPaddingSize="none"
-    >
-      <EuiContextMenuPanel data-test-subj="namespace-selector-menu" size="s" items={menuItems} />
-    </EuiPopover>
+    <EuiSuperSelect
+      data-test-subj="namespace-selector-superselect"
+      options={namespaceOptions}
+      valueOfSelected={activeNamespace}
+      onChange={onSelectedNamespaceChange}
+      disabled={namespaces.length < 2}
+      hasDividers
+      fullWidth
+      compressed
+      aria-label={label}
+      prepend={
+        <span
+          style={{
+            flexShrink: 0,
+            marginRight: '100px',
+          }}
+        >
+          {`${label}`}
+        </span>
+      }
+    />
   );
 };
