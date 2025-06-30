@@ -7,9 +7,16 @@
 
 import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
+import {
+  OBSERVABILITY_ENABLE_STREAMS_UI,
+  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
+} from '@kbn/management-settings-ids';
 import { useKibana } from './use_kibana';
 
 export interface StreamsFeatures {
+  ui?: {
+    enabled: boolean;
+  };
   significantEvents?: {
     available: boolean;
     enabled: boolean;
@@ -30,17 +37,20 @@ export function useStreamsPrivileges(): StreamsPrivileges {
       application: {
         capabilities: { streams },
       },
+      uiSettings,
     },
     dependencies: {
-      start: {
-        licensing,
-        streams: { config$ },
-      },
+      start: { licensing },
     },
   } = useKibana();
 
   const license = useObservable(licensing.license$);
-  const streamsConfig = useObservable(config$);
+
+  const uiEnabled = uiSettings.get<boolean>(OBSERVABILITY_ENABLE_STREAMS_UI);
+
+  const significantEventsEnabled = uiSettings.get<boolean>(
+    OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS
+  );
 
   return {
     ui: streams as {
@@ -48,15 +58,13 @@ export function useStreamsPrivileges(): StreamsPrivileges {
       [STREAMS_UI_PRIVILEGES.show]: boolean;
     },
     features: {
-      significantEvents:
-        license && streamsConfig
-          ? {
-              enabled: !!streamsConfig.experimental?.significantEventsEnabled,
-              available:
-                !!streamsConfig.experimental?.significantEventsEnabled &&
-                license.hasAtLeast('enterprise'),
-            }
-          : undefined,
+      ui: {
+        enabled: uiEnabled,
+      },
+      significantEvents: license && {
+        enabled: significantEventsEnabled,
+        available: significantEventsEnabled && license.hasAtLeast('enterprise'),
+      },
     },
   };
 }

@@ -159,13 +159,18 @@ export function SignificantEventFlyoutContents({
             {...validationMessages.kql}
           >
             <UncontrolledStreamsAppSearchBar
-              query={queryValues.kql?.query ?? ''}
+              query={queryValues.kql ? { language: 'kuery', ...queryValues.kql } : undefined}
               showQueryInput
               onQueryChange={() => {
                 setTouched((prev) => ({ ...prev, kql: true }));
               }}
               onQuerySubmit={(next) => {
-                setQueryValues((prev) => ({ ...prev, kql: { query: next.query } }));
+                setQueryValues((prev) => ({
+                  ...prev,
+                  kql: {
+                    query: typeof next.query?.query === 'string' ? next.query.query : '',
+                  },
+                }));
                 setTouched((prev) => ({ ...prev, kql: true }));
                 if (next.dateRange) {
                   setTimeRange(next.dateRange);
@@ -176,7 +181,7 @@ export function SignificantEventFlyoutContents({
               placeholder={i18n.translate('xpack.streams.significantEventFlyout.queryPlaceholder', {
                 defaultMessage: 'Filter events',
               })}
-              dataViews={dataViewsFetch.value}
+              indexPatterns={dataViewsFetch.value}
               submitOnBlur
             />
           </EuiFormRow>

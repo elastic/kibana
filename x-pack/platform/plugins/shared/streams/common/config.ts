@@ -19,14 +19,7 @@ export type StreamsConfig = TypeOf<typeof configSchema>;
  * NOTE: anything exposed here will be visible in the UI dev tools,
  * and therefore MUST NOT be anything that is sensitive information!
  */
-export const exposeToBrowserConfig = {
-  experimental: {
-    significantEventsEnabled: true,
-  },
-} as const;
+export const exposeToBrowserConfig = {} as const;
 
-export interface StreamsPublicConfig {
-  experimental?: {
-    significantEventsEnabled?: boolean;
-  };
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StreamsPublicConfig {}
