@@ -29,7 +29,7 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     --kbnHeaderBannerHeight: var(--kbn-layout--banner-height, 0px);
 
     // the total height of all app-area headers
-    --kbnAppHeadersOffset: var(--kbn-layout--application-top-bar-top, 0px);
+    --kbnAppHeadersOffset: var(--kbn-layout--application-content-top, 0px);
 
     // height of the project header app action menu which is part of the application area
     --kbnProjectHeaderAppActionMenuHeight: var(--kbn-layout--application-top-bar-height, 0px);
