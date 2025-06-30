@@ -33,7 +33,7 @@ import { MetricItemExtra } from './metric_item_extra';
 import { MetricItemIcon } from './metric_item_icon';
 import { FlyoutParamProps } from '../types';
 
-const METRIC_ITEM_HEIGHT = 160;
+const METRIC_ITEM_HEIGHT = 170;
 
 export const getColor = (
   theme: ReturnType<typeof useTheme>,
@@ -163,7 +163,7 @@ export const MetricItem = ({
                   id: monitor.configId,
                   location: locationName,
                   locationId: monitor.locationId,
-                  spaceId: monitor.spaceId,
+                  spaces: monitor.spaces,
                 });
               }
             }}

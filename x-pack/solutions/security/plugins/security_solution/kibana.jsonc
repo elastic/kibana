@@ -61,7 +61,8 @@
       "inference",
       "productDocBase",
       "telemetry",
-      "discoverShared"
+      "discoverShared",
+      "elasticAssistantSharedState"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
