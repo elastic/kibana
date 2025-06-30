@@ -9,7 +9,7 @@ Ensures that only one process at a time can hold a named lock, with automatic le
 Starting multiple re-index operation on the same source simultaneously can lead to data corruption. Wrapping the re-index call in `withLock("my_reindex")` guarantees that only one consumer can start the operation.
 
 **Bootstrapping tasks**
-On Kibana startup you might need to run migrations, create/update index mappings or bootstrapping other types of assets. Without a lock, every Kibana node that boots in parallel will try to run the same migrations. A lock ensures that the startup migrations only runs exactly once, even if multiple Kibana nodes spin up concurrently.
+On Kibana startup you might need to run migrations, create/update index mappings or bootstrapping other types of assets. Without a lock, every Kibana node that boots in parallel will try to run the same migrations. A lock ensures that the startup migrations only run exactly once, even if multiple Kibana nodes spin up concurrently.
   
 # API Documentation
 
