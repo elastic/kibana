@@ -69,7 +69,9 @@ const createActions = ({
     },
     setToolCallResult: ({ result, toolCallId }: { result: string; toolCallId: string }) => {
       setCurrentRound((round) => {
-        const step = round.steps.find((s) => isToolCallStep(s) && s.toolCallId === toolCallId);
+        const step = round.steps.find(
+          (s) => isToolCallStep(s) && s.toolCallId === toolCallId
+        ) as ToolCallStep;
         if (step) {
           step.result = result;
         }
