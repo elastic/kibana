@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CONNECTOR_NAME_INPUT, SAVE_ACTION_CONNECTOR_BTN } from '../screens/common/rule_actions';
 import { azureConnectorAPIPayload } from './api_calls/connectors';
 import { TIMELINE_CHECKBOX } from '../screens/timelines';
 import { CLOSE_FLYOUT } from '../screens/alerts';
@@ -43,6 +44,8 @@ import {
   QUICK_PROMPT_BADGE,
   ADD_NEW_CONNECTOR,
   SEND_TO_TIMELINE_BUTTON,
+  OPENAI_CONNECTOR_OPTION,
+  SECRETS_APIKEY_INPUT,
 } from '../screens/ai_assistant';
 
 export const openAssistant = (context?: 'rule' | 'alert') => {
@@ -151,6 +154,14 @@ export const createSystemPrompt = (
     });
   }
   cy.get(MODAL_SAVE_BUTTON).click();
+};
+
+export const createOpenAIConnector = (connectorName: string) => {
+  cy.get(OPENAI_CONNECTOR_OPTION).click();
+  cy.get(CONNECTOR_NAME_INPUT).type(connectorName);
+  cy.get(SECRETS_APIKEY_INPUT).type('1234');
+  cy.get(SAVE_ACTION_CONNECTOR_BTN).click();
+  cy.get(SAVE_ACTION_CONNECTOR_BTN).should('not.exist');
 };
 
 export const createQuickPrompt = (
