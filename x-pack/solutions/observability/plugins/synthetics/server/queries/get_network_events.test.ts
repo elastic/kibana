@@ -214,6 +214,12 @@ describe('getNetworkEvents', () => {
             "track_total_hits": true,
           },
           Object {
+            "context": Object {
+              "loggingOptions": Object {
+                "level": "debug",
+                "loggerName": "synthetics",
+              },
+            },
             "meta": true,
           },
         ],

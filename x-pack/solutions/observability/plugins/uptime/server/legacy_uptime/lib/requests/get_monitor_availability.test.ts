@@ -857,6 +857,12 @@ describe('monitor availability', () => {
             "size": 0,
           },
           Object {
+            "context": Object {
+              "loggingOptions": Object {
+                "level": "debug",
+                "loggerName": "synthetics",
+              },
+            },
             "meta": true,
           },
         ]
