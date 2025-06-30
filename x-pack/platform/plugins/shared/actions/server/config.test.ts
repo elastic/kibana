@@ -250,6 +250,50 @@ describe('config validation', () => {
     expect(result.email?.domain_allowlist).toEqual(['a.com', 'b.c.com', 'd.e.f.com']);
   });
 
+  test('validates rate limiter connector name', () => {
+    let config: Record<string, unknown> = {
+      rateLimiter: { slack: { limit: 10, lookbackWindow: '1m' } },
+    };
+
+    expect(() => configSchema.validate(config)).toThrow(
+      'Rate limiter configuration for connector type "slack" is not supported. Supported types: email'
+    );
+
+    config = {
+      rateLimiter: { email: { limit: 10, lookbackWindow: '1m' } },
+    };
+
+    expect(configSchema.validate(config)).toMatchInlineSnapshot(`
+      Object {
+        "allowedHosts": Array [
+          "*",
+        ],
+        "enableFooterInEmail": true,
+        "enabledActionTypes": Array [
+          "*",
+        ],
+        "maxResponseContentLength": ByteSizeValue {
+          "valueInBytes": 1048576,
+        },
+        "microsoftExchangeUrl": "https://login.microsoftonline.com",
+        "microsoftGraphApiScope": "https://graph.microsoft.com/.default",
+        "microsoftGraphApiUrl": "https://graph.microsoft.com/v1.0",
+        "preconfigured": Object {},
+        "preconfiguredAlertHistoryEsIndex": false,
+        "rateLimiter": Object {
+          "email": Object {
+            "limit": 10,
+            "lookbackWindow": "1m",
+          },
+        },
+        "responseTimeout": "PT1M",
+        "usage": Object {
+          "url": "https://usage-api.usage-api/api/v1/usage",
+        },
+      }
+    `);
+  });
+
   test('validates xpack.actions.webhook', () => {
     const config: Record<string, unknown> = {};
     let result = configSchema.validate(config);
