@@ -9,7 +9,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
-
+import { EnrichedEntityDefinitionsResponse } from '@kbn/observability-navigation-plugin/common/types';
 export interface UseGetK8sEntitiesDefinitionProps {
   http: HttpStart;
 }
@@ -18,7 +18,9 @@ export const useGetK8sEntitiesDefinition = (props: UseGetK8sEntitiesDefinitionPr
   const { http } = props;
 
   const queryFn = async () => {
-    const result = await http.get(`/internal/observability/entity_definitions/kubernetes`);
+    const result = await http.get<EnrichedEntityDefinitionsResponse[]>(
+      `/internal/observability/entity_definitions/kubernetes`
+    );
 
     return result;
   };

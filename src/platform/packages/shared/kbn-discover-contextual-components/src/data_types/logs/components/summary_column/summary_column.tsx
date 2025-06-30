@@ -21,9 +21,14 @@ import {
   getLogDocumentOverview,
   getMessageFieldWithFallbacks,
 } from '@kbn/discover-utils';
-import { getAvailableResourceFields, getAvailableTraceFields } from '@kbn/discover-utils/src';
+import {
+  ResourceFields,
+  getAvailableResourceFields,
+  getAvailableTraceFields,
+} from '@kbn/discover-utils/src';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HttpStart } from '@kbn/core/public';
+import { EnrichedEntityDefinitionsResponse } from '@kbn/observability-navigation-plugin/common/types';
 import { Resource } from './resource';
 import { Content } from './content';
 import { createResourceFields, formatJsonDocumentForContent, isTraceDocument } from './utils';
@@ -57,7 +62,7 @@ const getResourceFields = ({
 }: {
   isTracesDoc?: boolean;
   isMetricsDoc?: boolean;
-  k8sEntitiesDefinition: any;
+  k8sEntitiesDefinition: EnrichedEntityDefinitionsResponse[];
 }) => {
   if (isTracesDoc) {
     return {
@@ -67,14 +72,14 @@ const getResourceFields = ({
   }
 
   if (isMetricsDoc) {
-    // Fix TS Errors here and move to a util file
     const k8sFields = k8sEntitiesDefinition?.map((entity) => entity.attributes) || [];
 
     return {
       fields: k8sFields.flat(),
-      getAvailableFields: (resourceDoc) =>
+      // move this into a separate util if needed in other places
+      getAvailableFields: (resourceDoc: ResourceFields) =>
         k8sFields.reduce((acc, fields) => {
-          const field = fields.find((fieldName) => resourceDoc[fieldName]);
+          const field = fields.find((fieldName) => resourceDoc[fieldName as keyof ResourceFields]);
           if (field) {
             acc.push(field);
           }

@@ -95,7 +95,6 @@ export function CellActionsPopover({
     http: http as HttpStart,
   });
 
-  // need to fix TS error here
   const entityDefinition = rawEntitiesDefinition?.find((entity) =>
     entity.attributes.includes(property)
   );
