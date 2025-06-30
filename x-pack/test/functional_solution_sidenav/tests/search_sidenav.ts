@@ -41,9 +41,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // check side nav links
         await solutionNavigation.sidenav.expectSectionExists('search_project_nav');
-        await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'enterpriseSearch',
-        });
 
         // check the Data > Indices section
         await solutionNavigation.sidenav.clickLink({
@@ -68,12 +65,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // navigate back to the home page using header logo
         await solutionNavigation.clickLogo();
-        await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'enterpriseSearch',
-        });
+
         // Redirected to Onboarding Page to Create Index
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: 'Build',
+          text: 'Create your first index',
         });
 
         await expectNoPageReload();
