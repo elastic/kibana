@@ -6,12 +6,12 @@
  */
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { syntheticsMonitorAttributes } from '../../../../common/types/saved_objects';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import { SyntheticsRestApiRouteFactory } from '../../types';
-import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
-import { ConfigKey } from '../../../../common/runtime_types';
+import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { getMonitors, getSavedObjectKqlFilter } from '../../common';
+import { getSavedObjectKqlFilter } from '../../common';
 import { validateSpaceId } from '../services/validate_space_id';
 
 export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -26,7 +26,7 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
     }),
   },
   handler: async (routeContext): Promise<any> => {
-    const { request, response } = routeContext;
+    const { request, response, monitorConfigRepository } = routeContext;
     const { projectName } = request.params;
     const { monitors: monitorsToDelete } = request.body;
     const decodedProjectName = decodeURI(projectName);
@@ -40,23 +40,19 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
 
     await validateSpaceId(routeContext);
 
-    const deleteFilter = `${syntheticsMonitorType}.attributes.${
+    const deleteFilter = `${syntheticsMonitorAttributes}.${
       ConfigKey.PROJECT_ID
     }: "${decodedProjectName}" AND ${getSavedObjectKqlFilter({
       field: 'journey_id',
       values: monitorsToDelete.map((id: string) => `${id}`),
     })}`;
 
-    const { saved_objects: monitors } = await getMonitors(
-      {
-        ...routeContext,
-        request: {
-          ...request,
-          query: { ...request.query, filter: deleteFilter, perPage: 500 },
-        },
-      },
-      { fields: [] }
-    );
+    const { saved_objects: monitors } =
+      await monitorConfigRepository.find<EncryptedSyntheticsMonitorAttributes>({
+        perPage: 500,
+        filter: deleteFilter,
+        fields: [],
+      });
 
     const deleteMonitorAPI = new DeleteMonitorAPI(routeContext);
 
