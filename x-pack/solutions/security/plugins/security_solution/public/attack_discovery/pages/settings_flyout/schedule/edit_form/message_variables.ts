@@ -31,6 +31,7 @@ export const getMessageVariables = (): ActionVariables => {
               'Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data',
           }
         ),
+        useWithTripleBracesInTemplates: true,
       },
       {
         name: 'attack.summaryMarkdown',
@@ -40,6 +41,7 @@ export const getMessageVariables = (): ActionVariables => {
             defaultMessage: 'A markdown summary of attack discovery, using the same syntax',
           }
         ),
+        useWithTripleBracesInTemplates: true,
       },
       {
         name: 'attack.title',
@@ -68,6 +70,7 @@ export const getMessageVariables = (): ActionVariables => {
               'A short (no more than a sentence) summary of the attack discovery featuring only the host.name and user.name fields (when they are applicable), using the same syntax',
           }
         ),
+        useWithTripleBracesInTemplates: true,
       },
       {
         name: 'attack.mitreAttackTactics',
@@ -86,6 +89,7 @@ export const getMessageVariables = (): ActionVariables => {
             defaultMessage: 'A link to the attack discovery details',
           }
         ),
+        useWithTripleBracesInTemplates: true,
       },
     ],
   };
