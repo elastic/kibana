@@ -175,7 +175,9 @@ export function columnToOperation(
     );
   }
 
-  const scale = operationDefinition.scale ? operationDefinition.scale(column, dataView as IndexPattern) : 'ratio';
+  const scale = operationDefinition.scale
+    ? operationDefinition.scale(column, dataView as IndexPattern)
+    : 'ratio';
 
   return {
     dataType: normalizeOperationDataType(dataType),
