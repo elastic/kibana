@@ -93,11 +93,11 @@ This package exposes layout dimensions and positions as global CSS variables (cu
 - **Application**
   - `--kbn-layout--application-[top|bottom|left|right|height|width]`
 - **Application Top Bar**
-  - `--kbn-layout--application-top-bar-[height|top|left|width|right|bottom]`
+  - `--kbn-application--top-bar-[height|top|left|width|right|bottom]`
 - **Application Bottom Bar**
-  - `--kbn-layout--application-bottom-bar-[height|top|left|width|right|bottom]`
+  - `--kbn-application--bottom-bar-[height|top|left|width|right|bottom]`
 - **Application Content**
-  - `--kbn-layout--application-content-[top|bottom|left|right|height|width]`
+  - `--kbn-application--content-[top|bottom|left|right|height|width]`
 - **Common**
   - `--kbn-layout--aboveFlyoutLevel`
 
