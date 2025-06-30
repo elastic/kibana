@@ -30,7 +30,7 @@ export interface VulnerabilitiesGroupingAggregation {
   description?: {
     buckets?: GenericBuckets[];
   };
-  resourceId?: {
+  resourceName?: {
     buckets?: GenericBuckets[];
   };
   isLoading?: boolean;
