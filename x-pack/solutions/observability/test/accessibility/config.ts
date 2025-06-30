@@ -6,19 +6,22 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { services } from './services';
+import { pageObjects } from './page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../config.base.js'));
+  const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.ts'));
 
   return {
     ...functionalConfig.getAll(),
-    testFiles: [require.resolve('.')],
-    kbnTestServer: {
-      ...functionalConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...functionalConfig.get('kbnTestServer.serverArgs'),
-        `--xpack.profiling.enabled=true`,
-      ],
+
+    testFiles: [require.resolve('./apps/uptime')],
+
+    pageObjects,
+    services,
+
+    junit: {
+      reportName: 'X-Pack Observability Solution Accessibility Tests',
     },
   };
 }
