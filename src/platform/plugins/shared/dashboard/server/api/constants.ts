@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const PUBLIC_API_VERSION = '2023-10-31';
 export const PUBLIC_API_PATH = '/api/dashboards/dashboard';
 export const INTERNAL_API_VERSION = '1';
