@@ -426,12 +426,14 @@ export default function ({ getService }: FtrProviderContext) {
       await setTimeoutAsync(500);
 
       log.debug('Waiting for all sessions to be persisted...');
+
       await retry.tryForTime(20000, async () => {
         expect(await getNumberOfSessionDocuments()).to.be(3);
       });
 
       // Poke the background task to run
       await runCleanupTaskSoon();
+
       log.debug('Waiting for cleanup job to run...');
       await retry.tryForTime(30000, async () => {
         // The oldest session should have been removed, but the rest should still be valid.
@@ -443,18 +445,25 @@ export default function ({ getService }: FtrProviderContext) {
         unauthenticatedSessionOne.cookie,
         unauthenticatedSessionOne.location
       );
+
       await setTimeoutAsync(500); // Ensure the order of session cookie timestamps
+
       const samlSessionCookieTwo = await finishSAMLHandshake(
         unauthenticatedSessionTwo.cookie,
         unauthenticatedSessionTwo.location
       );
       await setTimeoutAsync(500); // Ensure the order of session cookie timestamps
+
       const samlSessionCookieThree = await finishSAMLHandshake(
         unauthenticatedSessionThree.cookie,
         unauthenticatedSessionThree.location
       );
 
       await es.indices.refresh({ index: '.kibana_security_session*' });
+      await es.cluster.health({
+        index: '.kibana_security_session*',
+        wait_for_status: 'yellow',
+      });
 
       // For authenticated sessions limit should be enforced
       await checkSessionCookieInvalid(samlSessionCookieOne);
