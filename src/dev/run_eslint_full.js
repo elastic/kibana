@@ -8,84 +8,33 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
-import { execSync } from 'child_process';
+import { REPO_ROOT } from '@kbn/repo-info';
 import execa from 'execa';
+
+const batchSize = 250;
+const maxParallelism = 8;
 
 run(
   async ({ log, flags }) => {
-    const repoRoot = execSync('git rev-parse --show-toplevel').toString('utf-8').trim();
-    const lsFiles = execa.sync('git', ['ls-files'], {
-      cwd: repoRoot,
-    });
     const bail = flags.bail || false;
 
-    const files = lsFiles.stdout
-      .toString('utf-8')
-      .trim()
-      .split('\n')
-      .filter((file) => file.match(/\.(js|mjs|ts|tsx)$/));
+    const { batches, files } = getLintableFileBatches();
+    log.info(`Found ${files.length} files in ${batches.length} batches to lint.`);
 
-    log.info(`Found ${files.length} files to lint.`);
-
-    const batchSize = 250;
-    const maxAsync = 8;
-
-    const eslintPassalongOptions = flags.unexpected
-      .concat([flags.cache ? null : '--no-cache'])
-      .filter(Boolean);
-    const args = ['scripts/eslint', ...eslintPassalongOptions];
+    const eslintArgs = flags.unexpected.concat([flags.cache ? null : '--no-cache']).filter(Boolean);
     log.info(
       `Running ESLint with args: ${pretty({
-        args,
+        args: eslintArgs,
         batchSize,
-        maxAsync,
+        maxParallelism,
       })}`
     );
-    const batches = [];
-    for (let i = 0; i < files.length; i += batchSize) {
-      batches.push(files.slice(i, i + batchSize));
-    }
 
-    const results = await runBatchedPromises(
-      batches.map((batch, idx) => () => {
-        return new Promise(async (resolve, reject) => {
-          try {
-            const timeBefore = Date.now();
-            log.info(`Running batch ${idx + 1}/${batches.length} with ${batch.length} files...`);
-            const lintProcessResult = await execa('node', args.concat(batch), {
-              cwd: repoRoot,
-              env: {
-                // Disable CI stats for individual runs, to avoid overloading ci-stats
-                CI_STATS_DISABLED: 'true',
-              },
-              reject: bail, // Don't throw on non-zero exit code
-            });
-            const timeAfter = Date.now();
-            const { stdout, stderr, exitCode } = lintProcessResult;
-            if (exitCode !== 0) {
-              const errorMessage = stderr?.toString() || stdout?.toString();
-              log.error(`Batch ${idx + 1}/${batches.length} failed ❌: ${errorMessage}`);
-              resolve({
-                success: false,
-                idx,
-                time: timeAfter - timeBefore,
-                error: stderr?.toString(),
-              });
-            } else {
-              log.info(`Batch ${idx + 1}/${batches.length} success: ${stdout.toString()}`);
-              resolve({
-                success: true,
-                idx,
-                time: timeAfter - timeBefore,
-              });
-            }
-          } catch (error) {
-            reject(error);
-          }
-        });
-      }),
-      maxAsync
+    const lintPromiseThunks = batches.map(
+      (batch, idx) => () =>
+        lintFileBatch({ batch, idx, eslintArgs, batchCount: batches.length, bail, log })
     );
+    const results = await runBatchedPromises(lintPromiseThunks, maxParallelism);
 
     const failedBatches = results.filter((result) => !result.success);
     if (failedBatches.length > 0) {
@@ -107,6 +56,56 @@ run(
     },
   }
 );
+
+function getLintableFileBatches() {
+  const files = execa
+    .sync('git', ['ls-files'], {
+      cwd: REPO_ROOT,
+      encoding: 'utf8',
+    })
+    .stdout.trim()
+    .split('\n')
+    .filter((file) => file.match(/\.(js|mjs|ts|tsx)$/));
+  const batches = [];
+  for (let i = 0; i < files.length; i += batchSize) {
+    batches.push(files.slice(i, i + batchSize));
+  }
+  return { batches, files };
+}
+
+async function lintFileBatch({ batch, bail, idx, eslintArgs, batchCount, log }) {
+  log.info(`Running batch ${idx + 1}/${batchCount} with ${batch.length} files...`);
+
+  const timeBefore = Date.now();
+  const args = ['scripts/eslint'].concat(eslintArgs).concat(batch);
+  const { stdout, stderr, exitCode } = await execa('node', args, {
+    cwd: REPO_ROOT,
+    env: {
+      // Disable CI stats for individual runs, to avoid overloading ci-stats
+      CI_STATS_DISABLED: 'true',
+    },
+    reject: bail, // Don't throw on non-zero exit code
+  });
+
+  const time = Date.now() - timeBefore;
+  if (exitCode !== 0) {
+    const errorMessage = stderr?.toString() || stdout?.toString();
+    log.error(`Batch ${idx + 1}/${batchCount} failed (${time}ms) ❌: ${errorMessage}`);
+    return {
+      success: false,
+      idx,
+      time,
+      error: errorMessage,
+    };
+  } else {
+    log.info(`Batch ${idx + 1}/${batchCount} success (${time}ms) ✅: ${stdout.toString()}`);
+    return {
+      success: true,
+      idx,
+      time,
+    };
+  }
+}
 
 function runBatchedPromises(promiseCreators, max) {
   const results = [];
