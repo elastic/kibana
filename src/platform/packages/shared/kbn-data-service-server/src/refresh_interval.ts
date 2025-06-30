@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 export const refreshIntervalSchema = schema.object({
   pause: schema.boolean({
     meta: {
-      description: 'Whether the refresh interval is set to be paused while viewing the dashboard.',
+      description: 'Set to false to auto-refresh data on an interval.',
     },
   }),
   value: schema.number({
