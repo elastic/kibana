@@ -6,14 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const esClient = getService('es');
   const retry = getService('retry');
 
-  describe('analytics indexes creation', () => {
+  describe.only('analytics indexes creation', () => {
     const indexVersion = 1;
 
     it('cases index should be created with the correct mappings and scripts on startup', async () => {

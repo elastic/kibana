@@ -1,5 +1,65 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`cases security and spaces enabled: trial Common analytics indexes synchronization task should sync the cases comments index 1`] = `
+Object {
+  "comment": "This is a cool comment",
+  "created_by": Object {
+    "email": null,
+    "full_name": null,
+    "username": "elastic",
+  },
+  "owner": "securitySolutionFixture",
+  "space_ids": Array [
+    "default",
+  ],
+}
+`;
+
+exports[`cases security and spaces enabled: trial Common analytics indexes synchronization task should sync the cases index 1`] = `
+Object {
+  "assignees": Array [
+    "mscott@theoffice.com",
+  ],
+  "category": "foobar",
+  "created_by": Object {
+    "email": null,
+    "full_name": null,
+    "profile_uid": null,
+    "username": "elastic",
+  },
+  "custom_fields": Array [
+    Object {
+      "key": "test_custom_field",
+      "type": "text",
+      "value": "value",
+    },
+  ],
+  "description": "This is a brand new case of a bad meanie defacing data",
+  "observables": Array [
+    Object {
+      "label": null,
+      "type": "observable-type-ipv4",
+      "value": "127.0.0.1",
+    },
+  ],
+  "owner": "securitySolutionFixture",
+  "severity": "low",
+  "severity_sort": 0,
+  "space_ids": Array [
+    "default",
+  ],
+  "status": "open",
+  "status_sort": 0,
+  "tags": Array [
+    "defacement",
+  ],
+  "title": "Super Bad Security Issue",
+  "total_alerts": 0,
+  "total_assignees": 1,
+  "total_comments": 0,
+}
+`;
+
 exports[`cases spaces only enabled: trial Common analytics indexes synchronization task should sync the cases comments index 1`] = `
 Object {
   "comment": "This is a cool comment",

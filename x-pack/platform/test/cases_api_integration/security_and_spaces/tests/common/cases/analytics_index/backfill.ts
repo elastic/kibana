@@ -13,10 +13,10 @@ import {
 } from '@kbn/cases-plugin/common/types/domain';
 import { OBSERVABLE_TYPE_IPV4, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
 import {
-  runActivitySynchronizationTask,
-  runAttachmentsSynchronizationTask,
-  runCasesSynchronizationTask,
-  runCommentsSynchronizationTask,
+  runActivityBackfillTask,
+  runAttachmentsBackfillTask,
+  runCasesBackfillTask,
+  runCommentsBackfillTask,
 } from '../../../../../common/lib/api/analytics';
 import {
   addObservable,
@@ -39,7 +39,7 @@ import {
   postCommentAlertReq,
   postCommentUserReq,
 } from '../../../../../common/lib/mock';
-import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const retry = getService('retry');
   const authSpace1 = getAuthWithSuperUser();
 
-  describe('analytics indexes synchronization task', () => {
+  describe.only('analytics indexes backfill task', () => {
     beforeEach(async () => {
       await deleteAllCaseAnalyticsItems(esClient);
       await deleteAllCaseItems(esClient);
@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('should sync the cases index', async () => {
+    it('should backfill the cases index', async () => {
       await createConfiguration(
         supertest,
         getConfigurationRequest({
@@ -101,7 +101,7 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       });
 
-      await runCasesSynchronizationTask(supertest);
+      await runCasesBackfillTask(supertest);
 
       await retry.try(async () => {
         const caseAnalytics = await esClient.get({
@@ -129,7 +129,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('should sync the cases attachments index', async () => {
+    it('should backfill the cases attachments index', async () => {
       const postedCase = await createCase(
         supertest,
         { ...postCaseReq, owner: SECURITY_SOLUTION_OWNER },
@@ -156,7 +156,7 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      await runAttachmentsSynchronizationTask(supertest);
+      await runAttachmentsBackfillTask(supertest);
 
       await retry.try(async () => {
         const firstAttachmentAnalytics = await esClient.get({
@@ -175,7 +175,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(secondAttachmentAnalytics.found).to.be(true);
     });
 
-    it('should sync the cases comments index', async () => {
+    it('should backfill the cases comments index', async () => {
       const postedCase = await createCase(supertest, postCaseReq, 200);
       const patchedCase = await createComment({
         supertest,
@@ -183,7 +183,7 @@ export default ({ getService }: FtrProviderContext): void => {
         params: postCommentUserReq,
       });
 
-      await runCommentsSynchronizationTask(supertest);
+      await runCommentsBackfillTask(supertest);
 
       await retry.try(async () => {
         const commentAnalytics = await esClient.get({
@@ -211,7 +211,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('should sync the activity index', async () => {
+    it('should backfill the activity index', async () => {
       const postedCase = await createCase(supertest, postCaseReq, 200);
       await updateCase({
         supertest,
@@ -236,7 +236,7 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      await runActivitySynchronizationTask(supertest);
+      await runActivityBackfillTask(supertest);
 
       let activityArray: any[] = [];
       await retry.try(async () => {

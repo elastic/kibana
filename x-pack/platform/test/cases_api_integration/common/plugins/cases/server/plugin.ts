@@ -98,13 +98,13 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
   }
 
   public start(core: CoreStart, plugins: FixtureStartDeps) {
-    scheduleCasesAnalyticsSyncTasks({ taskManager: plugins.taskManager, logger: this.log });
-    createCasesAnalyticsIndexes({
-      esClient: core.elasticsearch.client.asInternalUser,
-      logger: this.log,
-      isServerless: false,
-      taskManager: plugins.taskManager,
-    }).catch(() => {});
+    // scheduleCasesAnalyticsSyncTasks({ taskManager: plugins.taskManager, logger: this.log });
+    // createCasesAnalyticsIndexes({
+    //   esClient: core.elasticsearch.client.asInternalUser,
+    //   logger: this.log,
+    //   isServerless: false,
+    //   taskManager: plugins.taskManager,
+    // }).catch(() => {});
   }
   public stop() {}
 }
