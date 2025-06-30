@@ -2317,27 +2317,18 @@ module.exports = {
       },
     },
     {
-      files: ['src/platform/**/ui_tests/**/*', 'x-pack/platform/**/ui_tests/**/*'],
+      files: [
+        'src/platform/**/plugins/**/ui_tests/**/*.ts',
+        'x-pack/platform/**/plugins/**/ui_tests/**/*.ts',
+      ],
       rules: {
         'no-restricted-imports': [
           'error',
           {
-            paths: [
+            patterns: [
               {
-                name: '@playwright/test',
-                message: "Importing from '@playwright/test' is not allowed in these test files.",
-              },
-              {
-                name: 'playwright',
-                message: "Importing from 'playwright' is not allowed in these test files.",
-              },
-              {
-                name: 'kbn/scout-oblt',
-                message: "Please use 'kbn/scout' instead of 'kbn/scout-oblt' in test files.",
-              },
-              {
-                name: 'kbn/scout-security',
-                message: "Please use 'kbn/scout' instead of 'kbn/scout-security' in test files.",
+                group: ['@playwright/test', 'playwright', '@kbn/scout-oblt', '@kbn/scout-security'],
+                message: "Platform tests should import only from '@kbn/scout'.",
               },
             ],
           },
@@ -2345,23 +2336,16 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/observability/**/ui_tests/**/*'],
+      files: ['x-pack/solutions/observability/plugins/**/ui_tests/**/*.ts'],
       rules: {
         'no-restricted-imports': [
           'error',
           {
-            paths: [
+            patterns: [
               {
-                name: '@playwright/test',
-                message: "Importing from '@playwright/test' is not allowed in these test files.",
-              },
-              {
-                name: 'playwright',
-                message: "Importing from 'playwright' is not allowed in these test files.",
-              },
-              {
-                name: 'kbn/scout',
-                message: "Please use 'kbn/scout-oblt' instead of 'kbn/scout' in test files.",
+                group: ['@playwright/test', 'playwright', '@kbn/scout'],
+                message:
+                  "Observability solution tests should import from '@kbn/scout-oblt' instead.",
               },
             ],
           },
@@ -2369,23 +2353,16 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/security/**/ui_tests/**/*'],
+      files: ['x-pack/solutions/security/plugins/**/ui_tests/**/*.ts'],
       rules: {
         'no-restricted-imports': [
           'error',
           {
-            paths: [
+            patterns: [
               {
-                name: '@playwright/test',
-                message: "Importing from '@playwright/test' is not allowed in these test files.",
-              },
-              {
-                name: 'playwright',
-                message: "Importing from 'playwright' is not allowed in these test files.",
-              },
-              {
-                name: 'kbn/scout',
-                message: "Please use 'kbn/scout-security' instead of 'kbn/scout' in test files.",
+                group: ['@playwright/test', 'playwright', '@kbn/scout'],
+                message:
+                  "Security solution tests should import from '@kbn/scout-security' instead.",
               },
             ],
           },
