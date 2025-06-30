@@ -779,6 +779,7 @@ module.exports = {
         'x-pack/platform/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
         'x-pack/platform/test/*/*config.*ts',
         'x-pack/solutions/*/test/**/{tests,test_suites,apis,apps,deployment_agnostic,fixtures}/**/*',
+        'x-pack/solutions/*/test/api_integration_deployment_agnostic/**/*',
         'x-pack/solutions/*/test/**/*config.*ts',
         'x-pack/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
         'x-pack/test/*/*config.*ts',

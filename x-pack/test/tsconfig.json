@@ -150,7 +150,6 @@
     "@kbn/embeddable-alerts-table-plugin",
     "@kbn/lock-manager",
     "@kbn/alerts-ui-shared",
-    "@kbn/test-suites-xpack-observability",
     "@kbn/test-suites-xpack-platform",
     "@kbn/core-chrome-browser",
     "@kbn/event-log-plugin",

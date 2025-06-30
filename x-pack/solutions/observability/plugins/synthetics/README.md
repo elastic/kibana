@@ -74,7 +74,7 @@ We can run these tests like described above, but with some special config.
 `node scripts/functional_test_runner.js --config=test/functional_with_es_ssl/config.ts`
 
 ## Deployment agnostic API Integration Tests
-The Synthetics tests are located under `x-pack/test/api_integration/deployment_agnostic/apis/observability/synthetics` folder. In order to run the SLO tests of your interest, you can grep accordingly. Use the commands below to run all SLO tests (`grep=SyntheticsAPITests`) on stateful or serverless.
+The Synthetics tests are located under `x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics` folder. In order to run the SLO tests of your interest, you can grep accordingly. Use the commands below to run all SLO tests (`grep=SyntheticsAPITests`) on stateful or serverless.
 
 ### Stateful
 

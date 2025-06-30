@@ -20,7 +20,7 @@ yarn jest --config x-pack/platform/plugins/shared/dataset_quality/jest.config.js
 
 ### Deployment-agnostic API tests
 
-The deployment-agnostic API tests are located in [`x-pack/test/api_integration/deployment_agnostic/apis/observability/dataset_quality`](/x-pack/test/api_integration/deployment_agnostic/apis/observability/dataset_quality/).
+The deployment-agnostic API tests are located in [`x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality`](/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality/).
 
 #### Start server and run test (stateful)
 
@@ -29,7 +29,7 @@ The deployment-agnostic API tests are located in [`x-pack/test/api_integration/d
 node scripts/functional_tests_server --config x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts
 
 # run tests
-node scripts/functional_test_runner --config x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts --include ./x-pack/test/api_integration/deployment_agnostic/apis/observability/dataset_quality/$
+node scripts/functional_test_runner --config x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts --include ./x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality/$
 ```
 
 #### Start server and run test (serverless)
@@ -39,7 +39,7 @@ node scripts/functional_test_runner --config x-pack/test/api_integration/deploym
 node scripts/functional_tests_server --config x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.serverless.config.ts
 
 # run tests
-node scripts/functional_test_runner --config x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.serverless.config.ts --include ./x-pack/test/api_integration/deployment_agnostic/apis/observability/dataset_quality/$
+node scripts/functional_test_runner --config x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.serverless.config.ts --include ./x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality/$
 ```
 
 ### API integration tests
