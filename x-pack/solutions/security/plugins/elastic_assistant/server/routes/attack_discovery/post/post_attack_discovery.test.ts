@@ -19,6 +19,7 @@ import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/c
 import { AttackDiscoveryPostRequestBody } from '@kbn/elastic-assistant-common';
 
 import { updateAttackDiscoveryStatusToRunning } from '../helpers/helpers';
+import { hasWriteAttackDiscoveryAlertsPrivileges } from '../helpers/index_privileges';
 
 jest.mock('../helpers/helpers', () => {
   const original = jest.requireActual('../helpers/helpers');
@@ -26,6 +27,15 @@ jest.mock('../helpers/helpers', () => {
   return {
     ...original,
     updateAttackDiscoveryStatusToRunning: jest.fn(),
+  };
+});
+
+jest.mock('../helpers/index_privileges', () => {
+  const original = jest.requireActual('../helpers/index_privileges');
+
+  return {
+    ...original,
+    hasWriteAttackDiscoveryAlertsPrivileges: jest.fn(),
   };
 });
 
@@ -46,6 +56,7 @@ const mockDataClient = {
   updateAttackDiscovery: jest.fn(),
   createAttackDiscovery: jest.fn(),
   getAttackDiscovery: jest.fn(),
+  refreshEventLogIndex: jest.fn(),
 } as unknown as AttackDiscoveryDataClient;
 const mockApiConfig = {
   connectorId: 'connector-id',
@@ -81,6 +92,7 @@ describe('postAttackDiscoveryRoute', () => {
       currentAd: runningAd,
       attackDiscoveryId: mockCurrentAd.id,
     });
+    (hasWriteAttackDiscoveryAlertsPrivileges as jest.Mock).mockResolvedValue({ isSuccess: true });
   });
 
   it('should handle successful request', async () => {
@@ -133,6 +145,37 @@ describe('postAttackDiscoveryRoute', () => {
         success: false,
       },
       status_code: 500,
+    });
+  });
+
+  describe('Enabled `attackDiscoveryAlertsEnabled` feature flag', () => {
+    beforeEach(() => {
+      clients.core.featureFlags.getBooleanValue.mockResolvedValue(true);
+    });
+
+    it('should handle successful request', async () => {
+      const response = await server.inject(
+        postAttackDiscoveryRequest(mockRequestBody),
+        requestContextMock.convertContext(context)
+      );
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual(runningAd);
+    });
+
+    it('should handle missing privileges', async () => {
+      (hasWriteAttackDiscoveryAlertsPrivileges as jest.Mock).mockImplementation(({ response }) => {
+        return Promise.resolve({
+          isSuccess: false,
+          response: response.forbidden({ body: { message: 'no privileges' } }),
+        });
+      });
+
+      const response = await server.inject(
+        postAttackDiscoveryRequest(mockRequestBody),
+        requestContextMock.convertContext(context)
+      );
+      expect(response.status).toEqual(403);
+      expect(response.body).toEqual({ message: 'no privileges' });
     });
   });
 });
