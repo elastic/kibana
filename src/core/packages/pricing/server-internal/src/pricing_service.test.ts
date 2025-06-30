@@ -127,6 +127,37 @@ describe('PricingService', () => {
     });
   });
 
+  it('should block isFeatureAvailable until evaluateProductFeatures is called', async () => {
+    await service.preboot({ http: prebootHttp });
+    const setup = await service.setup({ http: setupHttp });
+
+    // Start calling isFeatureAvailable, before said feature was registered or evaluateProductFeatures is called
+    let resolved = false;
+    const promise = setup.isFeatureAvailable('testFeature').then(() => {
+      resolved = true;
+    });
+
+    // Now register the feature
+    setup.registerProductFeatures([
+      {
+        id: 'testFeature',
+        description: 'Test Feature',
+        products: [{ name: 'observability', tier: 'complete' }],
+      },
+    ]);
+
+    // Wait a short bit to ensure it doesn't resolve prematurely
+    await new Promise((r) => setTimeout(r, 100));
+    expect(resolved).toBe(false);
+
+    // Now "unlock" the gate
+    await setup.evaluateProductFeatures();
+
+    // Now it should resolve
+    await promise;
+    expect(resolved).toBe(true);
+  });
+
   describe('#start()', () => {
     it('returns a PricingTiersClient with the configured tiers', async () => {
       await service.preboot({ http: prebootHttp });
