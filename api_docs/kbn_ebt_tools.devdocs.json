@@ -316,49 +316,6 @@
       },
       {
         "parentPluginId": "@kbn/ebt-tools",
-        "id": "def-common.registerPerformanceMetricEventType",
-        "type": "Function",
-        "tags": [
-          "private"
-        ],
-        "label": "registerPerformanceMetricEventType",
-        "description": [
-          "\nRegister the `performance_metric` event type"
-        ],
-        "signature": [
-          "(analytics: Pick<",
-          "IAnalyticsClient",
-          ", \"registerEventType\">) => void"
-        ],
-        "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/helpers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/ebt-tools",
-            "id": "def-common.registerPerformanceMetricEventType.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "analytics",
-            "description": [
-              "The {@link AnalyticsClient } during the setup phase (it has the method `registerEventType`)"
-            ],
-            "signature": [
-              "Pick<",
-              "IAnalyticsClient",
-              ", \"registerEventType\">"
-            ],
-            "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/helpers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ebt-tools",
         "id": "def-common.reportPerformanceMetricEvent",
         "type": "Function",
         "tags": [],
@@ -482,6 +439,62 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.Meta",
+        "type": "Interface",
+        "tags": [],
+        "label": "Meta",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/performance_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.Meta.rangeFrom",
+            "type": "string",
+            "tags": [],
+            "label": "rangeFrom",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/performance_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.Meta.rangeTo",
+            "type": "string",
+            "tags": [],
+            "label": "rangeTo",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/performance_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.Meta.description",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "`[ttfmp_alerts] ${string}` | `[ttfmp_onboarding] ${string}` | `[ttfmp_synthetics] ${string}` | `[ttfmp_hosts] ${string}` | `[ttfmp_services] ${string}` | `[ttfmp_traces] ${string}` | `[ttfmp_dependencies] ${string}` | `[ttfmp_alert_details] ${string}` | `[ttfmp_slos] ${string}` | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/performance_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/ebt-tools",
         "id": "def-common.PerformanceMetricEvent",

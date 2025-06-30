@@ -37,7 +37,7 @@ export const VisualizeNoMatch = () => {
       bannerId = services.overlays.banners.replace(
         bannerId,
         toMountPoint(
-          <EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage}>
+          <EuiCallOut color="warning" iconType="info" title={bannerMessage}>
             <p>
               <FormattedMessage
                 id="visualizations.noMatchRoute.bannerText"
