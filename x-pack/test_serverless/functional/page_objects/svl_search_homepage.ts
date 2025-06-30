@@ -69,6 +69,21 @@ export function SvlSearchHomePageProvider({ getService }: FtrProviderContext) {
     async expectToBeOnObservabilityPage() {
       expect(await browser.getCurrentUrl()).contain('manage-data/ingest');
     },
+    async expectToBeOnIngestDataToSecurityPage() {
+      expect(await browser.getCurrentUrl()).contain(
+        'security/get-started/ingest-data-to-elastic-security'
+      );
+    },
+    async expectToBeOnInstallElasticDefendPage() {
+      expect(await browser.getCurrentUrl()).contain(
+        'security/configure-elastic-defend/install-elastic-defend'
+      );
+    },
+    async expectToBeOnCloudSecurityPosturePage() {
+      expect(await browser.getCurrentUrl()).contain(
+        'security/cloud/cloud-security-posture-management'
+      );
+    },
     async expectToBeOnSpacesCreatePage() {
       expect(await browser.getCurrentUrl()).contain('observability/start');
     },
