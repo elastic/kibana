@@ -39,7 +39,7 @@ export const BenefitsCallout = ({ licenseType }: Props) => (
       <EuiButton href={ELASTIC_SUPPORT_LINK} color="warning" fill target="_blank">
         <FormattedMessage
           id="xpack.intercept.feedbackFlyout.platinumOrHigherCallout.supportButton"
-          defaultMessage="Submit a request"
+          defaultMessage="Access support channel"
         />
       </EuiButton>
     </EuiCallOut>
