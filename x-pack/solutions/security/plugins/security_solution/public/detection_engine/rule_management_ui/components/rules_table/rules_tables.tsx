@@ -45,9 +45,11 @@ import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manu
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
 import { BulkManualRuleRunLimitErrorModal } from './bulk_actions/bulk_manual_rule_run_limit_error_modal';
 import { RulesWithGapsOverviewPanel } from '../../../rule_gaps/components/rules_with_gaps_overview_panel';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { BulkEditDeleteAlertSuppressionConfirmation } from './bulk_actions/bulk_edit_delete_alert_suprression_confirmation';
 import { BulkActionEditTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
+import { BulkFillRuleGapsModal } from '../../../rule_gaps/components/bulk_fill_rule_gaps';
+import { useBulkFillRuleGapsConfirmation } from '../../../rule_gaps/components/bulk_fill_rule_gaps/use_bulk_fill_rule_gaps_confirmation';
+import { BulkFillRuleGapsRuleLimitErrorModal } from './bulk_actions/bulk_schedule_gap_fills_rule_limit_error_modal';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -128,10 +130,23 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     confirmManualRuleRun,
   } = useManualRuleRunConfirmation();
 
+  const {
+    isBulkFillRuleGapsConfirmationVisible,
+    showBulkFillRuleGapsConfirmation,
+    cancelBulkFillRuleGaps,
+    confirmBulkFillRuleGaps,
+  } = useBulkFillRuleGapsConfirmation();
+
   const [
     isManualRuleRunLimitErrorVisible,
     showManualRuleRunLimitError,
     hideManualRuleRunLimitError,
+  ] = useBoolState();
+
+  const [
+    isBulkFillRuleGapsRuleLimitErrorVisible,
+    showBulkFillRuleGapsRuleLimitError,
+    hideBulkFillRuleGapsRuleLimitError,
   ] = useBoolState();
 
   const {
@@ -150,7 +165,9 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     showBulkActionConfirmation,
     showBulkDuplicateConfirmation,
     showManualRuleRunConfirmation,
+    showBulkFillRuleGapsConfirmation,
     showManualRuleRunLimitError,
+    showBulkFillRuleGapsRuleLimitError,
     completeBulkEditForm,
     executeBulkActionsDryRun,
   });
@@ -220,8 +237,6 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     setIsAllSelected(!isAllSelected);
     setSelectedRuleIds(!isAllSelected ? rules.map(({ id }) => id) : []);
   }, [rules, isAllSelected, setIsAllSelected, setSelectedRuleIds]);
-
-  const storeGapsInEventLogEnabled = useIsExperimentalFeatureEnabled('storeGapsInEventLogEnabled');
 
   const isTableEmpty =
     ruleManagementFilters?.rules_summary.custom_count === 0 &&
@@ -297,8 +312,18 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       {isManualRuleRunConfirmationVisible && (
         <ManualRuleRunModal onCancel={cancelManualRuleRun} onConfirm={confirmManualRuleRun} />
       )}
+      {isBulkFillRuleGapsConfirmationVisible && (
+        <BulkFillRuleGapsModal
+          onCancel={cancelBulkFillRuleGaps}
+          onConfirm={confirmBulkFillRuleGaps}
+          rulesCount={selectedRuleIds.length}
+        />
+      )}
       {isManualRuleRunLimitErrorVisible && (
         <BulkManualRuleRunLimitErrorModal onClose={hideManualRuleRunLimitError} />
+      )}
+      {isBulkFillRuleGapsRuleLimitErrorVisible && (
+        <BulkFillRuleGapsRuleLimitErrorModal onClose={hideBulkFillRuleGapsRuleLimitError} />
       )}
       {isBulkActionConfirmationVisible && bulkAction && (
         <BulkActionDryRunConfirmation
@@ -334,9 +359,8 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
 
       {shouldShowRulesTable && (
         <>
-          {selectedTab === AllRulesTabs.monitoring && storeGapsInEventLogEnabled && (
+          {selectedTab === AllRulesTabs.monitoring && (
             <>
-              <EuiSpacer />
               <RulesWithGapsOverviewPanel />
               <EuiSpacer />
             </>

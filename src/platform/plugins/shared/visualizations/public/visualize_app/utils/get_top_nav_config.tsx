@@ -11,7 +11,7 @@ import React from 'react';
 import moment from 'moment';
 import EventEmitter from 'events';
 import { i18n } from '@kbn/i18n';
-import { EuiBetaBadgeProps } from '@elastic/eui';
+import { EuiBetaBadgeProps, EuiCallOut } from '@elastic/eui';
 import { parse } from 'query-string';
 
 import { Capabilities } from '@kbn/core/public';
@@ -290,6 +290,118 @@ export const getTopNavConfig = (
   const showSaveButton =
     visualizeCapabilities.save || (!originatingApp && dashboardCapabilities.showWriteControls);
 
+  const showShareOptions = (anchorElement: HTMLElement, asExport?: boolean) => {
+    if (share) {
+      const currentState = stateContainer.getState();
+      const searchParams = parse(history.location.search);
+      const params: VisualizeLocatorParams = {
+        visId: savedVis?.id,
+        filters: currentState.filters,
+        refreshInterval: undefined,
+        timeRange: data.query.timefilter.timefilter.getTime(),
+        uiState: currentState.uiState,
+        query: currentState.query,
+        vis: currentState.vis,
+        linked: currentState.linked,
+        indexPattern:
+          visInstance.savedSearch?.searchSource?.getField('index')?.id ??
+          (searchParams.indexPattern as string),
+        savedSearchId: visInstance.savedSearch?.id ?? (searchParams.savedSearchId as string),
+      };
+      // TODO: support sharing in by-value mode
+      share.toggleShareContextMenu({
+        asExport,
+        anchorElement,
+        allowShortUrl: Boolean(visualizeCapabilities.createShortUrl),
+        shareableUrl: unhashUrl(window.location.href),
+        objectId: savedVis?.id,
+        objectType: 'visualization',
+        objectTypeMeta: {
+          title: i18n.translate('visualizations.share.shareModal.title', {
+            defaultMessage: 'Share this visualization',
+          }),
+          config: {
+            embed: {
+              computeAnonymousCapabilities: showPublicUrlSwitch,
+            },
+            integration: {
+              export: {
+                pdfReports: {
+                  draftModeCallOut: (
+                    <EuiCallOut
+                      color="warning"
+                      iconType="warning"
+                      title={i18n.translate('visualizations.exports.pdfReports.warning.title', {
+                        defaultMessage: 'Unsaved changes',
+                      })}
+                    >
+                      {i18n.translate(
+                        'visualizations.exports.pdfReports.postURLWatcherMessage.unsavedChanges',
+                        {
+                          defaultMessage: 'URL may change if you upgrade Kibana.',
+                        }
+                      )}
+                    </EuiCallOut>
+                  ),
+                },
+                imageReports: {
+                  draftModeCallOut: (
+                    <EuiCallOut
+                      color="warning"
+                      iconType="warning"
+                      title={i18n.translate('visualizations.exports.imageReports.warning.title', {
+                        defaultMessage: 'Unsaved changes',
+                      })}
+                    >
+                      {i18n.translate(
+                        'visualizations.exports.imageReports.postURLWatcherMessage.unsavedChanges',
+                        {
+                          defaultMessage: 'URL may change if you upgrade Kibana.',
+                        }
+                      )}
+                    </EuiCallOut>
+                  ),
+                },
+                csvReports: {
+                  draftModeCallOut: (
+                    <EuiCallOut
+                      color="warning"
+                      iconType="warning"
+                      title={i18n.translate('visualizations.exports.csvReports.warning.title', {
+                        defaultMessage: 'Unsaved changes',
+                      })}
+                    >
+                      {i18n.translate(
+                        'visualizations.exports.csvReports.postURLWatcherMessage.unsavedChanges',
+                        {
+                          defaultMessage: 'URL may change if you upgrade Kibana.',
+                        }
+                      )}
+                    </EuiCallOut>
+                  ),
+                },
+              },
+            },
+          },
+        },
+        sharingData: {
+          title:
+            savedVis?.title ||
+            i18n.translate('visualizations.reporting.defaultReportTitle', {
+              defaultMessage: 'Visualization [{date}]',
+              values: { date: moment().toISOString(true) },
+            }),
+          locatorParams: {
+            id: VISUALIZE_APP_LOCATOR,
+            version: getKibanaVersion(),
+            params,
+          },
+        },
+        isDirty: hasUnappliedChanges || hasUnsavedChanges,
+      });
+    }
+  };
+
   const topNavMenu: TopNavMenuData[] = [
     ...(displayEditInLensItem
       ? [
@@ -372,8 +484,33 @@ export const getTopNavConfig = (
         }
       },
     },
+    // Only show the export button if the current user meets the requirements for at least one registered export integration
+    ...(Boolean(share?.availableIntegrations('visualization', 'export')?.length)
+      ? ([
+          {
+            id: 'export',
+            iconType: 'download',
+            iconOnly: true,
+            label: i18n.translate('visualizations.topNavMenu.shareVisualizationButtonLabel', {
+              defaultMessage: 'export',
+            }),
+            description: i18n.translate(
+              'visualizations.topNavMenu.shareVisualizationButtonAriaLabel',
+              {
+                defaultMessage: 'Export Visualization',
+              }
+            ),
+            testId: 'exportTopNavButton',
+            run: (anchorElement) => showShareOptions(anchorElement, true),
+            // disable the Share button if no action specified and fot byValue visualizations
+            disableButton: !share || Boolean(!savedVis.id && originatingApp),
+          },
+        ] as TopNavMenuData[])
+      : []),
     {
       id: 'share',
+      iconType: 'share',
+      iconOnly: true,
       label: i18n.translate('visualizations.topNavMenu.shareVisualizationButtonLabel', {
         defaultMessage: 'share',
       }),
@@ -381,59 +518,7 @@ export const getTopNavConfig = (
         defaultMessage: 'Share Visualization',
       }),
       testId: 'shareTopNavButton',
-      run: (anchorElement) => {
-        if (share) {
-          const currentState = stateContainer.getState();
-          const searchParams = parse(history.location.search);
-          const params: VisualizeLocatorParams = {
-            visId: savedVis?.id,
-            filters: currentState.filters,
-            refreshInterval: undefined,
-            timeRange: data.query.timefilter.timefilter.getTime(),
-            uiState: currentState.uiState,
-            query: currentState.query,
-            vis: currentState.vis,
-            linked: currentState.linked,
-            indexPattern:
-              visInstance.savedSearch?.searchSource?.getField('index')?.id ??
-              (searchParams.indexPattern as string),
-            savedSearchId: visInstance.savedSearch?.id ?? (searchParams.savedSearchId as string),
-          };
-          // TODO: support sharing in by-value mode
-          share.toggleShareContextMenu({
-            anchorElement,
-            allowEmbed: true,
-            allowShortUrl: Boolean(visualizeCapabilities.createShortUrl),
-            shareableUrl: unhashUrl(window.location.href),
-            objectId: savedVis?.id,
-            objectType: 'visualization',
-            objectTypeMeta: {
-              title: i18n.translate('visualizations.share.shareModal.title', {
-                defaultMessage: 'Share this visualization',
-              }),
-              config: {
-                embed: {
-                  computeAnonymousCapabilities: showPublicUrlSwitch,
-                },
-              },
-            },
-            sharingData: {
-              title:
-                savedVis?.title ||
-                i18n.translate('visualizations.reporting.defaultReportTitle', {
-                  defaultMessage: 'Visualization [{date}]',
-                  values: { date: moment().toISOString(true) },
-                }),
-              locatorParams: {
-                id: VISUALIZE_APP_LOCATOR,
-                version: getKibanaVersion(),
-                params,
-              },
-            },
-            isDirty: hasUnappliedChanges || hasUnsavedChanges,
-          });
-        }
-      },
+      run: showShareOptions,
       // disable the Share button if no action specified and fot byValue visualizations
       disableButton: !share || Boolean(!savedVis.id && originatingApp),
     },

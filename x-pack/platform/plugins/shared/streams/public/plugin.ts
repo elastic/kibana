@@ -7,7 +7,6 @@
 
 import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { Logger } from '@kbn/logging';
-import { OBSERVABILITY_ENABLE_STREAMS_UI } from '@kbn/management-settings-ids';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import { Observable, from, shareReplay, startWith } from 'rxjs';
 import { once } from 'lodash';
@@ -58,16 +57,11 @@ const createStreamsStatusObservable = once(
     repositoryClient: StreamsRepositoryClient,
     logger: Logger
   ): Observable<StreamsStatus> => {
-    const { application, uiSettings } = core;
+    const { application } = core;
     const hasCapabilities = application.capabilities?.streams?.show;
-    const isUIEnabled = uiSettings.get(OBSERVABILITY_ENABLE_STREAMS_UI);
 
     if (!hasCapabilities) {
       return from([DISABLED_STATUS]);
-    }
-
-    if (isUIEnabled) {
-      return from([ENABLED_STATUS]);
     }
 
     return from(

@@ -23,6 +23,7 @@ import {
   getFunctionSignaturesByReturnType,
   setup,
   lookupIndexFields,
+  policies,
 } from './helpers';
 
 describe('autocomplete.suggest', () => {
@@ -54,12 +55,15 @@ describe('autocomplete.suggest', () => {
           'WHERE ',
           'SORT ',
           'LIMIT ',
+          'CHANGE_POINT ',
           'DISSECT ',
           'STATS ',
           'EVAL ',
           'GROK ',
+          'COMPLETION ',
           'MV_EXPAND ',
           'DROP ',
+          'ENRICH ',
           'KEEP ',
           'RENAME ',
           'SAMPLE ',
@@ -163,7 +167,7 @@ describe('autocomplete.suggest', () => {
             );
           });
 
-          test('lookup join', async () => {
+          test('lookup join after command name', async () => {
             await assertSuggestions('FROM a | FORK (LOOKUP JOIN /)', [
               'join_index ',
               'join_index_with_alias ',
@@ -171,8 +175,9 @@ describe('autocomplete.suggest', () => {
               'join_index_alias_1 $0',
               'join_index_alias_2 $0',
             ]);
-            const suggestions = await suggest('FROM a | FORK (LOOKUP JOIN join_index ON /)');
-            const labels = suggestions.map((s) => s.text.trim()).sort();
+          });
+
+          test('lookup join after ON keyword', async () => {
             const expected = getFieldNamesByType('any')
               .sort()
               .map((field) => field.trim());
@@ -180,9 +185,20 @@ describe('autocomplete.suggest', () => {
             for (const { name } of lookupIndexFields) {
               expected.push(name.trim());
             }
-            expected.sort();
 
-            expect(labels).toEqual(expected);
+            await assertSuggestions('FROM a | FORK (LOOKUP JOIN join_index ON /)', expected);
+          });
+
+          test('enrich', async () => {
+            const expectedPolicyNameSuggestions = policies
+              .map(({ name, suggestedAs }) => suggestedAs || name)
+              .map((name) => `${name} `);
+
+            await assertSuggestions(`FROM a | FORK (ENRICH /)`, expectedPolicyNameSuggestions);
+            await assertSuggestions(
+              `FROM a | FORK (ENRICH policy ON /)`,
+              getFieldNamesByType('any').map((v) => `${v} `)
+            );
           });
 
           describe('stats', () => {

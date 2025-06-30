@@ -5,25 +5,16 @@
  * 2.0.
  */
 
-import { findLatestPackageVersion } from '../../api/install_prebuilt_rules_and_timelines/install_prebuilt_rules_package';
-import {
-  PREBUILT_RULES_PACKAGE_NAME,
-  SECURITY_AI_PROMPTS_PACKAGE_NAME,
-} from '../../../../../../common/detection_engine/constants';
+import { SECURITY_AI_PROMPTS_PACKAGE_NAME } from '../../../../../../common/detection_engine/constants';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
-import type { ConfigType } from '../../../../../config';
+import { findLatestPackageVersion } from './find_latest_package_version';
 
 export async function installSecurityAiPromptsPackage(
-  config: ConfigType,
   context: SecuritySolutionApiRequestHandlerContext
 ) {
   try {
-    let pkgVersion = config.prebuiltRulesPackageVersion;
+    const pkgVersion = await findLatestPackageVersion(context, SECURITY_AI_PROMPTS_PACKAGE_NAME);
 
-    if (!pkgVersion) {
-      // Find latest package if the version isn't specified in the config
-      pkgVersion = await findLatestPackageVersion(context, PREBUILT_RULES_PACKAGE_NAME);
-    }
     return context.getInternalFleetServices().packages.ensureInstalledPackage({
       pkgName: SECURITY_AI_PROMPTS_PACKAGE_NAME,
       pkgVersion,

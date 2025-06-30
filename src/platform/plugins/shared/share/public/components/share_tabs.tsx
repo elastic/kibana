@@ -10,39 +10,35 @@
 import React, { type FC } from 'react';
 import { TabbedModal, type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
 
-import { ShareMenuProvider, useShareTabsContext, type IShareContext } from './context';
-import { linkTab, embedTab, exportTab } from './tabs';
+import { ShareProvider, useShareContext, type IShareContext } from './context';
+import { linkTab, embedTab } from './tabs';
 
 export const ShareMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
   return (
-    <ShareMenuProvider {...{ shareContext }}>
+    <ShareProvider {...{ shareContext }}>
       <ShareMenuTabs />
-    </ShareMenuProvider>
+    </ShareProvider>
   );
 };
 
 // this file is intended to replace share_context_menu
 export const ShareMenuTabs = () => {
-  const shareContext = useShareTabsContext();
+  const shareContext = useShareContext();
 
-  const { allowEmbed, objectTypeMeta, onClose, shareMenuItems, anchorElement, disabledShareUrl } =
-    shareContext;
+  const { objectTypeMeta, onClose, shareMenuItems, anchorElement } = shareContext;
 
   const tabs: Array<IModalTabDeclaration<any>> = [];
 
-  // do not show the link tab if the share url is disabled
-  if (!disabledShareUrl) {
+  // Do not show the link tab if the share url is disabled
+  if (!objectTypeMeta?.config.link?.disabled) {
     tabs.push(linkTab);
   }
 
-  const enabledItems = shareMenuItems.filter(({ shareMenuItem }) => !shareMenuItem?.disabled);
-
-  // do not show the export tab if the license is disabled
-  if (enabledItems.length > 0) {
-    tabs.push(exportTab);
-  }
-
-  if (allowEmbed) {
+  // Embed is disabled in the serverless offering, hence the need to check if the embed tab should be shown
+  if (
+    shareMenuItems.some(({ shareType }) => shareType === 'embed') &&
+    !objectTypeMeta?.config?.embed?.disabled
+  ) {
     tabs.push(embedTab);
   }
 

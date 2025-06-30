@@ -13,6 +13,7 @@ import { ContextPageObject } from './context_page';
 import { DashboardPageObject } from './dashboard_page';
 import { DiscoverPageObject } from './discover_page';
 import { ErrorPageObject } from './error_page';
+import { ExportPageObject } from './export_page';
 import { HeaderPageObject } from './header_page';
 import { HomePageObject } from './home_page';
 import { NewsfeedPageObject } from './newsfeed_page';
@@ -52,6 +53,7 @@ export const pageObjects = {
   discover: DiscoverPageObject,
   embeddedConsole: EmbeddedConsoleProvider,
   error: ErrorPageObject,
+  exports: ExportPageObject,
   header: HeaderPageObject,
   home: HomePageObject,
   newsfeed: NewsfeedPageObject,

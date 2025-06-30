@@ -155,6 +155,7 @@ import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
+import { usePrebuiltRulesViewBaseDiff } from '../../../rule_management/hooks/use_prebuilt_rules_view_base_diff';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -322,7 +323,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const mlCapabilities = useMlCapabilities();
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
-  const storeGapsInEventLogEnabled = useIsExperimentalFeatureEnabled('storeGapsInEventLogEnabled');
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
 
@@ -433,6 +433,18 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     message: ruleI18n.HAS_RULE_UPDATE_DETAILS_CALLOUT_MESSAGE,
     onUpgrade: refreshRule,
   });
+
+  const {
+    baseVersionFlyout,
+    openFlyout,
+    doesBaseVersionExist,
+    isLoading: isBaseVersionLoading,
+  } = usePrebuiltRulesViewBaseDiff({ rule, onRevert: refreshRule });
+
+  const isRevertBaseVersionDisabled = useMemo(
+    () => !doesBaseVersionExist || isBaseVersionLoading,
+    [doesBaseVersionExist, isBaseVersionLoading]
+  );
 
   const ruleStatusInfo = useMemo(() => {
     return (
@@ -610,6 +622,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
       {upgradeCallout}
+      {baseVersionFlyout}
       {isBulkDuplicateConfirmationVisible && (
         <BulkActionDuplicateExceptionsConfirmation
           onCancel={cancelRuleDuplication}
@@ -724,6 +737,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
                           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
                           confirmDeletion={confirmDeletion}
+                          isRevertBaseVersionDisabled={isRevertBaseVersionDisabled}
+                          openRuleDiffFlyout={openFlyout}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -854,12 +869,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       theme={theme}
                     />
                     <EuiSpacer size="xl" />
-                    {storeGapsInEventLogEnabled && (
-                      <>
-                        <RuleGaps ruleId={ruleId} enabled={isRuleEnabled} />
-                        <EuiSpacer size="xl" />
-                      </>
-                    )}
+                    <>
+                      <RuleGaps ruleId={ruleId} enabled={isRuleEnabled} />
+                      <EuiSpacer size="xl" />
+                    </>
                     <RuleBackfillsInfo ruleId={ruleId} />
                   </>
                 </Route>

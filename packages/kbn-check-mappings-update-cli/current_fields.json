@@ -915,6 +915,9 @@
     "installCount",
     "unInstallCount"
   ],
+  "scheduled_report": [
+    "createdBy"
+  ],
   "search": [
     "description",
     "title"
@@ -1091,6 +1094,34 @@
   "spaces-usage-stats": [],
   "synthetics-dynamic-settings": [],
   "synthetics-monitor": [
+    "alert",
+    "alert.status",
+    "alert.status.enabled",
+    "alert.tls",
+    "alert.tls.enabled",
+    "config_id",
+    "custom_heartbeat_id",
+    "enabled",
+    "hash",
+    "hosts",
+    "id",
+    "journey_id",
+    "locations",
+    "locations.id",
+    "locations.label",
+    "maintenance_windows",
+    "name",
+    "origin",
+    "project_id",
+    "schedule",
+    "schedule.number",
+    "tags",
+    "throttling",
+    "throttling.label",
+    "type",
+    "urls"
+  ],
+  "synthetics-monitor-multi-space": [
     "alert",
     "alert.status",
     "alert.status.enabled",

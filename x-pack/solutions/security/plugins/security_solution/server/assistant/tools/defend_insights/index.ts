@@ -53,7 +53,7 @@ export const DEFEND_INSIGHTS_TOOL: AssistantTool = Object.freeze({
     return requestHasRequiredAnonymizationParams(request) && llm != null;
   },
 
-  getTool(params: AssistantToolParams): DynamicTool | null {
+  async getTool(params: AssistantToolParams): Promise<DynamicTool | null> {
     if (!this.isSupported(params)) return null;
 
     const {
