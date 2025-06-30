@@ -6,3 +6,4 @@
  */
 
 export const ELASTIC_SUPPORT_LINK = 'https://support.elastic.co/home';
+export const SERVERLESS_FEEDBACK_FORM_LINK = 'https://ela.st/feedback-form';

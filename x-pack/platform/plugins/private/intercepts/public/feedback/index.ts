@@ -8,4 +8,4 @@
 export { FeedbackFlyout } from './feedback_flyout';
 export { FeedbackButton } from './feedback_button';
 export { BenefitsCallout } from './benefits_callout';
-export { ELASTIC_SUPPORT_LINK } from './constants';
+export { ELASTIC_SUPPORT_LINK, SERVERLESS_FEEDBACK_FORM_LINK } from './constants';
