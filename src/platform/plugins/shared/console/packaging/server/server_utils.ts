@@ -29,7 +29,7 @@ export class ConsoleSpecDefinitionsLoader {
   constructor(private config: SpecDefinitionsConfig) {}
 
   /**
-   * Load and merge all spec definitions from JSON files
+   * Load and merge all spec definitions from JSON and JS files
    * Returns the same format as the Kibana SpecDefinitionsService
    */
   public loadDefinitions(): SpecDefinitionsResult {
@@ -44,6 +44,9 @@ export class ConsoleSpecDefinitionsLoader {
         this.addEndpointDescription(endpoint, description);
       }
     });
+
+    // Load JavaScript-based definitions
+    this.loadJSDefinitions();
 
     return this.asJson();
   }
@@ -180,6 +183,52 @@ export class ConsoleSpecDefinitionsLoader {
     }
 
     return Boolean(description.availability[endpointsAvailability]);
+  }
+
+  private loadJSDefinitions() {
+    try {
+      const { fs, definitionsPath, stackVersion } = this.config;
+      
+      // Try TypeScript files first (most common case), then compiled JS
+      const tsIndexPath = fs.join(definitionsPath, stackVersion, 'js', 'index.ts');
+      const jsIndexPath = fs.join(definitionsPath, stackVersion, 'js', 'index.js');
+      
+      let jsLoaders: any;
+      let indexPath: string;
+      
+      // Check if TypeScript file exists
+      try {
+        fs.readFileSync(tsIndexPath, 'utf8');
+        indexPath = tsIndexPath;
+      } catch (tsError) {
+        // If no TypeScript file, try JavaScript
+        try {
+          fs.readFileSync(jsIndexPath, 'utf8');
+          indexPath = jsIndexPath;
+        } catch (jsError) {
+          console.warn(`No JS definitions found for stack version ${stackVersion}`);
+          return;
+        }
+      }
+
+      // Require the definitions file
+      jsLoaders = require(indexPath);
+      const specLoaders = jsLoaders.jsSpecLoaders;
+
+      if (Array.isArray(specLoaders)) {
+        specLoaders.forEach((loader: (service: ConsoleSpecDefinitionsLoader) => void) => {
+          try {
+            loader(this);
+          } catch (error) {
+            console.error(`Error loading JS spec definition:`, error);
+          }
+        });
+      } else {
+        console.warn(`jsSpecLoaders is not an array in the loaded module`);
+      }
+    } catch (error) {
+      console.error('Error loading JS definitions:', error);
+    }
   }
 }
 

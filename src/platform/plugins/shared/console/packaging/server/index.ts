@@ -11,7 +11,10 @@ export {
   ConsoleSpecDefinitionsLoader,
   createSpecDefinitionsLoader,
   createSpecDefinitionsLoaderWithAdapter,
+} from './server_utils';
+
+export {
   type FileSystemAdapter,
   type SpecDefinitionsConfig,
   type SpecDefinitionsResult,
-} from './server_utils';
+} from './types';

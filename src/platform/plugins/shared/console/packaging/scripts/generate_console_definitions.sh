@@ -79,6 +79,13 @@ process_version() {
     if [ -d "$KIBANA_SPEC_DEFINITIONS_DIR" ]; then
         echo "Copying spec_definitions directory structure to: $PERSISTENT_DEST"
         cp -r "$KIBANA_SPEC_DEFINITIONS_DIR/." "$PERSISTENT_DEST/"
+        
+        # Fix import paths in TypeScript files to point to the correct spec_definitions_service
+        echo "Fixing import paths in TypeScript files for version $version..."
+        # Fix files directly in js/ folder
+        find "$PERSISTENT_DEST/js" -name "*.ts" -maxdepth 1 -type f -exec sed -i '' "s#from '../../../services'#from '../../../../../server/services'#g" {} \;
+        # Fix files in js/query/ subfolder
+        find "$PERSISTENT_DEST/js/query" -name "*.ts" -type f -exec sed -i '' "s#from '../../../../services'#from '../../../../../../server/services'#g" {} \; 2>/dev/null || true
     else
         echo "Warning: spec_definitions directory not found in Kibana repo for version $version"
         mkdir -p "$PERSISTENT_DEST/js"
