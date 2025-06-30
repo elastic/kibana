@@ -15,7 +15,9 @@ import { BaseLanguageModel } from '@langchain/core/language_models/base';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+
 import { Prompt, QuestionRewritePrompt } from '../../common/prompt';
+import { isEISConnector } from '../utils/eis';
 
 export const getChatParams = async (
   {
@@ -39,7 +41,9 @@ export const getChatParams = async (
   chatPrompt: string;
   questionRewritePrompt: string;
   connector: Connector;
+  summarizationModel?: string;
 }> => {
+  let summarizationModel = model;
   const actionsClient = await actions.getActionsClientWithRequest(request);
   const connector = await actionsClient.get({ id: connectorId });
 
@@ -48,6 +52,11 @@ export const getChatParams = async (
 
   switch (connector.actionTypeId) {
     case INFERENCE_CONNECTOR_ID:
+      if (isEISConnector(connector)) {
+        if (!summarizationModel && connector.config?.providerConfig?.model_id) {
+          summarizationModel = connector.config?.providerConfig?.model_id;
+        }
+      }
       llmType = 'inference';
       modelType = 'openai';
       break;
@@ -81,7 +90,7 @@ export const getChatParams = async (
     request,
     connectorId,
     chatModelOptions: {
-      model: model || connector?.config?.defaultModel,
+      model: summarizationModel || connector?.config?.defaultModel,
       temperature: getDefaultArguments(llmType).temperature,
       // prevents the agent from retrying on failure
       // failure could be due to bad connector, we should deliver that result to the client asap
@@ -90,5 +99,11 @@ export const getChatParams = async (
     },
   });
 
-  return { chatModel, chatPrompt, questionRewritePrompt, connector };
+  return {
+    chatModel,
+    chatPrompt,
+    questionRewritePrompt,
+    connector,
+    summarizationModel: summarizationModel || connector?.config?.defaultModel,
+  };
 };
