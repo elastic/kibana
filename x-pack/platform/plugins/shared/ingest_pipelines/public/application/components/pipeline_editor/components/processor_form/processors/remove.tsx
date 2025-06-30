@@ -41,6 +41,7 @@ const getFieldConig = (
     path: string;
     config: FieldConfig<any>;
     labelAppend: JSX.Element;
+    key: string;
   }
 > => ({
   fields_to_remove: {
@@ -49,6 +50,7 @@ const getFieldConig = (
       type: FIELD_TYPES.COMBO_BOX,
       deserializer: to.arrayOfStrings,
       serializer: (v: string[]) => (v.length === 1 ? v[0] : v),
+      fieldsToValidateOnChange: ['fields.field', 'fields.keep'],
       label: i18n.translate('xpack.ingestPipelines.pipelineEditor.removeForm.fieldNameField', {
         defaultMessage: 'Fields to remove',
       }),
@@ -86,6 +88,7 @@ const getFieldConig = (
         </EuiLink>
       </EuiText>
     ),
+    key: 'field',
   },
   fields_to_keep: {
     path: 'fields.keep',
@@ -93,6 +96,7 @@ const getFieldConig = (
       type: FIELD_TYPES.COMBO_BOX,
       deserializer: to.arrayOfStrings,
       serializer: (v: string[]) => (v.length === 1 ? v[0] : v),
+      fieldsToValidateOnChange: ['fields.field', 'fields.keep'],
       label: i18n.translate('xpack.ingestPipelines.pipelineEditor.removeForm.keepNameField', {
         defaultMessage: 'Fields to be kept',
       }),
@@ -127,6 +131,7 @@ const getFieldConig = (
         </EuiLink>
       </EuiText>
     ),
+    key: 'keep',
   },
 });
 
