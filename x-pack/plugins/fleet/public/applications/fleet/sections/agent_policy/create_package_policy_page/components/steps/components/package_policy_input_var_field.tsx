@@ -416,7 +416,11 @@ function SecretInputField({
         </EuiText>
         <EuiSpacer size="s" />
         <EuiButtonEmpty
-          onClick={() => setIsReplacing(true)}
+          onClick={() => {
+            setIsReplacing(true);
+            setIsDirty(false);
+            onChange('');
+          }}
           color="primary"
           iconType="refresh"
           iconSide="left"
