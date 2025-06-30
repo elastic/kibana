@@ -11,6 +11,16 @@ import { SecurityCellActionsTrigger } from '../../../app/actions/constants';
 import { CellActionsMode, SecurityCellActions } from '.';
 import { CellActions } from '@kbn/cell-actions';
 
+jest.mock('../../../data_view_manager/hooks/use_data_view', () => ({
+  useDataView: jest.fn(() => ({
+    dataView: { id: 'security-default-dataview-id', fields: { getByName: jest.fn() } },
+  })),
+}));
+
+jest.mock('../../hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(() => false),
+}));
+
 const MockCellActions = CellActions as jest.Mocked<typeof CellActions>;
 jest.mock('@kbn/cell-actions', () => ({
   ...jest.requireActual('@kbn/cell-actions'),
