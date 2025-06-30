@@ -7,6 +7,7 @@
 
 import { DocumentationProduct } from '@kbn/product-doc-common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { getInferenceIdFromWriteIndex } from '@kbn/observability-ai-assistant-plugin/server';
 import type { FunctionRegistrationParameters } from '.';
 
 export const RETRIEVE_DOCUMENTATION_NAME = 'retrieve_elastic_doc';
@@ -64,6 +65,9 @@ export async function registerDocumentationFunction({
       } as const,
     },
     async ({ arguments: { query, product }, connectorId, simulateFunctionCalling }) => {
+      const inferenceId =
+        (await getInferenceIdFromWriteIndex(esClient, logger)) ?? defaultInferenceEndpoints.ELSER;
+
       const response = await llmTasks!.retrieveDocumentation({
         searchTerm: query,
         products: product ? [product] : undefined,
@@ -71,8 +75,7 @@ export async function registerDocumentationFunction({
         connectorId,
         request: resources.request,
         functionCalling: simulateFunctionCalling ? 'simulated' : 'auto',
-        // @TODO: FOR OBS ASSISTANT TEAM TO PASS IN THE RIGHT INFERENCE ID
-        inferenceId: defaultInferenceEndpoints.ELSER,
+        inferenceId,
       });
 
       return {
