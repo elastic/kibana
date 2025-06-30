@@ -8,3 +8,4 @@
  */
 
 export * from './truncate_preserve_highlight_tags';
+export * from './use_get_k8s_entities_definition';

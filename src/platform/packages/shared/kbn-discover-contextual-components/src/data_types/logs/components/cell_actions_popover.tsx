@@ -26,6 +26,8 @@ import { useBoolean } from '@kbn/react-hooks';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { HttpStart } from '@kbn/core/public';
 import {
   actionFilterForText,
   actionFilterOutText,
@@ -36,7 +38,7 @@ import {
   filterOutText,
   openCellActionPopoverAriaText,
 } from './translations';
-import { truncateAndPreserveHighlightTags } from './utils';
+import { truncateAndPreserveHighlightTags, useGetK8sEntitiesDefinition } from './utils';
 
 interface CellActionsPopoverProps {
   onFilter?: DocViewFilterFn;
@@ -58,11 +60,9 @@ interface CellActionsPopoverProps {
   }) => ReactElement;
 }
 
-const infraRoutes = {
-  overview: {
-    href: 'metrics/entity/Kubernetes/Overview?dashboardId=kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
-    label: 'Kubernetes Overview',
-  },
+const INFRA_K8S_DEFAULT_ROUTE = {
+  href: 'metrics/entity/cluster?dashboardId=kubernetes_otel-cluster-overview&entityId',
+  title: 'Overview',
 };
 
 export function CellActionsPopover({
@@ -74,6 +74,9 @@ export function CellActionsPopover({
   renderPopoverTrigger,
 }: CellActionsPopoverProps) {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { http },
+  } = useKibana();
   const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
 
   const makeFilterHandlerByOperator = (operator: '+' | '-') => () => {
@@ -88,10 +91,14 @@ export function CellActionsPopover({
     'data-test-subj': `dataTableCellActionsPopover_${property}`,
   };
 
-  const infraProps =
-    property in infraRoutes
-      ? infraRoutes[property as keyof typeof infraRoutes]
-      : infraRoutes.overview;
+  const { data: rawEntitiesDefinition } = useGetK8sEntitiesDefinition({
+    http: http as HttpStart,
+  });
+
+  // need to fix TS error here
+  const entityDefinition = rawEntitiesDefinition?.find((entity) =>
+    entity.attributes.includes(property)
+  );
 
   return (
     <EuiPopover
@@ -161,8 +168,12 @@ export function CellActionsPopover({
         </EuiPopoverFooter>
       ) : null}
       <EuiPopoverFooter>
-        <EuiButtonEmpty href={infraProps.href} size="s" iconType="dashboardApp">
-          Go to {infraProps.label} dashboard
+        <EuiButtonEmpty
+          href={entityDefinition?.navigation?.href || INFRA_K8S_DEFAULT_ROUTE.href}
+          size="s"
+          iconType="dashboardApp"
+        >
+          Go to {entityDefinition?.navigation?.title || INFRA_K8S_DEFAULT_ROUTE.title} dashboard
         </EuiButtonEmpty>
       </EuiPopoverFooter>
       <EuiPopoverFooter>

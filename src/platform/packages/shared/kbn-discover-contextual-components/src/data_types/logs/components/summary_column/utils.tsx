@@ -90,7 +90,6 @@ const getResourceBadgeComponent = (
   core: CoreStart,
   share?: SharePluginStart
 ): React.ComponentType<FieldBadgeWithActionsProps> => {
-  console.log('getResourceBadgeComponent', name, 'name');
   switch (name) {
     case EVENT_OUTCOME_FIELD:
       return EventOutcomeBadge;
