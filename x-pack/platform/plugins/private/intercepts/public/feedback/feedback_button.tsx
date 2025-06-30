@@ -12,14 +12,16 @@ import { EuiHeaderSectionItemButton, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SERVERLESS_FEEDBACK_FORM_LINK } from './constants';
 import { FeedbackFlyout } from './feedback_flyout';
 
 interface Props {
   core: CoreStart;
+  isServerless: boolean;
   getLicense: LicensingPluginStart['getLicense'];
 }
 
-export const FeedbackButton = ({ core, getLicense }: Props) => {
+export const FeedbackButton = ({ core, isServerless, getLicense }: Props) => {
   let flyoutRef: OverlayRef | null = null;
 
   const closeFlyout = () => {
@@ -55,13 +57,15 @@ export const FeedbackButton = ({ core, getLicense }: Props) => {
     <EuiHeaderSectionItemButton
       data-test-subj="feedbackButton"
       aria-controls="keyPadMenu"
-      aria-haspopup="true"
+      aria-haspopup={!isServerless}
       aria-label={i18n.translate('xpack.intercept.feedbackButton.ariaLabel', {
         defaultMessage: 'Give feedback',
       })}
       iconType="comment"
       textProps={false}
-      onClick={toogleFlyout}
+      onClick={isServerless ? undefined : toogleFlyout}
+      href={isServerless ? SERVERLESS_FEEDBACK_FORM_LINK : undefined}
+      target={isServerless ? '_blank' : undefined}
     >
       <EuiText size="s">
         <FormattedMessage id="xpack.intercept.feedbackButton.text" defaultMessage="Feedback" />
