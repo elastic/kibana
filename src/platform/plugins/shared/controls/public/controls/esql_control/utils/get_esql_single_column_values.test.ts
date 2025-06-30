@@ -61,11 +61,9 @@ describe('getESQLSingleColumnValues', () => {
     expect('values' in result).toBe(false);
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "columns": Array [
-          "column1",
-          "column2",
+        "errors": Array [
+          [Error: Query must return a single column],
         ],
-        "errors": Array [],
       }
     `);
   });
@@ -79,7 +77,6 @@ describe('getESQLSingleColumnValues', () => {
     expect('values' in result).toBe(false);
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "columns": Array [],
         "errors": Array [
           "Invalid ES|QL query",
         ],

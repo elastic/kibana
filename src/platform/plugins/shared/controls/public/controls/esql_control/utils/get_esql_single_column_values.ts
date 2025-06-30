@@ -16,7 +16,6 @@ export interface GetESQLSingleColumnValuesSuccess {
 }
 
 export interface GetESQLSingleColumnValuesFailure {
-  columns: string[];
   errors: Error[];
 }
 
@@ -51,9 +50,9 @@ export const getESQLSingleColumnValues = async ({
       return { values };
     }
 
-    return { columns, errors: [] };
+    return { errors: [new Error('Query must return a single column')] };
   } catch (e) {
-    return { columns: [], errors: [e] };
+    return { errors: [e] };
   }
 };
 
