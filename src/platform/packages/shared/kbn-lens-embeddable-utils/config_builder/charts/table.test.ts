@@ -59,8 +59,8 @@ test('generates table config', async () => {
       dataset: {
         esql: 'from test | count=count() by category',
       },
-      value: 'count',
-      breakdown: ['category'],
+      metrics: [{ value: 'count' }],
+      rows: ['category'],
     },
     {
       dataViewsAPI: mockDataViewsService() as any,

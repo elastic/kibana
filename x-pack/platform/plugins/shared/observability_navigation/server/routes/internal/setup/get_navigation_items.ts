@@ -8,7 +8,7 @@ import { PackageClient } from '@kbn/fleet-plugin/server';
 import { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { NavigationOverridesSavedObject } from '../../../saved_objects/navigation_overrides';
 import { OBSERVABILITY_NAVIGATION_OVERRIDES } from '../../../../common/saved_object_contants';
-import { ObservabilityDynamicNavigation } from '../../../../common/types';
+import { DynamicNavigationItem, ObservabilityDynamicNavigation } from '../../../../common/types';
 import { getEntityDefinitions } from '../entity_definitions/get_entity_definitions';
 import { getInstalledPackages } from './get_installed_packages';
 
@@ -117,7 +117,9 @@ export async function getNavigationItems({
       ]
     : [];
 
-  const entityDefinitions = await getEntityDefinitions({ namespace: KUBERNETES, soClient });
+  const entityDefinitions = includeEntityDefinitions
+    ? await getEntityDefinitions({ namespace: KUBERNETES, soClient })
+    : [];
 
   const navigationFromEntityDefinitions = entityDefinitions.map((entity, index) => ({
     id: `kubernetes_otel-cluster-overview`,
@@ -144,37 +146,72 @@ export async function getNavigationItems({
     navigationsCombined.length > 0
       ? [
           {
-            id: `${KUBERNETES.toLowerCase().replace(/[\.\s]/g, '-')}`,
+            id: formatId(KUBERNETES),
             title: KUBERNETES,
-            subItems: navigationsCombined.map((item) => {
-              return {
-                id: `${item.sideNavTitle.toLowerCase().replace(/[\.\s]/g, '-')}`,
-                title: item.sideNavTitle,
+            href: `/${formatId(KUBERNETES)}`,
+            subItems: navigationsCombined.map((item): DynamicNavigationItem => {
+              const id = formatId(item.sideNavTitle);
+
+              const navItem = {
+                id,
                 entityId: item.entityId,
+                title: item.sideNavTitle,
                 dashboardId: item.id,
                 order: item.sideNavOrder,
+                href: buildHref(id, formatId(KUBERNETES)),
               };
+
+              return navItem;
             }),
           },
         ]
       : [];
 
-  return (
-    mergeNavigationItems(
-      integrationNavigation,
-      navigationOverrides.flatMap((item) => item.attributes)
-    ) ?? []
+  const mergedNavigationItems = mergeNavigationItems(
+    integrationNavigation,
+    navigationOverrides.flatMap((item) => item.attributes).flatMap((nav) => nav.navigation)
   );
+
+  return mergedNavigationItems.map((item) => ({
+    ...item,
+    href: item.href
+      ? appendQueryParams(item.href, {
+          ...(item.entityId ? { entityId: item.entityId } : {}),
+          ...(item.dashboardId ? { dashboardId: item.dashboardId } : {}),
+        })
+      : undefined,
+    subItems: item.subItems?.map((subItem) => ({
+      ...subItem,
+      href: appendQueryParams(subItem.href, {
+        ...(subItem.entityId ? { entityId: subItem.entityId } : {}),
+        ...(subItem.dashboardId ? { dashboardId: subItem.dashboardId } : {}),
+      }),
+    })),
+  }));
+}
+
+function formatId(id: string): string {
+  return id.toLowerCase().replace(/[\.\s]/g, '-');
+}
+
+function buildHref(id: string, parent?: string): string {
+  const href = `${parent ? `${parent}/` : ''}${id}`;
+
+  return href;
+}
+
+function appendQueryParams(href: string, queryParams: Record<string, string>): string {
+  const params = new URLSearchParams(queryParams);
+  return `${href}?${params.toString()}`;
 }
 
 function mergeNavigationItems(
   integrationNavigation: ObservabilityDynamicNavigation[],
-  navigationOverridesItems: NavigationOverridesSavedObject[]
+  navigationOverridesItems: ObservabilityDynamicNavigation[]
 ): ObservabilityDynamicNavigation[] {
   const overrideMap = new Map<string, ObservabilityDynamicNavigation>();
 
-  // Flatten all override items into a map by id
-  for (const override of navigationOverridesItems.flatMap((o) => o.navigation ?? [])) {
+  for (const override of navigationOverridesItems) {
     overrideMap.set(override.id, override);
   }
 

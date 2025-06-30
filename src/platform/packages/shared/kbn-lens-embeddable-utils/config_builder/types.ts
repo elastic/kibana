@@ -140,6 +140,12 @@ export interface LensBreakdownTopValuesConfig {
   size?: number;
 }
 
+export interface LensTableRowConfig {
+  field: string;
+  name?: string;
+  oneClickFilter?: boolean;
+}
+
 export type LensBreakdownConfig =
   | string
   | Identity<
@@ -221,10 +227,12 @@ export interface LensTableConfigBase {
   /** field name to breakdown based on field type or full breakdown configuration */
   splitBy?: LensBreakdownConfig[];
   /** field name to breakdown based on field type or full breakdown configuration */
-  breakdown?: LensBreakdownConfig[];
+  rows?: Array<string | Identity<LensTableRowConfig>>;
 }
 
-export type LensTableConfig = Identity<LensBaseConfig & LensBaseLayer & LensTableConfigBase>;
+export type LensTableConfig = Identity<LensBaseConfig & LensTableConfigBase> & {
+  metrics: LensBaseLayer[];
+};
 
 export interface LensHeatmapConfigBase {
   chartType: 'heatmap';
