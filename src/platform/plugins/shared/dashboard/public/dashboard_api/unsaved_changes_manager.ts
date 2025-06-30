@@ -31,7 +31,6 @@ import { initializeSettingsManager } from './settings_manager';
 import { DashboardCreationOptions } from './types';
 import { DashboardState } from '../../common';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
-import { initializeViewModeManager } from './view_mode_manager';
 import {
   CONTROL_GROUP_EMBEDDABLE_ID,
   initializeControlGroupManager,
@@ -44,7 +43,6 @@ export function initializeUnsavedChangesManager({
   savedObjectId$,
   lastSavedState,
   settingsManager,
-  viewModeManager,
   creationOptions,
   controlGroupManager,
   getReferences,
@@ -56,7 +54,6 @@ export function initializeUnsavedChangesManager({
   savedObjectId$: PublishesSavedObjectId['savedObjectId$'];
   controlGroupManager: ReturnType<typeof initializeControlGroupManager>;
   layoutManager: ReturnType<typeof initializeLayoutManager>;
-  viewModeManager: ReturnType<typeof initializeViewModeManager>;
   settingsManager: ReturnType<typeof initializeSettingsManager>;
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
 }): {
@@ -101,7 +98,6 @@ export function initializeUnsavedChangesManager({
   );
 
   const unsavedChangesSubscription = combineLatest([
-    viewModeManager.api.viewMode$,
     dashboardStateChanges$,
     hasPanelChanges$,
     controlGroupManager.api.controlGroupApi$.pipe(
@@ -112,7 +108,7 @@ export function initializeUnsavedChangesManager({
     ),
   ])
     .pipe(debounceTime(DEBOUNCE_TIME))
-    .subscribe(([viewMode, dashboardChanges, hasPanelChanges, hasControlGroupChanges]) => {
+    .subscribe(([dashboardChanges, hasPanelChanges, hasControlGroupChanges]) => {
       const hasDashboardChanges = Object.keys(dashboardChanges ?? {}).length > 0;
       const hasUnsavedChanges = hasDashboardChanges || hasPanelChanges || hasControlGroupChanges;
 
