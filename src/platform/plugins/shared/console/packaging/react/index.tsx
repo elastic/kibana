@@ -68,7 +68,7 @@ import {
   RequestContextProvider,
 } from '../../public/application/contexts';
 import { createApi, createEsHostService } from '../../public/application/lib';
-import { AutocompleteInfo } from '../../public/services';
+import { AutocompleteInfo, setAutocompleteInfo } from '../../public/services';
 import type { OneConsoleProps } from './types';
 
 const trackUiMetricMock = { count: () => {}, load: () => {} };
@@ -231,6 +231,9 @@ export const OneConsole = ({ lang = 'en', http: customHttp }: OneConsoleProps) =
   const autocompleteInfo = new AutocompleteInfo();
   autocompleteInfo.setup(http);
   autocompleteInfo.mapping.setup(http, settings);
+  
+  // IMPORTANT: Set the global autocompleteInfo so getAutocompleteInfo() works
+  setAutocompleteInfo(autocompleteInfo);
 
   return (
     <IntlProvider locale={lang} messages={selectedTranslations.messages}>
