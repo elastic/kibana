@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-
 import { EuiFlexGroup, EuiStat, formatNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
