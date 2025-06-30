@@ -430,7 +430,10 @@ export class CoreSystem {
       `;
       this.rootDomElement.classList.add(coreSystemRootDomElement);
 
-      this.rendering.renderCore({ chrome, application, overlays }, coreUiTargetDomElement);
+      this.rendering.renderCore(
+        { chrome, application, overlays, featureFlags },
+        coreUiTargetDomElement
+      );
 
       performance.mark(KBN_LOAD_MARKS, {
         detail: LOAD_START_DONE,
