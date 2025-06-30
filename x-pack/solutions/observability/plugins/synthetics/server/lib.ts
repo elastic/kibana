@@ -16,7 +16,6 @@ import type {
   KibanaRequest,
   CoreRequestHandlerContext,
 } from '@kbn/core/server';
-import chalk from 'chalk';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ESSearchResponse, InferSearchResponseOf } from '@kbn/es-types';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
@@ -78,7 +77,6 @@ export class SyntheticsEsClient {
     let esError: any;
 
     const esParams = { index: SYNTHETICS_INDEX_PATTERN, ...params };
-    const startTime = process.hrtime();
     const startTimeNow = Date.now();
 
     let esRequestStatus: RequestStatus = RequestStatus.PENDING;
@@ -108,16 +106,6 @@ export class SyntheticsEsClient {
           startTime: startTimeNow,
         })
       );
-    }
-
-    if (isInspectorEnabled && this.request) {
-      debugESCall({
-        startTime,
-        request: this.request,
-        esError,
-        operationName: 'search',
-        params: esParams,
-      });
     }
 
     if (esError) {
@@ -186,7 +174,6 @@ export class SyntheticsEsClient {
     let esError: any;
 
     const esParams = { index: SYNTHETICS_INDEX_PATTERN, ...params };
-    const startTime = process.hrtime();
 
     const isInspectorEnabled = await this.getInspectEnabled();
 
@@ -199,16 +186,6 @@ export class SyntheticsEsClient {
       });
     } catch (e) {
       esError = e;
-    }
-
-    if (isInspectorEnabled && this.request) {
-      debugESCall({
-        startTime,
-        request: this.request,
-        esError,
-        operationName: 'count',
-        params: esParams,
-      });
     }
 
     if (esError) {
@@ -245,44 +222,6 @@ export class SyntheticsEsClient {
 
 export function createEsParams<T extends estypes.SearchRequest>(params: T): T {
   return params;
-}
-
-/* eslint-disable no-console */
-
-function formatObj(obj: Record<string, any>) {
-  return JSON.stringify(obj);
-}
-
-export function debugESCall({
-  operationName,
-  params,
-  request,
-  esError,
-  startTime,
-}: {
-  operationName: string;
-  params: Record<string, any>;
-  request: KibanaRequest;
-  esError: any;
-  startTime: [number, number];
-}) {
-  const highlightColor = esError ? 'bgRed' : 'inverse';
-  const diff = process.hrtime(startTime);
-  const duration = `${Math.round(diff[0] * 1000 + diff[1] / 1e6)}ms`;
-  const routeInfo = `${request.route.method.toUpperCase()} ${request.route.path}`;
-
-  console.log(chalk.bold[highlightColor](`=== Debug: ${routeInfo} (${duration}) ===`));
-
-  if (operationName === 'search') {
-    console.log(`GET ${params.index}/_${operationName}`);
-    console.log(formatObj(params.body));
-  } else {
-    console.log(chalk.bold('ES operation:'), operationName);
-
-    console.log(chalk.bold('ES query:'));
-    console.log(formatObj(params));
-  }
-  console.log(`\n`);
 }
 
 export const isTestUser = (server: SyntheticsServerSetup) => {
