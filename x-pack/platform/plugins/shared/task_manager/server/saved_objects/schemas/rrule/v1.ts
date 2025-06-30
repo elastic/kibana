@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { Frequency } from '@kbn/rrule';
 import moment from 'moment-timezone';
 
-function validateTimezone(timezone: string) {
+export function validateTimezone(timezone: string) {
   if (moment.tz.zone(timezone) != null) {
     return;
   }
@@ -36,7 +36,7 @@ const validateRecurrenceByWeekday = (array: string[]) => {
   }
 };
 
-const rruleCommon = schema.object({
+export const rruleCommon = schema.object({
   freq: schema.oneOf([
     schema.literal(0),
     schema.literal(1),
@@ -57,15 +57,21 @@ const rruleCommon = schema.object({
   tzid: schema.string({ validate: validateTimezone, defaultValue: 'UTC' }),
 });
 
-const byminute = schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 59 }), { minSize: 1 }));
-const byhour = schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 23 }), { minSize: 1 }));
-const byweekday = schema.maybe(
+export const byminute = schema.maybe(
+  schema.arrayOf(schema.number({ min: 0, max: 59 }), { minSize: 1 })
+);
+export const byhour = schema.maybe(
+  schema.arrayOf(schema.number({ min: 0, max: 23 }), { minSize: 1 })
+);
+export const byweekday = schema.maybe(
   schema.arrayOf(schema.string(), {
     minSize: 1,
     validate: validateRecurrenceByWeekday,
   })
 );
-const bymonthday = schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 31 }), { minSize: 1 }));
+export const bymonthday = schema.maybe(
+  schema.arrayOf(schema.number({ min: 1, max: 31 }), { minSize: 1 })
+);
 
 const rruleMonthly = rruleCommon.extends({
   freq: schema.literal(Frequency.MONTHLY),
@@ -92,3 +98,6 @@ const rruleDaily = rruleCommon.extends({
 });
 
 export const rruleSchedule = schema.oneOf([rruleMonthly, rruleWeekly, rruleDaily]);
+export const scheduleRruleSchema = schema.object({
+  rrule: rruleSchedule,
+});

@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
-  describe('watcher app', () => {
-    loadTestFile(require.resolve('./watcher_test'));
-  });
-}
+export {
+  rruleSchedule as rruleScheduleV1,
+  scheduleRruleSchema as scheduleRruleSchemaV1,
+} from './v1';
+export {
+  rruleSchedule as rruleScheduleV2,
+  scheduleRruleSchema as scheduleRruleSchemaV2,
+} from './v2';

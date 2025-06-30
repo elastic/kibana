@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+export {
+  SECURITY_FEATURE_ID_V2 as SECURITY_FEATURE_ID,
+  CASES_FEATURE_ID_V3 as CASES_FEATURE_ID,
+} from '@kbn/security-solution-features/constants';
+
 export const PLUGIN_ID = 'elasticAssistant';
 export const PLUGIN_NAME = 'elasticAssistant';
 
@@ -45,5 +50,3 @@ export const CAPABILITIES = `${BASE_PATH}/capabilities`;
 export const MINIMUM_AI_ASSISTANT_LICENSE = 'enterprise' as const;
 
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
-export const SECURITY_FEATURE_ID = 'siemV2' as const;
-export const CASES_FEATURE_ID = 'securitySolutionCasesV3' as const;

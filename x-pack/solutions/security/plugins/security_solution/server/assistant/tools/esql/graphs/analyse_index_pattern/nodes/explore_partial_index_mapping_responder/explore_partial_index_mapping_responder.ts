@@ -23,12 +23,11 @@ export const getExplorePartialIndexMappingResponder = async ({
 }: {
   createLlmInstance: CreateLlmInstance;
 }) => {
-  const llm = createLlmInstance();
+  const llm = await createLlmInstance();
   return async (state: typeof AnalyzeIndexPatternAnnotation.State) => {
     const { messages } = state;
 
     const lastMessage = messages[messages.length - 1];
-
     const result = await llm
       .withStructuredOutput(structuredOutput, { name: 'indexMappingAnalysis' })
       .invoke([
