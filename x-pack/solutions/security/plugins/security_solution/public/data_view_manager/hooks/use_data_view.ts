@@ -60,8 +60,9 @@ export const useDataView = (
         // this is due to the fact that many of our tests mock kibana hook and do not provide proper
         // double for dataViews service
         const currDv = await dataViews?.get(dataViewId);
-        // eslint-disable-next-line require-atomic-updates
-        loadedForTheFirstTimeRef.current = true;
+        if (!loadedForTheFirstTimeRef.current) {
+          loadedForTheFirstTimeRef.current = true;
+        }
         setRetrievedDataView(currDv);
         setLocalStatus('ready');
       } catch (error) {
