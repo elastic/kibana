@@ -77,7 +77,7 @@ describe('anonymizeRecords', () => {
 
     setupMockResponse(Array(2).fill({ entities: [] } as any));
 
-    await anonymizeRecords({
+    const { records } = await anonymizeRecords({
       input: [{ content: longText }],
       anonymizationRules: [nerRule],
       esClient: mockEsClient,
@@ -88,6 +88,10 @@ describe('anonymizeRecords', () => {
     expect(callArgs.docs).toHaveLength(2);
     expect(callArgs.docs[0].text_field).toBe(longText.slice(0, 1000));
     expect(callArgs.docs[1].text_field).toBe(longText.slice(1000));
+
+    // reconstructed value should match original and appear only once
+    expect(records[0].content).toBe(longText);
+    expect((records[0].content.match(/b/g) ?? []).length).toBe(1500);
   });
 
   it('supports additional NER models of same class without duplication', async () => {

@@ -110,7 +110,7 @@ export async function executeNerRule({
 
           let offset = 0;
 
-          let anonymizedValue = value!;
+          let anonymizedValue = allTexts[position];
 
           for (const entity of nerOutput.entities ?? []) {
             const from = entity.start_pos + offset;
