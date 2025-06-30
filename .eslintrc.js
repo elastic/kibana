@@ -2325,9 +2325,21 @@ module.exports = {
         'no-restricted-imports': [
           'error',
           {
-            patterns: [
+            paths: [
               {
-                group: ['@playwright/test', 'playwright', '@kbn/scout-oblt', '@kbn/scout-security'],
+                name: '@kbn/scout-oblt',
+                message: "Platform tests should import only from '@kbn/scout'.",
+              },
+              {
+                name: '@kbn/scout-security',
+                message: "Platform tests should import only from '@kbn/scout'.",
+              },
+              {
+                name: '@playwright/test',
+                message: "Platform tests should import only from '@kbn/scout'.",
+              },
+              {
+                name: 'playwright',
                 message: "Platform tests should import only from '@kbn/scout'.",
               },
             ],
@@ -2341,9 +2353,24 @@ module.exports = {
         'no-restricted-imports': [
           'error',
           {
-            patterns: [
+            paths: [
               {
-                group: ['@playwright/test', 'playwright', '@kbn/scout'],
+                name: '@kbn/scout',
+                message:
+                  "Observability solution tests should import from '@kbn/scout-oblt' instead.",
+              },
+              {
+                name: '@kbn/scout-security',
+                message:
+                  "Observability solution tests should import from '@kbn/scout-oblt' instead.",
+              },
+              {
+                name: '@playwright/test',
+                message:
+                  "Observability solution tests should import from '@kbn/scout-oblt' instead.",
+              },
+              {
+                name: 'playwright',
                 message:
                   "Observability solution tests should import from '@kbn/scout-oblt' instead.",
               },
@@ -2358,9 +2385,24 @@ module.exports = {
         'no-restricted-imports': [
           'error',
           {
-            patterns: [
+            paths: [
               {
-                group: ['@playwright/test', 'playwright', '@kbn/scout'],
+                name: '@kbn/scout',
+                message:
+                  "Security solution tests should import from '@kbn/scout-security' instead.",
+              },
+              {
+                name: '@kbn/scout-oblt',
+                message:
+                  "Security solution tests should import from '@kbn/scout-security' instead.",
+              },
+              {
+                name: '@playwright/test',
+                message:
+                  "Security solution tests should import from '@kbn/scout-security' instead.",
+              },
+              {
+                name: 'playwright',
                 message:
                   "Security solution tests should import from '@kbn/scout-security' instead.",
               },
