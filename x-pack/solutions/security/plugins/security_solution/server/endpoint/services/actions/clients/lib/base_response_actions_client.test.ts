@@ -532,11 +532,6 @@ describe('ResponseActionsClientImpl base class', () => {
     });
 
     describe('Telemetry', () => {
-      beforeEach(() => {
-        // @ts-expect-error
-        endpointAppContextService.experimentalFeatures.responseActionsTelemetryEnabled = true;
-      });
-
       it('should send action creation success telemetry for manual actions', async () => {
         await baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
 
