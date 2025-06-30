@@ -50,7 +50,6 @@ import { ShareSavedObjectsToSpacePageProvider } from './share_saved_objects_to_s
 import { SnapshotRestorePageProvider } from './snapshot_restore_page';
 import { StatusPageObject } from './status_page';
 import { TagManagementPageObject } from './tag_management_page';
-import { UpgradeAssistantFlyoutObject } from './upgrade_assistant_page';
 import { UptimePageObject } from './uptime_page';
 import { UserProfilePageProvider } from './user_profile_page';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
@@ -118,7 +117,6 @@ export const pageObjects = {
   spaceSelector: SpaceSelectorPageObject,
   statusPage: StatusPageObject,
   tagManagement: TagManagementPageObject,
-  upgradeAssistant: UpgradeAssistantFlyoutObject,
   uptime: UptimePageObject,
   userProfiles: UserProfilePageProvider,
   watcher: WatcherPageObject,
