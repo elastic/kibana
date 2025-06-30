@@ -204,6 +204,21 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.SEARCH_HOMEPAGE",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_HOMEPAGE",
+        "description": [],
+        "signature": [
+          "\"searchHomepage\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
         "id": "def-common.SEARCH_INDEX_MANAGEMENT",
         "type": "string",
         "tags": [],
