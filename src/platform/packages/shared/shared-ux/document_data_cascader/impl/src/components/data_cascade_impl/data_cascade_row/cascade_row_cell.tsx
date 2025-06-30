@@ -70,9 +70,16 @@ export function CascadeRowCell<G extends GroupNode, L extends LeafNode>({
             <RowTitleSlot row={row} />
           </EuiFlexItem>
           <EuiFlexItem grow={6}>
-            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+            <EuiFlexGroup
+              direction="row"
+              gutterSize="m"
+              alignItems="center"
+              justifyContent="flexEnd"
+            >
               {rowHeaderMetaSlots?.({ row }).map((metaSlot, index) => (
-                <EuiFlexItem key={index}>{metaSlot}</EuiFlexItem>
+                <EuiFlexItem grow={false} key={index}>
+                  {metaSlot}
+                </EuiFlexItem>
               ))}
             </EuiFlexGroup>
           </EuiFlexItem>
