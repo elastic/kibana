@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/public';
 
 import { useSelector } from 'react-redux';
@@ -39,6 +39,7 @@ export const useDataView = (
   const [localStatus, setLocalStatus] =
     useState<SharedDataViewSelectionState['status']>('pristine');
   const [retrievedDataView, setRetrievedDataView] = useState<DataView>(INITIAL_DV);
+  const loadedForTheFirstTimeRef = useRef(false);
 
   useEffect(() => {
     (async () => {
@@ -50,13 +51,17 @@ export const useDataView = (
         return;
       }
 
-      setLocalStatus('loading');
+      if (loadedForTheFirstTimeRef.current) {
+        setLocalStatus('loading');
+      }
 
       try {
         // TODO: remove conditional .get call when new data view picker is stabilized
         // this is due to the fact that many of our tests mock kibana hook and do not provide proper
         // double for dataViews service
         const currDv = await dataViews?.get(dataViewId);
+        // eslint-disable-next-line require-atomic-updates
+        loadedForTheFirstTimeRef.current = true;
         setRetrievedDataView(currDv);
         setLocalStatus('ready');
       } catch (error) {
