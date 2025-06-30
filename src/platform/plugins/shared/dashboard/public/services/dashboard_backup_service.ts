@@ -30,10 +30,14 @@ const getPanelsGetError = (message: string) =>
     values: { message },
   });
 
+export type DASHBOARD_BACKUP_STATE = Partial<DashboardState> & {
+  viewMode?: ViewMode;
+};
+
 interface DashboardBackupServiceType {
   clearState: (id?: string) => void;
-  getState: (id: string | undefined) => Partial<DashboardState> | undefined;
-  setState: (id: string | undefined, dashboardState: Partial<DashboardState>) => void;
+  getState: (id: string | undefined) => DASHBOARD_BACKUP_STATE | undefined;
+  setState: (id: string | undefined, backupState: DASHBOARD_BACKUP_STATE) => void;
   getViewMode: () => ViewMode;
   storeViewMode: (viewMode: ViewMode) => void;
   getDashboardIdsWithUnsavedChanges: () => string[];
@@ -108,10 +112,10 @@ class DashboardBackupService implements DashboardBackupServiceType {
     }
   }
 
-  public setState(id = DASHBOARD_PANELS_UNSAVED_ID, newState: Partial<DashboardState>) {
+  public setState(id = DASHBOARD_PANELS_UNSAVED_ID, backupState: DASHBOARD_BACKUP_STATE) {
     try {
       const allSpaces = this.sessionStorage.get(DASHBOARD_STATE_SESSION_KEY) ?? {};
-      set(allSpaces, [this.activeSpaceId, id], newState);
+      set(allSpaces, [this.activeSpaceId, id], backupState);
       this.sessionStorage.set(DASHBOARD_STATE_SESSION_KEY, allSpaces);
     } catch (e) {
       coreServices.notifications.toasts.addDanger({
@@ -156,14 +160,17 @@ class DashboardBackupService implements DashboardBackupServiceType {
     return hasUnsavedChanges(dashboards[id]);
   }
 
-  private getDashboards(): { [key: string]: Partial<DashboardState> } {
+  private getDashboards(): { [key: string]: DASHBOARD_BACKUP_STATE } {
     return this.sessionStorage.get(DASHBOARD_STATE_SESSION_KEY)?.[this.activeSpaceId] ?? {};
   }
 }
 
-function hasUnsavedChanges(unsavedChanges?: Partial<DashboardState>) {
-  return unsavedChanges
-    ? Object.keys(unsavedChanges).some((stateKey) => stateKey !== 'references')
+function hasUnsavedChanges(backupState?: DASHBOARD_BACKUP_STATE) {
+  return backupState
+    ? backupState.viewMode === 'edit' &&
+        Object.keys(backupState).some(
+          (stateKey) => stateKey !== 'viewMode' && stateKey !== 'references'
+        )
     : false;
 }
 
