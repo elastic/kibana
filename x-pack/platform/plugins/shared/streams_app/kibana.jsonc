@@ -27,7 +27,6 @@
       "streams",
       "unifiedSearch"
     ],
-    "optionalPlugins": ["observabilityAIAssistant"],
-    "requiredBundles": ["kibanaReact", "kibanaUtils", "observabilityAIAssistant"]
+    "optionalPlugins": ["observabilityAIAssistant"], "requiredBundles": ["kibanaReact", "kibanaUtils", "observabilityAIAssistant"]
   }
 }

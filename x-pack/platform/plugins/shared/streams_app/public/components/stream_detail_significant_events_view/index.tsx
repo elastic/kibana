@@ -24,8 +24,10 @@ import { SignificantEventsTable } from './significant_events_table';
 
 export function StreamDetailSignificantEventsView({
   definition,
+  refreshDefinition,
 }: {
   definition: Streams.all.GetResponse;
+  refreshDefinition: () => void;
 }) {
   const {
     core: { notifications },

@@ -16,7 +16,6 @@ import { RedirectTo } from '../redirect_to';
 import { ClassicStreamBadge, LifecycleBadge } from '../stream_badges';
 import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
 import { StreamDetailOverview } from '../stream_detail_overview';
-import { StreamDetailSignificantEventsView } from '../stream_detail_significant_events_view';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { StreamDescription } from './description';
 
@@ -50,20 +49,6 @@ const getStreamDetailTabs = ({
         defaultMessage: 'Dashboards',
       }),
     },
-    ...(features.significantEvents?.available
-      ? {
-          significant_events: {
-            href: router.link('/{key}/{tab}', {
-              path: { key: definition.stream.name, tab: 'significant_events' },
-            }),
-            content: <StreamDetailSignificantEventsView definition={definition} />,
-            label: i18n.translate('xpack.streams.streamDetailView.significantEventsTab', {
-              defaultMessage: 'Significant events',
-            }),
-            background: true,
-          },
-        }
-      : {}),
   } as const);
 
 export type StreamDetailTabs = ReturnType<typeof getStreamDetailTabs>;
