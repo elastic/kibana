@@ -117,8 +117,8 @@ describe('When the tabular page is loaded', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
     const rows = screen.getAllByRole('row');
-    expect(rows[1]).toHaveTextContent('.elser-2-elasticsearch');
-    expect(rows[2]).toHaveTextContent('.elser-2-elastic');
+    expect(rows[1]).toHaveTextContent('.elser-2-elastic');
+    expect(rows[2]).toHaveTextContent('.elser-2-elasticsearch');
     expect(rows[3]).toHaveTextContent('.multilingual-e5-small-elasticsearch');
     expect(rows[4]).toHaveTextContent('.sparkles');
     expect(rows[5]).toHaveTextContent('custom-inference-id');
