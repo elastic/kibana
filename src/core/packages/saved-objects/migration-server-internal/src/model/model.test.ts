@@ -731,7 +731,7 @@ describe('migrations v2 model', () => {
           expect(newState.retryDelay).toEqual(0);
         });
 
-        test('INIT -> CREATE_NEW_TARGET when the index does not exist and the migrator is NOT involved in a relocation', () => {
+        test('INIT -> CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION when the index does not exist and the migrator is NOT involved in a relocation', () => {
           const res: ResponseType<'INIT'> = Either.right({});
           const newState = model(initState, res);
 
