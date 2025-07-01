@@ -15,5 +15,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('../common/platform_security/roles.ts'));
     loadTestFile(require.resolve('../common/spaces/multiple_spaces_enabled.ts'));
     loadTestFile(require.resolve('./search_synonyms/search_synonyms_overview'));
+    loadTestFile(require.resolve('./search_query_rules/search_query_rules_overview'));
   });
 }
