@@ -35,7 +35,6 @@ import type {
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
   LogsEndpointAction,
-  LogsEndpointActionResponse,
   ResponseActionRunScriptOutputContent,
   ResponseActionRunScriptParameters,
 } from '../../../../../../common/endpoint/types';
