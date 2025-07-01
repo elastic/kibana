@@ -42,7 +42,7 @@ interface PreviewLinkProps {
    * The indexName to be passed to the flyout preview panel
    * when clicking on "Source event" id
    */
-  indexName?: string;
+  ancestorsIndexName?: string;
 }
 
 /**
@@ -55,7 +55,7 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
   scopeId,
   ruleId,
   children,
-  indexName,
+  ancestorsIndexName,
   'data-test-subj': dataTestSubj = FLYOUT_PREVIEW_LINK_TEST_ID,
 }) => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
@@ -68,9 +68,9 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
         field,
         scopeId,
         ruleId,
-        indexName
+        indexName: ancestorsIndexName
       }),
-    [value, field, scopeId, ruleId, indexName]
+    [value, field, scopeId, ruleId, ancestorsIndexName]
   );
 
   const onClick = useCallback(() => {

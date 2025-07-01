@@ -20,7 +20,7 @@ export const convertHighlightedFieldsToTableRow = (
   highlightedFields: UseHighlightedFieldsResult,
   scopeId: string,
   showCellActions: boolean,
-  indexName?: string
+  ancestorsIndexName?: string
 ): HighlightedFieldsTableRow[] => {
   const fieldNames = Object.keys(highlightedFields);
   return fieldNames.map((fieldName) => {
@@ -39,7 +39,7 @@ export const convertHighlightedFieldsToTableRow = (
         values,
         scopeId,
         showCellActions,
-        indexName,
+        ancestorsIndexName,
       },
     };
   });

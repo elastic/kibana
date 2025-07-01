@@ -48,7 +48,7 @@ export interface HighlightedFieldsTableRow {
      * The indexName to be passed to the flyout preview panel
      * when clicking on "Source event" id
      */
-    indexName?: string;
+    ancestorsIndexName?: string;
   };
 }
 
@@ -81,7 +81,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
       scopeId: string;
       isPreview: boolean;
       showCellActions: boolean;
-      indexName?: string;
+      ancestorsIndexName?: string;
     }) => (
       <>
         {description.showCellActions ? (
@@ -92,7 +92,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
               originalField={description.originalField}
               scopeId={description.scopeId}
               showPreview={true}
-              indexName={description.indexName}
+              ancestorsIndexName={description.ancestorsIndexName}
             />
           </CellActions>
         ) : (
@@ -135,7 +135,7 @@ export interface HighlightedFieldsProps {
    * The indexName to be passed to the flyout preview panel
    * when clicking on "Source event" id
    */
-  indexName?: string;
+  ancestorsIndexName?: string;
 }
 
 /**
@@ -149,7 +149,7 @@ export const HighlightedFields = memo(
     scopeId = '',
     showCellActions,
     showEditButton = false,
-    indexName,
+    ancestorsIndexName,
   }: HighlightedFieldsProps) => {
     const [isEditLoading, setIsEditLoading] = useState(false);
 
@@ -160,8 +160,8 @@ export const HighlightedFields = memo(
 
     const items = useMemo(
       () =>
-        convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions, indexName),
-      [highlightedFields, scopeId, showCellActions, indexName]
+        convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions, ancestorsIndexName),
+      [highlightedFields, scopeId, showCellActions, ancestorsIndexName]
     );
 
     return (

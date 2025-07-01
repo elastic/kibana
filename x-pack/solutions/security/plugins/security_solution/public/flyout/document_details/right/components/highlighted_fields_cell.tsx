@@ -49,7 +49,7 @@ export interface HighlightedFieldsCellProps {
    * The indexName to be passed to the flyout preview panel
    * when clicking on "Source event" id
    */
-  indexName?: string;
+  ancestorsIndexName?: string;
 }
 
 /**
@@ -61,7 +61,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
   originalField = '',
   scopeId = '',
   showPreview = false,
-  indexName,
+  ancestorsIndexName,
 }) => {
   const agentType: ResponseActionAgentType = useMemo(() => {
     return getAgentTypeForAgentIdField(originalField);
@@ -93,7 +93,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
                   value={value}
                   scopeId={scopeId}
                   data-test-subj={HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID}
-                  indexName={indexName}
+                  ancestorsIndexName={ancestorsIndexName}
                 />
               ) : field === AGENT_STATUS_FIELD_NAME ? (
                 <AgentStatus

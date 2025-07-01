@@ -59,7 +59,7 @@ export const InvestigationSection = memo(() => {
         scopeId={scopeId}
         showCellActions={true}
         showEditButton={editHighlightedFieldsEnabled}
-        indexName={ancestorIndex}
+        ancestorsIndexName={ancestorIndex}
       />
     </ExpandableSection>
   );
