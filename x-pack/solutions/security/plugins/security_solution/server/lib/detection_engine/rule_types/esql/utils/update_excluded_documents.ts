@@ -52,12 +52,12 @@ export const updateExcludedDocuments = ({
         return acc;
       }, new Set()).size === 1;
 
-    if (excludeSingleDocument) {
-      sourceDocuments[documentIds[0]] = sourceDocuments[lastId].filter(
-        (doc) => doc._index === lastIndex
-      );
-    } else if (lastId) {
-      if (lastIndex) {
+    if (lastId) {
+      if (excludeSingleDocument) {
+        sourceDocuments[documentIds[0]] = sourceDocuments[lastId].filter(
+          (doc) => doc._index === lastIndex
+        );
+      } else if (lastIndex) {
         sourceDocuments[lastId] = sourceDocuments[lastId].filter((doc) => doc._index !== lastIndex);
       } else {
         sourceDocuments[lastId]?.pop();

@@ -44,6 +44,7 @@ describe('updateExcludedDocuments', () => {
       results,
       isRuleAggregating: true,
       aggregatableTimestampField: '@timestamp',
+      searchExhausted: false,
     });
 
     expect(excludedDocuments).toEqual({
@@ -70,6 +71,7 @@ describe('updateExcludedDocuments', () => {
       results,
       isRuleAggregating: false,
       aggregatableTimestampField: '@timestamp',
+      searchExhausted: false,
     });
 
     expect(excludedDocuments).toEqual({
@@ -98,6 +100,7 @@ describe('updateExcludedDocuments', () => {
       results,
       isRuleAggregating: false,
       aggregatableTimestampField: '@timestamp',
+      searchExhausted: false,
     });
 
     expect(excludedDocuments).toEqual({
@@ -110,7 +113,7 @@ describe('updateExcludedDocuments', () => {
     });
   });
 
-  it('should skip last document for single id and multiple source documents', () => {
+  it('should not skip only document in results', () => {
     const excludedDocuments = {};
 
     const resultsInTestCase: Array<Record<string, string>> = [{ _id: 'id1', _index: 'packetbeat' }];
@@ -123,10 +126,60 @@ describe('updateExcludedDocuments', () => {
       results: resultsInTestCase,
       isRuleAggregating: false,
       aggregatableTimestampField: '@timestamp',
+      searchExhausted: false,
+    });
+
+    expect(excludedDocuments).toEqual({
+      packetbeat: [{ id: 'id1', timestamp: '2025-04-28T10:00:00Z' }],
+    });
+  });
+
+  it('should skip last document in results with the same id ', () => {
+    const excludedDocuments = {};
+
+    const resultsInTestCase: Array<Record<string, string>> = [
+      { _id: 'id1', _index: 'auditbeat' },
+      { _id: 'id1', _index: 'packetbeat' },
+    ];
+
+    updateExcludedDocuments({
+      excludedDocuments,
+      sourceDocuments: {
+        id1: [fetchedDocumentMock, { ...fetchedDocumentMock, _index: 'packetbeat' }],
+      },
+      results: resultsInTestCase,
+      isRuleAggregating: false,
+      aggregatableTimestampField: '@timestamp',
+      searchExhausted: false,
     });
 
     expect(excludedDocuments).toEqual({
       auditbeat: [{ id: 'id1', timestamp: '2025-04-28T10:00:00Z' }],
+    });
+  });
+
+  it('should not skip any document in results with the same id if results exhausted', () => {
+    const excludedDocuments = {};
+
+    const resultsInTestCase: Array<Record<string, string>> = [
+      { _id: 'id1', _index: 'auditbeat' },
+      { _id: 'id1', _index: 'packetbeat' },
+    ];
+
+    updateExcludedDocuments({
+      excludedDocuments,
+      sourceDocuments: {
+        id1: [fetchedDocumentMock, { ...fetchedDocumentMock, _index: 'packetbeat' }],
+      },
+      results: resultsInTestCase,
+      isRuleAggregating: false,
+      aggregatableTimestampField: '@timestamp',
+      searchExhausted: true,
+    });
+
+    expect(excludedDocuments).toEqual({
+      auditbeat: [{ id: 'id1', timestamp: '2025-04-28T10:00:00Z' }],
+      packetbeat: [{ id: 'id1', timestamp: '2025-04-28T10:00:00Z' }],
     });
   });
 
@@ -154,6 +207,7 @@ describe('updateExcludedDocuments', () => {
       results: [{ _id: 'id1' }, { _id: 'id2' }],
       isRuleAggregating: false,
       aggregatableTimestampField: 'kibana.combined_timestamp',
+      searchExhausted: false,
     });
 
     expect(excludedDocuments).toEqual({
