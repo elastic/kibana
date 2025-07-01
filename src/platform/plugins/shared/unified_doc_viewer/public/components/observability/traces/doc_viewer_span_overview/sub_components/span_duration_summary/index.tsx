@@ -69,6 +69,7 @@ export function SpanDurationSummary({
             <Duration
               duration={spanDuration}
               parent={{ loading, duration: trace?.duration, type: 'transaction' }}
+              size="xs"
             />
           </EuiText>
         </FieldWithoutActions>
