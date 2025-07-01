@@ -427,6 +427,13 @@ export const MODIFIED_PREBUILT_RULE_LABEL = i18n.translate(
   }
 );
 
+export const MODIFIED_PREBUILT_RULE_PER_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.customizedPrebuiltRulePerFieldLabel',
+  {
+    defaultMessage: 'Modified',
+  }
+);
+
 export const QUERY_LANGUAGE_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.queryLanguageLabel',
   {

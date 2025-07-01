@@ -26,6 +26,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { requiredOptional } from '@kbn/zod-helpers';
+import { getFormattedSectionLabel } from './helpers';
 import type {
   BuildingBlockType,
   RuleResponse,
@@ -269,12 +270,20 @@ export const Tags = ({ tags }: TagsProps) => (
   <BadgeList badges={tags} data-test-subj="tagsPropertyValue" />
 );
 
+interface PrepareAboutSectionListItemsProps {
+  rule: Partial<RuleResponse>;
+  hideName?: boolean;
+  hideDescription?: boolean;
+  showModifiedFields?: boolean;
+}
+
 // eslint-disable-next-line complexity
-const prepareAboutSectionListItems = (
-  rule: Partial<RuleResponse>,
-  hideName?: boolean,
-  hideDescription?: boolean
-): EuiDescriptionListProps['listItems'] => {
+const prepareAboutSectionListItems = ({
+  rule,
+  hideName,
+  hideDescription,
+  showModifiedFields = false,
+}: PrepareAboutSectionListItemsProps): EuiDescriptionListProps['listItems'] => {
   const aboutSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
   if (!hideName && rule.name) {
@@ -301,7 +310,13 @@ const prepareAboutSectionListItems = (
   if (rule.building_block_type) {
     aboutSectionListItems.push({
       title: (
-        <span data-test-subj="buildingBlockPropertyTitle">{i18n.BUILDING_BLOCK_FIELD_LABEL}</span>
+        <span data-test-subj="buildingBlockPropertyTitle">
+          {getFormattedSectionLabel(
+            i18n.BUILDING_BLOCK_FIELD_LABEL,
+            'building_block',
+            showModifiedFields
+          )}
+        </span>
       ),
       description: <BuildingBlock type="default" />,
     });
@@ -309,7 +324,11 @@ const prepareAboutSectionListItems = (
 
   if (rule.severity) {
     aboutSectionListItems.push({
-      title: <span data-test-subj="severityPropertyTitle">{i18n.SEVERITY_FIELD_LABEL}</span>,
+      title: (
+        <span data-test-subj="severityPropertyTitle">
+          {getFormattedSectionLabel(i18n.SEVERITY_FIELD_LABEL, 'severity', showModifiedFields)}
+        </span>
+      ),
       description: <SeverityBadge value={rule.severity} data-test-subj="severityPropertyValue" />,
     });
   }
@@ -323,7 +342,11 @@ const prepareAboutSectionListItems = (
             title:
               index === 0 ? (
                 <span data-test-subj="severityOverridePropertyTitle">
-                  {i18n.SEVERITY_MAPPING_FIELD_LABEL}
+                  {getFormattedSectionLabel(
+                    i18n.SEVERITY_MAPPING_FIELD_LABEL,
+                    'severity_mapping',
+                    showModifiedFields
+                  )}
                 </span>
               ) : (
                 ''
@@ -336,7 +359,11 @@ const prepareAboutSectionListItems = (
 
   if (rule.risk_score) {
     aboutSectionListItems.push({
-      title: <span data-test-subj="riskScorePropertyTitle">{i18n.RISK_SCORE_FIELD_LABEL}</span>,
+      title: (
+        <span data-test-subj="riskScorePropertyTitle">
+          {getFormattedSectionLabel(i18n.RISK_SCORE_FIELD_LABEL, 'risk_score', showModifiedFields)}
+        </span>
+      ),
       description: <RiskScore riskScore={rule.risk_score} />,
     });
   }
@@ -350,7 +377,11 @@ const prepareAboutSectionListItems = (
             title:
               index === 0 ? (
                 <span data-test-subj="riskScoreOverridePropertyTitle">
-                  {i18n.RISK_SCORE_MAPPING_FIELD_LABEL}
+                  {getFormattedSectionLabel(
+                    i18n.RISK_SCORE_MAPPING_FIELD_LABEL,
+                    'risk_score_mapping',
+                    showModifiedFields
+                  )}
                 </span>
               ) : (
                 ''
@@ -365,7 +396,11 @@ const prepareAboutSectionListItems = (
 
   if (rule.references && rule.references.length > 0) {
     aboutSectionListItems.push({
-      title: <span data-test-subj="referencesPropertyTitle">{i18n.REFERENCES_FIELD_LABEL}</span>,
+      title: (
+        <span data-test-subj="referencesPropertyTitle">
+          {getFormattedSectionLabel(i18n.REFERENCES_FIELD_LABEL, 'references', showModifiedFields)}
+        </span>
+      ),
       description: <References references={rule.references} />,
     });
   }
@@ -373,7 +408,13 @@ const prepareAboutSectionListItems = (
   if (rule.false_positives && rule.false_positives.length > 0) {
     aboutSectionListItems.push({
       title: (
-        <span data-test-subj="falsePositivesPropertyTitle">{i18n.FALSE_POSITIVES_FIELD_LABEL}</span>
+        <span data-test-subj="falsePositivesPropertyTitle">
+          {getFormattedSectionLabel(
+            i18n.FALSE_POSITIVES_FIELD_LABEL,
+            'false_positives',
+            showModifiedFields
+          )}
+        </span>
       ),
       description: <FalsePositives falsePositives={rule.false_positives} />,
     });
@@ -383,7 +424,11 @@ const prepareAboutSectionListItems = (
     aboutSectionListItems.push({
       title: (
         <span data-test-subj="investigationFieldsPropertyTitle">
-          {i18n.INVESTIGATION_FIELDS_FIELD_LABEL}
+          {getFormattedSectionLabel(
+            i18n.INVESTIGATION_FIELDS_FIELD_LABEL,
+            'investigation_fields',
+            showModifiedFields
+          )}
         </span>
       ),
       description: (
@@ -403,7 +448,11 @@ const prepareAboutSectionListItems = (
     aboutSectionListItems.push({
       title: (
         <span data-test-subj="ruleNameOverridePropertyTitle">
-          {i18n.RULE_NAME_OVERRIDE_FIELD_LABEL}
+          {getFormattedSectionLabel(
+            i18n.RULE_NAME_OVERRIDE_FIELD_LABEL,
+            'rule_name_override',
+            showModifiedFields
+          )}
         </span>
       ),
       description: <RuleNameOverride ruleNameOverride={rule.rule_name_override} />,
@@ -412,14 +461,26 @@ const prepareAboutSectionListItems = (
 
   if (rule.threat && rule.threat.length > 0) {
     aboutSectionListItems.push({
-      title: <span data-test-subj="threatPropertyTitle">{i18n.THREAT_FIELD_LABEL}</span>,
+      title: (
+        <span data-test-subj="threatPropertyTitle">
+          {getFormattedSectionLabel(i18n.THREAT_FIELD_LABEL, 'threat', showModifiedFields)}
+        </span>
+      ),
       description: <Threat threat={rule.threat} />,
     });
   }
 
   if ('threat_indicator_path' in rule && rule.threat_indicator_path) {
     aboutSectionListItems.push({
-      title: i18n.THREAT_INDICATOR_PATH_LABEL,
+      title: (
+        <span data-test-subj="threatIndicatorPathPropertyTitle">
+          {getFormattedSectionLabel(
+            i18n.THREAT_INDICATOR_PATH_LABEL,
+            'threat_indicator_path',
+            showModifiedFields
+          )}
+        </span>
+      ),
       description: <ThreatIndicatorPath threatIndicatorPath={rule.threat_indicator_path} />,
     });
   }
@@ -428,7 +489,11 @@ const prepareAboutSectionListItems = (
     aboutSectionListItems.push({
       title: (
         <span data-test-subj="timestampOverridePropertyTitle">
-          {i18n.TIMESTAMP_OVERRIDE_FIELD_LABEL}
+          {getFormattedSectionLabel(
+            i18n.TIMESTAMP_OVERRIDE_FIELD_LABEL,
+            'timestamp_override',
+            showModifiedFields
+          )}
         </span>
       ),
       description: <TimestampOverride timestampOverride={rule.timestamp_override} />,
@@ -437,14 +502,26 @@ const prepareAboutSectionListItems = (
 
   if (rule.max_signals) {
     aboutSectionListItems.push({
-      title: <span data-test-subj="maxSignalsPropertyTitle">{i18n.MAX_SIGNALS_FIELD_LABEL}</span>,
+      title: (
+        <span data-test-subj="maxSignalsPropertyTitle">
+          {getFormattedSectionLabel(
+            i18n.MAX_SIGNALS_FIELD_LABEL,
+            'max_signals',
+            showModifiedFields
+          )}
+        </span>
+      ),
       description: <MaxSignals maxSignals={rule.max_signals} />,
     });
   }
 
   if (rule.tags && rule.tags.length > 0) {
     aboutSectionListItems.push({
-      title: <span data-test-subj="tagsPropertyTitle">{i18n.TAGS_FIELD_LABEL}</span>,
+      title: (
+        <span data-test-subj="tagsPropertyTitle">
+          {getFormattedSectionLabel(i18n.TAGS_FIELD_LABEL, 'tags', showModifiedFields)}
+        </span>
+      ),
       description: <Tags tags={rule.tags} />,
     });
   }
@@ -457,6 +534,7 @@ export interface RuleAboutSectionProps extends React.ComponentProps<typeof EuiDe
   columnWidths?: EuiDescriptionListProps['columnWidths'];
   hideName?: boolean;
   hideDescription?: boolean;
+  showModifiedFields?: boolean;
 }
 
 export const RuleAboutSection = ({
@@ -464,9 +542,15 @@ export const RuleAboutSection = ({
   columnWidths = DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS,
   hideName,
   hideDescription,
+  showModifiedFields,
   ...descriptionListProps
 }: RuleAboutSectionProps) => {
-  const aboutSectionListItems = prepareAboutSectionListItems(rule, hideName, hideDescription);
+  const aboutSectionListItems = prepareAboutSectionListItems({
+    rule,
+    hideName,
+    hideDescription,
+    showModifiedFields,
+  });
 
   return (
     <div>

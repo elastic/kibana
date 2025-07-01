@@ -10,19 +10,20 @@ import React from 'react';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { isCustomizedPrebuiltRule } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
-import type { OpenRuleDiffFlyoutParams } from '../../hooks/use_prebuilt_rules_view_base_diff';
+import { usePrebuiltRuleBaseVersionContext } from './base_version_diff/base_version_context';
 
 interface CustomizedPrebuiltRuleBadgeProps {
   rule: RuleResponse | null;
-  doesBaseVersionExist: boolean;
-  openRuleDiffFlyout: (params: OpenRuleDiffFlyoutParams) => void;
 }
 
 export const CustomizedPrebuiltRuleBadge: React.FC<CustomizedPrebuiltRuleBadgeProps> = ({
   rule,
-  doesBaseVersionExist,
-  openRuleDiffFlyout,
 }) => {
+  const {
+    actions: { openBaseVersionFlyout },
+    state: { doesBaseVersionExist },
+  } = usePrebuiltRuleBaseVersionContext();
+
   if (rule === null || !isCustomizedPrebuiltRule(rule)) {
     return null;
   }
@@ -39,8 +40,8 @@ export const CustomizedPrebuiltRuleBadge: React.FC<CustomizedPrebuiltRuleBadgePr
           color="primary"
           iconType="expand"
           iconSide="right"
-          onClick={() => openRuleDiffFlyout({ isReverting: false })}
-          iconOnClick={() => openRuleDiffFlyout({ isReverting: false })}
+          onClick={() => openBaseVersionFlyout({ isReverting: false })}
+          iconOnClick={() => openBaseVersionFlyout({ isReverting: false })}
           onClickAriaLabel={i18n.MODIFIED_PREBUILT_RULE_LABEL}
           iconOnClickAriaLabel={i18n.MODIFIED_PREBUILT_RULE_LABEL}
         >

@@ -124,7 +124,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                       </VerticalOverflowContent>
                     </VerticalOverflowContainer>
                     <EuiSpacer size="m" />
-                    <RuleAboutSection rule={rule} hideName hideDescription />
+                    <RuleAboutSection rule={rule} hideName hideDescription showModifiedFields />
                   </div>
                 )}
               </EuiResizeObserver>

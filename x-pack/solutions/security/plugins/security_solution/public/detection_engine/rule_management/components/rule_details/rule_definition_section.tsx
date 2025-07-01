@@ -57,7 +57,7 @@ import {
   queryStyles,
   useRequiredFieldsStyles,
 } from './rule_definition_section.styles';
-import { getQueryLanguageLabel } from './helpers';
+import { getQueryLanguageLabel, getFormattedSectionLabel } from './helpers';
 import { useDefaultIndexPattern } from '../../hooks/use_default_index_pattern';
 import { convertDateMathToDuration } from '../../../../common/utils/date_math';
 import { DEFAULT_HISTORY_WINDOW_SIZE } from '../../../../common/constants';
@@ -484,18 +484,31 @@ export const HistoryWindowSize = ({ historyWindowStart }: HistoryWindowSizeProps
   );
 };
 
+interface PrepareDefinitionSectionListItemsProps {
+  rule: Partial<RuleResponse>;
+  isInteractive: boolean;
+  savedQuery: SavedQuery | undefined;
+  isSuppressionEnabled: boolean;
+  showModifiedFields?: boolean;
+}
+
 // eslint-disable-next-line complexity
-const prepareDefinitionSectionListItems = (
-  rule: Partial<RuleResponse>,
-  isInteractive: boolean,
-  savedQuery: SavedQuery | undefined,
-  isSuppressionEnabled: boolean
-): EuiDescriptionListProps['listItems'] => {
+const prepareDefinitionSectionListItems = ({
+  rule,
+  isInteractive,
+  savedQuery,
+  isSuppressionEnabled,
+  showModifiedFields = false,
+}: PrepareDefinitionSectionListItemsProps): EuiDescriptionListProps['listItems'] => {
   const definitionSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
   if ('index' in rule && rule.index && rule.index.length > 0) {
     definitionSectionListItems.push({
-      title: <span data-test-subj="indexPropertyTitle">{i18n.INDEX_FIELD_LABEL}</span>,
+      title: (
+        <span data-test-subj="indexPropertyTitle">
+          {getFormattedSectionLabel(i18n.INDEX_FIELD_LABEL, 'data_source', showModifiedFields)}
+        </span>
+      ),
       description: <Index index={rule.index} />,
     });
   }
@@ -504,14 +517,24 @@ const prepareDefinitionSectionListItems = (
     definitionSectionListItems.push(
       {
         title: (
-          <span data-test-subj="dataViewIdPropertyTitle">{i18n.DATA_VIEW_ID_FIELD_LABEL}</span>
+          <span data-test-subj="dataViewIdPropertyTitle">
+            {getFormattedSectionLabel(
+              i18n.DATA_VIEW_ID_FIELD_LABEL,
+              'data_source',
+              showModifiedFields
+            )}
+          </span>
         ),
         description: <DataViewId dataViewId={rule.data_view_id} />,
       },
       {
         title: (
           <span data-test-subj="dataViewIndexPatternPropertyTitle">
-            {i18n.DATA_VIEW_INDEX_PATTERN_FIELD_LABEL}
+            {getFormattedSectionLabel(
+              i18n.DATA_VIEW_INDEX_PATTERN_FIELD_LABEL,
+              'data_source',
+              showModifiedFields
+            )}
           </span>
         ),
         description: <DataViewIndexPattern dataViewId={rule.data_view_id} />,
@@ -524,7 +547,11 @@ const prepareDefinitionSectionListItems = (
       {
         title: (
           <span data-test-subj="savedQueryNamePropertyTitle">
-            {descriptionStepI18n.SAVED_QUERY_NAME_LABEL}
+            {getFormattedSectionLabel(
+              descriptionStepI18n.SAVED_QUERY_NAME_LABEL,
+              'kql_query',
+              showModifiedFields
+            )}
           </span>
         ),
         description: <SavedQueryName savedQueryName={savedQuery.attributes.title} />,
@@ -532,7 +559,11 @@ const prepareDefinitionSectionListItems = (
       {
         title: (
           <span data-test-subj="savedQueryLanguagePropertyTitle">
-            {i18n.SAVED_QUERY_LANGUAGE_LABEL}
+            {getFormattedSectionLabel(
+              i18n.SAVED_QUERY_LANGUAGE_LABEL,
+              'kql_query',
+              showModifiedFields
+            )}
           </span>
         ),
         description: (
@@ -547,7 +578,11 @@ const prepareDefinitionSectionListItems = (
       definitionSectionListItems.push({
         title: (
           <span data-test-subj="savedQueryFiltersPropertyTitle">
-            {descriptionStepI18n.SAVED_QUERY_FILTERS_LABEL}
+            {getFormattedSectionLabel(
+              descriptionStepI18n.SAVED_QUERY_FILTERS_LABEL,
+              'kql_query',
+              showModifiedFields
+            )}
           </span>
         ),
         description: (
@@ -565,7 +600,11 @@ const prepareDefinitionSectionListItems = (
       definitionSectionListItems.push({
         title: (
           <span data-test-subj="savedQueryContentPropertyTitle">
-            {descriptionStepI18n.SAVED_QUERY_LABEL}
+            {getFormattedSectionLabel(
+              descriptionStepI18n.SAVED_QUERY_LABEL,
+              'kql_query',
+              showModifiedFields
+            )}
           </span>
         ),
         description: (
@@ -580,7 +619,15 @@ const prepareDefinitionSectionListItems = (
 
   if ('filters' in rule && rule.filters?.length) {
     definitionSectionListItems.push({
-      title: <span data-test-subj="filtersPropertyTitle">{descriptionStepI18n.FILTERS_LABEL}</span>,
+      title: (
+        <span data-test-subj="filtersPropertyTitle">
+          {getFormattedSectionLabel(
+            descriptionStepI18n.FILTERS_LABEL,
+            'kql_query',
+            showModifiedFields
+          )}
+        </span>
+      ),
       description: (
         <Filters
           filters={rule.filters as Filter[]}
@@ -596,7 +643,13 @@ const prepareDefinitionSectionListItems = (
     if (rule.type === 'eql') {
       definitionSectionListItems.push({
         title: (
-          <span data-test-subj="eqlQueryPropertyTitle">{descriptionStepI18n.EQL_QUERY_LABEL}</span>
+          <span data-test-subj="eqlQueryPropertyTitle">
+            {getFormattedSectionLabel(
+              descriptionStepI18n.EQL_QUERY_LABEL,
+              'eql_query',
+              showModifiedFields
+            )}
+          </span>
         ),
         description: <Query query={rule.query} data-test-subj="eqlQueryPropertyValue" />,
       });
@@ -605,6 +658,11 @@ const prepareDefinitionSectionListItems = (
         title: (
           <span data-test-subj="esqlQueryPropertyTitle">
             {descriptionStepI18n.ESQL_QUERY_LABEL}
+            {getFormattedSectionLabel(
+              descriptionStepI18n.ESQL_QUERY_LABEL,
+              'esql_query',
+              showModifiedFields
+            )}
           </span>
         ),
         description: <Query query={rule.query} data-test-subj="esqlQueryPropertyValue" />,
@@ -613,14 +671,20 @@ const prepareDefinitionSectionListItems = (
       definitionSectionListItems.push(
         {
           title: (
-            <span data-test-subj="customQueryPropertyTitle">{descriptionStepI18n.QUERY_LABEL}</span>
+            <span data-test-subj="customQueryPropertyTitle">
+              {getFormattedSectionLabel(
+                descriptionStepI18n.QUERY_LABEL,
+                'kql_query',
+                showModifiedFields
+              )}
+            </span>
           ),
           description: <Query query={rule.query} data-test-subj="customQueryPropertyValue" />,
         },
         {
           title: (
             <span data-test-subj="customQueryLanguagePropertyTitle">
-              {i18n.QUERY_LANGUAGE_LABEL}
+              {getFormattedSectionLabel(i18n.QUERY_LANGUAGE_LABEL, 'kql_query', showModifiedFields)}
             </span>
           ),
           description: (
@@ -637,7 +701,11 @@ const prepareDefinitionSectionListItems = (
     definitionSectionListItems.push({
       title: (
         <span data-test-subj="eqlOptionsEventCategoryOverrideTitle">
-          {EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL}
+          {getFormattedSectionLabel(
+            EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL,
+            'eql_query',
+            showModifiedFields
+          )}
         </span>
       ),
       description: (
@@ -652,7 +720,11 @@ const prepareDefinitionSectionListItems = (
     definitionSectionListItems.push({
       title: (
         <span data-test-subj="eqlOptionsTiebreakerFieldTitle">
-          {EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_LABEL}
+          {getFormattedSectionLabel(
+            EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_LABEL,
+            'eql_query',
+            showModifiedFields
+          )}
         </span>
       ),
       description: (
@@ -667,7 +739,11 @@ const prepareDefinitionSectionListItems = (
     definitionSectionListItems.push({
       title: (
         <span data-test-subj="eqlOptionsTimestampFieldTitle">
-          {EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_LABEL}
+          {getFormattedSectionLabel(
+            EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_LABEL,
+            'eql_query',
+            showModifiedFields
+          )}
         </span>
       ),
       description: (
@@ -680,7 +756,7 @@ const prepareDefinitionSectionListItems = (
 
   if (rule.type) {
     definitionSectionListItems.push({
-      title: i18n.RULE_TYPE_FIELD_LABEL,
+      title: getFormattedSectionLabel(i18n.RULE_TYPE_FIELD_LABEL, 'type', showModifiedFields),
       description: <RuleType type={rule.type} />,
     });
   }
@@ -689,7 +765,11 @@ const prepareDefinitionSectionListItems = (
     definitionSectionListItems.push({
       title: (
         <span data-test-subj="anomalyThresholdPropertyTitle">
-          {i18n.ANOMALY_THRESHOLD_FIELD_LABEL}
+          {getFormattedSectionLabel(
+            i18n.ANOMALY_THRESHOLD_FIELD_LABEL,
+            'anomaly_threshold',
+            showModifiedFields
+          )}
         </span>
       ),
       description: <AnomalyThreshold anomalyThreshold={rule.anomaly_threshold} />,
@@ -699,7 +779,13 @@ const prepareDefinitionSectionListItems = (
   if ('machine_learning_job_id' in rule) {
     definitionSectionListItems.push({
       title: (
-        <span data-test-subj="mlJobPropertyTitle">{i18n.MACHINE_LEARNING_JOB_ID_FIELD_LABEL}</span>
+        <span data-test-subj="mlJobPropertyTitle">
+          {getFormattedSectionLabel(
+            i18n.MACHINE_LEARNING_JOB_ID_FIELD_LABEL,
+            'machine_learning_job_id',
+            showModifiedFields
+          )}
+        </span>
       ),
       description: (
         <MachineLearningJobList
@@ -714,7 +800,11 @@ const prepareDefinitionSectionListItems = (
     definitionSectionListItems.push({
       title: (
         <span data-test-subj="relatedIntegrationsPropertyTitle">
-          {i18n.RELATED_INTEGRATIONS_FIELD_LABEL}
+          {getFormattedSectionLabel(
+            i18n.RELATED_INTEGRATIONS_FIELD_LABEL,
+            'related_integrations',
+            showModifiedFields
+          )}
         </span>
       ),
       description: (
@@ -729,7 +819,13 @@ const prepareDefinitionSectionListItems = (
   if (rule.required_fields && rule.required_fields.length > 0) {
     definitionSectionListItems.push({
       title: (
-        <span data-test-subj="requiredFieldsPropertyTitle">{i18n.REQUIRED_FIELDS_FIELD_LABEL}</span>
+        <span data-test-subj="requiredFieldsPropertyTitle">
+          {getFormattedSectionLabel(
+            i18n.REQUIRED_FIELDS_FIELD_LABEL,
+            'required_fields',
+            showModifiedFields
+          )}
+        </span>
       ),
       description: <RequiredFields requiredFields={rule.required_fields} />,
     });
@@ -737,7 +833,13 @@ const prepareDefinitionSectionListItems = (
 
   definitionSectionListItems.push({
     title: (
-      <span data-test-subj="timelineTemplatePropertyTitle">{i18n.TIMELINE_TITLE_FIELD_LABEL}</span>
+      <span data-test-subj="timelineTemplatePropertyTitle">
+        {getFormattedSectionLabel(
+          i18n.TIMELINE_TITLE_FIELD_LABEL,
+          'timeline_template',
+          showModifiedFields
+        )}
+      </span>
     ),
     description: (
       <TimelineTitle timelineTitle={rule.timeline_title || timelinesI18n.DEFAULT_TIMELINE_TITLE} />
@@ -746,14 +848,26 @@ const prepareDefinitionSectionListItems = (
 
   if ('threshold' in rule && rule.threshold) {
     definitionSectionListItems.push({
-      title: <span data-test-subj="thresholdPropertyTitle">{i18n.THRESHOLD_FIELD_LABEL}</span>,
+      title: (
+        <span data-test-subj="thresholdPropertyTitle">
+          {getFormattedSectionLabel(i18n.THRESHOLD_FIELD_LABEL, 'threshold', showModifiedFields)}
+        </span>
+      ),
       description: <Threshold threshold={rule.threshold} />,
     });
   }
 
   if ('threat_index' in rule && rule.threat_index) {
     definitionSectionListItems.push({
-      title: <span data-test-subj="threatIndexPropertyTitle">{i18n.THREAT_INDEX_FIELD_LABEL}</span>,
+      title: (
+        <span data-test-subj="threatIndexPropertyTitle">
+          {getFormattedSectionLabel(
+            i18n.THREAT_INDEX_FIELD_LABEL,
+            'threat_index',
+            showModifiedFields
+          )}
+        </span>
+      ),
       description: <ThreatIndex threatIndex={rule.threat_index} />,
     });
   }
@@ -761,7 +875,13 @@ const prepareDefinitionSectionListItems = (
   if ('threat_filters' in rule && rule.threat_filters && rule.threat_filters.length > 0) {
     definitionSectionListItems.push({
       title: (
-        <span data-test-subj="threatFiltersPropertyTitle">{i18n.THREAT_FILTERS_FIELD_LABEL}</span>
+        <span data-test-subj="threatFiltersPropertyTitle">
+          {getFormattedSectionLabel(
+            i18n.THREAT_FILTERS_FIELD_LABEL,
+            'threat_query',
+            showModifiedFields
+          )}
+        </span>
       ),
       description: (
         <Filters
@@ -778,7 +898,11 @@ const prepareDefinitionSectionListItems = (
     definitionSectionListItems.push({
       title: (
         <span data-test-subj="threatQueryPropertyTitle">
-          {descriptionStepI18n.THREAT_QUERY_LABEL}
+          {getFormattedSectionLabel(
+            descriptionStepI18n.THREAT_QUERY_LABEL,
+            'threat_query',
+            showModifiedFields
+          )}
         </span>
       ),
       description: <Query query={rule.threat_query} data-test-subj="threatQueryPropertyValue" />,
@@ -789,7 +913,11 @@ const prepareDefinitionSectionListItems = (
     definitionSectionListItems.push({
       title: (
         <span data-test-subj="threatQueryLanguagePropertyTitle">
-          {i18n.THREAT_QUERY_LANGUAGE_LABEL}
+          {getFormattedSectionLabel(
+            i18n.THREAT_QUERY_LANGUAGE_LABEL,
+            'threat_query',
+            showModifiedFields
+          )}
         </span>
       ),
       description: (
@@ -803,7 +931,13 @@ const prepareDefinitionSectionListItems = (
   if ('threat_mapping' in rule && rule.threat_mapping) {
     definitionSectionListItems.push({
       title: (
-        <span data-test-subj="threatMappingPropertyTitle">{i18n.THREAT_MAPPING_FIELD_LABEL}</span>
+        <span data-test-subj="threatMappingPropertyTitle">
+          {getFormattedSectionLabel(
+            i18n.THREAT_MAPPING_FIELD_LABEL,
+            'threat_mapping',
+            showModifiedFields
+          )}
+        </span>
       ),
       description: <ThreatMapping threatMapping={rule.threat_mapping} />,
     });
@@ -813,7 +947,11 @@ const prepareDefinitionSectionListItems = (
     definitionSectionListItems.push({
       title: (
         <span data-test-subj="newTermsFieldsPropertyTitle">
-          {i18n.NEW_TERMS_FIELDS_FIELD_LABEL}
+          {getFormattedSectionLabel(
+            i18n.NEW_TERMS_FIELDS_FIELD_LABEL,
+            'new_terms_fields',
+            showModifiedFields
+          )}
         </span>
       ),
       description: <NewTermsFields newTermsFields={rule.new_terms_fields} />,
@@ -824,7 +962,11 @@ const prepareDefinitionSectionListItems = (
     definitionSectionListItems.push({
       title: (
         <span data-test-subj="newTermsWindowSizePropertyTitle">
-          {i18n.HISTORY_WINDOW_SIZE_FIELD_LABEL}
+          {getFormattedSectionLabel(
+            i18n.HISTORY_WINDOW_SIZE_FIELD_LABEL,
+            'history_window_start',
+            showModifiedFields
+          )}
         </span>
       ),
       description: <HistoryWindowSize historyWindowStart={rule.history_window_start} />,
@@ -886,6 +1028,7 @@ export interface RuleDefinitionSectionProps
   columnWidths?: EuiDescriptionListProps['columnWidths'];
   isInteractive?: boolean;
   dataTestSubj?: string;
+  showModifiedFields?: boolean;
 }
 
 export const RuleDefinitionSection = ({
@@ -893,6 +1036,7 @@ export const RuleDefinitionSection = ({
   isInteractive = false,
   columnWidths = DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS,
   dataTestSubj,
+  showModifiedFields,
   ...descriptionListProps
 }: RuleDefinitionSectionProps) => {
   const { savedQuery } = useGetSavedQuery({
@@ -902,12 +1046,13 @@ export const RuleDefinitionSection = ({
 
   const { isSuppressionEnabled } = useAlertSuppression(rule.type);
 
-  const definitionSectionListItems = prepareDefinitionSectionListItems(
+  const definitionSectionListItems = prepareDefinitionSectionListItems({
     rule,
     isInteractive,
     savedQuery,
-    isSuppressionEnabled
-  );
+    isSuppressionEnabled,
+    showModifiedFields,
+  });
 
   return (
     <div data-test-subj={dataTestSubj}>

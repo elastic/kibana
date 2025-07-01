@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { isPlainObject } from 'lodash';
 import type { Filter } from '@kbn/es-query';
 import type {
@@ -22,6 +23,7 @@ import {
 } from './constants';
 import * as i18n from './translations';
 import { assertUnreachable } from '../../../../../common/utility_types';
+import { CustomizedPrebuiltRulePerFieldBadge } from './customized_prebuilt_rule_per_field_badge';
 
 export const getSectionedFieldDiffs = (fields: FieldsGroupDiff[]) => {
   const aboutFields = [];
@@ -115,3 +117,10 @@ export function getDataSourceProps(dataSource: DiffableAllFields['data_source'])
 
   return assertUnreachable(dataSource);
 }
+
+export const getFormattedSectionLabel = (
+  label: string,
+  field: string,
+  showModifiedFields: boolean
+) =>
+  showModifiedFields ? <CustomizedPrebuiltRulePerFieldBadge label={label} field={field} /> : label;
