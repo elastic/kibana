@@ -9,6 +9,7 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 
 const batchSize = 250;
@@ -16,7 +17,7 @@ const maxParallelism = 8;
 
 run(
   async ({ log, flags }) => {
-    const bail = flags.bail || false;
+    const bail = !!(flags.bail || false);
 
     const { batches, files } = getLintableFileBatches();
     log.info(`Found ${files.length} files in ${batches.length} batches to lint.`);
@@ -81,7 +82,21 @@ function getLintableFileBatches() {
   return { batches, files };
 }
 
-async function lintFileBatch({ batch, bail, idx, eslintArgs, batchCount, log }) {
+async function lintFileBatch({
+  batch,
+  bail,
+  idx,
+  eslintArgs,
+  batchCount,
+  log,
+}: {
+  batch: string[];
+  bail: boolean;
+  idx: number;
+  eslintArgs: string[];
+  batchCount: number;
+  log: ToolingLog;
+}) {
   log.info(`Running batch ${idx + 1}/${batchCount} with ${batch.length} files...`);
 
   const timeBefore = Date.now();
@@ -115,11 +130,14 @@ async function lintFileBatch({ batch, bail, idx, eslintArgs, batchCount, log }) 
   }
 }
 
-function runBatchedPromises(promiseCreators, max) {
-  const results = [];
+function runBatchedPromises<T>(
+  promiseCreators: Array<() => Promise<T>>,
+  maxParallel: number
+): Promise<T[]> {
+  const results: T[] = [];
   let i = 0;
 
-  const next = () => {
+  const next: () => Promise<any> = () => {
     if (i >= promiseCreators.length) {
       return Promise.resolve();
     }
@@ -131,10 +149,10 @@ function runBatchedPromises(promiseCreators, max) {
     });
   };
 
-  const tasks = Array.from({ length: max }, () => next());
+  const tasks = Array.from({ length: maxParallel }, () => next());
   return Promise.all(tasks).then(() => results);
 }
 
-function pretty(obj) {
+function pretty(obj: any) {
   return JSON.stringify(obj, null, 2);
 }
