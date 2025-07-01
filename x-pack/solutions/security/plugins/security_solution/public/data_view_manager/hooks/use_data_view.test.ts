@@ -64,7 +64,7 @@ describe('useDataView', () => {
   it('should return DataView instance when data view is available', async () => {
     mockGet.mockResolvedValue(fakeDataView);
 
-    const { result, rerender } = renderHook(() => useDataView());
+    const { result } = renderHook(() => useDataView());
 
     expect(result.current.dataView).not.toBe(undefined);
     expect(result.current.dataView.id).toBe(undefined);
