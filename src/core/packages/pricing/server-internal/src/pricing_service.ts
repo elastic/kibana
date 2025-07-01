@@ -103,6 +103,12 @@ export class PricingService {
   }
 
   public start() {
+    if (this.logger.isLevelEnabled('debug')) {
+      this.logger.debug(
+        `Starting pricing service with config: ${JSON.stringify(this.pricingConfig.tiers)}`
+      );
+    }
+
     return {
       isFeatureAvailable: this.tiersClient.isFeatureAvailable,
     };
