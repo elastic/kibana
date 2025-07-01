@@ -1208,14 +1208,14 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 
 # Global Experience
 
-### Global Experience Reporting
-/x-pack/test/functional/apps/dashboard/reporting/ @elastic/appex-sharedux
-/x-pack/test/functional/apps/reporting/ @elastic/appex-sharedux
-/x-pack/test/functional/apps/reporting_management/ @elastic/appex-sharedux
-/x-pack/test/examples/screenshotting/ @elastic/appex-sharedux
-/x-pack/test/functional/es_archives/lens/reporting/ @elastic/appex-sharedux
-/x-pack/test/functional/es_archives/reporting/ @elastic/appex-sharedux
-/x-pack/test/functional/fixtures/kbn_archiver/reporting/ @elastic/appex-sharedux
+### Reporting
+/x-pack/test/functional/apps/dashboard/reporting/ @elastic/response-ops
+/x-pack/test/functional/apps/reporting/ @elastic/response-ops
+/x-pack/platform/test/functional/apps/reporting_management/ @elastic/response-ops
+/x-pack/test/examples/screenshotting/ @elastic/response-ops
+/x-pack/test/functional/es_archives/lens/reporting/ @elastic/response-ops
+/x-pack/test/functional/es_archives/reporting/ @elastic/response-ops
+/x-pack/test/functional/fixtures/kbn_archiver/reporting/ @elastic/response-ops
 /x-pack/platform/test/reporting_api_integration/ @elastic/response-ops
 /x-pack/platform/test/reporting_functional/ @elastic/response-ops
 /x-pack/test/stack_functional_integration/apps/reporting/ @elastic/appex-sharedux
@@ -2104,7 +2104,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/stack_functional_integration/apps/ccs @elastic/kibana-management
 /x-pack/test/functional/services/data_stream.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/watcher_page.ts @elastic/kibana-management
-/x-pack/test/functional/page_objects/upgrade_assistant_page.ts @elastic/kibana-management
+/x-pack/platform/test/functional/page_objects/upgrade_assistant_page.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/snapshot_restore_page.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/rollup_page.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/ingest_pipelines_page.ts @elastic/kibana-management
@@ -2112,7 +2112,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/functional/page_objects/cross_cluster_replication_page.ts @elastic/kibana-management
 /x-pack/test/functional/fixtures/ingest_pipeline_example_mapping.csv @elastic/kibana-management
 /x-pack/test/functional/apps/snapshot_restore @elastic/kibana-management
-/x-pack/test/functional/apps/painless_lab @elastic/kibana-management
+/x-pack/platform/test/functional/apps/painless_lab @elastic/kibana-management
 /x-pack/test_serverless/functional/test_suites/common/spaces/spaces_management.ts @elastic/kibana-management
 /x-pack/test/stack_functional_integration/apps/management @elastic/kibana-management
 /x-pack/test/functional/page_objects/*_management_page.ts @elastic/kibana-management
@@ -2134,7 +2134,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 ^/src/platform/test/functional/apps/saved_objects_management @elastic/kibana-management
 ^/src/platform/test/functional/apps/console/*.ts @elastic/kibana-management
 ^/src/platform/test/api_integration/apis/console/*.ts @elastic/kibana-management
-/x-pack/test/functional/apps/upgrade_assistant @elastic/kibana-management
+/x-pack/platform/test/functional/apps/upgrade_assistant @elastic/kibana-management
 /x-pack/platform/test/functional/apps/dev_tools @elastic/kibana-management
 /x-pack/test/upgrade_assistant_integration @elastic/kibana-management
 /x-pack/test/api_integration/deployment_agnostic/apis/console/ @elastic/kibana-management
@@ -2531,6 +2531,8 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/utils/rules/rule_gaps.ts @elastic/security-detection-engine
 /x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists @elastic/security-detection-engine
 /x-pack/test/functional/es_archives/asset_criticality @elastic/security-detection-engine
+/x-pack/solutions/security/plugins/security_solution/server/usage/exceptions @elastic/security-detection-engine
+/x-pack/solutions/security/plugins/security_solution/server/usage/value_lists @elastic/security-detection-engine
 
 ## Security Threat Intelligence - Under Security Platform
 /x-pack/solutions/security/plugins/security_solution/public/common/components/threat_match @elastic/security-detection-engine
