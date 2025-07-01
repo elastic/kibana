@@ -160,10 +160,6 @@ export interface AuthorizeChangeOwnershipObject extends AuthorizeObjectWithExist
 export interface AuthorizeBulkChangeOwnershipParams extends AuthorizeParams {
   /** The objects to authorize */
   objects: AuthorizeChangeOwnershipObject[];
-  accessControlOptions?: {
-    /** The new owner of the objects */
-    newOwner: string;
-  };
 }
 
 /**
