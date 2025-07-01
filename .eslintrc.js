@@ -2327,14 +2327,6 @@ module.exports = {
           {
             paths: [
               {
-                name: '@kbn/scout-oblt',
-                message: "Platform tests should import only from '@kbn/scout'.",
-              },
-              {
-                name: '@kbn/scout-security',
-                message: "Platform tests should import only from '@kbn/scout'.",
-              },
-              {
                 name: '@playwright/test',
                 message: "Platform tests should import only from '@kbn/scout'.",
               },
@@ -2356,11 +2348,6 @@ module.exports = {
             paths: [
               {
                 name: '@kbn/scout',
-                message:
-                  "Observability solution tests should import from '@kbn/scout-oblt' instead.",
-              },
-              {
-                name: '@kbn/scout-security',
                 message:
                   "Observability solution tests should import from '@kbn/scout-oblt' instead.",
               },
@@ -2388,11 +2375,6 @@ module.exports = {
             paths: [
               {
                 name: '@kbn/scout',
-                message:
-                  "Security solution tests should import from '@kbn/scout-security' instead.",
-              },
-              {
-                name: '@kbn/scout-oblt',
                 message:
                   "Security solution tests should import from '@kbn/scout-security' instead.",
               },
