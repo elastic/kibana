@@ -7,4 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { GettingStarted } from './getting_started';
+export interface Options {
+  /**
+   * The path to the .text file if available.
+   */
+  path?: string;
+  /**
+   * The content of the .text file if available.
+   */
+  content?: string;
+}
+
+export interface SyncOptions extends Options {
+  /** the content of the .text file to transform */
+  content: string;
+}
+
+export interface Result {
+  /**
+   * The output of the .text-to-CommonJS transform
+   */
+  source: string;
+}
