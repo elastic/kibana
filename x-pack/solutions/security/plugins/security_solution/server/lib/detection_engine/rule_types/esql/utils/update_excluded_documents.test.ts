@@ -110,6 +110,26 @@ describe('updateExcludedDocuments', () => {
     });
   });
 
+  it('should skip last document for single id and multiple source documents', () => {
+    const excludedDocuments = {};
+
+    const resultsInTestCase: Array<Record<string, string>> = [{ _id: 'id1', _index: 'packetbeat' }];
+
+    updateExcludedDocuments({
+      excludedDocuments,
+      sourceDocuments: {
+        id1: [fetchedDocumentMock, { ...fetchedDocumentMock, _index: 'packetbeat' }],
+      },
+      results: resultsInTestCase,
+      isRuleAggregating: false,
+      aggregatableTimestampField: '@timestamp',
+    });
+
+    expect(excludedDocuments).toEqual({
+      auditbeat: [{ id: 'id1', timestamp: '2025-04-28T10:00:00Z' }],
+    });
+  });
+
   it('should use kibana.combined_timestamp as timestamp field', () => {
     const fetchedDocumentWithCombined: FetchedDocument = {
       fields: { 'kibana.combined_timestamp': ['2025-04-28T11:11:11Z'] },
