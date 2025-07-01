@@ -29,7 +29,11 @@ export const SolutionPanel: FC<Props> = ({ addBasePath, solution }) => {
   const { trackUiMetric } = getServices();
 
   return (
-    <EuiFlexItem css={styles} data-test-subj={`homeSolutionPanel homeSolutionPanel_${solution.id}`}>
+    <EuiFlexItem
+      css={styles}
+      data-test-subj={`homeSolutionPanel homeSolutionPanel_${solution.id}`}
+      grow={false}
+    >
       <EuiCard
         className={`homeSolutionPanel homeSolutionPanel--${solution.id}`}
         description={solution.description}
@@ -56,7 +60,8 @@ export const SolutionPanel: FC<Props> = ({ addBasePath, solution }) => {
 const styles = ({ euiTheme }: UseEuiTheme) =>
   css({
     [`@media (min-width: ${euiTheme.breakpoint.m}px)`]: {
-      maxInlineSize: `calc(33.33% - ${euiTheme.size.m} * 10)`,
+      // width: '45%',
+      maxInlineSize: `calc(33.33% - ${euiTheme.size.m} * 10)`, // with personalizied it calculates not for each tile but for all 3
     },
     '.homeSolutionPanel': {
       img: {
