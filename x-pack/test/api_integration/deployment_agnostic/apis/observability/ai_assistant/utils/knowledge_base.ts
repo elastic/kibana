@@ -255,9 +255,9 @@ interface SemanticTextField {
   };
 }
 
-export async function getKnowledgeBaseEntriesFromEs(es: Client) {
+export async function getKnowledgeBaseEntriesFromEs(es: Client, size = 1000) {
   const res = await es.search<KnowledgeBaseEntry & SemanticTextField>({
-    size: 1000,
+    size,
     index: resourceNames.writeIndexAlias.kb,
     // Add fields parameter to include inference metadata
     fields: ['_inference_fields'],
