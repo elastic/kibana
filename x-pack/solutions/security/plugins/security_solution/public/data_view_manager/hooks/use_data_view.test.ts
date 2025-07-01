@@ -6,12 +6,13 @@
  */
 
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { TestProviders } from '../../common/mock';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../constants';
+import { DataView } from '@kbn/data-views-plugin/public';
 
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../constants';
 import { useDataView } from './use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useSelector } from 'react-redux';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 
 jest.mock('../../common/hooks/use_experimental_features');
 
@@ -23,19 +24,30 @@ jest.mock('react-redux', () => ({
 const mockGet = jest.fn();
 const mockToastsDanger = jest.fn();
 
+const mockNotifications = {
+  toasts: {
+    danger: mockToastsDanger,
+  },
+};
+
+const mockDataViews = { get: mockGet };
+
+const fakeDataView = new DataView({
+  spec: {
+    id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+  },
+  fieldFormats: {} as FieldFormatsStartCommon,
+});
+
 jest.mock('../../common/lib/kibana', () => {
   const actual = jest.requireActual('../../common/lib/kibana');
   return {
     ...actual,
     useKibana: () => ({
       services: {
-        dataViews: { get: mockGet },
+        dataViews: mockDataViews,
       },
-      notifications: {
-        toasts: {
-          danger: mockToastsDanger,
-        },
-      },
+      notifications: mockNotifications,
     }),
   };
 });
@@ -49,43 +61,57 @@ describe('useDataView', () => {
       .mockReturnValue({ dataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, status: 'ready' });
   });
 
-  // TODO: unskip it, it crashes node
-  it.skip('should return DataView instance when data view is available', async () => {
-    const fakeDataView = { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID };
+  it('should return DataView instance when data view is available', async () => {
     mockGet.mockResolvedValue(fakeDataView);
 
-    const { result } = renderHook(() => useDataView(), {
-      wrapper: TestProviders,
-    });
+    const { result, rerender } = renderHook(() => useDataView());
 
+    expect(result.current.dataView).not.toBe(undefined);
     expect(result.current.dataView.id).toBe(undefined);
-  });
-
-  // TODO: unskip it, it crashes node
-  it.skip('should set status to loading on subsequent calls after first load', async () => {
-    const fakeDataView = { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID };
-    mockGet.mockResolvedValue(fakeDataView);
-
-    const { result, rerender } = renderHook(() => useDataView(DataViewManagerScopeName.default), {
-      wrapper: TestProviders,
-    });
-
-    // First load
     expect(result.current.status).toBe('pristine');
 
-    // Simulate a change that triggers the effect again
-    act(() => rerender(DataViewManagerScopeName.default));
+    // NOTE: should switch to ready almost immediately
     await waitFor(() => {
       expect(result.current.status).toEqual('ready');
+    });
+
+    expect(result.current.dataView.id).toBe(DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID);
+  });
+
+  it('should set status to loading on subsequent calls after first load', async () => {
+    mockGet.mockResolvedValue(fakeDataView);
+
+    const { result, rerender } = renderHook(() => useDataView());
+
+    // First load, no loading state
+    expect(result.current.status).toBe('pristine');
+    await waitFor(() => {
+      if (result.current.status === 'loading') {
+        // if loading is returned here, we have an error. until the first data view is loaded from the service, we want to stay "pristine".
+        // this is because there are elements on some pages that depending on this behavior.
+        return;
+      }
+
+      expect(result.current.status).toEqual('ready');
+    });
+
+    jest
+      .mocked(useSelector)
+      .mockReturnValue({ dataViewId: 'different-data-view', status: 'ready' });
+
+    // Dont await on purpose
+    act(() => rerender());
+
+    // Should be loading at some point
+    await waitFor(() => {
+      expect(result.current.status).toEqual('loading');
     });
   });
 
   it('should not call get if newDataViewPickerEnabled is false', async () => {
     jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
 
-    const { result, rerender } = renderHook(() => useDataView(DataViewManagerScopeName.default), {
-      wrapper: TestProviders,
-    });
+    const { result, rerender } = renderHook(() => useDataView(DataViewManagerScopeName.default));
 
     await act(async () => rerender(DataViewManagerScopeName.default));
     expect(mockGet).not.toHaveBeenCalled();
@@ -95,9 +121,7 @@ describe('useDataView', () => {
   it('should not call get if dataViewId is missing', async () => {
     jest.mocked(useSelector).mockReturnValue({ dataViewId: undefined, status: 'ready' });
 
-    const { result, rerender } = renderHook(() => useDataView(DataViewManagerScopeName.default), {
-      wrapper: TestProviders,
-    });
+    const { result, rerender } = renderHook(() => useDataView(DataViewManagerScopeName.default));
 
     await act(async () => rerender(DataViewManagerScopeName.default));
     expect(mockGet).not.toHaveBeenCalled();
@@ -109,9 +133,7 @@ describe('useDataView', () => {
       .mocked(useSelector)
       .mockReturnValue({ dataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, status: 'loading' });
 
-    const { result, rerender } = renderHook(() => useDataView(DataViewManagerScopeName.default), {
-      wrapper: TestProviders,
-    });
+    const { result, rerender } = renderHook(() => useDataView(DataViewManagerScopeName.default));
 
     await act(async () => rerender(DataViewManagerScopeName.default));
     expect(mockGet).not.toHaveBeenCalled();
@@ -121,9 +143,7 @@ describe('useDataView', () => {
   it('should set status to error and call toasts.danger on get error', async () => {
     mockGet.mockRejectedValue(new Error('fail!'));
 
-    const { result, rerender } = renderHook(() => useDataView(DataViewManagerScopeName.default), {
-      wrapper: TestProviders,
-    });
+    const { result, rerender } = renderHook(() => useDataView(DataViewManagerScopeName.default));
 
     await act(async () => rerender(DataViewManagerScopeName.default));
     expect(result.current.status).toBe('error');
@@ -136,9 +156,7 @@ describe('useDataView', () => {
   it('should handle unknown error shape gracefully', async () => {
     mockGet.mockRejectedValue({});
 
-    const { result, rerender } = renderHook(() => useDataView(DataViewManagerScopeName.default), {
-      wrapper: TestProviders,
-    });
+    const { result, rerender } = renderHook(() => useDataView(DataViewManagerScopeName.default));
 
     await act(async () => rerender(DataViewManagerScopeName.default));
     expect(result.current.status).toBe('error');
