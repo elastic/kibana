@@ -30,7 +30,7 @@ import {
   type ChatEvent,
   type ChatAgentEvent,
   type RoundCompleteEvent,
-  OneChatDefaultAgentId,
+  oneChatDefaultAgentId,
   toSerializedAgentIdentifier,
   AgentIdentifier,
   SerializedAgentIdentifier,
@@ -119,7 +119,7 @@ class ChatServiceImpl implements ChatService {
   }
 
   converse({
-    agentId = OneChatDefaultAgentId,
+    agentId = oneChatDefaultAgentId,
     mode = AgentMode.normal,
     conversationId,
     connectorId,
