@@ -182,6 +182,7 @@ export const FINDINGS_GROUPING_OPTIONS = {
   CLOUD_ACCOUNT_ID: 'cloud.account.id',
   ORCHESTRATOR_CLUSTER_NAME: 'orchestrator.cluster.name',
   ORCHESTRATOR_CLUSTER_ID: 'orchestrator.cluster.id',
+  NAMESPACE: 'data_stream.namespace',
 };
 
 export const VULNERABILITY_FIELDS = {

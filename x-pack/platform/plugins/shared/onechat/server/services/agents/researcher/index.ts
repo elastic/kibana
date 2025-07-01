@@ -6,3 +6,4 @@
  */
 
 export { researcherTool } from './researcher_as_tool';
+export { runResearcherAgent } from './run_researcher_agent';

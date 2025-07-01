@@ -124,7 +124,7 @@ const callOut = (
       <EuiCallOut
         title={i18nTexts.onlyLogWritingEnabledTitle}
         color="warning"
-        iconType="help"
+        iconType="question"
         data-test-subj="deprecationWarningCallout"
       >
         <p>{i18nTexts.onlyLogWritingEnabledBody}</p>
@@ -135,7 +135,7 @@ const callOut = (
   if (!hasPrivileges && isDeprecationLogIndexingEnabled) {
     return (
       <EuiCallOut
-        iconType="help"
+        iconType="question"
         color="warning"
         title={i18nTexts.deniedPrivilegeTitle}
         data-test-subj="noIndexPermissionsCallout"

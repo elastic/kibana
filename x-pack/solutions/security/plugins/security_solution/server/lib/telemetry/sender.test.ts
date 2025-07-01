@@ -10,7 +10,7 @@ import type { ExperimentalFeatures } from '../../../common';
 import { TelemetryEventsSender } from './sender';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { Observable } from 'rxjs';
+import { of } from 'rxjs';
 import { URL } from 'url';
 
 describe('TelemetryEventsSender', () => {
@@ -485,7 +485,7 @@ describe('TelemetryEventsSender', () => {
       const sender = new TelemetryEventsSender(logger, {} as ExperimentalFeatures);
       sender['telemetryStart'] = {
         getIsOptedIn: jest.fn(async () => true),
-        isOptedIn$: new Observable<boolean>(),
+        isOptedIn$: of(true),
       };
       sender['telemetrySetup'] = {
         getTelemetryUrl: jest.fn(async () => new URL('https://telemetry.elastic.co')),
@@ -519,7 +519,7 @@ describe('TelemetryEventsSender', () => {
       sender['sendEvents'] = jest.fn();
       const telemetryStart = {
         getIsOptedIn: jest.fn(async () => false),
-        isOptedIn$: new Observable<boolean>(),
+        isOptedIn$: of(false),
       };
       sender['telemetryStart'] = telemetryStart;
 
@@ -536,7 +536,7 @@ describe('TelemetryEventsSender', () => {
       sender['sendEvents'] = jest.fn();
       const telemetryStart = {
         getIsOptedIn: jest.fn(async () => true),
-        isOptedIn$: new Observable<boolean>(),
+        isOptedIn$: of(true),
       };
       sender['telemetryStart'] = telemetryStart;
       sender['isTelemetryServicesReachable'] = jest.fn(async () => false);

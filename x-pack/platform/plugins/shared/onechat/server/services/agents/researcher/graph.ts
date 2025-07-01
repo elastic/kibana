@@ -8,20 +8,47 @@
 import { z } from '@kbn/zod';
 import { StateGraph, Annotation, Send } from '@langchain/langgraph';
 import { BaseMessage } from '@langchain/core/messages';
-import { ToolNode } from '@langchain/langgraph/prebuilt';
-import type { StructuredTool } from '@langchain/core/tools';
+import { messagesStateReducer } from '@langchain/langgraph';
+import { StructuredTool, DynamicStructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/core/server';
 import { InferenceChatModel } from '@kbn/inference-langchain';
-import { getToolCalls, extractTextContent } from '../chat/utils/from_langchain_messages';
-import { getReflectionPrompt, getExecutionPrompt, getAnswerPrompt } from './prompts';
-import { extractToolResults } from './utils';
-import { ActionResult, ReflectionResult, BacklogItem, lastReflectionResult } from './backlog';
+import { extractToolCalls, extractTextContent } from '@kbn/onechat-genai-utils/langchain';
+import { createAgentGraph } from '../chat/graph';
+import {
+  getIdentifyResearchGoalPrompt,
+  getReflectionPrompt,
+  getExecutionPrompt,
+  getAnswerPrompt,
+} from './prompts';
+import { SearchResult, ReflectionResult, BacklogItem, lastReflectionResult } from './backlog';
+
+const setResearchGoalToolName = 'set_research_goal';
+
+const setResearchGoalTool = () => {
+  return new DynamicStructuredTool({
+    name: setResearchGoalToolName,
+    description: 'use this tool to set the research goal that will be used for the research',
+    schema: z.object({
+      reasoning: z
+        .string()
+        .describe('brief reasoning of how and why you defined this research goal'),
+      researchGoal: z.string().describe('the identified research goal'),
+    }),
+    func: () => {
+      throw new Error(`${setResearchGoalToolName} was called and shouldn't have`);
+    },
+  });
+};
 
 const StateAnnotation = Annotation.Root({
   // inputs
-  initialQuery: Annotation<string>(), // the search query
+  initialMessages: Annotation<BaseMessage[]>({
+    reducer: messagesStateReducer,
+    default: () => [],
+  }),
   cycleBudget: Annotation<number>(), // budget in number of cycles
   // internal state
+  mainResearchGoal: Annotation<string>(),
   remainingCycles: Annotation<number>(),
   actionsQueue: Annotation<ResearchGoal[], ResearchGoal[]>({
     reducer: (state, actions) => {
@@ -29,7 +56,7 @@ const StateAnnotation = Annotation.Root({
     },
     default: () => [],
   }),
-  pendingActions: Annotation<ActionResult[], ActionResult[] | 'clear'>({
+  pendingActions: Annotation<SearchResult[], SearchResult[] | 'clear'>({
     reducer: (state, actions) => {
       return actions === 'clear' ? [] : [...state, ...actions];
     },
@@ -48,7 +75,7 @@ const StateAnnotation = Annotation.Root({
 export type StateType = typeof StateAnnotation.State;
 
 type ResearchStepState = StateType & {
-  researchGoal: ResearchGoal;
+  subResearchGoal: ResearchGoal;
 };
 
 export interface ResearchGoal {
@@ -67,65 +94,95 @@ export const createResearcherAgentGraph = async ({
   const stringify = (obj: unknown) => JSON.stringify(obj, null, 2);
 
   /**
-   * Initialize the flow by adding a first index explorer call to the action queue.
+   * Identify the research goal from the current discussion, or ask for additional info if required.
    */
-  const initialize = async (state: StateType) => {
-    const firstAction: ResearchGoal = {
-      question: state.initialQuery,
-    };
-    return {
-      actionsQueue: [firstAction],
-      remainingCycles: state.cycleBudget,
-    };
+  const identifyResearchGoal = async (state: StateType) => {
+    const researchGoalModel = chatModel.bindTools([setResearchGoalTool()]).withConfig({
+      tags: ['researcher-identify-research-goal', 'researcher-ask-for-clarification'],
+    });
+
+    const response = await researchGoalModel.invoke(
+      getIdentifyResearchGoalPrompt({ discussion: state.initialMessages })
+    );
+
+    const toolCalls = extractToolCalls(response);
+    const textContent = extractTextContent(response);
+
+    log.trace(
+      () =>
+        `identifyResearchGoal - textContent: ${textContent} - toolCalls: ${stringify(toolCalls)}`
+    );
+
+    if (toolCalls.length > 0) {
+      const { researchGoal, reasoning } = toolCalls[0].args as {
+        researchGoal: string;
+        reasoning: string;
+      };
+      const firstAction: ResearchGoal = {
+        question: researchGoal,
+      };
+      return {
+        mainResearchGoal: researchGoal,
+        backlog: [{ researchGoal, reasoning }],
+        actionsQueue: [firstAction],
+        remainingCycles: state.cycleBudget,
+      };
+    } else {
+      const generatedAnswer = textContent;
+      return {
+        generatedAnswer,
+        remainingCycles: state.cycleBudget,
+      };
+    }
+  };
+
+  const evaluateResearchGoal = async (state: StateType) => {
+    if (state.generatedAnswer) {
+      return '__end__';
+    }
+    return dispatchActions(state);
   };
 
   const dispatchActions = async (state: StateType) => {
     return state.actionsQueue.map((action) => {
       return new Send('perform_search', {
         ...state,
-        researchGoal: action,
+        subResearchGoal: action,
       } satisfies ResearchStepState);
     });
   };
 
   const performSearch = async (state: ResearchStepState) => {
-    const nextItem = state.researchGoal;
+    const nextItem = state.subResearchGoal;
 
     log.trace(() => `performSearch - nextItem: ${stringify(nextItem)}`);
 
-    const toolNode = new ToolNode<BaseMessage[]>(tools);
-    const executionModel = chatModel.bindTools(tools);
+    const executorAgent = createAgentGraph({
+      chatModel,
+      tools,
+      logger: log,
+      systemPrompt: '',
+    });
 
-    const response = await executionModel.invoke(
-      getExecutionPrompt({
-        currentResearchGoal: nextItem,
-        backlog: state.backlog,
-      })
+    const { addedMessages } = await executorAgent.invoke(
+      {
+        initialMessages: getExecutionPrompt({
+          currentResearchGoal: nextItem,
+          backlog: state.backlog,
+        }),
+      },
+      { tags: ['executor_agent'], metadata: { graphName: 'executor_agent' } }
     );
-    const toolCalls = getToolCalls(response);
 
-    log.trace(() => `performSearch - toolCalls: ${stringify(toolCalls)}`);
+    const agentResponse = extractTextContent(addedMessages[addedMessages.length - 1]);
 
-    const toolMessages = await toolNode.invoke([response]);
-    const toolResults = extractToolResults(toolMessages);
-
-    const actionResults: ActionResult[] = [];
-    for (let i = 0; i < toolResults.length; i++) {
-      const toolCall = toolCalls[i];
-      const toolResult = toolResults[i];
-      if (toolCall && toolResult) {
-        const actionResult: ActionResult = {
-          researchGoal: nextItem.question,
-          toolName: toolCall.toolId.toolId,
-          arguments: toolCall.args,
-          response: toolResult.result,
-        };
-        actionResults.push(actionResult);
-      }
-    }
+    const actionResult: SearchResult = {
+      researchGoal: nextItem.question,
+      output: agentResponse,
+    };
 
     return {
-      pendingActions: [...actionResults],
+      pendingActions: [actionResult],
     };
   };
 
@@ -169,7 +226,7 @@ export const createResearcherAgentGraph = async ({
 
     const response: ReflectionResult = await reflectModel.invoke(
       getReflectionPrompt({
-        userQuery: state.initialQuery,
+        userQuery: state.mainResearchGoal,
         backlog: state.backlog,
         maxFollowUpQuestions: 3,
         remainingCycles: state.remainingCycles - 1,
@@ -208,7 +265,7 @@ export const createResearcherAgentGraph = async ({
 
     const response = await answerModel.invoke(
       getAnswerPrompt({
-        userQuery: state.initialQuery,
+        userQuery: state.mainResearchGoal,
         backlog: state.backlog,
       })
     );
@@ -225,15 +282,16 @@ export const createResearcherAgentGraph = async ({
   // note: the node names are used in the event convertion logic, they should *not* be changed
   const graph = new StateGraph(StateAnnotation)
     // nodes
-    .addNode('initialize', initialize)
+    .addNode('identify_research_goal', identifyResearchGoal)
     .addNode('perform_search', performSearch)
     .addNode('collect_results', collectResults)
     .addNode('reflection', reflection)
     .addNode('answer', answer)
     // edges
-    .addEdge('__start__', 'initialize')
-    .addConditionalEdges('initialize', dispatchActions, {
+    .addEdge('__start__', 'identify_research_goal')
+    .addConditionalEdges('identify_research_goal', evaluateResearchGoal, {
       perform_search: 'perform_search',
+      __end__: '__end__',
     })
     .addEdge('perform_search', 'collect_results')
     .addEdge('collect_results', 'reflection')

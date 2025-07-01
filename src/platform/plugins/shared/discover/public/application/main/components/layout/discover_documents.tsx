@@ -83,6 +83,7 @@ import {
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
+import { useScopedServices } from '../../../../components/scoped_services_provider';
 
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
@@ -110,10 +111,11 @@ function DiscoverDocumentsComponent({
   onFieldEdited?: () => void;
 }) {
   const services = useDiscoverServices();
+  const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
-  const { dataViews, capabilities, uiSettings, uiActions, ebtManager, fieldsMetadata } = services;
+  const { dataViews, capabilities, uiSettings, uiActions, fieldsMetadata } = services;
   const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
   const [
     dataSource,
@@ -193,17 +195,17 @@ function DiscoverDocumentsComponent({
   const onAddColumnWithTracking = useCallback(
     (columnName: string) => {
       onAddColumn(columnName);
-      void ebtManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
     },
-    [onAddColumn, ebtManager, fieldsMetadata]
+    [onAddColumn, scopedEBTManager, fieldsMetadata]
   );
 
   const onRemoveColumnWithTracking = useCallback(
     (columnName: string) => {
       onRemoveColumn(columnName);
-      void ebtManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
     },
-    [onRemoveColumn, ebtManager, fieldsMetadata]
+    [onRemoveColumn, scopedEBTManager, fieldsMetadata]
   );
 
   const docViewerRef = useRef<DocViewerApi>(null);

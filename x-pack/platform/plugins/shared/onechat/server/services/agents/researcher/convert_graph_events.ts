@@ -22,16 +22,43 @@ import {
   createTextChunkEvent,
   createMessageEvent,
   createReasoningEvent,
+  extractTextContent,
+  ToolIdMapping,
 } from '@kbn/onechat-genai-utils/langchain';
 import type { StateType } from './graph';
-import { lastReflectionResult } from './backlog';
+import {
+  lastReflectionResult,
+  firstResearchGoalResult,
+  ResearchGoalResult,
+  ReflectionResult,
+} from './backlog';
 
 export type ResearcherAgentEvents = MessageChunkEvent | MessageCompleteEvent | ReasoningEvent;
 
+const formatResearchGoalReasoning = (researchGoal: ResearchGoalResult): string => {
+  return `${researchGoal.reasoning}\n\nDefining the research goal as: "${researchGoal.researchGoal}"`;
+};
+
+const formatReflectionResult = (reflection: ReflectionResult): string => {
+  let formatted = `${reflection.reasoning}\n\nThe current information are ${
+    reflection.isSufficient ? '*sufficient*' : '*insufficient*'
+  }`;
+
+  if (reflection.nextQuestions.length > 0) {
+    formatted += `\n\nThe following questions should be followed up on: ${reflection.nextQuestions
+      .map((question) => ` - ${question}`)
+      .join(', ')}`;
+  }
+
+  return formatted;
+};
+
 export const convertGraphEvents = ({
   graphName,
+  toolIdMapping,
 }: {
   graphName: string;
+  toolIdMapping: ToolIdMapping;
 }): OperatorFunction<LangchainStreamEvent, ResearcherAgentEvents> => {
   return (streamEvents$) => {
     const messageId = uuidv4();
@@ -41,7 +68,41 @@ export const convertGraphEvents = ({
           return EMPTY;
         }
 
-        // response text chunks
+        // clarification response text chunks
+        if (
+          matchEvent(event, 'on_chat_model_stream') &&
+          hasTag(event, 'researcher-ask-for-clarification')
+        ) {
+          const chunk: AIMessageChunk = event.data.chunk;
+          const textContent = extractTextContent(chunk);
+
+          if (textContent) {
+            const messageChunkEvent = createTextChunkEvent(chunk, { defaultMessageId: messageId });
+            return of(messageChunkEvent);
+          }
+        }
+
+        // clarification response message
+        if (matchEvent(event, 'on_chain_end') && matchName(event, 'identify_research_goal')) {
+          const { generatedAnswer } = event.data.output as StateType;
+          if (generatedAnswer) {
+            const messageEvent = createMessageEvent(generatedAnswer);
+            return of(messageEvent);
+          }
+        }
+
+        // research goal reasoning events
+        if (matchEvent(event, 'on_chain_end') && matchName(event, 'identify_research_goal')) {
+          const { backlog } = event.data.output as StateType;
+          const researchGoalResult = firstResearchGoalResult(backlog);
+
+          const reasoningEvent = createReasoningEvent(
+            formatResearchGoalReasoning(researchGoalResult)
+          );
+          return of(reasoningEvent);
+        }
+
+        // answer step text chunks
         if (matchEvent(event, 'on_chat_model_stream') && hasTag(event, 'researcher-answer')) {
           const chunk: AIMessageChunk = event.data.chunk;
 
@@ -49,7 +110,7 @@ export const convertGraphEvents = ({
           return of(messageChunkEvent);
         }
 
-        // response message
+        // answer step response message
         if (matchEvent(event, 'on_chain_end') && matchName(event, 'answer')) {
           const { generatedAnswer } = event.data.output as StateType;
 
@@ -57,12 +118,12 @@ export const convertGraphEvents = ({
           return of(messageEvent);
         }
 
-        // emit reasoning events for "reflection" step
+        // reasoning events for reflection step
         if (matchEvent(event, 'on_chain_end') && matchName(event, 'reflection')) {
           const { backlog } = event.data.output as StateType;
           const reflectionResult = lastReflectionResult(backlog);
 
-          const reasoningEvent = createReasoningEvent(reflectionResult.reasoning);
+          const reasoningEvent = createReasoningEvent(formatReflectionResult(reflectionResult));
           return of(reasoningEvent);
         }
 
