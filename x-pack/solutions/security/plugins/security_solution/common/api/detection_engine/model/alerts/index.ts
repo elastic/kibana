@@ -7,9 +7,10 @@
 
 import type {
   AncestorLatest,
+  DetectionAlert800,
   DetectionAlertLatest,
+  DetectionAlertRead,
   WrappedAlertLatest,
-  DetectionAlert,
 } from './schema';
 
 import type { NewTermsAlertLatest } from './new_terms_alert_schema';
@@ -18,8 +19,9 @@ import type { EqlBuildingBlockAlertLatest, EqlShellAlertLatest } from './eql_ale
 
 export type {
   AncestorLatest,
+  DetectionAlert800,
   DetectionAlertLatest,
-  DetectionAlert,
+  DetectionAlertRead as DetectionAlert,
   EqlBuildingBlockAlertLatest,
   EqlShellAlertLatest,
   NewTermsAlertLatest,

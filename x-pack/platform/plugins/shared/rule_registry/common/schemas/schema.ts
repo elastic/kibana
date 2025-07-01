@@ -26,6 +26,30 @@ import type {
 } from '@kbn/rule-data-utils';
 import {} from '@kbn/rule-data-utils';
 
+/**
+ * The types in this file create a system for defining a versioned schema and deriving read and write schemas for any specific version
+ * from a single schema definition. See x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/model/alerts/schema.ts
+ * for a more complex use case involving nesting and arrays of objects.
+ *
+ * To convert the single schema type into a schema for a specific version or set of versions, `ConvertSchemaType` maps over
+ * each key and filters out keys that don't match the provided version(s). It then converts the associated value (a SchemaNode)
+ * with `ConvertSchemaNode`. `ConvertSchemaNode` either (a) recursively calls `ConvertSchemaType` on each subfield,
+ * if there are subfields (i.e. if the node type matches `SchemaInternalNode), or (b) simply sets the type of the resulting
+ * field to the `type` specified in the node.
+ *
+ * Each node specifies which version the node was added in as a specific string type. The node type should correspond to how we'll
+ * *write* the field going forward - so a field that will be required in future alerts would be `string`, `number`, etc. An optional new field
+ * can be `string | undefined`, `number | undefined`, etc. `ConvertSchemaTypeToReadSchema` takes care of building a combined schema
+ * from *all* versions where new required fields that were not in the original schema version may be undefined in existing documents.
+ *
+ * If you want the schema from a specific version, use `ConvertSchemaType` and pass that version and all prior versions as a union type,
+ * e.g. `ConvertSchemaType<'8.0.0' | '8.4.0', Schema>` will yield the read and write schema for 8.4.0 alerts. This is useful if you want
+ * to do some specific logic on 8.4+ alerts.
+ *
+ * Passing `string` in as the version i.e. `ConvertSchemaType<string, Schema>` is a useful shorthand to get the latest schema. Since
+ * all versions extend `string`, all versions will be included.
+ */
+
 export type LeafNodeTypes =
   | object
   | object[]
@@ -95,7 +119,14 @@ export type ConvertSchemaNode<
     : Expand<ConvertSchemaType<ModelVersion, N['fields']>>
   : N['type'];
 
-// TODO: recreate type to build read schema from a SchemaType, given the original modelversion
+export type ConvertSchemaTypeToReadSchema<
+  OriginalVersion extends string,
+  Schema extends SchemaType
+> = Expand<{
+  [k in keyof Schema]: Required<Schema>[k]['version'] extends OriginalVersion
+    ? ConvertSchemaNode<OriginalVersion, Required<Schema>[k]>
+    : ConvertSchemaNode<OriginalVersion, Required<Schema>[k]> | undefined;
+}>;
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type CommonAlertFieldsSchema = {
@@ -140,14 +171,10 @@ type CommonAlertFieldsSchema = {
     version: Version800;
   };
   [ALERT_RULE_PARAMETERS]: {
-    type: object;
-    version: Version870;
-    fields: {
-      [key: string]: {
-        type: unknown;
-        version: Version870;
-      };
+    type: {
+      [key: string]: unknown;
     };
+    version: Version870;
   };
   [ALERT_RULE_REVISION]: {
     type: number;
@@ -178,7 +205,10 @@ type SuppressionFieldsSchema = {
 };
 
 export type CommonAlertFieldsLatest = ConvertSchemaType<string, CommonAlertFieldsSchema>;
+export type CommonAlertFields870 = ConvertSchemaType<Version870Plus, CommonAlertFieldsSchema>;
+
 export type SuppressionFieldsLatest = ConvertSchemaType<string, SuppressionFieldsSchema>;
+export type SuppressionFields870 = ConvertSchemaType<Version870Plus, SuppressionFieldsSchema>;
 
 export type AlertWithCommonFieldsLatest<T> = T & CommonAlertFieldsLatest;
 
@@ -186,3 +216,4 @@ type Version800 = '8.0.0';
 type Version860 = '8.6.0';
 type Version870 = '8.7.0';
 type Version880 = '8.8.0';
+type Version870Plus = Version800 | Version860 | Version870;

@@ -47,7 +47,7 @@ import type { BaseHit, SearchTypes } from '../../../../common/detection_engine/t
 import type { BuildReasonMessage } from './utils/reason_formatters';
 import type {
   DetectionAlertLatest,
-  DetectionAlert,
+  DetectionAlert800,
   WrappedAlertLatest,
 } from '../../../../common/api/detection_engine/model/alerts';
 import type {
@@ -237,7 +237,7 @@ export type SignalSearchResponse<
   TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
 > = estypes.SearchResponse<SignalSource, TAggregations>;
 export type SignalSourceHit = estypes.SearchHit<SignalSource>;
-export type AlertSourceHit = estypes.SearchHit<DetectionAlert>;
+export type AlertSourceHit = estypes.SearchHit<DetectionAlert800>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
 export type BaseSignalHit = estypes.SearchHit<SignalSource>;
 

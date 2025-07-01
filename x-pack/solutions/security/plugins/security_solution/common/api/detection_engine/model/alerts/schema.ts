@@ -7,7 +7,7 @@
 
 import type {
   ConvertSchemaType,
-  SchemaType,
+  ConvertSchemaTypeToReadSchema,
 } from '@kbn/rule-registry-plugin/common/schemas/schema';
 import type {
   ALERT_BUILDING_BLOCK_TYPE,
@@ -573,42 +573,17 @@ type DetectionAlertSchema = {
   };
 };
 
-type Version840Union = Version840 | Version800;
-type Version880Union = Version880 | Version840Union;
-type Version890Union = Version890 | Version880Union;
-type Version8120Union = Version8120 | Version890Union;
-type Version8130Union = Version8130 | Version8120Union;
-type Version8160Union = Version8160 | Version8130Union;
-type Version8180Union = Version8180 | Version8160Union;
-type Version8190Union = Version8190 | Version8180Union;
+export type DetectionAlertRead = ConvertSchemaTypeToReadSchema<Version800, DetectionAlertSchema> & {
+  [key: string]: SearchTypes;
+};
 
-type ConvertDetectionAlertSchema<
-  ModelVersion extends string,
-  Schema extends SchemaType
-> = ConvertSchemaType<ModelVersion, Schema> & { [key: string]: SearchTypes };
+export type DetectionAlertLatest = ConvertSchemaType<string, DetectionAlertSchema> & {
+  [key: string]: SearchTypes;
+};
 
-type DetectionAlert800 = ConvertDetectionAlertSchema<Version800, DetectionAlertSchema>;
-type DetectionAlert840 = ConvertDetectionAlertSchema<Version840Union, DetectionAlertSchema>;
-type DetectionAlert880 = ConvertDetectionAlertSchema<Version880Union, DetectionAlertSchema>;
-type DetectionAlert890 = ConvertDetectionAlertSchema<Version890Union, DetectionAlertSchema>;
-type DetectionAlert8120 = ConvertDetectionAlertSchema<Version8120Union, DetectionAlertSchema>;
-type DetectionAlert8130 = ConvertDetectionAlertSchema<Version8130Union, DetectionAlertSchema>;
-type DetectionAlert8160 = ConvertDetectionAlertSchema<Version8160Union, DetectionAlertSchema>;
-type DetectionAlert8180 = ConvertDetectionAlertSchema<Version8180Union, DetectionAlertSchema>;
-type DetectionAlert8190 = ConvertDetectionAlertSchema<Version8190Union, DetectionAlertSchema>;
-
-export type DetectionAlert =
-  | DetectionAlert800
-  | DetectionAlert840
-  | DetectionAlert880
-  | DetectionAlert890
-  | DetectionAlert8120
-  | DetectionAlert8130
-  | DetectionAlert8160
-  | DetectionAlert8180
-  | DetectionAlert8190;
-
-export type DetectionAlertLatest = ConvertDetectionAlertSchema<string, DetectionAlertSchema>;
+export type DetectionAlert800 = ConvertSchemaType<Version800, DetectionAlertSchema> & {
+  [key: string]: SearchTypes;
+};
 
 export type AncestorLatest = ConvertSchemaType<string, AlertAncestorSchema>;
 
