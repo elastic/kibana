@@ -51,7 +51,7 @@ export interface GetUiSettingsContext {
   request?: KibanaRequest;
 }
 
-export type UiSettingsSolution = SolutionId | 'classic';
+export type UiSettingsSolutions = Array<SolutionId | 'classic'>;
 
 /**
  * UiSettings parameters defined by the plugins.
@@ -119,10 +119,10 @@ export interface UiSettingsParams<T = unknown> {
    * scoped to a namespace. The default value is 'namespace'
    */
   scope?: UiSettingsScope;
-  /** The solution where this setting is applicable.
+  /** The solutions where this setting is applicable.
    * This field is used to determine whether the setting should be displayed in the Advanced settings app.
    * If undefined, the setting must be displayed in all solutions. */
-  solution?: UiSettingsSolution;
+  solutions?: UiSettingsSolutions;
 }
 
 /**

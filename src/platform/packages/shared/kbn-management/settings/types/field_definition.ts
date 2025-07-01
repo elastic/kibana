@@ -88,11 +88,11 @@ export interface FieldDefinition<
   type: T;
   /** An identifier of the field when it has an unsaved change. */
   unsavedFieldId: string;
-  /** The solution where this setting is applicable.
+  /** The solutions where this setting is applicable.
    * If undefined, the setting must be displayed in all solutions.
-   * @see {@link UiSettingsSolution}
+   * @see {@link UiSettingsSolutions}
    */
-  solution?: UiSettingsSolution;
+  solutions?: UiSettingsSolutions;
 }
 
 /**

@@ -29,9 +29,7 @@ export const useSettings = (scope: UiSettingsScope) => {
   useEffectOnce(() => {
     const subscription = subscribeToActiveSpace(() => {
       getActiveSpace().then((space) => {
-        // undefined solution defaults to "classic"
-        const solution = space.solution ?? 'classic';
-        setSolutionView(solution);
+        setSolutionView(space.solution);
       });
     });
 
