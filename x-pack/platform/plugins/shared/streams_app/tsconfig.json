@@ -76,6 +76,5 @@
     "@kbn/field-types",
     "@kbn/field-formats-plugin",
     "@kbn/test",
-    "@kbn/scout-oblt"
   ]
 }
