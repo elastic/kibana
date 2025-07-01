@@ -40,6 +40,9 @@ import type {
   ALERT_RULE_VERSION,
   ALERT_SEVERITY,
   ALERT_STATUS,
+  ALERT_UPDATED_AT,
+  ALERT_UPDATED_BY_USER_ID,
+  ALERT_UPDATED_BY_USER_NAME,
   ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_ASSIGNEE_IDS,
@@ -568,6 +571,18 @@ type DetectionAlertSchema = {
     version: Version8190;
   };
   [ALERT_ORIGINAL_DATA_STREAM_TYPE]?: {
+    type: string | undefined;
+    version: Version8190;
+  };
+  [ALERT_UPDATED_AT]?: {
+    type: string | undefined;
+    version: Version8190;
+  };
+  [ALERT_UPDATED_BY_USER_ID]?: {
+    type: string | undefined;
+    version: Version8190;
+  };
+  [ALERT_UPDATED_BY_USER_NAME]?: {
     type: string | undefined;
     version: Version8190;
   };

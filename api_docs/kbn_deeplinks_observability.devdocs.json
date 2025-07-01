@@ -718,7 +718,7 @@
         "label": "AppId",
         "description": [],
         "signature": [
-          "\"profiling\" | \"metrics\" | \"apm\" | \"synthetics\" | \"ux\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"observability-overview\" | \"streams\" | \"inventory\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\""
+          "\"profiling\" | \"metrics\" | \"apm\" | \"synthetics\" | \"ux\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"observability-overview\" | \"streams\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"inventory\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/deep_links.ts",
         "deprecated": false,

@@ -231,7 +231,7 @@ export function registerMigrateDataStreamRoutes({
       },
       options: {
         access: 'public',
-        summary: `Mark Data Stream indices as read only`,
+        summary: `Set data stream indices as read-only`,
       },
       validate: {
         body: schema.object({

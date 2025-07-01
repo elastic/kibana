@@ -1,6 +1,6 @@
 # DATE_EXTRACT
 
-The DATE_EXTRACT function is used to extract specific parts of a date.
+Extracts specific parts of a date, such as the year, month, day, or hour.
 
 ## Syntax
 
@@ -8,24 +8,61 @@ The DATE_EXTRACT function is used to extract specific parts of a date.
 
 ### Parameters
 
-#### datePart
+#### `datePart`
 
-This is the part of the date you want to extract, such as "year", "month" or "hour_of_day".
+The part of the date to extract. Supported values include:
 
-#### date
+- `aligned_day_of_week_in_month`
+- `aligned_day_of_week_in_year`
+- `aligned_week_of_month`
+- `aligned_week_of_year`
+- `ampm_of_day`
+- `clock_hour_of_ampm`
+- `clock_hour_of_day`
+- `day_of_month`
+- `day_of_week`
+- `day_of_year`
+- `epoch_day`
+- `era`
+- `hour_of_ampm`
+- `hour_of_day`
+- `instant_seconds`
+- `micro_of_day`
+- `micro_of_second`
+- `milli_of_day`
+- `milli_of_second`
+- `minute_of_day`
+- `minute_of_hour`
+- `month_of_year`
+- `nano_of_day`
+- `nano_of_second`
+- `offset_seconds`
+- `proleptic_month`
+- `second_of_day`
+- `second_of_minute`
+- `year`
+- `year_of_era`
 
-This is the date expression.
+Refer to `java.time.temporal.ChronoField` for detailed descriptions of these values. If `null`, the function returns `null`.
+
+#### `date`
+
+The date expression from which to extract the specified part. If `null`, the function returns `null`.
 
 ## Examples
 
-To extract the year from a date:
+### Extracting the Year from a Date
+
+Extract the year from a given date:
 
 ```esql
 ROW date = DATE_PARSE("yyyy-MM-dd", "2022-05-06")
 | EVAL year = DATE_EXTRACT("year", date)
 ```
 
-To find all events that occurred outside of business hours (before 9 AM or after 5PM), on any given date:
+### Filtering Events Outside Business Hours
+
+Retrieve all events that occurred outside of business hours (before 9 AM or after 5 PM):
 
 ```esql
 FROM sample_data

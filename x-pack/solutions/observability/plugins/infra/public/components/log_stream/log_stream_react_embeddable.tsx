@@ -127,7 +127,7 @@ const DeprecationCallout = () => {
   return (
     <EuiCallOut
       color="warning"
-      iconType="help"
+      iconType="question"
       onDismiss={() => setDismissed(true)}
       css={{
         position: 'absolute',

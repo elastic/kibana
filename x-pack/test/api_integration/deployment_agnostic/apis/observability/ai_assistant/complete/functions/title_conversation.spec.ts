@@ -12,10 +12,7 @@ import {
   TITLE_SYSTEM_MESSAGE,
 } from '@kbn/observability-ai-assistant-plugin/server/service/client/operators/get_generated_title';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
-import {
-  LlmProxy,
-  createLlmProxy,
-} from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
 import { chatComplete, clearConversations } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -24,7 +21,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
 
-  describe('when calling the title_conversation function', function () {
+  describe('tool: title_conversation', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['skipCloud']);
     let llmProxy: LlmProxy;

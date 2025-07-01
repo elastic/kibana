@@ -90,7 +90,6 @@ export function getTestSuiteFactory(context: DeploymentAgnosticFtrProviderContex
             // Disabled features are automatically added to the space when a solution is set
             'apm',
             'infrastructure',
-            'inventory',
             'logs',
             'observabilityCases',
             'observabilityCasesV2',
