@@ -26,7 +26,7 @@ export type ElasticsearchClient = Omit<
  */
 export interface ElasticsearchRequestLoggingOptions {
   /**
-   * The logger to use for logging requests. It results in the logger `elasticsearch.query.<loggerName>`.
+   * The logger name to use for logging requests. It results in the logger name `elasticsearch.query.<loggerName>`.
    * This allows grouping logs by the logger name, and using different configurations for each logger.
    */
   loggerName: string;
