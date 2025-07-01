@@ -5,10 +5,141 @@
  * 2.0.
  */
 
+import { type Subscription } from 'rxjs';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useFilesContext } from '@kbn/shared-ux-file-context';
+import type { DoneNotification, FileState } from '@kbn/shared-ux-file-upload/src/upload_state';
+import { createUploadState, type UploadState } from '@kbn/shared-ux-file-upload/src/upload_state';
+import { useUploadDone } from '../files/use_upload_done';
+import type { MarkdownEditorRef } from './editor';
 
-export function useImagePasteUpload() {
-    
+interface UseImagePasteUploadArgs {
+  editorRef: React.ForwardedRef<MarkdownEditorRef | null>;
+  field: FieldHook<string>;
+  caseId?: string;
+  owner: string[];
+}
 
+export function useImagePasteUpload({ editorRef, field, caseId, owner }: UseImagePasteUploadArgs): {
+  isUploading: boolean;
+  uploadState: UploadState;
+} {
+  const { client } = useFilesContext();
+  const kind = client.getFileKind('observabilityFilesCases');
 
-    return {};
+  const uploadState = useMemo(
+    () =>
+      createUploadState({
+        client,
+        fileKind: kind,
+        allowRepeatedUploads: false,
+      }),
+    [client, kind]
+  );
+
+  const [isUploading, setIsUploading] = useState(false);
+  const [placeholderInserted, setPlaceholderInserted] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState<FileState | null>(null);
+  const textarea =
+    editorRef === null || typeof editorRef === 'function'
+      ? null
+      : editorRef.current?.textarea ?? null;
+
+  // Replace the temporary placeholder with the final markdown once the file upload completes
+  const replacePlaceholder = useCallback(
+    (file: DoneNotification) => {
+      if (!textarea) return;
+      const newText = textarea.value.replace(
+        'uploading...',
+        `![${file.fileJSON.name}](/api/files/files/${kind.id}/${file.id}/blob)`
+      );
+      field.setValue(newText);
+    },
+    [textarea, field, kind.id]
+  );
+
+  const onDone = useUploadDone({
+    caseId,
+    owner,
+    onSuccess: () => {
+      setUploadingFile(null);
+      setPlaceholderInserted(false);
+    },
+    onFailure: () => {
+      setUploadingFile(null);
+      setIsUploading(false);
+    },
+  });
+
+  // Subscribe to the various upload observables
+  useEffect(() => {
+    const subs: Subscription[] = [];
+    if (!uploadState.done$.observed) {
+      subs.push(
+        uploadState.files$.subscribe((files: FileState[]) => {
+          if (files.length && files[0].status !== 'uploaded') setUploadingFile(files[0]);
+        }),
+        uploadState.done$.subscribe((files: DoneNotification[] | undefined) => {
+          if (files?.length) {
+            replacePlaceholder(files[0]);
+          }
+          setUploadingFile(null);
+          onDone(files);
+        }),
+        uploadState.error$.subscribe(() => {
+          setIsUploading(false);
+        }),
+        uploadState.uploading$.subscribe((uploading) => setIsUploading(uploading))
+      );
+    }
+
+    return () => {
+      subs.forEach((s) => s.unsubscribe?.());
+    };
+  }, [uploadState, replacePlaceholder, onDone]);
+
+  // Insert the temporary placeholder whilst the file is uploading
+  useEffect(() => {
+    if (!textarea || uploadingFile === null || placeholderInserted || !caseId) return;
+
+    const { selectionStart, selectionEnd } = textarea;
+    const placeholder = 'uploading...';
+    const before = field.value.slice(0, selectionStart);
+    const after = field.value.slice(selectionEnd);
+    field.setValue(before + placeholder + after);
+    setPlaceholderInserted(true);
+  }, [uploadingFile, placeholderInserted, textarea, field, caseId]);
+
+  // Attach paste listener once the textarea is available
+  const listenerRef = useRef<(e: ClipboardEvent) => void>();
+
+  useEffect(() => {
+    if (!textarea || !caseId) return;
+
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (const item of items) {
+        const file = item.getAsFile();
+        if (file) {
+          uploadState.setFiles([file]);
+          if (uploadState.hasFiles()) {
+            uploadState.upload({
+              caseIds: [caseId],
+              owner: owner[0],
+            });
+          }
+        }
+      }
+    };
+
+    listenerRef.current = handlePaste;
+    textarea.addEventListener('paste', handlePaste as EventListener);
+    return () => {
+      textarea.removeEventListener('paste', handlePaste as EventListener);
+    };
+  }, [textarea, uploadState, caseId, owner]);
+
+  return { isUploading, uploadState };
 }

@@ -12,7 +12,7 @@ export const ACTIONS = i18n.translate('xpack.cases.caseView.files.actions', {
 });
 
 export const ADD_FILE = i18n.translate('xpack.cases.caseView.files.addFile', {
-  defaultMessage: 'Add file LOL',
+  defaultMessage: 'Add file',
 });
 
 export const CLOSE_MODAL = i18n.translate('xpack.cases.caseView.files.closeModal', {
