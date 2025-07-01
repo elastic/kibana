@@ -98,7 +98,6 @@ export const FileUpload = React.forwardRef<EuiFilePickerClass, Props>(
           ref={ref as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
           onChange={(fs) => {
             uploadState.setFiles(Array.from(fs ?? []));
-            console.log('meta', meta);
             if (immediate && uploadState.hasFiles()) uploadState.upload(meta);
           }}
           multiple={multiple}

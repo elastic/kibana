@@ -7,28 +7,28 @@
 
 import { useCallback } from 'react';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
-import type { UploadedFile } from '@kbn/shared-ux-file-upload/src/file_upload';
+import type { DoneNotification } from '@kbn/shared-ux-file-upload';
 import { deleteFileAttachments } from '../../containers/api';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 import { AttachmentType, ExternalReferenceStorageType } from '../../../common';
 import * as translations from './translations';
+
 export const useUploadDone = function ({
   caseId,
   owner,
   onSuccess,
   onFailure,
 }: {
-  caseId: string;
+  caseId?: string;
   owner: string[];
   onSuccess: () => void;
   onFailure: (error: Error) => void;
 }) {
   const { mutateAsync: createAttachments } = useCreateAttachments();
   return useCallback(
-    async (chosenFiles: UploadedFile[]) => {
-      console.log('chosen files:', chosenFiles);
-      if (chosenFiles.length === 0) {
+    async (chosenFiles: DoneNotification[] | undefined) => {
+      if (!chosenFiles || chosenFiles.length === 0 || !caseId) {
         onFailure(new Error(translations.FAILED_UPLOAD));
         return;
       }

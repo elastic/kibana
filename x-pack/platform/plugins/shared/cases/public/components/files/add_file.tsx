@@ -58,7 +58,6 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
 
   const onUploadDone = useCallback(
     async (chosenFiles: UploadedFile[]) => {
-      console.log('hi hi hi hi hih ih i hi');
       if (chosenFiles.length === 0) {
         showDangerToast(i18n.FAILED_UPLOAD);
         return;

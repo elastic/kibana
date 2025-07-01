@@ -200,6 +200,7 @@ export const AddComment = React.memo(
                   ref: editorRef,
                   id,
                   draftStorageKey,
+                  caseId,
                   idAria: 'caseComment',
                   isDisabled: isLoading,
                   dataTestSubj: 'add-comment',
@@ -218,8 +219,7 @@ export const AddComment = React.memo(
                           isLoading={isLoading}
                           onClick={onSubmit}
                         >
-                          ADD COMMENT LOL
-                          {/* {i18n.ADD_COMMENT} */}
+                          {i18n.ADD_COMMENT}
                         </EuiButton>
                       </EuiFlexItem>
                     </EuiFlexGroup>
