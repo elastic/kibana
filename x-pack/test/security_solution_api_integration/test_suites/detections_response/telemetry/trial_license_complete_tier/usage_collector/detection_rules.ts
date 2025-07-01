@@ -1595,10 +1595,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-          console.log(
-            'HAS EXCEPTIONS',
-            stats.detection_rules.detection_rule_usage.elastic_total.has_exceptions
-          );
           expect(
             stats.detection_rules.detection_rule_usage.elastic_total.has_exceptions
           ).to.be.greaterThan(0);
