@@ -11398,6 +11398,24 @@
             "description": "Non-default value of setting."
           }
         },
+        "aiAssistant:preferredAIAssistantType:solution:observability": "aiAssistant:preferredAIAssistantType": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "aiAssistant:preferredAIAssistantType:solution:security": "aiAssistant:preferredAIAssistantType": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "aiAssistant:preferredAIAssistantType:solution:search": "aiAssistant:preferredAIAssistantType": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "observability:searchExcludedDataTiers": {
           "type": "array",
           "items": {

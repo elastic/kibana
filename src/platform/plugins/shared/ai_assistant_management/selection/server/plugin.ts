@@ -32,29 +32,35 @@ import { searchSolutionSetting } from './ui_settings/search_solution_setting';
 
 export class AIAssistantManagementSelectionPlugin
   implements
-    Plugin<
-      AIAssistantManagementSelectionPluginServerSetup,
-      AIAssistantManagementSelectionPluginServerStart,
-      AIAssistantManagementSelectionPluginServerDependenciesSetup,
-      AIAssistantManagementSelectionPluginServerDependenciesStart
-    >
+  Plugin<
+    AIAssistantManagementSelectionPluginServerSetup,
+    AIAssistantManagementSelectionPluginServerStart,
+    AIAssistantManagementSelectionPluginServerDependenciesSetup,
+    AIAssistantManagementSelectionPluginServerDependenciesStart
+  >
 {
   private readonly config: AIAssistantManagementSelectionConfig;
+  private readonly initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
+    this.initializerContext = initializerContext;
   }
 
   public setup(
     core: CoreSetup,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
+
+    const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
+
     core.uiSettings.register({
       [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
         ...classicSetting,
         value: this.config.preferredAIAssistantType,
       },
     });
+
 
     core.uiSettings.register({
       [OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
@@ -76,6 +82,7 @@ export class AIAssistantManagementSelectionPlugin
         value: this.config.searchSolutionPreferredAIAssistantType,
       },
     });
+
 
     core.capabilities.registerProvider(() => {
       return {
@@ -145,5 +152,5 @@ export class AIAssistantManagementSelectionPlugin
     return {};
   }
 
-  public stop() {}
+  public stop() { }
 }

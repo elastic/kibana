@@ -102,19 +102,22 @@ export class AIAssistantManagementPlugin
 
   public start(coreStart: CoreStart) {
     const preferredAIAssistantType: AIAssistantType = coreStart.uiSettings.get(
-      PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
+      PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, AIAssistantType.Default
     );
 
-    const observabilitySolutionPreferredAIAssistantType: AIAssistantType = coreStart.uiSettings.get(
-      OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
+    const observabilitySolutionPreferredAIAssistantType: AIAssistantType.Never | AIAssistantType.Observability = coreStart.uiSettings.get(
+      OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+      AIAssistantType.Observability
     );
 
-    const securitySolutionPreferredAIAssistantType: AIAssistantType = coreStart.uiSettings.get(
-      SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
+    const securitySolutionPreferredAIAssistantType: AIAssistantType.Never | AIAssistantType.Security = coreStart.uiSettings.get(
+      SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+      AIAssistantType.Security
     );
 
-    const searchSolutionPreferredAIAssistantType: AIAssistantType = coreStart.uiSettings.get(
-      SEARCH_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
+    const searchSolutionPreferredAIAssistantType: AIAssistantType.Never | AIAssistantType.Observability = coreStart.uiSettings.get(
+      SEARCH_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+      AIAssistantType.Observability
     );
 
     const aiAssistantType$ = new BehaviorSubject(preferredAIAssistantType);

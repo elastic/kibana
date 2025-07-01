@@ -34,5 +34,5 @@ export const observabilitySolutionSetting: Omit<UiSettingsParams<AIAssistantType
         [AIAssistantType.Never]: HIDE_ASSISTANT,
     },
     requiresPageReload: true,
-    solution: ['oblt']
+    solutions: ['oblt']
 }
