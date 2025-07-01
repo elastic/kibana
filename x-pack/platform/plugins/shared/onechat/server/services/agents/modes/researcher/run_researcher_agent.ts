@@ -6,10 +6,8 @@
  */
 
 import { from, filter, shareReplay } from 'rxjs';
-import { BuiltinToolIds, builtinToolProviderId } from '@kbn/onechat-common';
 import { AgentHandlerContext } from '@kbn/onechat-server';
 import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
-import { filterProviderTools } from '@kbn/onechat-genai-utils/framework';
 import { addRoundCompleteEvent, extractRound, conversationToLangchainMessages } from '../utils';
 import { createResearcherAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
@@ -36,30 +34,12 @@ const defaultCycleBudget = 5;
  */
 export const runResearcherAgent: RunResearcherAgentFn = async (
   { nextInput, conversation = [], cycleBudget = defaultCycleBudget, tools },
-  { logger, request, modelProvider, toolProvider, events }
+  { logger, request, modelProvider, events }
 ) => {
   const model = await modelProvider.getDefaultModel();
 
-  // TODO: use tools param instead of tool provider
-  const researcherTools = await filterProviderTools({
-    request,
-    provider: toolProvider,
-    rules: [
-      {
-        type: 'by_tool_id',
-        providerId: builtinToolProviderId,
-        toolIds: [
-          BuiltinToolIds.relevanceSearch,
-          BuiltinToolIds.naturalLanguageSearch,
-          BuiltinToolIds.indexExplorer,
-          BuiltinToolIds.getDocumentById,
-        ],
-      },
-    ],
-  });
-
   const { tools: langchainTools, idMappings: toolIdMapping } = await toolsToLangchain({
-    tools: researcherTools,
+    tools,
     logger,
     request,
   });
