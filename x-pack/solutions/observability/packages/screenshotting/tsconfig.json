@@ -10,7 +10,7 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx", "../../../../platform/plugins/shared/cases/public/components/case_view/screenshot_frame.tsx",
+    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
