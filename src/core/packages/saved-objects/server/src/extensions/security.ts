@@ -157,6 +157,13 @@ export interface AuthorizeChangeOwnershipObject extends AuthorizeObjectWithExist
   objectNamespace?: string;
 }
 
+export interface AuthorizeChangeAccessModeObject extends AuthorizeObjectWithExistingSpaces {
+  /**
+   * The namespace in which to update this object. Populated by options
+   * passed to the repository's changeOwnership method.
+   */
+  objectNamespace?: string;
+}
 export interface AuthorizeBulkChangeOwnershipParams extends AuthorizeParams {
   /** The objects to authorize */
   objects: AuthorizeChangeOwnershipObject[];
@@ -280,9 +287,15 @@ export type AuthorizeOpenPointInTimeParams = AuthorizeFindParams;
  * used for the AuthorizeChangeOwnership method of the ISavedObjectsSecurityExtension.
  */
 export interface AuthorizeChangeOwnershipParams extends AuthorizeParams {
-  /** The object to authorize */
+  /** The objects to authorize */
   objects: AuthorizeChangeOwnershipObject[];
 }
+
+export interface AuthorizeChangeAccessModeParams extends AuthorizeParams {
+  /** The objects to authorize */
+  objects: AuthorizeChangeAccessModeObject[];
+}
+
 /**
  * The AuthorizeAndRedactMultiNamespaceReferencesParams interface extends
  * AuthorizeParams and is used for the AuthorizeAndRedactMultiNamespaceReferences
