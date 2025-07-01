@@ -6,10 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
-
-import type { OnboardingCardCheckComplete } from '../../../../../types';
-import type { StartMigrationCardMetadata } from './types';
+import type { OnboardingCardCheckComplete } from '../../../../../../types';
+import type { StartMigrationCardMetadata } from '../common/types';
 
 const COMPLETE_BADGE_TEXT = (migrationsCount: number) =>
   i18n.translate('xpack.securitySolution.onboarding.siemMigrations.startMigration.completeBadge', {
@@ -21,19 +19,20 @@ const COMPLETE_BADGE_TEXT = (migrationsCount: number) =>
 export const checkStartMigrationCardComplete: OnboardingCardCheckComplete<
   StartMigrationCardMetadata
 > = async ({ siemMigrations }) => {
-  const missingCapabilities = siemMigrations.rules
+  const missingCapabilities = siemMigrations.dashboards
     .getMissingCapabilities('all')
     .map(({ description }) => description);
 
   let isComplete = false;
-  let migrationsCount = 0;
+  const migrationsCount = 0;
 
-  if (siemMigrations.rules.isAvailable()) {
-    const migrationsStats = await siemMigrations.rules.getRuleMigrationsStats();
-    isComplete = migrationsStats.some(
-      (migrationStats) => migrationStats.status === SiemMigrationTaskStatus.FINISHED
-    );
-    migrationsCount = migrationsStats.length;
+  if (siemMigrations.dashboards.isAvailable()) {
+    // const migrationsStats = await siemMigrations.rules.getRuleMigrationsStats();
+    // isComplete = migrationsStats.some(
+    //   (migrationStats) => migrationStats.status === SiemMigrationTaskStatus.FINISHED
+    // );
+    // migrationsCount = migrationsStats.length;
+    isComplete = false; // Placeholder for actual completion logic
   }
 
   return {

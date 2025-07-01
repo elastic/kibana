@@ -34,5 +34,17 @@ export const createSiemMigrationsMock = () => {
       traceOptionsStorage: createRuleMigrationStorageMock(),
       telemetry: createTelemetryServiceMock(),
     },
+    dashboards: {
+      getLatestStats$: jest.fn(),
+      getMissingCapabilities: jest.fn(),
+      hasMissingCapabilities: jest.fn(),
+      isAvailable: jest.fn(),
+      startPolling: jest.fn(),
+      getMissingResources: jest.fn(),
+      getIntegrations: jest.fn(),
+      connectorIdStorage: createRuleMigrationStorageMock(),
+      traceOptionsStorage: createRuleMigrationStorageMock(),
+      telemetry: createTelemetryServiceMock(),
+    },
   };
 };

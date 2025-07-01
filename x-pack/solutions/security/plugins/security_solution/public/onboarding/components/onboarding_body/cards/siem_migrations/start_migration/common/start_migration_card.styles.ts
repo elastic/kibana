@@ -7,13 +7,12 @@
 
 import { css } from '@emotion/css';
 import { useEuiTheme } from '@elastic/eui';
-
-export const TITLE_CLASS_NAME = 'siemMigrationsStartTitle';
+import { START_MIGRATION_TITLE_CLASS_NAME } from '../../../../../../../siem_migrations/common/styles';
 
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
   return css`
-    .${TITLE_CLASS_NAME} {
+    .${START_MIGRATION_TITLE_CLASS_NAME} {
       font-weight: ${euiTheme.font.weight.semiBold};
     }
   `;
