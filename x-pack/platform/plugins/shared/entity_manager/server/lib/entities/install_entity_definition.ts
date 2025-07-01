@@ -164,6 +164,7 @@ async function install({
 
   logger.debug(`Installing transforms for definition [${definition.id}]`);
   const transforms = await createAndInstallTransforms(esClient, definition, logger);
+  console.log(`KUBA DEBUG created transforms: ${JSON.stringify(transforms)}`);
 
   const updatedProps = await updateEntityDefinition(soClient, definition.id, {
     installStatus: 'installed',

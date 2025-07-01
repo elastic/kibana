@@ -48,6 +48,80 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       after(async () => {
+        await cleanUpEntityStore(providerContext);
+        await es.indices.deleteDataStream({ name: DATASTREAM_NAME });
+        await dataView.delete('security-solution');
+      });
+
+      it('Should backfill using pre-existing documents', async () => {
+        const HOST_NAME: string = 'host-transform-test-backfill';
+
+        // Create documents first:
+        await es.index(buildHostTransformDocument(HOST_NAME, { ip: '1.1.1.1' }, new Date().toISOString()));
+
+        // This document should be ingested and transformed as well.
+        const fourHoursAgo: string = new Date(Date.now() - 4 * 60 * 60 * 1000);
+        await es.index(buildHostTransformDocument(HOST_NAME, { ip: '1.1.1.2' }, fourHoursAgo));
+
+        const twentyFiveHoursAgo: string = new Date(Date.now() - 25 * 60 * 60 * 1000);
+        // We expect this document to be skipped, since 25h ago is outside of lookback window
+        await es.index(buildHostTransformDocument(HOST_NAME, { ip: '1.1.1.3' }, twentyFiveHoursAgo));
+
+        // Now enable the Entity Store...
+        const response = await supertest
+          .post('/api/entity_store/enable')
+          .set('kbn-xsrf', 'xxxx')
+          .send({});
+        expect(response.statusCode).to.eql(200);
+        expect(response.body.succeeded).to.eql(true);
+
+        // and wait for it to start up
+        await retry.waitForWithTimeout('Entity Store to initialize', TIMEOUT_MS, async () => {
+          const { body } = await supertest
+            .get('/api/entity_store/status')
+            .query({ include_components: true })
+            .expect(200);
+          expect(body.status).to.eql('running');
+          return true;
+        });
+
+        await retry.waitForWithTimeout(
+          'Document to be processed and transformed',
+          TIMEOUT_MS,
+          async () => {
+            const result = await es.search({
+              index: INDEX_NAME,
+              query: {
+                term: {
+                  'host.name': HOST_NAME,
+                },
+              },
+            });
+            const total = result.hits.total as SearchTotalHits;
+            expect(total.value).to.eql(1);
+            const hit = result.hits.hits[0] as SearchHit<Ecs>;
+            expect(hit._source).ok();
+            expect(hit._source?.host?.name).to.eql(HOST_NAME);
+            console.log(`KUBA TEST DEBUG: ${hit._source?.host?.ip}`)
+            expect(hit._source?.host?.ip).to.eql(['1.1.1.1', '1.1.1.2', '1.1.1.3']); // backfill
+
+            return true;
+          }
+        );
+      });
+    })
+
+    describe('Install Entity Store and test Host transform', () => {
+      before(async () => {
+        await cleanUpEntityStore(providerContext);
+        // Initialize security solution by creating a prerequisite index pattern.
+        // Helps avoid "Error initializing entity store: Data view not found 'security-solution-default'"
+        await dataView.create('security-solution');
+        // Create a test index matching transform's pattern to store test documents
+        await es.indices.createDataStream({ name: DATASTREAM_NAME });
+      });
+
+      after(async () => {
         await es.indices.deleteDataStream({ name: DATASTREAM_NAME });
         await dataView.delete('security-solution');
       });
@@ -177,6 +251,38 @@ export default function (providerContext: FtrProviderContext) {
           }
         );
       });
+
+      it('Should respect default lookback of 24h', async () => {
+        const HOST_NAME: string = 'host-transform-test-24h-lookback';
+
+        await createDocumentsAndTriggerTransform(providerContext, HOST_NAME, [{ ip: '1.1.1.1' }, { ip: '1.1.1.4' }], new Date().toISOString());
+        const twentyFiveHoursAgo: string = new Date(Date.now() - 25 * 60 * 60 * 1000);
+        // We expect this document to be skipped, since 25h ago is outside of lookback window
+        await createDocumentsAndTriggerTransform(providerContext, HOST_NAME, [{ ip: '1.1.1.8' }], twentyFiveHoursAgo.toISOString());
+
+        await retry.waitForWithTimeout(
+          'Document to be processed and transformed',
+          TIMEOUT_MS,
+          async () => {
+            const result = await es.search({
+              index: INDEX_NAME,
+              query: {
+                term: {
+                  'host.name': HOST_NAME,
+                },
+              },
+            });
+            const total = result.hits.total as SearchTotalHits;
+            expect(total.value).to.eql(1);
+            const hit = result.hits.hits[0] as SearchHit<Ecs>;
+            expect(hit._source).ok();
+            expect(hit._source?.host?.name).to.eql(HOST_NAME);
+            expect(hit._source?.host?.ip).to.eql(['1.1.1.1', '1.1.1.4']);
+
+            return true;
+          }
+        );
+      });
     });
   });
 }
@@ -195,10 +301,10 @@ function expectFieldToEqualValues(field: string[] | undefined, values: string[] 
   }
 }
 
-function buildHostTransformDocument(name: string, host: EcsHost): IndexRequest {
+function buildHostTransformDocument(name: string, host: EcsHost, customISOTimestamp?: string): IndexRequest {
   host.name = name;
   // Get timestamp without the millisecond part
-  const isoTimestamp: string = new Date().toISOString().split('.')[0];
+  const isoTimestamp: string = customISOTimestamp !== undefined ? customISOTimestamp : new Date().toISOString().split('.')[0];
   const document: IndexRequest = {
     index: DATASTREAM_NAME,
     document: {
@@ -212,7 +318,8 @@ function buildHostTransformDocument(name: string, host: EcsHost): IndexRequest {
 async function createDocumentsAndTriggerTransform(
   providerContext: FtrProviderContext,
   documentName: string,
-  docs: EcsHost[]
+  docs: EcsHost[],
+  customISOTimestamp?: string,
 ): Promise<void> {
   const retry = providerContext.getService('retry');
   const es = providerContext.getService('es');
@@ -227,7 +334,7 @@ async function createDocumentsAndTriggerTransform(
   const docsProcessed: number = transform.stats.documents_processed;
 
   for (let i = 0; i < docs.length; i++) {
-    const { result } = await es.index(buildHostTransformDocument(documentName, docs[i]));
+    const { result } = await es.index(buildHostTransformDocument(documentName, docs[i], customISOTimestamp));
     expect(result).to.eql('created');
   }
 
@@ -243,7 +350,8 @@ async function createDocumentsAndTriggerTransform(
     });
     transform = response.transforms[0];
     expect(transform.stats.trigger_count).to.greaterThan(triggerCount);
-    expect(transform.stats.documents_processed).to.greaterThan(docsProcessed);
+    // Kuba: not necessarily - if nothing happens, then docs processed can be the same
+    expect(transform.stats.documents_processed).to.not.lessThan(docsProcessed);
     return true;
   });
 }

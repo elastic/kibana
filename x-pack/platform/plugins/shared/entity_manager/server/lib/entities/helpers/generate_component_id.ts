@@ -48,6 +48,13 @@ function generateLatestId(definition: EntityDefinition) {
   return `${ENTITY_LATEST_PREFIX_V1}-${definition.id}` as const;
 }
 
+export function generateLatestBackfillTransformId(transformId: string) {
+  const parts = transformId.split('_');
+  parts.splice(-1, 0, 'backfill');
+  return parts.join('_') as const;
+}
+
+
 export const generateLatestTransformId = generateLatestId;
 export const generateLatestIngestPipelineId = generateLatestId;
 

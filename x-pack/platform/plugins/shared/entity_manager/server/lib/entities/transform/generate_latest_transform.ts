@@ -19,6 +19,7 @@ import {
 } from '../../../../common/constants_entities';
 import {
   generateLatestTransformId,
+  generateLatestBackfillTransformId,
   generateLatestIngestPipelineId,
   generateLatestIndexName,
 } from '../helpers/generate_component_id';
@@ -45,7 +46,9 @@ export function generateLatestTransform(
     },
   });
 
-  return generateTransformPutRequest({
+  // TODO(kuba) NOTE: Since we have backfill transform that is separate, the
+  // syncDelay should be equal to frequency so that the two do not overlap.
+  const putRequest = generateTransformPutRequest({
     definition,
     filter,
     transformId: generateLatestTransformId(definition),
@@ -55,6 +58,21 @@ export function generateLatestTransform(
     maxPageSearchSize:
       definition.latest.settings?.maxPageSearchSize ?? ENTITY_DEFAULT_MAX_PAGE_SEARCH_SIZE,
   });
+  return putRequest
+}
+
+export function generateLatestBackfillTransform(
+  definition: EntityDefinition
+): TransformPutTransformRequest {
+  const originalLookback = definition.latest.lookbackPeriod;
+  // Set the filter to correct time, i.e. `now-backfillPeriod`
+  definition.latest.lookbackPeriod = definition.latest.backfillPeriod;
+  const putRequest: TransformPutTransformRequest = generateLatestTransform(definition);
+  putRequest.transform_id = generateLatestBackfillTransformId(putRequest.transform_id);
+  delete putRequest.sync;
+  delete putRequest.frequency;
+  definition.latest.lookbackPeriod = originalLookback;
+  return putRequest;
 }
 
 const generateTransformPutRequest = ({
