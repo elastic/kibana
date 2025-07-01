@@ -13,7 +13,5 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": [
-    "@kbn/tracing-config",
-  ]
+  "kbn_references": []
 }

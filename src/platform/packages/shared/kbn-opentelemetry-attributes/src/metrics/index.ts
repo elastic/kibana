@@ -6,18 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { TracingConfig } from '@kbn/tracing-config';
 
-/**
- * Configuration for OpenTelemetry
- */
-export interface TelemetryConfig {
-  /**
-   * Tracing config. See {@link TracingConfig}.
-   */
-  tracing?: TracingConfig;
-  /**
-   * Whether telemetry collection is enabled.
-   */
-  enabled?: boolean;
-}
+export const METRIC_SPAN_SELF_TIME_COUNT = 'span.self_time.count';
+export const METRIC_SPAN_SELF_TIME_SUM_US = 'span.self_time.sum.us';

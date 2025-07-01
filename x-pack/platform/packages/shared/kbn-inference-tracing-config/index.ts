@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { schema, type TypeOf } from '@kbn/config-schema';
+export type {
+  InferenceTracingExportConfig,
+  InferenceTracingLangfuseExportConfig,
+  InferenceTracingPhoenixExportConfig,
+} from './types';
 
-export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
-});
-
-export type InferenceConfig = TypeOf<typeof configSchema>;
+export { inferenceTracingExportConfigSchema } from './config';
