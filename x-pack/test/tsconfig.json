@@ -132,5 +132,9 @@
     "@kbn/event-log-plugin",
     "@kbn/intercepts-plugin",
     "@kbn/inference-common",
+    "@kbn/streams-schema",
+    "@kbn/streams-plugin",
+    "@kbn/server-route-repository-utils",
+    "@kbn/content-packs-schema",
   ]
 }
