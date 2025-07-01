@@ -19,6 +19,7 @@ import {
 
 import { ConfigEntryView } from '../../types/types';
 import { ConfigurationField } from './configuration_field';
+import { ConfigFieldTitularComponent } from './titular_component_registry';
 import * as LABELS from '../../translations';
 
 interface ConfigurationFormItemsProps {
@@ -81,6 +82,7 @@ export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
 
         return (
           <EuiFlexItem key={key}>
+            <ConfigFieldTitularComponent configKey={key} />
             <EuiFormRow
               label={rowLabel}
               fullWidth

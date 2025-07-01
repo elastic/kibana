@@ -3261,6 +3261,10 @@
                 "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/internal/find_tags.ts"
               },
               {
+                "plugin": "@kbn/content-management-content-insights-server",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
+              },
+              {
                 "plugin": "share",
                 "path": "src/platform/plugins/shared/share/server/url_service/http/short_urls/register_get_route.ts"
               },
@@ -3411,10 +3415,6 @@
               {
                 "plugin": "inference",
                 "path": "x-pack/platform/plugins/shared/inference/server/routes/connectors.ts"
-              },
-              {
-                "plugin": "@kbn/content-management-content-insights-server",
-                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -3861,60 +3861,8 @@
                 "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_start_trial_routes.ts"
               },
               {
-                "plugin": "productDocBase",
-                "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
-              },
-              {
-                "plugin": "guidedOnboarding",
-                "path": "src/platform/plugins/shared/guided_onboarding/server/routes/guide_state_routes.ts"
-              },
-              {
-                "plugin": "guidedOnboarding",
-                "path": "src/platform/plugins/shared/guided_onboarding/server/routes/plugin_state_routes.ts"
-              },
-              {
-                "plugin": "guidedOnboarding",
-                "path": "src/platform/plugins/shared/guided_onboarding/server/routes/config_routes.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_inference_endpoints.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_join_indices.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_timeseries_indices.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_esql_extensions_route.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
-              },
-              {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/routes/metric_indices/index.ts"
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/conversations.ts"
               },
               {
                 "plugin": "searchprofiler",
@@ -3939,6 +3887,10 @@
               {
                 "plugin": "grokdebugger",
                 "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
+                "plugin": "productDocBase",
+                "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -4089,6 +4041,22 @@
                 "path": "x-pack/platform/test/cases_api_integration/common/plugins/cases/server/routes.ts"
               },
               {
+                "plugin": "guidedOnboarding",
+                "path": "src/platform/plugins/shared/guided_onboarding/server/routes/guide_state_routes.ts"
+              },
+              {
+                "plugin": "guidedOnboarding",
+                "path": "src/platform/plugins/shared/guided_onboarding/server/routes/plugin_state_routes.ts"
+              },
+              {
+                "plugin": "guidedOnboarding",
+                "path": "src/platform/plugins/shared/guided_onboarding/server/routes/config_routes.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts"
+              },
+              {
                 "plugin": "workchatFramework",
                 "path": "x-pack/solutions/chat/plugins/workchat-framework/server/routes/workflows.ts"
               },
@@ -4119,6 +4087,42 @@
               {
                 "plugin": "wciIndexSource",
                 "path": "x-pack/solutions/chat/plugins/wci-index-source/server/routes/configuration.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_inference_endpoints.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_join_indices.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_timeseries_indices.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_esql_extensions_route.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/routes/metric_indices/index.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -5933,6 +5937,10 @@
                 "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/internal/bulk_delete.ts"
               },
               {
+                "plugin": "@kbn/content-management-content-insights-server",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
+              },
+              {
                 "plugin": "share",
                 "path": "src/platform/plugins/shared/share/server/url_service/http/short_urls/register_create_route.ts"
               },
@@ -6143,10 +6151,6 @@
               {
                 "plugin": "inference",
                 "path": "x-pack/platform/plugins/shared/inference/server/routes/prompt.ts"
-              },
-              {
-                "plugin": "@kbn/content-management-content-insights-server",
-                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -6581,30 +6585,6 @@
                 "path": "x-pack/platform/plugins/shared/onechat/server/routes/conversations.ts"
               },
               {
-                "plugin": "productDocBase",
-                "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
-              },
-              {
-                "plugin": "productDocBase",
-                "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
-              },
-              {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
                 "plugin": "searchprofiler",
                 "path": "x-pack/platform/plugins/shared/searchprofiler/server/routes/profile.ts"
               },
@@ -6627,6 +6607,14 @@
               {
                 "plugin": "grokdebugger",
                 "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
+                "plugin": "productDocBase",
+                "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
+              },
+              {
+                "plugin": "productDocBase",
+                "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -6805,6 +6793,14 @@
                 "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts"
+              },
+              {
                 "plugin": "workchatApp",
                 "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/chat.ts"
               },
@@ -6823,6 +6819,14 @@
               {
                 "plugin": "wciIndexSource",
                 "path": "x-pack/solutions/chat/plugins/wci-index-source/server/routes/configuration.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -8353,18 +8357,6 @@
                 "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_license_route.ts"
               },
               {
-                "plugin": "guidedOnboarding",
-                "path": "src/platform/plugins/shared/guided_onboarding/server/routes/plugin_state_routes.ts"
-              },
-              {
-                "plugin": "observability",
-                "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
-              },
-              {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
                 "plugin": "grokdebugger",
                 "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
@@ -8389,12 +8381,24 @@
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
               },
               {
+                "plugin": "guidedOnboarding",
+                "path": "src/platform/plugins/shared/guided_onboarding/server/routes/plugin_state_routes.ts"
+              },
+              {
                 "plugin": "workchatApp",
                 "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/integrations.ts"
               },
               {
                 "plugin": "workchatApp",
                 "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/agents.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "infra",
@@ -8733,12 +8737,12 @@
                 "path": "x-pack/platform/plugins/private/reporting/server/test_helpers/create_mock_reportingplugin.ts"
               },
               {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/cases_api_integration/common/plugins/cases/server/routes.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "infra",
@@ -9097,14 +9101,6 @@
                 "path": "x-pack/platform/plugins/shared/ingest_pipelines/server/routes/api/database/delete.ts"
               },
               {
-                "plugin": "observability",
-                "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
-              },
-              {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
                 "plugin": "grokdebugger",
                 "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
@@ -9123,6 +9119,14 @@
               {
                 "plugin": "workchatApp",
                 "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/agents.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "infra",
@@ -12015,6 +12019,38 @@
                 "path": "x-pack/platform/plugins/private/banners/server/routes/info.ts"
               },
               {
+                "plugin": "customBranding",
+                "path": "x-pack/platform/plugins/private/custom_branding/server/routes/info.ts"
+              },
+              {
+                "plugin": "taskManager",
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.test.ts"
+              },
+              {
+                "plugin": "taskManager",
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.test.ts"
+              },
+              {
+                "plugin": "taskManager",
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.test.ts"
+              },
+              {
+                "plugin": "taskManager",
+                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.test.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/plugin_api_integration/plugins/event_log/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/xsoar_simulation.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/xsoar_simulation.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/agent/agent_status_handler.ts"
               },
@@ -12141,38 +12177,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/protection_updates_note/index.ts"
-              },
-              {
-                "plugin": "customBranding",
-                "path": "x-pack/platform/plugins/private/custom_branding/server/routes/info.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.test.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.test.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.test.ts"
-              },
-              {
-                "plugin": "taskManager",
-                "path": "x-pack/platform/plugins/shared/task_manager/server/routes/background_task_utilization.test.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/plugin_api_integration/plugins/event_log/server/init_routes.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/xsoar_simulation.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/xsoar_simulation.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -14461,7 +14465,87 @@
               },
               {
                 "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/esql_tools.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/esql_tools.ts"
+              },
+              {
+                "plugin": "onechat",
                 "path": "x-pack/platform/plugins/shared/onechat/server/routes/mcp.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/live_query/get_live_query_details_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/live_query/get_live_query_results_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/live_query/find_live_query_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/saved_query/find_saved_query_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/saved_query/read_saved_query_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/status/create_status_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/fleet_wrapper/get_agent_policies.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/fleet_wrapper/get_agent_policy.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/fleet_wrapper/get_agent_status_for_agent_policy.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/fleet_wrapper/get_package_policies.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/fleet_wrapper/get_agents.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/fleet_wrapper/get_agent_details.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/find_pack_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/privileges_check/privileges_check_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/asset/get_assets_status_route.ts"
+              },
+              {
+                "plugin": "dataUsage",
+                "path": "x-pack/platform/plugins/private/data_usage/server/routes/internal/data_streams.test.ts"
+              },
+              {
+                "plugin": "dataUsage",
+                "path": "x-pack/platform/plugins/private/data_usage/server/routes/internal/data_streams.test.ts"
               },
               {
                 "plugin": "lists",
@@ -14538,70 +14622,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/live_query/get_live_query_details_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/live_query/get_live_query_results_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/live_query/find_live_query_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/saved_query/find_saved_query_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/saved_query/read_saved_query_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/status/create_status_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/fleet_wrapper/get_agent_policies.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/fleet_wrapper/get_agent_policy.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/fleet_wrapper/get_agent_status_for_agent_policy.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/fleet_wrapper/get_package_policies.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/fleet_wrapper/get_agents.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/fleet_wrapper/get_agent_details.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/find_pack_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/privileges_check/privileges_check_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/asset/get_assets_status_route.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -14682,6 +14702,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/get_prebuilt_rules_status_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rule_base_version/get_prebuilt_rule_base_version_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14946,14 +14970,6 @@
               {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
-                "plugin": "dataUsage",
-                "path": "x-pack/platform/plugins/private/data_usage/server/routes/internal/data_streams.test.ts"
-              },
-              {
-                "plugin": "dataUsage",
-                "path": "x-pack/platform/plugins/private/data_usage/server/routes/internal/data_streams.test.ts"
               },
               {
                 "plugin": "infra",
@@ -15367,6 +15383,18 @@
                 "path": "x-pack/platform/plugins/shared/inference_endpoint/server/routes/index.ts"
               },
               {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/esql_tools.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/saved_query/update_saved_query_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/update_pack_route.ts"
+              },
+              {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/routes/update_endpoint_list_item_route.ts"
               },
@@ -15385,14 +15413,6 @@
               {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/routes/list/update_list_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/saved_query/update_saved_query_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/update_pack_route.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -16135,7 +16155,35 @@
               },
               {
                 "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/esql_tools.ts"
+              },
+              {
+                "plugin": "onechat",
                 "path": "x-pack/platform/plugins/shared/onechat/server/routes/mcp.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/live_query/create_live_query_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/saved_query/create_saved_query_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/create_pack_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/asset/update_assets_route.ts"
+              },
+              {
+                "plugin": "dataUsage",
+                "path": "x-pack/platform/plugins/private/data_usage/server/routes/internal/usage_metrics.test.ts"
+              },
+              {
+                "plugin": "dataUsage",
+                "path": "x-pack/platform/plugins/private/data_usage/server/routes/internal/usage_metrics.test.ts"
               },
               {
                 "plugin": "lists",
@@ -16208,22 +16256,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/setup/setup_health_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/live_query/create_live_query_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/saved_query/create_saved_query_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/create_pack_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/asset/update_assets_route.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -16336,6 +16368,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/revert_prebuilt_rule/revert_prebuilt_rule_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16588,14 +16624,6 @@
               {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
-                "plugin": "dataUsage",
-                "path": "x-pack/platform/plugins/private/data_usage/server/routes/internal/usage_metrics.test.ts"
-              },
-              {
-                "plugin": "dataUsage",
-                "path": "x-pack/platform/plugins/private/data_usage/server/routes/internal/usage_metrics.test.ts"
               },
               {
                 "plugin": "infra",
@@ -16989,7 +17017,19 @@
               },
               {
                 "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/esql_tools.ts"
+              },
+              {
+                "plugin": "onechat",
                 "path": "x-pack/platform/plugins/shared/onechat/server/routes/mcp.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/saved_query/delete_saved_query_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/delete_pack_route.ts"
               },
               {
                 "plugin": "lists",
@@ -17014,14 +17054,6 @@
               {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/routes/list/delete_list_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/saved_query/delete_saved_query_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/delete_pack_route.ts"
               },
               {
                 "plugin": "elasticAssistant",
