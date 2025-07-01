@@ -1412,6 +1412,9 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/onboarding/ @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/page_objects/svl_oblt_onboarding_stream_log_file.ts @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/page_objects/svl_oblt_onboarding_page.ts @elastic/obs-ux-logs-team
+/x-pack/test_serverless/functional/page_objects/asset_details.ts @elastic/obs-ux-logs-team
+/x-pack/test_serverless/functional/page_objects/infra_home_page.ts @elastic/obs-ux-logs-team
+/x-pack/test_serverless/functional/page_objects/infra_hosts_view.ts @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/plugins/infra/common/http_api/log_alerts @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/plugins/infra/common/http_api/log_analysis @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/plugins/infra/common/log_analysis @elastic/obs-ux-logs-team
