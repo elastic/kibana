@@ -133,7 +133,7 @@ export class DetailPanel extends Component {
             />
           }
           color="warning"
-          iconType="help"
+          iconType="question"
         >
           {/* A remote cluster is not editable if configured in elasticsearch.yml, so we direct the user to documentation instead */}
           {isConfiguredByNode ? (

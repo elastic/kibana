@@ -8,6 +8,7 @@
 import {
   getAttackChainMarkdown,
   getAttackDiscoveryMarkdown,
+  getAttackDiscoveryMarkdownFields,
   getMarkdownFields,
   getMarkdownWithOriginalValues,
 } from '.';
@@ -75,6 +76,15 @@ describe('getAttackDiscoveryMarkdown', () => {
     it('handles empty markdown', () => {
       const markdown = '';
       const expected = '';
+
+      const result = getMarkdownFields(markdown);
+
+      expect(result).toBe(expected);
+    });
+
+    it('handles whitespaces within the value correctly', () => {
+      const markdown = 'This is a {{ field1 value one }} and {{ field2 value two }}.';
+      const expected = 'This is a `value one` and `value two`.';
 
       const result = getMarkdownFields(markdown);
 
@@ -256,6 +266,61 @@ This appears to be a multi-stage attack involving malware delivery, privilege es
       });
 
       expect(markdown).toBe(expectedMarkdown);
+    });
+  });
+
+  describe('getAttackDiscoveryMarkdownFields', () => {
+    it('returns all markdown fields with replacements applied', () => {
+      const replacements = {
+        '5e454c38-439c-4096-8478-0a55511c76e3': 'foo.hostname',
+        '3bdc7952-a334-4d95-8092-cd176546e18a': 'bar.username',
+      };
+      const fields = getAttackDiscoveryMarkdownFields({
+        attackDiscovery: mockAttackDiscovery,
+        replacements,
+      });
+      expect(fields.detailsMarkdown).toBe(
+        'The following attack progression appears to have occurred on the host `foo.hostname` involving the user `bar.username`:\n\n- A suspicious application named "My Go Application.app" was launched, likely through a malicious download or installation.\n- This application spawned child processes to copy a malicious file named "unix1" to the user\'s home directory and make it executable.\n- The malicious "unix1" file was then executed, attempting to access the user\'s login keychain and potentially exfiltrate credentials.\n- The suspicious application also launched the "osascript" utility to display a fake system dialog prompting the user for their password, a technique known as credentials phishing.\n\nThis appears to be a multi-stage attack involving malware delivery, privilege escalation, credential access, and potentially data exfiltration. The attacker may have used social engineering techniques like phishing to initially compromise the system. The suspicious "My Go Application.app" exhibits behavior characteristic of malware families that attempt to steal user credentials and maintain persistence. Mitigations should focus on removing the malicious files, resetting credentials, and enhancing security controls around application whitelisting, user training, and data protection.'
+      );
+      expect(fields.entitySummaryMarkdown).toBe(
+        'Suspicious activity involving the host `foo.hostname` and user `bar.username`.'
+      );
+      expect(fields.summaryMarkdown).toBe(
+        'A multi-stage malware attack was detected on `foo.hostname` involving `bar.username`. A suspicious application delivered malware, attempted credential theft, and established persistence.'
+      );
+      expect(fields.title).toBe('Malware Attack With Credential Theft Attempt');
+    });
+
+    it('returns all markdown fields with original placeholders if no replacements', () => {
+      const fields = getAttackDiscoveryMarkdownFields({
+        attackDiscovery: mockAttackDiscovery,
+      });
+      expect(fields.detailsMarkdown).toBe(
+        'The following attack progression appears to have occurred on the host `5e454c38-439c-4096-8478-0a55511c76e3` involving the user `3bdc7952-a334-4d95-8092-cd176546e18a`:\n\n- A suspicious application named "My Go Application.app" was launched, likely through a malicious download or installation.\n- This application spawned child processes to copy a malicious file named "unix1" to the user\'s home directory and make it executable.\n- The malicious "unix1" file was then executed, attempting to access the user\'s login keychain and potentially exfiltrate credentials.\n- The suspicious application also launched the "osascript" utility to display a fake system dialog prompting the user for their password, a technique known as credentials phishing.\n\nThis appears to be a multi-stage attack involving malware delivery, privilege escalation, credential access, and potentially data exfiltration. The attacker may have used social engineering techniques like phishing to initially compromise the system. The suspicious "My Go Application.app" exhibits behavior characteristic of malware families that attempt to steal user credentials and maintain persistence. Mitigations should focus on removing the malicious files, resetting credentials, and enhancing security controls around application whitelisting, user training, and data protection.'
+      );
+      expect(fields.entitySummaryMarkdown).toBe(
+        'Suspicious activity involving the host `5e454c38-439c-4096-8478-0a55511c76e3` and user `3bdc7952-a334-4d95-8092-cd176546e18a`.'
+      );
+      expect(fields.summaryMarkdown).toBe(
+        'A multi-stage malware attack was detected on `5e454c38-439c-4096-8478-0a55511c76e3` involving `3bdc7952-a334-4d95-8092-cd176546e18a`. A suspicious application delivered malware, attempted credential theft, and established persistence.'
+      );
+      expect(fields.title).toBe('Malware Attack With Credential Theft Attempt');
+    });
+
+    it('returns empty strings for missing optional fields', () => {
+      const minimalDiscovery = {
+        ...mockAttackDiscovery,
+        entitySummaryMarkdown: undefined,
+        detailsMarkdown: '',
+        summaryMarkdown: '',
+      };
+      const fields = getAttackDiscoveryMarkdownFields({
+        attackDiscovery: minimalDiscovery,
+      });
+      expect(fields.entitySummaryMarkdown).toBe('');
+      expect(fields.detailsMarkdown).toBe('');
+      expect(fields.summaryMarkdown).toBe('');
+      expect(fields.title).toBe('Malware Attack With Credential Theft Attempt');
     });
   });
 });

@@ -8,10 +8,7 @@
 import expect from '@kbn/expect';
 import { MessageAddEvent, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { VisualizeESQLUserIntention } from '@kbn/observability-ai-assistant-plugin/common/functions/visualize_esql';
-import {
-  LlmProxy,
-  createLlmProxy,
-} from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
 import {
   getMessageAddedEvents,
   invokeChatCompleteWithFunctionRequest,
