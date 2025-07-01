@@ -5,5 +5,12 @@
  * 2.0.
  */
 
-export { createInternalRegistry } from './create_registry';
-export { combineAgentProviders } from './combine_providers';
+import { createBadRequestError } from '@kbn/onechat-common';
+
+const idRegexp = /^[a-zA-Z][a-zA-Z0-9_-]*$/;
+
+export const ensureValidId = (id: string) => {
+  if (!idRegexp.test(id)) {
+    throw createBadRequestError(`Invalid profile id: ${id}`);
+  }
+};

@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { createInternalRegistry } from './create_registry';
-export { combineAgentProviders } from './combine_providers';
+export { createClient, type AgentProfileClient } from './client';
+export { createStorage } from './storage';

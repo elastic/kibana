@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { createInternalRegistry } from './create_registry';
-export { combineAgentProviders } from './combine_providers';
+export { createDefaultAgentProvider } from './default_provider';
+export { creatProfileProvider } from './profile_provider';
