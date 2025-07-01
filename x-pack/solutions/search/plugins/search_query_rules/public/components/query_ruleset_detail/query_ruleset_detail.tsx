@@ -240,6 +240,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
                   })}
                 </>
               ),
+              'data-test-subj': 'queryRulesetDetailBackButton',
               color: 'primary',
               'aria-current': false,
               onClick: () => {
@@ -371,7 +372,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
                     id={splitButtonPopoverActionsId}
                     button={
                       <EuiButtonIcon
-                        data-test-subj="searchQueryRulesQueryRulesetDetailButton"
+                        data-test-subj="searchQueryRulesQueryRulesetActionsButton"
                         size="m"
                         iconType="boxesVertical"
                         aria-label="More"

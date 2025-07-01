@@ -247,7 +247,7 @@
             "label": "serverless",
             "description": [],
             "signature": [
-              "{ project_id: string; project_name?: string | undefined; project_type?: string | undefined; orchestrator_target?: string | undefined; } | undefined"
+              "{ project_id: string; project_name?: string | undefined; project_type?: \"search\" | \"security\" | \"observability\" | \"chat\" | undefined; orchestrator_target?: string | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
             "deprecated": false,
@@ -530,7 +530,7 @@
               "\nServerless configuration"
             ],
             "signature": [
-              "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: string | undefined; }"
+              "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"chat\" | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
             "deprecated": false,
@@ -920,7 +920,7 @@
             "\nServerless configuration"
           ],
           "signature": [
-            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: string | undefined; orchestratorTarget?: string | undefined; }"
+            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"chat\" | undefined; orchestratorTarget?: string | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
@@ -1269,7 +1269,7 @@
             "\nServerless configuration.\n"
           ],
           "signature": [
-            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: string | undefined; orchestratorTarget?: string | undefined; }"
+            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"chat\" | undefined; orchestratorTarget?: string | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,

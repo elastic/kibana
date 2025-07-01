@@ -7079,7 +7079,7 @@ Object {
     },
     "defaultModel": Object {
       "flags": Object {
-        "default": "gemini-1.5-pro-002",
+        "default": "gemini-2.5-pro",
         "error": [Function],
         "presence": "optional",
       },

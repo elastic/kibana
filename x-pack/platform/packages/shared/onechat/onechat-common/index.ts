@@ -27,6 +27,12 @@ export {
   unknownToolProviderId,
   BuiltinToolIds,
   BuiltinTags,
+  type ByIdsToolSelection,
+  type ToolSelection,
+  isByIdsToolSelection,
+  toolMatchSelection,
+  filterToolsBySelection,
+  allToolsSelectionWildcard,
 } from './tools';
 export {
   OnechatErrorCode,
@@ -36,19 +42,24 @@ export {
   isOnechatError,
   isAgentNotFoundError,
   isConversationNotFoundError,
+  isBadRequestError,
   createOnechatError,
   createInternalError,
   createToolNotFoundError,
   createAgentNotFoundError,
   createConversationNotFoundError,
+  createBadRequestError,
   type OnechatError,
   type OnechatInternalError,
   type OnechatToolNotFoundError,
+  type OnechatAgentNotFoundError,
+  type OnechatConversationNotFoundError,
+  type OnechatBadRequestError,
 } from './base/errors';
 export { type UserIdAndName } from './base/users';
 export {
-  OneChatDefaultAgentId,
-  OneChatDefaultAgentProviderId,
+  oneChatDefaultAgentId,
+  oneChatAgentProviderIds,
   AgentType,
   AgentMode,
   type AgentDescriptor,
@@ -82,6 +93,7 @@ export {
   isStructuredAgentIdentifier,
   toSerializedAgentIdentifier,
   toStructuredAgentIdentifier,
+  type AgentProfile,
 } from './agents';
 export {
   type RoundInput,

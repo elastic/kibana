@@ -11,7 +11,7 @@ import { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import {
   AgentMode,
-  OneChatDefaultAgentId,
+  oneChatDefaultAgentId,
   isRoundCompleteEvent,
   isConversationUpdatedEvent,
   isConversationCreatedEvent,
@@ -37,7 +37,7 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
           stream: schema.boolean({ defaultValue: false }),
         }),
         body: schema.object({
-          agentId: schema.string({ defaultValue: OneChatDefaultAgentId }),
+          agentId: schema.string({ defaultValue: oneChatDefaultAgentId }),
           mode: schema.oneOf(
             [
               schema.literal(AgentMode.normal),

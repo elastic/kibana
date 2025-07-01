@@ -71,14 +71,10 @@ export const registeredToolCreator = (tool: EsqlToolDefinition): RegisteredTool 
     schema: esqlSchema,
     handler: async ({ params }, { esClient }) => {
       const client = esClient.asCurrentUser;
-      const filledQuery = tool.query.replace(/\?(\w+)/g, (_, key) => {
-        const value = params[key];
-
-        return typeof value === 'string' ? `"${value.replace(/"/g, '\\"')}"` : value;
-      });
 
       const response = await client.esql.query({
-        query: filledQuery,
+        query: tool.query,
+        params: [params],
       });
 
       return response;

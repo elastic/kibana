@@ -1080,7 +1080,13 @@
           "; } & { esArchiver: ",
           "EsArchiverFixture",
           "; } & ",
-          "SynthtraceFixture",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SynthtraceFixture",
+            "text": "SynthtraceFixture"
+          },
           " & { apiServices: ",
           {
             "pluginId": "@kbn/scout",
@@ -1344,7 +1350,13 @@
           "; } & { uiSettings: ",
           "UiSettingsFixture",
           "; } & ",
-          "SynthtraceFixture",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SynthtraceFixture",
+            "text": "SynthtraceFixture"
+          },
           " & { apiServices: ",
           {
             "pluginId": "@kbn/scout",

@@ -1080,7 +1080,13 @@
           "; } & { esArchiver: ",
           "EsArchiverFixture",
           "; } & ",
-          "SynthtraceFixture",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SynthtraceFixture",
+            "text": "SynthtraceFixture"
+          },
           " & { apiServices: ",
           {
             "pluginId": "@kbn/scout",
@@ -1350,7 +1356,13 @@
           "; } & { uiSettings: ",
           "UiSettingsFixture",
           "; } & ",
-          "SynthtraceFixture",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SynthtraceFixture",
+            "text": "SynthtraceFixture"
+          },
           " & { apiServices: ",
           {
             "pluginId": "@kbn/scout",
@@ -5889,6 +5901,20 @@
             "description": [],
             "signature": [
               "CustomLogsPage"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/page_objects/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.ObltPageObjects.observabilityNavigation",
+            "type": "Object",
+            "tags": [],
+            "label": "observabilityNavigation",
+            "description": [],
+            "signature": [
+              "ObservabilityNavigation"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/page_objects/index.ts",
             "deprecated": false,

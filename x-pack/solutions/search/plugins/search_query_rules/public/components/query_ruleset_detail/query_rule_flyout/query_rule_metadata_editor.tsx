@@ -40,7 +40,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
   const [metadataField, setMetadataField] = useState<string>(criteria.metadata || '');
 
   return (
-    <EuiPanel hasBorder>
+    <EuiPanel data-test-subj="searchQueryRulesQueryRuleMetadataEditor" hasBorder>
       <EuiFlexGroup direction="row">
         <EuiFlexItem>
           <EuiFormRow

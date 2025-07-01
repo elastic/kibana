@@ -128,12 +128,6 @@ export {
   elasticModelIds,
 } from './src/inference_endpoints';
 
-export type {
-  InferenceTracingExportConfig,
-  InferenceTracingLangfuseExportConfig,
-  InferenceTracingPhoenixExportConfig,
-} from './src/tracing';
-
 export { type Model, ModelFamily, ModelPlatform, ModelProvider } from './src/model_provider';
 
 export {
