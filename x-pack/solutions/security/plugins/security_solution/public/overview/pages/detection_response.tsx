@@ -34,7 +34,7 @@ import { useGlobalFilterQuery } from '../../common/hooks/use_global_filter_query
 import { useKibana } from '../../common/lib/kibana';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
-import { DataViewLoading } from '../../data_view_manager/components/data_view_loading';
+import { DataViewLoading } from '../../data_view_manager/components/page_loader';
 
 const DetectionResponseComponent = () => {
   const { cases } = useKibana().services;
@@ -69,7 +69,7 @@ const DetectionResponseComponent = () => {
   }
 
   if (newDataViewPickerEnabled && status === 'pristine') {
-    return <DataViewLoading pageName="Detection response" />;
+    return <PageLoader pageName="Detection response" />;
   }
 
   return (

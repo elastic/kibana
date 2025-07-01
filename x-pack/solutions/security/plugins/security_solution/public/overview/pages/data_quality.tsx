@@ -36,7 +36,7 @@ import {
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
-import { DataViewLoading } from '../../data_view_manager/components/data_view_loading';
+import { DataViewLoading } from '../../data_view_manager/components/page_loader';
 
 const LOCAL_STORAGE_KEY = 'dataQualityDashboardLastChecked';
 
@@ -159,7 +159,7 @@ const DataQualityComponent: React.FC = () => {
   }
 
   if (newDataViewPickerEnabled && status === 'pristine') {
-    return <DataViewLoading pageName="Data quality" />;
+    return <PageLoader pageName="Data quality" />;
   }
 
   return (

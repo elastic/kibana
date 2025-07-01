@@ -43,7 +43,7 @@ import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_
 import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { DataViewLoading } from '../../data_view_manager/components/data_view_loading';
+import { DataViewLoading } from '../../data_view_manager/components/page_loader';
 
 const OverviewComponent = () => {
   const getGlobalFiltersQuerySelector = useMemo(
@@ -97,7 +97,7 @@ const OverviewComponent = () => {
   const { tiDataSources: allTiDataSources, isInitiallyLoaded: isTiLoaded } = useAllTiDataSources();
 
   if (newDataViewPickerEnabled && status === 'pristine') {
-    return <DataViewLoading pageName="Overview" />;
+    return <PageLoader pageName="Overview" />;
   }
 
   return (

@@ -15,7 +15,7 @@ const LOADING_TITLE = (pageName: string) =>
     values: { pageName },
   });
 
-export const DataViewLoading = ({ pageName }: { pageName: string }) => (
+export const PageLoader = ({ pageName }: { pageName: string }) => (
   <EuiEmptyPrompt
     icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
     title={<h2>{LOADING_TITLE(pageName)}</h2>}

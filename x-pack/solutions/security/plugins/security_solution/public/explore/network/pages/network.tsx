@@ -48,7 +48,7 @@ import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
-import { DataViewLoading } from '@kbn/security-solution-plugin/public/data_view_manager/components/data_view_loading';
+import { DataViewLoading } from '@kbn/security-solution-plugin/public/data_view_manager/components/page_loader';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -147,7 +147,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
     if (newDataViewPickerEnabled && status === 'pristine') {
-      return <DataViewLoading pageName="Network" />;
+      return <PageLoader pageName="Network" />;
     }
 
     return (
