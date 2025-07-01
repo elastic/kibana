@@ -12,12 +12,13 @@ import {
   EuiSwitch,
   EuiTextArea,
   EuiComboBox,
+  EuiFieldPassword,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from '@emotion/styled';
 import { CodeEditor } from '@kbn/code-editor';
-import { SecretFieldWrapper, SecretInputField } from '@kbn/fleet-plugin/public';
+import { SecretFieldWrapper, SecretInputField, useSecretsStorage } from '@kbn/fleet-plugin/public';
 import type { FormRowOnChange } from '.';
 import type { SettingsRow } from '../typings';
 
@@ -40,6 +41,8 @@ const DISABLED_LABEL = i18n.translate('xpack.apm.fleet_integration.settings.disa
 });
 
 export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
+  const secretsStorageEnabled = useSecretsStorage();
+
   switch (row.type) {
     case 'boolean': {
       return (
@@ -152,7 +155,7 @@ export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
       );
     }
     case 'secret': {
-      const text = () => (
+      const getTextField = () => (
         <EuiFieldText
           data-test-subj={row.dataTestSubj}
           disabled={isDisabled}
@@ -163,32 +166,47 @@ export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
           }}
         />
       );
-      return (
-        <SecretFieldWrapper>
-          <SecretInputField
+
+      if (secretsStorageEnabled) {
+        return (
+          <SecretFieldWrapper>
+            <SecretInputField
+              value={value}
+              onChange={(val) => {
+                onChange(row.key, val);
+              }}
+              frozen={isDisabled}
+              varDef={{
+                name: row?.rowTitle ?? '',
+                title: row.label,
+                type: 'text',
+                description: row?.rowDescription ?? '',
+                required: row?.required ?? false,
+                secret: true,
+              }}
+              isInvalid={false}
+              fieldLabel=""
+              fieldTestSelector={row.dataTestSubj ?? `secret-${row.key}`}
+              isDirty={false}
+              setIsDirty={() => {}}
+              getInputComponent={getTextField}
+              isEditPage={true}
+            />
+          </SecretFieldWrapper>
+        );
+      } else {
+        return (
+          <EuiFieldText
+            data-test-subj={row.dataTestSubj}
+            disabled={isDisabled}
             value={value}
-            onChange={(val) => {
-              onChange(row.key, val);
+            prepend={isDisabled ? <EuiIcon type="lock" /> : undefined}
+            onChange={(e) => {
+              onChange(row.key, e.target.value);
             }}
-            frozen={isDisabled}
-            varDef={{
-              name: row?.rowTitle ?? '',
-              title: row.label,
-              type: 'text',
-              description: row?.rowDescription ?? '',
-              required: row?.required ?? false,
-              secret: true,
-            }}
-            isInvalid={false}
-            fieldLabel=""
-            fieldTestSelector={row.dataTestSubj ?? `secret-${row.key}`}
-            isDirty={false}
-            setIsDirty={() => {}}
-            getInputComponent={text}
-            isEditPage={true}
           />
-        </SecretFieldWrapper>
-      );
+        );
+      }
     }
     default:
       throw new Error(`Unknown type "${row.type}"`);

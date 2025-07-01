@@ -10,9 +10,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { useFleetStatus } from '../../../../../../../../hooks';
-
 import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
+
+import { useSecretsStorage } from '../../../../../../../../hooks/use_secrets_storage';
 
 import { DatasetComponent } from './dataset_component';
 import { SecretFieldLabel, SecretFieldWrapper, SecretInputField } from './secret_input_field';
@@ -42,9 +42,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     datastreams = [],
     isEditPage = false,
   }) => {
-    const fleetStatus = useFleetStatus();
     const [isDirty, setIsDirty] = useState<boolean>(false);
-
     const { required, type, title, name, description } = varDef;
     const isInvalid = Boolean((isDirty || forceShowErrors) && !!varErrors?.length);
     const errors = isInvalid ? varErrors : null;
@@ -53,7 +51,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     // Boolean cannot be optional by default set to false
     const isOptional = useMemo(() => type !== 'bool' && !required, [required, type]);
 
-    const secretsStorageEnabled = fleetStatus.isReady && fleetStatus.isSecretsStorageEnabled;
+    const secretsStorageEnabled = useSecretsStorage();
     const useSecretsUi = secretsStorageEnabled && varDef.secret;
 
     if (name === DATASET_VAR_NAME && packageType === 'input') {
