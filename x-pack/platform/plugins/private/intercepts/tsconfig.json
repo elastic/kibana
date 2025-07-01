@@ -29,6 +29,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/i18n-react",
     "@kbn/licensing-plugin",
+    "@kbn/test-jest-helpers",
   ],
   "exclude": ["target/**/*"]
 }
