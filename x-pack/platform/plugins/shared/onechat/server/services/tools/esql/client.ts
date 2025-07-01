@@ -11,6 +11,7 @@ import {
   esqlToolProviderId,
 } from '@kbn/onechat-common';
 import { EsqlToolDefinition } from '@kbn/onechat-server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import {
   EsqlToolCreateRequest,
   EsqlToolCreateResponse,
@@ -18,7 +19,6 @@ import {
 } from '../../../../common/tools';
 import { esqlToolIndexName } from './storage';
 import { EsqlToolStorage } from './storage';
-import { ElasticsearchClient } from '@kbn/core/server';
 
 export interface EsqlToolClient {
   get(toolId: string): Promise<EsqlToolDefinition>;
@@ -29,7 +29,13 @@ export interface EsqlToolClient {
   execute(toolId: string, params: Record<string, any>): Promise<any>;
 }
 
-export const createClient = ({ storage, esClient }: { storage: EsqlToolStorage, esClient: ElasticsearchClient }): EsqlToolClient => {
+export const createClient = ({
+  storage,
+  esClient,
+}: {
+  storage: EsqlToolStorage;
+  esClient: ElasticsearchClient;
+}): EsqlToolClient => {
   return new EsqlToolClientImpl({ storage, esClient });
 };
 
@@ -38,9 +44,9 @@ class EsqlToolClientImpl {
   private readonly storage: EsqlToolStorage;
   private readonly esClient: ElasticsearchClient;
 
-  constructor({ storage, esClient }: { storage: EsqlToolStorage, esClient: ElasticsearchClient }) {
+  constructor({ storage, esClient }: { storage: EsqlToolStorage; esClient: ElasticsearchClient }) {
     this.storage = storage;
-    this.esClient = esClient
+    this.esClient = esClient;
   }
 
   async get(id: string): Promise<EsqlToolDefinition> {
@@ -134,16 +140,16 @@ class EsqlToolClientImpl {
 
   async execute(id: string, params: Array<Record<string, any>>): Promise<any> {
     const document = await this.get(id);
-    
+
     const response = await this.esClient.transport.request({
       method: 'POST',
       path: '/_query',
       body: {
         query: document.query,
-        params: params
-      }
+        params,
+      },
     });
-    
+
     return response;
   }
 }

@@ -153,8 +153,7 @@ export function registerESQLToolsRoutes({
               name: schema.maybe(schema.string()),
               description: schema.string(),
               query: schema.string(),
-              params: 
-              schema.arrayOf(
+              params: schema.arrayOf(
                 schema.recordOf(
                   schema.string(),
                   schema.object({
@@ -338,7 +337,7 @@ export function registerESQLToolsRoutes({
       })
     );
 
-    router.versioned
+  router.versioned
     .post({
       path: '/api/chat/tools/esql/_execute',
       security: {
@@ -358,18 +357,14 @@ export function registerESQLToolsRoutes({
       {
         version: '2023-10-31',
         validate: {
-          request: { 
+          request: {
             body: schema.object({
               id: schema.string(),
-              params: 
-              schema.arrayOf(
-                schema.recordOf(
-                  schema.string(), 
-                  schema.any(), { defaultValue: {} }
-                )
-              )
-            })
-          }
+              params: schema.arrayOf(
+                schema.recordOf(schema.string(), schema.any(), { defaultValue: {} })
+              ),
+            }),
+          },
         },
       },
       wrapHandler(async (ctx, request, response) => {

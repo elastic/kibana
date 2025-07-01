@@ -51,7 +51,7 @@ describe('EsqlToolRegistry', () => {
         name: 'test-tool',
         description: 'A test tool',
         query: 'FROM my_cases | WHERE case_id == ?case_id',
-        params: [{case_id: { type: 'keyword', description: 'Case ID' }}],
+        params: [{ case_id: { type: 'keyword', description: 'Case ID' } }],
         meta: {
           providerId: 'esql',
           tags: ['salesforce'],
@@ -80,7 +80,7 @@ describe('EsqlToolRegistry', () => {
         name: 'test-tool',
         description: 'A test tool',
         query: 'FROM my_cases | WHERE case_id == ?case_id',
-        params: [{case_id: { type: 'keyword', description: 'Case ID' }}],
+        params: [{ case_id: { type: 'keyword', description: 'Case ID' } }],
         meta: {
           providerId: 'esql',
           tags: ['salesforce'],
@@ -138,7 +138,7 @@ describe('EsqlToolRegistry', () => {
           name: 'test-tool-1',
           description: 'A test tool',
           query: 'FROM my_cases | WHERE case_id == ?case_id',
-          params: [{case_id: { type: 'keyword', description: 'Case ID' }}],
+          params: [{ case_id: { type: 'keyword', description: 'Case ID' } }],
           meta: {
             providerId: 'esql',
             tags: ['salesforce'],
@@ -151,7 +151,7 @@ describe('EsqlToolRegistry', () => {
           name: 'test-tool-2',
           description: 'A test tool',
           query: 'FROM my_cases | WHERE case_id == ?case_id',
-          params: [{case_id: { type: 'keyword', description: 'Case ID' }}],
+          params: [{ case_id: { type: 'keyword', description: 'Case ID' } }],
           meta: {
             providerId: 'esql',
             tags: ['salesforce'],
@@ -229,7 +229,7 @@ describe('EsqlToolClient', () => {
         name: 'test-tool',
         description: 'A test tool',
         query: 'FROM my_cases | WHERE case_id == ?case_id',
-        params: [{case_id: { type: 'keyword', description: 'Case ID' }}],
+        params: [{ case_id: { type: 'keyword', description: 'Case ID' } }],
         meta: {
           providerId: 'esql',
           tags: ['test'],
@@ -266,7 +266,7 @@ describe('EsqlToolClient', () => {
         name: 'existing-tool',
         description: 'A test tool',
         query: 'FROM my_cases | WHERE case_id == ?case_id',
-        params: [{case_id: { type: 'keyword', description: 'Case ID' }}],
+        params: [{ case_id: { type: 'keyword', description: 'Case ID' } }],
         meta: {
           providerId: 'esql',
           tags: [],
@@ -298,7 +298,7 @@ describe('EsqlToolClient', () => {
         name: 'test-tool',
         description: 'A test tool',
         query: 'FROM my_cases | WHERE case_id == ?case_id',
-        params: [{case_id: { type: 'keyword', description: 'Case ID' }}],
+        params: [{ case_id: { type: 'keyword', description: 'Case ID' } }],
         meta: {
           providerId: 'esql',
           tags: [],
@@ -334,7 +334,7 @@ describe('EsqlToolClient', () => {
           name: 'tool-1',
           description: 'Tool 1',
           query: 'FROM my_cases | WHERE case_id == ?case_id',
-          params: [{case_id: { type: 'keyword', description: 'Case ID' }}],
+          params: [{ case_id: { type: 'keyword', description: 'Case ID' } }],
           meta: { providerId: 'esql', tags: [] },
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -344,7 +344,7 @@ describe('EsqlToolClient', () => {
           name: 'tool-2',
           description: 'Tool 2',
           query: 'FROM my_cases | WHERE case_id == ?case_id',
-          params: [{case_id: { type: 'keyword', description: 'Case ID' }}],
+          params: [{ case_id: { type: 'keyword', description: 'Case ID' } }],
           meta: { providerId: 'esql', tags: [] },
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -376,7 +376,7 @@ describe('EsqlToolClient', () => {
         name: 'existing-tool',
         description: 'Original description',
         query: 'FROM my_cases | WHERE case_id == ?case_id',
-        params: [{case_id: { type: 'keyword', description: 'Case ID' }}],
+        params: [{ case_id: { type: 'keyword', description: 'Case ID' } }],
         meta: { providerId: 'esql', tags: ['original'] },
         created_at: '2024-01-01T00:00:00.000Z',
         updated_at: '2024-01-01T00:00:00.000Z',
@@ -421,7 +421,7 @@ describe('EsqlToolClient', () => {
         name: 'test-tool',
         description: 'A test tool',
         query: 'FROM my_cases | WHERE case_id == ?case_id',
-        params: [{case_id: { type: 'keyword', description: 'Case ID' }}],
+        params: [{ case_id: { type: 'keyword', description: 'Case ID' } }],
         meta: { providerId: 'esql', tags: [] },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -455,12 +455,14 @@ describe('EsqlToolClient', () => {
       name: 'test-tool',
       description: 'A test tool',
       query: 'FROM my_cases | WHERE case_id == ?case_id',
-      params: [{
-        "case_id": {
-          type: 'keyword',
-          description: 'ID of the case to retrieve',
+      params: [
+        {
+          case_id: {
+            type: 'keyword',
+            description: 'ID of the case to retrieve',
+          },
         },
-      }],
+      ],
       meta: { providerId: 'esql', tags: [] },
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -474,71 +476,76 @@ describe('EsqlToolClient', () => {
         request: jest.fn(),
       };
     });
-   
+
     it('should execute ES|QL query with parameters successfully', async () => {
       const mockResponse = {
         body: {
           columns: [{ name: 'case_id', type: 'keyword' }],
-          values: [['CASE-123']]
-        }
+          values: [['CASE-123']],
+        },
       };
-   
+
       mockElasticsearchClient.transport.request.mockResolvedValue(mockResponse);
-   
+
       const params = [{ case_id: 'CASE-123' }];
       const result = await client.execute('123', params);
-   
+
       expect(mockElasticsearchClient.get).toHaveBeenCalledWith({
         id: '123',
       });
-   
+
       expect(mockElasticsearchClient.transport.request).toHaveBeenCalledWith({
         method: 'POST',
         path: '/_query',
         body: {
           query: 'FROM my_cases | WHERE case_id == ?case_id',
           params: [{ case_id: 'CASE-123' }],
-        }
+        },
       });
-   
+
       expect(result).toEqual(mockResponse);
     });
-   
+
     it('should handle multiple parameters', async () => {
       const multiParamTool = {
         ...mockTool,
         query: 'FROM my_cases | WHERE case_id == ?case_id AND status == ?status',
-        params: [{
-          case_id: { type: 'keyword', description: 'Case ID' },
-          status: { type: 'keyword', description: 'Case status' },
-        }]
+        params: [
+          {
+            case_id: { type: 'keyword', description: 'Case ID' },
+            status: { type: 'keyword', description: 'Case status' },
+          },
+        ],
       };
-   
+
       mockElasticsearchClient.get.mockResolvedValue({
         _source: multiParamTool,
       });
-   
+
       const mockResponse = {
         body: {
-          columns: [{ name: 'case_id', type: 'keyword' }, { name: 'status', type: 'keyword' }],
-          values: [['CASE-123']]
-        }
+          columns: [
+            { name: 'case_id', type: 'keyword' },
+            { name: 'status', type: 'keyword' },
+          ],
+          values: [['CASE-123']],
+        },
       };
-   
+
       mockElasticsearchClient.transport.request.mockResolvedValue(mockResponse);
-   
-      const params = [{ case_id: 'CASE-123'}, {status: 'open' }];
+
+      const params = [{ case_id: 'CASE-123' }, { status: 'open' }];
       const result = await client.execute('123', params);
-   
+
       expect(mockElasticsearchClient.transport.request).toHaveBeenCalledWith({
         method: 'POST',
         path: '/_query',
         body: {
           query: 'FROM my_cases | WHERE case_id == ?case_id AND status == ?status',
           params: [{ case_id: 'CASE-123' }, { status: 'open' }],
-        }
+        },
       });
-   
+
       expect(result).toEqual(mockResponse);
     });
 
@@ -546,37 +553,42 @@ describe('EsqlToolClient', () => {
       const orderedParamTool = {
         ...mockTool,
         query: 'FROM my_cases | WHERE case_id == ? AND status == ?',
-        params: [{
-          case_id: { type: 'keyword', description: 'Case ID' },
-          status: { type: 'keyword', description: 'Case status' },
-        }]
+        params: [
+          {
+            case_id: { type: 'keyword', description: 'Case ID' },
+            status: { type: 'keyword', description: 'Case status' },
+          },
+        ],
       };
       mockElasticsearchClient.get.mockResolvedValue({
         _source: orderedParamTool,
       });
-   
+
       const mockResponse = {
         body: {
-          columns: [{ name: 'case_id', type: 'keyword' }, { name: 'status', type: 'keyword' }],
-          values: [['CASE-123']]
-        }
+          columns: [
+            { name: 'case_id', type: 'keyword' },
+            { name: 'status', type: 'keyword' },
+          ],
+          values: [['CASE-123']],
+        },
       };
-   
+
       mockElasticsearchClient.transport.request.mockResolvedValue(mockResponse);
-   
-      const params = [{ case_id: 'CASE-123'}, {status: 'open' }];
+
+      const params = [{ case_id: 'CASE-123' }, { status: 'open' }];
       const result = await client.execute('123', params);
-   
+
       expect(mockElasticsearchClient.transport.request).toHaveBeenCalledWith({
         method: 'POST',
         path: '/_query',
         body: {
           query: 'FROM my_cases | WHERE case_id == ? AND status == ?',
           params: [{ case_id: 'CASE-123' }, { status: 'open' }],
-        }
+        },
       });
-   
+
       expect(result).toEqual(mockResponse);
     });
-    })
+  });
 });

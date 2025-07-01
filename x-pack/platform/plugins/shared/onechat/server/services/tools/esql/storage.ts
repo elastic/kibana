@@ -40,8 +40,7 @@ export interface EsqlToolProperties {
   name: string;
   description: string;
   query: string;
-  params: 
-  Array<
+  params: Array<
     Record<
       string,
       {
