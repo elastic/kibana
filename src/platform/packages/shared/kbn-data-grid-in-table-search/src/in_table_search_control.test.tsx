@@ -421,10 +421,7 @@ describe('InTableSearchControl', () => {
       })
     );
 
-    expect(initialProps.onInitialStateChange).toHaveBeenCalledWith({
-      searchTerm: 'b',
-      activeMatchPosition: 2,
-    });
+    expect(initialProps.onInitialStateChange).not.toHaveBeenCalled(); // Initial state should not trigger a change
 
     rerender(<InTableSearchControl {...initialProps} inTableSearchTerm="aa" />);
 
