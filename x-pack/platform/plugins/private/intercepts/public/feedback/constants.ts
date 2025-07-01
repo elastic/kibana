@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-export const ELASTIC_SUPPORT_LINK = 'https://support.elastic.co/home';
-export const SERVERLESS_FEEDBACK_FORM_LINK = 'https://ela.st/feedback-form';
+export const ELASTIC_SUPPORT_URL = 'https://support.elastic.co/home';
+export const SERVERLESS_FEEDBACK_URL = 'https://ela.st/feedback-form';
+
 export enum FEEDBACK_TYPE {
   FEATURE_REQUEST = 'featureRequest',
   ISSUE_REPORT = 'issueReport',
