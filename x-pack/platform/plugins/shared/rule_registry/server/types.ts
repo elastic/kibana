@@ -18,8 +18,8 @@ import type {
   RuleExecutorServices,
   RuleType,
 } from '@kbn/alerting-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { AlertsClient } from './alert_data_client/alerts_client';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 
 type SimpleAlertType<
   TState extends RuleTypeState,
