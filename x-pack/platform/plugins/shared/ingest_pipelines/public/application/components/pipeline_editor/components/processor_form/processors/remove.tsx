@@ -33,7 +33,7 @@ type RemoveFields = {
   [K in keyof RemoveFieldsTypes]: FieldHook<RemoveFieldsTypes[K]>;
 };
 
-const getFieldConig = (
+const getFieldConfig = (
   toggleField: () => void
 ): Record<
   keyof RemoveFields,
@@ -147,8 +147,8 @@ export const Remove: FunctionComponent = () => {
   const FieldProps = useMemo(
     () =>
       isFieldsToKeep
-        ? getFieldConig(toggleRemoveField).fields_to_keep
-        : getFieldConig(toggleRemoveField).fields_to_remove,
+        ? getFieldConfig(toggleRemoveField).fields_to_keep
+        : getFieldConfig(toggleRemoveField).fields_to_remove,
     [isFieldsToKeep, toggleRemoveField]
   );
 
