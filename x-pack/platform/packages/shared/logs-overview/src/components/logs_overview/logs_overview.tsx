@@ -22,11 +22,11 @@ import { LogsOverviewErrorContent } from './logs_overview_error_content';
 import { LogsOverviewLoadingContent } from './logs_overview_loading_content';
 import { LogsOverviewStateContext, logsOverviewStateMachine } from './logs_overview_state_provider';
 
-export type LogsOverviewProps = LogsOverviewContentProps & {
+export type LogsOverviewProps = Pick<LogsOverviewContentProps, 'height' | 'timeRange'> & {
   dependencies: LogsOverviewDependencies;
-  documentFilters: QueryDslQueryContainer[] | undefined;
-  featureFlags: LogsOverviewFeatureFlags | undefined;
-  logsSource: LogsSourceConfiguration | undefined;
+  documentFilters?: QueryDslQueryContainer[] | undefined;
+  featureFlags?: LogsOverviewFeatureFlags | undefined;
+  logsSource?: LogsSourceConfiguration | undefined;
 };
 
 export type LogsOverviewDependencies = LogsOverviewContentDependencies & {
@@ -76,14 +76,12 @@ export const LogsOverview: React.FC<LogsOverviewProps> = React.memo(
   }
 );
 
-export type LogsOverviewContentProps = Pick<LogCategoriesProps, 'height'> &
-  Pick<LogEventsProps, 'height'> & {
+export type LogsOverviewContentProps = Pick<
+  LogCategoriesProps,
+  'height' | 'timeRange' | 'documentFilters'
+> &
+  Pick<LogEventsProps, 'height' | 'timeRange' | 'documentFilters'> & {
     dependencies: LogsOverviewDependencies;
-    documentFilters: QueryDslQueryContainer[];
-    timeRange: {
-      start: string;
-      end: string;
-    };
   };
 
 export type LogsOverviewContentDependencies = LogCategoriesDependencies & LogEventsDependencies;
