@@ -516,7 +516,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // we must reindex and synchronize with other migrators
         return {
           ...stateP,
-          controlState: 'CHECK_CLUSTER_ROUTING_ALLOCATION',
+          controlState: 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION',
         };
       } else {
         // this migrator is not involved in a relocation, we can proceed with the standard flow
@@ -561,7 +561,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       case MigrationType.Incompatible:
         return {
           ...stateP,
-          controlState: 'CHECK_CLUSTER_ROUTING_ALLOCATION',
+          controlState: 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION',
         };
       case MigrationType.Unnecessary:
         return {
@@ -739,7 +739,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else {
       throwBadResponse(stateP, res);
     }
-  } else if (stateP.controlState === 'CHECK_CLUSTER_ROUTING_ALLOCATION') {
+  } else if (stateP.controlState === 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return {

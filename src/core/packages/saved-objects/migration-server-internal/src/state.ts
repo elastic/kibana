@@ -396,8 +396,8 @@ export interface RefreshTarget extends PostInitState {
   readonly targetIndex: string;
 }
 
-export interface CheckClusterRoutingAllocationState extends SourceExistsState {
-  readonly controlState: 'CHECK_CLUSTER_ROUTING_ALLOCATION';
+export interface ReindexCheckClusterRoutingAllocationState extends SourceExistsState {
+  readonly controlState: 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION';
 }
 
 export interface CheckTargetTypesMappingsState extends PostInitState {
@@ -570,7 +570,6 @@ export interface LegacyDeleteState extends LegacyBaseState {
 
 export type State = Readonly<
   | CalculateExcludeFiltersState
-  | CheckClusterRoutingAllocationState
   | CheckTargetTypesMappingsState
   | CheckUnknownDocumentsState
   | CheckVersionIndexReadyActions
@@ -602,12 +601,13 @@ export type State = Readonly<
   | ReadyToReindexSyncState
   | RefreshSource
   | RefreshTarget
-  | RelocateCheckClusterRoutingAllocationState
+  | ReindexCheckClusterRoutingAllocationState
   | ReindexSourceToTempClosePit
   | ReindexSourceToTempIndexBulk
   | ReindexSourceToTempOpenPit
   | ReindexSourceToTempRead
   | ReindexSourceToTempTransform
+  | RelocateCheckClusterRoutingAllocationState
   | SetSourceWriteBlockState
   | SetTempWriteBlock
   | TransformedDocumentsBulkIndex

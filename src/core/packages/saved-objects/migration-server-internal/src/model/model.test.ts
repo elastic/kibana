@@ -58,7 +58,7 @@ import type {
   ReadyToReindexSyncState,
   DoneReindexingSyncState,
   LegacyCheckClusterRoutingAllocationState,
-  CheckClusterRoutingAllocationState,
+  ReindexCheckClusterRoutingAllocationState,
   PostInitState,
   CreateIndexCheckClusterRoutingAllocationState,
   RelocateCheckClusterRoutingAllocationState,
@@ -1324,14 +1324,14 @@ describe('migrations v2 model', () => {
 
         describe('if the migrator is involved in a relocation', () => {
           // no need to attempt to update the mappings, we are going to reindex
-          test('WAIT_FOR_YELLOW_SOURCE -> CHECK_CLUSTER_ROUTING_ALLOCATION', () => {
+          test('WAIT_FOR_YELLOW_SOURCE -> REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION', () => {
             const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
             const newState = model(
               { ...waitForYellowSourceState, mustRelocateDocuments: true },
               res
             );
 
-            expect(newState.controlState).toEqual('CHECK_CLUSTER_ROUTING_ALLOCATION');
+            expect(newState.controlState).toEqual('REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION');
           });
         });
       });
@@ -1406,12 +1406,12 @@ describe('migrations v2 model', () => {
       });
 
       describe('if action fails', () => {
-        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CHECK_CLUSTER_ROUTING_ALLOCATION if mappings changes are incompatible', () => {
+        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION if mappings changes are incompatible', () => {
           const res: ResponseType<'UPDATE_SOURCE_MAPPINGS_PROPERTIES'> = Either.left({
             type: 'incompatible_mapping_exception',
           });
           const newState = model(updateSourceMappingsPropertiesState, res);
-          expect(newState.controlState).toEqual('CHECK_CLUSTER_ROUTING_ALLOCATION');
+          expect(newState.controlState).toEqual('REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION');
         });
 
         test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> FATAL', () => {
@@ -1593,27 +1593,27 @@ describe('migrations v2 model', () => {
       });
     });
 
-    describe('CHECK_CLUSTER_ROUTING_ALLOCATION', () => {
-      const checkClusterRoutingAllocationState: CheckClusterRoutingAllocationState = {
+    describe('REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION', () => {
+      const checkClusterRoutingAllocationState: ReindexCheckClusterRoutingAllocationState = {
         ...postInitState,
-        controlState: 'CHECK_CLUSTER_ROUTING_ALLOCATION',
+        controlState: 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION',
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         sourceIndexMappings: Option.some({}) as Option.Some<IndexMapping>,
       };
 
-      test('CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_CLUSTER_ROUTING_ALLOCATION when cluster allocation is not compatible', () => {
-        const res: ResponseType<'CHECK_CLUSTER_ROUTING_ALLOCATION'> = Either.left({
+      test('REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION -> REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION when cluster allocation is not compatible', () => {
+        const res: ResponseType<'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION'> = Either.left({
           type: 'incompatible_cluster_routing_allocation',
         });
         const newState = model(checkClusterRoutingAllocationState, res);
 
-        expect(newState.controlState).toBe('CHECK_CLUSTER_ROUTING_ALLOCATION');
+        expect(newState.controlState).toBe('REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION');
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
       });
 
-      test('CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_UNKNOWN_DOCUMENTS when cluster allocation is compatible', () => {
-        const res: ResponseType<'CHECK_CLUSTER_ROUTING_ALLOCATION'> = Either.right({});
+      test('REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_UNKNOWN_DOCUMENTS when cluster allocation is compatible', () => {
+        const res: ResponseType<'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION'> = Either.right({});
         const newState = model(checkClusterRoutingAllocationState, res);
 
         expect(newState.controlState).toBe('CHECK_UNKNOWN_DOCUMENTS');

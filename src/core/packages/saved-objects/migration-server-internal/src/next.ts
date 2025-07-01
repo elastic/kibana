@@ -118,7 +118,8 @@ export const nextActionMap = (
       Actions.updateAliases({ client, aliasActions: state.preTransformDocsActions }),
     REFRESH_SOURCE: (state: RefreshSource) =>
       Actions.refreshIndex({ client, index: state.sourceIndex.value }),
-    CHECK_CLUSTER_ROUTING_ALLOCATION: () => Actions.checkClusterRoutingAllocationEnabled(client),
+    REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION: () =>
+      Actions.checkClusterRoutingAllocationEnabled(client),
     CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION: () =>
       Actions.checkClusterRoutingAllocationEnabled(client),
     RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION: () =>

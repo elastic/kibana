@@ -177,8 +177,8 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
       expect(logs).toContainLogEntries(
         [
           `[${index}] INIT -> WAIT_FOR_YELLOW_SOURCE.`,
-          `[${index}] WAIT_FOR_YELLOW_SOURCE -> CHECK_CLUSTER_ROUTING_ALLOCATION.`,
-          `[${index}] CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_UNKNOWN_DOCUMENTS.`,
+          `[${index}] WAIT_FOR_YELLOW_SOURCE -> REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION.`,
+          `[${index}] REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_UNKNOWN_DOCUMENTS.`,
           `[${index}] CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK.`,
           `[${index}] SET_SOURCE_WRITE_BLOCK -> CALCULATE_EXCLUDE_FILTERS.`,
           `[${index}] CALCULATE_EXCLUDE_FILTERS -> CREATE_REINDEX_TEMP.`,

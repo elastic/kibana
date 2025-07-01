@@ -49,7 +49,7 @@
   - [REFRESH\_SOURCE](#refresh_source)
     - [Next action](#next-action-15)
     - [New control state](#new-control-state-15)
-  - [CHECK\_CLUSTER\_ROUTING\_ALLOCATION](#check_cluster_routing_allocation)
+  - [REINDEX\_CHECK\_CLUSTER\_ROUTING\_ALLOCATION](#reindex_check_cluster_routing_allocation)
     - [Next action](#next-action-16)
     - [New control state](#new-control-state-16)
   - [CHECK\_UNKNOWN\_DOCUMENTS](#check_unknown_documents)
@@ -456,7 +456,7 @@ The latter usually happens when a new plugin is enabled that brings some incompa
 
 3. If the mappings are not updated due to incompatible changes and the migration is still in progress.
 
-    → [CHECK_CLUSTER_ROUTING_ALLOCATION](#check_cluster_routing_allocation)
+    → [REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION](#reindex_check_cluster_routing_allocation)
 
 4. If the mappings are not updated due to incompatible changes and the migration is already completed.
 
@@ -551,7 +551,7 @@ We are performing a *compatible migration*, and we discarded some unknown and ex
 
     → [FATAL](#fatal)
 
-## CHECK_CLUSTER_ROUTING_ALLOCATION
+## REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION
 
 ### Next action
 
@@ -577,7 +577,7 @@ The check only considers persistent and transient settings and does not take sta
 
 2. If it has a value that will not allow creating new *saved object* indices.
 
-    → [CHECK_CLUSTER_ROUTING_ALLOCATION](#check_cluster_routing_allocation) (retry)
+    → [REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION](#reindex_check_cluster_routing_allocation) (retry)
 
 ## CHECK_UNKNOWN_DOCUMENTS
 
