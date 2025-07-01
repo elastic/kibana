@@ -175,7 +175,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     TableId.alertsOnAlertsPage
   );
 
-  const loading = userInfoLoading || listsConfigLoading || isLoadingIndexPattern;
+  const loading = userInfoLoading || listsConfigLoading;
   const {
     application: { navigateToUrl },
     data,
