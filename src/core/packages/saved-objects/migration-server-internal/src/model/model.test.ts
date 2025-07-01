@@ -61,6 +61,7 @@ import type {
   CheckClusterRoutingAllocationState,
   PostInitState,
   CreateIndexCheckClusterRoutingAllocationState,
+  ReindexCheckClusterRoutingAllocationState,
 } from '../state';
 import { type TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
 import type { AliasAction, RetryableEsClientError } from '../actions';
@@ -803,6 +804,7 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toBe('CREATE_NEW_TARGET');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+        // check that we are correctly "forwarding" the state
         expect(newState.targetIndex).toEqual(
           createIndexCheckClusterRoutingAllocationState.targetIndex
         );
@@ -811,6 +813,50 @@ describe('migrations v2 model', () => {
         );
         expect(newState.esCapabilities).toEqual(
           createIndexCheckClusterRoutingAllocationState.esCapabilities
+        );
+      });
+    });
+
+    describe('REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION', () => {
+      const reindexCheckClusterRoutingAllocationState: ReindexCheckClusterRoutingAllocationState = {
+        ...postInitState,
+        controlState: 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION',
+        sourceIndex: Option.some('.kibana') as Option.Some<string>,
+        sourceIndexMappings: Option.some({}) as Option.Some<IndexMapping>,
+        tempIndexMappings: { properties: {} },
+      };
+
+      test('REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION -> CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION when cluster allocation is not compatible', () => {
+        const res: ResponseType<'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION'> = Either.left({
+          type: 'incompatible_cluster_routing_allocation',
+        });
+        const newState = model(reindexCheckClusterRoutingAllocationState, res);
+
+        expect(newState.controlState).toBe('REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
+      });
+
+      test('REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION -> CREATE_REINDEX_TEMP when cluster allocation is compatible', () => {
+        const res: ResponseType<'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION'> = Either.right({});
+        const newState = model(
+          reindexCheckClusterRoutingAllocationState,
+          res
+        ) as CreateReindexTempState;
+
+        expect(newState.controlState).toBe('CREATE_REINDEX_TEMP');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+        // check that we are correctly "forwarding" the state
+        expect(newState.tempIndex).toEqual(reindexCheckClusterRoutingAllocationState.tempIndex);
+        expect(newState.tempIndexAlias).toEqual(
+          reindexCheckClusterRoutingAllocationState.tempIndexAlias
+        );
+        expect(newState.tempIndexMappings).toEqual(
+          reindexCheckClusterRoutingAllocationState.tempIndexMappings
+        );
+        expect(newState.esCapabilities).toEqual(
+          reindexCheckClusterRoutingAllocationState.esCapabilities
         );
       });
     });
