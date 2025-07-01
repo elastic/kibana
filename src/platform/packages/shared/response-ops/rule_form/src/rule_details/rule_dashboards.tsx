@@ -50,7 +50,6 @@ export const RuleDashboards = ({ contentManagement, spaces }: Props) => {
   const [dashboardList, setDashboardList] = useState<DashboardOption[] | undefined>();
   const [searchValue, setSearchValue] = useState<string>('');
   const [isLoading, setLoading] = useState(false);
-  const [activeSpaces, setActiveSpaces] = useState<string[]>(['*']);
 
   const [selectedDashboards, setSelectedDashboards] = useState<
     Array<EuiComboBoxOptionOption<string>> | undefined
@@ -141,23 +140,11 @@ export const RuleDashboards = ({ contentManagement, spaces }: Props) => {
     label: dashboard.attributes.title,
   });
 
-  useEffect(() => {
-    if (spaces) {
-      spaces.getActiveSpace().then((activeSpace) => {
-        if (activeSpace) {
-          setActiveSpaces([activeSpace.id]);
-        } else {
-          setActiveSpaces(['*']);
-        }
-      });
-    }
-  }, [spaces]);
-
   const loadDashboards = useCallback(async () => {
     if (contentManagement) {
       setLoading(true);
       const dashboards = await dashboardServiceProvider(contentManagement)
-        .fetchDashboards({ query: { limit: 100, text: `${searchValue}*` }, spaces: activeSpaces })
+        .fetchDashboards({ limit: 100, text: `${searchValue}*` })
         .catch(() => {});
       const dashboardOptions = (dashboards ?? []).map((dashboard: DashboardItem) =>
         getDashboardItem(dashboard)
@@ -165,7 +152,7 @@ export const RuleDashboards = ({ contentManagement, spaces }: Props) => {
       setDashboardList(dashboardOptions);
       setLoading(false);
     }
-  }, [activeSpaces, contentManagement, searchValue]);
+  }, [contentManagement, searchValue]);
 
   useEffect(() => {
     if (isComboBoxOpen) {

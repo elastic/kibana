@@ -34,6 +34,5 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/content-management-plugin",
     "@kbn/content-management-utils",
-    "@kbn/spaces-plugin",
   ]
 }

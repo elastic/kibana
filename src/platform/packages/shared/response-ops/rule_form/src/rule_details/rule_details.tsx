@@ -35,7 +35,7 @@ export const RULE_DETAIL_MIN_ROW_WIDTH = 600;
 
 export const RuleDetails = () => {
   const { formData, baseErrors, plugins } = useRuleFormState();
-  const { contentManagement, spaces } = plugins;
+  const { contentManagement } = plugins;
 
   const dispatch = useRuleFormDispatch();
 
