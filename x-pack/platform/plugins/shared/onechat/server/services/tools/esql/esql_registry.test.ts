@@ -239,7 +239,7 @@ describe('EsqlToolClient', () => {
       indexExists: jest.fn(),
     } as unknown as jest.Mocked<EsqlToolStorage>;
 
-    client = createClient({ storage: mockStorage });
+    client = createClient({ storage: mockStorage, esClient: mockElasticsearchClient });
   });
 
   describe('create', () => {
@@ -466,6 +466,100 @@ describe('EsqlToolClient', () => {
       await expect(client.delete('non-existent')).rejects.toThrow(
         'ResponseError: resource_not_found_exception'
       );
+    });
+  });
+
+  describe('execute', () => {
+    const mockTool: EsqlToolCreateResponse = {
+      id: '123',
+      name: 'test-tool',
+      description: 'A test tool',
+      query: 'FROM my_cases | WHERE case_id == ?case_id',
+      params: {
+        "case_id": {
+          type: 'keyword',
+          description: 'ID of the case to retrieve',
+        },
+      },
+      meta: { providerId: 'esql', tags: [] },
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    beforeEach(() => {
+      mockElasticsearchClient.get.mockResolvedValue({
+        _source: mockTool,
+      });
+
+      mockElasticsearchClient.transport = {
+        request: jest.fn(),
+      };
+    });
+   
+    it('should execute ES|QL query with parameters successfully', async () => {
+      const mockResponse = {
+        body: {
+          columns: [{ name: 'case_id', type: 'keyword' }],
+          values: [['CASE-123']]
+        }
+      };
+   
+      mockElasticsearchClient.transport.request.mockResolvedValue(mockResponse);
+   
+      const params = { case_id: 'CASE-123' };
+      const result = await client.execute('123', params);
+   
+      expect(mockElasticsearchClient.get).toHaveBeenCalledWith({
+        id: '123',
+      });
+   
+      expect(mockElasticsearchClient.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/_query',
+        body: {
+          query: 'FROM my_cases | WHERE case_id == ?case_id',
+          params: [{ case_id: 'CASE-123' }],
+        }
+      });
+   
+      expect(result).toEqual(mockResponse);
+    });
+   
+    it('should handle multiple parameters', async () => {
+      const multiParamTool = {
+        ...mockTool,
+        query: 'FROM my_cases | WHERE case_id == ?case_id AND status == ?status',
+        params: {
+          case_id: { type: 'keyword', description: 'Case ID' },
+          status: { type: 'keyword', description: 'Case status' },
+        }
+      };
+   
+      mockElasticsearchClient.get.mockResolvedValue({
+        _source: multiParamTool,
+      });
+   
+      const mockResponse = {
+        body: {
+          columns: [{ name: 'case_id', type: 'keyword' }],
+          values: [['CASE-123']]
+        }
+      };
+   
+      mockElasticsearchClient.transport.request.mockResolvedValue(mockResponse);
+   
+      const params = { case_id: 'CASE-123', status: 'open' };
+      const result = await client.execute('123', params);
+   
+      expect(mockElasticsearchClient.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/_query',
+        body: {
+          query: 'FROM my_cases | WHERE case_id == ?case_id AND status == ?status',
+          params: [{ case_id: 'CASE-123' }, { status: 'open' }],
+        }
+      });
+   
+      expect(result).toEqual(mockResponse);
     });
   });
 });

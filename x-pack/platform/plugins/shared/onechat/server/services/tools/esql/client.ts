@@ -18,6 +18,7 @@ import {
 } from '../../../../common/tools';
 import { esqlToolIndexName } from './storage';
 import { EsqlToolStorage } from './storage';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 export interface EsqlToolClient {
   get(toolId: string): Promise<EsqlToolDefinition>;
@@ -25,18 +26,21 @@ export interface EsqlToolClient {
   create(esqlTool: EsqlToolCreateResponse): Promise<EsqlToolCreateResponse>;
   update(toolId: string, updates: Partial<EsqlToolCreateRequest>): Promise<EsqlToolCreateResponse>;
   delete(toolId: string): Promise<boolean>;
+  execute(toolId: string, params: Record<string, any>): Promise<any>;
 }
 
-export const createClient = ({ storage }: { storage: EsqlToolStorage }): EsqlToolClient => {
-  return new EsqlToolClientImpl({ storage });
+export const createClient = ({ storage, esClient }: { storage: EsqlToolStorage, esClient: ElasticsearchClient }): EsqlToolClient => {
+  return new EsqlToolClientImpl({ storage, esClient });
 };
 
 class EsqlToolClientImpl {
   public readonly id = esqlToolProviderId;
   private readonly storage: EsqlToolStorage;
+  private readonly esClient: ElasticsearchClient;
 
-  constructor({ storage }: { storage: EsqlToolStorage }) {
+  constructor({ storage, esClient }: { storage: EsqlToolStorage, esClient: ElasticsearchClient }) {
     this.storage = storage;
+    this.esClient = esClient
   }
 
   async get(id: string): Promise<EsqlToolDefinition> {
@@ -116,6 +120,7 @@ class EsqlToolClientImpl {
 
     return updatedTool;
   }
+
   async delete(id: string): Promise<boolean> {
     const result = await this.storage.getClient().delete({ id });
     if (result.result === 'not_found') {
@@ -125,5 +130,23 @@ class EsqlToolClientImpl {
       });
     }
     return true;
+  }
+
+  async execute(id: string, params: Record<string, any>): Promise<any> {
+    const document = await this.get(id);
+    const paramArray = Object.entries(params).map(([key, value]) => ({
+      [key]: value
+    }));
+    
+    const response = await this.esClient.transport.request({
+      method: 'POST',
+      path: '/_query',
+      body: {
+        query: document.query,
+        params: paramArray
+      }
+    });
+    
+    return response;
   }
 }

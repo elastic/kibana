@@ -72,9 +72,17 @@ export const registeredToolCreator = (tool: EsqlToolDefinition): RegisteredTool 
     handler: async ({ params }, { esClient }) => {
       const client = esClient.asCurrentUser;
 
-      const response = await client.esql.query({
-        query: tool.query,
-        params: [params],
+      const paramArray = Object.entries(params).map(([key, value]) => ({
+        [key]: value
+      }));
+      
+      const response = await client.transport.request({
+        method: 'POST',
+        path: '/_query',
+        body: {
+          query: tool.query,
+          params: paramArray
+        }
       });
 
       return response;

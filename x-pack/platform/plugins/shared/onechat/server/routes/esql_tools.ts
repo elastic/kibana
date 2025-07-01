@@ -333,4 +333,52 @@ export function registerESQLToolsRoutes({
         });
       })
     );
+
+    router.versioned
+    .post({
+      path: '/api/chat/tools/esql/{id}/_execute',
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+      access: 'public',
+      summary: 'Test an ES|QL Tool',
+      description: TECHNICAL_PREVIEW_WARNING,
+      options: {
+        tags: ['esql'],
+        availability: {
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: { 
+            params: schema.object({ id: schema.string() }, { unknowns: 'allow' }),
+            body: schema.object({
+              params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+            }),
+          }
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { uiSettings } = await ctx.core;
+        const enabled = await uiSettings.client.get(ESQL_TOOL_API_UI_SETTING_ID);
+
+        if (!enabled) {
+          return response.notFound();
+        }
+
+        const { esql: esqlToolService } = getInternalServices();
+        const client = await esqlToolService.getScopedClient({ request });
+        const result = await client.execute(request.params.id, request.body.params);
+
+        return response.ok({
+          body: {
+            success: result,
+          },
+        });
+      })
+    );
 }
