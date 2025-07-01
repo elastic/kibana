@@ -8,7 +8,12 @@
 import { from, filter, shareReplay } from 'rxjs';
 import { AgentHandlerContext } from '@kbn/onechat-server';
 import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
-import { addRoundCompleteEvent, extractRound, conversationToLangchainMessages } from '../utils';
+import {
+  addRoundCompleteEvent,
+  extractRound,
+  conversationToLangchainMessages,
+  selectProviderTools,
+} from '../utils';
 import { createPlannerAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import { RunAgentParams, RunAgentResponse } from '../run_agent';
@@ -33,13 +38,25 @@ const defaultCycleBudget = 3;
  * Create the handler function for the default onechat agent.
  */
 export const runPlannerAgent: RunPlannerAgentFn = async (
-  { nextInput, conversation = [], cycleBudget = defaultCycleBudget, tools },
-  { logger, request, modelProvider, events }
+  {
+    nextInput,
+    conversation = [],
+    toolSelection = [{ toolIds: ['*'] }],
+    customInstructions,
+    cycleBudget = defaultCycleBudget,
+  },
+  { logger, request, modelProvider, toolProvider, events }
 ) => {
   const model = await modelProvider.getDefaultModel();
 
+  const selectedTools = await selectProviderTools({
+    provider: toolProvider,
+    selection: toolSelection,
+    request,
+  });
+
   const { tools: langchainTools, idMappings: toolIdMapping } = await toolsToLangchain({
-    tools,
+    tools: selectedTools,
     logger,
     request,
   });
@@ -54,6 +71,7 @@ export const runPlannerAgent: RunPlannerAgentFn = async (
     logger,
     chatModel: model.chatModel,
     tools: langchainTools,
+    customInstructions,
   });
 
   const eventStream = agentGraph.streamEvents(
