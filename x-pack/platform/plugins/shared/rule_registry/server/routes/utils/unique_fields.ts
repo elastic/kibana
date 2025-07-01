@@ -11,7 +11,7 @@
  * 2.0.
  */
 
-import { FieldDescriptor, FieldSpec } from '@kbn/data-views-plugin/server';
+import type { FieldDescriptor, FieldSpec } from '@kbn/data-views-plugin/server';
 
 export const mergeUniqueFieldsByName = (
   otherFields: FieldDescriptor[],
