@@ -1696,15 +1696,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const dateRestart = new Date();
 
-          // re-trigger rule execution
-          await patchRule(supertest, log, {
-            id: createdRule.id,
-            enabled: false,
-          });
-          await patchRule(supertest, log, {
-            id: createdRule.id,
-            enabled: true,
-          });
+          await runSoonRule(supertest, createdRule.id);
 
           const alertsResponse = await getAlerts(
             supertest,
@@ -1718,6 +1710,79 @@ export default ({ getService }: FtrProviderContext) => {
 
           // no alert should be missed
           expect(alertsResponse.hits.hits.length).toBe(4);
+        });
+
+        it('should generate alerts over multiple pages from different indices but same event id for mv_expand when number alerts exceeds max signal', async () => {
+          const id = uuidv4();
+          const rule: EsqlRuleCreateProps = {
+            ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
+            query: `from ecs_compliant, ecs_compliant_synthetic_source metadata _id, _index ${internalIdPipe(
+              id
+            )} | mv_expand agent.name | sort @timestamp asc`,
+            from: '2020-10-28T05:15:00.000Z',
+            to: '2020-10-28T06:00:00.000Z',
+            interval: '45m',
+            enabled: true,
+          };
+
+          const document = {
+            id,
+            '@timestamp': '2020-10-28T05:30:00.000Z',
+            agent: { name: Array.from({ length: 150 }, (_, i) => `test_1_${1000 + i}`) },
+          };
+
+          await Promise.all(
+            ['ecs_compliant', 'ecs_compliant_synthetic_source'].map((index) =>
+              es.index({
+                index,
+                id,
+                refresh: true,
+                document,
+              })
+            )
+          );
+
+          const createdRule = await createRule(supertest, log, rule);
+
+          const alertsResponseFromFirstRuleExecution = await getAlerts(
+            supertest,
+            log,
+            es,
+            createdRule,
+            RuleExecutionStatusEnum['partial failure'], // rule has warning, alerts were truncated, thus "partial failure" status
+            200
+          );
+
+          expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
+
+          const dateRestart = new Date();
+
+          await runSoonRule(supertest, createdRule.id);
+
+          const alertsResponse = await getAlerts(
+            supertest,
+            log,
+            es,
+            createdRule,
+            RuleExecutionStatusEnum['partial failure'], // rule has warning, alerts were truncated, thus "partial failure" status
+            300,
+            dateRestart
+          );
+
+          const indexCounts = alertsResponse.hits.hits.reduce<Record<string, number>>(
+            (acc, curr) => {
+              const indexName = curr._source['kibana.alert.ancestors'][0].index;
+              acc[indexName] = (acc[indexName] || 0) + 1;
+              return acc;
+            },
+            {}
+          );
+          expect(alertsResponse.hits.hits.length).toBe(200);
+
+          expect(indexCounts).toEqual({
+            ecs_compliant: 100,
+            ecs_compliant_synthetic_source: 100,
+          });
         });
       });
     });

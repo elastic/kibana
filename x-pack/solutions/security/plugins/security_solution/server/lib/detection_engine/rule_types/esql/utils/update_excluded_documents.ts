@@ -19,12 +19,14 @@ export const updateExcludedDocuments = ({
   results,
   isRuleAggregating,
   aggregatableTimestampField,
+  searchExhausted,
 }: {
   excludedDocuments: Record<string, ExcludedDocument[]>;
   sourceDocuments: Record<string, FetchedDocument[]>;
   results: Array<Record<string, string>>;
   isRuleAggregating: boolean;
   aggregatableTimestampField: string;
+  searchExhausted: boolean;
 }): void => {
   // aggregating queries do not have event _id, so we will not exclude any documents
   if (isRuleAggregating) {
@@ -38,10 +40,28 @@ export const updateExcludedDocuments = ({
 
   const documentIds = Object.keys(sourceDocuments);
 
-  if (totalSourceDocuments !== 1) {
+  if (totalSourceDocuments !== 1 && !searchExhausted) {
     const lastId = results.at(-1)?._id;
-    if (lastId) {
-      sourceDocuments[lastId]?.pop();
+    const lastIndex = results.at(-1)?._index;
+
+    // if single document is returned(same id, same index across all results), we will exclude it
+    const excludeSingleDocument =
+      documentIds.length === 1 &&
+      results.reduce((acc, doc) => {
+        acc.add(doc._index);
+        return acc;
+      }, new Set()).size === 1;
+
+    if (excludeSingleDocument) {
+      sourceDocuments[documentIds[0]] = sourceDocuments[lastId].filter(
+        (doc) => doc._index === lastIndex
+      );
+    } else if (lastId) {
+      if (lastIndex) {
+        sourceDocuments[lastId] = sourceDocuments[lastId].filter((doc) => doc._index !== lastIndex);
+      } else {
+        sourceDocuments[lastId]?.pop();
+      }
     }
   }
 

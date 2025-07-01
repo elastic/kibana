@@ -245,6 +245,7 @@ export const esqlExecutor = async ({
             results,
             isRuleAggregating,
             aggregatableTimestampField: sharedParams.aggregatableTimestampField,
+            searchExhausted: results.length < size,
           });
 
           if (bulkCreateResult.alertsWereTruncated) {
@@ -275,6 +276,7 @@ export const esqlExecutor = async ({
             results,
             isRuleAggregating,
             aggregatableTimestampField: sharedParams.aggregatableTimestampField,
+            searchExhausted: results.length < size,
           });
 
           if (bulkCreateResult.alertsWereTruncated) {
