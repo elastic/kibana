@@ -17,8 +17,10 @@ import {
   EuiIconTip,
   EuiLink,
   EuiSpacer,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import { durationToNumber, REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
 
@@ -260,7 +262,10 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
         width: tableColumnWidths.title,
         render: (objectTitle: string, job) => {
           return (
-            <div data-test-subj="reportingListItemObjectTitle">
+            <div
+              data-test-subj="reportingListItemObjectTitle"
+              css={({ euiTheme }: UseEuiTheme) => css({ paddingTop: euiTheme.size.s })}
+            >
               <EuiLink
                 data-test-subj={`viewReportingLink-${job.id}`}
                 onClick={() => this.setState({ selectedJob: job })}
