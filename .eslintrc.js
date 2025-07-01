@@ -2318,7 +2318,7 @@ module.exports = {
     },
     {
       files: [
-        'src/platform/**/plugins/**/ui_tests/**/*.ts',
+        'src/platform/plugins/**/ui_tests/**/*.ts',
         'x-pack/platform/**/plugins/**/ui_tests/**/*.ts',
       ],
       rules: {
