@@ -13,8 +13,6 @@ import { SloApiProvider } from './slo_api';
 import { SynthtraceProvider } from './synthtrace';
 import { ObservabilityAIAssistantApiProvider } from './observability_ai_assistant_api';
 
-// x-pack/test/api_integration/deployment_agnostic/services/role_scoped_supertest.ts
-
 export type {
   InternalRequestHeader,
   RoleCredentials,
@@ -22,8 +20,8 @@ export type {
 } from '@kbn/ftr-common-functional-services';
 
 export const services = {
-  ...commonDeploymentAgnosticServices,
   ...xpackDeploymentAgnosticServices,
+  ...commonDeploymentAgnosticServices,
   // create a new deployment-agnostic service and load here
   apmApi: ApmApiProvider,
   synthtrace: SynthtraceProvider,

@@ -6,6 +6,7 @@
  */
 
 import { createServerlessFeatureFlagTestConfig } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/default_configs/feature_flag.serverless.config.base';
+import { services } from '../../services';
 
 export default createServerlessFeatureFlagTestConfig({
   serverlessProject: 'oblt',
@@ -14,6 +15,7 @@ export default createServerlessFeatureFlagTestConfig({
     '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
   ],
   testFiles: [require.resolve('./oblt.index.ts')],
+  services,
   junit: {
     reportName: 'Serverless Observability - Deployment-agnostic Feature Flag API Integration Tests',
   },

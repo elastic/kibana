@@ -6,9 +6,11 @@
  */
 
 import { createStatefulTestConfig } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/default_configs/stateful.config.base';
+import { services } from '../../services';
 
 export default createStatefulTestConfig({
   testFiles: [require.resolve('./oblt.index.ts')],
+  services,
   junit: {
     reportName: 'Stateful Observability - Deployment-agnostic API Integration Tests',
   },
