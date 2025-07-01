@@ -198,7 +198,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('Clicking view action opens discover session in discover', async function () {
+    it('Clicking "Explore in discover" action opens discover session in discover', async function () {
       await addSearchEmbeddableToDashboard();
       await dashboardPanelActions.clickPanelAction(
         'embeddablePanelAction-ACTION_VIEW_SAVED_SEARCH'
