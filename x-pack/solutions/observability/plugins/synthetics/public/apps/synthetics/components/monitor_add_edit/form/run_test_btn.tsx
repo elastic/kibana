@@ -31,7 +31,7 @@ export const RunTestButton = ({
   const { space } = useKibanaSpace();
   const { spaceId } = useGetUrlParams();
 
-  const handleTestNow = (formData: any) => {
+  const handleTestNow: SubmitHandler<FieldValues> = (formData) => {
     const config = formData as MonitorFieldsType;
     setInProgress(true);
     setTestRun({
