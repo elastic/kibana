@@ -430,11 +430,12 @@ export class PrivilegeMonitoringDataClient {
     // get all monitoring index source saved objects of type 'index'
     const monitoringIndexSources: MonitoringEntitySourceDescriptor[] =
       await this.monitoringIndexSourceClient.findByIndex();
+    const allStaleUsers: PrivMonBulkUser[] = [];
+
     if (monitoringIndexSources.length === 0) {
       this.log('debug', 'No monitoring index sources found. Skipping sync.');
       return;
     }
-    const allStaleUsers: PrivMonBulkUser[] = [];
 
     for (const source of monitoringIndexSources) {
       if (!source.indexPattern) {
@@ -442,20 +443,15 @@ export class PrivilegeMonitoringDataClient {
       } else {
         const index: string = source.indexPattern;
         const syncedUsernames = await this.ingestUsersFromIndexSource(source, index);
-
-        if (syncedUsernames != null) {
-          const staleUsers = await this.findStaleUsersForIndex(index, syncedUsernames);
-          allStaleUsers.push(...staleUsers);
+        if (syncedUsernames) {
+          allStaleUsers.push(...(await this.findStaleUsersForIndex(index, syncedUsernames)));
         }
       }
     }
-    if (allStaleUsers.length > 0) {
-      const ops = this.bulkOperationsForSoftDeleteUsers(allStaleUsers, this.getIndex());
-      await this.esClient.bulk({ body: ops });
-    }
+    if (allStaleUsers.length > 0) this.bulkDeleteStaleUsers(allStaleUsers);
   }
 
-  private async ingestUsersFromIndexSource(
+  public async ingestUsersFromIndexSource(
     source: MonitoringEntitySourceDescriptor,
     index: string
   ): Promise<string[] | null> {
@@ -534,6 +530,16 @@ export class PrivilegeMonitoringDataClient {
     return batchUsernames;
   }
 
+  public async bulkDeleteStaleUsers(staleUsernames: PrivMonBulkUser[]) {
+    try {
+      this.log('debug', `Found ${staleUsernames.length} stale users to soft delete`);
+      const ops = this.bulkOperationsForSoftDeleteUsers(staleUsernames, this.getIndex());
+      await this.esClient.bulk({ refresh: 'wait_for', body: ops });
+    } catch (error) {
+      this.log('error', `Error executing bulk soft delete operations: ${error}`);
+    }
+  }
+
   /**
    * Synchronizes a list of usernames with the monitoring index.
    * It checks for existing users, updates them if they exist, or creates new ones if they don't.
@@ -574,13 +580,13 @@ export class PrivilegeMonitoringDataClient {
 
     try {
       this.log('debug', `Bulk ops preview:\n${JSON.stringify(ops, null, 2)}`);
-      await this.esClient.bulk({ body: ops });
+      await this.esClient.bulk({ refresh: 'wait_for', body: ops });
     } catch (error) {
       this.log('error', `Error executing bulk operations: ${error}`);
     }
     return usernames;
   }
-  private async findStaleUsersForIndex(
+  public async findStaleUsersForIndex(
     indexName: string,
     userNames: string[]
   ): Promise<PrivMonBulkUser[]> {

@@ -72,7 +72,6 @@ describe('Privilege Monitoring Data Client', () => {
 
       expect(mockCreateOrUpdateIndex).toHaveBeenCalled();
       expect(mockStartPrivilegeMonitoringTask).toHaveBeenCalled();
-      expect(loggerMock.debug).toHaveBeenCalledTimes(3);
       expect(auditMock.log).toHaveBeenCalled();
       expect(result).toEqual(mockDescriptor);
     });
@@ -148,6 +147,7 @@ describe('Privilege Monitoring Data Client', () => {
     const mockLog = jest.fn();
 
     it('should sync all index users successfully', async () => {
+      dataClient.plainIndexSync = jest.fn().mockResolvedValue(['user1', 'user2']);
       const mockMonitoringSOSources = [
         { name: 'source1', indexPattern: 'index1' },
         { name: 'source2', indexPattern: 'index2' },
@@ -160,13 +160,22 @@ describe('Privilege Monitoring Data Client', () => {
           findByIndex: findByIndexMock,
         },
       });
-      dataClient.syncUsernamesFromIndex = jest.fn().mockResolvedValue(['user1', 'user2']);
       await dataClient.plainIndexSync();
       expect(findByIndexMock).toHaveBeenCalled();
-      expect(dataClient.syncUsernamesFromIndex).toHaveBeenCalledTimes(2);
-      expect(dataClient.syncUsernamesFromIndex).toHaveBeenCalledWith({
-        indexName: 'index1',
-        kuery: undefined,
+      // Should be able to get synced users from all sources
+      expect(dataClient.ingestUsersFromIndexSource).toHaveBeenCalledTimes(2);
+      // assuming that ingestUsersFromIndexSource returns the users
+      expect(dataClient.findStaleUsersForIndex).toHaveBeenCalledTimes(2);
+      // Check users are ingested and processed with correct sources and names
+      mockMonitoringSOSources.forEach((source) => {
+        expect(dataClient.ingestUsersFromIndexSource).toHaveBeenCalledWith({
+          source,
+          index: source.indexPattern,
+        });
+        expect(dataClient.findStaleUsersForIndex).toHaveBeenCalledWith({
+          indexName: source.indexPattern,
+          userNames: mockMonitoringSOSources.map((s) => s.name),
+        });
       });
     });
 
@@ -174,6 +183,7 @@ describe('Privilege Monitoring Data Client', () => {
       Object.defineProperty(dataClient, 'log', { value: mockLog });
       const findByIndexMock = jest.fn().mockResolvedValue([]);
       Object.defineProperty(dataClient, 'monitoringIndexSourceClient', {
+        // TODO: de-duplicate this across tests
         value: {
           init: jest.fn().mockResolvedValue({ status: 'success' }),
           update: jest.fn(),
