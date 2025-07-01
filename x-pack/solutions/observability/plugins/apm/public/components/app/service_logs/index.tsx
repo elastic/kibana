@@ -141,7 +141,9 @@ export function ServiceLogsOverview() {
   );
 
   if (status === FETCH_STATUS.SUCCESS) {
-    return <logsShared.LogsOverview documentFilters={logFilters} timeRange={timeRange} />;
+    return (
+      <logsShared.LogsOverview documentFilters={logFilters} timeRange={timeRange} height="60vh" />
+    );
   } else if (status === FETCH_STATUS.FAILURE) {
     return (
       <logsShared.LogsOverview.ErrorContent error={new Error('Failed to fetch service details')} />

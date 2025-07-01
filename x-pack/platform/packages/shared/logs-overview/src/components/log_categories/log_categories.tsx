@@ -9,7 +9,7 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ISearchGeneric } from '@kbn/search-types';
 import { createConsoleInspector } from '@kbn/xstate-utils';
-import React, { useCallback } from 'react';
+import React, { CSSProperties, useCallback } from 'react';
 import {
   CategorizeLogsServiceContext,
   categorizeLogsService,
@@ -55,6 +55,7 @@ export const LogCategories = React.memo<LogCategoriesProps>(
   ({
     dependencies,
     documentFilters,
+    height,
     logsSource,
     timeRange,
     grouping,
@@ -98,6 +99,7 @@ export const LogCategories = React.memo<LogCategoriesProps>(
           <LogCategoriesContent
             dependencies={dependencies}
             documentFilters={documentFilters}
+            height={height}
             logsSource={logsSource}
             timeRange={timeRange}
             grouping={grouping}
@@ -116,6 +118,7 @@ export type LogCategoriesContentProps = LogCategoriesControlBarProps &
     'categoryDetailsServiceState' | 'onCloseFlyout' | 'onOpenFlyout' | 'logCategories'
   > & {
     dependencies: LogCategoriesContentDependencies;
+    height?: CSSProperties['height'];
   };
 
 export type LogCategoriesContentDependencies = LogCategoriesControlBarDependencies &
@@ -125,6 +128,7 @@ export const LogCategoriesContent = React.memo<LogCategoriesContentProps>(
   ({
     dependencies,
     documentFilters,
+    height,
     logsSource,
     timeRange,
     grouping,
@@ -163,7 +167,7 @@ export const LogCategoriesContent = React.memo<LogCategoriesContentProps>(
     );
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="column" gutterSize="m" style={{ height }}>
         <EuiFlexItem grow={false}>
           <LogCategoriesControlBar
             dependencies={dependencies}

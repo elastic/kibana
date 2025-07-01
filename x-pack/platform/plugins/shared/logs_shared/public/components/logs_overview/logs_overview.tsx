@@ -14,6 +14,7 @@ import type {
 import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { map } from 'rxjs';
 
 const LazyLogsOverview = dynamic(() =>
   import('@kbn/logs-overview').then((mod) => ({ default: mod.LogsOverview }))
@@ -31,7 +32,7 @@ const LazyLogsOverviewLoadingContent = dynamic(() =>
   }))
 );
 
-export type LogsOverviewProps = Omit<FullLogsOverviewProps, 'dependencies'>;
+export type LogsOverviewProps = Omit<FullLogsOverviewProps, 'dependencies' | 'featureFlags'>;
 
 export interface SelfContainedLogsOverviewHelpers {
   useIsEnabled: () => boolean;
@@ -47,17 +48,24 @@ export type SelfContainedLogsOverview = SelfContainedLogsOverviewComponent &
 export const createLogsOverview = (
   dependencies: LogsOverviewDependencies
 ): SelfContainedLogsOverview => {
+  // Could be derived from multiple settings via `combineLatest`, but for now we
+  // only have one feature flag.
+  const featureFlags$ = dependencies.uiSettings.client
+    .get$(OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID, defaultIsEnabled)
+    .pipe(
+      map((value) => ({
+        isPatternsEnabled: value,
+      }))
+    );
+
   const SelfContainedLogsOverview = (props: LogsOverviewProps) => {
-    return <LazyLogsOverview dependencies={dependencies} {...props} />;
+    const featureFlags = useObservable(featureFlags$, undefined);
+
+    return <LazyLogsOverview dependencies={dependencies} featureFlags={featureFlags} {...props} />;
   };
 
-  const isEnabled$ = dependencies.uiSettings.client.get$(
-    OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID,
-    defaultIsEnabled
-  );
-
   SelfContainedLogsOverview.useIsEnabled = (): boolean => {
-    return useObservable<boolean>(isEnabled$, defaultIsEnabled);
+    return useObservable(featureFlags$, undefined)?.isPatternsEnabled ?? defaultIsEnabled;
   };
 
   SelfContainedLogsOverview.ErrorContent = LazyLogsOverviewErrorContent;

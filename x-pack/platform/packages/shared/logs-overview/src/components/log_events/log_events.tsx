@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ISearchGeneric } from '@kbn/search-types';
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import {
   LogEventsControlBar,
   LogEventsControlBarDependencies,
@@ -22,6 +22,7 @@ import {
 export type LogEventsProps = LogEventsControlBarProps &
   LogEventsContentProps & {
     dependencies: LogEventsDependencies;
+    height?: CSSProperties['height'];
   };
 
 export type LogEventsDependencies = LogEventsControlBarDependencies & LogEventsContentDependencies;
@@ -34,10 +35,11 @@ export const LogEvents = React.memo<LogEventsProps>(
     timeRange,
     grouping,
     groupingCapabilities,
+    height,
     onChangeGrouping,
   }) => {
     return (
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="column" gutterSize="m" style={{ height }}>
         <EuiFlexItem grow={false}>
           <LogEventsControlBar
             dependencies={dependencies}

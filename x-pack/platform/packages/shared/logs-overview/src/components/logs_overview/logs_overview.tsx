@@ -6,24 +6,26 @@
  */
 
 import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { type LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
-import React, { useCallback } from 'react';
 import { type DataViewsContract } from '@kbn/data-views-plugin/public';
-import { createConsoleInspector } from '@kbn/xstate-utils';
+import { type LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import { type MlPluginStart } from '@kbn/ml-plugin/public';
+import { createConsoleInspector } from '@kbn/xstate-utils';
+import React, { useCallback } from 'react';
+import { LogsOverviewFeatureFlags } from '../../types';
 import { LogsSourceConfiguration, resolveLogsSourceActor } from '../../utils/logs_source';
 import { loadMlCapabilitiesActor } from '../../utils/ml_capabilities';
-import { LogCategories, LogCategoriesDependencies } from '../log_categories';
+import { LogCategories, LogCategoriesDependencies, LogCategoriesProps } from '../log_categories';
+import { LogEvents, LogEventsDependencies, LogEventsProps } from '../log_events';
+import { GroupingCapabilities } from '../shared/control_bar';
+import { Grouping } from '../shared/grouping_selector';
 import { LogsOverviewErrorContent } from './logs_overview_error_content';
 import { LogsOverviewLoadingContent } from './logs_overview_loading_content';
 import { LogsOverviewStateContext, logsOverviewStateMachine } from './logs_overview_state_provider';
-import { LogEvents, LogEventsDependencies } from '../log_events';
-import { Grouping } from '../shared/grouping_selector';
-import { GroupingCapabilities } from '../shared/control_bar';
 
 export type LogsOverviewProps = LogsOverviewContentProps & {
   dependencies: LogsOverviewDependencies;
   documentFilters: QueryDslQueryContainer[] | undefined;
+  featureFlags: LogsOverviewFeatureFlags | undefined;
   logsSource: LogsSourceConfiguration | undefined;
 };
 
@@ -37,6 +39,8 @@ export const LogsOverview: React.FC<LogsOverviewProps> = React.memo(
   ({
     dependencies,
     documentFilters = defaultDocumentFilters,
+    featureFlags = defaultFeatureFlags,
+    height,
     logsSource = defaultLogsSource,
     timeRange,
   }) => {
@@ -55,6 +59,7 @@ export const LogsOverview: React.FC<LogsOverviewProps> = React.memo(
         })}
         options={{
           input: {
+            featureFlags,
             logsSource,
           },
           inspect: consoleInspector,
@@ -63,6 +68,7 @@ export const LogsOverview: React.FC<LogsOverviewProps> = React.memo(
         <LogsOverviewContent
           dependencies={dependencies}
           documentFilters={documentFilters}
+          height={height}
           timeRange={timeRange}
         />
       </LogsOverviewStateContext.Provider>
@@ -70,19 +76,20 @@ export const LogsOverview: React.FC<LogsOverviewProps> = React.memo(
   }
 );
 
-export interface LogsOverviewContentProps {
-  dependencies: LogsOverviewDependencies;
-  documentFilters: QueryDslQueryContainer[];
-  timeRange: {
-    start: string;
-    end: string;
+export type LogsOverviewContentProps = Pick<LogCategoriesProps, 'height'> &
+  Pick<LogEventsProps, 'height'> & {
+    dependencies: LogsOverviewDependencies;
+    documentFilters: QueryDslQueryContainer[];
+    timeRange: {
+      start: string;
+      end: string;
+    };
   };
-}
 
 export type LogsOverviewContentDependencies = LogCategoriesDependencies & LogEventsDependencies;
 
 export const LogsOverviewContent = React.memo<LogsOverviewContentProps>(
-  ({ dependencies, documentFilters, timeRange }) => {
+  ({ dependencies, documentFilters, height, timeRange }) => {
     const logsOverviewStateActorRef = LogsOverviewStateContext.useActorRef();
 
     const logsOverviewState = LogsOverviewStateContext.useSelector(identity);
@@ -133,6 +140,7 @@ export const LogsOverviewContent = React.memo<LogsOverviewContentProps>(
             timeRange={timeRange}
             grouping={grouping}
             groupingCapabilities={groupingCapabilities}
+            height={height}
             onChangeGrouping={changeGrouping}
           />
         );
@@ -145,6 +153,7 @@ export const LogsOverviewContent = React.memo<LogsOverviewContentProps>(
             timeRange={timeRange}
             grouping={grouping}
             groupingCapabilities={groupingCapabilities}
+            height={height}
             onChangeGrouping={changeGrouping}
           />
         );
@@ -154,6 +163,10 @@ export const LogsOverviewContent = React.memo<LogsOverviewContentProps>(
 );
 
 const defaultDocumentFilters: QueryDslQueryContainer[] = [];
+
+const defaultFeatureFlags: LogsOverviewFeatureFlags = {
+  isPatternsEnabled: true,
+};
 
 const defaultLogsSource: LogsSourceConfiguration = { type: 'shared_setting' };
 
