@@ -74,9 +74,9 @@ class AppContextService {
     const tools = [
       ...new Set(
         pluginNames
-          .map(name => this.registeredTools?.get(name) ?? new Set<AssistantTool>())
-          .flatMap(set => [...set])
-      )
+          .map((name) => this.registeredTools?.get(name) ?? new Set<AssistantTool>())
+          .flatMap((set) => [...set])
+      ),
     ];
 
     this.logger?.debug('AppContextService:getRegisteredTools');

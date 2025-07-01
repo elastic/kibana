@@ -294,7 +294,7 @@ export const langChainExecute = async ({
   // We don't (yet) support invoking these tools interactively
   const unsupportedTools = new Set(['attack-discovery', DEFEND_INSIGHTS_ID]);
   // securitySolutionUI tools should always be available even if the request is from another plugin
-  const plugins = Array.from(new Set([pluginName, DEFAULT_PLUGIN_NAME]))
+  const plugins = Array.from(new Set([pluginName, DEFAULT_PLUGIN_NAME]));
   const assistantTools = assistantContext
     .getRegisteredTools(plugins)
     .filter((tool) => !unsupportedTools.has(tool.id));

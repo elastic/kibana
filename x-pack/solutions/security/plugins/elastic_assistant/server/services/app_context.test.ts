@@ -108,7 +108,7 @@ describe('AppContextService', () => {
 
     it('get tools for multiple plugins', () => {
       const pluginName1 = 'pluginName1';
-      const pluginName2 = "pluginName2";
+      const pluginName2 = 'pluginName2';
 
       appContextService.start(mockAppContext);
       appContextService.registerTools(pluginName2, [toolOne, toolThree]);
