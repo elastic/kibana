@@ -140,7 +140,7 @@ export const FeedbackFlyoutBody = ({
     </EuiText>
   );
   return (
-    <EuiFlyoutBody>
+    <EuiFlyoutBody data-test-subj="feedbackFlyoutBody">
       <EuiForm component="form">
         <EuiFormRow
           helpText={
@@ -220,7 +220,7 @@ export const FeedbackFlyoutBody = ({
           }
         >
           <EuiFieldText
-            data-test-subj="feedbackEmail"
+            data-test-subj="feedbackEmailInput"
             value={userEmail}
             aria-label={i18n.translate(
               'xpack.intercepts.feedbackFlyout.form.emailInput.ariaLabel',
