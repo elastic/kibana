@@ -391,7 +391,12 @@ describe('InTableSearchControl', () => {
     const initialProps: InTableSearchControlProps = {
       initialState: {
         searchTerm: 'b',
-        activeMatchPosition: 2,
+        activeMatch: {
+          matchPosition: 2,
+          matchIndexWithinCell: 0,
+          columnId: 'column0',
+          rowIndex: 1,
+        },
       },
       onInitialStateChange: jest.fn(),
       inTableSearchTerm: 'b',
@@ -439,7 +444,12 @@ describe('InTableSearchControl', () => {
 
     expect(initialProps.onInitialStateChange).toHaveBeenLastCalledWith({
       searchTerm: 'aa',
-      activeMatchPosition: 1,
+      activeMatch: {
+        matchPosition: 1,
+        matchIndexWithinCell: 0,
+        columnId: 'column0',
+        rowIndex: 0,
+      },
     });
   });
 });

@@ -243,10 +243,6 @@ function updateActiveMatchPosition({
   onInitialStateChange: UseFindMatchesProps['onInitialStateChange'];
 }) {
   if (typeof matchPosition !== 'number') {
-    onInitialStateChange?.({
-      searchTerm: term,
-      activeMatch: undefined,
-    });
     return;
   }
 
@@ -265,10 +261,12 @@ function updateActiveMatchPosition({
       onScrollToActiveMatch(activeMatch, animate);
     }
 
-    onInitialStateChange?.({
-      searchTerm: term,
-      activeMatch: activeMatch || undefined,
-    });
+    if (animate) {
+      onInitialStateChange?.({
+        searchTerm: term,
+        activeMatch: activeMatch || undefined,
+      });
+    }
   }, 0);
 }
 
