@@ -13,9 +13,9 @@ import path from 'path';
 import {
   deployTinyElserAndSetupKb,
   teardownTinyElserModelAndInferenceEndpoint,
-} from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/model_and_inference';
-import { clearKnowledgeBase } from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/knowledge_base';
-import { ObservabilityAIAssistantApiClient } from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/observability_ai_assistant_api_client';
+} from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/model_and_inference';
+import { clearKnowledgeBase } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/knowledge_base';
+import { ObservabilityAIAssistantApiClient } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/observability_ai_assistant_api_client';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {

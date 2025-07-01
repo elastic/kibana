@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { pageObjects as tempFunctionalPageObjects } from '@kbn/test-suites-xpack/functional/page_objects';
 import { pageObjects as kibanaFunctionalPageObjects } from '@kbn/test-suites-xpack-platform/functional/page_objects';
 import { AssetDetailsProvider } from './asset_details';
 import { InfraHomePageProvider } from './infra_home_page';
@@ -17,6 +18,7 @@ import { UptimePageObject } from './uptime_page';
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
 export const pageObjects = {
+  ...tempFunctionalPageObjects,
   ...kibanaFunctionalPageObjects,
   assetDetails: AssetDetailsProvider,
   infraHome: InfraHomePageProvider,

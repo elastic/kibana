@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   createLlmProxy,
   LlmProxy,
-} from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/create_llm_proxy';
+} from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
 import { createConnector, deleteConnectors } from '../../common/connectors';
 import { createAndLoginUserWithCustomRole, deleteAndLogoutUser } from './helpers';
 

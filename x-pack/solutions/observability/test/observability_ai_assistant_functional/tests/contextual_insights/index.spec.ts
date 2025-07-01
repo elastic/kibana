@@ -11,7 +11,7 @@ import moment from 'moment';
 import {
   createLlmProxy,
   LlmProxy,
-} from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/create_llm_proxy';
+} from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { deleteConnectors, createConnector } from '../../common/connectors';
 

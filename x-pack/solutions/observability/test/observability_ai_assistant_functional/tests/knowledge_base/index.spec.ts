@@ -10,14 +10,14 @@ import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/commo
 import {
   LlmProxy,
   createLlmProxy,
-} from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/create_llm_proxy';
+} from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   deployTinyElserAndSetupKb,
   stopTinyElserModel,
   teardownTinyElserModelAndInferenceEndpoint,
-} from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/model_and_inference';
-import { clearKnowledgeBase } from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/knowledge_base';
+} from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/model_and_inference';
+import { clearKnowledgeBase } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/knowledge_base';
 import { createConnector, deleteConnectors } from '../../common/connectors';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

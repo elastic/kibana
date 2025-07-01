@@ -13,7 +13,7 @@ import {
 } from '@kbn/test-suites-src/analytics/services/kibana_ebt';
 import path from 'path';
 import { secondaryEditor, editor, viewer } from './users/users';
-import { getScopedApiClient } from '../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/observability_ai_assistant_api_client';
+import { getScopedApiClient } from '../../api_integration_deployment_agnostic/apis/ai_assistant/utils/observability_ai_assistant_api_client';
 import { InheritedFtrProviderContext, InheritedServices } from '../ftr_provider_context';
 import { ObservabilityAIAssistantUIProvider } from './ui';
 import { getApmSynthtraceEsClient } from './create_synthtrace_client';
@@ -43,7 +43,7 @@ export const observabilityAIAssistantFtrConfigs = {
       'logging.loggers': [observabilityAIAssistantDebugLogger],
       'plugin-path': path.resolve(
         __dirname,
-        '../../../../src/platform/test/analytics/plugins/analytics_ftr_helpers'
+        '../../../../../../src/platform/test/analytics/plugins/analytics_ftr_helpers'
       ),
     },
   },
@@ -65,7 +65,7 @@ async function getTestConfig({
   kibanaConfig: Record<string, any> | undefined;
   readConfigFile: FtrConfigProviderContext['readConfigFile'];
 }) {
-  const testConfig = await readConfigFile(require.resolve('../../functional/config.base.js'));
+  const testConfig = await readConfigFile(require.resolve('../../functional/config.base.ts'));
 
   const getScopedApiClientForUsername = (username: string) =>
     getScopedApiClient(kibanaServer, username);

@@ -11,11 +11,11 @@ import { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/anal
 import { pick } from 'lodash';
 import { parse as parseCookie } from 'tough-cookie';
 import { kbnTestConfig } from '@kbn/test';
-import { systemMessageSorted } from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/conversation';
+import { systemMessageSorted } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/conversation';
 import {
   createLlmProxy,
   LlmProxy,
-} from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/create_llm_proxy';
+} from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { editor } from '../../common/users/users';

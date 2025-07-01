@@ -9,10 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { createOpenAIConnector } from './utils/create_openai_connector';
 import { MachineLearningCommonAPIProvider } from '../../services/ml/common_api';
 
-import {
-  createLlmProxy,
-  LlmProxy,
-} from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/create_llm_proxy';
+import { createLlmProxy, LlmProxy } from '../../../common/utils/create_llm_proxy';
 
 const esArchiveIndex =
   'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index';

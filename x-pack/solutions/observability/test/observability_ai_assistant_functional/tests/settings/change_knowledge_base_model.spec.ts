@@ -12,12 +12,12 @@ import { createConnector, deleteConnectors } from '../../common/connectors';
 import {
   LlmProxy,
   createLlmProxy,
-} from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/create_llm_proxy';
+} from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
 import {
   deployTinyElserAndSetupKb,
   stopTinyElserModel,
   teardownTinyElserModelAndInferenceEndpoint,
-} from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/model_and_inference';
+} from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/model_and_inference';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
