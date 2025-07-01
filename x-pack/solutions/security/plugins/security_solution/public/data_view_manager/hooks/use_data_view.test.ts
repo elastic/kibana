@@ -49,17 +49,35 @@ describe('useDataView', () => {
       .mockReturnValue({ dataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, status: 'ready' });
   });
 
+  // TODO: unskip it, it crashes node
   it.skip('should return DataView instance when data view is available', async () => {
     const fakeDataView = { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID };
     mockGet.mockResolvedValue(fakeDataView);
 
-    const { result } = renderHook(() => useDataView(DataViewManagerScopeName.default), {
+    const { result } = renderHook(() => useDataView(), {
       wrapper: TestProviders,
     });
 
-    expect(mockGet).toHaveBeenCalledWith(DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID);
+    expect(result.current.dataView.id).toBe(undefined);
+  });
 
-    expect(result.current.dataView.id).toBe(fakeDataView.id);
+  // TODO: unskip it, it crashes node
+  it.skip('should set status to loading on subsequent calls after first load', async () => {
+    const fakeDataView = { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID };
+    mockGet.mockResolvedValue(fakeDataView);
+
+    const { result, rerender } = renderHook(() => useDataView(DataViewManagerScopeName.default), {
+      wrapper: TestProviders,
+    });
+
+    // First load
+    expect(result.current.status).toBe('pristine');
+
+    // Simulate a change that triggers the effect again
+    act(() => rerender(DataViewManagerScopeName.default));
+    await waitFor(() => {
+      expect(result.current.status).toEqual('ready');
+    });
   });
 
   it('should not call get if newDataViewPickerEnabled is false', async () => {
@@ -112,24 +130,6 @@ describe('useDataView', () => {
     expect(mockToastsDanger).toHaveBeenCalledWith({
       title: 'Error retrieving data view',
       body: expect.stringContaining('fail!'),
-    });
-  });
-
-  it.skip('should set status to loading on subsequent calls after first load', async () => {
-    const fakeDataView = { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID };
-    mockGet.mockResolvedValue(fakeDataView);
-
-    const { result, rerender } = renderHook(() => useDataView(DataViewManagerScopeName.default), {
-      wrapper: TestProviders,
-    });
-
-    // First load
-    expect(result.current.status).toBe('pristine');
-
-    // Simulate a change that triggers the effect again
-    act(() => rerender(DataViewManagerScopeName.default));
-    await waitFor(() => {
-      expect(result.current.status).toEqual('ready');
     });
   });
 
