@@ -94,7 +94,7 @@ describe('Agentless Agent service', () => {
     mockedAppContextService.getExperimentalFeatures.mockReturnValue({ agentless: false } as any);
     (axios as jest.MockedFunction<typeof axios>).mockReset();
     jest.spyOn(agentPolicyService, 'getFullAgentPolicy').mockResolvedValue({
-      outputs: { agentless: {} as any },
+      outputs: { default: {} as any },
     } as any);
     jest.clearAllMocks();
   });
@@ -131,16 +131,12 @@ describe('Agentless Agent service', () => {
     jest
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
-    mockedFleetServerHostService.list.mockResolvedValue({
-      items: [
-        {
-          id: 'mocked-fleet-server-id',
-          host: 'http://fleetserver:8220',
-          active: true,
-          is_default: true,
-          host_urls: ['http://fleetserver:8220'],
-        },
-      ],
+    mockedFleetServerHostService.get.mockResolvedValue({
+      id: 'mocked-fleet-server-id',
+      host: 'http://fleetserver:8220',
+      active: true,
+      is_default: true,
+      host_urls: ['http://fleetserver:8220'],
     } as any);
     mockedListEnrollmentApiKeys.mockResolvedValue({
       items: [
@@ -159,6 +155,8 @@ describe('Agentless Agent service', () => {
         id: 'mocked-agentless-agent-policy-id',
         name: 'agentless agent policy',
         namespace: 'default',
+        fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+        data_output_id: 'mock-fleet-default-output',
         supports_agentless: true,
         global_data_tags: [
           {
@@ -198,7 +196,7 @@ describe('Agentless Agent service', () => {
             elasticsearch_app_token: 'es-app-token',
           },
           policy_details: {
-            output_name: 'agentless',
+            output_name: 'default',
           },
         }),
         headers: expect.anything(),
@@ -239,16 +237,12 @@ describe('Agentless Agent service', () => {
     jest
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
-    mockedFleetServerHostService.list.mockResolvedValue({
-      items: [
-        {
-          id: 'mocked-fleet-server-id',
-          host: 'http://fleetserver:8220',
-          active: true,
-          is_default: true,
-          host_urls: ['http://fleetserver:8220'],
-        },
-      ],
+    mockedFleetServerHostService.get.mockResolvedValue({
+      id: 'mocked-fleet-server-id',
+      host: 'http://fleetserver:8220',
+      active: true,
+      is_default: true,
+      host_urls: ['http://fleetserver:8220'],
     } as any);
     mockedListEnrollmentApiKeys.mockResolvedValue({
       items: [
@@ -267,6 +261,8 @@ describe('Agentless Agent service', () => {
         id: 'mocked-agentless-agent-policy-id',
         name: 'agentless agent policy',
         namespace: 'default',
+        fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+        data_output_id: 'mock-fleet-default-output',
         supports_agentless: true,
         global_data_tags: [
           {
@@ -305,7 +301,7 @@ describe('Agentless Agent service', () => {
             elasticsearch_app_token: 'es-app-token',
           },
           policy_details: {
-            output_name: 'agentless',
+            output_name: 'default',
           },
         }),
         headers: expect.anything(),
@@ -346,16 +342,12 @@ describe('Agentless Agent service', () => {
     jest
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
-    mockedFleetServerHostService.list.mockResolvedValue({
-      items: [
-        {
-          id: 'mocked-fleet-server-id',
-          host: 'http://fleetserver:8220',
-          active: true,
-          is_default: true,
-          host_urls: ['http://fleetserver:8220'],
-        },
-      ],
+    mockedFleetServerHostService.get.mockResolvedValue({
+      id: 'mocked-fleet-server-id',
+      host: 'http://fleetserver:8220',
+      active: true,
+      is_default: true,
+      host_urls: ['http://fleetserver:8220'],
     } as any);
     mockedListEnrollmentApiKeys.mockResolvedValue({
       items: [
@@ -374,6 +366,8 @@ describe('Agentless Agent service', () => {
         id: 'mocked-agentless-agent-policy-id',
         name: 'agentless agent policy',
         namespace: 'default',
+        fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+        data_output_id: 'mock-fleet-default-output',
         supports_agentless: true,
         agentless: {
           resources: {
@@ -426,7 +420,7 @@ describe('Agentless Agent service', () => {
             elasticsearch_app_token: 'es-app-token',
           },
           policy_details: {
-            output_name: 'agentless',
+            output_name: 'default',
           },
         }),
         headers: expect.anything(),
@@ -467,16 +461,12 @@ describe('Agentless Agent service', () => {
     jest
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
-    mockedFleetServerHostService.list.mockResolvedValue({
-      items: [
-        {
-          id: 'mocked-fleet-server-id',
-          host: 'http://fleetserver:8220',
-          active: true,
-          is_default: true,
-          host_urls: ['http://fleetserver:8220'],
-        },
-      ],
+    mockedFleetServerHostService.get.mockResolvedValue({
+      id: 'mocked-fleet-server-id',
+      host: 'http://fleetserver:8220',
+      active: true,
+      is_default: true,
+      host_urls: ['http://fleetserver:8220'],
     } as any);
     mockedListEnrollmentApiKeys.mockResolvedValue({
       items: [
@@ -495,6 +485,8 @@ describe('Agentless Agent service', () => {
         id: 'mocked-agentless-agent-policy-id',
         name: 'agentless agent policy',
         namespace: 'default',
+        fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+        data_output_id: 'mock-fleet-default-output',
         supports_agentless: true,
         agentless: {
           resources: {
@@ -555,7 +547,7 @@ describe('Agentless Agent service', () => {
             elasticsearch_app_token: 'es-app-token',
           },
           policy_details: {
-            output_name: 'agentless',
+            output_name: 'default',
           },
         }),
         headers: expect.anything(),
@@ -594,16 +586,12 @@ describe('Agentless Agent service', () => {
     jest
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
-    mockedFleetServerHostService.list.mockResolvedValue({
-      items: [
-        {
-          id: 'mocked-fleet-server-id',
-          host: 'http://fleetserver:8220',
-          active: true,
-          is_default: true,
-          host_urls: ['http://fleetserver:8220'],
-        },
-      ],
+    mockedFleetServerHostService.get.mockResolvedValue({
+      id: 'mocked-fleet-server-id',
+      host: 'http://fleetserver:8220',
+      active: true,
+      is_default: true,
+      host_urls: ['http://fleetserver:8220'],
     } as any);
     mockedListEnrollmentApiKeys.mockResolvedValue({
       items: [
@@ -622,6 +610,8 @@ describe('Agentless Agent service', () => {
         id: 'mocked-agentless-agent-policy-id',
         name: 'agentless agent policy',
         namespace: 'default',
+        fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+        data_output_id: 'mock-fleet-default-output',
         supports_agentless: true,
       } as AgentPolicy
     );
@@ -798,16 +788,12 @@ describe('Agentless Agent service', () => {
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
 
-    mockedFleetServerHostService.list.mockResolvedValue({
-      items: [
-        {
-          id: 'mocked-fleet-server-id',
-          host: 'http://fleetserver:8220',
-          active: true,
-          is_default: true,
-          host_urls: ['http://fleetserver:8220'],
-        },
-      ],
+    mockedFleetServerHostService.get.mockResolvedValue({
+      id: 'mocked-fleet-server-id',
+      host: 'http://fleetserver:8220',
+      active: true,
+      is_default: true,
+      host_urls: ['http://fleetserver:8220'],
     } as any);
 
     mockedListEnrollmentApiKeys.mockResolvedValue({
@@ -824,6 +810,8 @@ describe('Agentless Agent service', () => {
       id: 'mocked-agentless-agent-policy-id',
       name: 'agentless agent policy',
       namespace: 'default',
+      fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+      data_output_id: 'mock-fleet-default-output',
       supports_agentless: true,
     } as AgentPolicy);
 
@@ -856,16 +844,12 @@ describe('Agentless Agent service', () => {
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
 
-    mockedFleetServerHostService.list.mockResolvedValue({
-      items: [
-        {
-          id: 'mocked-fleet-server-id',
-          host: 'http://fleetserver:8220',
-          active: true,
-          is_default: true,
-          host_urls: ['http://fleetserver:8220'],
-        },
-      ],
+    mockedFleetServerHostService.get.mockResolvedValue({
+      id: 'mocked-fleet-server-id',
+      host: 'http://fleetserver:8220',
+      active: true,
+      is_default: true,
+      host_urls: ['http://fleetserver:8220'],
     } as any);
 
     mockedListEnrollmentApiKeys.mockResolvedValue({
@@ -883,6 +867,8 @@ describe('Agentless Agent service', () => {
         id: 'mocked-agentless-agent-policy-id',
         name: 'agentless agent policy',
         namespace: 'default',
+        fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+        data_output_id: 'mock-fleet-default-output',
         supports_agentless: true,
       } as AgentPolicy)
     ).rejects.toThrowError();
@@ -916,16 +902,12 @@ describe('Agentless Agent service', () => {
     } as any);
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
 
-    mockedFleetServerHostService.list.mockResolvedValue({
-      items: [
-        {
-          id: 'mocked-fleet-server-id',
-          host: 'http://fleetserver:8220',
-          active: true,
-          is_default: true,
-          host_urls: ['http://fleetserver:8220'],
-        },
-      ],
+    mockedFleetServerHostService.get.mockResolvedValue({
+      id: 'mocked-fleet-server-id',
+      host: 'http://fleetserver:8220',
+      active: true,
+      is_default: true,
+      host_urls: ['http://fleetserver:8220'],
     } as any);
 
     mockedListEnrollmentApiKeys.mockResolvedValue({
@@ -947,6 +929,8 @@ describe('Agentless Agent service', () => {
         id: 'mocked-agentless-agent-policy-id',
         name: 'agentless agent policy',
         namespace: 'default',
+        fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+        data_output_id: 'mock-fleet-default-output',
         supports_agentless: true,
       } as AgentPolicy)
     ).rejects.toThrowError();
@@ -986,16 +970,12 @@ describe('Agentless Agent service', () => {
     jest
       .spyOn(appContextService, 'getKibanaVersion')
       .mockReturnValue('mocked-kibana-version-infinite');
-    mockedFleetServerHostService.list.mockResolvedValue({
-      items: [
-        {
-          id: 'mocked-fleet-server-id',
-          host: 'http://fleetserver:8220',
-          active: true,
-          is_default: true,
-          host_urls: ['http://fleetserver:8220'],
-        },
-      ],
+    mockedFleetServerHostService.get.mockResolvedValue({
+      id: 'mocked-fleet-server-id',
+      host: 'http://fleetserver:8220',
+      active: true,
+      is_default: true,
+      host_urls: ['http://fleetserver:8220'],
     } as any);
     mockedListEnrollmentApiKeys.mockResolvedValue({
       items: [
@@ -1011,6 +991,8 @@ describe('Agentless Agent service', () => {
       id: 'mocked-agentless-agent-policy-id',
       name: 'agentless agent policy',
       namespace: 'default',
+      fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+      data_output_id: 'mock-fleet-default-output',
       supports_agentless: true,
     } as AgentPolicy);
 
@@ -1052,6 +1034,8 @@ describe('Agentless Agent service', () => {
           id: 'mocked',
           name: 'agentless agent policy',
           namespace: 'default',
+          fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+          data_output_id: 'mock-fleet-default-output',
           supports_agentless: false,
         } as AgentPolicy)
       ).rejects.toThrowError(
@@ -1089,6 +1073,8 @@ describe('Agentless Agent service', () => {
           id: 'mocked',
           name: 'agentless agent policy',
           namespace: 'default',
+          fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+          data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
       ).rejects.toThrowError(
@@ -1110,6 +1096,8 @@ describe('Agentless Agent service', () => {
           id: 'mocked',
           name: 'agentless agent policy',
           namespace: 'default',
+          fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+          data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
       ).rejects.toThrowError(
@@ -1138,7 +1126,7 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedFleetServerHostService.list.mockResolvedValue({ items: [] } as any);
+      mockedFleetServerHostService.get.mockRejectedValue(new Error('NOT FOUND'));
       mockedListEnrollmentApiKeys.mockResolvedValue({
         items: [
           {
@@ -1154,6 +1142,8 @@ describe('Agentless Agent service', () => {
           id: 'mocked',
           name: 'agentless agent policy',
           namespace: 'default',
+          fleet_server_host_id: 'mock-invalid-default-fleet-server-host',
+          data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
       ).rejects.toThrowError(new AgentlessAgentConfigError('missing default Fleet server host'));
@@ -1180,15 +1170,11 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedFleetServerHostService.list.mockResolvedValue({
-        items: [
-          {
-            id: 'mocked',
-            host: 'http://fleetserver:8220',
-            active: true,
-            is_default: true,
-          },
-        ],
+      mockedFleetServerHostService.get.mockResolvedValue({
+        id: 'mocked',
+        host: 'http://fleetserver:8220',
+        active: true,
+        is_default: true,
       } as any);
       mockedListEnrollmentApiKeys.mockResolvedValue({
         items: [],
@@ -1199,6 +1185,8 @@ describe('Agentless Agent service', () => {
           id: 'mocked',
           name: 'agentless agent policy',
           namespace: 'default',
+          fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+          data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
       ).rejects.toThrowError(new AgentlessAgentConfigError('missing Fleet enrollment token'));
@@ -1225,16 +1213,12 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedFleetServerHostService.list.mockResolvedValue({
-        items: [
-          {
-            id: 'mocked-fleet-server-id',
-            host: 'http://fleetserver:8220',
-            active: true,
-            is_default: true,
-            host_urls: ['http://fleetserver:8220'],
-          },
-        ],
+      mockedFleetServerHostService.get.mockResolvedValue({
+        id: 'mocked-fleet-server-id',
+        host: 'http://fleetserver:8220',
+        active: true,
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
       } as any);
       mockedListEnrollmentApiKeys.mockResolvedValue({
         items: [
@@ -1260,6 +1244,8 @@ describe('Agentless Agent service', () => {
           id: 'mocked-agentless-agent-policy-id',
           name: 'agentless agent policy',
           namespace: 'default',
+          fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+          data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
       ).rejects.toThrowError();
@@ -1289,16 +1275,12 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedFleetServerHostService.list.mockResolvedValue({
-        items: [
-          {
-            id: 'mocked-fleet-server-id',
-            host: 'http://fleetserver:8220',
-            active: true,
-            is_default: true,
-            host_urls: ['http://fleetserver:8220'],
-          },
-        ],
+      mockedFleetServerHostService.get.mockResolvedValue({
+        id: 'mocked-fleet-server-id',
+        host: 'http://fleetserver:8220',
+        active: true,
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
       } as any);
       mockedListEnrollmentApiKeys.mockResolvedValue({
         items: [
@@ -1324,6 +1306,8 @@ describe('Agentless Agent service', () => {
           id: 'mocked-agentless-agent-policy-id',
           name: 'agentless agent policy',
           namespace: 'default',
+          fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+          data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
       ).rejects.toThrowError();
@@ -1353,16 +1337,12 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedFleetServerHostService.list.mockResolvedValue({
-        items: [
-          {
-            id: 'mocked-fleet-server-id',
-            host: 'http://fleetserver:8220',
-            active: true,
-            is_default: true,
-            host_urls: ['http://fleetserver:8220'],
-          },
-        ],
+      mockedFleetServerHostService.get.mockResolvedValue({
+        id: 'mocked-fleet-server-id',
+        host: 'http://fleetserver:8220',
+        active: true,
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
       } as any);
       mockedListEnrollmentApiKeys.mockResolvedValue({
         items: [
@@ -1388,6 +1368,8 @@ describe('Agentless Agent service', () => {
           id: 'mocked-agentless-agent-policy-id',
           name: 'agentless agent policy',
           namespace: 'default',
+          fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+          data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
       ).rejects.toThrowError();
@@ -1417,16 +1399,12 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedFleetServerHostService.list.mockResolvedValue({
-        items: [
-          {
-            id: 'mocked-fleet-server-id',
-            host: 'http://fleetserver:8220',
-            active: true,
-            is_default: true,
-            host_urls: ['http://fleetserver:8220'],
-          },
-        ],
+      mockedFleetServerHostService.get.mockResolvedValue({
+        id: 'mocked-fleet-server-id',
+        host: 'http://fleetserver:8220',
+        active: true,
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
       } as any);
       mockedListEnrollmentApiKeys.mockResolvedValue({
         items: [
@@ -1452,6 +1430,8 @@ describe('Agentless Agent service', () => {
           id: 'mocked-agentless-agent-policy-id',
           name: 'agentless agent policy',
           namespace: 'default',
+          fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+          data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
       ).rejects.toThrowError();
@@ -1481,16 +1461,12 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedFleetServerHostService.list.mockResolvedValue({
-        items: [
-          {
-            id: 'mocked-fleet-server-id',
-            host: 'http://fleetserver:8220',
-            active: true,
-            is_default: true,
-            host_urls: ['http://fleetserver:8220'],
-          },
-        ],
+      mockedFleetServerHostService.get.mockResolvedValue({
+        id: 'mocked-fleet-server-id',
+        host: 'http://fleetserver:8220',
+        active: true,
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
       } as any);
       mockedListEnrollmentApiKeys.mockResolvedValue({
         items: [
@@ -1516,6 +1492,8 @@ describe('Agentless Agent service', () => {
           id: 'mocked-agentless-agent-policy-id',
           name: 'agentless agent policy',
           namespace: 'default',
+          fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+          data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
       ).rejects.toThrowError();
@@ -1545,16 +1523,12 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedFleetServerHostService.list.mockResolvedValue({
-        items: [
-          {
-            id: 'mocked-fleet-server-id',
-            host: 'http://fleetserver:8220',
-            active: true,
-            is_default: true,
-            host_urls: ['http://fleetserver:8220'],
-          },
-        ],
+      mockedFleetServerHostService.get.mockResolvedValue({
+        id: 'mocked-fleet-server-id',
+        host: 'http://fleetserver:8220',
+        active: true,
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
       } as any);
       mockedListEnrollmentApiKeys.mockResolvedValue({
         items: [
@@ -1580,6 +1554,8 @@ describe('Agentless Agent service', () => {
           id: 'mocked-agentless-agent-policy-id',
           name: 'agentless agent policy',
           namespace: 'default',
+          fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+          data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
       ).rejects.toThrowError();
@@ -1609,16 +1585,12 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedFleetServerHostService.list.mockResolvedValue({
-        items: [
-          {
-            id: 'mocked-fleet-server-id',
-            host: 'http://fleetserver:8220',
-            active: true,
-            is_default: true,
-            host_urls: ['http://fleetserver:8220'],
-          },
-        ],
+      mockedFleetServerHostService.get.mockResolvedValue({
+        id: 'mocked-fleet-server-id',
+        host: 'http://fleetserver:8220',
+        active: true,
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
       } as any);
       mockedListEnrollmentApiKeys.mockResolvedValue({
         items: [
@@ -1644,6 +1616,8 @@ describe('Agentless Agent service', () => {
           id: 'mocked-agentless-agent-policy-id',
           name: 'agentless agent policy',
           namespace: 'default',
+          fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+          data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
       ).rejects.toThrowError();
@@ -1673,16 +1647,12 @@ describe('Agentless Agent service', () => {
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-      mockedFleetServerHostService.list.mockResolvedValue({
-        items: [
-          {
-            id: 'mocked-fleet-server-id',
-            host: 'http://fleetserver:8220',
-            active: true,
-            is_default: true,
-            host_urls: ['http://fleetserver:8220'],
-          },
-        ],
+      mockedFleetServerHostService.get.mockResolvedValue({
+        id: 'mocked-fleet-server-id',
+        host: 'http://fleetserver:8220',
+        active: true,
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
       } as any);
       mockedListEnrollmentApiKeys.mockResolvedValue({
         items: [
@@ -1708,6 +1678,8 @@ describe('Agentless Agent service', () => {
           id: 'mocked-agentless-agent-policy-id',
           name: 'agentless agent policy',
           namespace: 'default',
+          fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+          data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
       ).rejects.toThrowError();
