@@ -51,7 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('groups vulnerabilities by cloud account and sort by number of vulnerabilities desc', async () => {
         const groupSelector = findings.groupSelector();
         await groupSelector.openDropDown();
-        await groupSelector.setValue('Cloud account');
+        await groupSelector.setValue('Cloud account ID');
 
         const grouping = await findings.findingsGrouping();
 
@@ -134,7 +134,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await groupSelector.openDropDown();
         await groupSelector.setValue('None');
         await groupSelector.openDropDown();
-        await groupSelector.setValue('Resource');
+        await groupSelector.setValue('Resource ID');
         const grouping = await findings.findingsGrouping();
 
         const resourceOrder = [
@@ -177,7 +177,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await groupSelector.openDropDown();
         await groupSelector.setValue('None');
         await groupSelector.openDropDown();
-        await groupSelector.setValue('Resource');
+        await groupSelector.setValue('Resource ID');
 
         // Filter bar uses the field's customLabel in the DataView
 
