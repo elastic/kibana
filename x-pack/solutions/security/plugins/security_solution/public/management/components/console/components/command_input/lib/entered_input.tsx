@@ -58,14 +58,16 @@ const toInputCharacterDisplayString = (
 ): string => {
   let response = item.value;
 
+  console.log('newww');
   if (includeArgSelectorValues && item.isArgSelector) {
-    // Handle file values: use the filename
+    // For file selectors: show bare flag only (no filename in display text)
+    // File objects remain in selector state exclusively
     if (item.argState?.value instanceof File) {
-      const filename = item.argState.value.name;
-      const quotedFilename = filename.includes(' ') ? `"${filename}"` : filename;
-      response += `=${quotedFilename}`;
+      // Extract just the argument name (e.g., "--file" from any existing text)
+      const argMatch = response.match(/^(--[^=\s]+)/);
+      response = argMatch ? argMatch[1] : response; // Just "--file", no value
     }
-    // Handle string values: use valueText if it exists and is not empty
+    // For string selectors: add valueText only if it exists and is not empty
     else if (item.argState?.valueText && item.argState.valueText.trim() !== '') {
       const value = item.argState.valueText;
       const quotedValue = value.includes(' ') ? `"${value}"` : value;

@@ -9,6 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
 import type { ParsedCommandInterface } from '../../../service/types';
 import { parseCommandInput } from '../../../service/parsed_command_input';
+import '../../../command_handlers'; // Import to ensure handlers are registered
+import { commandRegistry } from '../../../command_handlers/command_registry';
 import type {
   ConsoleDataAction,
   ConsoleDataState,
@@ -27,14 +29,8 @@ const setArgSelectorValueToParsedArgs = (
   parsedInput: ParsedCommandInterface,
   enteredCommand: EnteredCommand | undefined
 ) => {
-  if (enteredCommand && enteredCommand.argsWithValueSelectors) {
-    for (const argName of Object.keys(enteredCommand.argsWithValueSelectors)) {
-      if (parsedInput.hasArg(argName)) {
-        const argumentValues = enteredCommand.argState[argName] ?? [];
-        // Always set selector values using valueText for proper command reconstruction
-        parsedInput.args[argName] = argumentValues.map((itemState) => itemState.value);
-      }
-    }
+  if (enteredCommand) {
+    commandRegistry.syncState(parsedInput, enteredCommand);
   }
 };
 
@@ -44,24 +40,8 @@ const initializeArgSelectorStateFromParsedArgs = (
   parsedInput: ParsedCommandInterface,
   enteredCommand: EnteredCommand | undefined
 ) => {
-  if (enteredCommand?.argsWithValueSelectors) {
-    for (const argName of Object.keys(enteredCommand.argsWithValueSelectors)) {
-      // Only initialize from parsed input if no selector state exists yet
-      if (
-        parsedInput.hasArg(argName) &&
-        (!enteredCommand.argState[argName] || enteredCommand.argState[argName].length === 0)
-      ) {
-        const parsedValues = parsedInput.args[argName];
-        enteredCommand.argState[argName] = [];
-
-        parsedValues.forEach((parsedValue, index) => {
-          enteredCommand.argState[argName][index] = {
-            value: parsedValue,
-            valueText: String(parsedValue),
-          };
-        });
-      }
-    }
+  if (enteredCommand) {
+    commandRegistry.initializeArgState(parsedInput, enteredCommand);
   }
 };
 
@@ -176,8 +156,9 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
 
         // Initialize argument selectors with values from parsed input
         // but only if selector state doesn't already exist
-        if (enteredCommand && parsedInput.name === 'runscript') {
-          initializeArgSelectorStateFromParsedArgs(parsedInput, enteredCommand);
+        // Delegate to individual command handlers
+        if (enteredCommand) {
+          commandRegistry.initializeArgState(parsedInput, enteredCommand);
         }
 
         // Then always update parsed input with selector values
@@ -241,9 +222,7 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         const updatedParsedInput = parseCommandInput(currentRawInput);
         setArgSelectorValueToParsedArgs(updatedParsedInput, updatedEnteredCommand);
 
-        let completeInputText = updatedParsedInput.name;
-
-        let configuration: {
+        const configuration: {
           leftOfCursorText?: string;
           rightOfCursorText?: string;
           parsedInput: ParsedCommandInterface;
@@ -251,30 +230,8 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
           parsedInput: updatedParsedInput,
         };
 
-        // Reconstruct command text for runscript command
-        if (updatedParsedInput.name === 'runscript') {
-          // Add arguments with their values including updated selector values
-          for (const [parsedInputArgName, argValues] of Object.entries(updatedParsedInput.args)) {
-            for (const value of argValues) {
-              if (typeof value === 'boolean' && value) {
-                completeInputText += ` --${parsedInputArgName}`;
-              } else if (typeof value === 'string') {
-                // Add quotes if the value contains spaces
-                const quotedValue = value.includes(' ') ? `"${value}"` : value;
-                completeInputText += ` --${parsedInputArgName}=${quotedValue}`;
-              }
-            }
-          }
-          const updatedFullParsedInput = parseCommandInput(completeInputText);
-
-          configuration = {
-            leftOfCursorText: completeInputText,
-            rightOfCursorText: '',
-            parsedInput: updatedFullParsedInput,
-          };
-        }
-
-        // Update the raw input text to include selector values
+        // Let main display system (EnteredInput) handle all command reconstruction
+        // Command handlers only manage state, not display
 
         return {
           ...state,
