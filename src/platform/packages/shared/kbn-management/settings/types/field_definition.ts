@@ -10,7 +10,7 @@
 import { ReactElement } from 'react';
 
 import { UiCounterMetricType } from '@kbn/analytics';
-import { DeprecationSettings, UiSettingsSolution } from '@kbn/core-ui-settings-common';
+import { DeprecationSettings, UiSettingsSolutions } from '@kbn/core-ui-settings-common';
 
 import { KnownTypeToValue, SettingType } from './setting_type';
 
