@@ -311,11 +311,21 @@ export interface CalculateExcludeFiltersState extends SourceExistsState {
   readonly controlState: 'CALCULATE_EXCLUDE_FILTERS';
 }
 
+export interface CreateIndexCheckClusterRoutingAllocationState extends PostInitState {
+  readonly controlState: 'CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION';
+  readonly sourceIndex: Option.None;
+  readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
+}
+
 export interface CreateNewTargetState extends PostInitState {
   /** Blank ES cluster, create a new version-specific target index */
   readonly controlState: 'CREATE_NEW_TARGET';
   readonly sourceIndex: Option.None;
   readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
+}
+
+export interface ReindexCheckClusterRoutingAllocationState extends PostInitState {
+  readonly controlState: 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION';
 }
 
 export interface CreateReindexTempState extends PostInitState {
@@ -567,6 +577,7 @@ export type State = Readonly<
   | CleanupUnknownAndExcluded
   | CleanupUnknownAndExcludedWaitForTaskState
   | CloneTempToTarget
+  | CreateIndexCheckClusterRoutingAllocationState
   | CreateNewTargetState
   | CreateReindexTempState
   | DoneReindexingSyncState
@@ -591,6 +602,7 @@ export type State = Readonly<
   | ReadyToReindexSyncState
   | RefreshSource
   | RefreshTarget
+  | ReindexCheckClusterRoutingAllocationState
   | ReindexSourceToTempClosePit
   | ReindexSourceToTempIndexBulk
   | ReindexSourceToTempOpenPit

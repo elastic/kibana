@@ -60,6 +60,7 @@ import type {
   LegacyCheckClusterRoutingAllocationState,
   CheckClusterRoutingAllocationState,
   PostInitState,
+  CreateIndexCheckClusterRoutingAllocationState,
 } from '../state';
 import { type TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
 import type { AliasAction, RetryableEsClientError } from '../actions';
@@ -734,7 +735,7 @@ describe('migrations v2 model', () => {
           const newState = model(initState, res);
 
           expect(newState).toMatchObject({
-            controlState: 'CREATE_NEW_TARGET',
+            controlState: 'CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION',
             sourceIndex: Option.none,
             targetIndex: '.kibana_7.11.0_001',
           });
@@ -742,7 +743,7 @@ describe('migrations v2 model', () => {
           expect(newState.retryDelay).toEqual(0);
         });
 
-        test('INIT -> CREATE_REINDEX_TEMP when the index does not exist and the migrator is involved in a relocation', () => {
+        test('INIT -> REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION when the index does not exist and the migrator is involved in a relocation', () => {
           const res: ResponseType<'INIT'> = Either.right({});
           const newState = model(
             {
@@ -753,7 +754,7 @@ describe('migrations v2 model', () => {
           );
 
           expect(newState).toMatchObject({
-            controlState: 'CREATE_REINDEX_TEMP',
+            controlState: 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION',
             sourceIndex: Option.none,
             targetIndex: '.kibana_7.11.0_001',
             versionIndexReadyActions: Option.some([
@@ -765,6 +766,52 @@ describe('migrations v2 model', () => {
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
         });
+      });
+    });
+
+    describe('CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION', () => {
+      const aliasActions = Option.some([Symbol('alias action')] as unknown) as Option.Some<
+        AliasAction[]
+      >;
+      const createIndexCheckClusterRoutingAllocationState: CreateIndexCheckClusterRoutingAllocationState =
+        {
+          ...postInitState,
+          controlState: 'CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION',
+          versionIndexReadyActions: aliasActions,
+          sourceIndex: Option.none as Option.None,
+          targetIndex: '.kibana_7.11.0_001',
+        };
+
+      test('CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION -> CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION when cluster allocation is not compatible', () => {
+        const res: ResponseType<'CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION'> = Either.left({
+          type: 'incompatible_cluster_routing_allocation',
+        });
+        const newState = model(createIndexCheckClusterRoutingAllocationState, res);
+
+        expect(newState.controlState).toBe('CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
+      });
+
+      test('CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION -> CREATE_NEW_TARGET when cluster allocation is compatible', () => {
+        const res: ResponseType<'CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION'> = Either.right({});
+        const newState = model(
+          createIndexCheckClusterRoutingAllocationState,
+          res
+        ) as CreateNewTargetState;
+
+        expect(newState.controlState).toBe('CREATE_NEW_TARGET');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+        expect(newState.targetIndex).toEqual(
+          createIndexCheckClusterRoutingAllocationState.targetIndex
+        );
+        expect(newState.targetIndexMappings).toEqual(
+          createIndexCheckClusterRoutingAllocationState.targetIndexMappings
+        );
+        expect(newState.esCapabilities).toEqual(
+          createIndexCheckClusterRoutingAllocationState.esCapabilities
+        );
       });
     });
 
