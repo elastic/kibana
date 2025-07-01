@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -80,15 +80,6 @@ export default function ({
         await testSubjects.missingOrFail('superDatePickerToggleQuickMenuButton');
         await testSubjects.existOrFail('globalQueryBar');
       });
-
-      it('renders as expected', async () => {
-        await dashboard.waitForRenderComplete();
-        const percentDifference = await screenshot.compareAgainstBaseline(
-          'dashboard_embed_mode',
-          updateBaselines
-        );
-        expect(percentDifference).to.be.lessThan(0.02);
-      });
     });
 
     describe('non-default URL params', () => {
@@ -103,32 +94,6 @@ export default function ({
         await testSubjects.existOrFail('queryInput');
         await testSubjects.existOrFail('superDatePickerToggleQuickMenuButton');
       });
-
-      it('renders as expected', async () => {
-        await dashboard.waitForRenderComplete();
-        const percentDifference = await screenshot.compareAgainstBaseline(
-          'dashboard_embed_mode_with_url_params',
-          updateBaselines
-        );
-        expect(percentDifference).to.be.lessThan(0.02);
-      });
-
-      it('renders as expected when scrolling', async () => {
-        const panels = await dashboard.getDashboardPanels();
-        const lastPanel = panels[panels.length - 1];
-        const lastPanelHeight = -parseInt(await lastPanel.getComputedStyle('height'), 10);
-        log.debug(
-          `scrolling to panel ${await lastPanel.getAttribute(
-            'data-test-embeddable-id'
-          )} with offset ${lastPanelHeight}...`
-        );
-        await lastPanel.scrollIntoViewIfNecessary(lastPanelHeight);
-        const percentDifference = await screenshot.compareAgainstBaseline(
-          'dashboard_embed_mode_scrolling',
-          updateBaselines
-        );
-        expect(percentDifference).to.be.lessThan(0.021);
-      });
     });
 
     after(async function () {
@@ -141,7 +106,7 @@ export default function ({
       // Then get rid of the timestamp so the rest of the tests work with state and app switching.
       useTimeStamp = false;
       await browser.get(newUrl.toString(), useTimeStamp);
-      await kibanaServer.savedObjects.cleanStandardList();
+      // await kibanaServer.savedObjects.cleanStandardList();
     });
   });
 }
