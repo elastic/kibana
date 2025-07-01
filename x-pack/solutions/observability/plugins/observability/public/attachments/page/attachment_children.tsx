@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiCallOut, EuiText, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { escape } from 'lodash';
 import { type PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import type { PageAttachmentPersistedState } from '@kbn/observability-schema';
 
@@ -40,7 +41,7 @@ export function PageAttachmentChildren({
       </EuiCallOut>
     );
   }
-  const href = url.pathAndQuery || '';
+  const href = escape(url.pathAndQuery || '');
   const label = url.label;
 
   return (
