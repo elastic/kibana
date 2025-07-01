@@ -198,7 +198,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('filters are added when a cell filter is clicked', async function () {
+    it('Clicking view action opens discover session in discover', async function () {
       await addSearchEmbeddableToDashboard();
       await dashboardPanelActions.clickPanelAction(
         'embeddablePanelAction-ACTION_VIEW_SAVED_SEARCH'
