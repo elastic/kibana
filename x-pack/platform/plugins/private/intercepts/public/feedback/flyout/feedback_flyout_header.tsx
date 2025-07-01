@@ -44,6 +44,7 @@ export const FeedbackFlyoutHeader = ({ closeFlyout }: Props) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
+            data-test-subj="feedbackFlyoutCloseButton"
             iconType="cross"
             color="neutral"
             size="xs"
