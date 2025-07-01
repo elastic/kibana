@@ -84,7 +84,7 @@ export const GridImplementation: StoryObj<{ query: string }> = {
               // eslint-disable-next-line no-console -- Handle group by change if needed
               console.log('Group By Changed:', groupBy);
             }}
-            onCascadeNodeExpanded={async ({ row }) => {
+            onCascadeGroupNodeExpanded={async ({ row }) => {
               // Simulate a data fetch on row expansion
               return new Promise((resolve) => {
                 setTimeout(() => {
@@ -100,7 +100,7 @@ export const GridImplementation: StoryObj<{ query: string }> = {
                 }, 3000);
               });
             }}
-            onCascadeLeafExpanded={async ({ row, nodePathMap }) => {
+            onCascadeLeafNodeExpanded={async ({ row, nodePathMap }) => {
               // Simulate a data fetch for the expanded leaf, ideally we'd want to use nodePath information to fetch this data
               return new Promise((resolve) => {
                 setTimeout(() => {
