@@ -21,7 +21,7 @@ const Container = styled.div`
 `;
 export const ValueWithSpaceWarning: FC<ValueWithSpaceWarningProps> = ({
   value,
-  tooltipIconType = 'iInCircle',
+  tooltipIconType = 'info',
   tooltipIconText,
 }) => {
   const { showSpaceWarningIcon, warningText } = useValueWithSpaceWarning({

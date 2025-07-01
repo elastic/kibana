@@ -132,7 +132,7 @@ export function MaintenanceWindowCallout({
             })
       }
       color="warning"
-      iconType="iInCircle"
+      iconType="info"
       data-test-subj="maintenanceWindowCallout"
     >
       {MAINTENANCE_WINDOW_RUNNING_DESCRIPTION}
