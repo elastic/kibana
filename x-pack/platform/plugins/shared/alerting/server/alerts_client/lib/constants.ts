@@ -4,9 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export default ({ loadTestFile }) => {
-  describe('reporting management app', function () {
-    loadTestFile(require.resolve('./report_listing'));
-  });
-};
+export const MAX_QUERIES = 20000;
