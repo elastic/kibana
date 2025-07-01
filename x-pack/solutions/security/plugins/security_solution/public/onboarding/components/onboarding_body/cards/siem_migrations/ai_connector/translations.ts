@@ -8,22 +8,22 @@
 import { i18n } from '@kbn/i18n';
 
 export const AI_CONNECTOR_CARD_TITLE = i18n.translate(
-  'xpack.securitySolution.onboarding.aiConnectorService.title',
+  'xpack.securitySolution.onboarding.aiConnector.title',
   {
-    defaultMessage: 'Configure AI service',
+    defaultMessage: 'Configure AI Provider',
   }
 );
 
 export const AI_CONNECTOR_CARD_DESCRIPTION_START = i18n.translate(
-  'xpack.securitySolution.onboarding.aiConnector.descriptionStartService',
-  { defaultMessage: 'This feature relies on an AI service for rule translation. ' }
+  'xpack.securitySolution.onboarding.aiConnector.descriptionStart',
+  { defaultMessage: 'This feature relies on an AI connector for rule translation. ' }
 );
 
 export const AI_CONNECTOR_CARD_DESCRIPTION_INFERENCE_CONNECTOR = i18n.translate(
-  'xpack.securitySolution.onboarding.aiConnector.descriptionInferenceConnectorService',
+  'xpack.securitySolution.onboarding.aiConnector.descriptionInferenceConnector',
   {
     defaultMessage:
-      'The Elastic-provided service is selected by default. You can configure another service and model if you prefer. ',
+      'The Elastic-provided connector is selected by default. You can configure another connector and model if you prefer. ',
   }
 );
 
