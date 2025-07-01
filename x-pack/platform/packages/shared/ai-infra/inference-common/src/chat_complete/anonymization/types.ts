@@ -14,6 +14,7 @@ interface AnonymizationRuleBase {
 export interface NamedEntityRecognitionRule extends AnonymizationRuleBase {
   type: 'NER';
   modelId: string;
+  allowedEntityClasses?: Array<'PER' | 'ORG' | 'LOC' | 'MISC'>;
 }
 export interface RegexAnonymizationRule extends AnonymizationRuleBase {
   type: 'RegExp';
@@ -50,6 +51,7 @@ export interface Deanonymization {
 export interface AnonymizationOutput {
   messages: Message[];
   anonymizations: Anonymization[];
+  system?: string;
 }
 
 export interface DeanonymizationOutput {

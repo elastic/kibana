@@ -117,12 +117,14 @@ export function createChatCompleteCallbackApi({
 
           return from(
             anonymizeMessages({
+              system,
               messages,
               anonymizationRules,
               esClient,
             })
           ).pipe(
             switchMap((anonymization) => {
+              const anonymizedSystem = anonymization.system ?? system;
               const connector = executor.getConnector();
               const connectorType = connector.type;
               const inferenceAdapter = getInferenceAdapter(connectorType);
@@ -138,7 +140,7 @@ export function createChatCompleteCallbackApi({
 
               return withChatCompleteSpan(
                 {
-                  system,
+                  system: anonymizedSystem,
                   messages: anonymization.messages,
                   tools,
                   toolChoice,
@@ -151,7 +153,7 @@ export function createChatCompleteCallbackApi({
                 () => {
                   return inferenceAdapter
                     .chatComplete({
-                      system,
+                      system: anonymizedSystem,
                       executor,
                       messages: anonymization.messages,
                       toolChoice,

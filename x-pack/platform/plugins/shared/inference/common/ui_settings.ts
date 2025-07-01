@@ -28,6 +28,16 @@ const nerRuleSchema = schema.allOf([
   schema.object({
     type: schema.literal('NER'),
     modelId: schema.maybe(schema.string()),
+    allowedEntityClasses: schema.maybe(
+      schema.arrayOf(
+        schema.oneOf([
+          schema.literal('PER'),
+          schema.literal('ORG'),
+          schema.literal('LOC'),
+          schema.literal('MISC'),
+        ])
+      )
+    ),
   }),
 ]);
 
@@ -49,6 +59,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
           type: 'NER',
           modelId: 'elastic__distilbert-base-uncased-finetuned-conll03-english',
           enabled: false,
+          allowedEntityClasses: ['PER', 'ORG', 'LOC'],
         },
       ],
       null,

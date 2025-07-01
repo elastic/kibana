@@ -54,6 +54,8 @@ export async function executeNerRule({
 }): Promise<AnonymizationState> {
   const anonymizations: Anonymization[] = state.anonymizations.concat();
 
+  const allowedNerEntities = rule.allowedEntityClasses;
+
   const limiter = pLimit(DEFAULT_MAX_CONCURRENT_REQUESTS);
 
   const allTexts: string[] = [];
@@ -112,7 +114,9 @@ export async function executeNerRule({
 
           let anonymizedValue = allTexts[position];
 
-          for (const entity of nerOutput.entities ?? []) {
+          for (const entity of (nerOutput.entities ?? []).filter((e) =>
+            allowedNerEntities ? allowedNerEntities.includes(e.class_name as any) : true
+          )) {
             const from = entity.start_pos + offset;
             const to = entity.end_pos + offset;
 

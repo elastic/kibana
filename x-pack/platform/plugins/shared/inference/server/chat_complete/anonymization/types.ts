@@ -19,6 +19,7 @@ export interface AnonymizationRecord {
   data?: string;
   contentParts?: string;
   content?: string;
+  system?: string;
 }
 
 /**

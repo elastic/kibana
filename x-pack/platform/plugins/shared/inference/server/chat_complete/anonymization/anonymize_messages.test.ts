@@ -38,6 +38,7 @@ describe('anonymizeMessages', () => {
     type: 'NER',
     enabled: true,
     modelId: 'model-1',
+    allowedEntityClasses: ['PER'],
   };
 
   const disabledRule: AnonymizationRule = { ...nerRule, enabled: false };
@@ -259,5 +260,102 @@ describe('anonymizeMessages', () => {
     assistant.toolCalls.forEach((call) => {
       expect(call.function.arguments.query).not.toContain('Bob');
     });
+  });
+  it('anonymizes the system prompt', async () => {
+    const systemPrompt = `<ConversationHistory>
+  [
+   {
+     "@timestamp": "2025-07-01T15:48:59.044Z",
+     "message": {
+       "role": "user",
+       "content": "my name is jorge"
+     }
+   }
+  ]
+  </ConversationHistory>`;
+
+    const start = systemPrompt.indexOf('jorge');
+    const end = start + 'jorge'.length;
+
+    setupMockResponse([
+      {
+        entities: [
+          {
+            entity: 'jorge',
+            class_name: 'PER',
+            start_pos: start,
+            end_pos: end,
+            class_probability: 0.99,
+          },
+        ],
+      },
+    ]);
+
+    const result = await anonymizeMessages({
+      system: systemPrompt,
+      messages: [],
+      anonymizationRules: [nerRule],
+      esClient: mockEsClient,
+    });
+    expect(result.system).toBe(
+      '<ConversationHistory>\n' +
+        '  [\n' +
+        '   {\n' +
+        '     "@timestamp": "2025-07-01T15:48:59.044Z",\n' +
+        '     "message": {\n' +
+        '       "role": "user",\n' +
+        '       "content": "my name is PER_ee4587b4ba681e38996a1b716facbf375786bff7"\n' +
+        '     }\n' +
+        '   }\n' +
+        '  ]\n' +
+        '  </ConversationHistory>'
+    );
+  });
+  it('anonymizes only allowed entity classes as defined in NER rule', async () => {
+    const userText = 'my name is jorge and I live in los angeles';
+
+    const startJorge = userText.indexOf('jorge');
+    const endJorge = startJorge + 'jorge'.length;
+
+    const startLA = userText.indexOf('los angeles');
+    const endLA = startLA + 'los angeles'.length;
+
+    setupMockResponse([
+      {
+        entities: [
+          {
+            entity: 'jorge',
+            class_name: 'PER',
+            start_pos: startJorge,
+            end_pos: endJorge,
+            class_probability: 0.99,
+          },
+          {
+            entity: 'los angeles',
+            class_name: 'LOC',
+            start_pos: startLA,
+            end_pos: endLA,
+            class_probability: 0.99,
+          },
+        ],
+      },
+    ]);
+
+    const { messages: maskedMsgs } = await anonymizeMessages({
+      messages: [
+        {
+          role: MessageRole.User,
+          content: userText,
+        },
+      ],
+      anonymizationRules: [nerRule], // nerRule allows only PER
+      esClient: mockEsClient,
+    });
+
+    const maskedContent = (maskedMsgs[0] as UserMessage).content;
+
+    expect(maskedContent).toBe(
+      'my name is PER_ee4587b4ba681e38996a1b716facbf375786bff7 and I live in los angeles'
+    );
   });
 });

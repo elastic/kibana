@@ -13,10 +13,12 @@ import { messageFromAnonymizationRecords } from './message_from_anonymization_re
 import { messageToAnonymizationRecords } from './message_to_anonymization_records';
 
 export async function anonymizeMessages({
+  system,
   messages,
   anonymizationRules,
   esClient,
 }: {
+  system?: string | undefined;
   messages: Message[];
   anonymizationRules: AnonymizationRule[];
   esClient: ElasticsearchClient;
@@ -30,6 +32,9 @@ export async function anonymizeMessages({
   }
 
   const toAnonymize = messages.map(messageToAnonymizationRecords);
+  if (system) {
+    toAnonymize.push({ system });
+  }
 
   const { records, anonymizations } = await anonymizeRecords({
     input: toAnonymize,
@@ -43,7 +48,10 @@ export async function anonymizeMessages({
     return merge({}, original, messageFromAnonymizationRecords(map));
   });
 
+  const anonymizedSystem = records.find((r) => 'system' in r) as { system?: string } | undefined;
+
   return {
+    system: anonymizedSystem?.system,
     messages: anonymizedMessages,
     anonymizations,
   };
