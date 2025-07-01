@@ -6,7 +6,7 @@
  */
 
 import { setup, assign, ActorRefFrom, fromObservable, MachineImplementationsFrom } from 'xstate5';
-import { Observable, filter, map, switchMap, firstValueFrom } from 'rxjs';
+import { Observable, filter, map, switchMap, timeout, catchError, throwError } from 'rxjs';
 import { MappingRuntimeField, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { IEsSearchResponse } from '@kbn/search-types';
@@ -27,30 +27,29 @@ export interface RoutingSamplesInput {
   condition?: Condition;
   start: number;
   end: number;
-  size?: number;
-  streamDefinition: Streams.WiredStream.GetResponse;
-  data: DataPublicPluginStart;
+  definition: Streams.WiredStream.GetResponse;
 }
 
 export interface RoutingSamplesContext {
   condition?: Condition;
   start: number;
   end: number;
-  size?: number;
-  streamDefinition: Streams.WiredStream.GetResponse;
-  data: DataPublicPluginStart;
+  definition: Streams.WiredStream.GetResponse;
   documents: SampleDocument[];
   documentsError?: Error;
-  documentCountsError?: Error;
   approximateMatchingPercentage?: string;
+  approximateMatchingPercentageError?: Error;
 }
 
 export type RoutingSamplesEvent =
   | { type: 'refresh' }
   | {
       type: 'updateOptions';
-      options: Partial<Pick<RoutingSamplesInput, 'condition' | 'start' | 'end' | 'size'>>;
-    };
+      options: Partial<Pick<RoutingSamplesInput, 'condition' | 'start' | 'end'>>;
+    }
+  | { type: 'retryDocuments' }
+  | { type: 'retryDocumentCounts' }
+  | { type: 'retry' };
 
 export type RoutingSamplesActorRef = ActorRefFrom<typeof routingSamplesMachine>;
 
@@ -59,17 +58,31 @@ interface SearchParams {
   condition?: Condition;
   start: number;
   end: number;
-  size?: number;
-  streamDefinition: Streams.WiredStream.GetResponse;
+  definition: Streams.WiredStream.GetResponse;
 }
 
-interface SearchInput {
+interface CollectorParams {
   data: DataPublicPluginStart;
   searchParams: SearchParams;
 }
 
 // Helper functions
+const SAMPLES_SIZE = 100;
 const PROBABILITY_THRESHOLD = 100000;
+const SEARCH_TIMEOUT_MS = 10000; // 10 seconds
+
+/**
+ * Creates a timestamp range query object for Elasticsearch
+ */
+const createTimestampRangeQuery = (start: number, end: number) => ({
+  range: {
+    '@timestamp': {
+      gte: start,
+      lte: end,
+      format: 'epoch_millis',
+    },
+  },
+});
 
 /**
  * Create runtime mappings for fields that aren't mapped.
@@ -78,15 +91,15 @@ const PROBABILITY_THRESHOLD = 100000;
  * ingest in the painless condition checks.
  */
 function getRuntimeMappings(
-  streamDefinition: Streams.WiredStream.GetResponse,
+  definition: Streams.WiredStream.GetResponse,
   condition?: Condition
 ): MappingRuntimeFields {
   if (!condition) return {};
 
   const wiredMappedFields =
-    'wired' in streamDefinition.stream.ingest ? streamDefinition.stream.ingest.wired.fields : {};
+    'wired' in definition.stream.ingest ? definition.stream.ingest.wired.fields : {};
   const mappedFields = Object.keys(wiredMappedFields).concat(
-    Object.keys(streamDefinition.inherited_fields)
+    Object.keys(definition.inherited_fields)
   );
 
   return Object.fromEntries(
@@ -121,44 +134,32 @@ function isValidSearchResult(result: IEsSearchResponse): boolean {
  * Extracts documents from search result
  */
 function extractDocumentsFromResult(result: IEsSearchResponse): SampleDocument[] {
-  return result.rawResponse.hits.hits.map((hit) => hit._source as SampleDocument);
+  return result.rawResponse.hits.hits.map((hit) => hit._source);
 }
 
 /**
  * Builds search parameters for documents query
  */
-function buildDocumentsSearchParams({
-  condition,
-  start,
-  end,
-  size = 500,
-  streamDefinition,
-}: SearchParams) {
+function buildDocumentsSearchParams({ condition, start, end, definition }: SearchParams) {
   const finalCondition = processCondition(condition);
-  const runtimeMappings = getRuntimeMappings(streamDefinition, finalCondition);
-  const query = finalCondition ? conditionToQueryDsl(finalCondition) : { match_all: {} };
+  const runtimeMappings = getRuntimeMappings(definition, finalCondition);
 
   return {
-    index: streamDefinition.stream.name,
+    index: definition.stream.name,
     body: {
       runtime_mappings: runtimeMappings,
       query: {
         bool: {
-          must: [query],
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                },
-              },
-            },
+          must: [
+            finalCondition ? conditionToQueryDsl(finalCondition) : { match_all: {} },
+            createTimestampRangeQuery(start, end),
           ],
         },
       },
-      size,
+      size: SAMPLES_SIZE,
       sort: [{ '@timestamp': { order: 'desc' as const } }],
+      terminate_after: SAMPLES_SIZE,
+      track_total_hits: false,
     },
   };
 }
@@ -178,17 +179,27 @@ function calculateProbability(docCount?: number): number {
 /**
  * Collects sample documents using Elasticsearch search
  */
-function collectDocuments({ data, searchParams }: SearchInput): Observable<SampleDocument[]> {
+function collectDocuments({ data, searchParams }: CollectorParams): Observable<SampleDocument[]> {
   const abortController = new AbortController();
   const params = buildDocumentsSearchParams({
     ...searchParams,
-    streamDefinition: searchParams.streamDefinition,
+    definition: searchParams.definition,
   });
 
   return new Observable((observer) => {
     const subscription = data.search
       .search({ params }, { abortSignal: abortController.signal })
-      .pipe(filter(isValidSearchResult), map(extractDocumentsFromResult))
+      .pipe(
+        timeout(SEARCH_TIMEOUT_MS),
+        filter(isValidSearchResult),
+        map(extractDocumentsFromResult),
+        catchError((error) => {
+          if (error.name === 'TimeoutError') {
+            return throwError(() => new Error('Document search timed out after 10 seconds'));
+          }
+          return throwError(() => error);
+        })
+      )
       .subscribe(observer);
 
     return () => {
@@ -204,25 +215,18 @@ function collectDocuments({ data, searchParams }: SearchInput): Observable<Sampl
 function collectDocumentCounts({
   data,
   searchParams,
-}: SearchInput): Observable<string | undefined> {
+}: CollectorParams): Observable<string | undefined> {
   const abortController = new AbortController();
-  const { condition, start, end, streamDefinition } = searchParams;
+  const { condition, start, end, definition } = searchParams;
   const finalCondition = processCondition(condition);
-  const runtimeMappings = getRuntimeMappings(streamDefinition, finalCondition);
+  const runtimeMappings = getRuntimeMappings(definition, finalCondition);
   const query = finalCondition ? conditionToQueryDsl(finalCondition) : { match_all: {} };
 
   // First get document count for sample rate calculation
   const countParams = {
-    index: streamDefinition.stream.name,
+    index: definition.stream.name,
     body: {
-      query: {
-        range: {
-          '@timestamp': {
-            gte: start,
-            lte: end,
-          },
-        },
-      },
+      query: createTimestampRangeQuery(start, end),
       size: 0,
       track_total_hits: true,
     },
@@ -233,6 +237,7 @@ function collectDocumentCounts({
       .search({ params: countParams }, { abortSignal: abortController.signal })
       .pipe(
         filter((result) => !isRunningResponse(result)),
+        timeout(SEARCH_TIMEOUT_MS),
         switchMap((countResult) => {
           const docCount =
             countResult.rawResponse.hits.total &&
@@ -243,60 +248,64 @@ function collectDocumentCounts({
 
           const probability = calculateProbability(docCount);
 
-          // Build final search with calculated probability
-          const finalParams = {
-            index: streamDefinition.stream.name,
-            body: {
-              runtime_mappings: runtimeMappings,
-              query: {
-                bool: {
-                  filter: [
-                    {
-                      range: {
-                        '@timestamp': {
-                          gte: start,
-                          lte: end,
+          return data.search
+            .search(
+              {
+                params: {
+                  index: definition.stream.name,
+                  body: {
+                    runtime_mappings: runtimeMappings,
+                    query: createTimestampRangeQuery(start, end),
+                    size: 0,
+                    aggs: {
+                      sample: {
+                        random_sampler: {
+                          probability,
+                        },
+                        aggs: {
+                          matching_docs: {
+                            filter: query,
+                          },
                         },
                       },
                     },
-                  ],
-                },
-              },
-              size: 0,
-              aggs: {
-                sample: {
-                  random_sampler: {
-                    probability,
-                  },
-                  aggs: {
-                    matching_docs: {
-                      filter: query,
-                    },
                   },
                 },
               },
-            },
-          };
-
-          return data.search.search(
-            { params: finalParams },
-            { abortSignal: abortController.signal }
-          );
+              { abortSignal: abortController.signal }
+            )
+            .pipe(
+              filter((result) => !isRunningResponse(result)),
+              timeout(SEARCH_TIMEOUT_MS),
+              map((result) => {
+                if (result.rawResponse?.aggregations) {
+                  const sampleAgg = result.rawResponse.aggregations.sample as {
+                    doc_count: number;
+                    probability: number;
+                    matching_docs: { doc_count: number };
+                  };
+                  const randomSampleDocCount = sampleAgg.doc_count / sampleAgg.probability;
+                  const matchingDocCount = sampleAgg.matching_docs.doc_count;
+                  const percentage = (100 * matchingDocCount) / randomSampleDocCount;
+                  return percentage.toFixed(2);
+                }
+                return undefined;
+              }),
+              catchError((error) => {
+                if (error.name === 'TimeoutError') {
+                  return throwError(
+                    () => new Error('Document count search timed out after 10 seconds')
+                  );
+                }
+                return throwError(() => error);
+              })
+            );
         }),
-        filter((result) => !isRunningResponse(result)),
-        map((result) => {
-          if (result.rawResponse?.aggregations) {
-            const sampleAgg = result.rawResponse.aggregations.sample as {
-              doc_count: number;
-              probability: number;
-              matching_docs: { doc_count: number };
-            };
-            const randomSampleDocCount = sampleAgg.doc_count / sampleAgg.probability;
-            const matchingDocCount = sampleAgg.matching_docs.doc_count;
-            const percentage = (100 * matchingDocCount) / randomSampleDocCount;
-            return percentage.toFixed(2);
+        catchError((error) => {
+          if (error.name === 'TimeoutError') {
+            return throwError(() => new Error('Document count search timed out after 10 seconds'));
           }
-          return undefined;
+          return throwError(() => error);
         })
       )
       .subscribe(observer);
@@ -319,55 +328,39 @@ export const routingSamplesMachine = setup({
     collectDocumentsCount: getPlaceholderFor(createDocumentsCountCollectorActor),
   },
   actions: {
-    initializeContext: assign(({ input }) => ({
-      condition: input.condition,
-      start: input.start,
-      end: input.end,
-      size: input.size,
-      streamDefinition: input.streamDefinition,
-      data: input.data,
-      documents: [],
-      documentsError: undefined,
-      documentCountsError: undefined,
-      approximateMatchingPercentage: undefined,
-    })),
     updateOptions: assign(({ context, event }) => {
       if (event.type !== 'updateOptions') return {};
       return {
         ...event.options,
       };
     }),
-    storeDocuments: assign(({ event }) => {
-      if (event.type !== 'xstate.done.actor.documentsFetcher') return {};
+    storeDocuments: assign((_, params: { documents: SampleDocument[] }) => {
       return {
-        documents: event.output,
+        documents: params.documents,
         documentsError: undefined,
       };
     }),
     storeDocumentsError: assign(({ event }) => {
-      if (event.type !== 'xstate.error.actor.documentsFetcher') return {};
       return {
         documentsError: event.error as Error,
       };
     }),
-    storeDocumentCounts: assign(({ event }) => {
-      if (event.type !== 'xstate.done.actor.documentCountsFetcher') return {};
+    storeDocumentCounts: assign((_, params: { count: string }) => {
       return {
-        approximateMatchingPercentage: event.output,
-        documentCountsError: undefined,
+        approximateMatchingPercentage: params.count,
+        approximateMatchingPercentageError: undefined,
       };
     }),
     storeDocumentCountsError: assign(({ event }) => {
-      if (event.type !== 'xstate.error.actor.documentCountsFetcher') return {};
       return {
-        documentCountsError: event.error as Error,
+        approximateMatchingPercentageError: event.error as Error,
       };
     }),
     clearData: assign(() => ({
       documents: [],
       approximateMatchingPercentage: undefined,
       documentsError: undefined,
-      documentCountsError: undefined,
+      approximateMatchingPercentageError: undefined,
     })),
   },
   guards: {
@@ -380,21 +373,15 @@ export const routingSamplesMachine = setup({
     condition: input.condition,
     start: input.start,
     end: input.end,
-    size: input.size,
-    streamDefinition: input.streamDefinition,
-    data: input.data,
+    definition: input.definition,
+    approximateMatchingPercentage: undefined,
     documents: [],
     documentsError: undefined,
-    documentCountsError: undefined,
-    approximateMatchingPercentage: undefined,
+    approximateMatchingPercentageError: undefined,
   }),
   initial: 'idle',
   states: {
     idle: {
-      always: {
-        target: 'fetching',
-        guard: 'hasValidTimeRange',
-      },
       on: {
         refresh: {
           target: 'fetching',
@@ -425,12 +412,18 @@ export const routingSamplesMachine = setup({
                     start: context.start,
                     end: context.end,
                     size: context.size,
-                    streamDefinition: context.streamDefinition,
+                    definition: context.definition,
                   },
                 }),
-                onDone: {
+                onSnapshot: {
+                  guard: ({ event }) => event.snapshot.context !== undefined,
                   target: 'success',
-                  actions: ['storeDocuments'],
+                  actions: [
+                    {
+                      type: 'storeDocuments',
+                      params: ({ event }) => ({ documents: event.snapshot.context ?? [] }),
+                    },
+                  ],
                 },
                 onError: {
                   target: 'error',
@@ -442,7 +435,12 @@ export const routingSamplesMachine = setup({
               type: 'final',
             },
             error: {
-              type: 'final',
+              on: {
+                retry: {
+                  target: 'loading',
+                  actions: ['clearDocumentsError'],
+                },
+              },
             },
           },
         },
@@ -459,12 +457,18 @@ export const routingSamplesMachine = setup({
                     condition: context.condition,
                     start: context.start,
                     end: context.end,
-                    streamDefinition: context.streamDefinition,
+                    definition: context.definition,
                   },
                 }),
-                onDone: {
+                onSnapshot: {
+                  guard: ({ event }) => event.snapshot.context !== undefined,
                   target: 'success',
-                  actions: ['storeDocumentCounts'],
+                  actions: [
+                    {
+                      type: 'storeDocumentCounts',
+                      params: ({ event }) => ({ count: event.snapshot.context ?? '' }),
+                    },
+                  ],
                 },
                 onError: {
                   target: 'error',
@@ -476,7 +480,12 @@ export const routingSamplesMachine = setup({
               type: 'final',
             },
             error: {
-              type: 'final',
+              on: {
+                retry: {
+                  target: 'loading',
+                  actions: ['clearDocumentCountsError'],
+                },
+              },
             },
           },
         },
@@ -495,6 +504,14 @@ export const routingSamplesMachine = setup({
       target: '.fetching',
       guard: 'hasValidTimeRange',
       actions: ['updateOptions'],
+    },
+    retryDocuments: {
+      target: '.fetching',
+      actions: ['clearDocumentsError'],
+    },
+    retryDocumentCounts: {
+      target: '.fetching',
+      actions: ['clearDocumentCountsError'],
     },
   },
 });

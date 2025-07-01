@@ -24,6 +24,10 @@ import {
 import { routingConverter } from '../../utils';
 import { RoutingDefinitionWithUIAttributes } from '../../types';
 import { selectCurrentRule } from './selectors';
+import {
+  createRoutingSamplesMachineImplementations,
+  routingSamplesMachine,
+} from './routing_samples_state_machine';
 
 export type StreamRoutingActorRef = ActorRefFrom<typeof streamRoutingMachine>;
 
@@ -37,6 +41,7 @@ export const streamRoutingMachine = setup({
     deleteStream: getPlaceholderFor(createDeleteStreamActor),
     forkStream: getPlaceholderFor(createForkStreamActor),
     upsertStream: getPlaceholderFor(createUpsertStreamActor),
+    routingSamplesMachine: getPlaceholderFor(() => routingSamplesMachine),
   },
   actions: {
     notifyStreamSuccess: getPlaceholderFor(createStreamSuccessNofitier),
@@ -149,6 +154,18 @@ export const streamRoutingMachine = setup({
           entry: [{ type: 'addNewRoutingRule' }],
           exit: [{ type: 'resetRoutingChanges' }],
           initial: 'changing',
+          invoke: {
+            id: 'routingSamplesMachine',
+            src: 'routingSamplesMachine',
+            input: ({ context }) => {
+              const currentRoutingRule = selectCurrentRule(context);
+
+              return {
+                definition: context.definition,
+                condition: currentRoutingRule.if,
+              };
+            },
+          },
           states: {
             changing: {
               on: {
@@ -317,12 +334,18 @@ export const createStreamRoutingMachineImplementations = ({
   refreshDefinition,
   streamsRepositoryClient,
   core,
+  data,
   forkSuccessNofitier,
 }: StreamRoutingServiceDependencies): MachineImplementationsFrom<typeof streamRoutingMachine> => ({
   actors: {
     deleteStream: createDeleteStreamActor({ streamsRepositoryClient }),
     forkStream: createForkStreamActor({ streamsRepositoryClient, forkSuccessNofitier }),
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient }),
+    routingSamplesMachine: routingSamplesMachine.provide(
+      createRoutingSamplesMachineImplementations({
+        data,
+      })
+    ),
   },
   actions: {
     refreshDefinition,
