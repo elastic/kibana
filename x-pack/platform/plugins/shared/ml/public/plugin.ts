@@ -319,9 +319,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               registerMlUiActions(pluginsSetup.uiActions, core);
 
               if (this.enabledFeatures.ad) {
-                if (pluginsSetup.cases) {
-                  registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
-                }
+                registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
 
                 if (pluginsSetup.maps) {
                   // This module contains async imports itself, and it is conditionally loaded if maps is enabled. We'll save

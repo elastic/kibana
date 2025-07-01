@@ -38,10 +38,7 @@ export class AiopsPlugin
         if (uiActions) {
           registerAiopsUiActions(uiActions, coreStart, pluginStart);
         }
-
-        if (cases) {
-          registerCases(cases, coreStart, pluginStart);
-        }
+        registerCases(cases, coreStart, pluginStart);
       }
     });
   }

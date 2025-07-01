@@ -13,10 +13,13 @@ import type { MlStartDependencies } from '../plugin';
 import { registerAnomalySwimLaneCasesAttachment } from './register_anomaly_swim_lane_attachment';
 
 export function registerCasesAttachments(
-  cases: CasesPublicSetup,
+  cases?: CasesPublicSetup,
   coreStart: CoreStart,
   pluginStart: MlStartDependencies
 ) {
+  if (!cases) {
+    return;
+  }
   registerAnomalySwimLaneCasesAttachment(cases, pluginStart);
   registerAnomalyChartsCasesAttachment(cases, coreStart, pluginStart);
   registerSingleMetricViewerCasesAttachment(cases, coreStart, pluginStart);
