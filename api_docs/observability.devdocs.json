@@ -8132,7 +8132,7 @@
                 "section": "def-public.ExploratoryEmbeddableProps",
                 "text": "ExploratoryEmbeddableProps"
               },
-              ") => React.JSX.Element | null; }"
+              ") => React.JSX.Element | null; } | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -8245,6 +8245,24 @@
                 "text": "LicenseManagementUIPluginSetup"
               },
               " | undefined"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.logsDataAccess",
+            "type": "Object",
+            "tags": [],
+            "label": "logsDataAccess",
+            "description": [],
+            "signature": [
+              "{ services: { logSourcesService: ",
+              "LogSourcesService",
+              "; logDataService: ",
+              "LogDataService",
+              "; }; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -23598,6 +23616,39 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-common.ElapsedTimestampTooltip",
+        "type": "Function",
+        "tags": [],
+        "label": "ElapsedTimestampTooltip",
+        "description": [],
+        "signature": [
+          "({ time }: Props) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/components/elapsed_timestamp_tooltip.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.ElapsedTimestampTooltip.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ time }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/common/components/elapsed_timestamp_tooltip.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.formatDurationFromTimeUnitChar",
         "type": "Function",
         "tags": [],
@@ -24634,6 +24685,22 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-common.OBSERVABILITY_TIERED_FEATURES",
+        "type": "Array",
+        "tags": [],
+        "label": "OBSERVABILITY_TIERED_FEATURES",
+        "description": [],
+        "signature": [
+          "PricingProductFeature",
+          "[]"
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/product_features.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.observabilityAlertFeatureIds",
         "type": "Array",
         "tags": [],
@@ -25064,6 +25131,58 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE",
+        "type": "Object",
+        "tags": [],
+        "label": "OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE",
+        "description": [
+          "\nTiered features"
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/product_features.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/solutions/observability/plugins/observability/common/product_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/solutions/observability/plugins/observability/common/product_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE.products",
+            "type": "Array",
+            "tags": [],
+            "label": "products",
+            "description": [],
+            "signature": [
+              "{ name: \"observability\"; tier: \"complete\"; }[]"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/common/product_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observability",
         "id": "def-common.observabilityPaths",
