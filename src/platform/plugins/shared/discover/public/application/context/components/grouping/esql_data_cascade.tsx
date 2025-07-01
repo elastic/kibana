@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useCallback, type ComponentProps } from 'react';
+import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import type { AggregateQuery } from '@kbn/es-query';
+import { buildEsQuery, type AggregateQuery } from '@kbn/es-query';
 import { type Filter } from '@kbn/es-query';
 import type { DataView, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
@@ -20,6 +21,7 @@ import { EuiBadge, EuiDescriptionList, EuiText, EuiButtonIcon } from '@elastic/e
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAppStateSelector } from '../../../main/state_management/discover_app_state_container';
 import type { DiscoverStateContainer } from '../../../main/state_management/discover_state';
+import { getDataGroupingQuery } from './query_builder';
 
 export { getESQLStatsQueryMeta } from '@kbn/document-data-cascader';
 
@@ -53,78 +55,60 @@ export const ESQLDataCascade = ({
   const globalFilters = globalState?.filters;
   const to = globalState?.time?.to;
   const from = globalState?.time?.from;
-  //   const globalQuery = globalState?.query;
+  const globalQuery = globalState?.query;
   const [query] = useAppStateSelector((state) => [state.query]);
 
   const queryMeta = useMemo(() => {
     return getESQLStatsQueryMeta((query as AggregateQuery).esql);
   }, [query]);
 
-  const [aggregationsQuery, setAggregationsQuery] = useState<string | undefined>();
+  const filters = useMemo(() => {
+    try {
+      return [
+        buildEsQuery(undefined, globalQuery != null ? [globalQuery] : [], [
+          ...(globalFilters?.filter((f) => f.meta.disabled === false) ?? []),
+          ...(defaultFilters ?? []),
+          // ...(parentGroupingFilter ?? []),
+        ]),
+      ];
+    } catch (e) {
+      return [];
+    }
+  }, [defaultFilters, globalFilters, globalQuery]);
 
-  //   const statsQueryMeta = useMemo(() => {
-  //     return getESQLStatsQueryMeta(globalQuery?.query || globalQuery?.esql || '');
-  //   }, [globalQuery]);
+  const onCascadeGroupNodeExpanded = useCallback<
+    NonNullable<ComponentProps<typeof DataCascade<DataTableRecord>>['onCascadeGroupNodeExpanded']>
+  >(
+    // @ts-expect-error - WIP to understand how data is structured
+    async ({ nodePath }) => {
+      const aggregationsQuery = getDataGroupingQuery({
+        additionalFilters: filters,
+        from: from ?? '',
+        selectedGroup: nodePath[nodePath.length - 1],
+        pageIndex: 0,
+        uniqueValue: `data-grouping-level-${nodePath.join('-')}`,
+        pageSize: 500,
+        to: to ?? '',
+      });
 
-  //   const columns = useMemo(() => {
-  //     if (
-  //       !globalQuery ||
-  //       (globalQuery as Query).language !== 'esql' ||
-  //       (globalQuery as AggregateQuery).esql === undefined
-  //     ) {
-  //       return [];
-  //     }
+      const searchResult = await lastValueFrom(
+        dataService.search.search({
+          params: {
+            index: dataView.getIndexPattern(),
+            size: 0,
+            track_total_hits: true,
+            body: {
+              ...aggregationsQuery,
+            },
+          },
+        })
+      );
 
-  //     const parsedQuery = (globalQuery as Query).query || (globalQuery as AggregateQuery).esql;
-
-  //     return getESQLStatsGroupByColumnsFromQuery(parsedQuery);
-  //   }, [globalQuery]);
-
-  //   const filters = useMemo(() => {
-  //     try {
-  //       return [
-  //         buildEsQuery(undefined, globalQuery != null ? [globalQuery] : [], [
-  //           ...(globalFilters?.filter((f) => f.meta.disabled === false) ?? []),
-  //           ...(defaultFilters ?? []),
-  //           ...(parentGroupingFilter ?? []),
-  //         ]),
-  //       ];
-  //     } catch (e) {
-  //       return [];
-  //     }
-  //   }, [defaultFilters, globalFilters, globalQuery, parentGroupingFilter]);
-
-  //   // Create a unique, but stable (across re-renders) value
-  //   const uniqueValue = useMemo(() => `data-grouping-level-${uuidv4()}`, []);
-
-  //   const { data: result, isLoading: isLoadingGroups } = useGetDataGroupAggregationsQuery<
-  //     GroupingAggregation<T>
-  //   >({
-  //     data: dataService,
-  //     aggregationsQuery,
-  //     dataView,
-  //     toasts: notifications.toasts,
-  //     enabled: aggregationsQuery && !isNoneGroup([selectedGroup]),
-  //   });
-
-  //   const onCascadeGroupingChange = useCallback<
-  //     NonNullable<ComponentProps<typeof DataCascade>['onCascadeGroupingChange']>
-  //   >(
-  //     (groupByColumn) => {
-  //       return setAggregationsQuery(
-  //         getDataGroupingQuery({
-  //           additionalFilters: filters,
-  //           from: from ?? '',
-  //           selectedGroup: groupByColumn,
-  //           pageIndex: 0,
-  //           uniqueValue,
-  //           pageSize: 500,
-  //           to: to ?? '',
-  //         })
-  //       );
-  //     },
-  //     [filters, from, to, uniqueValue]
-  //   );
+      // eslint-disable-next-line no-console -- WIP to understand how data is structured
+      console.log({ searchResult });
+    },
+    [dataService.search, dataView, filters, from, to]
+  );
 
   return (
     <div
@@ -154,7 +138,7 @@ export const ESQLDataCascade = ({
         rowHeaderTitleSlot={({ row }) => {
           return (
             <EuiText size="s">
-              <h4>{row.original.flattened[cascadeGroups[row.depth]]}</h4>
+              <h4>{row.original.flattened[cascadeGroups[row.depth]] as string}</h4>
             </EuiText>
           );
         }}
@@ -178,7 +162,17 @@ export const ESQLDataCascade = ({
                 </EuiText>
               );
             })
-            .concat([<EuiButtonIcon iconType="expand" />])
+            .concat([
+              <EuiButtonIcon
+                aria-label={i18n.translate('discover.esql_data_cascade.grouping.expand', {
+                  defaultMessage: 'Expand {groupValue} group',
+                  values: {
+                    groupValue: row.original.flattened[cascadeGroups[row.depth]] as string,
+                  },
+                })}
+                iconType="expand"
+              />,
+            ])
         }
         leafContentSlot={({ data }) => {
           return (
@@ -191,8 +185,9 @@ export const ESQLDataCascade = ({
           );
         }}
         onCascadeGroupingChange={() => {}}
-        onCascadeNodeExpanded={() => {}}
-        onCascadeLeafExpanded={() => {}}
+        onCascadeGroupNodeExpanded={onCascadeGroupNodeExpanded}
+        // @ts-expect-error - TODO: implement data fetching for leaf nodes
+        onCascadeLeafNodeExpanded={() => {}}
       />
     </div>
   );
