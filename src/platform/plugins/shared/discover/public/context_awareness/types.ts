@@ -23,6 +23,7 @@ import type { OmitIndexSignature } from 'type-fest';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
@@ -144,6 +145,16 @@ export interface DefaultAppStateExtension {
    * The state for chart visibility toggle
    */
   hideChart?: boolean;
+}
+
+/**
+ * Parameters passed to the modified vis attributes extension
+ */
+export interface ModifiedVisAttributesExtensionParams {
+  /**
+   * The vis attributes to modify
+   */
+  attributes: TypedLensByValueInput['attributes'];
 }
 
 /**
@@ -312,6 +323,18 @@ export interface Profile {
   getDefaultAdHocDataViews: () => Array<
     Omit<DataViewSpec, 'id'> & { id: NonNullable<DataViewSpec['id']> }
   >;
+
+  /**
+   * Chart
+   */
+
+  /**
+   * Allows modifying the default vis attributes used in the Discover chart
+   * @returns The modified vis attributes to use in the chart
+   */
+  getModifiedVisAttributes: (
+    params: ModifiedVisAttributesExtensionParams
+  ) => TypedLensByValueInput['attributes'];
 
   /**
    * Data grid
