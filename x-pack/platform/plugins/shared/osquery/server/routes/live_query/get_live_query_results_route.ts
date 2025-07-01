@@ -73,12 +73,10 @@ export const getLiveQueryResultsRoute = (
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
             : DEFAULT_SPACE_ID;
 
-          // Get integration namespaces for space-aware querying
           let integrationNamespaces: Record<string, string[]> = {};
           let spaceAwareIndexPatterns: string[] = [];
 
           const logger = osqueryContext.logFactory.get('get_live_query_results');
-          logger.info(`Active space ID: ${spaceId}`);
 
           if (osqueryContext?.service?.getIntegrationNamespaces) {
             const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
@@ -95,11 +93,9 @@ export const getLiveQueryResultsRoute = (
               `Retrieved integration namespaces: ${JSON.stringify(integrationNamespaces)}`
             );
 
-            // Build space-aware index patterns using the retrieved namespaces
             const baseIndexPatterns = [`logs-${OSQUERY_INTEGRATION_NAME}.result*`];
 
             spaceAwareIndexPatterns = baseIndexPatterns.flatMap((pattern) => {
-              // Check if we have namespaces for osquery integration
               const osqueryNamespaces = integrationNamespaces[OSQUERY_INTEGRATION_NAME];
 
               if (osqueryNamespaces && osqueryNamespaces.length > 0) {
@@ -108,7 +104,6 @@ export const getLiveQueryResultsRoute = (
                 );
               }
 
-              // If no specific namespaces found, return the original pattern
               return [pattern];
             });
 
@@ -136,14 +131,22 @@ export const getLiveQueryResultsRoute = (
 
           const queries = actionDetails?._source?.queries;
 
+          const osqueryNamespaces = integrationNamespaces[OSQUERY_INTEGRATION_NAME];
+          const namespacesOrUndefined =
+            osqueryNamespaces && osqueryNamespaces.length > 0 ? osqueryNamespaces : undefined;
+
           await lastValueFrom(
             zip(
               ...map(queries, (query) =>
-                getActionResponses(search, query.action_id, query.agents?.length ?? 0)
+                getActionResponses(
+                  search,
+                  query.action_id,
+                  query.agents?.length ?? 0,
+                  namespacesOrUndefined
+                )
               )
             )
           );
-
           const res = await lastValueFrom(
             search.search<ResultsRequestOptions, ResultsStrategyResponse>(
               {
@@ -161,9 +164,7 @@ export const getLiveQueryResultsRoute = (
                     field: request.query.sort ?? '@timestamp',
                   },
                 ],
-                integrationNamespaces: spaceAwareIndexPatterns.length
-                  ? spaceAwareIndexPatterns.join(',')
-                  : undefined,
+                integrationNamespaces: namespacesOrUndefined,
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }
             )

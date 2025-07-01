@@ -58,9 +58,9 @@ export const buildActionResultsQuery = ({
 
   let index: string | string[];
   if (integrationNamespaces && integrationNamespaces.length > 0) {
-    index = integrationNamespaces.map((namespace) =>
-      buildIndexNameWithNamespace(baseIndex, namespace)
-    );
+    index = integrationNamespaces
+      .map((namespace) => buildIndexNameWithNamespace(baseIndex, namespace))
+      .join(',');
   } else {
     index = baseIndex;
   }

@@ -44,7 +44,9 @@ export const buildResultsQuery = ({
   const filterQuery = [...timeRangeFilter, getQueryFilter({ filter })];
 
   // Use integrationNamespaces if provided, otherwise fallback to default pattern
-  const indexPattern = integrationNamespaces || `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
+  const indexPattern = integrationNamespaces?.length
+    ? integrationNamespaces.join(',')
+    : `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
 
   return {
     allow_no_indices: true,

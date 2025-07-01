@@ -23,5 +23,5 @@ export interface ResultsRequestOptions extends Omit<RequestOptionsPaginated, 'so
   agentId?: string;
   startDate?: string;
   sort: SortField[];
-  integrationNamespaces?: string;
+  integrationNamespaces?: string[];
 }
