@@ -65,7 +65,7 @@ export const KibanaPageTemplateInner: FC<Props> = ({
     // TODO: instead of using sticky = true here, we reproduce the same behavior to account for both legacy fixed layout and new grid layout.
     // https://github.com/elastic/eui/issues/8820
     sideBarProps.style = {
-      maxHeight: 'var(--kbn-layout--application-height, 100vh)',
+      maxHeight: 'var(--kbn-application--content-height, 100vh)',
       top: 'var(--euiFixedHeadersOffset, 0px)',
       position: 'sticky',
     };
@@ -83,7 +83,7 @@ export const KibanaPageTemplateInner: FC<Props> = ({
       // the following props can be removed to allow the template to auto-handle
       // the fixed header and banner heights.
       offset={0}
-      minHeight={header ? 'var(--kbn-layout--application-height)' : 0}
+      minHeight={header ? 'var(--kbn-application--content-height)' : 0}
       grow={header ? false : undefined}
       {...rest}
     >
