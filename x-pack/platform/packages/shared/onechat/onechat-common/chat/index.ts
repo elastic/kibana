@@ -11,10 +11,14 @@ export {
   type ToolCallWithResult,
   type ConversationRound,
   type Conversation,
+  type ConversationRoundStepMixin,
   type ToolCallStep,
   type ConversationRoundStep,
+  type ReasoningStepData,
+  type ReasoningStep,
   ConversationRoundStepType,
   isToolCallStep,
+  isReasoningStep,
 } from './conversation';
 export {
   ChatEventType,

@@ -57,5 +57,10 @@
   {
     "name": "security_detection_engine",
     "version": "9.0.7"
+  },
+  {
+    "name": "security_ai_prompts",
+    "version": "0.0.3",
+    "allowSyncToPrerelease": true
   }
 ]

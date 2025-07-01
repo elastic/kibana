@@ -11,11 +11,7 @@ import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { last } from 'lodash';
 import { GET_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
-import {
-  LlmProxy,
-  RelevantField,
-  createLlmProxy,
-} from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { LlmProxy, RelevantField, createLlmProxy } from '../../utils/create_llm_proxy';
 import { chatComplete, getSystemMessage, systemMessageSorted } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { createSimpleSyntheticLogs } from '../../synthtrace_scenarios/simple_logs';

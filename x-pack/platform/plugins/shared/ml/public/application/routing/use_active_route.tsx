@@ -75,7 +75,7 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
           toMountPoint(
             <EuiCallOut
               color="warning"
-              iconType="iInCircle"
+              iconType="info"
               title={
                 <FormattedMessage
                   id="xpack.ml.notFoundPage.title"

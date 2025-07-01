@@ -190,7 +190,7 @@ describe('registerUsageMetricsRoute', () => {
     });
   });
 
-  describe('when metric type data is null', () => {
+  describe('when metric type data is null or not present', () => {
     beforeEach(() => {
       jest.spyOn(DataUsageService.prototype, 'getMetrics').mockResolvedValue({
         ingest_rate: [
@@ -220,7 +220,6 @@ describe('registerUsageMetricsRoute', () => {
           {
             name: '.ds-2',
             error: null,
-            data: null,
           },
         ],
         search_vcu: [],
