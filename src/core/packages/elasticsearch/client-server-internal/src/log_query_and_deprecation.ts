@@ -15,6 +15,7 @@ import numeral from '@elastic/numeral';
 import type { Logger } from '@kbn/logging';
 import { isMaximumResponseSizeExceededError, type ElasticsearchErrorDetails } from '@kbn/es-errors';
 import type { ElasticsearchApiToRedactInLogs } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchRequestLoggingOptions } from '@kbn/core-elasticsearch-server/src/client/client';
 import { getEcsResponseLog } from './get_ecs_response_log';
 
 /**
@@ -198,9 +199,16 @@ export const instrumentEsQueryAndDeprecationLogger = ({
   const warningLogger = logger.get('warnings'); // elasticsearch.warnings
 
   client.diagnostic.on('response', (error, event) => {
+    const requestLoggingOptions = event?.meta?.request?.options?.context?.loggingOptions as
+      | ElasticsearchRequestLoggingOptions
+      | undefined;
+
+    const { loggerName } = requestLoggingOptions || {};
+    const customLogger = loggerName ? logger.get('query', loggerName) : queryLogger;
+
     // we could check this once and not subscribe to response events if both are disabled,
     // but then we would not be supporting hot reload of the logging configuration.
-    const logQuery = queryLogger.isLevelEnabled('debug');
+    const logQuery = customLogger.isLevelEnabled('debug');
     const logDeprecation = deprecationLogger.isLevelEnabled('debug');
 
     if (error && isMaximumResponseSizeExceededError(error)) {
@@ -213,7 +221,7 @@ export const instrumentEsQueryAndDeprecationLogger = ({
 
       if (logQuery) {
         const meta = getEcsResponseLog(event, bytes);
-        queryLogger.debug(queryMsg, meta);
+        customLogger.debug(queryMsg, meta);
       }
 
       if (logDeprecation && event.warnings && event.warnings.filter(isEsWarning).length > 0) {
