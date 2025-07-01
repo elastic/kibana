@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
+import { useVerticalBreakpoint } from './use_vertical_breakpoint';
 import { useAssistantContext } from '../../..';
 import { StarterPrompts } from './starter_prompts';
 import { SystemPrompt } from '../prompt_editor/system_prompt';
@@ -39,12 +40,16 @@ export const EmptyConvo: React.FC<Props> = ({
   setUserPrompt,
 }) => {
   const { assistantAvailability } = useAssistantContext();
+  const breakpoint = useVerticalBreakpoint();
+  console.log('breakpoint', breakpoint);
+  const isTallScreen = useMemo(() => breakpoint === 'tall', [breakpoint]);
   return (
     <EuiFlexGroup
       alignItems="center"
       justifyContent="spaceBetween"
       data-test-subj="emptyConvo"
       direction="column"
+      gutterSize={isTallScreen ? 'l' : 'm'}
     >
       <EuiFlexItem grow={false}>
         <EuiPanel
@@ -54,12 +59,17 @@ export const EmptyConvo: React.FC<Props> = ({
             text-align: center;
           `}
         >
-          <EuiFlexGroup alignItems="center" justifyContent="center" direction="column">
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="center"
+            direction="column"
+            gutterSize={isTallScreen ? 'l' : 'm'}
+          >
             <EuiFlexItem grow={false}>
-              <AssistantBeacon backgroundColor="emptyShade" size="xl" />
+              <AssistantBeacon backgroundColor="emptyShade" size={isTallScreen ? 'xl' : 'm'} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText>
+              <EuiText size={isTallScreen ? 'relative' : 'xs'}>
                 <h3>{i18n.EMPTY_SCREEN_TITLE}</h3>
                 <p>{i18n.EMPTY_SCREEN_DESCRIPTION}</p>
               </EuiText>
@@ -71,17 +81,22 @@ export const EmptyConvo: React.FC<Props> = ({
                 isSettingsModalVisible={isSettingsModalVisible}
                 onSystemPromptSelectionChange={setCurrentSystemPromptId}
                 setIsSettingsModalVisible={setIsSettingsModalVisible}
+                compressed={!isTallScreen}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <SetupKnowledgeBaseButton />
+              <SetupKnowledgeBaseButton {...(!isTallScreen ? { display: 'mini' } : {})} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
       </EuiFlexItem>
       {assistantAvailability.isStarterPromptsEnabled && (
         <EuiFlexItem grow={false} css={starterPromptWrapperClassName}>
-          <StarterPrompts connectorId={connectorId} setUserPrompt={setUserPrompt} />
+          <StarterPrompts
+            compressed={!isTallScreen}
+            connectorId={connectorId}
+            setUserPrompt={setUserPrompt}
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
