@@ -16,6 +16,7 @@ import { InTableSearchRestorableState, RenderCellValueWrapper } from './types';
 import { wrapRenderCellValueWithInTableSearchSupport } from './wrap_render_cell_value';
 import { clearSearchTermRegExpCache } from './in_table_search_highlights_wrapper';
 import { getHighlightColors } from './get_highlight_colors';
+import { getActiveMatchCss } from './get_active_match_css';
 
 export interface UseDataGridInTableSearchProps
   extends Pick<InTableSearchControlProps, 'rows' | 'visibleColumns'> {
@@ -82,6 +83,13 @@ export const useDataGridInTableSearch = (
   const [{ inTableSearchTerm, inTableSearchTermCss }, setInTableSearchState] =
     useState<UseDataGridInTableSearchState>(() => ({
       inTableSearchTerm: initialState?.searchTerm || '',
+      inTableSearchTermCss:
+        initialState?.searchTerm && initialState?.activeMatch
+          ? getActiveMatchCss({
+              activeMatch: initialState.activeMatch,
+              colors: getHighlightColors(euiTheme),
+            })
+          : undefined,
     }));
 
   const inTableSearchControl = useMemo(() => {

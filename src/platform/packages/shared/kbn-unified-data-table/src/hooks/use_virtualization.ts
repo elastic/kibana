@@ -64,12 +64,12 @@ export const useVirtualization = ({
 
           if (rendered) {
             const initialScroll = { top: scrollTopRef.current, left: scrollLeftRef.current };
-            setTimeout(() => {
+            requestAnimationFrame(() => {
               getVirtualizedElement(containerRef)?.scrollTo?.({
                 ...initialScroll,
                 behavior: 'instant',
               });
-            }, 0);
+            });
             isInitialScrollAppliedRef.current = true;
           }
         }

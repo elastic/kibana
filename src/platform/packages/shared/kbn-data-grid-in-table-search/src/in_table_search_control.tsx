@@ -15,13 +15,9 @@ import { css, type SerializedStyles } from '@emotion/react';
 import { useFindMatches } from './matches/use_find_matches';
 import { InTableSearchInput } from './in_table_search_input';
 import { UseFindMatchesProps } from './types';
-import {
-  CELL_MATCH_INDEX_ATTRIBUTE,
-  HIGHLIGHT_CLASS_NAME,
-  BUTTON_TEST_SUBJ,
-  INPUT_TEST_SUBJ,
-} from './constants';
+import { BUTTON_TEST_SUBJ, INPUT_TEST_SUBJ } from './constants';
 import { getHighlightColors } from './get_highlight_colors';
+import { getActiveMatchCss } from './get_active_match_css';
 
 const innerCss = css`
   .dataGridInTableSearch__matchesCounter {
@@ -78,33 +74,18 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
 
   const onScrollToActiveMatch: UseFindMatchesProps['onScrollToActiveMatch'] = useCallback(
     (activeMatch, animate) => {
-      const { rowIndex, columnId, matchIndexWithinCell } = activeMatch;
+      const { rowIndex, columnId } = activeMatch;
 
       if (typeof pageSize === 'number' && animate) {
         const expectedPageIndex = Math.floor(rowIndex / pageSize);
         onChangeToExpectedPage(expectedPageIndex);
       }
 
-      // Defines highlight styles for the active match.
-      // The cell border is useful when the active match is not visible due to the limited cell boundaries.
       onChangeCss(
-        css`
-          .euiDataGridRowCell[data-gridcell-row-index='${rowIndex}'][data-gridcell-column-id='${columnId}'] {
-            &:after {
-              content: '';
-              z-index: 2;
-              pointer-events: none;
-              position: absolute;
-              inset: 0;
-              border: 2px solid ${colors.activeHighlightBorderColor} !important;
-              border-radius: 3px;
-            }
-            .${HIGHLIGHT_CLASS_NAME}[${CELL_MATCH_INDEX_ATTRIBUTE}='${matchIndexWithinCell}'] {
-              color: ${colors.activeHighlightColor} !important;
-              background-color: ${colors.activeHighlightBackgroundColor} !important;
-            }
-          }
-        `
+        getActiveMatchCss({
+          activeMatch,
+          colors,
+        })
       );
 
       if (animate) {

@@ -20,6 +20,7 @@ export interface ActiveMatch {
   rowIndex: number;
   columnId: string;
   matchIndexWithinCell: number;
+  matchPosition: number;
 }
 
 export interface InTableSearchHighlightsWrapperProps {
@@ -37,7 +38,7 @@ export type RenderCellValueWrapper = (props: RenderCellValuePropsWithInTableSear
 
 export interface InTableSearchRestorableState {
   searchTerm?: string;
-  activeMatchPosition?: number;
+  activeMatch?: ActiveMatch;
 }
 
 export interface UseFindMatchesProps {

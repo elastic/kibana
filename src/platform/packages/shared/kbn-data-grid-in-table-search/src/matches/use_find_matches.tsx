@@ -41,8 +41,8 @@ export const useFindMatches = (props: UseFindMatchesProps): UseFindMatchesReturn
     onScrollToActiveMatch,
   } = props;
   const initialActiveMatchPositionRef = useRef<number | undefined>(
-    initialState?.activeMatchPosition && initialState?.searchTerm === inTableSearchTerm
-      ? initialState.activeMatchPosition
+    initialState?.activeMatch?.matchPosition && initialState?.searchTerm === inTableSearchTerm
+      ? initialState.activeMatch.matchPosition
       : undefined
   );
   const [state, setState] = useState<UseFindMatchesState>(INITIAL_STATE);
@@ -88,18 +88,18 @@ export const useFindMatches = (props: UseFindMatchesProps): UseFindMatchesReturn
 
       if (totalMatchesCount > 0) {
         updateActiveMatchPosition({
+          term,
           animate: !initialActiveMatchPosition,
           matchPosition: nextActiveMatchPosition,
           matchesList: nextMatchesList,
           columns: visibleColumns,
           onScrollToActiveMatch,
+          onInitialStateChange,
         });
-      }
-
-      if (!initialActiveMatchPosition) {
+      } else {
         onInitialStateChange?.({
           searchTerm: term,
-          activeMatchPosition: nextActiveMatchPosition || undefined,
+          activeMatch: undefined,
         });
       }
 
@@ -150,7 +150,7 @@ export const useFindMatches = (props: UseFindMatchesProps): UseFindMatchesReturn
     setState(INITIAL_STATE);
     onInitialStateChange?.({
       searchTerm: undefined,
-      activeMatchPosition: undefined,
+      activeMatch: undefined,
     });
   }, [setState, onInitialStateChange]);
 
@@ -211,6 +211,7 @@ function getActiveMatchForPosition({
           rowIndex: Number(rowIndex),
           columnId,
           matchIndexWithinCell: matchPosition - traversedMatchesCount - 1,
+          matchPosition,
         };
       }
 
@@ -226,18 +227,26 @@ let prevJumpTimer: NodeJS.Timeout | null = null;
 
 function updateActiveMatchPosition({
   animate = true,
+  term,
   matchPosition,
   matchesList,
   columns,
   onScrollToActiveMatch,
+  onInitialStateChange,
 }: {
   animate?: boolean;
+  term: string;
   matchPosition: number | null;
   matchesList: RowMatches[];
   columns: string[];
   onScrollToActiveMatch: UseFindMatchesProps['onScrollToActiveMatch'];
+  onInitialStateChange: UseFindMatchesProps['onInitialStateChange'];
 }) {
   if (typeof matchPosition !== 'number') {
+    onInitialStateChange?.({
+      searchTerm: term,
+      activeMatch: undefined,
+    });
     return;
   }
 
@@ -255,6 +264,11 @@ function updateActiveMatchPosition({
     if (activeMatch) {
       onScrollToActiveMatch(activeMatch, animate);
     }
+
+    onInitialStateChange?.({
+      searchTerm: term,
+      activeMatch: activeMatch || undefined,
+    });
   }, 0);
 }
 
@@ -282,15 +296,12 @@ function changeActiveMatchInState(
   }
 
   updateActiveMatchPosition({
+    term: prevState.term,
     matchPosition: nextMatchPosition,
     matchesList: prevState.matchesList,
     columns: prevState.columns,
     onScrollToActiveMatch,
-  });
-
-  onInitialStateChange?.({
-    searchTerm: prevState.term,
-    activeMatchPosition: nextMatchPosition,
+    onInitialStateChange,
   });
 
   return {
