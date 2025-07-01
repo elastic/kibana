@@ -19,7 +19,7 @@ import type {
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import type { Rule, RuleAction, RuleSystemAction } from '../../../../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import type { BulkActionSkipResult } from '../../../../../common/bulk_edit';
+import type { BulkEditActionSkipResult } from '../../../../../common/bulk_action';
 import type { RuleTypeRegistry } from '../../../../types';
 import {
   validateRuleTypeParams,
@@ -107,7 +107,7 @@ type RuleType = ReturnType<RuleTypeRegistry['get']>;
 // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 export interface BulkEditResult<Params extends RuleParams> {
   rules: Array<SanitizedRule<Params>>;
-  skipped: BulkActionSkipResult[];
+  skipped: BulkEditActionSkipResult[];
   errors: BulkOperationError[];
   total: number;
 }
@@ -284,7 +284,7 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule>>;
   errors: BulkOperationError[];
-  skipped: BulkActionSkipResult[];
+  skipped: BulkEditActionSkipResult[];
 }> {
   const rulesFinder =
     await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
@@ -297,7 +297,7 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
     );
 
   const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
-  const skipped: BulkActionSkipResult[] = [];
+  const skipped: BulkEditActionSkipResult[] = [];
   const errors: BulkOperationError[] = [];
   const apiKeysMap: ApiKeysMap = new Map();
   const username = await context.getUserName();
@@ -444,7 +444,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
   paramsModifier?: ParamsModifier<Params>;
   apiKeysMap: ApiKeysMap;
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
-  skipped: BulkActionSkipResult[];
+  skipped: BulkEditActionSkipResult[];
   errors: BulkOperationError[];
   username: string | null;
   shouldIncrementRevision?: ShouldIncrementRevision<Params>;

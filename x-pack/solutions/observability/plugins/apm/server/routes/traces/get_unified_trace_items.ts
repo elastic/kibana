@@ -24,6 +24,7 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
+  TIMESTAMP_US,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
@@ -43,6 +44,7 @@ const optionalFields = asMutableArray([
   PROCESSOR_EVENT,
   PARENT_ID,
   STATUS_CODE,
+  TIMESTAMP_US,
 ] as const);
 
 export function getErrorCountByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
@@ -147,15 +149,10 @@ export async function getUnifiedTraceItems({
       const docErrorCount = errorCountByDocId[id] || 0;
       return {
         id: event.span?.id ?? event.transaction?.id,
-        timestamp: event[AT_TIMESTAMP],
+        timestampUs: event.timestamp?.us ?? toMicroseconds(event[AT_TIMESTAMP]),
         name: event.span?.name ?? event.transaction?.name,
         traceId: event.trace.id,
-        duration:
-          apmDuration !== undefined
-            ? apmDuration
-            : Array.isArray(event.duration)
-            ? (event.duration as number[])[0]
-            : event.duration ?? 0,
+        duration: resolveDuration(apmDuration, event.duration),
         hasError:
           docErrorCount > 0 ||
           (event.status?.code && Array.isArray(event.status.code)
@@ -167,3 +164,22 @@ export async function getUnifiedTraceItems({
     })
     .filter((_) => _) as TraceItem[];
 }
+
+/**
+ * Resolve either an APM or OTEL duration and if OTEL, format the duration from nanoseconds to microseconds.
+ */
+function resolveDuration(apmDuration?: number, otelDuration?: number[] | string): number {
+  if (apmDuration) {
+    return apmDuration;
+  }
+
+  const duration = Array.isArray(otelDuration)
+    ? otelDuration[0]
+    : otelDuration
+    ? parseFloat(otelDuration)
+    : 0;
+
+  return duration * 0.001;
+}
+
+const toMicroseconds = (ts: string) => new Date(ts).getTime() * 1000; // Convert ms to us

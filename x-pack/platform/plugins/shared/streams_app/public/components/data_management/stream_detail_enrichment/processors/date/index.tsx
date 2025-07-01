@@ -12,6 +12,7 @@ import { useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import useMount from 'react-use/lib/useMount';
 import { StreamsAPIClientRequestParamsOf } from '@kbn/streams-plugin/public/api';
+import { STREAMS_TIERED_ML_FEATURE } from '@kbn/streams-plugin/common';
 import { getFormattedError } from '../../../../../util/errors';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { ProcessorFieldSelector } from '../processor_field_selector';
@@ -28,7 +29,7 @@ import { DateFormatsField } from './date_formats_field';
 
 import { selectPreviewDocuments } from '../../state_management/simulation_state_machine/selectors';
 import {
-  useStreamsEnrichmentSelector,
+  useStreamEnrichmentSelector,
   useSimulatorSelector,
 } from '../../state_management/stream_enrichment_state_machine';
 import { DateFormState } from '../../types';
@@ -43,7 +44,7 @@ export const DateProcessorForm = () => {
 
   const form = useFormContext<DateFormState>();
 
-  const definition = useStreamsEnrichmentSelector((snapshot) => snapshot.context.definition);
+  const definition = useStreamEnrichmentSelector((snapshot) => snapshot.context.definition);
   const previewDocuments = useSimulatorSelector((snapshot) =>
     selectPreviewDocuments(snapshot.context)
   );
@@ -90,6 +91,8 @@ export const DateProcessorForm = () => {
   };
 
   const hasPrivileges = definition.privileges.text_structure;
+  const isAvailableForTier = core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
+  const areSuggestionsAvailable = hasPrivileges && isAvailableForTier;
 
   /**
    * When the component mounts, we want to apply suggestions if the field name is prepopulated
@@ -99,7 +102,7 @@ export const DateProcessorForm = () => {
   useMount(() => {
     const { field, formats } = form.getValues();
     const isTouched = form.formState.touchedFields.formats;
-    if (hasPrivileges && field && isEmpty(formats) && !isTouched) {
+    if (areSuggestionsAvailable && field && isEmpty(formats) && !isTouched) {
       applySuggestions({ field });
     }
   });
@@ -110,7 +113,7 @@ export const DateProcessorForm = () => {
    * The function is intentionally created depending on privileges, so that in case of no privileges
    * the component does not try to call it.
    */
-  const handleProcessorFieldChange = hasPrivileges
+  const handleProcessorFieldChange = areSuggestionsAvailable
     ? (event: React.ChangeEvent<HTMLInputElement>) => {
         const field = event.target.value;
         const prevFormats = form.getValues('formats');
@@ -128,7 +131,7 @@ export const DateProcessorForm = () => {
    * The function is intentionally created depending on privileges, so that in case of no privileges
    * the component does not render the regenerate button.
    */
-  const handleGenerateSuggestionClick = hasPrivileges
+  const handleGenerateSuggestionClick = areSuggestionsAvailable
     ? () => {
         const field = form.getValues('field');
         applySuggestions({ field });

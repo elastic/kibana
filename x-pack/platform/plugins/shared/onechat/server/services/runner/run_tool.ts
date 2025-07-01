@@ -47,10 +47,11 @@ export const createToolHandlerContext = <TParams = Record<string, unknown>>({
   manager: RunnerManager;
 }): ToolHandlerContext => {
   const { onEvent } = toolExecutionParams;
-  const { request, defaultConnectorId, elasticsearch, modelProviderFactory, toolsService } =
+  const { request, defaultConnectorId, elasticsearch, modelProviderFactory, toolsService, logger } =
     manager.deps;
   return {
     request,
+    logger,
     esClient: elasticsearch.client.asScoped(request),
     modelProvider: modelProviderFactory({ request, defaultConnectorId }),
     runner: manager.getRunner(),

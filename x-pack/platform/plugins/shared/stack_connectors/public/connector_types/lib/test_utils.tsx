@@ -74,6 +74,7 @@ const FormTestProviderComponent: React.FC<FormTestProviderProps> = ({
   connectorServices = {
     validateEmailAddresses: jest.fn(),
     isWebhookSslWithPfxEnabled: true,
+    enabledEmailServices: ['*'],
   },
 }) => {
   const { form } = useForm({ defaultValue });

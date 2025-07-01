@@ -443,7 +443,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
                   />
                 }
               >
-                <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+                <EuiIcon color="subdued" type="info" className="eui-alignTop" />
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>

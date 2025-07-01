@@ -1,6 +1,6 @@
-# SHOW
+## SHOW
 
-The SHOW command retrieves details about the deployment and its capabilities.
+The `SHOW` command provides information about the deployment and its capabilities.
 
 ## Syntax
 
@@ -8,9 +8,9 @@ The SHOW command retrieves details about the deployment and its capabilities.
 
 ### Parameters
 
-#### item
+#### `item`
 
-The only acceptable value is `INFO`.
+This parameter can only be `INFO`.
 
 ## Examples
 

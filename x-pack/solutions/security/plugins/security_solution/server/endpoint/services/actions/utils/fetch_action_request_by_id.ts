@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALLOWED_ACTION_REQUEST_TAGS } from '../constants';
 import { stringify } from '../../../utils/stringify';
 import { NotFoundError } from '../../../errors';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../common/endpoint/constants';
@@ -16,6 +17,8 @@ import type {
 import { catchAndWrapError } from '../../../utils';
 import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
+import type { OrphanResponseActionsMetadata } from '../../../lib/reference_data';
+import { REF_DATA_KEYS } from '../../../lib/reference_data';
 
 /**
  * Fetches a single Action request document.
@@ -80,7 +83,33 @@ export const fetchActionRequestById = async <
             )}] failed with: ${err.message}`
         );
 
-        throw new NotFoundError(`Action [${actionId}] not found`);
+        let throwNotFoundError = true;
+
+        // Before throwing an error, lets check if the action has an "integration policy deleted" tag, and
+        // if so, then check if its allowed to be shown in the active space
+        if (
+          actionRequest.tags &&
+          actionRequest.tags.includes(ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted)
+        ) {
+          logger.debug(
+            `Checking to see if Orphan action [${actionId}] can be displayed in space [${spaceId}]`
+          );
+
+          const orphanActionsSpaceId = (
+            await endpointService
+              .getReferenceDataClient()
+              .get<OrphanResponseActionsMetadata>(REF_DATA_KEYS.orphanResponseActionsSpace)
+          ).metadata.spaceId;
+
+          if (orphanActionsSpaceId && orphanActionsSpaceId === spaceId) {
+            logger.debug(`Action [${actionId}] can be returned for spaceId [${spaceId}]`);
+            throwNotFoundError = false;
+          }
+        }
+
+        if (throwNotFoundError) {
+          throw new NotFoundError(`Action [${actionId}] not found`);
+        }
       }
     }
   }
@@ -88,6 +117,11 @@ export const fetchActionRequestById = async <
   // Ensure `agent.policy` is an array
   if (!Array.isArray(actionRequest.agent.policy)) {
     actionRequest.agent.policy = actionRequest.agent.policy ? [actionRequest.agent.policy] : [];
+  }
+
+  // Ensure `tags` is an array
+  if (!Array.isArray(actionRequest.tags)) {
+    actionRequest.tags = actionRequest.tags ? [actionRequest.tags] : [];
   }
 
   return actionRequest;

@@ -39,18 +39,23 @@ const createActions = (testBed: TestBed) => {
 
       component.update();
     },
-    clickDeprecationRowAt: async (
+    clickDeprecationRowAt: async (config: {
       deprecationType:
         | 'mlSnapshot'
         | 'indexSetting'
         | 'reindex'
         | 'default'
         | 'clusterSetting'
-        | 'dataStream',
-      index: number
-    ) => {
+        | 'dataStream'
+        | 'unfreeze';
+      index: number;
+      action?: 'reindex' | 'readonly' | 'unfreeze';
+    }) => {
+      const { deprecationType, index, action } = config;
       await act(async () => {
-        find(`deprecation-${deprecationType}`).at(index).simulate('click');
+        find(`deprecation-${deprecationType}${action ? `-${action}` : ''}`)
+          .at(index)
+          .simulate('click');
       });
 
       component.update();
@@ -189,6 +194,13 @@ const createActions = (testBed: TestBed) => {
 
       component.update();
     },
+    clickUnfreezeButton: async () => {
+      await act(async () => {
+        find('startIndexUnfreezeButton').simulate('click');
+      });
+
+      component.update();
+    },
     checkMigrationWarningCheckbox: async () => {
       await act(async () => {
         find('warninStepCheckbox')
@@ -219,7 +231,7 @@ const createActions = (testBed: TestBed) => {
     },
     closeFlyout: async () => {
       await act(async () => {
-        find('closeDataStreamReindexingButton').simulate('click');
+        find('closeDataStreamConfirmStepButton').simulate('click');
       });
       component.update();
     },

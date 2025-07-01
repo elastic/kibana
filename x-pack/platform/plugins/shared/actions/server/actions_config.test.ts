@@ -7,7 +7,6 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { ActionsConfig } from './config';
-import { DEFAULT_USAGE_API_URL } from './config';
 import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
@@ -41,9 +40,6 @@ const defaultActionsConfig: ActionsConfig = {
   microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
   microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
-  usage: {
-    url: DEFAULT_USAGE_API_URL,
-  },
 };
 
 describe('ensureUriAllowed', () => {
@@ -633,6 +629,14 @@ describe('getAwsSesConfig()', () => {
     expect(acu.getAwsSesConfig()).toEqual(null);
   });
 
+  test('returns null when no email.services.ses config set', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      email: { services: {} },
+    });
+    expect(acu.getAwsSesConfig()).toEqual(null);
+  });
+
   test('returns config if set', () => {
     const acu = getActionsConfigurationUtilities({
       ...defaultActionsConfig,
@@ -650,5 +654,49 @@ describe('getAwsSesConfig()', () => {
       port: 1234,
       secure: true,
     });
+  });
+});
+
+describe('getEnabledEmailServices()', () => {
+  test('returns all services when no email config set', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getEnabledEmailServices()).toEqual(['*']);
+  });
+
+  test('returns all services when no email.services config set', () => {
+    const acu = getActionsConfigurationUtilities({ ...defaultActionsConfig, email: {} });
+    expect(acu.getEnabledEmailServices()).toEqual(['*']);
+  });
+
+  test('returns all services when no email.services.enabled config set', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      email: { services: {} },
+    });
+    expect(acu.getEnabledEmailServices()).toEqual(['*']);
+  });
+
+  test('returns only enabled services', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      email: {
+        services: {
+          enabled: ['google-mail', 'microsoft-exchange'],
+        },
+      },
+    });
+    expect(acu.getEnabledEmailServices()).toEqual(['google-mail', 'microsoft-exchange']);
+  });
+
+  test('returns all services when enabled is set to "*" in config', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      email: {
+        services: {
+          enabled: ['*'],
+        },
+      },
+    });
+    expect(acu.getEnabledEmailServices()).toEqual(['*']);
   });
 });

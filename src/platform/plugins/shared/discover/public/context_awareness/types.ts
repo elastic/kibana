@@ -140,6 +140,10 @@ export interface DefaultAppStateExtension {
    * The field to apply for the histogram breakdown
    */
   breakdownField?: string;
+  /**
+   * The state for chart visibility toggle
+   */
+  hideChart?: boolean;
 }
 
 /**
@@ -188,6 +192,10 @@ export interface RowControlsExtensionParams {
    * @param options.initialTabId - The tabId to display in the flyout
    */
   setExpandedDoc?: (record?: DataTableRecord, options?: { initialTabId?: string }) => void;
+  /**
+   * Flag to indicate if Flyout opening controls must be rendered or not
+   */
+  isDocViewerEnabled: boolean;
 }
 
 /**

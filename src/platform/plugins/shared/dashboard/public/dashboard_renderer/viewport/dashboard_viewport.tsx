@@ -17,7 +17,7 @@ import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { CONTROL_GROUP_EMBEDDABLE_ID } from '../../dashboard_api/control_group_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
@@ -103,7 +103,7 @@ export const DashboardViewport = ({
   }, [dashboard]);
   */
 
-  const styles = useMemoizedStyles(dashboardViewportStyles);
+  const styles = useMemoCss(dashboardViewportStyles);
 
   return (
     <div
