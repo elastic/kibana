@@ -30028,6 +30028,40 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.SEARCH_AI_LAKE_ALLOWED_INSTALL_PACKAGES",
+        "type": "Array",
+        "tags": [],
+        "label": "SEARCH_AI_LAKE_ALLOWED_INSTALL_PACKAGES",
+        "description": [
+          "\nAllowlist of integrations in addition to {@link SEARCH_AI_LAKE_PACKAGES} which are available to\ninstall in the Serverless Security SearchAILake tier (AI4DSOC effort)."
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/constants/security_search_ai_lake.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.SEARCH_AI_LAKE_PACKAGES",
+        "type": "Array",
+        "tags": [],
+        "label": "SEARCH_AI_LAKE_PACKAGES",
+        "description": [
+          "\nAllowlist of the publicized integrations allowed in the Serverless Security SearchAILake tier (AI4DSOC effort).\nThis is used to control which integrations are displayed in the Configurations -> Integrations UI as well as\nwhich promotion rules will be installed."
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/constants/security_search_ai_lake.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.SETUP_API_ROUTE",
         "type": "string",
         "tags": [],
