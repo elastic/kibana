@@ -13,7 +13,7 @@ interface Props {
   allSystemPrompts: PromptResponse[];
   currentSystemPromptId: string | undefined;
   isSettingsModalVisible: boolean;
-  compressed: boolean;
+  compressed?: boolean;
   onSystemPromptSelectionChange: (systemPromptId: string | undefined) => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -22,7 +22,7 @@ const SystemPromptComponent: React.FC<Props> = ({
   allSystemPrompts,
   currentSystemPromptId,
   isSettingsModalVisible,
-  compressed,
+  compressed = false,
   onSystemPromptSelectionChange,
   setIsSettingsModalVisible,
 }) => {
