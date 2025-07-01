@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import PageNotFound from '../pages/404';
 import { AnnotationsPage } from '../pages/annotations/annotations';
 import { DatePickerContextProvider } from '../context/date_picker_context/date_picker_context';
 import { useKibana } from '../utils/kibana_react';
@@ -199,6 +200,14 @@ export const routes = {
   [ANNOTATIONS_PATH]: {
     handler: () => {
       return <AnnotationsPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  // 404 not found route
+  ['*']: {
+    handler: () => {
+      return <PageNotFound />;
     },
     params: {},
     exact: true,
