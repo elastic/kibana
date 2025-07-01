@@ -106,7 +106,6 @@
     "@kbn/es",
     "@kbn/metrics-data-access-plugin",
     "@kbn/dataset-quality-plugin",
-    "@kbn/reporting-common",
     "@kbn/io-ts-utils",
     "@kbn/security-plugin-types-common",
     "@kbn/slo-schema",

@@ -2759,6 +2759,8 @@
             "signature": [
               "{ services: { logSourcesService: ",
               "LogSourcesService",
+              "; logDataService: ",
+              "LogDataService",
               "; }; }"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
