@@ -194,7 +194,7 @@ export const createContextAwarenessMocks = ({
     documentProfileServiceMock,
     contextRecordMock,
     contextRecordMock2,
-    profilesManagerMock: profilesManagerMock,
+    profilesManagerMock,
     profileProviderServices,
     ebtManagerMock,
   };

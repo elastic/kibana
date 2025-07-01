@@ -32,7 +32,7 @@ import type { DiscoverCustomizationId } from '../../../../customizations/customi
 import { RuntimeStateProvider, internalStateActions } from '../../state_management/redux';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
 const { profilesManagerMock: mockProfilesManager } = createContextAwarenessMocks();
 mockProfilesManager.resolveDataSourceProfile({});
