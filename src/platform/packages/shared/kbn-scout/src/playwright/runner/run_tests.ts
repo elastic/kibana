@@ -172,7 +172,7 @@ export async function runPlaywrightTestCheck(log: ToolingLog) {
   const pwCmdArgs = [
     'test',
     `--config=x-pack/platform/plugins/private/discover_enhanced/ui_tests/playwright.config.ts`,
-    `--fail`,
+    `--list`,
   ];
 
   await withProcRunner(log, async (procs) => {
