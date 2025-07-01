@@ -48,6 +48,14 @@ describe('CrowdstrikeActionsClient class', () => {
     > = {}
   ) => responseActionsClientMock.createIsolateOptions({ ...overrides, agent_type: 'crowdstrike' });
 
+  const createCrowdstrikeRunscrtiptOptions = (
+    overrides: Omit<
+      Parameters<typeof responseActionsClientMock.createIsolateOptions>[0],
+      'agent_type'
+    > = {}
+  ) =>
+    responseActionsClientMock.createRunScriptOptions({ ...overrides, agent_type: 'crowdstrike' });
+
   beforeEach(() => {
     classConstructorOptions = CrowdstrikeMock.createConstructorOptions();
     connectorActionsMock = classConstructorOptions.connectorActions;
@@ -358,6 +366,138 @@ describe('CrowdstrikeActionsClient class', () => {
             actionId: expect.any(String),
             agentType: 'crowdstrike',
             command: 'unisolate',
+            isAutomated: false,
+          },
+        });
+      });
+    });
+  });
+
+  describe('#runscript()', () => {
+    it('should send action to Crowdstrike', async () => {
+      await crowdstrikeActionsClient.runscript(
+        createCrowdstrikeRunscrtiptOptions({
+          actionId: '123-456-789',
+          endpoint_ids: ['1-2-3-cs-agent'],
+          comment: 'test runscript comment',
+          parameters: {
+            raw: 'echo "Hello World"',
+          },
+        })
+      );
+
+      expect(connectorActionsMock.execute as jest.Mock).toHaveBeenCalledWith({
+        params: {
+          subAction: SUB_ACTION.EXECUTE_ADMIN_RTR,
+          subActionParams: {
+            command: 'runscript --Raw=```echo "Hello World"```',
+            endpoint_ids: ['1-2-3-cs-agent'],
+            actionParameters: {
+              comment:
+                'Action triggered from Elastic Security by user [foo] for action [runscript (action id: 123-456-789)]: test runscript comment',
+            },
+          },
+        },
+      });
+    });
+
+    it('should write action request to endpoint indexes', async () => {
+      await crowdstrikeActionsClient.runscript(responseActionsClientMock.createRunScriptOptions());
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(2);
+      expect(classConstructorOptions.esClient.index.mock.calls[0][0]).toEqual({
+        document: {
+          '@timestamp': expect.any(String),
+          EndpointActions: {
+            action_id: expect.any(String),
+            data: {
+              command: 'runscript',
+              comment: 'test comment',
+              parameters: { raw: 'ls' },
+              hosts: {
+                '1-2-3': {
+                  name: 'Crowdstrike-1460',
+                },
+              },
+            },
+            expiration: expect.any(String),
+            input_type: 'crowdstrike',
+            type: 'INPUT_ACTION',
+          },
+          agent: { id: ['1-2-3'] },
+          meta: {
+            hostName: 'Crowdstrike-1460',
+          },
+          user: { id: 'foo' },
+        },
+        index: ENDPOINT_ACTIONS_INDEX,
+        refresh: 'wait_for',
+      });
+      expect(classConstructorOptions.esClient.index.mock.calls[1][0]).toEqual({
+        document: {
+          '@timestamp': expect.any(String),
+          agent: { id: ['1-2-3'] },
+          EndpointActions: {
+            action_id: expect.any(String),
+            completed_at: expect.any(String),
+            started_at: expect.any(String),
+            data: {
+              command: 'runscript',
+              comment: 'test comment',
+              hosts: {
+                '1-2-3': {
+                  name: 'Crowdstrike-1460',
+                },
+              },
+              output: {
+                content: {
+                  code: '200',
+                  stderr: '',
+                  stdout: '',
+                },
+                type: 'text',
+              },
+              parameters: { raw: 'ls' },
+            },
+            input_type: 'crowdstrike',
+          },
+          error: undefined,
+          meta: undefined,
+        },
+        index: ENDPOINT_ACTION_RESPONSES_INDEX,
+        refresh: 'wait_for',
+      });
+    });
+
+    it('should return action details', async () => {
+      await crowdstrikeActionsClient.runscript(responseActionsClientMock.createRunScriptOptions());
+
+      expect(getActionDetailsByIdMock).toHaveBeenCalled();
+    });
+
+    it('should update cases', async () => {
+      await crowdstrikeActionsClient.runscript(
+        responseActionsClientMock.createRunScriptOptions({
+          case_ids: ['case-1'],
+        })
+      );
+
+      expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
+    });
+
+    describe('telemetry events', () => {
+      it('should send `runscript` action creation telemetry event', async () => {
+        await crowdstrikeActionsClient.runscript(
+          responseActionsClientMock.createRunScriptOptions()
+        );
+
+        expect(
+          classConstructorOptions.endpointService.getTelemetryService().reportEvent
+        ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
+          responseActions: {
+            actionId: expect.any(String),
+            agentType: 'crowdstrike',
+            command: 'runscript',
             isAutomated: false,
           },
         });
