@@ -3105,6 +3105,12 @@
                         "_meta": {
                           "description": "True if this rule has osquery response actions"
                         }
+                      },
+                      "has_exceptions": {
+                        "type": "boolean",
+                        "_meta": {
+                          "description": "True if this rule has exceptions"
+                        }
                       }
                     }
                   }
