@@ -29,8 +29,6 @@ import { GraphPageObject } from './graph_page';
 import { GrokDebuggerPageObject } from './grok_debugger_page';
 import { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
 import { IndexManagementPageProvider } from './index_management_page';
-import { InfraMetricsExplorerProvider } from './infra_metrics_explorer';
-import { InfraSavedViewsProvider } from './infra_saved_views';
 import { IngestPipelinesPageProvider } from './ingest_pipelines_page';
 import { LicenseManagementPageProvider } from './license_management_page';
 import { LogstashPageObject } from './logstash_page';
@@ -75,8 +73,6 @@ export const pageObjects = {
   grokDebugger: GrokDebuggerPageObject,
   indexLifecycleManagement: IndexLifecycleManagementPageProvider,
   indexManagement: IndexManagementPageProvider,
-  infraMetricsExplorer: InfraMetricsExplorerProvider,
-  infraSavedViews: InfraSavedViewsProvider,
   ingestPipelines: IngestPipelinesPageProvider,
   lens: LensPageProvider,
   licenseManagement: LicenseManagementPageProvider,
