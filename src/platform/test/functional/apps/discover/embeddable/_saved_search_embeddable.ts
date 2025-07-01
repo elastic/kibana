@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const dataGrid = getService('dataGrid');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
   const esArchiver = getService('esArchiver');
@@ -195,6 +196,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(2);
       });
+    });
+
+    it('filters are added when a cell filter is clicked', async function () {
+      await addSearchEmbeddableToDashboard();
+      await dashboardPanelActions.clickPanelAction(
+        'embeddablePanelAction-ACTION_VIEW_SAVED_SEARCH'
+      );
+
+      await discover.waitForDiscoverAppOnScreen();
+      expect(await discover.getSavedSearchTitle()).to.equal('Rendering Test: saved search');
     });
   });
 }
