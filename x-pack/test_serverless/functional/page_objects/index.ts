@@ -27,10 +27,17 @@ import { SvlApiKeysProvider } from './svl_api_keys';
 import { SvlSearchCreateIndexPageProvider } from './svl_search_create_index_page';
 import { SvlSearchInferenceManagementPageProvider } from './svl_search_inference_management_page';
 import { SvlDataUsagePageProvider } from './svl_data_usage';
+import { AssetDetailsProvider } from './asset_details';
+import { InfraHomePageProvider } from './infra_home_page';
+import { InfraHostsViewProvider } from './infra_hosts_view';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
   ...cloudSecurityPosturePageObjects,
+
+  assetDetails: AssetDetailsProvider,
+  infraHome: InfraHomePageProvider,
+  infraHostsView: InfraHostsViewProvider,
 
   svlCommonPage: SvlCommonPageProvider,
   svlCommonNavigation: SvlCommonNavigationProvider,

@@ -10,8 +10,6 @@ import { MonitorStatusTranslations } from '@kbn/uptime-plugin/common/rules/legac
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 import { deleteUptimeSettingsObject } from '../../../functional/apps/uptime';
 
-const ARCHIVE = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
-
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('uptime simple status alert', () => {
     const pageObjects = getPageObjects(['common', 'header', 'uptime']);
