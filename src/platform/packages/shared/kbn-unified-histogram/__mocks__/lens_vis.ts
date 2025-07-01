@@ -34,6 +34,8 @@ export const getLensVisMock = async ({
   allSuggestions,
   isTransformationalESQL,
   table,
+  externalVisContext,
+  getModifiedVisAttributes,
 }: {
   filters: QueryParams['filters'];
   query: QueryParams['query'];
@@ -46,6 +48,8 @@ export const getLensVisMock = async ({
   allSuggestions?: Suggestion[];
   isTransformationalESQL?: boolean;
   table?: Datatable;
+  externalVisContext?: UnifiedHistogramVisContext;
+  getModifiedVisAttributes?: Parameters<LensVisService['update']>[0]['getModifiedVisAttributes'];
 }): Promise<{
   lensService: LensVisService;
   visContext: UnifiedHistogramVisContext | undefined;
@@ -88,9 +92,10 @@ export const getLensVisMock = async ({
     },
     timeInterval,
     breakdownField,
-    externalVisContext: undefined,
+    externalVisContext,
     table,
     onSuggestionContextChange: () => {},
+    getModifiedVisAttributes,
   });
 
   return {

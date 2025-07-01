@@ -39,6 +39,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
@@ -353,6 +354,14 @@ export const useDiscoverHistogram = (
     [dispatch, setOverriddenVisContextAfterInvalidation, stateContainer.savedSearchState]
   );
 
+  const getModifiedVisAttributesAccessor = useProfileAccessor('getModifiedVisAttributes');
+  const getModifiedVisAttributes = useCallback<
+    NonNullable<UseUnifiedHistogramProps['getModifiedVisAttributes']>
+  >(
+    (attributes) => getModifiedVisAttributesAccessor((params) => params.attributes)({ attributes }),
+    [getModifiedVisAttributesAccessor]
+  );
+
   const chartHidden = useAppStateSelector((state) => state.hideChart);
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
@@ -401,6 +410,7 @@ export const useDiscoverHistogram = (
     breakdownField,
     onBreakdownFieldChange,
     searchSessionId,
+    getModifiedVisAttributes,
   };
 };
 
