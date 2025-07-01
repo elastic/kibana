@@ -1593,6 +1593,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams* @elastic/streams-program-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/streams @elastic/streams-program-team
 /x-pack/test/api_integration/fixtures/kbn_archiver/streams @elastic/streams-program-team
+/x-pack/test/common/utils/streams @elastic/streams-program-team
 
 ### END Observability Plugins
 

@@ -11,13 +11,13 @@ import {
   StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
   createStreamsRepositoryCustomRoleClient,
-} from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/apis/observability/streams/helpers/repository_client';
+} from '@kbn/test-suites-xpack/common/utils/streams/helpers/repository_client';
 import {
   disableStreams,
   enableStreams,
   getStream,
   putStream,
-} from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/apis/observability/streams/helpers/requests';
+} from '@kbn/test-suites-xpack/common/utils/streams/helpers/requests';
 
 const STREAM_NAME = 'logs.crud';
 const request: Streams.WiredStream.UpsertRequest = {
