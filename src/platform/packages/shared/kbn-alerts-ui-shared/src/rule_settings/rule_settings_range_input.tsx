@@ -36,7 +36,7 @@ export const RuleSettingsRangeInput = memo((props: RuleSettingsRangeInputProps) 
             size="s"
             type="question"
             content={labelPopoverText}
-            aria-label={labelPopoverText}
+            aria-label={String(label)}
           />
         )}
       </div>
