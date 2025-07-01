@@ -411,6 +411,7 @@ describe('MonitorConfigRepository', () => {
       expect(soClient.find).toHaveBeenCalledWith({
         type: syntheticsMonitorSavedObjectType,
         search: 'test',
+        page: 1,
         perPage: 5000,
       });
     });

@@ -205,7 +205,7 @@ export class MonitorConfigRepository {
     types: string[] = syntheticsMonitorSOTypes,
     soClient: SavedObjectsClientContract = this.soClient
   ): Promise<SavedObjectsFindResponse<T>> {
-    const { page = 1, perPage = 20, sortField, sortOrder = 'asc' } = options;
+    const { page = 1, perPage = 5000, sortField, sortOrder = 'asc' } = options;
 
     // To correctly paginate from two sources, we need to fetch enough items
     // from both to cover all items up to the current page.
