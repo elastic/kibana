@@ -25,6 +25,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       mockApiServer = await mockAgentlessApiService.listen(8089); // Start the agentless api mock server on port 8089
+      // Ensure fleet default outputs are setup
+      await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
       const getPkRes = await supertest
         .get(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}`)

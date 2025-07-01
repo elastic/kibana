@@ -10,7 +10,8 @@ import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { ParseAggregationResultsOpts } from '@kbn/triggers-actions-ui-plugin/common';
 import type { ESQLCommandOption } from '@kbn/esql-ast';
 import { type ESQLAstCommand, parse } from '@kbn/esql-ast';
-import { isOptionItem, isColumnItem } from '@kbn/esql-validation-autocomplete';
+import { isOptionItem, isColumnItem, isFunctionItem } from '@kbn/esql-validation-autocomplete';
+import { getArgsFromRenameFunction } from '@kbn/esql-utils';
 import { ActionGroupId } from './constants';
 
 type EsqlDocument = Record<string, string | null>;
@@ -248,8 +249,8 @@ const getRenameCommands = (commands: ESQLAstCommand[]): ESQLAstCommand[] =>
 const getFieldsFromRenameCommands = (astCommands: ESQLAstCommand[], fields: string[]): string[] => {
   return astCommands.reduce((updatedFields, command) => {
     for (const renameArg of command.args) {
-      if (isOptionItem(renameArg) && renameArg.name === 'as') {
-        const [original, renamed] = renameArg.args;
+      if (isFunctionItem(renameArg)) {
+        const { original, renamed } = getArgsFromRenameFunction(renameArg);
         if (isColumnItem(original) && isColumnItem(renamed)) {
           updatedFields = updatedFields.map((field) =>
             field === original.name ? renamed.name : field

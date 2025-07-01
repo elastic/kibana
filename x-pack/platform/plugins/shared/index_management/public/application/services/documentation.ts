@@ -16,7 +16,6 @@ class DocumentationService {
   private esDocsBase: string = '';
   private enrichPolicies: string = '';
   private createEnrichPolicies: string = '';
-  private dataStreamsFailureStore: string = '';
   private matchAllQuery: string = '';
   private indexManagement: string = '';
   private indexSettings: string = '';
@@ -79,7 +78,6 @@ class DocumentationService {
     this.esDocsBase = links.elasticsearch.docsBase;
     this.enrichPolicies = links.elasticsearch.enrichPolicies;
     this.createEnrichPolicies = links.elasticsearch.createEnrichPolicy;
-    this.dataStreamsFailureStore = links.elasticsearch.dataStreamsFailureStore;
     this.matchAllQuery = links.elasticsearch.matchAllQuery;
     this.indexManagement = links.management.indexManagement;
     this.indexSettings = links.elasticsearch.indexSettings;
@@ -203,10 +201,6 @@ class DocumentationService {
 
   public getCreateEnrichPolicyLink() {
     return this.createEnrichPolicies;
-  }
-
-  public getDataStreamsFailureStoreLink() {
-    return this.dataStreamsFailureStore;
   }
 
   public getMatchAllQueryLink() {

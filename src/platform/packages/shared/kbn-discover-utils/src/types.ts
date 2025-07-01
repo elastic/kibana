@@ -126,6 +126,8 @@ export interface SpanDocumentOverview
     UserAgentFields {
   'transaction.id'?: string;
   'transaction.name'?: string;
+  duration?: number;
+  kind?: string;
 }
 
 export interface TraceFields {

@@ -10,6 +10,7 @@
 import type { Observable } from 'rxjs';
 import type { IRouter, Logger, SavedObjectsClient } from '@kbn/core/server';
 import type { TelemetryCollectionManagerPluginSetup } from '@kbn/telemetry-collection-manager-plugin/server';
+import { registerTelemetryForceSend } from './telemetry_force_send';
 import type { TelemetryConfigType } from '../config';
 import { registerTelemetryConfigRoutes } from './telemetry_config';
 import { registerTelemetryOptInRoutes } from './telemetry_opt_in';
@@ -38,4 +39,7 @@ export function registerRoutes(options: RegisterRoutesParams) {
   registerTelemetryOptInStatsRoutes(router, telemetryCollectionManager);
   registerTelemetryUserHasSeenNotice(router, options.currentKibanaVersion);
   registerTelemetryLastReported(router, savedObjectsInternalClient$);
+  if (isDev) {
+    registerTelemetryForceSend(options);
+  }
 }

@@ -9,7 +9,6 @@ import { firstValueFrom } from 'rxjs';
 import {
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   KibanaRequest,
   Logger,
   Plugin,
@@ -17,7 +16,6 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
 import { EntityClient } from './lib/entity_client';
 import { entityManagerRouteRepository } from './routes';
@@ -28,28 +26,13 @@ import {
   EntityManagerPluginStartDependencies,
   EntityManagerServerSetup,
 } from './types';
-import { setupEntityDefinitionsIndex } from './lib/v2/definitions/setup_entity_definitions_index';
-import {
-  CREATE_ENTITY_TYPE_DEFINITION_PRIVILEGE,
-  CREATE_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
-  READ_ENTITY_TYPE_DEFINITION_PRIVILEGE,
-  READ_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
-  READ_ENTITIES_PRIVILEGE,
-} from './lib/v2/constants';
-import { installBuiltInDefinitions } from './lib/v2/definitions/install_built_in_definitions';
 import { disableManagedEntityDiscovery } from './lib/entities/uninstall_entity_definition';
 import { installEntityManagerTemplates } from './lib/manage_index_templates';
-import { instanceAsFilter } from './lib/v2/definitions/instance_as_filter';
-import { identityFieldsBySource } from './lib/v2/definitions/identity_fields_by_source';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityManagerServerPluginSetup {}
 export interface EntityManagerServerPluginStart {
   getScopedClient: (options: { request: KibanaRequest }) => Promise<EntityClient>;
-  v2: {
-    instanceAsFilter: typeof instanceAsFilter;
-    identityFieldsBySource: typeof identityFieldsBySource;
-  };
 }
 
 export const config: PluginConfigDescriptor<EntityManagerConfig> = {
@@ -81,46 +64,6 @@ export class EntityManagerServerPlugin
     core: CoreSetup,
     plugins: EntityManagerPluginSetupDependencies
   ): EntityManagerServerPluginSetup {
-    const ENTITY_MANAGER_FEATURE_ID = 'entityManager';
-    plugins.features.registerKibanaFeature({
-      id: ENTITY_MANAGER_FEATURE_ID,
-      name: 'Entity Manager',
-      description: 'All features related to the Elastic Entity model',
-      category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-      app: [ENTITY_MANAGER_FEATURE_ID],
-      privileges: {
-        all: {
-          app: [ENTITY_MANAGER_FEATURE_ID],
-          api: [
-            CREATE_ENTITY_TYPE_DEFINITION_PRIVILEGE,
-            CREATE_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
-            READ_ENTITY_TYPE_DEFINITION_PRIVILEGE,
-            READ_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
-            READ_ENTITIES_PRIVILEGE,
-          ],
-          ui: [],
-          savedObject: {
-            all: [],
-            read: [],
-          },
-        },
-        read: {
-          app: [ENTITY_MANAGER_FEATURE_ID],
-          api: [
-            READ_ENTITY_TYPE_DEFINITION_PRIVILEGE,
-            READ_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
-            READ_ENTITIES_PRIVILEGE,
-          ],
-          ui: [],
-          savedObject: {
-            all: [],
-            read: [],
-          },
-        },
-      },
-    });
-
     core.savedObjects.registerType(entityDefinition);
     core.savedObjects.registerType(EntityDiscoveryApiKeyType);
     plugins.encryptedSavedObjects.registerType({
@@ -187,18 +130,9 @@ export class EntityManagerServerPlugin
       .then(() => this.logger.debug(`Disabled managed entity discovery`))
       .catch((err) => this.logger.error(`Failed to disable managed entity discovery: ${err}`));
 
-    // Setup v2 definitions index
-    setupEntityDefinitionsIndex(core.elasticsearch.client, this.logger)
-      .then(() => installBuiltInDefinitions(core.elasticsearch.client, this.logger))
-      .catch((err) => this.logger.error(err));
-
     return {
       getScopedClient: async ({ request }: { request: KibanaRequest }) => {
         return this.getScopedClient({ request, coreStart: core });
-      },
-      v2: {
-        instanceAsFilter,
-        identityFieldsBySource,
       },
     };
   }

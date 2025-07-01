@@ -19,7 +19,7 @@ interface SourcererCalloutProps {
 export const SourcererCallout = React.memo<SourcererCalloutProps>(
   ({ isOnlyDetectionAlerts, title }) =>
     isOnlyDetectionAlerts ? (
-      <EuiCallOut data-test-subj="sourcerer-callout" iconType="iInCircle" size="s" title={title} />
+      <EuiCallOut data-test-subj="sourcerer-callout" iconType="info" size="s" title={title} />
     ) : null
 );
 

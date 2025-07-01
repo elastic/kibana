@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './preview_docs_filter';
+export * from './simulation_documents_search';
 export * from './simulation_state_machine';
 export * from './types';
 export * from './utils';

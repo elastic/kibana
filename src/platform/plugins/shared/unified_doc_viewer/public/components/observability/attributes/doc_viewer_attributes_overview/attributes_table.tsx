@@ -18,14 +18,16 @@ import {
 } from '../../../doc_viewer_table/table_cell_actions';
 import { FieldRow } from '../../../doc_viewer_table/field_row';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
+import { AttributeField } from './attributes_overview';
 
 interface AttributesTableProps
   extends Pick<
     DocViewRenderProps,
     'hit' | 'dataView' | 'columnsMeta' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
   > {
-  fields: string[];
+  fields: AttributeField[];
   searchTerm: string;
+  isEsqlMode: boolean;
 }
 
 export const AttributesTable = ({
@@ -38,6 +40,7 @@ export const AttributesTable = ({
   filter,
   onAddColumn,
   onRemoveColumn,
+  isEsqlMode,
 }: AttributesTableProps) => {
   const flattened = hit.flattened;
   const { fieldFormats, toasts } = getUnifiedDocViewerServices();
@@ -55,18 +58,14 @@ export const AttributesTable = ({
     };
   }, [onRemoveColumn, onAddColumn, columns]);
 
-  const displayedFields = useMemo(
-    () => fields.filter((field) => field.toLowerCase().includes(searchTerm.toLowerCase())),
-    [fields, searchTerm]
-  );
-
   const rows: FieldRow[] = useMemo(
     () =>
-      displayedFields.map(
+      fields.map(
         (field) =>
           new FieldRow({
-            name: field,
-            flattenedValue: flattened[field],
+            name: field.name,
+            displayNameOverride: field.displayName,
+            flattenedValue: flattened[field.name],
             hit,
             dataView,
             fieldFormats,
@@ -74,16 +73,16 @@ export const AttributesTable = ({
             columnsMeta,
           })
       ),
-    [displayedFields, flattened, hit, dataView, fieldFormats, columnsMeta]
+    [fields, flattened, hit, dataView, fieldFormats, columnsMeta]
   );
 
   const fieldCellActions = useMemo(
-    () => getFieldCellActions({ rows, isEsqlMode: false, onFilter: filter, onToggleColumn }),
-    [rows, filter, onToggleColumn]
+    () => getFieldCellActions({ rows, isEsqlMode, onFilter: filter, onToggleColumn }),
+    [rows, filter, onToggleColumn, isEsqlMode]
   );
   const fieldValueCellActions = useMemo(
-    () => getFieldValueCellActions({ rows, isEsqlMode: false, toasts, onFilter: filter }),
-    [rows, toasts, filter]
+    () => getFieldValueCellActions({ rows, isEsqlMode, toasts, onFilter: filter }),
+    [rows, toasts, filter, isEsqlMode]
   );
 
   const gridColumns: EuiDataGridProps['columns'] = [

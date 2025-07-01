@@ -14,6 +14,7 @@ import {
   getBulkActionEditRequest,
   getFindResultWithSingleHit,
   getFindResultWithMultiHits,
+  getBulkActionEditAlertSuppressionRequest,
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import { performBulkActionRoute } from './route';
@@ -22,6 +23,7 @@ import {
   getBulkDisableRuleActionSchemaMock,
 } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
+import type { ConfigType } from '../../../../../../config';
 
 jest.mock('../../../../../machine_learning/authz');
 
@@ -32,6 +34,9 @@ describe('Perform bulk action route', () => {
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
   const mockRule = getFindResultWithSingleHit().data[0];
+  const experimentalFeatures = {
+    bulkEditAlertSuppressionEnabled: true,
+  } as ConfigType['experimentalFeatures'];
 
   beforeEach(async () => {
     server = serverMock.create();
@@ -45,7 +50,9 @@ describe('Perform bulk action route', () => {
       errors: [],
       total: 1,
     });
-    performBulkActionRoute(server.router, ml);
+    performBulkActionRoute(server.router, ml, {
+      experimentalFeatures,
+    } as ConfigType);
   });
 
   describe('status codes', () => {
@@ -104,6 +111,32 @@ describe('Perform bulk action route', () => {
       expect(response.body).toEqual({
         message: 'More than 10000 rules matched the filter query. Try to narrow it down.',
         status_code: 400,
+      });
+    });
+
+    it('returns 403 if alert suppression license is not sufficient', async () => {
+      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+      const response = await server.inject(
+        getBulkActionEditAlertSuppressionRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.body).toEqual({
+        message: 'Alert suppression is enabled with platinum license or above.',
+        status_code: 403,
+      });
+    });
+
+    it('returns 403 for dry run mode if alert suppression license is not sufficient', async () => {
+      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+      const response = await server.inject(
+        { ...getBulkActionEditAlertSuppressionRequest(), query: { dry_run: 'true' } },
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.body).toEqual({
+        message: 'Alert suppression is enabled with platinum license or above.',
+        status_code: 403,
       });
     });
   });
@@ -507,7 +540,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 4 more'
+        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 6 more'
       );
     });
 
@@ -519,7 +552,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 4 more'
+        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 6 more'
       );
     });
 
@@ -553,7 +586,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'ids: Expected array, received string, action: Invalid literal value, expected "delete", ids: Expected array, received string, ids: Expected array, received string, action: Invalid literal value, expected "enable", and 10 more'
+        'ids: Expected array, received string, action: Invalid literal value, expected "delete", ids: Expected array, received string, ids: Expected array, received string, action: Invalid literal value, expected "enable", and 13 more'
       );
     });
 
@@ -750,6 +783,52 @@ describe('Perform bulk action route', () => {
         },
       })
     );
+  });
+});
+
+describe('Perform bulk action route, experimental feature bulkEditAlertSuppressionEnabled is disabled', () => {
+  let server: ReturnType<typeof serverMock.create>;
+  let { clients, context } = requestContextMock.createTools();
+  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
+  const experimentalFeatures = {} as ConfigType['experimentalFeatures'];
+
+  beforeEach(() => {
+    server = serverMock.create();
+    ({ clients, context } = requestContextMock.createTools());
+    ml = mlServicesMock.createSetupContract();
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+
+    performBulkActionRoute(server.router, ml, {
+      experimentalFeatures,
+    } as ConfigType);
+  });
+
+  it('returns error if experimental feature bulkEditAlertSuppressionEnabled is not enabled for alert suppression bulk action', async () => {
+    const response = await server.inject(
+      getBulkActionEditAlertSuppressionRequest(),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toEqual(400);
+    expect(response.body).toEqual({
+      message:
+        'Bulk alert suppression actions are not supported. Use "experimentalFeatures.bulkEditAlertSuppressionEnabled" config field to enable it.',
+      status_code: 400,
+    });
+  });
+
+  it('returns error for dry run mode if experimental feature bulkEditAlertSuppressionEnabled is not enabled for alert suppression bulk action', async () => {
+    const response = await server.inject(
+      { ...getBulkActionEditAlertSuppressionRequest(), query: { dry_run: 'true' } },
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toEqual(400);
+    expect(response.body).toEqual({
+      message:
+        'Bulk alert suppression actions are not supported. Use "experimentalFeatures.bulkEditAlertSuppressionEnabled" config field to enable it.',
+      status_code: 400,
+    });
   });
 });
 

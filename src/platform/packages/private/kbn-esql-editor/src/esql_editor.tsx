@@ -523,11 +523,12 @@ export const ESQLEditor = memo(function ESQLEditor({
             (await kibana.services?.esql?.getEditorExtensionsAutocomplete(
               queryString,
               activeSolutionId
-            )) ?? { recommendedQueries: [] }
+            )) ?? { recommendedQueries: [], recommendedFields: [] }
           );
         }
         return {
           recommendedQueries: [],
+          recommendedFields: [],
         };
       },
       getInferenceEndpoints: kibana.services?.esql?.getInferenceEndpointsAutocomplete,

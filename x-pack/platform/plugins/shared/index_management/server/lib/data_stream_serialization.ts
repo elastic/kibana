@@ -52,7 +52,7 @@ export function deserializeDataStream(
       : [failureStoreSettings.enabled];
 
     const matchesPattern = patterns.some((pattern) => {
-      const regex = new RegExp(pattern.replace('*', '.*'));
+      const regex = new RegExp(pattern.replace(/\*/g, '.*'));
       return regex.test(name);
     });
 

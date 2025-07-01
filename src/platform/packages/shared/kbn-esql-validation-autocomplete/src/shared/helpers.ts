@@ -271,33 +271,15 @@ export function getColumnByName(
   return fields.get(unescaped) || userDefinedColumns.get(unescaped)?.[0];
 }
 
-const ARRAY_REGEXP = /\[\]$/;
-
 export function isArrayType(type: string): type is ArrayType {
-  return ARRAY_REGEXP.test(type);
+  return type.endsWith('[]');
 }
-
-const arrayToSingularMap: Map<ArrayType, FunctionParameterType> = new Map([
-  ['double[]', 'double'],
-  ['unsigned_long[]', 'unsigned_long'],
-  ['long[]', 'long'],
-  ['integer[]', 'integer'],
-  ['counter_integer[]', 'counter_integer'],
-  ['counter_long[]', 'counter_long'],
-  ['counter_double[]', 'counter_double'],
-  ['keyword[]', 'keyword'],
-  ['text[]', 'text'],
-  ['date[]', 'date'],
-  ['date_period[]', 'date_period'],
-  ['boolean[]', 'boolean'],
-  ['any[]', 'any'],
-]);
 
 /**
  * Given an array type for example `string[]` it will return `string`
  */
-export function extractSingularType(type: FunctionParameterType): FunctionParameterType {
-  return isArrayType(type) ? arrayToSingularMap.get(type)! : type;
+export function unwrapArrayOneLevel(type: FunctionParameterType): FunctionParameterType {
+  return isArrayType(type) ? (type.slice(0, -2) as FunctionParameterType) : type;
 }
 
 export function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {
@@ -444,16 +426,16 @@ export function checkFunctionArgMatchesDefinition(
   parameterDefinition: FunctionParameter,
   references: ReferenceMaps,
   parentCommand?: string
-) {
-  const argType = parameterDefinition.type;
-  if (argType === 'any') {
+): boolean {
+  const parameterType = parameterDefinition.type;
+  if (parameterType === 'any') {
     return true;
   }
   if (isParam(arg)) {
     return true;
   }
   if (arg.type === 'literal') {
-    const matched = doesLiteralMatchParameterType(argType, arg);
+    const matched = doesLiteralMatchParameterType(parameterType, arg);
     return matched;
   }
   if (arg.type === 'function') {
@@ -462,13 +444,13 @@ export function checkFunctionArgMatchesDefinition(
       return fnDef.signatures.some(
         (signature) =>
           signature.returnType === 'unknown' ||
-          argType === signature.returnType ||
-          bothStringTypes(argType, signature.returnType)
+          parameterType === signature.returnType ||
+          bothStringTypes(parameterType, signature.returnType)
       );
     }
   }
   if (arg.type === 'timeInterval') {
-    return argType === 'time_duration' && inKnownTimeInterval(arg.unit);
+    return parameterType === 'time_duration' && inKnownTimeInterval(arg.unit);
   }
   if (arg.type === 'column') {
     const hit = getColumnForASTNode(arg, references);
@@ -481,14 +463,19 @@ export function checkFunctionArgMatchesDefinition(
       : [validHit.type];
 
     return wrappedTypes.some(
-      (ct) => ct === argType || bothStringTypes(ct, argType) || ct === 'null' || ct === 'unknown'
+      (ct) =>
+        ct === parameterType ||
+        bothStringTypes(ct, parameterType) ||
+        ct === 'null' ||
+        ct === 'unknown'
     );
   }
   if (arg.type === 'inlineCast') {
-    const lowerArgType = argType?.toLowerCase();
+    const lowerArgType = parameterType?.toLowerCase();
     const castedType = getExpressionType(arg);
     return castedType === lowerArgType;
   }
+  return false;
 }
 
 function fuzzySearch(fuzzyName: string, resources: IterableIterator<string>) {
@@ -593,11 +580,49 @@ export function getColumnExists(
 const removeSourceNameQuotes = (sourceName: string) =>
   sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
 
+// Function to clean a single index string from failure stores
+const cleanIndex = (inputIndex: string): string => {
+  let cleaned = inputIndex.trim();
+
+  // Remove '::data' suffix
+  if (cleaned.endsWith('::data')) {
+    cleaned = cleaned.slice(0, -6);
+  }
+  // Remove '::failures' suffix
+  if (cleaned.endsWith('::failures')) {
+    cleaned = cleaned.slice(0, -10);
+  }
+  return cleaned;
+};
+
+/**
+ * Checks if the source exists in the provided sources set.
+ * It supports both exact matches and fuzzy searches.
+ *
+ * @param index - The index to check, which can be a single value or a comma-separated list.
+ * @param sources - A Set of source names to check against.
+ * @returns true if the source exists, false otherwise.
+ */
+
+// The comma-separated index and the ::data or ::failures suffixes solution is temporary
+// till we fix the AST for the quoted index names https://github.com/elastic/kibana/issues/222505.
 export function sourceExists(index: string, sources: Set<string>) {
-  if (sources.has(removeSourceNameQuotes(index)) || index.startsWith('-')) {
+  if (index.startsWith('-')) {
     return true;
   }
-  return Boolean(fuzzySearch(index, sources.keys()));
+  // Split the index by comma to handle multiple values and clean each part
+  const individualIndices = index.split(',').map((item) => cleanIndex(item));
+  // Check if all individual indices exist in sources
+  const allExist = individualIndices.every((singleIndex) => {
+    // First, check for exact match after removing source name quotes
+    if (sources.has(removeSourceNameQuotes(singleIndex))) {
+      return true;
+    }
+    // If not an exact match, perform a fuzzy search
+    return Boolean(fuzzySearch(singleIndex, sources.keys()));
+  });
+
+  return allExist;
 }
 
 /**
