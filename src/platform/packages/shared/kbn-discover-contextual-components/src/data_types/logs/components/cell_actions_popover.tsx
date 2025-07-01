@@ -28,6 +28,9 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HttpStart } from '@kbn/core/public';
+import type { InfraDashboardLocatorParams } from '@kbn/observability-shared-plugin/common';
+import { INFRA_DASHBOARD_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
+import { DiscoverServices } from '@kbn/discover-plugin/public';
 import {
   actionFilterForText,
   actionFilterOutText,
@@ -60,12 +63,6 @@ interface CellActionsPopoverProps {
   }) => ReactElement;
 }
 
-// Ideally this should be deleted after the PoC
-const INFRA_K8S_DEFAULT_ROUTE = {
-  href: 'metrics/kubernetes/cluster?dashboardId=kubernetes_otel-cluster-overview&entityId',
-  title: 'Overview',
-};
-
 export function CellActionsPopover({
   onFilter,
   property,
@@ -76,16 +73,16 @@ export function CellActionsPopover({
 }: CellActionsPopoverProps) {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { http },
-  } = useKibana();
+    services: { http, share },
+  } = useKibana<DiscoverServices>();
   const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
-
+  const locator =
+    share && share.url.locators.get<InfraDashboardLocatorParams>(INFRA_DASHBOARD_LOCATOR_ID);
   const makeFilterHandlerByOperator = (operator: '+' | '-') => () => {
     if (onFilter) {
       onFilter(property, rawValue, operator);
     }
   };
-
   const popoverTriggerProps = {
     onClick: togglePopover,
     onClickAriaLabel: openCellActionPopoverAriaText,
@@ -167,15 +164,19 @@ export function CellActionsPopover({
           </EuiFlexGroup>
         </EuiPopoverFooter>
       ) : null}
-      <EuiPopoverFooter>
-        <EuiButtonEmpty
-          href={entityDefinition?.navigation?.href || INFRA_K8S_DEFAULT_ROUTE.href}
-          size="s"
-          iconType="dashboardApp"
-        >
-          Go to {entityDefinition?.navigation?.title || INFRA_K8S_DEFAULT_ROUTE.title} dashboard
-        </EuiButtonEmpty>
-      </EuiPopoverFooter>
+      {entityDefinition?.navigation?.href && (
+        <EuiPopoverFooter>
+          <EuiButtonEmpty
+            href={locator?.getRedirectUrl({
+              relativePath: entityDefinition?.navigation?.href,
+            })}
+            size="s"
+            iconType="dashboardApp"
+          >
+            Go to {entityDefinition?.navigation?.title} dashboard
+          </EuiButtonEmpty>
+        </EuiPopoverFooter>
+      )}
       <EuiPopoverFooter>
         <EuiCopy textToCopy={value}>
           {(copy) => (
