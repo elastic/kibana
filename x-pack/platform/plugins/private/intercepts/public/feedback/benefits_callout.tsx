@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { capitalize } from 'lodash';
-import { ELASTIC_SUPPORT_LINK } from './constants';
+import { ELASTIC_SUPPORT_URL } from './constants';
 
 interface Props {
   licenseType: string;
@@ -37,7 +37,7 @@ export const BenefitsCallout = ({ licenseType }: Props) => (
           defaultMessage="Submit issues and enhancement requests using your dedicated support channel. If your feedback is not urgent, you may still use this form."
         />
       </EuiText>
-      <EuiButton href={ELASTIC_SUPPORT_LINK} color="warning" fill target="_blank">
+      <EuiButton href={ELASTIC_SUPPORT_URL} color="warning" fill target="_blank">
         <FormattedMessage
           id="xpack.intercepts.feedbackFlyout.benefitsCallout.supportButton"
           defaultMessage="Access support channel"

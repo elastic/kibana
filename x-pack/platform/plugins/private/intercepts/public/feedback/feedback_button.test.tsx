@@ -11,7 +11,7 @@ import { FeedbackButton } from './feedback_button';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { SERVERLESS_FEEDBACK_FORM_LINK } from './constants';
+import { SERVERLESS_FEEDBACK_URL } from './constants';
 
 const coreStartMock = coreMock.createStart();
 const license = licensingMock.createLicense({
@@ -42,7 +42,7 @@ describe('FeedbackButton', () => {
     const feedbackButton = screen.getByTestId('feedbackButton');
 
     expect(feedbackButton).toBeInTheDocument();
-    expect(feedbackButton).toHaveAttribute('href', SERVERLESS_FEEDBACK_FORM_LINK);
+    expect(feedbackButton).toHaveAttribute('href', SERVERLESS_FEEDBACK_URL);
     expect(feedbackButton).not.toHaveAttribute('onClick');
   });
 

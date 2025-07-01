@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FeedbackFlyout } from './flyout';
-import { SERVERLESS_FEEDBACK_FORM_LINK } from './constants';
+import { SERVERLESS_FEEDBACK_URL } from './constants';
 
 interface Props {
   core: CoreStart;
@@ -60,7 +60,6 @@ export const FeedbackButton = ({ core, isServerless, getLicense }: Props) => {
   return (
     <EuiHeaderSectionItemButton
       data-test-subj="feedbackButton"
-      aria-controls="keyPadMenu"
       aria-haspopup={!isServerless}
       aria-label={i18n.translate('xpack.intercepts.feedbackButton.ariaLabel', {
         defaultMessage: 'Give feedback',
@@ -68,7 +67,7 @@ export const FeedbackButton = ({ core, isServerless, getLicense }: Props) => {
       iconType="comment"
       textProps={false}
       onClick={isServerless ? undefined : toogleFlyout}
-      href={isServerless ? SERVERLESS_FEEDBACK_FORM_LINK : undefined}
+      href={isServerless ? SERVERLESS_FEEDBACK_URL : undefined}
       target={isServerless ? '_blank' : undefined}
     >
       <EuiText size="s">

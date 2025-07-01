@@ -29,7 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { BenefitsCallout } from '../benefits_callout';
-import { ELASTIC_SUPPORT_LINK, FEEDBACK_TYPE } from '../constants';
+import { ELASTIC_SUPPORT_URL, FEEDBACK_TYPE } from '../constants';
 
 const feedbackTypes = [
   {
@@ -153,7 +153,7 @@ export const FeedbackFlyoutBody = ({
                     defaultMessage="This form helps us collect general feedback about our products. If you need assistance, {supportLink} instead."
                     values={{
                       supportLink: (
-                        <EuiLink href={ELASTIC_SUPPORT_LINK} target="_blank" external={true}>
+                        <EuiLink href={ELASTIC_SUPPORT_URL} target="_blank" external={true}>
                           <FormattedMessage
                             id="xpack.intercepts.feedbackFlyout.issueReport.helpText.supportLink"
                             defaultMessage="submit a support request"
