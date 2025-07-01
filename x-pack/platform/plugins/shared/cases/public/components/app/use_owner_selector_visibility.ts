@@ -4,15 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { SOLUTION_VIEW_CLASSIC } from '@kbn/spaces-plugin/common/constants';
+import {
+  KIBANA_OBSERVABILITY_PROJECT,
+  KIBANA_SECURITY_PROJECT,
+  KIBANA_OBSERVABILITY_SOLUTION,
+} from '@kbn/projects-solutions-groups';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useAvailableCasesOwners } from './use_available_owners';
 import { useActiveSolution } from './use_active_solution';
 import { getOwnerDefaultValue } from '../create/utils';
+import { APP_ID } from '../../../common/constants';
 
-export function useOwnerSelector() {
+export function useOwnerSelectorVisibility() {
   const { owner, isServerless } = useCasesContext();
-  console.log(isServerless, '!!isServerless');
   const activeSolution = useActiveSolution();
   const availableOwners = useAvailableCasesOwners();
 
@@ -20,12 +25,12 @@ export function useOwnerSelector() {
 
   const mapActiveSolutionToOwner = (solution: string): string => {
     switch (solution) {
-      case 'oblt':
-        return 'observability';
-      case 'security':
-        return 'securitySolution';
-      case 'classic':
-        return 'cases';
+      case KIBANA_OBSERVABILITY_PROJECT:
+        return KIBANA_OBSERVABILITY_SOLUTION;
+      case KIBANA_SECURITY_PROJECT:
+        return 'securitySolution'; // I didn't find a specific constant for security solution, so using a string
+      case SOLUTION_VIEW_CLASSIC:
+        return APP_ID; // cases
       default:
         return defaultOwnerValue;
     }
@@ -39,7 +44,7 @@ export function useOwnerSelector() {
   if (isServerless) {
     shouldShowOwnerSelector = availableOwners.length > 1;
   } else {
-    if (activeSolution === 'classic') {
+    if (activeSolution === SOLUTION_VIEW_CLASSIC) {
       shouldShowOwnerSelector = availableOwners.length > 1;
     }
   }

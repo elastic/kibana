@@ -5,11 +5,12 @@
  * 2.0.
  */
 import { useState, useEffect } from 'react';
+import { SOLUTION_VIEW_CLASSIC } from '@kbn/spaces-plugin/common/constants';
 import { useKibana } from '../../common/lib/kibana';
 
 export const useActiveSolution = () => {
   const { spaces } = useKibana().services;
-  const defaultSolution = spaces?.getActiveSpace ? undefined : 'classic'; // can I get this somewhere from a constant?
+  const defaultSolution = spaces?.getActiveSpace ? undefined : SOLUTION_VIEW_CLASSIC;
   const [activeSolution, setActiveSolution] = useState<string | undefined>(defaultSolution);
 
   useEffect(() => {

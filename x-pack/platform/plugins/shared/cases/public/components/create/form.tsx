@@ -31,8 +31,7 @@ import { CreateCaseFormFields } from './form_fields';
 import { getConfigurationByOwner } from '../../containers/configure/utils';
 import { CreateCaseOwnerSelector } from './owner_selector';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
-import { useActiveSolution } from '../app/use_active_solution';
-import { useOwnerSelector } from '../app/use_owner_selector';
+import { useOwnerSelectorVisibility } from '../app/use_owner_selector_visibility';
 import { getInitialCaseValue, getOwnerDefaultValue } from './utils';
 
 export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsProps>, 'withSteps'> {
@@ -66,7 +65,7 @@ export const FormFieldsWithFormContext: React.FC<FormFieldsWithFormContextProps>
     selectedOwner,
     onSelectedOwner,
   }) => {
-    const { shouldShowOwnerSelector, defaultOwnerValue } = useOwnerSelector();
+    const { shouldShowOwnerSelector, defaultOwnerValue } = useOwnerSelectorVisibility();
     const availableOwners = useAvailableCasesOwners();
 
     if (!shouldShowOwnerSelector) {
