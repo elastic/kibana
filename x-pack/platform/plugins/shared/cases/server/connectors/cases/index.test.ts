@@ -9,10 +9,14 @@ import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_acti
 import type { CasesConnectorConfig, CasesConnectorSecrets } from './types';
 import { getCasesConnectorAdapter, getCasesConnectorType } from '.';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { OBSERVABILITY_PROJECT_TYPE_ID, SECURITY_PROJECT_TYPE_ID } from '../../../common/constants';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
-import { attackDiscoveryAlerts } from './attack_discovery/index.mock';
+import { attackDiscoveryAlerts } from './attack_discovery/group_alerts.mock';
+import { DEFAULT_MAX_OPEN_CASES } from './constants';
+import type { AttackDiscoveryExpandedAlert } from './attack_discovery';
+import { ATTACK_DISCOVERY_MAX_OPEN_CASES } from './attack_discovery';
 
 describe('getCasesConnectorType', () => {
   const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
@@ -337,7 +341,7 @@ describe('getCasesConnectorType', () => {
 
       it('correctly fallsback to security owner if the project is serverless security', () => {
         const adapter = getCasesConnectorAdapter({
-          isServerlessSecurity: true,
+          serverlessProjectType: SECURITY_PROJECT_TYPE_ID,
           logger: mockLogger,
         });
 
@@ -424,6 +428,36 @@ describe('getCasesConnectorType', () => {
         recovered: { data: [], count: 0 },
       };
 
+      it('returns `internallyManagedAlerts` set to `true`', () => {
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
+
+        const connectorParams = adapter.buildActionParams({
+          // @ts-expect-error: not all fields are needed
+          alerts: alertsMock,
+          rule: attackDiscoveryRule,
+          params: getParams(),
+          spaceId: 'default',
+        });
+
+        expect(connectorParams.subActionParams.internallyManagedAlerts).toBe(true);
+      });
+
+      it('returns `maximumCasesToOpen` set to `ATTACK_DISCOVERY_MAX_OPEN_CASES`', () => {
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
+
+        const connectorParams = adapter.buildActionParams({
+          // @ts-expect-error: not all fields are needed
+          alerts: alertsMock,
+          rule: attackDiscoveryRule,
+          params: getParams(),
+          spaceId: 'default',
+        });
+
+        expect(connectorParams.subActionParams.maximumCasesToOpen).toBe(
+          ATTACK_DISCOVERY_MAX_OPEN_CASES
+        );
+      });
+
       it('correctly groups attack discovery alerts', () => {
         const adapter = getCasesConnectorAdapter({ logger: mockLogger });
 
@@ -494,6 +528,35 @@ describe('getCasesConnectorType', () => {
         expect(connectorParams.subActionParams.internallyManagedAlerts).toBe(true);
       });
 
+      it('correctly fallsback to general flow if alerts count is above the limit', () => {
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
+
+        const manyAttackDiscoveryAlerts = new Array<AttackDiscoveryExpandedAlert>(
+          ATTACK_DISCOVERY_MAX_OPEN_CASES + 1
+        ).fill(attackDiscoveryAlerts[0]);
+        const manyAlerts = {
+          all: { data: [...manyAttackDiscoveryAlerts], count: manyAttackDiscoveryAlerts.length },
+          new: { data: [...manyAttackDiscoveryAlerts], count: manyAttackDiscoveryAlerts.length },
+          ongoing: { data: [], count: 0 },
+          recovered: { data: [], count: 0 },
+        };
+
+        const connectorParams = adapter.buildActionParams({
+          // @ts-expect-error: not all fields are needed
+          alerts: manyAlerts,
+          rule: attackDiscoveryRule,
+          params: getParams(),
+          spaceId: 'default',
+        });
+
+        expect(connectorParams.subActionParams.groupedAlerts).toBeNull();
+        expect(connectorParams.subActionParams.internallyManagedAlerts).toBe(false);
+        expect(connectorParams.subActionParams.maximumCasesToOpen).toBe(DEFAULT_MAX_OPEN_CASES);
+        expect(mockLogger.error).toBeCalledWith(
+          'Could not setup grouped Attack Discovery alerts, because of error: Error: Circuit breaker: Attack discovery alerts grouping would create more than the maximum number of allowed cases 20.'
+        );
+      });
+
       it('correctly fallsback to general flow if alerts schema does not pass validation', () => {
         const adapter = getCasesConnectorAdapter({ logger: mockLogger });
 
@@ -507,6 +570,7 @@ describe('getCasesConnectorType', () => {
 
         expect(connectorParams.subActionParams.groupedAlerts).toBeNull();
         expect(connectorParams.subActionParams.internallyManagedAlerts).toBe(false);
+        expect(connectorParams.subActionParams.maximumCasesToOpen).toBe(DEFAULT_MAX_OPEN_CASES);
         expect(mockLogger.error).toBeCalledWith(
           'Could not setup grouped Attack Discovery alerts, because of error: Error: [0.kibana.alert.attack_discovery.alert_ids]: expected value of type [array] but got [undefined]'
         );
@@ -560,7 +624,7 @@ describe('getCasesConnectorType', () => {
 
       it('correctly overrides the consumer and producer if the project is serverless security', () => {
         const adapter = getCasesConnectorAdapter({
-          isServerlessSecurity: true,
+          serverlessProjectType: SECURITY_PROJECT_TYPE_ID,
           logger: mockLogger,
         });
 
@@ -580,6 +644,31 @@ describe('getCasesConnectorType', () => {
           'cases:securitySolution/findConfigurations',
           'cases:securitySolution/reopenCase',
           'cases:securitySolution/assignCase',
+        ]);
+      });
+
+      it('correctly overrides the consumer and producer if the project is serverless observability', () => {
+        const adapter = getCasesConnectorAdapter({
+          serverlessProjectType: OBSERVABILITY_PROJECT_TYPE_ID,
+          logger: mockLogger,
+        });
+
+        expect(
+          adapter.getKibanaPrivileges?.({
+            consumer: 'alerts',
+            producer: AlertConsumers.SIEM,
+          })
+        ).toEqual([
+          'cases:observability/createCase',
+          'cases:observability/updateCase',
+          'cases:observability/deleteCase',
+          'cases:observability/pushCase',
+          'cases:observability/createComment',
+          'cases:observability/updateComment',
+          'cases:observability/deleteComment',
+          'cases:observability/findConfigurations',
+          'cases:observability/reopenCase',
+          'cases:observability/assignCase',
         ]);
       });
     });

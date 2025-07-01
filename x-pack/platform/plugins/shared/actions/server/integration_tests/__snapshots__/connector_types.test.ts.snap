@@ -2763,7 +2763,7 @@ Object {
               },
               Object {
                 "args": Object {
-                  "limit": 10,
+                  "limit": 20,
                 },
                 "name": "max",
               },
@@ -2870,7 +2870,7 @@ Object {
         },
         Object {
           "args": Object {
-            "limit": 10,
+            "limit": 20,
           },
           "name": "max",
         },

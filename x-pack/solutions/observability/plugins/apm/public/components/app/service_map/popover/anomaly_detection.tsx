@@ -76,7 +76,7 @@ export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
           <h3>{ANOMALY_DETECTION_TITLE}</h3>
         </HealthStatusTitle>
         &nbsp;
-        <EuiIconTip type="iInCircle" content={ANOMALY_DETECTION_TOOLTIP} />
+        <EuiIconTip type="info" content={ANOMALY_DETECTION_TOOLTIP} />
         {!mlJobId && <EnableText>{ANOMALY_DETECTION_DISABLED_TEXT}</EnableText>}
       </section>
       {hasAnomalyDetectionScore && (

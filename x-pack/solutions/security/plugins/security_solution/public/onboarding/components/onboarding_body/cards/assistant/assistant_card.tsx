@@ -180,7 +180,7 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
               >
                 <CardCallOut
                   color="primary"
-                  icon="iInCircle"
+                  icon="info"
                   text={i18n.ASSISTANT_CARD_CALLOUT_INTEGRATIONS_TEXT}
                   action={
                     <EuiLink onClick={expandIntegrationsCard}>
