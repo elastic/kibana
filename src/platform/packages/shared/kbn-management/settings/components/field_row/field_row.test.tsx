@@ -347,6 +347,24 @@ describe('Field', () => {
         expect(getByText('Technical preview')).toBeInTheDocument();
       });
 
+      it('should NOT render technical preview badge if the technicalPreview is false or unspecified', () => {
+        const { queryByText } = render(
+          wrap(
+            <FieldRow
+              field={getFieldDefinition({
+                id,
+                setting,
+                params: { isCustom: true },
+              })}
+              onFieldChange={handleChange}
+              isSavingEnabled={true}
+            />
+          )
+        );
+
+        expect(queryByText('Technical preview')).not.toBeInTheDocument();
+      });
+
       it('should render unsaved value if there are unsaved changes', () => {
         const { getByTestId, getByAltText } = render(
           wrap(
