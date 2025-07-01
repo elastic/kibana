@@ -15,10 +15,14 @@ describe('rewriteLegacyPath', () => {
   });
 
   test('Should forward unsaved dashboard to create page', () => {
-    expect(rewriteLegacyPath('/dashboard?_g=(time:(from:now-15m,to:now))')).toBe('#/create?_g=(time:(from:now-15m,to:now))');
+    expect(rewriteLegacyPath('/dashboard?_g=(time:(from:now-15m,to:now))')).toBe(
+      '#/create?_g=(time:(from:now-15m,to:now))'
+    );
   });
 
   test('should forward persisted dashboard to view page', () => {
-    expect(rewriteLegacyPath('/dashboard/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b')).toBe('#/view/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b');
+    expect(rewriteLegacyPath('/dashboard/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b')).toBe(
+      '#/view/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b'
+    );
   });
 });

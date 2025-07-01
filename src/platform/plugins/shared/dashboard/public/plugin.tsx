@@ -63,11 +63,7 @@ import type {
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { DashboardMountContextProps } from './dashboard_app/types';
-import {
-  DASHBOARD_APP_ID,
-  LANDING_PAGE_PATH,
-  SEARCH_SESSION_ID,
-} from '../common/constants';
+import { DASHBOARD_APP_ID, LANDING_PAGE_PATH, SEARCH_SESSION_ID } from '../common/constants';
 import {
   GetPanelPlacementSettings,
   registerDashboardPanelPlacementSetting,
@@ -255,7 +251,7 @@ export class DashboardPlugin
     };
 
     core.application.register(app);
-    
+
     setupUrlForwarding(urlForwarding);
 
     const dashboardAppTitle = i18n.translate('dashboard.featureCatalogue.dashboardTitle', {
