@@ -115,11 +115,12 @@ export const useConversation = ({ conversationId }: { conversationId: string | u
   const queryKey = queryKeys.conversations.byId(conversationId ?? 'new');
   const { data: conversation, isLoading } = useQuery({
     queryKey,
-    queryFn: async () => {
-      if (conversationId) {
-        return conversationsService.get({ conversationId });
+    enabled: Boolean(conversationId),
+    queryFn: () => {
+      if (!conversationId) {
+        return Promise.reject(new Error('Invalid conversation id'));
       }
-      return null;
+      return conversationsService.get({ conversationId });
     },
   });
   const { navigateToOnechatUrl } = useNavigation();
