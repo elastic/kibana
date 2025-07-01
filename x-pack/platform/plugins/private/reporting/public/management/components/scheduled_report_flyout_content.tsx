@@ -405,6 +405,7 @@ export const ScheduledReportFlyoutContent = ({
               <EuiButton
                 type="submit"
                 form={SCHEDULED_REPORT_FORM_ID}
+                data-test-subj="scheduleExportSubmitButton"
                 isDisabled={isReportingHealthLoading || isUserProfileLoading}
                 onClick={onSubmit}
                 isLoading={isScheduleExportLoading}
