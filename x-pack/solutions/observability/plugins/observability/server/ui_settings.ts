@@ -59,7 +59,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
   [maxSuggestions]: {
     category: [observabilityFeatureId],
@@ -71,7 +71,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
       defaultMessage: 'Maximum number of suggestions fetched in autocomplete selection boxes.',
     }),
     schema: schema.number(),
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
   [enableComparisonByDefault]: {
     category: [observabilityFeatureId],
@@ -84,7 +84,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
         'Determines whether the comparison feature is enabled or disabled by default in the APM app.',
     }),
     schema: schema.boolean(),
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
   [defaultApmServiceEnvironment]: {
     category: [observabilityFeatureId],
@@ -98,7 +98,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     value: '',
     schema: schema.string(),
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
   [apmProgressiveLoading]: {
     category: [observabilityFeatureId],
@@ -150,7 +150,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
         }
       ),
     },
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
   [apmServiceGroupMaxNumberOfServices]: {
     category: [observabilityFeatureId],
@@ -162,7 +162,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
       defaultMessage: 'Limit the number of services in a given service group',
     }),
     schema: schema.number({ min: 1 }),
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
   [apmEnableTableSearchBar]: {
     category: [observabilityFeatureId],
@@ -180,7 +180,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     value: true,
     requiresPageReload: true,
     type: 'boolean',
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
   [apmEnableServiceInventoryTableSearchBar]: {
     category: [observabilityFeatureId],
@@ -201,7 +201,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     value: true,
     requiresPageReload: true,
     type: 'boolean',
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
   [apmEnableServiceMapApiV2]: {
     category: [observabilityFeatureId],
@@ -218,7 +218,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     value: false,
     requiresPageReload: false,
     type: 'boolean',
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
   [apmAWSLambdaPriceFactor]: {
     category: [observabilityFeatureId],
@@ -234,7 +234,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
       arm: schema.number(),
       x86_64: schema.number(),
     }),
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
   [apmAWSLambdaRequestCostPerMillion]: {
     category: [observabilityFeatureId],
@@ -243,7 +243,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     value: 0.2,
     schema: schema.number({ min: 0 }),
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
   [syntheticsThrottlingEnabled]: {
     category: [observabilityFeatureId],
@@ -265,7 +265,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     ),
     schema: schema.boolean(),
     requiresPageReload: true,
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
   [enableLegacyUptimeApp]: {
     category: [observabilityFeatureId],
@@ -279,7 +279,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
   [profilingShowErrorFrames]: {
     category: [observabilityFeatureId],
@@ -289,7 +289,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     value: false,
     schema: schema.boolean(),
     requiresPageReload: true,
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
   [profilingPervCPUWattX86]: {
     category: [observabilityFeatureId],
@@ -302,7 +302,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
   [profilingPervCPUWattArm64]: {
     category: [observabilityFeatureId],
@@ -318,7 +318,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     ),
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
   [profilingDatacenterPUE]: {
     category: [observabilityFeatureId],
@@ -343,7 +343,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
   [profilingCo2PerKWH]: {
     category: [observabilityFeatureId],
@@ -367,7 +367,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
   [profilingAWSCostDiscountRate]: {
     category: [observabilityFeatureId],
@@ -384,7 +384,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
           "If you're enrolled in the AWS Enterprise Discount Program (EDP), enter your discount rate to update the profiling cost calculation.",
       }
     ),
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
   [profilingAzureCostDiscountRate]: {
     category: [observabilityFeatureId],
@@ -401,7 +401,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
           'If you have an Azure Enterprise Agreement with Microsoft, enter your discount rate to update the profiling cost calculation.',
       }
     ),
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
   [profilingCostPervCPUPerHour]: {
     category: [observabilityFeatureId],
@@ -417,7 +417,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     ),
     schema: schema.number({ min: 0, max: 100 }),
     requiresPageReload: true,
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
   [apmEnableTransactionProfiling]: {
     category: [observabilityFeatureId],
@@ -427,7 +427,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     value: true,
     schema: schema.boolean(),
     requiresPageReload: true,
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
   [searchExcludedDataTiers]: {
     category: [observabilityFeatureId],
@@ -447,7 +447,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
       schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')])
     ),
     requiresPageReload: false,
-    solution: 'oblt',
+    solutions: ['classic', 'oblt'],
   },
 };
 
