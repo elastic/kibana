@@ -17,7 +17,12 @@ import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 
-const classicStreamManagementSubTabs = ['enrich', 'advanced', 'lifecycle'] as const;
+const classicStreamManagementSubTabs = [
+  'enrich',
+  'advanced',
+  'lifecycle',
+  'significantEvents',
+] as const;
 
 type ClassicStreamManagementSubTab = (typeof classicStreamManagementSubTabs)[number];
 
