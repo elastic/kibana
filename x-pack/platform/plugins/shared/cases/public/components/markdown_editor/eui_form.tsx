@@ -36,7 +36,7 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   isDisabled?: boolean;
   bottomRightContent?: React.ReactNode;
   caseTitle?: string;
-  caseId: string;
+  caseId?: string;
   caseTags?: string[];
   draftStorageKey?: string;
   disabledUiPlugins?: string[];
