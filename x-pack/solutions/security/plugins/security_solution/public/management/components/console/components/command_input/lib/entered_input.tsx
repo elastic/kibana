@@ -59,14 +59,19 @@ const toInputCharacterDisplayString = (
   let response = item.value;
 
   if (includeArgSelectorValues && item.isArgSelector) {
-    // For file selectors (File objects), don't add valueText to prevent duplication
-    // For string selectors, only add valueText if it exists
-    const hasFileValue = item.argState?.value instanceof File;
-    const hasStringValue = item.argState?.valueText && !hasFileValue;
-
-    if (hasStringValue) {
-      response += `="${item.argState.valueText}"`;
+    // Handle file values: use the filename
+    if (item.argState?.value instanceof File) {
+      const filename = item.argState.value.name;
+      const quotedFilename = filename.includes(' ') ? `"${filename}"` : filename;
+      response += `=${quotedFilename}`;
     }
+    // Handle string values: use valueText if it exists and is not empty
+    else if (item.argState?.valueText && item.argState.valueText.trim() !== '') {
+      const value = item.argState.valueText;
+      const quotedValue = value.includes(' ') ? `"${value}"` : value;
+      response += `=${quotedValue}`;
+    }
+    // For empty values, don't add anything (no ="" suffix)
   }
 
   return response;
@@ -145,14 +150,32 @@ export class EnteredInput {
                 let replacementLength = argChrLength; // Default: just replace argument name
                 const selectorValue = argState?.valueText || '';
 
-                // Only apply complex deduplication logic for runscript command (string selectors)
-                if (parsedInput.name === 'runscript') {
-                  // If there's a value after the argument name, check for exact match
-                  if ((charAfterArgName === '=' || charAfterArgName === ' ') && selectorValue) {
-                    const valueStart = startSearchIndexForNextArg + 1;
-                    const remainingText = input.substring(valueStart);
+                // Apply deduplication logic for all commands with argument selectors
+                // If there's a value after the argument name, check for exact match
+                if (charAfterArgName === '=' || charAfterArgName === ' ') {
+                  const valueStart = startSearchIndexForNextArg + 1;
+                  const remainingText = input.substring(valueStart);
 
-                    // Check for exact match (quoted or unquoted)
+                  // For file selectors, check if filename matches
+                  if (argState?.value instanceof File) {
+                    const filename = argState.value.name;
+                    const firstChar = remainingText.charAt(0);
+
+                    // Check for quoted filename match
+                    if (
+                      (firstChar === '"' || firstChar === "'") &&
+                      remainingText.startsWith(`${firstChar}${filename}${firstChar}`)
+                    ) {
+                      replacementLength = argChrLength + 1 + filename.length + 2; // arg + = + "filename"
+                    } else if (
+                      remainingText.startsWith(`${filename} `) ||
+                      remainingText === filename
+                    ) {
+                      replacementLength = argChrLength + 1 + filename.length; // arg + = + filename
+                    }
+                  }
+                  // For string selectors, check if text value matches
+                  else if (selectorValue) {
                     const firstChar = remainingText.charAt(0);
                     if (
                       (firstChar === '"' || firstChar === "'") &&

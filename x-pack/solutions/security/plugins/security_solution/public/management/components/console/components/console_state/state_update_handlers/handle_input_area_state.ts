@@ -241,13 +241,13 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         const updatedParsedInput = parseCommandInput(currentRawInput);
         setArgSelectorValueToParsedArgs(updatedParsedInput, updatedEnteredCommand);
 
-        // Reconstruct the complete input text including the updated selector values
         let completeInputText = updatedParsedInput.name;
 
         let configuration = {
           parsedInput: updatedParsedInput,
         };
-        // TODO HERE
+
+        // Reconstruct command text for runscript command
         if (updatedParsedInput.name === 'runscript') {
           // Add arguments with their values including updated selector values
           for (const [parsedInputArgName, argValues] of Object.entries(updatedParsedInput.args)) {
@@ -257,10 +257,6 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
               } else if (typeof value === 'string') {
                 // Add quotes if the value contains spaces
                 const quotedValue = value.includes(' ') ? `"${value}"` : value;
-                completeInputText += ` --${parsedInputArgName}=${quotedValue}`;
-              } else if (value instanceof File) {
-                // For File objects, use the filename for display in command text
-                const quotedValue = value.name.includes(' ') ? `"${value.name}"` : value.name;
                 completeInputText += ` --${parsedInputArgName}=${quotedValue}`;
               }
             }

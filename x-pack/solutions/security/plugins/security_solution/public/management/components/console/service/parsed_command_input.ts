@@ -34,7 +34,6 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
   for (const rawArg of rawArguments) {
     const argNameAndValueTrimmedString = rawArg.trim();
 
-    console.log({ argNameAndValueTrimmedString });
     if (argNameAndValueTrimmedString) {
       // rawArgument possible values here are:
       //    'option=something'
@@ -63,12 +62,13 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
             .trim()
             .replace(/\\-\\-/g, '--');
 
-          if (newArgValue.charAt(0) === '"') {
-            newArgValue = newArgValue.substring(1);
-          }
+          // Check if the value was originally quoted
+          const wasQuoted =
+            newArgValue.charAt(0) === '"' && newArgValue.charAt(newArgValue.length - 1) === '"';
 
-          if (newArgValue.charAt(newArgValue.length - 1) === '"') {
-            newArgValue = newArgValue.substring(0, newArgValue.length - 1);
+          // Strip quotes if present
+          if (wasQuoted) {
+            newArgValue = newArgValue.substring(1, newArgValue.length - 1);
           }
 
           response.args[argName].push(newArgValue);
