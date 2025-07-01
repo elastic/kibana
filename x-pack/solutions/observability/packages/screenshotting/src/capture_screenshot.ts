@@ -108,10 +108,10 @@ async function waitForSelector(
   const start = Date.now();
   return new Promise((resolve) => {
     const check = () => {
-      const el = iframe.contentDocument?.querySelector(selector);
+      const element = iframe.contentDocument?.querySelector(selector);
 
-      if (el) {
-        resolve(el as HTMLElement);
+      if (element) {
+        resolve(element as HTMLElement);
       } else if (Date.now() - start < timeout) {
         setTimeout(check, 300);
       } else {
@@ -166,8 +166,8 @@ export async function captureScreenshot(
     const selector = getSelectorForUrl(url);
 
     iframe.onload = async () => {
-      const el = await waitForSelector(iframe, selector, timeout);
-      if (!el) {
+      const element = await waitForSelector(iframe, selector, timeout);
+      if (!element) {
         cleanup();
         return resolve(null);
       }
@@ -178,7 +178,7 @@ export async function captureScreenshot(
       // await waitForFocus();
 
       try {
-        const canvas = await html2canvas(el);
+        const canvas = await html2canvas(element);
         const image = canvas.toDataURL('image/png');
         cleanup();
         resolve(image);
