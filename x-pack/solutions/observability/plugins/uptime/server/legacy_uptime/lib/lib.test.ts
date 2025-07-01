@@ -43,7 +43,7 @@ describe('UptimeEsClient', () => {
           index: 'heartbeat-*',
           ...mockSearchParams,
         },
-        { meta: true, context: { loggingOptions: { level: 'debug', loggerName: 'synthetics' } } }
+        { meta: true, context: { loggingOptions: { loggerName: 'synthetics' } } }
       );
       expect(result).toEqual({
         body: {},
@@ -71,7 +71,7 @@ describe('UptimeEsClient', () => {
           index: 'heartbeat-*',
           ...mockSearchParams,
         },
-        { meta: true, context: { loggingOptions: { level: 'debug', loggerName: 'synthetics' } } }
+        { meta: true, context: { loggingOptions: { loggerName: 'synthetics' } } }
       );
     });
   });
@@ -86,7 +86,7 @@ describe('UptimeEsClient', () => {
 
       expect(esClient.count).toHaveBeenCalledWith(mockCountParams, {
         meta: true,
-        context: { loggingOptions: { level: 'debug', loggerName: 'synthetics' } },
+        context: { loggingOptions: { loggerName: 'synthetics' } },
       });
       expect(result).toEqual({
         indices: 'heartbeat-*',
@@ -112,7 +112,7 @@ describe('UptimeEsClient', () => {
       await expect(uptimeEsClient.count(mockCountParams)).rejects.toThrow(mockError);
       expect(esClient.count).toHaveBeenCalledWith(mockCountParams, {
         meta: true,
-        context: { loggingOptions: { level: 'debug', loggerName: 'synthetics' } },
+        context: { loggingOptions: { loggerName: 'synthetics' } },
       });
     });
   });
@@ -166,7 +166,7 @@ describe('UptimeEsClient', () => {
           index: 'heartbeat-*,synthetics-*',
           ...mockSearchParams,
         },
-        { meta: true, context: { loggingOptions: { level: 'debug', loggerName: 'synthetics' } } }
+        { meta: true, context: { loggingOptions: { loggerName: 'synthetics' } } }
       );
     });
     it('appends synthetics-* in index for legacy alerts when settings are never saved', async () => {
@@ -195,7 +195,7 @@ describe('UptimeEsClient', () => {
           index: 'heartbeat-*,synthetics-*',
           ...mockSearchParams,
         },
-        { meta: true, context: { loggingOptions: { level: 'debug', loggerName: 'synthetics' } } }
+        { meta: true, context: { loggingOptions: { loggerName: 'synthetics' } } }
       );
     });
     it('does not append synthetics-* to index for stack version 8.10.0 or later', async () => {
@@ -222,7 +222,7 @@ describe('UptimeEsClient', () => {
             match_all: {},
           },
         },
-        { meta: true, context: { loggingOptions: { level: 'debug', loggerName: 'synthetics' } } }
+        { meta: true, context: { loggingOptions: { loggerName: 'synthetics' } } }
       );
 
       uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, {
@@ -242,7 +242,7 @@ describe('UptimeEsClient', () => {
             match_all: {},
           },
         },
-        { meta: true, context: { loggingOptions: { level: 'debug', loggerName: 'synthetics' } } }
+        { meta: true, context: { loggingOptions: { loggerName: 'synthetics' } } }
       );
     });
   });

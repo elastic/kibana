@@ -216,7 +216,6 @@ describe('getNetworkEvents', () => {
           Object {
             "context": Object {
               "loggingOptions": Object {
-                "level": "debug",
                 "loggerName": "synthetics",
               },
             },

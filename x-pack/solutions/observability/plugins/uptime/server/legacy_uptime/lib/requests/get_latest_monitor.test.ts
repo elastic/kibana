@@ -107,7 +107,7 @@ describe('getLatestMonitor', () => {
     expect(result?.monitor?.id).toBe('testMonitor');
     expect(mockEsClient.search).toHaveBeenCalledWith(expectedGetLatestSearchParams, {
       meta: true,
-      context: { loggingOptions: { level: 'debug', loggerName: 'synthetics' } },
+      context: { loggingOptions: { loggerName: 'synthetics' } },
     });
   });
 });

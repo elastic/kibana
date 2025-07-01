@@ -256,7 +256,6 @@ describe('getCerts', () => {
           Object {
             "context": Object {
               "loggingOptions": Object {
-                "level": "debug",
                 "loggerName": "synthetics",
               },
             },

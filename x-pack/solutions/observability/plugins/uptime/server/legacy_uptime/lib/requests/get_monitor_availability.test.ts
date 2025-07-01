@@ -859,7 +859,6 @@ describe('monitor availability', () => {
           Object {
             "context": Object {
               "loggingOptions": Object {
-                "level": "debug",
                 "loggerName": "synthetics",
               },
             },

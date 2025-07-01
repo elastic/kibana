@@ -82,11 +82,12 @@ export class SyntheticsEsClient {
     let esRequestStatus: RequestStatus = RequestStatus.PENDING;
 
     const isInspectorEnabled = await this.getInspectEnabled();
+
     try {
       res = await this.baseESClient.search(esParams, {
         meta: true,
         context: {
-          loggingOptions: getElasticsearchRequestLoggingOptions(isInspectorEnabled),
+          loggingOptions: getElasticsearchRequestLoggingOptions(),
         },
       });
       esRequestStatus = RequestStatus.OK;
@@ -94,6 +95,7 @@ export class SyntheticsEsClient {
       esError = e;
       esRequestStatus = RequestStatus.ERROR;
     }
+
     if ((isInspectorEnabled || this.isDev) && this.request) {
       this.inspectableEsQueries.push(
         getInspectResponse({
@@ -175,13 +177,11 @@ export class SyntheticsEsClient {
 
     const esParams = { index: SYNTHETICS_INDEX_PATTERN, ...params };
 
-    const isInspectorEnabled = await this.getInspectEnabled();
-
     try {
       res = await this.baseESClient.count(esParams, {
         meta: true,
         context: {
-          loggingOptions: getElasticsearchRequestLoggingOptions(isInspectorEnabled),
+          loggingOptions: getElasticsearchRequestLoggingOptions(),
         },
       });
     } catch (e) {
@@ -228,11 +228,8 @@ export const isTestUser = (server: SyntheticsServerSetup) => {
   return server.config.service?.username === 'localKibanaIntegrationTestsUser';
 };
 
-function getElasticsearchRequestLoggingOptions(
-  isInspectorEnabled?: boolean
-): ElasticsearchRequestLoggingOptions {
+function getElasticsearchRequestLoggingOptions(): ElasticsearchRequestLoggingOptions {
   return {
     loggerName: 'synthetics',
-    level: isInspectorEnabled ? 'info' : 'debug',
   };
 }

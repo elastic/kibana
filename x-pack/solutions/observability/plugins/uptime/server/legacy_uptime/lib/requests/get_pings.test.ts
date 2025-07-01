@@ -166,7 +166,6 @@ describe('getAll', () => {
         Object {
           "context": Object {
             "loggingOptions": Object {
-              "level": "debug",
               "loggerName": "synthetics",
             },
           },
@@ -232,7 +231,6 @@ describe('getAll', () => {
         Object {
           "context": Object {
             "loggingOptions": Object {
-              "level": "debug",
               "loggerName": "synthetics",
             },
           },
@@ -298,7 +296,6 @@ describe('getAll', () => {
         Object {
           "context": Object {
             "loggingOptions": Object {
-              "level": "debug",
               "loggerName": "synthetics",
             },
           },
@@ -369,7 +366,6 @@ describe('getAll', () => {
         Object {
           "context": Object {
             "loggingOptions": Object {
-              "level": "debug",
               "loggerName": "synthetics",
             },
           },
@@ -481,7 +477,6 @@ describe('getAll', () => {
         Object {
           "context": Object {
             "loggingOptions": Object {
-              "level": "debug",
               "loggerName": "synthetics",
             },
           },

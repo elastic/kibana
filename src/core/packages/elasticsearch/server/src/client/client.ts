@@ -30,8 +30,4 @@ export interface ElasticsearchRequestLoggingOptions {
    * This allows grouping logs by the logger name, and using different configurations for each logger.
    */
   loggerName: string;
-  /**
-   * The level at which to log the request.
-   */
-  level: 'debug' | 'info';
 }

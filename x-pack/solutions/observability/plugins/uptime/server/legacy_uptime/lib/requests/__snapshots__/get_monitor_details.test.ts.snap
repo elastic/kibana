@@ -58,7 +58,6 @@ Array [
   Object {
     "context": Object {
       "loggingOptions": Object {
-        "level": "debug",
         "loggerName": "synthetics",
       },
     },
@@ -113,7 +112,6 @@ Array [
   Object {
     "context": Object {
       "loggingOptions": Object {
-        "level": "debug",
         "loggerName": "synthetics",
       },
     },

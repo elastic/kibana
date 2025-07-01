@@ -105,13 +105,11 @@ export class UptimeEsClient {
 
     let esRequestStatus: RequestStatus = RequestStatus.PENDING;
 
-    const isInspectorEnabled = await this.getInspectEnabled();
-
     try {
       res = await this.baseESClient.search(esParams, {
         meta: true,
         context: {
-          loggingOptions: getElasticsearchRequestLoggingOptions(isInspectorEnabled),
+          loggingOptions: getElasticsearchRequestLoggingOptions(),
         },
       });
       esRequestStatus = RequestStatus.OK;
@@ -147,13 +145,11 @@ export class UptimeEsClient {
 
     const esParams = { index: this.heartbeatIndices, ...params };
 
-    const isInspectorEnabled = await this.getInspectEnabled();
-
     try {
       res = await this.baseESClient.count(esParams, {
         meta: true,
         context: {
-          loggingOptions: getElasticsearchRequestLoggingOptions(isInspectorEnabled),
+          loggingOptions: getElasticsearchRequestLoggingOptions(),
         },
       });
     } catch (e) {
@@ -239,11 +235,8 @@ export function createEsParams<T extends estypes.SearchRequest>(params: T): T {
   return params;
 }
 
-function getElasticsearchRequestLoggingOptions(
-  isInspectorEnabled?: boolean
-): ElasticsearchRequestLoggingOptions {
+function getElasticsearchRequestLoggingOptions(): ElasticsearchRequestLoggingOptions {
   return {
     loggerName: 'synthetics',
-    level: isInspectorEnabled ? 'info' : 'debug',
   };
 }

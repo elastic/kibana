@@ -203,12 +203,12 @@ export const instrumentEsQueryAndDeprecationLogger = ({
       | ElasticsearchRequestLoggingOptions
       | undefined;
 
-    const { loggerName, level = 'debug' } = requestLoggingOptions || {};
+    const { loggerName } = requestLoggingOptions || {};
     const customLogger = loggerName ? logger.get('query', loggerName) : queryLogger;
 
     // we could check this once and not subscribe to response events if both are disabled,
     // but then we would not be supporting hot reload of the logging configuration.
-    const logQuery = customLogger.isLevelEnabled(level);
+    const logQuery = customLogger.isLevelEnabled('debug');
     const logDeprecation = deprecationLogger.isLevelEnabled('debug');
 
     if (error && isMaximumResponseSizeExceededError(error)) {
@@ -221,7 +221,7 @@ export const instrumentEsQueryAndDeprecationLogger = ({
 
       if (logQuery) {
         const meta = getEcsResponseLog(event, bytes);
-        customLogger[level](queryMsg, meta);
+        customLogger.debug(queryMsg, meta);
       }
 
       if (logDeprecation && event.warnings && event.warnings.filter(isEsWarning).length > 0) {

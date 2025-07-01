@@ -168,7 +168,7 @@ describe('tlsRuleExecutor', () => {
             }),
           }),
         }),
-        { meta: true, context: { loggingOptions: { level: 'debug', loggerName: 'synthetics' } } }
+        { meta: true, context: { loggingOptions: { loggerName: 'synthetics' } } }
       );
     });
   });
