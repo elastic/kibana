@@ -12,7 +12,7 @@ import { AssistantTool } from '../types';
 export type PluginName = string;
 export type RegisteredToolsStorage = Map<PluginName, Set<AssistantTool>>;
 export type RegisteredFeaturesStorage = Map<PluginName, AssistantFeatures>;
-export type GetRegisteredTools = (pluginName: string) => AssistantTool[];
+export type GetRegisteredTools = (pluginName: string | string[]) => AssistantTool[];
 export type GetRegisteredFeatures = (pluginName: string) => AssistantFeatures;
 export interface ElasticAssistantAppContext {
   logger: Logger;
@@ -40,6 +40,7 @@ class AppContextService {
   }
 
   public stop() {
+    this.logger?.debug('AppContextService:stop');
     this.registeredTools.clear();
     this.registeredFeatures.clear();
   }
@@ -47,7 +48,7 @@ class AppContextService {
   /**
    * Register tools to be used by the Elastic Assistant
    *
-   * @param pluginName
+   * @param pluginName - the name of the plugin registering the tools, used to namespace the tools
    * @param tools
    */
   public registerTools(pluginName: string, tools: AssistantTool[]) {
@@ -67,8 +68,16 @@ class AppContextService {
    *
    * @param pluginName
    */
-  public getRegisteredTools(pluginName: string): AssistantTool[] {
-    const tools = Array.from(this.registeredTools?.get(pluginName) ?? new Set<AssistantTool>());
+  public getRegisteredTools(pluginName: string | string[]): AssistantTool[] {
+    const pluginNames = Array.isArray(pluginName) ? pluginName : [pluginName];
+
+    const tools = [
+      ...new Set(
+        pluginNames
+          .map(name => this.registeredTools?.get(name) ?? new Set<AssistantTool>())
+          .flatMap(set => [...set])
+      )
+    ];
 
     this.logger?.debug('AppContextService:getRegisteredTools');
     this.logger?.debug(`pluginName: ${pluginName}`);

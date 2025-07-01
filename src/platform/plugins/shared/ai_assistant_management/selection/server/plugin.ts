@@ -50,14 +50,14 @@ export class AIAssistantManagementSelectionPlugin
     core.uiSettings.register({
       [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
         name: i18n.translate('aiAssistantManagementSelection.preferredAIAssistantTypeSettingName', {
-          defaultMessage: 'AI Assistant Visibility',
+          defaultMessage: 'AI Assistant visibility',
         }),
         value: this.config.preferredAIAssistantType,
         description: i18n.translate(
           'aiAssistantManagementSelection.preferredAIAssistantTypeSettingDescription',
           {
             defaultMessage:
-              'Control whether the Search & Observability or Security AI assistants appear only in their own solutions, more widely across Kibana (but not in each others solution), or not at all. Customize assistant availability to fit your workflow.',
+              'Choose where and which AI Assistants are available. You can limit the AI Assistants to their own solutions, show either the Observability and Search AI Assistants or the Security AI Assistant in other Kibana apps, or hide AI Assistants entirely.',
           }
         ),
         schema: schema.oneOf(
@@ -79,15 +79,15 @@ export class AIAssistantManagementSelectionPlugin
         optionLabels: {
           [AIAssistantType.Default]: i18n.translate(
             'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueDefault',
-            { defaultMessage: 'Only in their own solutions' }
+            { defaultMessage: 'Only in their solutions' }
           ),
           [AIAssistantType.Observability]: i18n.translate(
             'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueObservability',
-            { defaultMessage: 'Show Search & Observability assistant in other apps' }
+            { defaultMessage: 'Observability and Search AI Assistants in other apps' }
           ),
           [AIAssistantType.Security]: i18n.translate(
             'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueSecurity',
-            { defaultMessage: 'Show Security assistant in other apps' }
+            { defaultMessage: 'Security AI Assistant in other apps' }
           ),
           [AIAssistantType.Never]: i18n.translate(
             'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueNever',
