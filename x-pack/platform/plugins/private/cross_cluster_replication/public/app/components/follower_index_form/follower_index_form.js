@@ -678,6 +678,7 @@ export class FollowerIndexForm extends PureComponent {
       return (
         <Fragment>
           <EuiCallOut
+            role="alert"
             title={
               <FormattedMessage
                 id="xpack.crossClusterReplication.followerIndexForm.validationErrorTitle"

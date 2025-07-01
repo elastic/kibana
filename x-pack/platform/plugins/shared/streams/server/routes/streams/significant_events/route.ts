@@ -6,11 +6,16 @@
  */
 
 import { badRequest } from '@hapi/boom';
-import { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
+import { SecurityError } from '../../../lib/streams/errors/security_error';
+import {
+  STREAMS_API_PRIVILEGES,
+  STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
+} from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { readSignificantEvents } from './read_significant_events';
+import { assertEnterpriseLicense } from '../../utils/assert_enterprise_license';
 
 export const readSignificantEventsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/significant_events 2023-10-31',
@@ -32,10 +37,23 @@ export const readSignificantEventsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  handler: async ({ params, request, getScopedClients }): Promise<SignificantEventsGetResponse> => {
-    const { streamsClient, assetClient, scopedClusterClient } = await getScopedClients({
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<SignificantEventsGetResponse> => {
+    const isAvailableForTier = server.core.pricing.isFeatureAvailable(
+      STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id
+    );
+    if (!isAvailableForTier) {
+      throw new SecurityError(`Cannot access API on the current pricing tier`);
+    }
+
+    const { streamsClient, assetClient, scopedClusterClient, licensing } = await getScopedClients({
       request,
     });
+    await assertEnterpriseLicense(licensing);
 
     const isStreamEnabled = await streamsClient.isStreamsEnabled();
     if (!isStreamEnabled) {

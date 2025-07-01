@@ -5,21 +5,22 @@
  * 2.0.
  */
 
+import React, { useEffect, useRef } from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RoutingDefinition } from '@kbn/streams-schema';
-import React, { useEffect, useRef } from 'react';
 import { RoutingConditionEditor } from '../condition_editor';
-import { ControlBar } from './control_bar';
+import { AddRoutingRuleControls } from './control_bars';
+import {
+  useStreamRoutingEvents,
+  useStreamsRoutingSelector,
+} from './state_management/stream_routing_state_machine';
+import { selectCurrentRule } from './state_management/stream_routing_state_machine';
 
-export function NewRoutingStreamEntry({
-  child,
-  onChildChange,
-}: {
-  child: RoutingDefinition;
-  onChildChange: (child?: RoutingDefinition) => void;
-}) {
+export function NewRoutingStreamEntry() {
   const panelRef = useRef<HTMLDivElement>(null);
+
+  const { changeRule } = useStreamRoutingEvents();
+  const currentRule = useStreamsRoutingSelector((snapshot) => selectCurrentRule(snapshot.context));
 
   useEffect(() => {
     if (panelRef.current) {
@@ -39,28 +40,18 @@ export function NewRoutingStreamEntry({
           >
             <EuiFieldText
               data-test-subj="streamsAppRoutingStreamEntryNameField"
-              value={child.destination}
+              value={currentRule.destination}
               fullWidth
               autoFocus
               compressed
-              onChange={(e) => {
-                onChildChange({
-                  ...child,
-                  destination: e.target.value,
-                });
-              }}
+              onChange={(e) => changeRule({ destination: e.target.value })}
             />
           </EuiFormRow>
           <RoutingConditionEditor
-            condition={child.if}
-            onConditionChange={(condition) => {
-              onChildChange({
-                ...child,
-                if: condition,
-              });
-            }}
+            condition={currentRule.if}
+            onConditionChange={(condition) => changeRule({ if: condition })}
           />
-          <ControlBar />
+          <AddRoutingRuleControls />
         </EuiFlexGroup>
       </EuiPanel>
     </div>

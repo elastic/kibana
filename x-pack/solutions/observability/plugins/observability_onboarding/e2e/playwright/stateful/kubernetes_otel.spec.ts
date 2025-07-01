@@ -51,8 +51,13 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
     ?.split('\n')[0]
     ?.replace('myapp', INSTRUMENTED_APP_NAME)
     ?.replace('my-namespace', INSTRUMENTED_APP_CONTAINER_NAMESPACE);
+  /**
+   * Adding timeout so Ensemble waits for the
+   * pods to be created before instrumenting the app
+   */
+  const sleepSnippet = `sleep 120`;
 
-  const codeSnippet = `${helmRepoSnippet}\n${installStackSnippet}\n${annotateAllResourceSnippet}\n${restartDeploymentSnippet}`;
+  const codeSnippet = `${helmRepoSnippet}\n${installStackSnippet}\n${sleepSnippet}\n${annotateAllResourceSnippet}\n${restartDeploymentSnippet}`;
 
   /**
    * Ensemble story watches for the code snippet file

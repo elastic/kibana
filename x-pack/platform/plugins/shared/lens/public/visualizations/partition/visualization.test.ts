@@ -15,15 +15,15 @@ import {
 } from '../../../common/constants';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { FramePublicAPI, OperationDescriptor, Visualization } from '../../types';
 import { themeServiceMock } from '@kbn/core/public/mocks';
-import { cloneDeep } from 'lodash';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { CollapseFunction } from '../../../common/expressions';
 import { PaletteOutput } from '@kbn/coloring';
-import { PersistedPieVisualizationState } from './persistence';
 import { LegendValue } from '@elastic/charts';
+import { DeprecatedLegendValuePieVisualizationState } from './runtime_state/converters/legend_stats';
 
 jest.mock('../../id_generator');
 
@@ -40,6 +40,7 @@ const paletteServiceMock = chartPluginMock.createPaletteRegistry();
 const pieVisualization = getPieVisualization({
   paletteService: paletteServiceMock,
   kibanaTheme: themeServiceMock.createStartContract(),
+  formatFactory: fieldFormatsServiceMock.createStartContract().deserialize,
 });
 
 function getExampleState(): PieVisualizationState {
@@ -93,7 +94,7 @@ describe('pie_visualization', () => {
       });
 
       it("doesn't count collapsed dimensions", () => {
-        const localState = cloneDeep(state);
+        const localState = structuredClone(state);
         localState.layers[0].collapseFns = {
           [colIds[0]]: 'some-fn' as CollapseFunction,
         };
@@ -104,7 +105,7 @@ describe('pie_visualization', () => {
       });
 
       it('counts multiple metrics as an extra bucket dimension', () => {
-        const localState = cloneDeep(state);
+        const localState = structuredClone(state);
         localState.layers[0].primaryGroups.pop();
         expect(
           pieVisualization.getUserMessages!(localState, { frame: {} as FramePublicAPI })
@@ -177,7 +178,7 @@ describe('pie_visualization', () => {
         expect('showValuesInLegend' in runtimeState.layers[0]).toEqual(false);
       });
       it('loads a xy chart with `showValuesInLegend` property equal to false and converts to legendStats: []', () => {
-        const persistedState: PersistedPieVisualizationState = getExampleState();
+        const persistedState: DeprecatedLegendValuePieVisualizationState = getExampleState();
         persistedState.layers[0].showValuesInLegend = false;
 
         const runtimeState = pieVisualization.initialize(() => 'first', persistedState);
@@ -187,7 +188,7 @@ describe('pie_visualization', () => {
       });
 
       it('loads a xy chart with `showValuesInLegend` property equal to true and converts to legendStats: [`values`]', () => {
-        const persistedState: PersistedPieVisualizationState = getExampleState();
+        const persistedState: DeprecatedLegendValuePieVisualizationState = getExampleState();
         persistedState.layers[0].showValuesInLegend = true;
 
         const runtimeState = pieVisualization.initialize(() => 'first', persistedState);
@@ -589,7 +590,7 @@ describe('pie_visualization', () => {
 
         expect(findPrimaryGroup(getConfig(state))?.supportsMoreColumns).toBeFalsy();
 
-        const stateWithCollapsed = cloneDeep(state);
+        const stateWithCollapsed = structuredClone(state);
         stateWithCollapsed.layers[0].collapseFns = { '1': 'sum' };
 
         expect(findPrimaryGroup(getConfig(stateWithCollapsed))?.supportsMoreColumns).toBeTruthy();
@@ -617,7 +618,7 @@ describe('pie_visualization', () => {
 
         expect(findPrimaryGroup(getConfig(state))?.supportsMoreColumns).toBeTruthy();
 
-        const stateWithMultipleMetrics = cloneDeep(state);
+        const stateWithMultipleMetrics = structuredClone(state);
         stateWithMultipleMetrics.layers[0].metrics.push('1', '2');
 
         expect(
@@ -643,7 +644,7 @@ describe('pie_visualization', () => {
 
         expect(findPrimaryGroup(getConfig(state))?.supportsMoreColumns).toBeTruthy();
 
-        const stateWithMultipleMetrics = cloneDeep(state);
+        const stateWithMultipleMetrics = structuredClone(state);
         stateWithMultipleMetrics.layers[0].metrics.push('1', '2');
 
         expect(

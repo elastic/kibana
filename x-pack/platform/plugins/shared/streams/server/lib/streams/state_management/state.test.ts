@@ -7,12 +7,6 @@
 
 /* eslint-disable max-classes-per-file */
 
-import {
-  GroupStreamDefinition,
-  StreamDefinition,
-  UnwiredStreamDefinition,
-  WiredStreamDefinition,
-} from '@kbn/streams-schema';
 import { State } from './state';
 import { GroupStream } from './streams/group_stream';
 import { UnwiredStream } from './streams/unwired_stream';
@@ -26,6 +20,8 @@ import {
 import { StreamChange } from './types';
 import { ElasticsearchAction } from './execution_plan/types';
 import { ExecutionPlan } from './execution_plan/execution_plan';
+import { Streams } from '@kbn/streams-schema';
+import { LockManagerService } from '@kbn/lock-manager';
 
 describe('State', () => {
   const searchMock = jest.fn();
@@ -34,12 +30,16 @@ describe('State', () => {
   };
   const stateDependenciesMock = {
     storageClient: storageClientMock,
+    lockManager: {
+      withLock: (_, cb) => cb(),
+    } as LockManagerService,
     isDev: true,
   } as any;
 
   it('loads the state and initializes the correct Stream class instances', async () => {
-    const wiredStream: WiredStreamDefinition = {
+    const wiredStream: Streams.WiredStream.Definition = {
       name: 'wired_stream',
+      description: '',
       ingest: {
         lifecycle: { inherit: {} },
         processing: [],
@@ -49,16 +49,18 @@ describe('State', () => {
         },
       },
     };
-    const unwiredStream: UnwiredStreamDefinition = {
+    const unwiredStream: Streams.UnwiredStream.Definition = {
       name: 'unwired_stream',
+      description: '',
       ingest: {
         lifecycle: { inherit: {} },
         processing: [],
         unwired: {},
       },
     };
-    const groupStream: GroupStreamDefinition = {
+    const groupStream: Streams.GroupStream.Definition = {
       name: 'group_stream',
+      description: '',
       group: {
         members: [],
       },
@@ -119,6 +121,7 @@ describe('State', () => {
             {
               type: 'upsert',
               definition: {
+                description: '',
                 name: 'whatever',
                 group: {
                   members: [],
@@ -150,6 +153,7 @@ describe('State', () => {
             {
               type: 'upsert',
               definition: {
+                description: '',
                 name: 'new_group_stream',
                 group: {
                   members: [],
@@ -184,6 +188,7 @@ describe('State', () => {
               type: 'upsert',
               definition: {
                 name: 'new_test_stream',
+                description: '',
                 group: {
                   members: [],
                 },
@@ -268,7 +273,7 @@ describe('State', () => {
 function streamThatModifiesStartingState(name: string, stateDependenciesMock: any) {
   class StartingStateModifyingStream extends StreamActiveRecord<any> {
     protected async doHandleUpsertChange(
-      definition: StreamDefinition,
+      definition: Streams.all.Definition,
       desiredState: State,
       startingState: State
     ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }> {
@@ -278,7 +283,7 @@ function streamThatModifiesStartingState(name: string, stateDependenciesMock: an
       return { cascadingChanges: [], changeStatus: 'unchanged' };
     }
 
-    clone(): StreamActiveRecord<StreamDefinition> {
+    clone(): StreamActiveRecord<Streams.all.Definition> {
       return new StartingStateModifyingStream(this.definition, this.dependencies);
     }
     protected async doHandleDeleteChange(): Promise<any> {
@@ -312,7 +317,7 @@ function streamThatModifiesStartingState(name: string, stateDependenciesMock: an
 function streamThatCascadesTooMuch(stateDependenciesMock: any) {
   class CascadingStream extends StreamActiveRecord<any> {
     protected async doHandleUpsertChange(
-      definition: StreamDefinition,
+      definition: Streams.all.Definition,
       desiredState: State,
       startingState: State
     ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }> {
@@ -322,6 +327,7 @@ function streamThatCascadesTooMuch(stateDependenciesMock: any) {
             type: 'upsert',
             definition: {
               name: 'and_another',
+              description: '',
               group: {
                 members: [],
               },
@@ -332,7 +338,7 @@ function streamThatCascadesTooMuch(stateDependenciesMock: any) {
       };
     }
 
-    clone(): StreamActiveRecord<StreamDefinition> {
+    clone(): StreamActiveRecord<Streams.all.Definition> {
       return new CascadingStream(this.definition, this.dependencies);
     }
     protected async doHandleDeleteChange(): Promise<any> {
@@ -366,7 +372,7 @@ function streamThatCascadesTooMuch(stateDependenciesMock: any) {
 function rollbackStream(name: string, stateDependenciesMock: any) {
   class SimpleStream extends StreamActiveRecord<any> {
     protected async doHandleUpsertChange(
-      definition: StreamDefinition
+      definition: Streams.all.Definition
     ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }> {
       return {
         cascadingChanges: [],
@@ -403,7 +409,7 @@ function rollbackStream(name: string, stateDependenciesMock: any) {
         },
       ];
     }
-    clone(): StreamActiveRecord<StreamDefinition> {
+    clone(): StreamActiveRecord<Streams.all.Definition> {
       return new SimpleStream(this.definition, this.dependencies);
     }
     protected async doDetermineUpdateActions(): Promise<ElasticsearchAction[]> {
@@ -422,7 +428,7 @@ function rollbackStream(name: string, stateDependenciesMock: any) {
 function flowStream() {
   class FlowStream extends StreamActiveRecord<any> {
     protected async doHandleUpsertChange(
-      definition: StreamDefinition
+      definition: Streams.all.Definition
     ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }> {
       return {
         cascadingChanges: [],
@@ -450,7 +456,7 @@ function flowStream() {
     protected async doDetermineDeleteActions(): Promise<ElasticsearchAction[]> {
       return [];
     }
-    clone(): StreamActiveRecord<StreamDefinition> {
+    clone(): StreamActiveRecord<Streams.all.Definition> {
       return new FlowStream(this.definition, this.dependencies);
     }
   }

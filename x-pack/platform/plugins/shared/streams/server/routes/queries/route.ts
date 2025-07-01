@@ -4,9 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
-import { internal } from '@hapi/boom';
 import {
   StreamQuery,
   streamQuerySchema,
@@ -14,8 +12,10 @@ import {
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
-import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
+import { QueryNotFoundError } from '../../lib/streams/errors/query_not_found_error';
 import { createServerRoute } from '../create_server_route';
+import { assertEnterpriseLicense } from '../utils/assert_enterprise_license';
+
 export interface ListQueriesResponse {
   queries: StreamQuery[];
 }
@@ -52,7 +52,8 @@ const listQueriesRoute = createServerRoute({
     },
   },
   async handler({ params, request, getScopedClients }): Promise<ListQueriesResponse> {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { assetClient, streamsClient, licensing } = await getScopedClients({ request });
+    await assertEnterpriseLicense(licensing);
     await streamsClient.ensureStream(params.path.name);
 
     const {
@@ -90,23 +91,19 @@ const upsertQueryRoute = createServerRoute({
     body: upsertStreamQueryRequestSchema,
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UpsertQueryResponse> => {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { streamsClient, queryClient, licensing } = await getScopedClients({ request });
     const {
       path: { name: streamName, queryId },
       body,
     } = params;
+    await assertEnterpriseLicense(licensing);
 
     await streamsClient.ensureStream(streamName);
-
-    await assetClient.linkAsset(streamName, {
-      [ASSET_TYPE]: 'query',
-      [ASSET_ID]: queryId,
-      query: {
-        id: queryId,
-        title: body.title,
-        kql: {
-          query: body.kql.query,
-        },
+    await queryClient.upsert(streamName, {
+      id: queryId,
+      title: body.title,
+      kql: {
+        query: body.kql.query,
       },
     });
 
@@ -138,7 +135,10 @@ const deleteQueryRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<DeleteQueryResponse> => {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { streamsClient, queryClient, licensing, assetClient } = await getScopedClients({
+      request,
+    });
+    await assertEnterpriseLicense(licensing);
 
     const {
       path: { queryId, name: streamName },
@@ -146,10 +146,12 @@ const deleteQueryRoute = createServerRoute({
 
     await streamsClient.ensureStream(streamName);
 
-    await assetClient.unlinkAsset(streamName, {
-      [ASSET_TYPE]: 'query',
-      [ASSET_ID]: queryId,
-    });
+    const queryLink = await assetClient.bulkGetByIds(streamName, 'query', [queryId]);
+    if (queryLink.length === 0) {
+      throw new QueryNotFoundError(`Query [${queryId}] not found in stream [${streamName}]`);
+    }
+
+    await queryClient.delete(streamName, queryId);
 
     return {
       acknowledged: true,
@@ -189,13 +191,9 @@ const bulkQueriesRoute = createServerRoute({
       ),
     }),
   }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    logger,
-  }): Promise<BulkUpdateAssetsResponse> => {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+  handler: async ({ params, request, getScopedClients }): Promise<BulkUpdateAssetsResponse> => {
+    const { streamsClient, queryClient, licensing } = await getScopedClients({ request });
+    await assertEnterpriseLicense(licensing);
 
     const {
       path: { name: streamName },
@@ -203,40 +201,7 @@ const bulkQueriesRoute = createServerRoute({
     } = params;
 
     await streamsClient.ensureStream(streamName);
-
-    const result = await assetClient.bulk(
-      streamName,
-      operations.map((operation) => {
-        if ('index' in operation) {
-          return {
-            index: {
-              asset: {
-                [ASSET_TYPE]: 'query',
-                [ASSET_ID]: operation.index.id,
-                query: {
-                  id: operation.index.id,
-                  title: operation.index.title,
-                  kql: { query: operation.index.kql.query },
-                },
-              },
-            },
-          };
-        }
-        return {
-          delete: {
-            asset: {
-              [ASSET_TYPE]: 'query',
-              [ASSET_ID]: operation.delete.id,
-            },
-          },
-        };
-      })
-    );
-
-    if (result.errors) {
-      logger.error(`Error indexing some items`);
-      throw internal(`Could not index all items`, { errors: result.errors });
-    }
+    await queryClient.bulk(streamName, operations);
 
     return { acknowledged: true };
   },

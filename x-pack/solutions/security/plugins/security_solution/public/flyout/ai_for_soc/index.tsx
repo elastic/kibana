@@ -7,10 +7,11 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useKibanaFeatureFlags } from '../../attack_discovery/pages/use_kibana_feature_flags';
 import { getRawData } from '../../assistant/helpers';
 import { AIAssistantSection } from './components/ai_assistant_section';
 import { AttackDiscoverySection } from './components/attack_discovery_section';
-import { AISummarySection } from './components/ai_summary_section';
+import { AlertSummarySection } from './components/alert_summary_section';
 import { HighlightedFields } from '../document_details/right/components/highlighted_fields';
 import { useAIForSOCDetailsContext } from './context';
 import { FlyoutBody } from '../shared/components/flyout_body';
@@ -33,6 +34,7 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
     async () => getRawData(dataFormattedForFieldBrowser),
     [dataFormattedForFieldBrowser]
   );
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
 
   return (
     <>
@@ -43,18 +45,20 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
       <FlyoutBody data-test-subj={FLYOUT_BODY_TEST_ID}>
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
-            <AISummarySection getPromptContext={getPromptContext} />
+            <AlertSummarySection getPromptContext={getPromptContext} />
           </EuiFlexItem>
           <EuiFlexItem>
             <HighlightedFields
               dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
               investigationFields={investigationFields}
-              isPreview={false}
+              showCellActions={false}
             />
           </EuiFlexItem>
-          <EuiFlexItem>
-            <AttackDiscoverySection />
-          </EuiFlexItem>
+          {attackDiscoveryAlertsEnabled && (
+            <EuiFlexItem>
+              <AttackDiscoverySection />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             <AIAssistantSection getPromptContext={getPromptContext} />
           </EuiFlexItem>

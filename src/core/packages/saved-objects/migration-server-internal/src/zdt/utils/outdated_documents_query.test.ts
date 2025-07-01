@@ -100,9 +100,12 @@ describe('getOutdatedDocumentsQuery', () => {
         '8.7.2': dummyMigration,
       }),
     });
+    const bazType = createType({
+      name: 'baz',
+    });
 
     const query = getOutdatedDocumentsQuery({
-      types: [fooType, barType],
+      types: [fooType, barType, bazType],
     });
 
     expect(query).toMatchInlineSnapshot(`
@@ -170,9 +173,12 @@ describe('getOutdatedDocumentsQuery', () => {
         '8.7.2': dummyMigration,
       }),
     });
+    const bazType = createType({
+      name: 'baz',
+    });
 
     const query = getOutdatedDocumentsQuery({
-      types: [fooType, barType],
+      types: [fooType, barType, bazType],
     });
 
     expect(query).toMatchInlineSnapshot(`

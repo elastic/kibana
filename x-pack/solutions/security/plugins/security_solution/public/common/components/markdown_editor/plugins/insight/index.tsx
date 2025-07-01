@@ -37,6 +37,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { useForm, FormProvider, useController } from 'react-hook-form';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../../../hooks/use_experimental_features';
 import { useUpsellingMessage } from '../../../../hooks/use_upselling';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
@@ -300,9 +301,13 @@ const InsightEditorComponent = ({
     uiSettings,
   } = useKibana().services;
 
-  const dataView = useGetScopedSourcererDataView({
+  const oldDataView = useGetScopedSourcererDataView({
     sourcererScope: SourcererScopeName.default,
   });
+
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.default);
+
+  const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
 
   const [providers, setProviders] = useState<Provider[][]>([[]]);
   const dateRangeChoices = useMemo(() => {
@@ -491,11 +496,11 @@ const InsightEditorComponent = ({
               />
             </EuiFormRow>
             <EuiFormRow label={i18n.FILTER_BUILDER} helpText={i18n.FILTER_BUILDER_TEXT} fullWidth>
-              {dataView ? (
+              {oldDataView ? (
                 <FiltersBuilderLazy
                   filters={filtersStub}
                   onChange={onChange}
-                  dataView={dataView}
+                  dataView={oldDataView}
                   maxDepth={1}
                 />
               ) : (

@@ -12,7 +12,6 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
 import { getActionList, getActionListByStatus } from '../../services';
@@ -63,6 +62,7 @@ export const actionListHandler = (
       },
     } = req;
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
+    const activeSpaceId = (await context.securitySolution).getSpaceId();
 
     try {
       const indexExists = await doesLogsEndpointActionsIndexExist({
@@ -75,33 +75,22 @@ export const actionListHandler = (
         return res.notFound({ body: 'index_not_found_exception' });
       }
 
-      // verify feature flag for sentinel_one `aaentType`
+      // verify feature flag for sentinel_one `agentType`
       const agentTypes = formatRequestParams(_agentTypes);
-      if (
-        !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled &&
-        agentTypes?.includes('sentinel_one')
-      ) {
-        return errorHandler(
-          logger,
-          res,
-          new CustomHttpRequestError('[request body.agentTypes]: sentinel_one is disabled', 400)
-        );
-      }
-
-      const requestParams = {
+      const requestParams: Parameters<typeof getActionList>[0] = {
         agentTypes,
         withOutputs: formatRequestParams(withOutputs),
         types: formatRequestParams(types),
         commands: formatRequestParams(commands),
-        esClient,
         elasticAgentIds: formatRequestParams(elasticAgentIds),
-        metadataService: endpointContext.service.getEndpointMetadataService(),
+        userIds: formatRequestParams(userIds),
         page,
         pageSize,
         startDate,
         endDate,
-        userIds: formatRequestParams(userIds),
-        logger,
+
+        spaceId: activeSpaceId,
+        endpointService: endpointContext.service,
       };
       // wrapper method to branch logic for
       // normal paged search via page, size

@@ -51,7 +51,7 @@ export function useDevToolsRequest({
           packagePolicyId
             ? generateUpdatePackagePolicyDevToolsRequest(
                 packagePolicyId,
-                set(omit(packagePolicy, 'elasticsearch', 'policy_id'), 'policy_ids', [
+                set(omit(packagePolicy, 'elasticsearch', 'spaceIds', 'policy_id'), 'policy_ids', [
                   ...packagePolicy.policy_ids,
                   '',
                 ])
@@ -82,7 +82,7 @@ export function useDevToolsRequest({
       packagePolicyId
         ? generateUpdatePackagePolicyDevToolsRequest(
             packagePolicyId,
-            omit(packagePolicy, 'elasticsearch', 'policy_id')
+            omit(packagePolicy, 'elasticsearch', 'spaceIds', 'policy_id')
           )
         : generateCreatePackagePolicyDevToolsRequest({
             ...packagePolicy,

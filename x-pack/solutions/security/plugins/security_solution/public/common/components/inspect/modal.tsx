@@ -25,6 +25,7 @@ import React, { useMemo, Fragment } from 'react';
 import styled from '@emotion/styled';
 
 import { useLocation } from 'react-router-dom';
+import { isString } from 'lodash/fp';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import type { InputsModelId } from '../../store/inputs/constants';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
@@ -165,7 +166,7 @@ export const ModalInspectQuery = ({
         title: (
           <span data-test-subj="index-pattern-title">
             {i18n.INDEX_PATTERN}{' '}
-            <EuiIconTip color="subdued" content={i18n.INDEX_PATTERN_DESC} type="iInCircle" />
+            <EuiIconTip color="subdued" content={i18n.INDEX_PATTERN_DESC} type="info" />
           </span>
         ),
         description: (
@@ -193,7 +194,7 @@ export const ModalInspectQuery = ({
         title: (
           <span data-test-subj="query-time-title">
             {i18n.QUERY_TIME}{' '}
-            <EuiIconTip color="subdued" content={i18n.QUERY_TIME_DESC} type="iInCircle" />
+            <EuiIconTip color="subdued" content={i18n.QUERY_TIME_DESC} type="info" />
           </span>
         ),
         description: (
@@ -210,7 +211,7 @@ export const ModalInspectQuery = ({
         title: (
           <span data-test-subj="request-timestamp-title">
             {i18n.REQUEST_TIMESTAMP}{' '}
-            <EuiIconTip color="subdued" content={i18n.REQUEST_TIMESTAMP_DESC} type="iInCircle" />
+            <EuiIconTip color="subdued" content={i18n.REQUEST_TIMESTAMP_DESC} type="info" />
           </span>
         ),
         description: (
@@ -248,7 +249,7 @@ export const ModalInspectQuery = ({
               <Fragment key={index}>
                 <EuiCodeBlock
                   data-test-subj="modal-inspect-request-preview"
-                  language="json"
+                  language={isString(inspectRequest.body) ? 'esql' : 'json'}
                   fontSize="m"
                   paddingSize="m"
                   color="dark"
@@ -257,7 +258,9 @@ export const ModalInspectQuery = ({
                   isVirtualized
                   lineNumbers
                 >
-                  {manageStringify(inspectRequest.body)}
+                  {isString(inspectRequest.body)
+                    ? inspectRequest.body
+                    : manageStringify(inspectRequest.body)}
                 </EuiCodeBlock>
               </Fragment>
             ))

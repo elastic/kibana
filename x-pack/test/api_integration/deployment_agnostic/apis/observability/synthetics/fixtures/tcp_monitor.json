@@ -39,5 +39,6 @@
   "ipv4": true,
   "ipv6": true,
   "params": "",
-  "max_attempts": 2
+  "max_attempts": 2,
+  "maintenance_windows": []
 }

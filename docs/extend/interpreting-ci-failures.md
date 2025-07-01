@@ -36,7 +36,7 @@ The logs in Pipeline Steps contain `Info` level logging. To debug Functional UI 
 
 Looking at the failure, we first look at the Error and stack trace. In the example below, this test failed to find an element within the timeout; `Error: retry.try timeout: TimeoutError: Waiting for element to be located By(css selector, [data-test-subj="createSpace"])`
 
-We know the test file from the stack trace was on line 50 of `test/accessibility/apps/spaces.ts` (this test and the stack trace context is kibana/x-pack/ so the file is {{kib-repo}}blob/master/x-pack/test/accessibility/apps/group1/spaces.ts#L50). The function to click on the element was called from a page object method in `test/functional/page_objects/space_selector_page.ts` {{kib-repo}}blob/master/x-pack/test/functional/page_objects/space_selector_page.ts#L58
+We know the test file from the stack trace was on line 50 of `test/accessibility/apps/spaces.ts` (this test and the stack trace context is kibana/x-pack/ so the file is [`x-pack/test/accessibility/apps/group1/spaces.ts`](https://github.com/elastic/kibana/blob/master/x-pack/test/accessibility/apps/group1/spaces.ts#L50). The function to click on the element was called from a page object method in [`test/functional/page_objects/space_selector_page.ts`](https://github.com/elastic/kibana/blob/master/x-pack/test/functional/page_objects/space_selector_page.ts#L58).
 
 ```
 [00:03:36]             │ debg --- retry.try error: Waiting for element to be located By(css selector, [data-test-subj="createSpace"])

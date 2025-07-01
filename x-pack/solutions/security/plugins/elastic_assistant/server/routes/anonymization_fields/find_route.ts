@@ -16,7 +16,7 @@ import {
 import {
   FindAnonymizationFieldsRequestQuery,
   FindAnonymizationFieldsResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+} from '@kbn/elastic-assistant-common/impl/schemas';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import _ from 'lodash';
 import { ElasticAssistantPluginRouter } from '../../types';

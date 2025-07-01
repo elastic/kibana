@@ -95,7 +95,7 @@ export const getDocumentCountStatsRequest = (
 
   const aggs = randomSamplerWrapper ? randomSamplerWrapper.wrap(rawAggs) : rawAggs;
 
-  const searchBody: estypes.MsearchMultisearchBody = {
+  const searchBody: estypes.SearchSearchRequestBody = {
     query: {
       bool: {
         filter: filterCriteria,

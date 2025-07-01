@@ -40,7 +40,8 @@ const renderTableTabTour = () =>
     </TestProviders>
   );
 
-describe('TableTabTour', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/219129
+describe.skip('TableTabTour', () => {
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
       ...mockedUseKibana,

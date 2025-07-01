@@ -5,25 +5,27 @@
  * 2.0.
  */
 
-import { pick } from 'lodash/fp';
-
+import type { AttackDiscoveryGraphState } from '../../../../langchain/graphs';
 import { ExampleInputWithOverrides } from '../../example_input';
-import { GraphState } from '../../../graphs/default_attack_discovery_graph/types';
 
 /**
  * Parses input from an LangSmith dataset example to get the graph input overrides
  */
-export const getGraphInputOverrides = (outputs: unknown): Partial<GraphState> => {
+export const getGraphInputOverrides = (outputs: unknown): Partial<AttackDiscoveryGraphState> => {
   const validatedInput = ExampleInputWithOverrides.safeParse(outputs).data ?? {}; // safeParse removes unknown properties
 
-  const { overrides } = validatedInput;
+  const { replacements, overrides } = validatedInput;
+
+  // Fallback to and rename the root level legacy properties `anonymizedAlerts`,
+  // and `attackDiscoveries` to the new graph property names:
+  const anonymizedDocuments = validatedInput.anonymizedDocuments ?? validatedInput.anonymizedAlerts;
+  const insights = validatedInput.insights ?? validatedInput.attackDiscoveries;
 
   // return all overrides at the root level:
   return {
-    // pick extracts just the anonymizedAlerts and replacements from the root level of the input,
-    // and only adds the anonymizedAlerts key if it exists in the input
-    ...pick('anonymizedAlerts', validatedInput),
-    ...pick('replacements', validatedInput),
+    anonymizedDocuments,
+    insights,
+    replacements,
     ...overrides, // bring all other overrides to the root level
   };
 };

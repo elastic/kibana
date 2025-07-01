@@ -6,13 +6,32 @@
  */
 
 import type { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { omit, pick } from 'lodash';
+import { convertToQueryString } from './utils';
 
-export const logEqlRequest = (request: EqlSearchRequest): string => {
-  const allowNoIndices =
-    request.allow_no_indices != null ? `?allow_no_indices=${request.allow_no_indices}` : '';
+const QUERY_FIELDS = [
+  'allow_no_indices',
+  'allow_partial_sequence_results',
+  'expand_wildcards',
+  'ignore_unavailable',
+  'keep_alive',
+  'keep_on_completion',
+  'wait_for_completion_timeout',
+];
 
-  return `POST /${request.index}/_eql/search${allowNoIndices}\n${JSON.stringify(
-    request.body,
+export const logEqlRequest = (searchRequest: EqlSearchRequest): string => {
+  const params = {
+    ...pick(searchRequest, QUERY_FIELDS),
+    ...searchRequest.querystring,
+  };
+
+  const body = {
+    ...omit(searchRequest, [...QUERY_FIELDS, 'index', 'querystring', 'body']),
+    ...(searchRequest.body as Record<string, unknown>),
+  };
+
+  return `POST /${searchRequest.index}/_eql/search${convertToQueryString(params)}\n${JSON.stringify(
+    body,
     null,
     2
   )}`;

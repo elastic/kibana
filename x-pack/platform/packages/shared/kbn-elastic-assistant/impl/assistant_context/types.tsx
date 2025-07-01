@@ -74,6 +74,7 @@ export interface AssistantAvailability {
   hasUpdateAIAssistantAnonymization: boolean;
   // When true, user has `Edit` privilege for `Global Knowledge Base`
   hasManageGlobalKnowledgeBase: boolean;
+  isStarterPromptsEnabled: boolean;
 }
 
 export type GetAssistantMessages = (commentArgs: {

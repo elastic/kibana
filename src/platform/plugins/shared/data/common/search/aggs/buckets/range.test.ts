@@ -11,55 +11,108 @@ import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { FieldFormatsGetConfigFn, NumberFormat } from '@kbn/field-formats-plugin/common';
+import { RangeKey } from './range_key';
 
 describe('Range Agg', () => {
-  const getConfig = (() => {}) as FieldFormatsGetConfigFn;
-  const getAggConfigs = () => {
-    const field = {
-      name: 'bytes',
+  describe('RangeKey', () => {
+    const label = 'some label';
+    describe.each([
+      ['open range', {}, undefined],
+      ['open upper range', { from: 0 }, undefined],
+      ['open lower range', { to: 100 }, undefined],
+      ['fully closed range', { from: 0, to: 100 }, undefined],
+      ['open range', {}, [{ label }]],
+      ['open upper range w/ label', { from: 0 }, [{ from: 0, label }]],
+      ['open lower range w/ label', { to: 100 }, [{ to: 100, label }]],
+      ['fully closed range w/ label', { from: 0, to: 100 }, [{ from: 0, to: 100, label }]],
+    ])('%s', (_, bucket: any, ranges) => {
+      const initial = new RangeKey(bucket, ranges);
+
+      test('should correctly set gte', () => {
+        expect(initial.gte).toBe(bucket?.from == null ? -Infinity : bucket.from);
+      });
+
+      test('should correctly set lt', () => {
+        expect(initial.lt).toBe(bucket?.to == null ? Infinity : bucket.to);
+      });
+
+      test('should correctly set label', () => {
+        expect(initial.label).toBe(ranges?.[0]?.label);
+      });
+
+      test('should correctly stringify field', () => {
+        expect(initial.toString()).toMatchSnapshot();
+      });
+    });
+  });
+
+  describe('#fromString', () => {
+    test.each([
+      ['empty range', '', {}],
+      ['bad buckets', 'from:baddd,to:baddd', {}],
+      ['open range', 'from:undefined,to:undefined', {}],
+      ['open upper range', 'from:0,to:undefined', { from: 0 }],
+      ['open lower range', 'from:undefined,to:100', { to: 100 }],
+      ['fully closed range', 'from:0,to:100', { from: 0, to: 100 }],
+      ['mixed closed range', 'from:-100,to:100', { from: -100, to: 100 }],
+      ['mixed open range', 'from:-100,to:undefined', { from: -100 }],
+      ['negative closed range', 'from:-100,to:-50', { from: -100, to: -50 }],
+      ['negative open range', 'from:undefined,to:-50', { to: -50 }],
+    ])('should correctly build RangeKey from string for %s', (_, rangeString, bucket) => {
+      const expected = new RangeKey(bucket);
+
+      expect(RangeKey.fromString(rangeString).toString()).toBe(expected.toString());
+    });
+  });
+
+  describe('RangeKey with getAggConfigs', () => {
+    const getConfig = (() => {}) as FieldFormatsGetConfigFn;
+    const getAggConfigs = () => {
+      const field = {
+        name: 'bytes',
+      };
+
+      const indexPattern = {
+        id: '1234',
+        title: 'logstash-*',
+        fields: {
+          getByName: () => field,
+          filter: () => [field],
+        },
+        getFormatterForField: () =>
+          new NumberFormat(
+            {
+              pattern: '0,0.[000] b',
+            },
+            getConfig
+          ),
+      } as any;
+
+      return new AggConfigs(
+        indexPattern,
+        [
+          {
+            type: BUCKET_TYPES.RANGE,
+            schema: 'segment',
+            params: {
+              field: 'bytes',
+              ranges: [
+                { from: 0, to: 1000 },
+                { from: 1000, to: 2000 },
+              ],
+            },
+          },
+        ],
+        {
+          typesRegistry: mockAggTypesRegistry(),
+        },
+        jest.fn()
+      );
     };
 
-    const indexPattern = {
-      id: '1234',
-      title: 'logstash-*',
-      fields: {
-        getByName: () => field,
-        filter: () => [field],
-      },
-      getFormatterForField: () =>
-        new NumberFormat(
-          {
-            pattern: '0,0.[000] b',
-          },
-          getConfig
-        ),
-    } as any;
-
-    return new AggConfigs(
-      indexPattern,
-      [
-        {
-          type: BUCKET_TYPES.RANGE,
-          schema: 'segment',
-          params: {
-            field: 'bytes',
-            ranges: [
-              { from: 0, to: 1000 },
-              { from: 1000, to: 2000 },
-            ],
-          },
-        },
-      ],
-      {
-        typesRegistry: mockAggTypesRegistry(),
-      },
-      jest.fn()
-    );
-  };
-
-  test('produces the expected expression ast', () => {
-    const aggConfigs = getAggConfigs();
-    expect(aggConfigs.aggs[0].toExpressionAst()).toMatchInlineSnapshot(`
+    test('produces the expected expression ast', () => {
+      const aggConfigs = getAggConfigs();
+      expect(aggConfigs.aggs[0].toExpressionAst()).toMatchInlineSnapshot(`
       Object {
         "chain": Array [
           Object {
@@ -120,23 +173,24 @@ describe('Range Agg', () => {
         "type": "expression",
       }
     `);
-  });
+    });
 
-  describe('getSerializedFormat', () => {
-    test('generates a serialized field format in the expected shape', () => {
-      const aggConfigs = getAggConfigs();
-      const agg = aggConfigs.aggs[0];
-      expect(agg.type.getSerializedFormat(agg)).toMatchInlineSnapshot(`
-        Object {
-          "id": "range",
-          "params": Object {
-            "id": "number",
+    describe('getSerializedFormat', () => {
+      test('generates a serialized field format in the expected shape', () => {
+        const aggConfigs = getAggConfigs();
+        const agg = aggConfigs.aggs[0];
+        expect(agg.type.getSerializedFormat(agg)).toMatchInlineSnapshot(`
+          Object {
+            "id": "range",
             "params": Object {
-              "pattern": "0,0.[000] b",
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.[000] b",
+              },
             },
-          },
-        }
-      `);
+          }
+        `);
+      });
     });
   });
 });

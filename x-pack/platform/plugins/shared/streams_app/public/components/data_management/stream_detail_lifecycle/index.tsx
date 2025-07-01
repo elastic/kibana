@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
-import {
-  IngestStreamGetResponse,
-  IngestStreamLifecycle,
-  IngestUpsertRequest,
-  isIlmLifecycle,
-  isRoot,
-  isUnwiredStreamGetResponse,
-  isWiredStreamGetResponse,
-} from '@kbn/streams-schema';
+import { IngestStreamLifecycle, Streams, isIlmLifecycle, isRoot } from '@kbn/streams-schema';
 import { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
+import { css } from '@emotion/react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { EditLifecycleModal, LifecycleEditAction } from './modal';
 import { RetentionSummary } from './summary';
@@ -32,7 +25,7 @@ function useLifecycleState({
   definition,
   isServerless,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   isServerless: boolean;
 }) {
   const [updateInProgress, setUpdateInProgress] = useState(false);
@@ -40,20 +33,16 @@ function useLifecycleState({
 
   const lifecycleActions = useMemo(() => {
     const actions: Array<{ name: string; action: LifecycleEditAction }> = [];
-    const isWired = isWiredStreamGetResponse(definition);
-    const isUnwired = isUnwiredStreamGetResponse(definition);
-    const isIlm = isIlmLifecycle(definition.effective_lifecycle);
+    const isWired = Streams.WiredStream.GetResponse.is(definition);
 
-    if (isWired || (isUnwired && !isIlm)) {
-      actions.push({
-        name: i18n.translate('xpack.streams.streamDetailLifecycle.setRetentionDays', {
-          defaultMessage: 'Set specific retention days',
-        }),
-        action: 'dsl',
-      });
-    }
+    actions.push({
+      name: i18n.translate('xpack.streams.streamDetailLifecycle.setRetentionDays', {
+        defaultMessage: 'Set specific retention days',
+      }),
+      action: 'dsl',
+    });
 
-    if (isWired && !isServerless) {
+    if (!isServerless) {
       actions.push({
         name: i18n.translate('xpack.streams.streamDetailLifecycle.setLifecyclePolicy', {
           defaultMessage: 'Use a lifecycle policy',
@@ -62,7 +51,7 @@ function useLifecycleState({
       });
     }
 
-    if (!isRoot(definition.stream.name) || (isUnwired && !isIlm)) {
+    if (isWired && !isRoot(definition.stream.name)) {
       actions.push({
         name: i18n.translate('xpack.streams.streamDetailLifecycle.resetToDefault', {
           defaultMessage: 'Reset to default',
@@ -87,7 +76,7 @@ export function StreamDetailLifecycle({
   definition,
   refreshDefinition,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
 }) {
   const {
@@ -130,7 +119,7 @@ export function StreamDetailLifecycle({
           ...definition.stream.ingest,
           lifecycle,
         },
-      } as IngestUpsertRequest;
+      };
 
       await streamsRepositoryClient.fetch('PUT /api/streams/{name}/_ingest 2023-10-31', {
         params: {
@@ -161,7 +150,7 @@ export function StreamDetailLifecycle({
   };
 
   return (
-    <>
+    <EuiFlexGroup gutterSize="m" direction="column">
       <EditLifecycleModal
         action={openEditModal}
         definition={definition}
@@ -170,51 +159,50 @@ export function StreamDetailLifecycle({
         getIlmPolicies={getIlmPolicies}
         updateInProgress={updateInProgress}
       />
-
-      <EuiPanel grow={false} hasShadow={false} hasBorder paddingSize="s">
-        <EuiFlexGroup gutterSize="m">
-          <EuiFlexItem grow={1}>
-            <RetentionSummary definition={definition} />
+      <EuiFlexGroup gutterSize="m" css={flexRowCss}>
+        <EuiPanel grow={false} hasShadow={false} hasBorder paddingSize="m">
+          <RetentionSummary
+            definition={definition}
+            isLoadingStats={isLoadingStats}
+            stats={stats}
+            statsError={statsError}
+          />
+        </EuiPanel>
+        <EuiPanel grow hasShadow={false} hasBorder paddingSize="m">
+          <RetentionMetadata
+            definition={definition}
+            lifecycleActions={lifecycleActions}
+            openEditModal={(action) => setOpenEditModal(action)}
+            isLoadingStats={isLoadingStats}
+            stats={stats}
+            statsError={statsError}
+          />
+        </EuiPanel>
+      </EuiFlexGroup>
+      <EuiFlexGroup gutterSize="m" css={flexRowCss}>
+        {definition.privileges.monitor && (
+          <EuiFlexItem grow={2}>
+            <EuiPanel hasShadow={false} hasBorder paddingSize="m">
+              <IngestionRate
+                definition={definition}
+                isLoadingStats={isLoadingStats}
+                stats={stats}
+              />
+            </EuiPanel>
           </EuiFlexItem>
-
-          <EuiFlexItem grow={4}>
-            <RetentionMetadata
-              definition={definition}
-              lifecycleActions={lifecycleActions}
-              openEditModal={(action) => setOpenEditModal(action)}
-              isLoadingStats={isLoadingStats}
-              stats={stats}
-              statsError={statsError}
-            />
+        )}
+        {definition.privileges.lifecycle && isIlmLifecycle(definition.effective_lifecycle) ? (
+          <EuiFlexItem grow={3}>
+            <EuiPanel hasShadow={false} hasBorder paddingSize="m">
+              <IlmSummary definition={definition} lifecycle={definition.effective_lifecycle} />
+            </EuiPanel>
           </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-
-      <EuiSpacer size="m" />
-
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="m">
-          {definition.privileges.monitor && (
-            <EuiFlexItem grow={2}>
-              <EuiPanel grow={true} hasShadow={false} hasBorder paddingSize="s">
-                <IngestionRate
-                  definition={definition}
-                  isLoadingStats={isLoadingStats}
-                  stats={stats}
-                />
-              </EuiPanel>
-            </EuiFlexItem>
-          )}
-
-          {definition.privileges.lifecycle && isIlmLifecycle(definition.effective_lifecycle) ? (
-            <EuiFlexItem grow={3}>
-              <EuiPanel grow={true} hasShadow={false} hasBorder paddingSize="s">
-                <IlmSummary definition={definition} lifecycle={definition.effective_lifecycle} />
-              </EuiPanel>
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </>
+        ) : null}
+      </EuiFlexGroup>
+    </EuiFlexGroup>
   );
 }
+
+const flexRowCss = css`
+  flex-grow: 0;
+`;

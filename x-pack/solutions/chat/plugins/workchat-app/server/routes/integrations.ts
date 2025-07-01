@@ -24,7 +24,7 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
   // Get a single integration by ID
   router.get(
     {
-      path: '/internal/workchat/integrations/{integrationId}',
+      path: '/internal/workchat/tools/{integrationId}',
       security: {
         authz: {
           requiredPrivileges: [apiCapabilities.useWorkchat],
@@ -53,7 +53,7 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
   // List all integrations
   router.get(
     {
-      path: '/internal/workchat/integrations',
+      path: '/internal/workchat/tools',
       security: {
         authz: {
           requiredPrivileges: [apiCapabilities.useWorkchat],
@@ -78,7 +78,7 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
   // Create a new integration
   router.post(
     {
-      path: '/internal/workchat/integrations',
+      path: '/internal/workchat/tools',
       security: {
         authz: {
           requiredPrivileges: [apiCapabilities.manageWorkchat],
@@ -117,7 +117,7 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
   // Update an existing integration
   router.put(
     {
-      path: '/internal/workchat/integrations/{integrationId}',
+      path: '/internal/workchat/tools/{integrationId}',
       security: {
         authz: {
           requiredPrivileges: [apiCapabilities.manageWorkchat],
@@ -156,7 +156,7 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
   // Delete an integration
   router.delete(
     {
-      path: '/internal/workchat/integrations/{integrationId}',
+      path: '/internal/workchat/tools/{integrationId}',
       security: {
         authz: {
           requiredPrivileges: [apiCapabilities.manageWorkchat],

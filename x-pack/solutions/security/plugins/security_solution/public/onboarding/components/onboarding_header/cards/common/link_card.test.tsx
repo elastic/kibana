@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { LinkCard } from './link_card';
 import { OnboardingHeaderCardId, TELEMETRY_HEADER_CARD } from '../../constants';
-import { mockTrackLinkClick } from '../../../__mocks__/mocks';
+import { mockReportLinkClick } from '../../../__mocks__/mocks';
 
 jest.mock('../../../lib/telemetry');
 jest.mock('../../../onboarding_context');
@@ -47,7 +47,7 @@ describe('DataIngestionHubHeaderCardComponent', () => {
     );
 
     getByTestId('headerCardLink').click();
-    expect(mockTrackLinkClick).toHaveBeenCalledWith(
+    expect(mockReportLinkClick).toHaveBeenCalledWith(
       `${TELEMETRY_HEADER_CARD}_${OnboardingHeaderCardId.demo}`
     );
   });

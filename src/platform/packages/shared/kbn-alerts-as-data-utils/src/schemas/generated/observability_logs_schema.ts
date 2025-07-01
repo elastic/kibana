@@ -83,6 +83,7 @@ const ObservabilityLogsAlertOptional = rt.partial({
       value: schemaStringArray,
     })
   ),
+  'kibana.alert.grouping': schemaUnknown,
 });
 
 // prettier-ignore

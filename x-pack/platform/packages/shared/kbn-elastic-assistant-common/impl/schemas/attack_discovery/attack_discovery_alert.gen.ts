@@ -17,7 +17,7 @@
 import { z } from '@kbn/zod';
 
 import { Replacements } from '../conversations/common_attributes.gen';
-import { NonEmptyString, User } from '../common_attributes.gen';
+import { NonEmptyTimestamp, User } from '../common_attributes.gen';
 
 /**
  * An attack discovery that's also an alert
@@ -45,6 +45,26 @@ export const AttackDiscoveryAlert = z.object({
    */
   connectorName: z.string(),
   /**
+   * The optional time the attack discovery alert was created
+   */
+  alertStart: z.string().optional(),
+  /**
+   * The optional time the attack discovery alert was last updated
+   */
+  alertUpdatedAt: z.string().optional(),
+  /**
+   * The optional id of the user who last updated the attack discovery alert
+   */
+  alertUpdatedByUserId: z.string().optional(),
+  /**
+   * The optional username of the user who updated the attack discovery alert
+   */
+  alertUpdatedByUserName: z.string().optional(),
+  /**
+   * The optional time the attack discovery alert workflow status was last updated
+   */
+  alertWorkflowStatusUpdatedAt: z.string().optional(),
+  /**
    * Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.
    */
   detailsMarkdown: z.string(),
@@ -65,7 +85,7 @@ export const AttackDiscoveryAlert = z.object({
    */
   mitreAttackTactics: z.array(z.string()).optional(),
   /**
-   * Optional Key-value pairs that are used to replace placeholders in the markdown fields
+   * Key-value pairs that are used to replace placeholders in the markdown fields
    */
   replacements: Replacements.optional(),
   /**
@@ -79,7 +99,7 @@ export const AttackDiscoveryAlert = z.object({
   /**
    * The time the attack discovery was generated
    */
-  timestamp: NonEmptyString,
+  timestamp: NonEmptyTimestamp,
   /**
    * A title for the attack discovery, in plain text
    */

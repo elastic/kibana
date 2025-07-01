@@ -214,6 +214,14 @@ export const topNavStrings = {
       defaultMessage: 'Switch to view-only mode',
     }),
   },
+  export: {
+    label: i18n.translate('dashboard.topNave.exportButtonAriaLabel', {
+      defaultMessage: 'Export',
+    }),
+    description: i18n.translate('dashboard.topNave.exportConfigDescription', {
+      defaultMessage: 'Export dashboard',
+    }),
+  },
   share: {
     label: i18n.translate('dashboard.topNave.shareButtonAriaLabel', {
       defaultMessage: 'share',
@@ -248,6 +256,11 @@ export const getControlButtonTitle = () =>
 export const getAddControlButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.addControlButtonTitle', {
     defaultMessage: 'Add control',
+  });
+
+export const getAddESQLControlButtonTitle = () =>
+  i18n.translate('dashboard.editingToolbar.addESQLControlButtonTitle', {
+    defaultMessage: 'Add ES|QL control',
   });
 
 export const getEditControlGroupButtonTitle = () =>

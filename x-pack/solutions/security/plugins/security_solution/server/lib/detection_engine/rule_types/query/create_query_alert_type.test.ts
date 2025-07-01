@@ -31,6 +31,12 @@ jest.mock('../utils/utils', () => ({
     };
   }),
   hasReadIndexPrivileges: jest.fn(async () => undefined),
+  checkForFrozenIndices: jest.fn(async () => []),
+}));
+
+jest.mock('@kbn/alerting-plugin/server', () => ({
+  ...jest.requireActual('@kbn/alerting-plugin/server'),
+  shouldCreateAlertsInAllSpaces: jest.fn().mockReturnValue(false),
 }));
 
 jest.mock('../utils/get_list_client', () => ({
@@ -253,7 +259,7 @@ describe('Custom Query Alerts', () => {
       expect.objectContaining({
         newStatus: RuleExecutionStatusEnum['partial failure'],
         message:
-          'Check privileges failed to execute Error: hastTimestampFields test error\n' +
+          'Timestamp fields check failed to execute Error: hastTimestampFields test error\n' +
           '\n' +
           "The rule's max alerts per run setting (10000) is greater than the Kibana alerting limit (1000). The rule will only write a maximum of 1000 alerts per rule run.",
       })

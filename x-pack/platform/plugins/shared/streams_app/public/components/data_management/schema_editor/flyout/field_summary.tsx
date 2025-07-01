@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { IngestStreamDefinition, isWiredStreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { FieldParent } from '../field_parent';
 import { FieldStatusBadge } from '../field_status';
@@ -57,7 +57,7 @@ interface FieldSummaryProps {
   field: SchemaField;
   isEditing: boolean;
   toggleEditMode: () => void;
-  stream: IngestStreamDefinition;
+  stream: Streams.ingest.all.Definition;
   onChange: (field: Partial<SchemaField>) => void;
 }
 
@@ -128,7 +128,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
               <span>
                 {FIELD_SUMMARIES.fieldStatus.label}{' '}
                 <EuiIconTip
-                  type="iInCircle"
+                  type="info"
                   color="subdued"
                   content={i18n.translate('xpack.streams.fieldSummary.statusTooltip', {
                     defaultMessage:
@@ -203,7 +203,9 @@ export const FieldSummary = (props: FieldSummaryProps) => {
 
         <EuiHorizontalRule margin="xs" />
       </EuiFlexGroup>
-      {isEditing && isWiredStreamDefinition(stream) && stream.ingest.wired.routing.length > 0 ? (
+      {isEditing &&
+      Streams.WiredStream.Definition.is(stream) &&
+      stream.ingest.wired.routing.length > 0 ? (
         <EuiFlexItem grow={false}>
           <ChildrenAffectedCallout childStreams={stream.ingest.wired.routing} />
         </EuiFlexItem>

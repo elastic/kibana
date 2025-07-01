@@ -9,7 +9,8 @@
     "public/**/*.json",
     "server/**/*",
     "typings/**/*",
-    "../../../../../typings/**/*"
+    "../../../../../typings/**/*",
+    "ui_tests/**/*"
   ],
   "kbn_references": [
     "@kbn/rule-data-utils",
@@ -100,7 +101,6 @@
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/core-elasticsearch-server",
     "@kbn/logging",
-    "@kbn/safer-lodash-set",
     "@kbn/features-plugin",
     "@kbn/files-plugin",
     "@kbn/server-route-repository",
@@ -115,10 +115,21 @@
     "@kbn/data-service",
     "@kbn/ebt-tools",
     "@kbn/response-ops-rule-params",
-    "@kbn/dashboard-plugin",
     "@kbn/fields-metadata-plugin",
     "@kbn/controls-plugin",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/dashboard-plugin",
+    "@kbn/deeplinks-analytics",
+    "@kbn/object-utils",
+    "@kbn/task-manager-plugin",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-pricing-common",
+    "@kbn/logs-data-access-plugin",
+    "@kbn/core-pricing-browser-mocks",
+    "@kbn/esql",
+    "@kbn/scout",
+    "@kbn/apm-synthtrace-client",
+    "@kbn/scout-oblt",
   ],
   "exclude": ["target/**/*"]
 }

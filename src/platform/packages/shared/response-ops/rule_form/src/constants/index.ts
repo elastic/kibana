@@ -80,3 +80,5 @@ export enum RuleFormStepId {
   ACTIONS = 'rule-actions',
   DETAILS = 'rule-details',
 }
+
+export const MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH = 1000;

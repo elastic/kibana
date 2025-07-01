@@ -36,7 +36,7 @@ import type { TabItem, TabsServices } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
 import { TabsBarWithBackground } from '../tabs_visual_glue_to_header/tabs_bar_with_background';
-import { TabsBarMenu } from '../tabs_bar_menu';
+import { TabsBarMenu, type TabsBarMenuProps } from '../tabs_bar_menu';
 
 const DROPPABLE_ID = 'unifiedTabsOrder';
 
@@ -60,6 +60,7 @@ export type TabsBarProps = Pick<
   maxItemsCount?: number;
   services: TabsServices;
   onAdd: () => Promise<void>;
+  onSelectRecentlyClosed: TabsBarMenuProps['onSelectRecentlyClosed'];
   onReorder: (items: TabItem[]) => void;
 };
 
@@ -80,6 +81,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       onAdd,
       onLabelEdited,
       onSelect,
+      onSelectRecentlyClosed,
       onReorder,
       onClose,
       getPreviewData,
@@ -278,10 +280,11 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <TabsBarMenu
-            openedItems={items}
+            items={items}
             selectedItem={selectedItem}
-            onSelectOpenedTab={onSelect}
             recentlyClosedItems={recentlyClosedItems}
+            onSelect={onSelect}
+            onSelectRecentlyClosed={onSelectRecentlyClosed}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -48,7 +48,7 @@ class Package {
   }
 
   /**
-   * @private
+   * @internal
    */
   constructor(
     /**
@@ -191,7 +191,13 @@ class Package {
     const dir = this.normalizedRepoRelativeDir;
     const oss = !dir.startsWith('x-pack/');
     const example = dir.startsWith('examples/') || dir.startsWith('x-pack/examples/');
-    const testPlugin = dir.startsWith('src/platform/test/') || dir.startsWith('x-pack/test/');
+    const testPlugin =
+      dir.startsWith('src/platform/test/') ||
+      dir.startsWith('x-pack/platform/test/') ||
+      dir.startsWith('x-pack/solutions/search/test/') ||
+      dir.startsWith('x-pack/solutions/observability/test/') ||
+      dir.startsWith('x-pack/solutions/security/test/') ||
+      dir.startsWith('x-pack/test/');
 
     return {
       oss,

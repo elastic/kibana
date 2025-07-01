@@ -16,7 +16,7 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
-import { IngestStreamGetResponse, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
+import { type Streams, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 
 import { IlmLink } from '../../data_management/stream_detail_lifecycle/ilm_link';
 import {
@@ -27,10 +27,10 @@ import { useDataStreamStats } from '../../data_management/stream_detail_lifecycl
 import { PrivilegesWarningIconWrapper } from '../../insufficient_privileges/insufficient_privileges';
 
 interface StreamStatsPanelProps {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
 }
 
-const RetentionDisplay = ({ definition }: { definition: IngestStreamGetResponse }) => {
+const RetentionDisplay = ({ definition }: { definition: Streams.ingest.all.GetResponse }) => {
   if (!definition) return <>-</>;
 
   if (isDslLifecycle(definition.effective_lifecycle)) {

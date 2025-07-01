@@ -7,21 +7,25 @@
 
 import type { PropsWithChildren } from 'react';
 import React, { createContext, useContext, useMemo } from 'react';
+import type { Tab } from '../types';
 
-export type TrackLinkClick = (link: string) => void;
+export type ReportLinkClick = (link: string) => void;
 
 export interface IntegrationContextValue {
   spaceId: string;
-  telemetry: { trackLinkClick?: TrackLinkClick };
+  integrationTabs: Tab[];
+  telemetry: {
+    reportLinkClick?: ReportLinkClick;
+  };
 }
 const IntegrationContext = createContext<IntegrationContextValue | null>(null);
 
 export const IntegrationContextProvider: React.FC<
-  PropsWithChildren<{ spaceId: string; trackLinkClick?: TrackLinkClick }>
-> = React.memo(({ children, spaceId, trackLinkClick }) => {
+  PropsWithChildren<{ spaceId: string; reportLinkClick?: ReportLinkClick; integrationTabs: Tab[] }>
+> = React.memo(({ children, integrationTabs, spaceId, reportLinkClick }) => {
   const value = useMemo<IntegrationContextValue>(
-    () => ({ spaceId, telemetry: { trackLinkClick } }),
-    [spaceId, trackLinkClick]
+    () => ({ spaceId, integrationTabs, telemetry: { reportLinkClick } }),
+    [spaceId, integrationTabs, reportLinkClick]
   );
 
   return <IntegrationContext.Provider value={value}>{children}</IntegrationContext.Provider>;

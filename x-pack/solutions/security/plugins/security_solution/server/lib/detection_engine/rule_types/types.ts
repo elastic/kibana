@@ -151,6 +151,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   ruleExecutionLoggerFactory: IRuleMonitoringService['createRuleExecutionLogClientForExecutors'];
   version: string;
   isPreview?: boolean;
+  isServerless?: boolean;
   experimentalFeatures: ExperimentalFeatures;
   alerting: SetupPlugins['alerting'];
   analytics?: AnalyticsServiceSetup;

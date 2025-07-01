@@ -2,24 +2,30 @@
 navigation_title: "{{sn-sir}}"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/servicenow-sir-action-type.html
+applies_to:
+  stack: all
+  serverless:
+    observability: ga
+    security: ga
 ---
 
 # {{sn-sir}} connector and action [servicenow-sir-action-type]
 
-
 The {{sn-sir}} connector uses the [import set API](https://developer.servicenow.com/dev.do#!/reference/api/sandiego/rest/c_ImportSetAPI) to create {{sn}} security incidents. You can use the connector for rule actions and cases.
-
 
 ## Create connectors in {{kib}} [define-servicenow-sir-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. You must choose whether to use OAuth for authentication.
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you're creating a rule. You must choose whether to use OAuth for authentication.
 
-% TO DO: Use `:class: screenshot`
-![{{sn-sir}} connector using basic auth](../images/servicenow-sir-connector-basic.png)
+:::{image} ../images/servicenow-sir-connector-basic.png
+:alt: {{sn-sir}} connector using basic auth
+:screenshot:
+:::
 
-% TO DO: Use `:class: screenshot`
-![{{sn-sir}} connector using OAuth](../images/servicenow-sir-connector-oauth.png)
-
+:::{image} ../images/servicenow-sir-connector-oauth.png
+:alt: {{sn-sir}} connector using OAuth
+:screenshot:
+:::
 
 ### Connector configuration [servicenow-sir-connector-configuration]
 
@@ -50,18 +56,19 @@ Use OAuth authentication
 :   By default, basic authentication is used instead of open authorization (OAuth).
 
 User identifier
-:   The identifier to use for OAuth type authentication. This identifier should be the user field you selected during setup. For example, if the selected user field is `Email`, the user identifier should be the user’s email address.
+:   The identifier to use for OAuth type authentication. This identifier should be the user field you selected during setup. For example, if the selected user field is `Email`, the user identifier should be the user's email address.
 
 Username
 :   The username for HTTP basic authentication.
 
-
 ## Test connectors [servicenow-sir-action-configuration]
 
-You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
+You can test connectors as you're creating or editing the connector in {{kib}}. For example:
 
-% TO DO: Use `:class: screenshot`
-![{{sn-sir}} params test](../images/servicenow-sir-params-test.png)
+:::{image} ../images/servicenow-sir-params-test.png
+:alt: {{sn-sir}} params test
+:screenshot:
+:::
 
 {{sn-sir}} actions have the following configuration properties.
 
@@ -83,7 +90,6 @@ Additional fields
 
     Note that the default source field names in the Elastic ServiceNow application are prefixed with "u_".
 
-
 Category
 :   The category of the incident.
 
@@ -97,7 +103,6 @@ Correlation ID
     Using the default configuration of `{{ruleID}}:{{alert ID}}` ensures that {{sn}} will create a separate incident record for every generated alert that uses a unique alert ID. If the rule generates multiple alerts that use the same alert IDs, {{sn}} creates and continually updates a single incident record for the alert.
     ::::
 
-
 Description
 :   The details about the incident.
 
@@ -110,16 +115,13 @@ Short description
 Subcategory
 :   The subcategory of the incident.
 
-
 ## Connector networking configuration [servicenow-sir-connector-networking-configuration]
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-
 ## Configure {{sn-sir}} [configuring-servicenow-sir]
 
 {{sn}} offers free [Personal Developer Instances](https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi), which you can use to test incidents.
-
 
 ### Prerequisites [servicenow-sir-connector-prerequisites]
 
@@ -133,8 +135,6 @@ After upgrading from {{stack}} version 7.15.0 or earlier to version 7.16.0 or la
 
     1. [Create an RSA keypair and add an X.509 Certificate](#servicenow-sir-connector-prerequisites-rsa-key).
     2. [Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map](#servicenow-sir-connector-prerequisites-endpoint).
-
-
 
 ### Assign cross-scope privileges [servicenow-sir-connector-privileges]
 
@@ -164,7 +164,6 @@ To access the cross scope privileges table:
 
 For more details, refer to the [{{sn}} product documentation](https://docs.servicenow.com/).
 
-
 ### Create a {{sn}} integration user [servicenow-sir-connector-prerequisites-integration-user]
 
 To ensure authenticated communication between Elastic and {{sn}}, create a {{sn}} integration user and assign it the appropriate roles. 
@@ -183,7 +182,6 @@ To ensure authenticated communication between Elastic and {{sn}}, create a {{sn}
 
 6. Click **Save**.
 
-
 ### Create a CORS rule [servicenow-sir-connector-prerequisites-cors-rule]
 
 A CORS rule is required for communication between Elastic and {{sn}}. To create a CORS rule:
@@ -199,12 +197,11 @@ A CORS rule is required for communication between Elastic and {{sn}}. To create 
 4. Go to the **HTTP methods** tab and select **GET**.
 5. Click **Submit** to create the rule.
 
-
 ### Create an RSA keypair and add an X.509 Certificate [servicenow-sir-connector-prerequisites-rsa-key]
 
 This step is required to use OAuth for authentication between Elastic and {{sn}}.
 
-**Create an RSA keypair:**
+#### Create an RSA keypair
 
 1. Use [OpenSSL](https://www.openssl.org/docs/man1.0.2/man1/genrsa.md) to generate an RSA private key.
 
@@ -226,8 +223,7 @@ This step is required to use OAuth for authentication between Elastic and {{sn}}
     openssl req -new -x509 -key example-private-key.pem -out example-sn-cert.pem -days 360
     ```
 
-
-**Add an X.509 certificate to ServiceNow:**
+#### Add an X.509 certificate to ServiceNow
 
 1. In your {{sn}} instance, go to **Certificates** and select **New**.
 2. Configure the certificate as follows:
@@ -235,11 +231,12 @@ This step is required to use OAuth for authentication between Elastic and {{sn}}
     * **Name**: Name the certificate.
     * **PEM Certificate**: Copy the generated public key into this text field.
 
-% TO DO: Use `:class: screenshot`
-![Shows new certificate form in ServiceNow](../images/servicenow-new-certificate.png)
+    :::{image} ../images/servicenow-new-certificate.png
+    :alt: Shows new certificate form in ServiceNow
+    :screenshot:
+    :::
 
 3. Click **Submit** to create the certificate.
-
 
 ### Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map [servicenow-sir-connector-prerequisites-endpoint]
 
@@ -248,19 +245,23 @@ This step is required to use OAuth for authentication between Elastic and {{sn}}
 1. In your {{sn}} instance, go to **Application Registry** and select **New**.
 2. Select **Create an OAuth JWT API endpoint for external clients** from the list of options.
 
-% TO DO: Use `:class: screenshot`
-![Shows application type selection](../images/servicenow-jwt-endpoint.png)
+    :::{image} ../images/servicenow-jwt-endpoint.png
+    :alt: Shows application type selection
+    :screenshot:
+    :::
 
 3. Configure the application as follows:
 
     * **Name**: Name the application.
     * **User field**: Select the field to use as the user identifier.
 
-% TO DO: Use `:class: screenshot`
-![Shows new application form in ServiceNow](../images/servicenow-new-application.png)
+    :::{image} ../images/servicenow-new-application.png
+    :alt: Shows new application form in ServiceNow
+    :screenshot:
+    :::
 
     ::::{important}
-    Remember the selected user field. You will use this as the **User Identifier Value** when creating the connector. For example, if you selected **Email** for **User field**, you will use the user’s email for the **User Identifier Value**.
+    Remember the selected user field. You will use this as the **User Identifier Value** when creating the connector. For example, if you selected **Email** for **User field**, you will use the user's email for the **User Identifier Value**.
     ::::
 
 4. Click **Submit** to create the application. You will be redirected to the list of applications.
@@ -271,28 +272,31 @@ This step is required to use OAuth for authentication between Elastic and {{sn}}
     * **Name**: Name the JWT Verifier Map.
     * **Sys certificate**: Click the search icon and select the name of the certificate created in the previous step.
 
-% TO DO: Use `:class: screenshot`
-![Shows new JWT Verifier Map form in ServiceNow](../images/servicenow-new-jwt-verifier-map.png)
+    :::{image} ../images/servicenow-new-jwt-verifier-map.png
+    :alt: Shows new JWT Verifier Map form in ServiceNow
+    :screenshot:
+    :::
 
 8. Click **Submit** to create the verifier map.
 9. Note the **Client ID**, **Client Secret** and **JWT Key ID**. You will need these values to create your {{sn}} connector.
 
-% TO DO: Use `:class: screenshot`
-![Shows where to find OAuth values in ServiceNow](../images/servicenow-oauth-values.png)
-
-
+:::{image} ../images/servicenow-oauth-values.png
+:alt: Shows where to find OAuth values in ServiceNow
+:screenshot:
+:::
 
 ## Update a deprecated {{sn-sir}} connector [servicenow-sir-connector-update]
 
 {{sn-sir}} connectors created in {{stack}} version 7.15.0 or earlier are marked as deprecated after you upgrade to version 7.16.0 or later. Deprecated connectors have a yellow icon after their name and display a warning message when selected.
 
-% TO DO: Use `:class: screenshot`
-![Shows deprecated ServiceNow connectors](../images/servicenow-sir-update-connector.png)
+:::{image} ../images/servicenow-sir-update-connector.png
+:alt: Shows deprecated ServiceNow connectors
+:screenshot:
+:::
 
 ::::{important}
 Deprecated connectors will continue to function with the rules they were added to and can be assigned to new rules. However, it is strongly recommended to update deprecated connectors or [create new ones](/reference/connectors-kibana.md#creating-new-connector) to ensure you have access to connector enhancements, such as updating incidents.
 ::::
-
 
 To update a deprecated connector:
 
@@ -306,4 +310,3 @@ To update a deprecated connector:
     3. Enter the username and password of your {{sn}} instance.
 
 5. Click **Update**.
-

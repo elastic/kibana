@@ -18,10 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import {
-  PromptResponse,
-  PromptTypeEnum,
-} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas';
 import { getOptions } from '../helpers';
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../../../assistant_context';

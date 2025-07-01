@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { RuleAction, RuleSystemAction } from '@kbn/alerting-plugin/common';
 import type { AlertsSelectionSettings } from '../../types';
 
 export interface AttackDiscoveryScheduleSchema {
@@ -13,5 +13,5 @@ export interface AttackDiscoveryScheduleSchema {
   connectorId?: string;
   alertsSelectionSettings: AlertsSelectionSettings;
   interval: string;
-  actions: RuleAction[];
+  actions: Array<RuleAction | RuleSystemAction>;
 }

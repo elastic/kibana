@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { WiredStreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { conditionToPainless } from '../helpers/condition_to_painless';
 import { getReroutePipelineName } from './name';
 
 interface GenerateReroutePipelineParams {
-  definition: WiredStreamDefinition;
+  definition: Streams.WiredStream.Definition;
 }
 
 export function generateReroutePipeline({ definition }: GenerateReroutePipelineParams) {

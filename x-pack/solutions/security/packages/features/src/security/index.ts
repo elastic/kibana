@@ -17,6 +17,11 @@ import {
   getSecurityV2BaseKibanaSubFeatureIds,
 } from './v2_features/kibana_sub_features';
 import type { SecurityFeatureParams } from './types';
+import { getSecurityV3BaseKibanaFeature } from './v3_features/kibana_features';
+import {
+  getSecurityV3BaseKibanaSubFeatureIds,
+  getSecurityV3SubFeaturesMap,
+} from './v3_features/kibana_sub_features';
 
 /**
  * @deprecated Use getSecurityV2Feature instead
@@ -29,10 +34,21 @@ export const getSecurityFeature = (
   subFeaturesMap: getSecuritySubFeaturesMap(params),
 });
 
+/**
+ * @deprecated Use getSecurityV3Feature instead
+ */
 export const getSecurityV2Feature = (
   params: SecurityFeatureParams
 ): ProductFeatureParams<SecuritySubFeatureId> => ({
   baseKibanaFeature: getSecurityV2BaseKibanaFeature(params),
   baseKibanaSubFeatureIds: getSecurityV2BaseKibanaSubFeatureIds(params),
   subFeaturesMap: getSecurityV2SubFeaturesMap(params),
+});
+
+export const getSecurityV3Feature = (
+  params: SecurityFeatureParams
+): ProductFeatureParams<SecuritySubFeatureId> => ({
+  baseKibanaFeature: getSecurityV3BaseKibanaFeature(params),
+  baseKibanaSubFeatureIds: getSecurityV3BaseKibanaSubFeatureIds(params),
+  subFeaturesMap: getSecurityV3SubFeaturesMap(params),
 });

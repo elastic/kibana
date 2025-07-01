@@ -56,3 +56,36 @@ export const systemIndicesMigrationStatus: SystemIndicesMigrationStatus = {
     },
   ],
 };
+
+export const systemIndicesMigrationErrorStatus: SystemIndicesMigrationStatus = {
+  migration_status: 'ERROR',
+  features: [
+    {
+      feature_name: 'kibana',
+      minimum_index_version: '7.1.1',
+      migration_status: 'ERROR',
+      indices: [
+        {
+          index: '.kibana',
+          migration_status: 'ERROR',
+          failure_cause: {
+            error: {
+              type: 'mapper_parsing_exception',
+              reason: 'something failed',
+            },
+          },
+        },
+        {
+          index: '.logs',
+          migration_status: 'ERROR',
+          failure_cause: {
+            error: {
+              type: 'mapper_parsing_exception',
+              reason: 'something failed',
+            },
+          },
+        },
+      ],
+    },
+  ],
+};

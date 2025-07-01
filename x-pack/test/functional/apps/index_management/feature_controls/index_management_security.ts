@@ -50,7 +50,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(sectionIds).to.contain('kibana');
 
           const dataSection = sections.find((section) => section.sectionId === 'data');
-          expect(dataSection?.sectionLinks).to.eql(['data_quality']);
+          expect(dataSection?.sectionLinks).to.eql(['data_quality', 'content_connectors']);
         });
       });
     });
@@ -75,7 +75,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           // The index_management_user has been given permissions to advanced settings for Stack Management Tests.
           // https://github.com/elastic/kibana/pull/113078/
-          expect(sections).to.have.length(3);
+          expect(sections).to.have.length(2);
           expect(sections[0]).to.eql({
             sectionId: 'data',
             sectionLinks: ['index_management', 'transform'],

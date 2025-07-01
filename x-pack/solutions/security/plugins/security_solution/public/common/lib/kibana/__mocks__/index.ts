@@ -6,9 +6,6 @@
  */
 
 import { notificationServiceMock } from '@kbn/core/public/mocks';
-
-import { createTGridMocks } from '@kbn/timelines-plugin/public/mock';
-
 import {
   createKibanaContextProviderMock,
   createUseUiSettingMock,
@@ -16,9 +13,9 @@ import {
   createStartServicesMock,
   createWithKibanaMock,
 } from '../kibana_react.mock';
-import { mockApm } from '../../apm/service.mock';
 import { APP_UI_ID } from '../../../../../common/constants';
-import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+
+export { useKibana } from './use_kibana';
 
 const mockStartServicesMock = createStartServicesMock();
 export const KibanaServices = {
@@ -40,54 +37,8 @@ export const KibanaServices = {
   getBuildFlavor: jest.fn(() => 'traditional'),
   getPrebuiltRulesPackageVersion: jest.fn(() => undefined),
 };
-export const useKibana = jest.fn().mockReturnValue({
-  services: {
-    ...mockStartServicesMock,
-    apm: mockApm(),
-    uiSettings: {
-      get: jest.fn(),
-      set: jest.fn(),
-    },
-    cases: mockCasesContract(),
-    data: {
-      ...mockStartServicesMock.data,
-      search: {
-        ...mockStartServicesMock.data.search,
-        search: jest.fn().mockImplementation(() => ({
-          subscribe: jest.fn().mockImplementation(() => ({
-            error: jest.fn(),
-            next: jest.fn(),
-            unsubscribe: jest.fn(),
-          })),
-        })),
-      },
-      query: {
-        ...mockStartServicesMock.data.query,
-        filterManager: {
-          addFilters: jest.fn(),
-          getFilters: jest.fn(),
-          getUpdates$: jest.fn().mockReturnValue({ subscribe: jest.fn() }),
-          setAppFilters: jest.fn(),
-        },
-      },
-    },
-    osquery: {
-      OsqueryResults: jest.fn().mockReturnValue(null),
-      fetchAllLiveQueries: jest.fn().mockReturnValue({ data: { data: { items: [] } } }),
-    },
-    timelines: createTGridMocks(),
-    savedObjectsTagging: {
-      ui: {
-        getTableColumnDefinition: jest.fn(),
-      },
-    },
-  },
-});
 export const useUiSetting = jest.fn(createUseUiSettingMock());
 export const useUiSetting$ = jest.fn(createUseUiSetting$Mock());
-export const useDarkMode = jest
-  .fn()
-  .mockImplementation((defaultValue?: boolean) => defaultValue ?? false);
 export const useHttp = jest.fn().mockReturnValue(createStartServicesMock().http);
 export const useTimeZone = jest.fn();
 export const useDateFormat = jest.fn().mockReturnValue('MMM D, YYYY @ HH:mm:ss.SSS');

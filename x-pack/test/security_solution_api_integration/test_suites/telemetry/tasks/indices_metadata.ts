@@ -43,7 +43,8 @@ export default ({ getService }: FtrProviderContext) => {
     let defaultPipeline: string;
     let finalPipeline: string;
 
-    describe('@ess @serverless indices metadata', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/216044
+    describe.skip('@ess @serverless indices metadata', () => {
       beforeEach(async () => {
         dsName = await randomDatastream(es);
         await ensureBackingIndices(dsName, NUM_INDICES, es);

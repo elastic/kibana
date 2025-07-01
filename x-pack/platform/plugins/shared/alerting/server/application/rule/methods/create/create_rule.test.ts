@@ -345,7 +345,7 @@ describe('create()', () => {
     });
   });
 
-  test('creates an rule', async () => {
+  test('creates a rule', async () => {
     const data = getMockData();
     const createdAttributes = {
       ...data,
@@ -434,6 +434,9 @@ describe('create()', () => {
         "alertTypeId": "123",
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "consumer": "bar",
         "createdAt": 2019-02-12T21:01:22.479Z,
@@ -487,6 +490,9 @@ describe('create()', () => {
         "apiKeyOwner": null,
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "consumer": "bar",
         "createdAt": "2019-02-12T21:01:22.479Z",
@@ -720,6 +726,9 @@ describe('create()', () => {
         "apiKeyOwner": null,
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "consumer": "bar",
         "createdAt": "2019-02-12T21:01:22.479Z",
@@ -944,6 +953,9 @@ describe('create()', () => {
         "alertTypeId": "123",
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "executionStatus": Object {
@@ -1151,6 +1163,9 @@ describe('create()', () => {
         "alertTypeId": "123",
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "executionStatus": Object {
@@ -1208,6 +1223,7 @@ describe('create()', () => {
         apiKeyOwner: null,
         artifacts: {
           dashboards: [],
+          investigation_guide: { blob: '' },
         },
         apiKeyCreatedByUser: null,
         consumer: 'bar',
@@ -1409,6 +1425,9 @@ describe('create()', () => {
         "alertTypeId": "123",
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "executionStatus": Object {
@@ -1472,6 +1491,7 @@ describe('create()', () => {
         apiKeyOwner: null,
         artifacts: {
           dashboards: [],
+          investigation_guide: { blob: '' },
         },
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
@@ -1588,6 +1608,9 @@ describe('create()', () => {
         "alertTypeId": "123",
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": false,
@@ -1730,6 +1753,7 @@ describe('create()', () => {
         apiKeyCreatedByUser: null,
         artifacts: {
           dashboards: [],
+          investigation_guide: { blob: '' },
         },
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
@@ -1788,6 +1812,9 @@ describe('create()', () => {
         "alertTypeId": "123",
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "executionStatus": Object {
@@ -1929,6 +1956,7 @@ describe('create()', () => {
         apiKeyCreatedByUser: null,
         artifacts: {
           dashboards: [],
+          investigation_guide: { blob: '' },
         },
         legacyId: null,
         consumer: 'bar',
@@ -1987,6 +2015,9 @@ describe('create()', () => {
         "alertTypeId": "123",
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "executionStatus": Object {
@@ -2118,6 +2149,7 @@ describe('create()', () => {
         apiKeyCreatedByUser: null,
         artifacts: {
           dashboards: [],
+          investigation_guide: { blob: '' },
         },
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
@@ -2169,6 +2201,9 @@ describe('create()', () => {
         "alertTypeId": "123",
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "consumer": "bar",
         "createdAt": 2019-02-12T21:01:22.479Z,
@@ -2268,6 +2303,7 @@ describe('create()', () => {
         apiKeyCreatedByUser: null,
         artifacts: {
           dashboards: [],
+          investigation_guide: { blob: '' },
         },
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
@@ -2319,6 +2355,9 @@ describe('create()', () => {
         "alertTypeId": "123",
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "consumer": "bar",
         "createdAt": 2019-02-12T21:01:22.479Z,
@@ -2418,6 +2457,9 @@ describe('create()', () => {
         apiKeyCreatedByUser: null,
         artifacts: {
           dashboards: [],
+          investigation_guide: {
+            blob: '',
+          },
         },
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
@@ -2469,6 +2511,9 @@ describe('create()', () => {
         "alertTypeId": "123",
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "consumer": "bar",
         "createdAt": 2019-02-12T21:01:22.479Z,
@@ -2590,6 +2635,9 @@ describe('create()', () => {
         apiKeyCreatedByUser: null,
         artifacts: {
           dashboards: [],
+          investigation_guide: {
+            blob: '',
+          },
         },
         legacyId: null,
         createdBy: 'elastic',
@@ -2662,6 +2710,9 @@ describe('create()', () => {
         "alertTypeId": "123",
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "consumer": "bar",
         "createdAt": 2019-02-12T21:01:22.479Z,
@@ -2992,6 +3043,9 @@ describe('create()', () => {
         apiKeyOwner: 'elastic',
         artifacts: {
           dashboards: [],
+          investigation_guide: {
+            blob: '',
+          },
         },
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
@@ -3096,6 +3150,9 @@ describe('create()', () => {
         alertTypeId: '123',
         artifacts: {
           dashboards: [],
+          investigation_guide: {
+            blob: '',
+          },
         },
         consumer: 'bar',
         name: 'abc',
@@ -3856,6 +3913,9 @@ describe('create()', () => {
         "alertTypeId": "123",
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "executionStatus": Object {
@@ -4077,6 +4137,9 @@ describe('create()', () => {
         apiKeyCreatedByUser: true,
         artifacts: {
           dashboards: [],
+          investigation_guide: {
+            blob: '',
+          },
         },
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
@@ -4258,6 +4321,9 @@ describe('create()', () => {
           "alertTypeId": "123",
           "artifacts": Object {
             "dashboards": Array [],
+            "investigation_guide": Object {
+              "blob": "",
+            },
           },
           "createdAt": 2019-02-12T21:01:22.479Z,
           "executionStatus": Object {
@@ -4314,6 +4380,9 @@ describe('create()', () => {
           apiKeyCreatedByUser: null,
           artifacts: {
             dashboards: [],
+            investigation_guide: {
+              blob: '',
+            },
           },
           consumer: 'bar',
           createdAt: '2019-02-12T21:01:22.479Z',
@@ -4639,6 +4708,9 @@ describe('create()', () => {
                 refId: 'dashboard_1',
               },
             ],
+            investigation_guide: {
+              blob: '',
+            },
           },
         }),
         {
@@ -4659,6 +4731,67 @@ describe('create()', () => {
       );
 
       expect(result.artifacts?.dashboards).toEqual(dashboards);
+    });
+
+    test('should create a rule with an investigation guide', async () => {
+      const expectedBlob = `# Summary
+This is an example of *Markdown* content.
+This is the type of text _investigation guides_ will contain.`;
+      const investigationGuide = {
+        investigation_guide: {
+          blob: expectedBlob,
+        },
+      };
+      const data = getMockData({
+        name: 'investigation guide test rule',
+        actions: [],
+        artifacts: {
+          ...investigationGuide,
+        },
+      });
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: 'ig123',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          enabled: false,
+          name: 'investigation guide test rule',
+          alertTypeId: '123',
+          schedule: { interval: 10000 },
+          params: {
+            bar: true,
+          },
+          executionStatus: getRuleExecutionStatusPending(now),
+          running: false,
+          createdAt: now,
+          updatedAt: now,
+          actions: [],
+          artifacts: {
+            ...investigationGuide,
+          },
+        },
+        references: [],
+      });
+
+      const result = await rulesClient.create({ data });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          artifacts: {
+            dashboards: [],
+            investigation_guide: {
+              blob: expectedBlob,
+            },
+          },
+        }),
+        {
+          id: 'mock-saved-object-id',
+          references: [],
+        }
+      );
+
+      expect(result.artifacts?.investigation_guide).toEqual(investigationGuide.investigation_guide);
     });
   });
 });

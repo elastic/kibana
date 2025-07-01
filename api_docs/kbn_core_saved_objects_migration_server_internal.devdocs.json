@@ -303,6 +303,20 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.KibanaMigrator.kibanaVersionCheck",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaVersionCheck",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
             "id": "def-server.KibanaMigrator.Unnamed",
             "type": "Function",
             "tags": [],
@@ -322,7 +336,7 @@
                 "id": "def-server.KibanaMigrator.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    client,\n    typeRegistry,\n    kibanaIndex,\n    defaultIndexTypesMap,\n    hashToVersionMap,\n    soMigrationsConfig,\n    kibanaVersion,\n    logger,\n    docLinks,\n    waitForMigrationCompletion,\n    nodeRoles,\n    esCapabilities,\n  }",
+                "label": "{\n    client,\n    typeRegistry,\n    kibanaIndex,\n    defaultIndexTypesMap,\n    hashToVersionMap,\n    soMigrationsConfig,\n    kibanaVersion,\n    logger,\n    docLinks,\n    waitForMigrationCompletion,\n    nodeRoles,\n    esCapabilities,\n    kibanaVersionCheck,\n  }",
                 "description": [],
                 "signature": [
                   "KibanaMigratorOptions"
@@ -360,7 +374,7 @@
             "label": "runMigrations",
             "description": [],
             "signature": [
-              "({ rerun }?: { rerun?: boolean | undefined; }) => Promise<",
+              "({ rerun, skipVersionCheck, }?: { rerun?: boolean | undefined; skipVersionCheck?: boolean | undefined; }) => Promise<",
               "MigrationResult",
               "[]>"
             ],
@@ -373,7 +387,7 @@
                 "id": "def-server.KibanaMigrator.runMigrations.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ rerun = false }",
+                "label": "{\n    rerun = false,\n    skipVersionCheck = false,\n  }",
                 "description": [],
                 "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
                 "deprecated": false,
@@ -385,6 +399,20 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "rerun",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+                    "id": "def-server.KibanaMigrator.runMigrations.$1.skipVersionCheck",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "skipVersionCheck",
                     "description": [],
                     "signature": [
                       "boolean | undefined"
@@ -2701,27 +2729,27 @@
               "InfoResponse",
               ">; }; ingest: ",
               "default",
-              "; knnSearch: { <TDocument = unknown>(this: That, params: ",
-              "KnnSearchRequest",
-              ", options?: ",
+              "; knnSearch: { (this: That, params?: ",
+              "TODO",
+              " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "KnnSearchResponse",
-              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-              "KnnSearchRequest",
-              ", options?: ",
+              "TODO",
+              ">; (this: That, params?: ",
+              "TODO",
+              " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "KnnSearchResponse",
-              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
-              "KnnSearchRequest",
-              ", options?: ",
+              "TODO",
+              ", unknown>>; (this: That, params?: ",
+              "TODO",
+              " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "KnnSearchResponse",
-              "<TDocument>>; }; license: ",
+              "TODO",
+              ">; }; license: ",
               "default",
               "; logstash: ",
               "default",
@@ -3347,6 +3375,22 @@
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.KibanaMigratorOptions.kibanaVersionCheck",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaVersionCheck",
+            "description": [
+              "Specify a minimum supported Kibana version, e.g. '8.18.0'"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3378,25 +3422,7 @@
       }
     ],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-        "id": "def-server.REMOVED_TYPES",
-        "type": "Array",
-        "tags": [],
-        "label": "REMOVED_TYPES",
-        "description": [
-          "\nTypes that are no longer registered and need to be removed\nAs of 8.8, no new types are allowed to be removed.\nRemoving saved object types is not backward compatible"
-        ],
-        "signature": [
-          "string[]"
-        ],
-        "path": "src/core/packages/saved-objects/migration-server-internal/src/core/unused_types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   },
   "common": {

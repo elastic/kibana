@@ -354,9 +354,7 @@ describe('IndexActionConnectorFields', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: {
@@ -399,9 +397,7 @@ describe('IndexActionConnectorFields', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: {
@@ -439,9 +435,7 @@ describe('IndexActionConnectorFields', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toBeCalledWith({
         data: {},

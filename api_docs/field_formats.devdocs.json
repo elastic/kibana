@@ -1561,47 +1561,6 @@
           },
           {
             "parentPluginId": "fieldFormats",
-            "id": "def-common.FieldFormat.fieldType",
-            "type": "CompoundType",
-            "tags": [
-              "property",
-              "private"
-            ],
-            "label": "fieldType",
-            "description": [],
-            "signature": [
-              "string | string[]"
-            ],
-            "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.FieldFormat.convertObject",
-            "type": "Object",
-            "tags": [
-              "property",
-              "private"
-            ],
-            "label": "convertObject",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatConvert",
-                "text": "FieldFormatConvert"
-              },
-              " | undefined"
-            ],
-            "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormat.htmlConvert",
             "type": "Function",
             "tags": [
@@ -1643,30 +1602,6 @@
                 "text": "TextContextTypeConvert"
               },
               " | undefined"
-            ],
-            "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fieldFormats",
-            "id": "def-common.FieldFormat.type",
-            "type": "Object",
-            "tags": [
-              "property",
-              "private"
-            ],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "typeof ",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormat",
-                "text": "FieldFormat"
-              }
             ],
             "path": "src/platform/plugins/shared/field_formats/common/field_format.ts",
             "deprecated": false,
@@ -4226,7 +4161,7 @@
                 "section": "def-common.Serializable",
                 "text": "Serializable"
               },
-              "; fractional: boolean; }"
+              "; fractional: boolean; alwaysShowSign: boolean; }"
             ],
             "path": "src/platform/plugins/shared/field_formats/common/converters/percent.ts",
             "deprecated": false,

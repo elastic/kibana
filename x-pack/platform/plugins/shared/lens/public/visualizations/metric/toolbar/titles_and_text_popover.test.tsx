@@ -47,13 +47,17 @@ describe('TitlesAndTextPopover', () => {
     valuesTextAlign: 'right',
     iconAlign: 'left',
     valueFontMode: 'default',
+    secondaryTrend: { type: 'none' },
   };
 
   const mockSetState = jest.fn();
 
   const renderToolbarOptions = (state: MetricVisualizationState) => {
     return {
-      ...render(<TitlesAndTextPopover state={state} setState={mockSetState} />),
+      ...render(<TitlesAndTextPopover state={state} setState={mockSetState} />, {
+        // fails in concurrent mode
+        legacyRoot: true,
+      }),
     };
   };
 

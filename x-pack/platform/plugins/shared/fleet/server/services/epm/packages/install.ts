@@ -41,24 +41,19 @@ import type {
   InstallSource,
   InstallType,
   KibanaAssetType,
-  NewPackagePolicy,
-  PackageInfo,
   PackageVerificationResult,
   InstallResultStatus,
 } from '../../../types';
 import {
   AUTO_UPGRADE_POLICIES_PACKAGES,
   CUSTOM_INTEGRATION_PACKAGE_SPEC_VERSION,
-  DATASET_VAR_NAME,
   GENERIC_DATASET_NAME,
 } from '../../../../common/constants';
 import {
   FleetError,
   PackageOutdatedError,
-  PackagePolicyValidationError,
   ConcurrentInstallOperationError,
   FleetUnauthorizedError,
-  PackageNotFoundError,
   FleetTooManyRequestsError,
   PackageInvalidDeploymentMode,
 } from '../../../errors';
@@ -67,7 +62,7 @@ import {
   MAX_TIME_COMPLETE_INSTALL,
   MAX_REINSTALL_RETRIES,
 } from '../../../constants';
-import { dataStreamService, licenseService } from '../..';
+import { licenseService } from '../..';
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
 import {
@@ -82,14 +77,17 @@ import type { ArchiveAsset } from '../kibana/assets/install';
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 import { auditLoggingService } from '../../audit_logging';
-import { getFilteredInstallPackages } from '../filtered_packages';
+import {
+  getAllowedSearchAiLakeInstallPackagesIfEnabled,
+  getFilteredInstallPackages,
+} from '../filtered_packages';
 import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agentless';
 
 import { _stateMachineInstallPackage } from './install_state_machine/_state_machine_package_install';
 
 import { formatVerificationResultForSO } from './package_verification';
 import { getInstallation, getInstallationObject } from './get';
-import { getInstalledPackageWithAssets, getPackageSavedObjects } from './get';
+import { getPackageSavedObjects } from './get';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackageByPkgKey } from './bundled_packages';
 import { convertStringToTitle, generateDescription } from './custom_integrations/utils';
@@ -99,13 +97,13 @@ import { generateDatastreamEntries } from './custom_integrations/assets/dataset/
 import { checkForNamingCollision } from './custom_integrations/validation/check_naming_collision';
 import { checkDatasetsNameFormat } from './custom_integrations/validation/check_dataset_name_format';
 import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
-import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
-import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
 import { setLastUploadInstallCache, getLastUploadInstallCache } from './utils';
 import { removeInstallation } from './remove';
 
 export const UPLOAD_RETRY_AFTER_MS = 10000; // 10s
 const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
+const MAX_INSTALL_RETRIES = 5;
+const BASE_RETRY_DELAY_MS = 1000; // 1s
 
 const PACKAGES_TO_INSTALL_WITH_STREAMING = [
   // The security_detection_engine package contains a large number of assets and
@@ -212,16 +210,32 @@ export async function ensureInstalledPackage(options: {
     };
   }
   const pkgkey = Registry.pkgToPkgKey(pkgKeyProps);
-  const installResult = await installPackage({
-    installSource: 'registry',
-    savedObjectsClient,
-    pkgkey,
-    spaceId,
-    esClient,
-    neverIgnoreVerificationError: !force,
-    force: true, // Always force outdated packages to be installed if a later version isn't installed
-    authorizationHeader,
-  });
+
+  const installPackageWithRetries = async (attempt: number): Promise<InstallResult> => {
+    const installResult = await installPackage({
+      installSource: 'registry',
+      savedObjectsClient,
+      pkgkey,
+      spaceId,
+      esClient,
+      neverIgnoreVerificationError: !force,
+      force: true, // Always force outdated packages to be installed if a later version isn't installed
+      authorizationHeader,
+    });
+
+    if (
+      attempt < MAX_INSTALL_RETRIES &&
+      installResult.error?.message.includes('version_conflict_engine_exception')
+    ) {
+      const delayMs = BASE_RETRY_DELAY_MS * 2 ** attempt; // Exponential backoff
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      return await installPackageWithRetries(++attempt);
+    } else {
+      return installResult;
+    }
+  };
+
+  const installResult = await installPackageWithRetries(0);
 
   if (installResult.error) {
     const errorPrefix =
@@ -568,6 +582,7 @@ async function installPackageFromRegistry({
       error: e,
       installType,
       installSource,
+      pkgName,
     };
   }
 }
@@ -651,6 +666,12 @@ export async function installPackageWithStateMachine(options: {
       throw new FleetUnauthorizedError(`${pkgName} installation is not authorized`);
     }
 
+    const allowlistPackages = getAllowedSearchAiLakeInstallPackagesIfEnabled();
+    // This will only trigger if xpack.fleet.internal.registry.searchAiLakePackageAllowlistEnabled: true
+    if (allowlistPackages && !allowlistPackages.includes(pkgName)) {
+      throw new FleetUnauthorizedError(`${pkgName} installation is not authorized`);
+    }
+
     // if the requested version is the same as installed version, check if we allow it based on
     // current installed package status and force flag, if we don't allow it,
     // just return the asset references from the existing installation
@@ -668,6 +689,7 @@ export async function installPackageWithStateMachine(options: {
           status: 'already_installed',
           installType,
           installSource,
+          pkgName,
         };
       }
     }
@@ -679,7 +701,7 @@ export async function installPackageWithStateMachine(options: {
         ...telemetryEvent,
         errorMessage: err.message,
       });
-      return { error: err, installType, installSource };
+      return { error: err, installType, installSource, pkgName };
     }
 
     // Saved object client need to be scopped with the package space for saved object tagging
@@ -722,14 +744,20 @@ export async function installPackageWithStateMachine(options: {
         logger.debug(`Removing old assets from previous versions of ${pkgName}`);
         await removeOldAssets({
           soClient: savedObjectsClient,
-          pkgName: packageInfo.name,
+          pkgName,
           currentVersion: packageInfo.version,
         });
         sendEvent({
           ...telemetryEvent!,
           status: 'success',
         });
-        return { assets, status: 'installed' as InstallResultStatus, installType, installSource };
+        return {
+          assets,
+          status: 'installed' as InstallResultStatus,
+          installType,
+          installSource,
+          pkgName,
+        };
       })
       .catch(async (err: Error) => {
         logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`, {
@@ -750,7 +778,7 @@ export async function installPackageWithStateMachine(options: {
           ...telemetryEvent!,
           errorMessage: err.message,
         });
-        return { error: err, installType, installSource };
+        return { error: err, installType, installSource, pkgName };
       });
   } catch (e) {
     sendEvent({
@@ -761,6 +789,7 @@ export async function installPackageWithStateMachine(options: {
       error: e,
       installType,
       installSource,
+      pkgName,
     };
   } finally {
     span?.end();
@@ -784,6 +813,7 @@ async function installPackageByUpload({
 
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
+  let pkgName = 'unknown';
   const installSource = isBundledPackage ? 'bundled' : 'upload';
 
   const timeToWaitString = moment
@@ -806,7 +836,7 @@ async function installPackageByUpload({
       }
     }
     const { packageInfo } = await generatePackageInfoFromArchiveBuffer(archiveBuffer, contentType);
-    const pkgName = packageInfo.name;
+    pkgName = packageInfo.name;
     const useStreaming = PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName);
 
     // Allow for overriding the version in the manifest for cases where we install
@@ -825,7 +855,7 @@ async function installPackageByUpload({
     deleteVerificationResult(packageInfo);
 
     setPackageInfo({
-      name: packageInfo.name,
+      name: pkgName,
       version: pkgVersion,
       packageInfo,
     });
@@ -866,6 +896,7 @@ async function installPackageByUpload({
       error: e,
       installType,
       installSource,
+      pkgName,
     };
   }
 }
@@ -1107,8 +1138,16 @@ export async function restartInstallation(options: {
   pkgVersion: string;
   installSource: InstallSource;
   verificationResult?: PackageVerificationResult;
+  previousVersion?: string;
 }) {
-  const { savedObjectsClient, pkgVersion, pkgName, installSource, verificationResult } = options;
+  const {
+    savedObjectsClient,
+    pkgVersion,
+    pkgName,
+    installSource,
+    verificationResult,
+    previousVersion,
+  } = options;
 
   let savedObjectUpdate: Partial<Installation> = {
     install_version: pkgVersion,
@@ -1123,6 +1162,10 @@ export async function restartInstallation(options: {
       verification_key_id: null, // unset any previous verification key id
       ...formatVerificationResultForSO(verificationResult),
     };
+  }
+
+  if (previousVersion) {
+    savedObjectUpdate.previous_version = previousVersion;
   }
 
   auditLoggingService.writeCustomSoAuditLog({
@@ -1288,126 +1331,6 @@ export async function ensurePackagesCompletedInstall(
   );
   await Promise.all(installingPromises);
   return installingPackages;
-}
-
-export async function installAssetsForInputPackagePolicy(opts: {
-  pkgInfo: PackageInfo;
-  logger: Logger;
-  packagePolicy: NewPackagePolicy;
-  esClient: ElasticsearchClient;
-  soClient: SavedObjectsClientContract;
-  force: boolean;
-}) {
-  const { pkgInfo, logger, packagePolicy, esClient, soClient, force } = opts;
-
-  if (pkgInfo.type !== 'input') return;
-
-  const datasetName = packagePolicy.inputs[0].streams[0].vars?.[DATASET_VAR_NAME]?.value;
-  const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName);
-  const existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
-    type: dataStream.type,
-    dataset: datasetName,
-  });
-
-  if (existingDataStreams.length) {
-    const existingDataStreamsAreFromDifferentPackage = existingDataStreams.some(
-      (ds) => ds._meta?.package?.name !== pkgInfo.name
-    );
-    if (existingDataStreamsAreFromDifferentPackage && !force) {
-      // user has opted to send data to an existing data stream which is managed by another
-      // package. This means certain custom setting such as elasticsearch settings
-      // defined by the package will not have been applied which could lead
-      // to unforeseen circumstances, so force flag must be used.
-      const streamIndexPattern = dataStreamService.streamPartsToIndexPattern({
-        type: dataStream.type,
-        dataset: datasetName,
-      });
-
-      throw new PackagePolicyValidationError(
-        `Datastreams matching "${streamIndexPattern}" already exist and are not managed by this package, force flag is required`
-      );
-    } else {
-      logger.info(
-        `Data stream for dataset ${datasetName} already exists, skipping index template creation for ${packagePolicy.id}`
-      );
-      return;
-    }
-  }
-
-  const existingIndexTemplate = await dataStreamService.getMatchingIndexTemplate(esClient, {
-    type: dataStream.type,
-    dataset: datasetName,
-  });
-
-  if (existingIndexTemplate) {
-    const indexTemplateOwnnedByDifferentPackage =
-      existingIndexTemplate._meta?.package?.name !== pkgInfo.name;
-    if (indexTemplateOwnnedByDifferentPackage && !force) {
-      // index template already exists but there is no data stream yet
-      // we do not want to override the index template
-
-      throw new PackagePolicyValidationError(
-        `Index template "${dataStream.type}-${datasetName}" already exist and is not managed by this package, force flag is required`
-      );
-    } else {
-      logger.info(
-        `Index template "${dataStream.type}-${datasetName}" already exists, skipping index template creation for ${packagePolicy.id}`
-      );
-      return;
-    }
-  }
-
-  const installedPkgWithAssets = await getInstalledPackageWithAssets({
-    savedObjectsClient: soClient,
-    pkgName: pkgInfo.name,
-    logger,
-  });
-  let packageInstallContext: PackageInstallContext | undefined;
-  if (!installedPkgWithAssets) {
-    throw new PackageNotFoundError(
-      `Error while creating index templates: unable to find installed package ${pkgInfo.name}`
-    );
-  }
-  try {
-    if (installedPkgWithAssets.installation.version !== pkgInfo.version) {
-      const pkg = await Registry.getPackage(pkgInfo.name, pkgInfo.version, {
-        ignoreUnverified: force,
-      });
-
-      const archiveIterator = createArchiveIteratorFromMap(pkg.assetsMap);
-      packageInstallContext = {
-        packageInfo: pkg.packageInfo,
-        paths: pkg.paths,
-        archiveIterator,
-      };
-    } else {
-      const archiveIterator = createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap);
-      packageInstallContext = {
-        packageInfo: installedPkgWithAssets.packageInfo,
-        paths: installedPkgWithAssets.paths,
-        archiveIterator,
-      };
-    }
-
-    await installIndexTemplatesAndPipelines({
-      installedPkg: installedPkgWithAssets.installation,
-      packageInstallContext,
-      esReferences: installedPkgWithAssets.installation.installed_es || [],
-      savedObjectsClient: soClient,
-      esClient,
-      logger,
-      onlyForDataStreams: [dataStream],
-    });
-    // Upate ES index patterns
-    await optimisticallyAddEsAssetReferences(
-      soClient,
-      installedPkgWithAssets.installation.name,
-      [],
-      generateESIndexPatterns([dataStream])
-    );
-  } catch (error) {
-    logger.warn(`installAssetsForInputPackagePolicy error: ${error}`);
-  }
 }
 
 interface NoPkgArgs {

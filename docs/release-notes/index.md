@@ -3,8 +3,6 @@ navigation_title: "Kibana"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/release-notes.html
   - https://www.elastic.co/guide/en/kibana/current/whats-new.html
-  - https://www.elastic.co/guide/en/kibana/master/release-notes-9.0.0.html
-  - https://www.elastic.co/guide/en/kibana/master/enhancements-and-bug-fixes-v9.0.0.html
 ---
 
 # Kibana release notes [kibana-release-notes]
@@ -22,6 +20,107 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 % ### Fixes [kibana-X.X.X-fixes]
 % *
+
+## 9.0.3 [kibana-9.0.3-release-notes]
+
+:::{important}
+The 9.0.3 release contains fixes for potential security vulnerabilities. Check our [security advisory for more details](https://discuss.elastic.co/c/announcements/security-announcements/31).
+:::
+
+### Features and enhancements [kibana-9.0.3-features-enhancements]
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.0.3 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.0.3 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+
+### Fixes [kibana-9.0.3-fixes]
+
+**Alerting**:
+* Fixes an issue that caused {{kib}} to repeatedly restart when `xpack.alerting.cancelAlertsOnRuleTimeout` was set to `false` in the `kibana.yml` file [#222263]({{kib-pull}}222263).
+* Resolves multiple issues in the Watcher UI that were introduced in 8.18.0, 8.18.1, 9.0.0, and 9.1.0. This includes the table not displaying more than 10 watches, an error banner appearing unexpectedly in certain scenarios, and the search bar functionality not working as expected [#223898]({{kib-pull}}223898).
+
+**Dashboards and Visualizations**:
+* Fixes an issue that prevented navigating through pages when inspecting a chart's data  [#217937]({{kib-pull}}217937).
+
+**Discover**:
+* In version 9.0.0, we changed the way time ranges are handled for Discover ES|QL CSV exports ([#216792]({{kib-pull}}216792)). We realized that this change caused an issue with CSV Post URLs now using an absolute time range instead of a relative one, leading to duplicate reports being generated. We've reverted this change while we investigate different solutions [#223249]({{kib-pull}}223249).
+* The request URL now appears correctly again when inspecting an ES|QL request [#221816]({{kib-pull}}221816).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.0.3 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.0.3 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Machine Learning**:
+* Ensures the {{bedrock}} connector respects the action proxy configuration [#224130]({{kib-pull}}224130).
+* Ensures the OpenAI connector respects the action proxy configuration for all sub-actions [#219617]({{kib-pull}}219617).
+* Allows you to add additional fields even if your ingest pipeline is empty when uploading a file [#222775]({{kib-pull}}222775).
+
+## 9.0.2 [kibana-9.0.2-release-notes]
+
+### Enhancements [kibana-9.0.2-features-enhancements]
+**Elastic Observability solution**:
+For the Elastic Observability 9.0.2 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+
+### Fixes [kibana-9.0.2-fixes]
+**Alerting**:
+* Fixes ignored dynamic templates [#219875](https://github.com/elastic/kibana/pull/219875).
+* Fixes an issue where notifications would not trigger after the expiration of maintenance windows on active alerts [#219797](https://github.com/elastic/kibana/pull/219797).
+
+**Dashboards**:
+* When adding a panel using **Add from library**, the interface now shows a success message and scrolls the dashboard to the added panel [#220122](https://github.com/elastic/kibana/pull/220122).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.0.2 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.0.2 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+
+
+## 9.0.1 [kibana-9.0.1-release-notes]
+
+::::{important}
+The 9.0.1 release contains fixes for potential security vulnerabilities. See our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+::::
+
+### Enhancements [kibana-9.0.1-features-enhancements]
+**Data ingestion and Fleet**:
+* Reuse shared integration policies when duplicating agent policies [#217872](https://github.com/elastic/kibana/pull/217872).
+
+**Elastic Security solution**:
+For the Elastic Security 9.0.1 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+
+### Fixes [kibana-9.0.1-fixes]
+**Dashboards & Visualizations**:
+* When exploring a dashboard, the request inspector now shows the correct request and response in any successful scenario [#216519](https://github.com/elastic/kibana/pull/216519).
+* Correctly synchronize the dashboard ES|QL query and filters with the corresponding visualization query in **Lens** [#218997](https://github.com/elastic/kibana/pull/218997).
+* Fixes an issue where keywords could be incorrectly formatted in a metric visualization [#218233](https://github.com/elastic/kibana/pull/218233).
+
+**Discover**:
+* Fixes incorrect behavior for requests on fields where the *Allow hidden and system indices* (`allow_hidden`) option of the data view could be ignored [#217628](https://github.com/elastic/kibana/pull/217628).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.0.1 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.0.1 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes broken icons in integrations coming from the Home plugin [#219206](https://github.com/elastic/kibana/pull/219206).
+* Fixes placeholder disappearing when a value is set in the Monaco code editor [#217828](https://github.com/elastic/kibana/pull/217828).
+
+**Machine Learning**:
+* Fixes an issue that could cause a page loading error to show when changing between Inference endpoints services [#219020](https://github.com/elastic/kibana/pull/219020).
+* Fixes missing field names in the step details of the anomaly detection job wizards [#218570](https://github.com/elastic/kibana/pull/218570).
+
+
 
 ## 9.0.0 [kibana-900-release-notes]
 

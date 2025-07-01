@@ -187,7 +187,8 @@ const AlertsTableContent = typedForwardRef(
       toolbarVisibility,
       shouldHighlightRow,
       dynamicRowHeight = false,
-      emptyStateHeight,
+      emptyState,
+      openLinksInNewTab = false,
       additionalContext,
       renderCellValue,
       renderCellPopover,
@@ -195,8 +196,11 @@ const AlertsTableContent = typedForwardRef(
       renderFlyoutHeader,
       renderFlyoutBody,
       renderFlyoutFooter,
+      flyoutOwnsFocus = false,
+      flyoutPagination = true,
       renderAdditionalToolbarControls: AdditionalToolbarControlsComponent,
       lastReloadRequestTime,
+      configurationStorage = new Storage(window.localStorage),
       services,
       ...publicDataGridProps
     }: AlertsTableProps<AC>,
@@ -208,9 +212,9 @@ const AlertsTableContent = typedForwardRef(
     const { casesConfiguration, showInspectButton } = publicDataGridProps;
     const { data, cases: casesService, http, notifications, application, licensing } = services;
     const queryClient = useQueryClient({ context: AlertsQueryContext });
-    const storage = useRef(new Storage(window.localStorage));
+    const storageRef = useRef(configurationStorage);
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
-    const localStorageAlertsTableConfig = storage.current.get(
+    const localStorageAlertsTableConfig = storageRef.current.get(
       id
     ) as Partial<AlertsTablePersistedConfiguration>;
 
@@ -263,7 +267,7 @@ const AlertsTableContent = typedForwardRef(
     } = useColumns({
       ruleTypeIds,
       storageAlertsTable,
-      storage,
+      storage: storageRef,
       id,
       defaultColumns: initialColumns ?? DEFAULT_COLUMNS,
       alertsFields: propBrowserFields,
@@ -394,22 +398,27 @@ const AlertsTableContent = typedForwardRef(
 
     const onSortChange = useCallback(
       (_sort: EuiDataGridSorting['columns']) => {
-        const newSort = _sort.map((sortItem) => {
-          return {
-            [sortItem.id]: {
-              order: sortItem.direction,
-            },
-          };
-        });
+        const newSort = _sort
+          .map((sortItem) => {
+            return {
+              [sortItem.id]: {
+                order: sortItem.direction,
+              },
+            };
+          })
+          .filter((entry) => {
+            const sortKey = Object.keys(entry)[0];
+            return visibleColumns.includes(sortKey);
+          });
 
         storageAlertsTable.current = {
           ...storageAlertsTable.current,
           sort: newSort,
         };
-        storage.current.set(id, storageAlertsTable.current);
+        storageRef.current.set(id, storageAlertsTable.current);
         setSort(newSort);
       },
-      [id]
+      [id, visibleColumns]
     );
 
     const CasesContext = useMemo(() => {
@@ -478,6 +487,9 @@ const AlertsTableContent = typedForwardRef(
           renderFlyoutHeader,
           renderFlyoutBody,
           renderFlyoutFooter,
+          flyoutOwnsFocus,
+          flyoutPagination,
+          openLinksInNewTab,
           services: memoizedServices,
         } as RenderContext<AC>),
       [
@@ -508,6 +520,9 @@ const AlertsTableContent = typedForwardRef(
         renderFlyoutHeader,
         renderFlyoutBody,
         renderFlyoutFooter,
+        flyoutOwnsFocus,
+        flyoutPagination,
+        openLinksInNewTab,
         memoizedServices,
       ]
     );
@@ -592,7 +607,10 @@ const AlertsTableContent = typedForwardRef(
               additionalToolbarControls={additionalToolbarControls}
               alertsQuerySnapshot={alertsQuerySnapshot}
               showInspectButton={showInspectButton}
-              height={emptyStateHeight}
+              messageTitle={emptyState?.messageTitle}
+              messageBody={emptyState?.messageBody}
+              height={emptyState?.height}
+              variant={emptyState?.variant}
             />
           </InspectButtonContainer>
         )}

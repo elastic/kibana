@@ -13,7 +13,9 @@ import 'jest-styled-components';
 import { TestProviders } from '../../../../common/mock';
 import { KpiPanel, StackByComboBox } from './components';
 import * as i18n from './translations';
+import { useStackByFields } from './hooks';
 
+jest.mock('./hooks');
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
   return {
@@ -58,6 +60,11 @@ jest.mock('../../../../common/lib/kibana/kibana_react', () => {
 });
 
 describe('components', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useStackByFields as jest.Mock).mockReturnValue(jest.fn());
+  });
+
   describe('KpiPanel', () => {
     test('it has a hidden overflow-x', () => {
       render(
@@ -107,6 +114,10 @@ describe('components', () => {
             data-test-subj="stackByComboBox"
             onSelect={onSelect}
             selected="agent.ephemeral_id"
+            dropDownoptions={[
+              { label: 'agent.ephemeral_id', value: 'agent.ephemeral_id' },
+              { label: 'agent.hostname', value: 'agent.hostname' },
+            ]}
           />
         </TestProviders>
       );

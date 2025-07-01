@@ -50,7 +50,6 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
       async (context, request, response) => {
         const [coreStartServices] = await osqueryContext.getStartServices();
         const coreContext = await context.core;
-        const soClient = coreContext.savedObjects.client;
 
         const {
           osquery: { writeLiveQueries, runSavedQueries },
@@ -115,13 +114,14 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
 
         try {
           const currentUser = coreContext.security.authc.getCurrentUser()?.username;
+          const space = await osqueryContext.service.getActiveSpace(request);
           const { response: osqueryAction, fleetActionsCount } = await createActionHandler(
             osqueryContext,
             request.body,
             {
-              soClient,
               metadata: { currentUser },
               alertData,
+              space,
             }
           );
           if (!fleetActionsCount) {

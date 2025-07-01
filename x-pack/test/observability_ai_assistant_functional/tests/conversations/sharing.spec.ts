@@ -9,14 +9,14 @@ import expect from '@kbn/expect';
 import {
   createLlmProxy,
   LlmProxy,
-} from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+} from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/create_llm_proxy';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { createConnector, deleteConnectors } from '../../common/connectors';
 import { deleteConversations } from '../../common/conversations';
 import { interceptRequest } from '../../common/intercept_request';
 
 export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {
-  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const ui = getService('observabilityAIAssistantUI');
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
@@ -38,7 +38,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     });
 
     void proxy.interceptTitle(expectedTitle);
-    void proxy.interceptConversation(expectedResponse);
+    void proxy.interceptWithResponse(expectedResponse);
 
     await testSubjects.setValue(ui.pages.conversations.chatInput, 'Hello');
     await testSubjects.pressEnter(ui.pages.conversations.chatInput);

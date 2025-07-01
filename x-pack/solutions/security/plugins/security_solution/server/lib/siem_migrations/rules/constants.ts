@@ -23,3 +23,6 @@ export const DEFAULT_TRANSLATION_SEVERITY: Severity = 'low';
 
 export const DEFAULT_TRANSLATION_RISK_SCORE =
   ELASTIC_SEVERITY_TO_RISK_SCORE_MAP[DEFAULT_TRANSLATION_SEVERITY];
+
+/** Maximum size for searches, aggregations and terms queries */
+export const MAX_ES_SEARCH_SIZE = 10_000 as const;

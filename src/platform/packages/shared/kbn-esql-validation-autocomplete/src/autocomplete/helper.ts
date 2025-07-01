@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { i18n } from '@kbn/i18n';
 import {
   ESQLSingleAstItem,
   Walker,
@@ -16,8 +16,10 @@ import {
   type ESQLFunction,
   type ESQLLiteral,
   type ESQLSource,
+  ESQLAstQueryExpression,
+  BasicPrettyPrinter,
 } from '@kbn/esql-ast';
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ESQLVariableType, IndexAutocompleteItem } from '@kbn/esql-types';
 import { uniqBy } from 'lodash';
 import { logicalOperators } from '../definitions/all_operators';
 import {
@@ -46,20 +48,94 @@ import {
   isFunctionItem,
   isLiteralItem,
   isTimeIntervalItem,
+  sourceExists,
+  isParamExpressionType,
 } from '../shared/helpers';
-import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
-import { listCompleteItem } from './complete_items';
+import type { ESQLSourceResult } from '../shared/types';
+import { listCompleteItem, commaCompleteItem, pipeCompleteItem } from './complete_items';
+import { ESQLFieldWithMetadata, ESQLUserDefinedColumn, ReferenceMaps } from '../validation/types';
 import {
   TIME_SYSTEM_PARAMS,
-  buildVariablesDefinitions,
+  TRIGGER_SUGGESTION_COMMAND,
+  buildUserDefinedColumnsDefinitions,
   getCompatibleLiterals,
   getDateLiterals,
   getFunctionSuggestions,
   getOperatorSuggestion,
   getOperatorSuggestions,
   getSuggestionsAfterNot,
+  buildSourcesDefinitions,
 } from './factories';
+import { metadataSuggestion } from './commands/metadata';
+
 import type { GetColumnsByTypeFn, SuggestionRawDefinition } from './types';
+
+/**
+ * This function returns a list of closing brackets that can be appended to
+ * a partial query to make it valid.
+ *
+ * A known limitation of this is that is not aware of commas "," or pipes "|"
+ * so it is not yet helpful on a multiple commands errors (a workaround is to pass each command here...)
+ * @param text
+ * @returns
+ */
+export function getBracketsToClose(text: string) {
+  const stack = [];
+  const pairs: Record<string, string> = { '"""': '"""', '/*': '*/', '(': ')', '[': ']', '"': '"' };
+  const pairsReversed: Record<string, string> = {
+    '"""': '"""',
+    '*/': '/*',
+    ')': '(',
+    ']': '[',
+    '"': '"',
+  };
+
+  for (let i = 0; i < text.length; i++) {
+    for (const openBracket in pairs) {
+      if (!Object.hasOwn(pairs, openBracket)) {
+        continue;
+      }
+
+      const substr = text.slice(i, i + openBracket.length);
+      if (pairsReversed[substr] && pairsReversed[substr] === stack[stack.length - 1]) {
+        stack.pop();
+        break;
+      } else if (substr === openBracket) {
+        stack.push(substr);
+        break;
+      }
+    }
+  }
+  return stack.reverse().map((bracket) => pairs[bracket]);
+}
+
+/**
+ * This function attempts to correct the syntax of a partial query to make it valid.
+ *
+ * We are generally dealing with incomplete queries when the user is typing. But,
+ * having an AST is helpful so we heuristically correct the syntax so it can be parsed.
+ *
+ * @param _query
+ * @param context
+ * @returns
+ */
+export function correctQuerySyntax(_query: string) {
+  let query = _query;
+  // check if all brackets are closed, otherwise close them
+  const bracketsToAppend = getBracketsToClose(query);
+
+  const endsWithBinaryOperatorRegex =
+    /(?:\+|\/|==|>=|>|in|<=|<|like|:|%|\*|-|not in|not like|not rlike|!=|rlike|and|or|not|=|as)\s+$/i;
+  const endsWithCommaRegex = /,\s+$/;
+
+  if (endsWithBinaryOperatorRegex.test(query) || endsWithCommaRegex.test(query)) {
+    query += ` ${EDITOR_MARKER}`;
+  }
+
+  query += bracketsToAppend.join('');
+
+  return query;
+}
 
 function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
   return args.flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg)).filter(isFunctionItem);
@@ -107,27 +183,55 @@ export function strictlyGetParamAtPosition(
   return params[position] ? params[position] : null;
 }
 
-export function getQueryForFields(queryString: string, commands: ESQLCommand[]) {
+/**
+ * This function is used to build the query that will be used to compute the
+ * available fields for the current cursor location.
+ *
+ * Generally, this is the user's query up to the end of the previous command.
+ *
+ * @param queryString The original query string
+ * @param commands
+ * @returns
+ */
+export function getQueryForFields(queryString: string, root: ESQLAstQueryExpression): string {
+  const commands = root.commands;
+  const lastCommand = commands[commands.length - 1];
+  if (lastCommand && lastCommand.name === 'fork' && lastCommand.args.length > 0) {
+    /**
+     * This translates the current fork command branch into a simpler but equivalent
+     * query that is compatible with the existing field computation/caching strategy.
+     *
+     * The intuition here is that if the cursor is within a fork branch, the
+     * previous context is equivalent to a query without the FORK command.:
+     *
+     * Original query: FROM lolz | EVAL foo = 1 | FORK (EVAL bar = 2) (EVAL baz = 3 | WHERE /)
+     * Simplified: FROM lolz | EVAL foo = 1 | EVAL baz = 3 | WHERE /
+     */
+    const currentBranch = lastCommand.args[lastCommand.args.length - 1] as ESQLAstQueryExpression;
+    const newCommands = commands.slice(0, -1).concat(currentBranch.commands.slice(0, -1));
+    return BasicPrettyPrinter.print({ ...root, commands: newCommands });
+  }
+
   // If there is only one source command and it does not require fields, do not
   // fetch fields, hence return an empty string.
-  return commands.length === 1 && ['row', 'show'].includes(commands[0].name) ? '' : queryString;
+  return commands.length === 1 && ['row', 'show'].includes(commands[0].name)
+    ? ''
+    : buildQueryUntilPreviousCommand(queryString, commands);
+}
+
+// TODO consider replacing this with a pretty printer-based solution
+function buildQueryUntilPreviousCommand(queryString: string, commands: ESQLCommand[]) {
+  const prevCommand = commands[Math.max(commands.length - 2, 0)];
+  return prevCommand ? queryString.substring(0, prevCommand.location.max + 1) : queryString;
 }
 
 export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'index' | 'policy') {
-  const fromCommand = commands.find(({ name }) => name === 'from');
-  const args = (fromCommand?.args ?? []) as ESQLSource[];
+  const sourceCommand = commands.find(({ name }) => name === 'from' || name === 'ts');
+  const args = (sourceCommand?.args ?? []) as ESQLSource[];
   // the marker gets added in queries like "FROM "
   return args.filter(
     (arg) => arg.sourceType === sourceType && arg.name !== '' && arg.name !== EDITOR_MARKER
   );
-}
-
-export function removeQuoteForSuggestedSources(suggestions: SuggestionRawDefinition[]) {
-  return suggestions.map((d) => ({
-    ...d,
-    // "text" -> text
-    text: d.text.startsWith('"') && d.text.endsWith('"') ? d.text.slice(1, -1) : d.text,
-  }));
 }
 
 export function getSupportedTypesForBinaryOperators(
@@ -266,7 +370,10 @@ export function isLiteralDateItem(nodeArg: ESQLAstItem): boolean {
 
 export function getValidSignaturesAndTypesToSuggestNext(
   node: ESQLFunction,
-  references: { fields: Map<string, ESQLRealField>; variables: Map<string, ESQLVariable[]> },
+  references: {
+    fields: Map<string, ESQLFieldWithMetadata>;
+    userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
+  },
   fnDefinition: FunctionDefinition,
   fullText: string,
   offset: number
@@ -388,13 +495,13 @@ export async function getFieldsOrFunctionsSuggestions(
   {
     functions,
     fields,
-    variables,
+    userDefinedColumns,
     values = false,
     literals = false,
   }: {
     functions: boolean;
     fields: boolean;
-    variables?: Map<string, ESQLVariable[]>;
+    userDefinedColumns?: Map<string, ESQLUserDefinedColumn[]>;
     literals?: boolean;
     values?: boolean;
   },
@@ -417,25 +524,25 @@ export async function getFieldsOrFunctionsSuggestions(
     functions
   );
 
-  const filteredVariablesByType: string[] = [];
-  if (variables) {
-    for (const variable of variables.values()) {
+  const filteredColumnByType: string[] = [];
+  if (userDefinedColumns) {
+    for (const userDefinedColumn of userDefinedColumns.values()) {
       if (
-        (types.includes('any') || types.includes(variable[0].type)) &&
-        !ignoreColumns.includes(variable[0].name)
+        (types.includes('any') || types.includes(userDefinedColumn[0].type)) &&
+        !ignoreColumns.includes(userDefinedColumn[0].name)
       ) {
-        filteredVariablesByType.push(variable[0].name);
+        filteredColumnByType.push(userDefinedColumn[0].name);
       }
     }
-    // due to a bug on the ES|QL table side, filter out fields list with underscored variable names (??)
+    // due to a bug on the ES|QL table side, filter out fields list with underscored userDefinedColumns names (??)
     // avg( numberField ) => avg_numberField_
     const ALPHANUMERIC_REGEXP = /[^a-zA-Z\d]/g;
     if (
-      filteredVariablesByType.length &&
-      filteredVariablesByType.some((v) => ALPHANUMERIC_REGEXP.test(v))
+      filteredColumnByType.length &&
+      filteredColumnByType.some((v) => ALPHANUMERIC_REGEXP.test(v))
     ) {
-      for (const variable of filteredVariablesByType) {
-        const underscoredName = variable.replace(ALPHANUMERIC_REGEXP, '_');
+      for (const userDefinedColumn of filteredColumnByType) {
+        const underscoredName = userDefinedColumn.replace(ALPHANUMERIC_REGEXP, '_');
         const index = filteredFieldsByType.findIndex(
           ({ label }) => underscoredName === label || `_${underscoredName}_` === label
         );
@@ -458,8 +565,8 @@ export async function getFieldsOrFunctionsSuggestions(
           ignored: ignoreFn,
         })
       : [],
-    variables
-      ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)
+    userDefinedColumns
+      ? pushItUpInTheList(buildUserDefinedColumnsDefinitions(filteredColumnByType), functions)
       : [],
     literals ? getCompatibleLiterals(types) : []
   );
@@ -480,7 +587,7 @@ export function pushItUpInTheList(suggestions: SuggestionRawDefinition[], should
 /** @deprecated — use getExpressionType instead (src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts) */
 export function extractTypeFromASTArg(
   arg: ESQLAstItem,
-  references: Pick<ReferenceMaps, 'fields' | 'variables'>
+  references: Pick<ReferenceMaps, 'fields' | 'userDefinedColumns'>
 ):
   | ESQLLiteral['literalType']
   | SupportedDataType
@@ -563,15 +670,24 @@ export function checkFunctionInvocationComplete(
   if (!argLengthCheck) {
     return { complete: false, reason: 'tooFewArgs' };
   }
-  if (fnDefinition.name === 'in' && Array.isArray(func.args[1]) && !func.args[1].length) {
+  if (
+    (fnDefinition.name === 'in' || fnDefinition.name === 'not in') &&
+    Array.isArray(func.args[1]) &&
+    !func.args[1].length
+  ) {
     return { complete: false, reason: 'tooFewArgs' };
   }
+
+  // If the function is complete, check that the types of the arguments match the function definition
   const hasCorrectTypes = fnDefinition.signatures.some((def) => {
     return func.args.every((a, index) => {
       return (
         fnDefinition.name.endsWith('null') ||
         def.params[index].type === 'any' ||
-        def.params[index].type === getExpressionType(a)
+        def.params[index].type === getExpressionType(a) ||
+        // this is a special case for expressions with named parameters
+        // e.g. "WHERE field == ?value"
+        isParamExpressionType(getExpressionType(a))
       );
     });
   });
@@ -719,6 +835,17 @@ type ExpressionPosition =
   | 'empty_expression';
 
 /**
+ * Escapes special characters in a string to be used as a literal match in a regular expression.
+ * @param {string} text The input string to escape.
+ * @returns {string} The escaped string.
+ */
+function escapeRegExp(text: string): string {
+  // Characters with special meaning in regex: . * + ? ^ $ { } ( ) | [ ] \
+  // We need to escape all of them. The `$&` in the replacement string means "the matched substring".
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
  * Determines the position of the cursor within an expression.
  * @param innerText
  * @param expressionRoot
@@ -746,7 +873,8 @@ export const getExpressionPosition = (
     if (
       isColumnItem(expressionRoot) &&
       // and not directly after the column name or prefix e.g. "colu/"
-      !new RegExp(`${expressionRoot.parts.join('\\.')}$`).test(innerText)
+      // we are escaping the column name here as it may contain special characters such as ??
+      !new RegExp(`${escapeRegExp(expressionRoot.parts.join('\\.'))}$`).test(innerText)
     ) {
       return 'after_column';
     }
@@ -811,7 +939,9 @@ export async function suggestForExpression({
       suggestions.push(
         ...getOperatorSuggestions({
           location,
-          leftParamType: expressionType,
+          // In case of a param literal, we don't know the type of the left operand
+          // so we can only suggest operators that accept any type as a left operand
+          leftParamType: isParamExpressionType(expressionType) ? undefined : expressionType,
           ignored: ['='],
         })
       );
@@ -997,3 +1127,119 @@ export function isExpressionComplete(
     !(isNullMatcher.test(innerText) || isNotNullMatcher.test(innerText))
   );
 }
+
+export function getSourceSuggestions(sources: ESQLSourceResult[], alreadyUsed: string[]) {
+  // hide indexes that start with .
+  return buildSourcesDefinitions(
+    sources
+      .filter(({ hidden, name }) => !hidden && !alreadyUsed.includes(name))
+      .map(({ name, dataStreams, title, type }) => {
+        return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title, type };
+      })
+  );
+}
+
+export async function additionalSourcesSuggestions(
+  queryText: string,
+  sources: ESQLSourceResult[],
+  ignored: string[],
+  recommendedQuerySuggestions: SuggestionRawDefinition[]
+) {
+  const suggestionsToAdd = await handleFragment(
+    queryText,
+    (fragment) =>
+      sourceExists(fragment, new Set(sources.map(({ name: sourceName }) => sourceName))),
+    (_fragment, rangeToReplace) => {
+      return getSourceSuggestions(sources, ignored).map((suggestion) => ({
+        ...suggestion,
+        rangeToReplace,
+      }));
+    },
+    (fragment, rangeToReplace) => {
+      const exactMatch = sources.find(({ name: _name }) => _name === fragment);
+      if (exactMatch?.dataStreams) {
+        // this is an integration name, suggest the datastreams
+        const definitions = buildSourcesDefinitions(
+          exactMatch.dataStreams.map(({ name }) => ({ name, isIntegration: false }))
+        );
+
+        return definitions;
+      } else {
+        const _suggestions: SuggestionRawDefinition[] = [
+          {
+            ...pipeCompleteItem,
+            filterText: fragment,
+            text: fragment + ' | ',
+            command: TRIGGER_SUGGESTION_COMMAND,
+            rangeToReplace,
+          },
+          {
+            ...commaCompleteItem,
+            filterText: fragment,
+            text: fragment + ', ',
+            command: TRIGGER_SUGGESTION_COMMAND,
+            rangeToReplace,
+          },
+          {
+            ...metadataSuggestion,
+            filterText: fragment,
+            text: fragment + ' METADATA ',
+            rangeToReplace,
+          },
+          ...recommendedQuerySuggestions.map((suggestion) => ({
+            ...suggestion,
+            rangeToReplace,
+            filterText: fragment,
+            text: fragment + suggestion.text,
+          })),
+        ];
+        return _suggestions;
+      }
+    }
+  );
+  return suggestionsToAdd;
+}
+
+// Treating lookup and time_series mode indices
+export const specialIndicesToSuggestions = (
+  indices: IndexAutocompleteItem[]
+): SuggestionRawDefinition[] => {
+  const mainSuggestions: SuggestionRawDefinition[] = [];
+  const aliasSuggestions: SuggestionRawDefinition[] = [];
+
+  for (const index of indices) {
+    mainSuggestions.push({
+      label: index.name,
+      text: index.name + ' ',
+      kind: 'Issue',
+      detail: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.autocomplete.specialIndexes.indexType.index',
+        {
+          defaultMessage: 'Index',
+        }
+      ),
+      sortText: '0-INDEX-' + index.name,
+      command: TRIGGER_SUGGESTION_COMMAND,
+    });
+
+    if (index.aliases) {
+      for (const alias of index.aliases) {
+        aliasSuggestions.push({
+          label: alias,
+          text: alias + ' $0',
+          kind: 'Issue',
+          detail: i18n.translate(
+            'kbn-esql-validation-autocomplete.esql.autocomplete.specialIndexes.indexType.alias',
+            {
+              defaultMessage: 'Alias',
+            }
+          ),
+          sortText: '1-ALIAS-' + alias,
+          command: TRIGGER_SUGGESTION_COMMAND,
+        });
+      }
+    }
+  }
+
+  return [...mainSuggestions, ...aliasSuggestions];
+};

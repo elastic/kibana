@@ -236,7 +236,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // add webhook connector 2
       await testSubjects.click('ruleActionsAddActionButton');
       await testSubjects.existOrFail('ruleActionsConnectorsModal');
-      await find.clickByButtonText(webhookConnectorName);
+
+      /*
+       * there is a naming overload between the card button text on the modal, and the button text on the
+       * action accordion rendered behind the modal. We select the cards and filter for the one we want,
+       * and then pick up the button by role.
+       */
+      const modalCards = await find.allByCssSelector(
+        '[data-test-subj="ruleActionsConnectorsModalCard"]'
+      );
+      const webhookCard = modalCards.find(async (card) => {
+        return (await card.getAttribute('innerText'))?.indexOf(webhookConnectorName) !== -1;
+      });
+      if (!webhookCard) {
+        throw new Error('Webhook connector card not found');
+      }
+      const cardButton = await webhookCard.findByCssSelector('button');
+      await cardButton.click();
+
       await find.setValueByClass('kibanaCodeEditor', 'myUniqueKey1');
 
       await find.clickByCssSelector(
@@ -394,13 +411,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       await firstDropdown.click();
       await firstDropdown.type('kibana.alert.action_group');
-      await find.clickByButtonText('kibana.alert.action_group');
+      const filterKeyOptionsList = await find.byCssSelector('.euiComboBoxOptionsList');
+      await find.clickByButtonText('kibana.alert.action_group', filterKeyOptionsList);
       const secondDropdown = await find.byCssSelector(
         '[data-test-subj="filter-0.1"] [data-test-subj="filterOperatorList"] [data-test-subj="comboBoxSearchInput"]'
       );
       await secondDropdown.click();
       await secondDropdown.type('exists');
-      await find.clickByButtonText('exists');
+      const filterOperationOptionsList = await find.byCssSelector('.euiComboBoxOptionsList');
+      await find.clickByButtonText('exists', filterOperationOptionsList);
       await testSubjects.click('saveFilter');
       await testSubjects.setValue('queryInput', '_id: *');
 

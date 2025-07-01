@@ -18,13 +18,15 @@ describe('useFormWithWarn', () => {
     it('is `undefined` initially', async () => {
       render(<TestForm warningValidationCodes={['warning']} />);
 
-      expect(screen.getByText('isValid: "undefined"')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('isValid: "undefined"')).toBeInTheDocument();
+      });
     });
 
     it('is `true` when input is valid', async () => {
       render(<TestForm warningValidationCodes={['warning']} />);
 
-      typeText('someValue');
+      await typeText('someValue');
       await submitForm();
 
       await waitFor(() => {
@@ -35,25 +37,29 @@ describe('useFormWithWarn', () => {
     it('is `true` when input has warnings', async () => {
       render(<TestForm warningValidationCodes={['warning']} />);
 
-      typeText('warning');
+      await typeText('warning');
       await submitForm();
 
-      expect(screen.getByText('isValid: true')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('isValid: true')).toBeInTheDocument();
+      });
     });
 
     it('is `false` when input has error', async () => {
       render(<TestForm warningValidationCodes={['warning']} />);
 
-      typeText('error');
+      await typeText('error');
       await submitForm();
 
-      expect(screen.getByText('isValid: false')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('isValid: false')).toBeInTheDocument();
+      });
     });
   });
 
   describe('isSubmitting', () => {
     it('toggles upon form submission', async () => {
-      render(<TestForm warningValidationCodes={['warning']} />);
+      render(<TestForm warningValidationCodes={['warning']} />, { legacyRoot: true });
 
       expect(screen.getByText('isSubmitting: false')).toBeInTheDocument();
 
@@ -87,7 +93,7 @@ describe('useFormWithWarn', () => {
       const handleSubmit = jest.fn();
 
       render(<TestForm warningValidationCodes={['warning']} onSubmit={handleSubmit} />);
-      typeText('someValue');
+      await typeText('someValue');
 
       await submitForm();
 
@@ -105,7 +111,7 @@ describe('useFormWithWarn', () => {
       const handleSubmit = jest.fn();
 
       render(<TestForm warningValidationCodes={['warning']} onSubmit={handleSubmit} />);
-      typeText('warning');
+      await typeText('warning');
 
       await submitForm();
 
@@ -129,7 +135,7 @@ describe('useFormWithWarn', () => {
       const handleSubmit = jest.fn();
 
       render(<TestForm warningValidationCodes={['warning']} onSubmit={handleSubmit} />);
-      typeText('error');
+      await typeText('error');
 
       await submitForm();
 
@@ -153,7 +159,7 @@ describe('useFormWithWarn', () => {
       const handleSubmit = jest.fn();
 
       render(<TestForm warningValidationCodes={['warning']} onSubmit={handleSubmit} />);
-      typeText('error warning');
+      await typeText('error warning');
 
       await submitForm();
 
@@ -232,8 +238,8 @@ function submitForm(): Promise<void> {
   });
 }
 
-function typeText(value: string): void {
-  act(() => {
+async function typeText(value: string): Promise<void> {
+  await act(() => {
     fireEvent.input(screen.getByRole('textbox'), {
       target: { value },
     });

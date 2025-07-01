@@ -12,11 +12,12 @@ import {
   ESQLAstQueryExpression,
   ESQLFunction,
   ESQLSingleAstItem,
+  ESQLSource,
   isESQLNamedParamLiteral,
 } from '@kbn/esql-ast/src/types';
 import {
-  ESQLRealField,
-  collectVariables,
+  ESQLFieldWithMetadata,
+  collectUserDefinedColumns,
   getFunctionDefinition,
   getFunctionSignatures,
   type ESQLCallbacks,
@@ -33,10 +34,7 @@ import {
 } from '@kbn/esql-validation-autocomplete/src/autocomplete/helper';
 import { ENRICH_MODES } from '@kbn/esql-validation-autocomplete/src/definitions/commands_helpers';
 import { within } from '@kbn/esql-validation-autocomplete/src/shared/helpers';
-import {
-  buildQueryUntilPreviousCommand,
-  getPolicyHelper,
-} from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
+import { getPolicyHelper } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '../../../../monaco_imports';
 import { monacoPositionToOffset } from '../shared/utils';
@@ -46,10 +44,17 @@ const ACCEPTABLE_TYPES_HOVER = i18n.translate('monaco.esql.hover.acceptableTypes
   defaultMessage: 'Acceptable types',
 });
 
+export type HoverMonacoModel = Pick<monaco.editor.ITextModel, 'getValue'>;
+
+/**
+ * @todo Monaco dependencies are not necesasry here: (1) replace {@link HoverMonacoModel}
+ * by some generic `getText(): string` method; (2) replace {@link monaco.Position} by
+ * `offset: number`.
+ */
 export async function getHoverItem(
-  model: monaco.editor.ITextModel,
+  model: HoverMonacoModel,
   position: monaco.Position,
-  resourceRetriever?: ESQLCallbacks
+  callbacks?: ESQLCallbacks
 ) {
   const fullText = model.getValue();
   const offset = monacoPositionToOffset(fullText, position);
@@ -71,6 +76,12 @@ export async function getHoverItem(
           containingFunction = fn as ESQLFunction<'variadic-call'>;
       }
     },
+    visitSource: (source, parent, walker) => {
+      if (within(offset, source.location)) {
+        node = source;
+        walker.abort();
+      }
+    },
     visitSingleAstItem: (_node) => {
       // ignore identifiers because we don't want to choose them as the node type
       // instead of the function node (functions can have an "operator" child which is
@@ -89,7 +100,7 @@ export async function getHoverItem(
     return hoverContent;
   }
 
-  const variables = resourceRetriever?.getVariables?.();
+  const variables = callbacks?.getVariables?.();
   const variablesContent = getVariablesHoverContent(node, variables);
 
   if (variablesContent.length) {
@@ -102,7 +113,7 @@ export async function getHoverItem(
       root,
       fullText,
       offset,
-      resourceRetriever
+      callbacks
     );
     hoverContent.contents.push(...argHints);
   }
@@ -121,7 +132,8 @@ export async function getHoverItem(
   }
 
   if (node.type === 'source' && node.sourceType === 'policy') {
-    const { getPolicyMetadata } = getPolicyHelper(resourceRetriever);
+    const source = node as ESQLSource;
+    const { getPolicyMetadata } = getPolicyHelper(callbacks);
     const policyMetadata = await getPolicyMetadata(node.name);
     if (policyMetadata) {
       hoverContent.contents.push(
@@ -144,18 +156,22 @@ export async function getHoverItem(
         ]
       );
     }
-  }
 
-  if (node.type === 'mode') {
-    const mode = ENRICH_MODES.find(({ name }) => name === node!.name)!;
-    hoverContent.contents.push(
-      ...[
-        { value: modeDescription },
-        {
-          value: `**${mode.name}**: ${mode.description}`,
-        },
-      ]
-    );
+    if (!!source.prefix) {
+      const mode = ENRICH_MODES.find(
+        ({ name }) => '_' + name === source.prefix!.valueUnquoted.toLowerCase()
+      )!;
+      if (mode) {
+        hoverContent.contents.push(
+          ...[
+            { value: modeDescription },
+            {
+              value: `**${mode.name}**: ${mode.description}`,
+            },
+          ]
+        );
+      }
+    }
   }
 
   return hoverContent;
@@ -168,10 +184,7 @@ async function getHintForFunctionArg(
   offset: number,
   resourceRetriever?: ESQLCallbacks
 ) {
-  const queryForFields = getQueryForFields(
-    buildQueryUntilPreviousCommand(root.commands, query),
-    root.commands
-  );
+  const queryForFields = getQueryForFields(query, root);
   const { getFieldsMap } = getFieldsByTypeRetriever(queryForFields, resourceRetriever);
 
   const fnDefinition = getFunctionDefinition(fnNode.name);
@@ -179,12 +192,12 @@ async function getHintForFunctionArg(
   if (!fnDefinition) {
     return [];
   }
-  const fieldsMap: Map<string, ESQLRealField> = await getFieldsMap();
-  const anyVariables = collectVariables(root.commands, fieldsMap, query);
+  const fieldsMap: Map<string, ESQLFieldWithMetadata> = await getFieldsMap();
+  const anyUserDefinedColumns = collectUserDefinedColumns(root.commands, fieldsMap, query);
 
   const references = {
     fields: fieldsMap,
-    variables: anyVariables,
+    userDefinedColumns: anyUserDefinedColumns,
   };
 
   const { typesToSuggestNext, enrichedArgs } = getValidSignaturesAndTypesToSuggestNext(

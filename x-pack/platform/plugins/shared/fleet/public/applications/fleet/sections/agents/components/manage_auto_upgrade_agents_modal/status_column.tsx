@@ -31,7 +31,7 @@ export const StatusColumn: React.FunctionComponent<{
         ? `policy_id:"${agentPolicyId}" AND upgrade_details.state:"UPG_FAILED" AND upgrade_details.target_version:"${version}"`
         : `policy_id:"${agentPolicyId}" AND agent.version:"${version}"`;
       return getHref('agent_list', {
-        kuery,
+        kuery: encodeURIComponent(kuery),
       });
     },
     [getHref, agentPolicyId, version]

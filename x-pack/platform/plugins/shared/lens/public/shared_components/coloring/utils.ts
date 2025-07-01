@@ -24,7 +24,7 @@ import {
 import { getOriginalId } from '@kbn/transpose-utils';
 import { Datatable, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { KbnPalettes } from '@kbn/palettes';
-import { DataType, DatasourcePublicAPI } from '../../types';
+import { DataType, DatasourcePublicAPI, OperationDescriptor } from '../../types';
 
 /**
  * Returns array of colors for provided palette or colorMapping
@@ -45,20 +45,9 @@ export function getPaletteDisplayColors(
         .getCategoricalColors(palette?.params?.steps || 10, palette);
 }
 
-/**
- * Analyze the column from the datasource prospective (formal check)
- * to know whether it's a numeric type or not
- * Note: to be used for Lens UI only
- */
-export function getAccessorType(
-  datasource: DatasourcePublicAPI | undefined,
-  accessor: string | undefined
+export function getAccessorTypeFromOperation(
+  operation: Pick<OperationDescriptor, 'isBucketed' | 'dataType' | 'hasArraySupport'> | null
 ) {
-  // No accessor means it's not a numeric type by default
-  if (!accessor || !datasource) {
-    return { isNumeric: false, isCategory: false };
-  }
-  const operation = datasource.getOperationForColumnId(accessor);
   const isNumericTypeFromOperation = Boolean(
     !operation?.isBucketed && operation?.dataType === 'number' && !operation.hasArraySupport
   );
@@ -67,6 +56,25 @@ export function getAccessorType(
       (!['number', 'date'].includes(operation?.dataType || '') && !operation?.hasArraySupport)
   );
   return { isNumeric: isNumericTypeFromOperation, isCategory: isBucketableTypeFromOperationType };
+}
+
+/**
+ * Analyze the column from the datasource prospective (formal check)
+ * to know whether it's a numeric type or not
+ * Note: to be used for Lens UI only
+ */
+export function getAccessorType(
+  datasource: Pick<DatasourcePublicAPI, 'getOperationForColumnId'> | undefined,
+  accessor: string | undefined
+) {
+  // No accessor means it's not a numeric type by default
+  if (!accessor || !datasource) {
+    return { isNumeric: false, isCategory: false };
+  }
+
+  const operation = datasource.getOperationForColumnId(accessor);
+
+  return getAccessorTypeFromOperation(operation);
 }
 
 /**

@@ -30,7 +30,7 @@ export const SectionError: React.FunctionComponent<Props> = ({
   } = error;
 
   return (
-    <EuiCallOut title={title} color="danger" iconType="warning" {...rest}>
+    <EuiCallOut title={title} role="alert" color="danger" iconType="warning" {...rest}>
       {cause ? message || errorString : <p>{message || errorString}</p>}
       {cause && (
         <Fragment>

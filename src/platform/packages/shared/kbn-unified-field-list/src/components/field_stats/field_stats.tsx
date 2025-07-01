@@ -495,6 +495,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
                 id={specId}
                 xAccessor={'key'}
                 yAccessors={['count']}
+                // Defaults to multi layer time axis as of Elastic Charts v70
                 xScaleType={ScaleType.Time}
                 yScaleType={ScaleType.Linear}
                 timeZone={getTimeZone(uiSettings)}

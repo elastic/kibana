@@ -8,8 +8,8 @@
 import { noop } from 'lodash/fp';
 import React, { useCallback } from 'react';
 
-import { ChartSettingsPopover } from '../../../../../common/components/chart_settings_popover';
-import { useChartSettingsPopoverConfiguration } from '../../../../../common/components/chart_settings_popover/configurations/default';
+import { ChartSettingsPopover } from '../chart_settings_popover';
+import { useChartSettingsPopoverConfiguration } from '../chart_settings_popover/configurations/default';
 
 interface Props {
   defaultStackByField: string;

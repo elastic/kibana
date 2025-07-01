@@ -71,10 +71,15 @@ export const PresentationPanelHeader = <
         padding: 0px ${euiTheme.size.s};
 
         display: flex;
-        flex-grow: 1;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         column-gap: ${euiTheme.size.s};
         align-items: center;
+        // all direct children now share the available parent width equally, ensuring consistent layout regardless of their content length
+        > * {
+          min-width: 0;
+          flex: 1 !important;
+          max-width: fit-content !important;
+        }
       `,
     };
   }, [euiTheme.colors.warning, euiTheme.size]);

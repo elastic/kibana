@@ -10,7 +10,7 @@ import { RuleTranslationResult } from '../../../../../../../../common/siem_migra
 import type {
   ElasticRulePartial,
   OriginalRule,
-  RuleMigration,
+  RuleMigrationRule,
 } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationResources } from '../../../retrievers/rule_resource_retriever';
 import type { RuleMigrationIntegration } from '../../../../types';
@@ -47,7 +47,7 @@ export const translateRuleState = Annotation.Root({
     reducer: (current, value) => value ?? current,
     default: () => RuleTranslationResult.UNTRANSLATABLE,
   }),
-  comments: Annotation<RuleMigration['comments']>({
+  comments: Annotation<RuleMigrationRule['comments']>({
     reducer: (current, value) => (value ? (current ?? []).concat(value) : current),
     default: () => [],
   }),

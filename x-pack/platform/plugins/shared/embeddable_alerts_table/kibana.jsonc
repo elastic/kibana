@@ -23,7 +23,10 @@
       "fieldFormats",
       "licensing",
       "cases",
-      "kibanaUtils"
+      "security",
+    ],
+    "requiredBundles": [
+      "kibanaReact"
     ],
     "optionalPlugins": []
   }

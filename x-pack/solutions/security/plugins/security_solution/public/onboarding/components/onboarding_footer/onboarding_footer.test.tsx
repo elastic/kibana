@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { FooterLinkItem } from './onboarding_footer';
 import { OnboardingFooterLinkItemId, TELEMETRY_FOOTER_LINK } from './constants';
-import { mockTrackLinkClick } from '../__mocks__/mocks';
+import { mockReportLinkClick } from '../__mocks__/mocks';
 
 jest.mock('../lib/telemetry');
 jest.mock('../onboarding_context');
@@ -46,7 +46,7 @@ describe('OnboardingFooterComponent', () => {
     );
 
     getByTestId('footerLinkItem').click();
-    expect(mockTrackLinkClick).toHaveBeenCalledWith(
+    expect(mockReportLinkClick).toHaveBeenCalledWith(
       `${TELEMETRY_FOOTER_LINK}_${OnboardingFooterLinkItemId.documentation}`
     );
   });

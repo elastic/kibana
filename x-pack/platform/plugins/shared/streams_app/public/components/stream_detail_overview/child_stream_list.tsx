@@ -8,14 +8,14 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
-import { IngestStreamGetResponse, isDescendantOf } from '@kbn/streams-schema';
+import { type Streams, isDescendantOf } from '@kbn/streams-schema';
 
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { AssetImage } from '../asset_image';
 import { StreamsList } from '../streams_list';
 import { useWiredStreams } from '../../hooks/use_wired_streams';
 
-export function ChildStreamList({ definition }: { definition?: IngestStreamGetResponse }) {
+export function ChildStreamList({ definition }: { definition?: Streams.ingest.all.GetResponse }) {
   const router = useStreamsAppRouter();
 
   const { wiredStreams } = useWiredStreams();

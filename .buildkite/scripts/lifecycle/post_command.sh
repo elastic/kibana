@@ -25,6 +25,9 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload 'test/**/screenshots/diff/*.png'
   buildkite-agent artifact upload 'test/**/screenshots/failure/*.png'
   buildkite-agent artifact upload 'test/**/screenshots/session/*.png'
+  buildkite-agent artifact upload 'src/platform/test/**/screenshots/diff/*.png'
+  buildkite-agent artifact upload 'src/platform/test/**/screenshots/failure/*.png'
+  buildkite-agent artifact upload 'src/platform/test/**/screenshots/session/*.png'
   buildkite-agent artifact upload 'src/platform/test/functional/failure_debug/html/*.html'
   buildkite-agent artifact upload 'x-pack/test/**/screenshots/diff/*.png'
   buildkite-agent artifact upload 'x-pack/test/**/screenshots/failure/*.png'
@@ -52,6 +55,10 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   if [[ -d 'target/test_failures' ]]; then
     buildkite-agent artifact upload 'target/test_failures/**/*'
     ts-node .buildkite/scripts/lifecycle/annotate_test_failures.ts
+  fi
+
+  if [[ -d 'target/agent_diagnostics' ]]; then
+    buildkite-agent artifact upload 'target/agent_diagnostics/**/*'
   fi
 
 fi

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isWiredStreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
 
@@ -24,7 +24,7 @@ export const useWiredStreams = () => {
   );
 
   return {
-    wiredStreams: result.value?.streams.filter(isWiredStreamDefinition),
+    wiredStreams: result.value?.streams.filter(Streams.WiredStream.Definition.is),
     isLoading: result.loading,
   };
 };

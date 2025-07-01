@@ -1168,7 +1168,7 @@ describe('TaskManagerRunner', () => {
       const schedule = {
         interval: '1m',
       };
-      const { instance, runner, store } = await readyToRunStageSetup({
+      const { instance, runner, store, logger } = await readyToRunStageSetup({
         instance: {
           status: TaskStatus.Running,
           startedAt: new Date(),
@@ -1195,7 +1195,8 @@ describe('TaskManagerRunner', () => {
 
       expect(getNextRunAtSpy).toHaveBeenCalledWith(
         expect.objectContaining({ schedule }),
-        expect.any(Number)
+        expect.any(Number),
+        logger
       );
     });
 

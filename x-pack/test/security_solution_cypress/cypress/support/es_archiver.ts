@@ -12,6 +12,20 @@ import { createEsClientForTesting, KbnClient, systemIndicesSuperuser } from '@kb
 import { ToolingLog } from '@kbn/tooling-log';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 
+interface ClientOptions {
+  url: string;
+  username: string;
+  password: string;
+}
+
+function createKibanaUrlWithAuth({ url, username, password }: ClientOptions) {
+  const clientUrl = new URL(url);
+  clientUrl.username = username;
+  clientUrl.password = password;
+
+  return clientUrl.toString();
+}
+
 export const esArchiver = (
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
@@ -26,7 +40,7 @@ export const esArchiver = (
     password: config.env.ELASTICSEARCH_PASSWORD,
   };
 
-  let authOverride;
+  let authOverride = systemIndicesSuperuser;
   if (isServerless) {
     authOverride = isCloudServerless ? serverlessCloudUser : systemIndicesSuperuser;
   }
@@ -39,9 +53,14 @@ export const esArchiver = (
 
   const kibanaUrl = config.env.KIBANA_URL || config.env.BASE_URL;
 
+  const kibanaUrlWithAuth = createKibanaUrlWithAuth({
+    url: kibanaUrl,
+    ...authOverride,
+  });
+
   const kbnClient = new KbnClient({
     log,
-    url: kibanaUrl as string,
+    url: kibanaUrlWithAuth,
     ...(config.env.ELASTICSEARCH_URL.includes('https')
       ? { certificateAuthorities: [Fs.readFileSync(CA_CERT_PATH)] }
       : {}),

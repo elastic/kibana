@@ -22,6 +22,11 @@ import type { Props } from '.';
 import { AlertsTreemapPanel } from '.';
 import { mockAlertSearchResponse } from './alerts_treemap/lib/mocks/mock_alert_search_response';
 
+jest.mock('../../../../common/components/cell_actions', () => ({
+  ...jest.requireActual('../../../../common/components/cell_actions'),
+  SecurityCellActions: jest.fn(() => <div data-test-subj="cell-actions-component" />),
+}));
+
 const from = '2022-07-28T08:20:18.966Z';
 const to = '2022-07-28T08:20:18.966Z';
 jest.mock('../../../../common/containers/use_global_time', () => {

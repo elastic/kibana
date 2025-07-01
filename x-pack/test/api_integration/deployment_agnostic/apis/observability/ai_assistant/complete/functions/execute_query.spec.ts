@@ -10,11 +10,8 @@ import expect from '@kbn/expect';
 import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { last } from 'lodash';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
-import { EsqlResponse } from '@elastic/elasticsearch/lib/helpers';
-import {
-  LlmProxy,
-  createLlmProxy,
-} from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { type EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
+import { LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
 import { chatComplete } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { createSimpleSyntheticLogs } from '../../synthtrace_scenarios/simple_logs';
@@ -24,8 +21,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const synthtrace = getService('synthtrace');
 
-  describe('execute_query', function () {
-    this.tags(['failsOnMKI']);
+  describe('tool: execute_query', function () {
+    this.tags(['skipCloud']);
     let llmProxy: LlmProxy;
     let connectorId: string;
 
@@ -86,7 +83,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             }),
         });
 
-        void llmProxy.interceptConversation('Hello from user');
+        void llmProxy.interceptWithResponse('Hello from user');
 
         ({ messageAddedEvents } = await chatComplete({
           userPrompt: 'Please retrieve the most recent Apache log messages',
@@ -190,7 +187,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         describe('the `execute_query` tool call response', () => {
-          let toolCallResponse: { columns: EsqlResponse['columns']; rows: EsqlResponse['values'] };
+          let toolCallResponse: {
+            columns: EsqlToRecords<any>['columns'];
+            rows: EsqlToRecords<any>['records'];
+          };
           before(async () => {
             toolCallResponse = JSON.parse(last(fourthRequestBody.messages)?.content as string);
           });

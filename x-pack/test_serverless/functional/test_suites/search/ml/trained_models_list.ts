@@ -29,7 +29,9 @@ export default function ({ getService, getPageObjects, getPageObject }: FtrProvi
 
     describe('page navigation', () => {
       it('renders trained models list', async () => {
-        await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
+        await svlCommonNavigation.sidenav.openSection(
+          'search_project_nav_footer.project_settings_project_nav'
+        );
         await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:trained_models' });
         await svlCommonNavigation.sidenav.expectLinkActive({
           deepLinkId: 'management:trained_models',
@@ -58,15 +60,9 @@ export default function ({ getService, getPageObjects, getPageObject }: FtrProvi
           'Your model will scale up to a maximum of 4,096 VCUs per hour based on your search or ingest load. It will automatically scale down when demand decreases, and you only pay for the resources you use.'
         );
 
-        // Adaptive resources switch should be checked by default
-        await ml.trainedModelsTable.assertAdaptiveResourcesSwitchChecked(true);
-
-        // Static allocations should be allowed for search projects
-        await ml.trainedModelsTable.toggleAdaptiveResourcesSwitch(false);
-
-        await ml.trainedModelsTable.assertVCPUHelperText(
-          'Your model will consume 4,096 VCUs, even when not in use.'
-        );
+        // Adaptive resources switch should be hidden
+        // always use adaptive resources for serverless projects
+        await ml.trainedModelsTable.assertAdaptiveResourcesSwitchExists(false);
       });
     });
   });

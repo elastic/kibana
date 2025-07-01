@@ -168,7 +168,7 @@ export interface BulkOperationError {
   };
 }
 
-export type BulkAction = 'DELETE' | 'ENABLE' | 'DISABLE';
+export type BulkAction = 'DELETE' | 'ENABLE' | 'DISABLE' | 'GET';
 
 export interface RuleBulkOperationAggregation {
   alertTypeId: {
@@ -191,6 +191,11 @@ interface DashboardItem {
   refId: string;
 }
 
+interface InvestigationGuide {
+  blob: string;
+}
+
 export interface DenormalizedArtifacts {
   dashboards?: DashboardItem[];
+  investigation_guide?: InvestigationGuide;
 }

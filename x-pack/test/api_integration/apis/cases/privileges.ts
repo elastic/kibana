@@ -14,7 +14,6 @@ import type {
 } from '@kbn/cases-plugin/common/types/domain';
 import { APP_ID as SECURITY_SOLUTION_APP_ID } from '@kbn/security-solution-plugin/common/constants';
 import { observabilityFeatureId as OBSERVABILITY_APP_ID } from '@kbn/observability-plugin/common';
-import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import {
   createCase,
@@ -24,7 +23,9 @@ import {
   createComment,
   updateCaseStatus,
   updateCaseAssignee,
-} from '../../../cases_api_integration/common/lib/api';
+} from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
+import { getPostCaseRequest } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/mock';
+import { suggestUserProfiles } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api/user_profiles';
 import {
   casesAllUser,
   casesV2AllUser,
@@ -56,8 +57,7 @@ import {
   secCasesV2NoReopenWithCreateCommentUser,
   secCasesV2NoCreateCommentWithReopenUser,
 } from './common/users';
-import { getPostCaseRequest } from '../../../cases_api_integration/common/lib/mock';
-import { suggestUserProfiles } from '../../../cases_api_integration/common/lib/api/user_profiles';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   describe('feature privilege', () => {

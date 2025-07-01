@@ -28,6 +28,7 @@ import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrat
 
 import { InstallationVersionStatus } from './installation_version_status';
 import { DisabledWrapperTooltip } from './disabled_wrapper_tooltip';
+import { DashboardsCell } from './dashboards_cell';
 
 function wrapActionWithDisabledTooltip(
   action: Action<InstalledPackageUIPackageListItem>,
@@ -68,6 +69,13 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
     },
     [setPagination]
   );
+  const usedByAgentPolicy = (item: InstalledPackageUIPackageListItem) => {
+    if (!item.packagePoliciesInfo) {
+      return false;
+    }
+    const count = item.packagePoliciesInfo.count;
+    return count > 0;
+  };
 
   return (
     <>
@@ -85,6 +93,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
         loading={isLoading}
         items={installedPackages}
         itemId="name"
+        rowProps={{ 'data-test-subj': 'installedIntegrationsTableRow' }}
         pagination={{
           pageIndex: pagination.pagination.currentPage - 1,
           totalItemCount: total,
@@ -124,7 +133,12 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                         version={item.version}
                       />
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
+                    <EuiFlexItem
+                      data-test-subj={`installedIntegrationsTable.integrationNameColumn.${item.name}`}
+                      grow={false}
+                    >
+                      {item.title}
+                    </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiLink>
               );
@@ -137,6 +151,12 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
             render: (item: InstalledPackageUIPackageListItem) => (
               <InstallationVersionStatus item={item} />
             ),
+          },
+          {
+            name: i18n.translate('xpack.fleet.epmInstalledIntegrations.dashboardsColumnTitle', {
+              defaultMessage: 'Dashboards',
+            }),
+            render: (item: InstalledPackageUIPackageListItem) => <DashboardsCell package={item} />,
           },
           {
             name: i18n.translate(
@@ -266,13 +286,18 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                   ),
                   icon: 'trash',
                   type: 'icon',
-                  description: i18n.translate(
-                    'xpack.fleet.epmInstalledIntegrations.uninstallIntegrationLabel',
-                    {
-                      defaultMessage: 'Uninstall integration',
-                    }
-                  ),
+
                   onClick: (item) => bulkUninstallIntegrationsWithConfirmModal([item]),
+                  enabled: (item) => !usedByAgentPolicy(item),
+                  description: (item) =>
+                    i18n.translate(
+                      'xpack.fleet.epmInstalledIntegrations.uninstallIntegrationLabel',
+                      {
+                        defaultMessage: usedByAgentPolicy(item)
+                          ? "You can't uninstall this integration because it is used by one or more agent policies"
+                          : 'Uninstall integration',
+                      }
+                    ),
                 },
                 !authz.integrations.removePackages,
                 i18n.translate(

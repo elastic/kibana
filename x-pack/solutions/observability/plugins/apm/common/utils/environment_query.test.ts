@@ -14,7 +14,23 @@ describe('environmentQuery', () => {
     it('returns ENVIRONMENT_NOT_DEFINED', () => {
       expect(environmentQuery('')).toEqual([
         {
-          term: { [SERVICE_ENVIRONMENT]: ENVIRONMENT_NOT_DEFINED.value },
+          bool: {
+            should: [
+              {
+                term: { [SERVICE_ENVIRONMENT]: ENVIRONMENT_NOT_DEFINED.value },
+              },
+              {
+                bool: {
+                  must_not: [
+                    {
+                      exists: { field: SERVICE_ENVIRONMENT },
+                    },
+                  ],
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
         },
       ]);
     });
@@ -35,7 +51,23 @@ describe('environmentQuery', () => {
   it('creates a query for missing service environments', () => {
     expect(environmentQuery(ENVIRONMENT_NOT_DEFINED.value)).toEqual([
       {
-        term: { [SERVICE_ENVIRONMENT]: ENVIRONMENT_NOT_DEFINED.value },
+        bool: {
+          should: [
+            {
+              term: { [SERVICE_ENVIRONMENT]: ENVIRONMENT_NOT_DEFINED.value },
+            },
+            {
+              bool: {
+                must_not: [
+                  {
+                    exists: { field: SERVICE_ENVIRONMENT },
+                  },
+                ],
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
       },
     ]);
   });

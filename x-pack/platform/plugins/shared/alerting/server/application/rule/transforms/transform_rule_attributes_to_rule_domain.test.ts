@@ -234,6 +234,9 @@ describe('transformRuleAttributesToRuleDomain', () => {
             "id": "dashboard-2",
           },
         ],
+        "investigation_guide": Object {
+          "blob": "",
+        },
       }
     `);
   });

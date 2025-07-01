@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { timelineActions } from '../store';
@@ -59,13 +59,19 @@ export const useCreateTimeline = ({
   ) ?? { id: '', patternList: [] };
 
   const { newDataViewPickerEnabled } = useEnableExperimental();
-  const { dataViewSpec: experimentalDataView } = useDataViewSpec(DataViewManagerScopeName.default);
+  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(
+    DataViewManagerScopeName.default
+  );
   const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.default);
 
-  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId;
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
+  const dataViewId = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalDataViewSpec.id ?? '' : oldDataViewId),
+    [experimentalDataViewSpec.id, newDataViewPickerEnabled, oldDataViewId]
+  );
+  const selectedPatterns = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
+    [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
+  );
 
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
@@ -93,7 +99,7 @@ export const useCreateTimeline = ({
       setSelectedDataView({
         id: dataViewId,
         fallbackPatterns: selectedPatterns,
-        scope: [DataViewManagerScopeName.timeline],
+        scope: DataViewManagerScopeName.timeline,
       });
 
       dispatch(

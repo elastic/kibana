@@ -38,6 +38,7 @@ import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locato
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import { NoPermissionsTooltip } from '../../../common/components/permissions';
 import { useAddToDashboard } from '../../../common/components/add_to_dashboard';
+import { selectOverviewState } from '../../../../state';
 
 type PopoverPosition = 'relative' | 'default';
 
@@ -115,9 +116,9 @@ export function ActionsPopover({
   const detailUrl = useMonitorDetailLocator({
     configId: monitor.configId,
     locationId: locationId ?? monitor.locationId,
-    spaceId: monitor.spaceId,
+    spaces: monitor.spaces,
   });
-  const editUrl = useEditMonitorLocator({ configId: monitor.configId, spaceId: monitor.spaceId });
+  const editUrl = useEditMonitorLocator({ configId: monitor.configId, spaces: monitor.spaces });
 
   const canEditSynthetics = useCanEditSynthetics();
 
@@ -151,6 +152,8 @@ export function ActionsPopover({
   );
 
   const testInProgress = useSelector(manualTestRunInProgressSelector(monitor.configId));
+
+  const { view } = useSelector(selectOverviewState);
 
   useEffect(() => {
     if (status === FETCH_STATUS.LOADING) {
@@ -190,6 +193,7 @@ export function ActionsPopover({
         monitorTypes: [],
         projects: [],
       },
+      view,
     },
     documentTitle: `${monitor.name} - ${monitor.locationLabel}`,
     objectType: i18n.translate('xpack.synthetics.overview.actions.addToDashboard.objectTypeLabel', {

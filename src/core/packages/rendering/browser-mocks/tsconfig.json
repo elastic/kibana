@@ -12,7 +12,8 @@
     "**/*.tsx"
   ],
   "kbn_references": [
-    "@kbn/core-rendering-browser"
+    "@kbn/core-rendering-browser",
+    "@kbn/i18n-react"
   ],
   "exclude": [
     "target/**/*"

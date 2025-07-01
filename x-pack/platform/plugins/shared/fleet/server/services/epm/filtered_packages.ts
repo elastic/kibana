@@ -6,7 +6,11 @@
  */
 
 import { appContextService } from '../app_context';
-import { FLEET_SERVER_PACKAGE } from '../../../common/constants';
+import {
+  FLEET_SERVER_PACKAGE,
+  SEARCH_AI_LAKE_PACKAGES,
+  SEARCH_AI_LAKE_ALLOWED_INSTALL_PACKAGES,
+} from '../../../common/constants';
 
 export function getFilteredSearchPackages() {
   const isElasticConnectorsServerlessEnabled = getElasticConnectorsServerlessEnabled();
@@ -37,14 +41,26 @@ export function getFilteredInstallPackages() {
   return filtered.concat(excludePackages);
 }
 
+export function getAllowedSearchAiLakeInstallPackagesIfEnabled() {
+  const enabled =
+    appContextService.getConfig()?.internal?.registry?.searchAiLakePackageAllowlistEnabled;
+  return enabled
+    ? SEARCH_AI_LAKE_PACKAGES.concat(SEARCH_AI_LAKE_ALLOWED_INSTALL_PACKAGES)
+    : undefined;
+}
+
 export function getElasticConnectorsServerlessEnabled() {
   const ELASTIC_CONNECTORS_SERVERLESS_PROJECT_TYPES = ['security', 'observability'];
 
   const cloud = appContextService.getCloud();
+
   return (
-    cloud?.isServerlessEnabled &&
-    ELASTIC_CONNECTORS_SERVERLESS_PROJECT_TYPES.includes(
-      appContextService.getCloud()?.serverless.projectType ?? ''
-    )
+    // is cloud and not serverless
+    (cloud?.isCloudEnabled && !cloud?.isServerlessEnabled) ||
+    // is serverless and project type is one of the supported
+    (cloud?.isServerlessEnabled &&
+      ELASTIC_CONNECTORS_SERVERLESS_PROJECT_TYPES.includes(
+        appContextService.getCloud()?.serverless.projectType ?? ''
+      ))
   );
 }

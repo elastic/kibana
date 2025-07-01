@@ -16,6 +16,7 @@ const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert'));
 export const initTlsLegacyAlertType: AlertTypeInitializer<RuleTypeModel> = ({
   core,
   plugins,
+  isHidden,
 }): RuleTypeModel => ({
   id: CLIENT_ALERT_TYPES.TLS_LEGACY,
   iconClass: 'uptimeApp',
@@ -33,5 +34,5 @@ export const initTlsLegacyAlertType: AlertTypeInitializer<RuleTypeModel> = ({
   description,
   validate: () => ({ errors: {} }),
   defaultActionMessage,
-  requiresAppContext: true,
+  requiresAppContext: isHidden,
 });

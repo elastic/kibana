@@ -38,12 +38,12 @@ export const LinkCard: React.FC<LinkCardProps> = React.memo(
     const cardStyles = useCardStyles();
     const cardClassName = classNames(cardStyles, 'headerCard');
     const {
-      telemetry: { trackLinkClick },
+      telemetry: { reportLinkClick },
     } = useOnboardingContext();
     const onClickWithReport = useCallback<React.MouseEventHandler>(() => {
-      trackLinkClick?.(`${TELEMETRY_HEADER_CARD}_${id}`);
+      reportLinkClick?.(`${TELEMETRY_HEADER_CARD}_${id}`);
       onClick?.();
-    }, [id, onClick, trackLinkClick]);
+    }, [id, onClick, reportLinkClick]);
 
     const panelTitleId = useGeneratedHtmlId();
 

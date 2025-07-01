@@ -20,6 +20,7 @@ import { Actions } from './actions';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../user_privileges';
 import { useHiddenByFlyout } from '../guided_onboarding_tour/use_hidden_by_flyout';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 
 const useHiddenByFlyoutMock = useHiddenByFlyout as jest.Mock;
 jest.mock('../guided_onboarding_tour/use_hidden_by_flyout', () => ({
@@ -46,48 +47,38 @@ jest.mock(
   })
 );
 
-const mockUseUiSetting = jest.fn().mockReturnValue([true]);
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
-  return {
-    ...original,
-    useUiSetting$: () => mockUseUiSetting(),
-  };
-});
-
 jest.mock('./add_note_icon_item', () => {
   return {
     AddEventNoteAction: jest.fn(() => <div data-test-subj="add-note-mock-action" />),
   };
 });
 
+const mockUseKibanaReturnValue = {
+  services: {
+    application: {
+      navigateToApp: jest.fn(),
+      getUrlForApp: jest.fn(),
+      capabilities: {
+        [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
+      },
+    },
+    cases: mockCasesContract(),
+    savedObjects: {
+      client: {},
+    },
+  },
+};
 jest.mock('../../lib/kibana', () => {
   const originalKibanaLib = jest.requireActual('../../lib/kibana');
 
   return {
     ...originalKibanaLib,
-    useKibana: () => ({
-      services: {
-        application: {
-          navigateToApp: jest.fn(),
-          getUrlForApp: jest.fn(),
-          capabilities: {
-            siemV2: { crud_alerts: true, read_alerts: true },
-          },
-        },
-        cases: mockCasesContract(),
-        uiSettings: {
-          get: jest.fn(),
-        },
-        savedObjects: {
-          client: {},
-        },
-      },
-    }),
+    useKibana: () => mockUseKibanaReturnValue,
     useToasts: jest.fn().mockReturnValue({
       addError: jest.fn(),
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
+      addInfo: jest.fn(),
       remove: jest.fn(),
     }),
     useNavigateTo: jest.fn().mockReturnValue({
@@ -390,24 +381,6 @@ describe('Actions', () => {
       expect(wrapper.find('[data-test-subj="view-in-analyzer"]').exists()).toBe(false);
     });
 
-    test('it does not render the analyze event button on the cases alerts table with advanced settings disabled', () => {
-      const ecsData = {
-        ...mockTimelineData[0].ecs,
-        event: { kind: ['alert'] },
-        agent: { type: ['endpoint'] },
-        process: { entity_id: ['1'] },
-      };
-      mockUseUiSetting.mockReturnValue([false]);
-
-      const wrapper = mount(
-        <TestProviders>
-          <Actions {...defaultProps} ecsData={ecsData} timelineId={TableId.alertsOnCasePage} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="view-in-analyzer"]').exists()).toBe(false);
-    });
-
     test('it does render the analyze event button on the cases alerts table with advanced settings enabled', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
@@ -415,7 +388,6 @@ describe('Actions', () => {
         agent: { type: ['endpoint'] },
         process: { entity_id: ['1'] },
       };
-      mockUseUiSetting.mockReturnValue([true]);
 
       const wrapper = mount(
         <TestProviders>
@@ -433,7 +405,6 @@ describe('Actions', () => {
         agent: { type: ['endpoint'] },
         process: { entity_id: ['1'] },
       };
-      mockUseUiSetting.mockReturnValue([false]);
 
       const wrapper = mount(
         <TestProviders>
@@ -462,28 +433,6 @@ describe('Actions', () => {
       expect(wrapper.find('[data-test-subj="session-view-button"]').exists()).toEqual(false);
     });
 
-    test('it should show session view button on action tabs when user access the session viewer via K8S dashboard', () => {
-      const ecsData = {
-        ...mockTimelineData[0].ecs,
-        event: { kind: ['alert'] },
-        agent: { type: ['endpoint'] },
-        process: { entry_leader: { entity_id: ['test_id'], start: ['2022-05-08T13:44:00.13Z'] } },
-        _index: '.ds-logs-endpoint.events.process-default',
-      };
-
-      const wrapper = mount(
-        <TestProviders>
-          <Actions
-            {...defaultProps}
-            ecsData={ecsData}
-            timelineId={TableId.kubernetesPageSessions}
-          />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="session-view-button"]').exists()).toEqual(true);
-    });
-
     test('it should show session view button on action tabs for enterprise users', () => {
       const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
 
@@ -506,25 +455,6 @@ describe('Actions', () => {
       expect(wrapper.find('[data-test-subj="session-view-button"]').exists()).toEqual(true);
     });
 
-    test('it does not render the session view button on the cases alerts table with advanced settings disabled', () => {
-      const ecsData = {
-        ...mockTimelineData[0].ecs,
-        event: { kind: ['alert'] },
-        agent: { type: ['endpoint'] },
-        process: { entry_leader: { entity_id: ['test_id'], start: ['2022-05-08T13:44:00.13Z'] } },
-        _index: '.ds-logs-endpoint.events.process-default',
-      };
-      mockUseUiSetting.mockReturnValue([false]);
-
-      const wrapper = mount(
-        <TestProviders>
-          <Actions {...defaultProps} ecsData={ecsData} timelineId={TableId.alertsOnCasePage} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="session-view-button"]').exists()).toBe(false);
-    });
-
     test('it does render the session view button on the cases alerts table with advanced settings enabled', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
@@ -533,7 +463,6 @@ describe('Actions', () => {
         process: { entry_leader: { entity_id: ['test_id'], start: ['2022-05-08T13:44:00.13Z'] } },
         _index: '.ds-logs-endpoint.events.process-default',
       };
-      mockUseUiSetting.mockReturnValue([true]);
 
       const wrapper = mount(
         <TestProviders>

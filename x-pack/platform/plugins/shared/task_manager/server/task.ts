@@ -11,6 +11,7 @@ import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { Frequency } from '@kbn/rrule';
 import { isErr, tryAsResult } from './lib/result_type';
 import type { Interval } from './lib/intervals';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
@@ -20,6 +21,7 @@ export const DEFAULT_TIMEOUT = '5m';
 
 export enum TaskPriority {
   Low = 1,
+  NormalLongRunning = 40,
   Normal = 50,
 }
 
@@ -93,7 +95,7 @@ export type SuccessfulRunResult = {
        * continue to use which ever schedule it already has, and if no there is
        * no previous schedule then it will be treated as a single-run task.
        */
-      schedule?: IntervalSchedule;
+      schedule?: IntervalSchedule | RruleSchedule;
       runAt?: never;
     }
 );
@@ -255,6 +257,40 @@ export interface IntervalSchedule {
    * An interval in minutes (e.g. '5m'). If specified, this is a recurring task.
    * */
   interval: Interval;
+  rrule?: never;
+}
+
+export type Rrule = RruleMonthly | RruleWeekly | RruleDaily;
+export interface RruleSchedule {
+  rrule: Rrule;
+  interval?: never;
+}
+
+interface RruleCommon {
+  freq: Frequency;
+  interval: number;
+  tzid: string;
+}
+interface RruleMonthly extends RruleCommon {
+  freq: Frequency.MONTHLY;
+  bymonthday?: number[];
+  byhour?: number[];
+  byminute?: number[];
+  byweekday?: string[];
+}
+interface RruleWeekly extends RruleCommon {
+  freq: Frequency.WEEKLY;
+  byweekday?: string[];
+  byhour?: number[];
+  byminute?: number[];
+  bymonthday?: never;
+}
+interface RruleDaily extends RruleCommon {
+  freq: Frequency.DAILY;
+  byhour?: number[];
+  byminute?: number[];
+  byweekday?: string[];
+  bymonthday?: never;
 }
 
 export interface TaskUserScope {
@@ -311,7 +347,7 @@ export interface TaskInstance {
    *
    * Currently, this supports a single format: an interval in minutes or seconds (e.g. '5m', '30s').
    */
-  schedule?: IntervalSchedule;
+  schedule?: IntervalSchedule | RruleSchedule;
 
   /**
    * A task-specific set of parameters, used by the task's run function to tailor

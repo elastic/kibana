@@ -2,33 +2,38 @@
 navigation_title: "Index"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/index-action-type.html
+applies_to:
+  stack: all
+  serverless: all
 ---
 
 # Index connector and action [index-action-type]
 
-
 An index connector indexes a document into {{es}}.
-
 
 ## Create connectors in {{kib}} [define-index-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you're creating a rule. For example:
 
-% TO DO: Use `:class: screenshot`
-![Index connector](../images/index-connector.png)
-
+:::{image} ../images/index-connector.png
+:alt: Index connector
+:screenshot:
+:::
 
 ### Connector configuration [index-connector-configuration]
 
-Index connectors must have a name and an {{es}} index. You can optionally choose a field that indicates when the document was indexed.
-
+Index connectors must have a name and an {{es}} index.
+You can optionally choose a field that indicates when the document was indexed.
 
 ## Test connectors [index-action-configuration]
 
-You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
+You can test connectors as you're creating or editing the connector in {{kib}}.
+For example:
 
-% TO DO: Use `:class: screenshot`
-![Index params test](../images/index-params-test.png)
+:::{image} ../images/index-params-test.png
+:alt: Index params test
+:screenshot:
+:::
 
 Index connector actions contain a document in JSON format. For example, if you have an index with the following properties:
 
@@ -59,4 +64,3 @@ Your test document could contain the following properties and variables:
     "context_message": "{{context.message}}"
 }
 ```
-

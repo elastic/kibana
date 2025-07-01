@@ -132,7 +132,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         });
       });
 
-      describe('User can monitor some data streams', () => {
+      describe('User can monitor some data streams', function () {
+        // This disables the forward-compatibility test for Elasticsearch 8.19 with Kibana and ES 9.0.
+        // These versions are not expected to work together. Note: Failure store is not available in ES 9.0,
+        // and running these tests will result in an "unknown index privilege [read_failure_store]" error.
+        this.onlyEsVersion('8.19 || >=9.1');
+
         before(async () => {
           // Index logs for synth-* and apache.access datasets
           await synthtrace.index(getInitialTestLogs({ to, count: 4 }));

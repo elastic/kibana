@@ -17,7 +17,7 @@ import {
 import { Subject } from 'rxjs';
 import {
   MockRuleMigrationsDataService,
-  mockInstall,
+  mockSetup,
   mockCreateClient as mockDataCreateClient,
 } from './data/__mocks__/mocks';
 import { mockCreateClient as mockTaskCreateClient, mockStopAll } from './task/__mocks__/mocks';
@@ -52,7 +52,7 @@ describe('SiemRuleMigrationsService', () => {
     it('should set esClusterClient and call dataStreamAdapter.install', () => {
       ruleMigrationsService.setup({ esClusterClient, pluginStop$ });
 
-      expect(mockInstall).toHaveBeenCalledWith({
+      expect(mockSetup).toHaveBeenCalledWith({
         esClient: esClusterClient.asInternalUser,
         pluginStop$,
       });
@@ -60,7 +60,7 @@ describe('SiemRuleMigrationsService', () => {
 
     it('should log error when data installation fails', async () => {
       const error = 'Failed to install';
-      mockInstall.mockRejectedValueOnce(error);
+      mockSetup.mockRejectedValueOnce(error);
       ruleMigrationsService.setup({ esClusterClient, pluginStop$ });
 
       await waitFor(() => {

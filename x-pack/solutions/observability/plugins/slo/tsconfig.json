@@ -30,7 +30,6 @@
     "@kbn/embeddable-plugin",
     "@kbn/embeddable-enhanced-plugin",
     "@kbn/lens-plugin",
-    "@kbn/ui-theme",
     "@kbn/es-query",
     "@kbn/react-kibana-mount",
     "@kbn/cases-plugin",
@@ -107,5 +106,6 @@
     "@kbn/server-route-repository-utils",
     "@kbn/fields-metadata-plugin",
     "@kbn/apm-sources-access-plugin",
+    "@kbn/lock-manager",
   ]
 }
