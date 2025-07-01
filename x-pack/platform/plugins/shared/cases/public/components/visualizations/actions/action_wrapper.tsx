@@ -30,7 +30,6 @@ const ActionWrapperWithContext: React.FC<PropsWithChildren<Props>> = ({
   currentAppId,
 }) => {
   const { application, ...startServices } = useKibana().services;
-
   const owner = getCaseOwnerByAppId(currentAppId);
   const casePermissions = canUseCases(application.capabilities)(owner ? [owner] : undefined);
   // TODO: Remove when https://github.com/elastic/kibana/issues/143201 is developed
@@ -72,12 +71,14 @@ const ActionWrapperComponent: React.FC<ActionWrapperComponentProps> = ({
         ...services.core,
         ...services.plugins,
         storage: services.storage,
+        isServerless: services.isServerless,
       }}
     >
       <Router history={services.history}>
         <ActionWrapperWithContext
           casesActionContextProps={casesActionContextProps}
           currentAppId={currentAppId}
+          isServerless={services.isServerless}
         >
           {children}
         </ActionWrapperWithContext>

@@ -17,6 +17,7 @@ export type CasesActionContextProps = Pick<
   | 'externalReferenceAttachmentTypeRegistry'
   | 'persistableStateAttachmentTypeRegistry'
   | 'getFilesClient'
+  | 'isServerless'
 >;
 
 export interface Services {

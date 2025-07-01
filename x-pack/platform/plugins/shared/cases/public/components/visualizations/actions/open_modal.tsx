@@ -62,7 +62,6 @@ export function openModal(
   services: Services
 ) {
   const targetDomElement = document.createElement('div');
-
   const cleanupDom = (shouldCleanup?: boolean) => {
     if (targetDomElement != null && shouldCleanup) {
       unmountComponentAtNode(targetDomElement);

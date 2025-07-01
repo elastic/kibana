@@ -17,6 +17,7 @@ export type GetCasesProps = Omit<
   | 'externalReferenceAttachmentTypeRegistry'
   | 'persistableStateAttachmentTypeRegistry'
   | 'getFilesClient'
+  | 'isServerless'
 >;
 
 const CasesRoutesLazy: React.FC<CasesProps> = lazy(() => import('../../components/app/routes'));
@@ -25,6 +26,7 @@ export const getCasesLazy = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
   getFilesClient,
+  isServerless = false,
   owner,
   permissions,
   basePath,
@@ -49,6 +51,7 @@ export const getCasesLazy = ({
       basePath,
       features,
       releasePhase,
+      isServerless,
     }}
   >
     <Suspense fallback={<EuiLoadingSpinner />}>

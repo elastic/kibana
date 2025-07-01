@@ -26,6 +26,7 @@ const CasesProviderLazy: React.FC<{
 const CasesProviderLazyWrapper = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
+  isServerless,
   owner,
   permissions,
   features,
@@ -43,6 +44,7 @@ const CasesProviderLazyWrapper = ({
         features,
         releasePhase,
         getFilesClient,
+        isServerless,
       }}
     >
       {children}
@@ -56,11 +58,13 @@ export const getCasesContextLazy = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
   getFilesClient,
+  isServerless,
 }: Pick<
   GetCasesContextPropsInternal,
   | 'externalReferenceAttachmentTypeRegistry'
   | 'persistableStateAttachmentTypeRegistry'
   | 'getFilesClient'
+  | 'isServerless'
 >): (() => React.FC<PropsWithChildren<GetCasesContextProps>>) => {
   const CasesProviderLazyWrapperWithRegistry: React.FC<PropsWithChildren<GetCasesContextProps>> = ({
     children,
@@ -71,6 +75,7 @@ export const getCasesContextLazy = ({
       externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
       persistableStateAttachmentTypeRegistry={persistableStateAttachmentTypeRegistry}
       getFilesClient={getFilesClient}
+      isServerless={isServerless}
     >
       {children}
     </CasesProviderLazyWrapper>

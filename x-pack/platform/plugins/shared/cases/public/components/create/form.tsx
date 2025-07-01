@@ -65,7 +65,8 @@ export const FormFieldsWithFormContext: React.FC<FormFieldsWithFormContextProps>
     selectedOwner,
     onSelectedOwner,
   }) => {
-    const { owner } = useCasesContext();
+    const { owner, isServerless } = useCasesContext();
+    console.log(isServerless, '!!isServerless in FormFieldsWithFormContext');
     const activeSolution = useActiveSolution();
     const availableOwners = useAvailableCasesOwners();
     let defaultOwnerValue = owner[0] ?? getOwnerDefaultValue(availableOwners);

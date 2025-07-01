@@ -22,12 +22,14 @@ interface CasesAppProps {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   getFilesClient: (scope: string) => ScopedFilesClient;
+  isServerless?: boolean;
 }
 
 const CasesAppComponent: React.FC<CasesAppProps> = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
   getFilesClient,
+  isServerless = false,
 }) => {
   const userCapabilities = useApplicationCapabilities();
 
@@ -36,6 +38,7 @@ const CasesAppComponent: React.FC<CasesAppProps> = ({
       {getCasesLazy({
         externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry,
+        isServerless,
         getFilesClient,
         owner: [APP_OWNER],
         useFetchAlertData: () => [false, {}],
