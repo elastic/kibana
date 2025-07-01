@@ -53,8 +53,6 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   agentSelection,
   timeout,
 }) => {
-  // const { data: hasActionResultsPrivileges, isLoading } = useActionResultsPrivileges();
-
   const initialAgentSelection = useMemo(() => {
     if (agentSelection) {
       return agentSelection;
@@ -96,40 +94,6 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
 
     return !isEmpty(pickBy(initialValue, (value) => !isEmpty(value))) ? initialValue : undefined;
   }, [alertIds, ecs_mapping, initialAgentSelection, initialQuery, packId, savedQueryId, timeout]);
-
-  // if (isLoading) {
-  //   return <EuiSkeletonText lines={10} />;
-  // }
-
-  // if (!hasActionResultsPrivileges) {
-  //   return (
-  //     <EuiEmptyPrompt
-  //       icon={<OsqueryIcon />}
-  //       title={
-  //         <h2>
-  //           <FormattedMessage
-  //             id="xpack.osquery.liveQuery.permissionDeniedPromptTitle"
-  //             defaultMessage="Permission denied"
-  //           />
-  //         </h2>
-  //       }
-  //       titleSize="xs"
-  //       body={
-  //         <p>
-  //           <FormattedMessage
-  //             id="xpack.osquery.liveQuery.permissionDeniedPromptBody"
-  //             defaultMessage="To view query results, ask your administrator to update your user role to have index {read} privileges on the {logs} index."
-  //             // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-  //             values={{
-  //               read: <EuiCode>read</EuiCode>,
-  //               logs: <EuiCode>logs-{OSQUERY_INTEGRATION_NAME}.result*</EuiCode>,
-  //             }}
-  //           />
-  //         </p>
-  //       }
-  //     />
-  //   );
-  // }
 
   return (
     <LiveQueryForm
