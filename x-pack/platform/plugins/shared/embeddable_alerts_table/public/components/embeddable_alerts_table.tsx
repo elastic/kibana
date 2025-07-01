@@ -153,8 +153,10 @@ export const EmbeddableAlertsTable = ({
         showKeyboardShortcuts: false,
         showDisplaySelector: false,
       }}
-      emptyStateHeight="flex"
-      emptyStateVariant="transparent"
+      emptyState={{
+        height: 'flex',
+        variant: 'transparent',
+      }}
       openLinksInNewTab={true}
       flyoutOwnsFocus={true}
       flyoutPagination={false}
