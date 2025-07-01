@@ -150,47 +150,45 @@ export function PreviewTable({
   }, [canonicalColumnOrder, setSorting, setVisibleColumns, columnWidths]);
 
   return (
-    <div>
-      <EuiDataGrid
-        aria-label={i18n.translate('xpack.streams.resultPanel.euiDataGrid.previewLabel', {
-          defaultMessage: 'Preview',
-        })}
-        columns={gridColumns}
-        columnVisibility={{
-          visibleColumns,
-          setVisibleColumns: setVisibleColumns || (() => {}),
-          canDragAndDropColumns: false,
-        }}
-        sorting={sortingConfig}
-        inMemory={sortingConfig ? { level: 'sorting' } : undefined}
-        height={height}
-        toolbarVisibility={toolbarVisibility}
-        rowCount={documents.length}
-        rowHeightsOptions={rowHeightsOptions}
-        onColumnResize={onColumnResize}
-        renderCellValue={({ rowIndex, columnId }) => {
-          const doc = documents[rowIndex];
-          if (!doc || typeof doc !== 'object') {
-            return '';
-          }
+    <EuiDataGrid
+      aria-label={i18n.translate('xpack.streams.resultPanel.euiDataGrid.previewLabel', {
+        defaultMessage: 'Preview',
+      })}
+      columns={gridColumns}
+      columnVisibility={{
+        visibleColumns,
+        setVisibleColumns: setVisibleColumns || (() => {}),
+        canDragAndDropColumns: false,
+      }}
+      sorting={sortingConfig}
+      inMemory={sortingConfig ? { level: 'sorting' } : undefined}
+      height={height}
+      toolbarVisibility={toolbarVisibility}
+      rowCount={documents.length}
+      rowHeightsOptions={rowHeightsOptions}
+      onColumnResize={onColumnResize}
+      renderCellValue={({ rowIndex, columnId }) => {
+        const doc = documents[rowIndex];
+        if (!doc || typeof doc !== 'object') {
+          return '';
+        }
 
-          if (renderCellValue) {
-            const renderedValue = renderCellValue(doc, columnId);
-            if (renderedValue !== undefined) {
-              return renderedValue;
-            }
+        if (renderCellValue) {
+          const renderedValue = renderCellValue(doc, columnId);
+          if (renderedValue !== undefined) {
+            return renderedValue;
           }
+        }
 
-          const value = (doc as SampleDocument)[columnId];
-          if (value === undefined || value === null) {
-            return '';
-          }
-          if (typeof value === 'object') {
-            return JSON.stringify(value);
-          }
-          return String(value);
-        }}
-      />
-    </div>
+        const value = (doc as SampleDocument)[columnId];
+        if (value === undefined || value === null) {
+          return '';
+        }
+        if (typeof value === 'object') {
+          return JSON.stringify(value);
+        }
+        return String(value);
+      }}
+    />
   );
 }
