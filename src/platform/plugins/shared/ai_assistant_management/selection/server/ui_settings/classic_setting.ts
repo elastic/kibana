@@ -41,5 +41,5 @@ export const classicSetting: Omit<UiSettingsParams<AIAssistantType>, 'value'> = 
         [AIAssistantType.Never]: HIDE_ALL_ASSISTANTS,
     },
     requiresPageReload: true,
-    solution: "classic"
+    solution: ["classic"]
 }

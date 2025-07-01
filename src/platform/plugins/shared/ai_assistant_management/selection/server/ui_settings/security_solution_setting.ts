@@ -35,5 +35,5 @@ export const securitySolutionSetting: Omit<UiSettingsParams<AIAssistantType.Secu
         [AIAssistantType.Never]: HIDE_ASSISTANT,
     },
     requiresPageReload: true,
-    solution: "security"
+    solution: ["security"]
 }

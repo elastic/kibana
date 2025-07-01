@@ -35,5 +35,5 @@ export const searchSolutionSetting: Omit<UiSettingsParams<AIAssistantType.Never 
         [AIAssistantType.Never]: HIDE_ASSISTANT,
     },
     requiresPageReload: true,
-    solution: "es"
+    solution: ["es"]
 }
