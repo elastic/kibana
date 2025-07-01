@@ -132,12 +132,12 @@ describe('When the tabular page is loaded', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
     const rows = screen.getAllByRole('row');
-    expect(rows[1]).toHaveTextContent('Elasticsearch');
-    expect(rows[1]).toHaveTextContent('.elser_model_2');
+    expect(rows[1]).toHaveTextContent('Elastic');
+    expect(rows[1]).toHaveTextContent('.elser-2-elastic');
 
-    expect(rows[2]).toHaveTextContent('Elastic');
-    expect(rows[2]).toHaveTextContent('.elser-2-elastic');
-
+    expect(rows[2]).toHaveTextContent('Elasticsearch');
+    expect(rows[2]).toHaveTextContent('.elser_model_2');
+    
     expect(rows[3]).toHaveTextContent('Elasticsearch');
     expect(rows[3]).toHaveTextContent('.multilingual-e5-small');
 
