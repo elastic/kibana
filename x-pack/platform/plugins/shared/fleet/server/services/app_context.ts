@@ -45,6 +45,7 @@ import type {
   PostAgentPolicyCreateCallback,
   PostAgentPolicyUpdateCallback,
 } from '../types';
+import { KibanaSavedObjectType } from '../types';
 import type { FleetAppContext } from '../plugin';
 import type { TelemetryEventsSender } from '../telemetry/sender';
 import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE } from '../constants';
@@ -203,7 +204,7 @@ class AppContextService {
 
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
     return appContextService.getSavedObjects().getScopedClient(request, {
-      includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+      includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE, KibanaSavedObjectType.alert],
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
   }

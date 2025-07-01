@@ -75,6 +75,7 @@ export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedOb
   [KibanaAssetType.securityRule]: KibanaSavedObjectType.securityRule,
   [KibanaAssetType.cloudSecurityPostureRuleTemplate]:
     KibanaSavedObjectType.cloudSecurityPostureRuleTemplate,
+  [KibanaAssetType.alert]: KibanaSavedObjectType.alert,
   [KibanaAssetType.tag]: KibanaSavedObjectType.tag,
   [KibanaAssetType.osqueryPackAsset]: KibanaSavedObjectType.osqueryPackAsset,
   [KibanaAssetType.osquerySavedQuery]: KibanaSavedObjectType.osquerySavedQuery,
