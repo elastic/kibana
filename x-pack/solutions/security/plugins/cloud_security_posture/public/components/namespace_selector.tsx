@@ -62,11 +62,10 @@ export const NamespaceSelector = ({
       prepend={
         <span
           style={{
-            flexShrink: 0,
-            marginRight: '100px',
+            inlineSize: '80px',
           }}
         >
-          {`${label}`}
+          {label}
         </span>
       }
     />
