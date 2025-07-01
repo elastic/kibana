@@ -182,13 +182,14 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       this.logger.info('Query executed. Sending query stats EBT', {
         queryName: query.name,
         traceId: queryStats.traceId,
+        queryStats,
       } as LogMeta);
 
       this.reportEBT(TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT, queryStats);
       statistics.push(queryStats);
     }
 
-    this.logger.info('Finished running health diagnostic task');
+    this.logger.info('Finished running health diagnostic task', { satistics } as LogMeta);
 
     return statistics;
   }
