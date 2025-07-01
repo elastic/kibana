@@ -102,12 +102,10 @@
     "@kbn/io-ts-utils",
     "@kbn/security-plugin-types-common",
     "@kbn/slo-schema",
-    "@kbn/typed-react-router-config",
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/infra-forge",
     "@kbn/slo-plugin",
     "@kbn/aiops-test-utils",
-    "@kbn/observability-ai-assistant-app-plugin",
     "@kbn/aiops-log-rate-analysis",
     "@kbn/search-types",
     "@kbn/data-quality-plugin",
@@ -133,5 +131,6 @@
     "@kbn/core-chrome-browser",
     "@kbn/event-log-plugin",
     "@kbn/intercepts-plugin",
+    "@kbn/inference-common",
   ]
 }
