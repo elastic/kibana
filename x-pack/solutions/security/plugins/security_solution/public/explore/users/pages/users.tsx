@@ -182,7 +182,7 @@ const UsersComponent = () => {
   const navTabs = useMemo(() => navTabsUsers(hasMlUserPermissions(capabilities)), [capabilities]);
 
   if (newDataViewPickerEnabled && status === 'pristine') {
-    return <PageLoader pageName="Users" />;
+    return <PageLoader />;
   }
 
   return (

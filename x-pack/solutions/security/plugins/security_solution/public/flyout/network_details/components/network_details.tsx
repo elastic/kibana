@@ -125,7 +125,7 @@ export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
   });
 
   if (newDataViewPickerEnabled && status === 'pristine') {
-    return <PageLoader pageName="Network details" />;
+    return <PageLoader />;
   }
 
   return indicesExist ? (

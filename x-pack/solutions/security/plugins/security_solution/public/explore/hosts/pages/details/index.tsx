@@ -216,7 +216,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   });
 
   if (newDataViewPickerEnabled && status === 'pristine') {
-    return <PageLoader pageName="Hosts" />;
+    return <PageLoader />;
   }
 
   return (

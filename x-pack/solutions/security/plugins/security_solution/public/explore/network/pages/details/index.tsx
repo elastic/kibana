@@ -195,7 +195,7 @@ const NetworkDetailsComponent: React.FC = () => {
   }, [sourcererDataView]);
 
   if (newDataViewPickerEnabled && status === 'pristine') {
-    return <PageLoader pageName="Network details" />;
+    return <PageLoader />;
   }
 
   return (

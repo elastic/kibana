@@ -60,7 +60,7 @@ const EntityAnalyticsComponent = () => {
   const entityTypes = useEntityAnalyticsTypes();
 
   if (newDataViewPickerEnabled && status === 'pristine') {
-    return <PageLoader pageName="Entity analytics" />;
+    return <PageLoader />;
   }
 
   return (

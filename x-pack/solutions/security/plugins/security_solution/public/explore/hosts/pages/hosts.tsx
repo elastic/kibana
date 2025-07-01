@@ -180,7 +180,7 @@ const HostsComponent = () => {
   );
 
   if (newDataViewPickerEnabled && status === 'pristine') {
-    return <PageLoader pageName="Hosts" />;
+    return <PageLoader />;
   }
 
   return (

@@ -7,17 +7,7 @@
 
 import React from 'react';
 import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
-const LOADING_TITLE = (pageName: string) =>
-  i18n.translate('xpack.securitySolution.page.loader', {
-    defaultMessage: 'Loading {pageName}',
-    values: { pageName },
-  });
-
-export const PageLoader = ({ pageName }: { pageName: string }) => (
-  <EuiEmptyPrompt
-    icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
-    title={<h2>{LOADING_TITLE(pageName)}</h2>}
-  />
+export const PageLoader = () => (
+  <EuiEmptyPrompt icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />} />
 );

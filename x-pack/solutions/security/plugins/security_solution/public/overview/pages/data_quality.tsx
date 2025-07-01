@@ -159,7 +159,7 @@ const DataQualityComponent: React.FC = () => {
   }
 
   if (newDataViewPickerEnabled && status === 'pristine') {
-    return <PageLoader pageName="Data quality" />;
+    return <PageLoader />;
   }
 
   return (

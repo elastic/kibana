@@ -51,7 +51,7 @@ export const TimelinesPage = React.memo(() => {
     tabName === TimelineTypeEnum.default ? TimelineTypeEnum.default : TimelineTypeEnum.template;
 
   if (newDataViewPickerEnabled && status === 'pristine') {
-    return <PageLoader pageName="Timelines" />;
+    return <PageLoader />;
   }
 
   return (

@@ -69,7 +69,7 @@ const DetectionResponseComponent = () => {
   }
 
   if (newDataViewPickerEnabled && status === 'pristine') {
-    return <PageLoader pageName="Detection response" />;
+    return <PageLoader />;
   }
 
   return (

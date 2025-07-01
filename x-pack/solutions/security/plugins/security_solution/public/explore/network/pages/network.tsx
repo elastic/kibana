@@ -147,7 +147,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
     if (newDataViewPickerEnabled && status === 'pristine') {
-      return <PageLoader pageName="Network" />;
+      return <PageLoader />;
     }
 
     return (

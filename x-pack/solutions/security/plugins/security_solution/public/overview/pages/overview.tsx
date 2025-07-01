@@ -97,7 +97,7 @@ const OverviewComponent = () => {
   const { tiDataSources: allTiDataSources, isInitiallyLoaded: isTiLoaded } = useAllTiDataSources();
 
   if (newDataViewPickerEnabled && status === 'pristine') {
-    return <PageLoader pageName="Overview" />;
+    return <PageLoader />;
   }
 
   return (

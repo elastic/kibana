@@ -214,7 +214,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   });
 
   if (newDataViewPickerEnabled && status === 'pristine') {
-    return <PageLoader pageName="User details" />;
+    return <PageLoader />;
   }
 
   return (

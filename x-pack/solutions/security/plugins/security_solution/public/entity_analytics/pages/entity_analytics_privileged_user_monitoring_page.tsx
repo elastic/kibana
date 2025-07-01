@@ -182,7 +182,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
   `;
 
   if (newDataViewPickerEnabled && status === 'pristine') {
-    return <PageLoader pageName="Entity analytics" />;
+    return <PageLoader />;
   }
 
   if (!indicesExist) {
