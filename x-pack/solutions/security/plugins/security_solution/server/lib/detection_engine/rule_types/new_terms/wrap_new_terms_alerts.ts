@@ -10,7 +10,7 @@ import objectHash from 'object-hash';
 import type {
   DetectionAlertLatest,
   NewTermsAlertLatest,
-  WrappedAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { ALERT_NEW_TERMS } from '../../../../../common/field_maps/field_names';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
@@ -28,7 +28,7 @@ export const wrapNewTermsAlerts = ({
 }: {
   sharedParams: SecuritySharedParams;
   eventsAndTerms: EventsAndTerms[];
-}): Array<WrappedAlertLatest<NewTermsAlertLatest>> => {
+}): Array<WrappedAlert<NewTermsAlertLatest>> => {
   return eventsAndTerms.map((eventAndTerms) => {
     const id = objectHash([
       eventAndTerms.event._index,

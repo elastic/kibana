@@ -12,14 +12,14 @@ import type { AlertWithCommonFieldsLatest } from '@kbn/rule-registry-plugin/comm
 import { makeFloatString } from '../utils/utils';
 import type {
   DetectionAlertLatest,
-  WrappedAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { EnrichEventsWrapper } from '../utils/enrichments/types';
 import { enrichEvents } from '../utils/enrichments';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 
 export interface BulkCreateParams<T extends DetectionAlertLatest> {
-  wrappedAlerts: Array<WrappedAlertLatest<T>>;
+  wrappedAlerts: Array<WrappedAlert<T>>;
   services: SecurityRuleServices;
   sharedParams: SecuritySharedParams;
   maxAlerts?: number;

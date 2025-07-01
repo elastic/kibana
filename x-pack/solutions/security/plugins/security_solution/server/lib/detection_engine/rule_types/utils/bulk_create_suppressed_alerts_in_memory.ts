@@ -28,7 +28,7 @@ import type {
   DetectionAlertLatest,
   EqlBuildingBlockAlertLatest,
   EqlShellAlertLatest,
-  WrappedAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { robustGet } from './source_fields_merging/utils/robust_field_access';
 import { buildAlertGroupFromSequence } from '../eql/build_alert_group_from_sequence';
@@ -77,7 +77,7 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
     AlertSuppressionMissingFieldsStrategyEnum.suppress;
 
   let suppressibleEvents = enrichedEvents;
-  let unsuppressibleWrappedDocs: Array<WrappedAlertLatest<DetectionAlertLatest>> = [];
+  let unsuppressibleWrappedDocs: Array<WrappedAlert<DetectionAlertLatest>> = [];
 
   if (!suppressOnMissingFields) {
     const partitionedEvents = partitionMissingFieldsEvents(
@@ -122,11 +122,11 @@ export const bulkCreateSuppressedSequencesInMemory = async ({
     AlertSuppressionMissingFieldsStrategyEnum.suppress;
 
   const suppressibleWrappedSequences: Array<
-    WrappedAlertLatest<EqlShellAlertLatest & SuppressionFieldsLatest> & {
-      subAlerts: Array<WrappedAlertLatest<EqlBuildingBlockAlertLatest>>;
+    WrappedAlert<EqlShellAlertLatest & SuppressionFieldsLatest> & {
+      subAlerts: Array<WrappedAlert<EqlBuildingBlockAlertLatest>>;
     }
   > = [];
-  const unsuppressibleWrappedDocs: Array<WrappedAlertLatest<DetectionAlertLatest>> = [];
+  const unsuppressibleWrappedDocs: Array<WrappedAlert<DetectionAlertLatest>> = [];
 
   sequences.forEach((sequence) => {
     const alertGroupFromSequence = buildAlertGroupFromSequence({
@@ -181,8 +181,8 @@ export interface ExecuteBulkCreateAlertsParams<
   sharedParams: SecuritySharedParams;
   services: SecurityRuleServices;
   alertSuppression: AlertSuppressionCamel;
-  unsuppressibleWrappedDocs: Array<WrappedAlertLatest<DetectionAlertLatest>>;
-  suppressibleWrappedDocs: Array<WrappedAlertLatest<T>>;
+  unsuppressibleWrappedDocs: Array<WrappedAlert<DetectionAlertLatest>>;
+  suppressibleWrappedDocs: Array<WrappedAlert<T>>;
   toReturn: SearchAfterAndBulkCreateReturnType;
   maxNumberOfAlertsMultiplier?: number;
 }

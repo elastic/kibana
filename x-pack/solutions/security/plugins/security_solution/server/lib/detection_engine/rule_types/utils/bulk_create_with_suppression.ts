@@ -17,7 +17,7 @@ import { isQueryRule } from '../../../../../common/detection_engine/utils';
 import { makeFloatString } from './utils';
 import type {
   DetectionAlertLatest,
-  WrappedAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import { getNumberOfSuppressedAlerts } from './get_number_of_suppressed_alerts';
@@ -47,7 +47,7 @@ export const bulkCreateWithSuppression = async <
   ruleType,
 }: {
   sharedParams: SecuritySharedParams;
-  wrappedDocs: Array<WrappedAlertLatest<T> & { subAlerts?: Array<WrappedAlertLatest<T>> }>;
+  wrappedDocs: Array<WrappedAlert<T> & { subAlerts?: Array<WrappedAlert<T>> }>;
   services: SecurityRuleServices;
   suppressionWindow: string;
   isSuppressionPerRuleExecution?: boolean;

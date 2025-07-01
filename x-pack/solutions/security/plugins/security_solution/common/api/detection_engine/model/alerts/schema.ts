@@ -587,7 +587,7 @@ export type DetectionAlert800 = ConvertSchemaType<Version800, DetectionAlertSche
 
 export type AncestorLatest = ConvertSchemaType<string, AlertAncestorSchema>;
 
-export interface WrappedAlertLatest<T> {
+export interface WrappedAlert<T> {
   _id: string;
   _index: string;
   _source: T;

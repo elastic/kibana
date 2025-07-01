@@ -13,7 +13,7 @@ import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/s
 
 import type {
   DetectionAlertLatest,
-  WrappedAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { EsqlRuleParams } from '../../rule_schema';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
@@ -32,9 +32,9 @@ export const wrapSuppressedEsqlAlerts = ({
   isRuleAggregating: boolean;
   events: Array<estypes.SearchHit<SignalSource>>;
   expandedFields: string[] | undefined;
-}): Array<WrappedAlertLatest<DetectionAlertLatest & SuppressionFieldsLatest>> => {
+}): Array<WrappedAlert<DetectionAlertLatest & SuppressionFieldsLatest>> => {
   const { spaceId, completeRule, tuple, primaryTimestamp, secondaryTimestamp } = sharedParams;
-  const wrapped = events.map<WrappedAlertLatest<DetectionAlertLatest & SuppressionFieldsLatest>>(
+  const wrapped = events.map<WrappedAlert<DetectionAlertLatest & SuppressionFieldsLatest>>(
     (event, i) => {
       const combinedFields = { ...event?.fields, ...event._source };
 

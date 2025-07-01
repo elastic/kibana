@@ -20,7 +20,7 @@ import {
 
 import type {
   DetectionAlertLatest,
-  WrappedAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 
@@ -46,7 +46,7 @@ export const wrapSuppressedThresholdALerts = ({
   buckets: ThresholdCompositeBucket[];
   buildReasonMessage: BuildReasonMessage;
   startedAt: Date;
-}): Array<WrappedAlertLatest<DetectionAlertLatest & SuppressionFieldsLatest>> => {
+}): Array<WrappedAlert<DetectionAlertLatest & SuppressionFieldsLatest>> => {
   const { completeRule, spaceId } = sharedParams;
   return buckets.map((bucket) => {
     const hit = transformBucketIntoHit(

@@ -11,7 +11,7 @@ import type { Filter } from '@kbn/es-query';
 
 import type {
   DetectionAlertLatest,
-  WrappedAlertLatest,
+  WrappedAlert,
 } from '../../../../../../common/api/detection_engine/model/alerts';
 import type { SecurityRuleServices } from '../../types';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
@@ -19,7 +19,7 @@ import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 export type EnrichmentType = estypes.SearchHit<unknown>;
 
 export type EventsForEnrichment<T extends DetectionAlertLatest> = Pick<
-  WrappedAlertLatest<T>,
+  WrappedAlert<T>,
   '_id' | '_source'
 >;
 

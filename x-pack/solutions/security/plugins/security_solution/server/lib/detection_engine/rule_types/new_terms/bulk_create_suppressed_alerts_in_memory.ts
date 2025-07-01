@@ -18,7 +18,7 @@ import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common
 import { executeBulkCreateAlerts } from '../utils/bulk_create_suppressed_alerts_in_memory';
 import type {
   DetectionAlertLatest,
-  WrappedAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { partitionMissingFieldsEvents } from '../utils/partition_missing_fields_events';
 import type { EventsAndTerms } from './types';
@@ -51,7 +51,7 @@ export const bulkCreateSuppressedNewTermsAlertsInMemory = async ({
     AlertSuppressionMissingFieldsStrategyEnum.suppress;
 
   let suppressibleEvents = eventsAndTerms;
-  let unsuppressibleWrappedDocs: Array<WrappedAlertLatest<DetectionAlertLatest>> = [];
+  let unsuppressibleWrappedDocs: Array<WrappedAlert<DetectionAlertLatest>> = [];
 
   if (!suppressOnMissingFields) {
     const partitionedEvents = partitionMissingFieldsEvents(

@@ -12,7 +12,7 @@ import type { EqlRuleParams } from '../../rule_schema';
 import type {
   EqlBuildingBlockAlertLatest,
   EqlShellAlertLatest,
-  WrappedAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 
@@ -26,7 +26,7 @@ export const wrapSequences = ({
   buildReasonMessage: BuildReasonMessage;
 }) =>
   sequences.reduce<
-    Array<WrappedAlertLatest<EqlShellAlertLatest> | WrappedAlertLatest<EqlBuildingBlockAlertLatest>>
+    Array<WrappedAlert<EqlShellAlertLatest> | WrappedAlert<EqlBuildingBlockAlertLatest>>
   >((acc, sequence) => {
     const { shellAlert, buildingBlocks } = buildAlertGroupFromSequence({
       sharedParams,

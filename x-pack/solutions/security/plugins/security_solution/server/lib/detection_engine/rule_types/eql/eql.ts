@@ -31,7 +31,7 @@ import type { EqlRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type {
   DetectionAlertLatest,
-  WrappedAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import {
   bulkCreateSuppressedAlertsInMemory,
@@ -125,7 +125,7 @@ export const eqlExecutor = async ({
         loggedRequests[0].duration = Math.round(eqlSearchDuration);
       }
 
-      let newSignals: Array<WrappedAlertLatest<DetectionAlertLatest>> | undefined;
+      let newSignals: Array<WrappedAlert<DetectionAlertLatest>> | undefined;
 
       const shardFailures = response.shard_failures;
       if (!isEmpty(shardFailures)) {

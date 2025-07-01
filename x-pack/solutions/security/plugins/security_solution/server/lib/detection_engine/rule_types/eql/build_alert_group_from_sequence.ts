@@ -33,7 +33,7 @@ import type {
   DetectionAlertLatest,
   EqlBuildingBlockAlertLatest,
   EqlShellAlertLatest,
-  WrappedAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { SuppressionTerm } from '../utils';
 
@@ -54,8 +54,8 @@ export interface BuildAlertGroupFromSequence {
 
 // eql shell alerts can have a subAlerts property
 // when suppression is used in EQL sequence queries
-export type WrappedEqlShellOptionalSubAlertsType = WrappedAlertLatest<EqlShellAlertLatest> & {
-  subAlerts?: Array<WrappedAlertLatest<EqlShellAlertLatest>>;
+export type WrappedEqlShellOptionalSubAlertsType = WrappedAlert<EqlShellAlertLatest> & {
+  subAlerts?: Array<WrappedAlert<EqlShellAlertLatest>>;
 };
 
 /**
@@ -70,8 +70,8 @@ export const buildAlertGroupFromSequence = ({
   sequence,
   buildReasonMessage,
 }: BuildAlertGroupFromSequence): {
-  shellAlert: WrappedAlertLatest<EqlShellAlertLatest> | undefined;
-  buildingBlocks: Array<WrappedAlertLatest<EqlBuildingBlockAlertLatest>>;
+  shellAlert: WrappedAlert<EqlShellAlertLatest> | undefined;
+  buildingBlocks: Array<WrappedAlert<EqlBuildingBlockAlertLatest>>;
 } => {
   const {
     alertTimestampOverride,
@@ -110,8 +110,8 @@ export const buildAlertGroupFromSequence = ({
   // The ID of each building block alert depends on all of the other building blocks as well,
   // so we generate the IDs after making all the BaseFields
   const buildingBlockIds = generateBuildingBlockIds(baseAlerts);
-  const wrappedBaseFields: Array<WrappedAlertLatest<DetectionAlertLatest>> = baseAlerts.map(
-    (block, i): WrappedAlertLatest<DetectionAlertLatest> => ({
+  const wrappedBaseFields: Array<WrappedAlert<DetectionAlertLatest>> = baseAlerts.map(
+    (block, i): WrappedAlert<DetectionAlertLatest> => ({
       _id: buildingBlockIds[i],
       _index: '',
       _source: {
@@ -134,7 +134,7 @@ export const buildAlertGroupFromSequence = ({
     publicBaseUrl,
     intendedTimestamp,
   });
-  const sequenceAlert: WrappedAlertLatest<EqlShellAlertLatest> = {
+  const sequenceAlert: WrappedAlert<EqlShellAlertLatest> = {
     _id: shellAlert[ALERT_UUID],
     _index: '',
     _source: shellAlert,
@@ -142,7 +142,7 @@ export const buildAlertGroupFromSequence = ({
 
   // Finally, we have the group id from the shell alert so we can convert the BaseFields into EqlBuildingBlocks
   const wrappedBuildingBlocks = wrappedBaseFields.map(
-    (block, i): WrappedAlertLatest<EqlBuildingBlockAlertLatest> => {
+    (block, i): WrappedAlert<EqlBuildingBlockAlertLatest> => {
       const alertUrl = getAlertDetailsUrl({
         alertId: block._id,
         index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
@@ -168,7 +168,7 @@ export const buildAlertGroupFromSequence = ({
 };
 
 export interface BuildAlertRootParams {
-  wrappedBuildingBlocks: Array<WrappedAlertLatest<DetectionAlertLatest>>;
+  wrappedBuildingBlocks: Array<WrappedAlert<DetectionAlertLatest>>;
   completeRule: CompleteRule<RuleParams>;
   spaceId: string | null | undefined;
   buildReasonMessage: BuildReasonMessage;

@@ -13,7 +13,7 @@ import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/s
 import type { SecuritySharedParams, SignalSourceHit } from '../types';
 import type {
   DetectionAlertLatest,
-  WrappedAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
@@ -35,7 +35,7 @@ export const wrapSuppressedAlerts = ({
   events: SignalSourceHit[];
   buildReasonMessage: BuildReasonMessage;
   sharedParams: SecuritySharedParams<MachineLearningRuleParams | EqlRuleParams | ThreatRuleParams>;
-}): Array<WrappedAlertLatest<DetectionAlertLatest & SuppressionFieldsLatest>> => {
+}): Array<WrappedAlert<DetectionAlertLatest & SuppressionFieldsLatest>> => {
   const { completeRule, spaceId, primaryTimestamp, secondaryTimestamp } = sharedParams;
   return events.map((event) => {
     const suppressionTerms = getSuppressionTerms({

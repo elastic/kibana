@@ -10,7 +10,7 @@ import { uniqBy } from 'lodash';
 
 import type {
   DetectionAlertLatest,
-  WrappedAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { EsqlRuleParams } from '../../rule_schema';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
@@ -28,8 +28,8 @@ export const wrapEsqlAlerts = ({
   isRuleAggregating: boolean;
   events: Array<estypes.SearchHit<SignalSource>>;
   expandedFields: string[] | undefined;
-}): Array<WrappedAlertLatest<DetectionAlertLatest>> => {
-  const wrapped = events.map<WrappedAlertLatest<DetectionAlertLatest>>((event, i) => {
+}): Array<WrappedAlert<DetectionAlertLatest>> => {
+  const wrapped = events.map<WrappedAlert<DetectionAlertLatest>>((event, i) => {
     const id = generateAlertId({
       event,
       spaceId: sharedParams.spaceId,

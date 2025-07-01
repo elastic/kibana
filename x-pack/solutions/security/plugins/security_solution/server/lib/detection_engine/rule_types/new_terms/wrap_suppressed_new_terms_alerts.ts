@@ -12,7 +12,7 @@ import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/s
 import type {
   DetectionAlertLatest,
   NewTermsAlertLatest,
-  WrappedAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { ALERT_NEW_TERMS } from '../../../../../common/field_maps/field_names';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
@@ -32,7 +32,7 @@ export const wrapSuppressedNewTermsAlerts = ({
 }: {
   sharedParams: SecuritySharedParams<NewTermsRuleParams>;
   eventsAndTerms: EventsAndTerms[];
-}): Array<WrappedAlertLatest<NewTermsAlertLatest & SuppressionFieldsLatest>> => {
+}): Array<WrappedAlert<NewTermsAlertLatest & SuppressionFieldsLatest>> => {
   return eventsAndTerms.map((eventAndTerms) => {
     const event = eventAndTerms.event;
     const { completeRule, spaceId } = sharedParams;

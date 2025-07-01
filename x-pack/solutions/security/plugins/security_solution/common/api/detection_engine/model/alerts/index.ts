@@ -10,7 +10,7 @@ import type {
   DetectionAlert800,
   DetectionAlertLatest,
   DetectionAlertRead,
-  WrappedAlertLatest,
+  WrappedAlert,
 } from './schema';
 
 import type { NewTermsAlertLatest } from './new_terms_alert_schema';
@@ -25,5 +25,5 @@ export type {
   EqlBuildingBlockAlertLatest,
   EqlShellAlertLatest,
   NewTermsAlertLatest,
-  WrappedAlertLatest,
+  WrappedAlert,
 };

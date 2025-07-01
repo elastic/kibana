@@ -72,7 +72,7 @@ import type {
   DetectionAlert,
   EqlBuildingBlockAlertLatest,
   EqlShellAlertLatest,
-  WrappedAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
@@ -899,16 +899,16 @@ export type RuleWithInMemorySuppression =
 
 export interface SequenceSuppressionTermsAndFieldsParams {
   sharedParams: SecuritySharedParams<EqlRuleParams>;
-  shellAlert: WrappedAlertLatest<EqlShellAlertLatest>;
-  buildingBlockAlerts: Array<WrappedAlertLatest<EqlBuildingBlockAlertLatest>>;
+  shellAlert: WrappedAlert<EqlShellAlertLatest>;
+  buildingBlockAlerts: Array<WrappedAlert<EqlBuildingBlockAlertLatest>>;
 }
 
 export type SequenceSuppressionTermsAndFieldsFactory = (
   shellAlert: WrappedEqlShellOptionalSubAlertsType,
-  buildingBlockAlerts: Array<WrappedAlertLatest<EqlBuildingBlockAlertLatest>>,
+  buildingBlockAlerts: Array<WrappedAlert<EqlBuildingBlockAlertLatest>>,
   buildReasonMessage: BuildReasonMessage
-) => WrappedAlertLatest<EqlShellAlertLatest & SuppressionFieldsLatest> & {
-  subAlerts: Array<WrappedAlertLatest<EqlBuildingBlockAlertLatest>>;
+) => WrappedAlert<EqlShellAlertLatest & SuppressionFieldsLatest> & {
+  subAlerts: Array<WrappedAlert<EqlBuildingBlockAlertLatest>>;
 };
 
 /**
@@ -929,10 +929,10 @@ export const buildShellAlertSuppressionTermsAndFields = ({
   sharedParams,
   shellAlert,
   buildingBlockAlerts,
-}: SequenceSuppressionTermsAndFieldsParams): WrappedAlertLatest<
+}: SequenceSuppressionTermsAndFieldsParams): WrappedAlert<
   EqlShellAlertLatest & SuppressionFieldsLatest
 > & {
-  subAlerts: Array<WrappedAlertLatest<EqlBuildingBlockAlertLatest>>;
+  subAlerts: Array<WrappedAlert<EqlBuildingBlockAlertLatest>>;
 } => {
   const { alertTimestampOverride, primaryTimestamp, secondaryTimestamp, completeRule, spaceId } =
     sharedParams;
