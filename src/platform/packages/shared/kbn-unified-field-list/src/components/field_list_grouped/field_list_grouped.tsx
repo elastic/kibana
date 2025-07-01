@@ -72,7 +72,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   );
   const isInitializedRef = useRef<boolean>(false);
   const [pageSize, setPageSize] = useRestorableState('pageSize', PAGINATION_SIZE);
-  const scrollPositionRef = useRestorableRef('scrollPosition', 0);
+  const scrollTopRef = useRestorableRef('scrollTop', 0);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
   const [storedInitiallyOpenSections, storeInitiallyOpenSections] =
     useLocalStorage<InitiallyOpenSections>(
@@ -113,14 +113,14 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
         return;
       }
       scrollContainer.scrollTop = 0;
-      scrollPositionRef.current = 0;
+      scrollTopRef.current = 0;
       setPageSize(PAGINATION_SIZE);
     }
-  }, [scrollToTopResetCounter, scrollContainer, setPageSize, scrollPositionRef]);
+  }, [scrollToTopResetCounter, scrollContainer, setPageSize, scrollTopRef]);
 
   const lazyScroll = useCallback(() => {
     if (scrollContainer) {
-      if (scrollContainer.scrollTop === scrollPositionRef.current) {
+      if (scrollContainer.scrollTop === scrollTopRef.current) {
         // scroll top was restored to the last position
         return;
       }
@@ -129,7 +129,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
         scrollContainer.scrollTop + scrollContainer.clientHeight >
         scrollContainer.scrollHeight * 0.9;
 
-      scrollPositionRef.current = scrollContainer.scrollTop;
+      scrollTopRef.current = scrollContainer.scrollTop;
 
       if (nearBottom) {
         setPageSize(
@@ -143,7 +143,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
         );
       }
     }
-  }, [scrollContainer, scrollPositionRef, setPageSize, pageSize, fieldGroups, accordionState]);
+  }, [scrollContainer, scrollTopRef, setPageSize, pageSize, fieldGroups, accordionState]);
 
   const paginatedFields = useMemo(() => {
     let remainingItems = pageSize;
@@ -166,11 +166,11 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
       className="unifiedFieldList__fieldListGrouped"
       data-test-subj={`${dataTestSubject}FieldGroups`}
       ref={(el) => {
-        if (el && !el.scrollTop && scrollPositionRef.current) {
+        if (el && !el.scrollTop && scrollTopRef.current) {
           // restore scroll position after restoring the initial ref value
           setTimeout(() => {
             el.scrollTo?.({
-              top: scrollPositionRef.current,
+              top: scrollTopRef.current,
               behavior: 'instant',
             });
           }, 0);
