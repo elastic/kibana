@@ -1905,6 +1905,7 @@
     "oboe": "^2.1.7",
     "openapi-types": "^12.1.3",
     "p-reflect": "2.1.0",
+    "p-timeout": "^6.1.4",
     "peggy": "^4.2.0",
     "picomatch": "^4.0.2",
     "pirates": "^4.0.7",
