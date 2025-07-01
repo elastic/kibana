@@ -1137,6 +1137,85 @@ describe('transformResponse', () => {
     });
   });
 
+  it('should correctly transform the responses with rrule.dtstart field', () => {
+    expect(
+      transformResponse(
+        mockLogger,
+        {
+          ...soResponse,
+          saved_objects: savedObjects.map((so) => ({
+            ...so,
+            attributes: {
+              ...so.attributes,
+              schedule: {
+                ...so.attributes.schedule,
+                rrule: {
+                  ...so.attributes.schedule.rrule,
+                  dtstart: new Date().toISOString(),
+                },
+              },
+            },
+            score: 0,
+          })),
+        },
+        lastRunResponse
+      )
+    ).toEqual({
+      page: 1,
+      per_page: 10,
+      total: 2,
+      data: [
+        {
+          id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+          created_at: '2025-05-06T21:10:17.137Z',
+          created_by: 'elastic',
+          enabled: true,
+          jobtype: 'printable_pdf_v2',
+          last_run: '2025-05-06T12:00:00.500Z',
+          next_run: expect.any(String),
+          payload: jsonPayload,
+          schedule: {
+            rrule: {
+              dtstart: expect.any(String),
+              freq: 3,
+              interval: 3,
+              byhour: [12],
+              byminute: [0],
+              tzid: 'UTC',
+            },
+          },
+          space_id: 'a-space',
+          title: '[Logs] Web Traffic',
+        },
+        {
+          id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+          created_at: '2025-05-06T21:12:06.584Z',
+          created_by: 'not-elastic',
+          enabled: true,
+          jobtype: 'PNGV2',
+          last_run: '2025-05-06T21:12:07.198Z',
+          next_run: expect.any(String),
+          notification: {
+            email: {
+              to: ['user@elastic.co'],
+            },
+          },
+          payload: jsonPayload,
+          title: 'Another cool dashboard',
+          schedule: {
+            rrule: {
+              dtstart: expect.any(String),
+              freq: 1,
+              interval: 3,
+              tzid: 'UTC',
+            },
+          },
+          space_id: 'a-space',
+        },
+      ],
+    });
+  });
+
   it('handles malformed payload', () => {
     const malformedSo = {
       ...savedObjects[0],
