@@ -18,7 +18,7 @@ import {
   type Row,
   type ExpandedState,
 } from '@tanstack/react-table';
-import { useVirtualizer, type VirtualizerOptions } from '@tanstack/react-virtual';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { SelectionDropdown } from './group_selection_combobox/selection_dropdown';
 import {
@@ -37,7 +37,7 @@ import {
   getCascadeRowNodePathValueRecord,
 } from './data_cascade_row';
 
-interface OnCascadeNodeExpandedArgs<G extends GroupNode> {
+interface OnCascadeGroupNodeExpandedArgs<G extends GroupNode> {
   row: Row<G>;
   /**
    * @description The path of the row that was expanded in the group by hierarchy.
@@ -45,7 +45,7 @@ interface OnCascadeNodeExpandedArgs<G extends GroupNode> {
   nodePath: string[];
 }
 
-interface OnCascadeLeafExpandedArgs<G extends GroupNode> {
+interface OnCascadeLeafNodeExpandedArgs<G extends GroupNode> {
   row: Row<G>;
   /**
    * @description The path of the row that was expanded in the group by hierarchy.
@@ -62,7 +62,7 @@ export interface DataCascadeImplProps<G extends GroupNode, L extends LeafNode>
       CascadeRowCellProps<G, L>,
       'rowHeaderTitleSlot' | 'rowHeaderMetaSlots' | 'leafContentSlot'
     >,
-    Pick<VirtualizerOptions<HTMLElement, HTMLElement>, 'overscan'> {
+    Pick<Parameters<typeof useVirtualizer>[0], 'overscan'> {
   /**
    * @description The data to be displayed in the cascade. It should be an array of group nodes.
    */
@@ -74,11 +74,11 @@ export interface DataCascadeImplProps<G extends GroupNode, L extends LeafNode>
   /**
    * @description Callback function that is called when a cascade node is expanded.
    */
-  onCascadeNodeExpanded: (args: OnCascadeNodeExpandedArgs<G>) => Promise<G[]>;
+  onCascadeGroupNodeExpanded: (args: OnCascadeGroupNodeExpandedArgs<G>) => Promise<G[]>;
   /**
    * @description Callback function for leaf expansion, which can be used to fetch data for leaf nodes.
    */
-  onCascadeLeafExpanded: (args: OnCascadeLeafExpandedArgs<G>) => Promise<L[]>;
+  onCascadeLeafNodeExpanded: (args: OnCascadeLeafNodeExpandedArgs<G>) => Promise<L[]>;
   /**
    * @description The spacing size of the component, can be 's' (small), 'm' (medium), or 'l' (large). Default is 'm'.
    */
@@ -86,23 +86,25 @@ export interface DataCascadeImplProps<G extends GroupNode, L extends LeafNode>
   tableTitleSlot: React.FC<{ rows: Array<Row<G>> }>;
 }
 
-export function DataCascadeImpl<T extends GroupNode, L extends LeafNode>({
+export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   data,
   onCascadeGroupingChange,
-  onCascadeNodeExpanded,
-  onCascadeLeafExpanded,
+  onCascadeGroupNodeExpanded,
+  onCascadeLeafNodeExpanded,
   rowHeaderTitleSlot,
   rowHeaderMetaSlots,
   leafContentSlot,
   size = 'm',
   tableTitleSlot: TableTitleSlot,
   overscan = 10,
-}: DataCascadeImplProps<T, L>) {
+}: DataCascadeImplProps<G, L>) {
   // The scrollable element for your list
   const parentRef = React.useRef(null);
+  const virtualizerItemSizeRef = React.useRef<Map<number, number>>(new Map());
+  const headerRowTranslationValueRef = React.useRef(0);
   const dispatch = useDataCascadeDispatch();
-  const state = useDataCascadeState<T, L>();
-  const columnHelper = createColumnHelper<T>();
+  const state = useDataCascadeState<G, L>();
+  const columnHelper = createColumnHelper<G>();
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
 
   useEffect(() => {
@@ -113,9 +115,9 @@ export function DataCascadeImpl<T extends GroupNode, L extends LeafNode>({
   }, [data, dispatch]);
 
   const fetchGroupNodeData = useCallback(
-    ({ row }: { row: Row<T> }) => {
+    ({ row }: { row: Row<G> }) => {
       const dataFetchFn = async () => {
-        const groupNodeData = await onCascadeNodeExpanded({
+        const groupNodeData = await onCascadeGroupNodeExpanded({
           row,
           nodePath: getCascadeRowNodePath(state.currentGroupByColumns, row),
         });
@@ -135,16 +137,16 @@ export function DataCascadeImpl<T extends GroupNode, L extends LeafNode>({
         console.error('Error fetching data for row with ID: %s', row.id, error);
       });
     },
-    [dispatch, onCascadeNodeExpanded, state.currentGroupByColumns]
+    [dispatch, onCascadeGroupNodeExpanded, state.currentGroupByColumns]
   );
 
   const fetchGroupLeafData = useCallback(
-    ({ row }: { row: Row<T> }) => {
+    ({ row }: { row: Row<G> }) => {
       const nodePath = getCascadeRowNodePath(state.currentGroupByColumns, row);
       const nodePathMap = getCascadeRowNodePathValueRecord(state.currentGroupByColumns, row);
 
       const dataFetchFn = async () => {
-        const groupLeafData = await onCascadeLeafExpanded({
+        const groupLeafData = await onCascadeLeafNodeExpanded({
           row,
           nodePathMap,
           nodePath,
@@ -168,10 +170,10 @@ export function DataCascadeImpl<T extends GroupNode, L extends LeafNode>({
         console.error('Error fetching data for leaf node', error);
       });
     },
-    [dispatch, onCascadeLeafExpanded, state.currentGroupByColumns]
+    [dispatch, onCascadeLeafNodeExpanded, state.currentGroupByColumns]
   );
 
-  const table = useReactTable<T>({
+  const table = useReactTable<G>({
     data: state.groupNodes,
     state: {
       expanded,
@@ -200,7 +202,7 @@ export function DataCascadeImpl<T extends GroupNode, L extends LeafNode>({
           }, props),
         cell: React.memo((props) => {
           return (
-            <CascadeRowCell<T, L>
+            <CascadeRowCell<G, L>
               {...{
                 ...props,
                 rowHeaderTitleSlot,
@@ -216,13 +218,13 @@ export function DataCascadeImpl<T extends GroupNode, L extends LeafNode>({
     getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => row.id,
     getRowCanExpand: useCallback(
-      (row: Row<T>) => {
+      (row: Row<G>) => {
         // only allow expanding rows up until the depth of the current group by columns
         return row.depth < state.currentGroupByColumns.length;
       },
       [state.currentGroupByColumns.length]
     ),
-    getSubRows: (row) => row.children as T[],
+    getSubRows: (row) => row.children as G[],
     getExpandedRowModel: getExpandedRowModel(),
     onExpandedChange: setExpanded,
   });
@@ -267,7 +269,7 @@ export function DataCascadeImpl<T extends GroupNode, L extends LeafNode>({
                     {rowVirtualizer.getVirtualItems().map(function buildCascadeRows(virtualItem) {
                       const row = rows[virtualItem.index];
                       return (
-                        <CascadeRow<T>
+                        <CascadeRow<G>
                           key={virtualItem.key}
                           populateGroupNodeDataFn={fetchGroupNodeData}
                           rowInstance={row}
