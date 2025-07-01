@@ -47,9 +47,7 @@ describe('BenefitsCallout', () => {
     const callout = await screen.findByTestId('benefitsCallout');
 
     expect(callout).toBeInTheDocument();
-    expect(callout).toHaveTextContent(
-      'Use your Platinum license benefits insteadSubmit issues and enhancement requests using your dedicated support channel. If your feedback is not urgent, you may still use this form.'
-    );
+    expect(callout).toHaveTextContent('Use your Platinum license benefits instead');
   });
 
   it('does not render callout for trial license type', async () => {
