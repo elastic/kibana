@@ -21,9 +21,9 @@ import {
 import type { AiopsPluginStartDeps } from '../types';
 
 export function registerCases(
-  cases?: CasesPublicSetup,
   coreStart: CoreStart,
-  pluginStart: AiopsPluginStartDeps
+  pluginStart: AiopsPluginStartDeps,
+  cases?: CasesPublicSetup
 ) {
   if (!cases) {
     return;
