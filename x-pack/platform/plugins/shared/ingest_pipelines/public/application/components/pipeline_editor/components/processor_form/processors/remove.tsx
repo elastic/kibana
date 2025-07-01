@@ -57,7 +57,7 @@ const getFieldConfig = (
       helpText: i18n.translate(
         'xpack.ingestPipelines.pipelineEditor.removeForm.fieldNameHelpText',
         {
-          defaultMessage: 'Fields to remove.',
+          defaultMessage: 'You can use plain text or template snippets.',
         }
       ),
       validations: [
@@ -83,7 +83,7 @@ const getFieldConfig = (
         <EuiLink onClick={toggleField} data-test-subj="toggleRemoveField">
           <FormattedMessage
             id="xpack.ingestPipelines.pipelineEditor.removeForm.defineFieldsToKeepLabel"
-            defaultMessage="Define fields to be kept"
+            defaultMessage="Define fields to keep instead"
           />
         </EuiLink>
       </EuiText>
@@ -98,10 +98,10 @@ const getFieldConfig = (
       serializer: (v: string[]) => (v.length === 1 ? v[0] : v),
       fieldsToValidateOnChange: ['fields.field', 'fields.keep'],
       label: i18n.translate('xpack.ingestPipelines.pipelineEditor.removeForm.keepNameField', {
-        defaultMessage: 'Fields to be kept',
+        defaultMessage: 'Fields to keep',
       }),
       helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.removeForm.keepNameHelpText', {
-        defaultMessage: 'When set, all fields other than those specified will be removed.',
+        defaultMessage: 'All fields other than those specified will be removed.',
       }),
       validations: [
         {
@@ -126,7 +126,7 @@ const getFieldConfig = (
         <EuiLink onClick={toggleField} data-test-subj="toggleRemoveField">
           <FormattedMessage
             id="xpack.ingestPipelines.pipelineEditor.removeForm.defineFieldsToRemoveLabel"
-            defaultMessage="Define fields to be removed"
+            defaultMessage="Define fields to remove instead"
           />
         </EuiLink>
       </EuiText>
