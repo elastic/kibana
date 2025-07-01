@@ -17,8 +17,10 @@ import {
   EuiIconTip,
   EuiLink,
   EuiSpacer,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import { durationToNumber, REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
 
