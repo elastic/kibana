@@ -121,7 +121,7 @@ export const nextActionMap = (
     CHECK_CLUSTER_ROUTING_ALLOCATION: () => Actions.checkClusterRoutingAllocationEnabled(client),
     CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION: () =>
       Actions.checkClusterRoutingAllocationEnabled(client),
-    REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION: () =>
+    RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION: () =>
       Actions.checkClusterRoutingAllocationEnabled(client),
     CHECK_UNKNOWN_DOCUMENTS: (state: CheckUnknownDocumentsState) =>
       Actions.checkForUnknownDocs({

@@ -57,7 +57,7 @@
   - [SET\_SOURCE\_WRITE\_BLOCK](#set_source_write_block)
     - [Next action](#next-action-18)
     - [New control state](#new-control-state-17)
-  - [REINDEX\_CHECK\_CLUSTER\_ROUTING\_ALLOCATION](#reindex_check_cluster_routing_allocation)
+  - [RELOCATE\_CHECK\_CLUSTER\_ROUTING\_ALLOCATION](#relocate_check_cluster_routing_allocation)
     - [Next action](#next-action-20)
     - [New control state](#new-control-state-19)
   - [REINDEX\_SOURCE\_TO\_TEMP\_OPEN\_PIT](#reindex_source_to_temp_open_pit)
@@ -607,7 +607,7 @@ Set a write block on the source index to prevent any older Kibana instances from
 
 → [CREATE_REINDEX_TEMP](#create_reindex_temp)
 
-## REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION
+## RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION
 
 ### Next action
 
@@ -627,7 +627,7 @@ If replica allocation is set to 'all', the migration continues to fetch the save
 
 2. If it has a value that will not allow creating new *saved object* indices.
 
-    → [REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION](#reindex_check_cluster_routing_allocation)
+    → [RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION](#relocate_check_cluster_routing_allocation)
 
 ## CREATE_REINDEX_TEMP
 

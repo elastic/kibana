@@ -163,8 +163,8 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
     // '.kibana_migrator_split' is a new index, all nodes' migrators must attempt to create it
     expect(logs).toContainLogEntries(
       [
-        `[${kibanaSplitIndex}] INIT -> REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION.`,
-        `[${kibanaSplitIndex}] REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION -> CREATE_REINDEX_TEMP.`,
+        `[${kibanaSplitIndex}] INIT -> RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION.`,
+        `[${kibanaSplitIndex}] RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION -> CREATE_REINDEX_TEMP.`,
         `[${kibanaSplitIndex}] CREATE_REINDEX_TEMP -> READY_TO_REINDEX_SYNC.`,
         // no docs to reindex, as source index did NOT exist
         `[${kibanaSplitIndex}] READY_TO_REINDEX_SYNC -> DONE_REINDEXING_SYNC.`,

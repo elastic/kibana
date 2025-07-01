@@ -324,8 +324,8 @@ export interface CreateNewTargetState extends PostInitState {
   readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
 }
 
-export interface ReindexCheckClusterRoutingAllocationState extends PostInitState {
-  readonly controlState: 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION';
+export interface RelocateCheckClusterRoutingAllocationState extends PostInitState {
+  readonly controlState: 'RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION';
 }
 
 export interface CreateReindexTempState extends PostInitState {
@@ -602,7 +602,7 @@ export type State = Readonly<
   | ReadyToReindexSyncState
   | RefreshSource
   | RefreshTarget
-  | ReindexCheckClusterRoutingAllocationState
+  | RelocateCheckClusterRoutingAllocationState
   | ReindexSourceToTempClosePit
   | ReindexSourceToTempIndexBulk
   | ReindexSourceToTempOpenPit

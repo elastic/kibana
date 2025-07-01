@@ -258,7 +258,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       return {
         ...stateP,
         ...postInitState,
-        controlState: 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION',
+        controlState: 'RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION',
         sourceIndex: Option.none as Option.None,
         targetIndex: newVersionTarget,
         versionIndexReadyActions: Option.some([
@@ -297,7 +297,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         throwBadResponse(stateP, left);
       }
     }
-  } else if (stateP.controlState === 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION') {
+  } else if (stateP.controlState === 'RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return {
