@@ -255,6 +255,10 @@ export function getWebpackConfig(
           test: /\.peggy$/,
           loader: require.resolve('@kbn/peggy-loader'),
         },
+        {
+          test: /\.text$/,
+          loader: require.resolve('@kbn/dot-text-loader'),
+        },
         // emits a separate file and exports the URL. Previously achievable by using file-loader.
         {
           include: [
