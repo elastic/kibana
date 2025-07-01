@@ -12,7 +12,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SampleDocument } from '@kbn/streams-schema';
-import React, { useMemo, useState, useCallback, useRef } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { recalcColumnWidths } from '../stream_detail_enrichment/utils';
 import { SimulationContext } from '../stream_detail_enrichment/state_management/simulation_state_machine';
 
@@ -107,7 +107,6 @@ export function PreviewTable({
   }, [setSorting, sorting]);
 
   const [columnWidths, setColumnWidths] = useState<Record<string, number | undefined>>({});
-  const gridWrapperRef = useRef<HTMLDivElement | null>(null);
 
   // Derive visibleColumns from canonical order
   const visibleColumns = useMemo(() => {
@@ -118,13 +117,12 @@ export function PreviewTable({
   }, [canonicalColumnOrder, displayColumns]);
 
   const onColumnResize = useCallback(
-    ({ columnId, width }: { columnId: string; width: number }) => {
+    ({ columnId, width }: { columnId: string; width: number | undefined }) => {
       setColumnWidths((prev) => {
         const updated = recalcColumnWidths({
           columnId,
           width,
           prevWidths: prev,
-          containerWidth: gridWrapperRef.current ? gridWrapperRef.current.offsetWidth : 0,
           visibleColumns,
         });
         return updated;
@@ -152,7 +150,7 @@ export function PreviewTable({
   }, [canonicalColumnOrder, setSorting, setVisibleColumns, columnWidths]);
 
   return (
-    <div ref={gridWrapperRef}>
+    <div>
       <EuiDataGrid
         aria-label={i18n.translate('xpack.streams.resultPanel.euiDataGrid.previewLabel', {
           defaultMessage: 'Preview',

@@ -47,11 +47,9 @@ interface FormStateDependencies {
 }
 interface RecalcColumnWidthsParams {
   columnId: string;
-  width: number;
+  width: number | undefined; // undefined -> reset width
   prevWidths: Record<string, number | undefined>;
-  containerWidth: number;
   visibleColumns: string[];
-  minLastColWidth?: number;
 }
 
 const PRIORITIZED_CONTENT_FIELDS = [
@@ -377,35 +375,19 @@ export const recalcColumnWidths = ({
   columnId,
   width,
   prevWidths,
-  containerWidth,
   visibleColumns,
-  minLastColWidth = 100,
 }: RecalcColumnWidthsParams): Record<string, number | undefined> => {
-  const updated = { ...prevWidths, [columnId]: width };
-
-  if (containerWidth <= 0 || visibleColumns.length === 0) {
-    return updated;
-  }
-
-  const lastIdx = visibleColumns.length - 1;
-  const lastCol = visibleColumns[lastIdx];
-  const fillerCol = columnId === lastCol && lastIdx > 0 ? visibleColumns[lastIdx - 1] : lastCol;
-
-  const totalExplicit = visibleColumns.reduce((sum, col) => {
-    if (col === fillerCol) {
-      return sum;
-    }
-    return sum + (updated[col] ?? 0);
-  }, 0);
-
-  const slack = containerWidth - totalExplicit;
-
-  if (slack <= 0) {
-    const current = updated[fillerCol] ?? containerWidth;
-    updated[fillerCol] = Math.max(current + slack, minLastColWidth);
+  const next = { ...prevWidths };
+  if (width === undefined) {
+    delete next[columnId];
   } else {
-    delete updated[fillerCol];
+    next[columnId] = width;
   }
 
-  return updated;
+  const allExplicit = visibleColumns.every((c) => next[c] !== undefined);
+  if (allExplicit) {
+    delete next[visibleColumns[visibleColumns.length - 1]];
+  }
+
+  return next;
 };
