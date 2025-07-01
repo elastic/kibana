@@ -438,7 +438,7 @@ export interface SavedObjectsClientContract {
   asScopedToNamespace(namespace: string): SavedObjectsClientContract;
 
   /**
-   * Updates an SavedObject
+   * Changes the ownership of one or more SavedObjects to a new owner.
    *
    * @param type - The type of SavedObject to update
    * @param id - The ID of the SavedObject to update
