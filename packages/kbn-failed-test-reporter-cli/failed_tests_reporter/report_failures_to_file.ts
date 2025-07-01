@@ -11,7 +11,7 @@ import Path from 'path';
 import Fs from 'fs';
 import { createHash } from 'crypto';
 
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { escape } from 'he';
@@ -77,7 +77,7 @@ function getAllScreenshots(log: ToolingLog) {
 }
 function findAllScreenshots(log: ToolingLog) {
   try {
-    return globby
+    return fastGlob
       .sync(
         [
           'src/platform/test/functional/**/screenshots/failure/*.png',

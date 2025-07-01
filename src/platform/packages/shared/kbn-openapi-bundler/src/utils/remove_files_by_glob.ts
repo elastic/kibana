@@ -8,7 +8,7 @@
  */
 
 import fs from 'fs/promises';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import { resolve } from 'path';
 
 /**
@@ -18,7 +18,7 @@ import { resolve } from 'path';
  * @param globPattern files pattern to remove
  */
 export async function removeFilesByGlob(path: string, globPattern: string): Promise<void> {
-  const filesToRemove = await globby([resolve(path, globPattern)]);
+  const filesToRemove = await fastGlob([resolve(path, globPattern)]);
 
   await Promise.all(filesToRemove.map((fileName) => fs.unlink(fileName)));
 }

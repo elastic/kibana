@@ -13,7 +13,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import normalize from 'normalize-path';
 import { getFailures } from './get_failures';
 import { GithubApi } from './github_api';
@@ -92,7 +92,7 @@ run(
         normalize(Path.resolve(p))
       );
       log.info('Searching for reports at', patterns);
-      const reportPaths = await globby(patterns, {
+      const reportPaths = await fastGlob(patterns, {
         absolute: true,
       });
 

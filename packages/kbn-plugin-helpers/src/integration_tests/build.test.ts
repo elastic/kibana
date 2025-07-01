@@ -15,7 +15,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/jest-serializers';
 import extract from 'extract-zip';
 import del from 'del';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import loadJsonFile from 'load-json-file';
 
 const PLUGIN_DIR = Path.resolve(REPO_ROOT, 'plugins/foo_test_plugin');
@@ -84,7 +84,7 @@ it('builds a generated plugin into a viable archive', async () => {
 
   await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR });
 
-  const files = await globby(['**/*'], { cwd: TMP_DIR, dot: true });
+  const files = await fastGlob(['**/*'], { cwd: TMP_DIR, dot: true });
   files.sort((a, b) => a.localeCompare(b));
 
   expect(files).toMatchInlineSnapshot(`

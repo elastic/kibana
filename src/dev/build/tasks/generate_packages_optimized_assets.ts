@@ -21,7 +21,7 @@ import gulpTerser from 'gulp-terser';
 import { ToolingLog } from '@kbn/tooling-log';
 import terser from 'terser';
 import vfs from 'vinyl-fs';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import del from 'del';
 import zlib from 'zlib';
 
@@ -101,7 +101,7 @@ const getCategory = (relative: string) => {
 
 function categorizeAssets(assetDirs: string[]) {
   const assets = assetDirs.flatMap((assetDir) =>
-    globby
+    fastGlob
       .sync(['**/*'], {
         cwd: assetDir,
         ignore: ['*-manifest.json', '*.gz', '*.br'],

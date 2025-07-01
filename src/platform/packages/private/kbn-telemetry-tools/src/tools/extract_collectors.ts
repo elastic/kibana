@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import * as path from 'path';
 import { parseUsageCollection } from './ts_parser';
 import { TelemetryRC } from './config';
@@ -17,7 +17,7 @@ export async function getProgramPaths({
   root,
   exclude,
 }: Pick<TelemetryRC, 'root' | 'exclude'>): Promise<string[]> {
-  const filePaths = await globby(
+  const filePaths = await fastGlob(
     [
       '**/*.ts',
       '!**/node_modules/**',

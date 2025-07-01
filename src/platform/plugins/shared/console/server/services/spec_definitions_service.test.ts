@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import fs from 'fs';
 import { SpecDefinitionsService } from '.';
 import type { EndpointDefinition, EndpointsAvailability } from '../../common/types';
 
 const mockReadFileSync = jest.spyOn(fs, 'readFileSync');
-const mockGlobbySync = jest.spyOn(globby, 'sync');
+const mockFastGlobSync = jest.spyOn(fastGlob, 'sync');
 const mockJsLoadersGetter = jest.fn();
 
 jest.mock('../lib', () => {
@@ -56,7 +56,7 @@ describe('SpecDefinitionsService', () => {
   });
   beforeEach(() => {
     // mock the function that lists files in the definitions folders
-    mockGlobbySync.mockImplementation(() => []);
+    mockFastGlobSync.mockImplementation(() => []);
     // mock the function that reads files
     mockReadFileSync.mockImplementation(() => '');
     // mock the function that returns the list of js definitions loaders
@@ -111,7 +111,7 @@ describe('SpecDefinitionsService', () => {
   });
 
   it('loads generated endpoints definition', () => {
-    mockGlobbySync.mockImplementation((pattern) => {
+    mockFastGlobSync.mockImplementation((pattern) => {
       if (pattern.includes('generated')) {
         return ['/generated/endpoint1.json', '/generated/endpoint2.json'];
       }
@@ -153,7 +153,7 @@ describe('SpecDefinitionsService', () => {
   });
 
   it('overrides an endpoint if override file is present', () => {
-    mockGlobbySync.mockImplementation((pattern) => {
+    mockFastGlobSync.mockImplementation((pattern) => {
       if (pattern.includes('generated')) {
         return ['/generated/endpoint1.json', '/generated/endpoint2.json'];
       }
@@ -213,7 +213,7 @@ describe('SpecDefinitionsService', () => {
   });
 
   it('loads manual definitions if any', () => {
-    mockGlobbySync.mockImplementation((pattern) => {
+    mockFastGlobSync.mockImplementation((pattern) => {
       if (pattern.includes('manual')) {
         return ['manual_endpoint.json'];
       }
@@ -241,7 +241,7 @@ describe('SpecDefinitionsService', () => {
   });
 
   it("manual definitions don't override generated files even when the same endpoint name is used", () => {
-    mockGlobbySync.mockImplementation((pattern) => {
+    mockFastGlobSync.mockImplementation((pattern) => {
       if (pattern.includes('generated')) {
         return ['generated_endpoint.json'];
       }
@@ -282,7 +282,7 @@ describe('SpecDefinitionsService', () => {
   });
 
   it('filters out endpoints not available in stack', () => {
-    mockGlobbySync.mockImplementation((pattern) => {
+    mockFastGlobSync.mockImplementation((pattern) => {
       if (pattern.includes('generated')) {
         return ['/generated/endpoint1.json', '/generated/endpoint2.json'];
       }
@@ -324,7 +324,7 @@ describe('SpecDefinitionsService', () => {
   });
 
   it('filters out endpoints not available in serverless', () => {
-    mockGlobbySync.mockImplementation((pattern) => {
+    mockFastGlobSync.mockImplementation((pattern) => {
       if (pattern.includes('generated')) {
         return ['/generated/endpoint1.json', '/generated/endpoint2.json'];
       }

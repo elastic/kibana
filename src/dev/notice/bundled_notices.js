@@ -10,11 +10,11 @@
 import { resolve } from 'path';
 import { readFile } from 'fs/promises';
 
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 
 export async function getBundledNotices(packageDirectory) {
   const pattern = resolve(packageDirectory, '*{LICENSE,NOTICE}*');
-  const paths = await globby(pattern);
+  const paths = await fastGlob(pattern);
   return Promise.all(
     paths.map(async (path) => ({
       path,

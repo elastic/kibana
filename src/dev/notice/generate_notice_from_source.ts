@@ -9,7 +9,7 @@
 
 import { readFile } from 'fs/promises';
 import { relative } from 'path';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 
 import { ToolingLog } from '@kbn/tooling-log';
 
@@ -51,7 +51,7 @@ export async function generateNoticeFromSource({ productName, directory, log }: 
 
   log.info(`Searching ${directory} for multi-line comments starting with @notice`);
 
-  const files = globby.stream(select, {
+  const files = fastGlob.stream(select, {
     cwd: directory,
     followSymbolicLinks: false,
     absolute: true,

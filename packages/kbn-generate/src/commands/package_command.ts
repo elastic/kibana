@@ -12,7 +12,7 @@ import Path from 'path';
 
 import inquirer from 'inquirer';
 import normalizePath from 'normalize-path';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import { ESLint } from 'eslint';
 
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -182,7 +182,7 @@ export const PackageCommand: GenerateCommand = {
       }
     }
 
-    const templateFiles = await globby('**/*', {
+    const templateFiles = await fastGlob('**/*', {
       cwd: PKG_TEMPLATE_DIR,
       absolute: false,
       dot: true,

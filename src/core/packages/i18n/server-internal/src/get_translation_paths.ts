@@ -8,7 +8,7 @@
  */
 
 import { resolve, dirname } from 'path';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import { readFile } from 'fs/promises';
 
 interface I18NRCFileStructure {
@@ -19,7 +19,7 @@ const I18N_RC = '.i18nrc.json';
 
 export async function getTranslationPaths({ cwd, nested }: { cwd: string; nested: boolean }) {
   const glob = nested ? `*/${I18N_RC}` : I18N_RC;
-  const entries = await globby(glob, { cwd, dot: true });
+  const entries = await fastGlob(glob, { cwd, dot: true });
   const translationPaths: string[] = [];
 
   for (const entry of entries) {

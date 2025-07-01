@@ -11,7 +11,7 @@ import { relative } from 'path';
 import Fs from 'fs';
 import { createGunzip, createGzip, constants } from 'zlib';
 import { promisify } from 'util';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import { ToolingLog } from '@kbn/tooling-log';
 import { createPromiseFromStreams } from '@kbn/utils';
 
@@ -27,7 +27,7 @@ export async function editAction({
   handler: () => Promise<any>;
 }) {
   const archives = (
-    await globby('**/*.gz', {
+    await fastGlob('**/*.gz', {
       cwd: path,
       absolute: true,
     })

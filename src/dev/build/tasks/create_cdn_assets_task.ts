@@ -17,7 +17,7 @@ import { getKibanaTranslationFiles, supportedLocale } from '@kbn/core-i18n-serve
 import { i18n, i18nLoader } from '@kbn/i18n';
 
 import del from 'del';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 
 import { mkdirp, compressTar, Task, copyAll, write } from '../lib';
 
@@ -34,7 +34,7 @@ export const CreateCdnAssets: Task = {
     await del(assets);
     await mkdirp(assets);
 
-    const plugins = globby.sync([`${buildSource}/node_modules/@kbn/**/*/kibana.jsonc`]);
+    const plugins = fastGlob.sync([`${buildSource}/node_modules/@kbn/**/*/kibana.jsonc`]);
 
     // translation files
     const pluginPaths = plugins.map((plugin) => resolve(dirname(plugin)));

@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import { ImportResolver } from '@kbn/import-resolver';
 import { ImportLocator } from '@kbn/import-locator';
 import { readPackageMap, Package, PluginPackage } from '@kbn/repo-packages';
@@ -49,7 +49,7 @@ export async function findUsedDependencies(
             ? Path.resolve(repoRoot, p.normalizedRepoRelativeDir, 'server/index.js')
             : []
         ),
-        ...(await globby(
+        ...(await fastGlob(
           [
             // main code entries
             'src/cli*/dist.js',

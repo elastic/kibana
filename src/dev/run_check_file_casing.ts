@@ -7,19 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { run } from '@kbn/dev-cli-runner';
+import { readGitignore } from './globs';
 import { File } from './file';
 import { checkFileCasing } from './precommit_hook/check_file_casing';
 
 run(async ({ log }) => {
-  const paths = await globby('**/*', {
+  const gitignore = readGitignore(REPO_ROOT);
+
+  const paths = await fastGlob('**/*', {
     cwd: REPO_ROOT,
     onlyFiles: true,
-    gitignore: true,
     ignore: [
+      // read and include patterns from .gitignore
+      ...gitignore,
+
       // the gitignore: true option makes sure that we don't
       // include files from node_modules in the result, but it still
       // loads all of the files from node_modules before filtering
@@ -40,7 +45,7 @@ run(async ({ log }) => {
     ],
   });
 
-  const files = paths.map((path) => new File(path));
+  const files = paths.map((p) => new File(p));
 
   await checkFileCasing(log, files);
 });

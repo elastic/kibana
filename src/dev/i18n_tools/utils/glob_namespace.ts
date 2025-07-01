@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import path from 'path';
 
 export interface Options {
@@ -31,7 +31,7 @@ export async function globTranslationFiles(fileRoot: string, options: Options = 
     .concat(additionalIgnore)
     .map((i) => `!${i}`);
 
-  const entries = await globby(['*.{js,jsx,ts,tsx}', ...ignore], {
+  const entries = await fastGlob(['*.{js,jsx,ts,tsx}', ...ignore], {
     cwd: fileRoot,
     baseNameMatch: true,
     markDirectories: mark,

@@ -13,7 +13,7 @@ import del from 'del';
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 
 const GENERATED_DIR = Path.resolve(REPO_ROOT, `plugins`);
 
@@ -33,7 +33,7 @@ it('generates a plugin', async () => {
     buffer: true,
   });
 
-  const paths = await globby('**/*', {
+  const paths = await fastGlob('**/*', {
     cwd: GENERATED_DIR,
     absolute: true,
     dot: true,
@@ -71,7 +71,7 @@ it('generates a plugin without UI', async () => {
     buffer: true,
   });
 
-  const paths = await globby('**/*', {
+  const paths = await fastGlob('**/*', {
     cwd: GENERATED_DIR,
     absolute: true,
     dot: true,
@@ -104,7 +104,7 @@ it('generates a plugin without server plugin', async () => {
     buffer: true,
   });
 
-  const paths = await globby('**/*', {
+  const paths = await fastGlob('**/*', {
     cwd: GENERATED_DIR,
     absolute: true,
     dot: true,

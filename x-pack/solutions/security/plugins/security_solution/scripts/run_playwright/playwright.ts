@@ -8,7 +8,7 @@
 import { run } from '@kbn/dev-cli-runner';
 import yargs from 'yargs';
 import _ from 'lodash';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import pMap from 'p-map';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import path from 'path';
@@ -77,7 +77,7 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
       const specConfig = playwrightConfigFile.testMatch;
       const specArg = argv.spec;
       const specPattern = specArg ?? specConfig;
-      const files = retrieveIntegrations(globby.sync(specPattern));
+      const files = retrieveIntegrations(fastGlob.sync(specPattern));
       const esPorts: number[] = [9200, 9220];
       const kibanaPorts: number[] = [5601, 5620];
       const fleetServerPorts: number[] = [8220];

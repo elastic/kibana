@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fs from 'fs';
+import path from 'path';
 import minimatch from 'minimatch';
 
 export function matchesAnyGlob(path, globs) {
@@ -15,4 +17,17 @@ export function matchesAnyGlob(path, globs) {
       dot: true,
     })
   );
+}
+
+export function readGitignore(rootPath) {
+  const gitignorePath = path.join(rootPath, '.gitignore');
+  try {
+    return fs
+      .readFileSync(gitignorePath, 'utf8')
+      .split('\n')
+      .filter((line) => line.trim() && !line.startsWith('#'))
+      .map((line) => line.trim());
+  } catch (error) {
+    return [];
+  }
 }

@@ -11,7 +11,7 @@ import { join } from 'path';
 import { writeFileSync, existsSync, mkdirSync } from 'fs';
 
 import sinon from 'sinon';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import del from 'del';
 
 import { Logger } from '../../cli/logger';
@@ -83,7 +83,7 @@ describe('kibana cli', function () {
       mkdirSync(join(pluginDir, 'bar'), { recursive: true });
 
       remove(settings, logger);
-      const files = globby.sync('**/*', { cwd: pluginDir, onlyFiles: false });
+      const files = fastGlob.sync('**/*', { cwd: pluginDir, onlyFiles: false });
       const expected = ['bar'];
       expect(files.sort()).toEqual(expected.sort());
     });

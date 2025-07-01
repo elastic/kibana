@@ -11,12 +11,13 @@ import fs from 'fs';
 import { readFile, writeFile } from 'fs/promises';
 import { resolve } from 'path';
 
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import yaml from 'js-yaml';
 
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
+import { readGitignore } from '../globs';
 
 interface BuildkiteStepFull {
   agents: { queue: string };
@@ -81,10 +82,11 @@ run(
   async ({ log, flags, flagsReader }) => {
     const filterExpressions = flagsReader.getPositionals();
 
-    const paths = await globby('.buildkite/**/*.yml', {
+    const gitignore = readGitignore(REPO_ROOT);
+    const paths = await fastGlob('.buildkite/**/*.yml', {
       cwd: REPO_ROOT,
       onlyFiles: true,
-      gitignore: true,
+      ignore: [...gitignore],
     });
 
     const pathsFiltered =

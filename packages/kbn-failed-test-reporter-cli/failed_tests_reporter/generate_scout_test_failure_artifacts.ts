@@ -9,7 +9,7 @@
 
 import Path from 'path';
 
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import fs from 'fs';
 import { createHash } from 'crypto';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -27,7 +27,7 @@ export async function generateScoutTestFailureArtifacts({
 }) {
   log.info('Searching for Scout test failure reports');
 
-  const dirs = await globby(SCOUT_TEST_FAILURE_DIR_PATTERN, {
+  const dirs = await fastGlob(SCOUT_TEST_FAILURE_DIR_PATTERN, {
     onlyDirectories: true,
   });
 

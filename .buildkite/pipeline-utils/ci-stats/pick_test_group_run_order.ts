@@ -9,7 +9,7 @@
 
 import * as Fs from 'fs';
 
-import * as globby from 'globby';
+import * as fastGlob from 'fast-glob';
 import minimatch from 'minimatch';
 
 import { load as loadYaml } from 'js-yaml';
@@ -284,7 +284,7 @@ export async function pickTestGroupRunOrder() {
   if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
 
   const jestUnitConfigs = LIMIT_CONFIG_TYPE.includes('unit')
-    ? globby.sync(['**/jest.config.js', '!**/__fixtures__/**'], {
+    ? fastGlob.sync(['**/jest.config.js', '!**/__fixtures__/**'], {
         cwd: process.cwd(),
         absolute: false,
         ignore: DISABLED_JEST_CONFIGS,
@@ -292,7 +292,7 @@ export async function pickTestGroupRunOrder() {
     : [];
 
   const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
-    ? globby.sync(['**/jest.integration.config.js', '!**/__fixtures__/**'], {
+    ? fastGlob.sync(['**/jest.integration.config.js', '!**/__fixtures__/**'], {
         cwd: process.cwd(),
         absolute: false,
         ignore: DISABLED_JEST_CONFIGS,

@@ -7,22 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
+import { readGitignore } from './globs';
 
 function listPaths(filePaths: string[]) {
   return filePaths.map((filePath: string) => ` - ${filePath}`).join('\n');
 }
 
 run(async ({ log }) => {
-  const filePaths = await globby('**/.prettierrc*', {
+  const gitignore = readGitignore(REPO_ROOT);
+  const filePaths = await fastGlob('**/.prettierrc*', {
     cwd: REPO_ROOT,
     onlyFiles: true,
-    gitignore: true,
     ignore: [
+      ...gitignore,
       // the gitignore: true option makes sure that we don't
       // include files from node_modules in the result, but it still
       // loads all of the files from node_modules before filtering

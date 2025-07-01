@@ -8,13 +8,13 @@
  */
 
 import Path from 'path';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 
 import { ascending } from '../common';
 
 export async function getOptimizerBuiltPaths() {
   return (
-    await globby(
+    await fastGlob(
       [
         '**/*',
         '!**/{__fixtures__,__snapshots__,integration_tests,audit_bundle_dependencies,node}/**',
