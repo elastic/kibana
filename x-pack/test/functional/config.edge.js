@@ -6,7 +6,7 @@
  */
 
 export default async function ({ readConfigFile }) {
-  const firefoxConfig = await readConfigFile(require.resolve('./config.firefox.js'));
+  const firefoxConfig = await readConfigFile(require.resolve('./config.base.js'));
 
   return {
     ...firefoxConfig.getAll(),
