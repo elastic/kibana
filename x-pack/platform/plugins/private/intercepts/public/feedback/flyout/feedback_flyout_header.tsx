@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 interface Props {
   closeFlyout: () => void;
@@ -24,9 +25,9 @@ interface Props {
 export const FeedbackFlyoutHeader = ({ closeFlyout }: Props) => {
   const { euiTheme } = useEuiTheme();
 
-  const boldTextCss = {
-    fontWeight: euiTheme.font.weight.semiBold,
-  };
+  const semiBoldTextCss = css`
+    font-weight: ${euiTheme.font.weight.semiBold};
+  `;
 
   return (
     <EuiFlyoutHeader hasBorder>
@@ -46,7 +47,7 @@ export const FeedbackFlyoutHeader = ({ closeFlyout }: Props) => {
             iconType="cross"
             color="neutral"
             size="xs"
-            css={boldTextCss}
+            css={semiBoldTextCss}
             aria-label={i18n.translate('xpack.intercepts.feedbackFlyout.closeButton.ariaLabel', {
               defaultMessage: 'Close flyout',
             })}
