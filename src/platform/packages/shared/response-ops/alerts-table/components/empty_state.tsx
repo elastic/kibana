@@ -15,6 +15,7 @@ import { css } from '@emotion/react';
 import icon from '../assets/illustration_product_no_results_magnifying_glass.svg';
 import { AlertsQueryInspector } from './alerts_query_inspector';
 import { ALERTS_TABLE_TITLE } from '../translations';
+import { AlertsTableProps } from '../types';
 
 const heights = {
   tall: 490,
@@ -24,16 +25,18 @@ const heights = {
 const panelStyle = {
   maxWidth: 500,
 };
+type EmptyState = NonNullable<AlertsTableProps['emptyState']>;
+type EmptyStateMessage = Pick<EmptyState, 'messageTitle' | 'messageBody'>;
 
-export const EmptyState: React.FC<{
-  height?: keyof typeof heights | 'flex';
-  variant?: 'subdued' | 'transparent';
-  messageTitle?: string;
-  messageBody?: string;
-  additionalToolbarControls?: ReactNode;
-  alertsQuerySnapshot?: EsQuerySnapshot;
-  showInspectButton?: boolean;
-}> = ({
+export const EmptyState: React.FC<
+  {
+    height?: keyof typeof heights | 'flex';
+    variant?: 'subdued' | 'transparent';
+    additionalToolbarControls?: ReactNode;
+    alertsQuerySnapshot?: EsQuerySnapshot;
+    showInspectButton?: boolean;
+  } & EmptyStateMessage
+> = ({
   height = 'tall',
   variant = 'subdued',
   messageTitle,
