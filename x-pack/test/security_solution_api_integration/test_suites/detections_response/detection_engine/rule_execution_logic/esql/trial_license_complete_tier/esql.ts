@@ -1695,7 +1695,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const dateRestart = new Date();
 
-          // re-trigger rule execution with new interval
+          // re-trigger rule execution
           await patchRule(supertest, log, {
             id: createdRule.id,
             enabled: false,

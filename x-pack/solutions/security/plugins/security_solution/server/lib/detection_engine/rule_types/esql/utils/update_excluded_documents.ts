@@ -30,13 +30,25 @@ export const updateExcludedDocuments = ({
   if (isRuleAggregating) {
     return;
   }
+
+  const totalSourceDocuments = Object.keys(sourceDocuments).reduce(
+    (acc, index) => acc + sourceDocuments[index].length,
+    0
+  );
+
   const documentIds = Object.keys(sourceDocuments);
-  const lastId = results.at(-1)?._id;
+
+  if (totalSourceDocuments !== 1) {
+    const lastId = results.at(-1)?._id;
+    if (lastId) {
+      sourceDocuments[lastId]?.pop();
+    }
+  }
 
   addToExcludedDocuments(
     excludedDocuments,
     sourceDocuments,
-    documentIds.length === 1 ? documentIds : documentIds.filter((id) => id !== lastId),
+    documentIds,
     aggregatableTimestampField
   );
 };

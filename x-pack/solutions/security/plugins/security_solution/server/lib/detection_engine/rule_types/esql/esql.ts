@@ -181,6 +181,7 @@ export const esqlExecutor = async ({
           loggedRequests: isLoggedRequestsEnabled ? loggedRequests : undefined,
           hasLoggedRequestsReachedLimit,
           runtimeMappings: sharedParams.runtimeMappings,
+          excludedDocuments,
         });
 
         const isAlertSuppressionActive = await getIsAlertSuppressionActive({

@@ -12,6 +12,8 @@ import type { RulePreviewLoggedRequest } from '../../../../../common/api/detecti
 import { logQueryRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
 import type { SignalSource } from '../types';
+import { convertExternalIdsToDSL } from './build_esql_search_request';
+import type { ExcludedDocument } from './types';
 
 export interface FetchedDocument {
   fields: estypes.SearchHit['fields'];
@@ -29,6 +31,7 @@ interface FetchSourceDocumentsArgs {
   loggedRequests?: RulePreviewLoggedRequest[];
   hasLoggedRequestsReachedLimit: boolean;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  excludedDocuments: Record<string, ExcludedDocument[]>;
 }
 /**
  * fetches source documents by list of their ids
@@ -43,6 +46,7 @@ export const fetchSourceDocuments = async ({
   loggedRequests,
   hasLoggedRequestsReachedLimit,
   runtimeMappings,
+  excludedDocuments,
 }: FetchSourceDocumentsArgs): Promise<Record<string, FetchedDocument[]>> => {
   const ids = results.reduce<string[]>((acc, doc) => {
     if (doc._id) {
@@ -62,6 +66,11 @@ export const fetchSourceDocuments = async ({
         filter: {
           ids: { values: ids },
         },
+        ...(Object.keys(excludedDocuments).length > 0
+          ? {
+              must_not: convertExternalIdsToDSL(excludedDocuments, new Set(ids)),
+            }
+          : {}),
       },
     },
   };
@@ -70,7 +79,7 @@ export const fetchSourceDocuments = async ({
     query: idsQuery.query,
     _source: true,
     fields: ['*'],
-    size: ids.length,
+    size: 2 * ids.length, // allows supporting multiple documents with the same _id across different indices
     runtime_mappings: runtimeMappings,
   };
   const ignoreUnavailable = true;

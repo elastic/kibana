@@ -74,8 +74,9 @@ export const buildEsqlSearchRequest = ({
   };
 };
 
-const convertExternalIdsToDSL = (
-  excludedDocuments: Record<string, ExcludedDocument[]>
+export const convertExternalIdsToDSL = (
+  excludedDocuments: Record<string, ExcludedDocument[]>,
+  idsToInclude?: Set<string>
 ): estypes.QueryDslQueryContainer[] => {
   const indices = Object.keys(excludedDocuments);
   const queries: estypes.QueryDslQueryContainer[] = [];
@@ -83,13 +84,17 @@ const convertExternalIdsToDSL = (
   for (const index of indices) {
     const documents = excludedDocuments[index];
 
-    if (documents.length > 0) {
+    const filteredDocuments = idsToInclude
+      ? documents.filter((doc) => idsToInclude.has(doc.id))
+      : documents;
+
+    if (filteredDocuments.length > 0) {
       queries.push({
         bool: {
           filter: [
             {
               ids: {
-                values: documents.map((doc) => doc.id),
+                values: filteredDocuments.map((doc) => doc.id),
               },
             },
             ...(index
