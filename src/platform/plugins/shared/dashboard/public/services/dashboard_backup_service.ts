@@ -82,10 +82,12 @@ class DashboardBackupService implements DashboardBackupServiceType {
 
   public clearState(id = DASHBOARD_PANELS_UNSAVED_ID) {
     try {
+      const allSpaces = this.sessionStorage.get(DASHBOARD_STATE_SESSION_KEY) ?? {};
       const dashboards = this.getDashboards();
       if (dashboards[id]) {
         delete dashboards[id];
         this.sessionStorage.set(DASHBOARD_STATE_SESSION_KEY, {
+          ...allSpaces,
           [this.activeSpaceId]: dashboards,
         });
       }
