@@ -6,5 +6,6 @@
  */
 
 export { AgentsService } from './agents_service';
+export { runAgent } from './modes';
 export type { AgentsServiceSetup, AgentsServiceStart, InternalAgentRegistry } from './types';
-export { runAgent } from './run_agent';
+export type { AgentProfileClient } from './profiles';
