@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiInlineEditTextSizes } from '@elastic/eui/src/components/inline_edit/inline_edit_text';
 import { asDuration } from '../../utils';
 import { PercentOfParent } from './percent_of_parent';
 
@@ -17,17 +18,18 @@ export interface DurationProps {
   parent?: {
     duration?: number;
     type: 'trace' | 'transaction';
-    loading: boolean;
+    loading?: boolean;
   };
+  size?: EuiInlineEditTextSizes;
 }
 
-export function Duration({ duration, parent }: DurationProps) {
+export function Duration({ duration, parent, size = 's' }: DurationProps) {
   if (!parent) {
-    <EuiText size="xs">{asDuration(duration)}</EuiText>;
+    <EuiText size={size}>{asDuration(duration)}</EuiText>;
   }
 
   return (
-    <EuiText size="xs">
+    <EuiText size={size}>
       {asDuration(duration)} &nbsp;
       {parent?.loading && <EuiLoadingSpinner data-test-subj="DurationLoadingSpinner" />}
       {!parent?.loading && parent?.duration && (
