@@ -81,9 +81,6 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
           value={value}
           onChange={onChange}
           frozen={frozen}
-          packageName={packageName}
-          packageType={packageType}
-          datastreams={datastreams}
           isEditPage={isEditPage}
           isInvalid={isInvalid}
           fieldLabel={fieldLabel}

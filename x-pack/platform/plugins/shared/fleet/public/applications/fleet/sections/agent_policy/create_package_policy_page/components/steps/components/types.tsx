@@ -6,24 +6,25 @@
  */
 import type { DataStream, RegistryVarsEntry } from '../../../../../../types';
 
-export interface InputFieldProps {
+export interface BaseInputFieldProps {
   varDef: RegistryVarsEntry;
   value: any;
   onChange: (newValue: any) => void;
+  frozen?: boolean;
+}
+export type InputFieldProps = BaseInputFieldProps & {
   errors?: string[] | null;
   forceShowErrors?: boolean;
-  frozen?: boolean;
   packageType?: string;
   packageName?: string;
   datastreams?: DataStream[];
   isEditPage?: boolean;
-}
+};
 
-export type InputComponentProps = InputFieldProps & {
+export type InputComponentProps = BaseInputFieldProps & {
   isDirty: boolean;
   setIsDirty: (isDirty: boolean) => void;
-  packageType?: string;
   isInvalid: boolean;
-  fieldLabel: string;
   fieldTestSelector: string;
+  fieldLabel: string;
 };

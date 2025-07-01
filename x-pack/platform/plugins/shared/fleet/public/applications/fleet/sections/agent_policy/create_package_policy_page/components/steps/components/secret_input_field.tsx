@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -26,10 +26,7 @@ export interface SecretInputFieldProps extends InputComponentProps {
   value: any;
   onChange: (newValue: any) => void;
   getInputComponent: (inputComponentProps: InputComponentProps) => React.JSX.Element;
-}
-
-export interface SecretInputFieldPropsNew extends InputComponentProps {
-  getInputComponent: (inputComponentProps: InputComponentProps) => React.JSX.Element;
+  isEditPage?: boolean;
 }
 
 /**
@@ -92,22 +89,9 @@ export const SecretFieldLabel = ({ fieldLabel }: { fieldLabel: string }) => {
  * SecretInputField renders an input field for a secret variable in a package policy.
  * This component is publicly exported to be used in other plugins
  */
-export function SecretInputField({
-  varDef,
-  value,
-  onChange,
-  frozen,
-  packageName,
-  packageType,
-  datastreams = [],
-  isEditPage,
-  isInvalid,
-  fieldLabel,
-  fieldTestSelector,
-  setIsDirty,
-  isDirty,
-  getInputComponent,
-}: SecretInputFieldProps) {
+export function SecretInputField(props: SecretInputFieldProps) {
+  const { varDef, value, onChange, isEditPage, fieldTestSelector, setIsDirty, getInputComponent } =
+    props;
   const [isReplacing, setIsReplacing] = useState(isEditPage && !value);
   const valueOnFirstRender = useRef(value);
 
@@ -116,20 +100,13 @@ export function SecretInputField({
   const showInactiveReplaceUi = isEditPage && !isReplacing && hasExistingValue;
   const valueIsSecretRef = value && value?.isSecretRef;
 
+  const newValue = useMemo(
+    () => (isReplacing && valueIsSecretRef ? '' : value),
+    [isReplacing, value, valueIsSecretRef]
+  );
   const inputComponent = getInputComponent({
-    varDef,
-    value: isReplacing && valueIsSecretRef ? '' : value,
-    onChange,
-    frozen,
-    packageName,
-    packageType,
-    datastreams,
-    isEditPage,
-    isInvalid,
-    fieldLabel,
-    fieldTestSelector,
-    isDirty,
-    setIsDirty,
+    ...props,
+    value: newValue,
   });
 
   // If there's no value for this secret, display the input as its "brand new" creation state
@@ -152,7 +129,11 @@ export function SecretInputField({
         </EuiText>
         <EuiSpacer size="s" />
         <EuiButtonEmpty
-          onClick={() => setIsReplacing(true)}
+          onClick={() => {
+            setIsReplacing(true);
+            setIsDirty(true);
+            onChange(''); // Clear the value
+          }}
           color="primary"
           iconType="refresh"
           iconSide="left"
