@@ -44,6 +44,8 @@ import { appContextService } from '..';
 
 import type { GetInstalledPackagesResponse } from '../../../common/types';
 
+import type { TemplateAgentPolicyInput } from '../../../common/types/models/agent_policy';
+
 import {
   type CustomPackageDatasetConfiguration,
   type EnsurePackageResult,
@@ -138,6 +140,7 @@ export interface PackageClient {
   getAgentPolicyConfigYAML(
     pkgName: string,
     pkgVersion?: string,
+    isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
     prerelease?: boolean,
     ignoreUnverified?: boolean
   ): Promise<string>;
@@ -321,6 +324,7 @@ class PackageClientImpl implements PackageClient {
   public async getAgentPolicyConfigYAML(
     pkgName: string,
     pkgVersion?: string,
+    isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
     prerelease?: boolean,
     ignoreUnverified?: boolean
   ) {
@@ -337,6 +341,7 @@ class PackageClientImpl implements PackageClient {
       pkgName,
       pkgVersion,
       'yml',
+      isInputIncluded,
       prerelease,
       ignoreUnverified
     );

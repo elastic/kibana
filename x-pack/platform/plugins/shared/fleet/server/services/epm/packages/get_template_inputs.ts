@@ -95,6 +95,7 @@ export async function getTemplateInputs(
   pkgName: string,
   pkgVersion: string,
   format: 'yml',
+  isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
   prerelease?: boolean,
   ignoreUnverified?: boolean
 ): Promise<string>;
@@ -103,6 +104,7 @@ export async function getTemplateInputs(
   pkgName: string,
   pkgVersion: string,
   format: 'json',
+  isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
   prerelease?: boolean,
   ignoreUnverified?: boolean
 ): Promise<{ inputs: TemplateAgentPolicyInput[] }>;
@@ -111,6 +113,7 @@ export async function getTemplateInputs(
   pkgName: string,
   pkgVersion: string,
   format: Format,
+  isInputIncluded: (input: TemplateAgentPolicyInput) => boolean = () => true,
   prerelease?: boolean,
   ignoreUnverified?: boolean
 ) {
@@ -185,7 +188,7 @@ export async function getTemplateInputs(
   const inputs = templatePackagePolicyToFullInputStreams(
     packagePolicyWithInputs.inputs as PackagePolicyInput[],
     inputIdsDestinationMap
-  );
+  ).filter(isInputIncluded);
 
   if (format === 'json') {
     return { inputs };
