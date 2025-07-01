@@ -336,7 +336,7 @@ export function registerESQLToolsRoutes({
 
     router.versioned
     .post({
-      path: '/api/chat/tools/esql/{id}/_execute',
+      path: '/api/chat/tools/esql/_execute',
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
@@ -355,8 +355,8 @@ export function registerESQLToolsRoutes({
         version: '2023-10-31',
         validate: {
           request: { 
-            params: schema.object({ id: schema.string() }, { unknowns: 'allow' }),
             body: schema.object({
+              id: schema.string(),
               params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
             }),
           }
@@ -372,7 +372,7 @@ export function registerESQLToolsRoutes({
 
         const { esql: esqlToolService } = getInternalServices();
         const client = await esqlToolService.getScopedClient({ request });
-        const result = await client.execute(request.params.id, request.body.params);
+        const result = await client.execute(request.body.id, request.body.params);
 
         return response.ok({
           body: {
