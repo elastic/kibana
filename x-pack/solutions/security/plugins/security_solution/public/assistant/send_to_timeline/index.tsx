@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { useDispatch, useSelector } from 'react-redux';
-
+import { css } from '@emotion/react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { extractTimelineCapabilities } from '../../common/utils/timeline_capabilities';
 import { sourcererSelectors } from '../../common/store';
@@ -271,6 +271,9 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
       flush="both"
       data-test-subj="sendToTimelineEmptyButton"
       size="xs"
+      css={css`
+        width: 100%;
+      `}
     >
       <EuiToolTip position="right" content={toolTipText}>
         <>{children}</>

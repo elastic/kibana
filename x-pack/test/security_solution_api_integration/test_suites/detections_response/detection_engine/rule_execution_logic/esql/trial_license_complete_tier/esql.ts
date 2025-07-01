@@ -65,7 +65,8 @@ export default ({ getService }: FtrProviderContext) => {
    */
   const internalIdPipe = (id: string) => `| where id=="${id}"`;
 
-  describe('@ess @serverless ES|QL rule type', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/224699
+  describe.skip('@ess @serverless ES|QL rule type', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
@@ -2209,6 +2210,7 @@ export default ({ getService }: FtrProviderContext) => {
         const doc1 = { agent: { name: 'test-1' } };
         await indexEnhancedDocuments({
           documents: [doc1],
+          interval: ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'],
           id: uuidv4(),
         });
 

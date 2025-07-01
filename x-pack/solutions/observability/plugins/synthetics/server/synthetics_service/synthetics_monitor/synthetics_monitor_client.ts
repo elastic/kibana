@@ -75,7 +75,8 @@ export class SyntheticsMonitorClient {
     const newPolicies = this.privateLocationAPI.createPackagePolicies(
       privateConfigs,
       allPrivateLocations,
-      spaceId
+      spaceId,
+      maintenanceWindows
     );
 
     const syncErrors = this.syntheticsService.addConfigs(publicConfigs, maintenanceWindows);
@@ -224,6 +225,7 @@ export class SyntheticsMonitorClient {
       privateConfig ? [privateConfig] : [],
       allPrivateLocations,
       spaceId,
+      [],
       monitor.testRunId,
       runOnce
     );

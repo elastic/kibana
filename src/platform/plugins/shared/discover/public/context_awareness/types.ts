@@ -140,6 +140,10 @@ export interface DefaultAppStateExtension {
    * The field to apply for the histogram breakdown
    */
   breakdownField?: string;
+  /**
+   * The state for chart visibility toggle
+   */
+  hideChart?: boolean;
 }
 
 /**

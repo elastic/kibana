@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EcsFlat } from '@elastic/ecs';
+import type { UseFieldsMetadataHook } from '@kbn/fields-metadata-plugin/public/hooks/use_fields_metadata';
 import * as i18n from '../translations';
-export type EcsAllowedValue = (typeof EcsFlat)['event.category']['allowed_values'][0];
 
 /**
  * Helper function to return the description of an allowed value of the specified field
@@ -17,8 +16,11 @@ export type EcsAllowedValue = (typeof EcsFlat)['event.category']['allowed_values
  * @param value
  * @returns ecs description of the value
  */
-export const getEcsAllowedValueDescription = (value: string): string => {
-  const allowedValues: EcsAllowedValue[] = EcsFlat['event.category']?.allowed_values ?? [];
+export const getEcsAllowedValueDescription = (
+  fieldsMetadata: ReturnType<UseFieldsMetadataHook>['fieldsMetadata'] = {},
+  value: string
+): string => {
+  const allowedValues = fieldsMetadata['event.category']?.allowed_values ?? [];
   const result =
     allowedValues?.find((item) => item.name === value)?.description ?? i18n.noEcsDescriptionReason;
   return result;

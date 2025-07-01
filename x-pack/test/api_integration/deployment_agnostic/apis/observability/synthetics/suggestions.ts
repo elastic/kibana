@@ -13,8 +13,9 @@ import {
   ProjectMonitorsRequest,
   PrivateLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
-import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
+import { syntheticsMonitorSavedObjectType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import pMap from 'p-map';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
@@ -60,7 +61,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.clean({
         types: [
-          syntheticsMonitorType,
+          syntheticsMonitorSavedObjectType,
           'ingest-agent-policies',
           'ingest-package-policies',
           'synthetics-private-location',
@@ -91,7 +92,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     beforeEach(async () => {
       await kibanaServer.savedObjects.clean({
-        types: [syntheticsMonitorType, 'ingest-package-policies'],
+        types: [syntheticsMonitorSavedObjectType, 'ingest-package-policies'],
       });
 
       monitors = [];
@@ -100,6 +101,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ..._monitors[0],
           locations: [privateLocation],
           name: `${_monitors[0].name} ${i}`,
+          spaces: [],
         });
       }
     });
@@ -121,54 +123,61 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(samlAuth.getInternalRequestHeader())
         .send(projectMonitors)
         .expect(200);
-      for (let i = 0; i < monitors.length; i++) {
-        await saveMonitor(monitors[i]);
-      }
+      await pMap(
+        monitors,
+        async (monitor) => {
+          return saveMonitor(monitor);
+        },
+        { concurrency: 1 }
+      );
+
       const apiResponse = await supertest
         .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SUGGESTIONS}`)
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
-      expect(apiResponse.body).toEqual({
-        locations: [
-          {
-            count: 22,
-            label: privateLocation.label,
-            value: privateLocation.id,
-          },
-        ],
-        monitorIds: expect.arrayContaining([
-          ...monitors.map((monitor) => ({
-            count: 1,
-            label: monitor.name,
-            value: expect.any(String),
-          })),
-          ...projectMonitors.monitors.slice(0, 2).map((monitor) => ({
-            count: 1,
-            label: monitor.name,
-            value: expect.any(String),
-          })),
-        ]),
-        monitorTypes: [
-          {
-            count: 20,
-            label: 'http',
-            value: 'http',
-          },
-          {
-            count: 2,
-            label: 'icmp',
-            value: 'icmp',
-          },
-        ],
-        projects: [
-          {
-            count: 2,
-            label: project,
-            value: project,
-          },
-        ],
-        tags: expect.arrayContaining([
+
+      expect(apiResponse.body.locations).toEqual([
+        {
+          count: 22,
+          label: privateLocation.label,
+          value: privateLocation.id,
+        },
+      ]);
+      const expectedIds = [
+        ...monitors.map((monitor) => ({
+          count: 1,
+          label: monitor.name,
+          value: expect.any(String),
+        })),
+        ...projectMonitors.monitors.slice(0, 2).map((monitor) => ({
+          count: 1,
+          label: monitor.name,
+          value: expect.any(String),
+        })),
+      ];
+      expect(apiResponse.body.monitorIds).toEqual(expect.arrayContaining(expectedIds));
+      expect(apiResponse.body.monitorTypes).toEqual([
+        {
+          count: 20,
+          label: 'http',
+          value: 'http',
+        },
+        {
+          count: 2,
+          label: 'icmp',
+          value: 'icmp',
+        },
+      ]);
+      expect(apiResponse.body.projects).toEqual([
+        {
+          count: 2,
+          label: project,
+          value: project,
+        },
+      ]);
+      expect(apiResponse.body.tags).toEqual(
+        expect.arrayContaining([
           {
             count: 21,
             label: 'tag1',
@@ -189,8 +198,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             label: 'service:smtp',
             value: 'service:smtp',
           },
-        ]),
-      });
+        ])
+      );
     });
 
     it('handles query params for projects', async () => {

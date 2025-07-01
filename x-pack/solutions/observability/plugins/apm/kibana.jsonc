@@ -35,7 +35,6 @@
       "uiActions",
       "logsDataAccess",
       "savedSearch",
-      "entityManager",
       "fieldsMetadata"
     ],
     "optionalPlugins": [
