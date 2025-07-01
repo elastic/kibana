@@ -19,10 +19,11 @@ export const BenefitsCallout = ({ licenseType }: Props) => (
   <>
     <EuiSpacer size="m" />
     <EuiCallOut
+      data-test-subj="benefitsCallout"
       color="warning"
       title={
         <FormattedMessage
-          id="xpack.intercepts.feedbackFlyout.platinumOrHigherCallout.title"
+          id="xpack.intercepts.feedbackFlyout.benefitsCallout.title"
           defaultMessage="Use your {licenseType} license benefits instead"
           values={{
             licenseType: capitalize(licenseType),
@@ -32,13 +33,13 @@ export const BenefitsCallout = ({ licenseType }: Props) => (
     >
       <EuiText component="p" size="s">
         <FormattedMessage
-          id="xpack.intercepts.feedbackFlyout.platinumOrHigherCallout.content"
+          id="xpack.intercepts.feedbackFlyout.benefitsCallout.content"
           defaultMessage="Submit issues and enhancement requests using your dedicated support channel. If your feedback is not urgent, you may still use this form."
         />
       </EuiText>
       <EuiButton href={ELASTIC_SUPPORT_LINK} color="warning" fill target="_blank">
         <FormattedMessage
-          id="xpack.intercepts.feedbackFlyout.platinumOrHigherCallout.supportButton"
+          id="xpack.intercepts.feedbackFlyout.benefitsCallout.supportButton"
           defaultMessage="Access support channel"
         />
       </EuiButton>

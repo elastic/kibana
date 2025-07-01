@@ -168,12 +168,12 @@ export const FeedbackFlyoutBody = ({
           }
         >
           <EuiSelect
+            data-test-subj="feedbackTypeSelect"
             options={feedbackTypes}
             value={feedbackType}
             aria-label={i18n.translate('xpack.intercepts.feedbackFlyout.form.select.ariaLabel', {
               defaultMessage: 'Select feedback type',
             })}
-            data-test-subj="feedbackTypeSelect"
             onChange={handleChangeFeedbackType}
           />
         </EuiFormRow>
@@ -193,11 +193,11 @@ export const FeedbackFlyoutBody = ({
           }
         >
           <EuiTextArea
+            data-test-subj="feedbackTextArea"
             value={feedbackText}
             aria-label={i18n.translate('xpack.intercepts.feedbackFlyout.form.textArea.ariaLabel', {
               defaultMessage: 'Enter your feedback here',
             })}
-            data-test-subj="feedbackTextArea"
             onChange={handleChangeFeedbackText}
           />
         </EuiFormRow>
@@ -220,6 +220,7 @@ export const FeedbackFlyoutBody = ({
           }
         >
           <EuiFieldText
+            data-test-subj="feedbackEmail"
             value={userEmail}
             aria-label={i18n.translate(
               'xpack.intercepts.feedbackFlyout.form.emailInput.ariaLabel',
@@ -227,7 +228,6 @@ export const FeedbackFlyoutBody = ({
                 defaultMessage: 'Enter your email here',
               }
             )}
-            data-test-subj="feedbackEmail"
             type="email"
             onChange={handleChangeEmail}
           />
