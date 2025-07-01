@@ -128,7 +128,7 @@ export async function canUseOutputForIntegration(
   };
 }
 
-export function canDeployAsAgentlessOrThrow(
+export function canDeployCustomPackageAsAgentlessOrThrow(
   packagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo
 ) {
