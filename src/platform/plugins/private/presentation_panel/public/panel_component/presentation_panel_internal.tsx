@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiErrorBoundary, EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import {
+  EuiErrorBoundary,
+  EuiFlexGroup,
+  EuiPanel,
+  htmlIdGenerator,
+  euiScrollBarStyles,
+  UseEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { PanelLoader } from '@kbn/panel-loader';
 import {
@@ -18,6 +25,7 @@ import {
 } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
 import { PresentationPanelHoverActions } from './panel_header/presentation_panel_hover_actions';
 import { PresentationPanelErrorInternal } from './presentation_panel_error_internal';
@@ -43,6 +51,7 @@ export const PresentationPanelInternal = <
 
   setDragHandles,
 }: PresentationPanelInternalProps<ApiType, ComponentPropsType>) => {
+  const styles = useMemoCss(embPanelStyles);
   const panelErrorCss = usePanelErrorCss();
   const [api, setApi] = useState<ApiType | null>(null);
   const headerId = useMemo(() => htmlIdGenerator()(), []);
@@ -129,7 +138,11 @@ export const PresentationPanelInternal = <
         aria-labelledby={headerId}
         data-test-subj="embeddablePanel"
         {...contentAttrs}
-        css={styles.embPanel}
+        css={[
+          styles.embPanel,
+          styles.embPanelScrollBar,
+          viewMode === 'edit' && styles.embPanelEditing,
+        ]}
       >
         {!hideHeader && api && (
           <PresentationPanelHeader
@@ -179,7 +192,7 @@ export const PresentationPanelInternal = <
  * if there is no reliance on EUI theme, then it is more performant to store styles as minimizable objects
  * outside of the React component so that it is not parsed on every render
  */
-const styles = {
+const embPanelStyles = {
   embPanel: css({
     zIndex: 'auto',
     flex: 1,
@@ -188,6 +201,20 @@ const styles = {
     height: '100%',
     position: 'relative',
     overflow: 'hidden',
+    '.visLegend__toggle': {
+      borderBottomRightRadius: 0,
+      borderTopLeftRadius: 0,
+      opacity: 0, // Fix overflow of vis's specifically for inside embeddable panels, lets the panel decide the overflow
+
+      '&:focus': {
+        opacity: 1,
+      },
+    },
+    '&:hover': {
+      '.visLegend__toggle': {
+        opacity: 1,
+      },
+    },
   }),
   embPanelContent: css({
     '&.embPanel__content': {
@@ -199,6 +226,17 @@ const styles = {
     },
     '&.embPanel__content--hidden, &[data-error]': {
       display: 'none',
+    },
+  }),
+  embPanelScrollBar: (euiThemeContext: UseEuiTheme) =>
+    css`
+      .visualization {
+        ${euiScrollBarStyles(euiThemeContext)}; /* Force a better looking scrollbar */
+      }
+    `,
+  embPanelEditing: css({
+    '.visLegend__toggle': {
+      opacity: 1, // Always show in editing mode
     },
   }),
 };
