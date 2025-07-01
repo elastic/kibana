@@ -211,7 +211,6 @@ export const DecorateWithKibanaContext: Decorator = (story) => {
     },
     featureFlags: {
       customThresholdAlertsEnabled: true,
-      logsUIEnabled: false,
       metricsExplorerEnabled: false,
       osqueryEnabled: true,
       inventoryThresholdAlertRuleEnabled: true,

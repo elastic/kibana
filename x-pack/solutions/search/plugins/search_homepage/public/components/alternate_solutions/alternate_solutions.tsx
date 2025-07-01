@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Observability } from './observability';
+import { Security } from './security';
 
 export const AlternateSolutions: React.FC = () => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
@@ -33,10 +34,9 @@ export const AlternateSolutions: React.FC = () => {
         <EuiFlexItem>
           <Observability />
         </EuiFlexItem>
-        {/* TO DO: Enable the following once we have text content ready
         <EuiFlexItem>
           <Security />
-        </EuiFlexItem> */}
+        </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );
