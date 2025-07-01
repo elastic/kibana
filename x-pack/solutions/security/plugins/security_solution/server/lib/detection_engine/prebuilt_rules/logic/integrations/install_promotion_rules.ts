@@ -6,6 +6,7 @@
  */
 
 import type { BulkOperationError, RulesClient } from '@kbn/alerting-plugin/server';
+import { SEARCH_AI_LAKE_PACKAGES } from '@kbn/fleet-plugin/common';
 import type { IDetectionRulesClient } from '../../../rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import type { IPrebuiltRuleAssetsClient } from '../rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRules } from '../rule_objects/create_prebuilt_rules';
@@ -17,7 +18,7 @@ import type {
 } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import { getErrorMessage } from '../../../../../utils/error_helpers';
 import type { EndpointInternalFleetServicesInterface } from '../../../../../endpoint/services/fleet';
-import { AI_FOR_SOC_INTEGRATIONS, PROMOTION_RULE_TAG } from '../../../../../../common/constants';
+import { PROMOTION_RULE_TAG } from '../../../../../../common/constants';
 
 interface InstallPromotionRulesParams {
   rulesClient: RulesClient;
@@ -52,9 +53,9 @@ export async function installPromotionRules({
   const installedIntegrations = new Set(
     (
       await Promise.all(
-        AI_FOR_SOC_INTEGRATIONS.map(async (integration) => {
+        SEARCH_AI_LAKE_PACKAGES.map(async (integration) => {
           // We don't care about installation status of the integration as all
-          // IA4SOC integrations are agentless (don't require setting up an
+          // AI4SOC integrations are agentless (don't require setting up an
           // integration policy). So the fact that the corresponding package is
           // installed is enough.
           const installation = await fleetServices.packages.getInstallation(integration);
