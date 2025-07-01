@@ -13,10 +13,12 @@ describe('alertsAsDataRbac', () => {
   describe('isSiemRuleType', () => {
     test('returns true for siem rule types', () => {
       expect(isSiemRuleType('siem.esqlRuleType')).toBe(true);
+      expect(isSiemRuleType('attack-discovery')).toBe(true);
     });
 
     test('returns false for NON siem rule types', () => {
       expect(isSiemRuleType('apm.anomaly')).toBe(false);
+      expect(isSiemRuleType('attack-discovery.test')).toBe(false);
     });
   });
 });

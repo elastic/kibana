@@ -17,6 +17,7 @@ describe('updateGlobalNavigation', () => {
   describe('when no observability apps are enabled', () => {
     it('hides the overview link', () => {
       const capabilities = {
+        logs: { show: false },
         navLinks: { apm: false, logs: false, metrics: false, uptime: false },
       } as unknown as ApplicationStart['capabilities'];
       const deepLinks: AppDeepLink[] = [];
@@ -37,6 +38,7 @@ describe('updateGlobalNavigation', () => {
   describe('when one observability app is enabled', () => {
     it('shows the overview link', () => {
       const capabilities = {
+        logs: { show: true },
         navLinks: { apm: true, logs: false, metrics: false, uptime: false },
       } as unknown as ApplicationStart['capabilities'];
       const deepLinks: AppDeepLink[] = [];
@@ -57,6 +59,7 @@ describe('updateGlobalNavigation', () => {
       it('shows the cases deep link', () => {
         const capabilities = {
           [casesFeatureId]: { read_cases: true },
+          logs: { show: true },
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
         } as unknown as ApplicationStart['capabilities'];
 
@@ -93,6 +96,7 @@ describe('updateGlobalNavigation', () => {
       it('hides the cases deep link', () => {
         const capabilities = {
           [casesFeatureId]: { read_cases: false },
+          logs: { show: true },
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
         } as unknown as ApplicationStart['capabilities'];
 
@@ -124,7 +128,45 @@ describe('updateGlobalNavigation', () => {
       it('shows the alerts deep link', () => {
         const capabilities = {
           [casesFeatureId]: { read_cases: true },
+          logs: { show: true },
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
+        } as unknown as ApplicationStart['capabilities'];
+
+        const deepLinks = [
+          {
+            id: 'alerts',
+            title: 'Alerts',
+            order: 8001,
+            path: '/alerts',
+            visibleIn: [],
+          },
+        ];
+        const callback = jest.fn();
+        const updater$ = {
+          next: (cb: AppUpdater) => callback(cb(app)),
+        } as unknown as Subject<AppUpdater>;
+
+        updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+
+        expect(callback).toHaveBeenCalledWith({
+          deepLinks: [
+            {
+              id: 'alerts',
+              title: 'Alerts',
+              order: 8001,
+              path: '/alerts',
+              visibleIn: ['sideNav', 'globalSearch'],
+            },
+          ],
+          visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
+        });
+      });
+
+      it('shows the alerts deep link for logs', () => {
+        const capabilities = {
+          [casesFeatureId]: { read_cases: true },
+          logs: { show: true },
+          navLinks: { apm: false, logs: false, metrics: false, uptime: false },
         } as unknown as ApplicationStart['capabilities'];
 
         const deepLinks = [

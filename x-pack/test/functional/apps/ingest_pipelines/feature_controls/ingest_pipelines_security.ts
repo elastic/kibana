@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { testEmbeddedConsole } from '@kbn/test-suites-xpack-platform/functional/apps/dev_tools/embedded_console';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { testEmbeddedConsole } from '../../dev_tools/embedded_console';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -51,7 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(sectionIds).to.contain('kibana');
 
           const dataSection = sections.find((section) => section.sectionId === 'data');
-          expect(dataSection?.sectionLinks).to.eql(['data_quality']);
+          expect(dataSection?.sectionLinks).to.eql(['data_quality', 'content_connectors']);
         });
       });
     });

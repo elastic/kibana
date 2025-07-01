@@ -49,10 +49,24 @@ export const login = (role?: string): void => {
     } else {
       testRole = role;
     }
+
     cy.task('getSessionCookie', testRole).then((cookie) => {
-      cy.setCookie('sid', cookie as string);
+      cy.setCookie('sid', cookie as string, {
+        // "hostOnly: true" sets the cookie without a domain.
+        // This makes cookie available only for the current host (not subdomains).
+        // It's needed to match the Serverless backend behavior where cookies are set without a domain.
+        // More info: https://github.com/elastic/kibana/issues/221741
+        hostOnly: true,
+      });
     });
+
     cy.visit('/');
+
+    cy.getCookies().then((cookies) => {
+      // Ensure that there's only a single session cookie named 'sid'.
+      const sessionCookies = cookies.filter((cookie) => cookie.name === 'sid');
+      expect(sessionCookies).to.have.length(1);
+    });
   } else {
     const user = role ? getEnvAuth(role) : defaultUser;
     loginWithUser(user);

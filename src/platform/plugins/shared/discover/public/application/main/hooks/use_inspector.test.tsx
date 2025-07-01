@@ -18,7 +18,7 @@ import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { internalStateActions } from '../state_management/redux';
 import React from 'react';
-import { DiscoverMainProvider } from '../state_management/discover_state_provider';
+import { DiscoverTestProvider } from '../../../__mocks__/test_provider';
 
 describe('test useInspector', () => {
   test('inspector open function is executed, expanded doc is closed', async () => {
@@ -42,7 +42,7 @@ describe('test useInspector', () => {
       },
       {
         wrapper: ({ children }) => (
-          <DiscoverMainProvider value={stateContainer}>{children}</DiscoverMainProvider>
+          <DiscoverTestProvider stateContainer={stateContainer}>{children}</DiscoverTestProvider>
         ),
       }
     );

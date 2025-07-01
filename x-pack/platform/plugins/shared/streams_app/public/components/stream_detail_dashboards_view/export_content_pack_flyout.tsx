@@ -84,7 +84,9 @@ export function ExportContentPackFlyout({
       const contentPack = await previewContent({
         http,
         definition,
-        file: new File([contentPackRaw], 'archive.zip', { type: 'application/zip' }),
+        file: new File([contentPackRaw], `${definition.stream.name}-1.0.0.zip`, {
+          type: 'application/zip',
+        }),
       });
 
       const indexPatterns = uniq(

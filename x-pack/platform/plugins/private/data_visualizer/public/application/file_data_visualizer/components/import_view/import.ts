@@ -119,6 +119,7 @@ export async function importData(props: Props, config: Config, setState: (state:
   }
 
   const inferenceId = getInferenceId(mappings);
+  const initializeDeployment = AutoDeploy.shouldAutoDeploy(inferenceId);
 
   setState({
     importing: true,
@@ -126,7 +127,7 @@ export async function importData(props: Props, config: Config, setState: (state:
     reading: true,
     initialized: true,
     permissionCheckStatus: IMPORT_STATUS.COMPLETE,
-    initializeDeployment: inferenceId !== null,
+    initializeDeployment,
     parseJSONStatus: getSuccess(success),
   });
 
@@ -151,9 +152,9 @@ export async function importData(props: Props, config: Config, setState: (state:
     return;
   }
 
-  if (inferenceId) {
+  if (initializeDeployment) {
     // Initialize deployment
-    const autoDeploy = new AutoDeploy(http, inferenceId);
+    const autoDeploy = new AutoDeploy(http, inferenceId!);
 
     try {
       await autoDeploy.deploy();

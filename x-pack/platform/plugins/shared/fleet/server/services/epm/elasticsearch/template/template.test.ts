@@ -69,6 +69,37 @@ describe('EPM template', () => {
     });
     expect(template.index_patterns).toStrictEqual([templateIndexPattern]);
   });
+  it('tests processing keyword field attributes in a dynamic template', () => {
+    const textFieldLiteralYml = `
+- name: labels.*
+  type: keyword
+  ignore_above: 4096
+`;
+    const fieldMapping = {
+      properties: {
+        labels: {
+          type: 'object',
+          dynamic: true,
+        },
+      },
+      dynamic_templates: [
+        {
+          'labels.*': {
+            match_mapping_type: 'string',
+            path_match: 'labels.*',
+            mapping: {
+              type: 'keyword',
+              ignore_above: 4096,
+            },
+          },
+        },
+      ],
+    };
+    const fields: Field[] = load(textFieldLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(fieldMapping);
+  });
 
   it('adds composed_of correctly', () => {
     const composedOfTemplates = ['component1', 'component2'];

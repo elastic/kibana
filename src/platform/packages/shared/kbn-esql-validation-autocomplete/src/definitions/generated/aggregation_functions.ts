@@ -1529,7 +1529,7 @@ const stCentroidAggDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_centroid_agg', {
     defaultMessage: 'Calculate the spatial centroid over a field with spatial point geometry type.',
   }),
-  preview: false,
+  preview: true,
   alias: undefined,
   signatures: [
     {
@@ -1566,7 +1566,7 @@ const stExtentAggDefinition: FunctionDefinition = {
     defaultMessage:
       'Calculate the spatial extent over a field with geometry type. Returns a bounding box for all values of the field.',
   }),
-  preview: false,
+  preview: true,
   alias: undefined,
   signatures: [
     {
@@ -1622,7 +1622,7 @@ const stdDevDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'std_dev',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.std_dev', {
-    defaultMessage: 'The standard deviation of a numeric field.',
+    defaultMessage: 'The population standard deviation of a numeric field.',
   }),
   preview: false,
   alias: undefined,
@@ -1917,7 +1917,7 @@ const valuesDefinition: FunctionDefinition = {
   name: 'values',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.values', {
     defaultMessage:
-      'Returns unique values as a multivalued field. The order of the returned values isn’t guaranteed.\nIf you need the values returned in order use `MV_SORT`.',
+      'Returns unique values as a multivalued field. The order of the returned values isn’t guaranteed.\nIf you need the values returned in order use\n`MV_SORT`.',
   }),
   preview: true,
   alias: undefined,

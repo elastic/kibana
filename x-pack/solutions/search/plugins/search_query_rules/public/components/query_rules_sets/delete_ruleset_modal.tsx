@@ -20,14 +20,22 @@ import { useDeleteRuleset } from '../../hooks/use_delete_query_rules_ruleset';
 export interface DeleteRulesetModalProps {
   rulesetId: string;
   closeDeleteModal: () => void;
+  onSuccessAction?: () => void;
 }
 
-export const DeleteRulesetModal = ({ closeDeleteModal, rulesetId }: DeleteRulesetModalProps) => {
+export const DeleteRulesetModal = ({
+  closeDeleteModal,
+  rulesetId,
+  onSuccessAction,
+}: DeleteRulesetModalProps) => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const onSuccess = () => {
     setIsLoading(false);
     closeDeleteModal();
+    if (onSuccessAction) {
+      onSuccessAction();
+    }
   };
   const confirmCheckboxId = useGeneratedHtmlId({
     prefix: 'confirmCheckboxId',
@@ -68,6 +76,7 @@ export const DeleteRulesetModal = ({ closeDeleteModal, rulesetId }: DeleteRulese
       <EuiCheckbox
         id={confirmCheckboxId}
         label="This ruleset is safe to delete"
+        data-test-subj="confirmDeleteRulesetCheckbox"
         checked={checked}
         onChange={(e) => {
           setChecked(e.target.checked);

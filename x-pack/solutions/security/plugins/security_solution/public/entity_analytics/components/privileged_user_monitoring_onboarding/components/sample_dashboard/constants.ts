@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import type { UserRowData } from './types';
-import type { VisualizationStackByOption } from '../esql_dashboard_panel';
+import type { VisualizationStackByOption } from '../esql_dashboard_panel/esql_dashboard_panel';
 
 export const PAGE_SIZE = 10;
 export const CURRENT_TIME = moment();

@@ -13,7 +13,7 @@ describe('#getDefaultRiskEngineConfiguration', () => {
     const namespace = 'default';
     const config = getDefaultRiskEngineConfiguration({ namespace });
 
-    expect(config._meta.mappingsVersion).toEqual(3);
+    expect(config._meta.mappingsVersion).toEqual(4);
     expect(riskScoreFieldMap).toMatchInlineSnapshot(`
       Object {
         "@timestamp": Object {

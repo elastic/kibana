@@ -359,8 +359,7 @@ describe('EndpointActionsClient', () => {
 
   type ResponseActionsMethodsOnly = keyof Omit<
     ResponseActionsClient,
-    // TODO: not yet implemented
-    'processPendingActions' | 'getFileDownload' | 'getFileInfo' | 'runscript'
+    'processPendingActions' | 'getFileDownload' | 'getFileInfo' | 'runscript' | 'getCustomScripts'
   >;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

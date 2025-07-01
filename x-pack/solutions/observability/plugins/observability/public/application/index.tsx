@@ -23,17 +23,23 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { PluginContext } from '../context/plugin_context/plugin_context';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
-import { routes } from '../routes/routes';
+import { routes, completeRoutes } from '../routes/routes';
+import { useKibana } from '../utils/kibana_react';
 import { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
 import { HideableReactQueryDevTools } from './hideable_react_query_dev_tools';
 
-function App() {
+export function App() {
+  const { pricing } = useKibana().services;
+  const isCompleteOverviewEnabled = pricing.isFeatureAvailable('observability:complete_overview');
+  const allRoutes = {
+    ...(isCompleteOverviewEnabled ? { ...completeRoutes, ...routes } : { ...routes }),
+  };
   return (
     <>
       <Routes enableExecutionContextTracking={true}>
-        {Object.keys(routes).map((key) => {
-          const path = key as keyof typeof routes;
-          const { handler, exact } = routes[path];
+        {Object.keys(allRoutes).map((key) => {
+          const path = key as keyof typeof allRoutes;
+          const { handler, exact } = allRoutes[path];
           const Wrapper = () => {
             return handler();
           };

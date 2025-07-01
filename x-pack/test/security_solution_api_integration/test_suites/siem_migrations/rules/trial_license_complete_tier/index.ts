@@ -10,6 +10,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('@ess @serverless SecuritySolution SIEM Migrations', () => {
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./rules/create'));
     loadTestFile(require.resolve('./rules/get'));
@@ -20,5 +21,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./start'));
     loadTestFile(require.resolve('./stop'));
     loadTestFile(require.resolve('./get_integrations'));
+    loadTestFile(require.resolve('./integrations_stats'));
   });
 }

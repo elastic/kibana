@@ -106,7 +106,9 @@ export function getESForward9Dot0PipelineTriggers(): BuildkiteTriggerStep[] {
     throw new Error('Update ES forward compatibility 9.0 pipeline to 8.19');
   }
   const targetESVersions = versions.versions.filter(
-    (v) => v.branch.startsWith('9.') || (v.branch.includes('main') && v.version.startsWith('9.0.0'))
+    (v) =>
+      // 9.1+, 8.19 => 9.0 is not supported
+      (v.branch.startsWith('9.') && v.branch !== '9.0') || v.branch.includes('main')
   );
 
   return targetESVersions.map(({ version }) => {
@@ -184,14 +186,14 @@ export function getArtifactStagingPipelineTriggers() {
 /**
  * This pipeline checks if there are any changes in the incorporated $BEATS_MANIFEST_LATEST_URL (beats version)
  * and triggers a staging artifact build.
- * Should be triggered for all open branches with a fixed version excluding 7.17: not main, 7.17 and 8.x.
+ * Should be triggered for all open branches with a fixed version excluding 7.17: 8.*, 9.* without main.
  *
  * TODO: we could basically do the check logic of .buildkite/scripts/steps/artifacts/trigger.sh in here, and remove kibana-artifacts-trigger
  */
 export function getArtifactBuildTriggers() {
   const versions = getVersionsFile();
-  const targetVersions = versions.prevMajors.filter((version) =>
-    Boolean(version.branch.match(/[0-9]{1,2}\.[0-9]{1,2}/))
+  const targetVersions = versions.versions.filter(
+    (version) => version.branch !== '7.17' && version.branch !== 'main'
   );
 
   return targetVersions.map(

@@ -133,7 +133,7 @@ export class DetailPanel extends Component {
             />
           }
           color="warning"
-          iconType="help"
+          iconType="question"
         >
           {/* A remote cluster is not editable if configured in elasticsearch.yml, so we direct the user to documentation instead */}
           {isConfiguredByNode ? (
@@ -179,6 +179,7 @@ export class DetailPanel extends Component {
     skipUnavailable,
     seeds,
     maxConnectionsPerCluster,
+    nodeConnections,
     initialConnectTimeout,
     mode,
     securityModel,
@@ -258,6 +259,18 @@ export class DetailPanel extends Component {
             <EuiDescriptionListTitle>
               <EuiTitle size="xs">
                 <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.nodeConnectionsLabel"
+                  defaultMessage="Node connections"
+                />
+              </EuiTitle>
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription data-test-subj="remoteClusterDetailNodeConnections">
+              {nodeConnections || '-'}
+            </EuiDescriptionListDescription>
+
+            <EuiDescriptionListTitle>
+              <EuiTitle size="xs">
+                <FormattedMessage
                   id="xpack.remoteClusters.detailPanel.maxConnectionsPerClusterLabel"
                   defaultMessage="Maximum connections"
                 />
@@ -290,6 +303,7 @@ export class DetailPanel extends Component {
     initialConnectTimeout,
     proxyAddress,
     proxySocketConnections,
+    maxProxySocketConnections,
     connectedSocketsCount,
     mode,
     serverName,
@@ -377,13 +391,25 @@ export class DetailPanel extends Component {
             <EuiDescriptionListTitle>
               <EuiTitle size="xs">
                 <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.proxySocketConnectionsLabel"
+                  defaultMessage="Proxy socket connections"
+                />
+              </EuiTitle>
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription data-test-subj="remoteClusterDetailProxySocketConnections">
+              {proxySocketConnections || '-'}
+            </EuiDescriptionListDescription>
+
+            <EuiDescriptionListTitle>
+              <EuiTitle size="xs">
+                <FormattedMessage
                   id="xpack.remoteClusters.detailPanel.maxSocketConnectionsLabel"
                   defaultMessage="Maximum socket connections"
                 />
               </EuiTitle>
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription data-test-subj="remoteClusterDetailMaxSocketConnections">
-              {proxySocketConnections ? proxySocketConnections : '-'}
+              {maxProxySocketConnections || '-'}
             </EuiDescriptionListDescription>
 
             <EuiDescriptionListTitle>

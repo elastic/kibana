@@ -16,24 +16,21 @@ import { sendTelemetryEvents } from '../../upgrade_sender';
 import { licenseService } from '../../license';
 import { auditLoggingService } from '../../audit_logging';
 import { appContextService } from '../../app_context';
-import { ConcurrentInstallOperationError, FleetError, PackageNotFoundError } from '../../../errors';
+import { ConcurrentInstallOperationError, FleetError } from '../../../errors';
 import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agentless';
 
 import * as Registry from '../registry';
-import { dataStreamService } from '../../data_streams';
 
 import {
   createInstallation,
   handleInstallPackageFailure,
-  installAssetsForInputPackagePolicy,
   installPackage,
   isPackageVersionOrLaterInstalled,
 } from './install';
 import * as installStateMachine from './install_state_machine/_state_machine_package_install';
 import { getBundledPackageByPkgKey } from './bundled_packages';
 
-import { getInstalledPackageWithAssets, getInstallationObject } from './get';
-import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
+import { getInstallationObject } from './get';
 
 jest.mock('../../data_streams');
 jest.mock('./get');
@@ -537,106 +534,6 @@ describe('install', () => {
         status: 'failure',
       });
     });
-  });
-});
-
-describe('installAssetsForInputPackagePolicy', () => {
-  beforeEach(() => {
-    jest.mocked(optimisticallyAddEsAssetReferences).mockReset();
-  });
-  it('should do nothing for non input package', async () => {
-    const mockedLogger = jest.mocked(appContextService.getLogger());
-    await installAssetsForInputPackagePolicy({
-      pkgInfo: {
-        type: 'integration',
-      } as any,
-      soClient: savedObjectsClientMock.create(),
-      esClient: {} as ElasticsearchClient,
-      force: false,
-      logger: mockedLogger,
-      packagePolicy: {} as any,
-    });
-  });
-  const TEST_PKG_INFO_INPUT = {
-    type: 'input',
-    name: 'test',
-    version: '1.0.0',
-    policy_templates: [
-      {
-        name: 'log',
-        type: 'log',
-      },
-    ],
-  };
-  it('should throw for input package if package is not installed', async () => {
-    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
-    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue(undefined);
-    const mockedLogger = jest.mocked(appContextService.getLogger());
-
-    await expect(() =>
-      installAssetsForInputPackagePolicy({
-        pkgInfo: TEST_PKG_INFO_INPUT as any,
-        soClient: savedObjectsClientMock.create(),
-        esClient: {} as ElasticsearchClient,
-        force: false,
-        logger: mockedLogger,
-        packagePolicy: {
-          inputs: [
-            {
-              type: 'log',
-              streams: [{ data_stream: { type: 'log' }, vars: { dataset: 'test.tata' } }],
-            },
-          ],
-        } as any,
-      })
-    ).rejects.toThrowError(PackageNotFoundError);
-  });
-
-  it('should install es index patterns for input package if package is installed', async () => {
-    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
-
-    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
-      installation: {
-        name: 'test',
-        version: '1.0.0',
-      },
-      packageInfo: TEST_PKG_INFO_INPUT,
-      assetsMap: new Map(),
-      paths: [],
-    } as any);
-    const mockedLogger = jest.mocked(appContextService.getLogger());
-
-    await installAssetsForInputPackagePolicy({
-      pkgInfo: TEST_PKG_INFO_INPUT as any,
-
-      soClient: savedObjectsClientMock.create(),
-      esClient: {} as ElasticsearchClient,
-      force: false,
-      logger: mockedLogger,
-      packagePolicy: {
-        inputs: [
-          {
-            name: 'log',
-            type: 'log',
-            streams: [
-              {
-                data_stream: { type: 'log' },
-                vars: { 'data_stream.dataset': { value: 'test.tata' } },
-              },
-            ],
-          },
-        ],
-      } as any,
-    });
-
-    expect(jest.mocked(optimisticallyAddEsAssetReferences)).toBeCalledWith(
-      expect.anything(),
-      expect.anything(),
-      expect.anything(),
-      {
-        'test.tata': 'log-test.tata-*',
-      }
-    );
   });
 });
 

@@ -16,6 +16,7 @@ import type {
 } from '@kbn/discover-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
+import { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { SavedSearchComponentProps } from '../types';
 import { SavedSearchComponentErrorContent } from './error';
 
@@ -36,6 +37,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     filters,
     index,
     timestampField,
+    columns,
     height,
   } = props;
 
@@ -65,10 +67,11 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
           searchSource.setField('filter', filters);
           const { searchSourceJSON, references } = searchSource.serialize();
           // By-value saved object structure
-          const attributes = {
+          const attributes: Partial<SavedSearchAttributes> = {
             kibanaSavedObjectMeta: {
               searchSourceJSON,
             },
+            columns,
           };
           setInitialSerializedState({
             rawState: {
@@ -94,6 +97,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
       abortController.abort();
     };
   }, [
+    columns,
     dataViews,
     documentViewerEnabled,
     filters,
@@ -137,6 +141,7 @@ const SavedSearchComponentTable: React.FC<
     timeRange,
     timestampField,
     index,
+    columns,
   } = props;
   const embeddableApi = useRef<SearchEmbeddableApi | undefined>(undefined);
 
@@ -196,6 +201,14 @@ const SavedSearchComponentTable: React.FC<
       embeddableApi.current.setTimeRange(timeRange);
     },
     [timeRange]
+  );
+
+  useEffect(
+    function syncColumns() {
+      if (!embeddableApi.current) return;
+      embeddableApi.current.setColumns(columns);
+    },
+    [columns]
   );
 
   return (

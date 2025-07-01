@@ -10,7 +10,7 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { PackageService } from '@kbn/fleet-plugin/server';
-import type { InferenceClient } from '@kbn/inference-plugin/server';
+import type { InferenceClient } from '@kbn/inference-common';
 import type { IndexAdapter, IndexPatternAdapter } from '@kbn/index-adapter';
 import type {
   RuleMigration,
@@ -23,6 +23,7 @@ import type { RuleVersions } from './data/rule_migrations_data_prebuilt_rules_cl
 import type { Stored } from '../types';
 
 export type StoredSiemMigration = Stored<RuleMigration>;
+
 export type StoredRuleMigration = Stored<RuleMigrationRule>;
 export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;
 

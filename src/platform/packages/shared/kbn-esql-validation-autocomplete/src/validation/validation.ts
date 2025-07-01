@@ -105,7 +105,7 @@ export async function validateQuery(
 }
 
 /**
- * @private
+ * @internal
  */
 export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getColumnsFor: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
@@ -117,6 +117,8 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   canSuggestVariables: [],
   getJoinIndices: [],
   getTimeseriesIndices: [],
+  getEditorExtensions: [],
+  getInferenceEndpoints: [],
 };
 
 /**
@@ -192,8 +194,15 @@ async function validateAst(
     messages.push(...commandMessages);
   }
 
+  const parserErrors = parsingResult.errors;
+
+  for (const error of parserErrors) {
+    error.message = error.message.replace(/\bLP\b/, "'('");
+    error.message = error.message.replace(/\bOPENING_BRACKET\b/, "'['");
+  }
+
   return {
-    errors: [...parsingResult.errors, ...messages.filter(({ type }) => type === 'error')],
+    errors: [...parserErrors, ...messages.filter(({ type }) => type === 'error')],
     warnings: messages.filter(({ type }) => type === 'warning'),
   };
 }
@@ -216,7 +225,7 @@ function validateCommand(
   }
 
   if (commandDef.validate) {
-    messages.push(...commandDef.validate(command, references));
+    messages.push(...commandDef.validate(command, references, ast));
   }
 
   switch (commandDef.name) {
@@ -404,7 +413,7 @@ export function validateSources(
 
     if (source.sourceType === 'index') {
       const index = source.index;
-      const sourceName = source.cluster ? source.name : index?.valueUnquoted;
+      const sourceName = source.prefix ? source.name : index?.valueUnquoted;
       if (!sourceName) continue;
 
       if (sourceExists(sourceName, availableSources) && !hasWildcard(sourceName)) {

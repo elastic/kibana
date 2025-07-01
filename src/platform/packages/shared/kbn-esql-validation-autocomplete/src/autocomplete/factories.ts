@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
-import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import { ESQLVariableType, type ESQLControlVariable, type RecommendedField } from '@kbn/esql-types';
 import { SuggestionRawDefinition } from './types';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
@@ -198,8 +198,27 @@ export const getSuggestionsAfterNot = (): SuggestionRawDefinition[] => {
     .map(getOperatorSuggestion);
 };
 
+/**
+ * Generates a sort key for field suggestions based on their categorization.
+ * Recommended fields are prioritized, followed by ECS fields.
+ *
+ * @param isEcs - True if the field is an Elastic Common Schema (ECS) field.
+ * @param isRecommended - True if the field is a recommended field from the registry.
+ * @returns A string representing the sort key ('1C' for recommended, '1D' for ECS, 'D' for others).
+ */
+const getFieldsSortText = (isEcs: boolean, isRecommended: boolean) => {
+  if (isRecommended) {
+    return '1C';
+  }
+  if (isEcs) {
+    return '1D';
+  }
+  return 'D';
+};
+
 export const buildFieldsDefinitionsWithMetadata = (
   fields: ESQLFieldWithMetadata[],
+  recommendedFieldsFromExtensions: RecommendedField[] = [],
   options?: {
     advanceCursor?: boolean;
     openSuggestions?: boolean;
@@ -210,7 +229,15 @@ export const buildFieldsDefinitionsWithMetadata = (
   getVariables?: () => ESQLControlVariable[] | undefined
 ): SuggestionRawDefinition[] => {
   const fieldsSuggestions = fields.map((field) => {
-    const titleCaseType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
+    const fieldType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
+    const titleCaseType = `${field.name} (${fieldType})`;
+    // Check if the field is in the recommended fields from extensions list
+    // and if so, mark it as recommended. This also ensures that recommended fields
+    // that are registered wrongly, won't be shown as suggestions.
+    const fieldIsRecommended = recommendedFieldsFromExtensions.some(
+      (recommendedField) => recommendedField.name === field.name
+    );
+    const sortText = getFieldsSortText(Boolean(field.isEcs), Boolean(fieldIsRecommended));
     return {
       label: field.name,
       text:
@@ -219,8 +246,7 @@ export const buildFieldsDefinitionsWithMetadata = (
         (options?.advanceCursor ? ' ' : ''),
       kind: 'Variable',
       detail: titleCaseType,
-      // If detected to be an ECS field, push it up to the top of the list
-      sortText: field.isEcs ? '1D' : 'D',
+      sortText,
       command: options?.openSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
     };
   }) as SuggestionRawDefinition[];
@@ -399,7 +425,7 @@ export function getCompatibleLiterals(
   getVariables?: () => ESQLControlVariable[] | undefined
 ) {
   const suggestions: SuggestionRawDefinition[] = [];
-  if (types.includes('time_literal')) {
+  if (types.includes('time_duration')) {
     const timeLiteralSuggestions = [
       ...buildConstantsDefinitions(getUnitDuration(1), undefined, undefined, options),
     ];

@@ -9,14 +9,16 @@ import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 
 import { Filters } from './filters';
-import { useDataView } from '../../../alert_selection/use_data_view';
+import { useCreateDataView } from '../../../../../../common/hooks/use_create_data_view';
 import { TestProviders } from '../../../../../../common/mock';
 import { useSourcererDataView } from '../../../../../../sourcerer/containers';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 
-jest.mock('../../../alert_selection/use_data_view');
+jest.mock('../../../../../../common/hooks/use_create_data_view');
 jest.mock('../../../../../../sourcerer/containers');
+jest.mock('../../../../../../common/hooks/use_experimental_features');
 
-const mockUseDataView = useDataView as jest.MockedFunction<typeof useDataView>;
+const mockUseCreateDataView = useCreateDataView as jest.MockedFunction<typeof useCreateDataView>;
 const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
   typeof useSourcererDataView
 >;
@@ -39,10 +41,14 @@ describe('Filters', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockUseDataView.mockReturnValue({
-      getIndexPattern: () => 'logstash-*',
-      fields: [{ name: '_type' }],
-    } as unknown as jest.Mocked<ReturnType<typeof useDataView>>);
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    mockUseCreateDataView.mockReturnValue({
+      dataView: {
+        getIndexPattern: () => 'logstash-*',
+        fields: [{ name: '_type' }],
+      },
+      loading: false,
+    } as unknown as jest.Mocked<ReturnType<typeof useCreateDataView>>);
     mockUseSourcererDataView.mockReturnValue({
       sourcererDataView: {},
       loading: false,

@@ -9,7 +9,8 @@
 
 import React from 'react';
 
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render as rtlRender, waitFor } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 
 import { take } from 'lodash';
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
@@ -18,6 +19,10 @@ import { OptionsListControlContext } from '../options_list_context_provider';
 import type { OptionsListComponentApi } from '../types';
 import { OptionsListPopoverSuggestions } from './options_list_popover_suggestions';
 import { OptionsListDisplaySettings } from '../../../../../common/options_list';
+
+const render = (ui: React.ReactElement) => {
+  return rtlRender(ui, { wrapper: EuiThemeProvider });
+};
 
 describe('Options list popover', () => {
   const allOptions = [

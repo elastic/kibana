@@ -28,6 +28,7 @@ function getConfig(overrides = {}) {
     markdownPlugins: { lens: true },
     files: { maxSize: 1, allowedMimeTypes: ALLOWED_MIME_TYPES },
     stack: { enabled: true },
+    incrementalId: { enabled: true },
     ...overrides,
   };
 }

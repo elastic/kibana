@@ -18,7 +18,7 @@
     "patterns": [
       "_transform/{transform_id}/_reset"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/reset-transform.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-reset-transform",
     "availability": {
       "stack": true,
       "serverless": true

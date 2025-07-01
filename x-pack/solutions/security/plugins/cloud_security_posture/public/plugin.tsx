@@ -17,8 +17,8 @@ import type {
   FindingsVulnerabilityFlyoutContentProps,
   FindingsVulnerabilityFlyoutFooterProps,
   FindingsVulnerabilityFlyoutHeaderProps,
-  FindingVulnerabilityFlyoutProps,
   FindingsMisconfigurationPanelExpandableFlyoutProps,
+  FindingsVulnerabilityPanelExpandableFlyoutProps,
 } from '@kbn/cloud-security-posture';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { CspLoadingState } from './components/csp_loading_state';
@@ -169,7 +169,7 @@ export class CspPlugin
       },
       getCloudSecurityPostureVulnerabilityFlyout: () => {
         return {
-          Component: (props: FindingVulnerabilityFlyoutProps) => (
+          Component: (props: FindingsVulnerabilityPanelExpandableFlyoutProps['params']) => (
             <LazyCspFindingsVulnerabilityFlyout {...props}>
               {props.children}
             </LazyCspFindingsVulnerabilityFlyout>

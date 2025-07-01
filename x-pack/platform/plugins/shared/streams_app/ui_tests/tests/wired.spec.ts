@@ -25,7 +25,7 @@ test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
     await pageObjects.streams.gotoCreateChildStream('logs');
 
     await page.getByLabel('Stream name').fill('logs.nginx');
-    await page.getByPlaceholder('Field').fill('agent.name');
+    await page.getByPlaceholder('Field').fill('attributes.custom_field');
     await page.getByPlaceholder('Value').fill('nginx');
     await page.getByRole('button', { name: 'Save' }).click();
     await expect(page.getByRole('link', { name: 'logs.nginx', exact: true })).toBeVisible();
@@ -47,24 +47,19 @@ test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
       index: 'logs',
       document: {
         '@timestamp': '2025-05-01T00:00:00.000Z',
-        message: JSON.stringify({
-          'log.level': 'info',
-          'log.logger': 'nginx',
-          message: 'GET /search HTTP/1.1 200 1070000',
-        }),
-        'agent.name': 'nginx',
-        'other.field': 'important',
+        'log.level': 'warn',
+        message: 'GET /search HTTP/1.1 200 1070000',
+        custom_field: 'nginx',
       },
       refresh: 'wait_for',
     });
 
-    await pageObjects.streams.gotoExtractFieldTab('logs.nginx');
+    await pageObjects.streams.gotoProcessingTab('logs.nginx');
     await page.getByText('Add a processor').click();
 
-    await page.locator('input[name="field"]').fill('message');
-    await page
-      .locator('input[name="patterns\\.0\\.value"]')
-      .fill('%{WORD:method} %{URIPATH:request}');
+    await page.locator('input[name="field"]').fill('body.text');
+    await page.getByTestId('streamsAppPatternExpression').click();
+    await page.keyboard.type('%{WORD:attributes.method}', { delay: 150 }); // Simulate real typing
     await page.getByRole('button', { name: 'Add processor' }).click();
     await page.getByRole('button', { name: 'Save changes' }).click();
     await expect(page.getByText("Stream's processors updated")).toBeVisible();
@@ -72,52 +67,20 @@ test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
 
     // Update "logs.nginx" mapping
     await pageObjects.streams.gotoSchemaEditorTab('logs.nginx');
+    await page.getByPlaceholder('Search...').fill('attributes');
+    await page.getByTestId('streamsAppContentRefreshButton').click();
 
+    await expect(page.getByTestId('streamsAppSchemaEditorFieldsTableLoaded')).toBeVisible();
     await page
-      .getByRole('row', { name: 'agent.name ----- ----- logs.' })
-      .getByLabel('Open actions menu')
-      .click();
-    await page
-      .getByRole('row', { name: 'agent.name ----- ----- logs.' })
-      .getByLabel('Open actions menu')
+      .getByRole('row', { name: 'attributes.custom_field' })
+      .getByTestId('streamsAppActionsButton')
       .click();
     await page.getByRole('button', { name: 'Map field' }).click();
     await page.getByRole('combobox').selectOption('keyword');
     await page.getByRole('button', { name: 'Save changes' }).click();
-    await page.getByRole('heading', { name: 'agent.name' }).waitFor({ state: 'hidden' });
+    await page.getByRole('heading', { name: 'logs.foo' }).waitFor({ state: 'hidden' });
 
     await expect(page.getByText('Mapped', { exact: true })).toBeVisible();
     await page.getByTestId('toastCloseButton').click();
-
-    // Add dashboard
-    await pageObjects.streams.gotoStreamDashboard('logs.nginx');
-    await page.getByRole('button', { name: 'Add a dashboard' }).click();
-    await expect(
-      page
-        .getByTestId('streamsAppAddDashboardFlyoutDashboardsTable')
-        .getByRole('button', { name: 'Some Dashboard' })
-    ).toBeVisible();
-    // eslint-disable-next-line playwright/no-nth-methods
-    await page.getByRole('cell', { name: 'Select row' }).locator('div').first().click();
-    await page.getByRole('button', { name: 'Add dashboard' }).click();
-    await expect(
-      page
-        .getByTestId('streamsAppStreamDetailDashboardsTable')
-        .getByTestId('streamsAppDashboardColumnsLink')
-    ).toHaveText('Some Dashboard');
-
-    // remove dashboard
-    await page
-      .getByTestId('streamsAppStreamDetailDashboardsTable')
-      .getByRole('cell', { name: 'Select row' })
-      .locator('div')
-      // eslint-disable-next-line playwright/no-nth-methods
-      .first()
-      .click();
-
-    await page.getByRole('button', { name: 'Unlink selected' }).click();
-    await expect(
-      page.getByTestId('streamsAppStreamDetailDashboardsTable').getByText('No items found')
-    ).toBeVisible();
   });
 });

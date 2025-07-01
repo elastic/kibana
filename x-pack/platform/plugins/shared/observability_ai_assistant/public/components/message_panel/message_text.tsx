@@ -14,6 +14,7 @@ import {
   EuiText,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
+  EuiCode,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import classNames from 'classnames';
@@ -22,11 +23,12 @@ import React, { useMemo } from 'react';
 import type { Node } from 'unist';
 import { ChatActionClickHandler } from '../chat/types';
 import { CodeBlock, EsqlCodeBlock } from './esql_code_block';
-
+import { anonymizedHighlightPlugin } from './anonymized_highlight';
 interface Props {
   content: string;
   loading: boolean;
   onActionClick: ChatActionClickHandler;
+  anonymizedHighlightedContent?: React.ReactNode;
 }
 
 const ANIMATION_TIME = 1;
@@ -115,7 +117,12 @@ const esqlLanguagePlugin = () => {
   };
 };
 
-export function MessageText({ loading, content, onActionClick }: Props) {
+export function MessageText({
+  loading,
+  content,
+  onActionClick,
+  anonymizedHighlightedContent,
+}: Props) {
   const containerClassName = css`
     overflow-wrap: anywhere;
   `;
@@ -129,6 +136,7 @@ export function MessageText({ loading, content, onActionClick }: Props) {
 
     processingPlugins[1][1].components = {
       ...components,
+      anonymized: (props) => <EuiCode data-test-subj="anonymizedContent">{props.content}</EuiCode>,
       cursor: Cursor,
       codeBlock: (props) => {
         return (
@@ -180,7 +188,12 @@ export function MessageText({ loading, content, onActionClick }: Props) {
     };
 
     return {
-      parsingPluginList: [loadingCursorPlugin, esqlLanguagePlugin, ...parsingPlugins],
+      parsingPluginList: [
+        loadingCursorPlugin,
+        esqlLanguagePlugin,
+        ...parsingPlugins,
+        anonymizedHighlightPlugin,
+      ],
       processingPluginList: processingPlugins,
     };
   }, [loading, onActionClick]);
@@ -192,7 +205,7 @@ export function MessageText({ loading, content, onActionClick }: Props) {
         parsingPluginList={parsingPluginList}
         processingPluginList={processingPluginList}
       >
-        {`${content}${loading ? CURSOR : ''}`}
+        {`${anonymizedHighlightedContent || content}${loading ? CURSOR : ''}`}
       </EuiMarkdownFormat>
     </EuiText>
   );

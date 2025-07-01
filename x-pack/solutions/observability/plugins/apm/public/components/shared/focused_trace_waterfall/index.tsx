@@ -4,22 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import React, { useMemo } from 'react';
-import type { WaterfallSpan, WaterfallTransaction } from '../../../../common/waterfall/typings';
+import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import type {
-  IWaterfallSpan,
-  IWaterfallTransaction,
-} from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
-import {
-  generateLegendsAndAssignColorsToWaterfall,
-  getSpanItem,
-  getTransactionItem,
-} from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
-import { WaterfallItem } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_item';
-import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
+import { TraceWaterfall } from '../trace_waterfall';
+import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TraceSummary } from './trace_summary';
 
 type FocusedTrace = APIReturnType<'GET /internal/apm/traces/{traceId}/{docId}'>;
@@ -27,152 +16,70 @@ type FocusedTrace = APIReturnType<'GET /internal/apm/traces/{traceId}/{docId}'>;
 interface Props {
   items: FocusedTrace;
   isEmbeddable?: boolean;
+  onErrorClick?: (params: { traceId: string; docId: string }) => void;
 }
 
-const margin = {
-  top: 40,
-  left: 20,
-  right: 50,
-  bottom: 0,
-};
-
-function convertChildrenToWatefallItem(
-  children: NonNullable<FocusedTrace['traceItems']>['focusedTraceTree'],
-  rootWaterfallTransaction: IWaterfallTransaction
+export function flattenChildren(
+  children: NonNullable<FocusedTrace['traceItems']>['focusedTraceTree']
 ) {
   function convert(
     child: NonNullable<FocusedTrace['traceItems']>['focusedTraceTree'][0]
-  ): Array<IWaterfallTransaction | IWaterfallSpan> {
-    const waterfallItem =
-      child.traceDoc.processor.event === 'transaction'
-        ? getTransactionItem(child.traceDoc as WaterfallTransaction, 0)
-        : getSpanItem(child.traceDoc as WaterfallSpan, 0);
-
-    waterfallItem.offset = calculateOffset({ item: waterfallItem, rootWaterfallTransaction });
-
+  ): Array<NonNullable<FocusedTrace['traceItems']>['rootDoc']> {
     const convertedChildren = child.children?.length ? child.children.flatMap(convert) : [];
-
-    return [waterfallItem, ...convertedChildren];
+    return [child.traceDoc, ...convertedChildren];
   }
 
   return children.flatMap(convert);
 }
 
-const calculateOffset = ({
-  item,
-  rootWaterfallTransaction,
-}: {
-  item: IWaterfallTransaction | IWaterfallSpan;
-  rootWaterfallTransaction: IWaterfallTransaction;
-}) => item.doc.timestamp.us - rootWaterfallTransaction.doc.timestamp.us;
+export function reparentDocumentToRoot(items: FocusedTrace['traceItems']) {
+  if (!items) {
+    return undefined;
+  }
+  const clonedItems = structuredClone(items);
+  const rootDocId = clonedItems.rootDoc.id;
 
-export function FocusedTraceWaterfall({ items, isEmbeddable = false }: Props) {
-  const { euiTheme } = useEuiTheme();
+  if (rootDocId === clonedItems.focusedTraceDoc.id || rootDocId === clonedItems.parentDoc?.id) {
+    return clonedItems;
+  }
 
-  const traceItems = items.traceItems;
+  if (clonedItems.parentDoc) {
+    clonedItems.parentDoc.parentId = rootDocId;
+  } else {
+    clonedItems.focusedTraceDoc.parentId = rootDocId;
+  }
+  return clonedItems;
+}
 
-  const waterfall: {
-    items: Array<IWaterfallTransaction | IWaterfallSpan>;
-    totalDuration: number;
-    focusedItemId?: string;
-  } = useMemo(() => {
-    const waterfallItems: Array<IWaterfallTransaction | IWaterfallSpan> = [];
+function getTraceItems(items: NonNullable<FocusedTrace['traceItems']>) {
+  const children = items.focusedTraceTree || [];
+  const childrenItems = flattenChildren(children);
 
-    if (!traceItems) {
-      return {
-        items: [],
-        totalDuration: 0,
-        focusedItemId: undefined,
-      };
-    }
+  const traceItems = [
+    items.rootDoc,
+    items.parentDoc?.id === items.rootDoc.id ? undefined : items.parentDoc,
+    items.focusedTraceDoc.id === items.rootDoc.id ? undefined : items.focusedTraceDoc,
+    ...childrenItems,
+  ].filter(Boolean) as TraceItem[];
 
-    const rootWaterfallTransaction = getTransactionItem(
-      traceItems.rootTransaction as WaterfallTransaction,
-      0
-    );
+  return traceItems;
+}
 
-    waterfallItems.push(rootWaterfallTransaction);
-
-    const parentItem = traceItems.parentDoc
-      ? traceItems.parentDoc.processor.event === 'transaction'
-        ? getTransactionItem(traceItems.parentDoc as WaterfallTransaction, 0)
-        : getSpanItem(traceItems.parentDoc as WaterfallSpan, 0)
-      : undefined;
-
-    if (parentItem && parentItem.id !== rootWaterfallTransaction.id) {
-      parentItem.offset = calculateOffset({ item: parentItem, rootWaterfallTransaction });
-      waterfallItems.push(parentItem);
-    }
-
-    const focusedItem =
-      traceItems.focusedTraceDoc.processor.event === 'transaction'
-        ? getTransactionItem(traceItems.focusedTraceDoc as WaterfallTransaction, 0)
-        : getSpanItem(traceItems.focusedTraceDoc as WaterfallSpan, 0);
-
-    focusedItem.offset = calculateOffset({ item: focusedItem, rootWaterfallTransaction });
-
-    if (focusedItem.id !== rootWaterfallTransaction.id) {
-      waterfallItems.push(focusedItem);
-    }
-
-    const focusedItemChildren = convertChildrenToWatefallItem(
-      traceItems.focusedTraceTree,
-      rootWaterfallTransaction
-    );
-
-    waterfallItems.push(...focusedItemChildren);
-    generateLegendsAndAssignColorsToWaterfall(waterfallItems);
-
-    return {
-      items: waterfallItems,
-      totalDuration: rootWaterfallTransaction.duration,
-      focusedItemId: focusedItem.id,
-    };
-  }, [traceItems]);
-
-  if (!waterfall.items.length) {
+export function FocusedTraceWaterfall({ items, onErrorClick }: Props) {
+  const reparentedItems = reparentDocumentToRoot(items.traceItems);
+  if (!reparentedItems) {
     return null;
   }
+  const traceItems = getTraceItems(reparentedItems);
 
   return (
     <>
-      <div
-        css={css`
-          position: relative;
-        `}
-      >
-        <div
-          css={css`
-            display: flex;
-            position: sticky;
-            top: var(--euiFixedHeadersOffset, 0);
-            z-index: ${euiTheme.levels.menu};
-            background-color: ${euiTheme.colors.emptyShade};
-            border-bottom: ${euiTheme.border.thin};
-          `}
-        >
-          <TimelineAxisContainer
-            xMax={waterfall.totalDuration}
-            margins={margin}
-            numberOfTicks={3}
-          />
-        </div>
-        <VerticalLinesContainer xMax={waterfall.totalDuration} margins={margin} />
-        {waterfall.items.map((item) => (
-          <WaterfallItem
-            key={item.id}
-            timelineMargins={margin}
-            color={item.color}
-            hasToggle={false}
-            errorCount={0}
-            isSelected={item.id === waterfall.focusedItemId}
-            item={item}
-            marginLeftLevel={0}
-            totalDuration={waterfall.totalDuration}
-            isEmbeddable={isEmbeddable}
-          />
-        ))}
-      </div>
+      <TraceWaterfall
+        traceItems={traceItems}
+        showAccordion={false}
+        highlightedTraceId={reparentedItems.focusedTraceDoc.id}
+        onErrorClick={onErrorClick}
+      />
       <EuiSpacer />
       <TraceSummary summary={items.summary} />
     </>

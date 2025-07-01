@@ -17,6 +17,7 @@ export {
   type CanDuplicatePanels,
   type CanExpandPanels,
 } from './interfaces/panel_management';
+export { type CanAddNewSection, apiCanAddNewSection } from './interfaces/can_add_new_section';
 export {
   canTrackContentfulRender,
   type TrackContentfulRender,

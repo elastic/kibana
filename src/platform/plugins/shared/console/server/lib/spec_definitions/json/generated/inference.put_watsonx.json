@@ -1,0 +1,28 @@
+{
+  "inference.put_watsonx": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "url_components": {
+      "task_type": [
+        "text_embedding",
+        "chat_completion",
+        "completion"
+      ]
+    },
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_inference/{task_type}/{watsonx_inference_id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-watsonx",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

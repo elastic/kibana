@@ -11,7 +11,6 @@ import type { ComponentType, ReactElement, Ref } from 'react';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { State } from '../../../../common/store';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
@@ -70,20 +69,12 @@ const EqlTab = tabWithSuspense(
   lazy(() => import('./eql')),
   <TimelineTabFallback />
 );
-const GraphTab = tabWithSuspense(
-  lazy(() => import('./graph')),
-  <TimelineTabFallback />
-);
 const NotesTab = tabWithSuspense(
   lazy(() => import('./notes')),
   <TimelineTabFallback />
 );
 const PinnedTab = tabWithSuspense(
   lazy(() => import('./pinned')),
-  <TimelineTabFallback />
-);
-const SessionTab = tabWithSuspense(
-  lazy(() => import('./session')),
   <TimelineTabFallback />
 );
 const EsqlTab = tabWithSuspense(
@@ -97,7 +88,6 @@ interface BasicTimelineTab {
   timelineFullScreen?: boolean;
   timelineId: TimelineId;
   timelineType: TimelineType;
-  graphEventId?: string;
   timelineDescription: string;
 }
 
@@ -122,27 +112,6 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     const shouldShowESQLTab = useMemo(
       () => isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null,
       [isEsqlAdvancedSettingEnabled, timelineESQLSavedSearch]
-    );
-    const getTab = useCallback(
-      (tab: TimelineTabs) => {
-        switch (tab) {
-          case TimelineTabs.graph:
-            return <GraphTab timelineId={timelineId} />;
-          case TimelineTabs.notes:
-            return <NotesTab timelineId={timelineId} />;
-          case TimelineTabs.session:
-            return <SessionTab timelineId={timelineId} />;
-          default:
-            return null;
-        }
-      },
-      [timelineId]
-    );
-
-    const isGraphOrNotesTabs = useMemo(
-      () =>
-        [TimelineTabs.graph, TimelineTabs.notes, TimelineTabs.session].includes(activeTimelineTab),
-      [activeTimelineTab]
     );
 
     return (
@@ -193,11 +162,10 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
         )}
         <LazyTimelineTabRenderer
           timelineId={timelineId}
-          shouldShowTab={isGraphOrNotesTabs}
-          isOverflowYScroll={activeTimelineTab === TimelineTabs.session}
-          dataTestSubj={`timeline-tab-content-${TimelineTabs.graph}-${TimelineTabs.notes}`}
+          shouldShowTab={activeTimelineTab === TimelineTabs.notes}
+          dataTestSubj={`timeline-tab-content-${TimelineTabs.notes}`}
         >
-          {isGraphOrNotesTabs ? getTab(activeTimelineTab) : null}
+          <NotesTab timelineId={timelineId} />
         </LazyTimelineTabRenderer>
       </>
     );
@@ -237,7 +205,6 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   timelineId,
   timelineFullScreen,
   timelineType,
-  graphEventId,
   timelineDescription,
 }) => {
   const dispatch = useDispatch();
@@ -362,10 +329,13 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   }, [setActiveTab, dispatch, timelineId]);
 
   useEffect(() => {
-    if (!graphEventId && activeTab === TimelineTabs.graph) {
+    // we redirect to the Query tab when we try to load Timeline urls with the Session or Analyzer tabs active
+    // Session View and Analyzer graph are now only rendered in the flyout
+    // @ts-ignore
+    if (activeTab === 'graph' || activeTab === 'session') {
       setQueryAsActiveTab();
     }
-  }, [activeTab, graphEventId, setQueryAsActiveTab]);
+  }, [activeTab, setQueryAsActiveTab]);
 
   return (
     <>

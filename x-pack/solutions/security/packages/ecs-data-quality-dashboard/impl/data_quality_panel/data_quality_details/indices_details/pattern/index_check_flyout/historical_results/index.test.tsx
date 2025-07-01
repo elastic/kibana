@@ -150,7 +150,8 @@ describe('HistoricalResults', () => {
       ).toBeInTheDocument();
     });
 
-    describe('when new date is selected', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/221030
+    describe.skip('when new date is selected', () => {
       it('should invoke fetchHistoricalResults with new start and end dates, from: 0 and remaining fetch query opts', async () => {
         const indexName = 'test';
         const historicalResult = getHistoricalResultStub(indexName);

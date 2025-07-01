@@ -10,9 +10,9 @@ import { FtrProviderContext } from './ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Search solution tests', function () {
+    loadTestFile(require.resolve('./tests/search_homepage'));
     loadTestFile(require.resolve('./tests/classic_navigation'));
     loadTestFile(require.resolve('./tests/solution_navigation'));
-    loadTestFile(require.resolve('./tests/search_overview'));
     loadTestFile(require.resolve('./tests/search_start'));
     loadTestFile(require.resolve('./tests/search_onboarding_api_keys.ts'));
     loadTestFile(require.resolve('./tests/search_index_details'));

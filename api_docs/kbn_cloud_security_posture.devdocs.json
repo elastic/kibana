@@ -103,7 +103,7 @@
             "id": "def-public.CspEvaluationBadge.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ type }",
+            "label": "{ type = MISCONFIGURATION_STATUS.UNKNOWN }",
             "description": [],
             "signature": [
               "Props"
@@ -156,7 +156,9 @@
         "type": "Function",
         "tags": [],
         "label": "decodeQuery",
-        "description": [],
+        "description": [
+          "\nDecodes query parameters from a search string"
+        ],
         "signature": [
           "<T extends unknown>(search?: string | undefined) => Partial<T> | undefined"
         ],
@@ -170,7 +172,9 @@
             "type": "string",
             "tags": [],
             "label": "search",
-            "description": [],
+            "description": [
+              "- The search string to decode"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -180,7 +184,9 @@
             "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The decoded query object or undefined if decoding fails"
+        ],
         "initialIsOpen": false
       },
       {
@@ -189,9 +195,11 @@
         "type": "Function",
         "tags": [],
         "label": "encodeQuery",
-        "description": [],
+        "description": [
+          "\nEncodes query parameters using rison and returns a search string with 'cspq=' prefix"
+        ],
         "signature": [
-          "(query: any) => string | undefined"
+          "(query: unknown) => string | undefined"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/query_utils.ts",
         "deprecated": false,
@@ -200,12 +208,14 @@
           {
             "parentPluginId": "@kbn/cloud-security-posture",
             "id": "def-public.encodeQuery.$1",
-            "type": "Any",
+            "type": "Unknown",
             "tags": [],
             "label": "query",
-            "description": [],
+            "description": [
+              "- The query object to encode"
+            ],
             "signature": [
-              "any"
+              "unknown"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/query_utils.ts",
             "deprecated": false,
@@ -213,7 +223,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The encoded search string or undefined if encoding fails"
+        ],
         "initialIsOpen": false
       },
       {
@@ -312,54 +324,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.getMisconfigurationStatusColor",
-        "type": "Function",
-        "tags": [],
-        "label": "getMisconfigurationStatusColor",
-        "description": [],
-        "signature": [
-          "(status?: ",
-          {
-            "pluginId": "@kbn/cloud-security-posture-common",
-            "scope": "common",
-            "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
-            "section": "def-common.MisconfigurationEvaluationStatus",
-            "text": "MisconfigurationEvaluationStatus"
-          },
-          " | undefined) => string"
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/get_finding_colors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.getMisconfigurationStatusColor.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "status",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/cloud-security-posture-common",
-                "scope": "common",
-                "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
-                "section": "def-common.MisconfigurationEvaluationStatus",
-                "text": "MisconfigurationEvaluationStatus"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/get_finding_colors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -804,49 +768,26 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.updateUrlQuery",
+        "id": "def-public.useGetMisconfigurationStatusColor",
         "type": "Function",
         "tags": [],
-        "label": "updateUrlQuery",
+        "label": "useGetMisconfigurationStatusColor",
         "description": [],
         "signature": [
-          "<T extends object>(newQuery: Partial<T>, search: string) => string"
+          "() => { getMisconfigurationStatusColor: (status: ",
+          {
+            "pluginId": "@kbn/cloud-security-posture-common",
+            "scope": "common",
+            "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
+            "section": "def-common.MisconfigurationEvaluationStatus",
+            "text": "MisconfigurationEvaluationStatus"
+          },
+          ") => string; }"
         ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/query_utils.ts",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_get_misconfiguration_status_color.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.updateUrlQuery.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "newQuery",
-            "description": [],
-            "signature": [
-              "Partial<T>"
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/query_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.updateUrlQuery.$2",
-            "type": "string",
-            "tags": [],
-            "label": "search",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/query_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -1274,7 +1215,9 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              ">): void; }"
+              ">): void; availableIntegrations: (objectType: string, groupId?: string | undefined) => ",
+              "ShareActionIntents",
+              "[]; }"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
             "deprecated": false,
@@ -1653,6 +1596,20 @@
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.FindingsVulnerabilityFlyoutContentProps.isPreviewMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isPreviewMode",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1907,67 +1864,16 @@
               }
             ],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.FindingVulnerabilityPanelExpandableFlyoutProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "FindingVulnerabilityPanelExpandableFlyoutProps",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/cloud-security-posture",
-            "scope": "public",
-            "docId": "kibKbnCloudSecurityPosturePluginApi",
-            "section": "def-public.FindingVulnerabilityPanelExpandableFlyoutProps",
-            "text": "FindingVulnerabilityPanelExpandableFlyoutProps"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/expandable-flyout",
-            "scope": "public",
-            "docId": "kibKbnExpandableFlyoutPluginApi",
-            "section": "def-public.FlyoutPanelProps",
-            "text": "FlyoutPanelProps"
-          }
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.FindingVulnerabilityPanelExpandableFlyoutProps.key",
-            "type": "string",
-            "tags": [],
-            "label": "key",
-            "description": [],
-            "signature": [
-              "\"findings-vulnerability-panel\""
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.FindingVulnerabilityPanelExpandableFlyoutProps.params",
-            "type": "Object",
+            "id": "def-public.FindingVulnerabilityFullFlyoutContentProps.isPreviewMode",
+            "type": "CompoundType",
             "tags": [],
-            "label": "params",
+            "label": "isPreviewMode",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/cloud-security-posture",
-                "scope": "public",
-                "docId": "kibKbnCloudSecurityPosturePluginApi",
-                "section": "def-public.FindingVulnerabilityFlyoutProps",
-                "text": "FindingVulnerabilityFlyoutProps"
-              }
+              "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
             "deprecated": false,
@@ -2170,7 +2076,7 @@
             "section": "def-public.FlyoutPanelProps",
             "text": "FlyoutPanelProps"
           },
-          " & { id: \"findings-misconfiguration-panel\"; params: BaseFlyoutProps & NonPreviewModeProps; }"
+          " & { id: \"findings-misconfiguration-panel\"; params: BaseMisconfigurationFlyoutProps & NonPreviewModeProps; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
         "deprecated": false,
@@ -2192,7 +2098,80 @@
             "section": "def-public.FlyoutPanelProps",
             "text": "FlyoutPanelProps"
           },
-          " & { id: \"findings-misconfiguration-panel-preview\"; params: BaseFlyoutProps & PreviewModeProps; }"
+          " & { id: \"findings-misconfiguration-panel-preview\"; params: BaseMisconfigurationFlyoutProps & PreviewModeProps; }"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.FindingsVulnerabilityPanelExpandableFlyoutProps",
+        "type": "Type",
+        "tags": [],
+        "label": "FindingsVulnerabilityPanelExpandableFlyoutProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/cloud-security-posture",
+            "scope": "public",
+            "docId": "kibKbnCloudSecurityPosturePluginApi",
+            "section": "def-public.FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview",
+            "text": "FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/cloud-security-posture",
+            "scope": "public",
+            "docId": "kibKbnCloudSecurityPosturePluginApi",
+            "section": "def-public.FindingsVulnerabilityPanelExpandableFlyoutPropsPreview",
+            "text": "FindingsVulnerabilityPanelExpandableFlyoutPropsPreview"
+          }
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview",
+        "type": "Type",
+        "tags": [],
+        "label": "FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/expandable-flyout",
+            "scope": "public",
+            "docId": "kibKbnExpandableFlyoutPluginApi",
+            "section": "def-public.FlyoutPanelProps",
+            "text": "FlyoutPanelProps"
+          },
+          " & { id: \"findings-vulnerability-panel\"; params: BaseVulnerabilityFlyoutProps & NonPreviewModeProps; }"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.FindingsVulnerabilityPanelExpandableFlyoutPropsPreview",
+        "type": "Type",
+        "tags": [],
+        "label": "FindingsVulnerabilityPanelExpandableFlyoutPropsPreview",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/expandable-flyout",
+            "scope": "public",
+            "docId": "kibKbnExpandableFlyoutPluginApi",
+            "section": "def-public.FlyoutPanelProps",
+            "text": "FlyoutPanelProps"
+          },
+          " & { id: \"findings-vulnerability-panel-preview\"; params: BaseVulnerabilityFlyoutProps & PreviewModeProps; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
         "deprecated": false,
@@ -2269,7 +2248,9 @@
         "type": "Type",
         "tags": [],
         "label": "NavFilter",
-        "description": [],
+        "description": [
+          "\nType alias for navigation filters"
+        ],
         "signature": [
           "{ [x: string]: FilterValue; }"
         ],

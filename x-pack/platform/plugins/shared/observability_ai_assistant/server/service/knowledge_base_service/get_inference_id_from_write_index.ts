@@ -8,9 +8,13 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { MappingSemanticTextProperty } from '@elastic/elasticsearch/lib/api/types';
 import { first } from 'lodash';
+import { Logger } from '@kbn/logging';
 import { resourceNames } from '..';
 
-export async function getConcreteWriteIndex(esClient: { asInternalUser: ElasticsearchClient }) {
+export async function getConcreteWriteIndex(
+  esClient: { asInternalUser: ElasticsearchClient },
+  logger: Logger
+) {
   try {
     const res = await esClient.asInternalUser.indices.getAlias({
       name: resourceNames.writeIndexAlias.kb,
@@ -18,26 +22,40 @@ export async function getConcreteWriteIndex(esClient: { asInternalUser: Elastics
 
     return first(Object.keys(res));
   } catch (error) {
+    logger.debug(
+      `Unable to get concrete write index for index alias "${resourceNames.writeIndexAlias.kb}": ${error}`
+    );
     return;
   }
 }
 
-export async function getInferenceIdFromWriteIndex(esClient: {
-  asInternalUser: ElasticsearchClient;
-}): Promise<string> {
-  const response = await esClient.asInternalUser.indices.getMapping({
-    index: resourceNames.writeIndexAlias.kb,
-  });
+export async function getInferenceIdFromWriteIndex(
+  esClient: {
+    asInternalUser: ElasticsearchClient;
+  },
+  logger: Logger
+): Promise<string | undefined> {
+  try {
+    const response = await esClient.asInternalUser.indices.getMapping({
+      index: resourceNames.writeIndexAlias.kb,
+    });
 
-  const [indexName, indexMappings] = Object.entries(response)[0];
+    const [indexName, indexMappings] = Object.entries(response)[0];
 
-  const inferenceId = (
-    indexMappings.mappings?.properties?.semantic_text as MappingSemanticTextProperty
-  )?.inference_id;
+    const inferenceId = (
+      indexMappings.mappings?.properties?.semantic_text as MappingSemanticTextProperty
+    )?.inference_id;
 
-  if (!inferenceId) {
-    throw new Error(`inference_id not found in field mappings for index ${indexName}`);
+    if (!inferenceId) {
+      logger.debug(`Inference ID missing in field mappings for index ${indexName}.`);
+      return undefined;
+    }
+
+    return inferenceId;
+  } catch (error) {
+    logger.debug(
+      `Unable to get index mapping for index alias "${resourceNames.writeIndexAlias.kb}": ${error}`
+    );
+    return undefined;
   }
-
-  return inferenceId;
 }

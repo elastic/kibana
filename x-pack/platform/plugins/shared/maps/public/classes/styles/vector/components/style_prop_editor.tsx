@@ -6,20 +6,14 @@
  */
 
 import React, { Component, Fragment, ReactElement } from 'react';
-import {
-  EuiFormRow,
-  EuiSelect,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFieldText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiFlexGroup, EuiFlexItem, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getVectorStyleLabel, getDisabledByMessage } from './get_vector_style_label';
 import { STYLE_TYPE, VECTOR_STYLES } from '../../../../../common/constants';
 import { CustomIcon } from '../../../../../common/descriptor_types';
 import { IStyleProperty } from '../properties/style_property';
 import { StyleField } from '../style_fields_helper';
+import { DisabledToolTip } from '../disabled_tooltip';
 
 export const FIXED_LABEL = i18n.translate('xpack.maps.styles.staticDynamicSelect.staticLabel', {
   defaultMessage: 'Fixed',
@@ -110,10 +104,7 @@ export class StylePropEditor<StaticOptions, DynamicOptions> extends Component<
 
     const stylePropertyForm =
       this.props.disabled && this.props.disabledBy ? (
-        <EuiToolTip
-          anchorClassName="mapStyleFormDisabledTooltip"
-          content={getDisabledByMessage(this.props.disabledBy)}
-        >
+        <DisabledToolTip content={getDisabledByMessage(this.props.disabledBy)}>
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem grow={false} className="mapStyleSettings__fixedBox">
               {staticDynamicSelect}
@@ -122,7 +113,7 @@ export class StylePropEditor<StaticOptions, DynamicOptions> extends Component<
               <EuiFieldText compressed disabled />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiToolTip>
+        </DisabledToolTip>
       ) : (
         <Fragment>
           {React.cloneElement(this.props.children, {
