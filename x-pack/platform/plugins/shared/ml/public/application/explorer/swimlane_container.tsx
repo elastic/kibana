@@ -523,6 +523,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                           xAccessor="time"
                           yAccessor="laneLabel"
                           valueAccessor="value"
+                          valueFormatter={(score: number) => String(Math.floor(score))}
                           highlightedData={highlightedData}
                           valueFormatter={getFormattedSeverityScore}
                           xScale={{
