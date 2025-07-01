@@ -229,15 +229,15 @@ export function getObservabilitySystemPrompt({
 
     if (isKnowledgeBaseReady && isFunctionAvailable(SUMMARIZE_FUNCTION_NAME)) {
       usage.push(
-        `**Summarization:** Use the \`${SUMMARIZE_FUNCTION_NAME}\` tool **only** when explicitly asked by the user to store information. Summaries **MUST** be generated in English.`
+        `**Summarization and Memory:** Use the \`${SUMMARIZE_FUNCTION_NAME}\` tool **only** when the user asks you to store, remember, save, or keep information. This function saves information permanently for retrieval in future sessions, not just for the current conversation (i.e don't just "keep something in mind" and **call the \`${SUMMARIZE_FUNCTION_NAME}\` to do it for you). Summaries **MUST** be generated in English.`
       );
     }
 
-    // if (isFunctionAvailable('context')) {
-    //   usage.push(
-    //     `7.  **Context Retrieval:** Use the \`context\` function proactively or when needed to understand the user's environment or retrieve prior knowledge.`
-    //   );
-    // }
+    if (isFunctionAvailable(CONTEXT_FUNCTION_NAME)) {
+      usage.push(
+        `**Context Retrieval:** You **MUST** use the \`${CONTEXT_FUNCTION_NAME}\` tool before answering any question that refers to internal knowledge or user's environment (e.g., teams, processes, on-call schedules). The tool returns a "learnings" array—incorporate this information directly. If the learnings do not contain the requested information, state that you could not find it. **Do not invent answers.**`
+      );
+    }
 
     if (
       isFunctionAvailable(GET_ALERTS_DATASET_INFO_FUNCTION_NAME) &&
