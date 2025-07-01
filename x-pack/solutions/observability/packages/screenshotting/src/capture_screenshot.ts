@@ -130,20 +130,6 @@ const getSelectorForUrl = (url: string) => {
   return 'main';
 };
 
-const waitForFocus = (): Promise<void> => {
-  return new Promise((resolve) => {
-    if (document.hasFocus()) {
-      resolve();
-    } else {
-      const onFocus = () => {
-        window.removeEventListener('focus', onFocus);
-        resolve();
-      };
-      window.addEventListener('focus', onFocus);
-    }
-  });
-};
-
 export async function captureScreenshot(
   url: string,
   options: CaptureOptions = {}
@@ -175,7 +161,6 @@ export async function captureScreenshot(
       await waitForDomStability(iframe, idleFor, timeout);
       await waitForIdle(iframe, timeout);
       await waitForNoLoadingCharts(iframe, timeout, stableFor);
-      // await waitForFocus();
 
       try {
         const canvas = await html2canvas(element);
