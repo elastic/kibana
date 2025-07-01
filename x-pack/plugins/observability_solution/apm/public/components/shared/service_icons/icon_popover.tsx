@@ -51,6 +51,7 @@ export function IconPopover({
       }
       isOpen={isOpen}
       closePopover={onClose}
+      onBlur={onClose}
     >
       <EuiPopoverTitle>{title}</EuiPopoverTitle>
       <div style={{ minWidth: 300 }}>
