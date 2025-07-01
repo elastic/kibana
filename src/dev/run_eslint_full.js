@@ -21,7 +21,11 @@ run(
     const { batches, files } = getLintableFileBatches();
     log.info(`Found ${files.length} files in ${batches.length} batches to lint.`);
 
-    const eslintArgs = flags.unexpected.concat([flags.cache ? null : '--no-cache']).filter(Boolean);
+    const eslintArgs =
+      // Unexpected will contain anything meant for ESLint directly, like `--fix`
+      flags.unexpected
+        // ESLint has no cache by default
+        .concat([flags.cache ? '--cache' : '--no-cache']);
     log.info(
       `Running ESLint with args: ${pretty({
         args: eslintArgs,
@@ -48,6 +52,10 @@ run(
     description: 'Run ESLint on all JavaScript/TypeScript files in the repository',
     flags: {
       boolean: ['bail', 'cache'],
+      default: {
+        bail: false,
+        cache: true, // Enable caching by default
+      },
       allowUnexpected: true,
       help: `
         --bail            Stop on the first linting error

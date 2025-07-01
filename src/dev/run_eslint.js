@@ -30,7 +30,7 @@ if (process.argv.includes('--help') || process.argv.includes('-h')) {
         process.argv.push('--quiet');
       }
 
-      if (!flags.cache) {
+      if (flags.cache) {
         process.argv.push('--cache');
       }
 
@@ -49,6 +49,8 @@ if (process.argv.includes('--help') || process.argv.includes('-h')) {
       });
     },
     {
+      description: 'Run ESLint on all JavaScript/TypeScript files in the repository',
+      usage: 'node scripts/eslint.js [options] [<file>...]',
       flags: {
         allowUnexpected: true,
         boolean: ['cache', 'fix', 'quiet'],
