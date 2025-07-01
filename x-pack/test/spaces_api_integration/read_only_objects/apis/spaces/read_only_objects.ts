@@ -182,7 +182,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(transferResponse.body).to.have.property('message');
         expect(transferResponse.body.message).to.contain(
-          `Unable to change ownership for types read_only_type`
+          `Unable to manage_access_control for types read_only_type`
         );
       });
 
