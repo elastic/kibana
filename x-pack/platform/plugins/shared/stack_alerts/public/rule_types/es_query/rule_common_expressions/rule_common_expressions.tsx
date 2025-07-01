@@ -171,7 +171,7 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
           <EuiIconTip
             position="right"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             content={SIZE_VALUE_TOOLTIP_CONTENT}
             aria-label={SIZE_VALUE_TOOLTIP_CONTENT}
           />,
