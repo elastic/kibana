@@ -136,6 +136,7 @@ export const FileUpload = <Kind extends string = string>({
   allowRepeatedUploads = false,
   className,
 }: Props<Kind>): ReturnType<FunctionComponent> => {
+  console.log('kindid', kindId);
   const { client } = useFilesContext();
   const ref = useRef<null | EuiFilePickerClass>(null);
   const fileKind = client.getFileKind(kindId);
@@ -149,6 +150,7 @@ export const FileUpload = <Kind extends string = string>({
       }),
     [client, repeatedUploads, fileKind]
   );
+  console.log('repeated uploads', repeatedUploads);
 
   /**
    * Hook state into component callbacks
@@ -158,7 +160,10 @@ export const FileUpload = <Kind extends string = string>({
       uploadState.clear$.subscribe(() => {
         ref.current?.removeFiles();
       }),
-      uploadState.done$.subscribe((n) => n && onDone(n)),
+      uploadState.done$.subscribe((n) => {
+        console.log('DONE CALLED IN FILE UPDLOAD', n);
+        return n && onDone(n);
+      }),
       uploadState.error$.subscribe((e) => e && onError?.(e)),
       uploadState.uploading$.subscribe((uploading) =>
         uploading ? onUploadStart?.() : onUploadEnd?.()

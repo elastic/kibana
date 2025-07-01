@@ -190,6 +190,7 @@ export const UserActionsList = React.memo(
       ? [...builtUserActions, ...bottomActions]
       : [...builtUserActions];
 
+    // console.log('COMMENTS!!!', comments);
     useEffect(() => {
       if (commentId != null && initLoading) {
         setInitLoading(false);

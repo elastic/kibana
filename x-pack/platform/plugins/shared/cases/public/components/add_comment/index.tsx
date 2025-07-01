@@ -242,7 +242,8 @@ export const AddComment = React.memo(
                           isLoading={isLoading}
                           onClick={onSubmit}
                         >
-                          {i18n.ADD_COMMENT}
+                          ADD COMMENT LOL
+                          {/* {i18n.ADD_COMMENT} */}
                         </EuiButton>
                       </EuiFlexItem>
                     </EuiFlexGroup>
