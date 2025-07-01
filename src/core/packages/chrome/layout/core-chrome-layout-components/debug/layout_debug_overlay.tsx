@@ -108,11 +108,11 @@ const slots: Array<{ name: string; style: React.CSSProperties }> = [
   {
     name: 'applicationTopBar',
     style: {
-      top: 'var(--kbn-layout--application-top-bar-top, 0)',
-      left: 'var(--kbn-layout--application-top-bar-left, 0)',
-      right: 'var(--kbn-layout--application-top-bar-right, 0)',
-      width: 'var(--kbn-layout--application-top-bar-width, 0)',
-      height: 'var(--kbn-layout--application-top-bar-height, 0)',
+      top: 'var(--kbn-application--top-bar-top, 0)',
+      left: 'var(--kbn-application--top-bar-left, 0)',
+      right: 'var(--kbn-application--top-bar-right, 0)',
+      width: 'var(--kbn-application--top-bar-width, 0)',
+      height: 'var(--kbn-application--top-bar-height, 0)',
     },
   },
   {
@@ -127,21 +127,21 @@ const slots: Array<{ name: string; style: React.CSSProperties }> = [
   {
     name: 'applicationBottomBar',
     style: {
-      bottom: 'var(--kbn-layout--application-bottom-bar-bottom, 0)',
-      left: 'var(--kbn-layout--application-bottom-bar-left, 0)',
-      right: 'var(--kbn-layout--application-bottom-bar-right, 0)',
-      width: 'var(--kbn-layout--application-bottom-bar-width, 0)',
-      height: 'var(--kbn-layout--application-bottom-bar-height, 0)',
+      bottom: 'var(--kbn-application--bottom-bar-bottom, 0)',
+      left: 'var(--kbn-application--bottom-bar-left, 0)',
+      right: 'var(--kbn-application--bottom-bar-right, 0)',
+      width: 'var(--kbn-application--bottom-bar-width, 0)',
+      height: 'var(--kbn-application--bottom-bar-height, 0)',
     },
   },
   {
     name: 'applicationContent',
     style: {
-      top: 'var(--kbn-layout--application-content-top, 0)',
-      left: 'var(--kbn-layout--application-content-left, 0)',
-      right: 'var(--kbn-layout--application-content-right, 0)',
-      width: 'var(--kbn-layout--application-content-width, 0)',
-      height: 'var(--kbn-layout--application-content-height, 0)',
+      top: 'var(--kbn-application--content-top, 0)',
+      left: 'var(--kbn-application--content-left, 0)',
+      right: 'var(--kbn-application--content-right, 0)',
+      width: 'var(--kbn-application--content-width, 0)',
+      height: 'var(--kbn-application--content-height, 0)',
     },
   },
 ];

@@ -22,6 +22,7 @@ Composable React layout primitives for Kibana's Chrome application shell. Provid
 All regions are passed as props to `ChromeLayout` Component. Each slot can be a React node or a function that receives the current layout state.
 
 Available slots:
+
 - `header`
 - `footer`
 - `navigation`
@@ -38,10 +39,7 @@ Available slots:
 Wrap your layout in a `LayoutConfigProvider` to set region sizes:
 
 ```tsx
-import {
-  ChromeLayout,
-  ChromeLayoutConfigProvider,
-} from '@kbn/core-chrome-layout-components';
+import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layout-components';
 
 <ChromeLayoutConfigProvider
   value={{
@@ -95,15 +93,13 @@ This package exposes layout dimensions and positions as global CSS variables (cu
 - **Application**
   - `--kbn-layout--application-[top|bottom|left|right|height|width]`
 - **Application Top Bar**
-  - `--kbn-layout--application-top-bar-[height|top|left|width|right|bottom]`
+  - `--kbn-application--top-bar-[height|top|left|width|right|bottom]`
 - **Application Bottom Bar**
-  - `--kbn-layout--application-bottom-bar-[height|top|left|width|right|bottom]`
+  - `--kbn-application--bottom-bar-[height|top|left|width|right|bottom]`
 - **Application Content**
-  - `--kbn-layout--application-content-[top|bottom|left|right|height|width]`
+  - `--kbn-application--content-[top|bottom|left|right|height|width]`
 - **Common**
   - `--kbn-layout--aboveFlyoutLevel`
-
-These variables are set at the `:root` level and update automatically based on the current layout state.
 
 These variables are set at the `:root` level and update automatically based on the current layout state.
 

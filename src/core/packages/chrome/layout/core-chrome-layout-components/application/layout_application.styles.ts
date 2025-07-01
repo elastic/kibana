@@ -32,7 +32,7 @@ const topBar: EmotionFn = ({ euiTheme }) => css`
   position: sticky;
   top: 0;
   z-index: ${euiTheme.levels.header};
-  height: var(--kbn-layout--application-top-bar-height);
+  height: var(--kbn-application--top-bar-height);
   flex-shrink: 0;
 `;
 
@@ -40,7 +40,7 @@ const bottomBar: EmotionFn = ({ euiTheme }) => css`
   position: sticky;
   bottom: 0;
   z-index: ${euiTheme.levels.header};
-  height: var(--kbn-layout--application-bottom-bar-height);
+  height: var(--kbn-application--bottom-bar-height);
   flex-shrink: 0;
 `;
 
