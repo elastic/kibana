@@ -443,7 +443,7 @@ describe('When using `EnteredInput` class with Argument-Based Bare Flags', () =>
       );
 
       // Should reconstruct correctly despite bare flag parsing difference
-      expect(input.getFullText()).toEqual(`runscript --ScriptName="test.ps1"`);
+      expect(input.getFullText()).toEqual(`runscript --ScriptName=test.ps1`);
     });
 
     it('should handle empty selector values gracefully', () => {
