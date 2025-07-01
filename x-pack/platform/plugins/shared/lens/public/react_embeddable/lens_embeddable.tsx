@@ -62,8 +62,6 @@ export const createLensEmbeddableFactory = (
       titleManager.api.title$?.subscribe((newTitle) => {
         if (newTitle === undefined) {
           delete initialState.rawState.title;
-        } else {
-          initialState.rawState.title = newTitle;
         }
       });
 
