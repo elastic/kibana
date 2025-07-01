@@ -1147,11 +1147,13 @@ describe('#authorize (unpublished by interface)', () => {
           spaces,
           actions: new Set([SecurityAction.CLOSE_POINT_IN_TIME]), // this is currently the only security action that does not require authz
         })
-      ).rejects.toThrowError('No actions specified for authorization check');
+      ).rejects.toThrowError(
+        'No actions or access control types specified for authorization check'
+      );
     });
   });
 
-  describe('scecurity actions with no audit action', () => {
+  describe('security actions with no audit action', () => {
     // These arguments are used for all unit tests below
     const types = new Set(['a', 'b', 'c']);
     const spaces = new Set(['x', 'y']);
@@ -2754,7 +2756,7 @@ describe('delete', () => {
       expect(enforceAuthorizationSpy).toHaveBeenCalledTimes(1);
     });
 
-    test.only(`adds an audit event per object when successful`, async () => {
+    test(`adds an audit event per object when successful`, async () => {
       const { securityExtension, checkPrivileges, auditLogger } = setup();
       checkPrivileges.mockResolvedValue(fullyAuthorizedCheckPrivilegesResponse);
 
@@ -2763,7 +2765,7 @@ describe('delete', () => {
         objects,
       });
 
-      expect(auditHelperSpy).toHaveBeenCalledTimes(2);
+      expect(auditHelperSpy).toHaveBeenCalledTimes(1);
       expect(addAuditEventSpy).toHaveBeenCalledTimes(objects.length);
       expect(auditLogger.log).toHaveBeenCalledTimes(objects.length);
       for (const obj of objects) {
