@@ -98,6 +98,15 @@ export const updateRuleUsage = (
           totalType: 'elastic_customized_total',
         }),
       };
+    } else {
+      updatedUsage = {
+        ...updatedUsage,
+        elastic_noncustomized_total: updateTotalUsage({
+          detectionRuleMetric,
+          updatedUsage,
+          totalType: 'elastic_noncustomized_total',
+        }),
+      };
     }
   } else {
     updatedUsage = {
