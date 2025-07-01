@@ -826,7 +826,7 @@ describe('migrations v2 model', () => {
         tempIndexMappings: { properties: {} },
       };
 
-      test('REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION -> CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION when cluster allocation is not compatible', () => {
+      test('REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION -> REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION when cluster allocation is not compatible', () => {
         const res: ResponseType<'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION'> = Either.left({
           type: 'incompatible_cluster_routing_allocation',
         });
