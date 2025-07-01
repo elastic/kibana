@@ -527,7 +527,7 @@ describe('EsqlToolClient', () => {
    
       mockElasticsearchClient.transport.request.mockResolvedValue(mockResponse);
    
-      const params = [{ case_id: 'CASE-123', status: 'open' }];
+      const params = [{ case_id: 'CASE-123'}, {status: 'open' }];
       const result = await client.execute('123', params);
    
       expect(mockElasticsearchClient.transport.request).toHaveBeenCalledWith({
@@ -564,7 +564,7 @@ describe('EsqlToolClient', () => {
    
       mockElasticsearchClient.transport.request.mockResolvedValue(mockResponse);
    
-      const params = [{ case_id: 'CASE-123', status: 'open' }];
+      const params = [{ case_id: 'CASE-123'}, {status: 'open' }];
       const result = await client.execute('123', params);
    
       expect(mockElasticsearchClient.transport.request).toHaveBeenCalledWith({

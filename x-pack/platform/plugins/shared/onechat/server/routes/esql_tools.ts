@@ -177,7 +177,6 @@ export function registerESQLToolsRoutes({
         if (!enabled) {
           return response.notFound();
         }
-
         if (!/^[a-zA-Z0-9_-]+$/.test(request.body.id)) {
           return response.badRequest({
             body: {
@@ -194,7 +193,7 @@ export function registerESQLToolsRoutes({
           name: request.body.name || request.body.id,
           description: request.body.description,
           query: request.body.query,
-          params: request.body.params || {},
+          params: request.body.params || [{}],
           meta: {
             tags: request.body.meta.tags || [],
             providerId: esqlToolProviderId,
@@ -380,7 +379,6 @@ export function registerESQLToolsRoutes({
         if (!enabled) {
           return response.notFound();
         }
-
         const { esql: esqlToolService } = getInternalServices();
         const client = await esqlToolService.getScopedClient({ request });
         const result = await client.execute(request.body.id, request.body.params);
