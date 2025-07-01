@@ -333,7 +333,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     async setValue(value: string) {
       const contextMenu = await testSubjects.find('groupByContextMenu');
       const menuItems = await contextMenu.findAllByCssSelector('button.euiContextMenuItem');
-      console.log(menuItems);
       const menuItemsOptions = await Promise.all(menuItems.map((item) => item.getVisibleText()));
       const menuItemValueIndex = menuItemsOptions.findIndex((item) => item === value);
       await menuItems[menuItemValueIndex].click();
