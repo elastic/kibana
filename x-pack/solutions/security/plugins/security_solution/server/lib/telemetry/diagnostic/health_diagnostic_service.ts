@@ -189,7 +189,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       statistics.push(queryStats);
     }
 
-    this.logger.info('Finished running health diagnostic task', { satistics } as LogMeta);
+    this.logger.info('Finished running health diagnostic task', { statistics } as LogMeta);
 
     return statistics;
   }
