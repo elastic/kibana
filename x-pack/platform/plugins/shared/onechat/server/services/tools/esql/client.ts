@@ -132,11 +132,10 @@ class EsqlToolClientImpl {
     return true;
   }
 
-  async execute(id: string, params: Record<string, any>): Promise<any> {
+  async execute(id: string, params: Array<Record<string, any>>): Promise<any> {
     const document = await this.get(id);
-    const paramArray = Object.entries(params).map(([key, value]) => ({
-      [key]: value
-    }));
+
+    const paramArray = Object.entries(params[0]).map(([key, value]) => ({ [key]: value }));
     
     const response = await this.esClient.transport.request({
       method: 'POST',
