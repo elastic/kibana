@@ -354,6 +354,65 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.getAttackDiscoveryMarkdownFields",
+        "type": "Function",
+        "tags": [],
+        "label": "getAttackDiscoveryMarkdownFields",
+        "description": [],
+        "signature": [
+          "({ attackDiscovery, replacements, }: { attackDiscovery: { title: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; id?: string | undefined; timestamp?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; }; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; }) => { detailsMarkdown: string; entitySummaryMarkdown: string; title: string; summaryMarkdown: string; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/utils/get_attack_discovery_markdown/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-common",
+            "id": "def-common.getAttackDiscoveryMarkdownFields.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  attackDiscovery,\n  replacements,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/utils/get_attack_discovery_markdown/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.getAttackDiscoveryMarkdownFields.$1.attackDiscovery",
+                "type": "Object",
+                "tags": [],
+                "label": "attackDiscovery",
+                "description": [],
+                "signature": [
+                  "{ title: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; id?: string | undefined; timestamp?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; }"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/utils/get_attack_discovery_markdown/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.getAttackDiscoveryMarkdownFields.$1.replacements",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "replacements",
+                "description": [],
+                "signature": [
+                  "Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/utils/get_attack_discovery_markdown/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.getIsDataAnonymizable",
         "type": "Function",
         "tags": [],
