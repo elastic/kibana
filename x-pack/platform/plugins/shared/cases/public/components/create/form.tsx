@@ -32,6 +32,7 @@ import { getConfigurationByOwner } from '../../containers/configure/utils';
 import { CreateCaseOwnerSelector } from './owner_selector';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useActiveSolution } from '../app/use_active_solution';
+import { useOwnerSelector } from '../app/use_owner_selector';
 import { getInitialCaseValue, getOwnerDefaultValue } from './utils';
 
 export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsProps>, 'withSteps'> {
@@ -65,35 +66,8 @@ export const FormFieldsWithFormContext: React.FC<FormFieldsWithFormContextProps>
     selectedOwner,
     onSelectedOwner,
   }) => {
-    const { owner, isServerless } = useCasesContext();
-    console.log(isServerless, '!!isServerless in FormFieldsWithFormContext');
-    const activeSolution = useActiveSolution();
+    const { shouldShowOwnerSelector, defaultOwnerValue } = useOwnerSelector();
     const availableOwners = useAvailableCasesOwners();
-    let defaultOwnerValue = owner[0] ?? getOwnerDefaultValue(availableOwners);
-    const mapActiveSolutionToOwner = (solution: string): string => {
-      switch (solution) {
-        case 'oblt':
-          return 'observability';
-        case 'security':
-          return 'securitySolution';
-        case 'classic':
-          return 'cases';
-        default:
-          return defaultOwnerValue;
-      }
-    };
-
-    // If the activeSolution is defined, we should use it to set the selected owner
-    // On serverlss activeSolution is undefined, so we use the default owner value, which is the first owner in the availableOwners array
-
-    if (activeSolution !== undefined) {
-      defaultOwnerValue = mapActiveSolutionToOwner(activeSolution);
-    }
-
-    // On stateful if the activeSolution is 'classic' and there are more than one available owners, we show the owner selector
-    // On serverless (activeSolution is undefined) there is only one owner, so we don't show the owner selector
-    const shouldShowOwnerSelector =
-      (activeSolution === undefined || activeSolution === 'classic') && availableOwners.length > 1;
 
     if (!shouldShowOwnerSelector) {
       onSelectedOwner(defaultOwnerValue);
