@@ -6,14 +6,14 @@
  */
 
 import {
-  OneChatDefaultAgentId,
-  OneChatDefaultAgentProviderId,
+  oneChatDefaultAgentId,
+  oneChatAgentProviderIds,
   AgentType,
   createAgentNotFoundError,
   toSerializedAgentIdentifier,
 } from '@kbn/onechat-common';
 import type { ConversationalAgentDefinition } from '@kbn/onechat-server';
-import type { AgentProviderWithId } from './types';
+import type { AgentProviderWithId } from '../types';
 import { createHandler } from './handler';
 
 /**
@@ -21,12 +21,12 @@ import { createHandler } from './handler';
  */
 export const createDefaultAgentProvider = (): AgentProviderWithId => {
   const provider: AgentProviderWithId = {
-    id: OneChatDefaultAgentProviderId,
+    id: oneChatAgentProviderIds.default,
     has: ({ agentId }) => {
-      return agentId === OneChatDefaultAgentId;
+      return agentId === oneChatDefaultAgentId;
     },
     get: ({ agentId }) => {
-      if (agentId === OneChatDefaultAgentId) {
+      if (agentId === oneChatDefaultAgentId) {
         return createDefaultAgentDescriptor();
       }
       throw createAgentNotFoundError({ agentId: toSerializedAgentIdentifier(agentId) });
@@ -42,8 +42,8 @@ export const createDefaultAgentProvider = (): AgentProviderWithId => {
 const createDefaultAgentDescriptor = (): ConversationalAgentDefinition => {
   return {
     type: AgentType.conversational,
-    id: OneChatDefaultAgentId,
+    id: oneChatDefaultAgentId,
     description: 'Default onechat agent',
-    handler: createHandler({ agentId: OneChatDefaultAgentId }),
+    handler: createHandler({ agentId: oneChatDefaultAgentId }),
   };
 };

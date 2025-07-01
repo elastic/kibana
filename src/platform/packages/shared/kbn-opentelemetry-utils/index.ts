@@ -7,4 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { GettingStarted } from './getting_started';
+export { flattenToAttributes } from './src/flatten_to_attributes';
+export { unflattenAttributes } from './src/unflatten_attributes';
+export { toTraceparent } from './src/to_traceparent';
+export { fromTraceparent } from './src/from_traceparent';
