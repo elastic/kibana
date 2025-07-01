@@ -29,6 +29,8 @@ import {
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let apiClient: StreamsSupertestRepositoryClient;
+  const config = getService('config');
+  const isServerless = !!config.get('serverless');
   const esClient = getService('es');
 
   interface Resources {
@@ -85,6 +87,38 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         before(async () => {
           await enableStreams(apiClient);
         });
+
+        it('reports enabled status', async () => {
+          expect(await getEnabled()).to.eql(true);
+        });
+
+        // Elasticsearch doesn't support streams in serverless mode yet
+        if (!isServerless) {
+          it('reports conflict if disabled on Elasticsearch level', async () => {
+            await esClient.transport.request({
+              method: 'POST',
+              path: '/_streams/logs/_disable',
+            });
+            expect(await getEnabled()).to.eql('conflict');
+          });
+
+          it('reports enabled after calling enabled again', async () => {
+            await enableStreams(apiClient);
+            expect(await getEnabled()).to.eql(true);
+          });
+
+          it('Elasticsearch streams is enabled too', async () => {
+            const response = await esClient.transport.request({
+              method: 'GET',
+              path: '/_streams/status',
+            });
+            expect(response).to.eql({
+              logs: {
+                enabled: true,
+              },
+            });
+          });
+        }
 
         it('is enabled', async () => {
           await disableStreams(apiClient);
@@ -521,16 +555,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const definitions = await Promise.all(streams.map((stream) => getStream(apiClient, stream)));
       for (const definition of definitions) {
         const inherited = Streams.WiredStream.GetResponse.parse(definition).inherited_fields;
-        for (const [field, config] of Object.entries(expectedFields)) {
-          expect(inherited[field]).to.eql(config);
+        for (const [field, fieldConfig] of Object.entries(expectedFields)) {
+          expect(inherited[field]).to.eql(fieldConfig);
         }
       }
 
       const mappingsResponse = await esClient.indices.getMapping({ index: streams });
       for (const { mappings } of Object.values(mappingsResponse)) {
-        for (const [field, config] of Object.entries(expectedFields)) {
+        for (const [field, fieldConfig] of Object.entries(expectedFields)) {
           const fieldPath = field.split('.').join('.properties.');
-          expect(get(mappings.properties, fieldPath)).to.eql(omit(config, ['from']));
+          expect(get(mappings.properties, fieldPath)).to.eql(omit(fieldConfig, ['from']));
         }
       }
     }
