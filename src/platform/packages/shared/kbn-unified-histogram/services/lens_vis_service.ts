@@ -14,6 +14,7 @@ import {
   appendToESQLQuery,
   isESQLColumnSortable,
   hasTransformationalCommand,
+  getCategorizeField,
 } from '@kbn/esql-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
@@ -244,9 +245,32 @@ export class LensVisService {
             preferredVisAttributes: externalVisContext?.attributes,
           });
 
+          let suggestion = allSuggestions[0];
+
+          const categorizeFields = getCategorizeField(queryParams.query.esql);
+          if (categorizeFields.length) {
+            const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
+
+            if (
+              suggestion.visualizationId === 'lnsXY' &&
+              'tickLabelsVisibilitySettings' in suggestionVisualizationState
+            ) {
+              suggestion = {
+                ...suggestion,
+                visualizationState: {
+                  ...(suggestionVisualizationState ?? {}),
+                  tickLabelsVisibilitySettings: {
+                    ...(suggestionVisualizationState.tickLabelsVisibilitySettings ?? {}),
+                    x: false,
+                  },
+                },
+              };
+            }
+          }
+
           if (allSuggestions.length) {
             availableSuggestionsWithType.push({
-              suggestion: allSuggestions[0],
+              suggestion,
               type: UnifiedHistogramSuggestionType.lensSuggestion,
             });
           }

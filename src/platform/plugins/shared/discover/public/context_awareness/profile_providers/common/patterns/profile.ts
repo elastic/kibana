@@ -103,7 +103,7 @@ export const createPatternDataSourceProfileProvider = (
     getDefaultAppState: (prev) => (params) => {
       return {
         ...prev(params),
-        hideChart: true,
+        hideChart: false,
         columns: [
           { name: 'Count', width: 150 },
           { name: 'Pattern', width: undefined },
