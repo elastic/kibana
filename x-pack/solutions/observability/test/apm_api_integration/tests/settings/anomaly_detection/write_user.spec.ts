@@ -69,6 +69,13 @@ export default function apiTest({ getService }: FtrProviderContext) {
             });
           });
 
+          it('create job with long environment name', async () => {
+            const longEnvironmentName =
+              'Production: This Is A Deliberately Long Environment Name To Test Limits - 1234567890';
+            const { status } = await createJobs([longEnvironmentName], { user });
+            expect(status).to.be(200);
+          });
+
           describe('with existing ML jobs', () => {
             before(async () => {
               await createJobs(['production', 'staging'], { user });
