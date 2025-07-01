@@ -7,14 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { peggyTransform } = require('./peggy');
-const { dotTextTransform } = require('./dot_text');
-const { babelTransform } = require('./babel');
+const DotText = require('@kbn/dot-text');
+const Crypto = require('crypto');
 
+/** @type {import('@jest/transform').AsyncTransformer} */
 module.exports = {
-  TRANSFORMS: {
-    '.peggy': peggyTransform,
-    '.text': dotTextTransform,
-    default: babelTransform,
+  canInstrument: false,
+
+  getCacheKey(sourceText) {
+    return Crypto.createHash('sha256').update(sourceText).digest('hex');
+  },
+
+  process(sourceText, sourcePath) {
+    return {
+      code: DotText.getJsSourceSync({
+        content: sourceText,
+        path: sourcePath,
+      }).source,
+    };
   },
 };
