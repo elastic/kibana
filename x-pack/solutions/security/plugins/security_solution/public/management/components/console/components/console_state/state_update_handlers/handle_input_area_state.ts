@@ -243,7 +243,11 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
 
         let completeInputText = updatedParsedInput.name;
 
-        let configuration = {
+        let configuration: {
+          leftOfCursorText?: string;
+          rightOfCursorText?: string;
+          parsedInput: ParsedCommandInterface;
+        } = {
           parsedInput: updatedParsedInput,
         };
 

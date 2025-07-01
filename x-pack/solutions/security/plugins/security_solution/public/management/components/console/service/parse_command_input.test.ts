@@ -172,7 +172,7 @@ describe('when using parsed command input utils', () => {
           input,
           args: {
             one: ['something -- here'],
-            two: ['--something --'],
+            two: ['"--something --'],
           },
         })
       );
@@ -187,7 +187,7 @@ describe('when using parsed command input utils', () => {
           input,
           args: {
             one: ['=something -- here'],
-            two: ['=something=something else'],
+            two: ['"=something=something else'],
           },
         })
       );
