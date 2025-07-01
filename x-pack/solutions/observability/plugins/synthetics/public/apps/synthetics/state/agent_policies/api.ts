@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NewLocation } from '../../components/settings/private_locations/add_location_flyout';
+import { NewLocation } from '../../components/settings/private_locations/add_or_edit_location_flyout';
 import { AgentPolicyInfo } from '../../../../../common/types';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { SyntheticsPrivateLocations } from '../../../../../common/runtime_types';

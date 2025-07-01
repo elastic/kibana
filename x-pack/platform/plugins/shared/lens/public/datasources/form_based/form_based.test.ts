@@ -3900,7 +3900,6 @@ describe('IndexPattern Data Source', () => {
               ...state.layers.first.columns,
               newStatic: {
                 dataType: 'number',
-                isStaticValue: true,
                 isBucketed: false,
                 label: 'Static value: 0',
                 operationType: 'static_value',

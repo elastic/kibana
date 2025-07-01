@@ -33,6 +33,7 @@ import type { RulePreviewLoggedRequest } from '../../../../../common/api/detecti
 import type { SecurityRuleServices, SecuritySharedParams, SignalSource } from '../types';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
 import { checkErrorDetails } from '../utils/check_error_details';
+import { logClusterShardFailuresEsql } from '../utils/log_cluster_shard_failures_esql';
 import type { ExcludedDocument, EsqlState } from './types';
 
 import {
@@ -131,7 +132,12 @@ export const esqlExecutor = async ({
           excludedDocumentIds: excludedDocuments.map(({ id }) => id),
           ruleExecutionTimeout,
         });
-        const esqlQueryString = { drop_null_columns: true };
+
+        const esqlQueryString = {
+          drop_null_columns: true,
+          // allow_partial_results is true by default, but we need to set it to false for aggregating queries
+          allow_partial_results: !isRuleAggregating,
+        };
         const hasLoggedRequestsReachedLimit = iteration >= 2;
 
         ruleExecutionLogger.debug(`ES|QL query request: ${JSON.stringify(esqlRequest)}`);
@@ -151,6 +157,7 @@ export const esqlExecutor = async ({
           loggedRequests: isLoggedRequestsEnabled ? loggedRequests : undefined,
         });
 
+        logClusterShardFailuresEsql({ response, result });
         const esqlSearchDuration = performance.now() - esqlSignalSearchStart;
         result.searchAfterTimes.push(makeFloatString(esqlSearchDuration));
 

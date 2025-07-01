@@ -30,6 +30,10 @@ import type {
   CspBenchmarkRule,
   CspSettings,
 } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import {
+  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+  DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
+} from '@kbn/cloud-security-posture-common';
 import semver from 'semver';
 import { isCspPackage } from '../common/utils/helpers';
 import { isSubscriptionAllowed } from '../common/utils/subscription';
@@ -241,8 +245,49 @@ export class CspPlugin
       this.logger
     );
     await scheduleFindingsStatsTask(taskManager, this.logger);
+    await this.initializeIndexAlias(esClient, this.logger);
     this.#isInitialized = true;
   }
+
+  // For integration versions earlier than 2.00, we will manually create an index alias for the deprecated latest index 'logs-cloud_security_posture.findings_latest-default'.
+  // For integration versions 2.00 and above, the index alias will be automatically created or updated as part of the Transform setup.
+  initializeIndexAlias = async (esClient: ElasticsearchClient, logger: Logger): Promise<void> => {
+    const isAliasExists = await esClient.indices.existsAlias({
+      name: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+    });
+
+    const isDeprecatedLatestIndexExists = await esClient.indices.exists({
+      index: DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
+    });
+
+    // This handles the following scenarios:
+    // 1. A customer using an older integration version (pre-2.00) who has upgraded their Kibana stack.
+    // 2. A customer with a new Kibana stack who installs an integration version earlier than 2.00 for the first time (e.g., in a serverless environment).
+    if (isDeprecatedLatestIndexExists && !isAliasExists) {
+      try {
+        await esClient.indices.updateAliases({
+          actions: [
+            {
+              add: {
+                index: DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
+                alias: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+                is_write_index: true,
+              },
+            },
+          ],
+        });
+        this.logger.info(
+          `Index alias ${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS} created successfully`
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failed to create index alias ${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS}`,
+          error
+        );
+        throw error;
+      }
+    }
+  };
 
   async uninstallResources(taskManager: TaskManagerStartContract, logger: Logger): Promise<void> {
     await removeFindingsStatsTask(taskManager, logger);

@@ -35,6 +35,13 @@ export const SHARED = i18n.translate(
   }
 );
 
+export const THE_VISIBILITY_OF_SHARED = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.badges.sharedBadge.theVisibilityOfSharedTooltip',
+  {
+    defaultMessage: 'The visibility of shared discoveries cannot be changed',
+  }
+);
+
 export const VISIBILITY = i18n.translate(
   'xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.badges.sharedBadge.visibilityDropdownLabel',
   {

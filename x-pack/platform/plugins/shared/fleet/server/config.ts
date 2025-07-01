@@ -171,6 +171,12 @@ export const config: PluginConfigDescriptor = {
               ),
             })
           ),
+          deploymentSecrets: schema.maybe(
+            schema.object({
+              fleetAppToken: schema.maybe(schema.string()),
+              elasticsearchAppToken: schema.maybe(schema.string()),
+            })
+          ),
           customIntegrations: schema.maybe(
             schema.object({
               enabled: schema.maybe(schema.boolean({ defaultValue: false })),
@@ -269,6 +275,9 @@ export const config: PluginConfigDescriptor = {
                 schema.literal('uptime'),
               ]),
               { defaultValue: [] }
+            ),
+            searchAiLakePackageAllowlistEnabled: schema.maybe(
+              schema.boolean({ defaultValue: false })
             ),
           },
           {

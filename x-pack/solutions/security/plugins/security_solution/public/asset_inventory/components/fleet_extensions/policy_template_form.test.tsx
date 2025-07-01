@@ -948,11 +948,13 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
     });
 
-    it('should render setup technology selector for AWS and allow to select cloud connector in ess environnement', async () => {
+    it('should render setup technology selector for AWS and allow to select cloud connector in ess  aws environnement', async () => {
       const newPackagePolicy = getMockPolicyAWS();
       (useKibana as jest.Mock).mockReturnValue({
         services: {
           cloud: {
+            cloudId:
+              'cloud_connector_cspm:dXMtZWFzdC0xLmF3cy5zdGFnaW5nLmZvdW5kaXQubm86NDQzJDYyMjExNzI5MDhjZTQ0YmE5YWNkOGFmN2NlYmUyYmVjJGZmYmUyNDc2NGFkNTQwODJhZTkyYjU1NDQ0ZDI3NzA5',
             deploymentUrl: 'https://cloud.elastic.co/deployments/bfdad4ef99a24212a06d387593686d63',
             isCloudEnabled: true,
             isServerlessEnabled: false,
@@ -1008,6 +1010,8 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       (useKibana as jest.Mock).mockReturnValue({
         services: {
           cloud: {
+            cloudId:
+              'cloud_connector_cspm:dXMtZWFzdC0xLmF3cy5zdGFnaW5nLmZvdW5kaXQubm86NDQzJDYyMjExNzI5MDhjZTQ0YmE5YWNkOGFmN2NlYmUyYmVjJGZmYmUyNDc2NGFkNTQwODJhZTkyYjU1NDQ0ZDI3NzA5',
             deploymentUrl: 'https://cloud.elastic.co/deployments/bfdad4ef99a24212a06d387593686d63',
             isCloudEnabled: true,
             isServerlessEnabled: false,
@@ -1062,6 +1066,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       (useKibana as jest.Mock).mockReturnValue({
         services: {
           cloud: {
+            cloudId: undefined,
             cloudHost: 'eu-west-1.aws.qa.elastic.cloud',
             deploymentUrl: undefined,
             isCloudEnabled: true,
@@ -1122,6 +1127,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       (useKibana as jest.Mock).mockReturnValue({
         services: {
           cloud: {
+            cloudId: undefined,
             cloudHost: 'eu-west-1.gcp.qa.elastic.cloud',
             deploymentUrl: undefined,
             isCloudEnabled: true,
@@ -1182,6 +1188,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       (useKibana as jest.Mock).mockReturnValue({
         services: {
           cloud: {
+            cloudId: undefined,
             cloudHost: 'eu-west-1.azure.qa.elastic.cloud',
             deploymentUrl: undefined,
             isCloudEnabled: true,

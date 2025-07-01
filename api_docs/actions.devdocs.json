@@ -199,6 +199,20 @@
         },
         {
           "parentPluginId": "actions",
+          "id": "def-public.ActionsPublicPluginSetup.enabledEmailServices",
+          "type": "Array",
+          "tags": [],
+          "label": "enabledEmailServices",
+          "description": [],
+          "signature": [
+            "string[]"
+          ],
+          "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "actions",
           "id": "def-public.ActionsPublicPluginSetup.isWebhookSslWithPfxEnabled",
           "type": "CompoundType",
           "tags": [],

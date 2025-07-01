@@ -30,11 +30,19 @@ export interface IKibanaMigrator {
    * multiple migrations running at the same time. When calling with this parameter, it's expected that the calling
    * code should ensure that the initial call resolves before calling the function again.
    *
+   * @param options.skipVersionCheck - If true, the migration logic will NOT check if the current Kibana version (in terms of system indices' aliases) is compatible.
+   *
+   * @remarks The main goal of the `skipVersionCheck` parameter is to facilitate the ES archiver imports for testing purposes.
+   * Notice that for standard deployments, the Kibana migration logic is run at startup, and it is already enforcing a minimum Kibana version.
+   *
    * @returns - A promise which resolves once all migrations have been applied.
    *    The promise resolves with an array of migration statuses, one for each
    *    elasticsearch index which was migrated.
    */
-  runMigrations(options?: { rerun?: boolean }): Promise<MigrationResult[]>;
+  runMigrations(options?: {
+    rerun?: boolean;
+    skipVersionCheck?: boolean;
+  }): Promise<MigrationResult[]>;
 
   prepareMigrations(): void;
 

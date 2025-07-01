@@ -43,10 +43,10 @@ const initializeTimerangeFromUrlParam = (
 ) => {
   if (initialState != null) {
     const globalLinkTo: LinkTo = { linkTo: get('global.linkTo', initialState) };
-    const globalType: TimeRangeKinds = get('global.timerange.kind', initialState);
+    const globalTimerangeKind: TimeRangeKinds = get('global.timerange.kind', initialState);
 
     const timelineLinkTo: LinkTo = { linkTo: get('timeline.linkTo', initialState) };
-    const timelineType: TimeRangeKinds = get('timeline.timerange.kind', initialState);
+    const timelineTimerangeKind: TimeRangeKinds = get('timeline.timerange.kind', initialState);
 
     const socTrendsLinkTo: LinkTo = { linkTo: get('socTrends.linkTo', initialState) };
     const socTrendsType: TimeRangeKinds = get('socTrends.timerange.kind', initialState);
@@ -76,8 +76,8 @@ const initializeTimerangeFromUrlParam = (
       dispatch(inputsActions.addLinkTo([InputsModelId.global, InputsModelId.timeline]));
     }
 
-    if (timelineType) {
-      if (timelineType === 'absolute') {
+    if (timelineTimerangeKind) {
+      if (timelineTimerangeKind === 'absolute') {
         const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
           get('timeline.timerange', initialState)
         );
@@ -90,7 +90,7 @@ const initializeTimerangeFromUrlParam = (
         );
       }
 
-      if (timelineType === 'relative') {
+      if (timelineTimerangeKind === 'relative') {
         const relativeRange = normalizeTimeRange<RelativeTimeRange>(
           get('timeline.timerange', initialState)
         );
@@ -110,8 +110,8 @@ const initializeTimerangeFromUrlParam = (
       }
     }
 
-    if (globalType) {
-      if (globalType === 'absolute') {
+    if (globalTimerangeKind) {
+      if (globalTimerangeKind === 'absolute') {
         const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
           get('global.timerange', initialState)
         );
@@ -123,7 +123,7 @@ const initializeTimerangeFromUrlParam = (
           })
         );
       }
-      if (globalType === 'relative') {
+      if (globalTimerangeKind === 'relative') {
         const relativeRange = normalizeTimeRange<RelativeTimeRange>(
           get('global.timerange', initialState)
         );

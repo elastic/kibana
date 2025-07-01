@@ -33,6 +33,7 @@ export function getNodeDownloadInfo(config: Config, platform: Platform) {
 
     let variantPath = '';
     if (variant === 'pointer-compression') variantPath = 'node-pointer-compression/';
+    if (variant === 'glibc-217') variantPath = 'node-glibc-217/';
     const url = `https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/${variantPath}dist/v${version}/${downloadName}`;
     const downloadPath = config.resolveFromRepo(
       '.node_binaries',

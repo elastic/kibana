@@ -479,7 +479,9 @@ Array [
                   },
                 ],
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -570,7 +572,9 @@ Array [
                 },
                 "name": "Generate CSV reports",
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -646,7 +650,9 @@ Array [
                   },
                 ],
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -706,7 +712,9 @@ Array [
                 "minimumLicense": "gold",
                 "name": "Generate PDF or PNG reports",
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -822,7 +830,9 @@ Array [
                   },
                 ],
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -850,7 +860,9 @@ Array [
                   },
                 ],
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -942,7 +954,9 @@ Array [
                 "minimumLicense": "gold",
                 "name": "Generate PDF or PNG reports",
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [
@@ -962,7 +976,9 @@ Array [
                 },
                 "name": "Generate CSV reports from Discover session panels",
                 "savedObject": Object {
-                  "all": Array [],
+                  "all": Array [
+                    "scheduled_report",
+                  ],
                   "read": Array [],
                 },
                 "ui": Array [

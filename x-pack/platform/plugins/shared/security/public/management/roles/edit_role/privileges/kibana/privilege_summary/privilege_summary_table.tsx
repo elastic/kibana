@@ -167,7 +167,7 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
           iconTip = (
             <EuiIconTip
               size="s"
-              type="iInCircle"
+              type="info"
               content={
                 <span>
                   <FormattedMessage
