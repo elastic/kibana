@@ -121,7 +121,8 @@ export function AlertDetails() {
   // used to trigger refetch when rule edit flyout closes
   const onUpdate = useCallback(() => {
     refetch();
-  }, [refetch]);
+    refetchRelatedDashboards();
+  }, [refetch, refetchRelatedDashboards]);
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();
   const [sources, setSources] = useState<AlertDetailsSource[]>();
@@ -195,6 +196,10 @@ export function AlertDetails() {
   usePageReady({
     isRefreshing: isLoading,
     isReady: !isLoading && !!alertDetail && activeTabId === 'overview',
+    meta: {
+      description:
+        '[ttfmp_alert_details] The Observability Alert Details overview page has loaded successfully.',
+    },
   });
 
   if (isLoading) {

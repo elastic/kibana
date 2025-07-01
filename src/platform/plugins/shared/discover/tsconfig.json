@@ -109,7 +109,8 @@
     "@kbn/alerts-ui-shared",
     "@kbn/core-pricing-browser-mocks",
     "@kbn/css-utils",
-    "@kbn/data-service-server"
+    "@kbn/data-service-server",
+    "@kbn/restorable-state"
   ],
   "exclude": [
     "target/**/*"

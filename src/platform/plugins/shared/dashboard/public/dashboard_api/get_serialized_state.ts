@@ -16,15 +16,9 @@ import type { DashboardAttributes } from '../../server';
 
 import type { DashboardState } from '../../common';
 import { LATEST_VERSION } from '../../common/content_management';
-import {
-  convertDashboardVersionToNumber,
-  convertNumberToDashboardVersion,
-} from '../services/dashboard_content_management_service/lib/dashboard_versioning';
 import { dataService, savedObjectsTaggingService } from '../services/kibana_services';
 import { DashboardApi } from './types';
 import { generateNewPanelIds } from './generate_new_panel_ids';
-
-const LATEST_DASHBOARD_CONTAINER_VERSION = convertNumberToDashboardVersion(LATEST_VERSION);
 
 export const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
   if (moment(time).isValid()) {
@@ -108,7 +102,7 @@ export const getSerializedState = ({
     : undefined;
 
   const attributes: DashboardAttributes = {
-    version: convertDashboardVersionToNumber(LATEST_DASHBOARD_CONTAINER_VERSION),
+    version: LATEST_VERSION,
     controlGroupInput: controlGroupInput as DashboardAttributes['controlGroupInput'],
     kibanaSavedObjectMeta: { searchSource },
     description: description ?? '',
