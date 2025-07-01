@@ -62,6 +62,7 @@ export {
   type ConnectorTelemetryMetadata,
   type AnonymizationRule,
   type RegexAnonymizationRule,
+  type NamedEntityRecognitionRule,
   type AnonymizationEntity,
   type Anonymization,
   type Deanonymization,

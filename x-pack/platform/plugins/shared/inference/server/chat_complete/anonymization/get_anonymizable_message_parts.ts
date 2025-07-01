@@ -7,6 +7,13 @@
 
 import { Message, MessageRole } from '@kbn/inference-common';
 
+/**
+ * getAnonymizableMessageParts returns just the data of a
+ * message that needs to be anonymized. This prevents us
+ * from anonymizing things that should not be anonymized
+ * because of technical dependencies, like `role` or
+ * `toolCallId`.
+ */
 export function getAnonymizableMessageParts(message: Message) {
   if (message.role === MessageRole.Tool) {
     return {

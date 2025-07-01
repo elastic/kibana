@@ -120,7 +120,6 @@ export function createChatCompleteCallbackApi({
               messages,
               anonymizationRules,
               esClient,
-              logger,
             })
           ).pipe(
             switchMap((anonymization) => {
