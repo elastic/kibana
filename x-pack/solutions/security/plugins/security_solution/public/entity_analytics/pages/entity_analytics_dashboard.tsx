@@ -26,7 +26,7 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useEntityAnalyticsTypes } from '../hooks/use_enabled_entity_types';
-import { DataViewLoading } from '../../data_view_manager/components/page_loader';
+import { PageLoader } from '../../common/components/page_loader';
 
 const EntityAnalyticsComponent = () => {
   const [skipEmptyPrompt, setSkipEmptyPrompt] = React.useState(false);

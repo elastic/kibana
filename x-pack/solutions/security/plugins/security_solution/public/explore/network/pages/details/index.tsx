@@ -33,6 +33,7 @@ import { FlowTargetSelectConnected } from '../../components/flow_target_select_c
 import type { IpOverviewProps } from '../../components/details';
 import { IpOverview } from '../../components/details';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
+import { PageLoader } from '../../../../common/components/page_loader';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useNetworkDetails, ID } from '../../containers/details';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -64,7 +65,6 @@ import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
-import { DataViewLoading } from '@kbn/security-solution-plugin/public/data_view_manager/components/page_loader';
 
 const NetworkDetailsManage = manageQuery(IpOverview);
 

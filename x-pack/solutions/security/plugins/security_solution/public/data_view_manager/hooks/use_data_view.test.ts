@@ -53,7 +53,7 @@ describe('useDataView', () => {
     const fakeDataView = { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID };
     mockGet.mockResolvedValue(fakeDataView);
 
-    const { result, rerender } = renderHook(() => useDataView(DataViewManagerScopeName.default), {
+    const { result } = renderHook(() => useDataView(DataViewManagerScopeName.default), {
       wrapper: TestProviders,
     });
 

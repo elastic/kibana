@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { PageLoader } from '../../../common/components/page_loader';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
@@ -32,7 +33,6 @@ import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
-import { DataViewLoading } from '@kbn/security-solution-plugin/public/data_view_manager/components/page_loader';
 
 export interface NetworkDetailsProps {
   /**

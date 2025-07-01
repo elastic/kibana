@@ -22,7 +22,7 @@ import { DataViewManagerScopeName } from '../../data_view_manager/constants';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
-import { PageLoader } from '../../data_view_manager/components/page_loader';
+import { PageLoader } from '../../common/components/page_loader';
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 

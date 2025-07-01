@@ -39,7 +39,7 @@ import { usePrivilegedMonitoringEngineStatus } from '../api/hooks/use_privileged
 import { PrivilegedUserMonitoringManageDataSources } from '../components/privileged_user_monitoring_manage_data_sources';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
-import { DataViewLoading } from '../../data_view_manager/components/page_loader';
+import { PageLoader } from '../../common/components/page_loader';
 
 type PageState =
   | { type: 'fetchingEngineStatus' }
