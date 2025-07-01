@@ -11,8 +11,7 @@ import { getNextRunAt } from './get_next_run_at';
 import { loggerMock } from '@kbn/logging-mocks';
 const mockLogger = loggerMock.create();
 
-// Failing: See https://github.com/elastic/kibana/issues/225833
-describe.skip('getNextRunAt', () => {
+describe('getNextRunAt', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -68,7 +67,7 @@ describe.skip('getNextRunAt', () => {
   test('should use the rrule with a fixed time when it is given to calculate the next runAt (same day)', () => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2025-06-30T10:00:00.000Z'));
-    const now = new Date('2025-06-30T10:00:00.000Z');
+    const now = new Date();
     const testStart = new Date(now.getTime() - 500);
     const testRunAt = new Date(now.getTime() - 1000);
     const nextRunAt = getNextRunAt(
@@ -95,8 +94,8 @@ describe.skip('getNextRunAt', () => {
 
   test('should use the rrule with a fixed time when it is given to calculate the next runAt (next day)', () => {
     jest.useFakeTimers();
-    jest.setSystemTime(new Date('2025-06-30T10:00:00.000Z'));
-    const now = new Date('2025-06-30T13:00:00.000Z');
+    jest.setSystemTime(new Date('2025-06-30T13:00:00.000Z'));
+    const now = new Date();
     const testStart = new Date(now.getTime() - 500);
     const testRunAt = new Date(now.getTime() - 1000);
     const nextRunAt = getNextRunAt(
