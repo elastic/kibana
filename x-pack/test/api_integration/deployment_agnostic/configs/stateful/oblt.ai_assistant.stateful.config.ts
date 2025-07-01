@@ -12,4 +12,16 @@ export default createStatefulTestConfig({
   junit: {
     reportName: 'Stateful Observability - Deployment-agnostic API Integration Tests',
   },
+  // @ts-expect-error
+  kbnTestServer: {
+    serverArgs: [
+      `--logging.loggers=${JSON.stringify([
+        {
+          name: 'plugins.observabilityAIAssistant',
+          level: 'all',
+          appenders: ['default'],
+        },
+      ])}`,
+    ],
+  },
 });

@@ -29,3 +29,18 @@ export const BuiltinTags = {
    */
   retrieval: 'retrieval',
 };
+
+/**
+ * Common ES Field Types
+ */
+export type FieldTypes =
+  | 'text'
+  | 'keyword'
+  | 'long'
+  | 'integer'
+  | 'double'
+  | 'float'
+  | 'boolean'
+  | 'date'
+  | 'object'
+  | 'nested';

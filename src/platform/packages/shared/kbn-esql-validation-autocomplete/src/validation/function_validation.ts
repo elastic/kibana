@@ -38,7 +38,6 @@ import {
   unwrapArrayOneLevel,
   isArrayType,
   isParametrized,
-  // isParam,
 } from '../shared/helpers';
 import { getMessageFromId, errors } from './errors';
 import { getMaxMinNumberOfParams, collapseWrongArgumentTypeMessages } from './helpers';

@@ -10,6 +10,7 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { TimeRange } from '@kbn/es-query';
 import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
 import { getValuesFromQueryField } from '@kbn/esql-utils';
 import { EsqlControlType, VariableNamePrefix } from '@kbn/esql-types';
@@ -35,6 +36,7 @@ interface ESQLControlsFlyoutProps {
   initialVariableType: ESQLVariableType;
   queryString: string;
   esqlVariables: ESQLControlVariable[];
+  timeRange?: TimeRange;
   onSaveControl?: (controlState: ESQLControlState, updatedQuery: string) => Promise<void>;
   onCancelControl?: () => void;
   cursorPosition?: monaco.Position;
@@ -47,6 +49,7 @@ export function ESQLControlsFlyout({
   initialVariableType,
   queryString,
   esqlVariables,
+  timeRange,
   onSaveControl,
   onCancelControl,
   cursorPosition,
@@ -185,6 +188,7 @@ export function ESQLControlsFlyout({
         setControlState={setControlState}
         search={search}
         valuesRetrieval={valuesField}
+        timeRange={timeRange}
       />
     ) : (
       <IdentifierControlForm

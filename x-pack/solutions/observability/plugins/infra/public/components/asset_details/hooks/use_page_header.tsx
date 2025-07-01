@@ -24,9 +24,6 @@ import { LinkToNodeDetails } from '../links';
 import { ContentTabIds, type LinkOptions, type Tab, type TabIds } from '../types';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 import { useTabSwitcherContext } from './use_tab_switcher';
-import { useEntitySummary } from './use_entity_summary';
-import { isMetricsSignal } from '../utils/get_data_stream_types';
-import { useDatePickerContext } from './use_date_picker';
 
 type TabItem = NonNullable<Pick<EuiPageHeaderProps, 'tabs'>['tabs']>[number];
 
@@ -137,34 +134,9 @@ const useFeatureFlagTabs = () => {
   };
 };
 
-const useMetricsTabs = () => {
-  const { asset } = useAssetDetailsRenderPropsContext();
-  const { dateRange } = useDatePickerContext();
-  const { dataStreams } = useEntitySummary({
-    entityType: asset.type,
-    entityId: asset.id,
-    from: dateRange.from,
-    to: dateRange.to,
-  });
-
-  const isMetrics = isMetricsSignal(dataStreams);
-
-  const hasMetricsTab = useCallback(
-    (tabItem: Tab) => {
-      return isMetrics || tabItem.id !== ContentTabIds.METRICS;
-    },
-    [isMetrics]
-  );
-
-  return {
-    hasMetricsTab,
-  };
-};
-
 const useTabs = (tabs: Tab[]) => {
   const { showTab, activeTabId } = useTabSwitcherContext();
   const { isTabEnabled } = useFeatureFlagTabs();
-  const { hasMetricsTab } = useMetricsTabs();
 
   const onTabClick = useCallback(
     (tabId: TabIds) => {
@@ -175,18 +147,16 @@ const useTabs = (tabs: Tab[]) => {
 
   const tabEntries: TabItem[] = useMemo(
     () =>
-      tabs
-        .filter((tab) => isTabEnabled(tab) && hasMetricsTab(tab))
-        .map(({ name, ...tab }) => {
-          return {
-            ...tab,
-            'data-test-subj': `infraAssetDetails${capitalize(tab.id)}Tab`,
-            onClick: () => onTabClick(tab.id),
-            isSelected: tab.id === activeTabId,
-            label: name,
-          };
-        }),
-    [activeTabId, isTabEnabled, hasMetricsTab, onTabClick, tabs]
+      tabs.filter(isTabEnabled).map(({ name, ...tab }) => {
+        return {
+          ...tab,
+          'data-test-subj': `infraAssetDetails${capitalize(tab.id)}Tab`,
+          onClick: () => onTabClick(tab.id),
+          isSelected: tab.id === activeTabId,
+          label: name,
+        };
+      }),
+    [activeTabId, isTabEnabled, onTabClick, tabs]
   );
 
   return { tabEntries };

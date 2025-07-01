@@ -72,6 +72,7 @@ export const fetchRulesByQueryOrIds = async ({
       start: gapRange.start,
       end: gapRange.end,
       statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
+      hasUnfilledIntervals: true,
     });
     ruleIdsWithGaps = ruleIdsWithGapsResponse.ruleIds;
     if (ruleIdsWithGaps.length === 0) {

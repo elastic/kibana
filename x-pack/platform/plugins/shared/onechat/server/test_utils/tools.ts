@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { builtinToolProviderId } from '@kbn/onechat-common';
+import { builtinToolProviderId, esqlToolProviderId } from '@kbn/onechat-common';
 import type {
   ToolProvider,
   ToolHandlerFn,
@@ -21,8 +21,10 @@ import type {
   RegisteredToolWithMeta,
 } from '../services/tools/types';
 import { ChangeReturnType } from './common';
+import { EsqlToolRegistry } from '../services/tools/esql/esql_registry';
 
 export type ToolProviderMock = jest.Mocked<ToolProvider>;
+export type EsqlToolProviderMock = jest.Mocked<EsqlToolRegistry>;
 export type ScopedPublicToolRegistryMock = jest.Mocked<ScopedPublicToolRegistry>;
 export type ScopedPublicToolRegistryFactoryFnMock = jest.MockedFn<
   ChangeReturnType<ScopedPublicToolRegistryFactoryFn, ScopedPublicToolRegistryMock>
@@ -31,6 +33,7 @@ export type InternalToolRegistryMock = jest.Mocked<InternalToolRegistry>;
 
 export type ToolsServiceStartMock = ToolsServiceStart & {
   registry: InternalToolRegistryMock;
+  esql: EsqlToolProviderMock;
 };
 
 export const createToolProviderMock = (): ToolProviderMock => {
@@ -38,6 +41,16 @@ export const createToolProviderMock = (): ToolProviderMock => {
     has: jest.fn(),
     get: jest.fn(),
     list: jest.fn(),
+  };
+};
+
+export const esqlToolProviderMock = (): EsqlToolProviderMock => {
+  return {
+    id: esqlToolProviderId,
+    has: jest.fn(),
+    get: jest.fn(),
+    list: jest.fn(),
+    getScopedClient: jest.fn(),
   };
 };
 
@@ -64,6 +77,7 @@ export const createScopedPublicToolRegistryMock = (): ScopedPublicToolRegistryMo
 export const createToolsServiceStartMock = (): ToolsServiceStartMock => {
   return {
     registry: createInternalToolRegistryMock(),
+    esql: esqlToolProviderMock(),
   };
 };
 

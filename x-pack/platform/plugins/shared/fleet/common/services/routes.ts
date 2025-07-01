@@ -312,6 +312,7 @@ export const agentRouteService = {
   getAgentsByActionsPath: () => AGENT_API_ROUTES.LIST_PATTERN,
   postMigrateSingleAgent: (agentId: string) =>
     AGENT_API_ROUTES.MIGRATE_PATTERN.replace('{agentId}', agentId),
+  postBulkMigrateAgents: () => AGENT_API_ROUTES.BULK_MIGRATE_PATTERN,
 };
 
 export const outputRoutesService = {

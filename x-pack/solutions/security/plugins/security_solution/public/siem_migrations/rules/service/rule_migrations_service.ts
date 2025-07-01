@@ -158,6 +158,22 @@ export class SiemRulesMigrationsService {
     }
   }
 
+  /** Deletes a rule migration by its ID, refreshing the stats to remove it from the list */
+  public async deleteMigration(migrationId: string): Promise<string> {
+    try {
+      await api.deleteMigration({ migrationId });
+
+      // Refresh stats to remove the deleted migration from the list. All UI observables will be updated automatically
+      await this.getRuleMigrationsStats();
+
+      this.telemetry.reportSetupMigrationDeleted({ migrationId });
+      return migrationId;
+    } catch (error) {
+      this.telemetry.reportSetupMigrationDeleted({ migrationId, error });
+      throw error;
+    }
+  }
+
   /** Upserts resources for a rule migration, batching the requests to avoid hitting the max payload size limit of the API */
   public async upsertMigrationResources(
     migrationId: string,

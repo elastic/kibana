@@ -9,6 +9,16 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 export type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
 
+export const PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING: MappingProperties = {
+  user: {
+    properties: {
+      name: {
+        type: 'keyword',
+      },
+    },
+  },
+};
+
 export const PRIVILEGED_MONITOR_USERS_INDEX_MAPPING: MappingProperties = {
   'event.ingested': {
     type: 'date',
@@ -21,6 +31,9 @@ export const PRIVILEGED_MONITOR_USERS_INDEX_MAPPING: MappingProperties = {
   },
   'user.is_privileged': {
     type: 'boolean',
+  },
+  'labels.sources': {
+    type: 'keyword',
   },
 };
 

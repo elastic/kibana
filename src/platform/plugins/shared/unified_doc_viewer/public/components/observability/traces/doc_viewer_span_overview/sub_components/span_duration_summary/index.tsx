@@ -12,7 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiTitle } from 
 import { i18n } from '@kbn/i18n';
 import { Duration, DurationDistributionChart } from '@kbn/apm-ui-shared';
 import { ProcessorEvent } from '@kbn/apm-types-shared';
-import { useTransactionContext } from '../../hooks/use_transaction';
+import { useRootSpanContext } from '../../hooks/use_root_span';
 import { useSpanLatencyChart } from '../../hooks/use_span_latency_chart';
 import { FieldWithoutActions } from '../../../components/field_without_actions';
 import { Section } from '../../../components/section';
@@ -21,14 +21,16 @@ export interface SpanDurationSummaryProps {
   spanDuration: number;
   spanName: string;
   serviceName: string;
+  isOtelSpan: boolean;
 }
 
 export function SpanDurationSummary({
   spanDuration,
   spanName,
   serviceName,
+  isOtelSpan,
 }: SpanDurationSummaryProps) {
-  const { transaction, loading } = useTransactionContext();
+  const { trace, loading } = useRootSpanContext();
   const {
     data: latencyChartData,
     loading: latencyChartLoading,
@@ -36,6 +38,7 @@ export function SpanDurationSummary({
   } = useSpanLatencyChart({
     spanName,
     serviceName,
+    isOtelSpan,
   });
 
   return (
@@ -65,7 +68,7 @@ export function SpanDurationSummary({
           <EuiText size="xs">
             <Duration
               duration={spanDuration}
-              parent={{ loading, duration: transaction?.duration, type: 'transaction' }}
+              parent={{ loading, duration: trace?.duration, type: 'transaction' }}
             />
           </EuiText>
         </FieldWithoutActions>
@@ -95,6 +98,7 @@ export function SpanDurationSummary({
                 eventType={ProcessorEvent.span}
                 showAxisTitle={false}
                 showLegend={false}
+                isOtelData={isOtelSpan}
                 dataTestSubPrefix="docViewerSpanOverview"
               />
             )}

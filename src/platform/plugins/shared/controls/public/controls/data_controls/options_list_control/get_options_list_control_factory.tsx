@@ -398,6 +398,34 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         setSort: (sort: OptionsListSortingType | undefined) => {
           sort$.next(sort);
         },
+        selectAll: (keys: string[]) => {
+          const field = api.field$.getValue();
+          if (keys.length < 1 || !field) {
+            api.setBlockingError(
+              new Error(OptionsListStrings.control.getInvalidSelectionMessage())
+            );
+            return;
+          }
+
+          const selectedOptions = selectionsManager.api.selectedOptions$.getValue() ?? [];
+          const newSelections = keys.filter((key) => !selectedOptions.includes(key as string));
+          selectionsManager.api.setSelectedOptions([...selectedOptions, ...newSelections]);
+        },
+        deselectAll: (keys: string[]) => {
+          const field = api.field$.getValue();
+          if (keys.length < 1 || !field) {
+            api.setBlockingError(
+              new Error(OptionsListStrings.control.getInvalidSelectionMessage())
+            );
+            return;
+          }
+
+          const selectedOptions = selectionsManager.api.selectedOptions$.getValue() ?? [];
+          const remainingSelections = selectedOptions.filter(
+            (option) => !keys.includes(option as string)
+          );
+          selectionsManager.api.setSelectedOptions(remainingSelections);
+        },
       };
 
       if (selectionsManager.api.hasInitialSelections) {

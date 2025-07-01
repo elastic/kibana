@@ -35,12 +35,12 @@ query
     ;
 
 sourceCommand
-    : explainCommand
-    | fromCommand
+    : fromCommand
     | rowCommand
     | showCommand
     // in development
     | {this.isDevVersion()}? timeSeriesCommand
+    | {this.isDevVersion()}? explainCommand
     ;
 
 processingCommand
@@ -241,11 +241,11 @@ commandOption
     ;
 
 explainCommand
-    : EXPLAIN subqueryExpression
+    : DEV_EXPLAIN subqueryExpression
     ;
 
 subqueryExpression
-    : OPENING_BRACKET query CLOSING_BRACKET
+    : LP query RP
     ;
 
 showCommand
@@ -308,8 +308,21 @@ rrfCommand
    : DEV_RRF
    ;
 
+inferenceCommandOptions
+    : inferenceCommandOption (COMMA inferenceCommandOption)*
+    ;
+
+inferenceCommandOption
+    : identifier ASSIGN inferenceCommandOptionValue
+    ;
+
+inferenceCommandOptionValue
+    : constant
+    | identifier
+    ;
+
 rerankCommand
-    : DEV_RERANK queryText=constant ON rerankFields (WITH inferenceId=identifierOrParameter)?
+    : DEV_RERANK queryText=constant ON rerankFields (WITH inferenceCommandOptions)?
     ;
 
 completionCommand

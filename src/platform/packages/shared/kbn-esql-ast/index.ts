@@ -52,6 +52,7 @@ export { Builder, type AstNodeParserFields, type AstNodeTemplate } from './src/b
 export {
   createParser,
   parse,
+  Parser,
   parseErrors,
   type ParseOptions,
   type ParseResult,

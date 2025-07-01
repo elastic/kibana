@@ -21,6 +21,7 @@ export const DEFAULT_TIMEOUT = '5m';
 
 export enum TaskPriority {
   Low = 1,
+  NormalLongRunning = 40,
   Normal = 50,
 }
 

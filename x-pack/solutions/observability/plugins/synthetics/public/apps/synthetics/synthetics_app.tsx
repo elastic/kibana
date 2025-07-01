@@ -11,6 +11,7 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { Router } from '@kbn/shared-ux-router';
 
@@ -59,21 +60,23 @@ const Application = (props: SyntheticsAppProps) => {
           },
         }}
       >
-        <SyntheticsSharedContext {...props}>
-          <Router history={appMountParameters.history}>
-            <SyntheticsSettingsContextProvider {...props}>
-              <PerformanceContextProvider>
-                <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
-                  <InspectorContextProvider>
-                    <PageRouter />
-                    <ActionMenu appMountParameters={appMountParameters} />
-                    <TestNowModeFlyoutContainer />
-                  </InspectorContextProvider>
-                </div>
-              </PerformanceContextProvider>
-            </SyntheticsSettingsContextProvider>
-          </Router>
-        </SyntheticsSharedContext>
+        <KibanaErrorBoundaryProvider analytics={coreStart.analytics}>
+          <SyntheticsSharedContext {...props}>
+            <Router history={appMountParameters.history}>
+              <SyntheticsSettingsContextProvider {...props}>
+                <PerformanceContextProvider>
+                  <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
+                    <InspectorContextProvider>
+                      <PageRouter />
+                      <ActionMenu appMountParameters={appMountParameters} />
+                      <TestNowModeFlyoutContainer />
+                    </InspectorContextProvider>
+                  </div>
+                </PerformanceContextProvider>
+              </SyntheticsSettingsContextProvider>
+            </Router>
+          </SyntheticsSharedContext>
+        </KibanaErrorBoundaryProvider>
       </KibanaThemeProvider>
     </KibanaRenderContextProvider>
   );

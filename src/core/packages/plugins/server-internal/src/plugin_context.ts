@@ -220,6 +220,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       getAsLabels: deps.executionContext.getAsLabels,
     },
     featureFlags: {
+      setInitialFeatureFlagsGetter: deps.featureFlags.setInitialFeatureFlagsGetter,
       setProvider: deps.featureFlags.setProvider,
       appendContext: deps.featureFlags.appendContext,
     },
@@ -292,6 +293,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
     pricing: {
+      isFeatureAvailable: deps.pricing.isFeatureAvailable,
       registerProductFeatures: deps.pricing.registerProductFeatures,
     },
     security: {
