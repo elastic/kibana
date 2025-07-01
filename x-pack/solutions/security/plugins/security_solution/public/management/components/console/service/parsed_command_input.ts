@@ -7,6 +7,8 @@
 
 import type { ParsedCommandInput, ParsedCommandInterface } from './types';
 import type { CommandDefinition } from '..';
+import '../command_handlers'; // Import to ensure handlers are registered
+import { commandRegistry } from '../command_handlers/command_registry';
 
 const parseInputString = (rawInput: string): ParsedCommandInput => {
   const input = rawInput.trim();
@@ -17,9 +19,9 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
 
   // Arguments that should use empty strings for bare flags instead of boolean true
   // These are typically selector arguments that can have values
-  const COMMAND_ARG_EMPTY_STRING_COMBINATIONS: Record<string, string[]> = {
-    runscript: ['ScriptName', 'CloudFile'],
-  };
+  // const COMMAND_ARG_EMPTY_STRING_COMBINATIONS: Record<string, string[]> = {
+  //   runscript: ['ScriptName', 'CloudFile'],
+  // };
 
   if (!input) {
     return response;
@@ -75,8 +77,8 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
         } else {
           // Argument has no value (bare flag)
           // Use empty string for whitelisted arguments, boolean true for others
-          const useStringValue =
-            COMMAND_ARG_EMPTY_STRING_COMBINATIONS[response.name]?.includes(argName);
+          const emptyStringArgs = commandRegistry.getEmptyStringArguments(response.name);
+          const useStringValue = emptyStringArgs.includes(argName);
           response.args[argName].push(useStringValue ? '' : true);
         }
       }
