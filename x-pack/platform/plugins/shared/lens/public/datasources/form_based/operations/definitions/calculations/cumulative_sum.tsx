@@ -82,7 +82,6 @@ export const cumulativeSumOperation: OperationDefinition<
     return dateBasedOperationToExpression(layer, columnId, 'cumulative_sum');
   },
   buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
-    const ref = layer.columns[referenceIds[0]];
     return {
       dataType: 'number',
       operationType: 'cumulative_sum',

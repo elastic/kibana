@@ -84,7 +84,6 @@ function buildOverallMetricOperation<T extends OverallMetricIndexPatternColumn<s
       });
     },
     buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
-      const ref = layer.columns[referenceIds[0]];
       return {
         dataType: 'number',
         operationType: `overall_${metric}`,
