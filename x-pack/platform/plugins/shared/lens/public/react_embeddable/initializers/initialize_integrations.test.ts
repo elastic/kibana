@@ -51,7 +51,7 @@ describe('Dashboard services API', () => {
       });
       const { rawState, references } = api.serializeState();
       // check the same 3 things as above
-      expect(rawState).toEqual(expect.objectContaining({}));
+expect(rawState).not.toEqual(expect.objectContaining({attributes: expect.anything()}));
       // * references should be at root level
       expect(references).toEqual([
         ...attributes.references,
