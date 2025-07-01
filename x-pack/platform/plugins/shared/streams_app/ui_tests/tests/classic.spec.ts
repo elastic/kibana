@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout';
 import { testData, test } from '../fixtures';
 
 const DATA_STREAM_NAME = 'my-data-stream';
