@@ -22,6 +22,7 @@ export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
 interface Props {
   casesActionContextProps: CasesActionContextProps;
   currentAppId?: string;
+  isServerless?: boolean;
 }
 
 const ActionWrapperWithContext: React.FC<PropsWithChildren<Props>> = ({
@@ -71,14 +72,12 @@ const ActionWrapperComponent: React.FC<ActionWrapperComponentProps> = ({
         ...services.core,
         ...services.plugins,
         storage: services.storage,
-        isServerless: services.isServerless,
       }}
     >
       <Router history={services.history}>
         <ActionWrapperWithContext
           casesActionContextProps={casesActionContextProps}
           currentAppId={currentAppId}
-          isServerless={services.isServerless}
         >
           {children}
         </ActionWrapperWithContext>
