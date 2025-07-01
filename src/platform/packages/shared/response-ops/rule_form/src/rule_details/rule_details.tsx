@@ -158,9 +158,7 @@ export const RuleDetails = () => {
           value={formData.artifacts?.investigation_guide?.blob ?? ''}
         />
       </EuiFormRow>
-      {contentManagement && (
-        <RuleDashboards contentManagement={contentManagement} spaces={spaces} />
-      )}
+      {contentManagement && <RuleDashboards contentManagement={contentManagement} />}
       <EuiSpacer size="xxl" />
     </>
   );
