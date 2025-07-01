@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { EuiErrorBoundary } from '@elastic/eui';
+import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { getAlertsSingleMetricConfig } from './configurations/alerts_configs/single_metric_config';
 import { getAlertsKPIConfig } from './configurations/alerts_configs/kpi_over_time_config';
 import { DataTypes, DataTypesLabels } from './labels';
@@ -111,9 +111,8 @@ export const obsvReportConfigMap = {
 
 export function ObservabilityExploratoryView(props: { startServices: StartServices }) {
   const { appMountParameters } = usePluginContext();
-
   return (
-    <EuiErrorBoundary>
+    <KibanaErrorBoundary>
       <ExploratoryViewContextProvider
         reportTypes={reportTypesList}
         dataTypes={dataTypes}
@@ -124,6 +123,6 @@ export function ObservabilityExploratoryView(props: { startServices: StartServic
       >
         <ExploratoryViewPage />
       </ExploratoryViewContextProvider>
-    </EuiErrorBoundary>
+    </KibanaErrorBoundary>
   );
 }
