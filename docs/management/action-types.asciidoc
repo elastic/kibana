@@ -30,6 +30,10 @@ a| <<d3security-action-type,D3 Security>>
 
 | Send a request to D3 Security.
 
+a| <<elastic-managed-llm,Elastic Managed LLM>>
+
+| Send a request to the Elastic Managed LLM.
+
 a| <<gemini-action-type,{gemini}>>
 
 | Send a request to {gemini}.
