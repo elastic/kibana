@@ -32,7 +32,7 @@ export const FeedbackFlyoutFooter = ({ isSendFeedbackButtonDisabled, submitFeedb
   `;
 
   return (
-    <EuiFlyoutFooter css={footerBackgroundCss}>
+    <EuiFlyoutFooter css={footerBackgroundCss} data-test-subj="feedbackFlyoutFooter">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
