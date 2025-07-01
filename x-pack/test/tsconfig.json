@@ -123,7 +123,6 @@
     "@kbn/gen-ai-functional-testing",
     "@kbn/response-ops-rule-params",
     "@kbn/scout-info",
-    "@kbn/apm-sources-access-plugin",
     "@kbn/aiops-change-point-detection",
     "@kbn/response-ops-alerts-filters-form",
     "@kbn/embeddable-alerts-table-plugin",

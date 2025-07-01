@@ -91,5 +91,7 @@
     "@kbn/streams-schema",
     "@kbn/test-suites-xpack-platform",
     "@kbn/test-suites-xpack-security",
+    "@kbn/ml-string-hash",
+    "@kbn/test-subj-selector",
   ]
 }
