@@ -6,17 +6,21 @@
  */
 
 import { services as xpackPlatformServices } from '@kbn/test-suites-xpack/functional/services';
+import { services as obltApiServices } from '../../api_integration/services';
 import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
 import { LogsUiProvider } from './logs_ui';
 import { UptimeProvider } from './uptime';
 import { ObservabilityProvider } from './observability';
 import { ApmSynthtraceKibanaClientProvider } from '../../api_integration/services/apm_synthtrace_kibana_client';
+import { SloUiServiceProvider } from './slo';
 
 export const services = {
   ...xpackPlatformServices,
+  ...obltApiServices,
   apmSynthtraceKibanaClient: ApmSynthtraceKibanaClientProvider,
   observability: ObservabilityProvider,
   infraSourceConfigurationForm: InfraSourceConfigurationFormProvider,
   logsUi: LogsUiProvider,
   uptime: UptimeProvider,
+  sloUi: SloUiServiceProvider,
 };
