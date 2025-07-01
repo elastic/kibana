@@ -10,35 +10,58 @@ import { combineLatest } from 'rxjs';
 import { DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
 import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
 import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
+import { Space } from '@kbn/spaces-plugin/common';
 
 function getVisibility(
-  appId: string | undefined,
-  applications: ReadonlyMap<string, PublicAppInfo>,
-  preferredAssistantType: AIAssistantType
+  {
+    appId,
+    applications,
+    preferredAssistantType,
+    space,
+    securitySolutionType
+  }: {
+    appId: string | undefined,
+    applications: ReadonlyMap<string, PublicAppInfo>,
+    preferredAssistantType: AIAssistantType,
+    space: Space
+    securitySolutionType: AIAssistantType.Security | AIAssistantType.Never
+  }
 ) {
-  // The "Global assistant" stack management setting for the security assistant still needs to be developed.
-  // In the meantime, while testing, show the Security assistant everywhere except in Observability.
-  if (preferredAssistantType === AIAssistantType.Never) {
-    return false;
+  switch (space.solution) {
+    case undefined:
+    case 'classic':
+    case 'security':
+      const visibilitySetting = (space.solution === 'classic' || space.solution == undefined) ? preferredAssistantType : securitySolutionType;
+      if (visibilitySetting === AIAssistantType.Never) {
+        return false;
+      }
+
+      const categoryId = (appId && applications.get(appId)?.category?.id) || DEFAULT_APP_CATEGORIES.kibana.id;
+      if (visibilitySetting === AIAssistantType.Security) {
+        return !([
+          DEFAULT_APP_CATEGORIES.observability.id,
+          DEFAULT_APP_CATEGORIES.enterpriseSearch.id,
+        ].includes(categoryId))
+      }
+
+      return DEFAULT_APP_CATEGORIES.security.id == categoryId;
+
+    case 'oblt':
+    case 'es':
+    case 'chat':
+      return false
+    default:
+      const _exhaustive: never = space.solution;
+      throw new Error(`Unhandled shape: ${_exhaustive}`);
+
   }
-
-  const categoryId =
-    (appId && applications.get(appId)?.category?.id) || DEFAULT_APP_CATEGORIES.kibana.id;
-
-  if (preferredAssistantType === AIAssistantType.Security) {
-    return (
-      categoryId !== DEFAULT_APP_CATEGORIES.observability.id &&
-      categoryId !== DEFAULT_APP_CATEGORIES.enterpriseSearch.id
-    );
-  }
-
-  return DEFAULT_APP_CATEGORIES.security.id === categoryId;
 }
 
 export function useIsNavControlVisible() {
   const {
     application: { currentAppId$, applications$ },
     aiAssistantManagementSelection,
+    spaces
   } = useKibana().services;
   const [isVisible, setIsVisible] = useState(false);
 
@@ -47,9 +70,11 @@ export function useIsNavControlVisible() {
       currentAppId$,
       applications$,
       aiAssistantManagementSelection.aiAssistantType$,
+      aiAssistantManagementSelection.securitySolutionType$,
+      spaces.getActiveSpace$()
     ]).subscribe({
-      next: ([appId, applications, preferredAssistantType]) => {
-        setIsVisible(getVisibility(appId, applications, preferredAssistantType));
+      next: ([appId, applications, preferredAssistantType, securitySolutionType, space]) => {
+        setIsVisible(getVisibility({ appId, applications, preferredAssistantType, space, securitySolutionType }));
       },
     });
 

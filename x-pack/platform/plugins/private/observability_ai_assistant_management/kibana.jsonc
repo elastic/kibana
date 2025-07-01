@@ -17,6 +17,7 @@
       "management",
       "observabilityAIAssistant",
       "ml",
+      "spaces"
     ],
     "optionalPlugins": [
       "home",

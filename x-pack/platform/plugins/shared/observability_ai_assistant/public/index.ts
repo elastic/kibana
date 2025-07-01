@@ -113,6 +113,8 @@ export {
   aiAssistantAnonymizationRules,
   aiAssistantSearchConnectorIndexPattern,
   aiAssistantPreferredAIAssistantType,
+  observabilityAiAssistantPreferredAIAssistantType,
+  searchAiAssistantPreferredAIAssistantType,
 } from '../common/ui_settings/settings_keys';
 
 export {

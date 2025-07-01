@@ -15,13 +15,17 @@ import type { ServerlessPluginSetup } from '@kbn/serverless/public';
 import { BehaviorSubject, Observable } from 'rxjs';
 import type { BuildFlavor } from '@kbn/config';
 import { AIAssistantType } from '../common/ai_assistant_type';
-import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
+import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+SEARCH_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AIAssistantManagementSelectionPluginPublicSetup {}
 
 export interface AIAssistantManagementSelectionPluginPublicStart {
   aiAssistantType$: Observable<AIAssistantType>;
+  observabilitySolutionType$: Observable<AIAssistantType.Observability | AIAssistantType.Never>;
+  securitySolutionType$: Observable<AIAssistantType.Security | AIAssistantType.Never>;
+  searchSolutionType$: Observable<AIAssistantType.Observability | AIAssistantType.Never>;
 }
 
 export interface SetupDependencies {
@@ -101,10 +105,31 @@ export class AIAssistantManagementPlugin
       PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
     );
 
+    const observabilitySolutionPreferredAIAssistantType: AIAssistantType = coreStart.uiSettings.get(
+      OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
+    );
+
+    const securitySolutionPreferredAIAssistantType: AIAssistantType = coreStart.uiSettings.get(
+      SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
+    );
+
+    const searchSolutionPreferredAIAssistantType: AIAssistantType = coreStart.uiSettings.get(
+      SEARCH_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
+    );
+
     const aiAssistantType$ = new BehaviorSubject(preferredAIAssistantType);
+    const observabilitySolutionType$ = new BehaviorSubject(
+      observabilitySolutionPreferredAIAssistantType
+    );
+    const securitySolutionType$ = new BehaviorSubject(securitySolutionPreferredAIAssistantType);
+    const searchSolutionType$ = new BehaviorSubject(searchSolutionPreferredAIAssistantType);    
+
 
     return {
-      aiAssistantType$: aiAssistantType$.asObservable(),
+      aiAssistantType$: aiAssistantType$.asObservable(), // Classic setting
+      observabilitySolutionType$: observabilitySolutionType$.asObservable(), // Observability solution setting
+      securitySolutionType$: securitySolutionType$.asObservable(), // Security solution setting
+      searchSolutionType$: searchSolutionType$.asObservable(), // Search solution setting
     };
   }
 }

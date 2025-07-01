@@ -16,7 +16,6 @@ import {
   Plugin,
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { AIAssistantManagementSelectionConfig } from './config';
 import type {
@@ -25,8 +24,11 @@ import type {
   AIAssistantManagementSelectionPluginServerSetup,
   AIAssistantManagementSelectionPluginServerStart,
 } from './types';
-import { AIAssistantType } from '../common/ai_assistant_type';
-import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
+import { OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, SEARCH_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
+import { classicSetting } from './ui_settings/classic_setting';
+import { observabilitySolutionSetting } from './ui_settings/observability_solution_setting';
+import { securitySolutionSetting } from './ui_settings/security_solution_setting';
+import { searchSolutionSetting } from './ui_settings/search_solution_setting';
 
 export class AIAssistantManagementSelectionPlugin
   implements
@@ -49,52 +51,29 @@ export class AIAssistantManagementSelectionPlugin
   ) {
     core.uiSettings.register({
       [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-        name: i18n.translate('aiAssistantManagementSelection.preferredAIAssistantTypeSettingName', {
-          defaultMessage: 'AI Assistant visibility',
-        }),
+        ...classicSetting,
         value: this.config.preferredAIAssistantType,
-        description: i18n.translate(
-          'aiAssistantManagementSelection.preferredAIAssistantTypeSettingDescription',
-          {
-            defaultMessage:
-              'Choose where and which AI Assistants are available. You can limit the AI Assistants to their own solutions, show either the Observability and Search AI Assistants or the Security AI Assistant in other Kibana apps, or hide AI Assistants entirely.',
-          }
-        ),
-        schema: schema.oneOf(
-          [
-            schema.literal(AIAssistantType.Default),
-            schema.literal(AIAssistantType.Observability),
-            schema.literal(AIAssistantType.Security),
-            schema.literal(AIAssistantType.Never),
-          ],
-          { defaultValue: AIAssistantType.Default }
-        ),
-        options: [
-          AIAssistantType.Default,
-          AIAssistantType.Observability,
-          AIAssistantType.Security,
-          AIAssistantType.Never,
-        ],
-        type: 'select',
-        optionLabels: {
-          [AIAssistantType.Default]: i18n.translate(
-            'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueDefault',
-            { defaultMessage: 'Only in their solutions' }
-          ),
-          [AIAssistantType.Observability]: i18n.translate(
-            'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueObservability',
-            { defaultMessage: 'Observability and Search AI Assistants in other apps' }
-          ),
-          [AIAssistantType.Security]: i18n.translate(
-            'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueSecurity',
-            { defaultMessage: 'Security AI Assistant in other apps' }
-          ),
-          [AIAssistantType.Never]: i18n.translate(
-            'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueNever',
-            { defaultMessage: 'Hide all assistants' }
-          ),
-        },
-        requiresPageReload: true,
+      },
+    });
+
+    core.uiSettings.register({
+      [OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+        ...observabilitySolutionSetting,
+        value: this.config.observabilitySolutionPreferredAIAssistantType,
+      },
+    });
+
+    core.uiSettings.register({
+      [SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+        ...securitySolutionSetting,
+        value: this.config.securitySolutionPreferredAIAssistantType,
+      },
+    });
+
+    core.uiSettings.register({
+      [SEARCH_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+        ...searchSolutionSetting,
+        value: this.config.searchSolutionPreferredAIAssistantType,
       },
     });
 

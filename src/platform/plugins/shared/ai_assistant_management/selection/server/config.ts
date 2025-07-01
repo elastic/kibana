@@ -22,6 +22,27 @@ const configSchema = schema.object({
     ],
     { defaultValue: AIAssistantType.Default }
   ),
+  observabilitySolutionPreferredAIAssistantType: schema.oneOf(
+    [
+      schema.literal(AIAssistantType.Never),
+      schema.literal(AIAssistantType.Observability),
+    ],
+    { defaultValue: AIAssistantType.Observability }
+  ),
+  securitySolutionPreferredAIAssistantType: schema.oneOf(
+    [
+      schema.literal(AIAssistantType.Never),
+      schema.literal(AIAssistantType.Security),
+    ],
+    { defaultValue: AIAssistantType.Security }
+  ),
+  searchSolutionPreferredAIAssistantType: schema.oneOf(
+    [
+      schema.literal(AIAssistantType.Never),
+      schema.literal(AIAssistantType.Observability),
+    ],
+    { defaultValue: AIAssistantType.Observability }
+  ),
 });
 
 export type AIAssistantManagementSelectionConfig = TypeOf<typeof configSchema>;
@@ -30,5 +51,8 @@ export const config: PluginConfigDescriptor<AIAssistantManagementSelectionConfig
   schema: configSchema,
   exposeToBrowser: {
     preferredAIAssistantType: true,
+    observabilitySolutionPreferredAIAssistantType: true,
+    securitySolutionPreferredAIAssistantType: true,
+    searchSolutionPreferredAIAssistantType: true,
   },
 };

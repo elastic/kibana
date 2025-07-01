@@ -11,6 +11,8 @@ import {
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
   aiAssistantPreferredAIAssistantType,
+  observabilityAiAssistantPreferredAIAssistantType, 
+  searchAiAssistantPreferredAIAssistantType
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { isEmpty } from 'lodash';
@@ -21,6 +23,7 @@ import { useEditableSettings } from '../../../hooks/use_editable_settings';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { BottomBarActions } from '../bottom_bar_actions/bottom_bar_actions';
+import useObservable from 'react-use/lib/useObservable';
 
 export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   const {
@@ -28,13 +31,15 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
     settings,
     notifications,
     application: { capabilities, getUrlForApp },
+    spaces
   } = useKibana().services;
   const { config } = useAppContext();
+  const activeSpace = useObservable(spaces.getActiveSpace$());
 
   const settingsKeys = [
     aiAssistantSimulatedFunctionCalling,
     ...(knowledgeBase.status.value?.enabled ? [aiAssistantSearchConnectorIndexPattern] : []),
-    ...(config.visibilityEnabled ? [aiAssistantPreferredAIAssistantType] : []),
+    ...(config.visibilityEnabled ? (activeSpace?.solution === undefined || activeSpace.solution === 'classic') ? [aiAssistantPreferredAIAssistantType] : activeSpace.solution === 'oblt' ? [observabilityAiAssistantPreferredAIAssistantType] : activeSpace.solution === 'es' ? [searchAiAssistantPreferredAIAssistantType] : []  : []),
   ];
 
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =

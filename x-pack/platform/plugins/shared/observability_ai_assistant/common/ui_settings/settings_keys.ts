@@ -14,4 +14,7 @@ export const aiAssistantSimulatedFunctionCalling =
 export const aiAssistantSearchConnectorIndexPattern =
   'observability:aiAssistantSearchConnectorIndexPattern';
 export const aiAssistantPreferredAIAssistantType = 'aiAssistant:preferredAIAssistantType';
+export const observabilityAiAssistantPreferredAIAssistantType = 'aiAssistant:preferredAIAssistantType:solution:observability';
+export const searchAiAssistantPreferredAIAssistantType = 'aiAssistant:preferredAIAssistantType:solution:search';
+
 export const aiAssistantAnonymizationRules = 'observability:aiAssistantAnonymizationRules';

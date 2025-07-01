@@ -11,4 +11,7 @@ import { AIAssistantType } from '../common/ai_assistant_type';
 
 export interface ConfigSchema {
   preferredAIAssistantType: AIAssistantType;
+  observabilitySolutionPreferredAIAssistantType: AIAssistantType.Observability | AIAssistantType.Never;
+  securitySolutionPreferredAIAssistantType: AIAssistantType.Security | AIAssistantType.Never;
+  searchSolutionPreferredAIAssistantType: AIAssistantType.Observability | AIAssistantType.Never;
 }
