@@ -63,7 +63,6 @@ export function AddToCaseContextItem() {
     return null;
   }
 
-  console.log('hasCasesPermissions', hasCasesPermissions);
   return hasCasesPermissions ? (
     <CasesContext permissions={casesPermissions} owner={['observability']}>
       {ObservabilityAIAssistantChatServiceContext && chatService?.value ? (
@@ -117,6 +116,7 @@ function AddToCaseButtonContent() {
       });
       return;
     }
+    setIsCommentModalOpen(false);
     casesModal.open({
       getAttachments: () => {
         const persistableStateAttachmentState: PageAttachmentPersistedState = {
