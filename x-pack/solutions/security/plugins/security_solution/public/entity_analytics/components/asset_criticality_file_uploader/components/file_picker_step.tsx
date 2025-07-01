@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, useI18n } from '@kbn/i18n-react';
 
 import type { EntityType } from '../../../../../common/entity_analytics/types';
-import { useAssetCriticalityEntityTypes } from '../../../hooks/use_enabled_entity_types';
+import { useEntityAnalyticsTypes } from '../../../hooks/use_enabled_entity_types';
 import { EntityTypeToIdentifierField } from '../../../../../common/entity_analytics/types';
 
 import {
@@ -61,7 +61,7 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
       line-height: ${useEuiFontSize('s').lineHeight};
     `;
 
-    const entityTypes = useAssetCriticalityEntityTypes();
+    const entityTypes = useEntityAnalyticsTypes();
 
     const sampleCSVContent = entityTypes
       .filter((entity): entity is SupportedEntityType => entity in entityCSVMap)

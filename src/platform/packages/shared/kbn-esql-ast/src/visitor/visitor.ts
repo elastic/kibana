@@ -129,6 +129,7 @@ export class Visitor<
 
         for (let i = nodes.length - 1; i >= 0; i--) {
           const node = nodes[i];
+          if (!node) continue;
           const { location } = node;
           if (!location) continue;
           const isInside = location.min <= pos && location.max >= pos;
@@ -145,13 +146,14 @@ export class Visitor<
         const nodes = [...ctx.arguments()];
         for (let i = nodes.length - 1; i >= 0; i--) {
           const node = nodes[i];
+          if (!node) continue;
           const { location } = node;
           if (!location) continue;
           const isInside = location.min <= pos && location.max >= pos;
           if (isInside) return ctx.visitExpression(node);
           const isAfter = location.max < pos;
           if (isAfter) {
-            if (ctx.node.location && ctx.node.location.max === location.max) {
+            if (ctx.node.location && ctx.node.location.max >= location.max) {
               return ctx.visitExpression(node) || node;
             }
             return node;
@@ -163,6 +165,7 @@ export class Visitor<
         const nodes = [...ctx.commands()];
         for (let i = nodes.length - 1; i >= 0; i--) {
           const node = nodes[i];
+          if (!node) continue;
           const { location } = node;
           if (!location) continue;
           const isInside = location.min <= pos && location.max >= pos;

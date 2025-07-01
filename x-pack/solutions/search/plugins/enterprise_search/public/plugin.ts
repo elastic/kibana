@@ -10,6 +10,7 @@ import { BehaviorSubject, firstValueFrom, type Subscription } from 'rxjs';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { ConsolePluginStart } from '@kbn/console-plugin/public';
+import { SearchConnectorsPluginStart } from '@kbn/content-connectors-plugin/public';
 import {
   AppMountParameters,
   CoreStart,
@@ -33,7 +34,6 @@ import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
-import { SearchConnectorsPluginStart } from '@kbn/search-connectors-plugin/public';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
@@ -45,12 +45,13 @@ import {
   APPLICATIONS_PLUGIN,
   ELASTICSEARCH_PLUGIN,
   AI_SEARCH_PLUGIN,
-  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
-  ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
+  ENTERPRISE_SEARCH_DATA_PLUGIN,
+  ENTERPRISE_SEARCH_HOME_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
   VECTOR_SEARCH_PLUGIN,
   SEMANTIC_SEARCH_PLUGIN,
+  SEARCH_HOMEPAGE,
 } from '../common/constants';
 import { registerLocators } from '../common/locators';
 import { ClientConfigType, InitialAppData } from '../common/types';
@@ -82,6 +83,7 @@ export interface PluginsStart {
   charts?: ChartsPluginStart;
   cloud?: CloudSetup & CloudStart;
   console?: ConsolePluginStart;
+  contentConnectors?: SearchConnectorsPluginStart;
   data?: DataPublicPluginStart;
   fleet?: FleetStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
@@ -90,8 +92,7 @@ export interface PluginsStart {
   licensing?: LicensingPluginStart;
   ml?: MlPluginStart;
   navigation: NavigationPublicPluginStart;
-  searchConnectors?: SearchConnectorsPluginStart;
-  searchNavigation?: SearchNavigationPluginStart;
+  searchNavigation: SearchNavigationPluginStart;
   searchPlayground?: SearchPlaygroundPluginStart;
   security?: SecurityPluginStart;
   share?: SharePluginStart;
@@ -212,40 +213,30 @@ export class EnterpriseSearchPlugin implements Plugin {
     const { cloud, share } = plugins;
 
     core.application.register({
-      appRoute: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+      appRoute: ENTERPRISE_SEARCH_HOME_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
-      id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
-      mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-        const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME);
-
-        await this.getInitialData(http);
-        const pluginData = this.getPluginData();
-
-        const { renderApp } = await import('./applications');
-        const { EnterpriseSearchOverview } = await import(
-          './applications/enterprise_search_overview'
-        );
-
-        return renderApp(EnterpriseSearchOverview, kibanaDeps, pluginData);
+      euiIconType: ENTERPRISE_SEARCH_HOME_PLUGIN.LOGO,
+      id: ENTERPRISE_SEARCH_HOME_PLUGIN.ID,
+      mount: async () => {
+        const [coreStart] = await core.getStartServices();
+        coreStart.application.navigateToApp(SEARCH_HOMEPAGE);
+        return () => {};
       },
       order: 0,
-      title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAV_TITLE,
-      visibleIn: ['home', 'kibanaOverview', 'globalSearch', 'sideNav'],
+      title: ENTERPRISE_SEARCH_HOME_PLUGIN.NAV_TITLE,
+      visibleIn: ['home', 'kibanaOverview'],
     });
 
     core.application.register({
-      appRoute: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL,
+      appRoute: ENTERPRISE_SEARCH_DATA_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       deepLinks: contentLinks,
-      euiIconType: ENTERPRISE_SEARCH_CONTENT_PLUGIN.LOGO,
-      id: ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
+      euiIconType: ENTERPRISE_SEARCH_DATA_PLUGIN.LOGO,
+      id: ENTERPRISE_SEARCH_DATA_PLUGIN.ID,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME);
+        chrome.docTitle.change(ENTERPRISE_SEARCH_DATA_PLUGIN.NAME);
 
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
@@ -258,14 +249,14 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(EnterpriseSearchContent, kibanaDeps, pluginData);
       },
       order: 1,
-      title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
+      title: ENTERPRISE_SEARCH_DATA_PLUGIN.NAV_TITLE,
       visibleIn: [],
     });
 
     core.application.register({
       appRoute: ELASTICSEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+      euiIconType: ENTERPRISE_SEARCH_HOME_PLUGIN.LOGO,
       id: ELASTICSEARCH_PLUGIN.ID,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
@@ -281,6 +272,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(Elasticsearch, kibanaDeps, pluginData);
       },
       title: ELASTICSEARCH_PLUGIN.NAME,
+      visibleIn: [],
     });
 
     core.application.register({
@@ -302,6 +294,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(EnterpriseSearchVectorSearch, kibanaDeps, pluginData);
       },
       title: VECTOR_SEARCH_PLUGIN.NAV_TITLE,
+      visibleIn: [],
     });
 
     core.application.register({
@@ -323,6 +316,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(EnterpriseSearchSemanticSearch, kibanaDeps, pluginData);
       },
       title: SEMANTIC_SEARCH_PLUGIN.NAV_TITLE,
+      visibleIn: [],
     });
 
     core.application.register({
@@ -356,7 +350,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME);
+        chrome.docTitle.change(ENTERPRISE_SEARCH_DATA_PLUGIN.NAME);
 
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
@@ -373,7 +367,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     core.application.register({
       appRoute: ANALYTICS_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+      euiIconType: ENTERPRISE_SEARCH_HOME_PLUGIN.LOGO,
       id: ANALYTICS_PLUGIN.ID,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
@@ -395,7 +389,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     core.application.register({
       appRoute: SEARCH_EXPERIENCES_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+      euiIconType: ENTERPRISE_SEARCH_HOME_PLUGIN.LOGO,
       id: SEARCH_EXPERIENCES_PLUGIN.ID,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
@@ -435,11 +429,11 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
-        description: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.DESCRIPTION,
+        description: ENTERPRISE_SEARCH_HOME_PLUGIN.DESCRIPTION,
         icon: 'logoElasticsearch',
-        id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
+        id: ENTERPRISE_SEARCH_HOME_PLUGIN.ID,
         order: 100,
-        path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+        path: ENTERPRISE_SEARCH_HOME_PLUGIN.URL,
         title: SEARCH_PRODUCT_NAME,
       });
 
@@ -489,22 +483,6 @@ export class EnterpriseSearchPlugin implements Plugin {
         })
       );
     });
-    if (plugins.searchNavigation !== undefined) {
-      // while we have ent-search apps in the side nav, we need to provide access
-      // to the base set of classic side nav items to the search-navigation plugin.
-      import('./applications/shared/layout/base_nav').then(({ buildBaseClassicNavItems }) => {
-        plugins.searchNavigation?.setGetBaseClassicNavItems(() => {
-          return buildBaseClassicNavItems();
-        });
-      });
-
-      // This is needed so that we can fetch product access for plugins
-      // that need to share the classic nav. This can be removed when we
-      // remove product access and ent-search apps.
-      plugins.searchNavigation.registerOnAppMountHandler(async () => {
-        return this.getInitialData(core.http);
-      });
-    }
 
     this.licenseSubscription = plugins.licensing?.license$.subscribe((license) => {
       if (hasEnterpriseLicense(license)) {

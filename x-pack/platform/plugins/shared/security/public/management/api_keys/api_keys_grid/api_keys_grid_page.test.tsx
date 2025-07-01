@@ -138,9 +138,11 @@ describe('APIKeysGridPage', () => {
     };
 
     const { findByText, queryByTestId, getByText } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
-        <APIKeysGridPage />
-      </Providers>
+      coreStart.rendering.addContext(
+        <Providers services={coreStart} authc={authc} history={history}>
+          <APIKeysGridPage />
+        </Providers>
+      )
     );
 
     expect(queryByTestId('apiKeysCreateTableButton')).not.toBeInTheDocument();
@@ -170,9 +172,11 @@ describe('APIKeysGridPage', () => {
     };
 
     const { findByText } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
-        <APIKeysGridPage />
-      </Providers>
+      coreStart.rendering.addContext(
+        <Providers services={coreStart} authc={authc} history={history}>
+          <APIKeysGridPage />
+        </Providers>
+      )
     );
 
     expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
@@ -194,9 +198,11 @@ describe('APIKeysGridPage', () => {
     };
 
     const { findByText } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
-        <APIKeysGridPage />
-      </Providers>
+      coreStart.rendering.addContext(
+        <Providers services={coreStart} authc={authc} history={history}>
+          <APIKeysGridPage />
+        </Providers>
+      )
     );
 
     expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
@@ -221,9 +227,11 @@ describe('APIKeysGridPage', () => {
     };
 
     const { findByText } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
-        <APIKeysGridPage />
-      </Providers>
+      coreStart.rendering.addContext(
+        <Providers services={coreStart} authc={authc} history={history}>
+          <APIKeysGridPage />
+        </Providers>
+      )
     );
 
     expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
@@ -254,9 +262,11 @@ describe('APIKeysGridPage', () => {
       };
 
       const { findByText, queryByText } = render(
-        <Providers services={coreStart} authc={authc} history={history}>
-          <APIKeysGridPage />
-        </Providers>
+        coreStart.rendering.addContext(
+          <Providers services={coreStart} authc={authc} history={history}>
+            <APIKeysGridPage />
+          </Providers>
+        )
       );
       expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
       expect(await findByText('You do not have permission to create API keys')).toBeInTheDocument();

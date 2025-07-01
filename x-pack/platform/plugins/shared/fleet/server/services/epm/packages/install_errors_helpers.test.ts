@@ -4,12 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+
+import type { Logger } from '@kbn/core/server';
 
 import type { InstallFailedAttempt } from '../../../types';
+
+import { getInstallationObject } from './get';
 
 import {
   clearLatestFailedAttempts,
   addErrorToLatestFailedAttempts,
+  createOrUpdateFailedInstallStatus,
 } from './install_errors_helpers';
 
 const generateFailedAttempt = (version: string) => ({
@@ -20,8 +27,18 @@ const generateFailedAttempt = (version: string) => ({
     message: 'test',
   },
 });
+let mockedLogger: jest.Mocked<Logger>;
 
-const mapFailledAttempsToTargetVersion = (attemps: InstallFailedAttempt[]) =>
+jest.mock('../../audit_logging');
+jest.mock('./get', () => {
+  return { getInstallationObject: jest.fn() };
+});
+
+const getInstallationObjectMock = getInstallationObject as jest.MockedFunction<
+  typeof getInstallationObject
+>;
+
+const mapFailedAttempsToTargetVersion = (attemps: InstallFailedAttempt[]) =>
   attemps.map((attempt) => attempt.target_version);
 
 describe('Install error helpers', () => {
@@ -30,16 +47,16 @@ describe('Install error helpers', () => {
       generateFailedAttempt('0.1.0'),
       generateFailedAttempt('0.2.0'),
     ];
-    it('should clear previous error on succesfull upgrade', () => {
-      const currentFailledAttemps = clearLatestFailedAttempts('0.2.0', previousFailedAttemps);
+    it('should clear previous error on successful upgrade', () => {
+      const currentFailedAttemps = clearLatestFailedAttempts('0.2.0', previousFailedAttemps);
 
-      expect(mapFailledAttempsToTargetVersion(currentFailledAttemps)).toEqual([]);
+      expect(mapFailedAttempsToTargetVersion(currentFailedAttemps)).toEqual([]);
     });
 
-    it('should not clear previous upgrade error on succesfull rollback', () => {
-      const currentFailledAttemps = clearLatestFailedAttempts('0.1.0', previousFailedAttemps);
+    it('should not clear previous upgrade error on successful rollback', () => {
+      const currentFailedAttempts = clearLatestFailedAttempts('0.1.0', previousFailedAttemps);
 
-      expect(mapFailledAttempsToTargetVersion(currentFailledAttemps)).toEqual(['0.2.0']);
+      expect(mapFailedAttempsToTargetVersion(currentFailedAttempts)).toEqual(['0.2.0']);
     });
   });
 
@@ -52,20 +69,115 @@ describe('Install error helpers', () => {
         generateFailedAttempt('0.2.2'),
         generateFailedAttempt('0.2.1'),
       ];
-      const currentFailledAttemps = addErrorToLatestFailedAttempts({
+      const currentFailedAttempts = addErrorToLatestFailedAttempts({
         targetVersion: '0.2.6',
         createdAt: new Date().toISOString(),
         error: new Error('new test'),
         latestAttempts: previousFailedAttemps,
       });
 
-      expect(mapFailledAttempsToTargetVersion(currentFailledAttemps)).toEqual([
+      expect(mapFailedAttempsToTargetVersion(currentFailedAttempts)).toEqual([
         '0.2.6',
         '0.2.5',
         '0.2.4',
         '0.2.3',
         '0.2.2',
       ]);
+    });
+  });
+
+  describe('createOrUpdateFailedInstallStatus', () => {
+    const soClientMock = savedObjectsClientMock.create();
+    mockedLogger = loggerMock.create();
+
+    it('should create installation object with latest_install_failed_attempts if none was found', async () => {
+      getInstallationObjectMock.mockResolvedValue(undefined);
+
+      await createOrUpdateFailedInstallStatus({
+        logger: mockedLogger,
+        savedObjectsClient: soClientMock,
+        pkgName: 'test-package',
+        pkgVersion: '0.1.0',
+        error: new Error('test error'),
+        installSource: 'registry',
+      });
+      expect(soClientMock.create).toHaveBeenCalledWith(
+        'epm-packages',
+        {
+          es_index_patterns: {},
+          install_source: 'registry',
+          install_started_at: expect.any(String),
+          install_status: 'install_failed',
+          install_version: '0.1.0',
+          installed_es: [],
+          installed_kibana: [],
+          name: 'test-package',
+          package_assets: [],
+          verification_status: 'unknown',
+          version: '0.1.0',
+          latest_install_failed_attempts: [
+            {
+              created_at: expect.any(String),
+              target_version: '0.1.0',
+              error: {
+                message: 'test error',
+                name: 'Error',
+                stack: expect.any(String),
+              },
+            },
+          ],
+        },
+        { id: 'test-package', overwrite: true }
+      );
+    });
+
+    it('should update latest_install_failed_attempts in the installation object if it exists', async () => {
+      getInstallationObjectMock.mockResolvedValue({
+        es_index_patterns: {},
+        install_source: 'registry',
+        install_started_at: '2025-06-11T07:15:06.838Z',
+        install_status: 'install_failed',
+        install_version: '0.1.0',
+        installed_es: [],
+        installed_kibana: [],
+        name: 'test-package',
+        package_assets: [],
+        verification_status: 'unknown',
+        version: '0.1.0',
+        latest_install_failed_attempts: [
+          {
+            created_at: '2025-06-11T07:15:06.838Z',
+            target_version: '0.1.0',
+            error: {
+              message: 'test error',
+              name: 'Error',
+              stack: 'test error - stacktrace',
+            },
+          },
+        ],
+      } as any);
+
+      await createOrUpdateFailedInstallStatus({
+        logger: mockedLogger,
+        savedObjectsClient: soClientMock,
+        pkgName: 'test-package',
+        pkgVersion: '0.1.0',
+        error: new Error('test error'),
+        installSource: 'registry',
+      });
+      expect(soClientMock.update).toHaveBeenCalledWith('epm-packages', 'test-package', {
+        latest_install_failed_attempts: [
+          {
+            created_at: expect.any(String),
+            target_version: '0.1.0',
+            error: {
+              message: 'test error',
+              name: 'Error',
+              stack: expect.any(String),
+            },
+          },
+        ],
+      });
     });
   });
 });

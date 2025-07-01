@@ -2,6 +2,16 @@
 // LAYOUT
 //
 
+@mixin flexParent($grow: 1, $shrink: 1, $basis: auto, $direction: column) {
+  flex: $grow $shrink $basis;
+  display: flex;
+  flex-direction: $direction;
+
+  > * {
+    flex-shrink: 0;
+  }
+}
+
 .visEditorSidebar {
   height: 100%;
   padding-left: $euiSizeS;

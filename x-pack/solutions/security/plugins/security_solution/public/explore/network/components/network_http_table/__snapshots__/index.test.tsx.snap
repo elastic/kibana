@@ -1,103 +1,838 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`NetworkHttp Table Component rendering it renders the default NetworkHttp table 1`] = `
-<Memo(NetworkHttpTableComponent)
-  data={
-    Array [
-      Object {
-        "cursor": Object {
-          "tiebreaker": null,
-          "value": "/computeMetadata/v1/instance/virtual-clock/drift-token",
-        },
-        "node": Object {
-          "_id": "/computeMetadata/v1/instance/virtual-clock/drift-token",
-          "domains": Array [
-            "metadata.google.internal",
-          ],
-          "lastHost": "suricata-iowa",
-          "lastSourceIp": "10.128.0.21",
-          "methods": Array [
-            "get",
-          ],
-          "path": "/computeMetadata/v1/instance/virtual-clock/drift-token",
-          "requestCount": 1440,
-          "statuses": Array [],
-        },
-      },
-      Object {
-        "cursor": Object {
-          "tiebreaker": null,
-          "value": "/computeMetadata/v1/",
-        },
-        "node": Object {
-          "_id": "/computeMetadata/v1/",
-          "domains": Array [
-            "metadata.google.internal",
-          ],
-          "lastHost": "suricata-iowa",
-          "lastSourceIp": "10.128.0.21",
-          "methods": Array [
-            "get",
-          ],
-          "path": "/computeMetadata/v1/",
-          "requestCount": 1020,
-          "statuses": Array [
-            "200",
-          ],
-        },
-      },
-      Object {
-        "cursor": Object {
-          "tiebreaker": null,
-          "value": "/computeMetadata/v1/instance/network-interfaces/",
-        },
-        "node": Object {
-          "_id": "/computeMetadata/v1/instance/network-interfaces/",
-          "domains": Array [
-            "metadata.google.internal",
-          ],
-          "lastHost": "suricata-iowa",
-          "lastSourceIp": "10.128.0.21",
-          "methods": Array [
-            "get",
-          ],
-          "path": "/computeMetadata/v1/instance/network-interfaces/",
-          "requestCount": 960,
-          "statuses": Array [],
-        },
-      },
-      Object {
-        "cursor": Object {
-          "tiebreaker": null,
-          "value": "/downloads/ca_setup.exe",
-        },
-        "node": Object {
-          "_id": "/downloads/ca_setup.exe",
-          "domains": Array [
-            "www.oxid.it",
-          ],
-          "lastHost": "jessie",
-          "lastSourceIp": "10.0.2.15",
-          "methods": Array [
-            "get",
-          ],
-          "path": "/downloads/ca_setup.exe",
-          "requestCount": 3,
-          "statuses": Array [
-            "200",
-          ],
-        },
-      },
-    ]
+.c0 {
+  width: 100%;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+}
+
+.c0 > * {
+  max-width: 100%;
+}
+
+.c0 .inspectButtonComponent {
+  pointer-events: none;
+  opacity: 0;
+  -webkit-transition: opacity 250ms ease;
+  transition: opacity 250ms ease;
+}
+
+.c0 .inspectButtonComponent:focus-visible {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.c0:hover .inspectButtonComponent {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.c4 {
+  color: #98a2b3;
+}
+
+.c2 .siemSubtitle__item {
+  color: #7a7f89;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.c1 {
+  position: relative;
+}
+
+.c3 tbody th,
+.c3 tbody td {
+  vertical-align: top;
+}
+
+.c3 tbody .euiTableCellContent {
+  display: block;
+}
+
+.c5 {
+  margin-top: 4px;
+}
+
+@media only screen and (min-width:575px) {
+  .c2 .siemSubtitle__item {
+    display: inline-block;
+    margin-right: 16px;
   }
-  fakeTotalCount={4}
-  id="http"
-  isInspect={false}
-  loadPage={[MockFunction]}
-  loading={false}
-  setQuerySkip={[MockFunction]}
-  showMorePagesIndicator={false}
-  totalCount={4}
-  type="page"
-/>
+
+  .c2 .siemSubtitle__item:last-child {
+    margin-right: 0;
+  }
+}
+
+<div
+  class="c0"
+  data-test-subj="hoverVisibilityContainer"
+>
+  <div
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium c1 emotion-euiPanel-grow-m-m-plain-hasBorder"
+    data-test-subj="table-http-loading-false"
+  >
+    <header
+      class="toggle-expand siemHeaderSection css-125xqyz-header"
+      data-test-subj="header-section"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-stretch-column"
+        data-test-subj="headerSectionOuterFlexGroup"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
+            data-test-subj="headerSectionInnerFlexGroup"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-grow-1"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
+                >
+                  <div
+                    class="euiFlexGroup header-section-titles emotion-euiFlexGroup-none-flexStart-stretch-row"
+                  >
+                    <div
+                      class="euiFlexItem emotion-euiFlexItem-growZero"
+                    >
+                      <button
+                        aria-label="Open"
+                        class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
+                        data-test-subj="query-toggle-header"
+                        title="Open"
+                        type="button"
+                      >
+                        <span
+                          aria-hidden="true"
+                          class="euiButtonIcon__icon"
+                          color="inherit"
+                          data-euiicon-type="arrowDown"
+                        />
+                      </button>
+                    </div>
+                    <div
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
+                    >
+                      <h2
+                        class="euiTitle emotion-euiTitle-l"
+                        data-test-subj="header-section-title"
+                      >
+                        <span
+                          class="eui-textBreakNormal"
+                        >
+                          HTTP Requests
+                        </span>
+                      </h2>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <button
+                    aria-label="Inspect"
+                    class="euiButtonIcon inspectButtonComponent emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
+                    data-test-subj="inspect-icon-button"
+                    disabled=""
+                    title="Inspect"
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      color="inherit"
+                      data-euiicon-type="inspect"
+                    />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
+        >
+          <div
+            class="c2 siemSubtitle"
+            data-test-subj="header-section-subtitle"
+          >
+            <p
+              class="siemSubtitle__item siemSubtitle__item--text"
+              data-test-subj="header-panel-subtitle"
+            >
+              Showing: 4 requests
+            </p>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div
+      class="euiBasicTable c3"
+      data-test-subj="paginated-basic-table"
+    >
+      <table
+        class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+        id="__table_generated-id"
+        tabindex="-1"
+      >
+        <caption
+          class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+        />
+        <thead>
+          <tr>
+            <th
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_Method_0"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="Method"
+                >
+                  Method
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_Domain_1"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="Domain"
+                >
+                  Domain
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_node.path_2"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="Path"
+                >
+                  Path
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_Status_3"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="Status"
+                >
+                  Status
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_Last host_4"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="Last host"
+                >
+                  Last host
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_Last source Ip_5"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="Last source Ip"
+                >
+                  Last source Ip
+                </span>
+              </div>
+            </th>
+            <th
+              aria-sort="descending"
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_node.requestCount_6"
+              role="columnheader"
+              scope="col"
+            >
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+              >
+                <button
+                  class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                      title="Requests"
+                    >
+                      Requests
+                    </span>
+                    <span
+                      class="euiTableSortIcon"
+                      data-euiicon-type="sortDown"
+                    />
+                  </div>
+                </button>
+              </span>
+            </th>
+          </tr>
+        </thead>
+        <tbody
+          class="css-0"
+        >
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+          >
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                get
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                metadata.google.internal
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                /computeMetadata/v1/instance/virtual-clock/drift-token
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <span
+                  class="c4"
+                >
+                  —
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <div
+                  data-test-subj="cellActions-renderContent-host.name"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        suricata-iowa
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <div
+                  data-test-subj="cellActions-renderContent-source.ip"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        <button
+                          class="euiLink emotion-euiLink-primary"
+                          data-test-subj="network-details"
+                          type="button"
+                        >
+                          10.128.0.21
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                1,440
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+          >
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                get
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                metadata.google.internal
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                /computeMetadata/v1/
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                200
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <div
+                  data-test-subj="cellActions-renderContent-host.name"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        suricata-iowa
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <div
+                  data-test-subj="cellActions-renderContent-source.ip"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        <button
+                          class="euiLink emotion-euiLink-primary"
+                          data-test-subj="network-details"
+                          type="button"
+                        >
+                          10.128.0.21
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                1,020
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+          >
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                get
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                metadata.google.internal
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                /computeMetadata/v1/instance/network-interfaces/
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <span
+                  class="c4"
+                >
+                  —
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <div
+                  data-test-subj="cellActions-renderContent-host.name"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        suricata-iowa
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <div
+                  data-test-subj="cellActions-renderContent-source.ip"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        <button
+                          class="euiLink emotion-euiLink-primary"
+                          data-test-subj="network-details"
+                          type="button"
+                        >
+                          10.128.0.21
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                960
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+          >
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                get
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                www.oxid.it
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                /downloads/ca_setup.exe
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                200
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <div
+                  data-test-subj="cellActions-renderContent-host.name"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        jessie
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                <div
+                  data-test-subj="cellActions-renderContent-source.ip"
+                >
+                  <div>
+                    <div
+                      class="euiPopover emotion-euiPopover-inline-block"
+                    >
+                      <div>
+                        <button
+                          class="euiLink emotion-euiLink-primary"
+                          data-test-subj="network-details"
+                          type="button"
+                        >
+                          10.0.2.15
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                 
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                3
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div
+      class="euiFlexGroup c5 emotion-euiFlexGroup-l-spaceBetween-center-row"
+    >
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      />
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <nav
+          class="euiPagination emotion-euiPagination"
+          data-test-subj="numberedPagination"
+        >
+          <span
+            aria-atomic="true"
+            aria-relevant="additions text"
+            class="emotion-euiScreenReaderOnly"
+            role="status"
+          >
+            Page 1 of 1
+          </span>
+          <button
+            aria-label="Previous page"
+            class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
+            data-test-subj="pagination-button-previous"
+            disabled=""
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="arrowLeft"
+            />
+          </button>
+          <ul
+            class="euiPagination__list emotion-euiPagination__list"
+          >
+            <li
+              class="euiPagination__item"
+            >
+              <button
+                aria-current="page"
+                aria-label="Page 1 of 1"
+                class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-disabled-isDisabled-euiPaginationButton-isActive"
+                data-test-subj="pagination-button-0"
+                disabled=""
+                type="button"
+              >
+                <span
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    class="eui-textTruncate euiButtonEmpty__text"
+                  >
+                    1
+                  </span>
+                </span>
+              </button>
+            </li>
+          </ul>
+          <button
+            aria-label="Next page"
+            class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
+            data-test-subj="pagination-button-next"
+            disabled=""
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="arrowRight"
+            />
+          </button>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
 `;

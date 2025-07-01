@@ -78,7 +78,6 @@ const ALL_SPACE_RESULTS: Space[] = [
       // Disabled features are automatically added to the space when a solution is set
       'apm',
       'infrastructure',
-      'inventory',
       'logs',
       'observabilityCases',
       'observabilityCasesV2',
@@ -93,7 +92,9 @@ const ALL_SPACE_RESULTS: Space[] = [
       'securitySolutionTimeline',
       'siem',
       'siemV2',
+      'siemV3',
       'slo',
+      'streams',
       'uptime',
     ],
     solution: 'es',

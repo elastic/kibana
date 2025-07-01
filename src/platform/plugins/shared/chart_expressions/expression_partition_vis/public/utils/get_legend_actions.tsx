@@ -12,10 +12,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { LegendAction, SeriesIdentifier, useLegendAction } from '@elastic/charts';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
+import { IInterpreterRenderEvent } from '@kbn/expressions-plugin/common';
 import { PartitionVisParams } from '../../common/types';
 import { CellValueAction, ColumnCellValueActions, FilterEvent } from '../types';
 import { getSeriesValueColumnIndex, getFilterPopoverTitle } from './filter_helpers';
@@ -25,16 +25,12 @@ const hasFilterCellAction = (actions: CellValueAction[]) => {
 };
 
 export const getLegendActions = (
-  canFilter: (
-    data: FilterEvent | null,
-    actions: DataPublicPluginStart['actions']
-  ) => Promise<boolean>,
+  canFilter: ((data: IInterpreterRenderEvent<unknown>) => Promise<boolean>) | undefined,
   getFilterEventData: (series: SeriesIdentifier) => FilterEvent | null,
   onFilter: (data: FilterEvent, negate?: any) => void,
   columnCellValueActions: ColumnCellValueActions,
   visParams: PartitionVisParams,
   visData: Datatable,
-  actions: DataPublicPluginStart['actions'],
   formatter: FieldFormatsStart
 ): LegendAction => {
   return ({ series: [pieSeries] }) => {
@@ -48,7 +44,12 @@ export const getLegendActions = (
     const [ref, onClose] = useLegendAction<HTMLDivElement>();
 
     useEffect(() => {
-      (async () => setIsFilterable(await canFilter(filterData, actions)))();
+      if (!canFilter || !filterData) {
+        setIsFilterable(false);
+        return;
+      }
+
+      (async () => setIsFilterable(await canFilter(filterData)))();
     }, [filterData]);
 
     if (columnIndex === -1) {

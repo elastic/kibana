@@ -35,12 +35,24 @@ describe('PluginsConfig', () => {
 
   it('retrieves shouldEnableAllPlugins', () => {
     const env = Env.createDefault(REPO_ROOT, getEnvOptions({ cliArgs: { dev: true } }));
-    const rawConfig: any = {
+    const rawConfig: PluginsConfigType = {
       initialize: true,
       paths: ['some-path', 'another-path'],
       forceEnableAllPlugins: true,
     };
     const config = new PluginsConfig(rawConfig, env);
-    expect(config.shouldEnableAllPlugins).toBe(true);
+    expect(config.shouldEnableAllPlugins).toEqual(true);
+  });
+
+  it('retrieves included plugin groups', () => {
+    const env = Env.createDefault(REPO_ROOT, getEnvOptions({ cliArgs: { dev: true } }));
+    const rawConfig: PluginsConfigType = {
+      initialize: true,
+      paths: ['some-path', 'another-path'],
+      forceEnableAllPlugins: true,
+      allowlistPluginGroups: ['search'],
+    };
+    const config = new PluginsConfig(rawConfig, env);
+    expect(config.allowlistPluginGroups).toEqual(['search']);
   });
 });

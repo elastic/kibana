@@ -31,7 +31,7 @@ elif [[ "$UNAME" == "Darwin" ]]; then
 fi
 echo " -- Running on OS: $OS"
 
-NODE_VARIANT=""
+NODE_VARIANT="node-glibc-217/"
 if [[ "${CI_FORCE_NODE_POINTER_COMPRESSION:-}" = "true" ]]; then
   echo ' -- Using Node.js variant with pointer compression enabled'
   NODE_VARIANT="node-pointer-compression/"

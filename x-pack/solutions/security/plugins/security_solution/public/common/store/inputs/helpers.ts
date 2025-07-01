@@ -18,6 +18,7 @@ import type {
   TimeRange,
 } from './model';
 import { InputsModelId } from './constants';
+import type { VisualizationTablesWithMeta } from '../../components/visualization_actions/types';
 
 export const updateInputFullScreen = (
   inputId: InputsModelId,
@@ -98,6 +99,7 @@ export interface UpdateQueryParams {
   refetch: Refetch | RefetchKql;
   state: InputsModel;
   searchSessionId?: string;
+  tables?: VisualizationTablesWithMeta;
 }
 
 export const upsertQuery = ({
@@ -108,6 +110,7 @@ export const upsertQuery = ({
   refetch,
   state,
   searchSessionId,
+  tables,
 }: UpdateQueryParams): InputsModel => {
   const queryIndex = state[inputId].queries.findIndex((q) => q.id === id);
   return {
@@ -126,6 +129,7 @@ export const upsertQuery = ({
                 refetch,
                 searchSessionId: state[inputId].queries[queryIndex].searchSessionId,
                 selectedInspectIndex: state[inputId].queries[queryIndex].selectedInspectIndex,
+                ...((tables && { tables }) ?? {}),
               },
               ...state[inputId].queries.slice(queryIndex + 1),
             ]
@@ -139,6 +143,7 @@ export const upsertQuery = ({
                 refetch,
                 selectedInspectIndex: 0,
                 searchSessionId,
+                ...((tables && { tables }) ?? {}),
               },
             ],
     },

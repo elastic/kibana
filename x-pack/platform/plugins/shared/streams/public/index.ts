@@ -11,6 +11,8 @@ import { StreamsPluginSetup, StreamsPluginStart } from './types';
 
 export type { StreamsPluginSetup, StreamsPluginStart };
 
+export { STREAMS_API_PRIVILEGES, STREAMS_UI_PRIVILEGES } from '../common/constants';
+
 export const plugin: PluginInitializer<StreamsPluginSetup, StreamsPluginStart> = (
   context: PluginInitializerContext
 ) => {

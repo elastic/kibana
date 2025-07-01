@@ -15,6 +15,7 @@ describe('EsqlService', () => {
   beforeAll(async () => {
     await testbed.start();
     await testbed.setupLookupIndices();
+    await testbed.setupTimeseriesIndices();
   });
 
   afterAll(async () => {
@@ -40,6 +41,40 @@ describe('EsqlService', () => {
       name: 'lookup_index2',
       mode: 'lookup',
       aliases: ['lookup_index2_alias1', 'lookup_index2_alias2'],
+    });
+  });
+
+  it('can load ES|QL Autocomplete/Validation indices for TS command', async () => {
+    const url = '/internal/esql/autocomplete/timeseries/indices';
+    const result = await testbed.GET(url).send().expect(200);
+
+    const item1 = result.body.indices.find((item: any) => item.name === 'ts_index1');
+    const item2 = result.body.indices.find((item: any) => item.name === 'ts_index2');
+
+    expect(item1).toMatchObject({
+      name: 'ts_index1',
+      mode: 'time_series',
+      aliases: [],
+    });
+
+    item2.aliases.sort();
+
+    expect(item2).toMatchObject({
+      name: 'ts_index2',
+      mode: 'time_series',
+      aliases: ['ts_index2_alias1', 'ts_index2_alias2'],
+    });
+  });
+
+  it('can load the inference endpoints by type', async () => {
+    const url = '/internal/esql/autocomplete/inference_endpoints/rerank';
+    const result = await testbed.GET(url).send().expect(200);
+
+    const rerankInferenceEndpoint = result.body.inferenceEndpoints[0];
+
+    expect(rerankInferenceEndpoint).toMatchObject({
+      inference_id: '.rerank-v1-elasticsearch',
+      task_type: 'rerank',
     });
   });
 });

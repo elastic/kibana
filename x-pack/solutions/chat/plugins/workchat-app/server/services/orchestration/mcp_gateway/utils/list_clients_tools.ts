@@ -9,7 +9,7 @@ import { JsonSchemaObject } from '@n8n/json-schema-to-zod';
 import { buildToolName } from '@kbn/wci-common';
 import type { McpClient } from '@kbn/wci-server';
 import type { Logger } from '@kbn/core/server';
-import { IntegrationTool } from '../types';
+import { GatewayTool } from '../types';
 
 /**
  * Retrieve all the tools from a list of MCP clients.
@@ -20,9 +20,9 @@ export const listClientsTools = async ({
 }: {
   clients: Record<string, McpClient>;
   logger?: Logger;
-}): Promise<IntegrationTool[]> => {
+}): Promise<GatewayTool[]> => {
   const clientsTools = await Promise.all(
-    Object.entries(clients).map<Promise<IntegrationTool[]>>(async ([clientId, client]) => {
+    Object.entries(clients).map<Promise<GatewayTool[]>>(async ([clientId, client]) => {
       try {
         const toolsResponse = await client.listTools();
         if (toolsResponse?.tools?.length) {

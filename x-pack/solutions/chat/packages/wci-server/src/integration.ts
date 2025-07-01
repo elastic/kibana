@@ -8,7 +8,7 @@
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { IntegrationType, IntegrationConfiguration } from '@kbn/wci-common';
-import type { McpProvider } from './mcp';
+import type { McpClientProvider } from './mcp';
 /**
  * Represents the definition of a type of integration for WorkChat.
  *
@@ -42,5 +42,5 @@ export interface IntegrationContext<T extends IntegrationConfiguration> {
  */
 export interface WorkChatIntegration {
   /** connect to the MCP client */
-  connect: McpProvider['connect'];
+  connect: McpClientProvider['connect'];
 }

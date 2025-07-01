@@ -5,20 +5,31 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { EuiFieldSearchProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { PolicySelectionItem } from '../policies_selector';
-import { PoliciesSelector } from '../policies_selector';
-import type { ImmutableArray, PolicyData } from '../../../../common/endpoint/types';
+import type { PolicySelectorMenuButtonProps } from '../policy_selector';
+import { PolicySelectorMenuButton } from '../policy_selector';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
+
+const GLOBAL_ENTRIES = i18n.translate(
+  'xpack.securitySolution.management.policiesSelector.globalEntries',
+  {
+    defaultMessage: 'Global entries',
+  }
+);
+const UNASSIGNED_ENTRIES = i18n.translate(
+  'xpack.securitySolution.management.policiesSelector.unassignedEntries',
+  {
+    defaultMessage: 'Unassigned entries',
+  }
+);
 
 export interface SearchExceptionsProps {
   defaultValue?: string;
   placeholder: string;
   hasPolicyFilter?: boolean;
-  policyList?: ImmutableArray<PolicyData>;
   defaultIncludedPolicies?: string;
   hideRefreshButton?: boolean;
   onSearch(
@@ -37,24 +48,61 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
     onSearch,
     placeholder,
     hasPolicyFilter,
-    policyList,
-    defaultIncludedPolicies,
+    defaultIncludedPolicies = '',
     hideRefreshButton = false,
   }) => {
     const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
+    const initiallySelectedPolicies = useMemo(() => {
+      return Array.from(
+        new Set(defaultIncludedPolicies.split(',').filter((id) => id.trim() !== ''))
+      );
+    }, [defaultIncludedPolicies]);
     const [query, setQuery] = useState<string>(defaultValue);
-    const [includedPolicies, setIncludedPolicies] = useState<string>(defaultIncludedPolicies || '');
+    const [includedPolicies, setIncludedPolicies] = useState<string[]>(
+      initiallySelectedPolicies.filter((id) => id !== 'global' && id !== 'unassigned')
+    );
 
-    const onChangeSelection = useCallback(
-      (items: PolicySelectionItem[]) => {
-        const includePoliciesNew = items
-          .filter((item) => item.checked === 'on')
-          .map((item) => item.id)
-          .join(',');
+    const [additionalSelectionItems, setAdditionalSelectionItems] = useState<
+      Required<PolicySelectorMenuButtonProps>['additionalListItems']
+    >([
+      {
+        label: i18n.translate(
+          'xpack.securitySolution.searchExceptions.additionalFiltersGroupLabel',
+          { defaultMessage: 'Additional filters' }
+        ),
+        isGroupLabel: true,
+      },
+      {
+        label: GLOBAL_ENTRIES,
+        data: { id: 'global' },
+        checked: initiallySelectedPolicies.includes('global') ? 'on' : undefined,
+        'data-test-subj': 'globalOption',
+      },
+      {
+        label: UNASSIGNED_ENTRIES,
+        data: { id: 'unassigned' },
+        checked: initiallySelectedPolicies.includes('unassigned') ? 'on' : undefined,
+        'data-test-subj': 'unassignedOption',
+      },
+    ]);
 
-        setIncludedPolicies(includePoliciesNew);
+    const policySelectionOnChangeHandler = useCallback<PolicySelectorMenuButtonProps['onChange']>(
+      (updatedSelectedPolicyIds, updatedAdditionalListItems) => {
+        setIncludedPolicies(updatedSelectedPolicyIds);
 
-        onSearch(query, includePoliciesNew, false);
+        const updatedFullSelection = [...updatedSelectedPolicyIds];
+
+        if (updatedAdditionalListItems) {
+          for (const additionalItem of updatedAdditionalListItems) {
+            if (additionalItem.checked === 'on') {
+              updatedFullSelection.push(additionalItem.data?.id);
+            }
+          }
+
+          setAdditionalSelectionItems(updatedAdditionalListItems);
+        }
+
+        onSearch(query, updatedFullSelection.join(','), false);
       },
       [onSearch, query]
     );
@@ -64,13 +112,13 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
       [setQuery]
     );
     const handleOnSearch = useCallback(
-      () => onSearch(query, includedPolicies, true),
+      () => onSearch(query, includedPolicies.join(), true),
       [onSearch, query, includedPolicies]
     );
 
     const handleOnSearchQuery = useCallback<NonNullable<EuiFieldSearchProps['onSearch']>>(
       (value) => {
-        onSearch(value, includedPolicies, false);
+        onSearch(value, includedPolicies.join(), false);
       },
       [onSearch, includedPolicies]
     );
@@ -93,12 +141,13 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
             data-test-subj="searchField"
           />
         </EuiFlexItem>
-        {canCreateArtifactsByPolicy && hasPolicyFilter && policyList ? (
+        {canCreateArtifactsByPolicy && hasPolicyFilter ? (
           <EuiFlexItem grow={false}>
-            <PoliciesSelector
-              policies={policyList}
-              defaultIncludedPolicies={defaultIncludedPolicies}
-              onChangeSelection={onChangeSelection}
+            <PolicySelectorMenuButton
+              selectedPolicyIds={includedPolicies}
+              additionalListItems={additionalSelectionItems}
+              onChange={policySelectionOnChangeHandler}
+              data-test-subj="policiesSelectorButton"
             />
           </EuiFlexItem>
         ) : null}

@@ -2,7 +2,7 @@
   "type": "shared-browser",
   "id": "@kbn/reporting-public",
   "owner": [
-    "@elastic/appex-sharedux"
+    "@elastic/response-ops"
   ],
   "group": "platform",
   "visibility": "private"

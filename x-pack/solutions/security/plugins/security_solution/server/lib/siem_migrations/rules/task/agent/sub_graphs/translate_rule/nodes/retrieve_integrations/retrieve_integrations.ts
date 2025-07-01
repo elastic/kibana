@@ -31,17 +31,14 @@ export const getRetrieveIntegrationsNode = ({
 }: GetRetrieveIntegrationsNodeParams): GraphNode => {
   return async (state) => {
     const query = state.semantic_query;
-    const integrations = await ruleMigrationsRetriever.integrations.getIntegrations(query);
+    const integrations = await ruleMigrationsRetriever.integrations.search(query);
     if (integrations.length === 0) {
       telemetryClient.reportIntegrationsMatch({
         preFilterIntegrations: [],
       });
+      const comment = '## Integration Matching Summary\n\nNo related integration found.';
       return {
-        comments: [
-          generateAssistantComment(
-            '## Integration Matching Summary\nNo related integration found.'
-          ),
-        ],
+        comments: [generateAssistantComment(comment)],
       };
     }
 

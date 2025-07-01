@@ -20,21 +20,16 @@ import {
 } from '@elastic/eui';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { FieldStatsFlyoutProvider } from '@kbn/ml-field-stats-flyout';
-import { useTimefilter } from '@kbn/ml-date-picker';
 import { pick } from 'lodash';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import {
-  ChangePointDetectionContextProvider,
   ChangePointDetectionControlsContextProvider,
-  useChangePointDetectionContext,
   useChangePointDetectionControlsContext,
 } from '../../components/change_point_detection/change_point_detection_context';
 import { DEFAULT_AGG_FUNCTION } from '../../components/change_point_detection/constants';
@@ -45,14 +40,14 @@ import { PartitionsSelector } from '../../components/change_point_detection/part
 import { SplitFieldSelector } from '../../components/change_point_detection/split_field_selector';
 import { ViewTypeSelector } from '../../components/change_point_detection/view_type_selector';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { useDataSource, DataSourceContextProvider } from '../../hooks/use_data_source';
+import { DataSourceContextProvider } from '../../hooks/use_data_source';
 import { FilterQueryContextProvider } from '../../hooks/use_filters_query';
 import { DEFAULT_SERIES } from './const';
-import type { ChangePointEmbeddableRuntimeState } from './types';
+import type { ChangePointEmbeddableState } from './types';
 
 export interface AnomalyChartsInitializerProps {
-  initialInput?: Partial<ChangePointEmbeddableRuntimeState>;
-  onCreate: (props: ChangePointEmbeddableRuntimeState) => void;
+  initialInput?: Partial<ChangePointEmbeddableState>;
+  onCreate: (props: ChangePointEmbeddableState) => void;
   onCancel: () => void;
 }
 
@@ -134,7 +129,7 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <EuiForm>
+        <EuiForm data-test-subj="aiopsChangePointDetectionControls">
           <ViewTypeSelector value={viewType} onChange={setViewType} />
           <EuiFormRow
             fullWidth
@@ -156,21 +151,20 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
               onChange={(newId) => {
                 setDataViewId(newId ?? '');
               }}
+              data-test-subj="aiopsChangePointChartEmbeddableDataViewSelector"
             />
           </EuiFormRow>
           <EuiHorizontalRule margin={'s'} />
           <DataSourceContextProvider dataViews={dataViews} dataViewId={dataViewId}>
             <DatePickerContextProvider {...datePickerDeps}>
               <FilterQueryContextProvider>
-                <ChangePointDetectionContextProvider>
-                  <ChangePointDetectionControlsContextProvider>
-                    <FormControls
-                      formInput={formInput}
-                      onChange={setFormInput}
-                      onValidationChange={setIsFormValid}
-                    />
-                  </ChangePointDetectionControlsContextProvider>
-                </ChangePointDetectionContextProvider>
+                <ChangePointDetectionControlsContextProvider>
+                  <FormControls
+                    formInput={formInput}
+                    onChange={setFormInput}
+                    onValidationChange={setIsFormValid}
+                  />
+                </ChangePointDetectionControlsContextProvider>
               </FilterQueryContextProvider>
             </DatePickerContextProvider>
           </DataSourceContextProvider>
@@ -210,7 +204,7 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
 };
 
 export type FormControlsProps = Pick<
-  ChangePointEmbeddableRuntimeState,
+  ChangePointEmbeddableState,
   'metricField' | 'splitField' | 'fn' | 'maxSeriesToPlot' | 'partitions'
 >;
 
@@ -219,12 +213,7 @@ export const FormControls: FC<{
   onChange: (update: FormControlsProps) => void;
   onValidationChange: (isValid: boolean) => void;
 }> = ({ formInput, onChange, onValidationChange }) => {
-  const { charts, data, fieldFormats, uiSettings } = useAiopsAppContext();
-  const { dataView } = useDataSource();
-  const { combinedQuery } = useChangePointDetectionContext();
   const { metricFieldOptions, splitFieldsOptions } = useChangePointDetectionControlsContext();
-  const timefilter = useTimefilter();
-  const timefilterActiveBounds = timefilter.getActiveBounds();
 
   const prevMetricFieldOptions = usePrevious(metricFieldOptions);
 
@@ -273,32 +262,10 @@ export const FormControls: FC<{
     [formInput, onChange]
   );
 
-  const fieldStatsServices: FieldStatsServices = useMemo(() => {
-    return {
-      uiSettings,
-      dataViews: data.dataViews,
-      data,
-      fieldFormats,
-      charts,
-    };
-  }, [uiSettings, data, fieldFormats, charts]);
-
   if (!isPopulatedObject(formInput)) return null;
 
   return (
-    <FieldStatsFlyoutProvider
-      fieldStatsServices={fieldStatsServices}
-      dataView={dataView}
-      dslQuery={combinedQuery}
-      timeRangeMs={
-        timefilterActiveBounds
-          ? {
-              from: timefilterActiveBounds.min!.valueOf(),
-              to: timefilterActiveBounds.max!.valueOf(),
-            }
-          : undefined
-      }
-    >
+    <>
       <EuiFormRow
         fullWidth
         label={
@@ -339,6 +306,6 @@ export const FormControls: FC<{
         onChange={(v) => updateCallback({ maxSeriesToPlot: v })}
         onValidationChange={(result) => onValidationChange(result === null)}
       />
-    </FieldStatsFlyoutProvider>
+    </>
   );
 };

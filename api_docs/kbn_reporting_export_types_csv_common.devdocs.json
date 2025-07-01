@@ -313,7 +313,7 @@
             "section": "def-common.SerializedSearchSourceFields",
             "text": "SerializedSearchSourceFields"
           },
-          "; layout?: { id?: ",
+          "; forceNow?: string | undefined; layout?: { id?: ",
           {
             "pluginId": "screenshotting",
             "scope": "common",
@@ -326,6 +326,43 @@
           "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; pagingStrategy?: ",
           "CsvPagingStrategy",
           " | undefined; }"
+        ],
+        "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-export-types-csv-common",
+        "id": "def-common.JobAppParamsCsvV2",
+        "type": "Type",
+        "tags": [],
+        "label": "JobAppParamsCsvV2",
+        "description": [],
+        "signature": [
+          "{ title: string; forceNow?: string | undefined; layout?: { id?: ",
+          {
+            "pluginId": "screenshotting",
+            "scope": "common",
+            "docId": "kibScreenshottingPluginApi",
+            "section": "def-common.LayoutType",
+            "text": "LayoutType"
+          },
+          " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+          "LayoutSelectorDictionary",
+          "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; pagingStrategy?: ",
+          "CsvPagingStrategy",
+          " | undefined; locatorParams: ",
+          "LocatorParams",
+          "<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">[]; }"
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/index.ts",
         "deprecated": false,
@@ -361,6 +398,22 @@
           "CsvFromSavedObjectBase & Omit<",
           "BaseParamsV2",
           ", \"title\"> & { title?: string | undefined; }"
+        ],
+        "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-export-types-csv-common",
+        "id": "def-common.JobParamsCsvV2",
+        "type": "Type",
+        "tags": [],
+        "label": "JobParamsCsvV2",
+        "description": [],
+        "signature": [
+          "BaseParamsCsvV2 & ",
+          "BaseParams"
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/index.ts",
         "deprecated": false,

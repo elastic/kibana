@@ -11,18 +11,17 @@ import {
   type DefendInsightsResponse,
   DefendInsightStatusEnum,
 } from '@kbn/elastic-assistant-common';
-import { useEffect, useRef } from 'react';
 import { WORKFLOW_INSIGHTS } from '../../translations';
 import { useKibana, useToasts } from '../../../../../../common/lib/kibana';
 
 interface UseFetchOngoingScansConfig {
   isPolling: boolean;
   endpointId: string;
-  onSuccess: () => void;
+  onSuccess: (expectedCount: number) => void;
   onInsightGenerationFailure: () => void;
 }
 
-export const useFetchOngoingScans = ({
+export const useFetchLatestScan = ({
   isPolling,
   endpointId,
   onSuccess,
@@ -31,46 +30,56 @@ export const useFetchOngoingScans = ({
   const { http } = useKibana().services;
   const toasts = useToasts();
 
-  // Ref to track if polling was active in the previous render
-  const wasPolling = useRef(isPolling);
-
-  useEffect(() => {
-    // If polling was active and isPolling is false, it means the condition has been met and we can run onSuccess logic (i.e. refetch insights)
-    if (wasPolling.current && !isPolling) {
-      onSuccess();
-    }
-    wasPolling.current = isPolling;
-  }, [isPolling, onSuccess]);
-
-  return useQuery<DefendInsightsResponse[], { body?: { error: string } }, DefendInsightsResponse[]>(
+  return useQuery<
+    DefendInsightsResponse | undefined,
+    { body?: { error: string } },
+    DefendInsightsResponse | undefined
+  >(
     [`fetchOngoingTasks-${endpointId}`],
     async () => {
       try {
         const response = await http.get<{ data: DefendInsightsResponse[] }>(DEFEND_INSIGHTS, {
           version: API_VERSIONS.internal.v1,
           query: {
-            status: DefendInsightStatusEnum.running,
             endpoint_ids: [endpointId],
+            size: 1,
           },
         });
-        if (response.data.length) {
-          const failedInsight = response.data.find((insight) => insight.status === 'failed');
 
-          if (failedInsight) {
-            toasts.addDanger({
-              title: WORKFLOW_INSIGHTS.toasts.fetchPendingInsightsError,
-              text: failedInsight.failureReason,
-            });
-            onInsightGenerationFailure();
-          }
+        const defendInsight = response.data[0];
+        if (!defendInsight) {
+          // no previous scan record - treat as 0 expected insights
+          onSuccess(0);
+          return undefined;
         }
-        return response.data;
+
+        const status = defendInsight.status;
+
+        if (status === DefendInsightStatusEnum.failed) {
+          toasts.addDanger({
+            title: WORKFLOW_INSIGHTS.toasts.fetchPendingInsightsError,
+            text: defendInsight.failureReason,
+          });
+          onInsightGenerationFailure();
+        }
+
+        if (status === DefendInsightStatusEnum.succeeded) {
+          const expectedCount = defendInsight.insights.reduce((acc, insight) => {
+            if (!insight.events) {
+              return acc;
+            }
+            return acc + insight.events.length;
+          }, 0);
+          onSuccess(expectedCount);
+        }
+
+        return defendInsight;
       } catch (error) {
         toasts.addDanger({
           title: WORKFLOW_INSIGHTS.toasts.fetchPendingInsightsError,
           text: error?.body?.error,
         });
-        return [];
+        return undefined;
       }
     },
     {

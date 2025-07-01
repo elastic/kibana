@@ -15,6 +15,7 @@ const createSetupMock = () => {
     index: '.kibana_task_manager',
     addMiddleware: jest.fn(),
     registerTaskDefinitions: jest.fn(),
+    registerCanEncryptedSavedObjects: jest.fn(),
   };
   return mock;
 };
@@ -28,7 +29,7 @@ const createStartMock = () => {
     bulkRemove: jest.fn(),
     schedule: jest.fn(),
     runSoon: jest.fn(),
-    ensureScheduled: jest.fn(),
+    ensureScheduled: jest.fn().mockResolvedValue(Promise.resolve()), // it's a promise and there are some places where it's followed by `.catch()`
     removeIfExists: jest.fn().mockResolvedValue(Promise.resolve()), // it's a promise and there are some places where it's followed by `.catch()`
     bulkUpdateSchedules: jest.fn(),
     bulkSchedule: jest.fn(),
@@ -36,6 +37,7 @@ const createStartMock = () => {
     bulkEnable: jest.fn(),
     getRegisteredTypes: jest.fn(),
     bulkUpdateState: jest.fn(),
+    registerEncryptedSavedObjectsClient: jest.fn(),
   };
   return mock;
 };

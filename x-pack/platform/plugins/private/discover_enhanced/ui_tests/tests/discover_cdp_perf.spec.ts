@@ -41,6 +41,7 @@ test.describe(
       page,
       pageObjects,
       perfTracker,
+      config,
     }) => {
       perfTracker.captureBundleResponses(cdp); // Start tracking
 
@@ -73,7 +74,7 @@ test.describe(
         'kbn-ui-shared-deps-npm',
         'lens',
         'maps',
-        'unifiedHistogram',
+        ...(config.projectType === 'security' ? ['securitySolution'] : []),
         'unifiedSearch',
       ]);
       // Validate individual plugin bundle sizes
@@ -81,10 +82,6 @@ test.describe(
         stats.plugins.find((p) => p.name === 'discover')?.totalSize,
         `Total 'discover' bundles size should not exceed 650 KB`
       ).toBeLessThan(650 * 1024);
-      expect(
-        stats.plugins.find((p) => p.name === 'unifiedHistogram')?.totalSize,
-        `Total 'unifiedHistogram' bundles size should not exceed 150 KB`
-      ).toBeLessThan(150 * 1024);
       expect(
         stats.plugins.find((p) => p.name === 'unifiedSearch')?.totalSize,
         `Total 'unifiedSearch' bundles size should not exceed 450 KB`

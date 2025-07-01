@@ -6,10 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import moment from 'moment';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-const timepickerFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker']);
   const esArchiver = getService('esArchiver');
@@ -32,6 +30,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
+      await ml.api.cleanMlIndices();
+      await ml.testResources.cleanMLSavedObjects();
 
       // Prepare jobs to generate notifications
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
@@ -41,10 +41,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           config.spaceId
         );
       }
-
-      await PageObjects.common.navigateToApp('ml', {
-        basePath: '',
-      });
     });
 
     after(async () => {
@@ -57,12 +53,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.testResources.deleteDataViewByTitle('ft_farequote');
     });
 
-    it('displays a generic notification indicator', async () => {
-      await ml.notifications.assertNotificationIndicatorExist();
-    });
-
     it('opens the Notifications page', async () => {
-      await ml.navigation.navigateToNotifications();
+      await ml.navigation.navigateToStackManagementMlSection(
+        'overview',
+        'mlStackManagementOverviewPage'
+      );
+      await ml.navigation.navigateToNotificationsTab();
 
       await ml.notifications.table.waitForTableToLoad();
       await ml.notifications.table.assertRowsNumberPerPage(25);
@@ -74,7 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('display a number of errors in the notification indicator', async () => {
-      await ml.navigation.navigateToOverview();
+      await ml.navigation.navigateToOverviewTab();
 
       const jobConfig = ml.commonConfig.getADFqSingleMetricJobConfig(failConfig.jobId);
       jobConfig.analysis_config = {
@@ -103,13 +99,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('supports custom sorting for notifications level', async () => {
-      await ml.navigation.navigateToNotifications();
+      await ml.navigation.navigateToNotificationsTab();
       await ml.notifications.table.waitForTableToLoad();
 
       await PageObjects.timePicker.pauseAutoRefresh();
-      const fromTime = moment().subtract(1, 'week').format(timepickerFormat);
-      const toTime = moment().format(timepickerFormat);
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
       await ml.notifications.table.waitForTableToLoad();
 

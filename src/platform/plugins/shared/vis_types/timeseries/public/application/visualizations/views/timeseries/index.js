@@ -24,11 +24,7 @@ import {
   Placement,
   Tooltip,
 } from '@elastic/charts';
-import {
-  MULTILAYER_TIME_AXIS_STYLE,
-  renderEndzoneTooltip,
-  useActiveCursor,
-} from '@kbn/charts-plugin/public';
+import { renderEndzoneTooltip, useActiveCursor } from '@kbn/charts-plugin/public';
 import { EuiIcon } from '@elastic/eui';
 import { getTimeZone } from '@kbn/visualization-utils';
 import { getUISettings, getCharts } from '../../../../services';
@@ -81,8 +77,6 @@ export const TimeSeries = ({
   palettesService,
   interval,
   isLastBucketDropped,
-  useLegacyTimeAxis,
-  ignoreDaylightTime,
   initialRender,
 }) => {
   // If the color isn't configured by the user, use the color mapping service
@@ -162,13 +156,6 @@ export const TimeSeries = ({
     ...GRID_LINE_CONFIG,
     visible: showGrid,
   };
-
-  const shouldUseNewTimeAxis =
-    series.every(
-      ({ stack, bars, lines }) => (bars?.show && stack !== STACKED_OPTIONS.NONE) || lines?.show
-    ) &&
-    !useLegacyTimeAxis &&
-    !ignoreDaylightTime;
 
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
@@ -353,8 +340,6 @@ export const TimeSeries = ({
         title={getAxisLabelString(interval)}
         tickFormat={xAxisFormatter}
         gridLine={gridLineStyle}
-        style={shouldUseNewTimeAxis ? MULTILAYER_TIME_AXIS_STYLE : undefined}
-        timeAxisLayerCount={shouldUseNewTimeAxis ? 2 : 0}
       />
     </Chart>
   );
@@ -380,5 +365,4 @@ TimeSeries.propTypes = {
   annotations: PropTypes.array,
   interval: PropTypes.number,
   isLastBucketDropped: PropTypes.bool,
-  useLegacyTimeAxis: PropTypes.bool,
 };

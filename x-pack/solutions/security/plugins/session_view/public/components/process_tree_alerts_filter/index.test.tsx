@@ -79,7 +79,9 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
       );
       await userEvent.click(filterButton);
 
-      renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-network').click();
+      await userEvent.click(
+        renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-network')
+      );
 
       expect(mockAlertEventCategorySelectedEvent).toHaveBeenCalledTimes(1);
       expect(mockAlertEventCategorySelectedEvent).toHaveBeenCalledWith('network');
@@ -245,7 +247,9 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
 
       beforeEach(() => {
         renderResult = mockedContext.render(
-          <ProcessTreeAlertsFilter {...props} alertTypeCounts={alertTypeCountsUpdated} />
+          <ProcessTreeAlertsFilter {...props} alertTypeCounts={alertTypeCountsUpdated} />,
+          // TODO: fails with concurrent mode
+          { legacyRoot: true }
         );
       });
       it('should set the EmptyFilterButton text content to  display "View: all alerts"  by default ', () => {
@@ -261,7 +265,9 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
         );
         await userEvent.click(filterButton);
 
-        renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-file').click();
+        await userEvent.click(
+          renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-file')
+        );
 
         expect(filterButton).toHaveTextContent('View: file alerts');
       });
@@ -272,7 +278,9 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
         );
         await userEvent.click(filterButton);
 
-        renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-default').click();
+        await userEvent.click(
+          renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-default')
+        );
 
         expect(filterButton).toHaveTextContent(`View: ${DEFAULT_ALERT_FILTER_VALUE} alerts`);
       });
@@ -283,7 +291,9 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
         );
         await userEvent.click(filterButton);
 
-        renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-process').click();
+        await userEvent.click(
+          renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-process')
+        );
 
         expect(filterButton).toHaveTextContent('View: process alerts');
       });
@@ -294,7 +304,9 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
         );
         await userEvent.click(filterButton);
 
-        renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-network').click();
+        await userEvent.click(
+          renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-network')
+        );
 
         expect(filterButton).toHaveTextContent('View: network alerts');
       });

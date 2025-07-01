@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { faker } from '@faker-js/faker';
-import { sample, range, memoize } from 'lodash';
 import { GeneratorFunction } from '../../types';
 import { replaceMetricsWithShapes } from '../../lib/replace_metrics_with_shapes';
 
@@ -14,18 +12,30 @@ export { indexTemplate } from './ecs';
 
 const createGroupIndex = (index: number) => Math.floor(index / 1000) * 1000;
 
-const randomBetween = (start = 0, end = 1, step = 0.1) => sample(range(start, end, step));
+const randomBetween = (min = 0, max = 1, step = 1) => {
+  const value = Math.random() * (max - min + 1) + min;
+  return value - (value % step);
+};
 
-let networkDataCount = 0;
-const generateNetworkData = memoize((_timestamp: string) => {
-  networkDataCount += Math.floor(10000 * Math.random());
-  return networkDataCount;
-});
+const networkDataCount: Record<string, number> = {};
+const generateNetworkData = (host: string, name: string, value: number) => {
+  const key = `${host}:${name}`;
+  if (networkDataCount[key] == null) {
+    networkDataCount[key] = 0;
+  }
+  if (networkDataCount[key] + value > Number.MAX_SAFE_INTEGER) {
+    networkDataCount[key] = 0;
+  }
+  networkDataCount[key] += value;
+  return networkDataCount[key];
+};
 
 export const generateEvent: GeneratorFunction = (config, schedule, index, timestamp) => {
   const groupIndex = createGroupIndex(index);
   const interval = schedule.interval ?? config.indexing.interval;
   const scenario = config.indexing.scenario || 'fake_hosts';
+  const rxBytes = randomBetween(100, 1000, 1);
+  const txBytes = randomBetween(100, 1000, 1);
   const docs = [
     {
       namespace: 'fake_hosts',
@@ -52,29 +62,29 @@ export const generateEvent: GeneratorFunction = (config, schedule, index, timest
           cores: 4,
           total: {
             norm: {
-              pct: randomBetween(),
+              pct: randomBetween(0, 1, 0.01),
             },
           },
           user: {
-            pct: randomBetween(1, 4),
+            pct: randomBetween(1, 4, 0.01),
           },
           system: {
-            pct: randomBetween(1, 4),
+            pct: randomBetween(1, 4, 0.01),
           },
         },
         load: {
-          1: randomBetween(1, 4),
+          1: randomBetween(1, 4, 0.01),
         },
         memory: {
           actual: {
             used: {
-              pct: randomBetween(1, 4),
+              pct: randomBetween(1, 4, 0.01),
             },
           },
         },
         filesystem: {
           used: {
-            pct: randomBetween(1, 4),
+            pct: randomBetween(1, 4, 0.01),
           },
         },
       },
@@ -95,10 +105,10 @@ export const generateEvent: GeneratorFunction = (config, schedule, index, timest
         network: {
           name: `network-${index}`,
           ingress: {
-            bytes: parseInt(faker.string.numeric(3), 10),
+            bytes: rxBytes,
           },
           egress: {
-            bytes: parseInt(faker.string.numeric(3), 10),
+            bytes: txBytes,
           },
         },
       },
@@ -115,15 +125,15 @@ export const generateEvent: GeneratorFunction = (config, schedule, index, timest
         network: {
           name: 'eth0',
           in: {
-            bytes: generateNetworkData(timestamp.toISOString()),
+            bytes: generateNetworkData(`host-${index}`, 'eth0-rx', rxBytes),
           },
           out: {
-            bytes: generateNetworkData(timestamp.toISOString()),
+            bytes: generateNetworkData(`host-${index}`, 'eth0-tx', txBytes),
           },
         },
         core: {
           system: {
-            ticks: randomBetween(1_000_000, 1_500_100),
+            ticks: randomBetween(1_000_000, 1_500_100, 1),
           },
         },
       },
@@ -143,6 +153,12 @@ export const generateEvent: GeneratorFunction = (config, schedule, index, timest
         mac: ['00-00-5E-00-53-23', '00-00-5E-00-53-24'],
         network: {
           name: `network-${index}`,
+          ingress: {
+            bytes: rxBytes,
+          },
+          egress: {
+            bytes: txBytes,
+          },
         },
       },
       event: {
@@ -158,15 +174,15 @@ export const generateEvent: GeneratorFunction = (config, schedule, index, timest
         network: {
           name: 'eth1',
           in: {
-            bytes: generateNetworkData(timestamp.toISOString()),
+            bytes: generateNetworkData(`host-${index}`, 'eth1-rx', rxBytes),
           },
           out: {
-            bytes: generateNetworkData(timestamp.toISOString()),
+            bytes: generateNetworkData(`host-${index}`, 'eth1-tx', txBytes),
           },
         },
         core: {
           system: {
-            ticks: randomBetween(1_000_000, 1_500_100),
+            ticks: randomBetween(1_000_000, 1_500_100, 1),
           },
         },
       },

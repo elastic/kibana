@@ -267,6 +267,11 @@ describe('getExecutionEventAggregation', () => {
                   missing: 0,
                 },
               },
+              frozenIndicesQueriedCount: {
+                min: {
+                  field: 'kibana.alert.rule.execution.metrics.frozen_indices_queried_count',
+                },
+              },
               indexDuration: {
                 min: {
                   field: 'kibana.alert.rule.execution.metrics.total_indexing_duration_ms',
@@ -424,6 +429,9 @@ describe('formatExecutionEventResponse', () => {
                 gapDuration: {
                   value: 0.0,
                 },
+                frozenIndicesQueriedCount: {
+                  value: 0,
+                },
               },
               ruleExecution: {
                 meta: {},
@@ -548,6 +556,9 @@ describe('formatExecutionEventResponse', () => {
                 },
                 gapDuration: {
                   value: 0.0,
+                },
+                frozenIndicesQueriedCount: {
+                  value: 0,
                 },
               },
               ruleExecution: {
@@ -685,6 +696,7 @@ describe('formatExecutionEventResponse', () => {
           indexing_duration_ms: 7,
           search_duration_ms: 480,
           gap_duration_s: 0,
+          frozen_indices_queried_count: 0,
           security_status: 'succeeded',
           security_message: 'succeeded',
         },
@@ -708,6 +720,7 @@ describe('formatExecutionEventResponse', () => {
           indexing_duration_ms: 0,
           search_duration_ms: 9,
           gap_duration_s: 0,
+          frozen_indices_queried_count: 0,
           security_status: 'succeeded',
           security_message: 'succeeded',
         },
@@ -741,6 +754,9 @@ describe('formatExecutionEventResponse', () => {
                 },
                 gapDuration: {
                   value: 0.0,
+                },
+                frozenIndicesQueriedCount: {
+                  value: 0,
                 },
               },
               ruleExecution: {
@@ -866,6 +882,9 @@ describe('formatExecutionEventResponse', () => {
                 },
                 gapDuration: {
                   value: 0.0,
+                },
+                frozenIndicesQueriedCount: {
+                  value: 0,
                 },
               },
               ruleExecution: {
@@ -1003,6 +1022,7 @@ describe('formatExecutionEventResponse', () => {
           indexing_duration_ms: 7,
           search_duration_ms: 480,
           gap_duration_s: 0,
+          frozen_indices_queried_count: 0,
           security_status: 'succeeded',
           security_message: 'succeeded',
         },
@@ -1026,6 +1046,7 @@ describe('formatExecutionEventResponse', () => {
           indexing_duration_ms: 0,
           search_duration_ms: 9,
           gap_duration_s: 0,
+          frozen_indices_queried_count: 0,
           security_status: 'succeeded',
           security_message: 'succeeded',
         },
@@ -1059,6 +1080,9 @@ describe('formatExecutionEventResponse', () => {
                 },
                 gapDuration: {
                   value: 0.0,
+                },
+                frozenIndicesQueriedCount: {
+                  value: 0,
                 },
               },
               ruleExecution: {
@@ -1189,6 +1213,9 @@ describe('formatExecutionEventResponse', () => {
                 },
                 gapDuration: {
                   value: 0.0,
+                },
+                frozenIndicesQueriedCount: {
+                  value: 0,
                 },
               },
               ruleExecution: {
@@ -1326,6 +1353,7 @@ describe('formatExecutionEventResponse', () => {
           indexing_duration_ms: 7,
           search_duration_ms: 480,
           gap_duration_s: 0,
+          frozen_indices_queried_count: 0,
           security_status: 'succeeded',
           security_message: 'succeeded',
         },
@@ -1349,6 +1377,7 @@ describe('formatExecutionEventResponse', () => {
           indexing_duration_ms: 0,
           search_duration_ms: 9,
           gap_duration_s: 0,
+          frozen_indices_queried_count: 0,
           security_status: 'succeeded',
           security_message: 'succeeded',
         },
@@ -1382,6 +1411,9 @@ describe('formatExecutionEventResponse', () => {
                 },
                 gapDuration: {
                   value: 0.0,
+                },
+                frozenIndicesQueriedCount: {
+                  value: 0,
                 },
               },
               ruleExecution: {
@@ -1551,6 +1583,7 @@ describe('formatExecutionEventResponse', () => {
           indexing_duration_ms: 0,
           search_duration_ms: 9,
           gap_duration_s: 0,
+          frozen_indices_queried_count: 0,
           security_status: 'succeeded',
           security_message: 'succeeded',
           backfill: {

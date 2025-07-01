@@ -19,6 +19,7 @@ import { mappings } from './mappings';
 import { settings } from './settings';
 import { query } from './query';
 import { reindex } from './reindex';
+import { retriever } from './retriever';
 import { search } from './search';
 
 export const jsSpecLoaders: Array<(registry: SpecDefinitionsService) => void> = [
@@ -32,5 +33,6 @@ export const jsSpecLoaders: Array<(registry: SpecDefinitionsService) => void> = 
   settings,
   query,
   reindex,
+  retriever,
   search,
 ];

@@ -6,6 +6,7 @@
  */
 
 import { FieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
+import { ALERT_WORKFLOW_STATUS_UPDATED_AT } from '@kbn/rule-data-utils';
 import {
   ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT,
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
@@ -31,6 +32,7 @@ import {
   ALERT_ATTACK_DISCOVERY_USERS_ID,
   ALERT_ATTACK_DISCOVERY_USERS_NAME,
   ALERT_ATTACK_DISCOVERY_USER_ID,
+  ALERT_ATTACK_DISCOVERY_USER_NAME,
   ALERT_RISK_SCORE,
 } from './field_names';
 
@@ -46,6 +48,11 @@ export const attackDiscoveryAlertFieldMap: FieldMap = {
 
   [ALERT_RISK_SCORE]: {
     type: 'float',
+    array: false,
+    required: false,
+  },
+  [ALERT_WORKFLOW_STATUS_UPDATED_AT]: {
+    type: 'date',
     array: false,
     required: false,
   },
@@ -128,12 +135,12 @@ export const attackDiscoveryAlertFieldMap: FieldMap = {
   [ALERT_ATTACK_DISCOVERY_REPLACEMENTS_VALUE]: {
     type: 'keyword',
     array: false,
-    required: false,
+    required: true,
   },
   [ALERT_ATTACK_DISCOVERY_REPLACEMENTS_UUID]: {
     type: 'keyword',
     array: false,
-    required: false,
+    required: true,
   },
   [ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN]: {
     type: 'text',
@@ -163,6 +170,12 @@ export const attackDiscoveryAlertFieldMap: FieldMap = {
     array: false,
     required: false,
   },
+  [ALERT_ATTACK_DISCOVERY_USER_NAME]: {
+    // optional field for ad hock attack discoveries
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   [ALERT_ATTACK_DISCOVERY_USERS]: {
     type: 'nested',
     array: true,
@@ -171,11 +184,11 @@ export const attackDiscoveryAlertFieldMap: FieldMap = {
   [ALERT_ATTACK_DISCOVERY_USERS_ID]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [ALERT_ATTACK_DISCOVERY_USERS_NAME]: {
     type: 'keyword',
     array: false,
-    required: false,
+    required: true,
   },
 } as const;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { packagePolicyRouteService } from '../../services';
 import type {
@@ -58,6 +58,26 @@ export const sendDeletePackagePolicy = (body: DeletePackagePoliciesRequest['body
     body: JSON.stringify(body),
   });
 };
+
+export function useDeletePackagePolicyMutation() {
+  const queryClient = useQueryClient();
+  return useMutation(
+    (body: DeletePackagePoliciesRequest['body']) => {
+      return sendRequestForRq<PostDeletePackagePoliciesResponse>({
+        path: packagePolicyRouteService.getDeletePath(),
+        method: 'post',
+        version: API_VERSIONS.public.v1,
+        body: JSON.stringify(body),
+      });
+    },
+    {
+      retry: false,
+      onSuccess: () => {
+        return queryClient.invalidateQueries({ queryKey: ['get-packages'] });
+      },
+    }
+  );
+}
 
 export function useGetPackagePoliciesQuery(
   query: GetPackagePoliciesRequest['query'],

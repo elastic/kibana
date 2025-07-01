@@ -249,42 +249,92 @@
           "label": "getCloudSecurityPostureMisconfigurationFlyout",
           "description": [],
           "signature": [
-            "({ ruleId, resourceId, }: ",
+            "() => { Component: React.FC<((Record<string, unknown> & BaseMisconfigurationFlyoutProps & NonPreviewModeProps) | (Record<string, unknown> & BaseMisconfigurationFlyoutProps & PreviewModeProps)) & { children?: ((props: ",
             {
               "pluginId": "@kbn/cloud-security-posture",
               "scope": "public",
               "docId": "kibKbnCloudSecurityPosturePluginApi",
-              "section": "def-public.FindingMisconfigurationFlyoutProps",
-              "text": "FindingMisconfigurationFlyoutProps"
+              "section": "def-public.FindingMisconfigurationFlyoutContentProps",
+              "text": "FindingMisconfigurationFlyoutContentProps"
             },
-            ") => React.JSX.Element"
+            ") => React.ReactNode) | undefined; }>; Header: React.FC<",
+            {
+              "pluginId": "@kbn/cloud-security-posture",
+              "scope": "public",
+              "docId": "kibKbnCloudSecurityPosturePluginApi",
+              "section": "def-public.FindingsMisconfigurationFlyoutHeaderProps",
+              "text": "FindingsMisconfigurationFlyoutHeaderProps"
+            },
+            ">; Body: React.FC<",
+            {
+              "pluginId": "@kbn/cloud-security-posture",
+              "scope": "public",
+              "docId": "kibKbnCloudSecurityPosturePluginApi",
+              "section": "def-public.FindingsMisconfigurationFlyoutContentProps",
+              "text": "FindingsMisconfigurationFlyoutContentProps"
+            },
+            ">; Footer: React.FC<",
+            {
+              "pluginId": "@kbn/cloud-security-posture",
+              "scope": "public",
+              "docId": "kibKbnCloudSecurityPosturePluginApi",
+              "section": "def-public.FindingMisconfigurationFlyoutFooterProps",
+              "text": "FindingMisconfigurationFlyoutFooterProps"
+            },
+            ">; }"
           ],
           "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
-          "children": [
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "cloudSecurityPosture",
+          "id": "def-public.CspClientPluginStart.getCloudSecurityPostureVulnerabilityFlyout",
+          "type": "Function",
+          "tags": [],
+          "label": "getCloudSecurityPostureVulnerabilityFlyout",
+          "description": [],
+          "signature": [
+            "() => { Component: React.FC<((Record<string, unknown> & BaseVulnerabilityFlyoutProps & NonPreviewModeProps) | (Record<string, unknown> & BaseVulnerabilityFlyoutProps & PreviewModeProps)) & { children?: ((props: ",
             {
-              "parentPluginId": "cloudSecurityPosture",
-              "id": "def-public.CspClientPluginStart.getCloudSecurityPostureMisconfigurationFlyout.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "{\n    ruleId,\n    resourceId,\n  }",
-              "description": [],
-              "signature": [
-                {
-                  "pluginId": "@kbn/cloud-security-posture",
-                  "scope": "public",
-                  "docId": "kibKbnCloudSecurityPosturePluginApi",
-                  "section": "def-public.FindingMisconfigurationFlyoutProps",
-                  "text": "FindingMisconfigurationFlyoutProps"
-                }
-              ],
-              "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
+              "pluginId": "@kbn/cloud-security-posture",
+              "scope": "public",
+              "docId": "kibKbnCloudSecurityPosturePluginApi",
+              "section": "def-public.FindingVulnerabilityFullFlyoutContentProps",
+              "text": "FindingVulnerabilityFullFlyoutContentProps"
+            },
+            ") => React.ReactNode) | undefined; }>; Header: React.FC<",
+            {
+              "pluginId": "@kbn/cloud-security-posture",
+              "scope": "public",
+              "docId": "kibKbnCloudSecurityPosturePluginApi",
+              "section": "def-public.FindingsVulnerabilityFlyoutHeaderProps",
+              "text": "FindingsVulnerabilityFlyoutHeaderProps"
+            },
+            ">; Body: React.FC<",
+            {
+              "pluginId": "@kbn/cloud-security-posture",
+              "scope": "public",
+              "docId": "kibKbnCloudSecurityPosturePluginApi",
+              "section": "def-public.FindingsVulnerabilityFlyoutContentProps",
+              "text": "FindingsVulnerabilityFlyoutContentProps"
+            },
+            ">; Footer: React.FC<",
+            {
+              "pluginId": "@kbn/cloud-security-posture",
+              "scope": "public",
+              "docId": "kibKbnCloudSecurityPosturePluginApi",
+              "section": "def-public.FindingsVulnerabilityFlyoutFooterProps",
+              "text": "FindingsVulnerabilityFlyoutFooterProps"
+            },
+            ">; }"
           ],
+          "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
           "returnComment": []
         }
       ],

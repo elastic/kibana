@@ -5,7 +5,7 @@ Object {
   "references": Array [
     Object {
       "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-b1c3efc6-c886-4fba-978f-3b6bb5e7948a",
+      "name": "indexpattern-datasource-layer-layer-id-generated-uuid",
       "type": "index-pattern",
     },
   ],
@@ -14,14 +14,14 @@ Object {
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "b1c3efc6-c886-4fba-978f-3b6bb5e7948a": Object {
+          "layer-id-generated-uuid": Object {
             "columnOrder": Array [
-              "e8842815-2a45-4c74-86de-c19a391e2424",
-              "d1452b87-0e9e-4fc0-a725-3727a18e0b37",
-              "2a4d5e20-f570-48e4-b9ab-ff3068919377",
+              "column-top-value-id-generated-uuid",
+              "column-timestamp-id-generated-uuid",
+              "column-dns-question-name-id-generated-uuid",
             ],
             "columns": Object {
-              "2a4d5e20-f570-48e4-b9ab-ff3068919377": Object {
+              "column-dns-question-name-id-generated-uuid": Object {
                 "dataType": "number",
                 "isBucketed": false,
                 "label": "Unique count of dns.question.name",
@@ -32,7 +32,7 @@ Object {
                 "scale": "ratio",
                 "sourceField": "dns.question.name",
               },
-              "d1452b87-0e9e-4fc0-a725-3727a18e0b37": Object {
+              "column-timestamp-id-generated-uuid": Object {
                 "dataType": "date",
                 "isBucketed": true,
                 "label": "@timestamp",
@@ -44,7 +44,7 @@ Object {
                 "scale": "interval",
                 "sourceField": "@timestamp",
               },
-              "e8842815-2a45-4c74-86de-c19a391e2424": Object {
+              "column-top-value-id-generated-uuid": Object {
                 "dataType": "string",
                 "isBucketed": true,
                 "label": "Top values of event.dataset",
@@ -53,7 +53,7 @@ Object {
                   "accuracyMode": true,
                   "missingBucket": false,
                   "orderBy": Object {
-                    "columnId": "2a4d5e20-f570-48e4-b9ab-ff3068919377",
+                    "columnId": "column-dns-question-name-id-generated-uuid",
                     "type": "column",
                   },
                   "orderDirection": "desc",
@@ -218,15 +218,15 @@ Object {
       "layers": Array [
         Object {
           "accessors": Array [
-            "2a4d5e20-f570-48e4-b9ab-ff3068919377",
+            "column-dns-question-name-id-generated-uuid",
           ],
-          "layerId": "b1c3efc6-c886-4fba-978f-3b6bb5e7948a",
+          "layerId": "layer-id-generated-uuid",
           "layerType": "data",
           "position": "top",
           "seriesType": "bar_stacked",
           "showGridlines": false,
-          "splitAccessor": "e8842815-2a45-4c74-86de-c19a391e2424",
-          "xAccessor": "d1452b87-0e9e-4fc0-a725-3727a18e0b37",
+          "splitAccessor": "column-top-value-id-generated-uuid",
+          "xAccessor": "column-timestamp-id-generated-uuid",
         },
       ],
       "legend": Object {

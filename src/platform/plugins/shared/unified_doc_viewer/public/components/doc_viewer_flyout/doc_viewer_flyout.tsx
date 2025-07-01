@@ -33,10 +33,12 @@ import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { DocViewerProps } from '@kbn/unified-doc-viewer';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
 
 export interface UnifiedDocViewerFlyoutProps {
+  docViewerRef?: DocViewerProps['ref'];
   'data-test-subj'?: string;
   flyoutTitle?: string;
   flyoutDefaultWidth?: EuiFlyoutProps['size'];
@@ -63,6 +65,7 @@ export interface UnifiedDocViewerFlyoutProps {
   onFilter?: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
   setExpandedDoc: (doc?: DataTableRecord) => void;
+  initialTabId?: string;
 }
 
 function getIndexByDocId(hits: DataTableRecord[], id: string) {
@@ -77,6 +80,7 @@ export const FLYOUT_WIDTH_KEY = 'unifiedDocViewer:flyoutWidth';
  * Flyout displaying an expanded row details
  */
 export function UnifiedDocViewerFlyout({
+  docViewerRef,
   'data-test-subj': dataTestSubj,
   flyoutTitle,
   flyoutActions,
@@ -97,6 +101,7 @@ export function UnifiedDocViewerFlyout({
   onRemoveColumn,
   onAddColumn,
   setExpandedDoc,
+  initialTabId,
 }: UnifiedDocViewerFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const isXlScreen = useIsWithinMinBreakpoint('xl');
@@ -147,6 +152,12 @@ export function UnifiedDocViewerFlyout({
         return;
       }
 
+      const isTabButton = (ev.target as HTMLElement).getAttribute('role') === 'tab';
+      if (isTabButton) {
+        // ignore events triggered when the tab buttons are focused
+        return;
+      }
+
       if (ev.key === keys.ARROW_LEFT || ev.key === keys.ARROW_RIGHT) {
         ev.preventDefault();
         ev.stopPropagation();
@@ -185,6 +196,7 @@ export function UnifiedDocViewerFlyout({
   const renderDefaultContent = useCallback(
     () => (
       <UnifiedDocViewer
+        ref={docViewerRef}
         columns={columns}
         columnsMeta={columnsMeta}
         dataView={dataView}
@@ -195,19 +207,22 @@ export function UnifiedDocViewerFlyout({
         textBasedHits={isEsqlQuery ? hits : undefined}
         docViewsRegistry={docViewsRegistry}
         decreaseAvailableHeightBy={80} // flyout footer height
+        initialTabId={initialTabId}
       />
     ),
     [
-      actualHit,
-      addColumn,
+      docViewerRef,
       columns,
       columnsMeta,
       dataView,
-      hits,
-      isEsqlQuery,
       onFilter,
+      actualHit,
+      addColumn,
       removeColumn,
+      isEsqlQuery,
+      hits,
       docViewsRegistry,
+      initialTabId,
     ]
   );
 

@@ -78,7 +78,6 @@ export const App: FunctionComponent = () => {
         }}
         initialFilter=""
         initialPageSize={50}
-        listingLimit={1000}
         getOnClickTitle={({ attributes }) =>
           () =>
             setSelectedFile(attributes as unknown as FileJSON)}

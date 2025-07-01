@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { AuthzDisabled } from '@kbn/core-security-server';
 
 import type { RouteDefinitionParams } from '../..';
 import { API_VERSIONS } from '../../../../common/constants';
@@ -29,10 +30,7 @@ export function defineGetRolesRoutes({
         tags: ['oas-tag:roles'],
       },
       security: {
-        authz: {
-          enabled: false,
-          reason: `This route delegates authorization to Core's scoped ES cluster client`,
-        },
+        authz: AuthzDisabled.delegateToESClient,
       },
     })
     .addVersion(

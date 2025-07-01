@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css, ThemeProvider } from '@emotion/react';
-import type { StoryFn, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
 import type { NodeProps, NodeViewModel } from '..';
 import { Graph } from '..';
@@ -21,10 +21,9 @@ import { GraphPerfMonitor } from './graph_perf_monitor';
 
 export default {
   title: 'Graph Benchmark',
-  description: 'CDR - Graph visualization',
   argTypes: {},
   decorators: [GlobalStylesStorybookDecorator],
-};
+} satisfies Meta<typeof Graph>;
 
 const useExpandButtonPopover = () => {
   const { id, state, actions } = useGraphPopover('node-expand-popover');
@@ -154,7 +153,7 @@ const useNodePopover = () => {
   );
 };
 
-const Template: StoryFn = () => {
+const Template = () => {
   const expandNodePopover = useExpandButtonPopover();
   const nodePopover = useNodePopover();
   const popovers = [expandNodePopover, nodePopover];

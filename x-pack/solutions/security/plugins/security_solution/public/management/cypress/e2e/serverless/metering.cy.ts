@@ -24,8 +24,9 @@ describe(
     env: {
       ftrConfig: {
         kbnServerArgs: [
-          `--xpack.securitySolutionServerless.usageReportingTaskInterval=1m`,
+          `--xpack.securitySolutionServerless.usageReportingTaskInterval=3m`,
           `--xpack.securitySolutionServerless.usageApi.url=http://localhost:3623`,
+          `--logging.loggers=[{ "name": "plugins.securitySolutionServerless", "level": "debug" }, { "name": "plugins.securitySolution", "level": "debug" }]`,
         ],
       },
     },
@@ -38,12 +39,13 @@ describe(
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHeartbeats> | undefined;
 
     before(() => {
-      startTransparentApiProxy({ port: 3623 });
-      indexEndpointHeartbeats({
-        count: HEARTBEAT_COUNT,
-        unbilledCount: UNBILLED_COUNT,
-      }).then((indexedHeartbeats) => {
-        endpointData = indexedHeartbeats;
+      startTransparentApiProxy({ port: 3623 }).then(() => {
+        indexEndpointHeartbeats({
+          count: HEARTBEAT_COUNT,
+          unbilledCount: UNBILLED_COUNT,
+        }).then((indexedHeartbeats) => {
+          endpointData = indexedHeartbeats;
+        });
       });
     });
 
@@ -59,8 +61,7 @@ describe(
       stopTransparentApiProxy();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/187083
-    describe.skip('Usage Reporting Task', () => {
+    describe('Usage Reporting Task', () => {
       it('properly sends indexed heartbeats to the metering api', () => {
         const expectedChunks = Math.ceil(HEARTBEAT_COUNT / METERING_SERVICE_BATCH_SIZE);
 
@@ -93,7 +94,7 @@ describe(
           },
           {
             delay: 15 * 1000,
-            timeout: 2 * 60 * 1000,
+            timeout: 6 * 60 * 1000,
           }
         );
       });

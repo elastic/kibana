@@ -10,10 +10,15 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
+import { EuiThemeProvider } from '@elastic/eui';
 
 import { BannersList } from './banners_list';
 import { BehaviorSubject } from 'rxjs';
 import type { OverlayBanner } from './banners_service';
+
+const Wrapper = ({ children }: { children: React.ReactNode }) => (
+  <EuiThemeProvider>{children}</EuiThemeProvider>
+);
 
 describe('BannersList', () => {
   test('renders null if no banners', () => {
@@ -32,8 +37,10 @@ describe('BannersList', () => {
       },
     ]);
 
-    expect(mount(<BannersList banners$={banners$} />).html()).toMatchInlineSnapshot(
-      `"<div class=\\"kbnGlobalBannerList\\"><div data-test-priority=\\"0\\" data-test-subj=\\"global-banner-item\\"><h1>Hello!</h1></div></div>"`
+    expect(
+      mount(<BannersList banners$={banners$} />, { wrappingComponent: Wrapper }).html()
+    ).toMatchInlineSnapshot(
+      `"<div class=\\"kbnGlobalBannerList\\"><div data-test-priority=\\"0\\" data-test-subj=\\"global-banner-item\\" class=\\"css-rhtlbg-BannerItem\\"><h1>Hello!</h1></div></div>"`
     );
   });
 
@@ -50,7 +57,7 @@ describe('BannersList', () => {
       },
     ]);
 
-    const component = mount(<BannersList banners$={banners$} />);
+    const component = mount(<BannersList banners$={banners$} />, { wrappingComponent: Wrapper });
 
     act(() => {
       banners$.next([
@@ -75,7 +82,7 @@ describe('BannersList', () => {
 
     // Two new banners should be rendered
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"kbnGlobalBannerList\\"><div data-test-priority=\\"1\\" data-test-subj=\\"global-banner-item\\"><h1>First Banner!</h1></div><div data-test-priority=\\"0\\" data-test-subj=\\"global-banner-item\\"><h1>Second banner!</h1></div></div>"`
+      `"<div class=\\"kbnGlobalBannerList\\"><div data-test-priority=\\"1\\" data-test-subj=\\"global-banner-item\\" class=\\"css-rhtlbg-BannerItem\\"><h1>First Banner!</h1></div><div data-test-priority=\\"0\\" data-test-subj=\\"global-banner-item\\" class=\\"css-rhtlbg-BannerItem\\"><h1>Second banner!</h1></div></div>"`
     );
     // Original banner should be unmounted
     expect(unmount).toHaveBeenCalled();

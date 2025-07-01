@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import { useQuickPromptUpdater } from '../../settings/use_settings_updater/use_quick_prompt_updater';
 import { QuickPromptSettingsEditor } from '../quick_prompt_settings/quick_prompt_editor';
 import * as i18n from './translations';
@@ -51,16 +51,19 @@ const QuickPromptSettingsManagementComponent = () => {
     currentAppId,
     http,
     promptsLoaded,
+    toasts,
   });
 
   const handleSave = useCallback(
     async (param?: { callback?: () => void }) => {
-      await saveQuickPromptSettings();
-      toasts?.addSuccess({
-        iconType: 'check',
-        title: SETTINGS_UPDATED_TOAST_TITLE,
-      });
-      param?.callback?.();
+      const didSucceed = await saveQuickPromptSettings();
+      if (didSucceed) {
+        toasts?.addSuccess({
+          iconType: 'check',
+          title: SETTINGS_UPDATED_TOAST_TITLE,
+        });
+        param?.callback?.();
+      }
     },
     [saveQuickPromptSettings, toasts]
   );

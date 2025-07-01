@@ -15,7 +15,8 @@ import {
   createDispatchHook,
   createSelectorHook,
 } from 'react-redux';
-import React, { type PropsWithChildren, useMemo, createContext } from 'react';
+import type { PropsWithChildren } from 'react';
+import React, { useMemo, createContext } from 'react';
 import { useAdHocDataViews } from './runtime_state';
 import type { DiscoverInternalState, TabState } from './types';
 import {
@@ -25,6 +26,7 @@ import {
 } from './internal_state';
 import { selectTab } from './selectors';
 import { type TabActionInjector, createTabActionInjector } from './utils';
+import type { ChartPortalNode } from '../../components/chart';
 
 const internalStateContext = createContext<ReactReduxContextValue>(
   // Recommended approach for versions of Redux prior to v9:
@@ -49,6 +51,7 @@ export const useInternalStateSelector: TypedUseSelectorHook<DiscoverInternalStat
 
 interface CurrentTabContextValue {
   currentTabId: string;
+  currentChartPortalNode?: ChartPortalNode;
   injectCurrentTab: TabActionInjector;
 }
 
@@ -56,11 +59,16 @@ const currentTabContext = createContext<CurrentTabContextValue | undefined>(unde
 
 export const CurrentTabProvider = ({
   currentTabId,
+  currentChartPortalNode,
   children,
-}: PropsWithChildren<{ currentTabId: string }>) => {
+}: PropsWithChildren<{ currentTabId: string; currentChartPortalNode?: ChartPortalNode }>) => {
   const contextValue = useMemo<CurrentTabContextValue>(
-    () => ({ currentTabId, injectCurrentTab: createTabActionInjector(currentTabId) }),
-    [currentTabId]
+    () => ({
+      currentTabId,
+      currentChartPortalNode,
+      injectCurrentTab: createTabActionInjector(currentTabId),
+    }),
+    [currentChartPortalNode, currentTabId]
   );
 
   return <currentTabContext.Provider value={contextValue}>{children}</currentTabContext.Provider>;
@@ -87,6 +95,8 @@ export const useCurrentTabAction = <TPayload extends TabActionPayload, TReturn>(
   const { injectCurrentTab } = useCurrentTabContext();
   return useMemo(() => injectCurrentTab(actionCreator), [actionCreator, injectCurrentTab]);
 };
+
+export const useCurrentChartPortalNode = () => useCurrentTabContext().currentChartPortalNode;
 
 export const useDataViewsForPicker = () => {
   const originalAdHocDataViews = useAdHocDataViews();

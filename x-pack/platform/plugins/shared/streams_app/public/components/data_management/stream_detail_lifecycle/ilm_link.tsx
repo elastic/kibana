@@ -7,18 +7,19 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { IngestStreamLifecycleILM } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../../hooks/use_kibana';
 
-export function IlmLink({
-  ilmLocator,
-  lifecycle,
-}: {
-  ilmLocator?: LocatorPublic<IlmLocatorParams>;
-  lifecycle: IngestStreamLifecycleILM;
-}) {
+export function IlmLink({ lifecycle }: { lifecycle: IngestStreamLifecycleILM }) {
+  const {
+    dependencies: {
+      start: { share },
+    },
+  } = useKibana();
+
+  const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
   return (
     <EuiLink
       target="_blank"

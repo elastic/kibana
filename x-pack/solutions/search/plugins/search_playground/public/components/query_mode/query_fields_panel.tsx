@@ -23,10 +23,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { docLinks } from '../../../common/doc_links';
-import type { ChatForm, ChatFormFields, QuerySourceFields } from '../../types';
+import type { PlaygroundForm, PlaygroundFormFields, QuerySourceFields } from '../../types';
 
 const isQueryFieldSelected = (
-  queryFields: ChatForm[ChatFormFields.queryFields],
+  queryFields: PlaygroundForm[PlaygroundFormFields.queryFields],
   index: string,
   field: string
 ): boolean => {
@@ -38,7 +38,7 @@ export interface QueryFieldsPanelProps {
   index: string;
   indexFields: QuerySourceFields;
   updateFields: (index: string, fieldName: string, checked: boolean) => void;
-  queryFields: ChatForm[ChatFormFields.queryFields];
+  queryFields: PlaygroundForm[PlaygroundFormFields.queryFields];
 }
 
 export const QueryFieldsPanel = ({

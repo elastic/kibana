@@ -351,6 +351,9 @@ describe('ApplicationService', () => {
 
       await act(async () => {
         await navigate('/app/app1');
+      });
+
+      await act(async () => {
         await navigateToApp('app2');
       });
 
@@ -422,6 +425,9 @@ describe('ApplicationService', () => {
 
       await act(async () => {
         await navigate('/app/app1');
+      });
+
+      await act(async () => {
         await navigateToApp('app2');
       });
 

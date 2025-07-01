@@ -51,7 +51,7 @@ const asyncNoop = async () => {};
 export class StreamManager {
   private readonly clientStreams: Map<SynthtraceEsClient<Fields>, PassThrough> = new Map();
   private readonly trackedGeneratorStreams: Writable[] = [];
-  private readonly trackedWorkers: Worker[] = [];
+  public readonly trackedWorkers: Worker[] = [];
 
   constructor(
     private readonly logger: ToolingLog,
@@ -134,6 +134,7 @@ export class StreamManager {
     this.trackedGeneratorStreams.push(generatorStream);
 
     await awaitStream(generatorStream).finally(() => {
+      pull(this.trackedGeneratorStreams, generatorStream);
       pull(streams, generatorStream);
     });
   }
@@ -148,6 +149,7 @@ export class StreamManager {
       this.clientStreams.set(client, stream);
       client.index(stream);
     }
+
     return stream;
   }
 

@@ -15,8 +15,6 @@ export * from './src/use_export_list';
 export * from './src/use_find_lists';
 export * from './src/use_find_lists_by_size';
 export * from './src/use_import_list';
-export * from './src/use_persist_exception_item';
-export * from './src/use_persist_exception_list';
 export * from './src/use_read_list_index';
 export * from './src/use_read_list_privileges';
 export * from './src/use_find_list_items';

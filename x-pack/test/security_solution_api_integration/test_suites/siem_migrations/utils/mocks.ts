@@ -14,14 +14,16 @@ import {
 import {
   ElasticRule,
   OriginalRule,
-  RuleMigration,
+  RuleMigrationRuleData,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
-import { INDEX_PATTERN as SIEM_MIGRATIONS_INDEX_PATTERN } from '@kbn/security-solution-plugin/server/lib/siem_migrations/rules/data/rule_migrations_data_service';
+import { INDEX_PATTERN as SIEM_MIGRATIONS_BASE_INDEX_PATTERN } from '@kbn/security-solution-plugin/server/lib/siem_migrations/rules/data/rule_migrations_data_service';
 import { generateAssistantComment } from '@kbn/security-solution-plugin/server/lib/siem_migrations/rules/task/util/comments';
+import { StoredSiemMigration } from '@kbn/security-solution-plugin/server/lib/siem_migrations/rules/types';
 
-const SIEM_MIGRATIONS_RULES_INDEX_PATTERN = `${SIEM_MIGRATIONS_INDEX_PATTERN}-rules-default`;
-
-export type RuleMigrationDocument = Omit<RuleMigration, 'id'>;
+const SIEM_MIGRATIONS_INDEX_PATTERN = `${SIEM_MIGRATIONS_BASE_INDEX_PATTERN}-migrations-default`;
+const SIEM_MIGRATIONS_RULES_INDEX_PATTERN = `${SIEM_MIGRATIONS_BASE_INDEX_PATTERN}-rules-default`;
+const SIEM_MIGRATIONS_RESOURCES_INDEX_PATTERN = `${SIEM_MIGRATIONS_BASE_INDEX_PATTERN}-resources-default`;
+const SOME_USER_ID = 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0';
 
 export const defaultOriginalRule: OriginalRule = {
   id: 'https://127.0.0.1:8089/servicesNS/nobody/SA-AccessProtection/saved/searches/Access%20-%20Default%20Account%20Usage%20-%20Rule',
@@ -59,13 +61,13 @@ export const defaultElasticRule: ElasticRule = {
   title: 'Access - Default Account Usage - Rule',
 };
 
-const defaultMigrationRuleDocument: RuleMigrationDocument = {
+const defaultMigrationRuleDocument: RuleMigrationRuleData = {
   '@timestamp': '2025-01-13T15:17:43.571Z',
   migration_id: '25a24356-3aab-401b-a73c-905cb8bf7a6d',
   original_rule: defaultOriginalRule,
   status: 'completed',
-  created_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-  updated_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+  created_by: SOME_USER_ID,
+  updated_by: SOME_USER_ID,
   updated_at: '2025-01-13T15:39:48.729Z',
   comments: [
     generateAssistantComment(
@@ -81,17 +83,17 @@ const defaultMigrationRuleDocument: RuleMigrationDocument = {
 };
 
 export const getMigrationRuleDocument = (
-  overrideParams: Partial<RuleMigrationDocument>
-): RuleMigrationDocument => ({
+  overrideParams: Partial<RuleMigrationRuleData>
+): RuleMigrationRuleData => ({
   ...defaultMigrationRuleDocument,
   ...overrideParams,
 });
 
 export const getMigrationRuleDocuments = (
   count: number,
-  overrideCallback: (index: number) => Partial<RuleMigrationDocument>
-): RuleMigrationDocument[] => {
-  const docs: RuleMigrationDocument[] = [];
+  overrideCallback: (index: number) => Partial<RuleMigrationRuleData>
+): RuleMigrationRuleData[] => {
+  const docs: RuleMigrationRuleData[] = [];
   for (let i = 0; i < count; i++) {
     const overrideParams = overrideCallback(i);
     docs.push(getMigrationRuleDocument(overrideParams));
@@ -116,7 +118,7 @@ export const statsOverrideCallbackFactory = ({
   fullyTranslated?: number;
   partiallyTranslated?: number;
 }) => {
-  const overrideCallback = (index: number): Partial<RuleMigrationDocument> => {
+  const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
     let translationResult;
     let status = SiemMigrationStatus.PENDING;
 
@@ -151,32 +153,66 @@ export const statsOverrideCallbackFactory = ({
   return overrideCallback;
 };
 
+const getDefaultMigrationDoc: () => Omit<StoredSiemMigration, 'id'> = () => ({
+  name: 'Default Migration',
+  created_by: SOME_USER_ID,
+  created_at: new Date().toISOString(),
+  last_execution: {
+    is_aborted: false,
+    started_at: new Date().toISOString(),
+    ended_at: null,
+    skip_prebuilt_rules_matching: false,
+    connector_id: 'preconfigured-bedrock',
+  },
+});
+
 export const createMigrationRules = async (
   es: Client,
-  rules: RuleMigrationDocument[]
+  rules: RuleMigrationRuleData[]
 ): Promise<string[]> => {
   const createdAt = new Date().toISOString();
+  const addRuleOperations = rules.flatMap((ruleMigration) => [
+    { create: { _index: SIEM_MIGRATIONS_RULES_INDEX_PATTERN } },
+    {
+      ...ruleMigration,
+      '@timestamp': createdAt,
+      updated_at: createdAt,
+    },
+  ]);
+
+  const migrationIdsToBeCreated = new Set(rules.map((rule) => rule.migration_id));
+  const createMigrationOperations = Array.from(migrationIdsToBeCreated).flatMap((migrationId) => [
+    { create: { _index: SIEM_MIGRATIONS_INDEX_PATTERN, _id: migrationId } },
+    {
+      ...getDefaultMigrationDoc(),
+    },
+  ]);
+
   const res = await es.bulk({
     refresh: 'wait_for',
-    operations: rules.flatMap((ruleMigration) => [
-      { create: { _index: SIEM_MIGRATIONS_RULES_INDEX_PATTERN } },
-      {
-        ...ruleMigration,
-        '@timestamp': createdAt,
-        updated_at: createdAt,
-      },
-    ]),
+    operations: [...createMigrationOperations, ...addRuleOperations],
   });
+
   const ids = res.items.reduce((acc, item) => {
-    if (item.create?._id) {
+    if (item.create?._id && item.create._index === SIEM_MIGRATIONS_RULES_INDEX_PATTERN) {
       acc.push(item.create._id);
     }
     return acc;
   }, [] as string[]);
+
   return ids;
 };
 
-export const deleteAllMigrationRules = async (es: Client): Promise<void> => {
+export const deleteAllRuleMigrations = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: [SIEM_MIGRATIONS_INDEX_PATTERN],
+    query: {
+      match_all: {},
+    },
+    ignore_unavailable: true,
+    refresh: true,
+  });
+
   await es.deleteByQuery({
     index: [SIEM_MIGRATIONS_RULES_INDEX_PATTERN],
     query: {
@@ -184,5 +220,88 @@ export const deleteAllMigrationRules = async (es: Client): Promise<void> => {
     },
     ignore_unavailable: true,
     refresh: true,
+  });
+  await es.deleteByQuery({
+    index: [SIEM_MIGRATIONS_RESOURCES_INDEX_PATTERN],
+    query: {
+      match_all: {},
+    },
+    ignore_unavailable: true,
+    refresh: true,
+  });
+};
+
+export const defaultMacroResource = {
+  type: 'macro',
+  name: 'host_event_count',
+  '@timestamp': '2025-05-21T15:23:15.505Z',
+  updated_by: SOME_USER_ID,
+  updated_at: '2025-05-21T15:23:15.505Z',
+  content: '`host_eventcount` | `daysago($lessThan$)` | `hoursago($greaterThan$,' > ')`',
+};
+
+export const defaultSplunkLookupResource = {
+  type: 'lookup',
+  name: 'splunk_lookup',
+  '@timestamp': '2025-05-21T15:23:15.505Z',
+  updated_by: SOME_USER_ID,
+  updated_at: '2025-05-21T15:23:15.505Z',
+};
+
+export const createMacrosForMigrationId = async ({
+  es,
+  migrationId,
+  count,
+}: {
+  es: Client;
+  migrationId: string;
+  count: number;
+}) => {
+  const macros = [];
+  for (let i = 0; i < count; i++) {
+    macros.push({
+      ...defaultMacroResource,
+      migration_id: migrationId,
+      name: `macro_${i}`,
+    });
+  }
+
+  const createMacroOperations = macros.flatMap((macro) => [
+    { create: { _index: SIEM_MIGRATIONS_RESOURCES_INDEX_PATTERN } },
+    macro,
+  ]);
+
+  await es.bulk({
+    refresh: 'wait_for',
+    operations: [...createMacroOperations],
+  });
+};
+
+export const createLookupsForMigrationId = async ({
+  es,
+  migrationId,
+  count,
+}: {
+  es: Client;
+  migrationId: string;
+  count: number;
+}) => {
+  const lookups = [];
+  for (let i = 0; i < count; i++) {
+    lookups.push({
+      ...defaultSplunkLookupResource,
+      migration_id: migrationId,
+      name: `lookup_${i}`,
+    });
+  }
+
+  const createLookupOperations = lookups.flatMap((lookup) => [
+    { create: { _index: SIEM_MIGRATIONS_RESOURCES_INDEX_PATTERN } },
+    lookup,
+  ]);
+
+  await es.bulk({
+    refresh: 'wait_for',
+    operations: [...createLookupOperations],
   });
 };

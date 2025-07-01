@@ -139,7 +139,7 @@ export class BulkUploader implements IBulkUploader {
 
   /**
    * Retrieves the OpsMetrics in the same format as the `kibana_stats` collector
-   * @private
+   * @internal
    */
   private async getOpsMetrics() {
     const {

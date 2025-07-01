@@ -41,7 +41,7 @@ export const command = {
       Path.resolve(REPO_ROOT, 'x-pack/node_modules'),
       Path.resolve(REPO_ROOT, 'data'),
       Path.resolve(REPO_ROOT, 'target'),
-      ...collectBazelPaths(),
+      Path.resolve(REPO_ROOT, '.es'),
       ...readCleanPatterns(REPO_ROOT),
       ...(await findPluginCleanPaths(log)),
     ]);

@@ -13,7 +13,7 @@ import {
   InfraSynthtraceEsClient,
   InfraSynthtraceKibanaClient,
   LogLevel,
-  OtelSynthtraceEsClient,
+  LogsSynthtraceEsClient,
   createLogger,
 } from '@kbn/apm-synthtrace';
 import { ScoutLogger } from './logger';
@@ -21,7 +21,7 @@ import { EsClient } from '../../types';
 
 let apmSynthtraceEsClientInstance: ApmSynthtraceEsClient | undefined;
 let infraSynthtraceEsClientInstance: InfraSynthtraceEsClient | undefined;
-let otelSynthtraceEsClientInstance: OtelSynthtraceEsClient | undefined;
+let logsSynthtraceEsClientInstance: LogsSynthtraceEsClient | undefined;
 const logger = createLogger(LogLevel.info);
 
 export async function getApmSynthtraceEsClient(
@@ -42,11 +42,10 @@ export async function getApmSynthtraceEsClient(
       logger,
       refreshAfterIndex: true,
       version,
+      pipeline: {
+        includeSerialization: false,
+      },
     });
-
-    apmSynthtraceEsClientInstance.pipeline(
-      apmSynthtraceEsClientInstance.getDefaultPipeline({ includeSerialization: false })
-    );
 
     log.serviceLoaded('apmSynthtraceClient');
   }
@@ -74,11 +73,10 @@ export async function getInfraSynthtraceEsClient(
       client: esClient,
       logger,
       refreshAfterIndex: true,
+      pipeline: {
+        includeSerialization: false,
+      },
     });
-
-    infraSynthtraceEsClientInstance.pipeline(
-      infraSynthtraceEsClientInstance.getDefaultPipeline({ includeSerialization: false })
-    );
 
     log.serviceLoaded('infraSynthtraceClient');
   }
@@ -86,20 +84,19 @@ export async function getInfraSynthtraceEsClient(
   return infraSynthtraceEsClientInstance;
 }
 
-export function getOtelSynthtraceEsClient(esClient: EsClient, log: ScoutLogger) {
-  if (!otelSynthtraceEsClientInstance) {
-    otelSynthtraceEsClientInstance = new OtelSynthtraceEsClient({
+export async function getLogsSynthtraceEsClient(esClient: EsClient, log: ScoutLogger) {
+  if (!logsSynthtraceEsClientInstance) {
+    logsSynthtraceEsClientInstance = new LogsSynthtraceEsClient({
       client: esClient,
       logger,
       refreshAfterIndex: true,
+      pipeline: {
+        includeSerialization: false,
+      },
     });
 
-    otelSynthtraceEsClientInstance.pipeline(
-      otelSynthtraceEsClientInstance.getDefaultPipeline({ includeSerialization: false })
-    );
-
-    log.serviceLoaded('otelSynthtraceClient');
+    log.serviceLoaded('logsSynthtraceClient');
   }
 
-  return otelSynthtraceEsClientInstance;
+  return logsSynthtraceEsClientInstance;
 }

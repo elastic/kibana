@@ -13,6 +13,7 @@ import type {
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
+import { catchAndWrapError } from './wrap_errors';
 
 export interface CreateSoFindIterableOptions<TDocument = unknown> {
   soClient: SavedObjectsClientContract;
@@ -57,7 +58,9 @@ export const createSoFindIterable = <TDocument = unknown>({
   let value: SavedObjectsFindResponse<TDocument>;
   let searchAfterValue: SavedObjectsFindResult['sort'] | undefined;
   let pointInTime: Promise<{ id: string }> = usePointInTime
-    ? soClient.openPointInTimeForType(findOptions.type, { keepAlive: keepAliveValue })
+    ? soClient
+        .openPointInTimeForType(findOptions.type, { keepAlive: keepAliveValue })
+        .catch(catchAndWrapError)
     : Promise.resolve({ id: '' });
 
   const setValue = (findResponse: SavedObjectsFindResponse<TDocument>): void => {
@@ -71,7 +74,7 @@ export const createSoFindIterable = <TDocument = unknown>({
       const pitId = (await pointInTime).id;
 
       if (pitId) {
-        await soClient.closePointInTime(pitId);
+        await soClient.closePointInTime(pitId).catch(catchAndWrapError);
       }
     }
   };

@@ -24,6 +24,9 @@ export {
   getValuesFromQueryField,
   getESQLQueryVariables,
   fixESQLQueryWithVariables,
+  getCategorizeColumns,
+  getArgsFromRenameFunction,
+  getCategorizeField,
 } from './utils/query_parsing_helpers';
 export { queryCannotBeSampled } from './utils/query_cannot_be_sampled';
 export {
@@ -46,3 +49,5 @@ export {
   isESQLFieldGroupable,
 } from './utils/esql_fields_utils';
 export { sanitazeESQLInput } from './utils/sanitaze_input';
+export { replaceESQLQueryIndexPattern } from './utils/replace_index_pattern';
+export { extractCategorizeTokens } from './utils/extract_categorize_tokens';

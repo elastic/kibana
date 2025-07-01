@@ -36,6 +36,7 @@ import {
   OLD_SLO_DETAIL_PATH,
   OLD_SLO_EDIT_PATH,
   CREATE_RULE_PATH,
+  EDIT_RULE_PATH,
 } from '../../common/locators/paths';
 import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
 
@@ -61,21 +62,10 @@ function SimpleRedirect({ to, redirectToApp }: { to: string; redirectToApp?: str
   return null;
 }
 
-export const routes = {
+export const completeRoutes = {
   [ROOT_PATH]: {
     handler: () => {
       return <SimpleRedirect to={OVERVIEW_PATH} />;
-    },
-    params: {},
-    exact: true,
-  },
-  [LANDING_PATH]: {
-    handler: () => {
-      return (
-        <HasDataContextProvider>
-          <LandingPage />
-        </HasDataContextProvider>
-      );
     },
     params: {},
     exact: true,
@@ -87,6 +77,20 @@ export const routes = {
           <DatePickerContextProvider>
             <OverviewPage />
           </DatePickerContextProvider>
+        </HasDataContextProvider>
+      );
+    },
+    params: {},
+    exact: true,
+  },
+};
+
+export const routes = {
+  [LANDING_PATH]: {
+    handler: () => {
+      return (
+        <HasDataContextProvider>
+          <LandingPage />
         </HasDataContextProvider>
       );
     },
@@ -136,6 +140,13 @@ export const routes = {
     exact: true,
   },
   [CREATE_RULE_PATH]: {
+    handler: () => {
+      return <RulePage />;
+    },
+    params: {},
+    exact: true,
+  },
+  [EDIT_RULE_PATH]: {
     handler: () => {
       return <RulePage />;
     },

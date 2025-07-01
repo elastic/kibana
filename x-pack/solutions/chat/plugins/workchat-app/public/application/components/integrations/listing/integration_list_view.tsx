@@ -5,64 +5,62 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiBasicTable, EuiBasicTableColumn, EuiButton } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiButton } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { IntegrationType } from '@kbn/wci-common';
-import type { Integration } from '../../../../../common/integrations';
+import { i18n } from '@kbn/i18n';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../app_paths';
-import { integrationTypeToLabel } from '../utils';
+import { toolLabels } from '../i18n';
 
-interface IntegrationListViewProps {
-  integrations: Integration[];
-}
-
-export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integrations }) => {
+export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
   const { navigateToWorkchatUrl } = useNavigation();
-  const columns: Array<EuiBasicTableColumn<Integration>> = [
-    { field: 'name', name: 'Name' },
-    {
-      field: 'type',
-      name: 'Type',
-      render: (type: IntegrationType) => integrationTypeToLabel(type),
-    },
-    { field: 'description', name: 'Description' },
-    {
-      name: 'Actions',
-      actions: [
-        {
-          name: 'Edit',
-          description: 'Edit this integration',
-          isPrimary: true,
-          icon: 'documentEdit',
-          type: 'icon',
-          onClick: ({ id }) => {
-            navigateToWorkchatUrl(appPaths.integrations.edit({ integrationId: id }));
-          },
-          'data-test-subj': 'integrationListTable-edit-btn',
+
+  const tabs = useMemo(() => {
+    return [
+      {
+        id: 'active',
+        label: i18n.translate('workchatApp.integrations.listView.activeTab', {
+          defaultMessage: 'Active',
+        }),
+        isSelected: tab === 'active',
+        onClick: () => {
+          navigateToWorkchatUrl(appPaths.tools.list);
         },
-      ],
-    },
-  ];
+      },
+      {
+        id: 'catalog',
+        label: i18n.translate('workchatApp.integrations.listView.catalogTab', {
+          defaultMessage: 'Catalog',
+        }),
+        isSelected: tab === 'catalog',
+        onClick: () => {
+          navigateToWorkchatUrl(appPaths.tools.catalog);
+        },
+      },
+    ];
+  }, [tab, navigateToWorkchatUrl]);
 
   return (
-    <KibanaPageTemplate panelled>
-      <KibanaPageTemplate.Header pageTitle="Integrations" />
-
-      <KibanaPageTemplate.Section grow={false} paddingSize="m">
+    <KibanaPageTemplate.Header
+      pageTitle={toolLabels.breadcrumb.toolsPill}
+      description={i18n.translate('workchatApp.integrations.listView.description', {
+        defaultMessage:
+          'Connect to your tools and data so you can easily find, understand, and act on the information that matters.',
+      })}
+      tabs={tabs}
+      rightSideItems={[
         <EuiButton
           onClick={() => {
-            return navigateToWorkchatUrl(appPaths.integrations.create);
+            return navigateToWorkchatUrl(appPaths.tools.create);
           }}
+          iconType="plusInCircle"
+          color="primary"
+          fill
         >
-          Create new integration
-        </EuiButton>
-      </KibanaPageTemplate.Section>
-
-      <KibanaPageTemplate.Section>
-        <EuiBasicTable columns={columns} items={integrations} />
-      </KibanaPageTemplate.Section>
-    </KibanaPageTemplate>
+          {toolLabels.listView.addToolLabel}
+        </EuiButton>,
+      ]}
+    />
   );
 };

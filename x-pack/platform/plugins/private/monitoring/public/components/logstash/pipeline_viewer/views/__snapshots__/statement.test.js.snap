@@ -2,10 +2,10 @@
 
 exports[`Statement component renders a CollapsibleStatement with else body for non-IfElement 1`] = `
 <li
-  className="monPipelineViewer__listItem"
+  css="unknown styles"
 >
   <div
-    css={[Function]}
+    css="unknown styles"
   />
   <CollapsibleStatement
     collapse={[MockFunction]}
@@ -25,7 +25,7 @@ exports[`Statement component renders a CollapsibleStatement with else body for n
         size="xs"
       >
         <span
-          css={[Function]}
+          css="unknown styles"
         >
           else
         </span>
@@ -37,10 +37,10 @@ exports[`Statement component renders a CollapsibleStatement with else body for n
 
 exports[`Statement component renders a CollapsibleStatement with if body for branch model 1`] = `
 <li
-  className="monPipelineViewer__listItem"
+  css="unknown styles"
 >
   <div
-    css={[Function]}
+    css="unknown styles"
   />
   <CollapsibleStatement
     collapse={[MockFunction]}
@@ -60,7 +60,7 @@ exports[`Statement component renders a CollapsibleStatement with if body for bra
         size="xs"
       >
         <span
-          css={[Function]}
+          css="unknown styles"
         >
           if
         </span>
@@ -82,10 +82,10 @@ exports[`Statement component renders a CollapsibleStatement with if body for bra
 
 exports[`Statement component renders a PluginStatement component for plugin model 1`] = `
 <li
-  className="monPipelineViewer__listItem"
+  css="unknown styles"
 >
   <div
-    css={[Function]}
+    css="unknown styles"
   />
   <PluginStatement
     onShowVertexDetails={[MockFunction]}
@@ -114,17 +114,17 @@ exports[`Statement component renders a PluginStatement component for plugin mode
 
 exports[`Statement component renders spacers for element with depth > 0 1`] = `
 <li
-  className="monPipelineViewer__listItem"
+  css="unknown styles"
 >
   <div
-    css={[Function]}
+    css="unknown styles"
   >
     <div
-      css={[Function]}
+      css="unknown styles"
       key="spacer_0"
     />
     <div
-      css={[Function]}
+      css="unknown styles"
       key="spacer_1"
     />
   </div>
@@ -146,7 +146,7 @@ exports[`Statement component renders spacers for element with depth > 0 1`] = `
         size="xs"
       >
         <span
-          css={[Function]}
+          css="unknown styles"
         >
           else
         </span>

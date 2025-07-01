@@ -6,4 +6,10 @@
  */
 
 export { getEcsGroups } from './src/get_ecs_groups';
-export type { Group } from './src/get_ecs_groups';
+export {
+  unflattenGrouping,
+  getFormattedGroups,
+  getFormattedGroupBy,
+  getGroupByObject,
+} from './src/group_by_object_utils';
+export type { Group, FieldsObject } from './src/types';

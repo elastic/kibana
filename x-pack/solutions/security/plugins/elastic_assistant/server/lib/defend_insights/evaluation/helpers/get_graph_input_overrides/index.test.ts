@@ -20,9 +20,9 @@ const mockReplacements = {
 };
 
 describe('getDefendInsightsGraphInputOverrides', () => {
-  it('should return root-level anonymizedEvents and replacements plus overrides', () => {
+  it('should return root-level anonymizedDocuments and replacements plus overrides', () => {
     const input = {
-      anonymizedEvents: [mockDoc],
+      anonymizedDocuments: [mockDoc],
       replacements: mockReplacements,
       overrides: {
         prompt: 'new prompt',
@@ -34,7 +34,7 @@ describe('getDefendInsightsGraphInputOverrides', () => {
     const result = getDefendInsightsGraphInputOverrides(input);
 
     expect(result).toEqual({
-      anonymizedEvents: [mockDoc],
+      anonymizedDocuments: [mockDoc],
       replacements: mockReplacements,
       prompt: 'new prompt',
       generationAttempts: 2,
@@ -43,14 +43,14 @@ describe('getDefendInsightsGraphInputOverrides', () => {
 
   it('should return only picked values when no overrides are present', () => {
     const input = {
-      anonymizedEvents: [mockDoc],
+      anonymizedDocuments: [mockDoc],
       replacements: mockReplacements,
     };
 
     const result = getDefendInsightsGraphInputOverrides(input);
 
     expect(result).toEqual({
-      anonymizedEvents: [mockDoc],
+      anonymizedDocuments: [mockDoc],
       replacements: mockReplacements,
     });
   });

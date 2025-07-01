@@ -11,11 +11,8 @@ import { Required } from 'utility-types';
 import { Client } from '@elastic/elasticsearch';
 import { ApmSynthtraceEsClient } from '../../lib/apm/client/apm_synthtrace_es_client';
 import { ApmSynthtraceKibanaClient } from '../../lib/apm/client/apm_synthtrace_kibana_client';
-import { EntitiesSynthtraceEsClient } from '../../lib/entities/entities_synthtrace_es_client';
-import { EntitiesSynthtraceKibanaClient } from '../../lib/entities/entities_synthtrace_kibana_client';
 import { InfraSynthtraceEsClient } from '../../lib/infra/infra_synthtrace_es_client';
 import { LogsSynthtraceEsClient } from '../../lib/logs/logs_synthtrace_es_client';
-import { OtelSynthtraceEsClient } from '../../lib/apm/client/apm_otel_synthtrace_es_client/otel_synthtrace_es_client';
 import { SynthtraceEsClientOptions } from '../../lib/shared/base_client';
 import { StreamsSynthtraceClient } from '../../lib/streams/streams_synthtrace_client';
 import { SyntheticsSynthtraceEsClient } from '../../lib/synthetics/synthetics_synthtrace_es_client';
@@ -23,13 +20,10 @@ import { Logger } from '../../lib/utils/create_logger';
 
 export interface SynthtraceClients {
   apmEsClient: ApmSynthtraceEsClient;
-  entitiesEsClient: EntitiesSynthtraceEsClient;
   infraEsClient: InfraSynthtraceEsClient;
   logsEsClient: LogsSynthtraceEsClient;
-  otelEsClient: OtelSynthtraceEsClient;
   streamsClient: StreamsSynthtraceClient;
   syntheticsEsClient: SyntheticsSynthtraceEsClient;
-  entitiesKibanaClient: EntitiesSynthtraceKibanaClient;
   esClient: Client;
 }
 
@@ -69,27 +63,17 @@ export async function getClients({
 
   const logsEsClient = new LogsSynthtraceEsClient(options);
   const infraEsClient = new InfraSynthtraceEsClient(options);
-  const entitiesEsClient = new EntitiesSynthtraceEsClient(options);
-
-  const entitiesKibanaClient = new EntitiesSynthtraceKibanaClient({
-    ...options,
-    kibanaClient: options.kibana,
-  });
 
   const syntheticsEsClient = new SyntheticsSynthtraceEsClient(options);
-  const otelEsClient = new OtelSynthtraceEsClient(options);
 
   const streamsClient = new StreamsSynthtraceClient(options);
 
   return {
     apmEsClient,
-    entitiesEsClient,
     infraEsClient,
     logsEsClient,
-    otelEsClient,
     streamsClient,
     syntheticsEsClient,
-    entitiesKibanaClient,
     esClient: options.client,
   };
 }

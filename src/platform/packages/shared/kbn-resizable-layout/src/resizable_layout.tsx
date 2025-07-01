@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ReactElement, useState } from 'react';
+import { ReactNode, useState } from 'react';
 import React from 'react';
 import { round } from 'lodash';
 import { PanelsResizable } from './panels_resizable';
@@ -47,11 +47,11 @@ export interface ResizableLayoutProps {
   /**
    * The fixed panel
    */
-  fixedPanel: ReactElement;
+  fixedPanel: ReactNode;
   /**
    * The flex panel
    */
-  flexPanel: ReactElement;
+  flexPanel: ReactNode;
   /**
    * Class name for the resize button
    */

@@ -32,7 +32,15 @@ describe('initAPIAuthorization', () => {
     const mockRequest = httpServerMock.createKibanaRequest({
       method: 'get',
       path: '/foo/bar',
-      routeTags: ['access:foo'],
+      kibanaRouteOptions: {
+        xsrfRequired: true,
+        access: 'internal',
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
     });
     const mockResponse = httpServerMock.createResponseFactory();
     const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
@@ -61,6 +69,16 @@ describe('initAPIAuthorization', () => {
       method: 'get',
       path: '/foo/bar',
       routeTags: ['not-access:foo'],
+      kibanaRouteOptions: {
+        xsrfRequired: true,
+        access: 'internal',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'Used in test suite',
+          },
+        },
+      },
     });
     const mockResponse = httpServerMock.createResponseFactory();
     const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
@@ -90,12 +108,25 @@ describe('initAPIAuthorization', () => {
       method: 'get',
       path: '/foo/bar',
       headers,
-      routeTags: ['access:foo'],
+      kibanaRouteOptions: {
+        xsrfRequired: true,
+        access: 'internal',
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
     });
     const mockResponse = httpServerMock.createResponseFactory();
     const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
 
-    const mockCheckPrivileges = jest.fn().mockReturnValue({ hasAllRequested: true });
+    const mockCheckPrivileges = jest.fn().mockReturnValue({
+      privileges: {
+        kibana: [{ privilege: 'api:foo', authorized: true }],
+      },
+      hasAllRequested: true,
+    });
     mockAuthz.mode.useRbacForRequest.mockReturnValue(true);
     mockAuthz.checkPrivilegesDynamicallyWithRequest.mockImplementation((request) => {
       // hapi conceals the actual "request" from us, so we make sure that the headers are passed to
@@ -105,10 +136,22 @@ describe('initAPIAuthorization', () => {
       return mockCheckPrivileges;
     });
 
+    mockAuthz.checkPrivilegesWithRequest.mockImplementation((request) => {
+      expect(request.headers).toMatchObject(headers);
+
+      return {
+        globally: () => ({
+          privileges: {
+            kibana: [{ privilege: 'api:foo', authorized: true }],
+          },
+        }),
+      };
+    });
+
     await postAuthHandler(mockRequest, mockResponse, mockPostAuthToolkit);
 
     expect(mockResponse.notFound).not.toHaveBeenCalled();
-    expect(mockPostAuthToolkit.next).toHaveBeenCalledTimes(1);
+    expect(mockPostAuthToolkit.authzResultNext).toHaveBeenCalledTimes(1);
     expect(mockCheckPrivileges).toHaveBeenCalledWith({
       kibana: [mockAuthz.actions.api.get('foo')],
     });
@@ -131,12 +174,25 @@ describe('initAPIAuthorization', () => {
       method: 'get',
       path: '/foo/bar',
       headers,
-      routeTags: ['access:foo'],
+      kibanaRouteOptions: {
+        xsrfRequired: true,
+        access: 'internal',
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
     });
     const mockResponse = httpServerMock.createResponseFactory();
     const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
 
-    const mockCheckPrivileges = jest.fn().mockReturnValue({ hasAllRequested: false });
+    const mockCheckPrivileges = jest.fn().mockReturnValue({
+      privileges: {
+        kibana: [{ privilege: 'api:foo', authorized: false }],
+      },
+      hasAllRequested: false,
+    });
     mockAuthz.mode.useRbacForRequest.mockReturnValue(true);
     mockAuthz.checkPrivilegesDynamicallyWithRequest.mockImplementation((request) => {
       // hapi conceals the actual "request" from us, so we make sure that the headers are passed to
@@ -144,6 +200,18 @@ describe('initAPIAuthorization', () => {
       expect(request.headers).toMatchObject(headers);
 
       return mockCheckPrivileges;
+    });
+
+    mockAuthz.checkPrivilegesWithRequest.mockImplementation((request) => {
+      expect(request.headers).toMatchObject(headers);
+
+      return {
+        globally: () => ({
+          privileges: {
+            kibana: [{ privilege: 'api:foo', authorized: false }],
+          },
+        }),
+      };
     });
 
     await postAuthHandler(mockRequest, mockResponse, mockPostAuthToolkit);
@@ -540,6 +608,255 @@ describe('initAPIAuthorization', () => {
           },
         },
         kibanaPrivilegesRequestActions: ['privilege1', 'privilege2'],
+        asserts: {
+          forbidden: true,
+        },
+      }
+    );
+
+    testSecurityConfig(
+      `protected route returns "authzResult" if user has permissions with complex anyRequired config`,
+      {
+        security: {
+          authz: {
+            requiredPrivileges: [
+              {
+                anyRequired: [
+                  { allOf: ['privilege1', 'privilege2'] },
+                  { allOf: ['privilege3', 'privilege4'] },
+                ],
+              },
+            ],
+          },
+        },
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: true },
+              { privilege: 'api:privilege2', authorized: false },
+              { privilege: 'api:privilege3', authorized: true },
+              { privilege: 'api:privilege4', authorized: true },
+            ],
+          },
+        },
+        kibanaPrivilegesRequestActions: ['privilege1', 'privilege2', 'privilege3', 'privilege4'],
+        asserts: {
+          authzResult: {
+            privilege1: true,
+            privilege2: false,
+            privilege3: true,
+            privilege4: true,
+          },
+        },
+      }
+    );
+
+    testSecurityConfig(
+      `protected route returns "authzResult" if user has permissions  requested with complex allRequired config`,
+      {
+        security: {
+          authz: {
+            requiredPrivileges: [
+              {
+                allRequired: [
+                  { anyOf: ['privilege1', 'privilege2'] },
+                  { anyOf: ['privilege3', 'privilege4'] },
+                ],
+              },
+            ],
+          },
+        },
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: true },
+              { privilege: 'api:privilege2', authorized: false },
+              { privilege: 'api:privilege3', authorized: true },
+              { privilege: 'api:privilege4', authorized: false },
+            ],
+          },
+        },
+        kibanaPrivilegesRequestActions: ['privilege1', 'privilege2', 'privilege3', 'privilege4'],
+        asserts: {
+          authzResult: {
+            privilege1: true,
+            privilege2: false,
+            privilege3: true,
+            privilege4: false,
+          },
+        },
+      }
+    );
+
+    testSecurityConfig(
+      `protected route returns forbidden if user doesn't have required privileges requested with complex allRequired config`,
+      {
+        security: {
+          authz: {
+            requiredPrivileges: [
+              {
+                allRequired: [
+                  { anyOf: ['privilege1', 'privilege2'] },
+                  { anyOf: ['privilege3', 'privilege4'] },
+                ],
+              },
+            ],
+          },
+        },
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: true },
+              { privilege: 'api:privilege2', authorized: false },
+              { privilege: 'api:privilege3', authorized: false },
+              { privilege: 'api:privilege4', authorized: false },
+            ],
+          },
+        },
+        kibanaPrivilegesRequestActions: ['privilege1', 'privilege2', 'privilege3', 'privilege4'],
+        asserts: {
+          forbidden: true,
+        },
+      }
+    );
+
+    testSecurityConfig(
+      `protected route returns "authzResult" if user has permissions requested with complex config`,
+      {
+        security: {
+          authz: {
+            requiredPrivileges: [
+              {
+                // (privilege1 OR privilege2) AND (privilege3 OR privilege4)
+                // AND ((privilege5 AND privilege6) OR (privilege7 AND privilege8))
+                allRequired: [
+                  { anyOf: ['privilege1', 'privilege2'] },
+                  { anyOf: ['privilege3', 'privilege4'] },
+                ],
+                anyRequired: [
+                  { allOf: ['privilege5', 'privilege6'] },
+                  { allOf: ['privilege7', 'privilege8'] },
+                ],
+              },
+            ],
+          },
+        },
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: true },
+              { privilege: 'api:privilege2', authorized: false },
+              { privilege: 'api:privilege3', authorized: false },
+              { privilege: 'api:privilege4', authorized: true },
+              { privilege: 'api:privilege5', authorized: false },
+              { privilege: 'api:privilege6', authorized: false },
+              { privilege: 'api:privilege7', authorized: true },
+              { privilege: 'api:privilege8', authorized: true },
+            ],
+          },
+        },
+        kibanaPrivilegesRequestActions: [
+          'privilege1',
+          'privilege2',
+          'privilege3',
+          'privilege4',
+          'privilege5',
+          'privilege6',
+          'privilege7',
+          'privilege8',
+        ],
+        asserts: {
+          authzResult: {
+            privilege1: true,
+            privilege2: false,
+            privilege3: false,
+            privilege4: true,
+            privilege5: false,
+            privilege6: false,
+            privilege7: true,
+            privilege8: true,
+          },
+        },
+      }
+    );
+
+    testSecurityConfig(
+      `protected route returns forbidden if user doesn't have required privileges with complex config`,
+      {
+        security: {
+          authz: {
+            requiredPrivileges: [
+              {
+                // (privilege1 OR privilege2) AND (privilege3 OR privilege4)
+                // AND ((privilege5 AND privilege6) OR (privilege7 AND privilege8))
+                allRequired: [
+                  { anyOf: ['privilege1', 'privilege2'] },
+                  { anyOf: ['privilege3', 'privilege4'] },
+                ],
+                anyRequired: [
+                  { allOf: ['privilege5', 'privilege6'] },
+                  { allOf: ['privilege7', 'privilege8'] },
+                ],
+              },
+            ],
+          },
+        },
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: true },
+              { privilege: 'api:privilege2', authorized: false },
+              { privilege: 'api:privilege3', authorized: false },
+              { privilege: 'api:privilege4', authorized: true },
+              { privilege: 'api:privilege5', authorized: false },
+              { privilege: 'api:privilege6', authorized: false },
+              { privilege: 'api:privilege7', authorized: true },
+              { privilege: 'api:privilege8', authorized: false },
+            ],
+          },
+        },
+        kibanaPrivilegesRequestActions: [
+          'privilege1',
+          'privilege2',
+          'privilege3',
+          'privilege4',
+          'privilege5',
+          'privilege6',
+          'privilege7',
+          'privilege8',
+        ],
+        asserts: {
+          forbidden: true,
+        },
+      }
+    );
+
+    testSecurityConfig(
+      `protected route returns forbidden if user doesn't have required privileges requested with complex anyRequired config`,
+      {
+        security: {
+          authz: {
+            requiredPrivileges: [
+              {
+                anyRequired: [
+                  { allOf: ['privilege1', 'privilege2'] },
+                  { allOf: ['privilege3', 'privilege4'] },
+                ],
+              },
+            ],
+          },
+        },
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [
+              { privilege: 'api:privilege1', authorized: true },
+              { privilege: 'api:privilege2', authorized: false },
+              { privilege: 'api:privilege3', authorized: false },
+              { privilege: 'api:privilege4', authorized: true },
+            ],
+          },
+        },
+        kibanaPrivilegesRequestActions: ['privilege1', 'privilege2', 'privilege3', 'privilege4'],
         asserts: {
           forbidden: true,
         },

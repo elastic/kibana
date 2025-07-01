@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { APM_AGENT_CONFIGURATION_INDEX } from '@kbn/apm-sources-access-plugin/server';
 import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
 import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
 import type { APMInternalESClient } from '../../../../lib/helpers/create_es_client/create_internal_es_client';
-import { APM_AGENT_CONFIGURATION_INDEX } from '../../apm_indices/apm_system_index_constants';
 
 export async function getExistingEnvironmentsForService({
   serviceName,

@@ -7,8 +7,8 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 
-export const config = schema.object({
+export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
 });
 
-export type InferenceConfig = TypeOf<typeof config>;
+export type InferenceConfig = TypeOf<typeof configSchema>;

@@ -15,7 +15,13 @@ import {
   type LensConfig,
   LensConfigBuilder,
 } from '@kbn/lens-embeddable-utils/config_builder';
+
 import { useKibanaContextForPlugin } from './use_kibana';
+
+const isAppleDevice =
+  typeof window !== 'undefined' && /Mac|iPhone|iPad/.test(window.navigator.userAgent);
+const isMetaKey = ({ metaKey, ctrlKey }: { metaKey: boolean; ctrlKey: boolean }) =>
+  isAppleDevice ? metaKey : ctrlKey;
 
 export type UseLensAttributesParams = LensConfig;
 
@@ -72,7 +78,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
         query: Query | AggregateQuery;
         lastReloadRequestTime?: number;
       }) =>
-      () => {
+      (openInNewTab: boolean) => {
         const injectedAttributes = injectFilters({ filters, query });
         if (injectedAttributes) {
           navigateToPrefilledEditor(
@@ -83,7 +89,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
               lastReloadRequestTime,
             },
             {
-              openInNewTab: true,
+              openInNewTab,
             }
           );
         }
@@ -127,7 +133,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
   };
 };
 
-const getOpenInLensAction = (onExecute: () => void): Action => {
+const getOpenInLensAction = (onExecute: (openInNewTab: boolean) => void): Action => {
   return {
     id: 'openInLens',
     getDisplayName(_context: ActionExecutionContext): string {
@@ -142,8 +148,11 @@ const getOpenInLensAction = (onExecute: () => void): Action => {
     async isCompatible(_context: ActionExecutionContext): Promise<boolean> {
       return true;
     },
-    async execute(_context: ActionExecutionContext): Promise<void> {
-      onExecute();
+    async execute({ event }: ActionExecutionContext): Promise<void> {
+      const openInNewTab = event
+        ? isMetaKey({ metaKey: event.metaKey, ctrlKey: event.ctrlKey })
+        : false;
+      onExecute(openInNewTab);
     },
     order: 100,
   };

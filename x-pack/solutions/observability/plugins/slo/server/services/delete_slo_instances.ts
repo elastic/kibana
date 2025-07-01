@@ -24,8 +24,7 @@ export class DeleteSLOInstances {
       throw new IllegalArgumentError("Cannot delete an SLO instance '*'");
     }
 
-    await this.deleteRollupData(params.list);
-    await this.deleteSummaryData(params.list);
+    await Promise.all([this.deleteRollupData(params.list), this.deleteSummaryData(params.list)]);
   }
 
   // Delete rollup data when excluding rollup data is not explicitly requested
@@ -33,6 +32,8 @@ export class DeleteSLOInstances {
     await this.esClient.deleteByQuery({
       index: SLI_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
+      conflicts: 'proceed',
+      slices: 'auto',
       query: {
         bool: {
           should: list
@@ -54,6 +55,9 @@ export class DeleteSLOInstances {
     await this.esClient.deleteByQuery({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
       refresh: true,
+      wait_for_completion: false,
+      conflicts: 'proceed',
+      slices: 'auto',
       query: {
         bool: {
           should: list.map((item) => ({

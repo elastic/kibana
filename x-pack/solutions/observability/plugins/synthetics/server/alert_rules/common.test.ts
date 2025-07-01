@@ -291,6 +291,7 @@ describe('setRecoveredAlertsContext', () => {
       dateFormat,
       tz: 'UTC',
       groupByLocation: true,
+      stalePendingConfigs: {},
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
       id: idWithLocation,
@@ -380,6 +381,7 @@ describe('setRecoveredAlertsContext', () => {
       dateFormat,
       tz: 'UTC',
       groupByLocation: true,
+      stalePendingConfigs: {},
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
       id: idWithLocation,
@@ -464,6 +466,7 @@ describe('setRecoveredAlertsContext', () => {
       dateFormat,
       tz: 'UTC',
       groupByLocation: true,
+      stalePendingConfigs: {},
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
       id: idWithLocation,
@@ -535,6 +538,7 @@ describe('setRecoveredAlertsContext', () => {
       dateFormat,
       tz: 'UTC',
       groupByLocation: true,
+      stalePendingConfigs: {},
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
       id: idWithLocation,
@@ -610,6 +614,7 @@ describe('setRecoveredAlertsContext', () => {
       dateFormat,
       tz: 'UTC',
       groupByLocation: true,
+      stalePendingConfigs: {},
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
       id: idWithLocation,
@@ -687,6 +692,7 @@ describe('setRecoveredAlertsContext', () => {
       dateFormat,
       tz: 'UTC',
       groupByLocation: false,
+      stalePendingConfigs: {},
     });
     expect(alertsClientMock.setAlertData).toBeCalledWith({
       id: idWithLocation,

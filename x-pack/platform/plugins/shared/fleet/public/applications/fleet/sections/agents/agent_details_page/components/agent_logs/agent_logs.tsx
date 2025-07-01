@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useMemo, useState, useCallback, useEffect } from 'react';
+import React, { memo, useMemo, useState, useCallback } from 'react';
 import styled from 'styled-components';
 import {
   EuiFlexGroup,
@@ -15,7 +15,6 @@ import {
   EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
-import useMeasure from 'react-use/lib/useMeasure';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { fromKueryExpression } from '@kbn/es-query';
 import semverGte from 'semver/functions/gte';
@@ -24,17 +23,16 @@ import semverCoerce from 'semver/functions/coerce';
 import { createStateContainerReactHelpers } from '@kbn/kibana-utils-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { TimeRange } from '@kbn/es-query';
-import { LogStream, type LogStreamProps } from '@kbn/logs-shared-plugin/public';
+import { LazySavedSearchComponent } from '@kbn/saved-search-component';
+import useAsync from 'react-use/lib/useAsync';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useLink, useStartServices } from '../../../../../hooks';
 
-import { DEFAULT_DATE_RANGE } from './constants';
 import { DatasetFilter } from './filter_dataset';
 import { LogLevelFilter } from './filter_log_level';
 import { LogQueryBar } from './query_bar';
 import { buildQuery } from './build_query';
-import { SelectLogLevel } from './select_log_level';
 import { ViewLogsButton, getFormattedRange } from './view_logs_button';
 
 const WrapperFlexGroup = styled(EuiFlexGroup)`
@@ -44,19 +42,6 @@ const WrapperFlexGroup = styled(EuiFlexGroup)`
 const DatePickerFlexItem = styled(EuiFlexItem)`
   max-width: 312px;
 `;
-
-const LOG_VIEW_SETTINGS: LogStreamProps['logView'] = {
-  type: 'log-view-reference',
-  logViewId: 'default',
-};
-
-const LOG_VIEW_COLUMNS: LogStreamProps['columns'] = [
-  { type: 'timestamp' },
-  { field: 'event.dataset', type: 'field' },
-  { field: 'component.id', type: 'field' },
-  { type: 'message' },
-  { field: 'error.message', type: 'field' },
-];
 
 export interface AgentLogsProps {
   agent: Agent;
@@ -84,7 +69,7 @@ const AgentPolicyLogsNotEnabledCallout: React.FunctionComponent<{ agentPolicy: A
       <EuiCallOut
         size="m"
         color="primary"
-        iconType="iInCircle"
+        iconType="info"
         title={
           <FormattedMessage
             id="xpack.fleet.agentLogs.logDisabledCallOutTitle"
@@ -120,13 +105,29 @@ const AgentPolicyLogsNotEnabledCallout: React.FunctionComponent<{ agentPolicy: A
 
 export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
   ({ agent, agentPolicy, state }) => {
-    const { data, application } = useStartServices();
+    const {
+      application,
+      logsDataAccess: {
+        services: { logSourcesService },
+      },
+      embeddable,
+      data: {
+        search: { searchSource },
+        query: {
+          timefilter: { timefilter: dataTimefilter },
+        },
+        dataViews,
+      },
+    } = useStartServices();
+
+    const logSources = useAsync(logSourcesService.getFlattenedLogSources);
+
     const { update: updateState } = AgentLogsUrlStateHelper.useTransitions();
 
     // Util to convert date expressions (returned by datepicker) to timestamps (used by LogStream)
     const getDateRangeTimestamps = useCallback(
       (timeRange: TimeRange) => {
-        const { min, max } = data.query.timefilter.timefilter.calculateBounds(timeRange);
+        const { min, max } = dataTimefilter.calculateBounds(timeRange);
         return min && max
           ? {
               start: min.valueOf(),
@@ -134,7 +135,7 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
             }
           : undefined;
       },
-      [data.query.timefilter.timefilter]
+      [dataTimefilter]
     );
 
     const tryUpdateDateRange = useCallback(
@@ -149,36 +150,6 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
       },
       [getDateRangeTimestamps, updateState]
     );
-
-    const [dateRangeTimestamps, setDateRangeTimestamps] = useState<{ start: number; end: number }>(
-      getDateRangeTimestamps({
-        from: state.start,
-        to: state.end,
-      }) ||
-        getDateRangeTimestamps({
-          from: DEFAULT_DATE_RANGE.start,
-          to: DEFAULT_DATE_RANGE.end,
-        })!
-    );
-
-    // Attempts to parse for timestamps when start/end date expressions change
-    // If invalid date expressions, set expressions back to default
-    // Otherwise set the new timestamps
-    useEffect(() => {
-      const timestampsFromDateRange = getDateRangeTimestamps({
-        from: state.start,
-        to: state.end,
-      });
-      if (!timestampsFromDateRange) {
-        tryUpdateDateRange({
-          from: DEFAULT_DATE_RANGE.start,
-          to: DEFAULT_DATE_RANGE.end,
-        });
-      } else {
-        setDateRangeTimestamps(timestampsFromDateRange);
-      }
-    }, [state.start, state.end, getDateRangeTimestamps, tryUpdateDateRange]);
-
     // Query validation helper
     const isQueryValid = useCallback((testQuery: string) => {
       try {
@@ -209,13 +180,15 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
 
     // Build final log stream query from agent id, datasets, log levels, and user input
     const logStreamQuery = useMemo(
-      () =>
-        buildQuery({
+      () => ({
+        language: 'kuery',
+        query: buildQuery({
           agentId: agent.id,
           datasets: state.datasets,
           logLevels: state.logLevels,
           userQuery: state.query,
         }),
+      }),
       [agent.id, state.datasets, state.logLevels, state.query]
     );
 
@@ -230,14 +203,6 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
       }
       return semverGte(agentVersionWithPrerelease, '7.11.0');
     }, [agentVersion]);
-
-    // Set absolute height on logs component (needed to render correctly in Safari)
-    // based on available height, or 600px, whichever is greater
-    const [logsPanelRef, { height: measuredlogPanelHeight }] = useMeasure<HTMLDivElement>();
-    const logPanelHeight = useMemo(
-      () => Math.max(measuredlogPanelHeight, 600),
-      [measuredlogPanelHeight]
-    );
 
     if (!isLogFeatureAvailable) {
       return (
@@ -328,7 +293,7 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
                 }}
               >
                 <ViewLogsButton
-                  logStreamQuery={logStreamQuery}
+                  logStreamQuery={logStreamQuery.query}
                   startTime={getFormattedRange(state.start)}
                   endTime={getFormattedRange(state.end)}
                 />
@@ -337,22 +302,31 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiPanel paddingSize="none" panelRef={logsPanelRef} grow={false}>
-            <LogStream
-              logView={LOG_VIEW_SETTINGS}
-              height={logPanelHeight}
-              startTimestamp={dateRangeTimestamps.start}
-              endTimestamp={dateRangeTimestamps.end}
-              query={logStreamQuery}
-              columns={LOG_VIEW_COLUMNS}
-            />
+          <EuiPanel paddingSize="none" grow={false}>
+            {logSources.value ? (
+              <LazySavedSearchComponent
+                dependencies={{ embeddable, searchSource, dataViews }}
+                index={logSources.value}
+                timeRange={{
+                  from: state.start,
+                  to: state.end,
+                }}
+                query={logStreamQuery}
+                height="60vh"
+                displayOptions={{
+                  enableDocumentViewer: true,
+                  enableFilters: false,
+                }}
+                columns={[
+                  '@timestamp',
+                  'event.dataset',
+                  'component.id',
+                  'message',
+                  'error.message',
+                ]}
+              />
+            ) : null}
           </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <SelectLogLevel
-            agent={agent}
-            agentPolicyLogLevel={agentPolicy?.advanced_settings?.agent_logging_level}
-          />
         </EuiFlexItem>
       </WrapperFlexGroup>
     );
