@@ -168,9 +168,6 @@ export const updateObjectOwnership = async <T>(
   const authorizationResult = await securityExtension?.authorizeChangeOwnership({
     namespace,
     objects: authObjects,
-    accessControlOptions: {
-      newOwner: owner, // TODO: Remove as we don't need to persist inside
-    },
   });
 
   const time = new Date().toISOString();
