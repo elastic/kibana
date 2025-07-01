@@ -10,6 +10,7 @@
 export interface SettingsCapabilities {
   spaceSettings: SettingCapability;
   globalSettings: SettingCapability;
+  solutionsFiltering: boolean;
 }
 
 interface SettingCapability {

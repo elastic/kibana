@@ -151,16 +151,20 @@ export const SettingsApplicationKibanaProvider: FC<
   };
 
   const getAllowlistedSettings = (scope: UiSettingsScope, solution: SolutionView | undefined) => {
+    const { solutionsFiltering } = application.capabilities;
     const scopeClient = getScopeClient(scope);
-    const rawSettings = Object.fromEntries(
-      Object.entries(scopeClient.getAll()).filter(
-        ([settingId, settingDef]) =>
-          !settingDef.readonly &&
-          !client.isCustom(settingId) &&
-          (!solution || !settingDef.solutions || settingDef.solutions.includes(solution))
-      )
-    );
-    return normalizeSettings(rawSettings);
+    if (solutionsFiltering) {
+      const filteredRawSettings = Object.fromEntries(
+        Object.entries(scopeClient.getAll()).filter(
+          ([settingId, settingDef]) =>
+            !settingDef.readonly &&
+            !client.isCustom(settingId) &&
+            (!solution || !settingDef.solutions || settingDef.solutions.includes(solution))
+        )
+      );
+      return normalizeSettings(filteredRawSettings);
+    }
+    return normalizeSettings(scopeClient.getAll());
   };
 
   const getSections = (scope: UiSettingsScope) => {
