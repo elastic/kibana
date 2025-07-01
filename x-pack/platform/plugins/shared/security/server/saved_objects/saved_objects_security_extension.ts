@@ -28,12 +28,14 @@ import type {
   AuthorizeBulkDeleteParams,
   AuthorizeBulkGetParams,
   AuthorizeBulkUpdateParams,
+  AuthorizeChangeAccessModeParams,
   AuthorizeChangeOwnershipParams,
   AuthorizeCheckConflictsParams,
   AuthorizeCreateParams,
   AuthorizeDeleteParams,
   AuthorizeFindParams,
   AuthorizeGetParams,
+  AuthorizeObject,
   AuthorizeOpenPointInTimeParams,
   AuthorizeUpdateParams,
   AuthorizeUpdateSpacesParams,
@@ -46,7 +48,6 @@ import type {
   SavedObject,
   WithAuditName,
 } from '@kbn/core-saved-objects-server';
-import type { AuthorizeObject } from '@kbn/core-saved-objects-server/src/extensions/security';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type {
@@ -93,6 +94,7 @@ export enum SecurityAction {
   BULK_UPDATE,
   UPDATE_OBJECTS_SPACES,
   CHANGE_OWNERSHIP,
+  CHANGE_ACCESS_MODE,
 }
 
 /**
@@ -112,6 +114,7 @@ export enum AuditAction {
   COLLECT_MULTINAMESPACE_REFERENCES = 'saved_object_collect_multinamespace_references', // this is separate from 'saved_object_get' because the user is only accessing an object's metadata
   UPDATE_OBJECTS_SPACES = 'saved_object_update_objects_spaces', // this is separate from 'saved_object_update' because the user is only updating an object's metadata
   UPDATE_OBJECTS_OWNER = 'saved_object_update_objects_owner',
+  UPDATE_OBJECTS_ACCESS_MODE = 'saved_object_update_objects_access_mode',
 }
 
 /**
@@ -369,7 +372,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     // Update                             'update'                AuditAction.UPDATE
     // Bulk Update                        'bulk_update'           AuditAction.UPDATE
     // Update Objects Spaces              'share_to_space'        AuditAction.UPDATE_OBJECTS_SPACES
-    // Manage Objects Access Control      'manage_access_control' N/A
+    // Change ownership                   'manage_access_control' AuditAction.UPDATE_OBJECTS_OWNER
+    // Change access mode                 'manage_access_control' AuditAction.UPDATE_OBJECTS_ACCESS_MODE
     this.actionMap = new Map([
       [SecurityAction.CHECK_CONFLICTS, { authzAction: 'bulk_create', auditAction: undefined }],
       [
@@ -413,8 +417,15 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         { authzAction: 'share_to_space', auditAction: AuditAction.UPDATE_OBJECTS_SPACES },
       ],
       [
-        SecurityAction.CHANGE_OWNERSHIP, // TODO: specify operation
-        { authzAction: 'manage_access_control', auditAction: undefined },
+        SecurityAction.CHANGE_OWNERSHIP,
+        { authzAction: 'manage_access_control', auditAction: AuditAction.UPDATE_OBJECTS_OWNER },
+      ],
+      [
+        SecurityAction.CHANGE_ACCESS_MODE, // TODO: specify operation
+        {
+          authzAction: 'manage_access_control',
+          auditAction: AuditAction.UPDATE_OBJECTS_ACCESS_MODE,
+        },
       ],
     ]);
   }
@@ -445,19 +456,14 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     return { authzActions, auditActions };
   }
 
-  private decodeSecurityAction(
-    securityAction: SecurityAction,
-    checkingAccessControl?: boolean
-  ): {
+  private decodeSecurityAction(securityAction: SecurityAction): {
     authzAction: string | undefined;
     auditAction: AuditAction | undefined;
-    accessControl: 'manage_access_control' | undefined;
   } {
     const { authzAction, auditAction } = this.actionMap.get(securityAction)!;
     return {
       authzAction,
       auditAction,
-      accessControl: checkingAccessControl ? 'manage_access_control' : undefined,
     };
   }
 
@@ -1122,19 +1128,21 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     namespace,
     objects,
   }: AuthorizeChangeOwnershipParams): Promise<CheckAuthorizationResult<A>> {
-    return await this.internalAuthorizeChangeOwnership({
-      namespace,
-      objects,
-    });
+    return await this.internalAuthorizeChangeAccessControl(
+      {
+        namespace,
+        objects,
+      },
+      SecurityAction.CHANGE_OWNERSHIP
+    );
   }
 
-  async internalAuthorizeChangeOwnership<A extends string>(
-    params: AuthorizeBulkChangeOwnershipParams
+  async internalAuthorizeChangeAccessControl<A extends string>(
+    params: AuthorizeBulkChangeOwnershipParams,
+    action: SecurityAction
   ): Promise<CheckAuthorizationResult<A>> {
     const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
-
-    const action = SecurityAction.CHANGE_OWNERSHIP;
 
     this.assertObjectsArrayNotEmpty(objects, action);
 
@@ -1148,7 +1156,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         objects,
         typeRegistry,
       });
-
+    const { auditAction, authzAction } = this.decodeSecurityAction(action);
     if (typesRequiringAccessControl.size > 0) {
       const authorizationResult = await this.checkAuthorization({
         types: new Set(typesRequiringAccessControl),
@@ -1167,12 +1175,12 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       }
 
       if (authorizationResult.status === 'unauthorized') {
-        errMessage = `Unable to change ownership for types ${[...typesRequiringAccessControl].join(
+        errMessage = `Unable to ${authzAction} for types ${[...typesRequiringAccessControl].join(
           ', '
         )}`;
         const err = new Error(errMessage);
         this.addAuditEvent({
-          action: AuditAction.UPDATE_OBJECTS_OWNER,
+          action: auditAction!,
           error: err,
           unauthorizedTypes: [...typesRequiringAccessControl],
           unauthorizedSpaces: [...spacesToAuthorize],
@@ -1185,6 +1193,19 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       status: 'fully_authorized',
       typeMap: new Map(),
     };
+  }
+
+  async authorizeChangeAccessMode<A extends string>({
+    namespace,
+    objects,
+  }: AuthorizeChangeAccessModeParams): Promise<CheckAuthorizationResult<A>> {
+    return await this.internalAuthorizeChangeAccessControl(
+      {
+        namespace,
+        objects,
+      },
+      SecurityAction.CHANGE_ACCESS_MODE
+    );
   }
 
   auditClosePointInTime() {
