@@ -59,9 +59,16 @@ import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useCurrentDataView, useCurrentTabSelector } from '../../state_management/redux';
+import {
+  internalStateActions,
+  useCurrentDataView,
+  useCurrentTabAction,
+  useCurrentTabSelector,
+  useInternalStateDispatch,
+} from '../../state_management/redux';
 import { TABS_ENABLED } from '../../../../constants';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
+import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
 
 const queryClient = new QueryClient();
@@ -377,6 +384,20 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     sendErrorMsg(stateContainer.dataState.data$.main$);
   }, [stateContainer.dataState]);
 
+  const dispatch = useInternalStateDispatch();
+  const layoutUiState = useCurrentTabSelector((state) => state.uiState.layout);
+  const setLayoutUiState = useCurrentTabAction(internalStateActions.setLayoutUiState);
+  const onInitialStateChange = useCallback(
+    (newLayoutUiState: Partial<DiscoverLayoutRestorableState>) => {
+      dispatch(
+        setLayoutUiState({
+          layoutUiState: newLayoutUiState,
+        })
+      );
+    },
+    [dispatch, setLayoutUiState]
+  );
+
   return (
     <EuiPage
       className="dscPage" // class is used in tests and other styles
@@ -497,6 +518,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                 )}
               </div>
             }
+            initialState={layoutUiState}
+            onInitialStateChange={onInitialStateChange}
           />
         </div>
       </EuiPageBody>

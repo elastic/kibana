@@ -38,17 +38,17 @@ export const researcherTool = (): RegisteredTool<typeof researcherSchema, Resear
       Notes:
         - Please include all useful information in the instructions, as the agent has no other context. `,
     schema: researcherSchema,
-    handler: async ({ instructions }, { toolProvider, request, modelProvider, runner, logger }) => {
+    handler: async ({ instructions }, context) => {
       const searchAgentResult = await runResearcherAgent(
         {
-          instructions,
-          toolProvider,
+          nextInput: { message: instructions },
+          tools: context.toolProvider,
         },
-        { request, modelProvider, runner, logger }
+        context
       );
 
       return {
-        answer: searchAgentResult.answer,
+        answer: searchAgentResult.round.assistantResponse.message,
       };
     },
     meta: {

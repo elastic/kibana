@@ -10,6 +10,7 @@ xpack.apm.enabled: false
 xpack.legacy_uptime.enabled: false
 xpack.ux.enabled: false
 xpack.uptime.enabled: false
+xpack.exploratoryView.enabled: false
 
 xpack.fleet.internal.registry.excludePackages: [
   # Oblt integrations
