@@ -137,7 +137,7 @@ describe('When the tabular page is loaded', () => {
 
     expect(rows[2]).toHaveTextContent('Elasticsearch');
     expect(rows[2]).toHaveTextContent('.elser_model_2');
-    
+
     expect(rows[3]).toHaveTextContent('Elasticsearch');
     expect(rows[3]).toHaveTextContent('.multilingual-e5-small');
 
