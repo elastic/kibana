@@ -225,10 +225,35 @@ and the migration source index is the index the `.kibana` alias points to.
 
     → [LEGACY_SET_WRITE_BLOCK](#legacy_set_write_block)
 
-6. If there are no `.kibana` indices, this is a fresh deployment. Initialize a
-   new saved objects index
+6. If there are no `.kibana` indices, this is a fresh deployment. Check cluster routing allocation and 
+   initialize a new saved objects index
+
+    → [CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION](#create_index_check_cluster_routing_allocation)
+
+7. If there is a new indices migrators (e.g. .kibana_alerting_cases). Check cluster routing allocation
+   and reindex (this is dead code and should be removed)
+
+## CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION
+
+### Next action
+
+`checkClusterRoutingAllocationEnabled`
+
+Check that replica allocation is enabled from cluster settings (`cluster.routing.allocation.enabled`). Migrations will fail when replica allocation is disabled during the bulk index operation that waits for all active shards. Migrations wait for all active shards to ensure that saved objects are replicated to protect against data loss.
+
+The Elasticsearch documentation mentions switching off replica allocation when restoring a cluster and this is a setting that might be overlooked when a restore is done. Migrations will fail early if replica allocation is incorrectly set to avoid adding a write block to the old index before running into a failure later.
+
+If replica allocation is set to 'all', the migration continues to fetch the saved object indices.
+
+### New control state
+
+1. If `cluster.routing.allocation.enabled` has a compatible value.
 
     → [CREATE_NEW_TARGET](#create_new_target)
+
+2. If it has a value that will not allow creating new *saved object* indices.
+
+    → [CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION](#create_index_check_cluster_routing_allocation)
 
 ## CREATE_NEW_TARGET
 
@@ -578,6 +603,28 @@ Set a write block on the source index to prevent any older Kibana instances from
 ### New control state
 
 → [CREATE_REINDEX_TEMP](#create_reindex_temp)
+
+## REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION
+
+### Next action
+
+`checkClusterRoutingAllocationEnabled`
+
+Check that replica allocation is enabled from cluster settings (`cluster.routing.allocation.enabled`). Migrations will fail when replica allocation is disabled during the bulk index operation that waits for all active shards. Migrations wait for all active shards to ensure that saved objects are replicated to protect against data loss.
+
+The Elasticsearch documentation mentions switching off replica allocation when restoring a cluster and this is a setting that might be overlooked when a restore is done. Migrations will fail early if replica allocation is incorrectly set to avoid adding a write block to the old index before running into a failure later.
+
+If replica allocation is set to 'all', the migration continues to fetch the saved object indices.
+
+### New control state
+
+1. If `cluster.routing.allocation.enabled` has a compatible value.
+
+    → [CREATE_REINDEX_TEMP](#create_reindex_temp)
+
+2. If it has a value that will not allow creating new *saved object* indices.
+
+    → [REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION](#reindex_check_cluster_routing_allocation)
 
 ## CREATE_REINDEX_TEMP
 
