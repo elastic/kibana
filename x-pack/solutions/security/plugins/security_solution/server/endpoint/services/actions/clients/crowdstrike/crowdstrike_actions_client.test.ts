@@ -23,7 +23,10 @@ import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
 import { CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../common/endpoint/service/response_actions/crowdstrike';
 import { BaseDataGenerator } from '../../../../../../common/endpoint/data_generators/base_data_generator';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
-import { ENDPOINT_RESPONSE_ACTION_SENT_EVENT } from '../../../../../lib/telemetry/event_based/events';
+import {
+  ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
+  ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
+} from '../../../../../lib/telemetry/event_based/events';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -257,6 +260,67 @@ describe('CrowdstrikeActionsClient class', () => {
           },
         });
       });
+
+      it('should send `isolate` action response telemetry event for successful action', async () => {
+        const actionResponse = {
+          data: {
+            errors: [],
+            action_id: '123-345-456',
+            action_status: 'successful',
+            command: 'isolate',
+            agent_type: 'crowdstrike',
+            agent_id: '1-2-3',
+          },
+        };
+        (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce(actionResponse);
+        await crowdstrikeActionsClient.isolate(
+          createCrowdstrikeIsolationOptions({ actionId: '123-345-456' })
+        );
+
+        expect(
+          classConstructorOptions.endpointService.getTelemetryService().reportEvent
+        ).toHaveBeenNthCalledWith(2, ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT.eventType, {
+          responseActions: {
+            actionId: '123-345-456',
+            actionStatus: 'successful',
+            agentType: 'crowdstrike',
+            command: 'isolate',
+          },
+        });
+      });
+
+      it('should send `isolate` action response telemetry event for failed action', async () => {
+        const actionResponse = {
+          data: {
+            errors: [
+              {
+                message: 'Failed to isolate host',
+              },
+            ],
+            action_id: '123-456-678',
+            action_status: 'failed',
+            command: 'isolate',
+            agent_type: 'crowdstrike',
+            agent_id: '1-2-3',
+          },
+        };
+        (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce(actionResponse);
+
+        await crowdstrikeActionsClient.isolate(
+          createCrowdstrikeIsolationOptions({ actionId: '123-456-678' })
+        );
+
+        expect(
+          classConstructorOptions.endpointService.getTelemetryService().reportEvent
+        ).toHaveBeenNthCalledWith(2, ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT.eventType, {
+          responseActions: {
+            actionId: '123-456-678',
+            actionStatus: 'failed',
+            agentType: 'crowdstrike',
+            command: 'isolate',
+          },
+        });
+      });
     });
   });
 
@@ -367,6 +431,67 @@ describe('CrowdstrikeActionsClient class', () => {
             agentType: 'crowdstrike',
             command: 'unisolate',
             isAutomated: false,
+          },
+        });
+      });
+
+      it('should send `release` action response telemetry event for successful action', async () => {
+        const actionResponse = {
+          data: {
+            errors: [],
+            action_id: '123-345-456',
+            action_status: 'successful',
+            command: 'unisolate',
+            agent_type: 'crowdstrike',
+            agent_id: '1-2-3',
+          },
+        };
+        (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce(actionResponse);
+        await crowdstrikeActionsClient.release(
+          createCrowdstrikeIsolationOptions({ actionId: '123-345-456' })
+        );
+
+        expect(
+          classConstructorOptions.endpointService.getTelemetryService().reportEvent
+        ).toHaveBeenNthCalledWith(2, ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT.eventType, {
+          responseActions: {
+            actionId: '123-345-456',
+            actionStatus: 'successful',
+            agentType: 'crowdstrike',
+            command: 'unisolate',
+          },
+        });
+      });
+
+      it('should send `release` action response telemetry event for failed action', async () => {
+        const actionResponse = {
+          data: {
+            errors: [
+              {
+                message: 'Failed to release host',
+              },
+            ],
+            action_id: '123-456-678',
+            action_status: 'failed',
+            command: 'unisolate',
+            agent_type: 'crowdstrike',
+            agent_id: '1-2-3',
+          },
+        };
+        (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce(actionResponse);
+
+        await crowdstrikeActionsClient.release(
+          createCrowdstrikeIsolationOptions({ actionId: '123-456-678' })
+        );
+
+        expect(
+          classConstructorOptions.endpointService.getTelemetryService().reportEvent
+        ).toHaveBeenNthCalledWith(2, ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT.eventType, {
+          responseActions: {
+            actionId: '123-456-678',
+            actionStatus: 'failed',
+            agentType: 'crowdstrike',
+            command: 'unisolate',
           },
         });
       });
@@ -499,6 +624,69 @@ describe('CrowdstrikeActionsClient class', () => {
             agentType: 'crowdstrike',
             command: 'runscript',
             isAutomated: false,
+          },
+        });
+      });
+
+      it('should send `runscript` action response telemetry event for successful action', async () => {
+        const actionResponse = {
+          actionId: '123-abc-678',
+          data: undefined,
+          status: 'ok',
+        };
+        (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce(actionResponse);
+
+        await crowdstrikeActionsClient.runscript(
+          createCrowdstrikeRunscrtiptOptions({
+            actionId: '123-abc-678',
+            endpoint_ids: ['1-2-3-cs-agent'],
+            comment: 'test runscript comment',
+            parameters: {
+              raw: 'echo "Hello World"',
+            },
+          })
+        );
+
+        expect(
+          classConstructorOptions.endpointService.getTelemetryService().reportEvent
+        ).toHaveBeenNthCalledWith(2, ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT.eventType, {
+          responseActions: {
+            actionId: '123-abc-678',
+            actionStatus: 'successful',
+            agentType: 'crowdstrike',
+            command: 'runscript',
+          },
+        });
+      });
+
+      // FIXME: What is the correct way to create a failed CS action response
+      it.skip('should send `runscript` action response telemetry event for failed action', async () => {
+        const actionResponse = {
+          actionId: '456-pqr-789',
+          status: 'error',
+          message: 'Failed to run script on host',
+          serviceMessage: 'Failed to run script on host',
+        };
+        (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce(actionResponse);
+
+        await crowdstrikeActionsClient.runscript(
+          createCrowdstrikeRunscrtiptOptions({
+            actionId: '456-pqr-789',
+            endpoint_ids: ['1-2-3-cs-agent'],
+            parameters: {
+              raw: 'echo "Hello World"',
+            },
+          })
+        );
+
+        expect(
+          classConstructorOptions.endpointService.getTelemetryService().reportEvent
+        ).toHaveBeenNthCalledWith(2, ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT.eventType, {
+          responseActions: {
+            actionId: '456-pqr-789',
+            actionStatus: 'failed',
+            agentType: 'crowdstrike',
+            command: 'runscript',
           },
         });
       });
