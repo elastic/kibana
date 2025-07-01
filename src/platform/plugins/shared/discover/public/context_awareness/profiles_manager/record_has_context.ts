@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './context_awareness';
-export * from './data_table_record_with_context';
-export * from './profiles';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecordWithContext } from './scoped_profiles_manager';
+
+export const recordHasContext = (
+  record: DataTableRecord | undefined
+): record is DataTableRecordWithContext => {
+  return Boolean(record && 'context' in record);
+};

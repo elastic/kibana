@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './context_awareness';
-export * from './data_table_record_with_context';
-export * from './profiles';
+// eslint-disable-next-line import/no-default-export
+export { ProfilesInspectorView as default } from './profiles_inspector_view';
