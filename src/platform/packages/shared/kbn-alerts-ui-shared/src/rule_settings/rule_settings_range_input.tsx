@@ -34,7 +34,7 @@ export const RuleSettingsRangeInput = memo((props: RuleSettingsRangeInputProps) 
           <EuiIconTip
             color="subdued"
             size="s"
-            type="questionInCircle"
+            type="question"
             content={labelPopoverText}
             aria-label={labelPopoverText}
           />
