@@ -39,7 +39,7 @@ import {
 } from '../antlr/esql_parser';
 import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
 import type { ESQLAst } from '../types';
-import { createCommand, createFunction, createLiteral, textExistsAndIsValid } from './factories';
+import { createCommand, createFunction, textExistsAndIsValid } from './factories';
 import { createChangePointCommand } from './factories/change_point';
 import { createDissectCommand } from './factories/dissect';
 import { createEvalCommand } from './factories/eval';
@@ -52,13 +52,13 @@ import { createRowCommand } from './factories/row';
 import { createSortCommand } from './factories/sort';
 import { createStatsCommand } from './factories/stats';
 import { createWhereCommand } from './factories/where';
+import { createMvExpandCommand } from './factories/mv_expand';
+import { createKeepCommand } from './factories/keep';
+import { createDropCommand } from './factories/drop';
+import { createRenameCommand } from './factories/rename';
+import { createSampleCommand } from './factories/sample';
 import { getPosition } from './helpers';
-import {
-  collectAllAggFields,
-  collectAllColumnIdentifiers,
-  visitByOption,
-  visitRenameClauses,
-} from './walkers';
+import { collectAllAggFields, visitByOption } from './walkers';
 import { createTimeseriesCommand } from './factories/timeseries';
 import { createRerankCommand } from './factories/rerank';
 import { createEnrichCommand } from './factories/enrich';
@@ -215,9 +215,11 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitKeepCommand(ctx: KeepCommandContext) {
-    const command = createCommand('keep', ctx);
+    if (this.inFork) {
+      return;
+    }
+    const command = createKeepCommand(ctx);
     this.ast.push(command);
-    command.args.push(...collectAllColumnIdentifiers(ctx));
   }
 
   /**
@@ -225,9 +227,11 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitDropCommand(ctx: DropCommandContext) {
-    const command = createCommand('drop', ctx);
+    if (this.inFork) {
+      return;
+    }
+    const command = createDropCommand(ctx);
     this.ast.push(command);
-    command.args.push(...collectAllColumnIdentifiers(ctx));
   }
 
   /**
@@ -235,9 +239,11 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitRenameCommand(ctx: RenameCommandContext) {
-    const command = createCommand('rename', ctx);
+    if (this.inFork) {
+      return;
+    }
+    const command = createRenameCommand(ctx);
     this.ast.push(command);
-    command.args.push(...visitRenameClauses(ctx.renameClause_list()));
   }
 
   /**
@@ -269,9 +275,11 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitMvExpandCommand(ctx: MvExpandCommandContext) {
-    const command = createCommand('mv_expand', ctx);
+    if (this.inFork) {
+      return;
+    }
+    const command = createMvExpandCommand(ctx);
     this.ast.push(command);
-    command.args.push(...collectAllColumnIdentifiers(ctx));
   }
 
   /**
@@ -288,6 +296,9 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitEnrichCommand(ctx: EnrichCommandContext) {
+    if (this.inFork) {
+      return;
+    }
     const command = createEnrichCommand(ctx);
 
     this.ast.push(command);
@@ -305,6 +316,9 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitJoinCommand(ctx: JoinCommandContext): void {
+    if (this.inFork) {
+      return;
+    }
     const command = createJoinCommand(ctx);
 
     this.ast.push(command);
@@ -377,12 +391,11 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
   }
 
   exitSampleCommand(ctx: SampleCommandContext): void {
-    const command = createCommand('sample', ctx);
-    this.ast.push(command);
-
-    if (ctx._probability) {
-      command.args.push(createLiteral('double', ctx._probability.DECIMAL_LITERAL()));
+    if (this.inFork) {
+      return;
     }
+    const command = createSampleCommand(ctx);
+    this.ast.push(command);
   }
 
   /**

@@ -109,10 +109,14 @@ describe('list expressions', () => {
   describe('tuple list', () => {
     test('can print comments around the tuple', () => {
       assertPrint('FROM a | WHERE b IN /* 1 */ /* 2 */ (1, 2, 3) /* 3 */');
+      assertPrint('FROM a | WHERE b NOT IN /* 1 */ /* 2 */ (1, 2, 3) /* 3 */');
     });
 
     test('can print comments inside the tuple', () => {
       assertPrint('FROM a | WHERE b IN (/* 1 */ 1 /* 2 */, /* 3 */ 2 /* 4 */, /* 5 */ 3 /* 6 */)');
+      assertPrint(
+        'FROM a | WHERE b NOT IN (/* 1 */ 1 /* 2 */, /* 3 */ 2 /* 4 */, /* 5 */ 3 /* 6 */)'
+      );
       assertPrint(
         'FROM a | WHERE b IN /* 0 */ (/* 1 */ 1 /* 2 */, /* 3 */ 2 /* 4 */, /* 5 */ 3 /* 6 */) /* 7 */'
       );
@@ -229,7 +233,11 @@ describe('commands', () => {
     });
   });
 
-  describe('RERANK', () => {
+  /**
+   * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
+   * get back to it after 9.1 release.
+   */
+  describe.skip('RERANK', () => {
     test('comments around all elements', () => {
       assertPrint(
         'FROM a | /*0*/ RERANK /*1*/ "query" /*2*/ ON /*3*/ field /*4*/ WITH /*5*/ id /*6*/'

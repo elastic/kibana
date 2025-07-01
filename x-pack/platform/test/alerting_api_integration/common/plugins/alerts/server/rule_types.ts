@@ -19,6 +19,9 @@ import type {
   RuleTypeParams,
 } from '@kbn/alerting-plugin/server';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { Dataset, createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
+import { alertFieldMap } from '@kbn/alerts-as-data-utils';
 import type { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 
 export const EscapableStrings = {
@@ -1295,6 +1298,112 @@ export function defineRuleTypes(
   { alerting, ruleRegistry }: Pick<FixtureSetupDeps, 'alerting' | 'ruleRegistry'>,
   logger: Logger
 ) {
+  const ruleDataClient = ruleRegistry.ruleDataService.initializeIndex({
+    feature: 'AlertingExample',
+    registrationContext: 'test.dangerouslycreatealertsinallspaces',
+    dataset: Dataset.alerts,
+    componentTemplateRefs: [],
+    componentTemplates: [
+      {
+        name: 'mappings',
+        mappings: mappingFromFieldMap(alertFieldMap, false),
+      },
+    ],
+  });
+
+  const persistenceRuleTypeWrapper = createPersistenceRuleTypeWrapper({
+    ruleDataClient,
+    logger,
+    formatAlert: undefined,
+  });
+
+  const dangerouslyCreateAlertsInAllSpacesPersistenceRuleType = persistenceRuleTypeWrapper({
+    id: 'test.persistenceDangerouslyCreateAlertsInAllSpaces',
+    name: 'Test Persistence Rule Type - All Spaces',
+    validate: { params: schema.any() },
+    defaultActionGroupId: 'default',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    minimumLicenseRequired: 'basic',
+    category: 'kibana',
+    producer: 'alertsFixture',
+    solution: 'stack',
+    isExportable: true,
+    async executor(ruleExecutorOptions) {
+      const { services } = ruleExecutorOptions;
+      const { alertWithPersistence } = services;
+
+      // generate some alerts
+      const alerts = range(0, 5).map((i) => {
+        const id = uuidv4();
+        return {
+          _id: id,
+          _source: {
+            original_source: {
+              _id: `${id}-${i}`,
+              '@timestamp': new Date().toISOString(),
+            },
+          },
+        };
+      });
+
+      await alertWithPersistence(alerts, true, 100);
+
+      return { state: {} };
+    },
+    autoRecoverAlerts: false,
+    alerts: {
+      context: 'test.dangerouslycreatealertsinallspaces',
+      mappings: { dynamic: false, fieldMap: { ...alertFieldMap } },
+      shouldWrite: false,
+      isSpaceAware: false,
+      dangerouslyCreateAlertsInAllSpaces: true,
+    },
+  });
+
+  const dangerouslyCreateAlertsInAllSpacesRuleType: RuleType<
+    {},
+    {},
+    {},
+    {},
+    {},
+    'default',
+    'recovered',
+    { original_source: { _id: string } }
+  > = {
+    id: 'test.dangerouslyCreateAlertsInAllSpaces',
+    name: 'Test Alerts Client Rule Type - All Spaces',
+    validate: { params: schema.any() },
+    defaultActionGroupId: 'default',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    minimumLicenseRequired: 'basic',
+    category: 'kibana',
+    producer: 'alertsFixture',
+    solution: 'stack',
+    isExportable: true,
+    async executor(ruleExecutorOptions) {
+      const { services } = ruleExecutorOptions;
+      const { alertsClient } = services;
+
+      range(0, 5).forEach((i) => {
+        alertsClient?.report({
+          id: `instance-${i}`,
+          actionGroup: 'default',
+          payload: { original_source: { _id: `instance-${i}` } },
+        });
+      });
+
+      return { state: {} };
+    },
+    autoRecoverAlerts: false,
+    alerts: {
+      context: 'test.dangerouslycreatealertsinallspaces',
+      mappings: { dynamic: false, fieldMap: { ...alertFieldMap } },
+      shouldWrite: true,
+      isSpaceAware: false,
+      dangerouslyCreateAlertsInAllSpaces: true,
+    },
+  };
+
   const noopRuleType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.noop',
     name: 'Test: Noop',
@@ -1567,4 +1676,6 @@ export function defineRuleTypes(
   alerting.registerType(getWaitingRuleType(logger));
   alerting.registerType(getSeverityRuleType());
   alerting.registerType(getInternalRuleType());
+  alerting.registerType(dangerouslyCreateAlertsInAllSpacesPersistenceRuleType);
+  alerting.registerType(dangerouslyCreateAlertsInAllSpacesRuleType);
 }

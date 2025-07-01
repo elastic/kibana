@@ -46,6 +46,7 @@ interface GetLatencyChartParams {
   signal: AbortSignal;
   spanName: string;
   serviceName: string;
+  isOtelSpan: boolean;
 }
 
 const getSpanLatencyChart = ({
@@ -53,6 +54,7 @@ const getSpanLatencyChart = ({
   signal,
   spanName,
   serviceName,
+  isOtelSpan,
 }: GetLatencyChartParams): Promise<{
   overallHistogram?: HistogramItem[];
   percentileThresholdValue?: number;
@@ -65,6 +67,7 @@ const getSpanLatencyChart = ({
       spanName,
       serviceName,
       chartType: 'spanLatency',
+      isOtel: isOtelSpan,
       end: timeFilter.to,
       environment: 'ENVIRONMENT_ALL',
       kuery: '',
@@ -83,9 +86,14 @@ interface SpanLatencyChartData {
 interface UseSpanLatencyChartParams {
   spanName: string;
   serviceName: string;
+  isOtelSpan?: boolean;
 }
 
-export const useSpanLatencyChart = ({ spanName, serviceName }: UseSpanLatencyChartParams) => {
+export const useSpanLatencyChart = ({
+  spanName,
+  serviceName,
+  isOtelSpan = false,
+}: UseSpanLatencyChartParams) => {
   const { core } = getUnifiedDocViewerServices();
   const { euiTheme } = useEuiTheme();
 
@@ -100,6 +108,7 @@ export const useSpanLatencyChart = ({ spanName, serviceName }: UseSpanLatencyCha
         signal,
         spanName,
         serviceName,
+        isOtelSpan,
       });
 
       return {

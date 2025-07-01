@@ -358,7 +358,7 @@
         "label": "DurationDistributionChart",
         "description": [],
         "signature": [
-          "({\n  data,\n  hasData,\n  markerCurrentEvent,\n  markerValue,\n  onChartSelection,\n  selection,\n  loading,\n  hasError,\n  eventType,\n  dataTestSubPrefix,\n  showAxisTitle = true,\n  showLegend = true,\n}: DurationDistributionChartProps) => React.JSX.Element"
+          "({\n  data,\n  hasData,\n  markerCurrentEvent,\n  markerValue,\n  onChartSelection,\n  selection,\n  loading,\n  hasError,\n  eventType,\n  dataTestSubPrefix,\n  showAxisTitle = true,\n  showLegend = true,\n  isOtelData = false,\n}: DurationDistributionChartProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration_distribution_chart/index.tsx",
         "deprecated": false,
@@ -369,7 +369,7 @@
             "id": "def-public.DurationDistributionChart.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  data,\n  hasData,\n  markerCurrentEvent,\n  markerValue,\n  onChartSelection,\n  selection,\n  loading,\n  hasError,\n  eventType,\n  dataTestSubPrefix,\n  showAxisTitle = true,\n  showLegend = true,\n}",
+            "label": "{\n  data,\n  hasData,\n  markerCurrentEvent,\n  markerValue,\n  onChartSelection,\n  selection,\n  loading,\n  hasError,\n  eventType,\n  dataTestSubPrefix,\n  showAxisTitle = true,\n  showLegend = true,\n  isOtelData = false,\n}",
             "description": [],
             "signature": [
               "DurationDistributionChartProps"

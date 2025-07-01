@@ -109,7 +109,7 @@ export function CoreVitalItem({
         description={
           <>
             {title}
-            <EuiIconTip content={helpLabel} type="questionInCircle" />
+            <EuiIconTip content={helpLabel} type="question" />
           </>
         }
         isLoading={loading}

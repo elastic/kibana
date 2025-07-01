@@ -110,7 +110,7 @@ export class AnonymizationService {
 
         // Update hashMap
         entities.forEach((e) => {
-          this.currentHashMap.set(e.hash, {
+          this.currentHashMap.set(e.class_name + '_' + e.hash, {
             value: e.entity,
             class_name: e.class_name,
             type: e.type,
@@ -217,5 +217,25 @@ export class AnonymizationService {
         })
       );
     };
+  }
+  isEnabled(): boolean {
+    return this.rules.some((rule) => rule.enabled);
+  }
+  getAnonymizationInstruction(): string {
+    if (!this.isEnabled()) return '';
+
+    const nerClasses = ['PER', 'LOC', 'ORG', 'MISC'];
+    const regexClasses = this.rules
+      .filter((rule) => rule.type === 'regex' && rule.enabled)
+      .map((rule) => (rule as RegexAnonymizationRule).entityClass);
+
+    const allClasses = [...nerClasses, ...regexClasses];
+    const exampleTokens = allClasses.map((c) => `\`${c}_abc123\``).join(', ');
+
+    return `Some entities in this conversation have been anonymized using placeholder tokens (e.g., ${exampleTokens}).
+  These represent named entities such as people (PER), locations (LOC), organizations (ORG), and miscellaneous types (MISC), ${
+    regexClasses.length ? `as well as custom types like ${regexClasses.join(', ')}. ` : ''
+  }
+  Do not attempt to infer their meaning, type, or real-world identity. Refer to them exactly as they appear unless explicitly resolved or described.`;
   }
 }

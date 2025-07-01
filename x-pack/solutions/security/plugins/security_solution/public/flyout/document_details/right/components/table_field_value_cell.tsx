@@ -70,11 +70,7 @@ export const TableFieldValueCell = memo(
     }
 
     return (
-      <EuiFlexGroup
-        data-test-subj={`event-field-${data.field}`}
-        direction="column"
-        gutterSize="none"
-      >
+      <EuiFlexGroup data-test-subj={`event-field-${data.field}`} direction="column" gutterSize="xs">
         {values.map((value, i) => {
           if (fieldFromBrowserField == null) {
             return (
