@@ -93,7 +93,7 @@ export const RuleSettingsFlappingTitleTooltip = (props: RuleSettingsFlappingTitl
             data-test-subj="ruleSettingsFlappingTitleTooltipButton"
             display="empty"
             color="primary"
-            iconType="questionInCircle"
+            iconType="question"
             aria-label={alertFlappingTitleInfo}
             onClick={() => setIsPopoverOpen(!isOpen)}
           />
