@@ -13,9 +13,9 @@ import type { MlStartDependencies } from '../plugin';
 import { registerAnomalySwimLaneCasesAttachment } from './register_anomaly_swim_lane_attachment';
 
 export function registerCasesAttachments(
-  cases?: CasesPublicSetup,
   coreStart: CoreStart,
-  pluginStart: MlStartDependencies
+  pluginStart: MlStartDependencies,
+  cases?: CasesPublicSetup
 ) {
   if (!cases) {
     return;
