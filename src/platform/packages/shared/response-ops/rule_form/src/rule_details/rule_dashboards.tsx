@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { debounce } from 'lodash';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { dashboardServiceProvider, type DashboardItem } from '../common/services/dashboard_service';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
@@ -31,7 +30,6 @@ import { LabelWithTooltip } from './label_with_tooltip';
 
 export interface Props {
   contentManagement: ContentManagementPublicStart;
-  spaces?: SpacesPluginStart;
 }
 
 interface DashboardOption {
@@ -39,7 +37,7 @@ interface DashboardOption {
   label: string;
 }
 
-export const RuleDashboards = ({ contentManagement, spaces }: Props) => {
+export const RuleDashboards = ({ contentManagement }: Props) => {
   const { formData } = useRuleFormState();
   const dispatch = useRuleFormDispatch();
   const dashboardsFormData = useMemo(

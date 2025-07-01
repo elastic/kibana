@@ -38,30 +38,6 @@ describe('DashboardService', () => {
     searchMock.mockRestore();
   });
 
-  test('should fetch dashboards from a specific space ', async () => {
-    // arrange
-    const searchMock = jest.spyOn(contentManagement.client, 'search').mockResolvedValue({
-      total: 0,
-      hits: [],
-    });
-
-    const resp = await dashboardService.fetchDashboards({ text: 'test*' });
-
-    expect(searchMock).toHaveBeenCalledWith({
-      contentTypeId: 'dashboard',
-      query: {
-        text: 'test*',
-      },
-      options: {
-        fields: ['title', 'description'],
-        includeReferences: ['tag'],
-      },
-    });
-    expect(resp).toEqual([]);
-
-    searchMock.mockRestore();
-  });
-
   test('should fetch dashboard by id', async () => {
     // mock get to resolve with a dashboard
     const getMock = jest.spyOn(contentManagement.client, 'get').mockResolvedValue({
