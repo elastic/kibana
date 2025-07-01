@@ -126,7 +126,16 @@ export class ShareRegistry implements ShareRegistryPublicApi {
   }
 
   private registerShareIntegration<I extends ShareIntegration>(
-    ...args: [string, Omit<I, 'shareType'>] | [Omit<I, 'shareType'>]
+    shareObject: string,
+    shareActionIntent: Omit<I, 'shareType'>
+  ): void;
+  private registerShareIntegration<I extends ShareIntegration>(
+    shareActionIntent: Omit<I, 'shareType'>
+  ): void;
+  private registerShareIntegration<I extends ShareIntegration>(
+    ...args:
+      | [shareObject: string, shareActionIntent: Omit<I, 'shareType'>]
+      | [shareActionIntent: Omit<I, 'shareType'>]
   ): void {
     const [shareObject, shareActionIntent] =
       args.length === 1 ? [this.globalMarker, args[0]] : args;

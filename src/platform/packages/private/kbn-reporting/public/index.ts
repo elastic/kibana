@@ -14,6 +14,7 @@ export { InternalApiClientProvider, useInternalApiClient } from './context';
 export { useCheckIlmPolicyStatus } from './hooks';
 export { ReportingAPIClient } from './reporting_api_client';
 export { checkLicense } from './license_check';
+export type { ReportingSharingData } from './share';
 
 import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';

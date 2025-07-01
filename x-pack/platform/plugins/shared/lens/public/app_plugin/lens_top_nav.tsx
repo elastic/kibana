@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
@@ -47,6 +47,7 @@ import {
   getShareURL,
 } from './share_action';
 import { getDatasourceLayers } from '../state_management/utils';
+import { LensSharingData } from './share_integrations/types';
 
 function getSaveButtonMeta({
   contextFromEmbeddable,
@@ -633,7 +634,8 @@ export const LensTopNavMenu = ({
         ) ?? [];
       const datatables =
         exportDatatables.length > 0 ? exportDatatables : Object.values(activeData ?? {});
-      const sharingData = {
+
+      const sharingData: LensSharingData = {
         datatables,
         csvEnabled,
         reportingDisabled: !csvEnabled,
@@ -647,6 +649,11 @@ export const LensTopNavMenu = ({
             activeVisualization.getReportingLayout?.(visualization.state) ??
             DEFAULT_LENS_LAYOUT_DIMENSIONS,
         },
+        getSerializedState: () => ({
+          // TODO formalize this structure to align with api input, Lens CM and new Lens SO
+          attributes: omit(currentDoc ?? initialInput?.attributes, 'savedObjectId', 'references'),
+          references: currentDoc?.references ?? initialInput?.attributes?.references ?? [],
+        }),
       };
 
       share.toggleShareContextMenu({
@@ -763,7 +770,8 @@ export const LensTopNavMenu = ({
             },
           },
         },
-        sharingData,
+        // TODO improve sharingData type in the shared plugin
+        sharingData: sharingData as unknown as { [key: string]: unknown },
         // only want to know about changes when savedObjectURL.href
         isDirty: isCurrentStateDirty || !currentDoc?.savedObjectId,
         onClose: () => {

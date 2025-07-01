@@ -15,12 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { ExportShare } from '@kbn/share-plugin/public/types';
 import { FormatFactory } from '../../../common/types';
-
-export interface CSVSharingData {
-  title: string;
-  datatables: Datatable[];
-  csvEnabled: boolean;
-}
+import { LensSharingData } from './types';
 
 declare global {
   interface Window {
@@ -40,7 +35,7 @@ async function downloadCSVs({
 }: {
   formatFactory: FormatFactory;
   uiSettings: IUiSettingsClient;
-} & Pick<CSVSharingData, 'title' | 'datatables'>) {
+} & Pick<LensSharingData, 'title' | 'datatables'>) {
   if (datatables.length === 0) {
     if (window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG) {
       window.ELASTIC_LENS_CSV_CONTENT = undefined;
@@ -105,7 +100,7 @@ interface DownloadPanelShareOpts {
   atLeastGold: () => boolean;
 }
 
-export const downloadCsvLensShareProvider = ({
+export const registerCsvExportIntegration = ({
   uiSettings,
   formatFactoryFn,
   atLeastGold,
@@ -116,7 +111,7 @@ export const downloadCsvLensShareProvider = ({
     groupId: 'export',
     config({ sharingData }) {
       // TODO fix sharingData types
-      const { title, datatables, csvEnabled } = sharingData as unknown as CSVSharingData;
+      const { title, datatables, csvEnabled } = sharingData as unknown as LensSharingData;
 
       const panelTitle = i18n.translate(
         'xpack.lens.reporting.shareContextMenu.csvReportsButtonLabel',

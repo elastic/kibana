@@ -47,6 +47,7 @@ import type { DraggingIdentifier, DragDropIdentifier, DropType } from '@kbn/dom-
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
+import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import type { DateRange, LayerType, SortingHint } from '../common/types';
 import type {
   LensSortActionData,
@@ -1373,7 +1374,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   /**
    * A visualization can return custom dimensions for the reporting tool
    */
-  getReportingLayout?: (state: T) => { height: number; width: number };
+  getReportingLayout?: (state: T) => LayoutParams['dimensions'];
   /**
    * Get all datatables to be exported as csv
    */

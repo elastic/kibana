@@ -141,7 +141,6 @@ export function SaveModalContainer({
     if (attributeService && lastKnownDoc) {
       await runSaveLensVisualization(
         {
-          ...lensServices,
           lastKnownDoc,
           initialInput,
           redirectTo,

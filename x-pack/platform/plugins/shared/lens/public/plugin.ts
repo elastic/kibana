@@ -135,7 +135,10 @@ import { setupExpressions } from './expressions';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
 import { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
-import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
+import {
+  registerCsvExportIntegration,
+  registerJsonExportIntegration,
+} from './app_plugin/share_integrations';
 import { LensDocument } from './persistence/saved_object_store';
 import {
   CONTENT_ID,
@@ -335,8 +338,6 @@ export class LensPlugin {
       embeddable,
       visualizations,
       charts,
-      globalSearch,
-      usageCollection,
       uiActionsEnhanced,
       share,
       contentManagement,
@@ -428,7 +429,7 @@ export class LensPlugin {
 
       share.registerShareIntegration<ExportShare>(
         'lens',
-        downloadCsvLensShareProvider({
+        registerCsvExportIntegration({
           uiSettings: core.uiSettings,
           formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
           atLeastGold: () => {
@@ -442,6 +443,14 @@ export class LensPlugin {
           },
         })
       );
+
+      core.getStartServices().then(([{ featureFlags }]) => {
+        const jsonSourceEnabled = featureFlags.getBooleanValue('lens.jsonDownloadLens', false);
+
+        if (jsonSourceEnabled) {
+          share.registerShareIntegration<ExportShare>('lens', registerJsonExportIntegration());
+        }
+      });
     }
 
     visualizations.registerAlias(lensVisTypeAlias);
