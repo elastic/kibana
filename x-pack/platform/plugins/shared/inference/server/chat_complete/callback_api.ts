@@ -33,6 +33,7 @@ import { retryWithExponentialBackoff } from '../../common/utils/retry_with_expon
 import { getRetryFilter } from '../../common/utils/error_retry_filter';
 import { anonymizeMessages } from './anonymization/anonymize_messages';
 import { deanonymizeMessage } from './anonymization/deanonymize_message';
+import { addAnonymizationInstruction } from './anonymization/add_anonymization_instruction';
 
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
@@ -124,7 +125,6 @@ export function createChatCompleteCallbackApi({
             })
           ).pipe(
             switchMap((anonymization) => {
-              const anonymizedSystem = anonymization.system ?? system;
               const connector = executor.getConnector();
               const connectorType = connector.type;
               const inferenceAdapter = getInferenceAdapter(connectorType);
@@ -137,10 +137,13 @@ export function createChatCompleteCallbackApi({
                   )
                 );
               }
+              const systemWithAnonymizationInstructions = anonymization.system
+                ? addAnonymizationInstruction(anonymization.system, anonymizationRules)
+                : system;
 
               return withChatCompleteSpan(
                 {
-                  system: anonymizedSystem,
+                  system: systemWithAnonymizationInstructions,
                   messages: anonymization.messages,
                   tools,
                   toolChoice,
@@ -153,7 +156,7 @@ export function createChatCompleteCallbackApi({
                 () => {
                   return inferenceAdapter
                     .chatComplete({
-                      system: anonymizedSystem,
+                      system: systemWithAnonymizationInstructions,
                       executor,
                       messages: anonymization.messages,
                       toolChoice,
