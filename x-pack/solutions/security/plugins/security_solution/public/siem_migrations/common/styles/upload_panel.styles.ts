@@ -7,7 +7,7 @@
 
 import { css } from '@emotion/css';
 
-export const useStyles = (compressed: boolean) => {
+export const useUploadPanelStyles = (compressed: boolean) => {
   const logoSize = compressed ? '32px' : '88px';
   return css`
     .siemMigrationsIcon {

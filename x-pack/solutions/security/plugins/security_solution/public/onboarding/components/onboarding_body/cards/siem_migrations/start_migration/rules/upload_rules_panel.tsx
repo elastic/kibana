@@ -14,13 +14,13 @@ import {
   EuiButtonEmpty,
   EuiPanel,
 } from '@elastic/eui';
-import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
-import { RuleMigrationsReadMore } from '../../../../../../siem_migrations/rules/components/migration_status_panels/read_more';
-import { SiemMigrationsIcon } from '../../../../../../siem_migrations/common/icon';
+import { useUploadPanelStyles } from '../../../../../../../siem_migrations/common/styles/upload_panel.styles';
+import { START_MIGRATION_TITLE_CLASS_NAME } from '../../../../../../../siem_migrations/common/styles';
+import { useKibana } from '../../../../../../../common/lib/kibana/kibana_react';
+import { RuleMigrationsReadMore } from '../../../../../../../siem_migrations/rules/components/migration_status_panels/read_more';
+import { SiemMigrationsIcon } from '../../../../../../../siem_migrations/common/icon';
 import * as i18n from './translations';
-import { TITLE_CLASS_NAME } from './start_migration_card.styles';
-import { useRuleMigrationDataInputContext } from '../../../../../../siem_migrations/rules/components/data_input_flyout/context';
-import { useStyles } from './upload_rules_panel.styles';
+import { useRuleMigrationDataInputContext } from '../../../../../../../siem_migrations/rules/components/data_input_flyout/context';
 
 export interface UploadRulesPanelProps {
   isUploadMore?: boolean;
@@ -33,7 +33,7 @@ export interface UploadRulesSectionPanelProps extends UploadRulesPanelProps {
 
 export const UploadRulesSectionPanel = React.memo<UploadRulesSectionPanelProps>(
   function UploadRulesSectionPanel({ isUploadMore = false, isDisabled = false, onOpenFlyout }) {
-    const styles = useStyles(isUploadMore);
+    const styles = useUploadPanelStyles(isUploadMore);
 
     return (
       <EuiPanel hasShadow={false} hasBorder paddingSize={isUploadMore ? 'm' : 'l'}>
@@ -48,13 +48,13 @@ export const UploadRulesSectionPanel = React.memo<UploadRulesSectionPanelProps>(
           </EuiFlexItem>
           <EuiFlexItem>
             {isUploadMore ? (
-              <EuiText size="s" className={TITLE_CLASS_NAME}>
+              <EuiText size="s" className={START_MIGRATION_TITLE_CLASS_NAME}>
                 <p>{i18n.START_MIGRATION_CARD_UPLOAD_MORE_TITLE}</p>
               </EuiText>
             ) : (
               <EuiFlexGroup direction="column" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiText size="m" className={TITLE_CLASS_NAME}>
+                  <EuiText size="m" className={START_MIGRATION_TITLE_CLASS_NAME}>
                     <p>{i18n.START_MIGRATION_CARD_UPLOAD_TITLE}</p>
                   </EuiText>
                 </EuiFlexItem>

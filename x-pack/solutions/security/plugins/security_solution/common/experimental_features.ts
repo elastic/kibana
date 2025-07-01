@@ -279,6 +279,10 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables advanced mode for Trusted Apps creation and update
    */
   trustedAppsAdvancedMode: false,
+  /**
+   * Enables the ability to import and migration dashboards through automatic migration service
+   */
+  automaticDashboardsMigration: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
@@ -294,7 +298,6 @@ const disableExperimentalPrefix = 'disable:' as const;
  * Use the `disable:` prefix to disable a feature.
  *
  * @param configValue
- * @throws SecuritySolutionInvalidExperimentalValue
  */
 export const parseExperimentalConfigValue = (
   configValue: string[]

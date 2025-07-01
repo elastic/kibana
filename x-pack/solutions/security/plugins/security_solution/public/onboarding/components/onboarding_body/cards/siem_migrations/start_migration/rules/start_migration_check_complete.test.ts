@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
-import { createStartServicesMock } from '../../../../../../common/lib/kibana/kibana_react.mock';
-import type { SiemMigrationsService } from '../../../../../../siem_migrations/service';
+import { SiemMigrationTaskStatus } from '../../../../../../../../common/siem_migrations/constants';
+import { createStartServicesMock } from '../../../../../../../common/lib/kibana/kibana_react.mock';
+import type { SiemMigrationsService } from '../../../../../../../siem_migrations/service';
 import { checkStartMigrationCardComplete } from './start_migration_check_complete';
 
 describe('startMigrationCheckComplete', () => {
