@@ -5461,6 +5461,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dot-text-loader@link:src/platform/packages/private/kbn-dot-text-loader":
+  version "0.0.0"
+  uid ""
+
+"@kbn/dot-text@link:src/platform/packages/private/kbn-dot-text":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ebt-tools@link:src/platform/packages/shared/kbn-ebt-tools":
   version "0.0.0"
   uid ""
