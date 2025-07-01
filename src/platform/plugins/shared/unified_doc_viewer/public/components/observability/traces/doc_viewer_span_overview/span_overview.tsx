@@ -22,6 +22,7 @@ import { getFlattenedSpanDocumentOverview } from '@kbn/discover-utils/src';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo } from 'react';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
+import { useFieldTypes } from '../../../../hooks/use_field_types';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { Trace } from '../components/trace';
 import { RootSpanProvider } from './hooks/use_root_span';
@@ -55,6 +56,7 @@ export function SpanOverview({
   showWaterfall = true,
   showActions = true,
   dataView,
+  columnsMeta,
 }: SpanOverviewProps) {
   const { fieldFormats } = getUnifiedDocViewerServices();
   const { formattedDoc, flattenedDoc } = useMemo(
@@ -64,6 +66,7 @@ export function SpanOverview({
     }),
     [dataView, fieldFormats, hit]
   );
+  const { docFieldTypes } = useFieldTypes({ doc: flattenedDoc, dataView, columnsMeta });
   const fieldConfigurations = useMemo(
     () => getSpanFieldConfiguration({ attributes: formattedDoc, flattenedDoc }),
     [formattedDoc, flattenedDoc]
@@ -110,6 +113,7 @@ export function SpanOverview({
                     <SpanSummaryField
                       key={fieldId}
                       fieldId={fieldId}
+                      fieldType={docFieldTypes[fieldId]}
                       fieldConfiguration={fieldConfigurations[fieldId]}
                       showActions={showActions}
                     />

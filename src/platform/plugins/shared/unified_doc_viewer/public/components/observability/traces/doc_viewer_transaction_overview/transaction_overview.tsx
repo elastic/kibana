@@ -20,6 +20,7 @@ import {
   TRANSACTION_ID_FIELD,
 } from '@kbn/discover-utils';
 import { getFlattenedTransactionDocumentOverview } from '@kbn/discover-utils/src';
+import { useFieldTypes } from '../../../../hooks/use_field_types';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { transactionFields } from './resources/fields';
 import { getTransactionFieldConfiguration } from './resources/get_transaction_field_configuration';
@@ -53,6 +54,7 @@ export function TransactionOverview({
   showWaterfall = true,
   showActions = true,
   dataView,
+  columnsMeta,
 }: TransactionOverviewProps) {
   const { fieldFormats } = getUnifiedDocViewerServices();
   const { formattedDoc, flattenedDoc } = useMemo(
@@ -62,7 +64,7 @@ export function TransactionOverview({
     }),
     [dataView, fieldFormats, hit]
   );
-
+  const { docFieldTypes } = useFieldTypes({ doc: flattenedDoc, dataView, columnsMeta });
   const transactionDuration = flattenedDoc[TRANSACTION_DURATION_FIELD];
   const fieldConfigurations = useMemo(
     () => getTransactionFieldConfiguration({ attributes: formattedDoc, flattenedDoc }),
@@ -98,6 +100,7 @@ export function TransactionOverview({
                   <TransactionSummaryField
                     key={fieldId}
                     fieldId={fieldId}
+                    fieldType={docFieldTypes[fieldId]}
                     fieldConfiguration={fieldConfigurations[fieldId]}
                     showActions={showActions}
                   />
