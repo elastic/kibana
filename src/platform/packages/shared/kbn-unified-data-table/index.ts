@@ -42,3 +42,4 @@ export { getDataGridDensity } from './src/hooks/use_data_grid_density';
 export { getRowHeight } from './src/hooks/use_row_height';
 
 export type { UnifiedDataTableRestorableState } from './src/restorable_state';
+export { default as ColumnHeaderTruncateContainer } from './src/components/column_header_truncate_container';

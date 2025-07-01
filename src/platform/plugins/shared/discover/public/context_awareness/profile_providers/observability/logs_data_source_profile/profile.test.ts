@@ -278,6 +278,33 @@ describe('logsDataSourceProfileProvider', () => {
       expect(rowAdditionalLeadingControls).toHaveLength(0);
     });
   });
+
+  describe('getColumnConfiguration', () => {
+    it('should return custom configuration for the "_source" column', () => {
+      const getColumnConfiguration = logsDataSourceProfileProvider.profile.getColumnConfiguration?.(
+        () => ({}),
+        {
+          context: {
+            category: DataSourceCategory.Logs,
+            logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
+          },
+        }
+      );
+
+      const columnConfiguration = getColumnConfiguration?.();
+
+      expect(columnConfiguration).toBeDefined();
+      expect(columnConfiguration).toHaveProperty('_source');
+
+      const config = columnConfiguration!._source({
+        column: { id: '_source', displayAsText: 'Summary' },
+        headerRowHeight: 1,
+      });
+
+      expect(config).toBeDefined();
+      expect(config).toHaveProperty('display');
+    });
+  });
 });
 
 describe('isLogsDataSourceContext', () => {

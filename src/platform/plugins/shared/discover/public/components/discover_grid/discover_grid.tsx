@@ -67,6 +67,11 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
     }))();
   }, [getPaginationConfigAccessor]);
 
+  const getColumnConfigurationAccessor = useProfileAccessor('getColumnConfiguration');
+  const customGridColumnsConfiguration = useMemo(() => {
+    return getColumnConfigurationAccessor(() => ({}))();
+  }, [getColumnConfigurationAccessor]);
+
   return (
     <UnifiedDataTable
       showColumnTokens
@@ -78,6 +83,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
       rowAdditionalLeadingControls={rowAdditionalLeadingControls}
       visibleCellActions={3} // this allows to show up to 3 actions on cell hover if available (filter in, filter out, and copy)
       paginationMode={paginationModeConfig.paginationMode}
+      customGridColumnsConfiguration={customGridColumnsConfiguration}
       {...props}
     />
   );

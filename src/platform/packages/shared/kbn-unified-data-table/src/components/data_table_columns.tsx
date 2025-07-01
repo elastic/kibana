@@ -40,6 +40,7 @@ import {
   DataTableColumnHeader,
   DataTableScoreColumnHeader,
   DataTableTimeColumnHeader,
+  DataTableSummaryColumnHeader,
 } from './data_table_column_header';
 import { UnifiedDataTableProps } from './data_table';
 
@@ -64,6 +65,7 @@ export const getColumnDisplayName = (
 const DataTableColumnHeaderMemoized = React.memo(DataTableColumnHeader);
 const DataTableTimeColumnHeaderMemoized = React.memo(DataTableTimeColumnHeader);
 const DataTableScoreColumnHeaderMemoized = React.memo(DataTableScoreColumnHeader);
+const DataTableSummaryColumnHeaderMemoized = React.memo(DataTableSummaryColumnHeader);
 
 export const OPEN_DETAILS = 'openDetails';
 export const SELECT_ROW = 'select';
@@ -255,6 +257,15 @@ function buildEuiGridColumn({
     visibleCellActions,
     displayHeaderCellProps: { className: 'unifiedDataTable__headerCell' },
   };
+
+  if (column.id === '_source') {
+    column.display = (
+      <DataTableSummaryColumnHeaderMemoized
+        columnDisplayName={columnDisplayName}
+        headerRowHeight={headerRowHeight}
+      />
+    );
+  }
 
   if (column.id === dataView.timeFieldName) {
     column.display = (
