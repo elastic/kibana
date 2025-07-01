@@ -111,7 +111,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     const statistics: HealthDiagnosticQueryStats[] = [];
     const toDate = new Date();
 
-    this.logger.info(`Running health diagnostic task`);
+    this.logger.info('Running health diagnostic task');
 
     if (this.queryExecutor === undefined) {
       this.logger.warn('CircuitBreakingQueryExecutor service is not started');
@@ -158,7 +158,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
         };
 
         this.logger.info('Sending query result EBT', {
-          name: query.name,
+          queryName: query.name,
           traceId: queryStats.traceId,
         } as LogMeta);
 
@@ -169,9 +169,9 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
         this.reportEBT(TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT, filtered);
 
         queryStats.passed = true;
-      } catch (err) {
-        queryStats.failure = err.message;
-        this.logger.error('Error running query', { error: err.message } as LogMeta);
+      } catch (error) {
+        queryStats.failure = error.message;
+        this.logger.error('Error running query', { error });
       }
 
       queryStats.circuitBreakers = circuitBreakers.reduce((acc, cb) => {
@@ -180,7 +180,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       }, {} as Record<string, unknown>);
 
       this.logger.info('Query executed. Sending query stats EBT', {
-        name: query.name,
+        queryName: query.name,
         traceId: queryStats.traceId,
       } as LogMeta);
 
@@ -255,12 +255,12 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       });
 
       this.logger.info('Task scheduled');
-    } catch (e) {
+    } catch (error) {
       this.logger.error('Error scheduling task', {
-        error: e.message,
+        error,
         taskId: TASK_ID,
         taskType: TASK_TYPE,
-      } as LogMeta);
+      });
     }
   }
 
@@ -292,10 +292,8 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     try {
       const artifact = await artifactService.getArtifact(QUERY_ARTIFACT_ID);
       return parseDiagnosticQueries(artifact.data);
-    } catch (err) {
-      this.logger.warn('Error getting health diagnostic queries', {
-        error: err.message,
-      } as LogMeta);
+    } catch (error) {
+      this.logger.warn('Error getting health diagnostic queries', { error });
       return [];
     }
   }
