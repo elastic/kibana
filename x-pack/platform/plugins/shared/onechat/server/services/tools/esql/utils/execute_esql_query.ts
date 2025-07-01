@@ -71,7 +71,7 @@ export const registeredToolCreator = (tool: EsqlToolDefinition): RegisteredTool 
     schema: esqlSchema,
     handler: async ({ params }, { esClient }) => {
       const client = esClient.asCurrentUser;
-      
+
       const response = await client.esql.query({
         query: tool.query,
         params: [params],
