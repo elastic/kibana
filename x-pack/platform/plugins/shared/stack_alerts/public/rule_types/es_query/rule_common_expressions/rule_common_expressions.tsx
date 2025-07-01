@@ -57,6 +57,13 @@ const SIZE_VALUE_TOOLTIP_CONTENT = i18n.translate(
   }
 );
 
+const SIZE_VALUE_EXPRESSION_LABEL = i18n.translate(
+  'xpack.stackAlerts.esQuery.ui.selectSizePrompt.label',
+  {
+    defaultMessage: 'Set the number of documents to send.',
+  }
+);
+
 export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
   esFields,
   thresholdComparator,
@@ -173,7 +180,7 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
             color="subdued"
             type="question"
             content={SIZE_VALUE_TOOLTIP_CONTENT}
-            aria-label={SIZE_VALUE_TOOLTIP_CONTENT}
+            aria-label={SIZE_VALUE_EXPRESSION_LABEL}
           />,
         ]}
       >
