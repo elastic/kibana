@@ -453,12 +453,20 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   /**
    * Returns the action details for a given response action id
    * @param actionId
+   * @param bypassSpaceValidation
    * @protected
    */
   protected async fetchActionDetails<T extends ActionDetails = ActionDetails>(
-    actionId: string
+    actionId: string,
+    /**
+     * if `true`, then no space validations will be done on the action retrieved. Default is `false`.
+     * USE IT CAREFULLY!
+     */
+    bypassSpaceValidation: boolean = false
   ): Promise<T> {
-    return getActionDetailsById(this.options.endpointService, this.options.spaceId, actionId);
+    return getActionDetailsById(this.options.endpointService, this.options.spaceId, actionId, {
+      bypassSpaceValidation,
+    });
   }
 
   /**
