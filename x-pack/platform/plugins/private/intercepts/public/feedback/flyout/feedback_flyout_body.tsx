@@ -27,6 +27,7 @@ import {
 import type { ILicense, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { BenefitsCallout } from '../benefits_callout';
 import { ELASTIC_SUPPORT_LINK, FEEDBACK_TYPE } from '../constants';
 
@@ -106,32 +107,35 @@ export const FeedbackFlyoutBody = ({
   const [license, setLicense] = useState<ILicense | undefined>(undefined);
   const { euiTheme } = useEuiTheme();
 
-  const fetchLicense = useCallback(async () => {
+  const getLicenseInfo = useCallback(async () => {
     try {
-      const licenseObject = await getLicense();
-      setLicense(licenseObject);
+      const licenseInfo = await getLicense();
+      setLicense(licenseInfo);
     } catch (_) {
       setLicense(undefined);
     }
   }, [getLicense]);
 
   useEffect(() => {
-    fetchLicense();
-  }, [fetchLicense]);
+    getLicenseInfo();
+  }, [getLicenseInfo]);
+
+  const licenseType = license?.type;
 
   const showBenefitsCallout =
     license?.hasAtLeast('platinum') &&
-    license?.type !== 'trial' &&
+    licenseType !== 'trial' &&
+    licenseType !== undefined &&
     feedbackType !== FEEDBACK_TYPE.OTHER_FEEDBACK;
 
   const showSelectHelpText = !showBenefitsCallout && feedbackType === FEEDBACK_TYPE.ISSUE_REPORT;
 
-  const boldTextCss = {
-    fontWeight: euiTheme.font.weight.semiBold,
-  };
+  const semiBoldTextCss = css`
+    font-weight: ${euiTheme.font.weight.semiBold};
+  `;
 
   const Label = ({ children }: PropsWithChildren) => (
-    <EuiText size="xs" css={boldTextCss}>
+    <EuiText size="xs" css={semiBoldTextCss}>
       {children}
     </EuiText>
   );
@@ -173,7 +177,7 @@ export const FeedbackFlyoutBody = ({
             onChange={handleChangeFeedbackType}
           />
         </EuiFormRow>
-        {showBenefitsCallout && <BenefitsCallout licenseType={license?.type ?? ''} />}
+        {showBenefitsCallout && <BenefitsCallout licenseType={licenseType} />}
         <EuiFormRow
           label={<Label>{getTextAreaLabel(feedbackType)}</Label>}
           helpText={

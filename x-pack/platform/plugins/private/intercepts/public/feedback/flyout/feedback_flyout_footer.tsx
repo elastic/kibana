@@ -16,6 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 
 interface Props {
   isSendFeedbackButtonDisabled: boolean;
@@ -25,10 +26,11 @@ interface Props {
 export const FeedbackFlyoutFooter = ({ isSendFeedbackButtonDisabled, submitFeedback }: Props) => {
   const { euiTheme } = useEuiTheme();
 
-  const footerBackgroundCss = {
-    backgroundColor: euiTheme.colors.backgroundBasePlain,
-    borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
-  };
+  const footerBackgroundCss = css`
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+    border-top: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+  `;
+
   return (
     <EuiFlyoutFooter css={footerBackgroundCss}>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">

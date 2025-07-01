@@ -12,12 +12,12 @@ import { FeedbackFlyoutBody, FeedbackFlyoutFooter, FeedbackFlyoutHeader } from '
 import { FEEDBACK_TYPE } from '../constants';
 
 interface Props {
-  getCurrentUser: CoreAuthenticationService['getCurrentUser'];
   closeFlyout: () => void;
+  getCurrentUser: CoreAuthenticationService['getCurrentUser'];
   getLicense: LicensingPluginStart['getLicense'];
 }
 
-export const FeedbackFlyout = ({ getCurrentUser, closeFlyout, getLicense }: Props) => {
+export const FeedbackFlyout = ({ closeFlyout, getCurrentUser, getLicense }: Props) => {
   const [feedbackType, setFeedbackType] = useState(FEEDBACK_TYPE.FEATURE_REQUEST);
   const [feedbackText, setFeedbackText] = useState('');
   const [userEmail, setUserEmail] = useState('');
