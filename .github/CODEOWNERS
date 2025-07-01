@@ -1458,6 +1458,8 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test/functional/services/observability @elastic/obs-ux-management-team
 /x-pack/test/api_integration/apis/slos @elastic/obs-ux-management-team
 /x-pack/test/accessibility/apps/group1/uptime.ts @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/functional_with_es_ssl/config.ts @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/functional_with_es_ssl/apps/uptime @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/accessibility/apps/observability.ts @elastic/obs-ux-management-team
 /x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
 /x-pack/solutions/observability/test/functional/services/observability @elastic/obs-ux-management-team
