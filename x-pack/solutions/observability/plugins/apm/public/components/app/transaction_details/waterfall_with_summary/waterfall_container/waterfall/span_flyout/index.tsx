@@ -26,6 +26,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
 import { Stacktrace, PlaintextStacktrace } from '@kbn/event-stacktrace';
+import { Duration } from '@kbn/apm-ui-shared';
 import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useFetcher, isPending } from '../../../../../../../hooks/use_fetcher';
@@ -34,7 +35,6 @@ import { SpanMetadata } from '../../../../../../shared/metadata_table/span_metad
 import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span_links_tab_content';
 import { Summary } from '../../../../../../shared/summary';
 import { CompositeSpanDurationSummaryItem } from '../../../../../../shared/summary/composite_span_duration_summary_item';
-import { DurationSummaryItem } from '../../../../../../shared/summary/duration_summary_item';
 import { HttpInfoSummaryItem } from '../../../../../../shared/summary/http_info_summary_item';
 import { TimestampTooltip } from '../../../../../../shared/timestamp_tooltip';
 import { SyncBadge } from '../badge/sync_badge';
@@ -268,10 +268,9 @@ function SpanFlyoutBody({
         items={[
           <TimestampTooltip time={span.timestamp.us / 1000} />,
           <>
-            <DurationSummaryItem
+            <Duration
               duration={span.span.duration.us}
-              totalDuration={totalDuration}
-              parentType="transaction"
+              parent={{ duration: totalDuration, type: 'transaction', loading: false }}
             />
             {span.span.composite && (
               <CompositeSpanDurationSummaryItem
