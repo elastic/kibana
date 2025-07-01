@@ -293,3 +293,11 @@ To enable the Chat UI located at `/app/chat/`, add the following to your Kibana 
 uiSettings.overrides:
   onechat:ui:enabled: true
 ```
+
+### Tools UI
+To enable the Tools UI located at `/app/chat/tools`, add the following to your Kibana config:
+
+```yaml
+uiSettings.overrides:
+  onechat:tools:enabled: true
+```
