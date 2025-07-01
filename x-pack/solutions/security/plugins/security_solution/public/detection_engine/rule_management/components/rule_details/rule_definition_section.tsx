@@ -657,7 +657,6 @@ const prepareDefinitionSectionListItems = ({
       definitionSectionListItems.push({
         title: (
           <span data-test-subj="esqlQueryPropertyTitle">
-            {descriptionStepI18n.ESQL_QUERY_LABEL}
             {getFormattedSectionLabel(
               descriptionStepI18n.ESQL_QUERY_LABEL,
               'esql_query',
