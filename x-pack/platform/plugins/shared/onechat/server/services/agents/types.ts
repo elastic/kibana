@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type {
   AgentProvider,
   AgentRegistry,
@@ -12,12 +13,15 @@ import type {
   RunAgentFn,
 } from '@kbn/onechat-server';
 
+import type { AgentProfileClient } from './profiles';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentsServiceSetup {}
 
 export interface AgentsServiceStart {
   registry: InternalAgentRegistry;
   execute: RunAgentFn;
+  getProfileClient: (request: KibanaRequest) => Promise<AgentProfileClient>;
 }
 
 export type AgentProviderWithId = AgentProvider & {
