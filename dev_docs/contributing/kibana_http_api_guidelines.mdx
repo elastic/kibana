@@ -454,31 +454,7 @@ Terraform needs complete information to track resource state effectively. If you
 
 **The challenge with defaults**
 
-Many Kibana APIs have extensive configuration options. Requiring users to specify every single value would create verbose, unwieldy configurations. However, being too sparse with returned data creates problems for Terraform.
-
-**The golden rule**
-
-A resource returned from a GET request should match as closely as possible to what a user specifies in a PUT request. When users don't specify values that affect critical behavior, consider returning those computed values too.
-
-```bash
-# User creates resource with minimal config
-POST /api/resource { "name": "my-resource" }
-
-# API applies defaults internally
-# name: "my-resource"
-# timeout: 30s (default)
-# retries: 3 (default)
-
-# Later, GET returns only user-specified values
-GET /api/resource/my-resource
-{ "name": "my-resource" }
-
-# Terraform can't detect if defaults changed!
-```
-
-**Why this matters for import operations**
-
-Terraform import brings existing resources under management by reading their current state. If your API returns different data than what users originally configured, it can cause [import state loss bugs](https://github.com/elastic/terraform-provider-elasticstack/issues/53).
+Many Kibana APIs have extensive configuration options. Requiring users to specify every single value would create verbose, unwieldy configurations. We need to keep in mind that changing a default may cause Terraform to get out-of-sync and so view changes to defaults as a breaking change until we can update our provider.
 
 ### Be predictable
 
