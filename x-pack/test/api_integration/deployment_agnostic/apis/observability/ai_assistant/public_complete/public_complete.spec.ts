@@ -11,10 +11,7 @@ import {
   type Message,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { type Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
-import {
-  createLlmProxy,
-  LlmProxy,
-} from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { createLlmProxy, LlmProxy } from '../utils/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
