@@ -99,7 +99,6 @@
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/es",
     "@kbn/dataset-quality-plugin",
-    "@kbn/reporting-common",
     "@kbn/io-ts-utils",
     "@kbn/security-plugin-types-common",
     "@kbn/slo-schema",
