@@ -154,7 +154,6 @@ const expectedIndexPatterns = {
 };
 
 const bytesColumn: GenericIndexPatternColumn = {
-  label: 'Sum of bytes',
   dataType: 'number',
   isBucketed: false,
 
@@ -687,8 +686,8 @@ describe('FormBasedDimensionEditor', () => {
           ...state.layers.first,
           columns: {
             ...state.layers.first.columns,
-            col1: expect.objectContaining({
-              label: 'Minimum of bytes',
+            col1: expect.not.objectContaining({
+              label: 'Min of bytes',
             }),
           },
         },
@@ -1101,7 +1100,6 @@ describe('FormBasedDimensionEditor', () => {
           datecolumn: {
             dataType: 'date',
             isBucketed: true,
-            label: '',
             operationType: 'date_histogram',
             sourceField: 'ts',
             params: {
@@ -1111,7 +1109,6 @@ describe('FormBasedDimensionEditor', () => {
           col2: {
             dataType: 'number',
             isBucketed: false,
-            label: 'Count of records',
             operationType: 'count',
             sourceField: '___records___',
             ...colOverrides,
@@ -1174,7 +1171,6 @@ describe('FormBasedDimensionEditor', () => {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
                 timeScale: 's',
-                label: 'Count of records per second',
               }),
             },
           },
@@ -1187,7 +1183,6 @@ describe('FormBasedDimensionEditor', () => {
         timeScale: 'h',
         sourceField: 'bytes',
         operationType: 'sum',
-        label: 'Sum of bytes per hour',
       });
       wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
       act(() => {
@@ -1203,7 +1198,6 @@ describe('FormBasedDimensionEditor', () => {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
                 timeScale: 'h',
-                label: 'Count of bytes per hour',
               }),
             },
           },
@@ -1234,7 +1228,6 @@ describe('FormBasedDimensionEditor', () => {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
                 timeScale: undefined,
-                label: 'Average of bytes',
               }),
             },
           },
@@ -1267,7 +1260,6 @@ describe('FormBasedDimensionEditor', () => {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
                 timeScale: 'h',
-                label: 'Count of records per hour',
               }),
             },
           },

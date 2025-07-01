@@ -105,7 +105,6 @@ export const filtersOperation: OperationDefinition<
     }
 
     return {
-      label: filtersLabel,
       dataType: 'string',
       operationType: OPERATION_NAME,
       scale: 'ordinal',

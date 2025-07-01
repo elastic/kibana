@@ -73,7 +73,6 @@ export const derivativeOperation: OperationDefinition<
     const differencesColumnParams = columnParams as DerivativeIndexPatternColumn;
     const timeScale = differencesColumnParams?.timeScale ?? previousColumn?.timeScale;
     return {
-      label: ofName(ref?.label, previousColumn?.timeScale, previousColumn?.timeShift),
       dataType: 'number',
       operationType: DIFFERENCES_ID,
       isBucketed: false,

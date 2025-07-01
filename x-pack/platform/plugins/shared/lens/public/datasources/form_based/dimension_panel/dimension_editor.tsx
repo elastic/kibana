@@ -1196,7 +1196,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                           props.indexPatterns[state.layers[layerId].indexPatternId]
                         ) !== value
                           ? { label: value }
-                          : {}),
+                          : { label: undefined}),
                       },
                     },
                   });

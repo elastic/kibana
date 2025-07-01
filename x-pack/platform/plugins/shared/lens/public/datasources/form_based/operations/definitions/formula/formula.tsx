@@ -206,7 +206,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
       const isPreviousFormulaColumn = previousColumn?.operationType === 'formula';
 
       return {
-        label: previousFormula || defaultLabel,
+        label: previousFormula || undefined,
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,

@@ -1331,7 +1331,6 @@ export function updateColumnLabel({
       [columnId]: {
         ...oldColumn,
         label: customLabel !== undefined ? customLabel : oldColumn.label,
-        customLabel: Boolean(customLabel),
       },
     } as Record<string, GenericIndexPatternColumn>,
   };

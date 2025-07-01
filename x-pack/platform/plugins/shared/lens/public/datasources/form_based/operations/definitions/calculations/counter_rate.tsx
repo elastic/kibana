@@ -88,13 +88,6 @@ export const counterRateOperation: OperationDefinition<
     const timeScale =
       previousColumn?.timeScale || counterRateColumnParams?.timeScale || DEFAULT_TIME_SCALE;
     return {
-      label: ofName(
-        metric && 'sourceField' in metric
-          ? indexPattern.getFieldByName(metric.sourceField)?.displayName
-          : undefined,
-        timeScale,
-        previousColumn?.timeShift
-      ),
       dataType: 'number',
       operationType: 'counter_rate',
       isBucketed: false,

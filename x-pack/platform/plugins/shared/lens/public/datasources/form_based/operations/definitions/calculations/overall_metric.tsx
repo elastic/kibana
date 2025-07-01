@@ -86,11 +86,6 @@ function buildOverallMetricOperation<T extends OverallMetricIndexPatternColumn<s
     buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
       const ref = layer.columns[referenceIds[0]];
       return {
-        label: ofName(
-          ref && 'sourceField' in ref
-            ? indexPattern.getFieldByName(ref.sourceField)?.displayName
-            : undefined
-        ),
         dataType: 'number',
         operationType: `overall_${metric}`,
         isBucketed: false,

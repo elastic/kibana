@@ -235,7 +235,6 @@ export const termsOperation: OperationDefinition<
     ).length;
 
     return {
-      label: ofName(field.displayName),
       dataType: field.type as DataType,
       operationType: 'terms',
       scale: 'ordinal',

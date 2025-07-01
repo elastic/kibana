@@ -122,7 +122,6 @@ export const cardinalityOperation: OperationDefinition<
     ),
   buildColumn({ field, previousColumn }, columnParams) {
     return {
-      label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.reducedTimeRange),
       dataType: 'number',
       operationType: CARDINALITY_ID,
       scale: SCALE,

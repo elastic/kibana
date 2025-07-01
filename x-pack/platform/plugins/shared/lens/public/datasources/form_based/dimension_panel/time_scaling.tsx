@@ -29,25 +29,12 @@ export function setTimeScaling(
   layer: FormBasedLayer,
   timeScale: TimeScaleUnit | undefined
 ) {
-  const currentColumn = layer.columns[columnId];
-  const label =
-    currentColumn.label ??
-    adjustTimeScaleLabelSuffix(
-      currentColumn.label ?? '',
-      currentColumn.timeScale,
-      timeScale,
-      currentColumn.timeShift,
-      currentColumn.timeShift,
-      currentColumn.reducedTimeRange,
-      currentColumn.reducedTimeRange
-    );
   return {
     ...layer,
     columns: {
       ...layer.columns,
       [columnId]: {
         ...layer.columns[columnId],
-        label,
         timeScale,
       },
     },

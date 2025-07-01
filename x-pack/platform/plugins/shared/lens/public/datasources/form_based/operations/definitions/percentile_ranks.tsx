@@ -122,12 +122,6 @@ export const percentileRanksOperation: OperationDefinition<
     const newPercentileRanksParam =
       columnParams?.value ?? (existingPercentileRanksParam || DEFAULT_PERCENTILE_RANKS_VALUE);
     return {
-      label: ofName(
-        getSafeName(field.name, indexPattern),
-        newPercentileRanksParam,
-        previousColumn?.timeShift,
-        previousColumn?.reducedTimeRange
-      ),
       dataType: 'number',
       operationType: 'percentile_rank',
       sourceField: field.name,

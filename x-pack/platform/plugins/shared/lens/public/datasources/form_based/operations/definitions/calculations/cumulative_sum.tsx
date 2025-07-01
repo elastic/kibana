@@ -84,13 +84,6 @@ export const cumulativeSumOperation: OperationDefinition<
   buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
     const ref = layer.columns[referenceIds[0]];
     return {
-      label: ofName(
-        ref && 'sourceField' in ref
-          ? indexPattern.getFieldByName(ref.sourceField)?.displayName
-          : undefined,
-        undefined,
-        previousColumn?.timeShift
-      ),
       dataType: 'number',
       operationType: 'cumulative_sum',
       isBucketed: false,
