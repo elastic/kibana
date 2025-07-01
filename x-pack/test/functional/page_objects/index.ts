@@ -20,7 +20,6 @@ import { GisPageObject } from '@kbn/test-suites-xpack-platform/functional/page_o
 import { LensPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/lens_page';
 import { UpgradeAssistantFlyoutObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/upgrade_assistant_page';
 import { ApiKeysPageProvider } from './api_keys_page';
-import { AssetDetailsProvider } from './asset_details';
 import { BannersPageObject } from './banners_page';
 import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
@@ -30,9 +29,6 @@ import { GraphPageObject } from './graph_page';
 import { GrokDebuggerPageObject } from './grok_debugger_page';
 import { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
 import { IndexManagementPageProvider } from './index_management_page';
-import { InfraHomePageProvider } from './infra_home_page';
-import { InfraHostsViewProvider } from './infra_hosts_view';
-import { InfraLogsPageProvider } from './infra_logs_page';
 import { InfraMetricsExplorerProvider } from './infra_metrics_explorer';
 import { InfraSavedViewsProvider } from './infra_saved_views';
 import { IngestPipelinesPageProvider } from './ingest_pipelines_page';
@@ -68,7 +64,6 @@ import { SearchNavigationProvider } from './search_navigation';
 export const pageObjects = {
   ...kibanaFunctionalPageObjects,
   apiKeys: ApiKeysPageProvider,
-  assetDetails: AssetDetailsProvider,
   banners: BannersPageObject,
   canvas: CanvasPageProvider,
   copySavedObjectsToSpace: CopySavedObjectsToSpacePageProvider,
@@ -80,9 +75,6 @@ export const pageObjects = {
   grokDebugger: GrokDebuggerPageObject,
   indexLifecycleManagement: IndexLifecycleManagementPageProvider,
   indexManagement: IndexManagementPageProvider,
-  infraHome: InfraHomePageProvider,
-  infraHostsView: InfraHostsViewProvider,
-  infraLogs: InfraLogsPageProvider,
   infraMetricsExplorer: InfraMetricsExplorerProvider,
   infraSavedViews: InfraSavedViewsProvider,
   ingestPipelines: IngestPipelinesPageProvider,
