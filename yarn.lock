@@ -20622,10 +20622,10 @@ hdr-histogram-js@^2.0.1:
     base64-js "^1.2.0"
     pako "^1.0.3"
 
-hdr-histogram-js@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/hdr-histogram-js/-/hdr-histogram-js-3.0.0.tgz#8e2d9a68e3313147804c47d85a9c22a93f85e24b"
-  integrity sha512-/EpvQI2/Z98mNFYEnlqJ8Ogful8OpArLG/6Tf2bPnkutBVLIeMVNHjk1ZDfshF2BUweipzbk+dB1hgSB7SIakw==
+hdr-histogram-js@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/hdr-histogram-js/-/hdr-histogram-js-3.0.1.tgz#b281e90d6ca80ee656bc378dafa39d7239b90855"
+  integrity sha512-l3GSdZL1Jr1C0kyb461tUjEdrRPZr8Qry7jByltf5JGrA0xvqOSrxRBfcrJqqV/AMEtqqhHhC6w8HW0gn76tRQ==
   dependencies:
     "@assemblyscript/loader" "^0.19.21"
     base64-js "^1.2.0"
@@ -25829,6 +25829,11 @@ p-timeout@^3.2.0:
   integrity sha512-rhIwUycgwwKcP9yTOOFK/AKsAopjjCakVqLHePO3CC6Mir1Z99xT+R63jZxAT5lFZLa2inS5h+ZS2GvR99/FBg==
   dependencies:
     p-finally "^1.0.0"
+
+p-timeout@^6.1.4:
+  version "6.1.4"
+  resolved "https://registry.yarnpkg.com/p-timeout/-/p-timeout-6.1.4.tgz#418e1f4dd833fa96a2e3f532547dd2abdb08dbc2"
+  integrity sha512-MyIV3ZA/PmyBN/ud8vV9XzwTrNtR4jFrObymZYnZqMmW0zA8Z17vnT0rBgFE/TlohB+YCHqXMgZzb3Csp49vqg==
 
 p-try@^2.0.0:
   version "2.2.0"
