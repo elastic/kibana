@@ -72,7 +72,9 @@ it(`#setup returns exposed services`, () => {
   const mockFeaturesSetup = featuresPluginMock.createSetup();
   const mockLicense = licenseMock.create();
   const mockCoreSetup = coreMock.createSetup();
+
   const mockTypeRegistry = coreMock.createStart().savedObjects.getTypeRegistry();
+  const mockGetTypeRegistry = jest.fn().mockResolvedValue(mockTypeRegistry);
 
   const authorizationService = new AuthorizationService();
   const getClusterClient = () => Promise.resolve(mockClusterClient);
@@ -88,7 +90,7 @@ it(`#setup returns exposed services`, () => {
     getSpacesService: mockGetSpacesService,
     getCurrentUser: jest.fn(),
     customBranding: mockCoreSetup.customBranding,
-    getTypeRegistry: jest.fn().mockResolvedValue(mockTypeRegistry),
+    getTypeRegistry: mockGetTypeRegistry,
   });
 
   expect(authz.applicationName).toBe(application);
@@ -122,7 +124,7 @@ it(`#setup returns exposed services`, () => {
     authz.actions,
     mockFeaturesSetup,
     mockLicense,
-    jest.fn().mockResolvedValue(mockTypeRegistry)
+    mockGetTypeRegistry
   );
 
   expect(authz.mode).toBe(mockAuthorizationMode);
