@@ -17,6 +17,8 @@ export interface UnifiedDataTableRestorableState {
   isFilterActive: boolean;
   isCompareActive: boolean;
   pageIndex: number;
+  scrollTop: number;
+  scrollLeft: number;
   inTableSearch?: InTableSearchRestorableState;
 }
 
