@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { captureScreenshot } from './src';
-export { CaptureScreenshotExample } from './examples';
+export * from './capture_screenshot';
