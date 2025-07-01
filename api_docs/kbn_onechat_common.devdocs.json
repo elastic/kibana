@@ -917,6 +917,115 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.isReasoningEvent",
+        "type": "Function",
+        "tags": [],
+        "label": "isReasoningEvent",
+        "description": [],
+        "signature": [
+          "(event: ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.OnechatEvent",
+            "text": "OnechatEvent"
+          },
+          "<string, any>) => event is ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ReasoningEvent",
+            "text": "ReasoningEvent"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.isReasoningEvent.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "event",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.OnechatEvent",
+                "text": "OnechatEvent"
+              },
+              "<string, any>"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.isReasoningStep",
+        "type": "Function",
+        "tags": [],
+        "label": "isReasoningStep",
+        "description": [],
+        "signature": [
+          "(step: ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ConversationRoundStep",
+            "text": "ConversationRoundStep"
+          },
+          ") => step is ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ReasoningStep",
+            "text": "ReasoningStep"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.isReasoningStep.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "step",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.ConversationRoundStep",
+                "text": "ConversationRoundStep"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.isRoundCompleteEvent",
         "type": "Function",
         "tags": [],
@@ -1248,8 +1357,8 @@
             "pluginId": "@kbn/onechat-common",
             "scope": "common",
             "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.ToolCallStep",
-            "text": "ToolCallStep"
+            "section": "def-common.ConversationRoundStep",
+            "text": "ConversationRoundStep"
           },
           ") => step is ",
           {
@@ -1276,8 +1385,8 @@
                 "pluginId": "@kbn/onechat-common",
                 "scope": "common",
                 "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.ToolCallStep",
-                "text": "ToolCallStep"
+                "section": "def-common.ConversationRoundStep",
+                "text": "ConversationRoundStep"
               }
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
@@ -1948,8 +2057,8 @@
                 "pluginId": "@kbn/onechat-common",
                 "scope": "common",
                 "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.ToolCallStep",
-                "text": "ToolCallStep"
+                "section": "def-common.ConversationRoundStep",
+                "text": "ConversationRoundStep"
               },
               "[]"
             ],
@@ -2150,6 +2259,58 @@
               "TData"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.ReasoningEventData",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReasoningEventData",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.ReasoningEventData.reasoning",
+            "type": "string",
+            "tags": [],
+            "label": "reasoning",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.ReasoningStepData",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReasoningStepData",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.ReasoningStepData.reasoning",
+            "type": "string",
+            "tags": [],
+            "label": "reasoning",
+            "description": [
+              "plain text reasoning content"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2649,6 +2810,20 @@
     "enums": [
       {
         "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.AgentMode",
+        "type": "Enum",
+        "tags": [],
+        "label": "AgentMode",
+        "description": [
+          "\nExecution mode for agents."
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/descriptor.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.ChatAgentEventType",
         "type": "Enum",
         "tags": [],
@@ -2667,6 +2842,18 @@
         "label": "ChatEventType",
         "description": [],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.ConversationRoundStepType",
+        "type": "Enum",
+        "tags": [],
+        "label": "ConversationRoundStepType",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2728,7 +2915,7 @@
         "tags": [],
         "label": "builtinToolProviderId",
         "description": [
-          "\nThe singleton sourceId used for all builtIn tools."
+          "\nThe singleton providerId used for all builtIn tools."
         ],
         "signature": [
           "\"builtIn\""
@@ -2762,7 +2949,13 @@
             "text": "ToolResultEvent"
           },
           " | ",
-          "ReasoningEvent",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ReasoningEvent",
+            "text": "ReasoningEvent"
+          },
           " | ",
           {
             "pluginId": "@kbn/onechat-common",
@@ -2920,37 +3113,26 @@
         "type": "Type",
         "tags": [],
         "label": "ConversationRoundStep",
-        "description": [],
+        "description": [
+          "\nDefines all possible types for round steps."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/onechat-common",
             "scope": "common",
             "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.ToolCallWithResult",
-            "text": "ToolCallWithResult"
+            "section": "def-common.ToolCallStep",
+            "text": "ToolCallStep"
           },
-          " & { type: ",
+          " | ",
           {
             "pluginId": "@kbn/onechat-common",
             "scope": "common",
             "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.ConversationRoundStepType",
-            "text": "ConversationRoundStepType"
-          },
-          "; }"
+            "section": "def-common.ReasoningStep",
+            "text": "ReasoningStep"
+          }
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.ConversationRoundStepType",
-        "type": "string",
-        "tags": [],
-        "label": "ConversationRoundStepType",
-        "description": [],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2990,6 +3172,40 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.esqlToolProviderId",
+        "type": "string",
+        "tags": [],
+        "label": "esqlToolProviderId",
+        "description": [
+          "\nThe singleton providerId used for all Esql tools."
+        ],
+        "signature": [
+          "\"esql\""
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.FieldTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldTypes",
+        "description": [
+          "\nCommon ES Field Types"
+        ],
+        "signature": [
+          "\"boolean\" | \"object\" | \"nested\" | \"keyword\" | \"text\" | \"date\" | \"integer\" | \"long\" | \"float\" | \"double\""
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3223,6 +3439,74 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.ReasoningEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "ReasoningEvent",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.OnechatEvent",
+            "text": "OnechatEvent"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ChatAgentEventType",
+            "text": "ChatAgentEventType"
+          },
+          ".reasoning, ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ReasoningEventData",
+            "text": "ReasoningEventData"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.ReasoningStep",
+        "type": "Type",
+        "tags": [],
+        "label": "ReasoningStep",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ReasoningStepData",
+            "text": "ReasoningStepData"
+          },
+          " & { type: ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ConversationRoundStepType",
+            "text": "ConversationRoundStepType"
+          },
+          ".reasoning; }"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.RoundCompleteEvent",
         "type": "Type",
         "tags": [],
@@ -3354,7 +3638,7 @@
             "section": "def-common.ConversationRoundStepType",
             "text": "ConversationRoundStepType"
           },
-          "; }"
+          ".toolCall; }"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
         "deprecated": false,

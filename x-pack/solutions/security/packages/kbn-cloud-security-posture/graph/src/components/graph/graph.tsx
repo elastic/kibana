@@ -15,7 +15,7 @@ import {
   useEdgesState,
   useNodesState,
 } from '@xyflow/react';
-import type { Edge, FitViewOptions, Node, ReactFlowInstance } from '@xyflow/react';
+import type { Edge, FitViewOptions, Node, ReactFlowInstance, FitView } from '@xyflow/react';
 import { useGeneratedHtmlId } from '@elastic/eui';
 import type { CommonProps } from '@elastic/eui';
 import { SvgDefsMarker } from '../edge/markers';
@@ -74,7 +74,7 @@ const edgeTypes = {
   default: DefaultEdge,
 };
 
-const fitViewOptions: FitViewOptions<Node> = {
+const fitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
   duration: 200,
 };
 
@@ -95,9 +95,7 @@ const fitViewOptions: FitViewOptions<Node> = {
 export const Graph = memo<GraphProps>(
   ({ nodes, edges, interactive, isLocked = false, children, ...rest }: GraphProps) => {
     const backgroundId = useGeneratedHtmlId();
-    const fitViewRef = useRef<
-      ((fitViewOptions?: FitViewOptions<Node> | undefined) => Promise<boolean>) | null
-    >(null);
+    const fitViewRef = useRef<FitView<Node<NodeViewModel>> | null>(null);
     const currNodesRef = useRef<NodeViewModel[]>([]);
     const currEdgesRef = useRef<EdgeViewModel[]>([]);
     const [isGraphInteractive, _setIsGraphInteractive] = useState(interactive);
@@ -125,7 +123,7 @@ export const Graph = memo<GraphProps>(
 
     const onInitCallback = useCallback(
       (xyflow: ReactFlowInstance<Node<NodeViewModel>, Edge<EdgeViewModel>>) => {
-        window.requestAnimationFrame(() => xyflow.fitView());
+        xyflow.fitView();
         fitViewRef.current = xyflow.fitView;
 
         // When the graph is not initialized as interactive, we need to fit the view on resize
