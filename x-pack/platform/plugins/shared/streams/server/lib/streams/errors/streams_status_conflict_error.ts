@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-export default ({ loadTestFile }) => {
-  describe('reporting management app', function () {
-    loadTestFile(require.resolve('./report_listing'));
-  });
-};
+import { StatusError } from './status_error';
+
+export class StreamsStatusConflictError extends StatusError {
+  constructor(message: string) {
+    super(message, 400);
+    this.name = 'StreamsStatusConflictError';
+  }
+}
