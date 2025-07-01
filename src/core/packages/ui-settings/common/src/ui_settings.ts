@@ -123,6 +123,7 @@ export interface UiSettingsParams<T = unknown> {
    * This field is used to determine whether the setting should be displayed in the Advanced settings app.
    * If undefined, the setting must be displayed in all solutions.
    * Example scenarios:
+   * - Setting in stateful security solution and serverless security project - solutions: ['classic', 'security'] and include setting in serverless security allowlist
    * - Setting only in stateful classic - solutions: ['classic'] and not include setting in serverless allowlist
    * - Setting only in stateful security/oblt/es - solutions: ['security', 'oblt', 'es'] and not include setting in serverless allowlist
    * - Setting only in serverless - The setting should be allowlisted and registered from a serverless plugin or registered conditionally

@@ -18,4 +18,5 @@ export const capabilitiesProvider = (config: AdvancedSettingsConfig) => ({
     show: config.advancedSettingsEnabled,
     save: true,
   },
+  solutionsFiltering: config.solutionsFilteringEnabled,
 });
