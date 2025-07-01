@@ -30,7 +30,7 @@ export const FeedbackFlyoutHeader = ({ closeFlyout }: Props) => {
   `;
 
   return (
-    <EuiFlyoutHeader hasBorder>
+    <EuiFlyoutHeader hasBorder data-test-subj="feedbackFlyoutHeader">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
