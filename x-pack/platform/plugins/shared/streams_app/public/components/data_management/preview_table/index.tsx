@@ -12,7 +12,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SampleDocument } from '@kbn/streams-schema';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useCallback, useRef } from 'react';
+import { recalcColumnWidths } from '../stream_detail_enrichment/utils';
 import { SimulationContext } from '../stream_detail_enrichment/state_management/simulation_state_machine';
 
 export function PreviewTable({
@@ -105,6 +106,9 @@ export function PreviewTable({
     } as EuiDataGridSorting;
   }, [setSorting, sorting]);
 
+  const [columnWidths, setColumnWidths] = useState<Record<string, number | undefined>>({});
+  const gridWrapperRef = useRef<HTMLDivElement | null>(null);
+
   // Derive visibleColumns from canonical order
   const visibleColumns = useMemo(() => {
     if (displayColumns) {
@@ -113,7 +117,22 @@ export function PreviewTable({
     return canonicalColumnOrder;
   }, [canonicalColumnOrder, displayColumns]);
 
-  // Derive gridColumns from canonical order
+  const onColumnResize = useCallback(
+    ({ columnId, width }: { columnId: string; width: number }) => {
+      setColumnWidths((prev) => {
+        const updated = recalcColumnWidths({
+          columnId,
+          width,
+          prevWidths: prev,
+          containerWidth: gridWrapperRef.current ? gridWrapperRef.current.offsetWidth : 0,
+          visibleColumns,
+        });
+        return updated;
+      });
+    },
+    [visibleColumns]
+  );
+
   const gridColumns = useMemo(() => {
     return canonicalColumnOrder.map((column) => ({
       id: column,
@@ -128,49 +147,52 @@ export function PreviewTable({
               showSortDesc: Boolean(setSorting),
             }
           : (false as false),
-      initialWidth: visibleColumns.length > 10 ? 250 : undefined,
+      initialWidth: columnWidths[column],
     }));
-  }, [canonicalColumnOrder, setSorting, setVisibleColumns, visibleColumns.length]);
+  }, [canonicalColumnOrder, setSorting, setVisibleColumns, columnWidths]);
 
   return (
-    <EuiDataGrid
-      aria-label={i18n.translate('xpack.streams.resultPanel.euiDataGrid.previewLabel', {
-        defaultMessage: 'Preview',
-      })}
-      columns={gridColumns}
-      columnVisibility={{
-        visibleColumns,
-        setVisibleColumns: setVisibleColumns || (() => {}),
-        canDragAndDropColumns: false,
-      }}
-      sorting={sortingConfig}
-      inMemory={sortingConfig ? { level: 'sorting' } : undefined}
-      height={height}
-      toolbarVisibility={toolbarVisibility}
-      rowCount={documents.length}
-      rowHeightsOptions={rowHeightsOptions}
-      renderCellValue={({ rowIndex, columnId }) => {
-        const doc = documents[rowIndex];
-        if (!doc || typeof doc !== 'object') {
-          return '';
-        }
-
-        if (renderCellValue) {
-          const renderedValue = renderCellValue(doc, columnId);
-          if (renderedValue !== undefined) {
-            return renderedValue;
+    <div ref={gridWrapperRef}>
+      <EuiDataGrid
+        aria-label={i18n.translate('xpack.streams.resultPanel.euiDataGrid.previewLabel', {
+          defaultMessage: 'Preview',
+        })}
+        columns={gridColumns}
+        columnVisibility={{
+          visibleColumns,
+          setVisibleColumns: setVisibleColumns || (() => {}),
+          canDragAndDropColumns: false,
+        }}
+        sorting={sortingConfig}
+        inMemory={sortingConfig ? { level: 'sorting' } : undefined}
+        height={height}
+        toolbarVisibility={toolbarVisibility}
+        rowCount={documents.length}
+        rowHeightsOptions={rowHeightsOptions}
+        onColumnResize={onColumnResize}
+        renderCellValue={({ rowIndex, columnId }) => {
+          const doc = documents[rowIndex];
+          if (!doc || typeof doc !== 'object') {
+            return '';
           }
-        }
 
-        const value = (doc as SampleDocument)[columnId];
-        if (value === undefined || value === null) {
-          return '';
-        }
-        if (typeof value === 'object') {
-          return JSON.stringify(value);
-        }
-        return String(value);
-      }}
-    />
+          if (renderCellValue) {
+            const renderedValue = renderCellValue(doc, columnId);
+            if (renderedValue !== undefined) {
+              return renderedValue;
+            }
+          }
+
+          const value = (doc as SampleDocument)[columnId];
+          if (value === undefined || value === null) {
+            return '';
+          }
+          if (typeof value === 'object') {
+            return JSON.stringify(value);
+          }
+          return String(value);
+        }}
+      />
+    </div>
   );
 }
