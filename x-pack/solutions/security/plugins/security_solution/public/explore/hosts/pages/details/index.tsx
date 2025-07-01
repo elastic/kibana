@@ -79,6 +79,7 @@ import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { DataViewLoading } from '@kbn/security-solution-plugin/public/data_view_manager/components/data_view_loading';
 
 const ES_HOST_FIELD = 'host.name';
 const HostOverviewManage = manageQuery(HostOverview);
@@ -215,7 +216,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   });
 
   if (newDataViewPickerEnabled && status === 'pristine') {
-    return null;
+    return <DataViewLoading pageName="Hosts" />;
   }
 
   return (

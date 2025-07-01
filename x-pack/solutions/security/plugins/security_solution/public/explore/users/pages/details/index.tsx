@@ -75,6 +75,7 @@ import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/ap
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { DataViewLoading } from '@kbn/security-solution-plugin/public/data_view_manager/components/data_view_loading';
 
 const QUERY_ID = 'UsersDetailsQueryId';
 const ES_USER_FIELD = 'user.name';
@@ -213,7 +214,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   });
 
   if (newDataViewPickerEnabled && status === 'pristine') {
-    return null;
+    return <DataViewLoading pageName="User details" />;
   }
 
   return (

@@ -22,6 +22,7 @@ import { DataViewManagerScopeName } from '../../data_view_manager/constants';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { DataViewLoading } from '../../data_view_manager/components/data_view_loading';
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
@@ -50,7 +51,7 @@ export const TimelinesPage = React.memo(() => {
     tabName === TimelineTypeEnum.default ? TimelineTypeEnum.default : TimelineTypeEnum.template;
 
   if (newDataViewPickerEnabled && status === 'pristine') {
-    return null;
+    return <DataViewLoading pageName="Timelines" />;
   }
 
   return (
