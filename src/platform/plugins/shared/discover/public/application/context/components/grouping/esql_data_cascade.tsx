@@ -117,7 +117,6 @@ export const ESQLDataCascade = ({
         flexDirection: 'column',
         height: '100%',
         width: '100%',
-        padding: euiTheme.size.s,
       })}
     >
       <DataCascade<DataTableRecord>
