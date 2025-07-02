@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { Conversation } from '@kbn/onechat-common';
 import {
+  Conversation,
   ConversationRound,
   ToolCallStep,
   createEmptyConversation,
   isToolCallStep,
-} from '@kbn/onechat-common/chat/conversation';
+  newConversationId,
+} from '@kbn/onechat-common';
 import { QueryClient, QueryKey, useQuery, useQueryClient } from '@tanstack/react-query';
 import produce from 'immer';
 import { queryKeys } from '../query_keys';
@@ -22,11 +23,11 @@ import { useOnechatServices } from './use_onechat_service';
 const createActions = ({
   queryClient,
   queryKey,
-  navigateToNewConversation,
+  navigateToConversation,
 }: {
   queryClient: QueryClient;
   queryKey: QueryKey;
-  navigateToNewConversation: ({ newConversationId }: { newConversationId: string }) => void;
+  navigateToConversation: ({ nextConversationId }: { nextConversationId: string }) => void;
 }) => {
   const setConversation = (updater: (conversation?: Conversation) => Conversation) => {
     queryClient.setQueryData<Conversation>(queryKey, updater);
@@ -43,7 +44,13 @@ const createActions = ({
   };
   return {
     invalidateConversation: () => {
-      queryClient.invalidateQueries({ queryKey });
+      const [_, conversationId] = queryKey;
+      if (conversationId === newConversationId) {
+        // Purge the query cache since we never fetch for conversation id "new"
+        queryClient.removeQueries({ queryKey });
+      } else {
+        queryClient.invalidateQueries({ queryKey });
+      }
     },
     addConversationRound: ({ userMessage }: { userMessage: string }) => {
       setConversation(
@@ -104,7 +111,7 @@ const createActions = ({
           })
         );
       }
-      navigateToNewConversation({ newConversationId: id });
+      navigateToConversation({ nextConversationId: id });
     },
   };
 };
@@ -112,7 +119,7 @@ const createActions = ({
 export const useConversation = ({ conversationId }: { conversationId: string | undefined }) => {
   const { conversationsService } = useOnechatServices();
   const queryClient = useQueryClient();
-  const queryKey = queryKeys.conversations.byId(conversationId ?? 'new');
+  const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
   const { data: conversation, isLoading } = useQuery({
     queryKey,
     enabled: Boolean(conversationId),
@@ -131,8 +138,8 @@ export const useConversation = ({ conversationId }: { conversationId: string | u
     actions: createActions({
       queryClient,
       queryKey,
-      navigateToNewConversation: ({ newConversationId }: { newConversationId: string }) => {
-        navigateToOnechatUrl(appPaths.chat.conversation({ conversationId: newConversationId }));
+      navigateToConversation: ({ nextConversationId }: { nextConversationId: string }) => {
+        navigateToOnechatUrl(appPaths.chat.conversation({ conversationId: nextConversationId }));
       },
     }),
   };

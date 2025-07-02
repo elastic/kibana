@@ -19,6 +19,8 @@ export {
   ConversationRoundStepType,
   isToolCallStep,
   isReasoningStep,
+  createEmptyConversation,
+  newConversationId,
 } from './conversation';
 export {
   ChatEventType,

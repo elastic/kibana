@@ -7,9 +7,8 @@
 
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import { newConversationId } from '@kbn/onechat-common';
 import { OnechatConversationsView } from '../components/conversations/conversations_view';
-
-const newConversationId = 'new';
 
 export const OnechatConversationsPage: React.FC = () => {
   const { conversationId: conversationIdParam } = useParams<{ conversationId?: string }>();

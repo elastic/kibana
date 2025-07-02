@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { newConversationId } from '@kbn/onechat-common';
+
 export const appPaths = {
   chat: {
-    new: '/conversations/new',
+    new: `/conversations/${newConversationId}`,
     conversation: ({ conversationId }: { conversationId: string }) => {
       return `/conversations/${conversationId}`;
     },

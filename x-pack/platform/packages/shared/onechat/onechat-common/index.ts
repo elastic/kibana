@@ -118,4 +118,6 @@ export {
   ConversationRoundStepType,
   isToolCallStep,
   isReasoningStep,
+  createEmptyConversation,
+  newConversationId,
 } from './chat';

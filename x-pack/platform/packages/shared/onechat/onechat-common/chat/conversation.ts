@@ -131,10 +131,12 @@ export interface Conversation {
   rounds: ConversationRound[];
 }
 
+export const newConversationId = 'new';
+
 export const createEmptyConversation = (): Conversation => {
   const now = new Date().toISOString();
   return {
-    id: 'new',
+    id: newConversationId,
     agentId: toSerializedAgentIdentifier({
       agentId: oneChatDefaultAgentId,
       providerId: oneChatAgentProviderIds.default,
