@@ -28,8 +28,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const testSubjects = getService('testSubjects');
 
-  describe('Search Homepage', function () {
-    describe.skip('as admin', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/225446
+  describe.skip('Search Homepage', function () {
+    describe('as admin', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginAsAdmin();
       });
@@ -38,7 +39,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await deleteAllTestIndices();
       });
 
-      it('goes to the start page if there exists no index', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/225446
+      it.skip('goes to the start page if there exists no index', async () => {
+        await pageObjects.common.navigateToApp('searchHomepage');
         await pageObjects.svlSearchHomePage.expectToBeOnStartpage();
       });
 
@@ -49,7 +52,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('as developer', function () {
+    describe('as developer', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginAsDeveloper();
       });
@@ -58,7 +61,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await deleteAllTestIndices();
       });
 
-      it('goes to the start page if there exists no index', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/225446
+      it.skip('goes to the start page if there exists no index', async () => {
+        await pageObjects.common.navigateToApp('searchHomepage');
         await pageObjects.svlSearchHomePage.expectToBeOnStartpage();
       });
 
@@ -153,6 +158,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.existOrFail('exploreLogstashAndBeatsLink');
           await testSubjects.click('exploreLogstashAndBeatsLink');
           await pageObjects.svlSearchHomePage.expectToBeOnObservabilityPage();
+        });
+
+        it('renders SIEM link', async () => {
+          await testSubjects.existOrFail('setupSiemLink');
+          await testSubjects.click('setupSiemLink');
+          await pageObjects.svlSearchHomePage.expectToBeOnIngestDataToSecurityPage();
+        });
+
+        it('renders Elastic Defend link', async () => {
+          await testSubjects.existOrFail('setupElasticDefendLink');
+          await testSubjects.click('setupElasticDefendLink');
+          await pageObjects.svlSearchHomePage.expectToBeOnInstallElasticDefendPage();
+        });
+
+        it('renders Cloud Security Posture Management link', async () => {
+          await testSubjects.existOrFail('cloudSecurityPostureManagementLink');
+          await testSubjects.click('cloudSecurityPostureManagementLink');
+          await pageObjects.svlSearchHomePage.expectToBeOnCloudSecurityPosturePage();
         });
       });
 

@@ -179,7 +179,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                                 content={tooltip}
                                 iconProps={tooltipIconProps}
                                 size="l"
-                                type="iInCircle"
+                                type="info"
                               />
                             </>
                           )}

@@ -55,6 +55,7 @@ export const defaultTabState: Omit<TabState, keyof TabItem> = {
     columns: false,
     rowHeight: false,
     breakdownField: false,
+    hideChart: false,
   },
   documentsRequest: {
     loadingStatus: LoadingStatus.Uninitialized,
@@ -235,6 +236,14 @@ export const internalStateSlice = createSlice({
     ) =>
       withTab(state, action, (tab) => {
         tab.uiState.fieldList = action.payload.fieldListUiState;
+      }),
+
+    setLayoutUiState: (
+      state,
+      action: TabAction<{ layoutUiState: Partial<TabState['uiState']['layout']> }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.uiState.layout = action.payload.layoutUiState;
       }),
   },
   extraReducers: (builder) => {
