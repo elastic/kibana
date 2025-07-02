@@ -8,6 +8,7 @@
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiButtonGroup,
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -116,15 +117,26 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                   <div ref={resizeRef} className={fullHeight}>
                     <VerticalOverflowContainer maxHeight={120}>
                       <VerticalOverflowContent maxHeight={120}>
-                        <EuiFlexGroup gutterSize="xs" direction="column" alignItems="flexStart">
-                          <CustomizedPrebuiltRulePerFieldBadge field={'description'} />
-                          <EuiText
-                            size="s"
-                            data-test-subj="stepAboutRuleDetailsToggleDescriptionText"
-                          >
-                            {stepDataDetails.description}
-                          </EuiText>
-                        </EuiFlexGroup>
+                        <EuiDescriptionList
+                          listItems={[
+                            {
+                              title: (
+                                <EuiFlexGroup gutterSize="xs" alignItems="center">
+                                  {i18n.ABOUT_PANEL_DETAILS_LABEL}
+                                  <CustomizedPrebuiltRulePerFieldBadge field={'description'} />
+                                </EuiFlexGroup>
+                              ),
+                              description: (
+                                <EuiText
+                                  size="s"
+                                  data-test-subj="stepAboutRuleDetailsToggleDescriptionText"
+                                >
+                                  {stepDataDetails.description}
+                                </EuiText>
+                              ),
+                            },
+                          ]}
+                        />
                       </VerticalOverflowContent>
                     </VerticalOverflowContainer>
                     <EuiSpacer size="m" />

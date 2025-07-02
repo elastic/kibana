@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import type { EuiBadgeProps } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 import * as i18n from './translations';
 import { usePrebuiltRuleBaseVersionContext } from './base_version_diff/base_version_context';
 
-type CustomizedPrebuiltRulePerFieldBadgeProps = {
+interface CustomizedPrebuiltRulePerFieldBadgeProps {
   field: string;
-} & EuiBadgeProps;
+}
 
 export const CustomizedPrebuiltRulePerFieldBadge: React.FC<
   CustomizedPrebuiltRulePerFieldBadgeProps
-> = ({ field, css, ...props }) => {
+> = ({ field }) => {
   const {
     actions: { openBaseVersionFlyout },
     state: { doesBaseVersionExist, modifiedFields },
@@ -30,14 +29,13 @@ export const CustomizedPrebuiltRulePerFieldBadge: React.FC<
   return (
     <EuiBadge
       data-test-subj="modified-prebuilt-rule-per-field-badge"
-      color="primary"
+      color="hollow"
       iconType="expand"
       iconSide="right"
       onClick={() => openBaseVersionFlyout({ isReverting: false })}
       iconOnClick={() => openBaseVersionFlyout({ isReverting: false })}
       onClickAriaLabel={i18n.MODIFIED_PREBUILT_RULE_PER_FIELD_LABEL}
       iconOnClickAriaLabel={i18n.MODIFIED_PREBUILT_RULE_PER_FIELD_LABEL}
-      css={css}
     >
       {i18n.MODIFIED_PREBUILT_RULE_PER_FIELD_LABEL}
     </EuiBadge>

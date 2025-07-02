@@ -37,7 +37,7 @@ export const CustomizedPrebuiltRuleBadge: React.FC<CustomizedPrebuiltRuleBadgePr
       {doesBaseVersionExist ? (
         <EuiBadge
           data-test-subj="modified-prebuilt-rule-badge"
-          color="primary"
+          color="hollow"
           iconType="expand"
           iconSide="right"
           onClick={() => openBaseVersionFlyout({ isReverting: false })}
