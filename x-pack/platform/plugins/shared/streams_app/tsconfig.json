@@ -75,6 +75,6 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/field-types",
     "@kbn/field-formats-plugin",
-    "@kbn/test"
+    "@kbn/test",
   ]
 }
