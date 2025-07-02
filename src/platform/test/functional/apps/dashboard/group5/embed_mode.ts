@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Then get rid of the timestamp so the rest of the tests work with state and app switching.
       useTimeStamp = false;
       await browser.get(newUrl.toString(), useTimeStamp);
-      // await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.cleanStandardList();
     });
   });
 }
