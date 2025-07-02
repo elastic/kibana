@@ -53,8 +53,20 @@ const addAuditEventSpy = jest.spyOn(
 );
 const getCurrentUser = jest.fn();
 const typeRegistry: Partial<ISavedObjectTypeRegistry> = {
-  supportsAccessControl: jest.fn().mockReturnValue(false),
+  supportsAccessControl: jest.fn().mockImplementation((type) => type === 'dashboard'),
 } as unknown as jest.Mocked<ISavedObjectTypeRegistry>;
+
+const accessControlServiceMock = {
+  setUserForOperation: jest.fn(),
+  getTypesRequiringAccessControlPrivilegeCheck: jest
+    .fn()
+    .mockReturnValue({ typesRequiringAccessControl: new Set() }),
+  enforceAccessControl: jest.fn(),
+};
+
+Object.defineProperty(SavedObjectsSecurityExtension.prototype, 'accessControlService', {
+  get: () => accessControlServiceMock,
+});
 
 const obj1 = {
   type: 'a',
@@ -6379,6 +6391,161 @@ describe(`#auditObjectsForSpaceDeletion`, () => {
         saved_object: { type: objects[2].type, id: objects[2].id },
       },
       message: `User is updating spaces of dashboard [id=${objects[2].id}]`,
+    });
+  });
+});
+
+describe('access control', () => {
+  const namespace = 'x';
+
+  afterEach(() => {
+    checkAuthorizationSpy.mockClear();
+    enforceAuthorizationSpy.mockClear();
+    redactNamespacesSpy.mockClear();
+    authorizeSpy.mockClear();
+    auditHelperSpy.mockClear();
+    addAuditEventSpy.mockClear();
+  });
+
+  describe('#authorizeChangeOwnership', () => {
+    const objectsWithExistingNamespaces = [
+      {
+        type: 'dashboard',
+        id: '1',
+        existingNamespaces: [],
+        accessControl: { owner: 'fake_profile_id', accessMode: 'read_only' as const },
+      },
+      {
+        type: 'visualization',
+        id: '2',
+        existingNamespaces: [],
+        accessControl: { owner: 'fake_profile_id', accessMode: 'read_only' as const },
+      },
+    ];
+
+    beforeEach(() => {
+      // Reset spies and mocks
+      accessControlServiceMock.setUserForOperation.mockClear();
+      accessControlServiceMock.getTypesRequiringAccessControlPrivilegeCheck.mockClear();
+      accessControlServiceMock.enforceAccessControl.mockClear();
+      checkAuthorizationSpy.mockClear();
+
+      // Mock current user with different profile_uid
+      getCurrentUser.mockReturnValue({
+        profile_uid: 'different_profile_id',
+        username: 'test_user',
+      });
+    });
+
+    test('throws an error when `namespace` is empty', async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      await expect(
+        securityExtension.authorizeChangeOwnership({
+          namespace: '',
+          objects: objectsWithExistingNamespaces,
+        })
+      ).rejects.toThrowError('namespace cannot be an empty string');
+      expect(checkPrivileges).not.toHaveBeenCalled();
+    });
+
+    test('throws an error when objects array is empty', async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      await expect(
+        securityExtension.authorizeChangeOwnership({
+          namespace,
+          objects: [],
+        })
+      ).rejects.toThrowError('No objects specified for manage_access_control authorization');
+      expect(checkPrivileges).not.toHaveBeenCalled();
+    });
+
+    test('throws an error when checkAuthorization fails', async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      checkPrivileges.mockRejectedValue(new Error('Oh no!'));
+      accessControlServiceMock.getTypesRequiringAccessControlPrivilegeCheck.mockReturnValueOnce({
+        typesRequiringAccessControl: new Set(['dashboard']),
+      });
+
+      await expect(
+        securityExtension.authorizeChangeOwnership({
+          namespace,
+          objects: objectsWithExistingNamespaces,
+        })
+      ).rejects.toThrowError('Oh no!');
+    });
+
+    test('sets user for operation and checks for types requiring access control', async () => {
+      const { securityExtension, checkPrivileges } = setup();
+      const mockUser = { username: 'testuser', profile_uid: 'user123' };
+      getCurrentUser.mockReturnValue(mockUser);
+
+      setupSimpleCheckPrivsMockResolve(checkPrivileges, 'dashboard', 'manage_access_control', true);
+
+      await securityExtension.authorizeChangeOwnership({
+        namespace,
+        objects: objectsWithExistingNamespaces,
+      });
+      expect(accessControlServiceMock.setUserForOperation).toHaveBeenCalledWith(mockUser);
+
+      expect(
+        accessControlServiceMock.getTypesRequiringAccessControlPrivilegeCheck
+      ).toHaveBeenCalledWith({
+        objects: objectsWithExistingNamespaces,
+        typeRegistry: expect.any(Object),
+      });
+    });
+
+    test('checks authorization with expected options when types require access control', async () => {
+      const { securityExtension } = setup();
+      accessControlServiceMock.getTypesRequiringAccessControlPrivilegeCheck.mockReturnValueOnce({
+        typesRequiringAccessControl: new Set(['dashboard']),
+      });
+      checkAuthorizationSpy.mockResolvedValue({
+        status: 'fully_authorized',
+        typeMap: new Map(),
+      });
+
+      await securityExtension.authorizeChangeOwnership({
+        namespace,
+        objects: objectsWithExistingNamespaces,
+      });
+
+      expect(checkAuthorizationSpy).toHaveBeenCalledWith({
+        types: new Set(['dashboard']),
+        spaces: new Set([namespace]),
+        actions: new Set([]),
+        options: {
+          allowGlobalResource: true,
+          typesRequiringAccessControl: new Set(['dashboard']),
+        },
+      });
+    });
+
+    test('throws forbidden error when access is unauthorized', async () => {
+      const { securityExtension } = setup();
+      accessControlServiceMock.getTypesRequiringAccessControlPrivilegeCheck.mockReturnValueOnce({
+        typesRequiringAccessControl: new Set(['dashboard']),
+      });
+      checkAuthorizationSpy.mockResolvedValue({
+        status: 'unauthorized',
+        typeMap: new Map(),
+      });
+
+      await expect(
+        securityExtension.authorizeChangeOwnership({
+          namespace,
+          objects: objectsWithExistingNamespaces,
+        })
+      ).rejects.toThrow();
+
+      expect(addAuditEventSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: AuditAction.UPDATE_OBJECTS_OWNER,
+          error: expect.any(Error),
+          unauthorizedTypes: ['dashboard'],
+          unauthorizedSpaces: [namespace],
+        })
+      );
     });
   });
 });

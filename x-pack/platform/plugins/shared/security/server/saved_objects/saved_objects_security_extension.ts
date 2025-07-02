@@ -332,8 +332,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     SecurityAction,
     { authzAction?: string; auditAction?: AuditAction }
   >;
-  private readonly accessControlService: AccessControlService;
   private readonly typeRegistryFunc: () => Promise<ISavedObjectTypeRegistry>;
+  private readonly _accessControlService: AccessControlService;
 
   constructor({
     actions,
@@ -348,7 +348,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     this.errors = errors;
     this.checkPrivilegesFunc = checkPrivileges;
     this.getCurrentUserFunc = getCurrentUser;
-    this.accessControlService = new AccessControlService();
+    this._accessControlService = new AccessControlService();
     this.typeRegistryFunc = getTypeRegistry;
 
     // This comment block is a quick reference for the action map, which maps authorization actions
@@ -428,6 +428,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         },
       ],
     ]);
+  }
+
+  public get accessControlService() {
+    return this._accessControlService;
   }
 
   private assertObjectsArrayNotEmpty(objects: AuthorizeObject[], action: SecurityAction) {
@@ -1141,14 +1145,13 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     params: AuthorizeBulkChangeOwnershipParams,
     action: SecurityAction
   ): Promise<CheckAuthorizationResult<A>> {
+    this.accessControlService.setUserForOperation(this.getCurrentUserFunc());
     const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
-
     this.assertObjectsArrayNotEmpty(objects, action);
 
     const spacesToAuthorize = new Set<string>([namespaceString]);
 
-    this.accessControlService.setUserForOperation(this.getCurrentUserFunc());
     const typeRegistry = await this.typeRegistryFunc();
 
     const { typesRequiringAccessControl } =
