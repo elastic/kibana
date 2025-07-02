@@ -98,6 +98,7 @@ export const RuleConsumerSelection = (props: RuleConsumerSelectionProps) => {
       isInvalid={!!baseErrors?.consumer?.length}
       error={baseErrors?.consumer}
       data-test-subj="ruleConsumerSelection"
+      aria-label={CONSUMER_SELECT_TITLE}
     >
       <EuiComboBox
         fullWidth
