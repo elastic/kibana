@@ -129,7 +129,7 @@ export interface UiSettingsParams<T = unknown> {
    * - Setting only in serverless - The setting should be allowlisted and registered from a serverless plugin or registered conditionally
    *   based on whether we are in serverless. Don't specify `solutions` as spaces in serverless don't have solution views.*/
   solutions?: UiSettingsSolutions;
-}
+};
 
 /**
  * Describes the values explicitly set by user.
@@ -138,7 +138,7 @@ export interface UiSettingsParams<T = unknown> {
 export interface UserProvidedValues<T = any> {
   userValue?: T;
   isOverridden?: boolean;
-}
+};
 
 /**
  * Denotes the scope of the setting
