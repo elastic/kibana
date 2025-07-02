@@ -80,7 +80,7 @@ export const hasReadAttackDiscoveryAlertsPrivileges = async ({
   context,
   response,
 }: AttackDiscoveryAlertsPrivilegesParams): Promise<PrivilegesCheckResults> => {
-  const privileges = ['read'];
+  const privileges = ['read', 'view_index_metadata'];
   return hasAttackDiscoveryAlertsPrivileges({
     additionalErrorMessage: 'Without these privileges you cannot read the Attack Discovery alerts.',
     context,
@@ -93,7 +93,7 @@ export const hasReadWriteAttackDiscoveryAlertsPrivileges = async ({
   context,
   response,
 }: AttackDiscoveryAlertsPrivilegesParams): Promise<PrivilegesCheckResults> => {
-  const privileges = ['read', 'write', 'maintenance'];
+  const privileges = ['read', 'view_index_metadata', 'write', 'maintenance'];
   return hasAttackDiscoveryAlertsPrivileges({
     additionalErrorMessage:
       'Without these privileges you cannot create, read, update or delete the Attack Discovery alerts.',
