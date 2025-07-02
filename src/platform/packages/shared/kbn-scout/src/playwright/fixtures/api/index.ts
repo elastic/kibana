@@ -7,22 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test as base } from 'playwright/test';
+import { TestType, test as base, mergeTests } from 'playwright/test';
 import { EsArchiverFixture, coreWorkerFixtures, esArchiverFixture } from '../worker';
 import type { CoreWorkerFixtures } from '../worker/core_fixtures';
 import { RequestAuthFixture, requestAuthFixture } from '../worker/api_key';
 import { ApiClientFixture, apiClientFixture } from '../worker/api_client';
 import { DefaultRolesFixture, defaultRolesFixture } from '../worker/default_roles';
 
-interface ApiWorkerFixtures extends CoreWorkerFixtures {
+export interface ApiWorkerFixtures extends CoreWorkerFixtures {
   apiClient: ApiClientFixture;
   defaultRolesFixture: DefaultRolesFixture;
   requestAuth: RequestAuthFixture;
   esArchiver: EsArchiverFixture;
 }
 
-export const apiTest = base.extend<ApiWorkerFixtures>({
-  // Remove built-in browser fixtures by overriding them with undefined and relaxing the types
+// This disables browser-related fixtures by overriding them with undefined
+export const noBrowserFixtures = base.extend({
   page: [
     async (_: unknown, use: (value: undefined) => Promise<void>) => {
       await use(undefined);
@@ -47,10 +47,13 @@ export const apiTest = base.extend<ApiWorkerFixtures>({
     },
     { scope: 'test' },
   ] as any,
-  // Add api testing fixtures
-  ...coreWorkerFixtures,
-  ...apiClientFixture,
-  ...defaultRolesFixture,
-  ...requestAuthFixture,
-  ...esArchiverFixture,
 });
+
+export const apiTest = mergeTests(
+  noBrowserFixtures,
+  coreWorkerFixtures,
+  apiClientFixture,
+  defaultRolesFixture,
+  requestAuthFixture,
+  esArchiverFixture
+) as unknown as TestType<{}, ApiWorkerFixtures>;
