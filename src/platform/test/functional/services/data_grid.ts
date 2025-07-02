@@ -1055,4 +1055,21 @@ export class DataGridService extends FtrService {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
   }
+
+  public async getScrollPosition() {
+    const container = await this.find.byCssSelector('.euiDataGrid__virtualized');
+    const scrollTop = await this.browser.execute(
+      'return arguments[0].scrollTop',
+      container._webElement
+    );
+    const scrollLeft = await this.browser.execute(
+      'return arguments[0].scrollLeft',
+      container._webElement
+    );
+
+    return {
+      scrollTop,
+      scrollLeft,
+    };
+  }
 }

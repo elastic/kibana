@@ -175,6 +175,73 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await dataGrid.getCurrentPageNumber()).to.be('3');
         });
       });
+
+      it('should restore scroll position', async () => {
+        expect(await dataGrid.getScrollPosition()).to.eql({ scrollTop: 0, scrollLeft: 0 });
+        await dataGrid.scrollTo(0, 300);
+        await retry.try(async () => {
+          expect(await dataGrid.getScrollPosition()).to.eql({ scrollTop: 300, scrollLeft: 0 });
+        });
+        expect(await dataGrid.getCurrentPageNumber()).to.be('1');
+
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        expect(await dataGrid.getScrollPosition()).to.eql({ scrollTop: 0, scrollLeft: 0 });
+        expect(await dataGrid.getCurrentPageNumber()).to.be('1');
+        await testSubjects.click('pagination-button-next');
+        await retry.try(async () => {
+          expect(await dataGrid.getCurrentPageNumber()).to.be('2');
+        });
+        await dataGrid.scrollTo(0, 500);
+
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        expect(await dataGrid.getScrollPosition()).to.eql({ scrollTop: 0, scrollLeft: 0 });
+        expect(await dataGrid.getCurrentPageNumber()).to.be('1');
+
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        expect(await dataGrid.getScrollPosition()).to.eql({ scrollTop: 0, scrollLeft: 0 });
+        expect(await dataGrid.getCurrentPageNumber()).to.be('1');
+        const searchTerm = 'Sep 22, 2015 @ 18:16:13.025';
+        await dataGrid.runInTableSearch(searchTerm);
+        await retry.try(async () => {
+          expect(await dataGrid.getCurrentPageNumber()).to.be('3');
+        });
+        await testSubjects.click('pagination-button-next');
+        await retry.try(async () => {
+          expect(await dataGrid.getCurrentPageNumber()).to.be('4');
+        });
+
+        await unifiedTabs.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
+        await retry.try(async () => {
+          expect(await dataGrid.getScrollPosition()).to.eql({ scrollTop: 300, scrollLeft: 0 });
+          expect(await dataGrid.getCurrentPageNumber()).to.be('1');
+        });
+
+        await unifiedTabs.selectTab(1);
+        await discover.waitUntilTabIsLoaded();
+        await retry.try(async () => {
+          expect(await dataGrid.getScrollPosition()).to.eql({ scrollTop: 500, scrollLeft: 0 });
+          expect(await dataGrid.getCurrentPageNumber()).to.be('2');
+        });
+
+        await unifiedTabs.selectTab(2);
+        await discover.waitUntilTabIsLoaded();
+        await retry.try(async () => {
+          expect(await dataGrid.getScrollPosition()).to.eql({ scrollTop: 0, scrollLeft: 0 });
+          expect(await dataGrid.getCurrentPageNumber()).to.be('1');
+        });
+
+        await unifiedTabs.selectTab(3);
+        await discover.waitUntilTabIsLoaded();
+        await retry.try(async () => {
+          expect(await dataGrid.getScrollPosition()).to.eql({ scrollTop: 0, scrollLeft: 0 });
+          expect(await dataGrid.getCurrentPageNumber()).to.be('4'); // in-table search should not affect the manually selected page
+          expect(await dataGrid.getInTableSearchTerm()).to.be(searchTerm);
+        });
+      });
     });
   });
 }
