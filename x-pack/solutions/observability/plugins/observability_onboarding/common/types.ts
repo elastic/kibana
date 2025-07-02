@@ -9,4 +9,5 @@ export interface ElasticAgentVersionInfo {
   agentVersion: string;
   agentBaseVersion: string;
   agentDockerImageVersion: string;
+  agentTargetVersion?: string;
 }

@@ -34,7 +34,7 @@ export function validateParamsForWarnings(
 
     try {
       const variables = new Set(
-        (Mustache.parse(value) as Array<[string, string]>)
+        Mustache.parse(value)
           .filter(([type]) => type === 'name')
           .map(([, v]) => v)
       );

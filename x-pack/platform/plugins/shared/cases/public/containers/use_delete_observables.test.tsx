@@ -10,8 +10,7 @@ import { useDeleteObservable } from './use_delete_observables';
 import { deleteObservable } from './api';
 import { useCasesToast } from '../common/use_cases_toast';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
-import type { AppMockRenderer } from '../common/mock';
-import { createAppMockRenderer } from '../common/mock';
+import { TestProviders } from '../common/mock';
 
 jest.mock('./api');
 jest.mock('../common/use_cases_toast');
@@ -24,10 +23,7 @@ describe('useDeleteObservable', () => {
   const showSuccessToast = jest.fn();
   const refreshCaseViewPage = useRefreshCaseViewPage();
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
     (useCasesToast as jest.Mock).mockReturnValue({ showErrorToast, showSuccessToast });
   });
@@ -36,7 +32,7 @@ describe('useDeleteObservable', () => {
     (deleteObservable as jest.Mock).mockResolvedValue({});
 
     const { result } = renderHook(() => useDeleteObservable(caseId, observableId), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -53,7 +49,7 @@ describe('useDeleteObservable', () => {
     (deleteObservable as jest.Mock).mockRejectedValue(error);
 
     const { result } = renderHook(() => useDeleteObservable(caseId, observableId), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {

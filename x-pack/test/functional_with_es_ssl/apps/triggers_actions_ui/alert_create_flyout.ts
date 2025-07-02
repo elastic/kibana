@@ -64,7 +64,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByCssSelector(
         '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
       );
-      await testSubjects.click('create-connector-flyout-save-btn');
     });
 
     const toastTitle = await toasts.getTitleAndDismiss();

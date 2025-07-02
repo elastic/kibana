@@ -57,6 +57,10 @@ export function ManageViewsFlyout<TSavedViewState extends SavedViewItem>({
 
   const renderName = (name: string, item: SavedViewItem) => (
     <EuiButtonEmpty
+      aria-label={i18n.translate('xpack.infra.renderName.button.ariaLabel', {
+        defaultMessage: 'Switch to {name}',
+        values: { name },
+      })}
       key={item.id}
       data-test-subj="infraRenderNameButton"
       onClick={() => {
@@ -83,6 +87,9 @@ export function ManageViewsFlyout<TSavedViewState extends SavedViewItem>({
   const renderMakeDefaultAction = (item: SavedViewItem) => {
     return (
       <EuiButtonIcon
+        aria-label={i18n.translate('xpack.infra.renderMakeDefaultAction.defaultButton.ariaLabel', {
+          defaultMessage: 'Mark as default',
+        })}
         key={item.id}
         data-test-subj="infraRenderMakeDefaultActionButton"
         iconType={item.attributes.isDefault ? 'starFilled' : 'starEmpty'}
@@ -120,7 +127,13 @@ export function ManageViewsFlyout<TSavedViewState extends SavedViewItem>({
 
   return (
     <EuiPortal>
-      <EuiFlyout onClose={onClose} data-test-subj="loadViewsFlyout">
+      <EuiFlyout
+        onClose={onClose}
+        data-test-subj="loadViewsFlyout"
+        aria-label={i18n.translate('xpack.infra.openView.flyout.ariaLabel', {
+          defaultMessage: 'Manage saved views dialog',
+        })}
+      >
         <EuiFlyoutHeader>
           <EuiTitle size="m">
             <h2>
@@ -142,7 +155,13 @@ export function ManageViewsFlyout<TSavedViewState extends SavedViewItem>({
           />
         </EuiFlyoutBody>
         <EuiModalFooter>
-          <EuiButtonEmpty data-test-subj="cancelSavedViewModal" onClick={onClose}>
+          <EuiButtonEmpty
+            aria-label={i18n.translate('xpack.infra.manageViewsFlyout.cancelButton.ariaLabel', {
+              defaultMessage: 'Cancel',
+            })}
+            data-test-subj="cancelSavedViewModal"
+            onClick={onClose}
+          >
             <FormattedMessage defaultMessage="Cancel" id="xpack.infra.openView.cancelButton" />
           </EuiButtonEmpty>
         </EuiModalFooter>
@@ -156,7 +175,13 @@ const DeleteConfimation = ({ isDisabled, onConfirm }: DeleteConfimationProps) =>
 
   return isConfirmVisible ? (
     <EuiFlexGroup>
-      <EuiButtonEmpty onClick={toggleVisibility} data-test-subj="hideConfirm">
+      <EuiButtonEmpty
+        aria-label={i18n.translate('xpack.infra.deleteConfimation.cancelButton.ariaLabel', {
+          defaultMessage: 'Cancel',
+        })}
+        onClick={toggleVisibility}
+        data-test-subj="hideConfirm"
+      >
         <FormattedMessage defaultMessage="cancel" id="xpack.infra.waffle.savedViews.cancel" />
       </EuiButtonEmpty>
       <EuiButton
@@ -175,6 +200,9 @@ const DeleteConfimation = ({ isDisabled, onConfirm }: DeleteConfimationProps) =>
     </EuiFlexGroup>
   ) : (
     <EuiButtonIcon
+      aria-label={i18n.translate('xpack.infra.deleteConfimation.deleteButton.ariaLabel', {
+        defaultMessage: 'Delete',
+      })}
       data-test-subj="infraDeleteConfimationButton"
       iconType="trash"
       color="danger"

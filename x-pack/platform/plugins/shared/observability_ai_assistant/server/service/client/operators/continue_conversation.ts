@@ -140,17 +140,13 @@ function getFunctionDefinitions({
 }: {
   functionClient: ChatFunctionClient;
   functionLimitExceeded: boolean;
-  disableFunctions:
-    | boolean
-    | {
-        except: string[];
-      };
+  disableFunctions: boolean;
 }) {
   if (functionLimitExceeded || disableFunctions === true) {
     return [];
   }
 
-  let systemFunctions = functionClient
+  const systemFunctions = functionClient
     .getFunctions()
     .map((fn) => fn.definition)
     .filter(
@@ -158,10 +154,6 @@ function getFunctionDefinitions({
         !def.visibility ||
         [FunctionVisibility.AssistantOnly, FunctionVisibility.All].includes(def.visibility)
     );
-
-  if (typeof disableFunctions === 'object') {
-    systemFunctions = systemFunctions.filter((fn) => disableFunctions.except.includes(fn.name));
-  }
 
   const actions = functionClient.getActions();
 
@@ -194,11 +186,7 @@ export function continueConversation({
   adHocInstructions: AdHocInstruction[];
   userInstructions: Instruction[];
   logger: Logger;
-  disableFunctions:
-    | boolean
-    | {
-        except: string[];
-      };
+  disableFunctions: boolean;
   tracer: LangTracer;
   connectorId: string;
   simulateFunctionCalling: boolean;

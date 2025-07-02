@@ -20,7 +20,7 @@ exports[`RiskScoreConfigurationSection renders correctly 1`] = `
         end="now"
         onTimeChange={[Function]}
         showUpdateButton={false}
-        start="now-30m"
+        start="now-30d"
         width="auto"
       />
     </div>

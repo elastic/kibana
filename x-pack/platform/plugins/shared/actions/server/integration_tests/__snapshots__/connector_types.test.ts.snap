@@ -5228,6 +5228,19 @@ Object {
     "presence": "optional",
   },
   "keys": Object {
+    "maxOutputTokens": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "number",
+    },
     "messages": Object {
       "flags": Object {
         "error": [Function],
@@ -5541,6 +5554,19 @@ Object {
     "presence": "optional",
   },
   "keys": Object {
+    "maxOutputTokens": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "number",
+    },
     "messages": Object {
       "flags": Object {
         "error": [Function],
@@ -5765,6 +5791,19 @@ Object {
     "presence": "optional",
   },
   "keys": Object {
+    "maxOutputTokens": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "number",
+    },
     "messages": Object {
       "flags": Object {
         "error": [Function],

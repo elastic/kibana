@@ -24,7 +24,7 @@ export const useSloSummaryDataView = () => {
   useEffect(() => {
     if (settings && remoteClusters) {
       const summaryIndices = getListOfSloSummaryIndices(settings, remoteClusters);
-      setIndexPattern(summaryIndices);
+      setIndexPattern(summaryIndices.join(','));
     }
   }, [settings, remoteClusters]);
 

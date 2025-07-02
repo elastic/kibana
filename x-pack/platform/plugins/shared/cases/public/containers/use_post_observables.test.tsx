@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import * as api from './api';
 import { useToasts } from '../common/lib/kibana';
-import type { AppMockRenderer } from '../common/mock';
-import { createAppMockRenderer } from '../common/mock';
 import { usePostObservable } from './use_post_observables';
 import { casesQueriesKeys } from './constants';
 import { mockCase } from './mock';
 import type { AddObservableRequest } from '../../common/types/api';
+import { TestProviders, createTestQueryClient } from '../common/mock';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -32,17 +32,14 @@ describe('usePostObservables', () => {
 
   (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'postObservable');
     const { result } = renderHook(() => usePostObservable(mockCase.id), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -55,9 +52,10 @@ describe('usePostObservables', () => {
   });
 
   it('invalidates the queries correctly', async () => {
-    const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
+    const queryClient = createTestQueryClient();
+    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
     const { result } = renderHook(() => usePostObservable(mockCase.id), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
     });
 
     act(() => {
@@ -69,7 +67,7 @@ describe('usePostObservables', () => {
 
   it('does shows a success toaster', async () => {
     const { result } = renderHook(() => usePostObservable(mockCase.id), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -85,7 +83,7 @@ describe('usePostObservables', () => {
       .mockRejectedValue(new Error('usePostObservables: Test error'));
 
     const { result } = renderHook(() => usePostObservable(mockCase.id), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {

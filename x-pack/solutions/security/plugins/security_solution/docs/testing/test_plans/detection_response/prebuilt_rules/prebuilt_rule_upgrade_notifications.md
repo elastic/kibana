@@ -46,6 +46,8 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: User is notified on the Rule Editing page when the rule is outdated and can be upgraded to a new version**](#scenario-user-is-notified-on-the-rule-editing-page-when-the-rule-is-outdated-and-can-be-upgraded-to-a-new-version)
     - [**Scenario: User can navigate from the Rule Editing page to the Rule Details page in order to upgrade the rule**](#scenario-user-can-navigate-from-the-rule-editing-page-to-the-rule-details-page-in-order-to-upgrade-the-rule)
     - [**Scenario: User cannot dismiss the prebuilt rule upgrade callout on the Rule Editing page**](#scenario-user-cannot-dismiss-the-prebuilt-rule-upgrade-callout-on-the-rule-editing-page)
+  - [Licensing](#licensing)
+    - [**Scenario: User is NOT notified on the Rule Editing page when the license is insufficient**](#scenario-user-is-not-notified-on-the-rule-editing-page-when-the-license-is-insufficient)
 
 ## Useful information
 
@@ -62,6 +64,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - **Callout to upgrade the rule**: is either of the two callouts, depending on the context of a given scenario:
   - a notification callout shown on the Rule Details page that encourages the user to upgrade the rule to its latest version;
   - a notification callout shown on the Rule Editing page that encourages the user to upgrade the rule to its latest version before editing it.
+- **rule customization**: a change to a customizable field of a prebuilt rule. Full list of customizable rule fields can be found in [Common information about prebuilt rules](./prebuilt_rules_common_info.md#customizable-rule-fields).
 
 ## Requirements
 
@@ -330,4 +333,18 @@ When user opens the Rule Editing page
 Then user should see the callout to upgrade the rule
 And user should NOT see any Dismiss buttons in it
 And user should NOT be able to dismiss it
+```
+
+### Licensing
+
+#### **Scenario: User is NOT notified on the Rule Editing page when the license is insufficient**
+
+**Automation**: 1 e2e test with a mock rule
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And the rule is outdated (a new version is available for this rule)
+And the license is insufficient for prebuilt rule customization
+When user opens the Rule Editing page
+Then user should NOT see the callout to upgrade the rule
 ```

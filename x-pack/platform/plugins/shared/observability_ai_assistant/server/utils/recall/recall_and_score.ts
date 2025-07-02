@@ -68,11 +68,9 @@ export async function recallAndScore({
     });
 
     analytics.reportEvent<RecallRanking>(recallRankingEventType, {
-      prompt: queries.map((query) => query.text).join('\n\n'),
       scoredDocuments: suggestions.map((suggestion) => {
         const llmScore = scores.find((score) => score.id === suggestion.id);
         return {
-          content: suggestion.text,
           elserScore: suggestion.score ?? -1,
           llmScore: llmScore ? llmScore.score : -1,
         };

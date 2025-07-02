@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
+import { jsonRt, toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
+import type { DependenciesTimeseriesStatisticsResponse } from './get_dependencies_timeseries_statistics';
+import { getDependenciesTimeseriesStatistics } from './get_dependencies_timeseries_statistics';
 import type { DependencyLatencyDistributionResponse } from './get_dependency_latency_distribution';
 import { getDependencyLatencyDistribution } from './get_dependency_latency_distribution';
 import { getErrorRateChartsForDependency } from './get_error_rate_charts_for_dependency';
@@ -32,14 +34,9 @@ import { getUpstreamServicesForDependency } from './get_upstream_services_for_de
 
 const topDependenciesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/dependencies/top_dependencies',
-  params: t.intersection([
-    t.type({
-      query: t.intersection([rangeRt, environmentRt, kueryRt, t.type({ numBuckets: toNumberRt })]),
-    }),
-    t.partial({
-      query: offsetRt,
-    }),
-  ]),
+  params: t.type({
+    query: t.intersection([rangeRt, environmentRt, kueryRt, t.type({ numBuckets: toNumberRt })]),
+  }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<TopDependenciesResponse> => {
     const { request, core } = resources;
@@ -49,7 +46,7 @@ const topDependenciesRoute = createApmServerRoute({
       getApmEventClient(resources),
       getRandomSampler({ coreStart, request, probability: 1 }),
     ]);
-    const { environment, offset, numBuckets, kuery, start, end } = resources.params.query;
+    const { environment, numBuckets, kuery, start, end } = resources.params.query;
 
     return getTopDependencies({
       apmEventClient,
@@ -58,8 +55,37 @@ const topDependenciesRoute = createApmServerRoute({
       numBuckets,
       environment,
       kuery,
-      offset,
       randomSampler,
+      withTimeseries: false,
+    });
+  },
+});
+
+const topDependenciesStatisticsRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/dependencies/top_dependencies/statistics',
+  params: t.type({
+    query: t.intersection([
+      t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
+      t.type({ numBuckets: toNumberRt }),
+    ]),
+    body: t.type({ dependencyNames: jsonRt.pipe(t.array(t.string)) }),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<DependenciesTimeseriesStatisticsResponse> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { environment, offset, numBuckets, kuery, start, end } = resources.params.query;
+    const { dependencyNames } = resources.params.body;
+
+    return getDependenciesTimeseriesStatistics({
+      apmEventClient,
+      start,
+      end,
+      environment,
+      kuery,
+      offset,
+      dependencyNames,
+      searchServiceDestinationMetrics: true,
+      numBuckets,
     });
   },
 });
@@ -403,4 +429,5 @@ export const dependencisRouteRepository = {
   ...dependencyOperationsRoute,
   ...dependencyLatencyDistributionChartsRoute,
   ...topDependencySpansRoute,
+  ...topDependenciesStatisticsRoute,
 };

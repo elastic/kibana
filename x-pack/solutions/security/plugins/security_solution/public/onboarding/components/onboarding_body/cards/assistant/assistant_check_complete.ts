@@ -5,43 +5,32 @@
  * 2.0.
  */
 
-import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import type { AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
 import { i18n } from '@kbn/i18n';
 import type { OnboardingCardCheckComplete } from '../../../../types';
-import { AIActionTypeIds } from '../common/connectors/constants';
+import { loadAiConnectors } from '../common/connectors/ai_connectors';
+import { getConnectorsAuthz } from '../common/connectors/authz';
 import type { AssistantCardMetadata } from './types';
+
+const completeBadgeText = (count: number) =>
+  i18n.translate('xpack.securitySolution.onboarding.assistantCard.badge.completeText', {
+    defaultMessage: '{count} AI {count, plural, one {connector} other {connectors}} added',
+    values: { count },
+  });
 
 export const checkAssistantCardComplete: OnboardingCardCheckComplete<
   AssistantCardMetadata
 > = async ({ http, application }) => {
-  const allConnectors = await loadConnectors({ http });
-  const {
-    capabilities: { actions },
-  } = application;
+  const authz = getConnectorsAuthz(application.capabilities);
 
-  const aiConnectors = allConnectors.reduce((acc: AIConnector[], connector) => {
-    if (!connector.isMissingSecrets && AIActionTypeIds.includes(connector.actionTypeId)) {
-      acc.push(connector);
-    }
-    return acc;
-  }, []);
+  if (!authz.canReadConnectors) {
+    return { isComplete: false, metadata: { connectors: [], ...authz } };
+  }
 
-  const completeBadgeText = i18n.translate(
-    'xpack.securitySolution.onboarding.assistantCard.badge.completeText',
-    {
-      defaultMessage: '{count} AI {count, plural, one {connector} other {connectors}} added',
-      values: { count: aiConnectors.length },
-    }
-  );
+  const aiConnectors = await loadAiConnectors(http);
 
   return {
     isComplete: aiConnectors.length > 0,
-    completeBadgeText,
-    metadata: {
-      connectors: aiConnectors,
-      canExecuteConnectors: Boolean(actions?.show && actions?.execute),
-      canCreateConnectors: Boolean(actions?.save),
-    },
+    completeBadgeText: completeBadgeText(aiConnectors.length),
+    metadata: { connectors: aiConnectors, ...authz },
   };
 };

@@ -93,7 +93,9 @@ const getMetricFormatter = (
   accessor: ExpressionValueVisDimension | string,
   columns: Datatable['columns']
 ) => {
-  const serializedFieldFormat = getFormatByAccessor(accessor, columns);
+  const type = getColumnByAccessor(accessor, columns)?.meta.type;
+  const defaultFormat = type ? { id: type } : undefined;
+  const serializedFieldFormat = getFormatByAccessor(accessor, columns, defaultFormat);
   const enhancedFieldFormat = enhanceFieldFormat(serializedFieldFormat);
   return getFormatService().deserialize(enhancedFieldFormat).getConverterFor('text');
 };
@@ -133,7 +135,7 @@ const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) =
 const getIcon =
   (type: string) =>
   ({ width, height, color }: { width: number; height: number; color: string }) =>
-    <EuiIcon type={type} fill={color} style={{ width, height }} />;
+    <EuiIcon type={type} fill={color} css={{ width, height }} />;
 
 export interface MetricVisComponentProps {
   data: Datatable;

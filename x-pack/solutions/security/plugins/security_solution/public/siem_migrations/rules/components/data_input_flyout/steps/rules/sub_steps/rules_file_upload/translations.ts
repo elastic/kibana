@@ -9,8 +9,17 @@ import { i18n } from '@kbn/i18n';
 
 export const RULES_DATA_INPUT_FILE_UPLOAD_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.title',
-  { defaultMessage: 'Update your rules export' }
+  { defaultMessage: 'Update exported rules' }
 );
+
+export const RULES_DATA_INPUT_FILE_UPLOAD_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.description',
+  {
+    defaultMessage:
+      'For best translation results, we will review your rules for macros and lookups. If found, we will ask you to upload them next.',
+  }
+);
+
 export const RULES_DATA_INPUT_FILE_UPLOAD_PROMPT = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.prompt',
   { defaultMessage: 'Select or drag and drop the exported JSON file' }

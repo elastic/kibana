@@ -81,7 +81,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             icon="refresh"
-            disabled={!isAgentUpgradeable(agent)}
+            disabled={!isAgentUpgradeable(agent) || agentPolicy?.supports_agentless === true}
             onClick={() => {
               setIsUpgradeModalOpen(true);
             }}
@@ -148,7 +148,9 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
       ? [
           <EuiContextMenuItem
             icon="trash"
-            disabled={!hasFleetAllPrivileges || !agent.active}
+            disabled={
+              !hasFleetAllPrivileges || !agent.active || agentPolicy?.supports_agentless === true
+            }
             onClick={() => {
               setIsUnenrollModalOpen(true);
             }}

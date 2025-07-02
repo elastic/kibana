@@ -244,7 +244,11 @@ describe('FeatureFlagsService Browser', () => {
     beforeEach(async () => {
       addHandlerSpy = jest.spyOn(featureFlagsClient, 'addHandler');
       injectedMetadata.getFeatureFlags.mockReturnValue({
-        overrides: { 'my-overridden-flag': true },
+        overrides: {
+          'my-overridden-flag': true,
+          'myPlugin.myOverriddenFlag': true,
+          myDestructuredObjPlugin: { myOverriddenFlag: true },
+        },
       });
       featureFlagsService.setup({ injectedMetadata });
       startContract = await featureFlagsService.start();
@@ -343,6 +347,15 @@ describe('FeatureFlagsService Browser', () => {
       expect(startContract.getBooleanValue('another-flag', false)).toEqual(false);
       expect(getBooleanValueSpy).toHaveBeenCalledTimes(1);
       expect(getBooleanValueSpy).toHaveBeenCalledWith('another-flag', false);
+    });
+
+    test('overrides with dotted names', async () => {
+      const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+      expect(startContract.getBooleanValue('myPlugin.myOverriddenFlag', false)).toEqual(true);
+      expect(
+        startContract.getBooleanValue('myDestructuredObjPlugin.myOverriddenFlag', false)
+      ).toEqual(true);
+      expect(getBooleanValueSpy).not.toHaveBeenCalled();
     });
   });
 });

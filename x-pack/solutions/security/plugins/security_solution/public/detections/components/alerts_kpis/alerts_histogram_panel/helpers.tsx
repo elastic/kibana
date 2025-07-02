@@ -92,8 +92,5 @@ export const createGenericSubtitle = (
   totalAlerts: string
 ) => !isInitialLoading && showTotalAlertsCount && totalAlerts;
 
-export const createEmbeddedDataSubtitle = (
-  embeddedDataLoaded: boolean,
-  embeddedDataAvailable: boolean,
-  totalAlerts: string
-) => embeddedDataLoaded && embeddedDataAvailable && totalAlerts;
+export const createEmbeddedDataSubtitle = (embeddedDataAvailable: boolean, totalAlerts: string) =>
+  embeddedDataAvailable && totalAlerts;

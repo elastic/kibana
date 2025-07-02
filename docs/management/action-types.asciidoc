@@ -50,6 +50,10 @@ a| <<jira-action-type,Jira>>
 
 | Create an incident in Jira.
 
+a| <<defender-action-type,Microsoft Defender for Endpoint>>
+
+| Send requests to Microsoft Defender-enrolled hosts.
+
 a| <<teams-action-type,Microsoft Teams>>
 
 | Send a message to a Microsoft Teams channel.

@@ -27,6 +27,8 @@ describe('FeatureFlagsService Server', () => {
           atPath: {
             overrides: {
               'my-overridden-flag': true,
+              'myPlugin.myOverriddenFlag': true,
+              myDestructuredObjPlugin: { myOverriddenFlag: true },
             },
           },
         }),
@@ -36,7 +38,9 @@ describe('FeatureFlagsService Server', () => {
   });
 
   afterEach(async () => {
+    jest.useRealTimers();
     await featureFlagsService.stop();
+    jest.spyOn(OpenFeature, 'setProviderAndWait').mockRestore(); // Make sure that we clean up any previous mocked implementations
     jest.clearAllMocks();
     await OpenFeature.clearProviders();
   });
@@ -45,7 +49,7 @@ describe('FeatureFlagsService Server', () => {
     test('appends a provider (no async operation)', () => {
       expect.assertions(1);
       const { setProvider } = featureFlagsService.setup();
-      const spy = jest.spyOn(OpenFeature, 'setProvider');
+      const spy = jest.spyOn(OpenFeature, 'setProviderAndWait');
       const fakeProvider = { metadata: { name: 'fake provider' } } as Provider;
       setProvider(fakeProvider);
       expect(spy).toHaveBeenCalledWith(fakeProvider);
@@ -251,10 +255,25 @@ describe('FeatureFlagsService Server', () => {
       expect(getBooleanValueSpy).toHaveBeenCalledTimes(1);
       expect(getBooleanValueSpy).toHaveBeenCalledWith('another-flag', false);
     });
+
+    test('overrides with dotted names', async () => {
+      const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+      await expect(
+        startContract.getBooleanValue('myPlugin.myOverriddenFlag', false)
+      ).resolves.toEqual(true);
+      await expect(
+        startContract.getBooleanValue('myDestructuredObjPlugin.myOverriddenFlag', false)
+      ).resolves.toEqual(true);
+      expect(getBooleanValueSpy).not.toHaveBeenCalled();
+    });
   });
 
   test('returns overrides', () => {
     const { getOverrides } = featureFlagsService.setup();
-    expect(getOverrides()).toStrictEqual({ 'my-overridden-flag': true });
+    expect(getOverrides()).toStrictEqual({
+      'my-overridden-flag': true,
+      'myPlugin.myOverriddenFlag': true,
+      myDestructuredObjPlugin: { myOverriddenFlag: true },
+    });
   });
 });

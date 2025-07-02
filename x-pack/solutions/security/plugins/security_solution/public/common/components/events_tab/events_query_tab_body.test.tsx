@@ -95,7 +95,6 @@ jest.mock('../../hooks/use_license', () => {
 describe('EventsQueryTabBody', () => {
   const commonProps: EventsQueryTabBodyComponentProps = {
     indexNames: ['test-index'],
-    setQuery: jest.fn(),
     tableId: TableId.test,
     type: HostsType.page,
     endDate: new Date('2000').toISOString(),

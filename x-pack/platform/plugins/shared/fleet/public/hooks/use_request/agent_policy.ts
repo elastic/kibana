@@ -128,6 +128,22 @@ export const sendGetOneAgentPolicy = (agentPolicyId: string) => {
   });
 };
 
+export const sendCreateAgentPolicyForRq = (
+  body: CreateAgentPolicyRequest['body'],
+  { withSysMonitoring }: { withSysMonitoring: boolean } = { withSysMonitoring: false }
+) => {
+  return sendRequestForRq<CreateAgentPolicyResponse>({
+    path: agentPolicyRouteService.getCreatePath(),
+    method: 'post',
+    body: JSON.stringify(body),
+    query: withSysMonitoring ? { sys_monitoring: true } : {},
+    version: API_VERSIONS.public.v1,
+  });
+};
+
+/**
+ * @deprecated use sendCreateAgentPolicyForRq instead
+ */
 export const sendCreateAgentPolicy = (
   body: CreateAgentPolicyRequest['body'],
   { withSysMonitoring }: { withSysMonitoring: boolean } = { withSysMonitoring: false }

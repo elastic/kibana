@@ -8,9 +8,9 @@
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { AppMockRenderer } from '../../common/mock';
+
 import { CaseSeverity, ConnectorTypes } from '../../../common/types/domain';
-import { createAppMockRenderer, mockedTestProvidersOwner } from '../../common/mock';
+import { mockedTestProvidersOwner, renderWithTestingProviders } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { useGetChoicesResponse } from '../create/mock';
@@ -24,7 +24,6 @@ jest.mock('../connectors/servicenow/use_get_choices');
 const useGetChoicesMock = useGetChoices as jest.Mock;
 
 describe('form fields', () => {
-  let appMockRenderer: AppMockRenderer;
   const onSubmit = jest.fn();
   const formDefaultValue = { tags: [], templateTags: [] };
   const defaultProps = {
@@ -49,12 +48,12 @@ describe('form fields', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
+
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
   });
 
   it('renders correctly', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...defaultProps} />
       </FormTestComponent>
@@ -64,7 +63,7 @@ describe('form fields', () => {
   });
 
   it('renders all steps', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...defaultProps} />
       </FormTestComponent>
@@ -77,7 +76,7 @@ describe('form fields', () => {
   });
 
   it('renders template fields correctly', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...defaultProps} />
       </FormTestComponent>
@@ -90,7 +89,7 @@ describe('form fields', () => {
   });
 
   it('renders case fields', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...defaultProps} />
       </FormTestComponent>
@@ -105,7 +104,7 @@ describe('form fields', () => {
   });
 
   it('renders case fields with existing value', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <FormTestComponent
         formDefaultValue={{
           title: 'Case title',
@@ -136,7 +135,7 @@ describe('form fields', () => {
   });
 
   it('renders sync alerts correctly', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...defaultProps} />
       </FormTestComponent>
@@ -154,7 +153,7 @@ describe('form fields', () => {
       },
     };
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...newProps} />
       </FormTestComponent>
@@ -164,7 +163,7 @@ describe('form fields', () => {
   });
 
   it('renders default connector correctly', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...defaultProps} />
       </FormTestComponent>
@@ -187,7 +186,7 @@ describe('form fields', () => {
       },
     };
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <FormTestComponent
         formDefaultValue={{ ...formDefaultValue, connectorId: 'servicenow-1' }}
         onSubmit={onSubmit}
@@ -202,21 +201,18 @@ describe('form fields', () => {
   });
 
   it('does not render sync alerts when feature is not enabled', () => {
-    appMockRenderer = createAppMockRenderer({
-      features: { alerts: { sync: false, enabled: true } },
-    });
-
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...defaultProps} />
-      </FormTestComponent>
+      </FormTestComponent>,
+      { wrapperProps: { features: { alerts: { sync: false, enabled: true } } } }
     );
 
     expect(screen.queryByTestId('caseSyncAlerts')).not.toBeInTheDocument();
   });
 
   it('calls onSubmit with template fields', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...defaultProps} />
       </FormTestComponent>
@@ -253,7 +249,7 @@ describe('form fields', () => {
   });
 
   it('calls onSubmit with case fields', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...defaultProps} />
       </FormTestComponent>
@@ -302,7 +298,7 @@ describe('form fields', () => {
       },
     };
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
         <FormFields {...newProps} />
       </FormTestComponent>
@@ -370,7 +366,7 @@ describe('form fields', () => {
       },
     };
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <FormTestComponent
         formDefaultValue={{ ...formDefaultValue, connectorId: 'servicenow-1' }}
         onSubmit={onSubmit}
@@ -431,7 +427,7 @@ describe('form fields', () => {
       },
     };
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <FormTestComponent onSubmit={onSubmit} formDefaultValue={formDefaultValue}>
         <FormFields {...newProps} />
       </FormTestComponent>

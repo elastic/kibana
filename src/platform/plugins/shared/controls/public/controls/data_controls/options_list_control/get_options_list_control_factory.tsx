@@ -185,9 +185,9 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           loadingSuggestions$,
           debouncedSearchString,
           parentApi: controlGroupApi,
-          controlFetch$: controlGroupApi.controlFetch$(uuid),
         },
         stateManager,
+        controlFetch$: (onReload: () => void) => controlGroupApi.controlFetch$(uuid, onReload),
       }).subscribe((result) => {
         // if there was an error during fetch, set blocking error and return early
         if (Object.hasOwn(result, 'error')) {

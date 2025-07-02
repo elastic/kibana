@@ -120,11 +120,6 @@ export const mockState: SyntheticsAppState = {
     error: null,
     data: [],
   },
-  settings: {
-    loading: false,
-    error: null,
-    success: null,
-  },
   dynamicSettings: {
     loading: false,
     locationMonitors: [],
@@ -344,7 +339,7 @@ function getMonitorDetailsMockSlice() {
             version: '8.3.0',
           },
           synthetics: {
-            journey: { name: 'inline', id: 'inline', tags: null },
+            journey: { name: 'inline', id: 'inline' },
             type: 'heartbeat/summary',
           },
           monitor: {
@@ -379,7 +374,6 @@ function getMonitorDetailsMockSlice() {
           ecs: { version: '8.0.0' },
           config_id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
           data_stream: { namespace: 'default', type: 'synthetics', dataset: 'browser' },
-          timestamp: '2022-07-24T17:04:03.769Z',
           docId: 'mkYqMYIBqL6WCtughFUq',
         },
         {
@@ -435,7 +429,6 @@ function getMonitorDetailsMockSlice() {
           ecs: { version: '8.0.0' },
           config_id: '4afd3980-0b72-11ed-9c10-b57918ea89d6',
           data_stream: { namespace: 'default', type: 'synthetics', dataset: 'browser' },
-          timestamp: '2022-07-24T17:01:48.326Z',
           docId: 'kUYoMYIBqL6WCtugc1We',
         },
       ],

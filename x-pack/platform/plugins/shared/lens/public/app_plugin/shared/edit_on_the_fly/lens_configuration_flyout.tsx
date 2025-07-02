@@ -452,6 +452,7 @@ export function LensEditConfigurationFlyout({
             hasPadding
             framePublicAPI={framePublicAPI}
             setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
+            parentApi={parentApi}
           />
         </FlyoutWrapper>
       </>
@@ -616,6 +617,7 @@ export function LensEditConfigurationFlyout({
                   datasourceId={datasourceId}
                   framePublicAPI={framePublicAPI}
                   setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
+                  parentApi={parentApi}
                 />
                 <EuiSpacer />
               </>

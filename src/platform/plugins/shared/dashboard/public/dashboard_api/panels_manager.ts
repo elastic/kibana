@@ -358,6 +358,7 @@ export function initializePanelsManager(
           [api.uuid]: api,
         });
       },
+      setPanels,
       reset: (lastSavedState: DashboardState) => {
         setPanels(lastSavedState.panels);
         restoredRuntimeState = {};
@@ -394,9 +395,11 @@ export function initializePanelsManager(
           const childApi = children$.value[id];
           const serializeResult = apiHasSerializableState(childApi)
             ? childApi.serializeState()
-            : { rawState: {} };
+            : {
+                rawState: panels$.value[id].explicitInput ?? {},
+                references: getReferencesForPanelId(id),
+              };
           acc[id] = { ...panels$.value[id], explicitInput: { ...serializeResult.rawState, id } };
-
           references.push(...prefixReferencesFromPanel(id, serializeResult.references ?? []));
 
           return acc;

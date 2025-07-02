@@ -32,6 +32,10 @@ export {
   AGENT_NAMES,
 } from './src/agent_names';
 
+export { getIngestionPath } from './src/agent_ingestion_path';
+
+export { getSdkNameAndLanguage } from './src/agent_sdk_name_and_language';
+
 export type {
   ElasticAgentName,
   OpenTelemetryAgentName,

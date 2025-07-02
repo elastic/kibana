@@ -41,11 +41,7 @@ import {
   InvokeAIRawActionParams,
   InvokeAIRawActionResponse,
 } from '../../../common/gemini/types';
-import {
-  SUB_ACTION,
-  DEFAULT_TIMEOUT_MS,
-  DEFAULT_TOKEN_LIMIT,
-} from '../../../common/gemini/constants';
+import { SUB_ACTION, DEFAULT_TIMEOUT_MS } from '../../../common/gemini/constants';
 import { DashboardActionParamsSchema } from '../../../common/gemini/schema';
 /** Interfaces to define Gemini model response type */
 
@@ -62,7 +58,7 @@ interface Payload {
   contents: MessageContent[];
   generation_config: {
     temperature: number;
-    maxOutputTokens: number;
+    maxOutputTokens?: number;
   };
   tool_config?: {
     function_calling_config: {
@@ -292,13 +288,20 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       signal,
       timeout,
       toolConfig,
+      maxOutputTokens,
     }: InvokeAIActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIActionResponse> {
     const res = await this.runApi(
       {
         body: JSON.stringify(
-          formatGeminiPayload({ messages, temperature, toolConfig, systemInstruction })
+          formatGeminiPayload({
+            maxOutputTokens,
+            messages,
+            temperature,
+            toolConfig,
+            systemInstruction,
+          })
         ),
         model,
         signal,
@@ -312,6 +315,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
 
   public async invokeAIRaw(
     {
+      maxOutputTokens,
       messages,
       model,
       temperature = 0,
@@ -325,7 +329,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     const res = await this.runApi(
       {
         body: JSON.stringify({
-          ...formatGeminiPayload({ messages, temperature, systemInstruction }),
+          ...formatGeminiPayload({ maxOutputTokens, messages, temperature, systemInstruction }),
           tools,
         }),
         model,
@@ -349,6 +353,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
    */
   public async invokeStream(
     {
+      maxOutputTokens,
       messages,
       systemInstruction,
       model,
@@ -364,7 +369,13 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     return (await this.streamAPI(
       {
         body: JSON.stringify({
-          ...formatGeminiPayload({ messages, temperature, toolConfig, systemInstruction }),
+          ...formatGeminiPayload({
+            maxOutputTokens,
+            messages,
+            temperature,
+            toolConfig,
+            systemInstruction,
+          }),
           tools,
         }),
         model,
@@ -379,11 +390,13 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
 
 /** Format the json body to meet Gemini payload requirements */
 const formatGeminiPayload = ({
+  maxOutputTokens,
   messages,
   systemInstruction,
   temperature,
   toolConfig,
 }: {
+  maxOutputTokens?: number;
   messages: Array<{ role: string; content: string; parts: MessagePart[] }>;
   systemInstruction?: string;
   toolConfig?: InvokeAIActionParams['toolConfig'];
@@ -393,7 +406,7 @@ const formatGeminiPayload = ({
     contents: [],
     generation_config: {
       temperature,
-      maxOutputTokens: DEFAULT_TOKEN_LIMIT,
+      maxOutputTokens,
     },
     ...(systemInstruction ? { system_instruction: { parts: [{ text: systemInstruction }] } } : {}),
     ...(toolConfig

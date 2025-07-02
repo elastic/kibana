@@ -159,6 +159,7 @@ import { waitForAlerts } from './alerts';
 import { refreshPage } from './security_header';
 import { COMBO_BOX_OPTION, TOOLTIP } from '../screens/common';
 import { EMPTY_ALERT_TABLE } from '../screens/alerts';
+import { fillComboBox } from './eui_form_interactions';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click();
@@ -463,7 +464,7 @@ export const removeAlertsIndex = () => {
 export const fillDefineCustomRule = (rule: QueryRuleCreateProps) => {
   if (rule.data_view_id !== undefined) {
     cy.get(DATA_VIEW_OPTION).click();
-    cy.get(DATA_VIEW_COMBO_BOX).type(`${rule.data_view_id}{enter}`);
+    fillComboBox({ parentSelector: DATA_VIEW_COMBO_BOX, options: rule.data_view_id });
   }
   cy.get(CUSTOM_QUERY_INPUT)
     .first()

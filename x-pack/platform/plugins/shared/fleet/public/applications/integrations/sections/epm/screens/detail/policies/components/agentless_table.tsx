@@ -10,6 +10,8 @@ import { EuiBadge, EuiBasicTable, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
 
+import { useLocation } from 'react-router-dom';
+
 import type {
   Agent,
   AgentPolicy,
@@ -109,9 +111,24 @@ export const AgentlessPackagePoliciesTable = ({
   }, [agentsKuery, canReadAgents, notifications.toasts]);
 
   // Flyout state
+  const { search } = useLocation();
+  const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const [flyoutOpenForPolicyId, setFlyoutOpenForPolicyId] = useState<string>();
   const [flyoutPackagePolicy, setFlyoutPackagePolicy] = useState<PackagePolicy>();
   const [flyoutAgentPolicy, setFlyoutAgentPolicy] = useState<AgentPolicy>();
+  useEffect(() => {
+    const flyoutAgentPolicyIdFromQuery = queryParams.get('openEnrollmentFlyout');
+    if (flyoutAgentPolicyIdFromQuery) {
+      const pp = packagePolicies.find((p) =>
+        p.packagePolicy.policy_ids.includes(flyoutAgentPolicyIdFromQuery)
+      );
+      if (pp) {
+        setFlyoutOpenForPolicyId(flyoutAgentPolicyIdFromQuery);
+        setFlyoutPackagePolicy(pp.packagePolicy);
+        setFlyoutAgentPolicy(pp.agentPolicies[0]);
+      }
+    }
+  }, [packagePolicies, queryParams]);
 
   return (
     <>

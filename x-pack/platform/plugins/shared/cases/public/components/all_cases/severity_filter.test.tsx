@@ -7,28 +7,24 @@
 
 import { CaseSeverity } from '../../../common/types/domain';
 import React from 'react';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
 import userEvent from '@testing-library/user-event';
 import { screen, waitFor, within } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { SeverityFilter } from './severity_filter';
+import { renderWithTestingProviders } from '../../common/mock';
 
 // Failing: See https://github.com/elastic/kibana/issues/176336
-describe.skip('Severity form field', () => {
+describe('Severity form field', () => {
   const onChange = jest.fn();
-  let appMockRender: AppMockRenderer;
+
   const props = {
     selectedOptionKeys: [],
     onChange,
   };
 
-  beforeEach(() => {
-    appMockRender = createAppMockRenderer();
-  });
-
   it('renders', async () => {
-    appMockRender.render(<SeverityFilter {...props} />);
+    renderWithTestingProviders(<SeverityFilter {...props} />);
 
     const popoverButton = await screen.findByTestId('options-filter-popover-button-severity');
     expect(popoverButton).toBeInTheDocument();
@@ -50,9 +46,13 @@ describe.skip('Severity form field', () => {
   });
 
   it('selects the correct value when changed', async () => {
-    appMockRender.render(<SeverityFilter {...props} />);
+    renderWithTestingProviders(<SeverityFilter {...props} />);
 
-    await userEvent.click(await screen.findByRole('button', { name: 'Severity' }));
+    const popoverButton = await screen.findByTestId('options-filter-popover-button-severity');
+    expect(popoverButton).toBeInTheDocument();
+    expect(popoverButton).not.toBeDisabled();
+
+    await userEvent.click(popoverButton);
 
     await waitForEuiPopoverOpen();
 

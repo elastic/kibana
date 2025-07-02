@@ -12,8 +12,8 @@ import { connector } from '../mock';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 import FieldsPreview from './case_fields_preview';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
+
+import { renderWithTestingProviders } from '../../../common/mock';
 import { createQueryWithMarkup } from '../../../common/test_utils';
 
 jest.mock('../../../common/lib/kibana');
@@ -67,21 +67,18 @@ describe('Jira Fields: Preview', () => {
     severityCode: '5',
   };
 
-  let appMockRenderer: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRenderer = createAppMockRenderer();
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     jest.clearAllMocks();
   });
 
   it('renders all fields correctly', () => {
-    appMockRenderer.render(<FieldsPreview connector={connector} fields={fields} />);
+    renderWithTestingProviders(<FieldsPreview connector={connector} fields={fields} />);
 
-    const getByText = createQueryWithMarkup(screen.getByText);
+    const getByTextWithMarkup = createQueryWithMarkup(screen.getByText);
 
-    expect(getByText('Incident types: Malware, Denial of Service')).toBeInTheDocument();
-    expect(getByText('Severity: Medium')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Incident types: Malware, Denial of Service')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Severity: Medium')).toBeInTheDocument();
   });
 });

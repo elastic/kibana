@@ -38,7 +38,13 @@ export const createNodeAgentInstructions = (commonOptions: AgentInstructions): E
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
-          <EuiCodeBlock language="bash" isCopyable={true}>
+          <EuiCodeBlock
+            language="bash"
+            isCopyable={true}
+            copyAriaLabel={i18n.translate('xpack.apm.onboarding.node.install.copyAriaLabel', {
+              defaultMessage: 'Copy the code to install the APM agent for Node.js',
+            })}
+          >
             npm install elastic-apm-node --save
           </EuiCodeBlock>
         </>

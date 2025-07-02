@@ -32,4 +32,15 @@ describe('deleteActions', () => {
       ]
     `);
   });
+
+  test('should return successes and errors', async () => {
+    const ids = ['1', '2', '/'];
+
+    http.delete.mockRejectedValueOnce(new Error('Failed to delete action 1'));
+    const result = await deleteActions({ ids, http });
+    // One action fails, but the others succeed
+    expect(result.successes.length).toBe(2);
+    expect(result.successes).toEqual([undefined, undefined]);
+    expect(result.errors.length).toBe(1);
+  });
 });

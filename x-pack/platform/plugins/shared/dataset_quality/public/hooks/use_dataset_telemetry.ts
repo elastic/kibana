@@ -11,7 +11,12 @@ import { getDateISORange } from '@kbn/timerange';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { useDatasetQualityFilters } from './use_dataset_quality_filters';
 import { DataStreamStat } from '../../common/data_streams_stats';
-import { DatasetEbtProps, DatasetNavigatedEbtProps } from '../services/telemetry';
+import {
+  DatasetEbtProps,
+  DatasetNavigatedEbtProps,
+  NavigationSource,
+  NavigationTarget,
+} from '../services/telemetry';
 
 export function useDatasetTelemetry() {
   const { service, telemetryClient } = useDatasetQualityContext();
@@ -115,5 +120,7 @@ function getDatasetEbtProps(
     ...datasetEbtProps,
     sort,
     filters: ebtFilters,
+    target: NavigationTarget.Discover,
+    source: NavigationSource.Table,
   };
 }

@@ -262,6 +262,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
             openFlyout={openFlyout}
             setLocalStorageAttackDiscoveryMaxAlerts={setLocalStorageAttackDiscoveryMaxAlerts}
             stats={stats}
+            showFlyout={showFlyout}
           />
           <EuiSpacer size="m" />
         </HeaderPage>

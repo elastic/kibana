@@ -11,6 +11,7 @@ import type { AnalyticsClient } from '@elastic/ebt/client';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 
 const MAX_CUSTOM_METRICS = 9;
+const MAX_DESCRIPTION_LENGTH = 256;
 // The keys and values for the custom metrics are limited to 9 pairs
 const ALLOWED_CUSTOM_METRICS_KEYS_VALUES = Array.from({ length: MAX_CUSTOM_METRICS }, (_, i) => [
   `key${i + 1}`,
@@ -28,6 +29,8 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
         const target = entry?.name;
         const duration = entry.duration;
         const meta = entry.detail?.meta;
+        const description = meta?.description;
+
         const customMetrics = Object.keys(entry.detail?.customMetrics ?? {}).reduce(
           (acc, metric) => {
             if (ALLOWED_CUSTOM_METRICS_KEYS_VALUES.includes(metric)) {
@@ -55,6 +58,13 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
             );
           }
 
+          if (description?.length > MAX_DESCRIPTION_LENGTH) {
+            // eslint-disable-next-line no-console
+            console.warn(
+              `The description for the measure: ${target} is too long. The maximum length is ${MAX_DESCRIPTION_LENGTH}. Strings longer than ${MAX_DESCRIPTION_LENGTH} will not be indexed or stored`
+            );
+          }
+
           // eslint-disable-next-line no-console
           console.log(`The measure ${target} completed in ${duration / 1000}s`);
         }
@@ -72,9 +82,11 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
             duration,
             ...customMetrics,
             meta: {
-              target,
               query_range_secs: meta?.queryRangeSecs,
-              query_offset_secs: meta?.queryOffsetSecs,
+              query_from_offset_secs: meta?.queryFromOffsetSecs,
+              query_to_offset_secs: meta?.queryToOffsetSecs,
+              description: description?.slice(0, MAX_DESCRIPTION_LENGTH),
+              is_initial_load: meta?.isInitialLoad,
             },
           });
         } catch (error) {

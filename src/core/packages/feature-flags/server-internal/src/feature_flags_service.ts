@@ -24,6 +24,9 @@ import {
 } from '@openfeature/server-sdk';
 import deepMerge from 'deepmerge';
 import { filter, switchMap, startWith, Subject } from 'rxjs';
+import { get } from 'lodash';
+import { createOpenFeatureLogger } from './create_open_feature_logger';
+import { setProviderWithRetries } from './set_provider_with_retries';
 import { type FeatureFlagsConfig, featureFlagsConfig } from './feature_flags_config';
 
 /**
@@ -54,7 +57,7 @@ export class FeatureFlagsService {
   constructor(private readonly core: CoreContext) {
     this.logger = core.logger.get('feature-flags-service');
     this.featureFlagsClient = OpenFeature.getClient();
-    OpenFeature.setLogger(this.logger.get('open-feature'));
+    OpenFeature.setLogger(createOpenFeatureLogger(this.logger.get('open-feature')));
   }
 
   /**
@@ -76,7 +79,7 @@ export class FeatureFlagsService {
         if (OpenFeature.providerMetadata !== NOOP_PROVIDER.metadata) {
           throw new Error('A provider has already been set. This API cannot be called twice.');
         }
-        OpenFeature.setProvider(provider);
+        setProviderWithRetries(provider, this.logger);
       },
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),
     };
@@ -165,9 +168,10 @@ export class FeatureFlagsService {
     flagName: string,
     fallbackValue: T
   ): Promise<T> {
+    const override = get(this.overrides, flagName); // using lodash get because flagName can come with dots and the config parser might structure it in objects.
     const value =
-      typeof this.overrides[flagName] !== 'undefined'
-        ? (this.overrides[flagName] as T)
+      typeof override !== 'undefined'
+        ? (override as T)
         : // We have to bind the evaluation or the client will lose its internal context
           await evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
     apm.addLabels({ [`flag_${flagName}`]: value });

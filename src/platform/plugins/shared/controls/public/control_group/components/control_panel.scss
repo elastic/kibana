@@ -8,7 +8,6 @@ $controlMinWidth: $euiSize * 14;
   max-inline-size: 100% !important;
   height: $euiButtonHeightSmall;
   box-shadow: none !important;
-  background-color: $euiFormBackgroundColor !important;
   border-radius: 0 $euiBorderRadius $euiBorderRadius 0 !important;
 
   &--roundedBorders {
@@ -89,7 +88,6 @@ $controlMinWidth: $euiSize * 14;
     .controlFrame__formControlLayout:after {
       content: '';
       position: absolute;
-      background-color: transparentize($euiColorPrimary, .5);
       border-radius: $euiBorderRadius;
       top: 0;
       bottom: 0;
@@ -217,7 +215,6 @@ $controlMinWidth: $euiSize * 14;
     border-radius: $euiBorderRadius;
     font-weight: $euiFontWeightSemiBold;
     border: $euiBorderWidthThin solid $euiFormBorderColor;
-    background-color: $euiFormInputGroupLabelBackground;
     min-width: $controlMinWidth;
     @include euiFontSizeXS;
   }

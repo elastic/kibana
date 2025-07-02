@@ -28,8 +28,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({ defaultIndex: 'test-histogram' });
     });
 
-    after(function () {
-      return esArchiver.unload('x-pack/test/functional/es_archives/pre_calculated_histogram');
+    after(async function () {
+      await esArchiver.unload('x-pack/test/functional/es_archives/pre_calculated_histogram');
+      await kibanaServer.uiSettings.unset('defaultIndex');
     });
 
     it('appears correctly in discover', async function () {

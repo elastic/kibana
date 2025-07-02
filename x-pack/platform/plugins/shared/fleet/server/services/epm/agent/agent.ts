@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import Handlebars from 'handlebars';
+import Handlebars from '@kbn/handlebars';
 import { safeLoad, safeDump } from 'js-yaml';
 import type { Logger } from '@kbn/core/server';
 
@@ -21,7 +21,7 @@ export function compileTemplate(variables: PackagePolicyConfigRecord, templateSt
   const { vars, yamlValues } = buildTemplateVariables(logger, variables);
   let compiledTemplate: string;
   try {
-    const template = handlebars.compile(templateStr, { noEscape: true });
+    const template = handlebars.compileAST(templateStr, { noEscape: true });
     compiledTemplate = template(vars);
   } catch (err) {
     throw new PackageInvalidArchiveError(`Error while compiling agent template: ${err.message}`);

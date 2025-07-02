@@ -24,9 +24,6 @@ export function getDefaultFleetServerpolicyId(spaceId?: string) {
 export function policyHasFleetServer(
   agentPolicy: Pick<AgentPolicy, 'package_policies' | 'has_fleet_server'>
 ) {
-  if (!agentPolicy.package_policies) {
-    return false;
-  }
   return (
     agentPolicy.package_policies?.some((p) => p.package?.name === FLEET_SERVER_PACKAGE) ||
     !!agentPolicy.has_fleet_server

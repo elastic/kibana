@@ -75,6 +75,7 @@ import type { ElasticModels } from './application/services/elastic_models_servic
 import type { MlApi } from './application/services/ml_api_service';
 import type { MlCapabilities } from '../common/types/capabilities';
 import { AnomalySwimLane } from './shared_components';
+import { registerEmbeddables } from './embeddables';
 
 export interface MlStartDependencies {
   cases?: CasesPublicStart;
@@ -259,12 +260,12 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               registerHomeFeature(pluginsSetup.home);
             }
 
-            const {
-              registerEmbeddables,
-              registerMlUiActions,
-              registerSearchLinks,
-              registerCasesAttachments,
-            } = await import('./register_helper');
+            if (fullLicense && mlCapabilities.canGetMlInfo && this.enabledFeatures.ad) {
+              registerEmbeddables(pluginsSetup.embeddable, core);
+            }
+
+            const { registerMlUiActions, registerSearchLinks, registerCasesAttachments } =
+              await import('./register_helper');
             registerSearchLinks(
               this.appUpdater$,
               fullLicense,
@@ -295,8 +296,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               registerMlUiActions(pluginsSetup.uiActions, core);
 
               if (this.enabledFeatures.ad) {
-                registerEmbeddables(pluginsSetup.embeddable, core);
-
                 if (pluginsSetup.cases) {
                   registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
                 }

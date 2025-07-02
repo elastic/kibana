@@ -8,22 +8,19 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
 import { TableSearch } from './search';
+import { renderWithTestingProviders } from '../../common/mock';
 
 describe('TableSearch', () => {
   const onFilterOptionsChange = jest.fn();
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('renders with empty value correctly', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <TableSearch filterOptionsSearch="" onFilterOptionsChange={onFilterOptionsChange} />
     );
 
@@ -31,7 +28,7 @@ describe('TableSearch', () => {
   });
 
   it('renders with initial value correctly', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <TableSearch filterOptionsSearch="My search" onFilterOptionsChange={onFilterOptionsChange} />
     );
 
@@ -39,7 +36,7 @@ describe('TableSearch', () => {
   });
 
   it('calls onFilterOptionsChange correctly', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <TableSearch filterOptionsSearch="" onFilterOptionsChange={onFilterOptionsChange} />
     );
 
@@ -49,7 +46,7 @@ describe('TableSearch', () => {
   });
 
   it('calls onFilterOptionsChange if the search term is empty', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <TableSearch filterOptionsSearch="" onFilterOptionsChange={onFilterOptionsChange} />
     );
 
@@ -59,7 +56,7 @@ describe('TableSearch', () => {
   });
 
   it('calls onFilterOptionsChange when clearing the search bar', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <TableSearch filterOptionsSearch="My search" onFilterOptionsChange={onFilterOptionsChange} />
     );
 

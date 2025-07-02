@@ -10,7 +10,10 @@ paths:
       operationId: BulkDeleteRules
       deprecated: true
       summary: Delete multiple detection rules
-      description: Delete detection rules in bulk.
+      description: |
+        Delete detection rules in bulk.
+        > warn
+        > This API is deprecated and will be removed in Kibana v9.0.
       tags:
         - Bulk API
       requestBody:
@@ -27,6 +30,11 @@ paths:
                     $ref: '../../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleObjectId'
                   rule_id:
                     $ref: '../../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
+            examples:
+              example1: 
+                value: 
+                  - rule_id: process_started_by_ms_office_program_possible_payload
+                  - id: 51658332-a15e-4c9e-912a-67214e2e2359
       responses:
         200:
           description: Indicates a successful call.
@@ -61,7 +69,10 @@ paths:
       operationId: BulkDeleteRulesPost
       deprecated: true
       summary: Delete multiple detection rules
-      description: Deletes multiple rules.
+      description: |
+        Delete detection rules in bulk.
+        > warn
+        > This API is deprecated and will be removed in Kibana v9.0.
       tags:
         - Bulk API
       requestBody:
@@ -78,6 +89,11 @@ paths:
                     $ref: '../../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleObjectId'
                   rule_id:
                     $ref: '../../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
+            examples:
+              example1: 
+                value: 
+                  - rule_id: process_started_by_ms_office_program_possible_payload
+                  - id: 51658332-a15e-4c9e-912a-67214e2e2359
       responses:
         200:
           description: Indicates a successful call.

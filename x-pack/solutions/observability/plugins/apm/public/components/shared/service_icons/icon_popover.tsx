@@ -43,6 +43,7 @@ export function IconPopover({
           color="text"
           onClick={onClick}
           iconType={icon.type}
+          aria-label={title}
           iconSize={icon.size ?? 'l'}
           className="serviceIcon_button"
           data-test-subj={`popover_${title}`}
@@ -51,6 +52,7 @@ export function IconPopover({
       }
       isOpen={isOpen}
       closePopover={onClose}
+      onBlur={onClose}
     >
       <EuiPopoverTitle>{title}</EuiPopoverTitle>
       <div style={{ minWidth: 300 }}>

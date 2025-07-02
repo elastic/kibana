@@ -7,19 +7,40 @@
 
 import { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import type { SourcererScopeName } from '../../sourcerer/store/model';
+import { SourcererScopeName } from '../../sourcerer/store/model';
 import { sourcererSelectors } from '../../sourcerer/store';
 import type { State } from '../store';
 
 export const useGetFieldSpec = (scopeId: SourcererScopeName) => {
   const kibanaDataViews = useSelector(sourcererSelectors.kibanaDataViews);
-  const selectedDataViewId = useSelector((state: State) =>
+
+  const scopedDataViewId = useSelector((state: State) =>
     sourcererSelectors.sourcererScopeSelectedDataViewId(state, scopeId)
   );
-  const dataView = useMemo(
-    () => kibanaDataViews.find((dv) => dv.id === selectedDataViewId),
-    [kibanaDataViews, selectedDataViewId]
+  const scopedDataView = useMemo(
+    () => kibanaDataViews.find((dv) => dv.id === scopedDataViewId),
+    [kibanaDataViews, scopedDataViewId]
   );
+
+  // we retrieve the default data view to be used in Timeline for some specific situations
+  const fallbackDefaultDataViewId = useSelector((state: State) =>
+    sourcererSelectors.sourcererScopeSelectedDataViewId(state, SourcererScopeName.default)
+  );
+  const fallbackDefaultDataView = useMemo(
+    () => kibanaDataViews.find((dv) => dv.id === fallbackDefaultDataViewId),
+    [fallbackDefaultDataViewId, kibanaDataViews]
+  );
+
+  // for Threshold, New Terms and Suppressed Timelines, when users click on Investigate in Timeline, the dataView is undefined.
+  // Falling back to the default dataView makes the cell actions working
+  const dataView = useMemo(
+    () =>
+      !scopedDataView && scopeId === SourcererScopeName.timeline
+        ? fallbackDefaultDataView
+        : scopedDataView,
+    [fallbackDefaultDataView, scopeId, scopedDataView]
+  );
+
   return useCallback(
     (fieldName: string) => {
       const fields = dataView?.fields;

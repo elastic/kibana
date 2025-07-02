@@ -7,13 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { EnrichedDeprecationInfo } from '../../../common/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { EnrichedDeprecationInfo } from '../../../common/types';
 
 export async function getHealthIndicators(
-  dataClient: IScopedClusterClient
+  dataClient: ElasticsearchClient
 ): Promise<EnrichedDeprecationInfo[]> {
-  const healthIndicators = await dataClient.asCurrentUser.healthReport();
+  const healthIndicators = await dataClient.healthReport();
   const isStatusNotGreen = (indicator?: estypes.HealthReportBaseIndicator): boolean => {
     return !!(indicator?.status && indicator?.status !== 'green');
   };

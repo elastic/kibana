@@ -20,7 +20,7 @@ export function useGroupName(groupBy: GroupByField, group: string, summary?: Gro
     case 'status':
       return groupName;
     case 'slo.instanceId':
-      if (groupName === ALL_VALUE || !summary) {
+      if (groupName === ALL_VALUE || !summary?.worst?.slo?.groupings) {
         return i18n.translate('xpack.slo.group.ungroupedInstanceId', {
           defaultMessage: 'Ungrouped',
         });

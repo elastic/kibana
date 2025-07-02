@@ -16,26 +16,50 @@
 
 import { z } from '@kbn/zod';
 
-import { NonEmptyString, User } from '../common_attributes.gen';
+import {
+  BulkActionBase,
+  NonEmptyString,
+  NonEmptyTimestamp,
+  User,
+  BulkCrudActionSummary,
+} from '../common_attributes.gen';
 
+/**
+ * Reason why a prompt was skipped during the bulk action.
+ */
 export type PromptsBulkActionSkipReason = z.infer<typeof PromptsBulkActionSkipReason>;
 export const PromptsBulkActionSkipReason = z.literal('PROMPT_FIELD_NOT_MODIFIED');
 
 export type PromptsBulkActionSkipResult = z.infer<typeof PromptsBulkActionSkipResult>;
 export const PromptsBulkActionSkipResult = z.object({
+  /**
+   * The ID of the prompt that was skipped.
+   */
   id: z.string(),
+  /**
+   * The name of the prompt that was skipped.
+   */
   name: z.string().optional(),
+  /**
+   * The reason for skipping the prompt.
+   */
   skip_reason: PromptsBulkActionSkipReason,
 });
 
 export type PromptDetailsInError = z.infer<typeof PromptDetailsInError>;
 export const PromptDetailsInError = z.object({
+  /**
+   * The ID of the prompt that encountered an error.
+   */
   id: z.string(),
+  /**
+   * The name of the prompt that encountered an error.
+   */
   name: z.string().optional(),
 });
 
 /**
- * Prompt type
+ * Type of the prompt (either system or quick).
  */
 export type PromptType = z.infer<typeof PromptType>;
 export const PromptType = z.enum(['system', 'quick']);
@@ -44,56 +68,123 @@ export const PromptTypeEnum = PromptType.enum;
 
 export type NormalizedPromptError = z.infer<typeof NormalizedPromptError>;
 export const NormalizedPromptError = z.object({
+  /**
+   * A message describing the error encountered.
+   */
   message: z.string(),
+  /**
+   * The HTTP status code associated with the error.
+   */
   status_code: z.number().int(),
+  /**
+   * A code representing the error type.
+   */
   err_code: z.string().optional(),
+  /**
+   * List of prompts that encountered errors.
+   */
   prompts: z.array(PromptDetailsInError),
 });
 
 export type PromptResponse = z.infer<typeof PromptResponse>;
 export const PromptResponse = z.object({
   id: NonEmptyString,
-  timestamp: NonEmptyString.optional(),
+  timestamp: NonEmptyTimestamp.optional(),
+  /**
+   * The name of the prompt.
+   */
   name: z.string(),
+  /**
+   * The type of the prompt.
+   */
   promptType: PromptType,
+  /**
+   * The content of the prompt.
+   */
   content: z.string(),
+  /**
+   * Categories associated with the prompt.
+   */
   categories: z.array(z.string()).optional(),
+  /**
+   * The color associated with the prompt.
+   */
   color: z.string().optional(),
+  /**
+   * Whether this prompt is the default for new conversations.
+   */
   isNewConversationDefault: z.boolean().optional(),
+  /**
+   * Whether this prompt is the default.
+   */
   isDefault: z.boolean().optional(),
+  /**
+   * The consumer that the prompt is associated with.
+   */
   consumer: z.string().optional(),
+  /**
+   * The timestamp of when the prompt was last updated.
+   */
   updatedAt: z.string().optional(),
+  /**
+   * The user who last updated the prompt.
+   */
   updatedBy: z.string().optional(),
+  /**
+   * The timestamp of when the prompt was created.
+   */
   createdAt: z.string().optional(),
+  /**
+   * The user who created the prompt.
+   */
   createdBy: z.string().optional(),
+  /**
+   * List of users associated with the prompt.
+   */
   users: z.array(User).optional(),
   /**
-   * Kibana space
+   * Kibana space where the prompt is located.
    */
   namespace: z.string().optional(),
 });
 
 export type PromptsBulkCrudActionResults = z.infer<typeof PromptsBulkCrudActionResults>;
 export const PromptsBulkCrudActionResults = z.object({
+  /**
+   * List of prompts that were updated.
+   */
   updated: z.array(PromptResponse),
+  /**
+   * List of prompts that were created.
+   */
   created: z.array(PromptResponse),
+  /**
+   * List of IDs of prompts that were deleted.
+   */
   deleted: z.array(z.string()),
+  /**
+   * List of prompts that were skipped.
+   */
   skipped: z.array(PromptsBulkActionSkipResult),
-});
-
-export type BulkCrudActionSummary = z.infer<typeof BulkCrudActionSummary>;
-export const BulkCrudActionSummary = z.object({
-  failed: z.number().int(),
-  skipped: z.number().int(),
-  succeeded: z.number().int(),
-  total: z.number().int(),
 });
 
 export type PromptsBulkCrudActionResponse = z.infer<typeof PromptsBulkCrudActionResponse>;
 export const PromptsBulkCrudActionResponse = z.object({
+  /**
+   * Indicates if the bulk action was successful.
+   */
   success: z.boolean().optional(),
+  /**
+   * The HTTP status code of the response.
+   */
   status_code: z.number().int().optional(),
+  /**
+   * A message describing the result of the bulk action.
+   */
   message: z.string().optional(),
+  /**
+   * The number of prompts processed in the bulk action.
+   */
   prompts_count: z.number().int().optional(),
   attributes: z.object({
     results: PromptsBulkCrudActionResults,
@@ -102,38 +193,71 @@ export const PromptsBulkCrudActionResponse = z.object({
   }),
 });
 
-export type BulkActionBase = z.infer<typeof BulkActionBase>;
-export const BulkActionBase = z.object({
-  /**
-   * Query to filter promps
-   */
-  query: z.string().optional(),
-  /**
-   * Array of prompts IDs
-   */
-  ids: z.array(z.string()).min(1).optional(),
-});
-
 export type PromptCreateProps = z.infer<typeof PromptCreateProps>;
 export const PromptCreateProps = z.object({
+  /**
+   * The name of the prompt.
+   */
   name: z.string(),
+  /**
+   * The type of the prompt.
+   */
   promptType: PromptType,
+  /**
+   * The content of the prompt.
+   */
   content: z.string(),
+  /**
+   * The color associated with the prompt.
+   */
   color: z.string().optional(),
+  /**
+   * List of categories for the prompt.
+   */
   categories: z.array(z.string()).optional(),
+  /**
+   * Whether this prompt should be the default for new conversations.
+   */
   isNewConversationDefault: z.boolean().optional(),
+  /**
+   * Whether this prompt should be the default.
+   */
   isDefault: z.boolean().optional(),
+  /**
+   * The consumer associated with the prompt.
+   */
   consumer: z.string().optional(),
 });
 
 export type PromptUpdateProps = z.infer<typeof PromptUpdateProps>;
 export const PromptUpdateProps = z.object({
+  /**
+   * The ID of the prompt to update.
+   */
   id: z.string(),
+  /**
+   * The updated content for the prompt.
+   */
   content: z.string().optional(),
+  /**
+   * The updated color associated with the prompt.
+   */
   color: z.string().optional(),
+  /**
+   * The updated categories for the prompt.
+   */
   categories: z.array(z.string()).optional(),
+  /**
+   * Whether the prompt should be the default for new conversations.
+   */
   isNewConversationDefault: z.boolean().optional(),
+  /**
+   * Whether this prompt should be the default.
+   */
   isDefault: z.boolean().optional(),
+  /**
+   * The updated consumer for the prompt.
+   */
   consumer: z.string().optional(),
 });
 
@@ -141,8 +265,17 @@ export type PerformPromptsBulkActionRequestBody = z.infer<
   typeof PerformPromptsBulkActionRequestBody
 >;
 export const PerformPromptsBulkActionRequestBody = z.object({
+  /**
+   * Criteria for deleting prompts in bulk.
+   */
   delete: BulkActionBase.optional(),
+  /**
+   * List of prompts to be created.
+   */
   create: z.array(PromptCreateProps).optional(),
+  /**
+   * List of prompts to be updated.
+   */
   update: z.array(PromptUpdateProps).optional(),
 });
 export type PerformPromptsBulkActionRequestBodyInput = z.input<

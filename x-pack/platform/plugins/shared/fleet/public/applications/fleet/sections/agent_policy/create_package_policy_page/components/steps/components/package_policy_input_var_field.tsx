@@ -107,6 +107,8 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
           datastreams={datastreams}
           value={value}
           onChange={onChange}
+          errors={errors}
+          isInvalid={isInvalid}
           isDisabled={isEditPage}
           fieldLabel={fieldLabel}
           description={description}
@@ -416,7 +418,11 @@ function SecretInputField({
         </EuiText>
         <EuiSpacer size="s" />
         <EuiButtonEmpty
-          onClick={() => setIsReplacing(true)}
+          onClick={() => {
+            setIsReplacing(true);
+            setIsDirty(false);
+            onChange('');
+          }}
           color="primary"
           iconType="refresh"
           iconSide="left"

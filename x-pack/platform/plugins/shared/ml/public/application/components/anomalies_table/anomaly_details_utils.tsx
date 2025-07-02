@@ -69,7 +69,7 @@ export function getInfluencersItems(
 
 export const DetailsItems: FC<{
   anomaly: MlAnomaliesTableRecord;
-  filter: EntityCellFilter;
+  filter?: EntityCellFilter;
   modelPlotEnabled: boolean;
 }> = ({ anomaly, filter, modelPlotEnabled }) => {
   const source = anomaly.source;
@@ -103,37 +103,39 @@ export const DetailsItems: FC<{
   }
 
   const items = [];
-  if (source.partition_field_value !== undefined && source.partition_field_name !== undefined) {
-    items.push({
-      title: source.partition_field_name,
-      description: getFilterEntity(
-        source.partition_field_name,
-        String(source.partition_field_value),
-        filter
-      ),
-    });
-  }
+  if (filter !== undefined) {
+    if (source.partition_field_value !== undefined && source.partition_field_name !== undefined) {
+      items.push({
+        title: source.partition_field_name,
+        description: getFilterEntity(
+          source.partition_field_name,
+          String(source.partition_field_value),
+          filter
+        ),
+      });
+    }
 
-  if (source.by_field_value !== undefined && source.by_field_name !== undefined) {
-    items.push({
-      title: source.by_field_name,
-      description: getFilterEntity(source.by_field_name, source.by_field_value, filter),
-    });
-  }
+    if (source.by_field_value !== undefined && source.by_field_name !== undefined) {
+      items.push({
+        title: source.by_field_name,
+        description: getFilterEntity(source.by_field_name, source.by_field_value, filter),
+      });
+    }
 
-  if (singleCauseByFieldName !== undefined && singleCauseByFieldValue !== undefined) {
-    // Display byField of single cause.
-    items.push({
-      title: singleCauseByFieldName,
-      description: getFilterEntity(singleCauseByFieldName, singleCauseByFieldValue, filter),
-    });
-  }
+    if (singleCauseByFieldName !== undefined && singleCauseByFieldValue !== undefined) {
+      // Display byField of single cause.
+      items.push({
+        title: singleCauseByFieldName,
+        description: getFilterEntity(singleCauseByFieldName, singleCauseByFieldValue, filter),
+      });
+    }
 
-  if (source.over_field_value !== undefined && source.over_field_name !== undefined) {
-    items.push({
-      title: source.over_field_name,
-      description: getFilterEntity(source.over_field_name, source.over_field_value, filter),
-    });
+    if (source.over_field_value !== undefined && source.over_field_name !== undefined) {
+      items.push({
+        title: source.over_field_name,
+        description: getFilterEntity(source.over_field_name, source.over_field_value, filter),
+      });
+    }
   }
 
   const anomalyTime = source[TIME_FIELD_NAME];

@@ -21,8 +21,8 @@ export function formatRequest(endpoint: string, pathParams: Record<string, any> 
 
   const pathname = Object.keys(pathParams).reduce((acc, paramName) => {
     return acc
-      .replace(`{${paramName}}`, pathParams[paramName])
-      .replace(`{${paramName}?}`, pathParams[paramName]);
+      .replace(`{${paramName}}`, encodeURIComponent(pathParams[paramName]))
+      .replace(`{${paramName}?}`, encodeURIComponent(pathParams[paramName]));
   }, rawPathname);
 
   if ((pathname.match(optionalReg) ?? [])?.length > 0) {

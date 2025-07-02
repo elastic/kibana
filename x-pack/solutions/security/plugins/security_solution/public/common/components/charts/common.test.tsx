@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
-import { renderHook } from '@testing-library/react';
+import { screen, render, renderHook } from '@testing-library/react';
 import { matchers } from '@emotion/jest';
 
 expect.extend(matchers);
@@ -28,13 +27,13 @@ jest.mock('../../lib/kibana');
 
 describe('WrappedByAutoSizer', () => {
   it('should render correct default height', () => {
-    const wrapper = mount(<WrappedByAutoSizer />);
-    expect(wrapper).toHaveStyleRule('height', defaultChartHeight);
+    render(<WrappedByAutoSizer data-test-subj="test" />);
+    expect(screen.getByTestId('test')).toHaveStyleRule('height', defaultChartHeight);
   });
 
   it('should render correct given height', () => {
-    const wrapper = mount(<WrappedByAutoSizer height="100px" />);
-    expect(wrapper).toHaveStyleRule('height', '100px');
+    render(<WrappedByAutoSizer data-test-subj="test" height="100px" />);
+    expect(screen.getByTestId('test')).toHaveStyleRule('height', '100px');
   });
 });
 

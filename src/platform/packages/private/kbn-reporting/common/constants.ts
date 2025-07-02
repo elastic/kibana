@@ -7,6 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  CANVAS_APP_LOCATOR,
+  DASHBOARD_APP_LOCATOR,
+  LENS_APP_LOCATOR,
+  VISUALIZE_APP_LOCATOR,
+} from '@kbn/deeplinks-analytics';
+
 export const ALLOWED_JOB_CONTENT_TYPES = [
   'application/json',
   'application/pdf',
@@ -44,6 +51,14 @@ export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
 /*
  * Client-side paths
  */
+
+// Allowed locator types for reporting: the "reportable" analytical apps we expect to redirect to during screenshotting
+export const REPORTING_REDIRECT_ALLOWED_LOCATOR_TYPES = [
+  CANVAS_APP_LOCATOR,
+  DASHBOARD_APP_LOCATOR,
+  LENS_APP_LOCATOR,
+  VISUALIZE_APP_LOCATOR,
+];
 
 // Redirection URL used to load app state for screenshotting
 export const REPORTING_REDIRECT_APP = '/app/reportingRedirect';

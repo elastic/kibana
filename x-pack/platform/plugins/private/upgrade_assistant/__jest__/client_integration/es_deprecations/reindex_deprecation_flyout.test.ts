@@ -23,6 +23,7 @@ const defaultReindexStatusMeta: ReindexStatusResponse['meta'] = {
   aliases: [],
   isFrozen: false,
   isReadonly: false,
+  isInDataStream: false,
 };
 
 describe('Reindex deprecation flyout', () => {

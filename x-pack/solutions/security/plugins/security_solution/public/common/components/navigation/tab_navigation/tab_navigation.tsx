@@ -103,7 +103,7 @@ export const TabNavigationComponent: React.FC<TabNavigationProps> = ({ navTabs }
     [navTabs, selectedTabId, search]
   );
 
-  return <EuiTabs>{renderTabs}</EuiTabs>;
+  return <EuiTabs data-test-subj="navigation-container">{renderTabs}</EuiTabs>;
 };
 
 TabNavigationComponent.displayName = 'TabNavigationComponent';

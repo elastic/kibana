@@ -9,11 +9,10 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import type { CaseUI } from '../../../../common';
-import type { AppMockRenderer } from '../../../common/mock';
 
-import { createAppMockRenderer } from '../../../common/mock';
 import { alertCommentWithIndices, basicCase } from '../../../containers/mock';
 import { CaseViewSimilarCases } from './case_view_similar_cases';
+import { renderWithTestingProviders } from '../../../common/mock';
 
 const caseData: CaseUI = {
   ...basicCase,
@@ -21,16 +20,13 @@ const caseData: CaseUI = {
 };
 
 // Failing: See https://github.com/elastic/kibana/issues/207056
-describe.skip('Case View Page similar cases tab', () => {
-  let appMockRender: AppMockRenderer;
-
+describe('Case View Page similar cases tab', () => {
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('should render the similar cases table', async () => {
-    appMockRender.render(<CaseViewSimilarCases caseData={caseData} />);
+    renderWithTestingProviders(<CaseViewSimilarCases caseData={caseData} />);
 
     expect(await screen.findByTestId('similar-cases-table')).toBeInTheDocument();
   });

@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiAccordion,
   EuiButton,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -23,7 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { docLinks } from '../../../common/doc_links';
-import { getExampleCode } from './code_examples';
+import { getExampleCode, getExistingIndexExampleCode } from './code_examples';
 
 interface ConnectToApiFlyoutProps {
   onClose: () => void;
@@ -78,11 +79,50 @@ export const ConnectToApiFlyout: React.FC<ConnectToApiFlyoutProps> = ({ onClose,
           </p>
         </EuiText>
         <EuiSpacer />
-        <EuiThemeProvider colorMode="dark">
-          <EuiCodeBlock language="json" isCopyable fontSize="m">
-            {getExampleCode(rulesetId)}
-          </EuiCodeBlock>
-        </EuiThemeProvider>
+        <EuiAccordion
+          id="connectToIndexNewIndexAccordion"
+          buttonContent={
+            <EuiTitle size="xs">
+              <h3>
+                {i18n.translate('xpack.searchSynonyms.ConnectToApiFlyout.exampleButton.newIndex', {
+                  defaultMessage: 'Assigning to a new index',
+                })}
+              </h3>
+            </EuiTitle>
+          }
+          initialIsOpen
+        >
+          <EuiSpacer size="m" />
+          <EuiThemeProvider colorMode="dark">
+            <EuiCodeBlock language="json" isCopyable fontSize="m">
+              {getExampleCode(rulesetId)}
+            </EuiCodeBlock>
+          </EuiThemeProvider>
+        </EuiAccordion>
+        <EuiSpacer size="l" />
+        <EuiAccordion
+          id="connectToIndexExistingIndexAccordion"
+          buttonContent={
+            <EuiTitle size="xs">
+              <h3>
+                {i18n.translate(
+                  'xpack.searchSynonyms.ConnectToApiFlyout.exampleButton.existingIndex',
+                  {
+                    defaultMessage: 'Assigning to an existing index',
+                  }
+                )}
+              </h3>
+            </EuiTitle>
+          }
+          initialIsOpen
+        >
+          <EuiSpacer size="m" />
+          <EuiThemeProvider colorMode="dark">
+            <EuiCodeBlock language="json" isCopyable fontSize="m">
+              {getExistingIndexExampleCode(rulesetId)}
+            </EuiCodeBlock>
+          </EuiThemeProvider>
+        </EuiAccordion>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">

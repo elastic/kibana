@@ -12,7 +12,13 @@ import { ObservabilityOnboardingAppServices } from '../../..';
 import { useFetcher } from '../../../hooks/use_fetcher';
 
 export function useKubernetesFlow(
-  onboardingFlowType: 'kubernetes_otel' | 'kubernetes' = 'kubernetes'
+  onboardingFlowType: 'kubernetes_otel' | 'kubernetes' = 'kubernetes',
+  options?: {
+    agentVersionRange?: {
+      versionFrom: string;
+      versionUpTo: string;
+    };
+  }
 ) {
   const {
     services: {
@@ -26,11 +32,12 @@ export function useKubernetesFlow(
         params: {
           body: {
             pkgName: onboardingFlowType,
+            agentVersionRange: options?.agentVersionRange,
           },
         },
       });
     },
-    [onboardingFlowType],
+    [onboardingFlowType, options?.agentVersionRange],
     { showToastOnError: false }
   );
 
