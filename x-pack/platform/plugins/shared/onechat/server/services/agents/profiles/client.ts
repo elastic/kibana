@@ -86,7 +86,7 @@ class AgentProfileClientImpl implements AgentProfileClient {
       track_total_hits: false,
       size: 1000,
       // no filtering options for now
-      query: {},
+      // query: {},
     });
 
     return response.hits.hits.map((hit) => fromEs(hit as Document));
