@@ -7,12 +7,12 @@ date: 2025-07-02
 tags: ['kibana', 'contributor', 'dev', 'http', 'api', 'rest', 'design']
 ---
 
-Kibana's public HTTP APIs are the foundation for developers, partners, and customers to build powerful extensions, automations, and integrations with Kibana.
+Kibana's public HTTP APIs are the foundation for developers, partners, and customers to build powerful automations and integrations with Kibana.
 
 These guidelines provide a set of best practices for designing HTTP APIs that are consistent, predictable, and easy to use. Whether you're building new APIs or enhancing existing ones, following these guidelines will help ensure that your APIs provide a great user experience.
 
 <DocCallOut title="Some APIs need to be Terraform-friendly">
-  As an extension to the guidance in this document refer to the [Guidelines for Terraform friendly HTTP APIs](/kibana-dev-docs/contributing/http-api-tf-guidelines).
+  As an extension to the guidance in this document refer to the [Guidelines for Terraform friendly HTTP APIs](/kibana-dev-docs/contributing/http-api-tf-guidelines) if you would like to support an Infrastructure-as-Code (IaC) use case.
 </DocCallOut>
 
 ## API design principles
@@ -30,7 +30,7 @@ This principle is embodied in the rest of this document, so read on for examples
 
 ### Optimize for a great API-user experience
 
-The important distinction here is to create a great _API_ user experience, as opposed to optimizing for _UI_ use cases as well. Front-ends have very different needs and constraints from public HTTP API clients. Our public HTTP APIs should be primitives that are simple to use and compose.
+Create a great _API_ user experience, as opposed to optimizing a single API for _UI_ use cases as well. Front-ends have very different needs and constraints from public HTTP API clients. Our public HTTP APIs should be primitives that are simple to use and compose.
 
 For example, a UI might want to optimise it's network requests by bundling multiple requests into a single request, but an API client would be better designed to de-optimise and simplify the requests:
 
@@ -62,7 +62,30 @@ GET /resource_bs?page=1
 }
 ```
 
-
 <DocCallOut title="Internal vs Public APIs">
-  We categorise Kibana APIs as either **internal** or **public**. See the [Internal vs Public APIs](#internal-vs-public-apis) section for more details.
+  To further reinforce these different purposes Kibana HTTP APIs serve, we categorise them as either **internal** or **public**. See the [Internal vs Public APIs](#internal-vs-public-apis) section for more details.
 </DocCallOut>
+
+### Commitment
+
+Public HTTP APIs are long-term commitments that we make to users. We must be committed to maintaining them and ensuring they continue to work as expected (for at least 18 months).
+
+Use the means available: first release new public HTTP APIs as `Technical Preview` or `Beta` to derisk any aspects of the API design you are uncertain about. In this way you can get real-world feedback before declaring an API generally available or stable. If you can find an internal use-case to dog-food an unreleased HTTP API, even better!
+
+Getting your HTTP APIs into a stable state is a process based on feedback from actual users.
+
+<DocCallOut title="Do not break clients!">
+  A public HTTP API should never cause a client to break. Not without a long (18 month) deprecation period and a ready alternative.
+
+  Even `Technical Preview` and `Beta` HTTP APIs should consider graceful paths for changes when possible.
+
+  Linus Torvalds famously said about Kernel development: "WE DO NOT BREAK USERSPACE!" (along with some other expletives). We should adopt this kind of rigor when working with our _public_ HTTP APIs and always proiritise finding ways to avoid breaking our APIs.
+</DocCallOut>
+
+## API Conventions
+
+### Internal vs Public APIs
+
+Public HTTP APIs are those that are exposed to users and are used by plugins and external tools. They are the backbone of our public HTTP APIs and are the focus of this document.
+
+## API Conventions
