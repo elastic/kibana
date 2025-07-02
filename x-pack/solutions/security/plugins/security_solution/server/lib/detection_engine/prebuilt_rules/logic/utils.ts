@@ -56,7 +56,7 @@ function getRulesWithAvailableTargetVersion(
  *
  * @param currentRules The list of rules currently installed.
  * @param targetRulesMap A map of the latest available rule versions, with rule_id as the key.
- * * @param mlAuthz Machine Learning authorization object
+ * @param mlAuthz Machine Learning authorization object
  * @returns An array of target rule version specifiers.
  */
 export function getPossibleUpgrades(
