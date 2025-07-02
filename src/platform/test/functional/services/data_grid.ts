@@ -960,6 +960,13 @@ export class DataGridService extends FtrService {
     return await currentPage.getVisibleText();
   }
 
+  public async getInTableSearchTerm() {
+    if (!(await this.testSubjects.exists(INPUT_TEST_SUBJ))) {
+      return null;
+    }
+    return await this.testSubjects.getAttribute(INPUT_TEST_SUBJ, 'value');
+  }
+
   public async runInTableSearch(searchTerm: string) {
     if (!(await this.testSubjects.exists(INPUT_TEST_SUBJ))) {
       await this.testSubjects.click(BUTTON_TEST_SUBJ);

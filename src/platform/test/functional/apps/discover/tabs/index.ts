@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
 
   describe('discover/tabs', function () {
     before(async function () {
-      await browser.setWindowSize(1200, 800);
+      await browser.setWindowSize(1200, 1200);
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'

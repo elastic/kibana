@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const dataGrid = getService('dataGrid');
 
   describe('tabs restorable state', function () {
     describe('sidebar', function () {
@@ -116,6 +117,62 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.clearSidebarFieldFilters();
         await retry.try(async () => {
           await expectState(initialCount);
+        });
+      });
+    });
+
+    describe('data grid', function () {
+      it('should restore the selected docs', async () => {
+        const expectState = async (count: number) => {
+          expect(await dataGrid.getNumberOfSelectedRowsOnCurrentPage()).to.be(count);
+          expect(await dataGrid.isSelectedRowsMenuVisible()).to.be(count > 0);
+        };
+
+        await expectState(0);
+
+        await dataGrid.selectRow(1);
+        await dataGrid.selectRow(3);
+        await expectState(2);
+
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await expectState(0);
+
+        await unifiedTabs.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
+        await expectState(2);
+      });
+
+      it('should restore in-table search', async () => {
+        expect(await dataGrid.getCurrentPageNumber()).to.be('1');
+
+        const searchTerm = 'Sep 22, 2015 @ 18:16:13.025';
+        const updatedActiveMatch = '2/3';
+        await dataGrid.runInTableSearch(searchTerm);
+        await dataGrid.goToNextInTableSearchMatch();
+        await retry.try(async () => {
+          expect(await dataGrid.getInTableSearchTerm()).to.be(searchTerm);
+          expect(await dataGrid.getInTableSearchMatchesCounter()).to.be(updatedActiveMatch);
+          expect(await dataGrid.getCurrentPageNumber()).to.be('3');
+        });
+
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        expect(await dataGrid.getInTableSearchTerm()).to.be(null);
+        expect(await dataGrid.getCurrentPageNumber()).to.be('1');
+
+        await unifiedTabs.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
+        await retry.try(async () => {
+          expect(await dataGrid.getInTableSearchTerm()).to.be(searchTerm);
+          expect(await dataGrid.getInTableSearchMatchesCounter()).to.be(updatedActiveMatch);
+          expect(await dataGrid.getCurrentPageNumber()).to.be('3');
+        });
+
+        await dataGrid.exitInTableSearch();
+        await retry.try(async () => {
+          expect(await dataGrid.getInTableSearchTerm()).to.be(null);
+          expect(await dataGrid.getCurrentPageNumber()).to.be('3');
         });
       });
     });
