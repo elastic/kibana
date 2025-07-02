@@ -90,6 +90,7 @@
     "@kbn/scout-info",
     "@kbn/streams-schema",
     "@kbn/test-suites-xpack-platform",
-    "@kbn/test-suites-xpack-security",
+    "@kbn/security-solution-plugin",
+    "@kbn/test-subj-selector",
   ]
 }
