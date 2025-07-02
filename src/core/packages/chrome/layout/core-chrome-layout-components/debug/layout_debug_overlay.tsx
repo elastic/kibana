@@ -106,12 +106,42 @@ const slots: Array<{ name: string; style: React.CSSProperties }> = [
     },
   },
   {
+    name: 'applicationTopBar',
+    style: {
+      top: 'var(--kbn-application--top-bar-top, 0)',
+      left: 'var(--kbn-application--top-bar-left, 0)',
+      right: 'var(--kbn-application--top-bar-right, 0)',
+      width: 'var(--kbn-application--top-bar-width, 0)',
+      height: 'var(--kbn-application--top-bar-height, 0)',
+    },
+  },
+  {
     name: 'footer',
     style: {
       top: 'var(--kbn-layout--footer-top, 0)',
       left: 'var(--kbn-layout--footer-left, 0)',
       width: 'var(--kbn-layout--footer-width, 0)',
       height: 'var(--kbn-layout--footer-height, 0)',
+    },
+  },
+  {
+    name: 'applicationBottomBar',
+    style: {
+      bottom: 'var(--kbn-application--bottom-bar-bottom, 0)',
+      left: 'var(--kbn-application--bottom-bar-left, 0)',
+      right: 'var(--kbn-application--bottom-bar-right, 0)',
+      width: 'var(--kbn-application--bottom-bar-width, 0)',
+      height: 'var(--kbn-application--bottom-bar-height, 0)',
+    },
+  },
+  {
+    name: 'applicationContent',
+    style: {
+      top: 'var(--kbn-application--content-top, 0)',
+      left: 'var(--kbn-application--content-left, 0)',
+      right: 'var(--kbn-application--content-right, 0)',
+      width: 'var(--kbn-application--content-width, 0)',
+      height: 'var(--kbn-application--content-height, 0)',
     },
   },
 ];
@@ -128,6 +158,9 @@ const defaultColors: Record<string, string> = {
   sidebar: '#ffd600',
   sidebarPanel: '#ff3d00',
   application: '#4caf50',
+  applicationTopBar: '#1976d2',
+  applicationBottomBar: '#e65100',
+  applicationContent: '#00bcd4',
   footer: '#7c4dff',
 };
 
