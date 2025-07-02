@@ -8,6 +8,7 @@
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { isEmpty } from 'lodash';
 import moment from 'moment/moment';
+import { buildIndexNameWithNamespace } from '../../../../utils/build_index_name_with_namespace';
 import { getQueryFilter } from '../../../../utils/build_query';
 import { OSQUERY_INTEGRATION_NAME } from '../../../../../common';
 import type { ResultsRequestOptions } from '../../../../../common/search_strategy';
@@ -21,6 +22,7 @@ export const buildResultsQuery = ({
   pagination: { activePage, querySize },
   integrationNamespaces,
 }: ResultsRequestOptions): ISearchRequestParams => {
+  const baseIndex = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
   const actionIdQuery = `action_id: ${actionId}`;
   const agentQuery = agentId ? ` AND agent.id: ${agentId}` : '';
   let filter = actionIdQuery + agentQuery;
@@ -43,14 +45,19 @@ export const buildResultsQuery = ({
       : [];
   const filterQuery = [...timeRangeFilter, getQueryFilter({ filter })];
 
-  // Use integrationNamespaces if provided, otherwise fallback to default pattern
-  const indexPattern = integrationNamespaces?.length
-    ? integrationNamespaces.join(',')
-    : `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
+  let index: string;
+
+  if (integrationNamespaces && integrationNamespaces.length > 0) {
+    index = integrationNamespaces
+      .map((namespace) => buildIndexNameWithNamespace(baseIndex, namespace))
+      .join(',');
+  } else {
+    index = baseIndex;
+  }
 
   return {
     allow_no_indices: true,
-    index: indexPattern,
+    index,
     ignore_unavailable: true,
     aggs: {
       count_by_agent_id: {

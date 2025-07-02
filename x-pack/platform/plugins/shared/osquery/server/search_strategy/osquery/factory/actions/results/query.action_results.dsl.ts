@@ -56,7 +56,7 @@ export const buildActionResultsQuery = ({
     baseIndex = `${AGENT_ACTIONS_RESULTS_INDEX}*`;
   }
 
-  let index: string | string[];
+  let index: string;
   if (integrationNamespaces && integrationNamespaces.length > 0) {
     index = integrationNamespaces
       .map((namespace) => buildIndexNameWithNamespace(baseIndex, namespace))
