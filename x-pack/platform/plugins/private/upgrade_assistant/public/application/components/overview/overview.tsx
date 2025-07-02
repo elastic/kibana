@@ -43,10 +43,19 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
     services: {
       breadcrumbs,
       core: { docLinks },
+      api,
     },
     plugins: { cloud },
     kibanaVersionInfo: { currentMajor, currentMinor, currentPatch },
   } = useAppContext();
+
+  const [mlEnabled, setMlEnabled] = useState<boolean>(true);
+
+  useEffect(() => {
+    api.getMLEnabled().then(({ data }) => {
+      setMlEnabled(data.mlEnabled);
+    });
+  }, [api]);
 
   const currentVersion = `${currentMajor}.${currentMinor}.${currentPatch}`;
 
@@ -141,7 +150,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
               }}
             />
           </EuiText>
-          <MachineLearningDisabledCallout />
+          {!mlEnabled && <MachineLearningDisabledCallout />}
         </EuiPageHeader>
         <EuiSpacer size="l" />
         <EuiSteps
