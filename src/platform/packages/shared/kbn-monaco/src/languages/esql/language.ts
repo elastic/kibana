@@ -8,7 +8,7 @@
  */
 
 import { validateQuery, type ESQLCallbacks, suggest } from '@kbn/esql-validation-autocomplete';
-import { esqlFunctionNames } from '@kbn/esql-ast';
+import { esqlFunctionNames } from '@kbn/esql-ast/src/definitions/generated/function_names';
 import { monarch } from '@elastic/monaco-esql';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
 import { monaco } from '../../monaco_imports';

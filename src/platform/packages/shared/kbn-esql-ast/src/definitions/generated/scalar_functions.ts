@@ -3834,15 +3834,12 @@ const logDefinition: FunctionDefinition = {
         messages.push({
           type: 'warning' as const,
           code: 'logOfNegativeValue',
-          text: i18n.translate(
-            'kbn-esql-ast.esql.divide.warning.logOfNegativeValue',
-            {
-              defaultMessage: 'Log of a negative number results in null: {value}',
-              values: {
-                value: arg.value,
-              },
-            }
-          ),
+          text: i18n.translate('kbn-esql-ast.esql.divide.warning.logOfNegativeValue', {
+            defaultMessage: 'Log of a negative number results in null: {value}',
+            values: {
+              value: arg.value,
+            },
+          }),
           location: arg.location,
         });
       }
@@ -3926,15 +3923,12 @@ const log10Definition: FunctionDefinition = {
         messages.push({
           type: 'warning' as const,
           code: 'logOfNegativeValue',
-          text: i18n.translate(
-            'kbn-esql-ast.esql.divide.warning.logOfNegativeValue',
-            {
-              defaultMessage: 'Log of a negative number results in null: {value}',
-              values: {
-                value: arg.value,
-              },
-            }
-          ),
+          text: i18n.translate('kbn-esql-ast.esql.divide.warning.logOfNegativeValue', {
+            defaultMessage: 'Log of a negative number results in null: {value}',
+            values: {
+              value: arg.value,
+            },
+          }),
           location: arg.location,
         });
       }
@@ -6901,13 +6895,10 @@ const mvMedianDefinition: FunctionDefinition = {
 const mvMedianAbsoluteDeviationDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'mv_median_absolute_deviation',
-  description: i18n.translate(
-    'kbn-esql-ast.esql.definitions.mv_median_absolute_deviation',
-    {
-      defaultMessage:
-        'Converts a multivalued field into a single valued field containing the median absolute deviation.\n\nIt is calculated as the median of each data point’s deviation from the median of the entire sample. That is, for a random variable `X`, the median absolute deviation is `median(|median(X) - X|)`.',
-    }
-  ),
+  description: i18n.translate('kbn-esql-ast.esql.definitions.mv_median_absolute_deviation', {
+    defaultMessage:
+      'Converts a multivalued field into a single valued field containing the median absolute deviation.\n\nIt is calculated as the median of each data point’s deviation from the median of the entire sample. That is, for a random variable `X`, the median absolute deviation is `median(|median(X) - X|)`.',
+  }),
   preview: false,
   alias: undefined,
   signatures: [
@@ -7274,13 +7265,10 @@ const mvPercentileDefinition: FunctionDefinition = {
 const mvPseriesWeightedSumDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'mv_pseries_weighted_sum',
-  description: i18n.translate(
-    'kbn-esql-ast.esql.definitions.mv_pseries_weighted_sum',
-    {
-      defaultMessage:
-        'Converts a multivalued expression into a single-valued column by multiplying every element on the input list by its corresponding term in P-Series and computing the sum.',
-    }
-  ),
+  description: i18n.translate('kbn-esql-ast.esql.definitions.mv_pseries_weighted_sum', {
+    defaultMessage:
+      'Converts a multivalued expression into a single-valued column by multiplying every element on the input list by its corresponding term in P-Series and computing the sum.',
+  }),
   preview: false,
   alias: undefined,
   signatures: [
@@ -10424,13 +10412,10 @@ const stGeohashDefinition: FunctionDefinition = {
 const stGeohashToLongDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_geohash_to_long',
-  description: i18n.translate(
-    'kbn-esql-ast.esql.definitions.st_geohash_to_long',
-    {
-      defaultMessage:
-        'Converts an input value representing a geohash grid-ID in string format into a long.',
-    }
-  ),
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_geohash_to_long', {
+    defaultMessage:
+      'Converts an input value representing a geohash grid-ID in string format into a long.',
+  }),
   ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
@@ -10474,13 +10459,10 @@ const stGeohashToLongDefinition: FunctionDefinition = {
 const stGeohashToStringDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_geohash_to_string',
-  description: i18n.translate(
-    'kbn-esql-ast.esql.definitions.st_geohash_to_string',
-    {
-      defaultMessage:
-        'Converts an input value representing a geohash grid-ID in long format into a string.',
-    }
-  ),
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_geohash_to_string', {
+    defaultMessage:
+      'Converts an input value representing a geohash grid-ID in long format into a string.',
+  }),
   ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
@@ -10592,13 +10574,10 @@ const stGeohexDefinition: FunctionDefinition = {
 const stGeohexToLongDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_geohex_to_long',
-  description: i18n.translate(
-    'kbn-esql-ast.esql.definitions.st_geohex_to_long',
-    {
-      defaultMessage:
-        'Converts an input value representing a geohex grid-ID in string format into a long.',
-    }
-  ),
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_geohex_to_long', {
+    defaultMessage:
+      'Converts an input value representing a geohex grid-ID in string format into a long.',
+  }),
   ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
@@ -10642,13 +10621,10 @@ const stGeohexToLongDefinition: FunctionDefinition = {
 const stGeohexToStringDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_geohex_to_string',
-  description: i18n.translate(
-    'kbn-esql-ast.esql.definitions.st_geohex_to_string',
-    {
-      defaultMessage:
-        'Converts an input value representing a Geohex grid-ID in long format into a string.',
-    }
-  ),
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_geohex_to_string', {
+    defaultMessage:
+      'Converts an input value representing a Geohex grid-ID in long format into a string.',
+  }),
   ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
@@ -10756,13 +10732,10 @@ const stGeotileDefinition: FunctionDefinition = {
 const stGeotileToLongDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_geotile_to_long',
-  description: i18n.translate(
-    'kbn-esql-ast.esql.definitions.st_geotile_to_long',
-    {
-      defaultMessage:
-        'Converts an input value representing a geotile grid-ID in string format into a long.',
-    }
-  ),
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_geotile_to_long', {
+    defaultMessage:
+      'Converts an input value representing a geotile grid-ID in string format into a long.',
+  }),
   ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
@@ -10806,13 +10779,10 @@ const stGeotileToLongDefinition: FunctionDefinition = {
 const stGeotileToStringDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_geotile_to_string',
-  description: i18n.translate(
-    'kbn-esql-ast.esql.definitions.st_geotile_to_string',
-    {
-      defaultMessage:
-        'Converts an input value representing a geotile grid-ID in long format into a string.',
-    }
-  ),
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_geotile_to_string', {
+    defaultMessage:
+      'Converts an input value representing a geotile grid-ID in long format into a string.',
+  }),
   ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
@@ -11924,10 +11894,9 @@ const termDefinition: FunctionDefinition = {
 const toAggregateMetricDoubleDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_aggregate_metric_double',
-  description: i18n.translate(
-    'kbn-esql-ast.esql.definitions.to_aggregate_metric_double',
-    { defaultMessage: 'Encode a numeric to an aggregate_metric_double.' }
-  ),
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_aggregate_metric_double', {
+    defaultMessage: 'Encode a numeric to an aggregate_metric_double.',
+  }),
   preview: false,
   alias: undefined,
   signatures: [],
@@ -12093,13 +12062,10 @@ const toBooleanDefinition: FunctionDefinition = {
 const toCartesianpointDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_cartesianpoint',
-  description: i18n.translate(
-    'kbn-esql-ast.esql.definitions.to_cartesianpoint',
-    {
-      defaultMessage:
-        'Converts an input value to a `cartesian_point` value.\nA string will only be successfully converted if it respects the\nWKT Point format.',
-    }
-  ),
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_cartesianpoint', {
+    defaultMessage:
+      'Converts an input value to a `cartesian_point` value.\nA string will only be successfully converted if it respects the\nWKT Point format.',
+  }),
   preview: false,
   alias: undefined,
   signatures: [
@@ -12154,13 +12120,10 @@ const toCartesianpointDefinition: FunctionDefinition = {
 const toCartesianshapeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_cartesianshape',
-  description: i18n.translate(
-    'kbn-esql-ast.esql.definitions.to_cartesianshape',
-    {
-      defaultMessage:
-        'Converts an input value to a `cartesian_shape` value.\nA string will only be successfully converted if it respects the\nWKT format.',
-    }
-  ),
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_cartesianshape', {
+    defaultMessage:
+      'Converts an input value to a `cartesian_shape` value.\nA string will only be successfully converted if it respects the\nWKT format.',
+  }),
   preview: false,
   alias: undefined,
   signatures: [
@@ -13473,13 +13436,10 @@ const toTimedurationDefinition: FunctionDefinition = {
 const toUnsignedLongDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_unsigned_long',
-  description: i18n.translate(
-    'kbn-esql-ast.esql.definitions.to_unsigned_long',
-    {
-      defaultMessage:
-        'Converts an input value to an unsigned long value. If the input parameter is of a date type,\nits value will be interpreted as milliseconds since the Unix epoch, converted to unsigned long.\nBoolean `true` will be converted to unsigned long `1`, `false` to `0`.',
-    }
-  ),
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_unsigned_long', {
+    defaultMessage:
+      'Converts an input value to an unsigned long value. If the input parameter is of a date type,\nits value will be interpreted as milliseconds since the Unix epoch, converted to unsigned long.\nBoolean `true` will be converted to unsigned long `1`, `false` to `0`.',
+  }),
   preview: true,
   alias: ['to_ul', 'to_ulong'],
   signatures: [

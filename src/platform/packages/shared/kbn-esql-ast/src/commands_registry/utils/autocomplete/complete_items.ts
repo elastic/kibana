@@ -13,12 +13,9 @@ import { esqlCommandRegistry } from '../..';
 import { buildDocumentation } from '../../../definitions/documentation_util';
 import { TIME_SYSTEM_PARAMS } from '../../../definitions/literals_helpers';
 
-const techPreviewLabel = i18n.translate(
-  'kbn-esql-ast.esql.autocomplete.techPreviewLabel',
-  {
-    defaultMessage: `Technical Preview`,
-  }
-);
+const techPreviewLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.techPreviewLabel', {
+  defaultMessage: `Technical Preview`,
+});
 
 function buildCharCompleteItem(
   label: string,
@@ -206,12 +203,9 @@ export const getDateHistogramCompletionItem: (histogramBarTarget?: number) => IS
   text: `BUCKET($0, ${histogramBarTarget}, ${TIME_SYSTEM_PARAMS.join(', ')})`,
   asSnippet: true,
   kind: 'Issue',
-  detail: i18n.translate(
-    'kbn-esql-ast.esql.autocomplete.addDateHistogramDetail',
-    {
-      defaultMessage: 'Add date histogram using bucket()',
-    }
-  ),
+  detail: i18n.translate('kbn-esql-ast.esql.autocomplete.addDateHistogramDetail', {
+    defaultMessage: 'Add date histogram using bucket()',
+  }),
   sortText: '1',
   command: TRIGGER_SUGGESTION_COMMAND,
 });

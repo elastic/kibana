@@ -965,13 +965,10 @@ const medianDefinition: FunctionDefinition = {
 const medianAbsoluteDeviationDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'median_absolute_deviation',
-  description: i18n.translate(
-    'kbn-esql-ast.esql.definitions.median_absolute_deviation',
-    {
-      defaultMessage:
-        'Returns the median absolute deviation, a measure of variability. It is a robust statistic, meaning that it is useful for describing data that may have outliers, or may not be normally distributed. For such data it can be more descriptive than standard deviation.\n\nIt is calculated as the median of each data point’s deviation from the median of the entire sample. That is, for a random variable `X`, the median absolute deviation is `median(|median(X) - X|)`.',
-    }
-  ),
+  description: i18n.translate('kbn-esql-ast.esql.definitions.median_absolute_deviation', {
+    defaultMessage:
+      'Returns the median absolute deviation, a measure of variability. It is a robust statistic, meaning that it is useful for describing data that may have outliers, or may not be normally distributed. For such data it can be more descriptive than standard deviation.\n\nIt is calculated as the median of each data point’s deviation from the median of the entire sample. That is, for a random variable `X`, the median absolute deviation is `median(|median(X) - X|)`.',
+  }),
   preview: false,
   alias: undefined,
   signatures: [

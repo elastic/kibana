@@ -99,10 +99,5 @@ export {
   TIME_SYSTEM_PARAMS,
 } from './src/definitions/literals_helpers';
 export * from './src/definitions/constants';
-export * from './src/definitions/all_operators';
-export { aggFunctionDefinitions } from './src/definitions/generated/aggregation_functions';
-export { esqlFunctionNames } from './src/definitions/generated/function_names';
-export { groupingFunctionDefinitions } from './src/definitions/generated/grouping_functions';
-export { scalarFunctionDefinitions } from './src/definitions/generated/scalar_functions';
 export * from './src/commands_registry/options/recommended_queries';
 export { getRecommendedQueriesTemplates } from './src/commands_registry/options/recommended_queries/templates';

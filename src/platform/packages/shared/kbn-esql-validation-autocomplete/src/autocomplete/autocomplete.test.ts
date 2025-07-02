@@ -12,11 +12,11 @@ import {
   TIME_SYSTEM_PARAMS,
   timeUnitsToSuggest,
   TRIGGER_SUGGESTION_COMMAND,
-  scalarFunctionDefinitions,
   getRecommendedQueriesTemplates,
   METADATA_FIELDS,
 } from '@kbn/esql-ast';
 import { ESQL_STRING_TYPES } from '@kbn/esql-ast/src/definitions/types';
+import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { getDateHistogramCompletionItem } from '@kbn/esql-ast/src/commands_registry/utils/autocomplete/complete_items';
 import { Location } from '../definitions/types';
 import {

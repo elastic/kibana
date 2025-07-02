@@ -9,19 +9,13 @@
 
 import { i18n } from '@kbn/i18n';
 
-const declarationLabel = i18n.translate(
-  'kbn-esql-ast.esql.autocomplete.declarationLabel',
-  {
-    defaultMessage: 'Declaration:',
-  }
-);
+const declarationLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.declarationLabel', {
+  defaultMessage: 'Declaration:',
+});
 
-const examplesLabel = i18n.translate(
-  'kbn-esql-ast.esql.autocomplete.examplesLabel',
-  {
-    defaultMessage: 'Examples:',
-  }
-);
+const examplesLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.examplesLabel', {
+  defaultMessage: 'Examples:',
+});
 
 /** @internal */
 export const buildFunctionDocumentation = (

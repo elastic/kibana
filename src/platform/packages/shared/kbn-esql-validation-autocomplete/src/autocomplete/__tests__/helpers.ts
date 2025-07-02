@@ -6,15 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import {
-  getSafeInsertText,
-  TRIGGER_SUGGESTION_COMMAND,
-  operatorsDefinitions,
-  aggFunctionDefinitions,
-  groupingFunctionDefinitions,
-  scalarFunctionDefinitions,
-  timeUnitsToSuggest,
-} from '@kbn/esql-ast';
+import { getSafeInsertText, TRIGGER_SUGGESTION_COMMAND, timeUnitsToSuggest } from '@kbn/esql-ast';
+import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
+import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
+import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
+import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
 import { camelCase } from 'lodash';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
 import {

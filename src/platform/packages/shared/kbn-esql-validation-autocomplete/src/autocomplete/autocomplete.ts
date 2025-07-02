@@ -28,11 +28,11 @@ import {
   commaCompleteItem,
   listCompleteItem,
   allStarConstant,
-  comparisonFunctions,
   getRecommendedQueriesSuggestionsFromStaticTemplates,
   FULL_TEXT_SEARCH_FUNCTIONS,
   ESQL_VARIABLES_PREFIX,
 } from '@kbn/esql-ast';
+import { comparisonFunctions } from '@kbn/esql-ast/src/definitions/all_operators';
 import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
 import { isNumericType } from '@kbn/esql-ast/src/definitions/types';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';

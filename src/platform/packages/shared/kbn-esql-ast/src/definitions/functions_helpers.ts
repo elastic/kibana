@@ -28,12 +28,9 @@ import { ESQLAstItem, ESQLFunction } from '../types';
 import { isParamExpressionType } from '../commands_registry/utils/validate';
 import { removeFinalUnknownIdentiferArg } from './shared';
 
-const techPreviewLabel = i18n.translate(
-  'kbn-esql-ast.esql.autocomplete.techPreviewLabel',
-  {
-    defaultMessage: `Technical Preview`,
-  }
-);
+const techPreviewLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.techPreviewLabel', {
+  defaultMessage: `Technical Preview`,
+});
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
 

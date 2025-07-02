@@ -19,12 +19,12 @@ import {
   type ESQLSource,
   type ESQLTimeInterval,
   esqlCommandRegistry,
-  operatorsDefinitions,
-  aggFunctionDefinitions,
-  groupingFunctionDefinitions,
-  scalarFunctionDefinitions,
   timeUnits,
 } from '@kbn/esql-ast';
+import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
+import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
+import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
+import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
 import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK } from '@kbn/esql-ast/src/parser/constants';
 import {
   ESQLIdentifier,
