@@ -199,7 +199,7 @@ export function getObservabilitySystemPrompt({
     // usage.push(
     //   `**Elastic Stack Questions:** For general questions about Elastic Stack products or features, ${
     //     isFunctionAvailable('retrieve_elastic_doc')
-    //       ? ` ideally use a dedicated 'retrieve_elastic_doc' function. If not,`
+    //       ? ` ideally use the dedicated 'retrieve_elastic_doc' tool. If not,`
     //       : ' answer based on your knowledge but state that the official Elastic documentation is the definitive source.'
     //   }`
     // );
@@ -207,16 +207,22 @@ export function getObservabilitySystemPrompt({
     if (isKnowledgeBaseReady && isFunctionAvailable(SUMMARIZE_FUNCTION_NAME)) {
       usage.push(
         `**Summarization and Memory:** You **MUST** use the \`${SUMMARIZE_FUNCTION_NAME}\` tool to save information for long-term use. Follow these steps:
-          * **Listen for Keywords:** Use this tool **only** when the user explicitly says phrases like "remember," "store," "save," or "keep" something.
+          * **Listen for Keywords:** Use this tool **only** when the user explicitly says phrases like "remember," "store," "save," or "keep" information.
           * **Understand the Goal:** This function creates a permanent memory that can be accessed in future conversations.
           * **Take Action:** When you detect a keyword, your primary action is to call the \`${SUMMARIZE_FUNCTION_NAME}\` tool. Do not just say that you will remember something.
-          * **Language:** All summaries **MUST** be in English.`
+          * **Language:** All summaries **MUST** be generated in English.`
       );
     }
 
     if (isFunctionAvailable(CONTEXT_FUNCTION_NAME)) {
       usage.push(
-        `**Context Retrieval:** You **MUST** use the \`${CONTEXT_FUNCTION_NAME}\` tool before answering any question that refers to internal knowledge or user's environment (e.g., teams, processes, on-call schedules). The tool returns a "learnings" array—incorporate this information directly. If the learnings do not contain the requested information, state that you could not find it. **Do not invent answers.**`
+        `**Context Retrieval:** You can use the \`${CONTEXT_FUNCTION_NAME}\` tool to retrieve relevant information from the knowledge database. The response will include a "learnings" field containing information
+          from the knowledge base that is most relevant to the user's current query. You should incorporate these learnings into your responses when answering the user's questions.
+          The information in the "learnings" field contains up-to-date information that you should consider when formulating your responses. DO NOT add disclaimers about the currency or certainty of this information.
+          Present this information directly without qualifiers like "I don't have specific, up-to-date information" or "I can't be completely certain".
+          
+          Stick strictly to the information provided in the "learnings" field. DO NOT assume, infer, or add any details that are not explicitly stated in the response.
+          If the user asks for information that is not covered in the "learnings" field, acknowledge the gap and ask for clarification rather than making assumptions or offering suggestions that aren't based on the provided knowledge.`
       );
     }
 
