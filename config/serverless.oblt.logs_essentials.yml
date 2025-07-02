@@ -44,3 +44,17 @@ xpack.fleet.internal.registry.excludePackages: [
   'profiler_agent',
   'synthetics_dashboards',
 ]
+
+xpack.actions.enabledActionTypes: [
+  'email',
+  'webhook',
+  'Jira',
+  'MS Teams',
+  'OpsGenie',
+  'PagerDuty',
+  'Slack',
+  'IBM Resilient',
+  'ServiceNow',
+  'Tines',
+  'Torq'
+]
