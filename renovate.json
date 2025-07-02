@@ -217,7 +217,6 @@
         "callsites",
         "chance",
         "cheerio",
-        "got",
         "@types/chance",
         "@types/pixelmatch",
         "@types/pngjs",
