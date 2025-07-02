@@ -17,12 +17,6 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
     args: {},
   };
 
-  // Arguments that should use empty strings for bare flags instead of boolean true
-  // These are typically selector arguments that can have values
-  // const COMMAND_ARG_EMPTY_STRING_COMBINATIONS: Record<string, string[]> = {
-  //   runscript: ['ScriptName', 'CloudFile'],
-  // };
-
   if (!input) {
     return response;
   }

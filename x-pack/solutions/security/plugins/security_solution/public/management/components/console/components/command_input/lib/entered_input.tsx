@@ -11,6 +11,8 @@ import type { ArgumentSelectorWrapperProps } from '../components/argument_select
 import { ArgumentSelectorWrapper } from '../components/argument_selector_wrapper';
 import type { ParsedCommandInterface } from '../../../service/types';
 import type { ArgSelectorState, EnteredCommand } from '../../console_state/types';
+import { commandRegistry } from '../../../command_handlers/command_registry';
+
 
 interface InputCharacter {
   value: string;
@@ -142,52 +144,18 @@ export class EnteredInput {
               ) {
                 const argState = enteredCommand.argState[argName]?.at(argIndex);
 
-                // Simple duplication prevention: check if typed value matches selector value
-                let replacementLength = argChrLength; // Default: just replace argument name
-                const selectorValue = argState?.valueText || '';
-
-                // Apply deduplication logic for all commands with argument selectors
-                // If there's a value after the argument name, check for exact match
-                if (charAfterArgName === '=' || charAfterArgName === ' ') {
-                  const valueStart = startSearchIndexForNextArg + 1;
-                  const remainingText = input.substring(valueStart);
-
-                  // For file selectors, check if filename matches
-                  if (argState?.value instanceof File) {
-                    const filename = argState.value.name;
-                    const firstChar = remainingText.charAt(0);
-
-                    // Check for quoted filename match
-                    if (
-                      (firstChar === '"' || firstChar === "'") &&
-                      remainingText.startsWith(`${firstChar}${filename}${firstChar}`)
-                    ) {
-                      replacementLength = argChrLength + 1 + filename.length + 2; // arg + = + "filename"
-                    } else if (
-                      remainingText.startsWith(`${filename} `) ||
-                      remainingText === filename
-                    ) {
-                      replacementLength = argChrLength + 1 + filename.length; // arg + = + filename
-                    }
+                // Use registry-level calculateReplacementLength for deduplication
+                const replacementLength = commandRegistry.calculateReplacementLength(
+                  enteredCommand.commandDefinition.name,
+                  {
+                    argChrLength,
+                    argState,
+                    selectorValue: argState?.valueText || '',
+                    input,
+                    startSearchIndexForNextArg,
+                    charAfterArgName,
                   }
-                  // For string selectors, check if text value matches
-                  else if (selectorValue) {
-                    const firstChar = remainingText.charAt(0);
-                    if (
-                      (firstChar === '"' || firstChar === "'") &&
-                      remainingText.startsWith(`${firstChar}${selectorValue}${firstChar}`)
-                    ) {
-                      // Quoted value: --arg="value" or --arg='value'
-                      replacementLength = argChrLength + 1 + selectorValue.length + 2; // arg + = + "value"
-                    } else if (
-                      remainingText.startsWith(`${selectorValue} `) ||
-                      remainingText === selectorValue
-                    ) {
-                      // Unquoted value: --arg=value
-                      replacementLength = argChrLength + 1 + selectorValue.length; // arg + = + value
-                    }
-                  }
-                }
+                );
 
                 const replaceValues: InputCharacter[] = Array.from(
                   { length: replacementLength },

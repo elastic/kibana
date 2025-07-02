@@ -63,6 +63,25 @@ export class CommandRegistry {
       handler.syncState(parsedInput, enteredCommand);
     }
   }
+
+  /**
+   * Calculate replacement length for deduplication for the given command.
+   */
+  calculateReplacementLength(commandName: string, args: {
+    argChrLength: number;
+    argState: EnteredCommand['argState'];
+    selectorValue: string;
+    input: string;
+    startSearchIndexForNextArg: number;
+    charAfterArgName: string;
+  }): number {
+    const handler = this.handlers.get(commandName);
+    if (handler && typeof handler.calculateReplacementLength === 'function') {
+      return handler.calculateReplacementLength(args);
+    }
+    // Default: just replace argument name (no deduplication logic)
+    return args.argChrLength;
+  }
 }
 
 // Create and export a singleton instance

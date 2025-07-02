@@ -51,4 +51,42 @@ export class UploadCommandHandler extends BaseCommandHandler {
       }
     }
   }
+
+  calculateReplacementLength({
+    argChrLength,
+    argState,
+    selectorValue,
+    input,
+    startSearchIndexForNextArg,
+    charAfterArgName,
+  }: {
+    argChrLength: number;
+    argState: any;
+    selectorValue: string;
+    input: string;
+    startSearchIndexForNextArg: number;
+    charAfterArgName: string;
+  }): number {
+    let replacementLength = argChrLength;
+    if (charAfterArgName === '=' || charAfterArgName === ' ') {
+      const valueStart = startSearchIndexForNextArg + 1;
+      const remainingText = input.substring(valueStart);
+      if (argState?.value instanceof File) {
+        const filename = argState.value.name;
+        const firstChar = remainingText.charAt(0);
+        if (
+          (firstChar === '"' || firstChar === "'") &&
+          remainingText.startsWith(`${firstChar}${filename}${firstChar}`)
+        ) {
+          replacementLength = argChrLength + 1 + filename.length + 2;
+        } else if (
+          remainingText.startsWith(`${filename} `) ||
+          remainingText === filename
+        ) {
+          replacementLength = argChrLength + 1 + filename.length;
+        }
+      }
+    }
+    return replacementLength;
+  }
 }

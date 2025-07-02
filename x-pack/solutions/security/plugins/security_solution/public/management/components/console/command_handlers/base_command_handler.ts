@@ -43,6 +43,19 @@ export interface CommandHandler {
    * This is called after parsing to ensure consistency between different state representations.
    */
   syncState?(parsedInput: ParsedCommandInterface, enteredCommand: EnteredCommand): void;
+
+  /**
+   * Calculate replacement length for text deduplication when selector values change.
+   * Used to determine how much text to replace when updating command arguments.
+   */
+  calculateReplacementLength?(args: {
+    argChrLength: number;
+    argState: EnteredCommand['argState'];
+    selectorValue: string;
+    input: string;
+    startSearchIndexForNextArg: number;
+    charAfterArgName: string;
+  }): number;
 }
 
 /**
