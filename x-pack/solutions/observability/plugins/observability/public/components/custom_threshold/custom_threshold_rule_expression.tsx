@@ -570,7 +570,7 @@ export default function Expressions(props: Props) {
               }
             )}{' '}
             <EuiIconTip
-              type="questionInCircle"
+              type="question"
               color="subdued"
               content={
                 hasGroupBy

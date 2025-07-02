@@ -523,7 +523,10 @@ describe('#update', () => {
       });
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes, { namespace });
+        const res = await updateSuccess(client, repository, registry, type, id, attributes, {
+          namespace,
+        });
+        expect(res.namespaces).toEqual([namespace]);
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.index).toHaveBeenCalledWith(
@@ -533,7 +536,10 @@ describe('#update', () => {
       });
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes, { references });
+        const res = await updateSuccess(client, repository, registry, type, id, attributes, {
+          references,
+        });
+        expect(res.namespaces).toEqual(['default']);
         expect(client.index).toHaveBeenCalledWith(
           expect.objectContaining({ id: expect.stringMatching(`${type}:${id}`) }),
           expect.anything()
@@ -541,10 +547,11 @@ describe('#update', () => {
       });
 
       it(`normalizes options.namespace from 'default' to undefined`, async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes, {
+        const res = await updateSuccess(client, repository, registry, type, id, attributes, {
           references,
           namespace: 'default',
         });
+        expect(res.namespaces).toEqual(['default']);
         expect(client.index).toHaveBeenCalledWith(
           expect.objectContaining({
             id: expect.stringMatching(`${type}:${id}`),

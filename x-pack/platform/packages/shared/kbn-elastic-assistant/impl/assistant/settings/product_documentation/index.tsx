@@ -68,7 +68,7 @@ export const ProductDocumentationManagement = React.memo<{
 
   return (
     <>
-      <EuiCallOut title={i18n.LABEL} iconType="iInCircle">
+      <EuiCallOut title={i18n.LABEL} iconType="info">
         <EuiText size="m">
           <span>{i18n.DESCRIPTION}</span>
         </EuiText>
