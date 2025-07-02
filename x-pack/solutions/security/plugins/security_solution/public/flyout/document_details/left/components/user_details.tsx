@@ -387,6 +387,8 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
               userName={userName}
               indexPatterns={selectedPatterns}
               jobNameById={jobNameById}
+              scopeId={scopeId}
+              isFlyoutOpen={true}
             />
           )}
         </AnomalyTableProvider>
