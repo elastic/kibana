@@ -6,8 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
-import type { SavedObject, SavedObjectAccessControl } from '../..';
+import type { SavedObjectAccessControl } from '../..';
 import type { SavedObjectsBaseOptions } from './base';
 /**
  * Options for the changing ownership of a saved object
@@ -15,9 +16,10 @@ import type { SavedObjectsBaseOptions } from './base';
  * @public
  */
 
-export interface SavedObjectsChangeOwnershipOptions<Attributes = unknown>
+export interface SavedObjectsChangeAccessControlOptions<Attributes = unknown>
   extends SavedObjectsBaseOptions {
   owner?: SavedObjectAccessControl['owner'];
+  accessMode?: SavedObjectAccessControl['accessMode'];
 }
 
 /**
@@ -25,12 +27,12 @@ export interface SavedObjectsChangeOwnershipOptions<Attributes = unknown>
  *
  * @public
  */
-export interface SavedObjectsChangeOwnershipResponse<T = unknown>
-  extends Omit<SavedObject<T>, 'accessControl'> {
-  accessControl: SavedObjectAccessControl;
+export interface SavedObjectsChangeAccessControlResponse {
+  objects: SavedObjectsChangeAccessControlResponseObject[];
 }
 
-export interface SavedObjectsChangeOwnershipObject {
+export interface SavedObjectsChangeAccessControlResponseObject {
   id: string;
   type: string;
+  error?: SavedObjectError;
 }

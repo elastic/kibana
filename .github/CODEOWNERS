@@ -268,6 +268,8 @@ src/core/packages/root/server-internal @elastic/kibana-core
 src/core/packages/saved-objects/api-browser @elastic/kibana-core
 src/core/packages/saved-objects/api-server @elastic/kibana-core
 src/core/packages/saved-objects/api-server-internal @elastic/kibana-core
+src/core/packages/saved-objects/api-server-internal/src/lib/apis/internals/change_object_access_control.test.ts @elastic/kibana-security
+src/core/packages/saved-objects/api-server-internal/src/lib/apis/internals/change_object_access_control.ts @elastic/kibana-security
 src/core/packages/saved-objects/api-server-mocks @elastic/kibana-core
 src/core/packages/saved-objects/base-server-internal @elastic/kibana-core
 src/core/packages/saved-objects/base-server-mocks @elastic/kibana-core
