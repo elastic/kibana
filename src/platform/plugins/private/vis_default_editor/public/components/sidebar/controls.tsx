@@ -15,13 +15,30 @@ import {
   EuiButtonEmpty,
   EuiToolTip,
   EuiIconTip,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
 
 import { Vis } from '@kbn/visualizations-plugin/public';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { discardChanges, EditorAction } from './state';
+
+const defaultEditorControlsStyles = {
+  base: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      borderTop: euiTheme.border.thin,
+      padding: euiTheme.size.s,
+      display: 'flex',
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+      '.visEditorSidebar__autoApplyButton': {
+        marginLeft: euiTheme.size.m,
+      },
+    }),
+};
 
 interface DefaultEditorControlsProps {
   applyChanges(): void;
@@ -40,6 +57,7 @@ function DefaultEditorControls({
   dispatch,
   vis,
 }: DefaultEditorControlsProps) {
+  const styles = useMemoCss(defaultEditorControlsStyles);
   const { enableAutoApply } = vis.type.editorConfig;
   const [autoApplyEnabled, setAutoApplyEnabled] = useState(false);
   const toggleAutoApply = useCallback(
@@ -59,7 +77,7 @@ function DefaultEditorControls({
   );
 
   return (
-    <div className="visEditorSidebar__controls">
+    <div className="visEditorSidebar__controls" css={styles.base}>
       {!autoApplyEnabled && (
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
           <EuiFlexItem grow={false}>
