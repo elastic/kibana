@@ -36,7 +36,6 @@ const AVAILABLE_RESOURCE_FIELDS: Array<Array<keyof ResourceFields>> = [
 
 export const getAvailableResourceFields = (resourceDoc: ResourceFields) =>
   AVAILABLE_RESOURCE_FIELDS.reduce((acc, fields) => {
-    console.log('getAvailableResourceFields', fields, resourceDoc);
     const field = fields.find((fieldName) => resourceDoc[fieldName]);
     if (field) {
       acc.push(field);

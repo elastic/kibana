@@ -20,9 +20,15 @@ import {
   TRACE_FIELDS,
   getLogDocumentOverview,
   getMessageFieldWithFallbacks,
-  METRIC_FIELDS,
 } from '@kbn/discover-utils';
-import { getAvailableResourceFields, getAvailableTraceFields } from '@kbn/discover-utils/src';
+import {
+  ResourceFields,
+  getAvailableResourceFields,
+  getAvailableTraceFields,
+} from '@kbn/discover-utils/src';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { HttpStart } from '@kbn/core/public';
+import { EnrichedEntityDefinitionsResponse } from '@kbn/observability-navigation-plugin/common/types';
 import { Resource } from './resource';
 import { Content } from './content';
 import { createResourceFields, formatJsonDocumentForContent, isTraceDocument } from './utils';
@@ -33,6 +39,7 @@ import {
   resourceLabel,
   traceLabel,
 } from '../translations';
+import { useGetK8sEntitiesDefinition } from '../utils';
 
 export interface SummaryColumnFactoryDeps {
   density: DataGridDensity | undefined;
@@ -51,9 +58,11 @@ export type AllSummaryColumnProps = SummaryColumnProps & SummaryColumnFactoryDep
 const getResourceFields = ({
   isTracesDoc,
   isMetricsDoc,
+  k8sEntitiesDefinition,
 }: {
   isTracesDoc?: boolean;
   isMetricsDoc?: boolean;
+  k8sEntitiesDefinition: EnrichedEntityDefinitionsResponse[];
 }) => {
   if (isTracesDoc) {
     return {
@@ -63,9 +72,19 @@ const getResourceFields = ({
   }
 
   if (isMetricsDoc) {
+    const k8sFields = k8sEntitiesDefinition?.map((entity) => entity.attributes) || [];
+
     return {
-      fields: METRIC_FIELDS,
-      getAvailableFields: getAvailableResourceFields,
+      fields: k8sFields.flat(),
+      // move this into a separate util if needed in other places
+      getAvailableFields: (resourceDoc: ResourceFields) =>
+        k8sFields.reduce((acc, fields) => {
+          const field = fields.find((fieldName) => resourceDoc[fieldName as keyof ResourceFields]);
+          if (field) {
+            acc.push(field);
+          }
+          return acc;
+        }, []),
     };
   }
 
@@ -77,12 +96,18 @@ const getResourceFields = ({
 
 export const SummaryColumn = (props: AllSummaryColumnProps) => {
   const { isDetails } = props;
+  const {
+    services: { http },
+  } = useKibana();
+  const { data: k8sEntitiesDefinition } = useGetK8sEntitiesDefinition({
+    http: http as HttpStart,
+  });
 
   if (isDetails) {
-    return <SummaryCellPopover {...props} />;
+    return <SummaryCellPopover {...props} k8sEntitiesDefinition={k8sEntitiesDefinition} />;
   }
 
-  return <SummaryCell {...props} />;
+  return <SummaryCell {...props} k8sEntitiesDefinition={k8sEntitiesDefinition} />;
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -95,9 +120,18 @@ const SummaryCell = ({
   density: maybeNullishDensity,
   rowHeight: maybeNullishRowHeight,
   ...props
-}: AllSummaryColumnProps) => {
-  const { dataView, onFilter, row, share, core, isTracesSummary, isMetricsSummary, fieldFormats } =
-    props;
+}: AllSummaryColumnProps & { k8sEntitiesDefinition: any }) => {
+  const {
+    dataView,
+    onFilter,
+    row,
+    share,
+    core,
+    isTracesSummary,
+    isMetricsSummary,
+    fieldFormats,
+    k8sEntitiesDefinition,
+  } = props;
 
   const density = maybeNullishDensity ?? DataGridDensity.COMPACT;
   const isCompressed = density === DataGridDensity.COMPACT;
@@ -108,6 +142,7 @@ const SummaryCell = ({
   const specificFields = getResourceFields({
     isTracesDoc: isTracesSummary && isTraceDocument(row),
     isMetricsDoc: isMetricsSummary,
+    k8sEntitiesDefinition,
   });
 
   const resourceFields = createResourceFields({
@@ -119,7 +154,6 @@ const SummaryCell = ({
     ...specificFields,
   });
 
-  console.log('SummaryCell', resourceFields, 'resourceFields');
   const shouldRenderResource = resourceFields.length > 0;
 
   return isSingleLine ? (
@@ -149,7 +183,9 @@ const SummaryCell = ({
   );
 };
 
-export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
+export const SummaryCellPopover = (
+  props: AllSummaryColumnProps & { k8sEntitiesDefinition: any }
+) => {
   const {
     row,
     dataView,
@@ -160,12 +196,14 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
     core,
     isTracesSummary,
     isMetricsSummary,
+    k8sEntitiesDefinition,
   } = props;
 
   const isTraceDoc = isTracesSummary && isTraceDocument(row);
   const specificFields = getResourceFields({
     isTracesDoc: isTraceDoc,
     isMetricsDoc: isMetricsSummary,
+    k8sEntitiesDefinition,
   });
   const resourceFields = createResourceFields({
     row,

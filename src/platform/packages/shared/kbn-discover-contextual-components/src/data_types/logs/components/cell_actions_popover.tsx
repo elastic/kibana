@@ -26,6 +26,11 @@ import { useBoolean } from '@kbn/react-hooks';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { HttpStart } from '@kbn/core/public';
+import type { InfraDashboardLocatorParams } from '@kbn/observability-shared-plugin/common';
+import { INFRA_DASHBOARD_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
+import { DiscoverServices } from '@kbn/discover-plugin/public';
 import {
   actionFilterForText,
   actionFilterOutText,
@@ -36,7 +41,7 @@ import {
   filterOutText,
   openCellActionPopoverAriaText,
 } from './translations';
-import { truncateAndPreserveHighlightTags } from './utils';
+import { truncateAndPreserveHighlightTags, useGetK8sEntitiesDefinition } from './utils';
 
 interface CellActionsPopoverProps {
   onFilter?: DocViewFilterFn;
@@ -58,13 +63,6 @@ interface CellActionsPopoverProps {
   }) => ReactElement;
 }
 
-const infraRoutes = {
-  overview: {
-    href: 'metrics/entity/Kubernetes/Overview?dashboardId=kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
-    label: 'Kubernetes Overview',
-  },
-};
-
 export function CellActionsPopover({
   onFilter,
   property,
@@ -74,24 +72,30 @@ export function CellActionsPopover({
   renderPopoverTrigger,
 }: CellActionsPopoverProps) {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { http, share },
+  } = useKibana<DiscoverServices>();
   const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
-
+  const locator =
+    share && share.url.locators.get<InfraDashboardLocatorParams>(INFRA_DASHBOARD_LOCATOR_ID);
   const makeFilterHandlerByOperator = (operator: '+' | '-') => () => {
     if (onFilter) {
       onFilter(property, rawValue, operator);
     }
   };
-
   const popoverTriggerProps = {
     onClick: togglePopover,
     onClickAriaLabel: openCellActionPopoverAriaText,
     'data-test-subj': `dataTableCellActionsPopover_${property}`,
   };
 
-  const infraProps =
-    property in infraRoutes
-      ? infraRoutes[property as keyof typeof infraRoutes]
-      : infraRoutes.overview;
+  const { data: rawEntitiesDefinition } = useGetK8sEntitiesDefinition({
+    http: http as HttpStart,
+  });
+
+  const entityDefinition = rawEntitiesDefinition?.find((entity) =>
+    entity.attributes.includes(property)
+  );
 
   return (
     <EuiPopover
@@ -160,11 +164,19 @@ export function CellActionsPopover({
           </EuiFlexGroup>
         </EuiPopoverFooter>
       ) : null}
-      <EuiPopoverFooter>
-        <EuiButtonEmpty href={infraProps.href} size="s" iconType="dashboardApp">
-          Go to {infraProps.label} dashboard
-        </EuiButtonEmpty>
-      </EuiPopoverFooter>
+      {entityDefinition?.navigation?.href && (
+        <EuiPopoverFooter>
+          <EuiButtonEmpty
+            href={locator?.getRedirectUrl({
+              relativePath: entityDefinition?.navigation?.href,
+            })}
+            size="s"
+            iconType="dashboardApp"
+          >
+            Go to {entityDefinition?.navigation?.title} dashboard
+          </EuiButtonEmpty>
+        </EuiPopoverFooter>
+      )}
       <EuiPopoverFooter>
         <EuiCopy textToCopy={value}>
           {(copy) => (

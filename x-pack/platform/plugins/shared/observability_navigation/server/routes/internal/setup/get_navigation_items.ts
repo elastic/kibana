@@ -46,14 +46,14 @@ export async function getNavigationItems({
           id: 'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013',
           entityId: 'entity.k8s.cronjob',
           sideNavTitle: 'Cron jobs',
-          sideNavOrder: 900,
+          sideNavOrder: 1200,
           type: 'dashboard',
         },
         {
           id: 'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013',
           entityId: 'entity.k8s.statefulset',
           sideNavTitle: 'Stateful sets',
-          sideNavOrder: 600,
+          sideNavOrder: 900,
           type: 'dashboard',
         },
 
@@ -61,28 +61,49 @@ export async function getNavigationItems({
           id: 'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013',
           entityId: 'entity.k8s.pod',
           sideNavTitle: 'Pods',
+          sideNavOrder: 400,
+          type: 'dashboard',
+        },
+        {
+          id: 'kubernetes_otel-cluster-overview',
+          entityId: 'entity.k8s.namespace',
+          sideNavTitle: 'Namespaces',
           sideNavOrder: 300,
+          type: 'dashboard',
+        },
+        {
+          id: 'kubernetes_otel-cluster-overview',
+          entityId: 'entity.k8s.replicaset',
+          sideNavTitle: 'Replicaset',
+          sideNavOrder: 700,
+          type: 'dashboard',
+        },
+        {
+          id: 'kubernetes_otel-cluster-overview',
+          entityId: 'entity.k8s.container',
+          sideNavTitle: 'Containers',
+          sideNavOrder: 500,
           type: 'dashboard',
         },
         {
           id: 'kubernetes-5be46210-bcb1-11ec-b64f-7dd6e8e82013',
           entityId: 'entity.k8s.deployment',
           sideNavTitle: 'Deployments',
-          sideNavOrder: 400,
+          sideNavOrder: 600,
           type: 'dashboard',
         },
         {
           id: 'kubernetes-85879010-bcb1-11ec-b64f-7dd6e8e82013',
           entityId: 'entity.k8s.daemonset',
           sideNavTitle: 'Daemon sets',
-          sideNavOrder: 700,
+          sideNavOrder: 1000,
           type: 'dashboard',
         },
         {
           id: 'kubernetes-9bf990a0-bcb1-11ec-b64f-7dd6e8e82013',
           entityId: 'entity.k8s.job',
           sideNavTitle: 'Jobs',
-          sideNavOrder: 800,
+          sideNavOrder: 1100,
           type: 'dashboard',
         },
         {
@@ -195,7 +216,7 @@ function formatId(id: string): string {
 }
 
 function buildHref(id: string, parent?: string): string {
-  const href = `${parent ? `${parent}/` : ''}${id}`;
+  const href = `/${parent ? `${parent}/` : ''}${id}`;
 
   return href;
 }
