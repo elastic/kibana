@@ -53,6 +53,7 @@ xpack.actions.enabledActionTypes: [
   '.opsgenie',
   '.pagerduty',
   '.slack',
+  '.slack_api',
   '.resilient',
   '.servicenow',
   '.tines',
