@@ -55,7 +55,7 @@ describe('pipeline trigger combinations', () => {
     // all branches that have fixed versions, and excluding 7.17 (i.e. not 7.17, [0-9].x and main)
     const branches = versionsFile.versions
       .filter((v) => v.branch.match(/[0-9]{1,2}\.[0-9]{1,2}/))
-      .filter((v) => v.previousMajor === true)
+      .filter((v) => v.branch !== '7.17')
       .map((v) => v.branch);
 
     expect(triggerTriggers.length).to.eql(branches.length);
