@@ -149,6 +149,7 @@ import {
   ACTION_EDIT_LENS_EMBEDDABLE,
   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
 } from './trigger_actions/open_lens_config/constants';
+import { SAVED_OBJECT_REF_NAME } from '@kbn/presentation-publishing';
 
 export type { SaveProps } from './app_plugin';
 
@@ -409,7 +410,14 @@ export class LensPlugin {
                 rawState: {
                   savedObjectId: savedObject.id,
                 },
-                references: savedObject.references,
+                references: [
+                  ...savedObject.references,
+                  {
+                    name: SAVED_OBJECT_REF_NAME,
+                    type: LENS_EMBEDDABLE_TYPE,
+                    id: savedObject.id,
+                  }
+                ],
               },
             },
             true

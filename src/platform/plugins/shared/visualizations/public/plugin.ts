@@ -123,6 +123,7 @@ import {
 } from '../common/content_management';
 import type { VisualizeSavedObjectInputState } from './embeddable/types';
 import { registerActions } from './actions/register_actions';
+import { SAVED_OBJECT_REF_NAME } from '@kbn/presentation-publishing';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -414,7 +415,14 @@ export class VisualizationsPlugin
               rawState: {
                 savedObjectId: savedObject.id,
               },
-              references: savedObject.references,
+              references: [
+                ...savedObject.references,
+                {
+                  name: SAVED_OBJECT_REF_NAME,
+                  type: VISUALIZE_EMBEDDABLE_TYPE,
+                  id: savedObject.id,
+                }
+              ],
             },
           },
           true

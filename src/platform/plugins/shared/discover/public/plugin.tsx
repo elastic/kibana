@@ -62,6 +62,7 @@ import { registerDiscoverEBTManagerAnalytics } from './ebt_manager/discover_ebt_
 import type { ProfilesManager } from './context_awareness';
 import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
 import { getProfilesInspectorView } from './context_awareness/inspector/get_profiles_inspector_view';
+import { SAVED_OBJECT_REF_NAME } from '@kbn/presentation-publishing';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -402,8 +403,15 @@ export class DiscoverPlugin
           {
             panelType: SEARCH_EMBEDDABLE_TYPE,
             serializedState: {
-              rawState: { savedObjectId: savedObject.id },
-              references: savedObject.references,
+              rawState: {},
+              references: [
+                ...savedObject.references,
+                {
+                  name: SAVED_OBJECT_REF_NAME,
+                  type: SEARCH_EMBEDDABLE_TYPE,
+                  id: savedObject.id,
+                }
+              ],
             },
           },
           true
