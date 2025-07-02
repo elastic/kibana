@@ -50,8 +50,8 @@ export function registerAgentProfileRoutes({
         }
         const { agents } = getInternalServices();
         const service = await agents.getProfileService(request);
-        const profiles = await service.list();
-        return response.ok({ body: { profiles } });
+        const agentProfiles = await service.list();
+        return response.ok({ body: { agentProfiles } });
       })
     );
 
@@ -87,14 +87,9 @@ export function registerAgentProfileRoutes({
         }
         const { agents } = getInternalServices();
         const service = await agents.getProfileService(request);
-        try {
-          const profile = await service.get(request.params.id);
-          return response.ok({ body: { profile } });
-        } catch (e) {
-          return response.notFound({
-            body: { message: `Profile with id ${request.params.id} not found.` },
-          });
-        }
+
+        const profile = await service.get(request.params.id);
+        return response.ok({ body: profile });
       })
     );
 
@@ -144,7 +139,7 @@ export function registerAgentProfileRoutes({
         const { agents } = getInternalServices();
         const service = await agents.getProfileService(request);
         const profile = await service.create(request.body);
-        return response.ok({ body: { profile } });
+        return response.ok({ body: profile });
       })
     );
 
@@ -197,7 +192,7 @@ export function registerAgentProfileRoutes({
         const service = await agents.getProfileService(request);
         const update = { id: request.params.id, ...request.body };
         const profile = await service.update(update);
-        return response.ok({ body: { profile } });
+        return response.ok({ body: profile });
       })
     );
 
