@@ -17,7 +17,6 @@ import {
   INFRA_LOGS_APP,
   INFRA_METRICS_APP,
   UNIVERSAL_PROFILING_APP,
-  UPTIME_APP,
   UX_APP,
 } from '../constants';
 import { getDataHandler } from './data_handler';
@@ -50,7 +49,6 @@ export const HasDataContext = createContext({} as HasDataContextValue);
 
 const apps: DataContextApps[] = [
   APM_APP,
-  UPTIME_APP,
   INFRA_LOGS_APP,
   INFRA_METRICS_APP,
   UX_APP,
@@ -73,9 +71,6 @@ export const appLabels: Record<DataContextApps, string> = {
   }),
   universal_profiling: i18n.translate('xpack.observability.overview.profilingLabel', {
     defaultMessage: 'Profiling',
-  }),
-  uptime: i18n.translate('xpack.observability.overview.uptimeLabel', {
-    defaultMessage: 'Uptime',
   }),
   ux: i18n.translate('xpack.observability.overview.uxLabel', {
     defaultMessage: 'UX',
@@ -121,11 +116,6 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
                 indices: resultUx?.indices,
                 serviceName: resultUx?.serviceName as string,
               });
-              break;
-            case UPTIME_APP:
-              const resultSy = await getDataHandler(app)?.hasData();
-              updateState({ hasData: resultSy?.hasData, indices: resultSy?.indices });
-
               break;
             case APM_APP:
               const resultApm = await getDataHandler(app)?.hasData();

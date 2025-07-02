@@ -10,7 +10,6 @@ import React from 'react';
 import { APMSection } from './sections/apm/apm_section';
 import { LogsSection } from './sections/logs/logs_section';
 import { MetricsSection } from './sections/metrics/metrics_section';
-import { UptimeSection } from './sections/uptime/uptime_section';
 import { UXSection } from './sections/ux/ux_section';
 import { HasDataMap } from '../../../context/has_data_context/has_data_context';
 import type { BucketSize } from '../helpers/calculate_bucket_size';
@@ -32,9 +31,6 @@ export function DataSections({ bucketSize }: Props) {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <APMSection bucketSize={bucketSize} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <UptimeSection bucketSize={bucketSize} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <UXSection bucketSize={bucketSize} />
