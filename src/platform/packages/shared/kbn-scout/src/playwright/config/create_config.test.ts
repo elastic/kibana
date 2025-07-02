@@ -66,7 +66,7 @@ describe('createPlaywrightConfig', () => {
     expect(config.timeout).toBe(60000);
     expect(config.expect?.timeout).toBe(10000);
     expect(config.outputDir).toBe('./.scout/output/test-artifacts');
-    expect(config.projects).toHaveLength(1);
+    expect(config.projects).toHaveLength(3);
     expect(config.projects![0].name).toEqual('local');
   });
 
