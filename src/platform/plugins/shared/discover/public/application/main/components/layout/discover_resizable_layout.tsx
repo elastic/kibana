@@ -99,9 +99,7 @@ export const InternalDiscoverResizableLayout = ({
   );
 };
 
-export const DiscoverResizableLayout = withRestorableState(
-  React.memo(InternalDiscoverResizableLayout)
-);
+export const DiscoverResizableLayout = withRestorableState(InternalDiscoverResizableLayout);
 
 export type DiscoverResizableLayoutProps = ComponentProps<typeof DiscoverResizableLayout>;
 
