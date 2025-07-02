@@ -6,7 +6,7 @@
  */
 import { EuiBadge, EuiBasicTable } from '@elastic/eui';
 import React from 'react';
-import { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management/v2';
+import type { DashboardSavedObjectAttributes } from '@kbn/dashboard-plugin/server';
 import { capitalize } from 'lodash';
 import { ContentPackEntry } from '@kbn/content-packs-schema';
 
@@ -26,7 +26,7 @@ export function ContentPackObjectsList({
           name: 'Asset name',
           render: (entry: ContentPackEntry) => {
             if (entry.type === 'dashboard') {
-              return (entry.attributes as DashboardAttributes).title;
+              return (entry.attributes as DashboardSavedObjectAttributes).title;
             }
 
             return 'unknown object type';
