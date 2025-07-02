@@ -6,31 +6,66 @@
  */
 
 import { services as commonDeploymentAgnosticServices } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services';
-import { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
 import { services as xpackDeploymentAgnosticServices } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
+import { RoleScopedSupertestProvider } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
+import { CustomRoleScopedSupertestProvider } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/custom_role_scoped_supertest';
+
+import type { DeploymentAgnosticCommonServices } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
+import type { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
 import { ApmApiProvider } from './apm_api';
 import { SloApiProvider } from './slo_api';
 import { SynthtraceProvider } from './synthtrace';
 import { ObservabilityAIAssistantApiProvider } from './observability_ai_assistant_api';
 
+// Re-export types
 export type {
   InternalRequestHeader,
   RoleCredentials,
   SupertestWithoutAuthProviderType,
 } from '@kbn/ftr-common-functional-services';
 
-export const services = {
-  ...xpackDeploymentAgnosticServices,
-  ...commonDeploymentAgnosticServices,
-  // create a new deployment-agnostic service and load here
+const allServices = {
+  // stateful services
+  supertest: commonDeploymentAgnosticServices.supertest,
+  es: commonDeploymentAgnosticServices.es,
+  esDeleteAllIndices: commonDeploymentAgnosticServices.esDeleteAllIndices,
+  esArchiver: commonDeploymentAgnosticServices.esArchiver,
+  esSupertest: commonDeploymentAgnosticServices.esSupertest,
+  indexPatterns: commonDeploymentAgnosticServices.indexPatterns,
+  ingestPipelines: commonDeploymentAgnosticServices.ingestPipelines,
+  kibanaServer: commonDeploymentAgnosticServices.kibanaServer,
+  ml: commonDeploymentAgnosticServices.ml,
+  randomness: commonDeploymentAgnosticServices.randomness,
+  retry: commonDeploymentAgnosticServices.retry,
+  security: commonDeploymentAgnosticServices.security,
+  usageAPI: commonDeploymentAgnosticServices.usageAPI,
+  spaces: commonDeploymentAgnosticServices.spaces,
+  // DA services
+  alertingApi: xpackDeploymentAgnosticServices.alertingApi,
+  supertestWithoutAuth: commonDeploymentAgnosticServices.supertestWithoutAuth,
+  samlAuth: commonDeploymentAgnosticServices.samlAuth,
+  dataViewApi: commonDeploymentAgnosticServices.dataViewApi,
+  packageApi: commonDeploymentAgnosticServices.packageApi,
+  roleScopedSupertest: RoleScopedSupertestProvider,
+  customRoleScopedSupertest: CustomRoleScopedSupertestProvider,
+  // custom providers (extra services)
   apmApi: ApmApiProvider,
   synthtrace: SynthtraceProvider,
   observabilityAIAssistantApi: ObservabilityAIAssistantApiProvider,
   sloApi: SloApiProvider,
+  // add any other required or extra services here
 };
 
-export type ObltDeploymentAgnosticCommonServices = typeof services;
+export const services = allServices as DeploymentAgnosticCommonServices;
+
+export type ObltDeploymentAgnosticCommonServices = DeploymentAgnosticCommonServices;
+
+// Import and re-export types and providers from canonical modules
 export type SupertestWithRoleScopeType = SupertestWithRoleScope;
-export { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
+
+export {
+  SupertestWithRoleScope,
+  RoleScopedSupertestProvider,
+} from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
+
 export { CustomRoleScopedSupertestProvider } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/custom_role_scoped_supertest';
-export { RoleScopedSupertestProvider } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';

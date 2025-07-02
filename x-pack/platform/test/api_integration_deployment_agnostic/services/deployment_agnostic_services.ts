@@ -5,26 +5,29 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-import { services as apiIntegrationServices } from '../../api_integration/services';
+import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import { UsageAPIProvider } from '../../api_integration/services/usage_api';
+import { IngestPipelinesProvider } from '../../api_integration/services/ingest_pipelines';
+import { SpacesServiceProvider } from '../../api_integration/services/spaces';
+import { MachineLearningProvider } from '../../api_integration/services/ml';
 
 /**
  * Load only services that support both stateful & serverless deployments (including Cloud/MKI),
  * e.g. `randomness` or `retry` are deployment agnostic
  */
-export const deploymentAgnosticServices = _.pick(apiIntegrationServices, [
-  'supertest', // TODO: review its behaviour
-  'es',
-  'esDeleteAllIndices', // TODO: review its behaviour
-  'esArchiver',
-  'esSupertest', // TODO: review its behaviour
-  'indexPatterns',
-  'ingestPipelines',
-  'kibanaServer',
-  'ml',
-  'randomness',
-  'retry',
-  'security',
-  'usageAPI',
-  'spaces',
-]);
+export const deploymentAgnosticServices = {
+  supertest: commonFunctionalServices.supertest,
+  es: commonFunctionalServices.es,
+  esDeleteAllIndices: commonFunctionalServices.esDeleteAllIndices,
+  esArchiver: commonFunctionalServices.esArchiver,
+  esSupertest: commonFunctionalServices.esSupertest,
+  indexPatterns: commonFunctionalServices.indexPatterns,
+  ingestPipelines: IngestPipelinesProvider,
+  kibanaServer: commonFunctionalServices.kibanaServer,
+  ml: MachineLearningProvider,
+  randomness: commonFunctionalServices.randomness,
+  retry: commonFunctionalServices.retry,
+  security: commonFunctionalServices.security,
+  usageAPI: UsageAPIProvider,
+  spaces: SpacesServiceProvider,
+};
