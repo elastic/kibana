@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures, test as baseTest } from '@kbn/scout-oblt';
+import {
+  ScoutPage,
+  ScoutTestFixtures,
+  ScoutWorkerFixtures,
+  test as baseTest,
+} from '@kbn/scout-oblt';
 import { SLOPageObjects, extendPageObjects } from './page_objects';
 
 export interface StreamsTestFixtures extends ScoutTestFixtures {
