@@ -45,6 +45,7 @@ export interface DocViewRenderProps {
   docViewsRegistry?: DocViewsRegistry | ((prevRegistry: DocViewsRegistry) => DocViewsRegistry);
   decreaseAvailableHeightBy?: number;
   initialTabId?: string;
+  additionalDocViewerProps?: Record<string, unknown>;
 }
 export type DocViewerComponent = React.FC<DocViewRenderProps>;
 export type DocViewRenderFn = (

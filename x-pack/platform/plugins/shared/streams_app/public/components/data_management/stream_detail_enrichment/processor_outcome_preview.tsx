@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   EuiFilterButton,
   EuiFilterGroup,
@@ -19,7 +19,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { Sample } from '@kbn/grok-ui';
-import { GrokProcessorDefinition } from '@kbn/streams-schema';
+import { FlattenRecord, GrokProcessorDefinition, SampleDocument } from '@kbn/streams-schema';
+import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
+import { DataTableRecord } from '@kbn/discover-utils';
+import useAsync from 'react-use/lib/useAsync';
+import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import { useKibana } from '../../../hooks/use_kibana';
 import { PreviewTable } from '../preview_table';
 import {
   useSimulatorSelector,
@@ -31,11 +36,18 @@ import {
   getTableColumns,
   previewDocsFilterOptions,
 } from './state_management/simulation_state_machine';
-import { selectPreviewDocuments } from './state_management/simulation_state_machine/selectors';
+import {
+  selectOriginalPreviewRecords,
+  selectPreviewRecords,
+} from './state_management/simulation_state_machine/selectors';
 import { isGrokProcessor } from './utils';
 import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
 import { WithUIAttributes } from './types';
 import { AssetImage } from '../../asset_image';
+import { docViewJson } from './doc_viewer_json';
+import { docViewDiff } from './doc_viewer_diff';
+
+export const FLYOUT_WIDTH_KEY = 'streamsEnrichment:flyoutWidth';
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(
@@ -188,6 +200,7 @@ const PreviewDocumentsGroupBy = () => {
 
 const OutcomePreviewTable = () => {
   const processors = useSimulatorSelector((state) => state.context.processors);
+  const streamName = useSimulatorSelector((state) => state.context.streamName);
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
   const previewColumnsSorting = useSimulatorSelector(
@@ -201,8 +214,24 @@ const OutcomePreviewTable = () => {
   );
   const previewColumnsOrder = useSimulatorSelector((state) => state.context.previewColumnsOrder);
   const previewDocuments = useSimulatorSelector((snapshot) =>
-    selectPreviewDocuments(snapshot.context)
+    selectPreviewRecords(snapshot.context)
   );
+  const originalSamples = useSimulatorSelector((snapshot) =>
+    selectOriginalPreviewRecords(snapshot.context)
+  );
+
+  const { core, dependencies } = useKibana();
+  const { data, unifiedDocViewer } = dependencies.start;
+
+  const docViewsRegistry = useMemo(() => {
+    const docViewers = unifiedDocViewer.registry.getAll();
+    const myRegistry = new DocViewsRegistry([
+      docViewers.find((docView) => docView.id === 'doc_view_table')!,
+      docViewDiff,
+      docViewJson,
+    ]);
+    return myRegistry;
+  }, [unifiedDocViewer.registry]);
 
   const {
     setExplicitlyEnabledPreviewColumns,
@@ -301,6 +330,40 @@ const OutcomePreviewTable = () => {
     setPreviewColumnsOrder(visibleColumns);
   };
 
+  const hits = useMemo(() => {
+    return previewDocuments.map((doc, idx) => recordToHit(idx, doc as FlattenRecord));
+  }, [previewDocuments]);
+
+  const [currentDoc, setExpandedDoc] = React.useState<DataTableRecord | undefined>(hits[0]);
+
+  useEffect(() => {
+    setExpandedDoc(hits[0]);
+  }, [hits]);
+
+  const { value: streamDataView } = useAsync(() =>
+    data.dataViews.create({
+      title: streamName,
+      timeFieldName: '@timestamp',
+    })
+  );
+
+  const additionalDocViewerProps = useMemo(() => {
+    return {
+      originalSample: originalSamples
+        ? originalSamples[Number(currentDoc?.id.split('-')[0])]
+        : undefined,
+    };
+  }, [currentDoc?.id, originalSamples]);
+
+  useEffect(() => {
+    if (additionalDocViewerProps.originalSample) {
+      // If the original sample is available, enable the diff tab - otherwise disable it
+      docViewsRegistry.enableById('doc_view_diff');
+    } else {
+      docViewsRegistry.disableById('doc_view_diff');
+    }
+  }, [additionalDocViewerProps.originalSample, docViewsRegistry]);
+
   if (isEmpty(previewDocuments)) {
     return (
       <EuiEmptyPrompt
@@ -329,33 +392,64 @@ const OutcomePreviewTable = () => {
   }
 
   return (
-    <PreviewTable
-      documents={previewDocuments}
-      displayColumns={previewColumns}
-      rowHeightsOptions={grokMode ? { defaultHeight: 'auto' } : undefined}
-      toolbarVisibility
-      setVisibleColumns={setVisibleColumns}
-      sorting={previewColumnsSorting}
-      setSorting={setPreviewColumnsSorting}
-      columnOrderHint={previewColumnsOrder}
-      renderCellValue={
-        grokMode
-          ? (document, columnId) => {
-              const value = document[columnId];
-              if (typeof value === 'string' && columnId === grokField) {
-                return (
-                  <Sample
-                    grokCollection={grokCollection}
-                    draftGrokExpressions={draftProcessor.resources?.grokExpressions ?? []}
-                    sample={value}
-                  />
-                );
-              } else {
-                return undefined;
+    <>
+      <PreviewTable
+        documents={previewDocuments as SampleDocument[]}
+        displayColumns={previewColumns}
+        rowHeightsOptions={grokMode ? { defaultHeight: 'auto' } : undefined}
+        toolbarVisibility
+        setVisibleColumns={setVisibleColumns}
+        sorting={previewColumnsSorting}
+        setSorting={setPreviewColumnsSorting}
+        columnOrderHint={previewColumnsOrder}
+        renderCellValue={
+          grokMode
+            ? (document, columnId) => {
+                const value = document[columnId];
+                if (typeof value === 'string' && columnId === grokField) {
+                  return (
+                    <Sample
+                      grokCollection={grokCollection}
+                      draftGrokExpressions={draftProcessor.resources?.grokExpressions ?? []}
+                      sample={value}
+                    />
+                  );
+                } else {
+                  return undefined;
+                }
               }
-            }
-          : undefined
-      }
-    />
+            : undefined
+        }
+      />
+      {currentDoc && streamDataView && (
+        <UnifiedDocViewerFlyout
+          data-test-subj="esqlRowDetailsFlyout"
+          flyoutWidthLocalStorageKey={FLYOUT_WIDTH_KEY}
+          flyoutType={'push'}
+          services={{
+            toastNotifications: core.notifications.toasts,
+          }}
+          isEsqlQuery={false}
+          hit={currentDoc}
+          additionalDocViewerProps={additionalDocViewerProps}
+          hits={hits}
+          dataView={streamDataView}
+          docViewsRegistry={docViewsRegistry}
+          columns={[]}
+          onAddColumn={() => {}}
+          onRemoveColumn={() => {}}
+          onClose={() => {}}
+          setExpandedDoc={setExpandedDoc}
+        />
+      )}
+    </>
   );
 };
+
+function recordToHit(idx: number, record: FlattenRecord): DataTableRecord {
+  return {
+    id: String(idx) + '-' + new Date().getTime(), // Unique ID for the record
+    raw: record,
+    flattened: record,
+  };
+}
