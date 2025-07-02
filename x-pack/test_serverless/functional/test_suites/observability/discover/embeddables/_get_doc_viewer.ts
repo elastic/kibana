@@ -264,7 +264,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should toggle to stacktrace accordion when 1st quality issue and then stacktrace control is clicked for different row', async () => {
-        await dataGrid.clickQualityIssueLeadingControl(0);
+        await dataGrid.clickQualityIssueLeadingControl(1);
 
         const stacktraceAccordionState = await testSubjects.getAccordionState(
           'unifiedDocViewLogsOverviewStacktraceAccordion'
@@ -278,8 +278,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(stacktraceAccordionState).to.equal('false');
         expect(qualityIssuesAccordionState).to.equal('true');
 
-        // Clicking on Stacktrace control of the same row while the Flyout is still open
-        await dataGrid.clickStacktraceLeadingControl(1);
+        // Clicking on Stacktrace control of the different row while the Flyout is still open
+        await dataGrid.clickStacktraceLeadingControl(2);
 
         const stacktraceAccordionState2 = await testSubjects.getAccordionState(
           'unifiedDocViewLogsOverviewStacktraceAccordion'

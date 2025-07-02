@@ -6,7 +6,12 @@
  */
 
 import type { StructuredToolIdentifier } from '../tools/tools';
-import type { SerializedAgentIdentifier } from '../agents';
+import {
+  oneChatDefaultAgentId,
+  toSerializedAgentIdentifier,
+  type SerializedAgentIdentifier,
+  oneChatAgentProviderIds,
+} from '../agents';
 import type { UserIdAndName } from '../base/users';
 
 /**
@@ -67,6 +72,13 @@ export type ToolCallStep = ConversationRoundStepMixin<
   ToolCallWithResult
 >;
 
+export const createToolCallStep = (toolCallWithResult: ToolCallWithResult): ToolCallStep => {
+  return {
+    type: ConversationRoundStepType.toolCall,
+    ...toolCallWithResult,
+  };
+};
+
 export const isToolCallStep = (step: ConversationRoundStep): step is ToolCallStep => {
   return step.type === ConversationRoundStepType.toolCall;
 };
@@ -114,3 +126,19 @@ export interface Conversation {
   updatedAt: string;
   rounds: ConversationRound[];
 }
+
+export const createEmptyConversation = (): Conversation => {
+  const now = new Date().toISOString();
+  return {
+    id: 'new',
+    agentId: toSerializedAgentIdentifier({
+      agentId: oneChatDefaultAgentId,
+      providerId: oneChatAgentProviderIds.default,
+    }),
+    user: { id: '', username: '' },
+    title: '',
+    createdAt: now,
+    updatedAt: now,
+    rounds: [],
+  };
+};
