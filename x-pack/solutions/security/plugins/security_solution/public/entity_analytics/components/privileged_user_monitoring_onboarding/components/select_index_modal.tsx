@@ -60,7 +60,6 @@ export const IndexSelectorModal = ({
   const [selectedOptions, setSelected] = useState<Array<EuiComboBoxOptionOption<string>>>(
     editDataSource?.indexPattern?.split(',').map((index) => ({ label: index })) ?? []
   );
-  const editMode = !!editDataSource; // If monitoredIndices is provided, we are in edit mode
 
   const [isCreateIndexModalOpen, { on: showCreateIndexModal, off: hideCreateIndexModal }] =
     useBoolean(false);
@@ -86,7 +85,7 @@ export const IndexSelectorModal = ({
 
   const addPrivilegedUsers = useCallback(async () => {
     if (selectedOptions.length > 0) {
-      if (editMode) {
+      if (editDataSource?.id) {
         await updatePrivMonMonitoredIndices(
           editDataSource.id,
           selectedOptions.map(({ label }) => label).join(',')
@@ -99,7 +98,6 @@ export const IndexSelectorModal = ({
     }
   }, [
     editDataSource?.id,
-    editMode,
     onImport,
     registerPrivMonMonitoredIndices,
     selectedOptions,

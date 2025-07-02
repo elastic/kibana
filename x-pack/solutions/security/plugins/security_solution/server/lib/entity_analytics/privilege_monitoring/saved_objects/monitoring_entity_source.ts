@@ -43,7 +43,6 @@ export class MonitoringEntitySourceDescriptorClient {
         );
       return updated;
     } catch (e) {
-      //
       if (e.output?.statusCode !== 404) throw e;
 
       // Does not exist, create it.
