@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiBadgeGroup, EuiBasicTable, EuiBasicTableColumn, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBadgeGroup,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiHorizontalRule,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ToolDescriptor } from '@kbn/onechat-common';
 import React from 'react';
-import { useOnechatTools } from '../../hooks/use_tools';
-
-const parseToolDescription = (description: string): string => {
-  // Truncate at newline
-  const [truncatedDescription] = description.split('\n');
-  return truncatedDescription;
-};
+import { useOnechatEsqlTools } from '../../hooks/use_tools';
+import { truncateAtNewline } from '../../utils/truncate_at_newline';
 
 const columns: Array<EuiBasicTableColumn<ToolDescriptor>> = [
   {
@@ -36,7 +40,7 @@ const columns: Array<EuiBasicTableColumn<ToolDescriptor>> = [
     width: '60%',
     valign: 'top',
     render: (description: string) => {
-      return <EuiText size="s">{parseToolDescription(description)}</EuiText>;
+      return <EuiText size="s">{truncateAtNewline(description)}</EuiText>;
     },
   },
   {
@@ -60,8 +64,8 @@ const columns: Array<EuiBasicTableColumn<ToolDescriptor>> = [
   },
 ];
 
-export const OnechatToolsTable: React.FC = () => {
-  const { tools, isLoading, error } = useOnechatTools();
+export const OnechatEsqlTools: React.FC = () => {
+  const { tools, isLoading, error } = useOnechatEsqlTools();
   const errorMessage = error
     ? i18n.translate('xpack.onechat.tools.listToolsErrorMessage', {
         defaultMessage: 'Failed to fetch tools',
@@ -69,15 +73,33 @@ export const OnechatToolsTable: React.FC = () => {
     : undefined;
 
   return (
-    <EuiBasicTable
-      loading={isLoading}
-      columns={columns}
-      items={tools}
-      itemId="id"
-      noItemsMessage={i18n.translate('xpack.onechat.tools.noToolsMessage', {
-        defaultMessage: 'No tools found',
-      })}
-      error={errorMessage}
-    />
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiTitle size="s">
+        <h2>
+          {i18n.translate('xpack.onechat.tools.esqlToolsTitle', { defaultMessage: 'ES|QL Tools' })}
+        </h2>
+      </EuiTitle>
+      <EuiText component="p" size="s">
+        {i18n.translate('xpack.onechat.tools.esqlToolsDescription', {
+          defaultMessage: 'Define your own custom tools using ES|QL queries.',
+        })}
+      </EuiText>
+      <EuiHorizontalRule margin="xs" />
+      {tools.length > 0 ? (
+        <EuiBasicTable
+          loading={isLoading}
+          columns={columns}
+          items={tools}
+          itemId="id"
+          error={errorMessage}
+        />
+      ) : (
+        <EuiText component="p" size="s" textAlign="center" color="subdued">
+          {i18n.translate('xpack.onechat.tools.noEsqlToolsMessage', {
+            defaultMessage: "It looks like you don't have any ES|QL tools defined yet.",
+          })}
+        </EuiText>
+      )}
+    </EuiFlexGroup>
   );
 };
