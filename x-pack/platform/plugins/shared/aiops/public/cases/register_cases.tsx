@@ -21,13 +21,10 @@ import {
 import type { AiopsPluginStartDeps } from '../types';
 
 export function registerCases(
+  cases: CasesPublicSetup,
   coreStart: CoreStart,
-  pluginStart: AiopsPluginStartDeps,
-  cases?: CasesPublicSetup
+  pluginStart: AiopsPluginStartDeps
 ) {
-  if (!cases) {
-    return;
-  }
   const ChangePointDetectionComponent = getChangePointDetectionComponent(coreStart, pluginStart);
 
   cases.attachmentFramework.registerPersistableState({
