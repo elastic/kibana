@@ -170,28 +170,28 @@ export const RULE_NEW_VERSION_DETECTED_WARNING_DESCRIPTION = (ruleName: string) 
   );
 
 export const CURRENT_RULE_VERSION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.upgradeFlyout.currentVersionLabel',
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.currentVersionLabel',
   {
     defaultMessage: 'Current rule',
   }
 );
 
 export const CURRENT_VERSION_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.upgradeFlyout.currentVersionDescriptionLabel',
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.currentVersionDescriptionLabel',
   {
     defaultMessage: 'Shows currently installed rule',
   }
 );
 
 export const ELASTIC_UPDATE_VERSION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.upgradeFlyout.elasticUpdateVersionLabel',
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.elasticUpdateVersionLabel',
   {
     defaultMessage: 'Elastic update',
   }
 );
 
 export const UPDATED_VERSION_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.upgradeFlyout.updatedVersionDescriptionLabel',
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.updatedVersionDescriptionLabel',
   {
     defaultMessage: 'Shows rule that will be installed',
   }
