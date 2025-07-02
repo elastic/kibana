@@ -7,34 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({
-  getService,
-  getPageObjects,
-  updateBaselines,
-}: FtrProviderContext & { updateBaselines: boolean }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const { dashboard } = getPageObjects(['dashboard']);
   const browser = getService('browser');
   const globalNav = getService('globalNav');
-  const screenshot = getService('screenshots');
-  const log = getService('log');
 
   describe('embed mode', () => {
-    /*
-     * Note: The baseline images used in all of the screenshot tests in this test suite were taken directly from the CI environment
-     * in order to overcome a known issue with the pixel density of fonts being significantly different when running locally versus
-     * when running these tests as part of CI.
-     *
-     * This was done so that the screenshot tests can pass during CI; however, as a consequence, they may fail locally. Be careful
-     * when running this test suite with the --updateBaselines flag.
-     */
-
     const urlParamExtensions = [
       'show-top-menu=true',
       'show-query-input=true',
