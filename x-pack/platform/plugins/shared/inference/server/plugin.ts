@@ -26,6 +26,7 @@ import {
   InferenceStartDependencies,
 } from './types';
 import { uiSettings } from '../common/ui_settings';
+import { initRegexWorker, destroyRegexWorker } from './chat_complete/anonymization/regex_worker';
 
 export class InferencePlugin
   implements
@@ -61,6 +62,7 @@ export class InferencePlugin
   }
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
+    initRegexWorker();
     const createAnonymizationRulesPromise = (request: KibanaRequest) => {
       return (async () => {
         if (request) {
@@ -102,6 +104,7 @@ export class InferencePlugin
   }
 
   async stop() {
+    await destroyRegexWorker();
     await this.shutdownProcessor?.();
   }
 }

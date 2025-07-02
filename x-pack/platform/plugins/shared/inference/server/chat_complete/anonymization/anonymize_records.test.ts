@@ -8,6 +8,7 @@
 import { anonymizeRecords } from './anonymize_records';
 import { AnonymizationRule } from '@kbn/inference-common';
 import { MlInferenceResponseResult } from '@elastic/elasticsearch/lib/api/types';
+import { initRegexWorker } from './regex_worker';
 
 const mockEsClient = {
   ml: {
@@ -41,6 +42,7 @@ describe('anonymizeRecords', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    initRegexWorker();
   });
 
   it('masks values using regex rule', async () => {

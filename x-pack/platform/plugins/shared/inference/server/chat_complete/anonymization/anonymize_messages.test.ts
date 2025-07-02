@@ -16,6 +16,7 @@ import {
 } from '@kbn/inference-common';
 import { messageToAnonymizationRecords } from './message_to_anonymization_records';
 import { getEntityMask } from './get_entity_mask';
+import { initRegexWorker } from './regex_worker';
 
 const mockEsClient = {
   ml: {
@@ -26,6 +27,7 @@ const mockEsClient = {
 describe('anonymizeMessages', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    initRegexWorker();
   });
 
   const setupMockResponse = (entities: MlInferenceResponseResult[]) => {

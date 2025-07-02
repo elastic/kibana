@@ -25,6 +25,10 @@ export interface RegexAnonymizationRule extends AnonymizationRuleBase {
 
 export type AnonymizationRule = NamedEntityRecognitionRule | RegexAnonymizationRule;
 
+export interface RegexAnonymizationTask {
+  rule: RegexAnonymizationRule;
+  records: Array<Record<string, string>>;
+}
 enum RuleMaskType {
   hash = 'hash',
 }
