@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import {
   syntheticsMonitorSavedObjectType,
@@ -16,17 +15,16 @@ import {
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
+import { SupertestWithRoleScopeType } from '../../../services';
 
 const runTests = (
   { getService }: DeploymentAgnosticFtrProviderContext,
   { usePrivateLocations }: { usePrivateLocations: boolean }
 ) => {
-  const supertest = getService('supertestWithoutAuth');
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestEditorWithApiKey: SupertestWithRoleScopeType;
   const kibanaServer = getService('kibanaServer');
-  const samlAuth = getService('samlAuth');
   const privateLocationService = new PrivateLocationTestService(getService);
-
-  let editorUser: RoleCredentials;
 
   const saveMonitor = async (monitor: any, type: string, spaceId?: string) => {
     let url = SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + `?internal=true&savedObjectType=${type}`;
@@ -34,11 +32,7 @@ const runTests = (
       url = `/s/${spaceId}${url}`;
       monitor.spaces = [spaceId];
     }
-    const res = await supertest
-      .post(url)
-      .set(editorUser.apiKeyHeader)
-      .set(samlAuth.getInternalRequestHeader())
-      .send(monitor);
+    const res = await supertestEditorWithApiKey.post(url).send(monitor);
     expect(res.status).eql(200, JSON.stringify(res.body));
     return res.body;
   };
@@ -48,11 +42,7 @@ const runTests = (
     if (spaceId) {
       url = `/s/${spaceId}${url}`;
     }
-    const res = await supertest
-      .put(url)
-      .set(editorUser.apiKeyHeader)
-      .set(samlAuth.getInternalRequestHeader())
-      .send(monitor);
+    const res = await supertestEditorWithApiKey.put(url).send(monitor);
     expect(res.status).eql(200, JSON.stringify(res.body));
     return res.body;
   };
@@ -62,11 +52,7 @@ const runTests = (
     if (spaceId) {
       url = `/s/${spaceId}${url}`;
     }
-    const res = await supertest
-      .delete(url)
-      .set(editorUser.apiKeyHeader)
-      .set(samlAuth.getInternalRequestHeader())
-      .send();
+    const res = await supertestEditorWithApiKey.delete(url).send();
     expect(res.status).eql(200, JSON.stringify(res.body));
     return res.body;
   };
@@ -81,9 +67,17 @@ const runTests = (
   let delMulti: any;
   let privateLocation: any;
 
+  const applyLocation = (data: any, customPrivateLocation?: any) => {
+    if (!customPrivateLocation) return data;
+    const { locations, ...rest } = data as any;
+    return { ...rest, private_locations: [customPrivateLocation.id] };
+  };
+
   before(async () => {
     await kibanaServer.savedObjects.cleanStandardList();
-    editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+    supertestEditorWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
+      withInternalHeaders: true,
+    });
     privateLocation = usePrivateLocations
       ? await privateLocationService.addTestPrivateLocation()
       : undefined;
@@ -92,17 +86,17 @@ const runTests = (
   const spacesToDeleteIds: string[] = [];
 
   after(async () => {
+    await supertestEditorWithApiKey.destroy();
     await kibanaServer.savedObjects.cleanStandardList();
     await Promise.all(spacesToDeleteIds.map((id) => kibanaServer.spaces.delete(id)));
   });
 
   beforeEach(() => {
     uuid = uuidv4();
-    httpMonitor = getFixtureJson('http_monitor');
-    if (usePrivateLocations) {
-      delete httpMonitor.locations;
-      httpMonitor.private_locations = [privateLocation.id];
-    }
+    httpMonitor = applyLocation(
+      getFixtureJson('http_monitor'),
+      usePrivateLocations ? privateLocation : undefined
+    );
   });
 
   describe('Legacy and Multi-space monitor CRUD', () => {
@@ -347,10 +341,8 @@ const runTests = (
     });
 
     it('should filter all monitors (showFromAllSpaces)', async () => {
-      const res = await supertest
+      const res = await supertestEditorWithApiKey
         .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '?showFromAllSpaces=true&perPage=1000')
-        .set(editorUser.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
         .expect(200);
       const found = res.body.monitors.filter((m: any) =>
         [monitorDefault.id, monitorSpace.id, legacyMonitorSpace.id].includes(m.id)
@@ -400,13 +392,10 @@ const runTests = (
 
     it('should find both legacy and multi-space monitors by name', async () => {
       const searchName = `search-${searchUuid}`;
-      const res = await supertest
-        .get(
-          SYNTHETICS_API_URLS.SYNTHETICS_MONITORS +
-            `?query=${encodeURIComponent(searchName)}&perPage=1000`
-        )
-        .set(editorUser.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader());
+      const res = await supertestEditorWithApiKey.get(
+        SYNTHETICS_API_URLS.SYNTHETICS_MONITORS +
+          `?query=${encodeURIComponent(searchName)}&perPage=1000`
+      );
 
       expect(res.status).eql(200, JSON.stringify(res.body));
 
@@ -427,21 +416,18 @@ const runTests = (
       const INVALID_SPACE = `invalid-space-${uuidv4()}`;
       await kibanaServer.spaces.create({ id: INVALID_SPACE, name: `Invalid Space` });
       spacesToDeleteIds.push(INVALID_SPACE);
-      const monitorData = {
-        ...getFixtureJson('http_monitor'),
-        name: `invalid-create-${uuidv4()}`,
-        spaces: ['default'],
-      };
-      if (usePrivateLocations) {
-        delete monitorData.locations;
-        monitorData.private_locations = [
-          (await privateLocationService.addTestPrivateLocation(INVALID_SPACE)).id,
-        ];
-      }
-      const resp = await supertest
+      const monitorData = applyLocation(
+        {
+          ...getFixtureJson('http_monitor'),
+          name: `invalid-create-${uuidv4()}`,
+          spaces: ['default'],
+        },
+        usePrivateLocations
+          ? await privateLocationService.addTestPrivateLocation(INVALID_SPACE)
+          : undefined
+      );
+      const resp = await supertestEditorWithApiKey
         .post(`/s/${INVALID_SPACE}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?internal=true`)
-        .set(editorUser.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
         .send(monitorData);
 
       expect(resp.status).to.be(400);
@@ -454,33 +440,28 @@ const runTests = (
       const EDIT_SPACE = `edit-space-${uuidv4()}`;
       await kibanaServer.spaces.create({ id: EDIT_SPACE, name: `Edit Space` });
       spacesToDeleteIds.push(EDIT_SPACE);
-      const monitorData = {
-        ...getFixtureJson('http_monitor'),
-        name: `edit-invalid-${uuidv4()}`,
-        spaces: [EDIT_SPACE],
-      };
-      if (usePrivateLocations) {
-        delete monitorData.locations;
-        monitorData.private_locations = [
-          (await privateLocationService.addTestPrivateLocation(EDIT_SPACE)).id,
-        ];
-      }
+      const monitorData = applyLocation(
+        {
+          ...getFixtureJson('http_monitor'),
+          name: `edit-invalid-${uuidv4()}`,
+          spaces: [EDIT_SPACE],
+        },
+        usePrivateLocations
+          ? await privateLocationService.addTestPrivateLocation(EDIT_SPACE)
+          : undefined
+      );
       // Create monitor in EDIT_SPACE
-      const res = await supertest
+      const res = await supertestEditorWithApiKey
         .post(
           `/s/${EDIT_SPACE}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?internal=true&savedObjectType=${syntheticsMonitorSavedObjectType}`
         )
-        .set(editorUser.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
         .send(monitorData);
       expect(res.status).eql(200, JSON.stringify(res.body));
       // Try to edit monitor with spaces not including EDIT_SPACE
-      const resp = await supertest
+      const resp = await supertestEditorWithApiKey
         .put(
           `/s/${EDIT_SPACE}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${res.body.id}?internal=true`
         )
-        .set(editorUser.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
         .send({ name: `edit-invalid-${uuidv4()}`, spaces: ['default'] });
 
       expect(resp.status).to.be(400);
