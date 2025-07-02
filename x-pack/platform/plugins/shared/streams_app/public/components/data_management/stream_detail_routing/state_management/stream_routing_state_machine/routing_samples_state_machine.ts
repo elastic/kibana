@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { setup, assign, ActorRefFrom, fromObservable, MachineImplementationsFrom } from 'xstate5';
+import {
+  setup,
+  assign,
+  ActorRefFrom,
+  fromObservable,
+  fromEventObservable,
+  MachineImplementationsFrom,
+  SnapshotFrom,
+} from 'xstate5';
 import { Observable, filter, map, switchMap, timeout, catchError, throwError } from 'rxjs';
 import { isEmpty } from 'lodash';
 import { MappingRuntimeField, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
@@ -21,20 +29,18 @@ import {
 } from '@kbn/streams-schema';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
+import { TimeState } from '@kbn/es-query';
+import { BehaviorSubject } from 'rxjs';
 import { emptyEqualsToAlways } from '../../../../../util/condition';
 
 // Types
 export interface RoutingSamplesInput {
   condition?: Condition;
-  start: number;
-  end: number;
   definition: Streams.WiredStream.GetResponse;
 }
 
 export interface RoutingSamplesContext {
   condition?: Condition;
-  start: number;
-  end: number;
   definition: Streams.WiredStream.GetResponse;
   documents: SampleDocument[];
   documentsError?: Error;
@@ -48,6 +54,7 @@ export type RoutingSamplesEvent =
   | { type: 'routingSamples.updateCondition'; condition?: Condition };
 
 export type RoutingSamplesActorRef = ActorRefFrom<typeof routingSamplesMachine>;
+export type RoutingSamplesActorSnapshot = SnapshotFrom<typeof routingSamplesMachine>;
 
 // Shared interfaces
 interface SearchParams {
@@ -59,7 +66,8 @@ interface SearchParams {
 
 interface CollectorParams {
   data: DataPublicPluginStart;
-  searchParams: SearchParams;
+  timeStateSubject$: BehaviorSubject<TimeState>;
+  searchParams: Pick<SearchParams, 'condition' | 'definition'>;
 }
 
 // Helper functions
@@ -76,6 +84,7 @@ export const routingSamplesMachine = setup({
   actors: {
     collectDocuments: getPlaceholderFor(createDocumentsCollectorActor),
     collectDocumentsCount: getPlaceholderFor(createDocumentsCountCollectorActor),
+    subscribeTimeUpdates: getPlaceholderFor(createTimeUpdatesActor),
   },
   actions: {
     updateCondition: assign((_, params: { condition?: Condition }) => ({
@@ -98,30 +107,42 @@ export const routingSamplesMachine = setup({
       approximateMatchingPercentageError: params.error,
     })),
   },
+  delays: {
+    conditionUpdateDebounceTime: 500,
+  },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5QCcD2BXALgSwHZQGUBDAWwAcAbOAYjSz0NMrgDpkwAzd2ACwG0ADAF1EoMqljYcqXKJAAPRAGYAHCpYBGAGwAWNQFYl+gJwB2U1oBMAGhABPRPsvrTK-To0rVAlZdUBff1s6HHxicipYWgxQxgjWdDIIIkwwAHkyaVxYQREkEHFJLLlFBFVjFi1jYwFjJS0VHQEteq1bBwRLLVMWYxVTY08dGt9GrUDgmIZw5lgWDjBMAGMeBhYIVCX0EjBcTDmKVCIIBmoN3DAWPAA3VABrS6XUCiolzAARTe3d-dy5Qqk2BkJUQGg0lgELHqSghWg0wwESmM7UQEPUjR0+hMzVM+nMSgmIBC0yYkXmixWaw2Wx2ewORxO+GoYGQaGQLEoKQ4qGQJBYTxeYDenxpPxywn+EkBwPypTBEKhLVh8JqSJRZScLAG5g0Sg0WP0Aks+sJxLCpNYC2Wq3w6y+tP2LBZbOi9HN8Tm7EwyDsf3yAOKstB4J0LER+nBlj0pma+ja9lRcahOkxuOGDQE7lNU3ds3J1qp9p+AGEMHSWIdjqdzpcbvdHs9Xh8i3TS+g9n6xFLA6A5frISnBpZqhYNAJweqseoBDOVFpaoaVBoLNm3XE81bKbbqd89m3y5XGVBmayeRyKFyeXyBU2Rbv9vvMJ2Ct2gbIgwgwYaWIPwSO4eONgJggWhJjOtS6OYKaGqYq6xDMZKbjaUB2qKe5lo6zo8q68EWp6iw+s+AZviCn4aIMLDGjocLDpiNROOq876Cwho+PiKgzqmgRBCAuCoBAcByGa66RJKRQkR+ShNJougGEYZgWEBHQALRYr0mYwlY1FGDGOhwSSHr5luUBidK769oguhKD+wyePCsJzko6p6ixxjUU0ljDq4qhxvpuaIRSyGofe8D+q+MoWSBFG-kuOgOS06pghUtTUTimbGFGuJ+SJlqBYWaGOoeDCmT2CiIKYSI2YMsXxU5wGwr0VT6I0-ZRhl4w8cJCG5QW24to6sDoEsSxwKFXbiRFZWflJkKgZ5zUzuYnnxh0DUmKmeq+LGWgdZMa7dXMSH5SFTqnsgJUSZFurSXNlgLQIS1dOqzg9DUKYceROhKAM2UHUZQU7g6j5jS+E3mVNVQaFVdlxc0jnqtR6h3Q9oHGFYViZr9eH-cdQMYfSVb4Bdk2lBVFQxfZcMJcBcI9POd0QqorjNFjhlHX1BXAywg3DaNxPg3KTQ9F45GqO5pieaYk5qbiPiWLioEWHirMbnlHP3lzWHnWFYOkfCD0sCLdRjDoEvy4xEtQm5+oee9tTcf4QA */
   id: 'routingSamples',
   context: ({ input }) => ({
     condition: input.condition,
-    start: input.start,
-    end: input.end,
     definition: input.definition,
     approximateMatchingPercentage: undefined,
     documents: [],
     documentsError: undefined,
     approximateMatchingPercentageError: undefined,
   }),
+  initial: 'fetching',
+  invoke: {
+    id: 'subscribeTimeUpdatesActor',
+    src: 'subscribeTimeUpdates',
+  },
   on: {
     'routingSamples.refresh': {
       target: '.fetching',
+      reenter: true,
     },
     'routingSamples.updateCondition': {
-      target: '.fetching',
+      target: '.debouncingCondition',
+      reenter: true,
       actions: [{ type: 'updateCondition', params: ({ event }) => event }],
     },
   },
-  initial: 'fetching',
   states: {
+    debouncingCondition: {
+      after: {
+        conditionUpdateDebounceTime: 'fetching',
+      },
+    },
     fetching: {
       type: 'parallel',
       states: {
@@ -134,8 +155,6 @@ export const routingSamplesMachine = setup({
                 src: 'collectDocuments',
                 input: ({ context }) => ({
                   condition: context.condition,
-                  start: context.start,
-                  end: context.end,
                   definition: context.definition,
                 }),
                 onSnapshot: {
@@ -182,8 +201,6 @@ export const routingSamplesMachine = setup({
                 src: 'collectDocumentsCount',
                 input: ({ context }) => ({
                   condition: context.condition,
-                  start: context.start,
-                  end: context.end,
                   definition: context.definition,
                 }),
                 onSnapshot: {
@@ -226,29 +243,48 @@ export const routingSamplesMachine = setup({
 
 export interface RoutingSamplesMachineDeps {
   data: DataPublicPluginStart;
+  timeStateSubject$: BehaviorSubject<TimeState>;
 }
 
 export const createRoutingSamplesMachineImplementations = ({
   data,
+  timeStateSubject$,
 }: RoutingSamplesMachineDeps): MachineImplementationsFrom<typeof routingSamplesMachine> => ({
   actors: {
-    collectDocuments: createDocumentsCollectorActor({ data }),
-    collectDocumentsCount: createDocumentsCountCollectorActor({ data }),
+    collectDocuments: createDocumentsCollectorActor({ data, timeStateSubject$ }),
+    collectDocumentsCount: createDocumentsCountCollectorActor({ data, timeStateSubject$ }),
+    subscribeTimeUpdates: createTimeUpdatesActor({ timeStateSubject$ }),
   },
 });
 
-export function createDocumentsCollectorActor({ data }: Pick<RoutingSamplesMachineDeps, 'data'>) {
-  return fromObservable<SampleDocument[], SearchParams>(({ input }) => {
-    return collectDocuments({ data, searchParams: input });
-  });
+export function createDocumentsCollectorActor({
+  data,
+  timeStateSubject$,
+}: Pick<RoutingSamplesMachineDeps, 'data' | 'timeStateSubject$'>) {
+  return fromObservable<SampleDocument[], Pick<SearchParams, 'condition' | 'definition'>>(
+    ({ input }) => {
+      return collectDocuments({ data, timeStateSubject$, searchParams: input });
+    }
+  );
 }
 
 export function createDocumentsCountCollectorActor({
   data,
-}: Pick<RoutingSamplesMachineDeps, 'data'>) {
-  return fromObservable<string | undefined, SearchParams>(({ input }) => {
-    return collectDocumentCounts({ data, searchParams: input });
-  });
+  timeStateSubject$,
+}: Pick<RoutingSamplesMachineDeps, 'data' | 'timeStateSubject$'>) {
+  return fromObservable<string | undefined, Pick<SearchParams, 'condition' | 'definition'>>(
+    ({ input }) => {
+      return collectDocumentCounts({ data, timeStateSubject$, searchParams: input });
+    }
+  );
+}
+
+function createTimeUpdatesActor({
+  timeStateSubject$,
+}: Pick<RoutingSamplesMachineDeps, 'timeStateSubject$'>) {
+  return fromEventObservable(() =>
+    timeStateSubject$.pipe(map(() => ({ type: 'routingSamples.refresh' })))
+  );
 }
 
 /**
@@ -410,16 +446,25 @@ function calculateProbability(docCount?: number): number {
 /**
  * Collects sample documents using Elasticsearch search
  */
-function collectDocuments({ data, searchParams }: CollectorParams): Observable<SampleDocument[]> {
+function collectDocuments({
+  data,
+  timeStateSubject$,
+  searchParams,
+}: CollectorParams): Observable<SampleDocument[]> {
   const abortController = new AbortController();
-  const params = buildDocumentsSearchParams(searchParams);
+  const { start, end } = timeStateSubject$.getValue();
+  const params = buildDocumentsSearchParams({ ...searchParams, start, end });
 
   return new Observable((observer) => {
     const subscription = data.search
       .search({ params }, { abortSignal: abortController.signal })
       .pipe(
         timeout(SEARCH_TIMEOUT_MS),
-        filter((result) => !isEmpty(result.rawResponse.hits?.hits)),
+        filter(
+          (result) =>
+            (isRunningResponse(result) && isEmpty(result.rawResponse.hits?.hits)) ||
+            !isEmpty(result.rawResponse.hits?.hits)
+        ),
         map(extractDocumentsFromResult),
         catchError(handleTimeoutError)
       )
@@ -437,11 +482,12 @@ function collectDocuments({ data, searchParams }: CollectorParams): Observable<S
  */
 function collectDocumentCounts({
   data,
+  timeStateSubject$,
   searchParams,
 }: CollectorParams): Observable<string | undefined> {
   const abortController = new AbortController();
-
-  const params = buildDocumentCountSearchParams(searchParams);
+  const { start, end } = timeStateSubject$.getValue();
+  const params = buildDocumentCountSearchParams({ ...searchParams, start, end });
 
   return new Observable((observer) => {
     const subscription = data.search
@@ -460,7 +506,12 @@ function collectDocumentCounts({
           return data.search
             .search(
               {
-                params: buildDocumentCountProbabilitySearchParams({ ...searchParams, docCount }),
+                params: buildDocumentCountProbabilitySearchParams({
+                  ...searchParams,
+                  start,
+                  end,
+                  docCount,
+                }),
               },
               { abortSignal: abortController.signal }
             )

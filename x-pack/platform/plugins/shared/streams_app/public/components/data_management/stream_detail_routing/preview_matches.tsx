@@ -8,7 +8,7 @@
 import { EuiText, EuiLoadingSpinner, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { AsyncSample } from '../../../hooks/queries/use_async_sample';
+import { RoutingSamplesContext } from './state_management/stream_routing_state_machine/routing_samples_state_machine';
 
 const matchText = i18n.translate('xpack.streams.streamRouting.previewMatchesText', {
   defaultMessage: 'Approximate match rate',
@@ -23,9 +23,9 @@ export const PreviewMatches = ({
   error,
   isLoading,
 }: {
-  approximateMatchingPercentage: AsyncSample['approximateMatchingPercentage'];
-  error: AsyncSample['documentCountsError'];
-  isLoading: AsyncSample['isLoadingDocumentCounts'];
+  approximateMatchingPercentage: RoutingSamplesContext['approximateMatchingPercentage'];
+  error?: RoutingSamplesContext['approximateMatchingPercentageError'];
+  isLoading: boolean;
 }) => {
   if (isLoading) {
     return (

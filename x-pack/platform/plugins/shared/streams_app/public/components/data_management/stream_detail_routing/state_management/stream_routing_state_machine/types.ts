@@ -9,12 +9,15 @@ import { CoreStart } from '@kbn/core/public';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { Streams } from '@kbn/streams-schema';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { BehaviorSubject } from 'rxjs';
+import { TimeState } from '@kbn/es-query';
 import { RoutingDefinitionWithUIAttributes } from '../../types';
 
 export interface StreamRoutingServiceDependencies {
   forkSuccessNofitier: (streamName: string) => void;
   refreshDefinition: () => void;
   streamsRepositoryClient: StreamsRepositoryClient;
+  timeStateSubject$: BehaviorSubject<TimeState>;
   core: CoreStart;
   data: DataPublicPluginStart;
 }

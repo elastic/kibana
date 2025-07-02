@@ -4,7 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MachineImplementationsFrom, assign, and, setup, sendTo, ActorRefFrom } from 'xstate5';
+import {
+  MachineImplementationsFrom,
+  assign,
+  and,
+  enqueueActions,
+  setup,
+  sendTo,
+  ActorRefFrom,
+} from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { Streams, isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
 import { ALWAYS_CONDITION } from '../../../../../util/condition';
@@ -174,7 +182,16 @@ export const streamRoutingMachine = setup({
                   actions: [{ type: 'resetRoutingChanges' }],
                 },
                 'routingRule.change': {
-                  actions: [{ type: 'patchRule', params: ({ event }) => event }],
+                  actions: enqueueActions(({ enqueue, event }) => {
+                    enqueue({ type: 'patchRule', params: { routingRule: event.routingRule } });
+
+                    if (event.routingRule.if) {
+                      enqueue.sendTo('routingSamplesMachine', {
+                        type: 'routingSamples.updateCondition',
+                        condition: event.routingRule.if,
+                      });
+                    }
+                  }),
                 },
                 'routingRule.edit': {
                   guard: 'hasManagePrivileges',
@@ -338,6 +355,7 @@ export const createStreamRoutingMachineImplementations = ({
   streamsRepositoryClient,
   core,
   data,
+  timeStateSubject$,
   forkSuccessNofitier,
 }: StreamRoutingServiceDependencies): MachineImplementationsFrom<typeof streamRoutingMachine> => ({
   actors: {
@@ -347,6 +365,7 @@ export const createStreamRoutingMachineImplementations = ({
     routingSamplesMachine: routingSamplesMachine.provide(
       createRoutingSamplesMachineImplementations({
         data,
+        timeStateSubject$,
       })
     ),
   },
