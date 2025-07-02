@@ -13,6 +13,7 @@ describe('config validation', () => {
       expect(ConfigSchema.validate({})).toMatchInlineSnapshot(`
         Object {
           "analytics": Object {},
+          "enabled": true,
           "files": Object {
             "allowedMimeTypes": Array [
               "image/aces",

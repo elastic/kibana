@@ -127,7 +127,6 @@
     "@kbn/logs-data-access-plugin",
     "@kbn/core-pricing-browser-mocks",
     "@kbn/esql",
-    "@kbn/scout",
     "@kbn/apm-synthtrace-client",
     "@kbn/scout-oblt",
   ],
