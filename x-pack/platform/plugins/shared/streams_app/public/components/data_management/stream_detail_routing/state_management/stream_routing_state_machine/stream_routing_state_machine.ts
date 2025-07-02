@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MachineImplementationsFrom, assign, and, setup, ActorRefFrom } from 'xstate5';
+import { MachineImplementationsFrom, assign, and, setup, sendTo, ActorRefFrom } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { Streams, isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
 import { ALWAYS_CONDITION } from '../../../../../util/condition';
@@ -184,6 +184,9 @@ export const streamRoutingMachine = setup({
                 'routingRule.fork': {
                   guard: 'canForkStream',
                   target: 'forking',
+                },
+                'routingSamples.refresh': {
+                  actions: [sendTo('routingSamplesMachine', { type: 'routingSamples.refresh' })],
                 },
               },
             },

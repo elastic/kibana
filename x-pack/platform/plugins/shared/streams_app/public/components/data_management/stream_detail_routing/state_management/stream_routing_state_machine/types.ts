@@ -39,4 +39,5 @@ export type StreamRoutingEvent =
   | { type: 'routingRule.fork' }
   | { type: 'routingRule.reorder'; routing: RoutingDefinitionWithUIAttributes[] }
   | { type: 'routingRule.remove' }
-  | { type: 'routingRule.save' };
+  | { type: 'routingRule.save' }
+  | { type: 'routingSamples.refresh' };

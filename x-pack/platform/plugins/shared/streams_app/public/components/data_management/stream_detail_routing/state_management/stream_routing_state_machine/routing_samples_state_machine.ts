@@ -7,6 +7,7 @@
 
 import { setup, assign, ActorRefFrom, fromObservable, MachineImplementationsFrom } from 'xstate5';
 import { Observable, filter, map, switchMap, timeout, catchError, throwError } from 'rxjs';
+import { isEmpty } from 'lodash';
 import { MappingRuntimeField, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { IEsSearchResponse } from '@kbn/search-types';
@@ -42,14 +43,12 @@ export interface RoutingSamplesContext {
 }
 
 export type RoutingSamplesEvent =
-  | { type: 'refresh' }
+  | { type: 'routingSamples.refresh' }
+  | { type: 'routingSamples.retry' }
   | {
-      type: 'updateOptions';
-      options: Partial<Pick<RoutingSamplesInput, 'condition' | 'start' | 'end'>>;
-    }
-  | { type: 'retryDocuments' }
-  | { type: 'retryDocumentCounts' }
-  | { type: 'retry' };
+      type: 'routingSamples.updateOptions';
+      options: Partial<Pick<RoutingSamplesInput, 'condition'>>;
+    };
 
 export type RoutingSamplesActorRef = ActorRefFrom<typeof routingSamplesMachine>;
 
@@ -127,7 +126,14 @@ function processCondition(condition?: Condition): Condition | undefined {
  * Validates if the search result contains hits
  */
 function isValidSearchResult(result: IEsSearchResponse): boolean {
-  return !isRunningResponse(result) && result.rawResponse.hits?.hits !== undefined;
+  return !isEmpty(result.rawResponse.hits?.hits);
+}
+
+function handleTimeoutError(error: Error) {
+  if (error.name === 'TimeoutError') {
+    return throwError(() => new Error('Document count search timed out after 10 seconds'));
+  }
+  return throwError(() => error);
 }
 
 /**
@@ -193,12 +199,7 @@ function collectDocuments({ data, searchParams }: CollectorParams): Observable<S
         timeout(SEARCH_TIMEOUT_MS),
         filter(isValidSearchResult),
         map(extractDocumentsFromResult),
-        catchError((error) => {
-          if (error.name === 'TimeoutError') {
-            return throwError(() => new Error('Document search timed out after 10 seconds'));
-          }
-          return throwError(() => error);
-        })
+        catchError(handleTimeoutError)
       )
       .subscribe(observer);
 
@@ -291,22 +292,10 @@ function collectDocumentCounts({
                 }
                 return undefined;
               }),
-              catchError((error) => {
-                if (error.name === 'TimeoutError') {
-                  return throwError(
-                    () => new Error('Document count search timed out after 10 seconds')
-                  );
-                }
-                return throwError(() => error);
-              })
+              catchError(handleTimeoutError)
             );
         }),
-        catchError((error) => {
-          if (error.name === 'TimeoutError') {
-            return throwError(() => new Error('Document count search timed out after 10 seconds'));
-          }
-          return throwError(() => error);
-        })
+        catchError(handleTimeoutError)
       )
       .subscribe(observer);
 
@@ -367,7 +356,7 @@ export const routingSamplesMachine = setup({
     hasValidTimeRange: ({ context }) => Boolean(context.start && context.end),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QCcD2BXALgSwHZQGUBDAWwAcAbOAYmTADM7YALAbQAYBdRUM1WbDlS4eIAB6IALACYANCACeiAIwBmdgDoAbKukB2VQE4ArJIAce5YbNmAvrfloseQqUo10ZCEUxgA8mRCuLAc3EggfAJBohIIMvJKCNL6GuxmxmZapjKqylpmkvaOGDj4xORUsBrYEFS0DExsXKKRgtjCMSpGGoZa5pLsuXrG7MoJUtKGGqrGhurq0mqGhuxaRSBOpa4VcNW1YNSe3r4BQSHN4a3R4bHKksap0qqSz6vDo+MIxlpaGnpmymU-0Md2WawcGxKLnK7iqNTqoRa-DaHRuKhSI3+7BWWneY0UiC01mmxmMRnSGVmqnWm2hbkqGnoYEwAGNmC5qBBhGANLBMD4ebSyvTdkzWez8IjLsjrqBbpJJH9VGZpAVSTZAWpPqoiRpkn0VjYQcpjPoaVDhTsqmK2S4NFyWegSGBcJgqhRUEQIByubgeXgAG6oADWPIdTpdboAYsy2WBkFLeDL2iI0QgzCZtKNjMMDICFapPtJcRpJMsTJqnkNzc5LbDGbGJVB7ahHc7Xe7Pd78NR42hkBpKD56KhkCQW23I7AY+L44mIsnUXLEBmHlps7ncncXtr1z0yew9JZFmkfjWtjCGTamxOI66AMIYDsaD1en3c6q4IOh2-tzCP9AOxnOMEwuJMohTToEBBNcT2sGDvmUMxPmMPI9SyUllRzSQgXPOkrQbcU7XDP8AOfV9uygXtkH7QcKGHUdxxIyMyOjRs5zAhcIKXcREBBX5VRWAwdFyPpJE+PQFQ0DJDEsSS9EWIk9HsCFcFQCA4FEIVtlhJFuNTZcEAAWi0T4jJkVJ2CsrJDGLZQ0j0dhCghbTL12eEwD0lEDN4uI5AJBBVD0KZMmkF5VgzMxRlUakXItHSr0bFwvNlXyZEVQTD0WSQsmxUyAvuUty1eAwM2USZwWKWsEtFJL8F-KcUsgtNJAU7QBh0HKcpGXpPiBKZyzmAZSpBWKqovEVrTq5tmPIrtkulfSoNNTQ+lWZ4+ly3qAtVTR9VNRZhi0RY8LrRKiPq2a3V5dAWRZOB4EW7yoMBaRNBwgZelMYtzH8xJVTMPVi1QoxTxmaRTpqqaLpm1s72uvtRyanjbnK967jy76+hVbUAW0YKdGWIFQZNSG3Oh21Lrh0inzdZGfNiVrpD1DMsruLb8sSGRAb0DCyXSSTcLi6rycIynYcnB9ac7N98Hp5a3pZoTso5z4tDQt68lkpYVhBMnJrFm8rtYqpYFu+7YEe8DnrTQF-g0KwyXUI8rMPNX1GkmZ2EmaRZksFV9YI69iOpljpY0RHkHl22rHenN2FQySfl5znEFzB2FQGU18la3IVNsIA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QCcD2BXALgSwHZQGUBDAWwAcAbOAYjSz0NMrgDpkwAzd2ACwG0ADAF1EoMqljYcqXKJAAPRAGYAHCpYBGAGwAWNQFYl+gJwB2U1oBMAGhABPRPsvrTK-To0rVAlZdUBff1s6HHxicipYWgxQxgjWdDIIIkwwAHkyaVxYQREkEHFJLLlFBFVjFi1jYwFjJS0VHQEteq1bBwRLLVMWYxVTY08dGt9GrUDgmIZw5lgWDjBMAGMeBhYIVCX0EjBcTDmKVCIIBmoN3DAWPAA3VABrS6XUCiolzAARTe3d-dy5Qqk2BkJUQGg0lgELHqSghWg0wwESmM7UQEPUjR0+hMzVM+nMSgmIBC0yYkXmixWaw2Wx2ewORxO+GoYGQaGQLEoKQ4qGQJBYTxeYDenxpPxywn+EkBwPypTBEKhLVh8JqSJRZScLAG5g0Sg0WP0Aks+sJxLCpNYC2Wq3w6y+tP2LBZbOi9HN8Tm7EwyDsf3yAOKstB4J0LER+nBlj0pma+ja9lRcahOkxuOGDQE7lNU3ds3J1qp9p+AGEMHSWIdjqdzpcbvdHs9Xh8i3TS+g9n6xFLA6A5frISnBpZqhYNAJweqseoBDOVFpaoaVBoLNm3XE81bKbbqd89m3y5XGVBmayeRyKFyeXyBU2Rbv9vvMJ2Ct2gbIgwgwYaWIPwSO4eONgJggWhJjOtS6OYKaGqYq6xDMZKbjaUB2qKe5lo6zo8q68EWp6iw+s+AZviCn4aIMLDGjocLDpiNROOq876Cwho+PiKgzqmgRBCAuCoBAcByGa66RJKRQkR+ShNJougGEYZgWEBHQALRYr0mYwlY1FGDGOhwSSHr5luUBidK769oguhKD+wyePCsJzko6p6ixxjUU0ljDq4qhxvpuaIRSyGofe8D+q+MoWSBFG-kuOgOS06pghUtTUTimbGFGuJ+SJlqBYWaGOoeDCmT2CiIKYSI2YMsXxU5wGwr0VT6I0-ZRhl4w8cJCG5QW24to6sDoEsSxwKFXbiRFZWflJkKgZ5zUzuYnnxh0DUmKmeq+LGWgdZMa7dXMSH5SFTqnsgJUSZFurSXNlgLQIS1dOqzg9DUKYceROhKAM2UHUZQU7g6j5jS+E3mVNVQaFVdlxc0jnqtR6h3Q9oHGFYViZr9eH-cdQMYfSVb4Bdk2lBVFQxfZcMJcBcI9POd0QqorjNFjhlHX1BXAywg3DaNxPg3KTQ9F45GqO5pieaYk5qbiPiWLioEWHirMbnlHP3lzWHnWFYOkfCD0sCLdRjDoEvy4xEtQm5+oee9tTcf4QA */
   id: 'routingSamples',
   context: ({ input }) => ({
     condition: input.condition,
@@ -379,23 +368,18 @@ export const routingSamplesMachine = setup({
     documentsError: undefined,
     approximateMatchingPercentageError: undefined,
   }),
-  initial: 'idle',
-  states: {
-    idle: {
-      on: {
-        refresh: {
-          target: 'fetching',
-          guard: 'hasValidTimeRange',
-        },
-        updateOptions: {
-          target: 'fetching',
-          guard: 'hasValidTimeRange',
-          actions: ['updateOptions'],
-        },
-      },
+  on: {
+    'routingSamples.refresh': {
+      target: '.fetching',
     },
+    'routingSamples.updateOptions': {
+      target: '.fetching',
+      actions: ['updateOptions'],
+    },
+  },
+  initial: 'fetching',
+  states: {
     fetching: {
-      entry: ['clearData'],
       type: 'parallel',
       states: {
         documents: {
@@ -406,24 +390,22 @@ export const routingSamplesMachine = setup({
                 id: 'collectDocuments',
                 src: 'collectDocuments',
                 input: ({ context }) => ({
-                  data: context.data,
-                  searchParams: {
-                    condition: context.condition,
-                    start: context.start,
-                    end: context.end,
-                    size: context.size,
-                    definition: context.definition,
-                  },
+                  condition: context.condition,
+                  start: context.start,
+                  end: context.end,
+                  definition: context.definition,
                 }),
                 onSnapshot: {
                   guard: ({ event }) => event.snapshot.context !== undefined,
-                  target: 'success',
                   actions: [
                     {
                       type: 'storeDocuments',
                       params: ({ event }) => ({ documents: event.snapshot.context ?? [] }),
                     },
                   ],
+                },
+                onDone: {
+                  target: 'success',
                 },
                 onError: {
                   target: 'error',
@@ -436,9 +418,8 @@ export const routingSamplesMachine = setup({
             },
             error: {
               on: {
-                retry: {
+                'routingSamples.retry': {
                   target: 'loading',
-                  actions: ['clearDocumentsError'],
                 },
               },
             },
@@ -452,23 +433,22 @@ export const routingSamplesMachine = setup({
                 id: 'collectDocumentsCount',
                 src: 'collectDocumentsCount',
                 input: ({ context }) => ({
-                  data: context.data,
-                  searchParams: {
-                    condition: context.condition,
-                    start: context.start,
-                    end: context.end,
-                    definition: context.definition,
-                  },
+                  condition: context.condition,
+                  start: context.start,
+                  end: context.end,
+                  definition: context.definition,
                 }),
                 onSnapshot: {
                   guard: ({ event }) => event.snapshot.context !== undefined,
-                  target: 'success',
                   actions: [
                     {
                       type: 'storeDocumentCounts',
                       params: ({ event }) => ({ count: event.snapshot.context ?? '' }),
                     },
                   ],
+                },
+                onDone: {
+                  target: 'success',
                 },
                 onError: {
                   target: 'error',
@@ -481,37 +461,12 @@ export const routingSamplesMachine = setup({
             },
             error: {
               on: {
-                retry: {
-                  target: 'loading',
-                  actions: ['clearDocumentCountsError'],
-                },
+                'routingSamples.retry': 'loading',
               },
             },
           },
         },
       },
-      onDone: {
-        target: 'idle',
-      },
-    },
-  },
-  on: {
-    refresh: {
-      target: '.fetching',
-      guard: 'hasValidTimeRange',
-    },
-    updateOptions: {
-      target: '.fetching',
-      guard: 'hasValidTimeRange',
-      actions: ['updateOptions'],
-    },
-    retryDocuments: {
-      target: '.fetching',
-      actions: ['clearDocumentsError'],
-    },
-    retryDocumentCounts: {
-      target: '.fetching',
-      actions: ['clearDocumentCountsError'],
     },
   },
 });
