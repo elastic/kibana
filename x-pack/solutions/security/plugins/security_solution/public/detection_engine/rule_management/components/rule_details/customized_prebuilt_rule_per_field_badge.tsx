@@ -5,48 +5,41 @@
  * 2.0.
  */
 
-import { EuiBadge, useEuiTheme } from '@elastic/eui';
+import type { EuiBadgeProps } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import React from 'react';
-import { css } from '@emotion/react';
 import * as i18n from './translations';
 import { usePrebuiltRuleBaseVersionContext } from './base_version_diff/base_version_context';
 
-interface CustomizedPrebuiltRulePerFieldBadgeProps {
-  label: string;
+type CustomizedPrebuiltRulePerFieldBadgeProps = {
   field: string;
-}
+} & EuiBadgeProps;
 
 export const CustomizedPrebuiltRulePerFieldBadge: React.FC<
   CustomizedPrebuiltRulePerFieldBadgeProps
-> = ({ field, label }) => {
-  const { euiTheme } = useEuiTheme();
+> = ({ field, css, ...props }) => {
   const {
     actions: { openBaseVersionFlyout },
     state: { doesBaseVersionExist, modifiedFields },
   } = usePrebuiltRuleBaseVersionContext();
 
   if (!doesBaseVersionExist || !modifiedFields.has(field)) {
-    return label;
+    return null;
   }
 
   return (
-    <>
-      {label}
-      <EuiBadge
-        data-test-subj="modified-prebuilt-rule-per-field-badge"
-        color="primary"
-        iconType="expand"
-        iconSide="right"
-        onClick={() => openBaseVersionFlyout({ isReverting: false })}
-        iconOnClick={() => openBaseVersionFlyout({ isReverting: false })}
-        onClickAriaLabel={i18n.MODIFIED_PREBUILT_RULE_PER_FIELD_LABEL}
-        iconOnClickAriaLabel={i18n.MODIFIED_PREBUILT_RULE_PER_FIELD_LABEL}
-        css={css`
-          margin-left: ${euiTheme.size.xs};
-        `}
-      >
-        {i18n.MODIFIED_PREBUILT_RULE_PER_FIELD_LABEL}
-      </EuiBadge>
-    </>
+    <EuiBadge
+      data-test-subj="modified-prebuilt-rule-per-field-badge"
+      color="primary"
+      iconType="expand"
+      iconSide="right"
+      onClick={() => openBaseVersionFlyout({ isReverting: false })}
+      iconOnClick={() => openBaseVersionFlyout({ isReverting: false })}
+      onClickAriaLabel={i18n.MODIFIED_PREBUILT_RULE_PER_FIELD_LABEL}
+      iconOnClickAriaLabel={i18n.MODIFIED_PREBUILT_RULE_PER_FIELD_LABEL}
+      css={css}
+    >
+      {i18n.MODIFIED_PREBUILT_RULE_PER_FIELD_LABEL}
+    </EuiBadge>
   );
 };

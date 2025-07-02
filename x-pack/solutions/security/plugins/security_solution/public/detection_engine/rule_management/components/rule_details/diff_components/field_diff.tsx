@@ -19,9 +19,11 @@ const SubFieldComponent = ({
   fieldName,
   shouldShowSeparator,
   shouldShowSubtitles,
+  displayCurrentVersionRightSide,
 }: FieldDiff & {
   shouldShowSeparator: boolean;
   shouldShowSubtitles: boolean;
+  displayCurrentVersionRightSide: boolean;
 }) => (
   <EuiFlexGroup justifyContent="spaceBetween">
     <EuiFlexGroup direction="column">
@@ -30,7 +32,11 @@ const SubFieldComponent = ({
           <h4>{fieldToDisplayNameMap[fieldName] ?? startCase(camelCase(fieldName))}</h4>
         </EuiTitle>
       ) : null}
-      <DiffView oldSource={currentVersion} newSource={targetVersion} />
+      {displayCurrentVersionRightSide ? (
+        <DiffView oldSource={targetVersion} newSource={currentVersion} />
+      ) : (
+        <DiffView oldSource={currentVersion} newSource={targetVersion} />
+      )}
       {shouldShowSeparator ? <EuiHorizontalRule margin="s" size="full" /> : null}
     </EuiFlexGroup>
   </EuiFlexGroup>
@@ -39,11 +45,13 @@ const SubFieldComponent = ({
 export interface FieldDiffComponentProps {
   ruleDiffs: FormattedFieldDiff;
   fieldsGroupName: string;
+  displayCurrentVersionRightSide?: boolean;
 }
 
 export const FieldGroupDiffComponent = ({
   ruleDiffs,
   fieldsGroupName,
+  displayCurrentVersionRightSide = false,
 }: FieldDiffComponentProps) => {
   const { fieldDiffs, shouldShowSubtitles } = ruleDiffs;
 
@@ -68,6 +76,7 @@ export const FieldGroupDiffComponent = ({
             currentVersion={currentVersion}
             targetVersion={targetVersion}
             fieldName={specificFieldName}
+            displayCurrentVersionRightSide={displayCurrentVersionRightSide}
           />
         );
       })}

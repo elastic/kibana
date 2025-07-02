@@ -38,10 +38,10 @@ export const BaseVersionDiffFlyoutSubheader = ({
   );
 
   const fieldsDiff = Object.keys(diff.fields);
-  const fieldUpdates = fieldsDiff.length > 0 && (
+  const fieldModifications = fieldsDiff.length > 0 && (
     <EuiText size="s">
       <strong>
-        {i18n.FIELD_UPDATES}
+        {i18n.FIELD_MODIFICATIONS}
         {':'}
       </strong>{' '}
       {fieldsDiff
@@ -57,7 +57,7 @@ export const BaseVersionDiffFlyoutSubheader = ({
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
       <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>{fieldUpdates}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{fieldModifications}</EuiFlexItem>
       </EuiFlexGroup>
       {isOutdated && (
         <>

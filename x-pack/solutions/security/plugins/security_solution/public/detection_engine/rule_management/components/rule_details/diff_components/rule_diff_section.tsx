@@ -14,9 +14,15 @@ interface RuleDiffSectionProps {
   title: string;
   fieldGroups: FieldsGroupDiff[];
   dataTestSubj?: string;
+  displayCurrentVersionRightSide?: boolean;
 }
 
-export const RuleDiffSection = ({ title, fieldGroups, dataTestSubj }: RuleDiffSectionProps) => (
+export const RuleDiffSection = ({
+  title,
+  fieldGroups,
+  displayCurrentVersionRightSide,
+  dataTestSubj,
+}: RuleDiffSectionProps) => (
   <>
     <EuiSpacer size="m" />
     <EuiAccordion
@@ -36,7 +42,11 @@ export const RuleDiffSection = ({ title, fieldGroups, dataTestSubj }: RuleDiffSe
         return (
           <React.Fragment key={fieldsGroupName}>
             <EuiSpacer size="m" />
-            <FieldGroupDiffComponent ruleDiffs={formattedDiffs} fieldsGroupName={fieldsGroupName} />
+            <FieldGroupDiffComponent
+              ruleDiffs={formattedDiffs}
+              fieldsGroupName={fieldsGroupName}
+              displayCurrentVersionRightSide={displayCurrentVersionRightSide}
+            />
           </React.Fragment>
         );
       })}

@@ -15,13 +15,20 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/css';
-import * as i18n from '../json_diff/translations';
 
 interface RuleDiffHeaderBarProps {
-  diffRightSideTitle?: string;
+  leftSideRuleLabel: string;
+  rightSideRuleLabel: string;
+  leftSideRuleDescription: string;
+  rightSideRuleDescription: string;
 }
 
-export const RuleDiffHeaderBar = ({ diffRightSideTitle }: RuleDiffHeaderBarProps) => {
+export const RuleDiffHeaderBar = ({
+  leftSideRuleLabel,
+  rightSideRuleLabel,
+  leftSideRuleDescription,
+  rightSideRuleDescription,
+}: RuleDiffHeaderBarProps) => {
   const { euiTheme } = useEuiTheme();
   return (
     <div
@@ -37,24 +44,19 @@ export const RuleDiffHeaderBar = ({ diffRightSideTitle }: RuleDiffHeaderBarProps
         <EuiFlexGroup alignItems="baseline" gutterSize="xs">
           <EuiIconTip
             color="subdued"
-            content={i18n.CURRENT_VERSION_DESCRIPTION}
+            content={leftSideRuleDescription}
             type="info"
             size="m"
             display="block"
           />
           <EuiTitle size="xxs">
-            <h6>{i18n.CURRENT_RULE_VERSION}</h6>
+            <h6>{leftSideRuleLabel}</h6>
           </EuiTitle>
         </EuiFlexGroup>
         <EuiFlexGroup alignItems="baseline" gutterSize="xs">
-          <EuiIconTip
-            color="subdued"
-            content={i18n.UPDATED_VERSION_DESCRIPTION}
-            type="info"
-            size="m"
-          />
+          <EuiIconTip color="subdued" content={rightSideRuleDescription} type="info" size="m" />
           <EuiTitle size="xxs">
-            <h6>{diffRightSideTitle ?? i18n.ELASTIC_UPDATE_VERSION}</h6>
+            <h6>{rightSideRuleLabel}</h6>
           </EuiTitle>
         </EuiFlexGroup>
       </EuiFlexGroup>

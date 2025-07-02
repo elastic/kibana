@@ -17,13 +17,21 @@ import * as i18n from './translations';
 interface PerFieldRuleDiffTabProps {
   ruleDiff: PartialRuleDiff;
   header?: React.ReactNode;
-  diffRightSideTitle?: string;
+  leftSideRuleLabel: string;
+  rightSideRuleLabel: string;
+  leftSideRuleDescription: string;
+  rightSideRuleDescription: string;
+  displayCurrentVersionRightSide?: boolean;
 }
 
 export const PerFieldRuleDiffTab = ({
   ruleDiff,
   header,
-  diffRightSideTitle,
+  leftSideRuleLabel,
+  rightSideRuleLabel,
+  leftSideRuleDescription,
+  rightSideRuleDescription,
+  displayCurrentVersionRightSide,
 }: PerFieldRuleDiffTabProps) => {
   const fieldsToRender = useMemo(() => {
     const fields: FieldsGroupDiff[] = [];
@@ -49,12 +57,18 @@ export const PerFieldRuleDiffTab = ({
 
   return (
     <>
-      <RuleDiffHeaderBar diffRightSideTitle={diffRightSideTitle} />
+      <RuleDiffHeaderBar
+        leftSideRuleLabel={leftSideRuleLabel}
+        rightSideRuleLabel={rightSideRuleLabel}
+        leftSideRuleDescription={leftSideRuleDescription}
+        rightSideRuleDescription={rightSideRuleDescription}
+      />
       {header}
       {aboutFields.length !== 0 && (
         <RuleDiffSection
           title={i18n.ABOUT_SECTION_LABEL}
           fieldGroups={aboutFields}
+          displayCurrentVersionRightSide={displayCurrentVersionRightSide}
           dataTestSubj="perFieldDiffAboutSection"
         />
       )}
@@ -62,6 +76,7 @@ export const PerFieldRuleDiffTab = ({
         <RuleDiffSection
           title={i18n.DEFINITION_SECTION_LABEL}
           fieldGroups={definitionFields}
+          displayCurrentVersionRightSide={displayCurrentVersionRightSide}
           dataTestSubj="perFieldDiffDefinitionSection"
         />
       )}
@@ -69,6 +84,7 @@ export const PerFieldRuleDiffTab = ({
         <RuleDiffSection
           title={i18n.SCHEDULE_SECTION_LABEL}
           fieldGroups={scheduleFields}
+          displayCurrentVersionRightSide={displayCurrentVersionRightSide}
           dataTestSubj="perFieldDiffScheduleSection"
         />
       )}
@@ -76,6 +92,7 @@ export const PerFieldRuleDiffTab = ({
         <RuleDiffSection
           title={i18n.SETUP_GUIDE_SECTION_LABEL}
           fieldGroups={setupFields}
+          displayCurrentVersionRightSide={displayCurrentVersionRightSide}
           dataTestSubj="perFieldDiffSetupSection"
         />
       )}

@@ -120,7 +120,11 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
           <PerFieldRuleDiffTab
             header={headerCallout}
             ruleDiff={diff}
-            diffRightSideTitle={i18n.BASE_VERSION_LABEL}
+            leftSideRuleLabel={i18n.BASE_VERSION_LABEL}
+            rightSideRuleLabel={i18n.CURRENT_VERSION_LABEL}
+            leftSideRuleDescription={i18n.BASE_VERSION_DESCRIPTION}
+            rightSideRuleDescription={i18n.CURRENT_VERSION_DESCRIPTION}
+            displayCurrentVersionRightSide={true}
           />
         </TabContentPadding>
       ),
@@ -136,9 +140,12 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
       content: (
         <div>
           <RuleDiffTab
-            oldRule={currentRule}
-            newRule={baseRule}
-            newRuleLabel={i18n.BASE_VERSION_LABEL}
+            oldRule={baseRule}
+            newRule={currentRule}
+            leftSideRuleLabel={i18n.BASE_VERSION_LABEL}
+            rightSideRuleLabel={i18n.CURRENT_VERSION_LABEL}
+            leftSideRuleDescription={i18n.BASE_VERSION_DESCRIPTION}
+            rightSideRuleDescription={i18n.CURRENT_VERSION_DESCRIPTION}
           />
         </div>
       ),

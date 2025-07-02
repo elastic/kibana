@@ -8,6 +8,7 @@
 import React from 'react';
 import { isPlainObject } from 'lodash';
 import type { Filter } from '@kbn/es-query';
+import { EuiFlexGroup } from '@elastic/eui';
 import type {
   DiffableAllFields,
   RuleFieldsDiff,
@@ -123,4 +124,11 @@ export const getFormattedSectionLabel = (
   field: string,
   showModifiedFields: boolean
 ) =>
-  showModifiedFields ? <CustomizedPrebuiltRulePerFieldBadge label={label} field={field} /> : label;
+  showModifiedFields ? (
+    <EuiFlexGroup gutterSize="xs" alignItems="center">
+      {label}
+      <CustomizedPrebuiltRulePerFieldBadge field={field} />
+    </EuiFlexGroup>
+  ) : (
+    label
+  );
