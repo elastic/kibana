@@ -16,7 +16,8 @@ export function initRegexWorker() {
   worker = new Piscina({
     filename: require.resolve('./regex_worker_wrapper.js'),
     workerData: { fullpath: regexWorkerFilename },
-    maxThreads: 1,
+    minThreads: 0,
+    maxThreads: 3,
   });
 }
 
