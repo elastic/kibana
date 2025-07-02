@@ -59,8 +59,8 @@ const DataStreamTableRowCells: React.FunctionComponent<TableRowProps> = ({
         flyoutProps: {
           onClose: closeFlyout,
           className: 'eui-textBreakWord',
-          'data-test-subj': 'reindexDetails',
-          'aria-labelledby': 'reindexDetailsFlyoutTitle',
+          'data-test-subj': 'reindexDataStreamDetails',
+          'aria-labelledby': 'reindexDataStreamDetailsFlyoutTitle',
         },
       });
     }

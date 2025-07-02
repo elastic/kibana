@@ -175,7 +175,12 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
         {(list, search) => (
           <>
             {search && (
-              <EuiPanel paddingSize="s" hasShadow={false} css={{ paddingBottom: 0 }}>
+              <EuiPanel
+                color="transparent"
+                paddingSize="s"
+                hasShadow={false}
+                css={{ paddingBottom: 0 }}
+              >
                 {search}
               </EuiPanel>
             )}

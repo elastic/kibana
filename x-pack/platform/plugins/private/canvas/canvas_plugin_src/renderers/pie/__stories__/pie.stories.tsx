@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { pie } from '..';
 import { Render } from '../../__stories__/render';
 
@@ -42,8 +41,12 @@ const data = [
   },
 ];
 
-storiesOf('renderers/pie', module)
-  .add('default', () => {
+export default {
+  title: 'renderers/pie',
+};
+
+export const Default = {
+  render: () => {
     const config = {
       data,
       options: pieOptions,
@@ -54,8 +57,13 @@ storiesOf('renderers/pie', module)
       },
     };
     return <Render renderer={pie} config={config} />;
-  })
-  .add('with legend', () => {
+  },
+
+  name: 'default',
+};
+
+export const WithLegend = {
+  render: () => {
     const options = {
       ...pieOptions,
       legend: { show: true },
@@ -72,4 +80,7 @@ storiesOf('renderers/pie', module)
     };
 
     return <Render renderer={pie} config={config} />;
-  });
+  },
+
+  name: 'with legend',
+};

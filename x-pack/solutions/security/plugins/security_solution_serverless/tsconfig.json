@@ -11,7 +11,9 @@
     "server/**/*.ts",
     "../../../../../typings/**/*"
   ],
-  "exclude": ["target/**/*"],
+  "exclude": [
+    "target/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",

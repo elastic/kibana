@@ -1,0 +1,12 @@
+{
+  "type": "plugin",
+  "id": "@kbn/elasticsearch-client-plugin",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "elasticsearchClientPlugin",
+    "server": true,
+    "browser": false
+  }
+}

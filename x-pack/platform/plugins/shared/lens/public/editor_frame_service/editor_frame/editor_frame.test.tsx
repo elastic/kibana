@@ -27,18 +27,20 @@ import {
   createExpressionRendererMock,
   mockStoreDeps,
   renderWithReduxStore,
+  mockDataPlugin,
 } from '../../mocks';
+import { mountWithProvider } from '../../mocks/enzyme';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
-import { mockDataPlugin, mountWithProvider } from '../../mocks';
 import { LensAppState, setState } from '../../state_management';
 import { getLensInspectorService } from '../../lens_inspector_service';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { EuiThemeProvider } from '@elastic/eui';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
@@ -143,12 +145,14 @@ describe('editor_frame', () => {
     }
   ) => {
     const { store, ...rtlRender } = renderWithReduxStore(
-      <EditorFrame
-        {...getDefaultProps()}
-        visualizationMap={visualizationMap}
-        datasourceMap={datasourceMap}
-        {...propsOverrides}
-      />,
+      <EuiThemeProvider>
+        <EditorFrame
+          {...getDefaultProps()}
+          visualizationMap={visualizationMap}
+          datasourceMap={datasourceMap}
+          {...propsOverrides}
+        />
+      </EuiThemeProvider>,
       {},
       {
         preloadedState: {
@@ -490,18 +494,23 @@ describe('editor_frame', () => {
           },
         } as EditorFrameProps;
         instance = (
-          await mountWithProvider(<EditorFrame {...props} />, {
-            preloadedState: {
-              datasourceStates: {
-                testDatasource: {
-                  isLoading: false,
-                  state: {
-                    internalState1: '',
+          await mountWithProvider(
+            <EuiThemeProvider>
+              <EditorFrame {...props} />
+            </EuiThemeProvider>,
+            {
+              preloadedState: {
+                datasourceStates: {
+                  testDatasource: {
+                    isLoading: false,
+                    state: {
+                      internalState1: '',
+                    },
                   },
                 },
               },
-            },
-          })
+            }
+          )
         ).instance;
 
         instance.update();
@@ -587,7 +596,13 @@ describe('editor_frame', () => {
           },
         } as EditorFrameProps;
 
-        instance = (await mountWithProvider(<EditorFrame {...props} />)).instance;
+        instance = (
+          await mountWithProvider(
+            <EuiThemeProvider>
+              <EditorFrame {...props} />
+            </EuiThemeProvider>
+          )
+        ).instance;
 
         instance.update();
 

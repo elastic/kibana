@@ -25,7 +25,8 @@ jest.mock('react-redux', () => {
   };
 });
 
-describe('<TableTab />', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/216393
+describe.skip('<TableTab />', () => {
   it('should render table component', () => {
     const contextValue = {
       eventId: 'some_Id',

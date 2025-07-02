@@ -35,7 +35,7 @@ export const subscribeControlGroup =
     const { discoverStateContainer } = context;
 
     const filtersSubscription = context.controlGroupAPI.filters$.subscribe((newFilters = []) => {
-      discoverStateContainer.internalState.transitions.setCustomFilters(newFilters);
+      discoverStateContainer.actions.setCustomFilters(newFilters);
       discoverStateContainer.actions.fetchData();
     });
 
@@ -70,7 +70,7 @@ const constructControlPanelsWithDataViewId = (
   stateContainer: DiscoverStateContainer,
   newControlPanels: ControlPanels
 ) => {
-  const dataView = stateContainer.internalState.getState().dataView!;
+  const dataView = stateContainer.runtimeStateManager.currentDataView$.getValue()!;
 
   const validatedControlPanels = isValidState(newControlPanels)
     ? newControlPanels

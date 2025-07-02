@@ -9,6 +9,7 @@
 
 import React from 'react';
 
+import type { Meta, StoryObj } from '@storybook/react';
 import {
   ProjectSwitcherStorybookMock,
   type ProjectSwitcherStorybookParams,
@@ -16,7 +17,6 @@ import {
 
 import { ProjectSwitcher as Component } from './switcher';
 import { ProjectSwitcherProvider as Provider } from './services';
-
 import mdx from '../README.mdx';
 
 export default {
@@ -27,17 +27,19 @@ export default {
       page: mdx,
     },
   },
-};
+} as Meta;
 
 const mock = new ProjectSwitcherStorybookMock();
 const argTypes = mock.getArgumentTypes();
 
-export const ProjectSwitcher = (params: ProjectSwitcherStorybookParams) => {
-  return (
-    <Provider {...mock.getServices(params)}>
-      <Component {...params} />
-    </Provider>
-  );
-};
+export const ProjectSwitcher: StoryObj<ProjectSwitcherStorybookParams> = {
+  render: (params) => {
+    return (
+      <Provider {...mock.getServices(params)}>
+        <Component {...params} />
+      </Provider>
+    );
+  },
 
-ProjectSwitcher.argTypes = argTypes;
+  argTypes,
+};

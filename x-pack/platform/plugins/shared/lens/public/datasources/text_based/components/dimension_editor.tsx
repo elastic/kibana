@@ -62,7 +62,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           const columns = table.columns.map((col) => {
             return {
               id: col.variable ?? col.id,
-              name: col.variable ? `?${col.variable}` : col.name,
+              name: col.variable ? `??${col.variable}` : col.name,
               meta: col?.meta ?? { type: 'number' },
               variable: col.variable,
               compatible:

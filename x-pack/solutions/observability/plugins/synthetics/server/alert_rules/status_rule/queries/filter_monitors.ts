@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { KueryNode, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { SyntheticsEsClient } from '../../../lib';
@@ -27,40 +27,53 @@ export async function queryFilterMonitors({
   if (!ruleParams.kqlQuery) {
     return;
   }
-  const filters = toElasticsearchQuery(fromKueryExpression(ruleParams.kqlQuery));
-  const { body: result } = await esClient.search({
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            FINAL_SUMMARY_FILTER,
-            getRangeFilter({ from: 'now-24h/m', to: 'now/m' }),
-            getTimeSpanFilter(),
-            {
-              term: {
-                'meta.space_id': spaceId,
+
+  let kueryNode: KueryNode;
+
+  // This is to check if the kqlQuery is valid, if it is not the fromKueryExpression will throw an error
+  try {
+    kueryNode = fromKueryExpression(ruleParams.kqlQuery);
+  } catch (error) {
+    return;
+  }
+
+  const filters = toElasticsearchQuery(kueryNode);
+  const { body: result } = await esClient.search(
+    {
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              FINAL_SUMMARY_FILTER,
+              getRangeFilter({ from: 'now-24h/m', to: 'now/m' }),
+              getTimeSpanFilter(),
+              {
+                term: {
+                  'meta.space_id': spaceId,
+                },
               },
-            },
-            {
-              bool: {
-                should: filters,
+              {
+                bool: {
+                  should: filters,
+                },
               },
-            },
-            ...getFilters(ruleParams),
-          ],
+              ...getFilters(ruleParams),
+            ],
+          },
         },
-      },
-      aggs: {
-        ids: {
-          terms: {
-            size: 10000,
-            field: 'config_id',
+        aggs: {
+          ids: {
+            terms: {
+              size: 10000,
+              field: 'config_id',
+            },
           },
         },
       },
     },
-  });
+    'queryFilterMonitors'
+  );
 
   return result.aggregations?.ids.buckets.map((bucket) => bucket.key as string);
 }

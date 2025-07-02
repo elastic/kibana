@@ -108,13 +108,13 @@ describe('useHostIsolationAction', () => {
     expect(hookProps.closePopover).toHaveBeenCalled();
   });
 
-  it('should NOT return the menu item for Events', () => {
+  it('should return the menu item for Events', () => {
     hookProps.detailsData = endpointAlertDataMock.generateAlertDetailsItemDataForAgentType('foo', {
       'kibana.alert.rule.uuid': undefined,
     });
     const { result } = render();
 
-    expect(result.current).toHaveLength(0);
+    expect(result.current).toHaveLength(1);
   });
 
   it('should NOT return menu item if user does not have authz', async () => {

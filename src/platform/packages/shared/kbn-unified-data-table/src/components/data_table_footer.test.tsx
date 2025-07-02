@@ -13,6 +13,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { UnifiedDataTableFooter } from './data_table_footer';
 import { servicesMock } from '../../__mocks__/services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { DEFAULT_PAGINATION_MODE } from '../..';
 
 describe('UnifiedDataTableFooter', function () {
   it('should not render anything when not on the last page', async () => {
@@ -26,6 +27,8 @@ describe('UnifiedDataTableFooter', function () {
           rowCount={500}
           data={servicesMock.data}
           fieldFormats={servicesMock.fieldFormats}
+          paginationMode={DEFAULT_PAGINATION_MODE}
+          hasScrolledToBottom={false}
         />
       </KibanaContextProvider>
     );
@@ -42,6 +45,8 @@ describe('UnifiedDataTableFooter', function () {
         rowCount={500}
         data={servicesMock.data}
         fieldFormats={servicesMock.fieldFormats}
+        paginationMode={DEFAULT_PAGINATION_MODE}
+        hasScrolledToBottom={false}
       />
     );
     expect(component.isEmptyRender()).toBe(true);
@@ -57,6 +62,8 @@ describe('UnifiedDataTableFooter', function () {
         rowCount={500}
         data={servicesMock.data}
         fieldFormats={servicesMock.fieldFormats}
+        paginationMode={DEFAULT_PAGINATION_MODE}
+        hasScrolledToBottom={false}
       />
     );
     expect(findTestSubject(component, 'unifiedDataTableFooter').text()).toBe(
@@ -79,6 +86,8 @@ describe('UnifiedDataTableFooter', function () {
         onFetchMoreRecords={mockLoadMore}
         data={servicesMock.data}
         fieldFormats={servicesMock.fieldFormats}
+        paginationMode={DEFAULT_PAGINATION_MODE}
+        hasScrolledToBottom={false}
       />
     );
     expect(findTestSubject(component, 'unifiedDataTableFooter').text()).toBe(
@@ -91,6 +100,50 @@ describe('UnifiedDataTableFooter', function () {
     button.simulate('click');
 
     expect(mockLoadMore).toHaveBeenCalledTimes(1);
+  });
+
+  it('should render the load more button where pagination mode is set to singlePage and user has reached the bottom of the page', () => {
+    const mockLoadMore = jest.fn();
+
+    const component = mountWithIntl(
+      <UnifiedDataTableFooter
+        pageCount={5}
+        pageIndex={4}
+        sampleSize={500}
+        totalHits={1000}
+        rowCount={500}
+        isLoadingMore={false}
+        onFetchMoreRecords={mockLoadMore}
+        data={servicesMock.data}
+        fieldFormats={servicesMock.fieldFormats}
+        paginationMode={'singlePage'}
+        hasScrolledToBottom={true}
+      />
+    );
+
+    expect(findTestSubject(component, 'dscGridSampleSizeFetchMoreLink').exists()).toBe(true);
+  });
+
+  it('should not render the load more button where pagination mode is set to singlePage and but the user has not reached the bottom of the page', () => {
+    const mockLoadMore = jest.fn();
+
+    const component = mountWithIntl(
+      <UnifiedDataTableFooter
+        pageCount={5}
+        pageIndex={4}
+        sampleSize={500}
+        totalHits={1000}
+        rowCount={500}
+        isLoadingMore={false}
+        onFetchMoreRecords={mockLoadMore}
+        data={servicesMock.data}
+        fieldFormats={servicesMock.fieldFormats}
+        paginationMode={'singlePage'}
+        hasScrolledToBottom={false}
+      />
+    );
+
+    expect(findTestSubject(component, 'dscGridSampleSizeFetchMoreLink').exists()).toBe(false);
   });
 
   it('should render a disabled button when loading more', async () => {
@@ -107,6 +160,8 @@ describe('UnifiedDataTableFooter', function () {
         onFetchMoreRecords={mockLoadMore}
         data={servicesMock.data}
         fieldFormats={servicesMock.fieldFormats}
+        paginationMode={DEFAULT_PAGINATION_MODE}
+        hasScrolledToBottom={false}
       />
     );
     expect(findTestSubject(component, 'unifiedDataTableFooter').text()).toBe(
@@ -132,6 +187,8 @@ describe('UnifiedDataTableFooter', function () {
         rowCount={10000}
         data={servicesMock.data}
         fieldFormats={servicesMock.fieldFormats}
+        paginationMode={DEFAULT_PAGINATION_MODE}
+        hasScrolledToBottom={false}
       />
     );
     expect(findTestSubject(component, 'unifiedDataTableFooter').text()).toBe(

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpSetup } from '@kbn/core-http-browser';
-import { AsApiContract } from '@kbn/actions-types';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import type { AsApiContract } from '@kbn/actions-types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../constants';
 import { transformResolvedRule } from '../../transformations';
-import { ResolvedRule } from '../../types';
+import type { ResolvedRule } from '../../types';
 
 export async function resolveRule({
   http,

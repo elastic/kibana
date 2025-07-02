@@ -14,8 +14,10 @@ describe('getVariablesHoverContent', () => {
   test('should return empty array if no variables are used in the query', async () => {
     const node = {
       type: 'source',
-      cluster: '',
-      index: 'logst*',
+      cluster: undefined,
+      index: {
+        valueUnquoted: 'logst*',
+      },
       name: 'logst*',
       sourceType: 'index',
       location: {
@@ -40,8 +42,10 @@ describe('getVariablesHoverContent', () => {
   test('should return empty array if no variables are given', () => {
     const node = {
       type: 'source',
-      cluster: '',
-      index: 'logst*',
+      cluster: undefined,
+      index: {
+        valueUnquoted: 'logst*',
+      },
       name: 'logst*',
       sourceType: 'index',
       location: {

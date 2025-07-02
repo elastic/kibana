@@ -7,6 +7,7 @@
 import { setupFleetServer } from '../tasks/fleet_server';
 import { AGENT_FLYOUT, AGENT_POLICY_DETAILS_PAGE } from '../screens/fleet';
 import { login } from '../tasks/login';
+import { visit } from '../tasks/common';
 
 describe('Edit agent policy', () => {
   beforeEach(() => {
@@ -37,7 +38,7 @@ describe('Edit agent policy', () => {
   });
 
   it('should edit agent policy', () => {
-    cy.visit('/app/fleet/policies/policy-1/settings');
+    visit('/app/fleet/policies/policy-1/settings');
     cy.get('[placeholder="Optional description"').clear().type('desc');
 
     cy.intercept('/api/fleet/agent_policies/policy-1', {
@@ -135,7 +136,7 @@ describe('Edit agent policy', () => {
       },
     });
 
-    cy.visit('/app/fleet/policies/policy-1');
+    visit('/app/fleet/policies/policy-1');
 
     cy.getBySel(AGENT_POLICY_DETAILS_PAGE.ADD_AGENT_LINK).click();
     cy.getBySel(AGENT_FLYOUT.KUBERNETES_PLATFORM_TYPE).click();

@@ -14,9 +14,11 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item_store/mock';
 import { FilterStateStore } from '@kbn/es-query';
-import { DiscoverAppLocatorDefinition } from './app_locator';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { DiscoverAppLocatorParams } from './app_locator';
+import { DISCOVER_APP_LOCATOR } from './app_locator';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
+import { appLocatorGetLocationCommon } from './app_locator_get_location';
 
 const dataViewId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
 const savedSearchId: string = '571aaf70-4c88-11e8-b3d7-01146121b73d';
@@ -26,11 +28,14 @@ interface SetupParams {
 }
 
 const setup = async ({ useHash = false }: SetupParams = {}) => {
-  const locator = new DiscoverAppLocatorDefinition({ useHash, setStateToKbnUrl });
-
-  return {
-    locator,
+  const locator = {
+    id: DISCOVER_APP_LOCATOR,
+    getLocation: (params: DiscoverAppLocatorParams) => {
+      return appLocatorGetLocationCommon({ useHash, setStateToKbnUrl }, params);
+    },
   };
+
+  return { locator };
 };
 
 beforeEach(() => {
@@ -267,7 +272,7 @@ describe('Discover url generator', () => {
     const { locator } = await setup();
     const { state } = await locator.getLocation({ dataViewSpec: dataViewSpecMock });
 
-    expect(state.dataViewSpec).toEqual(dataViewSpecMock);
+    expect((state as Record<string, unknown>).dataViewSpec).toEqual(dataViewSpecMock);
   });
 
   describe('useHash property', () => {

@@ -61,7 +61,8 @@
       "licenseManagement",
       "profilingDataAccess",
       "cases",
-      "observabilityAIAssistant"
+      "observabilityAIAssistant",
+      "share"
     ],
     "requiredBundles": [
       "fleet",

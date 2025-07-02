@@ -8,14 +8,36 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { RouteSecurity, RouteConfigOptions } from '@kbn/core-http-server';
+import type {
+  RouteSecurity,
+  RouteConfigOptions,
+  AllRequiredCondition,
+  AnyRequiredCondition,
+} from '@kbn/core-http-server';
 import { ReservedPrivilegesSet } from '@kbn/core-http-server';
+import { unwindNestedSecurityPrivileges } from '@kbn/core-security-server';
 import type { DeepPartial } from '@kbn/utility-types';
 
 const privilegeSetSchema = schema.object(
   {
-    anyRequired: schema.maybe(schema.arrayOf(schema.string(), { minSize: 2 })),
-    allRequired: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+    anyRequired: schema.maybe(
+      schema.arrayOf(
+        schema.oneOf([
+          schema.string(),
+          schema.object({ allOf: schema.arrayOf(schema.string(), { minSize: 2 }) }),
+        ]),
+        { minSize: 2 }
+      )
+    ),
+    allRequired: schema.maybe(
+      schema.arrayOf(
+        schema.oneOf([
+          schema.string(),
+          schema.object({ anyOf: schema.arrayOf(schema.string(), { minSize: 2 }) }),
+        ]),
+        { minSize: 1 }
+      )
+    ),
   },
   {
     validate: (value) => {
@@ -42,10 +64,14 @@ const requiredPrivilegesSchema = schema.arrayOf(
           allRequired.push(privilege);
         } else {
           if (privilege.anyRequired) {
-            anyRequired.push(...privilege.anyRequired);
+            anyRequired.push(
+              ...unwindNestedSecurityPrivileges<AnyRequiredCondition>(privilege.anyRequired)
+            );
           }
           if (privilege.allRequired) {
-            allRequired.push(...privilege.allRequired);
+            allRequired.push(
+              ...unwindNestedSecurityPrivileges<AllRequiredCondition>(privilege.allRequired)
+            );
           }
         }
       });

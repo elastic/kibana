@@ -191,7 +191,6 @@ describe('Fleet integrations', () => {
         requestContextFactoryMock.create(),
         endpointAppContextStartContract.alerting,
         licenseService,
-        exceptionListClient,
         cloudService,
         productFeaturesService,
         telemetryConfigProviderMock

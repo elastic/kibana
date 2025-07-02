@@ -68,6 +68,7 @@ describe('autocomplete.suggest', () => {
         expect(labels).toEqual([
           'join_index',
           'join_index_with_alias',
+          'lookup_index',
           'join_index_alias_1',
           'join_index_alias_2',
         ]);
@@ -86,7 +87,7 @@ describe('autocomplete.suggest', () => {
           .map((s) => s.label)
           .sort();
 
-        expect(indices).toEqual(['join_index', 'join_index_with_alias']);
+        expect(indices).toEqual(['join_index', 'join_index_with_alias', 'lookup_index']);
         expect(aliases).toEqual(['join_index_alias_1', 'join_index_alias_2']);
       });
     });

@@ -13,7 +13,7 @@ Object {
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiText emotion-EuiText"
+            class="euiText emotion-euiText-xs-euiBadgeFontFamily"
           >
             created_by
           </div>
@@ -23,7 +23,7 @@ Object {
           data-test-subj="MetaInfoDetailslastUpdate"
         >
           <span
-            class="euiBadge emotion-EuiInnerText"
+            class="euiBadge emotion-euiBadge-default-euiBadgeFontFamily"
             title="Last update value"
           >
             <span
@@ -43,7 +43,7 @@ Object {
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiText emotion-EuiText"
+            class="euiText emotion-euiText-xs-euiBadgeFontFamily"
           >
             by
           </div>
@@ -59,7 +59,7 @@ Object {
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <span
-                class="euiBadge emotion-EuiInnerText"
+                class="euiBadge emotion-euiBadge-hollow-euiBadgeFontFamily"
                 title="value"
               >
                 <span
@@ -87,7 +87,7 @@ Object {
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
-          class="euiText emotion-EuiText"
+          class="euiText emotion-euiText-xs-euiBadgeFontFamily"
         >
           created_by
         </div>
@@ -97,7 +97,7 @@ Object {
         data-test-subj="MetaInfoDetailslastUpdate"
       >
         <span
-          class="euiBadge emotion-EuiInnerText"
+          class="euiBadge emotion-euiBadge-default-euiBadgeFontFamily"
           title="Last update value"
         >
           <span
@@ -117,7 +117,7 @@ Object {
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
-          class="euiText emotion-EuiText"
+          class="euiText emotion-euiText-xs-euiBadgeFontFamily"
         >
           by
         </div>
@@ -133,7 +133,7 @@ Object {
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <span
-              class="euiBadge emotion-EuiInnerText"
+              class="euiBadge emotion-euiBadge-hollow-euiBadgeFontFamily"
               title="value"
             >
               <span
@@ -218,7 +218,7 @@ Object {
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiText emotion-EuiText"
+            class="euiText emotion-euiText-xs-euiBadgeFontFamily"
           >
             created_by
           </div>
@@ -228,7 +228,7 @@ Object {
           data-test-subj="MetaInfoDetailslastUpdate"
         >
           <span
-            class="euiBadge emotion-EuiInnerText"
+            class="euiBadge emotion-euiBadge-default-euiBadgeFontFamily"
             title="last update"
           >
             <span
@@ -246,7 +246,7 @@ Object {
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiText emotion-EuiText"
+            class="euiText emotion-euiText-xs-euiBadgeFontFamily"
           >
             by
           </div>
@@ -262,7 +262,7 @@ Object {
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <span
-                class="euiBadge emotion-EuiInnerText"
+                class="euiBadge emotion-euiBadge-hollow-euiBadgeFontFamily"
                 title="value"
               >
                 <span
@@ -290,7 +290,7 @@ Object {
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
-          class="euiText emotion-EuiText"
+          class="euiText emotion-euiText-xs-euiBadgeFontFamily"
         >
           created_by
         </div>
@@ -300,7 +300,7 @@ Object {
         data-test-subj="MetaInfoDetailslastUpdate"
       >
         <span
-          class="euiBadge emotion-EuiInnerText"
+          class="euiBadge emotion-euiBadge-default-euiBadgeFontFamily"
           title="last update"
         >
           <span
@@ -318,7 +318,7 @@ Object {
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
-          class="euiText emotion-EuiText"
+          class="euiText emotion-euiText-xs-euiBadgeFontFamily"
         >
           by
         </div>
@@ -334,7 +334,7 @@ Object {
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <span
-              class="euiBadge emotion-EuiInnerText"
+              class="euiBadge emotion-euiBadge-hollow-euiBadgeFontFamily"
               title="value"
             >
               <span

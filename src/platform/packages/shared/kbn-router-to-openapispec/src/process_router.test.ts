@@ -118,7 +118,7 @@ describe('processRouter', () => {
               'manage_spaces',
               {
                 allRequired: ['taskmanager'],
-                anyRequired: ['console'],
+                anyRequired: ['console', 'devtools'],
               },
             ],
           },
@@ -139,7 +139,7 @@ describe('processRouter', () => {
               'manage_spaces',
               {
                 allRequired: ['taskmanager'],
-                anyRequired: ['console'],
+                anyRequired: ['console', 'devtools'],
               },
             ],
           },
@@ -172,11 +172,11 @@ describe('processRouter', () => {
     expect(result.paths['/qux']?.post).toBeDefined();
 
     expect(result.paths['/qux']?.post?.description).toEqual(
-      '[Required authorization] Route required privileges: ALL of [manage_spaces, taskmanager] AND ANY of [console].'
+      '[Required authorization] Route required privileges: (manage_spaces AND taskmanager) AND (console OR devtools).'
     );
 
     expect(result.paths['/quux']?.post?.description).toEqual(
-      'This a test route description.<br/><br/>[Required authorization] Route required privileges: ALL of [manage_spaces, taskmanager] AND ANY of [console].'
+      'This a test route description.<br/><br/>[Required authorization] Route required privileges: (manage_spaces AND taskmanager) AND (console OR devtools).'
     );
   });
 });

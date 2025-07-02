@@ -6,6 +6,7 @@
  */
 import { useEffect, useState } from 'react';
 import { isEqual } from 'lodash';
+import { createEmptyLensState } from '../../../react_embeddable/helper';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { useLensSelector } from '../../../state_management';
 import { extractReferencesFromState } from '../../../utils';
@@ -17,20 +18,25 @@ export const useCurrentAttributes = ({
   datasourceMap,
   visualizationMap,
 }: {
-  initialAttributes: TypedLensSerializedState['attributes'];
+  initialAttributes?: TypedLensSerializedState['attributes'];
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
-  textBasedMode?: string;
+  textBasedMode?: boolean;
 }) => {
   const { datasourceStates, visualization } = useLensSelector((state) => state.lens);
-  // use the latest activeId, but fallback to attributes
-  const activeVisualization =
-    visualizationMap[visualization.activeId ?? initialAttributes.visualizationType];
 
-  const [currentAttributes, setCurrentAttributes] =
-    useState<TypedLensSerializedState['attributes']>(initialAttributes);
+  const [currentAttributes, setCurrentAttributes] = useState<
+    TypedLensSerializedState['attributes'] | undefined
+  >(initialAttributes);
+
+  // use the latest activeId, but fallback to attributes
+  const visualizationType = visualization.activeId ?? initialAttributes?.visualizationType;
+  const activeVisualization = visualizationType ? visualizationMap[visualizationType] : undefined;
 
   useEffect(() => {
+    if (!activeVisualization) {
+      return;
+    }
     const dsStates = Object.fromEntries(
       Object.entries(datasourceStates).map(([id, ds]) => {
         const dsState = ds.state;
@@ -53,15 +59,16 @@ export const useCurrentAttributes = ({
             activeVisualization,
           })
         : [];
+    const attributes = initialAttributes ?? createEmptyLensState().attributes;
     const attrs: TypedLensSerializedState['attributes'] = {
-      ...initialAttributes,
+      ...attributes,
       state: {
-        ...initialAttributes.state,
+        ...attributes.state,
         visualization: visualization.state,
         datasourceStates: dsStates,
       },
       references,
-      visualizationType: visualization.activeId ?? initialAttributes.visualizationType,
+      visualizationType: activeVisualization.id,
     };
     if (!isEqual(attrs, currentAttributes)) {
       setCurrentAttributes(attrs);

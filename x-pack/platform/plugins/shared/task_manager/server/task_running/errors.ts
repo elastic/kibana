@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { TaskErrorSource } from '../../common';
-import { EphemeralTask } from '../task';
+import type { EphemeralTask } from '../task';
 
 export { TaskErrorSource };
 

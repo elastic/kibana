@@ -20,7 +20,7 @@ export const ViewDocument = ({ ping }: { ping: Ping }) => {
 
   const dataView = useSyntheticsDataView();
   const formatter = useDateFormat();
-  const formattedTimestamp = formatter(ping.timestamp);
+  const formattedTimestamp = formatter(ping['@timestamp']);
 
   const [, hit] = useEsDocSearch({ id: ping.docId, index: SYNTHETICS_INDEX_PATTERN, dataView });
 

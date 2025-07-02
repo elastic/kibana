@@ -9,7 +9,7 @@ import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiTitle, useEuiTheme } from '
 import { css } from '@emotion/react';
 import React from 'react';
 
-import * as i18n from './translations';
+import * as i18n from '../translations';
 
 export const PageTitle: React.FC = React.memo(() => {
   const { euiTheme } = useEuiTheme();

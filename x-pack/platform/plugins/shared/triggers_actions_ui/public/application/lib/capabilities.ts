@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { SubFeature } from '@kbn/actions-plugin/common';
-import { RuleType } from '../../types';
-import { InitialRule } from '../sections/rule_form/rule_reducer';
+import type { SubFeature } from '@kbn/actions-plugin/common';
+import type { RuleType, Rule } from '../../types';
 
 /**
  * NOTE: Applications that want to show the alerting UIs will need to add
@@ -25,25 +24,18 @@ export const hasExecuteActionsCapability = (capabilities: Capabilities, subFeatu
 export const hasDeleteActionsCapability = (capabilities: Capabilities) =>
   capabilities?.actions?.delete;
 
-export function hasAllPrivilege(
-  ruleConsumer: InitialRule['consumer'],
-  ruleType?: RuleType
-): boolean {
+export function hasAllPrivilege(ruleConsumer: Rule['consumer'], ruleType?: RuleType): boolean {
   return ruleType?.authorizedConsumers[ruleConsumer]?.all ?? false;
 }
 
 export function hasAllPrivilegeWithProducerCheck(
-  ruleConsumer: InitialRule['consumer'],
+  ruleConsumer: Rule['consumer'],
   ruleType?: RuleType
 ): boolean {
   if (ruleConsumer === ruleType?.producer) {
     return true;
   }
   return hasAllPrivilege(ruleConsumer, ruleType);
-}
-
-export function hasReadPrivilege(rule: InitialRule, ruleType?: RuleType): boolean {
-  return ruleType?.authorizedConsumers[rule.consumer]?.read ?? false;
 }
 
 export const hasManageApiKeysCapability = (capabilities: Capabilities) =>

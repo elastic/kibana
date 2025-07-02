@@ -49,11 +49,8 @@ import type {
   ScheduleStepRuleJson,
   AboutStepRuleJson,
   ActionsStepRuleJson,
-} from '../../../../detections/pages/detection_engine/rules/types';
-import {
-  DataSourceType,
-  AlertSuppressionDurationType,
-} from '../../../../detections/pages/detection_engine/rules/types';
+} from '../../../common/types';
+import { DataSourceType, AlertSuppressionDurationType } from '../../../common/types';
 import type {
   RuleCreateProps,
   AlertSuppression,

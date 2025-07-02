@@ -58,7 +58,12 @@ export const EngineDescriptor = z.object({
     .optional()
     .default('1m'),
   docsPerSecond: z.number().int().optional(),
-  error: z.object({}).optional(),
+  error: z
+    .object({
+      message: z.string(),
+      action: z.literal('init'),
+    })
+    .optional(),
 });
 
 export type EngineComponentResource = z.infer<typeof EngineComponentResource>;
@@ -104,7 +109,7 @@ export const InspectQuery = z.object({
 });
 
 /**
- * Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour.
+ * Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour. Must be less than or equal to half the duration of the lookback period,
  */
 export type Interval = z.infer<typeof Interval>;
 export const Interval = z.string().regex(/^[1-9]\d*[smh]$/);

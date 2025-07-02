@@ -25,11 +25,13 @@ import {
   useGroupedFields,
 } from '@kbn/unified-field-list';
 import { OverrideFieldGroupDetails } from '@kbn/unified-field-list/src/types';
+import { useEuiTheme } from '@elastic/eui';
 import type { DatasourceDataPanelProps } from '../../../types';
 import type { TextBasedPrivateState } from '../types';
 import { getStateFromAggregateQuery } from '../utils';
 import { FieldItem } from '../../common/field_item';
 import { getColumnsFromCache } from '../fieldlist_cache';
+import { dataPanelStyles } from '../../common/datapanel.styles';
 
 const getCustomFieldType: GetCustomFieldType<DatatableColumn> = (field) => field?.meta.type;
 
@@ -129,7 +131,7 @@ export function TextBasedDataPanel({
     },
     [hasSuggestionForField, dropOntoWorkspace]
   );
-
+  const euiThemeContext = useEuiTheme();
   return (
     <KibanaContextProvider
       services={{
@@ -137,7 +139,7 @@ export function TextBasedDataPanel({
       }}
     >
       <FieldList
-        className="lnsInnerIndexPatternDataPanel"
+        css={dataPanelStyles(euiThemeContext)}
         isProcessing={!dataHasLoaded}
         prepend={
           <FieldListFilters {...fieldListFiltersProps} data-test-subj="lnsTextBasedLanguages" />

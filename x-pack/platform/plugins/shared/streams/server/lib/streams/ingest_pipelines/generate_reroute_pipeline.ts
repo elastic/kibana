@@ -26,7 +26,7 @@ export function generateReroutePipeline({ definition }: GenerateReroutePipelineP
       };
     }),
     _meta: {
-      description: `Reoute pipeline for the ${definition.name} stream`,
+      description: `Reroute pipeline for the ${definition.name} stream`,
       managed: true,
     },
     version: ASSET_VERSION,

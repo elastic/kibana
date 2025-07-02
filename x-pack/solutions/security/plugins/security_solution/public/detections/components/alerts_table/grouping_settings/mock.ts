@@ -50,11 +50,6 @@ export const getQuery = (
             ],
           },
         },
-        countSeveritySubAggregation: {
-          cardinality: {
-            field: 'kibana.alert.severity',
-          },
-        },
         hostsCountAggregation: {
           cardinality: {
             field: 'host.name',
@@ -175,9 +170,6 @@ export const groupingSearchResponse = {
               },
             ],
           },
-          countSeveritySubAggregation: {
-            value: 1,
-          },
           usersCountAggregation: {
             value: 0,
           },
@@ -225,9 +217,6 @@ export const groupingSearchResponse = {
                 doc_count: 300,
               },
             ],
-          },
-          countSeveritySubAggregation: {
-            value: 1,
           },
           usersCountAggregation: {
             value: 0,
@@ -277,9 +266,6 @@ export const groupingSearchResponse = {
               },
             ],
           },
-          countSeveritySubAggregation: {
-            value: 1,
-          },
           usersCountAggregation: {
             value: 0,
           },
@@ -327,9 +313,6 @@ export const groupingSearchResponse = {
                 doc_count: 300,
               },
             ],
-          },
-          countSeveritySubAggregation: {
-            value: 1,
           },
           usersCountAggregation: {
             value: 0,
@@ -379,9 +362,6 @@ export const groupingSearchResponse = {
               },
             ],
           },
-          countSeveritySubAggregation: {
-            value: 1,
-          },
           usersCountAggregation: {
             value: 0,
           },
@@ -429,9 +409,6 @@ export const groupingSearchResponse = {
                 doc_count: 300,
               },
             ],
-          },
-          countSeveritySubAggregation: {
-            value: 1,
           },
           usersCountAggregation: {
             value: 0,
@@ -481,9 +458,6 @@ export const groupingSearchResponse = {
               },
             ],
           },
-          countSeveritySubAggregation: {
-            value: 1,
-          },
           usersCountAggregation: {
             value: 0,
           },
@@ -531,9 +505,6 @@ export const groupingSearchResponse = {
                 doc_count: 300,
               },
             ],
-          },
-          countSeveritySubAggregation: {
-            value: 1,
           },
           usersCountAggregation: {
             value: 0,
@@ -583,9 +554,6 @@ export const groupingSearchResponse = {
               },
             ],
           },
-          countSeveritySubAggregation: {
-            value: 1,
-          },
           usersCountAggregation: {
             value: 91,
           },
@@ -633,9 +601,6 @@ export const groupingSearchResponse = {
                 doc_count: 273,
               },
             ],
-          },
-          countSeveritySubAggregation: {
-            value: 1,
           },
           usersCountAggregation: {
             value: 91,
@@ -685,9 +650,6 @@ export const groupingSearchResponse = {
               },
             ],
           },
-          countSeveritySubAggregation: {
-            value: 1,
-          },
           usersCountAggregation: {
             value: 91,
           },
@@ -735,9 +697,6 @@ export const groupingSearchResponse = {
                 doc_count: 273,
               },
             ],
-          },
-          countSeveritySubAggregation: {
-            value: 1,
           },
           usersCountAggregation: {
             value: 91,
@@ -787,9 +746,6 @@ export const groupingSearchResponse = {
               },
             ],
           },
-          countSeveritySubAggregation: {
-            value: 1,
-          },
           usersCountAggregation: {
             value: 91,
           },
@@ -837,9 +793,6 @@ export const groupingSearchResponse = {
                 doc_count: 273,
               },
             ],
-          },
-          countSeveritySubAggregation: {
-            value: 1,
           },
           usersCountAggregation: {
             value: 91,
@@ -889,9 +842,6 @@ export const groupingSearchResponse = {
               },
             ],
           },
-          countSeveritySubAggregation: {
-            value: 1,
-          },
           usersCountAggregation: {
             value: 91,
           },
@@ -939,9 +889,6 @@ export const groupingSearchResponse = {
                 doc_count: 273,
               },
             ],
-          },
-          countSeveritySubAggregation: {
-            value: 1,
           },
           usersCountAggregation: {
             value: 91,
@@ -991,9 +938,6 @@ export const groupingSearchResponse = {
               },
             ],
           },
-          countSeveritySubAggregation: {
-            value: 1,
-          },
           usersCountAggregation: {
             value: 0,
           },
@@ -1041,9 +985,6 @@ export const groupingSearchResponse = {
                 doc_count: 100,
               },
             ],
-          },
-          countSeveritySubAggregation: {
-            value: 1,
           },
           usersCountAggregation: {
             value: 0,
@@ -1093,9 +1034,6 @@ export const groupingSearchResponse = {
               },
             ],
           },
-          countSeveritySubAggregation: {
-            value: 1,
-          },
           usersCountAggregation: {
             value: 0,
           },
@@ -1143,9 +1081,6 @@ export const groupingSearchResponse = {
                 doc_count: 100,
               },
             ],
-          },
-          countSeveritySubAggregation: {
-            value: 1,
           },
           usersCountAggregation: {
             value: 0,
@@ -1195,9 +1130,6 @@ export const groupingSearchResponse = {
               },
             ],
           },
-          countSeveritySubAggregation: {
-            value: 1,
-          },
           usersCountAggregation: {
             value: 0,
           },
@@ -1245,9 +1177,6 @@ export const groupingSearchResponse = {
                 doc_count: 100,
               },
             ],
-          },
-          countSeveritySubAggregation: {
-            value: 1,
           },
           usersCountAggregation: {
             value: 0,
@@ -1297,9 +1226,6 @@ export const groupingSearchResponse = {
               },
             ],
           },
-          countSeveritySubAggregation: {
-            value: 1,
-          },
           usersCountAggregation: {
             value: 0,
           },
@@ -1348,9 +1274,6 @@ export const groupingSearchResponse = {
               },
             ],
           },
-          countSeveritySubAggregation: {
-            value: 1,
-          },
           usersCountAggregation: {
             value: 0,
           },
@@ -1398,9 +1321,6 @@ export const groupingSearchResponse = {
                 doc_count: 91,
               },
             ],
-          },
-          countSeveritySubAggregation: {
-            value: 1,
           },
           usersCountAggregation: {
             value: 91,

@@ -7,6 +7,7 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 import { Index } from '@kbn/index-management-plugin/server';
+import { isArray } from 'lodash';
 
 export const rollupDataEnricher = async (indicesList: Index[], client: IScopedClusterClient) => {
   if (!indicesList || !indicesList.length) {
@@ -19,7 +20,10 @@ export const rollupDataEnricher = async (indicesList: Index[], client: IScopedCl
     });
 
     return indicesList.map((index) => {
-      const isRollupIndex = !!rollupJobData[index.name];
+      let isRollupIndex = !!rollupJobData[index.name];
+      if (!isRollupIndex && isArray(index.aliases)) {
+        isRollupIndex = index.aliases.some((alias) => !!rollupJobData[alias]);
+      }
       return {
         ...index,
         isRollupIndex,

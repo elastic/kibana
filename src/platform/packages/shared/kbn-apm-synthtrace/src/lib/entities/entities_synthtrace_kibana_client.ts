@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fetch from 'node-fetch';
 import { Logger } from '../utils/create_logger';
-import { kibanaHeaders } from '../shared/client_headers';
-import { getFetchAgent } from '../../cli/utils/ssl';
+import { KibanaClient } from '../shared/base_kibana_client';
+import { getKibanaClient } from '../../cli/utils/get_kibana_client';
 
 interface EntityDefinitionResponse {
   definitions: Array<{ type: string; state: { installed: boolean; running: boolean } }>;
@@ -18,21 +17,20 @@ interface EntityDefinitionResponse {
 
 export class EntitiesSynthtraceKibanaClient {
   private readonly logger: Logger;
-  private target: string;
+  private readonly kibana: KibanaClient;
 
-  constructor(options: { logger: Logger; target: string }) {
+  constructor(options: { logger: Logger } & ({ target: string } | { kibanaClient: KibanaClient })) {
+    this.kibana = 'kibanaClient' in options ? options.kibanaClient : getKibanaClient(options);
     this.logger = options.logger;
-    this.target = options.target;
   }
 
   async installEntityIndexPatterns() {
-    const url = `${this.target}/internal/entities/definition?includeState=true`;
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: kibanaHeaders(),
-      agent: getFetchAgent(url),
-    });
-    const entityDefinition: EntityDefinitionResponse = await response.json();
+    const entityDefinition = await this.kibana.fetch<EntityDefinitionResponse>(
+      `/internal/entities/definition?includeState=true`,
+      {
+        method: 'GET',
+      }
+    );
 
     const hasEntityDefinitionsInstalled = entityDefinition.definitions?.find(
       (definition) => definition.type === 'service'
@@ -42,21 +40,15 @@ export class EntitiesSynthtraceKibanaClient {
       this.logger.debug('Entity definitions are already defined');
     } else {
       this.logger.debug('Installing Entity definitions');
-      const entityEnablementUrl = `${this.target}/internal/entities/managed/enablement?installOnly=true`;
-      await fetch(entityEnablementUrl, {
+      await this.kibana.fetch(`/internal/entities/managed/enablement?installOnly=true`, {
         method: 'PUT',
-        headers: kibanaHeaders(),
-        agent: getFetchAgent(url),
       });
     }
   }
 
   async uninstallEntityIndexPatterns() {
-    const url = `${this.target}/internal/entities/managed/enablement`;
-    await fetch(url, {
+    await this.kibana.fetch(`/internal/entities/managed/enablement`, {
       method: 'DELETE',
-      headers: kibanaHeaders(),
-      agent: getFetchAgent(url),
     });
   }
 }

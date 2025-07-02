@@ -29,7 +29,7 @@ export const Popover = ({
     <EuiPopover
       panelPaddingSize="s"
       focusTrapProps={{
-        returnFocus: false,
+        returnFocus: true,
       }}
       button={
         <button

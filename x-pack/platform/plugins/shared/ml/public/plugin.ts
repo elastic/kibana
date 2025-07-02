@@ -44,7 +44,7 @@ import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/publ
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
-import type { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
@@ -109,7 +109,6 @@ export interface MlStartDependencies {
 export interface MlSetupDependencies {
   alerting?: AlertingSetup;
   cases?: CasesPublicSetup;
-  dashboard: DashboardSetup;
   embeddable: EmbeddableSetup;
   fieldFormats: FieldFormatsSetup;
   home?: HomePublicPluginSetup;

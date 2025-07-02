@@ -21,14 +21,14 @@ import {
   SiemMigrationStatus,
   RuleTranslationResult,
 } from '../../../../../common/siem_migrations/constants';
+import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
-  type RuleMigration,
   type RuleMigrationTaskStats,
   type RuleMigrationTranslationStats,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 import { getSortingOptions, type RuleMigrationSort } from './sort';
 import { conditions as searchConditions } from './search';
+import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 
 export type CreateRuleMigrationInput = Omit<
   RuleMigration,

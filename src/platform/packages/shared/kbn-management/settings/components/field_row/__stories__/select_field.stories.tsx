@@ -24,5 +24,9 @@ const settingFields = {
   options: ['option1', 'option2', 'option3'],
 };
 
-export default getStory('Select Row', 'A setting with a boolean value.', argTypes);
+const Story = getStory('Select Row', 'A setting with a boolean value.', argTypes);
 export const SelectRow = getFieldRowStory('select' as const, settingFields);
+
+export default {
+  ...Story,
+};

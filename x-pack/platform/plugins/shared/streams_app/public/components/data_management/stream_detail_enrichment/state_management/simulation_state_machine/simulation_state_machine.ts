@@ -6,8 +6,14 @@
  */
 import { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom, assign, setup } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { FlattenRecord, isSchema, processorDefinitionSchema } from '@kbn/streams-schema';
+import {
+  FlattenRecord,
+  SampleDocument,
+  isSchema,
+  processorDefinitionSchema,
+} from '@kbn/streams-schema';
 import { isEmpty, isEqual } from 'lodash';
+import { flattenObjectNestedLast } from '@kbn/object-utils';
 import {
   dateRangeMachine,
   createDateRangeMachineImplementations,
@@ -30,7 +36,13 @@ import {
   createSimulationRunnerActor,
   createSimulationRunFailureNofitier,
 } from './simulation_runner_actor';
-import { filterSimulationDocuments, composeSamplingCondition } from './utils';
+import {
+  composeSamplingCondition,
+  getSchemaFieldsFromSimulation,
+  mapField,
+  unmapField,
+} from './utils';
+import { MappedSchemaField } from '../../../schema_editor/types';
 
 export type SimulationActorRef = ActorRefFrom<typeof simulationMachine>;
 export type SimulationActorSnapshot = SnapshotFrom<typeof simulationMachine>;
@@ -38,7 +50,7 @@ export interface ProcessorEventParams {
   processors: ProcessorDefinitionWithUIAttributes[];
 }
 
-const hasSamples = (samples: FlattenRecord[]) => !isEmpty(samples);
+const hasSamples = (samples: SampleDocument[]) => !isEmpty(samples);
 
 const isValidProcessor = (processor: ProcessorDefinitionWithUIAttributes) =>
   isSchema(processorDefinitionSchema, processorConverter.toAPIDefinition(processor));
@@ -66,24 +78,33 @@ export const simulationMachine = setup({
     storeProcessors: assign((_, params: ProcessorEventParams) => ({
       processors: params.processors,
     })),
-    storeSamples: assign((_, params: { samples: FlattenRecord[] }) => ({
+    storeSamples: assign((_, params: { samples: SampleDocument[] }) => ({
       samples: params.samples,
     })),
     storeSimulation: assign((_, params: { simulation: Simulation | undefined }) => ({
       simulation: params.simulation,
     })),
-    derivePreviewDocuments: assign(({ context }) => {
-      return {
-        previewDocuments: context.simulation
-          ? filterSimulationDocuments(context.simulation.documents, context.previewDocsFilter)
-          : context.samples,
-      };
-    }),
     deriveSamplingCondition: assign(({ context }) => ({
       samplingCondition: composeSamplingCondition(context.processors),
     })),
+    deriveDetectedSchemaFields: assign(({ context }) => ({
+      detectedSchemaFields: context.simulation
+        ? getSchemaFieldsFromSimulation(
+            context.simulation.detected_fields,
+            context.detectedSchemaFields,
+            context.streamName
+          )
+        : context.detectedSchemaFields,
+    })),
+    mapField: assign(({ context }, params: { field: MappedSchemaField }) => ({
+      detectedSchemaFields: mapField(context.detectedSchemaFields, params.field),
+    })),
+    unmapField: assign(({ context }, params: { fieldName: string }) => ({
+      detectedSchemaFields: unmapField(context.detectedSchemaFields, params.fieldName),
+    })),
     resetSimulation: assign({
       processors: [],
+      detectedSchemaFields: [],
       simulation: undefined,
       samplingCondition: composeSamplingCondition([]),
       previewDocsFilter: 'outcome_filter_all',
@@ -114,6 +135,7 @@ export const simulationMachine = setup({
         parentRef: self,
       },
     }),
+    detectedSchemaFields: [],
     previewDocsFilter: 'outcome_filter_all',
     previewDocuments: [],
     processors: input.processors,
@@ -125,14 +147,11 @@ export const simulationMachine = setup({
   on: {
     'dateRange.update': '.loadingSamples',
     'simulation.changePreviewDocsFilter': {
-      actions: [
-        { type: 'storePreviewDocsFilter', params: ({ event }) => event },
-        { type: 'derivePreviewDocuments' },
-      ],
+      actions: [{ type: 'storePreviewDocsFilter', params: ({ event }) => event }],
     },
     'simulation.reset': {
       target: '.idle',
-      actions: [{ type: 'resetSimulation' }, { type: 'derivePreviewDocuments' }],
+      actions: [{ type: 'resetSimulation' }],
     },
     // Handle adding/reordering processors
     'processors.*': {
@@ -158,7 +177,7 @@ export const simulationMachine = setup({
       },
       {
         target: '.idle',
-        actions: [{ type: 'resetSimulation' }, { type: 'derivePreviewDocuments' }],
+        actions: [{ type: 'resetSimulation' }],
       },
     ],
   },
@@ -176,7 +195,18 @@ export const simulationMachine = setup({
       ],
     },
 
-    idle: {},
+    idle: {
+      on: {
+        'simulation.fields.map': {
+          target: 'assertingSimulationRequirements',
+          actions: [{ type: 'mapField', params: ({ event }) => event }],
+        },
+        'simulation.fields.unmap': {
+          target: 'assertingSimulationRequirements',
+          actions: [{ type: 'unmapField', params: ({ event }) => event }],
+        },
+      },
+    },
 
     debouncingChanges: {
       on: {
@@ -208,13 +238,20 @@ export const simulationMachine = setup({
           streamName: context.streamName,
           absoluteTimeRange: context.dateRangeRef.getSnapshot().context.absoluteTimeRange,
         }),
-        onDone: {
-          target: 'assertingSimulationRequirements',
-          actions: [
-            { type: 'storeSamples', params: ({ event }) => ({ samples: event.output }) },
-            { type: 'derivePreviewDocuments' },
-          ],
-        },
+        onDone: [
+          {
+            guard: {
+              type: 'hasProcessors',
+              params: ({ context }) => ({ processors: context.processors }),
+            },
+            target: 'assertingSimulationRequirements',
+            actions: [{ type: 'storeSamples', params: ({ event }) => ({ samples: event.output }) }],
+          },
+          {
+            target: 'idle',
+            actions: [{ type: 'storeSamples', params: ({ event }) => ({ samples: event.output }) }],
+          },
+        ],
         onError: {
           target: 'idle',
           actions: [
@@ -244,14 +281,15 @@ export const simulationMachine = setup({
         src: 'runSimulation',
         input: ({ context }) => ({
           streamName: context.streamName,
-          documents: context.samples,
+          documents: context.samples.map(flattenObjectNestedLast) as FlattenRecord[],
           processors: context.processors,
+          detectedFields: context.detectedSchemaFields,
         }),
         onDone: {
           target: 'idle',
           actions: [
             { type: 'storeSimulation', params: ({ event }) => ({ simulation: event.output }) },
-            { type: 'derivePreviewDocuments' },
+            { type: 'deriveDetectedSchemaFields' },
           ],
         },
         onError: {

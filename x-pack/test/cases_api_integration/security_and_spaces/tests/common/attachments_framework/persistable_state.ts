@@ -13,7 +13,7 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
   persistableStateAttachment,

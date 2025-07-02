@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import './_explorer_chart_tooltip.scss';
 import PropTypes from 'prop-types';
 import React from 'react';
 
 import { CHART_TYPE } from '../explorer_constants';
 
 import { i18n } from '@kbn/i18n';
+import { useExplorerChartTooltipStyles } from './explorer_chart_tooltip_styles';
 
 const CHART_DESCRIPTION = {
   [CHART_TYPE.EVENT_DISTRIBUTION]: i18n.translate(
@@ -36,12 +36,18 @@ const CHART_DESCRIPTION = {
 import { EuiSpacer } from '@elastic/eui';
 
 function TooltipDefinitionList({ toolTipData }) {
+  const {
+    title: titleStyle,
+    description: descriptionStyle,
+    descriptionList,
+  } = useExplorerChartTooltipStyles();
+
   return (
-    <dl className="mlDescriptionList">
+    <dl css={descriptionList}>
       {toolTipData.map(({ title, description }) => (
         <React.Fragment key={`${title} ${description}`}>
-          <dt className="mlDescriptionList__title">{title}</dt>
-          <dd className="mlDescriptionList__description">{description}</dd>
+          <dt css={titleStyle}>{title}</dt>
+          <dd css={descriptionStyle}>{description}</dd>
         </React.Fragment>
       ))}
     </dl>
@@ -55,6 +61,8 @@ export const ExplorerChartInfoTooltip = ({
   chartType,
   entityFields = [],
 }) => {
+  const { tooltip, chartDescription: chartDescriptionStyle } = useExplorerChartTooltipStyles();
+
   const chartDescription = CHART_DESCRIPTION[chartType];
 
   const toolTipData = [
@@ -86,12 +94,12 @@ export const ExplorerChartInfoTooltip = ({
   });
 
   return (
-    <div className="ml-explorer-chart-info-tooltip">
+    <div css={tooltip}>
       <TooltipDefinitionList toolTipData={toolTipData} />
       {chartDescription && (
         <React.Fragment>
           <EuiSpacer size="s" />
-          <div className="ml-explorer-chart-description">{chartDescription}</div>
+          <div css={chartDescriptionStyle}>{chartDescription}</div>
         </React.Fragment>
       )}
     </div>

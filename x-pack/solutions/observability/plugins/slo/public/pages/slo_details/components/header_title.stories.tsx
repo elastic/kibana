@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
-import { ComponentStory } from '@storybook/react';
-
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { buildSlo } from '../../../data/slo/slo';
 import { HeaderTitle as Component, Props } from './header_title';
@@ -18,15 +15,15 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
-
 const defaultProps: Props = {
   slo: buildSlo(),
   isLoading: false,
 };
 
-export const Default = Template.bind({});
-Default.args = defaultProps;
+export const Default = {
+  args: defaultProps,
+};
 
-export const WithLoading = Template.bind({});
-WithLoading.args = { slo: undefined, isLoading: false };
+export const WithLoading = {
+  args: { slo: undefined, isLoading: false },
+};

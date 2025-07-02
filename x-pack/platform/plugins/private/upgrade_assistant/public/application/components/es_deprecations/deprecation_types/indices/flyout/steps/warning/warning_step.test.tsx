@@ -43,6 +43,7 @@ describe('WarningFlyoutStep', () => {
       aliases: [],
       isFrozen: false,
       isReadonly: false,
+      isInDataStream: false,
     },
   };
 

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { filter, from, map, switchMap, tap, throwError } from 'rxjs';
-import { isReadable, Readable } from 'stream';
+import { filter, map, tap, defer } from 'rxjs';
 import {
   Message,
   MessageRole,
@@ -15,7 +14,7 @@ import {
 } from '@kbn/inference-common';
 import { parseSerdeChunkMessage } from './serde_utils';
 import { InferenceConnectorAdapter } from '../../types';
-import { convertUpstreamError } from '../../utils';
+import { handleConnectorResponse } from '../../utils';
 import type { BedRockImagePart, BedRockMessage, BedRockTextPart } from './types';
 import {
   BedrockChunkMember,
@@ -51,27 +50,13 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       ...(metadata?.connectorTelemetry ? { telemetryMetadata: metadata.connectorTelemetry } : {}),
     };
 
-    return from(
-      executor.invoke({
+    return defer(() => {
+      return executor.invoke({
         subAction: 'invokeStream',
         subActionParams,
-      })
-    ).pipe(
-      switchMap((response) => {
-        if (response.status === 'error') {
-          return throwError(() =>
-            convertUpstreamError(response.serviceMessage!, {
-              messagePrefix: 'Error calling connector:',
-            })
-          );
-        }
-        if (isReadable(response.data as any)) {
-          return serdeEventstreamIntoObservable(response.data as Readable);
-        }
-        return throwError(() =>
-          createInferenceInternalError('Unexpected error', response.data as Record<string, any>)
-        );
-      }),
+      });
+    }).pipe(
+      handleConnectorResponse({ processStream: serdeEventstreamIntoObservable }),
       tap((eventData) => {
         if ('modelStreamErrorException' in eventData) {
           throw createInferenceInternalError(eventData.modelStreamErrorException.originalMessage);

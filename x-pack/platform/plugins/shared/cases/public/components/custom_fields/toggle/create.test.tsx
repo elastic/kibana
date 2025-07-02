@@ -13,8 +13,7 @@ import { Create } from './create';
 import { customFieldsConfigurationMock } from '../../../containers/mock';
 import userEvent from '@testing-library/user-event';
 
-// FLAKY: https://github.com/elastic/kibana/issues/177304
-describe.skip('Create ', () => {
+describe('Create ', () => {
   const onSubmit = jest.fn();
 
   beforeEach(() => {

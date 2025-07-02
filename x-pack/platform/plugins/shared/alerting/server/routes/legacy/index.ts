@@ -21,7 +21,7 @@ import { unmuteAlertInstanceRoute } from './unmute_instance';
 import { muteAllAlertRoute } from './mute_all';
 import { unmuteAllAlertRoute } from './unmute_all';
 import { healthRoute } from './health';
-import { RouteOptions } from '..';
+import type { RouteOptions } from '..';
 
 export function defineLegacyRoutes(opts: RouteOptions) {
   const { router, licenseState, encryptedSavedObjects, usageCounter, isServerless, docLinks } =

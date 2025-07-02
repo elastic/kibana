@@ -91,7 +91,7 @@ export function VisitorBreakdown() {
           {!dataView?.id ? (
             <EuiLoadingEmbeddable justifyContent="spaceAround" alignItems={'center'}>
               <EuiFlexItem grow={false}>
-                <EuiLoadingChart size="l" mono />
+                <EuiLoadingChart size="l" />
               </EuiFlexItem>
             </EuiLoadingEmbeddable>
           ) : (
@@ -114,7 +114,7 @@ export function VisitorBreakdown() {
           {!dataView?.id ? (
             <EuiLoadingEmbeddable justifyContent="spaceAround" alignItems={'center'}>
               <EuiFlexItem grow={false}>
-                <EuiLoadingChart size="l" mono />
+                <EuiLoadingChart size="l" />
               </EuiFlexItem>
             </EuiLoadingEmbeddable>
           ) : (

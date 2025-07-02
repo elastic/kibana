@@ -88,15 +88,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       this.tags(['skipSvlSearch', 'skipSvlSec']);
 
       after(async () => {
-        await esArchiver.load('test/functional/fixtures/es_archiver/discover/context_awareness');
+        await esArchiver.load(
+          'src/platform/test/functional/fixtures/es_archiver/discover/context_awareness'
+        );
         await kibanaServer.importExport.load(
-          'test/functional/fixtures/kbn_archiver/discover/context_awareness'
+          'src/platform/test/functional/fixtures/kbn_archiver/discover/context_awareness'
         );
       });
 
       it('should fall back to the profile data view when no other data views are available', async () => {
         await kibanaServer.importExport.unload(
-          'test/functional/fixtures/kbn_archiver/discover/context_awareness'
+          'src/platform/test/functional/fixtures/kbn_archiver/discover/context_awareness'
         );
         await common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
@@ -114,7 +116,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show the no data page when no ES data is available', async () => {
-        await esArchiver.unload('test/functional/fixtures/es_archiver/discover/context_awareness');
+        await esArchiver.unload(
+          'src/platform/test/functional/fixtures/es_archiver/discover/context_awareness'
+        );
         await common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });

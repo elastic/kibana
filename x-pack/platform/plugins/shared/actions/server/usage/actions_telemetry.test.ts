@@ -6,7 +6,8 @@
  */
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { errors } from '@elastic/elasticsearch';
 import {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createInferenceInternalError, InferenceTaskInternalError } from '@kbn/inference-common';
+import { createInferenceProviderError, InferenceTaskProviderError } from '@kbn/inference-common';
 
 const connectorStatusCodeRegexp = /Status code: ([0-9]{3})/i;
 const inferenceStatusCodeRegexp = /status \[([0-9]{3})\]/i;
@@ -13,7 +13,7 @@ const inferenceStatusCodeRegexp = /status \[([0-9]{3})\]/i;
 export const convertUpstreamError = (
   source: string | Error,
   { statusCode, messagePrefix }: { statusCode?: number; messagePrefix?: string } = {}
-): InferenceTaskInternalError => {
+): InferenceTaskProviderError => {
   const message = typeof source === 'string' ? source : source.message;
 
   let status = statusCode;
@@ -35,5 +35,5 @@ export const convertUpstreamError = (
 
   const messageWithPrefix = messagePrefix ? `${messagePrefix} ${message}` : message;
 
-  return createInferenceInternalError(messageWithPrefix, { status });
+  return createInferenceProviderError(messageWithPrefix, { status });
 };

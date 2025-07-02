@@ -1,0 +1,118 @@
+{
+  "queries": [
+    {
+      "id": "jk2_init_found_child",
+      "title": "JK2 Init Found Child",
+      "description": "Returns logs where 'jk2_init() Found child' is found in the scoreboard slot.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "jk2_init() Found child scoreboard slot",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "worker_env_init_ok",
+      "title": "Worker Environment Init OK",
+      "description": "Returns logs where 'workerEnv.init() ok' is mentioned.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "workerEnv.init() ok",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mod_jk_child_error_state",
+      "title": "Mod JK Child WorkerEnv Error State",
+      "description": "Returns logs where 'mod_jk child workerEnv in error state' is found.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "mod_jk child workerEnv error state",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "directory_index_forbidden",
+      "title": "Directory Index Forbidden",
+      "description": "Returns logs where 'Directory index forbidden by rule' is mentioned.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Directory index forbidden by rule",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "jk2_init_cant_find_child",
+      "title": "JK2 Init Can't Find Child",
+      "description": "Returns logs where 'jk2_init() Can't find child' is found in the scoreboard.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "jk2_init() Can't find child scoreboard",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mod_jk_child_init",
+      "title": "Mod JK Child Init",
+      "description": "Returns logs where 'mod_jk child init' is mentioned.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "mod_jk child init",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

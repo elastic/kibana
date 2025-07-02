@@ -7,6 +7,7 @@
 
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import React from 'react';
+import { SIEM_MIGRATION_MANAGER_LICENSE_BTN } from '../messages';
 
 export const SiemMigrationStartUpsellSection = React.memo(function SiemMigrationStartUpsellSection({
   title,
@@ -40,7 +41,7 @@ export const SiemMigrationStartUpsellSection = React.memo(function SiemMigration
                   color="warning"
                   fill
                 >
-                  {'Manage License'}
+                  {SIEM_MIGRATION_MANAGER_LICENSE_BTN}
                 </EuiButton>
               </EuiFlexItem>
             ) : null}

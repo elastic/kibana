@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AsApiContract, RewriteRequestCase, ActionType } from '@kbn/actions-types';
+import type { AsApiContract, RewriteRequestCase, ActionType } from '@kbn/actions-types';
 
 const transformConnectorType: RewriteRequestCase<ActionType> = ({
   enabled_in_config: enabledInConfig,

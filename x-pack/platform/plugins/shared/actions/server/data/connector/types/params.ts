@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClient } from '@kbn/core/server';
 
 export type SavedObjectClientForFind = Pick<SavedObjectsClient, 'find'>;
 export interface SearchConnectorsSoParams {

@@ -19,7 +19,7 @@ import {
   getCase,
 } from '../../../../common/lib/api';
 
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -51,6 +51,26 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(updatedCase.observables.length).to.be.greaterThan(0);
+      });
+
+      it('can returns bad request when observable value does not pass validation', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+        expect(postedCase.observables).to.eql([]);
+
+        const newObservableData = {
+          value: 'not ip actually',
+          typeKey: OBSERVABLE_TYPE_IPV4.key,
+          description: '',
+        };
+
+        await addObservable({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            observable: newObservableData,
+          },
+          expectedHttpCode: 400,
+        });
       });
 
       it('returns bad request when using unknown observable type', async () => {
@@ -102,6 +122,34 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(updatedObservable.observables[0].value).to.be('192.168.68.1');
+      });
+
+      it('returns bad request when observable value does not pass validation', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+
+        const newObservableData = {
+          value: '127.0.0.1',
+          typeKey: OBSERVABLE_TYPE_IPV4.key,
+          description: '',
+        };
+
+        const {
+          observables: [observable],
+        } = await addObservable({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            observable: newObservableData,
+          },
+        });
+
+        await updateObservable({
+          supertest,
+          params: { observable: { description: '', value: 'not ip' } },
+          caseId: postedCase.id,
+          observableId: observable.id as string,
+          expectedHttpCode: 400,
+        });
       });
     });
 

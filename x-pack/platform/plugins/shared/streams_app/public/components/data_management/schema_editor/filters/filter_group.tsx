@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 import React from 'react';
+import { css } from '@emotion/react';
 
 export const FilterGroup = ({
   filterGroupButtonLabel,
@@ -57,9 +58,9 @@ export const FilterGroup = ({
         <EuiSelectable aria-label={filterGroupButtonLabel} options={items} onChange={onChange}>
           {(list) => (
             <div
-              css={{
-                minWidth: '200px',
-              }}
+              css={css`
+                min-width: 220px;
+              `}
             >
               {list}
             </div>

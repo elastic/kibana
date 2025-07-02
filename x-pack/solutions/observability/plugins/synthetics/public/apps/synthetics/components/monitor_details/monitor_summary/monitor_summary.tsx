@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiTitle, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LoadWhenInView } from '@kbn/observability-shared-plugin/public';
-import { useTestFlyoutOpen } from '../../test_now_mode/hooks/use_test_flyout_open';
 
 import { useMonitorDetailsPage } from '../use_monitor_details_page';
 import { useMonitorRangeFrom } from '../hooks/use_monitor_range_from';
@@ -30,8 +29,6 @@ import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
 
 export const MonitorSummary = () => {
   const { from, to } = useMonitorRangeFrom();
-
-  const isFlyoutOpen = !!useTestFlyoutOpen();
 
   const dateLabel = from === 'now-30d/d' ? LAST_30_DAYS_LABEL : TO_DATE_LABEL;
 
@@ -118,13 +115,13 @@ export const MonitorSummary = () => {
       />
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m" wrap={true}>
-        <EuiFlexItem css={isFlyoutOpen ? { minWidth: 260, maxWidth: 500 } : { maxWidth: 500 }}>
+        <EuiFlexItem css={{ minWidth: 430 }}>
           <LastTestRun />
         </EuiFlexItem>
         <EuiFlexItem css={{ minWidth: 260 }}>
           <MonitorAlerts dateLabel={dateLabel} from={from} to={to} />
           <EuiSpacer size="m" />
-          <StepDurationPanel />
+          <StepDurationPanel legendPosition="bottom" />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

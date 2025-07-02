@@ -33,8 +33,8 @@ jest.mock('../../../lib/action_connector_api', () => ({
 jest.mock('../../../lib/rule_api/rules_kuery_filter', () => ({
   loadRulesWithKueryFilter: jest.fn(),
 }));
-jest.mock('../../../lib/rule_api/rule_types', () => ({
-  loadRuleTypes: jest.fn(),
+jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => ({
+  getRuleTypes: jest.fn(),
 }));
 jest.mock('../../../lib/rule_api/aggregate_kuery_filter', () => ({
   loadRuleAggregationsWithKueryFilter: jest.fn(),
@@ -90,7 +90,10 @@ jest.mock('../../../../common/get_experimental_features', () => ({
 jest.mock('../../../lib/rule_api/aggregate_kuery_filter', () => ({
   loadRuleAggregationsWithKueryFilter: jest.fn(),
 }));
-jest.mock('@kbn/alerts-ui-shared', () => ({ MaintenanceWindowCallout: jest.fn(() => <></>) }));
+jest.mock('@kbn/alerts-ui-shared', () => ({
+  ...jest.requireActual('@kbn/alerts-ui-shared'),
+  MaintenanceWindowCallout: jest.fn(() => <></>),
+}));
 jest.mock('@kbn/kibana-utils-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/kibana-utils-plugin/public');
   return {
@@ -106,7 +109,7 @@ jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [null, () => null
 const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
   '../../../lib/rule_api/aggregate_kuery_filter'
 );
-const { loadRuleTypes } = jest.requireMock('../../../lib/rule_api/rule_types');
+const { getRuleTypes } = jest.requireMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
 const { loadRulesWithKueryFilter } = jest.requireMock('../../../lib/rule_api/rules_kuery_filter');
 const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
 
@@ -146,7 +149,7 @@ describe('Rules list Bulk Edit', () => {
       data: mockedRulesData,
     });
     loadActionTypes.mockResolvedValue([]);
-    loadRuleTypes.mockResolvedValue([ruleTypeFromApi, getDisabledByLicenseRuleTypeFromApi()]);
+    getRuleTypes.mockResolvedValue([ruleTypeFromApi, getDisabledByLicenseRuleTypeFromApi()]);
     loadAllActions.mockResolvedValue([]);
     loadRuleAggregationsWithKueryFilter.mockResolvedValue({});
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
@@ -201,7 +204,7 @@ describe('Rules list Bulk Edit', () => {
   });
 
   it('does not render select all button if the user is not authorized', async () => {
-    loadRuleTypes.mockResolvedValue([ruleTypeFromApi, getDisabledByLicenseRuleTypeFromApi(false)]);
+    getRuleTypes.mockResolvedValue([ruleTypeFromApi, getDisabledByLicenseRuleTypeFromApi(false)]);
     renderWithProviders(<RulesList />);
     await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 

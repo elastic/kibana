@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import http from 'http';
-import https from 'https';
-import { Plugin, CoreSetup } from '@kbn/core/server';
+import type http from 'http';
+import type https from 'https';
+import type { Plugin, CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import {
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
 } from '@kbn/actions-plugin/server/plugin';
-import { ActionType } from '@kbn/actions-plugin/server';
+import type { ActionType } from '@kbn/actions-plugin/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { initPlugin as initPagerduty } from './pagerduty_simulation';
 import { initPlugin as initSwimlane } from './swimlane_simulation';

@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { DocLinksServiceSetup } from '@kbn/core/server';
-import { ILicenseState } from '../../lib/license_state';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { DocLinksServiceSetup } from '@kbn/core/server';
+import type { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import type { AlertingRouter } from '../../types';

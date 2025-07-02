@@ -8,7 +8,7 @@
  */
 
 import { getEmptyValue } from './helpers';
-import { GroupingAggregation, ParsedGroupingAggregation } from '../..';
+import type { GroupingAggregation, ParsedGroupingAggregation } from '../..';
 import type { GroupingQueryArgs, GroupingQuery } from './types';
 /** The maximum number of groups to render */
 export const DEFAULT_GROUP_BY_FIELD_SIZE = 10;

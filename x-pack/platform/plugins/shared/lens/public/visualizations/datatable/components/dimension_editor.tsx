@@ -19,18 +19,12 @@ import {
   applyPaletteParams,
   defaultPaletteParams,
   findMinMaxByColumnId,
-  shouldColorByTerms,
+  getAccessorType,
 } from '../../../shared_components';
-
-import './dimension_editor.scss';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
 import { ColorMappingByValues } from '../../../shared_components/coloring/color_mapping_by_values';
 import { ColorMappingByTerms } from '../../../shared_components/coloring/color_mapping_by_terms';
 import { getColumnAlignment } from '../utils';
-import {
-  getFieldMetaFromDatatable,
-  isNumericField,
-} from '../../../../common/expressions/datatable/utils';
 import { DatatableInspectorTables } from '../../../../common/expressions/datatable/datatable_fn';
 
 const idPrefix = htmlIdGenerator()();
@@ -82,13 +76,13 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   const currentData =
     frame.activeData?.[localState.layerId] ?? frame.activeData?.[DatatableInspectorTables.Default];
   const datasource = frame.datasourceLayers?.[localState.layerId];
-  const { isBucketed } = datasource?.getOperationForColumnId(accessor) ?? {};
-  const meta = getFieldMetaFromDatatable(currentData, accessor);
-  const showColorByTerms = shouldColorByTerms(meta?.type, isBucketed);
-  const currentAlignment = getColumnAlignment(column, isNumericField(meta));
+
+  const { isNumeric, isCategory: isBucketable } = getAccessorType(datasource, accessor);
+  const showColorByTerms = isBucketable;
+  const showDynamicColoringFeature = isBucketable || isNumeric;
+  const currentAlignment = getColumnAlignment(column, isNumeric);
   const currentColorMode = column?.colorMode || 'none';
   const hasDynamicColoring = currentColorMode !== 'none';
-  const showDynamicColoringFeature = meta?.type !== 'date';
   const visibleColumnsCount = localState.columns.filter((c) => !c.hidden).length;
 
   const hasTransposedColumn = localState.columns.some(({ isTransposed }) => isTransposed);

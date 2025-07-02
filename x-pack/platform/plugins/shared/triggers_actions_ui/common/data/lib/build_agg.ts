@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DateRangeInfo, getDateRangeInfo } from './date_range_info';
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { DateRangeInfo } from './date_range_info';
+import { getDateRangeInfo } from './date_range_info';
 
 export interface BuildAggregationOpts {
   timeSeries?: {

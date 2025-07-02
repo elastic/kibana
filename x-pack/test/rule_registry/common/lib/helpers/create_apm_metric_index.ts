@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { APM_METRIC_INDEX_NAME } from '../../constants';
-import { GetService } from '../../types';
+import type { GetService } from '../../types';
 
 export const createApmMetricIndex = async (getService: GetService) => {
   const es = getService('es');

@@ -20,12 +20,7 @@ export enum CancelLoadingState {
   Error,
 }
 
-export type DeprecationTableColumns =
-  | 'type'
-  | 'index'
-  | 'message'
-  | 'correctiveAction'
-  | 'isCritical';
+export type DeprecationTableColumns = 'type' | 'index' | 'message' | 'correctiveAction' | 'level';
 
 export type Status = 'in_progress' | 'complete' | 'idle' | 'error';
 export interface DeprecationLoggingPreviewProps {

@@ -44,6 +44,7 @@ exports[`render 1`] = `
             anchorClassName="homRecentlyAccessed__anchor"
             content="label0"
             delay="regular"
+            disableScreenReaderOutput={false}
             display="inlineBlock"
             position="bottom"
           >
@@ -79,6 +80,7 @@ exports[`render 1`] = `
             anchorClassName="homRecentlyAccessed__anchor"
             content="label1"
             delay="regular"
+            disableScreenReaderOutput={false}
             display="inlineBlock"
             position="bottom"
           >

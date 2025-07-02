@@ -209,9 +209,23 @@ defining and authenticating with custom roles in both UI functional tests and AP
 
 To test role management within the Observability project, you can execute the tests using the existing [config.feature_flags.ts](x-pack/test_serverless/functional/test_suites/observability/config.feature_flags.ts), where this functionality is explicitly enabled. Though the config is not run on MKI, it provides the ability to test custom roles in Kibana CI before the functionality is enabled in MKI. When roles management is enabled on MKI, these tests can be migrated to the regular FTR config and will be run on MKI.
 
-For compatibility with MKI, the role name `customRole` is reserved for use in tests. The test user is automatically assigned to this role, but before logging in via the browser, generating a cookie header, or creating an API key in each test suite, the role’s privileges must be updated.
+When running tests locally against MKI, ensure that the `.ftr/role_users.json` file includes the reserved role name `custom_role_worker_1` along with its credentials. This role name has been updated for compatibility with Scout, which supports parallel test execution and allows multiple credential pairs to be passed.
 
-Note: We are still working on a solution to run these tests against MKI. In the meantime, please tag the suite with `skipMKI`.
+```json
+{
+  "viewer": {
+    "email": ...,
+    "password": ..."
+  },
+  ...
+  "custom_role_worker_1": {
+    "email": ...,
+    "password": ...
+  }
+}
+```
+
+When using QAF to create a project with a custom native role, ensure that the role name `custom_role_worker_1` is configured as a Kibana role. While the test user is automatically assigned to the custom role, you must update the role's privileges before performing actions such as logging in via the browser, generating a cookie header, or creating an API key within each test suite.
 
 FTR UI test example:
 ```
@@ -254,7 +268,7 @@ await samlAuth.setCustomRole({
 });
 
 // Then, generate an API key with the newly defined privileges
-const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('customRole');
+const roleAuthc = await samlAuth.createM2mApiKeyWithCustomRoleScope();
 
 // Remember to invalidate the API key after use and delete the custom role
 await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);

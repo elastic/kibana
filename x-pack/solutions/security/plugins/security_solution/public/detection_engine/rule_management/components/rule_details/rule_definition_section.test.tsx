@@ -8,16 +8,16 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { RuleDefinitionSection } from './rule_definition_section';
 import type {
-  RuleResponse,
   AlertSuppressionMissingFieldsStrategy,
+  RuleResponse,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import * as useAlertSuppressionMock from '../../logic/use_alert_suppression';
-import * as useGetSavedQueryMock from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
+import * as useGetSavedQueryMock from '../../../common/use_get_saved_query';
 import * as useUpsellingMessageMock from '../../../../common/hooks/use_upselling';
 import {
-  ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS,
   ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS,
   ALERT_SUPPRESSION_PER_RULE_EXECUTION,
+  ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS,
 } from '../../../rule_creation_ui/components/description_step/translations';
 
 jest.spyOn(useGetSavedQueryMock, 'useGetSavedQuery').mockReturnValue({

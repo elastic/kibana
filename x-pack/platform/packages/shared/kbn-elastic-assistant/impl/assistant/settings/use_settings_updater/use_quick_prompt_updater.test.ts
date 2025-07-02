@@ -8,9 +8,17 @@
 import { renderHook, act } from '@testing-library/react';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { useQuickPromptUpdater } from './use_quick_prompt_updater';
-import { FindPromptsResponse, PromptResponse } from '@kbn/elastic-assistant-common';
-
+import { FindPromptsResponse, PromptResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common';
+import { bulkUpdatePrompts } from '../../../..';
+import { IToasts } from '@kbn/core-notifications-browser';
 const mockHttp = {} as HttpSetup;
+jest.mock('../../../..');
+jest.mock('../../quick_prompts/quick_prompt_settings/helpers', () => {
+  return {
+    getRandomEuiColor: jest.fn(() => '#61A2FF'),
+  };
+});
+const mockBulkUpdatePrompts = bulkUpdatePrompts as jest.Mock;
 const quickPrompt: PromptResponse = {
   timestamp: '2025-02-24T18:13:51.851Z',
   users: [{ id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0', name: 'elastic' }],
@@ -57,11 +65,19 @@ const mockAllPrompts: FindPromptsResponse = {
     },
   ],
 };
+const mockToasts = {
+  addSuccess: jest.fn(),
+  addDanger: jest.fn(),
+} as unknown as IToasts;
 
 describe('useQuickPromptUpdater', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it('should initialize with quick prompts', () => {
     const { result } = renderHook(() =>
       useQuickPromptUpdater({
+        toasts: mockToasts,
         allPrompts: mockAllPrompts,
         currentAppId: 'securitySolutionUI',
         http: mockHttp,
@@ -76,6 +92,7 @@ describe('useQuickPromptUpdater', () => {
   it('should select a quick prompt by id', () => {
     const { result } = renderHook(() =>
       useQuickPromptUpdater({
+        toasts: mockToasts,
         allPrompts: mockAllPrompts,
         currentAppId: 'securitySolutionUI',
         http: mockHttp,
@@ -93,6 +110,7 @@ describe('useQuickPromptUpdater', () => {
   it('should add a new quick prompt when selecting by name', () => {
     const { result } = renderHook(() =>
       useQuickPromptUpdater({
+        toasts: mockToasts,
         allPrompts: mockAllPrompts,
         currentAppId: 'securitySolutionUI',
         http: mockHttp,
@@ -104,13 +122,21 @@ describe('useQuickPromptUpdater', () => {
       result.current.onQuickPromptSelect('New Quick Prompt');
     });
 
-    expect(result.current.quickPromptSettings).toHaveLength(3);
-    expect(result.current.quickPromptSettings[2].name).toBe('New Quick Prompt');
+    expect(result.current.selectedQuickPrompt).toEqual({
+      name: 'New Quick Prompt',
+      id: '',
+      content: '',
+      color: '#61A2FF',
+      categories: [],
+      promptType: PromptTypeEnum.quick,
+      consumer: 'securitySolutionUI',
+    });
   });
 
   it('should change the content of a selected quick prompt', () => {
     const { result } = renderHook(() =>
       useQuickPromptUpdater({
+        toasts: mockToasts,
         allPrompts: mockAllPrompts,
         currentAppId: 'securitySolutionUI',
         http: mockHttp,
@@ -132,6 +158,7 @@ describe('useQuickPromptUpdater', () => {
   it('should update prompt color', () => {
     const { result } = renderHook(() =>
       useQuickPromptUpdater({
+        toasts: mockToasts,
         allPrompts: mockAllPrompts,
         currentAppId: 'securitySolutionUI',
         http: mockHttp,
@@ -156,6 +183,7 @@ describe('useQuickPromptUpdater', () => {
   it('should reset quick prompt settings', () => {
     const { result } = renderHook(() =>
       useQuickPromptUpdater({
+        toasts: mockToasts,
         allPrompts: mockAllPrompts,
         currentAppId: 'securitySolutionUI',
         http: mockHttp,
@@ -167,12 +195,101 @@ describe('useQuickPromptUpdater', () => {
       result.current.onQuickPromptSelect('New Quick Prompt');
     });
 
-    expect(result.current.quickPromptSettings).toHaveLength(3);
+    expect(result.current.selectedQuickPrompt?.name).toEqual('New Quick Prompt');
 
     act(() => {
       result.current.resetQuickPromptSettings();
     });
+    expect(result.current.selectedQuickPrompt).toEqual(undefined);
+  });
+  it('should delete a quick prompt by id', async () => {
+    const { result } = renderHook(() =>
+      useQuickPromptUpdater({
+        toasts: mockToasts,
+        allPrompts: mockAllPrompts,
+        currentAppId: 'securitySolutionUI',
+        http: mockHttp,
+        promptsLoaded: true,
+      })
+    );
 
-    expect(result.current.quickPromptSettings).toHaveLength(2);
+    act(() => {
+      result.current.onQuickPromptDelete('OZ4qOZUBqnYEVX-cWulv');
+    });
+    await act(async () => {
+      await result.current.saveQuickPromptSettings();
+    });
+
+    expect(mockBulkUpdatePrompts).toHaveBeenCalledWith(
+      mockHttp,
+      {
+        delete: { ids: ['OZ4qOZUBqnYEVX-cWulv'] },
+      },
+      mockToasts
+    );
+  });
+
+  it('should change the context of a selected quick prompt', () => {
+    const { result } = renderHook(() =>
+      useQuickPromptUpdater({
+        toasts: mockToasts,
+        allPrompts: mockAllPrompts,
+        currentAppId: 'securitySolutionUI',
+        http: mockHttp,
+        promptsLoaded: true,
+      })
+    );
+
+    act(() => {
+      result.current.onQuickPromptSelect('OZ4qOZUBqnYEVX-cWulv');
+    });
+
+    act(() => {
+      result.current.onQuickPromptContextChange([
+        { category: 'new-category', description: 'text', tooltip: 'hi' },
+      ]);
+    });
+
+    expect(result.current.selectedQuickPrompt?.categories).toEqual(['new-category']);
+  });
+
+  it('should save quick prompt settings', async () => {
+    const { result } = renderHook(() =>
+      useQuickPromptUpdater({
+        toasts: mockToasts,
+        allPrompts: mockAllPrompts,
+        currentAppId: 'securitySolutionUI',
+        http: mockHttp,
+        promptsLoaded: true,
+      })
+    );
+
+    act(() => {
+      result.current.onQuickPromptSelect('OZ4qOZUBqnYEVX-cWulv');
+    });
+
+    act(() => {
+      result.current.onPromptContentChange('Updated content');
+    });
+    await act(async () => {
+      await result.current.saveQuickPromptSettings();
+    });
+    expect(mockBulkUpdatePrompts).toHaveBeenCalledWith(
+      mockHttp,
+      {
+        create: [
+          {
+            categories: [],
+            color: '#61A2FF',
+            consumer: 'securitySolutionUI',
+            content: 'Updated content',
+            id: '',
+            name: 'OZ4qOZUBqnYEVX-cWulv',
+            promptType: 'quick',
+          },
+        ],
+      },
+      mockToasts
+    );
   });
 });

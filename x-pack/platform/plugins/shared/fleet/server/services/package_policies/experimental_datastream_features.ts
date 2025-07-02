@@ -155,21 +155,32 @@ export async function handleExperimentalDatastreamFeatureOptIn({
     });
 
     if (isSyntheticSourceOptInChanged) {
-      sourceModeSettings = {
-        _source: {
-          ...(featureMapEntry.features.synthetic_source ? { mode: 'synthetic' } : {}),
-        },
-      };
+      sourceModeSettings = featureMapEntry.features.synthetic_source
+        ? {
+            source: {
+              mode: 'synthetic',
+            },
+          }
+        : {};
     }
 
     if (componentTemplateChanged) {
       const body = {
         template: {
           ...componentTemplate.template,
+          settings: {
+            ...componentTemplate.template?.settings,
+            index: {
+              ...componentTemplate.template?.settings?.index,
+              mapping: {
+                ...componentTemplate.template?.settings?.index?.mapping,
+                ...sourceModeSettings,
+              },
+            },
+          },
           mappings: {
             ...mappings,
             properties: mappingsProperties ?? {},
-            ...sourceModeSettings,
           },
         },
       };

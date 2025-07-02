@@ -87,17 +87,7 @@ describe('useTimeRange', () => {
     );
     expect(result.current.timeRangeDisplay).toMatchInlineSnapshot(`
       <EuiText
-        css={
-          Object {
-            "map": undefined,
-            "name": "1vgo99t",
-            "next": undefined,
-            "styles": "
-          padding: 0 8px 0 8px;
-        ",
-            "toString": [Function],
-          }
-        }
+        css="unknown styles"
         size="xs"
         textAlign="center"
       >
@@ -122,17 +112,7 @@ describe('useTimeRange', () => {
     expect(result.current.timeRangeDisplay).toMatchInlineSnapshot(`
       <EuiFlexGroup
         alignItems="baseline"
-        css={
-          Object {
-            "map": undefined,
-            "name": "1ly21re",
-            "next": undefined,
-            "styles": "
-            flex-grow: 0;
-          ",
-            "toString": [Function],
-          }
-        }
+        css="unknown styles"
         gutterSize="none"
         justifyContent="center"
         responsive={false}
@@ -141,17 +121,7 @@ describe('useTimeRange', () => {
           grow={false}
         >
           <EuiText
-            css={
-              Object {
-                "map": undefined,
-                "name": "1vgo99t",
-                "next": undefined,
-                "styles": "
-          padding: 0 8px 0 8px;
-        ",
-                "toString": [Function],
-              }
-            }
+            css="unknown styles"
             size="xs"
             textAlign="center"
           >
@@ -188,17 +158,7 @@ describe('useTimeRange', () => {
     expect(result.current.timeRangeDisplay).toMatchInlineSnapshot(`
       <EuiFlexGroup
         alignItems="baseline"
-        css={
-          Object {
-            "map": undefined,
-            "name": "1ly21re",
-            "next": undefined,
-            "styles": "
-            flex-grow: 0;
-          ",
-            "toString": [Function],
-          }
-        }
+        css="unknown styles"
         gutterSize="none"
         justifyContent="center"
         responsive={false}
@@ -207,17 +167,7 @@ describe('useTimeRange', () => {
           grow={false}
         >
           <EuiText
-            css={
-              Object {
-                "map": undefined,
-                "name": "1vgo99t",
-                "next": undefined,
-                "styles": "
-          padding: 0 8px 0 8px;
-        ",
-                "toString": [Function],
-              }
-            }
+            css="unknown styles"
             size="xs"
             textAlign="center"
           >
@@ -251,17 +201,7 @@ describe('useTimeRange', () => {
     );
     expect(result.current.timeRangeDisplay).toMatchInlineSnapshot(`
       <EuiText
-        css={
-          Object {
-            "map": undefined,
-            "name": "1vgo99t",
-            "next": undefined,
-            "styles": "
-          padding: 0 8px 0 8px;
-        ",
-            "toString": [Function],
-          }
-        }
+        css="unknown styles"
         size="xs"
         textAlign="center"
       >

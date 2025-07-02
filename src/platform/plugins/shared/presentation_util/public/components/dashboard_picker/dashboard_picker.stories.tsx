@@ -23,6 +23,8 @@ export default {
   },
 };
 
-export const Example = ({ isDisabled }: { isDisabled: boolean }) => (
-  <DashboardPicker onChange={action('onChange')} isDisabled={isDisabled} />
-);
+export const Example = {
+  render: ({ isDisabled }: { isDisabled: boolean }) => (
+    <DashboardPicker onChange={action('onChange')} isDisabled={isDisabled} />
+  ),
+};

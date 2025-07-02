@@ -31,6 +31,7 @@ exports[`Doc table cell component renders a cell with filter buttons if it is fi
           className="kbnDocTableCell__filterButton"
           content="Filter for value"
           delay="regular"
+          disableScreenReaderOutput={false}
           display="inlineBlock"
           position="bottom"
         >
@@ -158,6 +159,7 @@ exports[`Doc table cell component renders a cell with filter buttons if it is fi
           className="kbnDocTableCell__filterButton"
           content="Filter out value"
           delay="regular"
+          disableScreenReaderOutput={false}
           display="inlineBlock"
           position="bottom"
         >

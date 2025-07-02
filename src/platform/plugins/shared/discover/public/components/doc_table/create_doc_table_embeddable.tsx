@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { DocTableEmbeddable, DocTableEmbeddableProps } from './doc_table_embeddable';
+import type { DocTableEmbeddableProps } from './doc_table_embeddable';
+import { DocTableEmbeddable } from './doc_table_embeddable';
 
 export function DiscoverDocTableEmbeddable(renderProps: DocTableEmbeddableProps) {
   return (

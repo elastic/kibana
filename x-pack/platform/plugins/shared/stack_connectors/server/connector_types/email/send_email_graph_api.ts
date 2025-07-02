@@ -7,12 +7,13 @@
 
 // @ts-expect-error missing type def
 import stringify from 'json-stringify-safe';
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { Logger } from '@kbn/core/server';
+import type { AxiosInstance, AxiosResponse } from 'axios';
+import axios from 'axios';
+import type { Logger } from '@kbn/core/server';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { SendEmailOptions } from './send_email';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { SendEmailOptions } from './send_email';
 
 export async function sendEmailGraphApi(
   sendEmailOptions: SendEmailGraphApiOptions,

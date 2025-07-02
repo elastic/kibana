@@ -145,6 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
         'endpoint:user-artifact-packager',
         'entity_store:data_view:refresh',
         'entity_store:field_retention:enrichment',
+        'fleet:automatic-agent-upgrade-task',
         'fleet:bump_agent_policies',
         'fleet:check-deleted-files-task',
         'fleet:delete-unenrolled-agents-task',
@@ -168,6 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
         'security:endpoint-diagnostics',
         'security:endpoint-meta-telemetry',
         'security:indices-metadata-telemetry',
+        'security:ingest-pipelines-stats-telemetry',
         'security:telemetry-configuration',
         'security:telemetry-detection-rules',
         'security:telemetry-diagnostic-timelines',
@@ -176,6 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
         'security:telemetry-prebuilt-rule-alerts',
         'security:telemetry-timelines',
         'session_cleanup',
+        'slo:temp-summary-cleanup-task',
         'task_manager:delete_inactive_background_task_nodes',
         'task_manager:mark_removed_tasks_as_unrecognized',
       ]);

@@ -7,15 +7,15 @@
 
 import { monitorEventLoopDelay } from 'perf_hooks';
 
-import { ConcreteTaskInstance } from './task';
+import type { ConcreteTaskInstance } from './task';
 
-import { Result, Err } from './lib/result_type';
-import { ClaimAndFillPoolResult } from './lib/fill_pool';
-import { PollingError } from './polling';
-import { DecoratedError, TaskRunResult } from './task_running';
-import { EphemeralTaskInstanceRequest } from './ephemeral_task_lifecycle';
+import type { Result, Err } from './lib/result_type';
+import type { ClaimAndFillPoolResult } from './lib/fill_pool';
+import type { PollingError } from './polling';
+import type { DecoratedError, TaskRunResult } from './task_running';
 import type { EventLoopDelayConfig } from './config';
-import { TaskManagerMetrics } from './metrics/task_metrics_collector';
+import type { TaskManagerMetrics } from './metrics/task_metrics_collector';
+import type { EphemeralTaskInstanceRequest } from './ephemeral_task_lifecycle';
 
 export enum TaskPersistence {
   Recurring = 'recurring',

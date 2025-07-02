@@ -26,22 +26,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // Failing: See https://github.com/elastic/kibana/issues/173165
   describe.skip('Header menu', () => {
     before(async () => {
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await esArchiver.load(
         'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
       );
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await PageObjects.svlCommonPage.loginAsViewer();
       await PageObjects.observabilityLogsExplorer.navigateTo();
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
       );
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     it('should inject the app header menu on the top navbar', async () => {

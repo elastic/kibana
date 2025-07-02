@@ -11,6 +11,8 @@ import { TooltipInfo, XYChartSeriesIdentifier } from '@elastic/charts';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import React, { FC } from 'react';
+import { euiFontSize, euiShadow, type UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { CommonXYDataLayerConfig } from '../../../common';
 import {
   DatatablesWithFormatInfo,
@@ -22,8 +24,6 @@ import { XDomain } from '../x_domain';
 import { EndzoneTooltipHeader } from './endzone_tooltip_header';
 import { TooltipData, TooltipRow } from './tooltip_row';
 import { isEndzoneBucket } from './utils';
-
-import './tooltip.scss';
 
 type Props = TooltipInfo & {
   xDomain?: XDomain;
@@ -126,9 +126,9 @@ export const Tooltip: FC<Props> = ({
   const renderEndzoneTooltip = header ? isEndzoneBucket(header?.value, xDomain) : false;
 
   return (
-    <div className="detailedTooltip">
+    <div css={styles.customToolTip}>
       {renderEndzoneTooltip && (
-        <div className="detailedTooltip__header">
+        <div css={styles.header}>
           <EndzoneTooltipHeader />
         </div>
       )}
@@ -137,4 +137,43 @@ export const Tooltip: FC<Props> = ({
       </table>
     </div>
   );
+};
+
+const styles = {
+  header: ({ euiTheme }: UseEuiTheme) => css`
+    > :last-child {
+      margin-bottom: ${euiTheme.size.s};
+    }
+  `,
+
+  customToolTip: (euiThemeContext: UseEuiTheme) =>
+    css`
+      z-index: ${euiThemeContext.euiTheme.levels.toast};
+      pointer-events: none;
+
+      padding: ${euiThemeContext.euiTheme.size.s};
+      border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
+      max-width: calc(${euiThemeContext.euiTheme.size.xl} * 10);
+      overflow: hidden;
+      border: ${euiThemeContext.euiTheme.border.width.thin} solid
+        ${euiThemeContext.euiTheme.components.tooltipBorderFloating};
+
+      ${euiFontSize(euiThemeContext, 's')}
+      color: ${euiThemeContext.euiTheme.colors.textParagraph};
+
+      ${euiShadow(euiThemeContext)}
+      background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
+
+      table {
+        table-layout: fixed;
+        width: 100%;
+
+        td,
+        th {
+          text-align: left;
+          padding: ${euiThemeContext.euiTheme.size.xs};
+          overflow-wrap: break-word;
+        }
+      }
+    `,
 };

@@ -12,10 +12,11 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep } from '../test_utils';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { MonitoringStats } from '../monitoring';
-import { configSchema, TaskManagerConfig } from '../config';
+import type { MonitoringStats } from '../monitoring';
+import type { TaskManagerConfig } from '../config';
+import { configSchema } from '../config';
 import { backgroundTaskUtilizationRoute } from './background_task_utilization';
-import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');

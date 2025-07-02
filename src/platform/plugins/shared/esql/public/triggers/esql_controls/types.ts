@@ -13,6 +13,11 @@ export enum EsqlControlType {
   VALUES_FROM_QUERY = 'VALUES_FROM_QUERY',
 }
 
+export enum VariableNamePrefix {
+  IDENTIFIER = '??',
+  VALUE = '?',
+}
+
 export type ControlWidthOptions = 'small' | 'medium' | 'large';
 
 export interface ESQLControlState {

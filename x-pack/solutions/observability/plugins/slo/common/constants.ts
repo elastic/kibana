@@ -85,6 +85,9 @@ export const getSLOPipelineId = (sloId: string, sloRevision: number) =>
 export const getSLOSummaryPipelineId = (sloId: string, sloRevision: number) =>
   `.slo-observability.summary.pipeline-${sloId}-${sloRevision}`;
 
+export const getWildcardPipelineId = (sloId: string, sloRevision: number) =>
+  `.slo-observability.*.pipeline-${sloId}-${sloRevision}`;
+
 export const SYNTHETICS_INDEX_PATTERN = 'synthetics-*';
 export const SYNTHETICS_DEFAULT_GROUPINGS = ['monitor.name', 'observer.geo.name', 'monitor.id'];
 

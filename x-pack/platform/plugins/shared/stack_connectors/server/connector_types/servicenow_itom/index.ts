@@ -20,7 +20,7 @@ import {
   ExternalIncidentServiceConfigurationBaseSchema,
 } from '../lib/servicenow/schema';
 import * as i18n from '../lib/servicenow/translations';
-import {
+import type {
   ExecutorSubActionGetChoicesParams,
   PushToServiceResponse,
   ServiceNowExecutorResultData,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { addons } from '@storybook/addons';
+import { addons } from '@storybook/manager-api';
 import { create } from '@storybook/theming';
 import { PANEL_ID } from '@storybook/addon-actions';
 

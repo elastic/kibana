@@ -1,0 +1,26 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search-query-rules",
+  "owner": "@elastic/search-kibana",
+  "group": "search",
+  "visibility": "private",
+  "plugin": {
+    "id": "searchQueryRules",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "searchQueryRules",
+    ],
+    "requiredPlugins": [
+      "features",
+    ],
+    "optionalPlugins": [
+      "console",
+      "searchNavigation",
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+    ]
+  }
+}

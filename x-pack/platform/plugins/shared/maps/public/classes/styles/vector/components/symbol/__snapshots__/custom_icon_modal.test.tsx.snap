@@ -85,6 +85,7 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
                 <EuiToolTip
                   content="Adjusts the balance of the signed distance function between the inside (approaching 1) and outside (approaching 0) of the icon."
                   delay="regular"
+                  disableScreenReaderOutput={false}
                   display="inlineBlock"
                   position="top"
                 >
@@ -118,6 +119,7 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
                 <EuiToolTip
                   content="Adjusts the size of the signed distance function around the Alpha threshold as a percent of icon size."
                   delay="regular"
+                  disableScreenReaderOutput={false}
                   display="inlineBlock"
                   position="top"
                 >

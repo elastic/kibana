@@ -8,37 +8,23 @@
 import { RootSchema, EventTypeOpts } from '@kbn/core/server';
 
 interface ScoredDocument {
-  content: string;
-  elserScore: number;
+  esScore: number;
   llmScore: number;
 }
 
 export interface RecallRanking {
-  prompt: string;
   scoredDocuments: ScoredDocument[];
 }
 
 const schema: RootSchema<RecallRanking> = {
-  prompt: {
-    type: 'text',
-    _meta: {
-      description: 'The user prompt that was used for the ELSER text_expansion',
-    },
-  },
   scoredDocuments: {
     type: 'array',
     items: {
       properties: {
-        content: {
-          type: 'text',
-          _meta: {
-            description: 'The raw content of the recalled document',
-          },
-        },
-        elserScore: {
+        esScore: {
           type: 'float',
           _meta: {
-            description: 'The score produced by ELSER text_expansion',
+            description: 'The score produced by Elasticsearch',
           },
         },
         llmScore: {

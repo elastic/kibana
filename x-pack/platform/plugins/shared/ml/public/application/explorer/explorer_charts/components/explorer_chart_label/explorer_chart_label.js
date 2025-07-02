@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import './_explorer_chart_label.scss';
 import PropTypes from 'prop-types';
 import React, { Fragment, useCallback } from 'react';
 
-import { EuiIconTip } from '@elastic/eui';
+import { EuiIconTip, useEuiTheme } from '@elastic/eui';
 
 import { ExplorerChartLabelBadge } from './explorer_chart_label_badge';
 import { ExplorerChartInfoTooltip } from '../../explorer_chart_info_tooltip';
 import { EntityFilter } from './entity_filter';
+import { css } from '@emotion/react';
 
 export function ExplorerChartLabel({
   detectorLabel,
@@ -67,9 +67,11 @@ export function ExplorerChartLabel({
   });
 
   const infoIcon = (
-    <span className="ml-explorer-chart-info-icon">
+    <span>
       <EuiIconTip
-        className="ml-explorer-chart-eui-icon-tip"
+        css={{
+          maxWidth: 'none',
+        }}
         content={<ExplorerChartInfoTooltip {...infoTooltip} />}
         position="top"
         size="s"
@@ -77,10 +79,18 @@ export function ExplorerChartLabel({
     </span>
   );
 
+  const { euiTheme } = useEuiTheme();
+
+  const badgesStyles = css({
+    display: 'flex',
+    alignItems: 'center',
+    marginTop: euiTheme.size.xs,
+  });
+
   return (
     <>
-      <span className="ml-explorer-chart-label">
-        <span className="ml-explorer-chart-label-detector">
+      <span>
+        <span>
           {detectorLabel}
           {labelSeparator}
         </span>
@@ -91,7 +101,7 @@ export function ExplorerChartLabel({
           </>
         )}
       </span>
-      {wrapLabel && <span className="ml-explorer-chart-label-badges">{entityFieldBadges}</span>}
+      {wrapLabel && <span css={badgesStyles}>{entityFieldBadges}</span>}
     </>
   );
 }

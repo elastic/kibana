@@ -9,13 +9,15 @@
 
 import { isEqual, uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
-import { Filter, fromCombinedFilter } from '@kbn/es-query';
-import { Query, uniqFilters } from '@kbn/es-query';
+import type { ExecutionContext } from '@kbn/expressions-plugin/common';
+import type { Filter } from '@kbn/es-query';
+import { fromCombinedFilter } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
+import { uniqFilters } from '@kbn/es-query';
 import { unboxExpressionValue } from '@kbn/expressions-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { ExpressionFunctionKibanaContext } from '@kbn/data-plugin/common';
-import { SavedSearch } from '../types';
+import type { ExpressionFunctionKibanaContext } from '@kbn/data-plugin/common';
+import type { SavedSearch } from '../types';
 
 export interface KibanaContextStartDependencies {
   getSavedSearch: (id: string) => Promise<SavedSearch>;

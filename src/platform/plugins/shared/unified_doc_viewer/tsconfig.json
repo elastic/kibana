@@ -39,8 +39,8 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/management-settings-ids",
     "@kbn/apm-types",
-    "@kbn/event-stacktrace"
-
+    "@kbn/event-stacktrace",
+    "@kbn/react-hooks"
   ],
   "exclude": [
     "target/**/*",

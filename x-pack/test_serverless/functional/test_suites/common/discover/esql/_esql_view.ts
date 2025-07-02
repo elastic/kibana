@@ -41,12 +41,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       log.debug('load kibana index with default index pattern');
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
-      // and load a set of makelogs data
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
+      // and load a set of makelogs data
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await esArchiver.load(
+        'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
+      );
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();

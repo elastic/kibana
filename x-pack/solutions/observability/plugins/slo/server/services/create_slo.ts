@@ -100,7 +100,7 @@ export class CreateSLO {
         this.summaryTransformManager.start(summaryTransformId),
       ]);
     } catch (err) {
-      this.logger.error(
+      this.logger.debug(
         `Cannot create the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back. ${err}`
       );
 
@@ -108,7 +108,7 @@ export class CreateSLO {
         try {
           await operation();
         } catch (rollbackErr) {
-          this.logger.error(`Rollback operation failed. ${rollbackErr}`);
+          this.logger.debug(`Rollback operation failed. ${rollbackErr}`);
         }
       });
 

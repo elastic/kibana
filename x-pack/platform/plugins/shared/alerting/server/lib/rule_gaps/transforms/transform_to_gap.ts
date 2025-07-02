@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
+import type { QueryEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { Gap } from '../gap';
-import { StringInterval } from '../types';
+import type { StringInterval } from '../types';
 
 type PotentialInterval = { lte?: string; gte?: string } | undefined;
 

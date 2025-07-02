@@ -24,7 +24,10 @@ export const navigateToDiscoverPageInServerless = () => {
 };
 
 export const navigateToExplorePageInServerless = () => {
-  navigateTo(EXPLORE);
+  // NOTE: the "Explore" page is not directly accessible from the side nav at this time
+  navigateTo(EXPLORE); // open secondary navigation panel
+  navigateTo('[data-test-subj~="panelNavItem-id-hosts"]'); // navigate to "Hosts"
+  navigateToExploreUsingBreadcrumb();
 };
 
 export const navigateToHostsUsingBreadcrumb = () => {

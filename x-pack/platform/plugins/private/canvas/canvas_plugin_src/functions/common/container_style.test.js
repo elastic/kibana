@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getElasticLogo } from '@kbn/presentation-util-plugin/common';
+import { elasticLogo } from '@kbn/expression-utils';
 import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { getFunctionErrors } from '../../../i18n';
 import { containerStyle } from './containerStyle';
@@ -14,11 +14,6 @@ const errors = getFunctionErrors().containerStyle;
 
 describe('containerStyle', () => {
   const fn = functionWrapper(containerStyle);
-
-  let elasticLogo;
-  beforeEach(async () => {
-    elasticLogo = (await getElasticLogo()).elasticLogo;
-  });
 
   describe('default output', () => {
     it('returns a containerStyle', () => {

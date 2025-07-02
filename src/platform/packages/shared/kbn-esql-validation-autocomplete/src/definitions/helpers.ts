@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CommandDefinition, FunctionDefinition, FunctionParameterType } from './types';
+import type { FunctionDefinition, FunctionParameterType } from './types';
 
 /**
  * Given a function definition, this function will return a list of function signatures
@@ -53,52 +53,6 @@ function handleAdditionalArgs(
         .map((arg) => printArguments(arg, withTypes))
         .join(', ')}${withTypes ? ']' : ''}`
     : '';
-}
-
-export function getCommandSignature(
-  { name, signature, options, examples }: CommandDefinition<string>,
-  typeName?: string,
-  { withTypes }: { withTypes: boolean } = { withTypes: true }
-) {
-  const commandName = typeName
-    ? `${typeName.toUpperCase()} ${name.toUpperCase()}`
-    : name.toUpperCase();
-  return {
-    declaration: `${commandName} ${printCommandArguments(signature, withTypes)} ${(
-      options || []
-    ).map(
-      (option) =>
-        `${
-          option.wrapped ? option.wrapped[0] : ''
-        }${option.name.toUpperCase()} ${printCommandArguments(option.signature, withTypes)}${
-          option.wrapped ? option.wrapped[1] : ''
-        }`
-    )}`,
-    examples,
-  };
-}
-
-function printCommandArguments(
-  { multipleParams, params }: CommandDefinition<string>['signature'],
-  withTypes: boolean
-): string {
-  return `${params.map((arg) => printCommandArgument(arg, withTypes)).join(', `')}${
-    multipleParams
-      ? ` ,[...${params.map((arg) => printCommandArgument(arg, withTypes)).join(', `')}]`
-      : ''
-  }`;
-}
-
-function printCommandArgument(
-  param: CommandDefinition<string>['signature']['params'][number],
-  withTypes: boolean
-): string {
-  if (!withTypes) {
-    return param.name || '';
-  }
-  return `${param.name}${param.optional ? ':?' : ':'} ${param.type}${
-    param.innerTypes ? `{${param.innerTypes}}` : ''
-  }`;
 }
 
 export function printArguments(

@@ -7,11 +7,14 @@
 
 import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
-import { ActionTypeRegistry, ActionTypeRegistryOpts } from '../action_type_registry';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { ActionTypeRegistryOpts } from '../action_type_registry';
+import { ActionTypeRegistry } from '../action_type_registry';
 import { ActionsClient } from './actions_client';
-import { ExecutorType } from '../types';
-import { ActionExecutor, TaskRunnerFactory, ILicenseState } from '../lib';
+import type { ExecutorType } from '../types';
+import type { ILicenseState } from '../lib';
+import { ActionExecutor, TaskRunnerFactory } from '../lib';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { licenseStateMock } from '../lib/license_state.mock';
@@ -24,7 +27,7 @@ import {
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { actionExecutorMock } from '../lib/action_executor.mock';
-import { ActionsAuthorization } from '../authorization/actions_authorization';
+import type { ActionsAuthorization } from '../authorization/actions_authorization';
 import { actionsAuthorizationMock } from '../authorization/actions_authorization.mock';
 import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';

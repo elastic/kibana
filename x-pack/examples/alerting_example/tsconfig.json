@@ -32,5 +32,6 @@
     "@kbn/unified-search-plugin",
     "@kbn/response-ops-rule-form",
     "@kbn/fields-metadata-plugin",
+    "@kbn/i18n-react",
   ]
 }

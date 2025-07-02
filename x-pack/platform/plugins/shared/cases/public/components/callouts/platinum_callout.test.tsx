@@ -6,22 +6,20 @@
  */
 
 import React from 'react';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+import { screen } from '@testing-library/react';
+
 import { PlatinumLicenseCallout } from './platinum_callout';
+import { renderWithTestingProviders } from '../../common/mock';
 
 describe('PlatinumLicenseCallout ', () => {
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders', () => {
-    const result = appMockRender.render(<PlatinumLicenseCallout />);
+    renderWithTestingProviders(<PlatinumLicenseCallout />);
 
-    expect(result.getByTestId('case-callout-license-info')).toBeInTheDocument();
-    expect(result.getByText('Upgrade to an appropriate license')).toBeInTheDocument();
+    expect(screen.getByTestId('case-callout-license-info')).toBeInTheDocument();
+    expect(screen.getByText('Upgrade to an appropriate license')).toBeInTheDocument();
   });
 });

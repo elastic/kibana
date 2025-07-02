@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import { FixturePlugin } from './plugin';
 
 export const plugin = async (initializerContext: PluginInitializerContext) =>

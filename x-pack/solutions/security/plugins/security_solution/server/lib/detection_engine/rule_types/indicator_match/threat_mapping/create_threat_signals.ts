@@ -45,7 +45,6 @@ export const createThreatSignals = async ({
   services,
   wrapSuppressedHits,
   licensing,
-  experimentalFeatures,
   scheduleNotificationResponseActionsService,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const {
@@ -89,7 +88,6 @@ export const createThreatSignals = async ({
     enrichmentTimes: [],
     bulkCreateTimes: [],
     searchAfterTimes: [],
-    lastLookBackDate: null,
     createdSignalsCount: 0,
     suppressedAlertsCount: 0,
     createdSignals: [],
@@ -341,7 +339,6 @@ export const createThreatSignals = async ({
           threatIndexFields,
           sortOrder,
           isAlertSuppressionActive,
-          experimentalFeatures,
         }),
     });
   } else {
@@ -377,7 +374,6 @@ export const createThreatSignals = async ({
           threatIndexFields,
           sortOrder,
           isAlertSuppressionActive,
-          experimentalFeatures,
         }),
     });
   }

@@ -8,6 +8,6 @@
  */
 
 import { createContext } from 'react';
-import { QueryClient } from '@tanstack/react-query';
+import type { QueryClient } from '@tanstack/react-query';
 
 export const AlertsQueryContext = createContext<QueryClient | undefined>(undefined);

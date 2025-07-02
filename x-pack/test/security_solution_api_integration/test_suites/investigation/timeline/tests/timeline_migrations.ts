@@ -37,7 +37,8 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
   const utils = getService('securitySolutionUtils');
   let supertest: TestAgent;
 
-  describe('@skipInServerless Timeline migrations', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/201872
+  describe.skip('@skipInServerless Timeline migrations', () => {
     before(async () => {
       supertest = await utils.createSuperTest();
     });

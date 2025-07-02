@@ -49,6 +49,12 @@ export const registerResolveImportErrorsRoute = (
           accepts: 'multipart/form-data',
         },
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the Saved Objects Client',
+        },
+      },
       validate: {
         query: schema.object(
           {

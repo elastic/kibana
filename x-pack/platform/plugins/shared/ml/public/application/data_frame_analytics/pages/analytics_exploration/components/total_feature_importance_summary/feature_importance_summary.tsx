@@ -8,21 +8,12 @@
 import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
-import { EuiButtonEmpty, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer, EuiText, EuiCallOut, useEuiTheme } from '@elastic/eui';
 import type { RecursivePartial, AxisStyle, PartialTheme, BarSeriesProps } from '@elastic/charts';
-import {
-  Chart,
-  Settings,
-  Axis,
-  ScaleType,
-  Position,
-  BarSeries,
-  LEGACY_LIGHT_THEME,
-} from '@elastic/charts';
+import { Chart, Settings, Axis, ScaleType, Position, BarSeries } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { euiLightVars as euiVars } from '@kbn/ui-theme';
 import {
   getAnalysisType,
   isClassificationAnalysis,
@@ -39,40 +30,6 @@ import {
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 import { ExpandableSection } from '../expandable_section';
-
-const { euiColorMediumShade } = euiVars;
-const axisColor = euiColorMediumShade;
-
-const axes: RecursivePartial<AxisStyle> = {
-  axisLine: {
-    stroke: axisColor,
-  },
-  tickLabel: {
-    fontSize: 12,
-    fill: axisColor,
-  },
-  tickLine: {
-    stroke: axisColor,
-  },
-  gridLine: {
-    horizontal: {
-      dash: [1, 2],
-    },
-    vertical: {
-      strokeWidth: 0,
-    },
-  },
-};
-const theme: PartialTheme = {
-  axes,
-  legend: {
-    /**
-     * Added buffer between label and value.
-     * Smaller values render a more compact legend
-     */
-    spacingBuffer: 100,
-  },
-};
 
 export interface FeatureImportanceSummaryPanelProps {
   totalFeatureImportance: TotalFeatureImportance[];
@@ -98,8 +55,14 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
   totalFeatureImportance,
   jobConfig,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const {
-    services: { docLinks },
+    services: {
+      docLinks,
+      charts: {
+        theme: { useChartsBaseTheme },
+      },
+    },
   } = useMlKibana();
 
   interface Datum {
@@ -109,6 +72,46 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
   }
   type PlotData = Datum[];
   type SeriesProps = Omit<BarSeriesProps, 'id' | 'xScaleType' | 'yScaleType' | 'data'>;
+
+  const baseTheme = useChartsBaseTheme();
+
+  const theme: PartialTheme = useMemo(() => {
+    const euiColorMediumShade = euiTheme.colors.mediumShade;
+    const axisColor = euiColorMediumShade;
+
+    const axes: RecursivePartial<AxisStyle> = {
+      axisLine: {
+        stroke: axisColor,
+      },
+      tickLabel: {
+        fontSize: 12,
+        fill: axisColor,
+      },
+      tickLine: {
+        stroke: axisColor,
+      },
+      gridLine: {
+        horizontal: {
+          dash: [1, 2],
+        },
+        vertical: {
+          strokeWidth: 0,
+        },
+      },
+    };
+
+    return {
+      axes,
+      legend: {
+        /**
+         * Added buffer between label and value.
+         * Smaller values render a more compact legend
+         */
+        spacingBuffer: 100,
+      },
+    };
+  }, [euiTheme]);
+
   const [plotData, barSeriesSpec, showLegend, chartHeight] = useMemo<
     [plotData: PlotData, barSeriesSpec: SeriesProps, showLegend?: boolean, chartHeight?: number]
   >(() => {
@@ -295,8 +298,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
                 <Settings
                   rotation={90}
                   theme={theme}
-                  // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-                  baseTheme={LEGACY_LIGHT_THEME}
+                  baseTheme={baseTheme}
                   showLegend={showLegend}
                   locale={i18n.getLocale()}
                 />

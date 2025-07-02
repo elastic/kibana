@@ -8,7 +8,7 @@
  */
 
 import React, { type FC, useMemo, useEffect, useState, useCallback } from 'react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import {
   EuiTitle,
   EuiCollapsibleNavItem,
@@ -20,6 +20,7 @@ import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
 import type { EuiThemeSize, RenderAs } from '@kbn/core-chrome-browser/src/project_navigation';
 
+import { SubItemTitle } from './subitem_title';
 import { useNavigation as useServices } from '../../services';
 import { isAbsoluteLink, isActiveFromUrl, isAccordionNode } from '../../utils';
 import type { BasePathService, NavigateToUrlFn } from '../../types';
@@ -117,7 +118,6 @@ const serializeNavNode = (
   const serialized: ChromeProjectNavigationNode = {
     ...navNode,
   };
-
   serialized.renderAs = getRenderAs(serialized, { isSideNavCollapsed });
   serialized.spaceBefore = getSpaceBefore(serialized, {
     isSideNavCollapsed,
@@ -138,9 +138,17 @@ const serializeNavNode = (
 const isEuiCollapsibleNavItemProps = (
   props: EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemProps
 ): props is EuiCollapsibleNavItemProps => {
-  return (
-    props.title !== undefined && (props as EuiCollapsibleNavSubItemProps).renderItem === undefined
-  );
+  // collapsible nav item should not have renderItem
+  if ('renderItem' in props) {
+    return false;
+  }
+
+  if (!(props.title || props.items?.length)) {
+    // title is not needed if nav item has sub-items
+    return false;
+  }
+
+  return true;
 };
 
 const renderBlockTitle: (
@@ -153,7 +161,7 @@ const renderBlockTitle: (
       size="xxxs"
       className="eui-textTruncate"
       data-test-subj={dataTestSubj}
-      css={({ euiTheme }: any) => {
+      css={({ euiTheme }) => {
         return {
           marginTop: spaceBefore ? euiTheme.size[spaceBefore] : undefined,
           paddingBlock: euiTheme.size.xs,
@@ -257,7 +265,7 @@ const getEuiProps = (
   // if it is the highest match in the URL, not if one of its children is also active.
   const onlyIfHighestMatch = isAccordion && !isCollapsible;
   const isActive = isActiveFromUrl(navNode.path, activeNodes, onlyIfHighestMatch);
-  const isExternal = Boolean(href) && !navNode.isElasticInternalLink && isAbsoluteLink(href!);
+  const isExternal = Boolean(href) && navNode.isExternalLink && isAbsoluteLink(href!);
   const isAccordionExpanded = !getIsCollapsed(path);
 
   let isSelected = isActive;
@@ -283,6 +291,16 @@ const getEuiProps = (
         })
         .flat();
 
+  /**
+   * Check if the click event is a special click (e.g. right click, click with modifier key)
+   * We do not want to prevent the default behavior in these cases.
+   */
+  const isSpecialClick = (e: React.MouseEvent<HTMLElement | HTMLButtonElement>) => {
+    const isModifiedEvent = !!(e.metaKey || e.altKey || e.ctrlKey || e.shiftKey);
+    const isLeftClickEvent = e.button === 0;
+    return isModifiedEvent || !isLeftClickEvent;
+  };
+
   const linkProps: EuiCollapsibleNavItemProps['linkProps'] | undefined = hasLink
     ? {
         href,
@@ -298,6 +316,10 @@ const getEuiProps = (
 
           if (customOnClick) {
             customOnClick(e);
+            return;
+          }
+
+          if (isSpecialClick(e)) {
             return;
           }
 
@@ -326,6 +348,10 @@ const getEuiProps = (
     // Do not navigate if it is a collapsible accordion, if there is a "link" defined it
     // will be used in the breadcrumb navigation.
     if (isAccordion && isCollapsible) return;
+
+    if (isSpecialClick(e)) {
+      return;
+    }
 
     if (href !== undefined) {
       e.preventDefault();
@@ -368,7 +394,7 @@ function nodeToEuiCollapsibleNavProps(
     _navNode,
     deps
   );
-  const { id, path, href, renderAs, isCollapsible, spaceBefore } = navNode;
+  const { id, path, href, renderAs, isCollapsible, spaceBefore, isExternalLink } = navNode;
 
   if (navNode.renderItem) {
     // Leave the rendering to the consumer
@@ -378,7 +404,9 @@ function nodeToEuiCollapsibleNavProps(
     };
   }
 
-  if (renderAs === 'panelOpener') {
+  const hasVisibleSubItems = subItems && subItems.length > 0;
+
+  if (renderAs === 'panelOpener' && hasVisibleSubItems) {
     // Render as a panel opener (button to open a panel as a second navigation)
     return {
       items: [...renderPanelOpener(navNode, deps)],
@@ -386,7 +414,7 @@ function nodeToEuiCollapsibleNavProps(
     };
   }
 
-  if (renderAs === 'block' && deps.treeDepth > 0 && subItems) {
+  if (renderAs === 'block' && deps.treeDepth > 0 && hasVisibleSubItems) {
     // Render as a group block (bold title + list of links underneath)
     return {
       items: [...renderGroup(navNode, subItems)],
@@ -402,14 +430,17 @@ function nodeToEuiCollapsibleNavProps(
       isSelected,
       onClick,
       icon: navNode.icon,
-      title: navNode.title,
+      // @ts-expect-error title accepts JSX elements and they render correctly but the type definition expects a string
+      title: navNode.withBadge ? <SubItemTitle item={navNode} /> : navNode.title,
       ['data-test-subj']: dataTestSubj,
       iconProps: { size: deps.treeDepth === 0 ? 'm' : 's' },
 
-      // Render as an accordion or a link (handled by EUI) depending if
-      // "items" is undefined or not. If it is undefined --> a link, otherwise an
-      // accordion is rendered.
-      ...(subItems ? { items: subItems, isCollapsible } : { href, linkProps }),
+      // If navNode has subItems, render as an accordion.
+      // Otherwise render as a link.
+      // NavItemProp declarations are handled by us, rendering is handled by EUI.
+      ...(hasVisibleSubItems
+        ? { items: subItems, isCollapsible }
+        : { href, ...linkProps, external: isExternalLink }),
     },
   ];
 
@@ -424,12 +455,6 @@ function nodeToEuiCollapsibleNavProps(
 
   return { items, isVisible };
 }
-
-const className = css`
-  .euiAccordion__childWrapper {
-    transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
-  }
-`;
 
 interface Props {
   navNode: ChromeProjectNavigationNode;
@@ -469,7 +494,6 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
       basePath,
     });
   }, [navNode, navigateToUrl, closePanel, getIsCollapsed, activeNodes, eventTracker, basePath]);
-
   const { items: topLevelItems } = props;
 
   // Serializer to add recursively the accordionProps to each of the items
@@ -532,17 +556,21 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
   }, [topLevelItems, serializeAccordionItems]);
 
   if (!isEuiCollapsibleNavItemProps(props)) {
-    throw new Error(
-      `Invalid EuiCollapsibleNavItem props for node ${(props as EuiCollapsibleNavSubItemProps).id}`
-    );
+    throw new Error(`Invalid EuiCollapsibleNavItem props for node ${_navNode.id}`);
   }
 
   if (!isVisible) {
     return null;
   }
 
+  const navItemStyles = css`
+    .euiAccordion__childWrapper {
+      transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
+    }
+  `;
+
   if (!items) {
-    return <EuiCollapsibleNavItem {...props} className={className} />;
+    return <EuiCollapsibleNavItem {...props} css={navItemStyles} />;
   }
 
   // Item type ExclusiveUnion - accordions should not contain links
@@ -551,7 +579,7 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
   return (
     <EuiCollapsibleNavItem
       {...rest}
-      className={className}
+      css={navItemStyles}
       items={items}
       accordionProps={getAccordionProps(navNode.path)}
     />

@@ -19,7 +19,7 @@ import { useAnomalyDetectionJobsContext } from '../../../../context/anomaly_dete
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTheme } from '../../../../hooks/use_theme';
-import { getLegacyApmHref } from '../../../shared/links/apm/apm_link';
+import { getLegacyApmHref } from '../../../shared/links/apm/apm_link_hooks';
 
 export function AnomalyDetectionSetupLink() {
   const { query } = useApmParams('/*');

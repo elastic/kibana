@@ -13,6 +13,7 @@ import { memoize } from 'lodash';
 import { UI_SETTINGS, ValueSuggestionsMethod } from '@kbn/data-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { TimefilterSetup } from '@kbn/data-plugin/public';
+import { buildQueryFromFilters } from '@kbn/es-query';
 import type { AutocompleteUsageCollector } from '../collectors';
 
 export type ValueSuggestionsGetFn = (args: ValueSuggestionsGetFnArgs) => Promise<any[]>;
@@ -125,7 +126,6 @@ export const setupValueSuggestionProvider = (
     const timeFilter = useTimeRange
       ? getAutocompleteTimefilter(timefilter, indexPattern)
       : undefined;
-    const { buildQueryFromFilters } = await import('@kbn/es-query');
     const filterQuery = timeFilter ? buildQueryFromFilters([timeFilter], indexPattern).filter : [];
     const filters = [...(boolFilter ? boolFilter : []), ...filterQuery];
     try {

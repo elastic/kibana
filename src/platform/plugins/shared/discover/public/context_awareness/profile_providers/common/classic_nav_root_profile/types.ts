@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RootProfileProvider } from '../../..';
+import type { RootProfileProvider } from '../../..';
 
 export interface ClassicNavRootProfileContext {
   allLogsIndexPattern: string | undefined;

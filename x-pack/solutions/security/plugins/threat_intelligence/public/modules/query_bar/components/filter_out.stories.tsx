@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { EuiContextMenuPanel, EuiDataGrid, EuiDataGridColumn } from '@elastic/eui';
 import { EuiDataGridColumnVisibility } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { mockIndicatorsFiltersContext } from '../../../mocks/mock_indicators_filters_context';
@@ -18,7 +18,7 @@ export default {
   title: 'FilterOut',
 };
 
-export const ButtonIcon: Story<void> = () => {
+export const ButtonIcon: StoryFn = () => {
   const mockIndicator: Indicator = generateMockIndicator();
   const mockField: string = 'threat.feed.name';
 
@@ -29,7 +29,7 @@ export const ButtonIcon: Story<void> = () => {
   );
 };
 
-export const ContextMenu: Story<void> = () => {
+export const ContextMenu: StoryFn = () => {
   const mockIndicator: Indicator = generateMockIndicator();
   const mockField: string = 'threat.feed.name';
   const items = [<FilterOutContextMenu data={mockIndicator} field={mockField} />];
@@ -41,7 +41,7 @@ export const ContextMenu: Story<void> = () => {
   );
 };
 
-export const DataGrid: Story<void> = () => {
+export const DataGrid: StoryFn = () => {
   const mockIndicator: Indicator = generateMockIndicator();
   const mockField: string = 'threat.feed.name';
   const columnId: string = '1';

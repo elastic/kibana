@@ -6,8 +6,10 @@
  */
 
 import {
+  ClusterComponentTemplate,
   IndicesDataStream,
   IndicesDataStreamLifecycleWithRollover,
+  IndicesGetIndexTemplateIndexTemplateItem,
   IngestPipeline,
 } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -74,7 +76,7 @@ export async function deleteUnmanagedStreamObjects({
     dataStream,
     scopedClusterClient,
   });
-  const pipelineName = unmanagedAssets.find((asset) => asset.type === 'ingest_pipeline')?.id;
+  const pipelineName = unmanagedAssets.ingestPipeline;
   if (pipelineName) {
     const { targetPipelineName, targetPipeline, referencesStreamManagedPipeline } =
       await findStreamManagedPipelineReference(scopedClusterClient, pipelineName, name);
@@ -152,10 +154,17 @@ interface ReadUnmanagedAssetsParams extends BaseParams {
   dataStream: IndicesDataStream;
 }
 
+export interface UnmanagedElasticsearchAssets {
+  ingestPipeline: string | undefined;
+  componentTemplates: string[];
+  indexTemplate: string;
+  dataStream: string;
+}
+
 export async function getUnmanagedElasticsearchAssets({
   dataStream,
   scopedClusterClient,
-}: ReadUnmanagedAssetsParams) {
+}: ReadUnmanagedAssetsParams): Promise<UnmanagedElasticsearchAssets> {
   // retrieve linked index template, component template and ingest pipeline
   const templateName = dataStream.template;
   const componentTemplates: string[] = [];
@@ -173,28 +182,110 @@ export async function getUnmanagedElasticsearchAssets({
   });
   const ingestPipelineId = currentIndex[writeIndexName].settings?.index?.default_pipeline;
 
-  return [
-    ...(ingestPipelineId
-      ? [
-          {
-            type: 'ingest_pipeline' as const,
-            id: ingestPipelineId,
-          },
-        ]
-      : []),
-    ...componentTemplates.map((componentTemplateName) => ({
-      type: 'component_template' as const,
-      id: componentTemplateName,
-    })),
-    {
-      type: 'index_template' as const,
-      id: templateName,
-    },
-    {
-      type: 'data_stream' as const,
-      id: dataStream.name,
-    },
-  ];
+  return {
+    ingestPipeline: ingestPipelineId,
+    componentTemplates,
+    indexTemplate: templateName,
+    dataStream: dataStream.name,
+  };
+}
+interface ReadUnmanagedAssetsDetailsParams extends BaseParams {
+  assets: UnmanagedElasticsearchAssets;
+}
+
+export type UnmanagedComponentTemplateDetails = (
+  | ClusterComponentTemplate
+  | { name: string; component_template: undefined }
+) & {
+  used_by: string[];
+};
+
+export interface UnmanagedElasticsearchAssetDetails {
+  ingestPipeline?: IngestPipeline & { name: string };
+  componentTemplates: UnmanagedComponentTemplateDetails[];
+  indexTemplate: IndicesGetIndexTemplateIndexTemplateItem;
+  dataStream: IndicesDataStream;
+}
+
+async function fetchComponentTemplate(
+  scopedClusterClient: IScopedClusterClient,
+  name: string
+): Promise<ClusterComponentTemplate | { name: string; component_template: undefined }> {
+  try {
+    const response = await scopedClusterClient.asCurrentUser.cluster.getComponentTemplate({ name });
+    return (
+      response.component_templates.find((template) => template.name === name) ?? {
+        name,
+        component_template: undefined,
+      }
+    );
+  } catch (e) {
+    if (e.meta?.statusCode === 404) {
+      return { name, component_template: undefined };
+    }
+    throw e;
+  }
+}
+
+async function fetchComponentTemplates(
+  scopedClusterClient: IScopedClusterClient,
+  names: string[],
+  allIndexTemplates: IndicesGetIndexTemplateIndexTemplateItem[]
+): Promise<UnmanagedComponentTemplateDetails[]> {
+  const templates = await Promise.all(
+    names.map((name) => fetchComponentTemplate(scopedClusterClient, name))
+  );
+
+  return templates
+    .filter(
+      (
+        template
+      ): template is ClusterComponentTemplate | { name: string; component_template: undefined } =>
+        template !== undefined
+    )
+    .map((componentTemplate) => ({
+      ...componentTemplate,
+      used_by: allIndexTemplates
+        .filter((template) => template.index_template.composed_of.includes(componentTemplate.name))
+        .map((template) => template.name),
+    }));
+}
+
+async function fetchIngestPipeline(
+  scopedClusterClient: IScopedClusterClient,
+  pipelineId: string | undefined
+): Promise<(IngestPipeline & { name: string }) | undefined> {
+  if (!pipelineId) return undefined;
+  const response = await scopedClusterClient.asCurrentUser.ingest.getPipeline({ id: pipelineId });
+  return { ...response[pipelineId], name: pipelineId };
+}
+
+export async function getUnmanagedElasticsearchAssetDetails({
+  scopedClusterClient,
+  assets,
+}: ReadUnmanagedAssetsDetailsParams): Promise<UnmanagedElasticsearchAssetDetails> {
+  const allIndexTemplates = (await scopedClusterClient.asCurrentUser.indices.getIndexTemplate())
+    .index_templates;
+
+  const [ingestPipeline, componentTemplates, dataStreamResponse] = await Promise.all([
+    fetchIngestPipeline(scopedClusterClient, assets.ingestPipeline),
+    fetchComponentTemplates(scopedClusterClient, assets.componentTemplates, allIndexTemplates),
+    scopedClusterClient.asCurrentUser.indices.getDataStream({ name: assets.dataStream }),
+  ]);
+
+  const indexTemplate = allIndexTemplates.find(
+    (template) => template.name === assets.indexTemplate
+  );
+  if (!indexTemplate) {
+    throw new Error(`Index template ${assets.indexTemplate} not found`);
+  }
+
+  return {
+    ingestPipeline,
+    componentTemplates,
+    indexTemplate,
+    dataStream: dataStreamResponse.data_streams[0],
+  };
 }
 
 interface CheckAccessParams extends BaseParams {
@@ -287,7 +378,7 @@ async function tryGettingPipeline({ scopedClusterClient, id }: ReadStreamParams)
   }
 }
 
-async function getDataStream({
+export async function getDataStream({
   name,
   scopedClusterClient,
 }: {

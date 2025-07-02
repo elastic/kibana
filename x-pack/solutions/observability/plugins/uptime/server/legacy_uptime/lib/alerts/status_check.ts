@@ -21,12 +21,12 @@ import {
   AlertsLocatorParams,
   formatDurationFromTimeUnitChar,
   getAlertUrl,
+  observabilityFeatureId,
   observabilityPaths,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { asyncForEach } from '@kbn/std';
-import { uptimeRuleFieldMap } from '../../../../common/rules/uptime_rule_field_map';
 import { MonitorSummary, UptimeAlertTypeFactory } from './types';
 import {
   StatusCheckFilters,
@@ -290,6 +290,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
   category: DEFAULT_APP_CATEGORIES.observability.id,
   producer: 'uptime',
+  solution: observabilityFeatureId,
   name: i18n.translate('xpack.uptime.alerts.monitorStatus', {
     defaultMessage: 'Uptime monitor status',
   }),
@@ -543,7 +544,6 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     return { state: updateState(state, downMonitorsByLocation.length > 0) };
   },
   alerts: UptimeRuleTypeAlertDefinition,
-  fieldsForAAD: Object.keys(uptimeRuleFieldMap),
   getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
     observabilityPaths.ruleDetails(rule.id),
 });

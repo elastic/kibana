@@ -5,53 +5,57 @@
  * 2.0.
  */
 
-import { ComponentStory } from '@storybook/react';
-import React from 'react';
-import { TLPBadge, TLPBadgeProps } from './tlp_badge';
+import { TLPBadge } from './tlp_badge';
 
 export default {
   component: TLPBadge,
   title: 'TLPBadge',
 };
 
-const Template: ComponentStory<typeof TLPBadge> = (args: TLPBadgeProps) => <TLPBadge {...args} />;
-
-export const Red = Template.bind({});
-Red.args = {
-  value: 'RED',
+export const Red = {
+  args: {
+    value: 'RED',
+  },
 };
 
-export const Amber = Template.bind({});
-Amber.args = {
-  value: 'AMBER',
+export const Amber = {
+  args: {
+    value: 'AMBER',
+  },
 };
 
-export const AmberStrict = Template.bind({});
-AmberStrict.args = {
-  value: 'AMBER+STRICT',
+export const AmberStrict = {
+  args: {
+    value: 'AMBER+STRICT',
+  },
 };
 
-export const Green = Template.bind({});
-Green.args = {
-  value: 'GREEN',
+export const Green = {
+  args: {
+    value: 'GREEN',
+  },
 };
 
-export const White = Template.bind({});
-White.args = {
-  value: 'WHITE',
+export const White = {
+  args: {
+    value: 'WHITE',
+  },
 };
 
-export const Clear = Template.bind({});
-Clear.args = {
-  value: 'CLEAR',
+export const Clear = {
+  args: {
+    value: 'CLEAR',
+  },
 };
 
-export const Empty = Template.bind({});
-Empty.args = {
-  value: undefined,
+export const Empty = {
+  args: {
+    value: undefined,
+  },
 };
 
-export const Other = Template.bind({});
-Other.args = {
-  value: 'other',
+export const Other = {
+  args: {
+    value: 'other',
+  },
 };

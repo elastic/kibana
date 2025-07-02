@@ -12,6 +12,7 @@ import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback } from 'react';
+import { ML_RULES_UNAVAILABLE } from './translations';
 import { MAX_MANUAL_RULE_RUN_BULK_SIZE } from '../../../../../../common/constants';
 import type { TimeRange } from '../../../../rule_gaps/types';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -23,16 +24,15 @@ import type {
   BulkActionEditType,
 } from '../../../../../../common/api/detection_engine/rule_management';
 import {
-  BulkActionTypeEnum,
   BulkActionEditTypeEnum,
+  BulkActionTypeEnum,
 } from '../../../../../../common/api/detection_engine/rule_management';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { BULK_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import { canEditRuleWithActions } from '../../../../../common/utils/privileges';
-import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
-import * as detectionI18n from '../../../../../detections/pages/detection_engine/translations';
+import * as i18n from '../../../../common/translations';
 import { useBulkExport } from '../../../../rule_management/logic/bulk_actions/use_bulk_export';
 import { useExecuteBulkAction } from '../../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 import { useDownloadExportedRules } from '../../../../rule_management/logic/bulk_actions/use_download_exported_rules';
@@ -114,7 +114,7 @@ export const useBulkActions = ({
 
         const mlRuleCount = disabledRules.length - disabledRulesNoML.length;
         if (!hasMlPermissions && mlRuleCount > 0) {
-          toasts.addWarning(detectionI18n.ML_RULES_UNAVAILABLE(mlRuleCount));
+          toasts.addWarning(ML_RULES_UNAVAILABLE(mlRuleCount));
         }
 
         const ruleIds = hasMlPermissions

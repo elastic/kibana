@@ -8,6 +8,9 @@
 export const ELASTIC_AI_ASSISTANT_URL = '/api/security_ai_assistant';
 export const ELASTIC_AI_ASSISTANT_INTERNAL_URL = '/internal/elastic_assistant';
 
+export const POST_ACTIONS_CONNECTOR_EXECUTE =
+  `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/actions/connector/{connectorId}/_execute` as const;
+
 export const ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL =
   `${ELASTIC_AI_ASSISTANT_URL}/current_user/conversations` as const;
 export const ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID =
@@ -60,3 +63,20 @@ export const ELASTIC_AI_ASSISTANT_EVALUATE_URL =
 export const DEFEND_INSIGHTS_TOOL_ID = 'defend-insights';
 export const DEFEND_INSIGHTS = `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/defend_insights`;
 export const DEFEND_INSIGHTS_BY_ID = `${DEFEND_INSIGHTS}/{id}`;
+
+// Attack Discovery
+export const ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG =
+  'securitySolution.assistantAttackDiscoverySchedulingEnabled' as const;
+export const ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID = 'attack-discovery' as const;
+
+export const ATTACK_DISCOVERY = `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/attack_discovery` as const;
+export const ATTACK_DISCOVERY_BY_CONNECTOR_ID = `${ATTACK_DISCOVERY}/{connectorId}` as const;
+export const ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID =
+  `${ATTACK_DISCOVERY}/cancel/{connectorId}` as const;
+export const ATTACK_DISCOVERY_SCHEDULES = `${ATTACK_DISCOVERY}/schedules` as const;
+export const ATTACK_DISCOVERY_SCHEDULES_BY_ID = `${ATTACK_DISCOVERY_SCHEDULES}/{id}` as const;
+export const ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE =
+  `${ATTACK_DISCOVERY_SCHEDULES}/{id}/_enable` as const;
+export const ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE =
+  `${ATTACK_DISCOVERY_SCHEDULES}/{id}/_disable` as const;
+export const ATTACK_DISCOVERY_SCHEDULES_FIND = `${ATTACK_DISCOVERY_SCHEDULES}/_find` as const;

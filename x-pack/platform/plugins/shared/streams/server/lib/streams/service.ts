@@ -29,7 +29,8 @@ export type StreamsStorageClient = IStorageClient<StreamsStorageSettings, Stream
 export class StreamsService {
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    private readonly isDev: boolean
   ) {}
 
   async getClientWithRequest({
@@ -47,18 +48,19 @@ export class StreamsService {
 
     const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
 
-    const storageAdapter = new StorageIndexAdapter<StreamsStorageSettings, StreamDefinition>(
-      scopedClusterClient.asInternalUser,
-      logger,
-      streamsStorageSettings
-    );
+    const storageAdapter = new StorageIndexAdapter<
+      StreamsStorageSettings,
+      StreamDefinition & { _id: string }
+    >(scopedClusterClient.asInternalUser, logger, streamsStorageSettings);
 
     return new StreamsClient({
       assetClient,
       logger,
       scopedClusterClient,
       storageClient: storageAdapter.getClient(),
+      request,
       isServerless,
+      isDev: this.isDev,
     });
   }
 }

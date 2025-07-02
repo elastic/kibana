@@ -27,6 +27,8 @@ interface SuggestionsSelectProps {
   serviceName?: string;
 }
 
+export type { SuggestionsSelectProps };
+
 export function SuggestionsSelect({
   customOptions,
   customOptionText,

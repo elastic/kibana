@@ -92,17 +92,21 @@ describe('.execute() & getHref', () => {
         },
         plugins: {
           uiActionsEnhanced: {},
-          dashboard: {
-            locator: {
-              getLocation: async (params: DashboardLocatorParams) => {
-                return await definition.getLocation(params);
+          share: {
+            url: {
+              locators: {
+                get: () => ({
+                  getLocation: async (params: DashboardLocatorParams) => {
+                    return await definition.getLocation(params);
+                  },
+                }),
               },
             },
           },
         },
         self: {},
       })) as unknown as StartServicesGetter<
-        Pick<StartDependencies, 'data' | 'uiActionsEnhanced' | 'dashboard'>
+        Pick<StartDependencies, 'data' | 'uiActionsEnhanced' | 'share'>
       >,
     });
 

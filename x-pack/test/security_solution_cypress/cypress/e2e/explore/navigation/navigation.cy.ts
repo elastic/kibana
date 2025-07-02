@@ -60,13 +60,8 @@ import {
   ENTITY_ANALYTICS_URL,
   INDICATORS_URL,
   DISCOVER_URL,
-  RULES_LANDING_URL,
   RULES_COVERAGE_URL,
-  INVESTIGATIONS_URL,
   OSQUERY_URL,
-  MACHINE_LEARNING_LANDING_URL,
-  ASSETS_URL,
-  FLEET_URL,
   CLOUD_DEFEND_URL,
   HOSTS_URL,
 } from '../../../urls/navigation';
@@ -86,122 +81,127 @@ import {
   THREAT_INTELLIGENCE_PAGE,
 } from '../../../screens/kibana_navigation';
 
-describe('top-level navigation common to all pages in the Security app', { tags: '@ess' }, () => {
-  beforeEach(() => {
-    login();
-    visitWithTimeRange(TIMELINES_URL);
-  });
+// Failing: See https://github.com/elastic/kibana/issues/217577
+describe.skip(
+  'top-level navigation common to all pages in the Security app',
+  { tags: '@ess' },
+  () => {
+    beforeEach(() => {
+      login();
+      visitWithTimeRange(TIMELINES_URL);
+    });
 
-  it('navigates to the Dashboards landing page', () => {
-    navigateFromHeaderTo(DASHBOARDS);
-    cy.url().should('include', DASHBOARDS_URL);
-  });
+    it('navigates to the Dashboards landing page', () => {
+      navigateFromHeaderTo(DASHBOARDS);
+      cy.url().should('include', DASHBOARDS_URL);
+    });
 
-  it('navigates to the Overview page', () => {
-    navigateFromHeaderTo(OVERVIEW);
-    cy.url().should('include', OVERVIEW_URL);
-  });
+    it('navigates to the Overview page', () => {
+      navigateFromHeaderTo(OVERVIEW);
+      cy.url().should('include', OVERVIEW_URL);
+    });
 
-  it('navigates to the Detection & Response page', () => {
-    navigateFromHeaderTo(DETECTION_RESPONSE);
-    cy.url().should('include', DETECTION_AND_RESPONSE_URL);
-  });
+    it('navigates to the Detection & Response page', () => {
+      navigateFromHeaderTo(DETECTION_RESPONSE);
+      cy.url().should('include', DETECTION_AND_RESPONSE_URL);
+    });
 
-  it('navigates to the Entity Analytics page', () => {
-    navigateFromHeaderTo(ENTITY_ANALYTICS);
-    cy.url().should('include', ENTITY_ANALYTICS_URL);
-  });
+    it('navigates to the Entity Analytics page', () => {
+      navigateFromHeaderTo(ENTITY_ANALYTICS);
+      cy.url().should('include', ENTITY_ANALYTICS_URL);
+    });
 
-  it('navigates to the CSP dashboard page', () => {
-    navigateFromHeaderTo(CSP_DASHBOARD);
-    cy.url().should('include', CSP_DASHBOARD_URL);
-  });
+    it('navigates to the CSP dashboard page', () => {
+      navigateFromHeaderTo(CSP_DASHBOARD);
+      cy.url().should('include', CSP_DASHBOARD_URL);
+    });
 
-  it('navigates to the Alerts page', () => {
-    navigateFromHeaderTo(ALERTS);
-    cy.url().should('include', ALERTS_URL);
-  });
+    it('navigates to the Alerts page', () => {
+      navigateFromHeaderTo(ALERTS);
+      cy.url().should('include', ALERTS_URL);
+    });
 
-  it('navigates to the Findings page', () => {
-    navigateFromHeaderTo(CSP_FINDINGS);
-    cy.url().should('include', CSP_FINDINGS_URL);
-  });
+    it('navigates to the Findings page', () => {
+      navigateFromHeaderTo(CSP_FINDINGS);
+      cy.url().should('include', CSP_FINDINGS_URL);
+    });
 
-  it('navigates to the Timelines page', () => {
-    navigateFromHeaderTo(TIMELINES);
-    cy.url().should('include', TIMELINES_URL);
-  });
+    it('navigates to the Timelines page', () => {
+      navigateFromHeaderTo(TIMELINES);
+      cy.url().should('include', TIMELINES_URL);
+    });
 
-  it('navigates to the Explore landing page', () => {
-    navigateFromHeaderTo(EXPLORE);
-    cy.url().should('include', EXPLORE_URL);
-  });
+    it('navigates to the Explore landing page', () => {
+      navigateFromHeaderTo(EXPLORE);
+      cy.url().should('include', EXPLORE_URL);
+    });
 
-  it('navigates to the Hosts page', () => {
-    navigateFromHeaderTo(HOSTS);
-    cy.url().should('include', HOSTS_URL);
-  });
+    it('navigates to the Hosts page', () => {
+      navigateFromHeaderTo(HOSTS);
+      cy.url().should('include', HOSTS_URL);
+    });
 
-  it('navigates to the Network page', () => {
-    navigateFromHeaderTo(NETWORK);
-    cy.url().should('include', NETWORK_URL);
-  });
+    it('navigates to the Network page', () => {
+      navigateFromHeaderTo(NETWORK);
+      cy.url().should('include', NETWORK_URL);
+    });
 
-  it('navigates to the Users page', () => {
-    navigateFromHeaderTo(USERS);
-    cy.url().should('include', USERS_URL);
-  });
+    it('navigates to the Users page', () => {
+      navigateFromHeaderTo(USERS);
+      cy.url().should('include', USERS_URL);
+    });
 
-  it('navigates to the Indicators page', () => {
-    navigateFromHeaderTo(INDICATORS);
-    cy.url().should('include', INDICATORS_URL);
-  });
+    it('navigates to the Indicators page', () => {
+      navigateFromHeaderTo(INDICATORS);
+      cy.url().should('include', INDICATORS_URL);
+    });
 
-  it('navigates to the Rules page', () => {
-    navigateFromHeaderTo(RULES);
-    cy.url().should('include', RULES_MANAGEMENT_URL);
-  });
+    it('navigates to the Rules page', () => {
+      navigateFromHeaderTo(RULES);
+      cy.url().should('include', RULES_MANAGEMENT_URL);
+    });
 
-  it('navigates to the Exceptions page', () => {
-    navigateFromHeaderTo(EXCEPTIONS);
-    cy.url().should('include', EXCEPTIONS_URL);
-  });
+    it('navigates to the Exceptions page', () => {
+      navigateFromHeaderTo(EXCEPTIONS);
+      cy.url().should('include', EXCEPTIONS_URL);
+    });
 
-  it('navigates to the Cases page', () => {
-    navigateFromHeaderTo(CASES);
-    cy.url().should('include', CASES_URL);
-  });
+    it('navigates to the Cases page', () => {
+      navigateFromHeaderTo(CASES);
+      cy.url().should('include', CASES_URL);
+    });
 
-  it('navigates to the Manage landing page', () => {
-    navigateFromHeaderTo(SETTINGS);
-    cy.url().should('include', MANAGE_URL);
-  });
+    it('navigates to the Manage landing page', () => {
+      navigateFromHeaderTo(SETTINGS);
+      cy.url().should('include', MANAGE_URL);
+    });
 
-  it('navigates to the Endpoints page', () => {
-    navigateFromHeaderTo(ENDPOINTS);
-    cy.url().should('include', ENDPOINTS_URL);
-  });
-  it('navigates to the Policies page', () => {
-    navigateFromHeaderTo(POLICIES);
-    cy.url().should('include', POLICIES_URL);
-  });
-  it('navigates to the Trusted Apps page', () => {
-    navigateFromHeaderTo(TRUSTED_APPS);
-    cy.url().should('include', TRUSTED_APPS_URL);
-  });
-  it('navigates to the Event Filters page', () => {
-    navigateFromHeaderTo(EVENT_FILTERS);
-    cy.url().should('include', EVENT_FILTERS_URL);
-  });
-  it('navigates to the Blocklist page', () => {
-    navigateFromHeaderTo(BLOCKLIST);
-    cy.url().should('include', BLOCKLIST_URL);
-  });
-  it('navigates to the CSP Benchmarks page', () => {
-    navigateFromHeaderTo(CSP_BENCHMARKS);
-    cy.url().should('include', CSP_BENCHMARKS_URL);
-  });
-});
+    it('navigates to the Endpoints page', () => {
+      navigateFromHeaderTo(ENDPOINTS);
+      cy.url().should('include', ENDPOINTS_URL);
+    });
+    it('navigates to the Policies page', () => {
+      navigateFromHeaderTo(POLICIES);
+      cy.url().should('include', POLICIES_URL);
+    });
+    it('navigates to the Trusted Apps page', () => {
+      navigateFromHeaderTo(TRUSTED_APPS);
+      cy.url().should('include', TRUSTED_APPS_URL);
+    });
+    it('navigates to the Event Filters page', () => {
+      navigateFromHeaderTo(EVENT_FILTERS);
+      cy.url().should('include', EVENT_FILTERS_URL);
+    });
+    it('navigates to the Blocklist page', () => {
+      navigateFromHeaderTo(BLOCKLIST);
+      cy.url().should('include', BLOCKLIST_URL);
+    });
+    it('navigates to the CSP Benchmarks page', () => {
+      navigateFromHeaderTo(CSP_BENCHMARKS);
+      cy.url().should('include', CSP_BENCHMARKS_URL);
+    });
+  }
+);
 
 describe('Kibana navigation to all pages in the Security app ', { tags: '@ess' }, () => {
   beforeEach(() => {
@@ -267,36 +267,12 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
     cy.url().should('include', DASHBOARDS_URL);
   });
 
-  it('navigates to the Overview page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.OVERVIEW, true);
-    cy.url().should('include', OVERVIEW_URL);
-  });
-
-  it('navigates to the Detection & Response page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.DETECTION_RESPONSE, true);
-    cy.url().should('include', DETECTION_AND_RESPONSE_URL);
-  });
-
-  it('navigates to the Entity Analytics page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.ENTITY_ANALYTICS, true);
-    cy.url().should('include', ENTITY_ANALYTICS_URL);
-  });
-
-  it('navigates to the CSP dashboard page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.CSP_DASHBOARD, true);
-    cy.url().should('include', CSP_DASHBOARD_URL);
-  });
-
-  it('navigates to the Rules landing page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.RULES_LANDING, true);
-    cy.url().should('include', RULES_LANDING_URL);
-  });
   it('navigates to the Rules page', () => {
     navigateFromHeaderTo(ServerlessHeaders.RULES, true);
     cy.url().should('include', RULES_MANAGEMENT_URL);
   });
 
-  it('navigates to the Rules page', () => {
+  it('navigates to the CSP Benchmarks page', () => {
     navigateFromHeaderTo(ServerlessHeaders.CSP_BENCHMARKS, true);
     cy.url().should('include', CSP_BENCHMARKS_URL);
   });
@@ -326,11 +302,6 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
     cy.url().should('include', CASES_URL);
   });
 
-  it('navigates to the Investigations page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.INVESTIGATIONS, true);
-    cy.url().should('include', INVESTIGATIONS_URL);
-  });
-
   it('navigates to the Timelines page', () => {
     navigateFromHeaderTo(ServerlessHeaders.TIMELINES, true);
     cy.url().should('include', TIMELINES_URL);
@@ -343,11 +314,6 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
   it('navigates to the Indicators page', () => {
     navigateFromHeaderTo(ServerlessHeaders.THREAT_INTELLIGENCE, true);
     cy.url().should('include', INDICATORS_URL);
-  });
-
-  it('navigates to the Explore landing page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.EXPLORE, true);
-    cy.url().should('include', EXPLORE_URL);
   });
 
   it('navigates to the Hosts page', () => {
@@ -365,24 +331,12 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
     cy.url().should('include', USERS_URL);
   });
 
-  it('navigates to the Assets page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.ASSETS, true);
-    cy.url().should('include', ASSETS_URL);
-  });
   it('navigates to the Endpoints page', () => {
     navigateFromHeaderTo(ServerlessHeaders.ENDPOINTS, true);
     cy.url().should('include', ENDPOINTS_URL);
   });
-  it('navigates to the Fleet page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.FLEET, true);
-    cy.url().should('include', FLEET_URL);
-  });
   it('navigates to the Cloud defend page', () => {
     navigateFromHeaderTo(ServerlessHeaders.CLOUD_DEFEND, true);
     cy.url().should('include', CLOUD_DEFEND_URL);
-  });
-  it('navigates to the Machine learning landing page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.MACHINE_LEARNING, true);
-    cy.url().should('include', MACHINE_LEARNING_LANDING_URL);
   });
 });

@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
 import fastGlob from 'fast-glob';
-import { getScoutPlaywrightConfigs } from './search_configs';
+import yaml from 'js-yaml';
+import { ToolingLog } from '@kbn/tooling-log';
+import { getScoutPlaywrightConfigs, validateWithScoutCiConfig } from './search_configs';
 
 jest.mock('fast-glob');
+jest.mock('js-yaml');
 
 describe('getScoutPlaywrightConfigs', () => {
   let mockLog: ToolingLog;
@@ -77,6 +79,102 @@ describe('getScoutPlaywrightConfigs', () => {
     expect(plugins.size).toBe(0);
     expect(mockLog.warning).toHaveBeenCalledWith(
       expect.stringContaining('Unable to extract plugin name from path')
+    );
+  });
+});
+
+describe('validateWithScoutCiConfig', () => {
+  let mockLog: ToolingLog;
+  const mockScoutCiConfig = {
+    ui_tests: {
+      enabled: ['pluginA', 'pluginB'],
+      disabled: ['pluginC'],
+    },
+  };
+
+  beforeEach(() => {
+    mockLog = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
+    jest.spyOn(mockLog, 'warning').mockImplementation(jest.fn());
+    (yaml.safeLoad as jest.Mock).mockReturnValue(mockScoutCiConfig);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should return only enabled plugins', () => {
+    const pluginsWithConfigs = new Map([
+      [
+        'pluginA',
+        {
+          group: 'group1',
+          pluginPath: 'pluginPathA',
+          usesParallelWorkers: true,
+          configs: ['configA'],
+        },
+      ],
+      [
+        'pluginB',
+        {
+          group: 'group1',
+          pluginPath: 'pluginPathB',
+          usesParallelWorkers: false,
+          configs: ['configB1', 'configB2'],
+        },
+      ],
+      [
+        'pluginC',
+        {
+          group: 'group2',
+          pluginPath: 'pluginPathC',
+          usesParallelWorkers: true,
+          configs: ['configC'],
+        },
+      ],
+    ]);
+
+    const result = validateWithScoutCiConfig(mockLog, pluginsWithConfigs);
+    expect(result.size).toBe(2);
+    expect(result.has('pluginA')).toBe(true);
+    expect(result.has('pluginB')).toBe(true);
+    expect(result.has('pluginC')).toBe(false);
+  });
+
+  it('should throw an error if plugins are not registered in Scout CI config', () => {
+    const pluginsWithConfigs = new Map([
+      [
+        'pluginX',
+        {
+          group: 'groupX',
+          pluginPath: 'pluginPathX',
+          usesParallelWorkers: true,
+          configs: ['configX'],
+        },
+      ],
+    ]);
+
+    expect(() => validateWithScoutCiConfig(mockLog, pluginsWithConfigs)).toThrow(
+      "The following plugins are not registered in Scout CI config '.buildkite/scout_ci_config.yml':\n- pluginX"
+    );
+  });
+
+  it('should log a warning for disabled plugins', () => {
+    const pluginsWithConfigs = new Map([
+      [
+        'pluginC',
+        {
+          group: 'group2',
+          pluginPath: 'pluginPathC',
+          usesParallelWorkers: true,
+          configs: ['configC'],
+        },
+      ],
+    ]);
+
+    validateWithScoutCiConfig(mockLog, pluginsWithConfigs);
+
+    expect(mockLog.warning).toHaveBeenCalledWith(
+      `The following plugins are disabled in '.buildkite/scout_ci_config.yml' and will be excluded from CI run\n- pluginC`
     );
   });
 });

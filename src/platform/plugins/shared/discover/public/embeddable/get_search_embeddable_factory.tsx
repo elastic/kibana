@@ -13,12 +13,12 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { APPLY_FILTER_TRIGGER, generateFilters } from '@kbn/data-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { FetchContext } from '@kbn/presentation-publishing';
 import {
-  FetchContext,
   getUnchangingComparator,
   initializeTimeRange,
   initializeTitleManager,
@@ -26,17 +26,17 @@ import {
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
+import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
-import { DiscoverServices } from '../build_services';
+import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
 import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
-import {
+import type {
   NonPersistedDisplayOptions,
   SearchEmbeddableApi,
   SearchEmbeddableRuntimeState,

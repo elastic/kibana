@@ -33,6 +33,7 @@ describe('SessionUserHostWorkingDir', () => {
           <SessionUserHostWorkingDir
             eventId="eventid-123"
             session="session-123"
+            scopeId="some_scope"
             contextId="contextid-123"
             hostName="hostname-123"
             userName="username-123"
@@ -51,6 +52,7 @@ describe('SessionUserHostWorkingDir', () => {
           <EuiFlexItem grow={false} component="span">
             <SessionUserHostWorkingDir
               eventId="eventid-123"
+              scopeId="some_scope"
               contextId="contextid-123"
               session={undefined}
               hostName={undefined}
@@ -71,6 +73,7 @@ describe('SessionUserHostWorkingDir', () => {
           <EuiFlexItem grow={false} component="span">
             <SessionUserHostWorkingDir
               eventId="eventid-123"
+              scopeId="some_scope"
               contextId="contextid-123"
               session="session-123"
               hostName={undefined}
@@ -91,6 +94,7 @@ describe('SessionUserHostWorkingDir', () => {
           <EuiFlexItem grow={false} component="span">
             <SessionUserHostWorkingDir
               eventId="eventid-123"
+              scopeId="some_scope"
               contextId="contextid-123"
               session="session-123"
               hostName="hostname-123"
@@ -111,6 +115,7 @@ describe('SessionUserHostWorkingDir', () => {
           <EuiFlexItem grow={false} component="span">
             <SessionUserHostWorkingDir
               eventId="eventid-123"
+              scopeId="some_scope"
               contextId="contextid-123"
               session="session-123"
               hostName="hostname-123"
@@ -131,6 +136,7 @@ describe('SessionUserHostWorkingDir', () => {
           <EuiFlexItem grow={false} component="span">
             <SessionUserHostWorkingDir
               eventId="eventid-123"
+              scopeId="some_scope"
               contextId="contextid-123"
               session="session-123"
               hostName="hostname-123"
@@ -151,6 +157,7 @@ describe('SessionUserHostWorkingDir', () => {
           <EuiFlexItem grow={false} component="span">
             <SessionUserHostWorkingDir
               eventId="eventid-123"
+              scopeId="some_scope"
               contextId="contextid-123"
               session="session-123"
               hostName="hostname-123"
@@ -171,6 +178,7 @@ describe('SessionUserHostWorkingDir', () => {
           <EuiFlexItem grow={false} component="span">
             <SessionUserHostWorkingDir
               eventId="eventid-123"
+              scopeId="some_scope"
               contextId="contextid-123"
               session="session-123"
               hostName="hostname-123"

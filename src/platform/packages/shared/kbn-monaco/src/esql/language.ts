@@ -7,20 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
+import { suggest, validateQuery, type ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
 import { monaco } from '../monaco_imports';
 
 import { ESQL_LANG_ID } from './lib/constants';
 
 import type { CustomLangModuleType } from '../types';
-import type { ESQLWorker } from './worker/esql_worker';
 
-import { WorkerProxyService } from '../common/worker_proxy';
-import { ESQLAstAdapter } from './lib/esql_ast_provider';
 import { wrapAsMonacoSuggestions } from './lib/converters/suggestions';
-import { wrapAsMonacoCodeActions } from './lib/converters/actions';
+import { wrapAsMonacoMessages } from './lib/converters/positions';
+import { getHoverItem } from './lib/hover/hover';
+import { monacoPositionToOffset } from './lib/shared/utils';
 
-const workerProxyService = new WorkerProxyService<ESQLWorker>();
 const removeKeywordSuffix = (name: string) => {
   return name.endsWith('.keyword') ? name.slice(0, -8) : name;
 };
@@ -29,8 +27,6 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
   ID: ESQL_LANG_ID,
   async onLanguage() {
     const { ESQLTokensProvider } = await import('./lib');
-
-    workerProxyService.setup(ESQL_LANG_ID);
 
     monaco.languages.setTokensProvider(ESQL_LANG_ID, new ESQLTokensProvider());
   },
@@ -54,28 +50,11 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
     ],
   },
   validate: async (model: monaco.editor.ITextModel, code: string, callbacks?: ESQLCallbacks) => {
-    const astAdapter = new ESQLAstAdapter(
-      (...uris) => workerProxyService.getWorker(uris),
-      callbacks
-    );
-    return await astAdapter.validate(model, code);
-  },
-  getSignatureProvider: (callbacks?: ESQLCallbacks): monaco.languages.SignatureHelpProvider => {
-    return {
-      signatureHelpTriggerCharacters: [' ', '('],
-      async provideSignatureHelp(
-        model: monaco.editor.ITextModel,
-        position: monaco.Position,
-        _token: monaco.CancellationToken,
-        context: monaco.languages.SignatureHelpContext
-      ) {
-        const astAdapter = new ESQLAstAdapter(
-          (...uris) => workerProxyService.getWorker(uris),
-          callbacks
-        );
-        return astAdapter.suggestSignature(model, position, context);
-      },
-    };
+    const text = code ?? model.getValue();
+    const { errors, warnings } = await validateQuery(text, undefined, callbacks);
+    const monacoErrors = wrapAsMonacoMessages(text, errors);
+    const monacoWarnings = wrapAsMonacoMessages(text, warnings);
+    return { errors: monacoErrors, warnings: monacoWarnings };
   },
   getHoverProvider: (callbacks?: ESQLCallbacks): monaco.languages.HoverProvider => {
     return {
@@ -84,30 +63,24 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
         position: monaco.Position,
         token: monaco.CancellationToken
       ) {
-        const astAdapter = new ESQLAstAdapter(
-          (...uris) => workerProxyService.getWorker(uris),
-          callbacks
-        );
-        return astAdapter.getHover(model, position, token);
+        return getHoverItem(model, position, token, callbacks);
       },
     };
   },
   getSuggestionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CompletionItemProvider => {
     return {
-      triggerCharacters: [',', '(', '=', ' ', '[', ''],
+      triggerCharacters: ['(', ' ', '[', '?'],
       async provideCompletionItems(
         model: monaco.editor.ITextModel,
         position: monaco.Position,
         context: monaco.languages.CompletionContext
       ): Promise<monaco.languages.CompletionList> {
-        const astAdapter = new ESQLAstAdapter(
-          (...uris) => workerProxyService.getWorker(uris),
-          callbacks
-        );
-        const suggestions = await astAdapter.autocomplete(model, position, context);
+        const fullText = model.getValue();
+        const offset = monacoPositionToOffset(fullText, position);
+        const suggestions = await suggest(fullText, offset, context, callbacks);
         return {
           // @ts-expect-error because of range typing: https://github.com/microsoft/monaco-editor/issues/4638
-          suggestions: wrapAsMonacoSuggestions(suggestions),
+          suggestions: wrapAsMonacoSuggestions(suggestions, fullText),
         };
       },
       async resolveCompletionItem(item, token): Promise<monaco.languages.CompletionItem> {
@@ -145,27 +118,6 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
         }
 
         return item;
-      },
-    };
-  },
-
-  getCodeActionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CodeActionProvider => {
-    return {
-      async provideCodeActions(
-        model /** ITextModel*/,
-        range /** Range*/,
-        context /** CodeActionContext*/,
-        token /** CancellationToken*/
-      ) {
-        const astAdapter = new ESQLAstAdapter(
-          (...uris) => workerProxyService.getWorker(uris),
-          callbacks
-        );
-        const actions = await astAdapter.codeAction(model, range, context);
-        return {
-          actions: wrapAsMonacoCodeActions(model, actions),
-          dispose: () => {},
-        };
       },
     };
   },

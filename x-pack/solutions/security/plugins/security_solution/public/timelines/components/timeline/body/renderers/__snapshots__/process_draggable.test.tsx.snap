@@ -15,6 +15,7 @@ exports[`ProcessDraggable rendering it renders against shallow snapshot 1`] = `
       fieldType="keyword"
       iconType="console"
       isAggregatable={true}
+      scopeId="some_scope"
       value="process-name-1"
     />
   </EuiFlexItem>
@@ -28,6 +29,7 @@ exports[`ProcessDraggable rendering it renders against shallow snapshot 1`] = `
       fieldType="keyword"
       isAggregatable={true}
       queryValue="123"
+      scopeId="some_scope"
       value="(123)"
     />
   </EuiFlexItem>

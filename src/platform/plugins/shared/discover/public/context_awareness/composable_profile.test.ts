@@ -8,8 +8,9 @@
  */
 
 import { DataGridDensity } from '@kbn/unified-data-table';
-import { AppliedProfile, getMergedAccessor } from './composable_profile';
-import { Profile } from './types';
+import type { AppliedProfile } from './composable_profile';
+import { getMergedAccessor } from './composable_profile';
+import type { Profile } from './types';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 
 const getCellRenderersParams = {

@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export

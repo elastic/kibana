@@ -8,10 +8,8 @@
  */
 
 import { SOURCE_COLUMN } from '@kbn/unified-data-table';
-import {
-  SummaryColumnGetterDeps,
-  getSummaryColumn,
-} from '../../../../components/data_types/logs/summary_column';
+import type { SummaryColumnGetterDeps } from '../../../../components/data_types/logs/summary_column';
+import { getSummaryColumn } from '../../../../components/data_types/logs/summary_column';
 
 export type DataGridColumnsDeps = CustomCellRendererDeps;
 

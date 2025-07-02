@@ -7,10 +7,10 @@
 
 import type SuperTest from 'supertest';
 import expect from '@kbn/expect';
-import { BulkCreateCasesResponse } from '@kbn/cases-plugin/common/types/api';
+import type { BulkCreateCasesResponse } from '@kbn/cases-plugin/common/types/api';
 import { CaseSeverity } from '@kbn/cases-plugin/common';
 import { CaseStatuses, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
-import { User } from '../../../../common/lib/authentication/types';
+import type { User } from '../../../../common/lib/authentication/types';
 import { defaultUser, getPostCaseRequest, postCaseResp } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -19,7 +19,7 @@ import {
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromUserAction,
 } from '../../../../common/lib/api';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   secOnly,
   secOnlyRead,

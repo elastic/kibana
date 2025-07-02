@@ -64,6 +64,11 @@ export const joinIndices: JoinIndexAutocompleteItem[] = [
     mode: 'lookup',
     aliases: ['join_index_alias_1', 'join_index_alias_2'],
   },
+  {
+    name: 'lookup_index',
+    mode: 'lookup',
+    aliases: [],
+  },
 ];
 
 export function getCallbackMocks(): ESQLCallbacks {
@@ -77,6 +82,14 @@ export function getCallbackMocks(): ESQLCallbacks {
       }
       if (/dissect|grok/.test(query)) {
         const field: ESQLRealField = { name: 'firstWord', type: 'text' };
+        return [field];
+      }
+      if (/join_index/.test(query)) {
+        const field: ESQLRealField = {
+          name: 'keywordField',
+          type: 'unsupported',
+          hasConflict: true,
+        };
         return [field];
       }
       return fields;

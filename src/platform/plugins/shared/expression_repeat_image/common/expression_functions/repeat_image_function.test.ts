@@ -8,19 +8,12 @@
  */
 
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
-import { getElasticLogo, getElasticOutline } from '@kbn/presentation-util-plugin/common';
+import { elasticLogo, elasticOutline } from '@kbn/expression-utils';
 import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { repeatImageFunction } from './repeat_image_function';
 
 describe('repeatImage', () => {
   const fn = functionWrapper(repeatImageFunction);
-
-  let elasticLogo: string;
-  let elasticOutline: string;
-  beforeEach(async () => {
-    elasticLogo = await (await getElasticLogo()).elasticLogo;
-    elasticOutline = await (await getElasticOutline()).elasticOutline;
-  });
 
   it('returns a render as repeatImage', async () => {
     const result = await fn(10, {}, {} as ExecutionContext);

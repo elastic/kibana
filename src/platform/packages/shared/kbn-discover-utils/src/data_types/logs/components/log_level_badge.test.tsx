@@ -14,7 +14,7 @@ import { LogLevelBadge } from './log_level_badge';
 
 const renderBadge = (logLevel: string) => {
   render(
-    <EuiProvider>
+    <EuiProvider highContrastMode={false}>
       <LogLevelBadge
         logLevel={logLevel}
         fallback={<span data-test-subj="logLevelBadge-unknown">{logLevel}</span>}

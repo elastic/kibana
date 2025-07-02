@@ -9,6 +9,7 @@ import { EuiText, EuiLink, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { css, cx } from '@emotion/css';
+import { i18n } from '@kbn/i18n';
 import { HOST_METRICS_DOC_HREF } from '../../../common/visualizations';
 import { HOST_METRIC_GROUP_TITLES } from '../translations';
 import { Section } from '../components/section';
@@ -73,6 +74,13 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
         extraAction={
           onShowAll ? (
             <EuiButtonEmpty
+              aria-label={i18n.translate(
+                'xpack.infra.assetDetails.charts.host.showAllButton.ariaLabel',
+                {
+                  defaultMessage: 'Show all {metric} charts',
+                  values: { metric: HOST_METRIC_GROUP_TITLES[metric] },
+                }
+              )}
               data-test-subj="infraAssetDetailsHostChartsShowAllButton"
               onClick={() => onShowAll(metric)}
               size="xs"

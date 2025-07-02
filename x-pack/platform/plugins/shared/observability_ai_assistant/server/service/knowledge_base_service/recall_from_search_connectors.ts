@@ -51,7 +51,11 @@ export async function recallFromSearchConnectors({
     }),
   ]);
 
-  return orderBy([...semanticTextConnectors, ...legacyConnectors], (entry) => entry.score, 'desc');
+  return orderBy(
+    [...semanticTextConnectors, ...legacyConnectors],
+    (entry) => entry.esScore,
+    'desc'
+  );
 }
 
 async function recallFromSemanticTextConnectors({
@@ -72,24 +76,31 @@ async function recallFromSemanticTextConnectors({
     index: connectorIndices,
     fields: `*`,
     allow_no_indices: true,
-    types: ['semantic_text'],
+    types: ['text'],
     filters: '-metadata,-parent',
   });
 
-  const semanticTextFields = Object.keys(fieldCaps.fields);
-  if (!semanticTextFields.length) {
+  const textFields = Object.keys(fieldCaps.fields);
+  if (!textFields.length) {
+    logger.debug(`No text fields found in indices: ${connectorIndices}`);
     return [];
   }
-  logger.debug(`Semantic text field for search connectors: ${semanticTextFields}`);
+
+  logger.debug(`Text field for search connectors: ${textFields}`);
 
   const params = {
     index: connectorIndices,
     size: 20,
     query: {
       bool: {
-        should: semanticTextFields.flatMap((field) => {
+        should: textFields.flatMap((field) => {
           return queries.map(({ text, boost = 1 }) => ({
-            bool: { filter: [{ semantic: { field, query: text, boost } }] },
+            match: {
+              [field]: {
+                query: text,
+                boost,
+              },
+            },
           }));
         }),
         minimum_should_match: 1,
@@ -101,7 +112,7 @@ async function recallFromSemanticTextConnectors({
 
   const results = response.hits.hits.map((hit) => ({
     text: JSON.stringify(hit._source),
-    score: hit._score!,
+    esScore: hit._score!,
     is_correction: false,
     id: hit._id!,
   }));
@@ -187,7 +198,7 @@ async function recallFromLegacyConnectors({
 
   const results = response.hits.hits.map((hit) => ({
     text: JSON.stringify(hit._source),
-    score: hit._score!,
+    esScore: hit._score!,
     is_correction: false,
     id: hit._id!,
   }));

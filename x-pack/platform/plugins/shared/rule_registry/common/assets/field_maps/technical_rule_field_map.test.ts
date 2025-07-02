@@ -95,6 +95,11 @@ it('matches snapshot', () => {
         "required": false,
         "type": "keyword",
       },
+      "kibana.alert.pending_recovered_count": Object {
+        "array": false,
+        "required": false,
+        "type": "long",
+      },
       "kibana.alert.previous_action_group": Object {
         "array": false,
         "required": false,

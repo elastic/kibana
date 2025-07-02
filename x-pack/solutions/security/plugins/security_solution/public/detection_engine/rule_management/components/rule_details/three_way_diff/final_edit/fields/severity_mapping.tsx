@@ -17,7 +17,7 @@ import { SeverityOverride } from '../../../../../../rule_creation_ui/components/
 import { useDefaultIndexPattern } from '../../../../../hooks/use_default_index_pattern';
 import { getUseRuleIndexPatternParameters } from '../utils';
 import { useRuleIndexPattern } from '../../../../../../rule_creation_ui/pages/form';
-import { fillEmptySeverityMappings } from '../../../../../../../detections/pages/detection_engine/rules/helpers';
+import { fillEmptySeverityMappings } from '../../../../../../common/helpers';
 import { filterOutEmptySeverityMappingItems } from '../../../../../../rule_creation_ui/pages/rule_creation/helpers';
 
 interface SeverityMappingEditProps {

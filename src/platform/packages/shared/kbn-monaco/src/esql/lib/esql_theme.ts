@@ -54,7 +54,9 @@ export const buildESQLTheme = ({
       // commands
       ...buildRuleGroup(
         [
-          'dev_metrics',
+          'dev_time_series',
+          'dev_rerank',
+          'dev_fork',
           'metadata',
           'mv_expand',
           'stats',
@@ -91,6 +93,8 @@ export const buildESQLTheme = ({
           'join',
           'dev_change_point',
           'dev_insist',
+          'dev_rrf',
+          'dev_completion',
         ],
         euiThemeVars.euiColorAccentText,
         true // isBold
@@ -155,14 +159,10 @@ export const buildESQLTheme = ({
           'setting',
           'setting_line_comment',
           'settting_multiline_comment',
-          'metrics_line_comment',
-          'metrics_multiline_comment',
-          'closing_metrics_line_comment',
-          'closing_metrics_multiline_comment',
           'change_point_line_comment',
           'change_point_multiline_comment',
-          'insist_line_comment',
-          'insist_multiline_comment',
+          'fork_line_comment',
+          'fork_multiline_comment',
         ],
         euiThemeVars.euiTextSubduedColor
       ),
@@ -174,6 +174,8 @@ export const buildESQLTheme = ({
           'integer_literal',
           'decimal_literal',
           'named_or_positional_param',
+          'named_or_positional_double_params',
+          'double_params',
           'param',
           'timespan_literal',
         ],

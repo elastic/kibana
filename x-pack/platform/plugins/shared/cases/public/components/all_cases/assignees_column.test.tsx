@@ -8,26 +8,22 @@
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import type { AssigneesColumnProps } from './assignees_column';
 import { AssigneesColumn } from './assignees_column';
+import { renderWithTestingProviders } from '../../common/mock';
 
 // Failing: See https://github.com/elastic/kibana/issues/192674
-describe.skip('AssigneesColumn', () => {
+describe('AssigneesColumn', () => {
   const defaultProps: AssigneesColumnProps = {
     assignees: userProfiles,
     userProfiles: userProfilesMap,
     compressedDisplayLimit: 2,
   };
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
     jest.clearAllMocks();
-
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders a long dash if the assignees is an empty array', async () => {
@@ -36,7 +32,7 @@ describe.skip('AssigneesColumn', () => {
       assignees: [],
     };
 
-    appMockRender.render(<AssigneesColumn {...props} />);
+    renderWithTestingProviders(<AssigneesColumn {...props} />);
 
     expect(
       screen.queryByTestId('case-table-column-assignee-damaged_raccoon')
@@ -51,7 +47,7 @@ describe.skip('AssigneesColumn', () => {
       ...defaultProps,
     };
 
-    appMockRender.render(<AssigneesColumn {...props} />);
+    renderWithTestingProviders(<AssigneesColumn {...props} />);
 
     expect(screen.getByTestId('case-table-column-assignee-damaged_raccoon')).toBeInTheDocument();
     expect(screen.getByTestId('case-table-column-assignee-physical_dinosaur')).toBeInTheDocument();
@@ -63,7 +59,7 @@ describe.skip('AssigneesColumn', () => {
       compressedDisplayLimit: 5,
     };
 
-    appMockRender.render(<AssigneesColumn {...props} />);
+    renderWithTestingProviders(<AssigneesColumn {...props} />);
 
     expect(screen.getByTestId('case-table-column-assignee-damaged_raccoon')).toBeInTheDocument();
     expect(screen.getByTestId('case-table-column-assignee-physical_dinosaur')).toBeInTheDocument();
@@ -76,7 +72,7 @@ describe.skip('AssigneesColumn', () => {
       compressedDisplayLimit: 2,
     };
 
-    appMockRender.render(<AssigneesColumn {...props} />);
+    renderWithTestingProviders(<AssigneesColumn {...props} />);
 
     expect(screen.getByTestId('case-table-column-expand-button')).toBeInTheDocument();
     expect(screen.getByText('+1 more')).toBeInTheDocument();
@@ -88,7 +84,7 @@ describe.skip('AssigneesColumn', () => {
       compressedDisplayLimit: 5,
     };
 
-    appMockRender.render(<AssigneesColumn {...props} />);
+    renderWithTestingProviders(<AssigneesColumn {...props} />);
 
     expect(screen.queryByTestId('case-table-column-expand-button')).not.toBeInTheDocument();
   });
@@ -99,7 +95,7 @@ describe.skip('AssigneesColumn', () => {
       compressedDisplayLimit: userProfiles.length,
     };
 
-    appMockRender.render(<AssigneesColumn {...props} />);
+    renderWithTestingProviders(<AssigneesColumn {...props} />);
 
     expect(screen.queryByTestId('case-table-column-expand-button')).not.toBeInTheDocument();
   });
@@ -110,7 +106,7 @@ describe.skip('AssigneesColumn', () => {
       compressedDisplayLimit: 2,
     };
 
-    appMockRender.render(<AssigneesColumn {...props} />);
+    renderWithTestingProviders(<AssigneesColumn {...props} />);
 
     expect(screen.queryByTestId('case-table-column-assignee-wet_dingo')).not.toBeInTheDocument();
 
@@ -118,11 +114,9 @@ describe.skip('AssigneesColumn', () => {
     expect(screen.getByText('+1 more')).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('case-table-column-expand-button'));
+    expect(await screen.findByText('show less')).toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(screen.getByText('show less')).toBeInTheDocument();
-      expect(screen.getByTestId('case-table-column-assignee-wet_dingo')).toBeInTheDocument();
-    });
+    expect(screen.getByTestId('case-table-column-assignee-wet_dingo')).toBeInTheDocument();
   });
 
   it('shows more avatars and then hides them when the expand row button is clicked multiple times', async () => {
@@ -131,7 +125,7 @@ describe.skip('AssigneesColumn', () => {
       compressedDisplayLimit: 2,
     };
 
-    appMockRender.render(<AssigneesColumn {...props} />);
+    renderWithTestingProviders(<AssigneesColumn {...props} />);
 
     expect(screen.queryByTestId('case-table-column-assignee-wet_dingo')).not.toBeInTheDocument();
 
@@ -140,16 +134,14 @@ describe.skip('AssigneesColumn', () => {
 
     await userEvent.click(screen.getByTestId('case-table-column-expand-button'));
 
-    await waitFor(() => {
-      expect(screen.getByText('show less')).toBeInTheDocument();
-      expect(screen.getByTestId('case-table-column-assignee-wet_dingo')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('show less')).toBeInTheDocument();
+    expect(screen.getByTestId('case-table-column-assignee-wet_dingo')).toBeInTheDocument();
+
+    await waitFor(() => {});
 
     await userEvent.click(screen.getByTestId('case-table-column-expand-button'));
 
-    await waitFor(() => {
-      expect(screen.getByText('+1 more')).toBeInTheDocument();
-      expect(screen.queryByTestId('case-table-column-assignee-wet_dingo')).not.toBeInTheDocument();
-    });
+    expect(await screen.findByText('+1 more')).toBeInTheDocument();
+    expect(screen.queryByTestId('case-table-column-assignee-wet_dingo')).not.toBeInTheDocument();
   });
 });

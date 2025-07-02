@@ -17,6 +17,7 @@ import {
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import {
   attackDiscoveryDataClientMock,
+  attackDiscoveryScheduleDataClientMock,
   conversationsDataClientMock,
   dataClientMock,
   knowledgeBaseDataClientMock,
@@ -31,6 +32,7 @@ import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
 import { DefendInsightsDataClient } from '../ai_assistant_data_clients/defend_insights';
 import { authenticatedUser } from './user';
+import { AttackDiscoveryScheduleDataClient } from '../lib/attack_discovery/schedules/data_client';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -49,6 +51,7 @@ export const createMockClients = () => {
       getAIAssistantKnowledgeBaseDataClient: knowledgeBaseDataClientMock.create(),
       getAIAssistantPromptsDataClient: dataClientMock.create(),
       getAttackDiscoveryDataClient: attackDiscoveryDataClientMock.create(),
+      getAttackDiscoverySchedulingDataClient: attackDiscoveryScheduleDataClientMock.create(),
       getDefendInsightsDataClient: dataClientMock.create(),
       getAIAssistantAnonymizationFieldsDataClient: dataClientMock.create(),
       getSpaceId: jest.fn(),
@@ -129,6 +132,14 @@ const createElasticAssistantRequestContextMock = (
       () => clients.elasticAssistant.getAttackDiscoveryDataClient
     ) as unknown as jest.MockInstance<Promise<AttackDiscoveryDataClient | null>, [], unknown> &
       (() => Promise<AttackDiscoveryDataClient | null>),
+    getAttackDiscoverySchedulingDataClient: jest.fn(
+      () => clients.elasticAssistant.getAttackDiscoverySchedulingDataClient
+    ) as unknown as jest.MockInstance<
+      Promise<AttackDiscoveryScheduleDataClient | null>,
+      [],
+      unknown
+    > &
+      (() => Promise<AttackDiscoveryScheduleDataClient | null>),
     getDefendInsightsDataClient: jest.fn(
       () => clients.elasticAssistant.getDefendInsightsDataClient
     ) as unknown as jest.MockInstance<Promise<DefendInsightsDataClient | null>, [], unknown> &

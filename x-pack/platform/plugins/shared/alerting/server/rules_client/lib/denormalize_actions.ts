@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectReference } from '@kbn/core/server';
-import { ActionsClient } from '@kbn/actions-plugin/server';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import {
   preconfiguredConnectorActionRefPrefix,
   systemConnectorActionRefPrefix,
 } from '../common/constants';
-import { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } from '../types';
+import type { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } from '../types';
 
 export async function denormalizeActions(
   actionsClient: ActionsClient,

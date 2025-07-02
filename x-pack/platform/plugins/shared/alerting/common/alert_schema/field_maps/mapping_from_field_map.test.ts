@@ -249,6 +249,9 @@ describe('mappingFromFieldMap', () => {
                 last_detected: {
                   type: 'date',
                 },
+                pending_recovered_count: {
+                  type: 'long',
+                },
                 previous_action_group: {
                   type: 'keyword',
                 },

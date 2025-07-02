@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { Spaces } from '../../../../../scenarios';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../../../common/lib';
 
 const RULE_INTERVAL_SECONDS = 3;

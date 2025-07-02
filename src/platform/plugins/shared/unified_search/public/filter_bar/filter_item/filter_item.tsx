@@ -412,7 +412,3 @@ function FilterItemComponent(props: FilterItemProps) {
 }
 
 export const FilterItem = withCloseFilterEditorConfirmModal(FilterItemComponent);
-
-// Needed for React.lazy
-// eslint-disable-next-line import/no-default-export
-export default FilterItem;

@@ -57,7 +57,8 @@ export function registerBatchReindexIndicesRoutes(
       const callAsCurrentUser = esClient.asCurrentUser;
       const reindexActions = reindexActionsFactory(
         getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
-        callAsCurrentUser
+        callAsCurrentUser,
+        log
       );
       try {
         const inProgressOps = await reindexActions.findAllByStatus(ReindexStatus.inProgress);

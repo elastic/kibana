@@ -18,6 +18,7 @@
     "requiredPlugins": [
       "data",
       "discover",
+      "encryptedSavedObjects",
       "fieldFormats",
       "home",
       "management",

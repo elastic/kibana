@@ -6,13 +6,13 @@
  */
 
 import Boom from '@hapi/boom';
-import { KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import {
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterType,
 } from '../../../../authorization';
-import { RulesClientContext } from '../../../../rules_client';
-import { GetRuleIdsWithGapsParams, GetRuleIdsWithGapsResponse } from './types';
+import type { RulesClientContext } from '../../../../rules_client';
+import type { GetRuleIdsWithGapsParams, GetRuleIdsWithGapsResponse } from './types';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
 export const RULE_SAVED_OBJECT_TYPE = 'alert';

@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  AlertingAuthorizationFilterType,
-  AlertingAuthorizationFilterOpts,
-} from '../../authorization';
+import type { AlertingAuthorizationFilterOpts } from '../../authorization';
+import { AlertingAuthorizationFilterType } from '../../authorization';
 
 export {
   systemConnectorActionRefPrefix,

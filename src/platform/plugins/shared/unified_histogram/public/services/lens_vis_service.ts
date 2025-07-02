@@ -32,6 +32,7 @@ import {
   getLensAttributesFromSuggestion,
   ChartType,
   mapVisToChartType,
+  computeInterval,
 } from '@kbn/visualization-utils';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { XYConfiguration } from '@kbn/visualizations-plugin/common';
@@ -51,7 +52,6 @@ import {
   injectESQLQueryIntoLensLayers,
   TIMESTAMP_COLUMN,
 } from '../utils/external_vis_context';
-import { computeInterval } from '../utils/compute_interval';
 import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table';
 
 const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';

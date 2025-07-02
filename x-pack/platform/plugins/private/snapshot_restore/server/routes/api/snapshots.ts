@@ -182,6 +182,12 @@ export function registerSnapshotsRoutes({
   router.get(
     {
       path: addBasePath('snapshots/{repository}/{snapshot}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: { params: getOneParamsSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
@@ -239,7 +245,16 @@ export function registerSnapshotsRoutes({
 
   // DELETE one or multiple snapshots
   router.post(
-    { path: addBasePath('snapshots/bulk_delete'), validate: { body: deleteSchema } },
+    {
+      path: addBasePath('snapshots/bulk_delete'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: { body: deleteSchema },
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
 

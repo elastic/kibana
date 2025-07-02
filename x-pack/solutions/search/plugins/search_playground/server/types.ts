@@ -8,6 +8,7 @@
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchPlaygroundPluginSetup {}
@@ -22,6 +23,7 @@ export interface SearchPlaygroundPluginSetupDependencies {
 
 export interface SearchPlaygroundPluginStartDependencies {
   actions: ActionsPluginStartContract;
+  inference: InferenceServerStart;
   cloud?: CloudStart;
 }
 

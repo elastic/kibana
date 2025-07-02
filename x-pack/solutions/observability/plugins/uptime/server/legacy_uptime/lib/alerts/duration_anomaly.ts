@@ -25,6 +25,7 @@ import {
   alertsLocatorID,
   AlertsLocatorParams,
   getAlertUrl,
+  observabilityFeatureId,
   observabilityPaths,
 } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
@@ -107,6 +108,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
   id: CLIENT_ALERT_TYPES.DURATION_ANOMALY,
   category: DEFAULT_APP_CATEGORIES.observability.id,
   producer: 'uptime',
+  solution: observabilityFeatureId,
   name: durationAnomalyTranslations.alertFactoryName,
   validate: {
     params: uptimeDurationAnomalyRuleParamsSchema,

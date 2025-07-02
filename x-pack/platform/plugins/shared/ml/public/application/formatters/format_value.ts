@@ -14,6 +14,8 @@
 
 import moment from 'moment';
 import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
+import type { AnomalyDateFunction } from '@kbn/ml-anomaly-utils/types';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 const SIGFIGS_IF_ROUNDING = 3; // Number of sigfigs to use for values < 10
 
@@ -28,7 +30,7 @@ const SIGFIGS_IF_ROUNDING = 3; // Number of sigfigs to use for values < 10
 export function formatValue(
   value: number[] | number,
   mlFunction: string,
-  fieldFormat?: any,
+  fieldFormat?: FieldFormat,
   record?: MlAnomalyRecordDoc
 ) {
   // actual and typical values in anomaly record results will be arrays.
@@ -58,39 +60,15 @@ export function formatValue(
 export function formatSingleValue(
   value: number,
   mlFunction?: string,
-  fieldFormat?: any,
+  fieldFormat?: FieldFormat,
   record?: MlAnomalyRecordDoc
 ) {
   if (value === undefined || value === null) {
     return '';
   }
 
-  if (mlFunction === 'time_of_week') {
-    const date =
-      record !== undefined && record.timestamp !== undefined
-        ? new Date(record.timestamp)
-        : new Date();
-    /**
-     * For time_of_week we model "time in UTC" modulo "duration of week in seconds".
-     * This means the numbers we output from the backend are seconds after a whole number of weeks after 1/1/1970 in UTC.
-     */
-    const remainder = moment(date).unix() % moment.duration(1, 'week').asSeconds();
-    const offset = moment.duration(remainder, 'seconds');
-    const utcMoment = moment.utc(date).subtract(offset).startOf('day').add(value, 's');
-    return moment(utcMoment.valueOf()).format('ddd HH:mm');
-  } else if (mlFunction === 'time_of_day') {
-    /**
-     * For time_of_day, actual / typical is the UTC offset in seconds from the
-     * start of the day, so need to manipulate to UTC moment of the start of the day
-     * that the anomaly occurred using record timestamp if supplied, add on the offset, and finally
-     * revert to configured timezone for formatting.
-     */
-    const d =
-      record !== undefined && record.timestamp !== undefined
-        ? new Date(record.timestamp)
-        : new Date();
-    const utcMoment = moment.utc(d).startOf('day').add(value, 's');
-    return moment(utcMoment.valueOf()).format('HH:mm');
+  if (mlFunction === 'time_of_week' || mlFunction === 'time_of_day') {
+    return formatTimeValue(value, mlFunction, record).formatted;
   } else {
     if (fieldFormat !== undefined) {
       return fieldFormat.convert(value, 'text');
@@ -100,11 +78,7 @@ export function formatSingleValue(
       const absValue = Math.abs(value);
       if (absValue >= 10000 || absValue === Math.floor(absValue)) {
         // Output 0 decimal places if whole numbers or >= 10000
-        if (fieldFormat !== undefined) {
-          return fieldFormat.convert(value, 'text');
-        } else {
-          return Number(value.toFixed(0));
-        }
+        return Number(value.toFixed(0));
       } else if (absValue >= 10) {
         // Output to 1 decimal place between 10 and 10000
         return Number(value.toFixed(1));
@@ -124,6 +98,61 @@ export function formatSingleValue(
         }
         return Math.round(value * multiple) / multiple;
       }
+    }
+  }
+}
+
+export function formatTimeValue(
+  value: number,
+  mlFunction: AnomalyDateFunction,
+  record?: MlAnomalyRecordDoc
+) {
+  const date =
+    record !== undefined && record.timestamp !== undefined
+      ? new Date(record.timestamp)
+      : new Date();
+
+  switch (mlFunction) {
+    case 'time_of_week': {
+      /**
+       * For time_of_week we model "time in UTC" modulo "duration of week in seconds".
+       * This means the numbers we output from the backend are seconds after a whole number of weeks after 1/1/1970 in UTC.
+       */
+      const remainder = moment(date).unix() % moment.duration(1, 'week').asSeconds();
+      const offset = moment.duration(remainder, 'seconds');
+      const utcMoment = moment.utc(date).subtract(offset).startOf('day').add(value, 's');
+
+      // Convert to local timezone for display
+      const localMoment = moment(utcMoment.valueOf());
+      const formatted = localMoment.format('ddd HH:mm');
+
+      return { formatted, moment: localMoment };
+    }
+
+    case 'time_of_day': {
+      /**
+       * For time_of_day, actual / typical is the UTC offset in seconds from the
+       * start of the day, so need to manipulate to UTC moment of the start of the day
+       * that the anomaly occurred using record timestamp if supplied, add on the offset, and finally
+       * revert to configured timezone for formatting.
+       */
+      const utcMoment = moment.utc(date).startOf('day').add(value, 's');
+
+      // Convert to local timezone
+      const localMoment = moment(utcMoment.valueOf());
+
+      // Get the reference date in local timezone
+      const referenceDate = moment(date).startOf('day');
+
+      // Get the date part of the calculated moment
+      const localMomentDate = localMoment.clone().startOf('day');
+
+      // Calculate the day offset
+      const dayOffset = Math.floor(localMomentDate.diff(referenceDate, 'days'));
+
+      const formatted = localMoment.format('HH:mm');
+
+      return { formatted, moment: localMoment, dayOffset };
     }
   }
 }

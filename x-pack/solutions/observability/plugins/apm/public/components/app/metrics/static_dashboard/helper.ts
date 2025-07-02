@@ -61,11 +61,8 @@ export async function convertSavedDashboardToPanels(
     const { gridData, embeddableConfig, panelIndex, title } = panel;
     const { attributes } = embeddableConfig;
     const { state } = attributes;
-    const {
-      datasourceStates: {
-        formBased: { layers },
-      },
-    } = state;
+    const layers =
+      state.datasourceStates?.formBased?.layers ?? state.datasourceStates?.textBased?.layers ?? [];
 
     acc[gridData.i] = {
       type: panel.type,

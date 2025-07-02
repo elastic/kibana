@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/invalid_scripted_field'
+        'src/platform/test/functional/fixtures/kbn_archiver/invalid_scripted_field'
       );
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await common.navigateToApp('discover');

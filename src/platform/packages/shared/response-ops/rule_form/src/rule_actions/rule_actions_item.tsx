@@ -106,7 +106,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     selectedRuleTypeModel,
     connectors,
     connectorTypes,
-    aadTemplateFields,
+    alertFields,
   } = useRuleFormState();
 
   const [tab, setTab] = useState<string>(MESSAGES_TAB);
@@ -160,9 +160,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     ruleTypeModel: selectedRuleTypeModel,
   });
 
-  const templateFields = action.useAlertDataForTemplate
-    ? aadTemplateFields
-    : availableActionVariables;
+  const templateFields = action.useAlertDataForTemplate ? alertFields : availableActionVariables;
 
   const checkEnabledResult = useMemo(() => {
     if (!actionType) {

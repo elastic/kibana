@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './field_item.scss';
-
 import React, { useCallback, useState, useMemo } from 'react';
 import { EuiText, EuiButton, EuiPopoverFooter } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -246,11 +244,15 @@ export function InnerFieldItem(props: FieldItemProps) {
   }, [dataViewField, filters, hideDetails, indexPattern, query, services]);
 
   return (
-    <li>
+    <li data-attr-field={field.name}>
       <FieldPopover
         isOpen={infoIsOpen}
         closePopover={closePopover}
         panelClassName="lnsFieldItem__fieldPanel"
+        panelStyle={{
+          minWidth: '260px',
+          maxWidth: '300px',
+        }}
         initialFocus=".lnsFieldItem__fieldPanel"
         data-test-subj="lnsFieldListPanelField"
         panelProps={{

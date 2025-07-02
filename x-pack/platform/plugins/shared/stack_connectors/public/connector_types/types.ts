@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiIconProps } from '@elastic/eui';
-import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { EuiIconProps } from '@elastic/eui';
+import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 export interface EmailActionParams {
   to: string[];

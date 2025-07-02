@@ -10,6 +10,7 @@
 import '@testing-library/jest-dom';
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
+import { EuiThemeProvider } from '@elastic/eui';
 import { BehaviorSubject, of } from 'rxjs';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 
@@ -17,7 +18,11 @@ describe('HeaderBreadcrumbs', () => {
   it('renders updates to the breadcrumbs$ observable', async () => {
     const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
 
-    render(<HeaderBreadcrumbs breadcrumbs$={breadcrumbs$} />);
+    render(
+      <EuiThemeProvider>
+        <HeaderBreadcrumbs breadcrumbs$={breadcrumbs$} />
+      </EuiThemeProvider>
+    );
 
     expect(await screen.findByLabelText('Breadcrumbs')).toHaveTextContent('First');
 
@@ -36,7 +41,11 @@ describe('HeaderBreadcrumbs', () => {
       { text: 'Last', href: '/something', onClick: jest.fn() },
     ]);
 
-    render(<HeaderBreadcrumbs breadcrumbs$={breadcrumbs$} />);
+    render(
+      <EuiThemeProvider>
+        <HeaderBreadcrumbs breadcrumbs$={breadcrumbs$} />
+      </EuiThemeProvider>
+    );
 
     const lastBreadcrumb = await screen.findByTitle('Last');
 

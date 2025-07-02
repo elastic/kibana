@@ -21,7 +21,8 @@ import {
   claimSort,
 } from './mark_available_tasks_as_claimed';
 
-import { TaskStatus, TaskPriority, ConcreteTaskInstance } from '../task';
+import type { ConcreteTaskInstance } from '../task';
+import { TaskStatus, TaskPriority } from '../task';
 
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';

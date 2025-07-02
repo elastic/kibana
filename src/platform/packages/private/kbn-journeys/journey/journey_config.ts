@@ -82,7 +82,7 @@ export interface ScalabilitySetup {
 export interface JourneyConfigOptions<CtxExt extends { '@timestamp'?: number | undefined }> {
   /**
    * Relative path to FTR config file. Use to override the default ones:
-   * 'x-pack/test/functional/config.base.js', 'test/functional/config.base.js'
+   * 'x-pack/test/functional/config.base.js', 'src/platform/test/functional/config.base.js'
    */
   ftrConfigPath?: string;
   /**

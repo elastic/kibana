@@ -12,6 +12,6 @@ import { render } from '@testing-library/react';
 describe('EmptyMessage', () => {
   it('renders a null component', () => {
     const { container } = render(<EmptyMessage />);
-    expect(container.firstChild).toBeNull();
+    expect(container).toBeEmptyDOMElement();
   });
 });

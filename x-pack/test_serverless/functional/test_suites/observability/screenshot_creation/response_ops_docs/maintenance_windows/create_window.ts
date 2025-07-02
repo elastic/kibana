@@ -36,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         '[data-test-subj="maintenanceWindowScopedQuerySwitch"] .euiSwitch__button'
       );
       await filterAlerts.click();
-      const radioGroup = await testSubjects.find('maintenanceWindowCategorySelectionRadioGroup');
+      const radioGroup = await testSubjects.find('maintenanceWindowSolutionSelectionRadioGroup');
       const label = await radioGroup.findByCssSelector(`label[for="observability"]`);
       await label.click();
       await testSubjects.setValue('queryInput', 'kibana.alert.rule.name: custom-threshold-rule-1');

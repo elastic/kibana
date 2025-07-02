@@ -16,7 +16,7 @@ import {
   RelevantField,
   createLlmProxy,
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { chatComplete, getSystemMessage, systemMessageSorted } from './helpers';
+import { chatComplete, getSystemMessage, systemMessageSorted } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { createSimpleSyntheticLogs } from '../../synthtrace_scenarios/simple_logs';
 

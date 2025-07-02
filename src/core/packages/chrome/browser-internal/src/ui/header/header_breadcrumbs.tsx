@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiHeaderBreadcrumbs } from '@elastic/eui';
+import { EuiHeaderBreadcrumbs, makeHighContrastColor, shade, tint } from '@elastic/eui';
+import { css } from '@emotion/react';
 import classNames from 'classnames';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -43,6 +44,26 @@ export function HeaderBreadcrumbs({ breadcrumbs$ }: Props) {
       ),
     };
   });
-
-  return <EuiHeaderBreadcrumbs breadcrumbs={crumbs} max={10} data-test-subj="breadcrumbs" />;
+  // Modify last breadcrumb's text color to comply with A11y contrast ratio (AA)
+  // https://github.com/elastic/kibana/issues/214597
+  return (
+    <EuiHeaderBreadcrumbs
+      breadcrumbs={crumbs}
+      max={10}
+      data-test-subj="breadcrumbs"
+      css={({ euiTheme, colorMode }) => css`
+        [class*='euiBreadcrumb-application'] .euiBreadcrumb__content:not(.euiLink) {
+          color: ${makeHighContrastColor(
+            colorMode === 'DARK'
+              ? shade(euiTheme.colors.darkestShade, 0.2)
+              : tint(euiTheme.colors.darkestShade, 0.2)
+          )(
+            colorMode === 'DARK'
+              ? shade(euiTheme.colors.darkestShade, 0.7)
+              : tint(euiTheme.colors.darkestShade, 0.85)
+          )};
+        }
+      `}
+    />
+  );
 }

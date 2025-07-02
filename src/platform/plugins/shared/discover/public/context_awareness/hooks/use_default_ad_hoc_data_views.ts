@@ -13,6 +13,7 @@ import useUnmount from 'react-use/lib/useUnmount';
 import type { RootProfileState } from './use_root_profile';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
+import { internalStateActions } from '../../application/main/state_management/redux';
 
 /**
  * Hook to retrieve and initialize the default profile ad hoc data views
@@ -36,7 +37,7 @@ export const useDefaultAdHocDataViews = ({
 
     // Clear the cache of old data views before creating
     // the new ones to avoid cache hits on duplicate IDs
-    for (const prevId of internalState.get().defaultProfileAdHocDataViewIds) {
+    for (const prevId of internalState.getState().defaultProfileAdHocDataViewIds) {
       dataViews.clearInstanceCache(prevId);
     }
 
@@ -45,7 +46,7 @@ export const useDefaultAdHocDataViews = ({
       profileDataViewSpecs.map((spec) => dataViews.create(spec, true))
     );
 
-    internalState.transitions.setDefaultProfileAdHocDataViews(profileDataViews);
+    internalState.dispatch(internalStateActions.setDefaultProfileAdHocDataViews(profileDataViews));
   });
 
   // This approach allows us to return a callback with a stable reference
@@ -53,11 +54,11 @@ export const useDefaultAdHocDataViews = ({
 
   // Make sure to clean up on unmount
   useUnmount(() => {
-    for (const prevId of internalState.get().defaultProfileAdHocDataViewIds) {
+    for (const prevId of internalState.getState().defaultProfileAdHocDataViewIds) {
       dataViews.clearInstanceCache(prevId);
     }
 
-    internalState.transitions.setDefaultProfileAdHocDataViews([]);
+    internalState.dispatch(internalStateActions.setDefaultProfileAdHocDataViews([]));
   });
 
   return { initializeProfileDataViews };

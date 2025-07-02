@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 const tags = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
 
@@ -210,7 +210,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
             .get(
               `${getUrlPrefix(
                 Spaces.space1.id
-              )}/internal/alerting/rules/_tags?page=1&per_page=5&rule_type_ids=["non_existent"]`
+              )}/internal/alerting/rules/_tags?page=1&per_page=5&rule_type_ids=non_existent`
             )
             .expect(200);
 
@@ -241,7 +241,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
             .get(
               `${getUrlPrefix(
                 Spaces.space1.id
-              )}/internal/alerting/rules/_tags?page=1&per_page=10&rule_type_ids=["test.noop","test.restricted-noop"]`
+              )}/internal/alerting/rules/_tags?page=1&per_page=10&rule_type_ids=test.noop&rule_type_ids=test.restricted-noop`
             )
             .expect(200);
 

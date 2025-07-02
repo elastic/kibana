@@ -79,7 +79,8 @@ export default function (providerContext: FtrProviderContext) {
     },
   });
 
-  describe('GET /internal/cloud_security_posture/benchmarks', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/217399
+  describe.skip('GET /internal/cloud_security_posture/benchmarks', () => {
     describe('Get Benchmark API', async () => {
       beforeEach(async () => {
         await findingsIndex.deleteAll();

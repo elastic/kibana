@@ -121,10 +121,10 @@
   content: '';
   position: absolute;
   top: 0;
-  bottom: -$euiSize * .3;
-  left: -$euiSize * 3;
+  bottom: -$euiSize * .1;
+  left: -$euiSize * .5;
   right: 0;
-  background: transparentize($euiColorPrimary, .9);
+  background: transparentize($euiColorPrimary, .95);
   border: $euiBorderThin;
   border-color: $euiColorPrimary;
   pointer-events: none; /* Ensures the pseudo-element doesn't block interactions */

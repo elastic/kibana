@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './table_basic.scss';
 import { ColorMappingInputData, PaletteOutput, getFallbackDataBounds } from '@kbn/coloring';
 import React, {
   useLayoutEffect,
@@ -33,11 +32,11 @@ import { IconChartDatatable } from '@kbn/chart-icons';
 import useObservable from 'react-use/lib/useObservable';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { getOriginalId } from '@kbn/transpose-utils';
+import { css } from '@emotion/react';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import type { FormatFactory } from '../../../../common/types';
 import { RowHeightMode } from '../../../../common/types';
 import { LensGridDirection } from '../../../../common/expressions';
-import { VisualizationContainer } from '../../../visualization_container';
 import { findMinMaxByColumnId, shouldColorByTerms } from '../../../shared_components';
 import type {
   DataContextType,
@@ -499,9 +498,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   if (isEmpty) {
     return (
-      <VisualizationContainer className="lnsDataTableContainer">
+      <div
+        css={datatableContainerStyles}
+        className="eui-scrollBar"
+        data-test-subj="lnsVisualizationContainer"
+      >
         <EmptyPlaceholder icon={IconChartDatatable} />
-      </VisualizationContainer>
+      </div>
     );
   }
 
@@ -512,7 +515,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     });
 
   return (
-    <VisualizationContainer className="lnsDataTableContainer">
+    <div
+      css={datatableContainerStyles}
+      className="eui-scrollBar"
+      data-test-subj="lnsVisualizationContainer"
+    >
       <DataContext.Provider
         value={{
           table: firstLocalTable,
@@ -557,6 +564,28 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           ref={dataGridRef}
         />
       </DataContext.Provider>
-    </VisualizationContainer>
+    </div>
   );
 };
+
+const datatableContainerStyles = css`
+  height: 100%;
+  overflow: auto hidden;
+  user-select: text;
+
+  .lnsTableCell--multiline {
+    white-space: pre-wrap;
+  }
+
+  .lnsTableCell--left {
+    text-align: left;
+  }
+
+  .lnsTableCell--right {
+    text-align: right;
+  }
+
+  .lnsTableCell--center {
+    text-align: center;
+  }
+`;

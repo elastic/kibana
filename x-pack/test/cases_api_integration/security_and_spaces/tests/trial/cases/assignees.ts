@@ -19,7 +19,7 @@ import {
   bulkGetUserProfiles,
 } from '../../../../common/lib/api';
 
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { superUser } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export

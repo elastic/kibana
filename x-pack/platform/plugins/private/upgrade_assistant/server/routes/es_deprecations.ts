@@ -8,7 +8,7 @@
 import { API_BASE_PATH } from '../../common/constants';
 import { getESUpgradeStatus } from '../lib/es_deprecations_status';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
-import { RouteDependencies } from '../types';
+import type { RouteDependencies } from '../types';
 import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
 import { reindexServiceFactory } from '../lib/reindexing';
 
@@ -36,10 +36,12 @@ export function registerESDeprecationRoutes({
           savedObjects: { client: savedObjectsClient },
           elasticsearch: { client },
         } = await core;
-        const status = await getESUpgradeStatus(client, { featureSet, dataSourceExclusions });
-
+        const status = await getESUpgradeStatus(client.asCurrentUser, {
+          featureSet,
+          dataSourceExclusions,
+        });
         const asCurrentUser = client.asCurrentUser;
-        const reindexActions = reindexActionsFactory(savedObjectsClient, asCurrentUser);
+        const reindexActions = reindexActionsFactory(savedObjectsClient, asCurrentUser, log);
         const reindexService = reindexServiceFactory(asCurrentUser, reindexActions, log, licensing);
         const indexNames = [...status.migrationsDeprecations, ...status.enrichedHealthIndicators]
           .filter(({ index }) => typeof index !== 'undefined')
@@ -51,6 +53,7 @@ export function registerESDeprecationRoutes({
           body: status,
         });
       } catch (error) {
+        log.error(error);
         return handleEsError({ error, response });
       }
     })

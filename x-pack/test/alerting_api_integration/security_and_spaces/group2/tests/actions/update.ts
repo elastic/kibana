@@ -11,7 +11,7 @@ import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integrati
 
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { checkAAD, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function updateActionTests({ getService }: FtrProviderContext) {

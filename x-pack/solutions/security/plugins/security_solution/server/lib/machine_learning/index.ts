@@ -34,7 +34,7 @@ export const getAnomalies = async (
   return mlAnomalySearch(queryRequest, params.jobIds);
 };
 
-export const buildAnomalyQuery = (params: AnomaliesSearchParams): estypes.SearchRequest => {
+export const buildAnomalyQuery = (params: AnomaliesSearchParams) => {
   const boolCriteria = buildCriteria(params);
   return {
     body: {

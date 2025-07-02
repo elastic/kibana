@@ -5,12 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { ComponentProps } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { EsqlCodeBlock as Component } from './esql_code_block';
 
-const meta: ComponentMeta<typeof Component> = {
+const meta: Meta<typeof Component> = {
   component: Component,
   title: 'app/Molecules/ES|QL Code Block',
 };
@@ -25,7 +25,7 @@ const render = (props: ComponentProps<typeof Component>) => {
   );
 };
 
-export const Simple: ComponentStoryObj<typeof Component> = {
+export const Simple: StoryObj<typeof Component> = {
   args: {
     value: `FROM packetbeat-*
     | STATS COUNT_DISTINCT(destination.domain)`,

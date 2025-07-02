@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import { partiallyUpdateRule } from '../saved_objects/partially_update_rule';
 
 const TIME_TO_WAIT = 2000;
@@ -16,7 +16,7 @@ export class RuleRunningHandler {
   private ruleTypeId: string;
 
   private runningTimeoutId?: NodeJS.Timeout;
-  private isUpdating: boolean = false;
+  private isUpdating = false;
   private runningPromise?: Promise<void>;
 
   constructor(client: ISavedObjectsRepository, logger: Logger, ruleTypeId: string) {

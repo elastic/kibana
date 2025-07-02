@@ -9,13 +9,12 @@ import { PaletteRegistry, CustomizablePalette, CUSTOM_PALETTE } from '@kbn/color
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ColorMode } from '@kbn/charts-plugin/common';
+import { css } from '@emotion/react';
 import type { LegacyMetricState } from '../../../common/types';
 import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
 import { applyPaletteParams, PalettePanelContainer } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultPaletteParams } from './palette_config';
-
-import './dimension_editor.scss';
 
 const idPrefix = htmlIdGenerator()();
 
@@ -129,12 +128,14 @@ export function MetricDimensionEditor(
       </EuiFormRow>
       {hasDynamicColoring && (
         <EuiFormRow
-          className="lnsDynamicColoringRow"
           display="columnCompressed"
           fullWidth
           label={i18n.translate('xpack.lens.paletteMetricGradient.label', {
             defaultMessage: 'Color mapping',
           })}
+          css={css`
+            align-items: center;
+          `}
         >
           <PalettePanelContainer
             palette={displayStops.map(({ color }) => color)}

@@ -14,10 +14,6 @@ import React, { Fragment, type FC } from 'react';
 import { PanelGroup } from './panel_group';
 import { PanelNavItem } from './panel_nav_item';
 
-function isGroupNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>) {
-  return children !== undefined;
-}
-
 function isItemNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>) {
   return children === undefined;
 }
@@ -35,32 +31,20 @@ function isItemNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>)
 function serializeChildren(node: PanelSelectedNode): ChromeProjectNavigationNode[] | undefined {
   if (!node.children) return undefined;
 
-  const allChildrenAreItems = node.children.every((_node) => {
+  const someChildrenAreItems = node.children.some((_node) => {
     if (isItemNode(_node)) return true;
     return _node.renderAs === 'item';
   });
 
-  if (allChildrenAreItems) {
+  if (someChildrenAreItems) {
     // Automatically wrap all the children into top level "root" group.
     return [
       {
         id: 'root',
-        title: '',
         path: `${node.path}.root`,
         children: [...node.children],
       },
     ];
-  }
-
-  const allChildrenAreGroups = node.children.every((_node) => {
-    if (_node.renderAs === 'item') return false;
-    return isGroupNode(_node);
-  });
-
-  if (!allChildrenAreGroups) {
-    throw new Error(
-      `[Chrome navigation] Error in node [${node.id}]. Children must either all be "groups" or all "items" but not a mix of both.`
-    );
   }
 
   return node.children;

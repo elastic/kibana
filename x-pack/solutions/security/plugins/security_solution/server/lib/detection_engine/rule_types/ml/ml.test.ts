@@ -6,10 +6,7 @@
  */
 
 import dateMath from '@kbn/datemath';
-import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
-import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { mlExecutor } from './ml';
-import type { ExperimentalFeatures } from '../../../../../common';
 import { getCompleteRuleMock, getMlRuleParams } from '../../rule_schema/mocks';
 import { findMlSignals } from './find_ml_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
@@ -17,18 +14,19 @@ import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
 import type { MachineLearningRuleParams } from '../../rule_schema';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { getSharedParamsMock } from '../__mocks__/shared_params';
+import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
+import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 
 jest.mock('./find_ml_signals');
 jest.mock('./bulk_create_ml_signals');
 
 describe('ml_executor', () => {
-  let mockExperimentalFeatures: jest.Mocked<ExperimentalFeatures>;
   let mockScheduledNotificationResponseAction: jest.Mock;
   let jobsSummaryMock: jest.Mock;
   let forceStartDatafeedsMock: jest.Mock;
   let stopDatafeedsMock: jest.Mock;
   let mlMock: ReturnType<typeof mlPluginServerMock.createSetupContract>;
-  let alertServices: RuleExecutorServicesMock;
+  let ruleServices: PersistenceExecutorOptionsMock;
 
   const params = getMlRuleParams();
   const mlCompleteRule = getCompleteRuleMock<MachineLearningRuleParams>(params);
@@ -48,7 +46,6 @@ describe('ml_executor', () => {
   sharedParams.ruleExecutionLogger = ruleExecutionLogger;
 
   beforeEach(() => {
-    mockExperimentalFeatures = {} as jest.Mocked<ExperimentalFeatures>;
     mockScheduledNotificationResponseAction = jest.fn();
     jobsSummaryMock = jest.fn();
     mlMock = mlPluginServerMock.createSetupContract();
@@ -57,7 +54,7 @@ describe('ml_executor', () => {
       forceStartDatafeeds: forceStartDatafeedsMock,
       stopDatafeeds: stopDatafeedsMock,
     });
-    alertServices = alertsMock.createRuleExecutorServices();
+    ruleServices = createPersistenceExecutorOptionsMock();
     (findMlSignals as jest.Mock).mockResolvedValue({
       anomalyResults: {
         _shards: {},
@@ -81,10 +78,9 @@ describe('ml_executor', () => {
       mlExecutor({
         sharedParams,
         ml: undefined,
-        services: alertServices,
+        services: ruleServices,
         wrapSuppressedHits: jest.fn(),
         isAlertSuppressionActive: true,
-        experimentalFeatures: mockExperimentalFeatures,
         scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
       })
     ).rejects.toThrow('ML plugin unavailable during rule execution');
@@ -95,10 +91,9 @@ describe('ml_executor', () => {
     const { result } = await mlExecutor({
       sharedParams,
       ml: mlMock,
-      services: alertServices,
+      services: ruleServices,
       wrapSuppressedHits: jest.fn(),
       isAlertSuppressionActive: true,
-      experimentalFeatures: mockExperimentalFeatures,
       scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
     });
     expect(ruleExecutionLogger.warn).toHaveBeenCalled();
@@ -120,10 +115,9 @@ describe('ml_executor', () => {
     const { result } = await mlExecutor({
       sharedParams,
       ml: mlMock,
-      services: alertServices,
+      services: ruleServices,
       wrapSuppressedHits: jest.fn(),
       isAlertSuppressionActive: true,
-      experimentalFeatures: mockExperimentalFeatures,
       scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
     });
     expect(ruleExecutionLogger.warn).toHaveBeenCalled();
@@ -141,10 +135,9 @@ describe('ml_executor', () => {
     const { result } = await mlExecutor({
       sharedParams,
       ml: mlMock,
-      services: alertServices,
+      services: ruleServices,
       wrapSuppressedHits: jest.fn(),
       isAlertSuppressionActive: true,
-      experimentalFeatures: mockExperimentalFeatures,
       scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
     });
     expect(result.userError).toEqual(true);
@@ -165,10 +158,9 @@ describe('ml_executor', () => {
     const { result } = await mlExecutor({
       sharedParams,
       ml: mlMock,
-      services: alertServices,
+      services: ruleServices,
       wrapSuppressedHits: jest.fn(),
       isAlertSuppressionActive: true,
-      experimentalFeatures: mockExperimentalFeatures,
       scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
     });
 
@@ -182,10 +174,9 @@ describe('ml_executor', () => {
     const { result } = await mlExecutor({
       sharedParams,
       ml: mlMock,
-      services: alertServices,
+      services: ruleServices,
       wrapSuppressedHits: jest.fn(),
       isAlertSuppressionActive: true,
-      experimentalFeatures: mockExperimentalFeatures,
       scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
     });
     expect(mockScheduledNotificationResponseAction).toBeCalledWith({

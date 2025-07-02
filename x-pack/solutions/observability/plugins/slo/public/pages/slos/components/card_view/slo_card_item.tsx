@@ -271,11 +271,12 @@ export function SloCardChart({
   const { cardColor } = useSloCardColor(slo.summary.status);
   const subTitle = getSubTitle(slo);
   const { sliValue, sloTarget, sloDetailsUrl } = useSloFormattedSummary(slo);
+  const chartBaseTheme = charts.theme.useChartsBaseTheme();
 
   return (
     <Chart>
       <Settings
-        baseTheme={charts.theme.useChartsBaseTheme()}
+        baseTheme={chartBaseTheme}
         theme={{
           metric: {
             iconAlign: 'right',

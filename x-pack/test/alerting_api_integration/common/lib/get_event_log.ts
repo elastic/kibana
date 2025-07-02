@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IValidatedEventInternalDocInfo } from '@kbn/event-log-plugin/server';
+import type { IValidatedEventInternalDocInfo } from '@kbn/event-log-plugin/server';
 import { getUrlPrefix } from '.';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 interface GreaterThanEqualCondition {
   gte: number;

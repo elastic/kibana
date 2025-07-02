@@ -5,17 +5,19 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import { KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder, nodeTypes } from '@kbn/es-query';
 import {
   buildRuleTypeIdsFilter,
   combineFilters,
   combineFilterWithAuthorizationFilter,
 } from '../../../../rules_client/common/filters';
 import { findRulesSo } from '../../../../data/rule/methods/find_rules_so';
-import { ruleTagsParamsSchema, RuleTagsParams, RuleTagsAggregationResult } from '.';
+import type { RuleTagsParams, RuleTagsAggregationResult } from '.';
+import { ruleTagsParamsSchema } from '.';
 import type { RuleTagsFormattedResponse } from '../../../../../common/routes/rule/apis/tags';
 import { DEFAULT_TAGS_PER_PAGE } from '../../../../../common/routes/rule/apis/tags/constants/latest';
-import { RulesClientContext } from '../../../../rules_client/types';
+import type { RulesClientContext } from '../../../../rules_client/types';
 import { AlertingAuthorizationEntity } from '../../../../authorization';
 import { alertingAuthorizationFilterOpts } from '../../../../rules_client/common/constants';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';

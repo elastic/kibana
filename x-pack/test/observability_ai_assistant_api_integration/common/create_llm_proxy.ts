@@ -42,6 +42,11 @@ export interface RelevantField {
   name: string;
 }
 
+export interface KnowledgeBaseDocument {
+  id: string;
+  text: string;
+}
+
 export interface LlmResponseSimulator {
   requestBody: ChatCompletionStreamParams;
   status: (code: number) => void;
@@ -197,14 +202,10 @@ export class LlmProxy {
       when: (requestBody) => requestBody.tool_choice?.function?.name === 'select_relevant_fields',
       arguments: (requestBody) => {
         const messageWithFieldIds = last(requestBody.messages);
-        relevantFields = (messageWithFieldIds?.content as string)
-          .split('\n\n')
-          .slice(1)
-          .join('')
-          .trim()
-          .split('\n')
+        const matches = (messageWithFieldIds?.content as string).match(/\{[\s\S]*?\}/g)!;
+        relevantFields = matches
           .slice(from, to)
-          .map((line) => JSON.parse(line) as RelevantField);
+          .map((jsonStr) => JSON.parse(jsonStr) as RelevantField);
 
         return JSON.stringify({ fieldIds: relevantFields.map(({ id }) => id) });
       },
@@ -215,6 +216,30 @@ export class LlmProxy {
       getRelevantFields: async () => {
         await simulator;
         return relevantFields;
+      },
+    };
+  }
+
+  interceptScoreToolChoice(log: ToolingLog) {
+    let documents: KnowledgeBaseDocument[] = [];
+
+    const simulator = this.interceptWithFunctionRequest({
+      name: 'score',
+      // @ts-expect-error
+      when: (requestBody) => requestBody.tool_choice?.function?.name === 'score',
+      arguments: (requestBody) => {
+        documents = extractDocumentsFromMessage(last(requestBody.messages)?.content as string, log);
+        const scores = documents.map((doc: KnowledgeBaseDocument) => `${doc.id},7`).join(';');
+
+        return JSON.stringify({ scores });
+      },
+    });
+
+    return {
+      simulator,
+      getDocuments: async () => {
+        await simulator;
+        return documents;
       },
     };
   }
@@ -354,4 +379,9 @@ async function getRequestBody(request: http.IncomingMessage): Promise<ChatComple
 
 function sseEvent(chunk: unknown) {
   return `data: ${JSON.stringify(chunk)}\n\n`;
+}
+
+function extractDocumentsFromMessage(content: string, log: ToolingLog): KnowledgeBaseDocument[] {
+  const matches = content.match(/\{[\s\S]*?\}/g)!;
+  return matches.map((jsonStr) => JSON.parse(jsonStr));
 }

@@ -32,6 +32,7 @@ import {
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
   SiemMigrationsStartUpsellSectionLazy,
+  SiemMigrationsTranslatedRulesUpsellPageLazy,
 } from './lazy_upselling';
 
 interface UpsellingsConfig {
@@ -101,6 +102,12 @@ export const upsellingPages: UpsellingPages = [
     pageName: SecurityPageName.attackDiscovery,
     minimumLicenseRequired: 'enterprise',
     component: AttackDiscoveryUpsellingPageLazy,
+  },
+
+  {
+    pageName: SecurityPageName.siemMigrationsRules,
+    minimumLicenseRequired: 'enterprise',
+    component: SiemMigrationsTranslatedRulesUpsellPageLazy,
   },
 ];
 

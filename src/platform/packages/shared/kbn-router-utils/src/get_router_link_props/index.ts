@@ -14,7 +14,7 @@ export interface RouterLinkProps {
 
 interface GetRouterLinkPropsDeps {
   href?: string;
-  onClick(): void;
+  onClick(event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>): void;
 }
 
 const isModifiedEvent = (event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) =>
@@ -48,7 +48,7 @@ export const getRouterLinkProps = ({ href, onClick }: GetRouterLinkPropsDeps): R
     // Prevent regular link behavior, which causes a browser refresh.
     event.preventDefault();
 
-    onClick();
+    onClick(event);
   };
 
   return { href, onClick: guardedClickHandler };

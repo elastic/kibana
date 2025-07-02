@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { TechnicalPreviewBadge } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApmPluginStartDeps } from '../../../../plugin';
@@ -49,6 +50,9 @@ export function EntitiesInventoryCallout({ onDismiss }: EntitiesInventoryCallout
         >
           <EuiButtonIcon
             data-test-subj="apmEntitiesInventoryCalloutDismiss"
+            aria-label={i18n.translate('xpack.apm.entitiesInventoryCallout.ariaLabel', {
+              defaultMessage: 'Hide the entities inventory callout',
+            })}
             iconType="cross"
             onClick={onDismiss}
           />

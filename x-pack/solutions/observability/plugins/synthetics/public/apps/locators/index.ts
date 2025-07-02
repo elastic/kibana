@@ -9,9 +9,11 @@ import { SerializableRecord } from '@kbn/utility-types';
 import { monitorDetailNavigatorParams } from './monitor_detail';
 import { editMonitorNavigatorParams } from './edit_monitor';
 import { syntheticsSettingsNavigatorParams } from './settings';
+import { addMonitorNavigatorParams } from './add_monitor';
 
 export const locators: Array<Pick<LocatorPublic<SerializableRecord>, 'id' | 'getLocation'>> = [
   monitorDetailNavigatorParams,
   editMonitorNavigatorParams,
   syntheticsSettingsNavigatorParams,
+  addMonitorNavigatorParams,
 ];

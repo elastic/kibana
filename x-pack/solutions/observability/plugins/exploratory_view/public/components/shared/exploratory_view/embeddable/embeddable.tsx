@@ -9,12 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
-import {
-  FormulaPublicApi,
-  LensEmbeddableInput,
-  LensPublicStart,
-  XYState,
-} from '@kbn/lens-plugin/public';
+import { FormulaPublicApi, LensPublicStart, XYState } from '@kbn/lens-plugin/public';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
 import styled from 'styled-components';
 import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
@@ -217,7 +212,7 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
       />
       {isSaveOpen && attributesJSON && (
         <LensSaveModalComponent
-          initialInput={attributesJSON as unknown as LensEmbeddableInput}
+          initialInput={{ attributes: attributesJSON }}
           onClose={() => setIsSaveOpen(false)}
           // if we want to do anything after the viz is saved
           // right now there is no action, so an empty function

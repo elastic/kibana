@@ -54,14 +54,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'backing indices should not specify an ilm_policy'
         );
         if (!isServerless) {
-          expect(dataStream.prefer_ilm).to.eql(false, 'data stream should not specify prefer_ilm');
+          expect(dataStream.prefer_ilm).to.eql(
+            false,
+            `data stream ${dataStream.name} should not specify prefer_ilm`
+          );
           expect(dataStream.indices.every((index) => !index.prefer_ilm)).to.eql(
             true,
             'backing indices should not specify prefer_ilm'
           );
         }
       } else if (isIlmLifecycle(expectedLifecycle)) {
-        expect(dataStream.prefer_ilm).to.eql(true, 'data stream should specify prefer_ilm');
+        expect(dataStream.prefer_ilm).to.eql(
+          true,
+          `data stream ${dataStream.name} should specify prefer_ilm`
+        );
         expect(dataStream.ilm_policy).to.eql(expectedLifecycle.ilm.policy);
         expect(
           dataStream.indices.every(
@@ -91,6 +97,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       },
       dashboards: [],
+      queries: [],
     };
 
     describe('Wired streams update', () => {
@@ -99,6 +106,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const response = await putStream(apiClient, 'logs', {
           dashboards: [],
+          queries: [],
           stream: {
             ingest: {
               ...(rootDefinition as WiredStreamGetResponse).stream.ingest,
@@ -126,6 +134,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'logs',
           {
             dashboards: [],
+            queries: [],
             stream: {
               ingest: {
                 ...(rootDefinition as WiredStreamGetResponse).stream.ingest,
@@ -146,6 +155,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const rootDefinition = await getStream(apiClient, 'logs');
         await putStream(apiClient, 'logs', {
           dashboards: [],
+          queries: [],
           stream: {
             ingest: {
               ...(rootDefinition as WiredStreamGetResponse).stream.ingest,
@@ -155,6 +165,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         await putStream(apiClient, 'logs.overrides', {
           dashboards: [],
+          queries: [],
           stream: {
             ingest: {
               ...wiredPutBody.stream.ingest,
@@ -181,6 +192,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('applies the nearest parent lifecycle when deleted', async () => {
         await putStream(apiClient, 'logs.10d', {
           dashboards: [],
+          queries: [],
           stream: {
             ingest: {
               ...wiredPutBody.stream.ingest,
@@ -190,6 +202,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         await putStream(apiClient, 'logs.10d.20d', {
           dashboards: [],
+          queries: [],
           stream: {
             ingest: {
               ...wiredPutBody.stream.ingest,
@@ -202,6 +215,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // delete lifecycle of the 20d override
         await putStream(apiClient, 'logs.10d.20d', {
           dashboards: [],
+          queries: [],
           stream: {
             ingest: {
               ...wiredPutBody.stream.ingest,
@@ -222,6 +236,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('handles no retention dsl', async () => {
         await putStream(apiClient, 'logs.no', {
           dashboards: [],
+          queries: [],
           stream: {
             ingest: {
               ...wiredPutBody.stream.ingest,
@@ -232,6 +247,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await putStream(apiClient, 'logs.no.retention', {
           dashboards: [],
+          queries: [],
           stream: {
             ingest: {
               ...wiredPutBody.stream.ingest,
@@ -253,6 +269,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             'logs.ilm',
             {
               dashboards: [],
+              queries: [],
               stream: {
                 ingest: {
                   ...wiredPutBody.stream.ingest,
@@ -268,6 +285,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, 'logs.ilm.stream', wiredPutBody);
           await putStream(apiClient, 'logs.ilm', {
             dashboards: [],
+            queries: [],
             stream: {
               ingest: {
                 ...wiredPutBody.stream.ingest,
@@ -290,6 +308,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const name = 'logs.ilm-with-backing-indices';
           await putStream(apiClient, name, {
             dashboards: [],
+            queries: [],
             stream: {
               ingest: {
                 ...wiredPutBody.stream.ingest,
@@ -303,6 +322,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           await putStream(apiClient, name, {
             dashboards: [],
+            queries: [],
             stream: {
               ingest: {
                 ...wiredPutBody.stream.ingest,
@@ -322,6 +342,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const name = 'logs.dlm-with-backing-indices';
           await putStream(apiClient, name, {
             dashboards: [],
+            queries: [],
             stream: {
               ingest: {
                 ...wiredPutBody.stream.ingest,
@@ -339,6 +360,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           await putStream(apiClient, name, {
             dashboards: [],
+            queries: [],
             stream: {
               ingest: {
                 ...wiredPutBody.stream.ingest,
@@ -366,6 +388,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         },
         dashboards: [],
+        queries: [],
       };
 
       const createDataStream = async (name: string, lifecycle: IngestStreamLifecycle) => {
@@ -403,30 +426,34 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const indexName = 'unwired-stream-inherit';
         const clean = await createDataStream(indexName, { dsl: { data_retention: '77d' } });
 
-        await putStream(apiClient, indexName, unwiredPutBody);
-
-        await expectLifecycle([indexName], { dsl: { data_retention: '77d' } });
-
-        await clean();
+        try {
+          await putStream(apiClient, indexName, unwiredPutBody);
+          await expectLifecycle([indexName], { dsl: { data_retention: '77d' } });
+        } finally {
+          await clean();
+        }
       });
 
       it('overrides dsl retention', async () => {
         const indexName = 'unwired-stream-override-dsl';
         const clean = await createDataStream(indexName, { dsl: { data_retention: '77d' } });
 
-        await putStream(apiClient, indexName, {
-          dashboards: [],
-          stream: {
-            ingest: {
-              ...unwiredPutBody.stream.ingest,
-              lifecycle: { dsl: { data_retention: '11d' } },
+        try {
+          await putStream(apiClient, indexName, {
+            dashboards: [],
+            queries: [],
+            stream: {
+              ingest: {
+                ...unwiredPutBody.stream.ingest,
+                lifecycle: { dsl: { data_retention: '11d' } },
+              },
             },
-          },
-        });
+          });
 
-        await expectLifecycle([indexName], { dsl: { data_retention: '11d' } });
-
-        await clean();
+          await expectLifecycle([indexName], { dsl: { data_retention: '11d' } });
+        } finally {
+          await clean();
+        }
       });
 
       if (!isServerless) {
@@ -434,22 +461,25 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const indexName = 'unwired-stream-ilm-to-dsl';
           const clean = await createDataStream(indexName, { ilm: { policy: 'my-policy' } });
 
-          await putStream(
-            apiClient,
-            indexName,
-            {
-              dashboards: [],
-              stream: {
-                ingest: {
-                  ...unwiredPutBody.stream.ingest,
-                  lifecycle: { dsl: { data_retention: '1d' } },
+          try {
+            await putStream(
+              apiClient,
+              indexName,
+              {
+                dashboards: [],
+                queries: [],
+                stream: {
+                  ingest: {
+                    ...unwiredPutBody.stream.ingest,
+                    lifecycle: { dsl: { data_retention: '1d' } },
+                  },
                 },
               },
-            },
-            400
-          );
-
-          await clean();
+              400
+            );
+          } finally {
+            await clean();
+          }
         });
       }
     });
@@ -459,6 +489,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const indexName = 'logs.dslnostats';
         await putStream(apiClient, indexName, {
           dashboards: [],
+          queries: [],
           stream: {
             ingest: {
               ...wiredPutBody.stream.ingest,
@@ -478,6 +509,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const indexName = 'logs.ilmpolicydontexists';
           await putStream(apiClient, indexName, {
             dashboards: [],
+            queries: [],
             stream: {
               ingest: {
                 ...wiredPutBody.stream.ingest,
@@ -508,6 +540,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           await putStream(apiClient, indexName, {
             dashboards: [],
+            queries: [],
             stream: {
               ingest: {
                 ...wiredPutBody.stream.ingest,

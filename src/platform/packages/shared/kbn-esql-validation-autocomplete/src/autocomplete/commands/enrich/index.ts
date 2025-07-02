@@ -14,7 +14,7 @@ import {
   isSingleItem,
   unescapeColumnName,
 } from '../../../shared/helpers';
-import { CommandSuggestParams } from '../../../definitions/types';
+import { CommandSuggestParams, Location } from '../../../definitions/types';
 import type { SuggestionRawDefinition } from '../../types';
 import {
   Position,
@@ -145,7 +145,7 @@ export async function suggest({
         return [pipeCompleteItem, { ...commaCompleteItem, command: TRIGGER_SUGGESTION_COMMAND }];
       } else {
         // not recognized as a field name, assume new user-defined column name
-        return getOperatorSuggestions({ command: 'enrich' });
+        return getOperatorSuggestions({ location: Location.ENRICH });
       }
     }
 

@@ -13,14 +13,14 @@
  */
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { IRouter } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 
 import { verifyAccessAndContext } from '../lib';
-import { ILicenseState } from '../../lib';
-import { AlertingRequestHandlerContext } from '../../types';
+import type { ILicenseState } from '../../lib';
+import type { AlertingRequestHandlerContext } from '../../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';
 
 export function registerFieldsRoute(

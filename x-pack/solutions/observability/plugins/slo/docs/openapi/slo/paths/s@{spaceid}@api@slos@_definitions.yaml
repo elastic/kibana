@@ -15,6 +15,11 @@ get:
       schema:
         type: boolean
       example: true
+    - name: tags
+      in: query
+      description: Filters the SLOs by tag
+      schema:
+        type: string
     - name: search
       in: query
       description: Filters the SLOs by name
@@ -29,7 +34,7 @@ get:
       example: 1
     - name: perPage
       in: query
-      description: Number of SLOs returned by page 
+      description: Number of SLOs returned by page
       schema:
         type: integer
         default: 100

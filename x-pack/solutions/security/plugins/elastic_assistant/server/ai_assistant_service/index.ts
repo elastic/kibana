@@ -52,6 +52,10 @@ import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
 import { DefendInsightsDataClient } from '../ai_assistant_data_clients/defend_insights';
 import { createGetElserId, ensureProductDocumentationInstalled } from './helpers';
 import { hasAIAssistantLicense } from '../routes/helpers';
+import {
+  AttackDiscoveryScheduleDataClient,
+  CreateAttackDiscoveryScheduleDataClientParams,
+} from '../lib/attack_discovery/schedules/data_client';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
@@ -224,7 +228,7 @@ export class AIAssistantService {
   private async rolloverDataStream(
     initialInferenceEndpointId: string,
     targetInferenceEndpointId: string
-  ): Promise<void> {
+  ): Promise<DataStreamSpacesAdapter> {
     const esClient = await this.options.elasticsearchClientPromise;
 
     const currentDataStream = this.createDataStream({
@@ -289,6 +293,8 @@ export class AIAssistantService {
     } catch (e) {
       /* empty */
     }
+
+    return newDS;
   }
 
   private async initializeResources(): Promise<InitializationPromise> {
@@ -340,12 +346,12 @@ export class AIAssistantService {
 
       // Used only for testing purposes
       if (this.modelIdOverride && !isUsingDedicatedInferenceEndpoint) {
-        await this.rolloverDataStream(
+        this.knowledgeBaseDataStream = await this.rolloverDataStream(
           ELASTICSEARCH_ELSER_INFERENCE_ID,
           ASSISTANT_ELSER_INFERENCE_ID
         );
       } else if (isUsingDedicatedInferenceEndpoint) {
-        await this.rolloverDataStream(
+        this.knowledgeBaseDataStream = await this.rolloverDataStream(
           ASSISTANT_ELSER_INFERENCE_ID,
           ELASTICSEARCH_ELSER_INFERENCE_ID
         );
@@ -362,7 +368,7 @@ export class AIAssistantService {
             `Deleted existing inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model '${elserId}'`
           );
         } catch (error) {
-          this.options.logger.error(
+          this.options.logger.debug(
             `Error deleting inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model '${elserId}':\n${error}`
           );
         }
@@ -385,12 +391,13 @@ export class AIAssistantService {
           },
           writeIndexOnly: true,
         });
-        await this.knowledgeBaseDataStream.install({
-          esClient,
-          logger: this.options.logger,
-          pluginStop$: this.options.pluginStop$,
-        });
       }
+
+      await this.knowledgeBaseDataStream.install({
+        esClient,
+        logger: this.options.logger,
+        pluginStop$: this.options.pluginStop$,
+      });
 
       await this.promptsDataStream.install({
         esClient,
@@ -604,6 +611,14 @@ export class AIAssistantService {
       indexPatternsResourceName: this.resourceNames.aliases.attackDiscovery,
       kibanaVersion: this.options.kibanaVersion,
       spaceId: opts.spaceId,
+    });
+  }
+
+  public async createAttackDiscoverySchedulingDataClient(
+    opts: CreateAttackDiscoveryScheduleDataClientParams
+  ): Promise<AttackDiscoveryScheduleDataClient | null> {
+    return new AttackDiscoveryScheduleDataClient({
+      rulesClient: opts.rulesClient,
     });
   }
 

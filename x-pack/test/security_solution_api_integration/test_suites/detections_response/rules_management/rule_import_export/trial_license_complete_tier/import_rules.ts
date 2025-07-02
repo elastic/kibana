@@ -1625,7 +1625,27 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('supporting prebuilt rule customization', () => {
       describe('compatibility with prebuilt rule fields', () => {
-        it('imports custom rules alongside prebuilt rules when feature flag is disabled', async () => {
+        it('accepts rules with "immutable: true"', async () => {
+          const rule = getCustomQueryRuleParams({
+            rule_id: 'rule-immutable',
+            // @ts-expect-error the API supports this param, but we only need it in {@link RuleToImport}
+            immutable: true,
+          });
+          const ndjson = combineToNdJson(rule);
+
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_IMPORT_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .attach('file', Buffer.from(ndjson), 'rules.ndjson')
+            .expect(200);
+
+          expect(body).toMatchObject({
+            success: true,
+          });
+        });
+
+        it('imports custom rules alongside prebuilt rules', async () => {
           const ndjson = combineToNdJson(
             getCustomQueryRuleParams({
               rule_id: 'rule-immutable',
@@ -1644,18 +1664,8 @@ export default ({ getService }: FtrProviderContext): void => {
             .expect(200);
 
           expect(body).toMatchObject({
-            success: false,
-            success_count: 1,
-            errors: [
-              {
-                rule_id: 'rule-immutable',
-                error: {
-                  status_code: 400,
-                  message:
-                    'Importing prebuilt rules is not supported. To import this rule as a custom rule, first duplicate the rule and then export it. [rule_id: rule-immutable]',
-                },
-              },
-            ],
+            success: true,
+            success_count: 2,
           });
         });
 

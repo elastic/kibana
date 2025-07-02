@@ -27,7 +27,7 @@ export interface FilterBadgeProps {
   readOnly?: boolean;
 }
 
-function FilterBadge({
+export function FilterBadge({
   filter,
   dataViews,
   valueLabel,
@@ -91,7 +91,3 @@ function FilterBadge({
     </EuiBadge>
   );
 }
-
-// React.lazy support
-// eslint-disable-next-line import/no-default-export
-export default FilterBadge;

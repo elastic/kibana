@@ -162,12 +162,12 @@ function getStateFromParams(params: LensAppLocatorParams): MainHistoryLocationSt
     return {};
   }
   const outputState: LensShareableState = {
-    activeDatasourceId: params.activeDatasourceId!,
-    visualization: params.visualization!,
+    activeDatasourceId: params.activeDatasourceId,
+    visualization: params.visualization,
     datasourceStates: Object.fromEntries(
-      Object.entries(params.datasourceStates!).map(([id, { state }]) => [id, state])
+      Object.entries(params.datasourceStates).map(([id, { state }]) => [id, state])
     ) as Record<string, { state: unknown }> & SerializableRecord,
-    references: params.references!,
+    references: params.references,
   };
   if (params.dataViewSpecs) {
     outputState.dataViewSpecs = params.dataViewSpecs;

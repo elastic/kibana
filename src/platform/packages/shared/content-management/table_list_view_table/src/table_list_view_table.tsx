@@ -49,7 +49,6 @@ import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import {
   Table,
   ConfirmDeleteModal,
-  ListingLimitWarning,
   ItemDetails,
   UpdatedAtField,
   FORBIDDEN_SEARCH_CHARS,
@@ -81,7 +80,6 @@ export interface TableListViewTableProps<
 > {
   entityName: string;
   entityNamePlural: string;
-  listingLimit: number;
   initialFilter?: string;
   initialPageSize: number;
   emptyPrompt?: JSX.Element;
@@ -326,7 +324,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   initialFilter: initialQuery,
   headingId,
   initialPageSize,
-  listingLimit,
   urlStateEnabled = true,
   customSortingOptions,
   customTableColumn,
@@ -378,8 +375,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const initialQueryInitialized = useRef(false);
 
   const {
-    canEditAdvancedSettings,
-    getListingLimitSettingsUrl,
     getTagIdsFromReferences,
     searchQueryParser,
     notifyError,
@@ -453,7 +448,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     showDeleteModal,
     isDeletingItems,
     selectedIds,
-    totalItems,
     hasUpdatedAtMetadata,
     hasCreatedByMetadata,
     hasRecentlyAccessedMetadata,
@@ -463,7 +457,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   } = state;
 
   const showFetchError = Boolean(fetchError);
-  const showLimitError = !showFetchError && totalItems > listingLimit;
 
   const fetchItems = useCallback(async () => {
     dispatch({ type: 'onFetchItems' });
@@ -1180,17 +1173,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   return (
     <>
-      {/* Too many items error */}
-      {showLimitError && (
-        <ListingLimitWarning
-          canEditAdvancedSettings={canEditAdvancedSettings}
-          advancedSettingsLink={getListingLimitSettingsUrl()}
-          entityNamePlural={entityNamePlural}
-          totalItems={totalItems}
-          listingLimit={listingLimit}
-        />
-      )}
-
       {/* Error while fetching items */}
       {showFetchError && renderFetchError()}
 

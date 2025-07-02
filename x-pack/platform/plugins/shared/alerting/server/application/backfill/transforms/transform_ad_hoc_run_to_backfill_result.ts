@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
-import { AdHocRun, AdHocRunSO } from '../../../data/ad_hoc_run/types';
+import type { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
+import type { AdHocRun, AdHocRunSO } from '../../../data/ad_hoc_run/types';
 import { createBackfillError } from '../../../backfill_client/lib';
-import { ScheduleBackfillResult } from '../methods/schedule/types';
+import type { ScheduleBackfillResult } from '../methods/schedule/types';
 import { transformRawActionsToDomainActions } from '../../rule/transforms';
 
 interface TransformAdHocRunToBackfillResultOpts {

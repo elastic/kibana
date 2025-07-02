@@ -23,6 +23,11 @@ spaceTest.describe(
       await scoutSpace.uiSettings.set({ 'autocomplete:useTimeRange': false });
     });
 
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsViewer();
+      await pageObjects.discover.goto();
+    });
+
     spaceTest.afterAll(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.unset(
         'doc_table:legacy',
@@ -31,11 +36,6 @@ spaceTest.describe(
       );
       await scoutSpace.uiSettings.set({ 'autocomplete:useTimeRange': true });
       await scoutSpace.savedObjects.cleanStandardList();
-    });
-
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsViewer();
-      await pageObjects.discover.goto();
     });
 
     spaceTest('show up if outside of range', async ({ page, pageObjects }) => {

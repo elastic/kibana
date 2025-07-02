@@ -23,16 +23,18 @@ import {
   EuiForm,
   EuiSpacer,
   EuiIconTip,
+  type UseEuiTheme,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
-import classNames from 'classnames';
+import { css } from '@emotion/react';
 import { WorkspaceField } from '../../types';
 import { iconChoices } from '../../helpers/style_choices';
 import { UpdateableFieldProperties } from './field_manager';
-
 import { isEqual } from '../helpers';
 import { IconRenderer } from '../icon_renderer';
+import { gphFieldBadgeSizeStyles } from '../../styles';
 
 export interface FieldPickerProps {
   field: WorkspaceField;
@@ -53,8 +55,9 @@ export function FieldEditor({
   allFields,
 }: FieldPickerProps) {
   const [open, setOpen] = useState(false);
-
   const [currentField, setCurrentField] = useState(initialField);
+
+  const euiThemeContext = useEuiTheme();
 
   const { color, hopSize, lastValidHopSize, icon, name: fieldName } = currentField;
 
@@ -132,9 +135,6 @@ export function FieldEditor({
         <EuiBadge
           color={initialField.color}
           iconSide="right"
-          className={classNames('gphFieldEditor__badge', {
-            'gphFieldEditor__badge--disabled': isDisabled,
-          })}
           onClickAriaLabel={badgeDescription}
           title=""
           onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
@@ -144,12 +144,26 @@ export function FieldEditor({
               setOpen(true);
             }
           }}
+          css={[
+            gphFieldBadgeSizeStyles(euiThemeContext),
+            {
+              ...(isDisabled &&
+                css({
+                  '&, &:hover, &:focus, &:not(:disabled):hover, &:not(:disabled):focus': {
+                    opacity: 0.7,
+                    textDecoration: 'line-through',
+                  },
+
+                  // Chrome fix for focus: duplicate or Safari will ignore completely the disabled rule
+                  '&:hover:not(:focus-visible), &:focus:not(:focus-visible)': {
+                    opacity: 0.7,
+                    textDecoration: 'line-through',
+                  },
+                })),
+            },
+          ]}
         >
-          <IconRenderer
-            className="gphFieldEditor__badgeIcon"
-            icon={initialField.icon}
-            color={color}
-          />
+          <IconRenderer icon={initialField.icon} css={styles.badgeIcon} color={color} />
           {initialField.name}
         </EuiBadge>
       }
@@ -216,7 +230,7 @@ export function FieldEditor({
             width: 380,
             initialFocusedItemIndex: -1,
             content: (
-              <EuiForm className="gphFieldEditor__displayForm">
+              <EuiForm css={styles.displayFrom}>
                 <EuiFormRow
                   display="columnCompressed"
                   label={i18n.translate('xpack.graph.fieldManager.fieldLabel', {
@@ -394,3 +408,16 @@ function toOptions(
       type: type as ButtonHTMLAttributes<HTMLButtonElement>['type'],
     }));
 }
+
+const styles = {
+  badgeIcon: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: 'auto',
+      marginRight: euiTheme.size.xs,
+    }),
+
+  displayFrom: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.s,
+    }),
+};

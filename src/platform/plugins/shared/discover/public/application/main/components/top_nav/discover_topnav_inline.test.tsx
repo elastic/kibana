@@ -15,6 +15,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { render, screen, waitFor } from '@testing-library/react';
+import { internalStateActions } from '../../state_management/redux';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
@@ -23,7 +24,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 
 function getProps({ hideNavMenuItems }: { hideNavMenuItems?: boolean } = {}) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  stateContainer.internalState.transitions.setDataView(dataViewMock);
+  stateContainer.internalState.dispatch(internalStateActions.setDataView(dataViewMock));
   stateContainer.customizationContext.displayMode = 'standalone';
   stateContainer.customizationContext.inlineTopNav.enabled = true;
   stateContainer.customizationContext.inlineTopNav.showLogsExplorerTabs = false;

@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import type { DefineStepRule } from '../../../common/types';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { isEqlRule, isEqlSequenceQuery } from '../../../../../common/detection_engine/utils';
 import {

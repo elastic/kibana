@@ -14,7 +14,7 @@ import classNames from 'classnames';
 import { css } from '@emotion/css';
 
 import { useNavigation as useServices } from '../../../services';
-import { NavItemLabel } from './panel_nav_item_label';
+import { SubItemTitle } from '../subitem_title';
 import { usePanel } from './context';
 
 interface Props {
@@ -24,7 +24,8 @@ interface Props {
 export const PanelNavItem: FC<Props> = ({ item }) => {
   const { navigateToUrl } = useServices();
   const { close: closePanel } = usePanel();
-  const { id, icon, deepLink, openInNewTab } = item;
+  const { id, icon, deepLink, openInNewTab, isExternalLink, renderItem } = item;
+
   const href = deepLink?.url ?? item.href;
   const { euiTheme } = useEuiTheme();
 
@@ -39,16 +40,21 @@ export const PanelNavItem: FC<Props> = ({ item }) => {
     [closePanel, href, navigateToUrl]
   );
 
-  return (
+  return renderItem ? (
+    renderItem()
+  ) : (
     <EuiListGroupItem
       key={id}
-      label={<NavItemLabel item={item} />}
+      label={<SubItemTitle item={item} />}
       wrapText
       className={classNames(
         'sideNavPanelLink',
         css`
           &.sideNavPanelLink:hover {
             background-color: ${transparentize(euiTheme.colors.lightShade, 0.5)};
+          }
+          & svg[class*='EuiExternalLinkIcon'] {
+            margin-left: auto;
           }
         `
       )}
@@ -57,6 +63,7 @@ export const PanelNavItem: FC<Props> = ({ item }) => {
       href={href}
       iconType={icon}
       onClick={onClick}
+      external={isExternalLink}
       target={openInNewTab ? '_blank' : undefined}
     />
   );

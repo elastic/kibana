@@ -9,10 +9,11 @@
 
 import { useEffect, useMemo } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { DiscoverAppLocatorParams } from '../../../common/app_locator';
+import type { DiscoverAppLocatorParams } from '../../../common/app_locator';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { displayPossibleDocsDiffInfoAlert } from '../main/hooks/use_alert_results_toast';
-import { getAlertUtils, QueryParams } from './view_alert_utils';
+import type { QueryParams } from './view_alert_utils';
+import { getAlertUtils } from './view_alert_utils';
 
 type NonNullableEntry<T> = { [K in keyof T]: NonNullable<T[keyof T]> };
 

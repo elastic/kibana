@@ -975,6 +975,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
 
         {shouldRenderAgentlessSelector && (
           <SetupTechnologySelector
+            showLimitationsMessage={!isServerless}
             disabled={isEditPage}
             setupTechnology={setupTechnology}
             onSetupTechnologyChange={(value) => {

@@ -1,0 +1,4 @@
+[[dependencies-versions]]
+== List of dependencies
+
+Refer to https://artifacts.elastic.co/reports/dependencies/dependencies-current.html[Elastic Stack third-party dependencies] for the complete list of dependencies.

@@ -13,7 +13,7 @@ import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/al
 import { QueryOptionsOverrides } from '@kbn/alerts-ui-shared/src/common/types/tanstack_query_utility_types';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import { queryKeys } from '../constants';
+import { queryKeys } from '../query_keys';
 import { MutedAlerts, ServerError } from '../types';
 import {
   getMutedAlertsInstancesByRule,
@@ -38,13 +38,15 @@ export interface UseGetMutedAlertsQueryParams {
   notifications: NotificationsStart;
 }
 
+export const getKey = queryKeys.getMutedAlerts;
+
 export const useGetMutedAlertsQuery = (
   { ruleIds, http, notifications: { toasts } }: UseGetMutedAlertsQueryParams,
   { enabled }: QueryOptionsOverrides<typeof getMutedAlerts> = {}
 ) => {
   return useQuery({
     context: AlertsQueryContext,
-    queryKey: queryKeys.mutedAlerts(ruleIds),
+    queryKey: getKey(ruleIds),
     queryFn: ({ signal }) => getMutedAlerts({ http, signal, ruleIds }),
     onError: (error: ServerError) => {
       if (error.name !== 'AbortError') {
@@ -54,5 +56,6 @@ export const useGetMutedAlertsQuery = (
       }
     },
     enabled: ruleIds.length > 0 && enabled !== false,
+    refetchOnWindowFocus: false,
   });
 };

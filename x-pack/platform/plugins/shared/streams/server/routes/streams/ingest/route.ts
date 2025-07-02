@@ -15,11 +15,18 @@ import {
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { createServerRoute } from '../../create_server_route';
+import { ASSET_ID, ASSET_TYPE } from '../../../lib/streams/assets/fields';
+import { QueryAsset } from '../../../../common/assets';
 
 const readIngestRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/_ingest',
+  endpoint: 'GET /api/streams/{name}/_ingest 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Get ingest stream settings',
+    description: 'Fetches the ingest settings of an ingest stream definition',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {
@@ -53,9 +60,14 @@ const readIngestRoute = createServerRoute({
 });
 
 const upsertIngestRoute = createServerRoute({
-  endpoint: 'PUT /api/streams/{name}/_ingest',
+  endpoint: 'PUT /api/streams/{name}/_ingest 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Update ingest stream settings',
+    description: 'Upserts the ingest settings of an ingest stream definition',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {
@@ -84,20 +96,22 @@ const upsertIngestRoute = createServerRoute({
 
     const name = params.path.name;
 
-    const assets = await assetClient.getAssets({
-      entityId: name,
-      entityType: 'stream',
-    });
+    const assets = await assetClient.getAssets(name);
 
     const ingestUpsertRequest = params.body;
 
     const dashboards = assets
-      .filter((asset) => asset.assetType === 'dashboard')
-      .map((asset) => asset.assetId);
+      .filter((asset) => asset[ASSET_TYPE] === 'dashboard')
+      .map((asset) => asset[ASSET_ID]);
+
+    const queries = assets
+      .filter((asset): asset is QueryAsset => asset[ASSET_TYPE] === 'query')
+      .map((asset) => asset.query);
 
     const upsertRequest = {
       dashboards,
       stream: ingestUpsertRequest,
+      queries,
     } as StreamUpsertRequest;
 
     return await streamsClient.upsertStream({

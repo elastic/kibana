@@ -58,7 +58,7 @@ function getContentsComponent(
   return null;
 }
 
-export interface ContentsProps {
+interface ContentsProps {
   elementData: cytoscape.NodeDataDefinition | cytoscape.ElementDataDefinition;
   environment: Environment;
   kuery: string;
@@ -74,6 +74,8 @@ interface PopoverProps {
   start: string;
   end: string;
 }
+
+export type { ContentsProps, PopoverProps };
 
 export function Popover({ focusedServiceName, environment, kuery, start, end }: PopoverProps) {
   const theme = useTheme();

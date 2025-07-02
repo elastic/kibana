@@ -52,7 +52,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
         screenshotDirectories
       );
       await retry.waitFor('add-template exist', async () => {
-        return await testSubjects.exists('add-template');
+        return await testSubjects.isEnabled('add-template');
       });
       await testSubjects.click('add-template');
       await svlCommonScreenshots.takeScreenshot(

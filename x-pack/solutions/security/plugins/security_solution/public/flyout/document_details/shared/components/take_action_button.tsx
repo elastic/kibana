@@ -203,7 +203,7 @@ export const TakeActionButton: FC = () => {
         />
       )}
 
-      {isHostIsolationPanelOpen && alertId && (
+      {isHostIsolationPanelOpen && (
         // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
         <EuiFlyout onClose={showAlertDetails} size="m" maskProps={flyoutZIndex}>
           <IsolateHostPanelHeader
@@ -213,7 +213,7 @@ export const TakeActionButton: FC = () => {
           <IsolateHostPanelContent
             isIsolateActionSuccessBannerVisible={isIsolateActionSuccessBannerVisible}
             hostName={hostName}
-            alertId={alertId}
+            alertId={alertId ?? undefined}
             isolateAction={isolateAction}
             dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
             showAlertDetails={showAlertDetails}

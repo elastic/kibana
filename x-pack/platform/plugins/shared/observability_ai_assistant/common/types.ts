@@ -62,6 +62,7 @@ export interface Conversation {
   numeric_labels: Record<string, number>;
   namespace: string;
   public: boolean;
+  archived?: boolean;
 }
 
 type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {
@@ -93,14 +94,6 @@ export interface Instruction {
   id: string;
   text: string;
 }
-
-export interface AdHocInstruction {
-  id?: string;
-  text: string;
-  instruction_type: 'user_instruction' | 'application_instruction';
-}
-
-export type InstructionOrPlainText = string | Instruction;
 
 export enum KnowledgeBaseType {
   // user instructions are included in the system prompt regardless of the user's input
@@ -152,4 +145,9 @@ export interface ObservabilityAIAssistantScreenContext {
   }>;
   actions?: Array<ScreenContextActionDefinition<any>>;
   starterPrompts?: StarterPrompt[];
+}
+
+export enum ConversationAccess {
+  SHARED = 'shared',
+  PRIVATE = 'private',
 }

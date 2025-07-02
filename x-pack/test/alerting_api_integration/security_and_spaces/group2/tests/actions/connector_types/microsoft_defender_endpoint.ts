@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { FeaturesPrivileges, Role } from '@kbn/security-plugin-types-common';
+import type { FeaturesPrivileges, Role } from '@kbn/security-plugin-types-common';
 import {
   MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
   MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
-import SuperTest from 'supertest';
+import type SuperTest from 'supertest';
 import expect from '@kbn/expect';
 import { getUrlPrefix } from '../../../../../common/lib';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { createSupertestErrorLogger } from '../../../../../common/lib/log_supertest_errors';
 
 // eslint-disable-next-line import/no-default-export

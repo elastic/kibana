@@ -25,7 +25,6 @@
     ],
     "optionalPlugins": [
       "serverless",
-      "triggersActionsUi",
       "unifiedSearch",
       "dataViews",
       "dataViewEditor",
@@ -35,7 +34,6 @@
     ],
     "requiredBundles": [
       "kibanaReact",
-      "triggersActionsUi"
     ],
     "extraPublicDirs": [
       "common"

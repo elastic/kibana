@@ -331,6 +331,7 @@ export interface DocLinks {
     readonly reindexWithPipeline: string;
     readonly logsDatastream: string;
     readonly usingLogsDbIndexModeWithESSecurity: string;
+    readonly dataStreamReindex: string;
   };
   readonly rollupJobs: string;
   readonly elasticsearch: Record<string, string>;
@@ -377,6 +378,7 @@ export interface DocLinks {
     readonly manageDetectionRules: string;
     readonly createDetectionRules: string;
     readonly updatePrebuiltDetectionRules: string;
+    readonly prebuiltRuleCustomizationPromoBlog: string;
     readonly createEsqlRuleType: string;
     readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {
@@ -389,6 +391,8 @@ export interface DocLinks {
     readonly signalsMigrationApi: string;
     readonly legacyEndpointManagementApiDeprecations: string;
     readonly legacyRuleManagementBulkApiDeprecations: string;
+    readonly siemMigrations: string;
+    readonly llmPerformanceMatrix: string;
   };
   readonly query: {
     readonly eql: string;
@@ -705,6 +709,10 @@ export interface DocLinks {
   };
   readonly synonyms: {
     readonly synonymsAPIDocumentation: string;
+  };
+
+  readonly queryRules: {
+    readonly queryRulesAPIDocumentation: string;
   };
 }
 
