@@ -59,3 +59,5 @@ xpack.actions.enabledActionTypes: [
   '.tines',
   '.torq'
 ]
+
+xpack.cases.enabled: false
