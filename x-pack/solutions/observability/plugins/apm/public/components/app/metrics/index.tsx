@@ -36,7 +36,7 @@ export function Metrics() {
         title={i18n.translate('xpack.apm.metrics.emptyState.title', {
           defaultMessage: 'Runtime metrics are not available for this Agent / SDK type.',
         })}
-        iconType="iInCircle"
+        iconType="info"
         data-test-subj="apmMetricsNoDashboardFound"
       />
     );
