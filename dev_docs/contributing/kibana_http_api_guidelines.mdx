@@ -86,7 +86,25 @@ Getting your HTTP APIs into a stable state is a process based on feedback from a
 
 ### Pluralization
 
-### Pluralization
+Prefer pluralization over singularization in HTTP API paths when referring to collections. For example:
+
+✅ DO
+```
+GET /api/resources             # List
+GET /api/resources/{id}        # Get a single resource
+DELETE /api/resources/{id}     # Delete a resource
+PUT /api/resources/{id}        # Update a resource
+POST /api/resources            # Create a resource
+```
+
+❌ DO NOT
+```
+GET /api/resource             # List
+GET /api/resource/{id}        # Get a single resource
+DELETE /api/resource/{id}     # Delete a resource
+PUT /api/resource/{id}        # Update a resource
+POST /api/resource            # Create a resource
+```
 
 ### Internal vs Public APIs
 
