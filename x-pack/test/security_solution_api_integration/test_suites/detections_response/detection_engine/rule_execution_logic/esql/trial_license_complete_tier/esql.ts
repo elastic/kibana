@@ -1770,8 +1770,10 @@ export default ({ getService }: FtrProviderContext) => {
 
           const indexCounts = alertsResponse.hits.hits.reduce<Record<string, number>>(
             (acc, curr) => {
-              const indexName = curr._source['kibana.alert.ancestors'][0].index;
-              acc[indexName] = (acc[indexName] || 0) + 1;
+              const indexName = curr._source?.[ALERT_ANCESTORS][0].index;
+              if (indexName) {
+                acc[indexName] = (acc[indexName] || 0) + 1;
+              }
               return acc;
             },
             {}
