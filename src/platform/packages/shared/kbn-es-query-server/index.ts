@@ -17,5 +17,6 @@ export type {
   RelativeTimeRange,
   Filter,
   FilterMeta,
+  AggregateQuery,
   Query,
 } from './src/types';

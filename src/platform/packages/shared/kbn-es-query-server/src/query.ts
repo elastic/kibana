@@ -28,3 +28,7 @@ export const querySchema = <T extends string[]>(supportedLanguages?: T) => {
     language: languageSchema,
   });
 };
+
+export const aggregateQuerySchema = schema.object({
+  esql: schema.string(),
+});
