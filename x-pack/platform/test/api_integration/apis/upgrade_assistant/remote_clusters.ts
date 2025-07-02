@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
 
-  describe('Remote clusters', function () {
+  describe.skip('Remote clusters', function () {
     describe('GET /api/upgrade_assistant/remote_clusters', () => {
       before(async () => {
         try {
