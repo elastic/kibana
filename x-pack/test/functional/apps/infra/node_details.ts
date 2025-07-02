@@ -131,8 +131,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await browser.refresh();
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/225181
-  describe.skip('Node Details', () => {
+  describe('Node Details', () => {
     let synthEsClient: InfraSynthtraceEsClient;
     before(async () => {
       synthEsClient = await getInfraSynthtraceEsClient(esClient);
@@ -643,6 +642,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('Overview Tab', () => {
         before(async () => {
+          // Close the metric popover if it is open
+          await browser.pressKeys(browser.keys.ESCAPE);
           await pageObjects.assetDetails.clickOverviewTab();
         });
 
