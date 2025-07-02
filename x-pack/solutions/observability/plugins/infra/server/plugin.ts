@@ -195,16 +195,14 @@ export class InfraServerPlugin
       countLogs: () => UsageCollector.countLogs(),
     });
 
-    if (this.config.featureFlags.logsUIEnabled) {
-      plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
-        {
-          sampleObject: null, // indicates that there is no sample object associated with this app link's path
-          getPath: () => `/app/logs`,
-          label: logsSampleDataLinkLabel,
-          icon: 'logsApp',
-        },
-      ]);
-    }
+    plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
+      {
+        sampleObject: null, // indicates that there is no sample object associated with this app link's path
+        getPath: () => `/app/logs`,
+        label: logsSampleDataLinkLabel,
+        icon: 'logsApp',
+      },
+    ]);
 
     registerRuleTypes(plugins.alerting, this.libs, this.config, {
       alertsLocator,

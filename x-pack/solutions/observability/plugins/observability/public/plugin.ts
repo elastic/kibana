@@ -74,6 +74,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
+import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -153,6 +154,7 @@ export interface ObservabilityPublicPluginsStart {
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   licenseManagement?: LicenseManagementUIPluginSetup;
+  logsDataAccess: LogsDataAccessPluginStart;
   navigation: NavigationPublicPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
