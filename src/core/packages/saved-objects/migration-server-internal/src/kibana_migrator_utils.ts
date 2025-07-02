@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { migrationRetryCallCluster } from '@kbn/core-elasticsearch-server-internal';
 import type { IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
-import type { Logger } from '@kbn/logging';
 import type { IndexMap } from './core';
 import { TypeStatus, type TypeStatusDetails } from './kibana_migrator_constants';
 
@@ -48,71 +45,13 @@ export function createWaitGroupMap<T>(keys: string[]): Record<string, WaitGroup<
   }, {});
 }
 
-export async function getCurrentIndexTypesMap({
-  client,
-  mainIndex,
-  defaultIndexTypesMap,
-  logger,
-  retryDelay = 2500,
-}: {
-  client: ElasticsearchClient;
-  mainIndex: string;
-  defaultIndexTypesMap: IndexTypesMap;
-  logger: Logger;
-  retryDelay?: number;
-}): Promise<IndexTypesMap | undefined> {
-  try {
-    // check if the main index (i.e. .kibana) exists
-    const mapping = await migrationRetryCallCluster(
-      () =>
-        client.indices.getMapping({
-          index: mainIndex,
-        }),
-      retryDelay
-    );
-
-    // main index exists, try to extract the indexTypesMap from _meta
-    const meta = Object.values(mapping)?.[0]?.mappings._meta;
-    return meta?.indexTypesMap ?? defaultIndexTypesMap;
-  } catch (error) {
-    if (error.meta?.statusCode === 404) {
-      logger.debug(`The ${mainIndex} index do NOT exist. Assuming this is a fresh deployment`);
-      return undefined;
-    } else {
-      logger.fatal(`Cannot query the meta information on the ${mainIndex} saved object index`);
-      throw error;
-    }
-  }
-}
-
-export async function getIndicesInvolvedInRelocation({
-  client,
-  mainIndex,
-  indexTypesMap,
-  defaultIndexTypesMap,
-  logger,
-}: {
-  client: ElasticsearchClient;
-  mainIndex: string;
-  indexTypesMap: IndexTypesMap;
-  defaultIndexTypesMap: IndexTypesMap;
-  logger: Logger;
-}): Promise<string[]> {
+export function getIndicesInvolvedInRelocation(
+  currentIndexTypesMap: IndexTypesMap,
+  desiredIndexTypesMap: IndexTypesMap
+): string[] {
   const indicesWithRelocatingTypesSet = new Set<string>();
 
-  const currentIndexTypesMap = await getCurrentIndexTypesMap({
-    client,
-    mainIndex,
-    defaultIndexTypesMap,
-    logger,
-  });
-
-  if (!currentIndexTypesMap) {
-    // this is a fresh deployment, no indices must be relocated
-    return [];
-  }
-
-  const typeIndexDistribution = calculateTypeStatuses(currentIndexTypesMap, indexTypesMap);
+  const typeIndexDistribution = calculateTypeStatuses(currentIndexTypesMap, desiredIndexTypesMap);
 
   Object.values(typeIndexDistribution)
     .filter(({ status }) => status === TypeStatus.Moved)

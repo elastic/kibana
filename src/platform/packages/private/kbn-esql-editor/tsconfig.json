@@ -36,7 +36,8 @@
     "@kbn/shared-ux-table-persist",
     "@kbn/esql-types",
     "@kbn/field-types",
-    "@kbn/licensing-plugin"
+    "@kbn/licensing-plugin",
+    "@kbn/i18n-react"
   ],
   "exclude": [
     "target/**/*",

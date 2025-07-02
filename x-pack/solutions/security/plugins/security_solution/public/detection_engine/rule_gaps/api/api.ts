@@ -119,10 +119,16 @@ export const getRuleIdsWithGaps = async ({
   start,
   end,
   statuses = [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
+  hasUnfilledIntervals,
+  hasInProgressIntervals,
+  hasFilledIntervals,
 }: {
   start: string;
   end: string;
   statuses: string[];
+  hasUnfilledIntervals?: boolean;
+  hasInProgressIntervals?: boolean;
+  hasFilledIntervals?: boolean;
   signal?: AbortSignal;
 }): Promise<GetRuleIdsWithGapResponseBody> =>
   KibanaServices.get().http.fetch<GetRuleIdsWithGapResponseBody>(
@@ -133,6 +139,15 @@ export const getRuleIdsWithGaps = async ({
         start,
         end,
         statuses,
+        ...(hasUnfilledIntervals !== undefined && {
+          has_unfilled_intervals: hasUnfilledIntervals,
+        }),
+        ...(hasInProgressIntervals !== undefined && {
+          has_in_progress_intervals: hasInProgressIntervals,
+        }),
+        ...(hasFilledIntervals !== undefined && {
+          has_filled_intervals: hasFilledIntervals,
+        }),
       }),
       signal,
     }

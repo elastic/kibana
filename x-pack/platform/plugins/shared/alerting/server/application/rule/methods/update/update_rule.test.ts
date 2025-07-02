@@ -7,7 +7,6 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import {
@@ -30,17 +29,10 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { migrateLegacyActions } from '../../../../rules_client/lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import type { RuleDomain } from '../../types';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
-
-jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
-  return {
-    migrateLegacyActions: jest.fn(),
-  };
-});
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -224,11 +216,6 @@ describe('update()', () => {
         params: { validate: (params) => params },
       },
       validLegacyConsumers: [],
-    });
-    (migrateLegacyActions as jest.Mock).mockResolvedValue({
-      hasLegacyActions: false,
-      resultedActions: [],
-      resultedReferences: [],
     });
   });
 
@@ -3452,68 +3439,6 @@ describe('update()', () => {
         version: '123',
       }
     );
-  });
-
-  describe('legacy actions migration for SIEM', () => {
-    beforeEach(() => {
-      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-        id: '1',
-        type: RULE_SAVED_OBJECT_TYPE,
-        attributes: {
-          enabled: true,
-          schedule: { interval: '1m' },
-          params: {
-            bar: true,
-          },
-          actions: [],
-          notifyWhen: 'onActiveAlert',
-          scheduledTaskId: 'task-123',
-          executionStatus: {
-            lastExecutionDate: '2019-02-12T21:01:22.479Z',
-            status: 'pending',
-          },
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-        references: [],
-      });
-    });
-
-    test('should call migrateLegacyActions', async () => {
-      const existingDecryptedSiemAlert = {
-        ...existingDecryptedAlert,
-        attributes: { ...existingDecryptedAlert.attributes, consumer: AlertConsumers.SIEM },
-      };
-
-      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce(
-        existingDecryptedSiemAlert
-      );
-
-      actionsClient.getBulk.mockReset();
-      actionsClient.isPreconfigured.mockReset();
-
-      await rulesClient.update({
-        id: '1',
-        data: {
-          schedule: { interval: '1m' },
-          name: 'abc',
-          tags: ['foo'],
-          params: {
-            bar: true,
-            risk_score: 40,
-            severity: 'low',
-          },
-          throttle: null,
-          notifyWhen: 'onActiveAlert',
-          actions: [],
-        },
-      });
-
-      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        ruleId: '1',
-        attributes: existingDecryptedSiemAlert.attributes,
-      });
-    });
   });
 
   it('calls the authentication API key function if the user is authenticated using an api key', async () => {

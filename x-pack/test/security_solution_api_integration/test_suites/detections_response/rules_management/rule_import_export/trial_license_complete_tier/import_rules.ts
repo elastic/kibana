@@ -96,7 +96,7 @@ const getImportRuleBuffer = (connectorId: string) => {
 
   return Buffer.from(ndjson);
 };
-const getImportRuleWithConnectorsBuffer = (connectorId: string) => {
+const getImportRuleWithConnectorsBuffer = (connectorId: string, originId?: string) => {
   const rule1 = getRuleImportWithActions([
     {
       group: 'default',
@@ -109,6 +109,7 @@ const getImportRuleWithConnectorsBuffer = (connectorId: string) => {
   ]);
   const connector = {
     id: connectorId,
+    originId,
     type: 'action',
     updated_at: '2023-01-25T14:35:52.852Z',
     created_at: '2023-01-25T14:35:52.852Z',
@@ -900,6 +901,40 @@ export default ({ getService }: FtrProviderContext): void => {
             .expect(200);
 
           expect(overwriteResponseBody).toMatchObject({
+            success: true,
+            success_count: 1,
+            rules_count: 1,
+            errors: [],
+            action_connectors_success: true,
+            action_connectors_success_count: 1,
+            action_connectors_warnings: [],
+            action_connectors_errors: [],
+          });
+        });
+
+        it('should import rules and connectors when connectors include an originId', async () => {
+          const defaultSpaceConnectorId = 'c5548aec-a02f-4d98-8a37-5ed7e1810c0e';
+          const originId = '6f353a28-74c8-4660-8ea5-2485dbe64fbf';
+
+          const buffer = getImportRuleWithConnectorsBuffer(defaultSpaceConnectorId, originId);
+
+          await supertest
+            .post(`${DETECTION_ENGINE_RULES_IMPORT_URL}`)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .attach('file', buffer, 'rules.ndjson')
+            .expect(200);
+
+          const { body } = await supertest
+            .post(
+              `/s/${spaceId}${DETECTION_ENGINE_RULES_IMPORT_URL}?overwrite=true&overwrite_action_connectors=true`
+            )
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .attach('file', buffer, 'rules.ndjson')
+            .expect(200);
+
+          expect(body).toMatchObject({
             success: true,
             success_count: 1,
             rules_count: 1,

@@ -16,7 +16,7 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import type { CustomHostSettings } from '@kbn/actions-plugin/server/config';
 import type { ProxySettings } from '@kbn/actions-plugin/server/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { sendEmailGraphApi } from './send_email_graph_api';
+import { sendEmailGraphApi, sendEmailWithAttachments } from './send_email_graph_api';
 
 const createAxiosInstanceMock = axios.create as jest.Mock;
 const axiosInstanceMock = jest.fn();
@@ -24,6 +24,7 @@ const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 describe('sendEmailGraphApi', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
   });
   const configurationUtilities = actionsConfigMock.create();
@@ -42,6 +43,7 @@ describe('sendEmailGraphApi', () => {
         options: getSendEmailOptions(),
         messageHTML: 'test1',
         headers: {},
+        attachments: [],
       },
       logger,
       configurationUtilities,
@@ -137,12 +139,13 @@ describe('sendEmailGraphApi', () => {
         options: getSendEmailOptions(),
         messageHTML: 'test2',
         headers: { Authorization: 'Bearer 1234567' },
+        attachments: [],
       },
       logger,
       configurationUtilities,
       connectorUsageCollector
     );
-    expect(axiosInstanceMock.mock.calls[1]).toMatchInlineSnapshot(`
+    expect(axiosInstanceMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "https://graph.microsoft.com/v1.0/users/fred@example.com/sendMail",
         Object {
@@ -235,12 +238,13 @@ describe('sendEmailGraphApi', () => {
         options: getSendEmailOptions(),
         messageHTML: 'test3',
         headers: {},
+        attachments: [],
       },
       logger,
       configurationUtilities,
       connectorUsageCollector
     );
-    expect(axiosInstanceMock.mock.calls[2]).toMatchInlineSnapshot(`
+    expect(axiosInstanceMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "https://test/users/fred@example.com/sendMail",
         Object {
@@ -334,7 +338,7 @@ describe('sendEmailGraphApi', () => {
 
     await expect(
       sendEmailGraphApi(
-        { options: getSendEmailOptions(), messageHTML: 'test1', headers: {} },
+        { options: getSendEmailOptions(), messageHTML: 'test1', headers: {}, attachments: [] },
         logger,
         configurationUtilities,
         connectorUsageCollector
@@ -348,6 +352,243 @@ describe('sendEmailGraphApi', () => {
         "error thrown sending Microsoft Exchange email for clientID: undefined: {\\"error\\":{\\"code\\":\\"ErrorMimeContentInvalidBase64String\\",\\"message\\":\\"Invalid base64 string for MIME content.\\"}}",
       ]
     `);
+  });
+
+  describe('sendEmailWithAttachments', () => {
+    test('email adds a small attachment', async () => {
+      const connectorUsageCollector = new ConnectorUsageCollector({
+        logger,
+        connectorId: 'test-connector-id',
+      });
+
+      // create draft
+      axiosInstanceMock.mockReturnValueOnce({
+        status: 201,
+        data: { id: 'draftId' },
+      });
+      // add small attachment
+      axiosInstanceMock.mockReturnValueOnce({
+        status: 201,
+      });
+      // send draft
+      axiosInstanceMock.mockReturnValueOnce({
+        status: 202,
+      });
+      const axiosInstance = axios.create();
+
+      await sendEmailWithAttachments({
+        sendEmailOptions: {
+          options: getSendEmailOptions(),
+          messageHTML: 'test1',
+          attachments: [
+            {
+              content: 'dGVzdC1vdXRwdXR0ZXN0LW91dHB1dA==',
+              contentType: 'test-content-type',
+              encoding: 'base64',
+              filename: 'report.pdf',
+            },
+          ],
+          headers: {},
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector,
+        axiosInstance,
+      });
+
+      expect(axiosInstanceMock).toHaveBeenCalledTimes(3);
+
+      const [createDraftUrl, createDraft] = axiosInstanceMock.mock.calls[0];
+      expect(createDraftUrl).toEqual(
+        'https://graph.microsoft.com/v1.0/users/fred@example.com/messages'
+      );
+      expect(createDraft.data).toEqual({
+        bccRecipients: [],
+        body: {
+          content: 'test1',
+          contentType: 'HTML',
+        },
+        ccRecipients: [
+          {
+            emailAddress: {
+              address: 'bob@example.com',
+            },
+          },
+          {
+            emailAddress: {
+              address: 'robert@example.com',
+            },
+          },
+        ],
+        subject: 'a subject',
+        toRecipients: [
+          {
+            emailAddress: {
+              address: 'jim@example.com',
+            },
+          },
+        ],
+      });
+
+      const [addAttachmentUrl, addAttachment] = axiosInstanceMock.mock.calls[1];
+      expect(addAttachmentUrl).toEqual(
+        'https://graph.microsoft.com/v1.0/users/fred@example.com/messages/draftId/attachments'
+      );
+      expect(addAttachment.data).toEqual({
+        '@odata.type': '#microsoft.graph.fileAttachment',
+        contentBytes: 'dGVzdC1vdXRwdXR0ZXN0LW91dHB1dA==',
+        contentType: 'test-content-type',
+        name: 'report.pdf',
+      });
+
+      const [sendDraftUrl] = axiosInstanceMock.mock.calls[2];
+      expect(sendDraftUrl).toEqual(
+        'https://graph.microsoft.com/v1.0/users/fred@example.com/messages/draftId/send'
+      );
+    });
+
+    test('email uploads a large attachment', async () => {
+      const connectorUsageCollector = new ConnectorUsageCollector({
+        logger,
+        connectorId: 'test-connector-id',
+      });
+
+      // create draft
+      axiosInstanceMock.mockReturnValueOnce({
+        status: 201,
+        data: { id: 'draftId' },
+      });
+      // create upload session
+      axiosInstanceMock.mockReturnValueOnce({
+        status: 201,
+        data: { uploadUrl: 'http://test-upload-session.com' },
+      });
+      // upload attachment 1/3
+      axiosInstanceMock.mockReturnValueOnce({
+        status: 200,
+      });
+      // upload attachment 2/3
+      axiosInstanceMock.mockReturnValueOnce({
+        status: 200,
+      });
+      // upload attachment 3/3
+      axiosInstanceMock.mockReturnValueOnce({
+        status: 200,
+      });
+      // close upload session
+      axiosInstanceMock.mockReturnValueOnce({
+        status: 204,
+      });
+      // send draft
+      axiosInstanceMock.mockReturnValueOnce({
+        status: 202,
+      });
+      const axiosInstance = axios.create();
+
+      await sendEmailWithAttachments(
+        {
+          sendEmailOptions: {
+            options: getSendEmailOptions(),
+            messageHTML: 'test1',
+            attachments: [
+              {
+                content: 'dGVzdC1vdXRwdXR0ZXN0LW91dHB1dA==',
+                contentType: 'test-content-type',
+                encoding: 'base64',
+                filename: 'report.pdf',
+              },
+            ],
+            headers: {},
+          },
+          logger,
+          configurationUtilities,
+          connectorUsageCollector,
+          axiosInstance,
+        },
+        30,
+        10
+      );
+      expect(axiosInstanceMock).toHaveBeenCalledTimes(7);
+
+      const [createDraftUrl, createDraft] = axiosInstanceMock.mock.calls[0];
+      expect(createDraftUrl).toEqual(
+        'https://graph.microsoft.com/v1.0/users/fred@example.com/messages'
+      );
+      expect(createDraft.data).toEqual({
+        bccRecipients: [],
+        body: {
+          content: 'test1',
+          contentType: 'HTML',
+        },
+        ccRecipients: [
+          {
+            emailAddress: {
+              address: 'bob@example.com',
+            },
+          },
+          {
+            emailAddress: {
+              address: 'robert@example.com',
+            },
+          },
+        ],
+        subject: 'a subject',
+        toRecipients: [
+          {
+            emailAddress: {
+              address: 'jim@example.com',
+            },
+          },
+        ],
+      });
+
+      const [createUploadSessionUrl, createUploadSession] = axiosInstanceMock.mock.calls[1];
+      expect(createUploadSessionUrl).toEqual(
+        'https://graph.microsoft.com/v1.0/users/fred@example.com/messages/draftId/attachments/createUploadSession'
+      );
+      expect(createUploadSession.data).toEqual({
+        AttachmentItem: {
+          attachmentType: 'file',
+          name: 'report.pdf',
+          size: 22,
+        },
+      });
+
+      const [uploadAttachmentUrl1, uploadAttachment1] = axiosInstanceMock.mock.calls[2];
+      expect(uploadAttachmentUrl1).toEqual('http://test-upload-session.com');
+      expect(uploadAttachment1.data).toBeTruthy();
+      expect(uploadAttachment1.headers).toEqual({
+        'Content-Length': '10',
+        'Content-Range': 'bytes 0-9/22',
+        'Content-Type': 'application/octet-stream',
+      });
+
+      const [uploadAttachmentUrl2, uploadAttachment2] = axiosInstanceMock.mock.calls[3];
+      expect(uploadAttachmentUrl2).toEqual('http://test-upload-session.com');
+      expect(uploadAttachment2.data).toBeTruthy();
+      expect(uploadAttachment2.headers).toEqual({
+        'Content-Length': '10',
+        'Content-Range': 'bytes 10-19/22',
+        'Content-Type': 'application/octet-stream',
+      });
+
+      const [uploadAttachmentUrl3, uploadAttachment3] = axiosInstanceMock.mock.calls[4];
+      expect(uploadAttachmentUrl3).toEqual('http://test-upload-session.com');
+      expect(uploadAttachment3.data).toBeTruthy();
+      expect(uploadAttachment3.headers).toEqual({
+        'Content-Length': '2',
+        'Content-Range': 'bytes 20-21/22',
+        'Content-Type': 'application/octet-stream',
+      });
+
+      const [closeUploadSessionUrl] = axiosInstanceMock.mock.calls[5];
+      expect(closeUploadSessionUrl).toEqual('http://test-upload-session.com');
+
+      const [sendDraftUrl] = axiosInstanceMock.mock.calls[6];
+      expect(sendDraftUrl).toEqual(
+        'https://graph.microsoft.com/v1.0/users/fred@example.com/messages/draftId/send'
+      );
+    });
   });
 });
 

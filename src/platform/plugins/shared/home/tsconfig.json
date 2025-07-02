@@ -22,7 +22,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/utility-types",
-    "@kbn/guided-onboarding",
     "@kbn/ui-theme",
     "@kbn/config-schema",
     "@kbn/utility-types-jest",
@@ -34,8 +33,8 @@
     "@kbn/core-http-common",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/core-http-browser",
-    "@kbn/deeplinks-observability",
     "@kbn/react-kibana-context-theme",
+    "@kbn/css-utils",
   ],
   "exclude": [
     "target/**/*",

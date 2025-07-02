@@ -6,10 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
-import {
-  LlmProxy,
-  createLlmProxy,
-} from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { LlmProxy, createLlmProxy } from '../utils/create_llm_proxy';
 import { setAdvancedSettings } from '../utils/advanced_settings';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { clearConversations } from '../utils/conversation';
@@ -40,28 +37,24 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       // configure anonymization rules for these tests
       await setAdvancedSettings(supertest, {
-        'observability:aiAssistantAnonymizationRules': [
-          {
-            id: 'email_regex',
-            entityClass: 'EMAIL',
-            type: 'regex',
-            pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
-            enabled: true,
-            builtIn: true,
-            description: 'Anonymize email addresses',
-            normalize: true,
-          },
-          {
-            id: 'url_regex',
-            entityClass: 'URL',
-            type: 'regex',
-            pattern: 'https?://[^\\s]+',
-            enabled: true,
-            builtIn: true,
-            description: 'Anonymize URLs',
-            normalize: true,
-          },
-        ],
+        'observability:aiAssistantAnonymizationRules': JSON.stringify(
+          [
+            {
+              entityClass: 'EMAIL',
+              type: 'regex',
+              pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
+              enabled: true,
+            },
+            {
+              entityClass: 'URL',
+              type: 'regex',
+              pattern: 'https?://[^\\s]+',
+              enabled: true,
+            },
+          ],
+          null,
+          2
+        ),
       });
     });
 

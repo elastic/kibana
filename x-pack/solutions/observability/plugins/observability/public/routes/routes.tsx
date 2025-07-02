@@ -62,21 +62,10 @@ function SimpleRedirect({ to, redirectToApp }: { to: string; redirectToApp?: str
   return null;
 }
 
-export const routes = {
+export const completeRoutes = {
   [ROOT_PATH]: {
     handler: () => {
       return <SimpleRedirect to={OVERVIEW_PATH} />;
-    },
-    params: {},
-    exact: true,
-  },
-  [LANDING_PATH]: {
-    handler: () => {
-      return (
-        <HasDataContextProvider>
-          <LandingPage />
-        </HasDataContextProvider>
-      );
     },
     params: {},
     exact: true,
@@ -88,6 +77,20 @@ export const routes = {
           <DatePickerContextProvider>
             <OverviewPage />
           </DatePickerContextProvider>
+        </HasDataContextProvider>
+      );
+    },
+    params: {},
+    exact: true,
+  },
+};
+
+export const routes = {
+  [LANDING_PATH]: {
+    handler: () => {
+      return (
+        <HasDataContextProvider>
+          <LandingPage />
         </HasDataContextProvider>
       );
     },

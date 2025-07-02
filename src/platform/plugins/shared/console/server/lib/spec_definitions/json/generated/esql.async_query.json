@@ -17,17 +17,6 @@
         "cbor",
         "smile",
         "arrow"
-      ],
-      "keep_alive": [
-        "5d",
-        "-1",
-        "0"
-      ],
-      "keep_on_completion": "__flag__",
-      "wait_for_completion_timeout": [
-        "1s",
-        "-1",
-        "0"
       ]
     },
     "methods": [
