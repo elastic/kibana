@@ -229,7 +229,7 @@ describe('config validation', () => {
 
     config.email = {};
     expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-      `"[email]: Email configuration requires either domain_allowlist or recipient_allowlist to be specified (but not both)"`
+      `"[email]: email.domain_allowlist, email.recipient_allowlist, or email.services must be defined"`
     );
 
     config.email = { domain_allowlist: [] };
@@ -241,39 +241,56 @@ describe('config validation', () => {
     expect(result.email?.domain_allowlist).toEqual(['a.com', 'b.c.com', 'd.e.f.com']);
   });
 
-  test('validates email.recipient_allowlist', () => {
+  describe('email.recipient_allowlist', () => {
     const config: Record<string, unknown> = {};
-    let result = configSchema.validate(config);
-    expect(result.email === undefined);
+    test('validates no email config at all', () => {
+      let result = configSchema.validate(config);
+      expect(result.email === undefined);
+    });
 
-    config.email = {};
-    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-      `"[email]: Email configuration requires either domain_allowlist or recipient_allowlist to be specified (but not both)"`
-    );
+    test('validates empty email config', () => {
+      config.email = {};
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email]: email.domain_allowlist, email.recipient_allowlist, or email.services must be defined"`
+      );
+    });
 
-    config.email = { recipient_allowlist: [] };
-    result = configSchema.validate(config);
-    expect(result.email?.recipient_allowlist).toEqual([]);
+    test('validates email config with recipient_allowlist = null', () => {
+      config.email = { recipient_allowlist: null };
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email.recipient_allowlist]: expected value of type [array] but got [null]"`
+      );
+    });
 
-    config.email = {
-      recipient_allowlist: [
+    test('validates email config with recipient_allowlist = []', () => {
+      config.email = { recipient_allowlist: [] };
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email.recipient_allowlist]: array size is [0], but cannot be smaller than [1]"`
+      );
+    });
+
+    test('validates email config with recipient_allowlist', () => {
+      config.email = {
+        recipient_allowlist: [
+          'a.com',
+          'b.c.com',
+          'd.e.f.com',
+          '*.bar@a.com',
+          'foo.bar@b.com',
+          '*@d.e.f.com',
+        ],
+      };
+
+      const result = configSchema.validate(config);
+      expect(result.email?.recipient_allowlist).toEqual([
         'a.com',
         'b.c.com',
         'd.e.f.com',
         '*.bar@a.com',
         'foo.bar@b.com',
         '*@d.e.f.com',
-      ],
-    };
-    result = configSchema.validate(config);
-    expect(result.email?.recipient_allowlist).toEqual([
-      'a.com',
-      'b.c.com',
-      'd.e.f.com',
-      '*.bar@a.com',
-      'foo.bar@b.com',
-      '*@d.e.f.com',
-    ]);
+      ]);
+    });
   });
 
   test('throws when domain_allowlist and recipient_allowlist are used at the same time', () => {
@@ -286,7 +303,7 @@ describe('config validation', () => {
       recipient_allowlist: ['*.bar@a.com'],
     };
     expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-      `"[email]: Email configuration requires either domain_allowlist or recipient_allowlist to be specified (but not both)"`
+      `"[email]: email.domain_allowlist and email.recipient_allowlist can not be used at the same time"`
     );
   });
 
@@ -366,7 +383,7 @@ describe('config validation', () => {
     test('validates empty email config', () => {
       config.email = {};
       expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-        `"[email]: email.domain_allowlist or email.services must be defined"`
+        `"[email]: email.domain_allowlist, email.recipient_allowlist, or email.services must be defined"`
       );
     });
 

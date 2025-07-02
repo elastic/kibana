@@ -37,14 +37,12 @@ export interface Config {
 
 export class Plugin implements CorePlugin<ActionsPublicPluginSetup> {
   private readonly allowedEmailDomains: string[] | null = null;
-  private readonly recipientAllowlist: string[] | null = null;
   private readonly enabledEmailServices: string[];
   private readonly webhookSslWithPfxEnabled: boolean;
 
   constructor(ctx: PluginInitializerContext<Config>) {
     const config = ctx.config.get();
     this.allowedEmailDomains = config.email?.domain_allowlist || null;
-    this.recipientAllowlist = config.email?.recipient_allowlist || null;
     this.enabledEmailServices = Array.from(new Set(config.email?.services?.enabled || ['*']));
     this.webhookSslWithPfxEnabled = config.webhook?.ssl.pfx.enabled ?? true;
   }
@@ -52,7 +50,7 @@ export class Plugin implements CorePlugin<ActionsPublicPluginSetup> {
   public setup(): ActionsPublicPluginSetup {
     return {
       validateEmailAddresses: (emails: string[], options: ValidateEmailAddressesOptions) =>
-        validateEmails(this.allowedEmailDomains, emails, options, this.recipientAllowlist),
+        validateEmails(this.allowedEmailDomains, emails, options),
       enabledEmailServices: this.enabledEmailServices,
       isWebhookSslWithPfxEnabled: this.webhookSslWithPfxEnabled,
     };

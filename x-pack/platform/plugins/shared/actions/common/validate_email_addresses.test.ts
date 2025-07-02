@@ -242,6 +242,79 @@ describe('validate_email_address', () => {
     });
   });
 
+  it('should validate correctly when using email recipient allowlist config', async () => {
+    const recipientAllowlist = ['admin-*@example.com', '*@mydomain.com', 'foo.*@test.com'];
+    const testEmails = [
+      'bob@elastic.co',
+      'jim@somewhere.org',
+      'not an email',
+      'foo.bar@elastic.co',
+      'user@mydomain.com',
+      'admin-network@example.com',
+      'foo.bar@test.com',
+    ];
+
+    const validated = validateEmailAddresses(null, testEmails, {}, recipientAllowlist);
+    expect(validated).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "address": "bob@elastic.co",
+          "reason": "notAllowed",
+          "valid": false,
+        },
+        Object {
+          "address": "jim@somewhere.org",
+          "reason": "notAllowed",
+          "valid": false,
+        },
+        Object {
+          "address": "not an email",
+          "reason": "invalid",
+          "valid": false,
+        },
+        Object {
+          "address": "foo.bar@elastic.co",
+          "reason": "notAllowed",
+          "valid": false,
+        },
+        Object {
+          "address": "user@mydomain.com",
+          "valid": true,
+        },
+        Object {
+          "address": "admin-network@example.com",
+          "valid": true,
+        },
+        Object {
+          "address": "foo.bar@test.com",
+          "valid": true,
+        },
+      ]
+    `);
+  });
+
+  it('should ignore the recipient allowlist when using the isSender option', async () => {
+    const recipientAllowlist = ['admin-*@example.com', '*@mydomain.com', 'foo.*@test.com'];
+    const testEmails = ['sender@foo.com', 'foo.bar@elastic.com'];
+
+    const validated = validateEmailAddresses(
+      null,
+      testEmails,
+      { isSender: true },
+      recipientAllowlist
+    );
+    expect(validated).toEqual([
+      {
+        address: 'sender@foo.com',
+        valid: true,
+      },
+      {
+        address: 'foo.bar@elastic.com',
+        valid: true,
+      },
+    ]);
+  });
+
   const entriesGood: ValidatedEmail[] = [
     { address: 'a', valid: true },
     { address: 'b', valid: true },

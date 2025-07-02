@@ -146,10 +146,10 @@ $$$action-config-email-domain-allowlist$$$
     For example:
 
     ```yaml
-    xpack.actions.email.recipient_allowlist: ["*.doe@example.com", "*@example.org"]
+    xpack.actions.email.recipient_allowlist: ["admin-*@company.org", "sales-*@example.com"]
     ```
 
-    Only "to", "cc", or "bcc" email addresses that match the listed patterns will be accepted. For example, "john.doe@example.com" or "johndoe@example.org".
+    Only "to", "cc", or "bcc" email addresses that match the listed patterns will be accepted. For example, "admin-network@company.org" or "sales-north@example.com".
 
 `xpack.actions.email.services.ses.host` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :    The SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.

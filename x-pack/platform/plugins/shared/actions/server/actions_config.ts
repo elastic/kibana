@@ -177,7 +177,7 @@ function validateEmails(
   addresses: string[],
   options: ValidateEmailAddressesOptions
 ): string | undefined {
-  if (config.email?.domain_allowlist == null) {
+  if (config.email?.domain_allowlist == null && config.email?.recipient_allowlist == null) {
     return;
   }
 

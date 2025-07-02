@@ -20,7 +20,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
   describe('email connector', () => {
     afterEach(() => objectRemover.removeAll());
 
-    it('does not apply recipient_allowlist on "from" field', async () => {
+    it('does ignore recipient_allowlist on "from" field', async () => {
       const { status, body } = await createConnector(fromEmailAddress);
       expect(status).to.be(200);
 
@@ -61,7 +61,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       }
     });
 
-    it('in execute when invalid "to", "cc" or "bcc" used', async () => {
+    it('throws when invalid "to", "cc" or "bcc" used', async () => {
       const conn = await createConnector(fromEmailAddress);
       expect(conn.status).to.be(200);
 
@@ -72,16 +72,16 @@ export default function emailTest({ getService }: FtrProviderContext) {
       const cc = allowedEmailAddresses;
       const bcc = allowedEmailAddresses;
 
-      to.push('not.foo@example.org');
-      cc.push('invalid@domain.co');
-      bcc.push('foobar@example.org');
+      to.push('to.foo@example.org');
+      cc.push('invalidcc@domain.co');
+      bcc.push('foobar@bcc.org');
 
       const { status, body } = await runConnector(id, to, cc, bcc);
       expect(status).to.be(200);
 
       expect(body?.status).to.be('error');
       expect(body?.message).to.match(
-        /not allowed emails: not.foo@example.org, invalid@domain.co, foobar@example.org/
+        /not allowed emails: to.foo@example.org, invalidcc@domain.co, foobar@bcc.org/
       );
     });
   });

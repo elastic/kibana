@@ -118,7 +118,7 @@ function validateEmailAddress_(
     }
   }
 
-  if (!isSender && recipientAllowList !== null) {
+  if (!isSender && recipientAllowList != null) {
     for (const emailAddress of emailAddresses) {
       let flattenEmailAddresses = [];
 
