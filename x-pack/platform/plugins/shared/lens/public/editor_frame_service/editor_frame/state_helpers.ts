@@ -34,7 +34,7 @@ import type {
   SuggestionRequest,
 } from '../../types';
 import { buildExpression } from './expression_helpers';
-import { LensDocument } from '../../persistence/saved_object_store';
+import { LensDocument } from '../../persistence';
 import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from '../../utils';
 import type { DatasourceState, DatasourceStates, VisualizationState } from '../../state_management';
 import { readFromStorage } from '../../settings_storage';

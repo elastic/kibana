@@ -67,7 +67,7 @@ import {
 import type { LensInspector } from './lens_inspector_service';
 import type { DataViewsState, GeneralDatasourceStates } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
-import type { LensDocument } from './persistence/saved_object_store';
+import type { LensDocument } from './persistence';
 import { TableInspectorAdapter } from './editor_frame_service/types';
 
 export type StartServices = Pick<

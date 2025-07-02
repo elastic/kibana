@@ -6,7 +6,7 @@
  */
 
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import { SavedObjectIndexStore } from './saved_object_store';
+import { LensDocumentService } from './lens_document_service';
 
 describe('LensStore', () => {
   function testStore(testId?: string) {
@@ -18,7 +18,7 @@ describe('LensStore', () => {
 
     return {
       client,
-      store: new SavedObjectIndexStore({
+      service: new LensDocumentService({
         client,
         registry: jest.fn(),
       } as unknown as ContentManagementPublicStart),
@@ -27,8 +27,8 @@ describe('LensStore', () => {
 
   describe('save', () => {
     test('creates and returns a visualization document', async () => {
-      const { client, store } = testStore('FOO');
-      const doc = await store.save({
+      const { client, service } = testStore('FOO');
+      const doc = await service.save({
         title: 'Hello',
         description: 'My doc',
         visualizationType: 'bar',
@@ -82,8 +82,8 @@ describe('LensStore', () => {
     });
 
     test('updates and returns a visualization document', async () => {
-      const { client, store } = testStore('Gandalf');
-      const doc = await store.save({
+      const { client, service } = testStore('Gandalf');
+      const doc = await service.save({
         savedObjectId: 'Gandalf',
         title: 'Even the very wise cannot see all ends.',
         visualizationType: 'line',
@@ -134,7 +134,7 @@ describe('LensStore', () => {
 
   describe('load', () => {
     test('throws if an error is returned', async () => {
-      const { client, store } = testStore();
+      const { client, service } = testStore();
       client.get = jest.fn(async () => ({
         meta: { outcome: 'exactMatch' },
         item: {
@@ -149,7 +149,7 @@ describe('LensStore', () => {
         },
       }));
 
-      await expect(store.load('Paul')).rejects.toThrow('shoot dang!');
+      await expect(service.load('Paul')).rejects.toThrow('shoot dang!');
     });
   });
 });

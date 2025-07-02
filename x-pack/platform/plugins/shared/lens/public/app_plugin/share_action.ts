@@ -11,7 +11,7 @@ import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { LensAppLocatorParams } from '../../common/locator/locator';
 import type { LensAppState } from '../state_management';
 import type { LensAppServices } from './types';
-import type { LensDocument } from '../persistence/saved_object_store';
+import type { LensDocument } from '../persistence';
 import type { DatasourceMap, VisualizationMap } from '../types';
 import { extractReferencesFromState, getResolvedDateRange } from '../utils';
 import { getEditPath } from '../../common/constants';
@@ -23,7 +23,7 @@ export interface ShareableConfiguration
   > {
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
-  currentDoc: LensDocument | undefined;
+  currentDoc?: LensDocument;
   adHocDataViews?: DataViewSpec[];
 }
 
@@ -37,7 +37,7 @@ export const DEFAULT_LENS_LAYOUT_DIMENSIONS = {
 
 function getShareURLForSavedObject(
   { application, data }: Pick<LensAppServices, 'application' | 'data'>,
-  currentDoc: LensDocument | undefined
+  currentDoc?: LensDocument
 ) {
   return new URL(
     `${application.getUrlForApp('lens', { absolute: true })}${
@@ -122,8 +122,7 @@ export function getShareURL(
   shareLocatorParams: LensAppLocatorParams,
   services: Pick<LensAppServices, 'application' | 'data'>,
   configuration: ShareableConfiguration,
-  shareUrlEnabled: boolean,
-  isDirty: boolean
+  shareUrlEnabled: boolean
 ) {
   return {
     shareableUrl: shareUrlEnabled ? shortUrlService(shareLocatorParams) : undefined,

@@ -683,8 +683,7 @@ export const LensTopNavMenu = ({
                   shareLocatorParams,
                   { application, data },
                   configuration,
-                  shareUrlEnabled,
-                  isCurrentStateDirty
+                  shareUrlEnabled
                 );
 
                 return !currentDoc?.savedObjectId ? (await shareableUrl)! : savedObjectURL.href;
@@ -836,6 +835,9 @@ export const LensTopNavMenu = ({
                   returnToOrigin: true,
                   ...(contextFromEmbeddable && { newDescription: initialContext.description }),
                   panelTimeRange: contextFromEmbeddable ? initialContext.panelTimeRange : undefined,
+                  onTitleDuplicate() {
+                    console.log('test');
+                  },
                 },
                 {
                   saveToLibrary: Boolean(initialInput?.savedObjectId),

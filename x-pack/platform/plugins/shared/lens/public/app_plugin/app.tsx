@@ -16,7 +16,7 @@ import { css } from '@emotion/react';
 import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { AddUserMessages, EditorFrameInstance, Simplify, UserMessagesGetter } from '../types';
-import { LensDocument } from '../persistence/saved_object_store';
+import { LensDocument } from '../persistence';
 
 import {
   setState,
@@ -53,7 +53,7 @@ export type SaveProps = Simplify<
   Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
     returnToOrigin: boolean;
     dashboardId?: string | null;
-    onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
+    onTitleDuplicate: OnSaveProps['onTitleDuplicate'];
     newDescription?: string;
     newTags?: string[];
     panelTimeRange?: TimeRange;

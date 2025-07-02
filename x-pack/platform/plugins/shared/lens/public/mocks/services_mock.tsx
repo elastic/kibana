@@ -30,7 +30,7 @@ import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/pu
 import { LensAppServices } from '../app_plugin/types';
 import { mockDataPlugin } from './data_plugin_mock';
 import { getLensInspectorService } from '../lens_inspector_service';
-import { LensDocument, SavedObjectIndexStore } from '../persistence';
+import { LensDocument, LensDocumentService } from '../persistence';
 import { LensAttributesService } from '../lens_attribute_service';
 import { mockDatasourceStates } from './store_mocks';
 
@@ -62,7 +62,7 @@ export function makeAttributeService(doc: LensDocument): jest.Mocked<LensAttribu
   const attributeServiceMock: jest.Mocked<LensAttributesService> = {
     loadFromLibrary: jest.fn().mockResolvedValue(exactMatchDoc),
     saveToLibrary: jest.fn().mockResolvedValue(doc.savedObjectId),
-    checkForDuplicateTitle: jest.fn(),
+    checkForDuplicateTitle: jest.fn().mockResolvedValue(false),
     injectReferences: jest.fn((_runtimeState, references) => ({
       ..._runtimeState,
       attributes: {
@@ -127,11 +127,12 @@ export function makeDefaultServices(
       closeInspector: jest.fn(),
     },
     presentationUtil: presentationUtilPluginMock.createStartContract(),
-    savedObjectStore: {
+    lensDocumentService: {
       load: jest.fn(),
       search: jest.fn(),
       save: jest.fn(),
-    } as unknown as SavedObjectIndexStore,
+      checkForDuplicateTitle: jest.fn().mockResolvedValue(false),
+    } as unknown as LensDocumentService,
     stateTransfer: createEmbeddableStateTransferMock() as EmbeddableStateTransfer,
     getOriginatingAppName: jest.fn(() => 'defaultOriginatingApp'),
     application: {
