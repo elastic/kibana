@@ -16,14 +16,13 @@ import { getAlertFieldsByRuleTypeIds } from './get_alert_fields_by_rule_type_ids
 
 describe('getAlertFieldsByRuleTypeIds', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  const { context } = requestContextMock.createTools();
   let getFieldsForWildcardMock: jest.Mock;
   const coreRequestHandler = coreMock.createRequestHandlerContext();
   const authorizationMock = alertingAuthorizationMock.create();
 
   beforeEach(async () => {
     server = serverMock.create();
-    ({ clients, context } = requestContextMock.createTools());
 
     IndexPatternsFetcher.prototype.getFieldsForWildcard = getFieldsForWildcardMock;
     getAlertFieldsByRuleTypeIds(server.router);
@@ -176,7 +175,7 @@ describe('getAlertFieldsByRuleTypeIds', () => {
         type: 'string',
       },
     ]);
-    expect(response.body.browserFields).toBeDefined();
+    expect(response.body.alertFields).toBeDefined();
   });
 
   test('returns only SIEM fields when no other rule types are authorized', async () => {
