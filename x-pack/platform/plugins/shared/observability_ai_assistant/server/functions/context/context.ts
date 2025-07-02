@@ -29,7 +29,7 @@ export function registerContextFunction({
       name: CONTEXT_FUNCTION_NAME,
       description:
         'This function provides context as to what the user is looking at on their screen, and recalled documents from the knowledge base that matches their query',
-      isInternal: false,
+      isInternal: true,
     },
     async ({ messages, screenContexts, chat }, signal) => {
       const { analytics } = await resources.plugins.core.start();

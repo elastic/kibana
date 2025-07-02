@@ -36,6 +36,7 @@ import {
   ToolChoiceType,
 } from '@kbn/inference-common';
 import { isLockAcquisitionError } from '@kbn/lock-manager';
+import { CONTEXT_FUNCTION_NAME } from '../../../common';
 import { resourceNames } from '..';
 import {
   ChatCompletionChunkEvent,
@@ -59,7 +60,6 @@ import {
   KnowledgeBaseType,
   KnowledgeBaseEntryRole,
 } from '../../../common/types';
-import { CONTEXT_FUNCTION_NAME } from '../../functions/context/context';
 import type { ChatFunctionClient } from '../chat_function_client';
 import { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
 import { AnonymizationService } from '../anonymization';

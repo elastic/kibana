@@ -22,8 +22,12 @@ import {
   throwError,
 } from 'rxjs';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
-import { CONTEXT_FUNCTION_NAME } from '../../../functions/context/context';
-import { createFunctionNotFoundError, Message, MessageRole } from '../../../../common';
+import {
+  CONTEXT_FUNCTION_NAME,
+  createFunctionNotFoundError,
+  Message,
+  MessageRole,
+} from '../../../../common';
 import {
   createFunctionLimitExceededError,
   MessageOrChatEvent,

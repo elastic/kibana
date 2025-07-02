@@ -8,8 +8,7 @@
 /// <reference types="@kbn/ambient-ftr-types"/>
 
 import expect from '@kbn/expect';
-import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
-import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/context';
+import { CONTEXT_FUNCTION_NAME, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { chatClient, esClient, kibanaClient } from '../../services';
 
 const KB_INDEX = '.kibana-observability-ai-assistant-kb-*';
