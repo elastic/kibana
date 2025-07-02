@@ -6,8 +6,10 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { agentPolicyUpdateEventHandler } from './agent_policy_update';
+
 import { createAppContextStartContractMock } from '../mocks';
+
+import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { appContextService } from './app_context';
 import { getAgentById, getAgentPolicyForAgent, getAgentsByKuery } from './agents';
 
@@ -44,9 +46,11 @@ describe('agentPolicyUpdateEventHandler', () => {
       expect(esClient.update).toBeCalledWith(
         expect.objectContaining({
           id: 'agent1',
-          doc: expect.objectContaining({
-            unenrollment_started_at: expect.anything(),
-          }),
+          body: {
+            doc: expect.objectContaining({
+              unenrollment_started_at: expect.anything(),
+            }),
+          },
         })
       );
     });
