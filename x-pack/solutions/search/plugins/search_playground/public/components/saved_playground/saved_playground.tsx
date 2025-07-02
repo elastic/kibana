@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -19,19 +19,21 @@ import { usePlaygroundBreadcrumbs } from '../../hooks/use_playground_breadcrumbs
 import { useSavedPlaygroundParameters } from '../../hooks/use_saved_playground_parameters';
 import { useShowSetupPage } from '../../hooks/use_show_setup_page';
 import {
-  PlaygroundPageMode,
-  PlaygroundViewMode,
-  SavedPlaygroundForm,
-  SavedPlaygroundFormFields,
-} from '../../types';
-import { Header } from '../header';
-import {
   SAVED_PLAYGROUND_CHAT_PATH,
   SAVED_PLAYGROUND_CHAT_QUERY_PATH,
   SAVED_PLAYGROUND_SEARCH_PATH,
   SAVED_PLAYGROUND_SEARCH_QUERY_PATH,
 } from '../../routes';
+import {
+  PlaygroundPageMode,
+  PlaygroundViewMode,
+  SavedPlaygroundForm,
+  SavedPlaygroundFormFields,
+} from '../../types';
+import { isSavedPlaygroundFormDirty } from '../../utils/saved_playgrounds';
+
 import { Chat } from '../chat';
+import { SavedPlaygroundHeader } from './header';
 import { ChatSetupPage } from '../setup_page/chat_setup_page';
 import { SearchMode } from '../search_mode/search_mode';
 import { SearchQueryMode } from '../query_mode/search_query_mode';
@@ -106,6 +108,11 @@ export const SavedPlayground = () => {
       }
     }
   }, [formState.isLoading, pageMode, summarizationModel, models, setValue]);
+  const { isDirty, dirtyFields } = formState;
+  const savedFormIsDirty = useMemo(() => {
+    if (!isDirty) return false;
+    return isSavedPlaygroundFormDirty(dirtyFields);
+  }, [isDirty, dirtyFields]);
 
   const handleModeChange = (id: PlaygroundViewMode) =>
     navigateToView(pageMode ?? PlaygroundPageMode.Search, id, location.search);
@@ -127,12 +134,11 @@ export const SavedPlayground = () => {
   }
   return (
     <>
-      <Header
+      <SavedPlaygroundHeader
         playgroundName={playgroundName}
-        hasChanges={false}
+        hasChanges={savedFormIsDirty}
         pageMode={pageMode}
         viewMode={viewMode}
-        showDocs={false}
         onModeChange={handleModeChange}
         isActionsDisabled={false}
         onSelectPageModeChange={handlePageModeChange}
