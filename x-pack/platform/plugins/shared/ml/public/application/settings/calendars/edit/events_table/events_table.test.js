@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+
 import { EventsTable } from './events_table';
 
 jest.mock('../../../../capabilities/check_capabilities', () => ({
@@ -32,9 +33,9 @@ const testProps = {
 
 describe('EventsTable', () => {
   test('Renders events table with no search bar', () => {
-    const wrapper = shallowWithIntl(<EventsTable {...testProps} />);
+    const { container } = renderWithI18n(<EventsTable {...testProps} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('Renders events table with search bar', () => {
@@ -43,8 +44,8 @@ describe('EventsTable', () => {
       showSearchBar: true,
     };
 
-    const wrapper = shallowWithIntl(<EventsTable {...showSearchBarProps} />);
+    const { container } = renderWithI18n(<EventsTable {...showSearchBarProps} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 });
