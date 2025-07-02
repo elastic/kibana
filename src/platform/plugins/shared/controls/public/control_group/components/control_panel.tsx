@@ -123,7 +123,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
   const controlWidth = width ?? DEFAULT_CONTROL_WIDTH;
   const controlGrow = grow ?? DEFAULT_CONTROL_GROW;
   const controlLabel = usingTwoLineLayout ? panelTitle || defaultPanelTitle || '...' : undefined;
-  
+
   return (
     <EuiFlexItem
       ref={setNodeRef}
