@@ -51,7 +51,9 @@ export class CommandRegistry {
     parsedInput: ParsedCommandInterface;
   } {
     const handler = this.handlers.get(parsedInput.name);
-    return handler?.reconstructCommandText?.(parsedInput);
+    return handler?.reconstructCommandText?.(parsedInput) ?? {
+      parsedInput,
+    };
   }
 
   /**
