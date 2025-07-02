@@ -13,7 +13,6 @@ import type { ParsedCommandInterface } from '../../../service/types';
 import type { ArgSelectorState, EnteredCommand } from '../../console_state/types';
 import { commandRegistry } from '../../../command_handlers/command_registry';
 
-
 interface InputCharacter {
   value: string;
   renderValue: ReactNode;
