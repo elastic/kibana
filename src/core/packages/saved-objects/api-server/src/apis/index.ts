@@ -82,7 +82,7 @@ export type {
   SavedObjectsBulkDeleteResponse,
 } from './bulk_delete';
 export type {
-  SavedObjectsChangeOwnershipOptions,
-  SavedObjectsChangeOwnershipResponse,
+  SavedObjectsChangeAccessControlOptions,
+  SavedObjectsChangeAccessControlResponse,
   SavedObjectsChangeOwnershipObject,
-} from './change_ownership';
+} from './change_access_control';

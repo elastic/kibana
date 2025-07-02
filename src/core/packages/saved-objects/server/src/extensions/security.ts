@@ -487,6 +487,15 @@ export interface ISavedObjectsSecurityExtension {
   ) => Promise<CheckAuthorizationResult<A>>;
 
   /**
+   * Performs authorization for the CHANGE_ACCESS_MODE security action
+   * @param params the namespace and object to authorize for changing access mode
+   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
+   */
+  authorizeChangeAccessMode: <A extends string>(
+    params: AuthorizeChangeAccessModeParams
+  ) => Promise<CheckAuthorizationResult<A>>;
+
+  /**
    * Performs audit logging for the CLOSE_POINT_IN_TIME security action
    */
   auditClosePointInTime: () => void;
