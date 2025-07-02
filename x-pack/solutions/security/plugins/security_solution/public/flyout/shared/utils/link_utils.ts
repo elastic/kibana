@@ -27,6 +27,7 @@ import {
 } from '../../network_details';
 import { RulePanelKey, RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../rule_details/right';
 import { DocumentDetailsRightPanelKey } from '../../document_details/shared/constants/panel_keys';
+import { EVENT_PREVIEW_BANNER } from '../../document_details/preview/constants';
 
 // Helper function to check if the field has a flyout link
 export const isFlyoutLink = ({
@@ -50,7 +51,7 @@ interface GetFlyoutParams {
   field: string;
   scopeId: string;
   ruleId?: string;
-  indexName?: string
+  ancestorsIndexName?: string
 }
 
 const FLYOUT_FIELDS = [HOST_NAME_FIELD_NAME, USER_NAME_FIELD_NAME, SIGNAL_RULE_NAME_FIELD_NAME];
@@ -115,7 +116,7 @@ export const getPreviewPanelParams = ({
   field,
   scopeId,
   ruleId,
-  indexName,
+  ancestorsIndexName,
 }: GetFlyoutParams): FlyoutPanelProps | null => {
   if (!isFlyoutLink({ field, ruleId, scopeId })) {
     return null;
@@ -169,7 +170,8 @@ export const getPreviewPanelParams = ({
         params: {
           id: value,
           scopeId,
-          indexName,
+          indexName: ancestorsIndexName,
+          banner: EVENT_PREVIEW_BANNER,
         },
       };
     default:

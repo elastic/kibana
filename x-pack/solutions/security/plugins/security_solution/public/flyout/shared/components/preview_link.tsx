@@ -68,7 +68,7 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
         field,
         scopeId,
         ruleId,
-        indexName: ancestorsIndexName
+        ancestorsIndexName
       }),
     [value, field, scopeId, ruleId, ancestorsIndexName]
   );
