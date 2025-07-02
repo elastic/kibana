@@ -1191,10 +1191,34 @@
           },
           {
             "parentPluginId": "navigation",
+            "id": "def-common.DEFAULT_ROUTES.search",
+            "type": "string",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "path": "src/platform/plugins/shared/navigation/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
             "id": "def-common.DEFAULT_ROUTES.oblt",
             "type": "string",
             "tags": [],
             "label": "oblt",
+            "description": [
+              "// O11y aliases"
+            ],
+            "path": "src/platform/plugins/shared/navigation/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-common.DEFAULT_ROUTES.observability",
+            "type": "string",
+            "tags": [],
+            "label": "observability",
             "description": [],
             "path": "src/platform/plugins/shared/navigation/common/constants.ts",
             "deprecated": false,
