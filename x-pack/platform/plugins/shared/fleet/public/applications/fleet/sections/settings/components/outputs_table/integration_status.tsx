@@ -257,6 +257,7 @@ export const IntegrationStatus: React.FunctionComponent<{
                 id={`${customAsset.type}:${customAsset.name}`}
                 key={`${customAsset.type}:${customAsset.name}`}
                 arrowDisplay={customAsset.error ? 'left' : 'none'}
+                isDisabled={!customAsset.error}
                 buttonContent={
                   <EuiFlexGroup alignItems="baseline" gutterSize="xs">
                     <EuiFlexItem grow={false}>
