@@ -5,11 +5,8 @@
  * 2.0.
  */
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+require('../../../../../../../../src/setup_node_env');
 const { workerData } = require('worker_threads');
-
-if (workerData.fullpath.endsWith('.ts')) {
-  // eslint-disable-next-line import/no-extraneous-dependencies
-  require('ts-node').register({ transpileOnly: true });
-}
 // eslint-disable-next-line import/no-dynamic-require
 module.exports = require(workerData.fullpath);
