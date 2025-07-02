@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useState, useEffect } from 'react';
-import { SOLUTION_VIEW_CLASSIC } from '@kbn/spaces-plugin/common/constants';
+import { SOLUTION_VIEW_CLASSIC } from '@kbn/spaces-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
 
 export const useActiveSolution = () => {

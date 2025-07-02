@@ -12,6 +12,7 @@ export {
   ENTER_SPACE_PATH,
   DEFAULT_SPACE_ID,
   API_VERSIONS,
+  SOLUTION_VIEW_CLASSIC,
 } from './constants';
 export { addSpaceIdToPath, getSpaceIdFromPath } from '@kbn/spaces-utils';
 export type {
