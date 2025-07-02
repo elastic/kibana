@@ -11,7 +11,7 @@ import type { ESQLCommand } from '../../../types';
 import {
   pipeCompleteItem,
   getCommandAutocompleteDefinitions,
-} from '../../utils/autocomplete/complete_items';
+} from '../../utils/complete_items';
 import { pipePrecedesCurrentWord } from '../../../definitions/shared';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';

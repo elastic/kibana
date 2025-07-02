@@ -8,10 +8,11 @@
  */
 
 import { ESQLAst, ESQLAstItem, ESQLCommand, ESQLFunction } from '@kbn/esql-ast';
+import { getExpressionType } from '@kbn/esql-ast/src/definitions/expressions_helpers';
 import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
 import { Visitor } from '@kbn/esql-ast/src/visitor';
 import type { ESQLUserDefinedColumn, ESQLFieldWithMetadata } from '../validation/types';
-import { isColumnItem, isFunctionItem, getExpressionType } from './helpers';
+import { isColumnItem, isFunctionItem } from './helpers';
 
 function addToUserDefinedColumnOccurrences(
   userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>,

@@ -13,46 +13,13 @@ import {
   isColumn,
   isParamLiteral,
   isFunctionExpression,
-} from '../../../ast/helpers';
-import type { ESQLAstItem, ESQLColumn, ESQLIdentifier, ESQLFunction } from '../../../types';
-import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn, ICommandContext } from '../../types';
-import type { SupportedDataType, FunctionDefinition } from '../../../definitions/types';
-import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK } from '../../../parser/constants';
-import { lastItem } from '../../../visitor/utils';
-import { getFunctionDefinition } from '../../../definitions/functions_helpers';
-/**
- * Take a column name like "`my``column`"" and return "my`column"
- */
-export function unescapeColumnName(columnName: string) {
-  // TODO this doesn't cover all escaping scenarios... the best thing to do would be
-  // to use the AST column node parts array, but in some cases the AST node isn't available.
-  if (columnName.startsWith(SINGLE_BACKTICK) && columnName.endsWith(SINGLE_BACKTICK)) {
-    return columnName.slice(1, -1).replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK);
-  }
-  return columnName;
-}
-
-/**
- * This function returns the userDefinedColumn or field matching a column
- */
-export function getColumnByName(
-  columnName: string,
-  { fields, userDefinedColumns }: ICommandContext
-): ESQLFieldWithMetadata | ESQLUserDefinedColumn | undefined {
-  const unescaped = unescapeColumnName(columnName);
-  return fields.get(unescaped) || userDefinedColumns.get(unescaped)?.[0];
-}
-
-/**
- * This function returns the userDefinedColumn or field matching a column
- */
-export function getColumnForASTNode(
-  node: ESQLColumn | ESQLIdentifier,
-  { fields, userDefinedColumns }: ICommandContext
-): ESQLFieldWithMetadata | ESQLUserDefinedColumn | undefined {
-  const formatted = node.type === 'identifier' ? node.name : node.parts.join('.');
-  return getColumnByName(formatted, { fields, userDefinedColumns });
-}
+} from '../ast/helpers';
+import type { ESQLAstItem, ESQLFunction } from '../types';
+import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../commands_registry/types';
+import type { SupportedDataType, FunctionDefinition } from './types';
+import { lastItem } from '../visitor/utils';
+import { getFunctionDefinition } from './functions_helpers';
+import { getColumnForASTNode, isParamExpressionType } from './shared';
 
 /**
  * Gets the signatures of a function that match the number of arguments
@@ -150,11 +117,6 @@ export function isExpressionComplete(
     !(isNullMatcher.test(innerText) || isNotNullMatcher.test(innerText))
   );
 }
-
-/**
- * Type guard to check if the type is 'param'
- */
-export const isParamExpressionType = (type: string): type is 'param' => type === 'param';
 
 /**
  * Determines the type of the expression

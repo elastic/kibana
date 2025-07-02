@@ -13,7 +13,7 @@ import {
   pipeCompleteItem,
   colonCompleteItem,
   semiColonCompleteItem,
-} from '../../utils/autocomplete/complete_items';
+} from '../../utils/complete_items';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { buildConstantsDefinitions } from '../../../definitions/literals_helpers';

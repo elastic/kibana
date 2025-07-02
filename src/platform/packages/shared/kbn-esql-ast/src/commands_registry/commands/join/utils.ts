@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { handleFragment, columnExists } from '../../utils/autocomplete';
-import { unescapeColumnName } from '../../utils/validate';
+import { handleFragment, columnExists } from '../../../definitions/autocomplete_helpers';
+import { unescapeColumnName } from '../../../definitions/expressions_helpers';
 import * as mutate from '../../../mutate';
 import { LeafPrinter } from '../../../pretty_print/leaf_printer';
-import { pipeCompleteItem, commaCompleteItem } from '../../utils/autocomplete/complete_items';
+import { pipeCompleteItem, commaCompleteItem } from '../../utils/complete_items';
 import { buildFieldsDefinitionsWithMetadata } from '../../../definitions/functions_helpers';
 import { ICommand } from '../../registry';
 import { ESQLAstJoinCommand, ESQLCommand, ESQLCommandOption } from '../../../types';
@@ -135,12 +135,9 @@ export const getFieldSuggestions = async (
       detail += ' ';
     }
 
-    detail += i18n.translate(
-      'kbn-esql-ast.esql.autocomplete.join.commonFieldNote',
-      {
-        defaultMessage: '(common field)',
-      }
-    );
+    detail += i18n.translate('kbn-esql-ast.esql.autocomplete.join.commonFieldNote', {
+      defaultMessage: '(common field)',
+    });
 
     commonField.detail = detail;
   }

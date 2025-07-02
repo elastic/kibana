@@ -23,10 +23,10 @@ import { scalarFunctionDefinitions } from './generated/scalar_functions';
 import { ESQLFieldWithMetadata, ISuggestionItem } from '../commands_registry/types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../commands_registry/constants';
 import { buildFunctionDocumentation } from './documentation_util';
-import { getSafeInsertText, getControlSuggestion } from '../commands_registry/utils/autocomplete';
+import { getSafeInsertText, getControlSuggestion } from './autocomplete_helpers';
 import { ESQLAstItem, ESQLFunction } from '../types';
-import { isParamExpressionType } from '../commands_registry/utils/validate';
-import { removeFinalUnknownIdentiferArg } from './shared';
+import { removeFinalUnknownIdentiferArg, isParamExpressionType } from './shared';
+import { getTestFunctions } from './test_functions';
 
 const techPreviewLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.techPreviewLabel', {
   defaultMessage: `Technical Preview`,
@@ -36,9 +36,14 @@ let fnLookups: Map<string, FunctionDefinition> | undefined;
 
 function buildFunctionLookup() {
   // we always refresh if we have test functions
-  if (!fnLookups) {
+  if (!fnLookups || getTestFunctions().length) {
     fnLookups = operatorsDefinitions
-      .concat(scalarFunctionDefinitions, aggFunctionDefinitions, groupingFunctionDefinitions)
+      .concat(
+        scalarFunctionDefinitions,
+        aggFunctionDefinitions,
+        groupingFunctionDefinitions,
+        getTestFunctions()
+      )
       .reduce((memo, def) => {
         memo.set(def.name, def);
         if (def.alias) {

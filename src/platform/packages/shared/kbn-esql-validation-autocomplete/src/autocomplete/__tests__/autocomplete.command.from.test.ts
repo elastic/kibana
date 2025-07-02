@@ -6,7 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { getRecommendedQueriesTemplates, METADATA_FIELDS } from '@kbn/esql-ast';
+import { METADATA_FIELDS } from '@kbn/esql-ast';
+import { getRecommendedQueriesTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries/templates';
 import { setup, indexes, integrations } from './helpers';
 
 const visibleIndices = indexes

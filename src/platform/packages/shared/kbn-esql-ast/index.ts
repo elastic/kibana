@@ -79,25 +79,21 @@ export { singleItems, resolveItem, lastItem, firstItem } from './src/visitor/uti
 
 export { esqlCommandRegistry } from './src/commands_registry';
 
-export * from './src/commands_registry/utils/autocomplete/complete_items';
+export * from './src/commands_registry/utils/complete_items';
 export * from './src/commands_registry/constants';
 export { METADATA_FIELDS } from './src/commands_registry/options/metadata';
+export { TIME_SYSTEM_PARAMS } from './src/definitions/literals_helpers';
 export {
   getFieldsOrFunctionsSuggestions,
   getControlSuggestionIfSupported,
   getControlSuggestion,
   getSafeInsertText,
-} from './src/commands_registry/utils/autocomplete';
+  pushItUpInTheList,
+} from './src/definitions/autocomplete_helpers';
 export { getSuggestionsToRightOfOperatorExpression } from './src/definitions/operators_helpers';
 export {
   buildFieldsDefinitionsWithMetadata,
   getFunctionSuggestions,
 } from './src/definitions/functions_helpers';
-export {
-  getDateLiterals,
-  getCompatibleLiterals,
-  TIME_SYSTEM_PARAMS,
-} from './src/definitions/literals_helpers';
+
 export * from './src/definitions/constants';
-export * from './src/commands_registry/options/recommended_queries';
-export { getRecommendedQueriesTemplates } from './src/commands_registry/options/recommended_queries/templates';

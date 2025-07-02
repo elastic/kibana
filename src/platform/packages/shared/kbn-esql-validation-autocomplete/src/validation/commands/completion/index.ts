@@ -8,9 +8,9 @@
  */
 
 import { ESQLMessage } from '@kbn/esql-ast';
+import { getExpressionType } from '@kbn/esql-ast/src/definitions/expressions_helpers';
 import { i18n } from '@kbn/i18n';
 import { ESQLAstCommand, ESQLAstCompletionCommand } from '@kbn/esql-ast/src/types';
-import { getExpressionType } from '../../../shared/helpers';
 import { ReferenceMaps } from '../../types';
 
 const supportedPromptTypes = ['text', 'keyword', 'unknown', 'param'];

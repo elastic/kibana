@@ -6,7 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { getLastNonWhitespaceChar } from '../commands_registry/utils/autocomplete';
+import { ESQLColumn, ESQLIdentifier } from '../types';
+import type {
+  ESQLFieldWithMetadata,
+  ESQLUserDefinedColumn,
+  ICommandContext,
+} from '../commands_registry/types';
+import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK } from '../parser/constants';
+import { getLastNonWhitespaceChar } from './autocomplete_helpers';
 import type { ESQLAstItem } from '../types';
 import type { SupportedDataType } from './types';
 /**
@@ -102,3 +109,42 @@ export function pipePrecedesCurrentWord(text: string) {
 export function isRestartingExpression(text: string) {
   return getLastNonWhitespaceChar(text) === ',' || characterPrecedesCurrentWord(text, ',');
 }
+
+/**
+ * Take a column name like "`my``column`"" and return "my`column"
+ */
+export function unescapeColumnName(columnName: string) {
+  // TODO this doesn't cover all escaping scenarios... the best thing to do would be
+  // to use the AST column node parts array, but in some cases the AST node isn't available.
+  if (columnName.startsWith(SINGLE_BACKTICK) && columnName.endsWith(SINGLE_BACKTICK)) {
+    return columnName.slice(1, -1).replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK);
+  }
+  return columnName;
+}
+
+/**
+ * This function returns the userDefinedColumn or field matching a column
+ */
+export function getColumnByName(
+  columnName: string,
+  { fields, userDefinedColumns }: ICommandContext
+): ESQLFieldWithMetadata | ESQLUserDefinedColumn | undefined {
+  const unescaped = unescapeColumnName(columnName);
+  return fields.get(unescaped) || userDefinedColumns.get(unescaped)?.[0];
+}
+
+/**
+ * This function returns the userDefinedColumn or field matching a column
+ */
+export function getColumnForASTNode(
+  node: ESQLColumn | ESQLIdentifier,
+  { fields, userDefinedColumns }: ICommandContext
+): ESQLFieldWithMetadata | ESQLUserDefinedColumn | undefined {
+  const formatted = node.type === 'identifier' ? node.name : node.parts.join('.');
+  return getColumnByName(formatted, { fields, userDefinedColumns });
+}
+
+/**
+ * Type guard to check if the type is 'param'
+ */
+export const isParamExpressionType = (type: string): type is 'param' => type === 'param';

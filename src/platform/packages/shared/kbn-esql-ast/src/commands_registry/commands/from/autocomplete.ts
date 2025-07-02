@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCommand } from '../../../types';
-import { pipeCompleteItem, commaCompleteItem } from '../../utils/autocomplete/complete_items';
+import { pipeCompleteItem, commaCompleteItem } from '../../utils/complete_items';
 import {
   getSourcesFromCommands,
   getSourceSuggestions,
@@ -15,7 +15,7 @@ import {
 } from '../../../definitions/sources_helpers';
 import { metadataSuggestion, getMetadataSuggestions } from '../../options/metadata';
 import { getRecommendedQueriesSuggestions } from '../../options/recommended_queries';
-import { withinQuotes } from '../../utils/autocomplete';
+import { withinQuotes } from '../../../definitions/autocomplete_helpers';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { getOverlapRange, isRestartingExpression } from '../../../definitions/shared';
 

@@ -8,8 +8,8 @@
  */
 import type { ESQLCommand } from '../../../types';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
-import { pipeCompleteItem } from '../../utils/autocomplete/complete_items';
-import { findFinalWord } from '../../utils/autocomplete';
+import { pipeCompleteItem } from '../../utils/complete_items';
+import { findFinalWord } from '../../../definitions/autocomplete_helpers';
 
 export async function autocomplete(
   query: string,

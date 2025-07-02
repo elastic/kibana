@@ -23,10 +23,8 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FEEDBACK_LINK } from '@kbn/esql-utils';
 import { type RecommendedQuery, REGISTRY_EXTENSIONS_ROUTE } from '@kbn/esql-types';
-import {
-  getRecommendedQueriesTemplates,
-  getRecommendedQueriesTemplatesFromExtensions,
-} from '@kbn/esql-ast';
+import { getRecommendedQueriesTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries/templates';
+import { getRecommendedQueriesTemplatesFromExtensions } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
 import { getCategorizationField } from '@kbn/aiops-utils';
 import type { IUnifiedSearchPluginServices } from '../types';

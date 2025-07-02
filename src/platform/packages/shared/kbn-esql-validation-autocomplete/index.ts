@@ -24,19 +24,15 @@ export { suggest } from './src/autocomplete/autocomplete';
  * for the ES|QL language
  */
 export type {
-  ValidationErrors,
   ESQLUserDefinedColumn,
   ESQLFieldWithMetadata,
   ESQLPolicy,
-  ErrorTypes as ESQLValidationErrorTypes,
 } from './src/validation/types';
 export { collectUserDefinedColumns } from './src/shared/user_defined_columns';
 export {
   getAllFunctions,
   isSupportedFunction,
   getFunctionDefinition,
-  getColumnForASTNode as lookupColumn,
-  shouldBeQuotedText,
   printFunctionSignature,
   checkFunctionArgMatchesDefinition as isEqualType,
   isSourceItem,
@@ -46,7 +42,6 @@ export {
   isLiteralItem,
   isTimeIntervalItem,
   isAssignment,
-  isAssignmentComplete,
   isSingleItem,
 } from './src/shared/helpers';
 export { getFunctionSignatures } from './src/definitions/helpers';

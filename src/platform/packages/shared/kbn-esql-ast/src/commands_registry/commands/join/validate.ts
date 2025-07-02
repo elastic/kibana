@@ -17,7 +17,7 @@ import type {
 } from '../../../types';
 import { isBinaryExpression, isIdentifier, isSource } from '../../../ast/helpers';
 import type { ICommandContext } from '../../types';
-import { errors } from '../../utils/validate/errors';
+import { errors } from '../../../definitions/errors';
 
 export const validate = (
   command: ESQLCommand,

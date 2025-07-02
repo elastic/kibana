@@ -6,7 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { getDateLiterals, pipeCompleteItem, FULL_TEXT_SEARCH_FUNCTIONS } from '@kbn/esql-ast';
+import { pipeCompleteItem, FULL_TEXT_SEARCH_FUNCTIONS } from '@kbn/esql-ast';
+import { getDateLiterals } from '@kbn/esql-ast/src/definitions/literals_helpers';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { ESQL_COMMON_NUMERIC_TYPES } from '@kbn/esql-ast/src/definitions/types';
 import { log10ParameterTypes, powParameterTypes } from './constants';

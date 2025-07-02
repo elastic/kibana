@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { ISuggestionItem } from '../commands_registry/types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../commands_registry/constants';
-import { getControlSuggestion } from '../commands_registry/utils/autocomplete';
+import { getControlSuggestion } from './autocomplete_helpers';
 import { timeUnitsToSuggest } from './constants';
 
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];

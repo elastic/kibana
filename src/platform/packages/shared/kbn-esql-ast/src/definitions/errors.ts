@@ -16,8 +16,8 @@ import type {
   ESQLMessage,
   ESQLSource,
   ESQLIdentifier,
-} from '../../../types';
-import type { ErrorTypes, ErrorValues } from '../../../definitions/types';
+} from '../types';
+import type { ErrorTypes, ErrorValues } from './types';
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({
   messageId,
@@ -466,9 +466,3 @@ export const errors = {
       identifier: identifier.name,
     }),
 };
-
-export function getUnknownTypeLabel() {
-  return i18n.translate('kbn-esql-ast.esql.validation.unknownColumnType', {
-    defaultMessage: 'Unknown type',
-  });
-}

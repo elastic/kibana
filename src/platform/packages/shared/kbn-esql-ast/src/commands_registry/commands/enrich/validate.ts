@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { getMessageFromId } from '../../utils/validate/errors';
+import { getMessageFromId } from '../../../definitions/errors';
 import type { ESQLSource, ESQLCommand, ESQLMessage, ESQLAst } from '../../../types';
 import { ENRICH_MODES } from './util';
 import type { ESQLPolicy, ICommandContext } from '../../types';

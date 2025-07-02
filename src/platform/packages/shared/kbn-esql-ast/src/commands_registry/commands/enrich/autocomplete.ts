@@ -11,9 +11,9 @@ import {
   pipeCompleteItem,
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
-} from '../../utils/autocomplete/complete_items';
-import { findFinalWord, findPreviousWord } from '../../utils/autocomplete';
-import { unescapeColumnName } from '../../utils/validate';
+} from '../../utils/complete_items';
+import { findFinalWord, findPreviousWord } from '../../../definitions/autocomplete_helpers';
+import { unescapeColumnName } from '../../../definitions/expressions_helpers';
 import {
   type ISuggestionItem,
   type ICommandContext,

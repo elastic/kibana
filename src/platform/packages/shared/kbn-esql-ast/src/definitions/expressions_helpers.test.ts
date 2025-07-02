@@ -6,48 +6,24 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { parse } from '@kbn/esql-ast';
-import { getExpressionType, shouldBeQuotedSource, sourceExists } from './helpers';
-import { SupportedDataType, FunctionDefinitionTypes, Location } from '../definitions/types';
+import { parse } from '../parser';
+import { SupportedDataType, FunctionDefinitionTypes } from './types';
+import { Location } from '../commands_registry/types';
+import { buildPartialMatcher, getExpressionType } from './expressions_helpers';
 import { setTestFunctions } from './test_functions';
 
-describe('shouldBeQuotedSource', () => {
-  it('does not have to be quoted for sources with acceptable characters @-+$', () => {
-    expect(shouldBeQuotedSource('foo')).toBe(false);
-    expect(shouldBeQuotedSource('123-test@foo_bar+baz1')).toBe(false);
-    expect(shouldBeQuotedSource('my-index*')).toBe(false);
-    expect(shouldBeQuotedSource('my-index$')).toBe(false);
-    expect(shouldBeQuotedSource('.my-index$')).toBe(false);
-  });
-  it(`should be quoted if containing any of special characters [:"=|,[\]/ \t\r\n]`, () => {
-    expect(shouldBeQuotedSource('foo\ttest')).toBe(true);
-    expect(shouldBeQuotedSource('foo\rtest')).toBe(true);
-    expect(shouldBeQuotedSource('foo\ntest')).toBe(true);
-    expect(shouldBeQuotedSource('foo:test=bar')).toBe(true);
-    expect(shouldBeQuotedSource('foo|test=bar')).toBe(true);
-    expect(shouldBeQuotedSource('foo[test]=bar')).toBe(true);
-    expect(shouldBeQuotedSource('foo/test=bar')).toBe(true);
-    expect(shouldBeQuotedSource('foo test=bar')).toBe(true);
-    expect(shouldBeQuotedSource('foo,test-*,abc')).toBe(true);
-    expect(shouldBeQuotedSource('foo, test-*, abc, xyz')).toBe(true);
-    expect(shouldBeQuotedSource('foo, test-*, abc, xyz,test123')).toBe(true);
-    expect(shouldBeQuotedSource('foo,test,xyz')).toBe(true);
-    expect(
-      shouldBeQuotedSource('<logstash-{now/M{yyyy.MM}}>,<logstash-{now/d{yyyy.MM.dd|+12:00}}>')
-    ).toBe(true);
-    expect(shouldBeQuotedSource('`backtick`,``multiple`back``ticks```')).toBe(true);
-    expect(shouldBeQuotedSource('test,metadata,metaata,.metadata')).toBe(true);
-    expect(shouldBeQuotedSource('cluster:index')).toBe(true);
-    expect(shouldBeQuotedSource('cluster:index|pattern')).toBe(true);
-    expect(shouldBeQuotedSource('cluster:.index')).toBe(true);
-    expect(shouldBeQuotedSource('cluster*:index*')).toBe(true);
-    expect(shouldBeQuotedSource('cluster*:*')).toBe(true);
-    expect(shouldBeQuotedSource('*:index*')).toBe(true);
-    expect(shouldBeQuotedSource('*:index|pattern')).toBe(true);
-    expect(shouldBeQuotedSource('*:*')).toBe(true);
-    expect(shouldBeQuotedSource('*:*,cluster*:index|pattern,i|p')).toBe(true);
-    expect(shouldBeQuotedSource('index-[dd-mm]')).toBe(true);
+describe('buildPartialMatcher', () => {
+  it('should build a partial matcher', () => {
+    const str = 'is NoT nulL';
+    const matcher = buildPartialMatcher(str);
+
+    for (let i = 0; i < str.length; i++) {
+      expect(matcher.test(str.slice(0, i + 1))).toEqual(true);
+    }
+
+    expect(matcher.test('not')).toEqual(false);
+    expect(matcher.test('is null')).toEqual(false);
+    expect(matcher.test('is not nullz')).toEqual(false);
   });
 });
 
@@ -344,72 +320,5 @@ describe('getExpressionType', () => {
         expect(getExpressionType(ast)).toBe(expectedType);
       }
     );
-  });
-
-  describe('sourceExists', () => {
-    const mockSources = new Set(['source1', 'source2', 'source3', 'another_source']);
-
-    // Basic single index existence
-    it('should return true for an existing single source', () => {
-      expect(sourceExists('source1', mockSources)).toBe(true);
-    });
-
-    it('should return false for a non-existing single source', () => {
-      expect(sourceExists('nonExistentSource', mockSources)).toBe(false);
-    });
-
-    // Exclusion prefix
-    it('should return true for an index starting with "-" (exclusion)', () => {
-      expect(sourceExists('-sourceToExclude', mockSources)).toBe(true);
-    });
-
-    // Comma-delimited indices (all exist)
-    it('should return true for comma-delimited indices where all parts exist', () => {
-      expect(sourceExists('source1,source2', mockSources)).toBe(true);
-    });
-
-    it('should return true for comma-delimited indices with spaces where all parts exist', () => {
-      expect(sourceExists(' source1 , source2 ', mockSources)).toBe(true);
-    });
-
-    // Comma-delimited indices (some missing)
-    it('should return false for comma-delimited indices where one part is missing', () => {
-      expect(sourceExists('source1,nonExistent', mockSources)).toBe(false);
-    });
-
-    it('should return false for comma-delimited indices where all parts are missing', () => {
-      expect(sourceExists('nonExistent1,nonExistent2', mockSources)).toBe(false);
-    });
-
-    // ::data suffix removal
-    it('should return true for an index with ::data suffix if the base source exists', () => {
-      expect(sourceExists('source1::data', mockSources)).toBe(true);
-    });
-
-    it('should return false for an index with ::data suffix if the base source does not exist', () => {
-      expect(sourceExists('nonExistent::data', mockSources)).toBe(false);
-    });
-
-    // ::failures suffix removal
-    it('should return true for an index with ::failures suffix if the base source exists', () => {
-      expect(sourceExists('source2::failures', mockSources)).toBe(true);
-    });
-
-    it('should return false for an index with ::failures suffix if the base source does not exist', () => {
-      expect(sourceExists('nonExistent::failures', mockSources)).toBe(false);
-    });
-
-    // Combinations
-    it('should return true for mixed valid comma-delimited indices including suffixes', () => {
-      expect(sourceExists('source1::data,source3', mockSources)).toBe(true);
-    });
-
-    it('should return false for mixed comma-delimited indices with one missing and suffixes', () => {
-      expect(sourceExists('source1::data,nonExistent::failures', mockSources)).toBe(false);
-    });
-
-    it('should handle empty string gracefully (false)', () => {
-      expect(sourceExists('', mockSources)).toBe(false);
-    });
   });
 });

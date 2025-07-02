@@ -19,6 +19,9 @@ import {
   walk,
   esqlCommandRegistry,
 } from '@kbn/esql-ast';
+import { getMessageFromId, errors } from '@kbn/esql-ast/src/definitions/errors';
+import { sourceExists } from '@kbn/esql-ast/src/definitions/sources_helpers';
+import { ErrorTypes } from '@kbn/esql-ast/src/definitions/types';
 import type { ESQLIdentifier } from '@kbn/esql-ast/src/types';
 import {
   areFieldAndUserDefinedColumnTypesCompatible,
@@ -30,11 +33,9 @@ import {
   isParametrized,
   isSourceItem,
   isTimeIntervalItem,
-  sourceExists,
 } from '../shared/helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { collectUserDefinedColumns } from '../shared/user_defined_columns';
-import { errors, getMessageFromId } from './errors';
 import { validateFunction } from './function_validation';
 import {
   retrieveFields,
@@ -46,7 +47,6 @@ import {
 import type {
   ESQLFieldWithMetadata,
   ESQLUserDefinedColumn,
-  ErrorTypes,
   ReferenceMaps,
   ValidationOptions,
   ValidationResult,

@@ -18,15 +18,15 @@ import {
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
   getDateHistogramCompletionItem,
-} from '../../utils/autocomplete/complete_items';
+} from '../../utils/complete_items';
 import {
   pushItUpInTheList,
   columnExists,
   handleFragment,
   getControlSuggestionIfSupported,
   suggestForExpression,
-} from '../../utils/autocomplete';
-import { isExpressionComplete, getExpressionType } from '../../utils/validate';
+} from '../../../definitions/autocomplete_helpers';
+import { isExpressionComplete, getExpressionType } from '../../../definitions/expressions_helpers';
 import { TRIGGER_SUGGESTION_COMMAND, ESQL_VARIABLES_PREFIX } from '../../constants';
 import { getPosition, isMarkerNode } from './utils';
 

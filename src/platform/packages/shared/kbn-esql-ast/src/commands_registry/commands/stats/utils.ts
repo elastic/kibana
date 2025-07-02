@@ -25,7 +25,7 @@ import {
 } from '../../../ast/helpers';
 import { isOptionNode } from '../../../ast/util';
 import { Walker } from '../../../walker';
-import { findPreviousWord, getLastNonWhitespaceChar } from '../../utils/autocomplete';
+import { findPreviousWord, getLastNonWhitespaceChar } from '../../../definitions/autocomplete_helpers';
 import { ISuggestionItem } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { EDITOR_MARKER } from '../../../parser/constants';

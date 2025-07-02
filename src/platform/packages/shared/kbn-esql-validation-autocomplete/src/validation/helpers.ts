@@ -20,9 +20,9 @@ import {
   Walker,
 } from '@kbn/esql-ast';
 import { mutate, synth } from '@kbn/esql-ast';
+import { getMessageFromId } from '@kbn/esql-ast/src/definitions/errors';
 import { FunctionDefinition } from '../definitions/types';
 import { getAllArrayTypes, getAllArrayValues } from '../shared/helpers';
-import { getMessageFromId } from './errors';
 import type { ESQLPolicy, ReferenceMaps } from './types';
 
 export function buildQueryForFieldsFromSource(queryString: string, ast: ESQLAst) {

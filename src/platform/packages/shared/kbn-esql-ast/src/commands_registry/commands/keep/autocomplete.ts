@@ -9,8 +9,8 @@
 import type { ESQLCommand } from '../../../types';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import { pipeCompleteItem, commaCompleteItem } from '../../utils/autocomplete/complete_items';
-import { columnExists, getLastNonWhitespaceChar, handleFragment } from '../../utils/autocomplete';
+import { pipeCompleteItem, commaCompleteItem } from '../../utils/complete_items';
+import { columnExists, getLastNonWhitespaceChar, handleFragment } from '../../../definitions/autocomplete_helpers';
 import { isColumn } from '../../../ast/helpers';
 
 export async function autocomplete(

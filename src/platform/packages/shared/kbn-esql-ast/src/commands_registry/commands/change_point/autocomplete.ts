@@ -9,10 +9,10 @@
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommand } from '../../../types';
 import { ESQL_NUMBER_TYPES } from '../../../definitions/types';
-import { pipeCompleteItem } from '../../utils/autocomplete/complete_items';
+import { pipeCompleteItem } from '../../utils/complete_items';
 import type { ISuggestionItem, ICommandCallbacks } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import { buildUserDefinedColumnsDefinitions, findFinalWord } from '../../utils/autocomplete';
+import { buildUserDefinedColumnsDefinitions, findFinalWord } from '../../../definitions/autocomplete_helpers';
 
 export enum Position {
   VALUE = 'value',

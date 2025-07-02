@@ -14,13 +14,13 @@ import {
   pipeCompleteItem,
   getNewUserDefinedColumnSuggestion,
   assignCompletionItem,
-} from '../../utils/autocomplete/complete_items';
+} from '../../utils/complete_items';
 import {
   getFieldsOrFunctionsSuggestions,
   findFinalWord,
   handleFragment,
   columnExists,
-} from '../../utils/autocomplete';
+} from '../../../definitions/autocomplete_helpers';
 import {
   type ISuggestionItem,
   Location,
@@ -29,7 +29,7 @@ import {
 } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND, ESQL_VARIABLES_PREFIX } from '../../constants';
 import { EDITOR_MARKER } from '../../../parser/constants';
-import { getExpressionType, isExpressionComplete } from '../../utils/validate';
+import { getExpressionType, isExpressionComplete } from '../../../definitions/expressions_helpers';
 import { getFunctionDefinition } from '../../../definitions/functions_helpers';
 
 export enum CompletionPosition {

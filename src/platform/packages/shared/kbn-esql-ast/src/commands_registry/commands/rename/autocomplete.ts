@@ -14,8 +14,8 @@ import {
   assignCompletionItem,
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
-} from '../../utils/autocomplete/complete_items';
-import { columnExists } from '../../utils/autocomplete';
+} from '../../utils/complete_items';
+import { columnExists } from '../../../definitions/autocomplete_helpers';
 
 export async function autocomplete(
   query: string,

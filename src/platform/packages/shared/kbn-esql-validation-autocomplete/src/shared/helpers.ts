@@ -8,7 +8,6 @@
  */
 import {
   Walker,
-  lastItem,
   type ESQLAstCommand,
   type ESQLAstItem,
   type ESQLColumn,
@@ -21,11 +20,12 @@ import {
   esqlCommandRegistry,
   timeUnits,
 } from '@kbn/esql-ast';
+import { getColumnForASTNode } from '@kbn/esql-ast/src/definitions/shared';
 import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
 import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
-import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK } from '@kbn/esql-ast/src/parser/constants';
+import { getExpressionType } from '@kbn/esql-ast/src/definitions/expressions_helpers';
 import {
   ESQLIdentifier,
   ESQLInlineCast,
@@ -45,7 +45,6 @@ import {
   FunctionParameter,
   FunctionParameterType,
   FunctionReturnType,
-  SupportedDataType,
   getLocationFromCommandOrOptionName,
 } from '../definitions/types';
 import type {
@@ -198,40 +197,6 @@ function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQ
   return false;
 }
 
-/**
- * This function returns the userDefinedColumn or field matching a column
- */
-export function getColumnForASTNode(
-  node: ESQLColumn | ESQLIdentifier,
-  { fields, userDefinedColumns }: Pick<ReferenceMaps, 'fields' | 'userDefinedColumns'>
-): ESQLFieldWithMetadata | ESQLUserDefinedColumn | undefined {
-  const formatted = node.type === 'identifier' ? node.name : node.parts.join('.');
-  return getColumnByName(formatted, { fields, userDefinedColumns });
-}
-
-/**
- * Take a column name like "`my``column`"" and return "my`column"
- */
-export function unescapeColumnName(columnName: string) {
-  // TODO this doesn't cover all escaping scenarios... the best thing to do would be
-  // to use the AST column node parts array, but in some cases the AST node isn't available.
-  if (columnName.startsWith(SINGLE_BACKTICK) && columnName.endsWith(SINGLE_BACKTICK)) {
-    return columnName.slice(1, -1).replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK);
-  }
-  return columnName;
-}
-
-/**
- * This function returns the userDefinedColumn or field matching a column
- */
-export function getColumnByName(
-  columnName: string,
-  { fields, userDefinedColumns }: Pick<ReferenceMaps, 'fields' | 'userDefinedColumns'>
-): ESQLFieldWithMetadata | ESQLUserDefinedColumn | undefined {
-  const unescaped = unescapeColumnName(columnName);
-  return fields.get(unescaped) || userDefinedColumns.get(unescaped)?.[0];
-}
-
 export function isArrayType(type: string): type is ArrayType {
   return type.endsWith('[]');
 }
@@ -329,7 +294,10 @@ export function getAllArrayTypes(
         types.push(subArg.literalType);
       }
       if (subArg.type === 'column') {
-        const hit = getColumnForASTNode(subArg, references);
+        const hit = getColumnForASTNode(subArg, {
+          fields: references.fields,
+          userDefinedColumns: references.userDefinedColumns,
+        });
         types.push(hit?.type || 'unsupported');
       }
       if (subArg.type === 'timeInterval') {
@@ -414,7 +382,10 @@ export function checkFunctionArgMatchesDefinition(
     return parameterType === 'time_duration' && inKnownTimeInterval(arg.unit);
   }
   if (arg.type === 'column') {
-    const hit = getColumnForASTNode(arg, references);
+    const hit = getColumnForASTNode(arg, {
+      fields: references.fields,
+      userDefinedColumns: references.userDefinedColumns,
+    });
     const validHit = hit;
     if (!validHit) {
       return false;
@@ -497,11 +468,6 @@ function getWildcardPosition(name: string) {
 export function hasWildcard(name: string) {
   return /\*/.test(name);
 }
-export function isUserDefinedColumn(
-  column: ESQLFieldWithMetadata | ESQLUserDefinedColumn | undefined
-): column is ESQLUserDefinedColumn {
-  return Boolean(column && 'location' in column);
-}
 
 /**
  * This returns the name with any quotes that were present.
@@ -536,121 +502,6 @@ export function getColumnExists(
   }
 
   return false;
-}
-
-const removeSourceNameQuotes = (sourceName: string) =>
-  sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
-
-// Function to clean a single index string from failure stores
-const cleanIndex = (inputIndex: string): string => {
-  let cleaned = inputIndex.trim();
-
-  // Remove '::data' suffix
-  if (cleaned.endsWith('::data')) {
-    cleaned = cleaned.slice(0, -6);
-  }
-  // Remove '::failures' suffix
-  if (cleaned.endsWith('::failures')) {
-    cleaned = cleaned.slice(0, -10);
-  }
-  return cleaned;
-};
-
-/**
- * Checks if the source exists in the provided sources set.
- * It supports both exact matches and fuzzy searches.
- *
- * @param index - The index to check, which can be a single value or a comma-separated list.
- * @param sources - A Set of source names to check against.
- * @returns true if the source exists, false otherwise.
- */
-
-// The comma-separated index and the ::data or ::failures suffixes solution is temporary
-// till we fix the AST for the quoted index names https://github.com/elastic/kibana/issues/222505.
-export function sourceExists(index: string, sources: Set<string>) {
-  if (index.startsWith('-')) {
-    return true;
-  }
-  // Split the index by comma to handle multiple values and clean each part
-  const individualIndices = index.split(',').map((item) => cleanIndex(item));
-  // Check if all individual indices exist in sources
-  const allExist = individualIndices.every((singleIndex) => {
-    // First, check for exact match after removing source name quotes
-    if (sources.has(removeSourceNameQuotes(singleIndex))) {
-      return true;
-    }
-    // If not an exact match, perform a fuzzy search
-    return Boolean(fuzzySearch(singleIndex, sources.keys()));
-  });
-
-  return allExist;
-}
-
-/**
- * Works backward from the cursor position to determine if
- * the final character of the previous word matches the given character.
- */
-function characterPrecedesCurrentWord(text: string, char: string) {
-  let inCurrentWord = true;
-  for (let i = text.length - 1; i >= 0; i--) {
-    if (inCurrentWord && /\s/.test(text[i])) {
-      inCurrentWord = false;
-    }
-
-    if (!inCurrentWord && !/\s/.test(text[i])) {
-      return text[i] === char;
-    }
-  }
-}
-
-export function pipePrecedesCurrentWord(text: string) {
-  return characterPrecedesCurrentWord(text, '|');
-}
-
-export function getLastNonWhitespaceChar(text: string) {
-  return text[text.trimEnd().length - 1];
-}
-
-/**
- * Are we after a comma? i.e. STATS fieldA, <here>
- */
-export function isRestartingExpression(text: string) {
-  return getLastNonWhitespaceChar(text) === ',' || characterPrecedesCurrentWord(text, ',');
-}
-
-export function findPreviousWord(text: string) {
-  const words = text.split(/\s+/);
-  return words[words.length - 2];
-}
-
-export function withinQuotes(text: string) {
-  const quoteCount = (text.match(/"/g) || []).length;
-  return quoteCount % 2 === 1;
-}
-
-export function endsInWhitespace(text: string) {
-  return /\s$/.test(text);
-}
-
-/**
- * Returns the word at the end of the text if there is one.
- * @param text
- * @returns
- */
-export function findFinalWord(text: string) {
-  const words = text.split(/\s+/);
-  return words[words.length - 1];
-}
-
-export function shouldBeQuotedSource(text: string) {
-  // Based on lexer `fragment UNQUOTED_SOURCE_PART`
-  return /[:"=|,[\]\/ \t\r\n]/.test(text);
-}
-export function shouldBeQuotedText(
-  text: string,
-  { dashSupported }: { dashSupported?: boolean } = {}
-) {
-  return dashSupported ? /[^a-zA-Z\d_\.@-]/.test(text) : /[^a-zA-Z\d_\.@]/.test(text);
 }
 
 export const isAggFunction = (arg: ESQLFunction): boolean =>
@@ -713,144 +564,6 @@ export function getParamAtPosition(
   position: number
 ) {
   return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
-}
-
-// --- Expression types helpers ---
-
-/**
- * Type guard to check if the type is 'param'
- */
-export const isParamExpressionType = (type: string): type is 'param' => type === 'param';
-
-/**
- * Determines the type of the expression
- */
-export function getExpressionType(
-  root: ESQLAstItem | undefined,
-  fields?: Map<string, ESQLFieldWithMetadata>,
-  userDefinedColumns?: Map<string, ESQLUserDefinedColumn[]>
-): SupportedDataType | 'unknown' {
-  if (!root) {
-    return 'unknown';
-  }
-
-  if (!isSingleItem(root)) {
-    if (root.length === 0) {
-      return 'unknown';
-    }
-    return getExpressionType(root[0], fields, userDefinedColumns);
-  }
-
-  if (isLiteralItem(root)) {
-    return root.literalType;
-  }
-
-  if (isTimeIntervalItem(root)) {
-    return 'time_duration';
-  }
-
-  // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
-  if (isInlineCastItem(root)) {
-    switch (root.castType) {
-      case 'int':
-        return 'integer';
-      case 'bool':
-        return 'boolean';
-      case 'string':
-        return 'keyword';
-      case 'text':
-        return 'keyword';
-      case 'datetime':
-        return 'date';
-      default:
-        return root.castType;
-    }
-  }
-
-  if (isColumnItem(root) && fields && userDefinedColumns) {
-    const column = getColumnForASTNode(root, { fields, userDefinedColumns });
-    const lastArg = lastItem(root.args);
-    // If the last argument is a param, we return its type (param literal type)
-    // This is useful for cases like `where ??field`
-    if (isParam(lastArg)) {
-      return lastArg.literalType;
-    }
-    if (!column) {
-      return 'unknown';
-    }
-    return column.type;
-  }
-
-  if (root.type === 'list') {
-    return getExpressionType(root.values[0], fields, userDefinedColumns);
-  }
-
-  if (isFunctionItem(root)) {
-    const fnDefinition = getFunctionDefinition(root.name);
-    if (!fnDefinition) {
-      return 'unknown';
-    }
-
-    /**
-     * Special case for COUNT(*) because
-     * the "*" column doesn't match any
-     * of COUNT's function definitions
-     */
-    if (
-      fnDefinition.name === 'count' &&
-      root.args[0] &&
-      isColumnItem(root.args[0]) &&
-      root.args[0].name === '*'
-    ) {
-      return 'long';
-    }
-
-    if (fnDefinition.name === 'case' && root.args.length) {
-      /**
-       * The CASE function doesn't fit our system of function definitions
-       * and needs special handling. This is imperfect, but it's a start because
-       * at least we know that the final argument to case will never be a conditional
-       * expression, always a result expression.
-       *
-       * One problem with this is that if a false case is not provided, the return type
-       * will be null, which we aren't detecting. But this is ok because we consider
-       * userDefinedColumns and fields to be nullable anyways and account for that during validation.
-       */
-      return getExpressionType(root.args[root.args.length - 1], fields, userDefinedColumns);
-    }
-
-    const signaturesWithCorrectArity = getSignaturesWithMatchingArity(fnDefinition, root);
-
-    if (!signaturesWithCorrectArity.length) {
-      return 'unknown';
-    }
-    const argTypes = root.args.map((arg) => getExpressionType(arg, fields, userDefinedColumns));
-
-    // When functions are passed null for any argument, they generally return null
-    // This is a special case that is not reflected in our function definitions
-    if (argTypes.some((argType) => argType === 'null')) return 'null';
-
-    const matchingSignature = signaturesWithCorrectArity.find((signature) => {
-      return argTypes.every((argType, i) => {
-        const param = getParamAtPosition(signature, i);
-        return (
-          param &&
-          (param.type === 'any' ||
-            param.type === argType ||
-            (argType === 'keyword' && ['date', 'date_period'].includes(param.type)) ||
-            isParamExpressionType(argType))
-        );
-      });
-    });
-
-    if (!matchingSignature) {
-      return 'unknown';
-    }
-
-    return matchingSignature.returnType === 'any' ? 'unknown' : matchingSignature.returnType;
-  }
-
-  return 'unknown';
 }
 
 // --- Fields helpers ---

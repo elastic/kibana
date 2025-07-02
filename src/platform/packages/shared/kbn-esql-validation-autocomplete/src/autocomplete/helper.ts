@@ -17,6 +17,7 @@ import {
   TIME_SYSTEM_PARAMS,
 } from '@kbn/esql-ast';
 import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
+import { getColumnForASTNode } from '@kbn/esql-ast/src/definitions/shared';
 import { uniqBy } from 'lodash';
 import {
   FunctionDefinitionTypes,
@@ -26,7 +27,6 @@ import {
 } from '../definitions/types';
 import { compareTypesWithLiterals } from '../shared/esql_types';
 import {
-  getColumnForASTNode,
   getFunctionDefinition,
   isAssignment,
   isColumnItem,
@@ -35,7 +35,6 @@ import {
   isTimeIntervalItem,
 } from '../shared/helpers';
 import { ESQLFieldWithMetadata, ESQLUserDefinedColumn, ReferenceMaps } from '../validation/types';
-import type { SuggestionRawDefinition } from './types';
 
 /**
  * This function returns a list of closing brackets that can be appended to
@@ -331,16 +330,6 @@ export function getValidSignaturesAndTypesToSuggestNext(
     argIndex,
     currentArg,
   };
-}
-
-export function pushItUpInTheList(suggestions: SuggestionRawDefinition[], shouldPromote: boolean) {
-  if (!shouldPromote) {
-    return suggestions;
-  }
-  return suggestions.map(({ sortText, ...rest }) => ({
-    ...rest,
-    sortText: `1${sortText}`,
-  }));
 }
 
 /** @deprecated — use getExpressionType instead (src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts) */

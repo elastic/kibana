@@ -8,8 +8,8 @@
  */
 import type { ESQLCommand } from '../../../types';
 import { isColumn } from '../../../ast/helpers';
-import { pipeCompleteItem, commaCompleteItem } from '../../utils/autocomplete/complete_items';
-import { getLastNonWhitespaceChar, handleFragment, columnExists } from '../../utils/autocomplete';
+import { pipeCompleteItem, commaCompleteItem } from '../../utils/complete_items';
+import { getLastNonWhitespaceChar, handleFragment, columnExists } from '../../../definitions/autocomplete_helpers';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 

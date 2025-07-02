@@ -8,33 +8,34 @@
  */
 import { i18n } from '@kbn/i18n';
 import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-types';
-import type { ESQLSingleAstItem, ESQLFunction } from '../../../types';
+import type { ESQLSingleAstItem, ESQLFunction } from '../types';
 import type {
   ISuggestionItem,
   GetColumnsByTypeFn,
   ESQLUserDefinedColumn,
   ICommandContext,
-} from '../../types';
-import { Location } from '../../types';
+} from '../commands_registry/types';
+import { Location } from '../commands_registry/types';
 import {
   getDateLiterals,
   getCompatibleLiterals,
   buildConstantsDefinitions,
-} from '../../../definitions/literals_helpers';
-import { SINGLE_TICK_REGEX, DOUBLE_BACKTICK } from '../../../parser/constants';
-import { type SupportedDataType, isParameterType } from '../../../definitions/types';
-import { getOverlapRange } from '../../../definitions/shared';
-import { getExpressionType, getColumnByName, isParamExpressionType } from '../validate';
-import { getFunctionSuggestions } from '../../../definitions/functions_helpers';
-import { logicalOperators } from '../../../definitions/all_operators';
+} from './literals_helpers';
+import { SINGLE_TICK_REGEX, DOUBLE_BACKTICK } from '../parser/constants';
+import { type SupportedDataType, isParameterType } from './types';
+import { getOverlapRange } from './shared';
+import { getExpressionType } from './expressions_helpers';
+import { getColumnByName, isParamExpressionType } from './shared';
+import { getFunctionSuggestions } from './functions_helpers';
+import { logicalOperators } from './all_operators';
 import {
   getOperatorSuggestion,
   getOperatorSuggestions,
   getOperatorsSuggestionsAfterNot,
   getSuggestionsToRightOfOperatorExpression,
-} from '../../../definitions/operators_helpers';
-import { isColumn, isFunctionExpression, isLiteral, isTimeInterval } from '../../../ast/helpers';
-import { Walker } from '../../../walker';
+} from './operators_helpers';
+import { isColumn, isFunctionExpression, isLiteral, isTimeInterval } from '../ast/helpers';
+import { Walker } from '../walker';
 
 export const shouldBeQuotedText = (
   text: string,

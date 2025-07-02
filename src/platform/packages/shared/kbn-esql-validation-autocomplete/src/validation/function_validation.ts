@@ -16,8 +16,10 @@ import {
   UNSUPPORTED_COMMANDS_BEFORE_MATCH,
   UNSUPPORTED_COMMANDS_BEFORE_QSTR,
 } from '@kbn/esql-ast';
+import { getMessageFromId, errors } from '@kbn/esql-ast/src/definitions/errors';
 import { uniqBy } from 'lodash';
 import { isList } from '@kbn/esql-ast/src/ast/helpers';
+import { getColumnForASTNode } from '@kbn/esql-ast/src/definitions/shared';
 import {
   isLiteralItem,
   isTimeIntervalItem,
@@ -35,7 +37,6 @@ import {
   isInlineCastItem,
   getQuotedColumnName,
   getColumnExists,
-  getColumnForASTNode,
   isFunctionOperatorParam,
   getSignaturesWithMatchingArity,
   getParamAtPosition,
@@ -43,7 +44,6 @@ import {
   isArrayType,
   isParametrized,
 } from '../shared/helpers';
-import { getMessageFromId, errors } from './errors';
 import { getMaxMinNumberOfParams, collapseWrongArgumentTypeMessages } from './helpers';
 import { ReferenceMaps } from './types';
 import { compareTypesWithLiterals } from '../shared/esql_types';
@@ -554,7 +554,10 @@ function validateFunctionColumnArg(
   if (
     !checkFunctionArgMatchesDefinition(actualArg, parameterDefinition, references, parentCommand)
   ) {
-    const columnHit = getColumnForASTNode(actualArg, references);
+    const columnHit = getColumnForASTNode(actualArg, {
+      fields: references.fields,
+      userDefinedColumns: references.userDefinedColumns,
+    });
     const isConflictType = columnHit && 'hasConflict' in columnHit && columnHit.hasConflict;
     if (!isConflictType) {
       messages.push(
