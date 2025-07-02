@@ -18,7 +18,7 @@ export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
           const { expectErrors } = await setup();
 
           await expectErrors('f', [
-            "SyntaxError: mismatched input 'f' expecting {'explain', 'row', 'from', 'show'}",
+            "SyntaxError: mismatched input 'f' expecting {'row', 'from', 'show'}",
           ]);
           await expectErrors('from ', [
             "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",

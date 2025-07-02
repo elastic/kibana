@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { SUPPORTED_TRAINED_MODELS } from '@kbn/test-suites-xpack/functional/services/ml/api';
-import { ServerlessRoleName } from '../../../../shared/lib';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -17,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const tinyElser = SUPPORTED_TRAINED_MODELS.TINY_ELSER;
 
     before(async () => {
-      await PageObjects.svlCommonPage.loginWithRole(ServerlessRoleName.PLATFORM_ENGINEER);
+      await PageObjects.svlCommonPage.loginWithRole('platform_engineer');
       await ml.api.importTrainedModel(tinyElser.name, tinyElser.name);
       // Make sure the .ml-stats index is created in advance, see https://github.com/elastic/elasticsearch/issues/65846
       await ml.api.assureMlStatsIndexExists();
