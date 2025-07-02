@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DataViewPicker } from '.';
-import { useDataViewSpec } from '../../hooks/use_data_view_spec';
+import { useDataView } from '../../hooks/use_data_view';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../../constants';
 import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useDispatch } from 'react-redux';
@@ -24,8 +24,8 @@ jest.mock('../../../common/utils/global_query_string', () => ({
   useUpdateUrlParam: jest.fn(),
 }));
 
-jest.mock('../../hooks/use_data_view_spec', () => ({
-  useDataViewSpec: jest.fn(),
+jest.mock('../../hooks/use_data_view', () => ({
+  useDataView: jest.fn(),
 }));
 
 jest.mock('../../hooks/use_select_data_view', () => ({
@@ -79,11 +79,11 @@ describe('DataViewPicker', () => {
   beforeEach(() => {
     jest.mocked(useUpdateUrlParam).mockReturnValue(jest.fn());
 
-    jest.mocked(useDataViewSpec).mockReturnValue({
-      dataViewSpec: {
+    jest.mocked(useDataView).mockReturnValue({
+      dataView: {
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         name: 'Default Security Data View',
-      },
+      } as unknown as DataView,
       status: 'ready',
     });
 

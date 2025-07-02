@@ -39,7 +39,7 @@ import { useSourcererDataView } from '../../sourcerer/containers';
 import { useDiscoverState } from '../../timelines/components/timeline/tabs/esql/use_discover_state';
 import { useKibana } from '../../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 export interface SendToTimelineButtonProps {
   asEmptyButton: boolean;
@@ -67,10 +67,10 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
   const { dataViewId: oldTimelineDataViewId } = useSourcererDataView(SourcererScopeName.timeline);
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataViewSpec } = useDataViewSpec(SourcererScopeName.timeline);
+  const { dataView } = useDataView(SourcererScopeName.timeline);
 
   const timelineDataViewId = newDataViewPickerEnabled
-    ? dataViewSpec?.id ?? null
+    ? dataView?.id ?? null
     : oldTimelineDataViewId;
 
   const { setDiscoverAppState } = useDiscoverState();
