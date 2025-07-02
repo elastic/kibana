@@ -22,27 +22,27 @@ export interface ApiWorkerFixtures extends CoreWorkerFixtures {
 }
 
 // This disables browser-related fixtures by overriding them with undefined
-export const noBrowserFixtures = base.extend({
+const noBrowserFixtures = base.extend({
   page: [
-    async (_: unknown, use: (value: undefined) => Promise<void>) => {
+    async ({}, use: (value: undefined) => Promise<void>) => {
       await use(undefined);
     },
     { scope: 'test' },
   ] as any,
   browser: [
-    async (_: unknown, use: (value: undefined) => Promise<void>) => {
+    async ({}, use: (value: undefined) => Promise<void>) => {
       await use(undefined);
     },
     { scope: 'worker' },
   ] as any,
   context: [
-    async (_: unknown, use: (value: undefined) => Promise<void>) => {
+    async ({}, use: (value: undefined) => Promise<void>) => {
       await use(undefined);
     },
     { scope: 'test' },
   ] as any,
   request: [
-    async (_: unknown, use: (value: undefined) => Promise<void>) => {
+    async ({}, use: (value: undefined) => Promise<void>) => {
       await use(undefined);
     },
     { scope: 'test' },

@@ -27,7 +27,10 @@ interface PluginScoutConfig {
 
 export const getScoutPlaywrightConfigs = (searchPaths: string[], log: ToolingLog) => {
   const patterns = searchPaths.map((basePath) =>
-    path.join(basePath, '**/ui_tests/{playwright.config.ts,parallel.playwright.config.ts}')
+    path.join(
+      basePath,
+      '**/ui_tests/{playwright.config.ts,parallel.playwright.config.ts,playwright.api.config.ts}'
+    )
   );
 
   log.info('Searching for Playwright config files in the following paths:');
