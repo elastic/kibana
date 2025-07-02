@@ -112,7 +112,7 @@
               "\nModel name, e.g. elser"
             ],
             "signature": [
-              "\"elser\" | \"e5\" | \"rerank\""
+              "\"rerank\" | \"elser\" | \"e5\""
             ],
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
             "deprecated": false,
@@ -433,7 +433,7 @@
         "label": "ElasticCuratedModelName",
         "description": [],
         "signature": [
-          "\"elser\" | \"e5\" | \"rerank\""
+          "\"rerank\" | \"elser\" | \"e5\""
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,
@@ -637,7 +637,7 @@
         "label": "ModelState",
         "description": [],
         "signature": [
-          "\"started\" | \"starting\" | \"stopping\" | \"downloading\" | \"downloaded\" | \"notDownloaded\" | null"
+          "\"started\" | \"starting\" | \"stopping\" | \"downloading\" | \"downloaded\" | \"notDownloaded\" | \"downloadedInDifferentSpace\" | null"
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,
@@ -652,7 +652,7 @@
         "label": "SupportedPytorchTasksType",
         "description": [],
         "signature": [
-          "\"text_expansion\" | \"ner\" | \"question_answering\" | \"zero_shot_classification\" | \"text_classification\" | \"text_embedding\" | \"fill_mask\""
+          "\"text_embedding\" | \"text_expansion\" | \"ner\" | \"question_answering\" | \"zero_shot_classification\" | \"text_classification\" | \"fill_mask\""
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,
@@ -722,7 +722,7 @@
         "label": "MODEL_STATE",
         "description": [],
         "signature": [
-          "{ readonly DOWNLOADING: \"downloading\"; readonly DOWNLOADED: \"downloaded\"; readonly NOT_DOWNLOADED: \"notDownloaded\"; readonly STARTED: \"started\"; readonly STARTING: \"starting\"; readonly STOPPING: \"stopping\"; }"
+          "{ readonly DOWNLOADING: \"downloading\"; readonly DOWNLOADED: \"downloaded\"; readonly NOT_DOWNLOADED: \"notDownloaded\"; readonly DOWNLOADED_IN_DIFFERENT_SPACE: \"downloadedInDifferentSpace\"; readonly STARTED: \"started\"; readonly STARTING: \"starting\"; readonly STOPPING: \"stopping\"; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,

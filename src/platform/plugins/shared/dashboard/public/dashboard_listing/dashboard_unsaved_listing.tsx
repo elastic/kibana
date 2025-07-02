@@ -15,10 +15,14 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiTitle,
+  UseEuiTheme,
+  euiBreakpoint,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ViewMode } from '@kbn/presentation-publishing';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DashboardAttributes } from '../../server/content_management';
 import {
   DASHBOARD_PANELS_UNSAVED_ID,
@@ -27,6 +31,40 @@ import {
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from './_dashboard_listing_strings';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
+
+const unsavedItemStyles = {
+  item: (euiThemeContext: UseEuiTheme) =>
+    css({
+      marginTop: euiThemeContext.euiTheme.size.m,
+      [euiBreakpoint(euiThemeContext, ['xs', 's'])]: {
+        marginTop: euiThemeContext.euiTheme.size.base,
+      },
+    }),
+  heading: (euiThemeContext: UseEuiTheme) =>
+    css({
+      [euiBreakpoint(euiThemeContext, ['xs', 's'])]: {
+        marginBottom: euiThemeContext.euiTheme.size.xs,
+      },
+    }),
+  icon: (euiThemeContext: UseEuiTheme) =>
+    css({
+      marginRight: euiThemeContext.euiTheme.size.m,
+    }),
+  title: css({
+    marginBottom: 0,
+  }),
+  titleLoading: (euiThemeContext: UseEuiTheme) =>
+    css({
+      color: `${euiThemeContext.euiTheme.colors.subduedText} !important`,
+    }),
+  actions: (euiThemeContext: UseEuiTheme) =>
+    css({
+      marginLeft: `calc(${euiThemeContext.euiTheme.size.l} + ${euiThemeContext.euiTheme.size.xs})`,
+      [euiBreakpoint(euiThemeContext, ['xs', 's'])]: {
+        flexDirection: 'column',
+      },
+    }),
+};
 
 const DashboardUnsavedItem = ({
   id,
@@ -39,28 +77,16 @@ const DashboardUnsavedItem = ({
   onOpenClick: () => void;
   onDiscardClick: () => void;
 }) => {
+  const styles = useMemoCss(unsavedItemStyles);
   return (
-    <div className="dshUnsavedListingItem">
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="none"
-        className="dshUnsavedListingItem__heading"
-        responsive={false}
-      >
+    <div css={styles.item}>
+      <EuiFlexGroup alignItems="center" gutterSize="none" css={styles.heading} responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon
-            color="text"
-            className="dshUnsavedListingItem__icon"
-            type={title ? 'dashboardApp' : 'clock'}
-          />
+          <EuiIcon color="text" css={styles.icon} type={title ? 'dashboardApp' : 'clock'} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
-            <h4
-              className={`dshUnsavedListingItem__title ${
-                title ? '' : 'dshUnsavedListingItem__loading'
-              }`}
-            >
+            <h4 css={[styles.title, !title && styles.titleLoading]}>
               {title || dashboardUnsavedListingStrings.getLoadingTitle()}
             </h4>
           </EuiTitle>
@@ -69,7 +95,7 @@ const DashboardUnsavedItem = ({
       <EuiFlexGroup
         alignItems="flexStart"
         gutterSize="none"
-        className="dshUnsavedListingItem__actions"
+        css={styles.actions}
         responsive={false}
       >
         <EuiFlexItem grow={false}>

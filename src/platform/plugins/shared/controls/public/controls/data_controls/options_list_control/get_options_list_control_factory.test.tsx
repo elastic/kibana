@@ -11,13 +11,17 @@ import React from 'react';
 
 import { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { render, waitFor } from '@testing-library/react';
+import { render as rtlRender, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { EuiThemeProvider } from '@elastic/eui';
 
 import { coreServices, dataViewsService } from '../../../services/kibana_services';
 import { getMockedControlGroupApi, getMockedFinalizeApi } from '../../mocks/control_mocks';
-import * as initializeControl from '../initialize_data_control';
 import { getOptionsListControlFactory } from './get_options_list_control_factory';
+
+const render = (ui: React.ReactElement) => {
+  return rtlRender(ui, { wrapper: EuiThemeProvider });
+};
 
 describe('Options List Control Api', () => {
   const uuid = 'myControl1';
@@ -345,36 +349,5 @@ describe('Options List Control Api', () => {
         },
       ]);
     });
-  });
-
-  test('ensure initialize data control contains all editor state', async () => {
-    const initializeSpy = jest.spyOn(initializeControl, 'initializeDataControl');
-    const initialState = {
-      dataViewId: 'myDataViewId',
-      fieldName: 'myFieldName',
-      runPastTimeout: true,
-    };
-    await factory.buildControl({
-      initialState: {
-        dataViewId: 'myDataViewId',
-        fieldName: 'myFieldName',
-        runPastTimeout: true,
-      },
-      finalizeApi,
-      uuid,
-      controlGroupApi,
-    });
-    expect(initializeSpy).toHaveBeenCalledWith(
-      uuid,
-      'optionsListControl',
-      'optionsListDataView',
-      initialState,
-      {
-        searchTechnique: expect.anything(),
-        singleSelect: expect.anything(),
-        runPastTimeout: expect.anything(),
-      },
-      controlGroupApi
-    );
   });
 });

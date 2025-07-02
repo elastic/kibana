@@ -59,6 +59,13 @@ export const RULE_TYPES_LOAD_ERROR_MESSAGE = i18n.translate(
   }
 );
 
+export const SOLUTION_SELECTOR_ERROR_MESSAGE = i18n.translate(
+  'alertsFiltersForm.solutionSelector.errorMessage',
+  {
+    defaultMessage: 'Cannot get the available solutions',
+  }
+);
+
 export const DELETE_OPERAND_LABEL = i18n.translate('alertsFiltersForm.deleteOperand', {
   defaultMessage: 'Delete operand',
 });
@@ -104,5 +111,25 @@ export const SOLUTION_SELECTOR_PLACEHOLDER = i18n.translate(
   'alertsFiltersForm.solutionSelectorPlaceholder',
   {
     defaultMessage: 'Select solution',
+  }
+);
+
+export const getMaxFiltersNote = (max: number) =>
+  i18n.translate('alertsFiltersForm.maxFiltersReached', {
+    defaultMessage: 'Maximum number of {max} filters reached',
+    values: { max },
+  });
+
+export const FILTER_TYPE_REQUIRED_ERROR_MESSAGE = i18n.translate(
+  'alertsFiltersForm.filterTypeRequiredErrorMessage',
+  {
+    defaultMessage: 'Filter type is required',
+  }
+);
+
+export const FILTER_VALUE_REQUIRED_ERROR_MESSAGE = i18n.translate(
+  'alertsFiltersForm.filterValueRequiredErrorMessage',
+  {
+    defaultMessage: 'Filter value is required',
   }
 );

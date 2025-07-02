@@ -23,6 +23,7 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ChromeStart } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type { PluginsServiceStart } from '@kbn/core-plugins-contracts-browser';
+import type { PricingServiceStart } from '@kbn/core-pricing-browser';
 import type { SecurityServiceStart } from '@kbn/core-security-browser';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
@@ -78,6 +79,8 @@ export interface CoreStart {
   theme: ThemeServiceStart;
   /** {@link PluginsServiceStart} */
   plugins: PluginsServiceStart;
+  /** {@link PricingServiceStart} */
+  pricing: PricingServiceStart;
   /** {@link SecurityServiceStart} */
   security: SecurityServiceStart;
   /** {@link UserProfileServiceStart} */

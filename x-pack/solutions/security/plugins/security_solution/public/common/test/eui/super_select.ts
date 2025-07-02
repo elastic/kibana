@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 
 export function showEuiSuperSelectOptions(toggleButton: HTMLElement): Promise<void> {
   fireEvent.click(toggleButton);
@@ -30,33 +30,31 @@ type SelectEuiSuperSelectOptionParameters =
       optionIndex?: undefined;
     };
 
-export function selectEuiSuperSelectOption({
+export async function selectEuiSuperSelectOption({
   toggleButton,
   optionIndex,
   optionText,
 }: SelectEuiSuperSelectOptionParameters): Promise<void> {
-  return act(async () => {
-    await showEuiSuperSelectOptions(toggleButton);
+  await showEuiSuperSelectOptions(toggleButton);
 
-    const options = Array.from(document.querySelectorAll('[role="listbox"] [role="option"]'));
+  const options = Array.from(document.querySelectorAll('[role="listbox"] [role="option"]'));
 
-    if (typeof optionText === 'string') {
-      const lowerCaseOptionText = optionText.toLocaleLowerCase();
-      const optionToSelect = options.find(
-        (option) => option.textContent?.toLowerCase() === lowerCaseOptionText
-      );
+  if (typeof optionText === 'string') {
+    const lowerCaseOptionText = optionText.toLocaleLowerCase();
+    const optionToSelect = options.find(
+      (option) => option.textContent?.toLowerCase() === lowerCaseOptionText
+    );
 
-      if (optionToSelect) {
-        fireEvent.click(optionToSelect);
-      } else {
-        throw new Error(
-          `Could not find option with text "${optionText}". Available options: ${options
-            .map((option) => option.textContent)
-            .join(', ')}`
-        );
-      }
+    if (optionToSelect) {
+      fireEvent.click(optionToSelect);
     } else {
-      fireEvent.click(options[optionIndex]);
+      throw new Error(
+        `Could not find option with text "${optionText}". Available options: ${options
+          .map((option) => option.textContent)
+          .join(', ')}`
+      );
     }
-  });
+  } else {
+    fireEvent.click(options[optionIndex]);
+  }
 }

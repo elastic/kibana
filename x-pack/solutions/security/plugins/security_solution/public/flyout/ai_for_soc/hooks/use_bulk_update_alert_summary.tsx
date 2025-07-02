@@ -15,7 +15,7 @@ import {
 import type {
   PerformAlertSummaryBulkActionRequestBody,
   PerformAlertSummaryBulkActionResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas/alert_summary/bulk_crud_alert_summary_route.gen';
+} from '@kbn/elastic-assistant-common/impl/schemas';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 
 interface BulkUpdateAlertSummaryProps {

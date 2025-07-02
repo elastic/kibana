@@ -9,6 +9,27 @@ import { Flyouts } from '../constants/flyouts';
 import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 
 /**
+ * Returns true if the SecuritySolution flyout is open.
+ */
+export const isSecuritySolutionFlyoutOpen = (query: URLSearchParams): boolean => {
+  const queryHasSecuritySolutionFlyout = query.has(URL_PARAM_KEY.flyout);
+  const securitySolutionFlyoutHasValue =
+    query.get(URL_PARAM_KEY.flyout) !== '()' && query.get(URL_PARAM_KEY.flyout) !== '(preview:!())';
+  return queryHasSecuritySolutionFlyout && securitySolutionFlyoutHasValue;
+};
+
+/**
+ * Returns true if the Timeline flyout is open.
+ */
+export const isTimelineFlyoutOpen = (query: URLSearchParams): boolean => {
+  const queryHasTimelineFlyout = query.has(URL_PARAM_KEY.timelineFlyout);
+  const timelineFlyoutHasValue =
+    query.get(URL_PARAM_KEY.timelineFlyout) !== '()' &&
+    query.get(URL_PARAM_KEY.timelineFlyout) !== '(preview:!())';
+  return queryHasTimelineFlyout && timelineFlyoutHasValue;
+};
+
+/**
  * Hook that returns which flyout is the user currently interacting with.
  * If the url contains timelineFlyout parameter and its value is not empty, we know the timeline flyout is rendered.
  * As it is always on top of the normal flyout, we can deduce which flyout the user is interacting with.
@@ -16,27 +37,18 @@ import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 export const useWhichFlyout = (): string | null => {
   const query = new URLSearchParams(window.location.search);
 
-  const queryHasSecuritySolutionFlyout = query.has(URL_PARAM_KEY.flyout);
-  const securitySolutionFlyoutHasValue =
-    query.get(URL_PARAM_KEY.flyout) !== '()' && query.get(URL_PARAM_KEY.flyout) !== '(preview:!())';
-  const isSecuritySolutionFlyoutOpen =
-    queryHasSecuritySolutionFlyout && securitySolutionFlyoutHasValue;
+  const securitySolutionFlyoutOpen = isSecuritySolutionFlyoutOpen(query);
+  const timelineFlyoutOpen = isTimelineFlyoutOpen(query);
 
-  const queryHasTimelineFlyout = query.has(URL_PARAM_KEY.timelineFlyout);
-  const timelineFlyoutHasValue =
-    query.get(URL_PARAM_KEY.timelineFlyout) !== '()' &&
-    query.get(URL_PARAM_KEY.timelineFlyout) !== '(preview:!())';
-  const isTimelineFlyoutOpen = queryHasTimelineFlyout && timelineFlyoutHasValue;
-
-  if (isSecuritySolutionFlyoutOpen && isTimelineFlyoutOpen) {
+  if (securitySolutionFlyoutOpen && timelineFlyoutOpen) {
     return Flyouts.timeline;
   }
 
-  if (isSecuritySolutionFlyoutOpen) {
+  if (securitySolutionFlyoutOpen) {
     return Flyouts.securitySolution;
   }
 
-  if (isTimelineFlyoutOpen) {
+  if (timelineFlyoutOpen) {
     return Flyouts.timeline;
   }
 

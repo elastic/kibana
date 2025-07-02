@@ -33,14 +33,22 @@ const panelOpenerStyles = {
       padding-inline: calc(${euiTheme.size.xs} * 2);
       background-color: inherit;
 
-      &:hover {
+      &:focus,
+      &:hover:not(:disabled) {
         background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+        text-decoration: none;
       }
 
       &.isSelected {
         background-color: ${euiTheme.colors.backgroundLightPrimary};
+
+        &:focus,
         &:hover {
           background-color: ${euiTheme.colors.backgroundLightPrimary};
+        }
+
+        * {
+          color: ${euiTheme.colors.textPrimary};
         }
       }
 
@@ -85,7 +93,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
     [selectedNode?.id, item, closePanel, openPanel]
   );
 
-  const onLinkClick = useCallback(
+  const onTogglePanelClick = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
       togglePanel(e.target);
@@ -95,7 +103,9 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
 
   return (
     <EuiButton
-      onClick={onLinkClick}
+      aria-label={title}
+      aria-expanded={isExpanded}
+      onClick={onTogglePanelClick}
       iconSide="right"
       iconSize="s"
       iconType="arrowRight"

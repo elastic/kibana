@@ -11,6 +11,8 @@ import { EuiSpacer, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow } from 
 import { removeRow, isColorInvalid } from './color_stops_utils';
 import { i18n } from '@kbn/i18n';
 import { MbValidatedColorPicker } from './mb_validated_color_picker';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { mapColorStopsStyles } from '../map_color_stops.styles';
 
 export const ColorStops = ({
   onChange,
@@ -21,6 +23,7 @@ export const ColorStops = ({
   addNewRow,
   swatches,
 }) => {
+  const styles = useMemoCss(mapColorStopsStyles);
   function getStopInput(stop, index) {
     const onStopChange = (newStopValue) => {
       const newColorStops = _.cloneDeep(colorStops);
@@ -112,7 +115,7 @@ export const ColorStops = ({
     return (
       <EuiFormRow
         key={index}
-        className="mapColorStop"
+        css={styles.mapColorStops}
         isInvalid={errors.length !== 0}
         error={errors}
         display="rowCompressed"

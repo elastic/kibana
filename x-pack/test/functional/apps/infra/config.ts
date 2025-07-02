@@ -17,7 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
-        `--xpack.infra.featureFlags.profilingEnabled=true`,
+        `--xpack.profiling.enabled=true`,
       ],
     },
   };

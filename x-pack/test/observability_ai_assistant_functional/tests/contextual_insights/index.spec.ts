@@ -11,7 +11,7 @@ import moment from 'moment';
 import {
   createLlmProxy,
   LlmProxy,
-} from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+} from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/create_llm_proxy';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { deleteConnectors, createConnector } from '../../common/connectors';
 
@@ -103,6 +103,11 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     describe('when there are no connectors', () => {
       it('should not show the contextual insight component', async () => {
         await navigateToError();
+
+        await new Promise((resolve, reject) => {
+          setTimeout(resolve, 30_000);
+        });
+
         await testSubjects.missingOrFail(ui.pages.contextualInsights.button);
       });
     });

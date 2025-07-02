@@ -13,5 +13,9 @@ interface SandboxProps {
 }
 
 export const RulesSettingsLinkSandbox = ({ triggersActionsUi }: SandboxProps) => {
-  return <div style={{ flex: 1 }}>{triggersActionsUi.getRulesSettingsLink()}</div>;
+  return (
+    <div style={{ flex: 1 }}>
+      {triggersActionsUi.getRulesSettingsLink({ alertDeleteCategoryIds: ['management'] })}
+    </div>
+  );
 };

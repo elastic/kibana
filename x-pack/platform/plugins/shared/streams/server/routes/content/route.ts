@@ -6,14 +6,17 @@
  */
 
 import { Readable } from 'stream';
+import { isNotFoundError } from '@kbn/es-errors';
 import { z } from '@kbn/zod';
 import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/utils';
 import { installManagedIndexPattern } from '@kbn/fleet-plugin/server/services/epm/kibana/assets/install';
 import {
-  ContentPackEntry,
+  ContentPack,
   contentPackIncludedObjectsSchema,
   isIncludeAll,
+  isSupportedSavedObjectType,
 } from '@kbn/content-packs-schema';
+import type { SavedObject } from '@kbn/core/server';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { Asset } from '../../../common';
 import { DashboardAsset, DashboardLink } from '../../../common/assets';
@@ -21,12 +24,16 @@ import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
 import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
 import {
+  CONTENT_NAME,
+  STREAM_NAME,
   generateArchive,
   parseArchive,
   prepareForExport,
   prepareForImport,
   referenceManagedIndexPattern,
+  savedObjectLinks,
 } from '../../lib/content';
+import { StoredContentPack } from '../../lib/content/content_client';
 
 const MAX_CONTENT_PACK_SIZE_BYTES = 1024 * 1024 * 5; // 5MB
 
@@ -85,7 +92,7 @@ const exportContentRoute = createServerRoute({
       includeReferencesDeep: true,
     });
 
-    const savedObjects: ContentPackEntry[] = await createPromiseFromStreams([
+    const savedObjects: SavedObject[] = await createPromiseFromStreams([
       exportStream,
       createConcatStream([]),
     ]);
@@ -101,7 +108,7 @@ const exportContentRoute = createServerRoute({
     return response.ok({
       body: archive,
       headers: {
-        'Content-Disposition': `attachment; filename="${params.body.name}.zip"`,
+        'Content-Disposition': `attachment; filename="${params.body.name}-${params.body.version}.zip"`,
         'Content-Type': 'application/zip',
       },
     });
@@ -137,18 +144,35 @@ const importContentRoute = createServerRoute({
     },
   },
   async handler({ params, request, getScopedClients, context }) {
-    const { assetClient, soClient, streamsClient } = await getScopedClients({ request });
+    const { assetClient, soClient, streamsClient, contentClient } = await getScopedClients({
+      request,
+    });
+    const importer = (await context.core).savedObjects.getImporter(soClient);
 
     await streamsClient.ensureStream(params.path.name);
 
     const contentPack = await parseArchive(params.body.content);
+    const storedContentPack = await contentClient
+      .getStoredContentPack(params.path.name, contentPack.name)
+      .catch((err) => {
+        if (isNotFoundError(err)) {
+          return {
+            [STREAM_NAME]: params.path.name,
+            [CONTENT_NAME]: contentPack.name,
+            dashboards: [],
+          } as StoredContentPack;
+        }
 
-    const importer = (await context.core).savedObjects.getImporter(soClient);
+        throw err;
+      });
 
+    const savedObjectEntries = contentPack.entries.filter(isSupportedSavedObjectType);
+    const links = savedObjectLinks(savedObjectEntries, storedContentPack);
     const savedObjects = prepareForImport({
       target: params.path.name,
       include: params.body.include,
-      savedObjects: contentPack.entries,
+      savedObjects: savedObjectEntries,
+      links,
     });
 
     if (referenceManagedIndexPattern(savedObjects)) {
@@ -166,12 +190,17 @@ const importContentRoute = createServerRoute({
       overwrite: true,
     });
 
+    await contentClient.upsertStoredContentPack(params.path.name, {
+      name: contentPack.name,
+      ...links,
+    });
+
     const createdAssets: Array<Omit<DashboardLink, 'asset.uuid'>> =
       successResults
         ?.filter((savedObject) => savedObject.type === 'dashboard')
         .map((dashboard) => ({
           [ASSET_TYPE]: 'dashboard',
-          [ASSET_ID]: dashboard.destinationId ?? dashboard.id,
+          [ASSET_ID]: dashboard.id,
         })) ?? [];
 
     if (createdAssets.length > 0) {
@@ -210,7 +239,10 @@ const previewContentRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  async handler({ params }) {
+  async handler({ request, params, getScopedClients }): Promise<ContentPack> {
+    const { streamsClient } = await getScopedClients({ request });
+    await streamsClient.ensureStream(params.path.name);
+
     return await parseArchive(params.body.content);
   },
 });

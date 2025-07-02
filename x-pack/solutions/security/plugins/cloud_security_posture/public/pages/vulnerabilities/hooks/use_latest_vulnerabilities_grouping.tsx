@@ -16,7 +16,7 @@ import {
 } from '@kbn/grouping/src';
 import { useMemo } from 'react';
 import {
-  CDR_3RD_PARTY_RETENTION_POLICY,
+  CDR_EXTENDED_VULN_RETENTION_POLICY,
   VULNERABILITIES_SEVERITY,
 } from '@kbn/cloud-security-posture-common';
 import { buildEsQuery, Filter } from '@kbn/es-query';
@@ -100,9 +100,12 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
   ];
 
   switch (field) {
-    case VULNERABILITY_GROUPING_OPTIONS.RESOURCE_NAME:
-      return [...aggMetrics, getTermAggregation('resourceId', VULNERABILITY_FIELDS.RESOURCE_ID)];
-    case VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
+    case VULNERABILITY_GROUPING_OPTIONS.RESOURCE_ID:
+      return [
+        ...aggMetrics,
+        getTermAggregation('resourceName', VULNERABILITY_FIELDS.RESOURCE_NAME),
+      ];
+    case VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID:
       return [
         ...aggMetrics,
         getTermAggregation('cloudProvider', VULNERABILITY_FIELDS.CLOUD_PROVIDER),
@@ -249,7 +252,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     groupByField: currentSelectedGroup,
     uniqueValue,
     timeRange: {
-      from: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
+      from: `now-${CDR_EXTENDED_VULN_RETENTION_POLICY}`,
       to: 'now',
     },
     pageNumber: activePageIndex * pageSize,

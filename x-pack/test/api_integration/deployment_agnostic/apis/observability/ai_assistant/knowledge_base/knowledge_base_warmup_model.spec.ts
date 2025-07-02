@@ -38,7 +38,7 @@ export default function WarmupModelApiTest({ getService }: DeploymentAgnosticFtr
     });
   }
 
-  describe('/internal/observability_ai_assistant/kb/warmup_model', function () {
+  describe('Knowledge base: POST /internal/observability_ai_assistant/kb/warmup_model', function () {
     const inferenceId = TINY_ELSER_INFERENCE_ID;
 
     before(async () => {

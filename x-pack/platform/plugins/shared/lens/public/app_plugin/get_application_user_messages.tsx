@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -292,14 +292,8 @@ export const useApplicationUserMessages = ({
   visualizationState?: VisualizationState;
   visualization?: Visualization;
 }) => {
-  const [userMessages, setUserMessages] = useState<UserMessage[]>([]);
-  // these are messages managed from other parts of Lens
-  const [additionalUserMessages, setAdditionalUserMessages] = useState<Record<string, UserMessage>>(
-    {}
-  );
-
-  useEffect(() => {
-    setUserMessages([
+  const userMessages = useMemo(
+    () => [
       ...(datasourceState && datasourceState.state && datasource && activeDatasourceId
         ? datasource.getUserMessages(datasourceState.state, {
             frame: framePublicAPI,
@@ -330,52 +324,63 @@ export const useApplicationUserMessages = ({
         core: coreStart,
         dataViews: framePublicAPI.dataViews,
       }),
-    ]);
-  }, [
-    activeDatasourceId,
-    datasource,
-    datasourceState,
-    dispatch,
-    framePublicAPI,
-    visualization,
-    visualizationState,
-    visualizationType,
-    coreStart,
-  ]);
+    ],
+    [
+      activeDatasourceId,
+      datasource,
+      datasourceState,
+      dispatch,
+      framePublicAPI,
+      visualization,
+      visualizationState,
+      visualizationType,
+      coreStart,
+    ]
+  );
+  // these are messages managed from other parts of Lens
+  const [additionalUserMessages, setAdditionalUserMessages] = useState<Record<string, UserMessage>>(
+    {}
+  );
 
-  const getUserMessages: UserMessagesGetter = (locationId, filterArgs) =>
-    filterAndSortUserMessages(
-      userMessages.concat(Object.values(additionalUserMessages)),
-      locationId,
-      filterArgs ?? {}
-    );
+  const getUserMessages: UserMessagesGetter = useCallback(
+    (locationId, filterArgs) =>
+      filterAndSortUserMessages(
+        userMessages.concat(Object.values(additionalUserMessages)),
+        locationId,
+        filterArgs ?? {}
+      ),
+    [additionalUserMessages, userMessages]
+  );
 
-  const addUserMessages: AddUserMessages = (messages) => {
-    const newMessageMap = {
-      ...additionalUserMessages,
-    };
-
-    const addedMessageIds: string[] = [];
-    messages.forEach((message) => {
-      if (!newMessageMap[message.uniqueId]) {
-        addedMessageIds.push(message.uniqueId);
-        newMessageMap[message.uniqueId] = message;
-      }
-    });
-
-    if (addedMessageIds.length) {
-      setAdditionalUserMessages(newMessageMap);
-    }
-
-    return () => {
-      const withMessagesRemoved = {
+  const addUserMessages: AddUserMessages = useCallback(
+    (messages) => {
+      const newMessageMap = {
         ...additionalUserMessages,
       };
 
-      addedMessageIds.forEach((id) => delete withMessagesRemoved[id]);
+      const addedMessageIds: string[] = [];
+      messages.forEach((message) => {
+        if (!newMessageMap[message.uniqueId]) {
+          addedMessageIds.push(message.uniqueId);
+          newMessageMap[message.uniqueId] = message;
+        }
+      });
 
-      setAdditionalUserMessages(withMessagesRemoved);
-    };
-  };
+      if (addedMessageIds.length) {
+        setAdditionalUserMessages(newMessageMap);
+      }
+
+      return () => {
+        const withMessagesRemoved = {
+          ...additionalUserMessages,
+        };
+
+        addedMessageIds.forEach((id) => delete withMessagesRemoved[id]);
+
+        setAdditionalUserMessages(withMessagesRemoved);
+      };
+    },
+    [additionalUserMessages]
+  );
   return { getUserMessages, addUserMessages };
 };

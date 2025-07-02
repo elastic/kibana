@@ -16,10 +16,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { debounceTime } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { SharedDashboardState } from '../../common/types';
+import { DashboardState } from '../../common/types';
 import { DashboardApi, DashboardCreationOptions } from '..';
 import { DASHBOARD_APP_ID } from '../../common/constants';
-import { loadDashboardHistoryLocationState } from '../../common/locator/load_dashboard_history_location_state';
 import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
 import { DashboardTopNav } from '../dashboard_top_nav';
 import {
@@ -45,7 +44,11 @@ import {
   getSessionURLObservable,
   removeSearchSessionIdFromURL,
 } from './url/search_sessions_integration';
-import { loadAndRemoveDashboardState, startSyncingExpandedPanelState } from './url/url_utils';
+import {
+  extractDashboardState,
+  loadAndRemoveDashboardState,
+  startSyncingExpandedPanelState,
+} from './url';
 
 export interface DashboardAppProps {
   history: History;
@@ -137,8 +140,21 @@ export function DashboardApp({
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
     const getInitialInput = () => {
-      const stateFromLocator = loadDashboardHistoryLocationState(getScopedHistory);
-      const initialUrlState = loadAndRemoveDashboardState(kbnUrlStateStorage);
+      let stateFromLocator: Partial<DashboardState> = {};
+      try {
+        stateFromLocator = extractDashboardState(getScopedHistory().location.state);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn('Unable to extract dashboard state from locator. Error: ', e);
+      }
+
+      let initialUrlState: Partial<DashboardState> = {};
+      try {
+        initialUrlState = loadAndRemoveDashboardState(kbnUrlStateStorage);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn('Unable to extract dashboard state from URL. Error: ', e);
+      }
 
       // Override all state with URL + Locator input
       return {
@@ -206,9 +222,7 @@ export function DashboardApp({
       .change$(DASHBOARD_STATE_STORAGE_KEY)
       .pipe(debounceTime(10)) // debounce URL updates so react has time to unsubscribe when changing URLs
       .subscribe(() => {
-        const rawAppStateInUrl = kbnUrlStateStorage.get<SharedDashboardState>(
-          DASHBOARD_STATE_STORAGE_KEY
-        );
+        const rawAppStateInUrl = kbnUrlStateStorage.get<unknown>(DASHBOARD_STATE_STORAGE_KEY);
         if (rawAppStateInUrl) setRegenerateId(uuidv4());
       });
     return () => appStateSubscription.unsubscribe();

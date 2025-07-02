@@ -23,6 +23,7 @@ import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mock
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
+import { pricingServiceMock } from '@kbn/core-pricing-server-mocks';
 
 export function createCoreStartMock() {
   const mock: MockedKeys<CoreStart> = {
@@ -43,6 +44,7 @@ export function createCoreStartMock() {
     plugins: {
       onStart: jest.fn(),
     },
+    pricing: pricingServiceMock.createStartContract(),
   };
 
   return mock;

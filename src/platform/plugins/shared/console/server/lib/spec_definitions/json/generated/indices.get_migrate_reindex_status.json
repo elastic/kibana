@@ -1,0 +1,21 @@
+{
+  "indices.get_migrate_reindex_status": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_migration/reindex/{index}/_status"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-migration",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

@@ -84,7 +84,9 @@
     "@kbn/ui-actions-browser",
     "@kbn/esql-types",
     "@kbn/saved-objects-tagging-plugin",
-    "@kbn/std"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/std",
+    "@kbn/css-utils"
   ],
   "exclude": ["target/**/*"]
 }

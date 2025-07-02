@@ -17,7 +17,7 @@ import { ManageLandingPage } from './pages/landing';
 
 const ManagementLanding = () => (
   <PluginTemplateWrapper>
-    <SecurityRoutePageWrapper pageName={SecurityPageName.administration} redirectOnMissing>
+    <SecurityRoutePageWrapper pageName={SecurityPageName.administration}>
       <ManageLandingPage />
     </SecurityRoutePageWrapper>
   </PluginTemplateWrapper>

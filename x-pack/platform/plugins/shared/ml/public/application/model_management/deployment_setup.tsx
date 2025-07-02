@@ -59,6 +59,7 @@ import type { HttpService } from '../services/http_service';
 import { ModelStatusIndicator } from './model_status_indicator';
 import type { TrainedModelsService } from './trained_models_service';
 import { useMlKibana } from '../contexts/kibana';
+import type { MlCapabilitiesService } from '../capabilities/check_capabilities';
 
 interface DeploymentSetupProps {
   config: DeploymentParamsUI;
@@ -817,7 +818,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
           errors={errors}
           isUpdate={isUpdate}
           disableAdaptiveResourcesControl={
-            showNodeInfo ? false : !nlpSettings.modelDeployment.allowStaticAllocations
+            !showNodeInfo || !nlpSettings.modelDeployment.allowStaticAllocations
           }
           deploymentsParams={
             isModelNotDownloaded || !isNLPModelItem(model)
@@ -917,7 +918,8 @@ export const getUserInputModelDeploymentParamsProvider =
     showNodeInfo: boolean,
     nlpSettings: NLPSettings,
     httpService: HttpService,
-    trainedModelsService: TrainedModelsService
+    trainedModelsService: TrainedModelsService,
+    mlCapabilities: MlCapabilitiesService
   ) =>
   (
     modelId: string,
@@ -939,7 +941,9 @@ export const getUserInputModelDeploymentParamsProvider =
       try {
         const modalSession = overlays.openModal(
           toMountPoint(
-            <KibanaContextProvider services={{ mlServices: { httpService, trainedModelsService } }}>
+            <KibanaContextProvider
+              services={{ mlServices: { httpService, trainedModelsService, mlCapabilities } }}
+            >
               <StartUpdateDeploymentModal
                 nlpSettings={nlpSettings}
                 showNodeInfo={showNodeInfo}

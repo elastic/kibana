@@ -179,6 +179,12 @@ Array [
   },
   Object {
     "appLink": "",
+    "attributes": Object {},
+    "id": "sample_security_ai_prompt",
+    "type": "security-ai-prompt",
+  },
+  Object {
+    "appLink": "",
     "attributes": Object {
       "description": "Identifies a suspicious parent child process relationship with cmd.exe descending from svchost.exe",
     },

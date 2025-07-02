@@ -1,0 +1,23 @@
+title: Connector request properties for a Microsoft Defender for Endpoint connector
+required:
+  - apiUrl
+  - projectKey
+description: Defines properties for connectors when type is `.microsoft_defender_endpoint`.
+type: object
+properties:
+  apiUrl:
+    type: string
+    description: >
+      The URL of the Microsoft Defender for Endpoint API. If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname is added to the allowed hosts.
+  clientId:
+    type: string
+    description: The application (client) identifier for your app in the Azure portal.
+  oAuthScope:
+    type: string
+    description: The OAuth scopes or permission sets for the Microsoft Defender for Endpoint API.
+  oAuthServerUrl:
+    type: string
+    description: The OAuth server URL where authentication is sent and received for the Microsoft Defender for Endpoint API.
+  tenantId:
+    description: The tenant identifier for your app in the Azure portal.
+    type: string

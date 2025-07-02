@@ -18,7 +18,7 @@ import {
 import { coreMock } from '@kbn/core/public/mocks';
 import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
 import { UiActionsEnhancedActionFactory } from '@kbn/ui-actions-enhanced-plugin/public';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 
 function createAction(
   allPossibleTriggers = ['VALUE_CLICK_TRIGGER'],

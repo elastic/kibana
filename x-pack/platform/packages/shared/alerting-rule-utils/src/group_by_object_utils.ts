@@ -8,6 +8,8 @@
 import { unflattenObject } from '@kbn/object-utils';
 import { Group } from './types';
 
+// TODO: Remove after updating the group logic in the log threshold rule
+// https://github.com/elastic/kibana/issues/220006
 export const getGroupByObject = (
   groupBy: string | string[] | undefined,
   groupValueSet: Set<string>
@@ -28,6 +30,16 @@ export const getGroupByObject = (
   return groupKeyValueMappingsObject;
 };
 
+export const unflattenGrouping = (
+  grouping?: Record<string, string> | undefined
+): Record<string, any> | undefined => {
+  if (grouping) {
+    return unflattenObject(grouping);
+  }
+};
+
+// TODO: Remove after updating the group logic in the log threshold rule
+// https://github.com/elastic/kibana/issues/220006
 export const getFormattedGroupBy = (
   groupBy: string | string[] | undefined,
   groupSet: Set<string>
@@ -45,4 +57,15 @@ export const getFormattedGroupBy = (
     });
   }
   return groupByKeysObjectMapping;
+};
+
+export const getFormattedGroups = (grouping?: Record<string, string>): Group[] | undefined => {
+  const groups: Group[] = [];
+  if (grouping) {
+    const groupKeys = Object.keys(grouping);
+    groupKeys.forEach((group) => {
+      groups.push({ field: group, value: grouping[group] });
+    });
+  }
+  return groups.length ? groups : undefined;
 };

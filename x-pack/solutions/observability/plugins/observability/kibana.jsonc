@@ -28,7 +28,6 @@
       "fieldFormats",
       "uiActions",
       "presentationUtil",
-      "exploratoryView",
       "features",
       "files",
       "inspector",
@@ -42,13 +41,15 @@
       "visualizations",
       "dashboard",
       "expressions",
-      "logsShared",
+      "logsDataAccess",
       "licensing",
       "navigation",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "esql"
     ],
     "optionalPlugins": [
       "discover",
+      "exploratoryView",
       "home",
       "usageCollection",
       "cloud",
@@ -62,6 +63,7 @@
     "requiredBundles": [
       "data",
       "discover",
+      "logsShared",
       "kibanaReact",
       "kibanaUtils",
       "unifiedSearch",

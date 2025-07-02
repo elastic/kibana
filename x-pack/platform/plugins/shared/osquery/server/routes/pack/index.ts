@@ -17,7 +17,7 @@ import { updatePackRoute } from './update_pack_route';
 export const initPackRoutes = (router: IRouter, context: OsqueryAppContext) => {
   createPackRoute(router, context);
   deletePackRoute(router, context);
-  findPackRoute(router);
-  readPackRoute(router);
+  findPackRoute(router, context);
+  readPackRoute(router, context);
   updatePackRoute(router, context);
 };

@@ -25,7 +25,7 @@ export class UnifiedFieldListPageObject extends FtrService {
 
   public async clearFieldSearchInput() {
     const fieldSearch = await this.testSubjects.find('fieldListFiltersFieldSearch');
-    await fieldSearch.clearValue();
+    await fieldSearch.clearValueWithKeyboard();
   }
 
   public async getAllFieldNames() {
@@ -93,6 +93,14 @@ export class UnifiedFieldListPageObject extends FtrService {
     return Promise.all(
       elements.map(async (element) => (await element.getAttribute('data-attr-field')) ?? '')
     );
+  }
+
+  public async getSidebarSectionFieldCount(sectionName: SidebarSectionName): Promise<number> {
+    const counter = await this.find.byCssSelector(
+      `[data-test-subj="${this.getSidebarSectionSelector(sectionName)}-count"]`
+    );
+
+    return Number(await counter.getVisibleText());
   }
 
   public async toggleSidebarSection(sectionName: SidebarSectionName) {
@@ -275,6 +283,12 @@ export class UnifiedFieldListPageObject extends FtrService {
     await this.retry.waitFor('sidebar filter closed', async () => {
       return !(await this.testSubjects.exists('fieldListFiltersFieldTypeFilterOptions'));
     });
+  }
+
+  public async clearSidebarFieldFilters() {
+    await this.openSidebarFieldFilter();
+    await this.testSubjects.click('fieldListFiltersFieldTypeFilterClearAll');
+    await this.closeSidebarFieldFilter();
   }
 
   public async getFieldStatsViewType(): Promise<

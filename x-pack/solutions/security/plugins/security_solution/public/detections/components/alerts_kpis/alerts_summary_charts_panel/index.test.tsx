@@ -86,18 +86,19 @@ describe('AlertsSummaryChartsPanel', () => {
 
   describe('toggleQuery', () => {
     test('toggles', async () => {
-      await act(async () => {
-        const { container } = render(
-          <TestProviders>
-            <AlertsSummaryChartsPanel {...defaultProps} />
-          </TestProviders>
-        );
-        const element = container.querySelector('[data-test-subj="query-toggle-header"]');
+      const { container } = render(
+        <TestProviders>
+          <AlertsSummaryChartsPanel {...defaultProps} />
+        </TestProviders>
+      );
+      const element = container.querySelector('[data-test-subj="query-toggle-header"]');
+      act(() => {
         if (element) {
           fireEvent.click(element);
         }
-        expect(mockSetIsExpanded).toBeCalledWith(false);
       });
+
+      expect(mockSetIsExpanded).toBeCalledWith(false);
     });
 
     it('when isExpanded is true, render summary chart', () => {

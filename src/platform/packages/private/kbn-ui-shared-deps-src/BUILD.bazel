@@ -35,6 +35,8 @@ webpack_cli(
     "//src/platform/packages/shared/kbn-std",
     "//src/platform/packages/shared/kbn-safer-lodash-set",
     "//src/platform/packages/private/kbn-peggy",
+    "//src/platform/packages/private/kbn-dot-text",
+    "//src/platform/packages/private/kbn-dot-text-loader",
     "//packages/kbn-peggy-loader",
     "//src/platform/packages/shared/shared-ux/error_boundary",
     "//src/platform/packages/shared/kbn-rison",
@@ -59,7 +61,8 @@ webpack_cli(
       "NODE_ENV": "production",
     },
     "//conditions:default": {
-      "NODE_ENV": "development"
+      "NODE_ENV": "development",
+      "EUI_AMSTERDAM": "$(EUI_AMSTERDAM)",
     },
   }),
   visibility = ["//visibility:public"],

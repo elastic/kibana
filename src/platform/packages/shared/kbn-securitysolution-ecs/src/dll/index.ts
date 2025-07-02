@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CodeSignature } from '../file';
+import type { CodeSignature, Ext } from '../file';
 import type { ProcessPe } from '../process';
 
 export interface DllEcs {
+  Ext?: Ext;
   path?: string;
   code_signature?: CodeSignature;
   pe?: ProcessPe;

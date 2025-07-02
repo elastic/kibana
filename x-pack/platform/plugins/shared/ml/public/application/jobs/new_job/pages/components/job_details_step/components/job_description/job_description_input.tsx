@@ -14,7 +14,7 @@ import { Description } from './description';
 export const JobDescriptionInput: FC = () => {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
   const [jobDescription, setJobDescription] = useState(jobCreator.description);
-  const jobDescriptionTitleId = useGeneratedHtmlId({ prefix: 'jobDescriptionTitleId' });
+  const titleId = useGeneratedHtmlId({ prefix: 'jobDescriptionInput' });
   useEffect(() => {
     jobCreator.description = jobDescription;
     jobCreatorUpdate();
@@ -22,12 +22,12 @@ export const JobDescriptionInput: FC = () => {
   }, [jobDescription]);
 
   return (
-    <Description titleId={jobDescriptionTitleId}>
+    <Description titleId={titleId}>
       <EuiTextArea
         value={jobDescription}
         onChange={(e) => setJobDescription(e.target.value)}
         data-test-subj="mlJobWizardInputJobDescription"
-        aria-labelledby={jobDescriptionTitleId}
+        aria-labelledby={titleId}
       />
     </Description>
   );

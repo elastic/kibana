@@ -80,7 +80,7 @@ export function PreviewPanel() {
   if (isIdle) {
     content = (
       <EuiEmptyPrompt
-        icon={<AssetImage />}
+        icon={<AssetImage type="yourPreviewWillAppearHere" />}
         titleSize="s"
         title={
           <h2>
@@ -197,7 +197,7 @@ export function PreviewPanel() {
     <>
       <EuiFlexItem grow={false}>
         {isLoadingDocuments && <EuiProgress size="xs" color="accent" position="absolute" />}
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
           <EuiFlexGroup component="span" gutterSize="s" alignItems="center">
             <EuiIcon type="inspect" />
             <strong>

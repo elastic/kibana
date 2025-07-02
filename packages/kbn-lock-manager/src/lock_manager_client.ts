@@ -87,6 +87,8 @@ export class LockManager {
                 def instantNow = Instant.ofEpochMilli(now);
                 ctx._source.createdAt = instantNow.toString();
                 ctx._source.expiresAt = instantNow.plusMillis(params.ttl).toString();
+                ctx._source.metadata = params.metadata;
+                ctx._source.token = params.token;
               } else {
                 ctx.op = 'noop';
               }
@@ -94,13 +96,11 @@ export class LockManager {
             params: {
               ttl,
               token: this.token,
+              metadata,
             },
           },
           // @ts-expect-error
-          upsert: {
-            metadata,
-            token: this.token,
-          },
+          upsert: {},
         },
         {
           retryOnTimeout: true,
@@ -189,7 +189,7 @@ export class LockManager {
         this.logger.debug(`Lock "${this.lockId}" released with token ${this.token}.`);
         return true;
       case 'noop':
-        this.logger.debug(
+        this.logger.warn(
           `Lock "${this.lockId}" with token = ${this.token} could not be released. Token does not match.`
         );
         return false;

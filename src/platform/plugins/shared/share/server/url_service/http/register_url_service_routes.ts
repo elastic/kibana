@@ -20,7 +20,9 @@ export const registerUrlServiceRoutes = (
   router: IRouter,
   url: ServerUrlService
 ) => {
-  registerCreateRoute(router, url);
+  const { http } = core;
+
+  registerCreateRoute(router, url, http);
   registerGetRoute(router, url);
   registerDeleteRoute(router, url);
   registerResolveRoute(router, url);

@@ -15,6 +15,9 @@ import type { IndexNameProviders, SiemRuleMigrationsClientDependencies } from '.
 import { RuleMigrationsDataMigrationClient } from './rule_migrations_data_migration_client';
 
 export class RuleMigrationsDataClient {
+  protected logger: Logger;
+  protected esClient: IScopedClusterClient['asInternalUser'];
+
   public readonly migrations: RuleMigrationsDataMigrationClient;
   public readonly rules: RuleMigrationsDataRulesClient;
   public readonly resources: RuleMigrationsDataResourcesClient;
@@ -71,5 +74,40 @@ export class RuleMigrationsDataClient {
       logger,
       spaceId
     );
+
+    this.logger = logger;
+    this.esClient = esScopedClient.asInternalUser;
+  }
+
+  /**
+   *
+   * Deletes a migration and all its associated rules and resources.
+   *
+   */
+  async deleteMigration(migrationId: string) {
+    const migrationDeleteOperations = await this.migrations.prepareDelete({
+      id: migrationId,
+    });
+
+    const rulesByMigrationIdDeleteOperations = await this.rules.prepareDelete(migrationId);
+
+    const resourcesByMigrationIdDeleteOperations = await this.resources.prepareDelete(migrationId);
+
+    return this.esClient
+      .bulk({
+        refresh: 'wait_for',
+        operations: [
+          ...migrationDeleteOperations,
+          ...rulesByMigrationIdDeleteOperations,
+          ...resourcesByMigrationIdDeleteOperations,
+        ],
+      })
+      .then(() => {
+        this.logger.info(`Deleted migration ${migrationId}`);
+      })
+      .catch((error) => {
+        this.logger.error(`Error deleting migration ${migrationId}: ${error}`);
+        throw error;
+      });
   }
 }

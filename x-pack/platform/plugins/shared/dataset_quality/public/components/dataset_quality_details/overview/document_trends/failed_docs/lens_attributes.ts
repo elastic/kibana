@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { GenericIndexPatternColumn, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 
-import { ALL_PATTERNS_SELECTOR, FAILURE_STORE_SELECTOR } from '../../../../../../common/constants';
+import { DATA_SELECTOR, FAILURE_STORE_SELECTOR } from '../../../../../../common/constants';
 import {
   flyoutFailedDocsTrendText,
   flyoutFailedDocsPercentageText,
@@ -148,14 +148,14 @@ function getAdHocDataViewState(id: string, dataStream: string, title: string) {
     adHocDataViews: {
       [id]: {
         id,
-        title: `${dataStream}${ALL_PATTERNS_SELECTOR}`,
+        title: `${dataStream}${DATA_SELECTOR},${dataStream}${FAILURE_STORE_SELECTOR}`,
         timeFieldName: '@timestamp',
         sourceFilters: [],
         fieldFormats: {},
         runtimeFieldMap: {},
         fieldAttrs: {},
         allowNoIndex: false,
-        name: `${dataStream}${ALL_PATTERNS_SELECTOR}`,
+        name: `${dataStream}${DATA_SELECTOR},${dataStream}${FAILURE_STORE_SELECTOR}`,
       },
     },
   };

@@ -23,14 +23,15 @@ import { Status } from '../../../../common/types/api';
 import { SyncsContextMenu } from './syncs_context_menu';
 import { AppContextProvider } from '../../../app_context';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { AppDependencies } from '../../../types';
+import { AppDependencies, SearchConnectorsPluginStartDependencies } from '../../../types';
+
 const appContext: AppDependencies = {
   isAgentlessEnabled: true,
   connectorTypes: [],
   kibanaVersion: '',
   isCloud: false,
   hasPlatinumLicense: false,
-  plugins: {},
+  plugins: {} as unknown as SearchConnectorsPluginStartDependencies,
 };
 jest.mock('@kbn/kibana-react-plugin/public');
 const http = httpServiceMock.createSetupContract();

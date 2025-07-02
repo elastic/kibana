@@ -237,13 +237,9 @@ export const functions = {
             {
               defaultMessage: `
   ### IS NOT NULL
-  Use \`IS NOT NULL\` to filter data based on whether the field exists or not.
+  Returns \`false\` if the value is \`NULL\`, \`true\` otherwise.
 
-  \`\`\`esql
-  FROM employees
-  | WHERE is_rehired IS NOT NULL
-  | STATS COUNT(emp_no)
-  \`\`\`
+  Note: If a field is only in some documents it will be \`NULL\` in the documents that did not contain it.
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -269,12 +265,9 @@ export const functions = {
             {
               defaultMessage: `
   ### IS NULL
-  Use \`IS NULL\` to filter data based on whether the field exists or not.
+  Returns \`true\` if the value is \`NULL\`, \`false\` otherwise.
 
-  \`\`\`esql
-  FROM employees
-  | WHERE birth_date IS NULL
-  \`\`\`
+  Note: If a field is only in some documents it will be \`NULL\` in the documents that did not contain it.
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -359,7 +352,8 @@ export const functions = {
   Use \`LIKE\` to filter data based on string patterns using wildcards. \`LIKE\`
   usually acts on a field placed on the left-hand side of the operator, but it can
   also act on a constant (literal) expression. The right-hand side of the operator
-  represents the pattern.
+  represents the pattern or a list of patterns. If a list of patterns is provided,
+  the expression will return true if any of the patterns match.
 
   The following wildcard characters are supported:
 
@@ -385,7 +379,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.match_operator (:)', {
         defaultMessage: 'MATCH_OPERATOR (:)',
       }),
-      preview: true,
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab

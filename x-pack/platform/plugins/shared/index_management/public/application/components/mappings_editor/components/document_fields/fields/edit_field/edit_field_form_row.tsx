@@ -16,8 +16,10 @@ import {
   EuiSpacer,
   EuiButtonIcon,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 
+import { css } from '@emotion/react';
 import {
   ToggleField,
   UseField,
@@ -60,6 +62,21 @@ export const EditFieldFormRow = React.memo(
     'data-test-subj': dataTestSubj,
   }: Props) => {
     const form = useFormContext();
+
+    const { euiTheme } = useEuiTheme();
+
+    const styles = {
+      formRow: css`
+        margin-bottom: ${euiTheme.size.xl};
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      `,
+      description: css`
+        padding-top: ${euiTheme.size.xs};
+      `,
+    };
 
     const initialVisibleState =
       withToggle === false
@@ -119,11 +136,7 @@ export const EditFieldFormRow = React.memo(
       );
 
     const renderContent = () => {
-      const toggle = withToggle && (
-        <EuiFlexItem grow={false} className="mappingsEditor__editFieldFormRow__toggle">
-          {renderToggleInput()}
-        </EuiFlexItem>
-      );
+      const toggle = withToggle && <EuiFlexItem grow={false}>{renderToggleInput()}</EuiFlexItem>;
 
       const controlsTitle = (
         <EuiTitle size="xs">
@@ -132,11 +145,7 @@ export const EditFieldFormRow = React.memo(
       );
 
       const controlsDescription = description && (
-        <EuiText
-          size="s"
-          color="subdued"
-          className="mappingsEditor__editField__formRow__description"
-        >
+        <EuiText size="s" color="subdued" css={styles.description}>
           {description}
         </EuiText>
       );
@@ -156,7 +165,7 @@ export const EditFieldFormRow = React.memo(
                   <EuiButtonIcon
                     href={docLink.href}
                     target="_blank"
-                    iconType="help"
+                    iconType="question"
                     aria-label={docLink.text}
                   />
                 </EuiToolTip>
@@ -179,9 +188,8 @@ export const EditFieldFormRow = React.memo(
       );
 
       return (
-        <EuiFlexGroup className="mappingsEditor__editField__formRow" data-test-subj={dataTestSubj}>
+        <EuiFlexGroup css={styles.formRow} data-test-subj={dataTestSubj}>
           {toggle}
-
           <EuiFlexItem>
             <div>
               {controlsHeader}

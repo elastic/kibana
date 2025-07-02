@@ -47,7 +47,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               Readable.from(spanLinksData.events.producerConsumer),
               Readable.from(spanLinksData.events.producerMultiple),
             ],
-            apmSynthtraceEsClient.getPipeline(pipeline)
+            apmSynthtraceEsClient.resolvePipelineType(pipeline)
           );
         });
 
