@@ -19,25 +19,11 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
-import {
-  ChromeBreadcrumb,
-  type ChromeBreadcrumbsAppendExtension,
-  ChromeGlobalHelpExtensionMenuLink,
-  ChromeHelpExtension,
-  ChromeHelpMenuLink,
-  ChromeNavControl,
-  ChromeUserBanner,
-} from '@kbn/core-chrome-browser/src';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { HttpStart } from '@kbn/core-http-browser';
-import { MountPoint } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Router } from '@kbn/shared-ux-router';
 import React, { type ComponentProps, useCallback } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { debounceTime, Observable } from 'rxjs';
-import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
 import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
@@ -47,6 +33,7 @@ import { ScreenReaderRouteAnnouncements, SkipToMainContent } from '../header/scr
 import { AppMenuBar } from './app_menu';
 import { ProjectNavigation } from './navigation';
 import { BreadcrumbsWithExtensionsWrapper } from '../header/breadcrumbs_with_extensions';
+import { useChromeUiState } from '../../ui_store';
 
 const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
   logo: {
@@ -113,52 +100,29 @@ const headerStrings = {
 };
 
 export interface Props extends Pick<ComponentProps<typeof HeaderHelpMenu>, 'isServerless'> {
-  headerBanner$?: Observable<ChromeUserBanner | undefined> | null;
-  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  breadcrumbsAppendExtensions$: Observable<ChromeBreadcrumbsAppendExtension[]>;
-  actionMenu$?: Observable<MountPoint | undefined> | null;
+  includesActionMenu?: boolean;
+  includesHeaderBanner?: boolean;
+
   docLinks: DocLinksStart;
   children: React.ReactNode;
-  customBranding$: Observable<CustomBranding>;
-  globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
-  helpExtension$: Observable<ChromeHelpExtension | undefined>;
-  helpSupportUrl$: Observable<string>;
-  helpMenuLinks$: Observable<ChromeHelpMenuLink[]>;
-  homeHref$: Observable<string | undefined>;
   kibanaVersion: string;
   application: InternalApplicationStart;
-  loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
-  navControlsLeft$: Observable<ChromeNavControl[]>;
-  navControlsCenter$: Observable<ChromeNavControl[]>;
-  navControlsRight$: Observable<ChromeNavControl[]>;
   prependBasePath: (url: string) => string;
-  isSideNavCollapsed$: Observable<boolean>;
   toggleSideNav: (isCollapsed: boolean) => void;
   isFixed?: boolean;
   as?: 'div' | 'header';
 }
 
-const LOADING_DEBOUNCE_TIME = 80;
-
-type LogoProps = Pick<
-  Props,
-  'application' | 'homeHref$' | 'loadingCount$' | 'prependBasePath' | 'customBranding$'
-> & {
+type LogoProps = Pick<Props, 'application' | 'prependBasePath'> & {
   logoCss: HeaderCss['logo'];
 };
 
-const Logo = ({
-  loadingCount$,
-  homeHref$,
-  prependBasePath,
-  application,
-  logoCss,
-  customBranding$,
-}: LogoProps) => {
-  const loadingCount = useObservable(loadingCount$.pipe(debounceTime(LOADING_DEBOUNCE_TIME)), 0);
-  const homeHref = useObservable(homeHref$, '/app/home');
-  const customBranding = useObservable(customBranding$, {});
-  const { logo } = customBranding;
+const Logo = ({ prependBasePath, application, logoCss }: LogoProps) => {
+  // TODO: add debounce to isLoading to avoid flickering
+  const isLoading = useChromeUiState((state) => state.loadingCount > 0);
+  const homeHref = useChromeUiState((state) => state.homeHref);
+  const customBranding = useChromeUiState((state) => state.customBranding);
+  const { logo } = customBranding ?? {};
 
   let fullHref: string | undefined;
   if (homeHref) {
@@ -207,7 +171,7 @@ const Logo = ({
 
   return (
     <span css={logoCss.container} data-test-subj="nav-header-logo">
-      {loadingCount === 0 ? (
+      {!isLoading ? (
         renderLogo()
       ) : (
         <a onClick={navigateHome} href={fullHref} css={logoCss.spinner}>
@@ -230,14 +194,20 @@ export const ProjectHeader = ({
   prependBasePath,
   docLinks,
   toggleSideNav,
-  customBranding$,
   isServerless,
-  breadcrumbsAppendExtensions$,
+  includesActionMenu,
+  includesHeaderBanner,
   isFixed = true,
   as = 'header',
-  ...observables
 }: Props) => {
   const { euiTheme } = useEuiTheme();
+
+  const navControlsCenter = useChromeUiState((state) => state.navControlsCenter);
+  const navControlsLeft = useChromeUiState((state) => state.navControlsLeft);
+  const navControlsRight = useChromeUiState((state) => state.navControlsRight);
+  const projectBreadcrumbs = useChromeUiState((state) => state.projectBreadcrumbs) ?? [];
+  const isSideNavCollapsed = useChromeUiState((state) => state.isSideNavCollapsed);
+
   const headerCss = getHeaderCss(euiTheme);
   const { logo: logoCss } = headerCss;
 
@@ -245,14 +215,10 @@ export const ProjectHeader = ({
 
   return (
     <>
-      <ScreenReaderRouteAnnouncements
-        breadcrumbs$={observables.breadcrumbs$}
-        customBranding$={customBranding$}
-        appId$={application.currentAppId$}
-      />
+      <ScreenReaderRouteAnnouncements breadcrumbs={projectBreadcrumbs} />
       <SkipToMainContent />
 
-      {observables.headerBanner$ && <HeaderTopBanner headerBanner$={observables.headerBanner$} />}
+      {includesHeaderBanner && <HeaderTopBanner />}
       <HeaderElement data-test-subj="kibanaProjectHeader">
         <div id="globalHeaderBars" data-test-subj="headerGlobalNav" className="header__bars">
           <EuiHeader position={isFixed ? 'fixed' : 'static'} className="header__firstBar">
@@ -260,7 +226,7 @@ export const ProjectHeader = ({
               {children && (
                 <Router history={application.history}>
                   <ProjectNavigation
-                    isSideNavCollapsed$={observables.isSideNavCollapsed$}
+                    isSideNavCollapsed={isSideNavCollapsed}
                     toggleSideNav={toggleSideNav}
                   >
                     {children}
@@ -272,9 +238,6 @@ export const ProjectHeader = ({
                 <Logo
                   prependBasePath={prependBasePath}
                   application={application}
-                  homeHref$={observables.homeHref$}
-                  loadingCount$={observables.loadingCount$}
-                  customBranding$={customBranding$}
                   logoCss={logoCss}
                 />
               </EuiHeaderSectionItem>
@@ -282,7 +245,7 @@ export const ProjectHeader = ({
               <EuiHeaderSectionItem css={headerCss.leftNavcontrols}>
                 <HeaderNavControls
                   side="left"
-                  navControls$={observables.navControlsLeft$}
+                  navControls={navControlsLeft}
                   append={<div className="navcontrols__separator" />}
                 />
               </EuiHeaderSectionItem>
@@ -292,10 +255,8 @@ export const ProjectHeader = ({
                   coreStart={{ application }}
                   css={headerCss.redirectAppLinksContainer}
                 >
-                  <BreadcrumbsWithExtensionsWrapper
-                    breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
-                  >
-                    <Breadcrumbs breadcrumbs$={observables.breadcrumbs$} />
+                  <BreadcrumbsWithExtensionsWrapper>
+                    <Breadcrumbs breadcrumbs={projectBreadcrumbs} />
                   </BreadcrumbsWithExtensionsWrapper>
                 </RedirectAppLinks>
               </EuiHeaderSectionItem>
@@ -303,16 +264,12 @@ export const ProjectHeader = ({
 
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem>
-                <HeaderNavControls navControls$={observables.navControlsCenter$} />
+                <HeaderNavControls navControls={navControlsCenter} />
               </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem>
                 <HeaderHelpMenu
                   isServerless={isServerless}
-                  globalHelpExtensionMenuLinks$={observables.globalHelpExtensionMenuLinks$}
-                  helpExtension$={observables.helpExtension$}
-                  helpSupportUrl$={observables.helpSupportUrl$}
-                  defaultContentLinks$={observables.helpMenuLinks$}
                   kibanaDocLink={docLinks.links.elasticStackGetStarted}
                   docLinks={docLinks}
                   kibanaVersion={kibanaVersion}
@@ -325,16 +282,14 @@ export const ProjectHeader = ({
                   gap: ${euiTheme.size.s};
                 `}
               >
-                <HeaderNavControls navControls$={observables.navControlsRight$} />
+                <HeaderNavControls navControls={navControlsRight} />
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
           </EuiHeader>
         </div>
       </HeaderElement>
 
-      {observables.actionMenu$ && (
-        <AppMenuBar appMenuActions$={observables.actionMenu$} isFixed={true} />
-      )}
+      {includesActionMenu && <AppMenuBar isFixed={true} />}
     </>
   );
 };

@@ -8,7 +8,7 @@
  */
 
 // withRx.ts ---------------------------------------------------------------
-import { auditTime, BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, startWith } from 'rxjs';
 import { unstable_batchedUpdates } from 'react-dom';
 import type { StateCreator, StoreApi } from 'zustand/vanilla';
 import { createStore } from 'zustand/vanilla';
@@ -42,7 +42,14 @@ const withRx =
     const initial = config(set, get, _api);
 
     /* 2. wire the streams */
-    const combined$ = combineLatest(streams);
+    const normalizedStreams: Streams = Object.fromEntries(
+      Object.entries(streams).map(([key, stream]) => [
+        key,
+        stream instanceof BehaviorSubject ? stream : stream.pipe(startWith(undefined)),
+      ])
+    ) as Streams;
+
+    const combined$ = combineLatest(normalizedStreams);
 
     /* 3. push snapshots into the store */
     const store = _api;

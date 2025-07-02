@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import { useChromeUiState } from '@kbn/core-chrome-browser-internal/src/ui_store';
 import { LegacyFixedLayoutGlobalStyles } from './legacy_fixed_global_app_style';
 import { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
@@ -28,11 +28,9 @@ export class LegacyFixedLayout implements LayoutService {
     const chromeHeader = chrome.getLegacyHeaderComponentForFixedLayout();
     const bannerComponent = overlays.banners.getComponent();
     const appComponent = application.getComponent();
-    const chromeVisible$ = chrome.getIsVisible$();
 
     return React.memo(() => {
-      // TODO: Get rid of observables https://github.com/elastic/kibana/issues/225265
-      const chromeVisible = useObservable(chromeVisible$, false);
+      const chromeVisible = useChromeUiState((state) => state.isVisible);
 
       return (
         <>

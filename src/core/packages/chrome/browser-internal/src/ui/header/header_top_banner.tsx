@@ -8,14 +8,11 @@
  */
 
 import React, { FC } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { Observable } from 'rxjs';
-import type { ChromeUserBanner } from '@kbn/core-chrome-browser';
 import { css } from '@emotion/react';
 import { HeaderExtension } from './header_extension';
+import { useChromeUiState } from '../../ui_store/chrome_ui_store_provider';
 
 export interface HeaderTopBannerProps {
-  headerBanner$: Observable<ChromeUserBanner | undefined>;
   position?: 'fixed' | 'static';
 }
 
@@ -41,11 +38,9 @@ const styles = {
   `,
 };
 
-export const HeaderTopBanner: FC<HeaderTopBannerProps> = ({
-  headerBanner$,
-  position = 'fixed',
-}) => {
-  const headerBanner = useObservable(headerBanner$, undefined);
+export const HeaderTopBanner: FC<HeaderTopBannerProps> = ({ position = 'fixed' }) => {
+  const headerBanner = useChromeUiState((state) => state.headerBanner);
+
   if (!headerBanner) {
     return null;
   }

@@ -7,76 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Component } from 'react';
-import * as Rx from 'rxjs';
+import React from 'react';
 import { EuiBetaBadge } from '@elastic/eui';
-import type { ChromeBadge } from '@kbn/core-chrome-browser';
+import { useChromeUiState } from '../../ui_store';
 
-interface Props {
-  badge$: Rx.Observable<ChromeBadge | undefined>;
-}
+export const HeaderBadge: React.FC = () => {
+  const badge = useChromeUiState((state) => state.badge);
 
-interface State {
-  badge: ChromeBadge | undefined;
-}
-
-export class HeaderBadge extends Component<Props, State> {
-  private subscription?: Rx.Subscription;
-
-  constructor(props: Props) {
-    super(props);
-
-    this.state = { badge: undefined };
+  if (badge == null) {
+    return null;
   }
 
-  public componentDidMount() {
-    this.subscribe();
-  }
-
-  public componentDidUpdate(prevProps: Props) {
-    if (prevProps.badge$ === this.props.badge$) {
-      return;
-    }
-
-    this.unsubscribe();
-    this.subscribe();
-  }
-
-  public componentWillUnmount() {
-    this.unsubscribe();
-  }
-
-  public render() {
-    if (this.state.badge == null) {
-      return null;
-    }
-
-    return (
-      <div css={({ euiTheme }) => ({ alignSelf: 'center', marginLeft: euiTheme.size.base })}>
-        <EuiBetaBadge
-          data-test-subj="headerBadge"
-          data-test-badge-label={this.state.badge.text}
-          tabIndex={0}
-          label={this.state.badge.text}
-          tooltipContent={this.state.badge.tooltip}
-          iconType={this.state.badge.iconType}
-        />
-      </div>
-    );
-  }
-
-  private subscribe() {
-    this.subscription = this.props.badge$.subscribe((badge) => {
-      this.setState({
-        badge,
-      });
-    });
-  }
-
-  private unsubscribe() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-      this.subscription = undefined;
-    }
-  }
-}
+  return (
+    <div css={({ euiTheme }) => ({ alignSelf: 'center', marginLeft: euiTheme.size.base })}>
+      <EuiBetaBadge
+        data-test-subj="headerBadge"
+        data-test-badge-label={badge.text}
+        tabIndex={0}
+        label={badge.text}
+        tooltipContent={badge.tooltip}
+        iconType={badge.iconType}
+      />
+    </div>
+  );
+};

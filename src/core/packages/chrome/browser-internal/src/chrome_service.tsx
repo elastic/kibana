@@ -60,7 +60,8 @@ import type { InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
 import { handleSystemColorModeChange } from './handle_system_colormode_change';
 import { AppMenuBar } from './ui/project/app_menu';
-import { createChromeUiStore } from './ui_state/ui_state';
+import { createChromeUiStore } from './ui_store/chrome_ui_store';
+import { useChromeUiState } from './ui_store';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
 const SNAPSHOT_REGEX = /-snapshot/i;
@@ -441,33 +442,16 @@ export class ChromeService {
       <Header
         /* customizable header variations */
         as={as}
-        headerBanner$={includeBanner ? headerBanner$.pipe(takeUntil(this.stop$)) : null}
+        includeBanner={includeBanner}
         isFixed={isFixed}
         /* consistent header properties */
         isServerless={this.isServerless}
-        loadingCount$={http.getLoadingCount$()}
         application={application}
-        badge$={badge$.pipe(takeUntil(this.stop$))}
         basePath={http.basePath}
-        breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
-        breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$.pipe(takeUntil(this.stop$))}
-        customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
         kibanaDocLink={docLinks.links.kibana.guide}
         docLinks={docLinks}
-        forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
-        globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
-        helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
-        helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
-        helpMenuLinks$={helpMenuLinks$}
         homeHref={http.basePath.prepend('/app/home')}
         kibanaVersion={injectedMetadata.getKibanaVersion()}
-        navLinks$={navLinks.getNavLinks$()}
-        recentlyAccessed$={recentlyAccessed.get$()}
-        navControlsLeft$={navControls.getLeft$()}
-        navControlsCenter$={navControls.getCenter$()}
-        navControlsRight$={navControls.getRight$()}
-        navControlsExtension$={navControls.getExtension$()}
-        customBranding$={customBranding$}
       />
     );
 
@@ -506,24 +490,11 @@ export class ChromeService {
         isFixed={isFixed}
         as={as}
         application={application}
-        globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
-        actionMenu$={includeAppMenu ? application.currentActionMenu$ : null}
-        breadcrumbs$={projectNavigation.getProjectBreadcrumbs$().pipe(takeUntil(this.stop$))}
-        breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$.pipe(takeUntil(this.stop$))}
-        customBranding$={customBranding$}
-        helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
-        helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
-        helpMenuLinks$={helpMenuLinks$}
-        navControlsLeft$={navControls.getLeft$()}
-        navControlsCenter$={navControls.getCenter$()}
-        navControlsRight$={navControls.getRight$()}
-        loadingCount$={http.getLoadingCount$()}
-        headerBanner$={includeBanner ? headerBanner$.pipe(takeUntil(this.stop$)) : null}
-        homeHref$={projectNavigation.getProjectHome$()}
+        includesActionMenu={includeAppMenu}
+        includesHeaderBanner={includeBanner}
         docLinks={docLinks}
         kibanaVersion={injectedMetadata.getKibanaVersion()}
         prependBasePath={http.basePath.prepend}
-        isSideNavCollapsed$={this.isSideNavCollapsed$}
         toggleSideNav={setIsSideNavCollapsed}
       >
         {includeSideNavigation ? getProjectSideNavComponent() : null}
@@ -558,18 +529,15 @@ export class ChromeService {
     };
 
     const getLegacyHeaderComponentForFixedLayout = () => {
-      const defaultChromeStyle = chromeStyleSubject$.getValue();
-
       const HeaderComponent = () => {
-        // TODO: remove useObservable usage https://github.com/elastic/kibana/issues/225265
-        const isVisible = useObservable(this.isVisible$);
-        const chromeStyle = useObservable(chromeStyle$, defaultChromeStyle);
+        const isVisible = useChromeUiState((state) => state.isVisible);
+        const chromeStyle = useChromeUiState((state) => state.chromeStyle);
 
         if (!isVisible) {
           return (
             <div data-test-subj="kibanaHeaderChromeless">
-              <LoadingIndicator loadingCount$={http.getLoadingCount$()} showAsBar />
-              <HeaderTopBanner headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))} />
+              <LoadingIndicator showAsBar />
+              <HeaderTopBanner />
             </div>
           );
         }
@@ -613,7 +581,30 @@ export class ChromeService {
     };
 
     const store = createChromeUiStore({
+      badge$,
+      breadcrumbs$,
+      breadcrumbsAppendExtensions$,
+      chromeStyle$,
+      customBranding$,
+      customNavLink$,
+      currentAppId$: application.currentAppId$,
+      currentActionMenu$: application.currentActionMenu$,
+      globalHelpExtensionMenuLinks$,
+      headerBanner$,
+      helpExtension$,
+      helpMenuLinks$,
+      helpSupportUrl$,
       isVisible$: this.isVisible$,
+      loadingCount$: http.getLoadingCount$(),
+      navControlsCenter$: navControls.getCenter$(),
+      navControlsExtension$: navControls.getExtension$(),
+      navControlsLeft$: navControls.getLeft$(),
+      navControlsRight$: navControls.getRight$(),
+      navLinks$: navLinks.getNavLinks$(),
+      recentlyAccessed$: recentlyAccessed.get$(),
+      projectBreadcrumbs$: projectNavigation.getProjectBreadcrumbs$(),
+      isSideNavCollapsed$: this.isSideNavCollapsed$,
+      homeHref$: projectNavigation.getProjectHome$(),
     });
 
     return {
@@ -627,22 +618,17 @@ export class ChromeService {
       getClassicHeaderComponentForGridLayout,
       getProjectHeaderComponentForGridLayout,
       getHeaderBanner: () => {
-        return (
-          <HeaderTopBanner
-            headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
-            position={'static'}
-          />
-        );
+        return <HeaderTopBanner position={'static'} />;
       },
       getChromelessHeader: () => {
         return (
           <div data-test-subj="kibanaHeaderChromeless">
-            <LoadingIndicator loadingCount$={http.getLoadingCount$()} showAsBar />
+            <LoadingIndicator showAsBar />
           </div>
         );
       },
       getProjectAppMenuComponent: () => {
-        return <AppMenuBar appMenuActions$={application.currentActionMenu$} isFixed={false} />;
+        return <AppMenuBar isFixed={false} />;
       },
 
       // chrome APIs

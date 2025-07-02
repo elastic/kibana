@@ -7,25 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useState, useEffect } from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import React, { FC, useEffect, useState } from 'react';
 import { EuiScreenReaderLive, EuiSkipLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
-import type { HeaderProps } from './header';
+import { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
+import { useChromeUiState } from '../../ui_store';
 
 const DEFAULT_BRAND = 'Elastic'; // This may need to be DRYed out with https://github.com/elastic/kibana/blob/main/src/core/packages/rendering/server-internal/src/views/template.tsx#L35
 const SEPARATOR = ' - ';
 
 export const ScreenReaderRouteAnnouncements: FC<{
-  breadcrumbs$: HeaderProps['breadcrumbs$'];
-  customBranding$: HeaderProps['customBranding$'];
-  appId$: InternalApplicationStart['currentAppId$'];
-}> = ({ breadcrumbs$, customBranding$, appId$ }) => {
+  breadcrumbs: ChromeBreadcrumb[];
+}> = ({ breadcrumbs }) => {
   const [routeTitle, setRouteTitle] = useState('');
-  const branding = useObservable(customBranding$)?.pageTitle || DEFAULT_BRAND;
-  const breadcrumbs = useObservable(breadcrumbs$, []);
+  const branding = useChromeUiState((state) => state.customBranding?.pageTitle ?? DEFAULT_BRAND);
 
   useEffect(() => {
     if (breadcrumbs.length) {
@@ -46,7 +41,7 @@ export const ScreenReaderRouteAnnouncements: FC<{
 
   // 1. Canvas dynamically updates breadcrumbs *and* page title/history on every name onChange,
   // which leads to focus fighting if this is enabled
-  const appId = useObservable(appId$);
+  const appId = useChromeUiState((state) => state.currentAppId);
   const disableFocusForApps = ['canvas'];
   const focusRegionOnTextChange = !disableFocusForApps.includes(appId || '');
 

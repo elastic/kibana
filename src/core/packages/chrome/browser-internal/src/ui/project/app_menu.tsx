@@ -7,17 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
 import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
-
-import { MountPoint } from '@kbn/core-mount-utils-browser';
 import React, { useMemo } from 'react';
-import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_action_menu';
+import { useChromeUiState } from '../../ui_store';
+import { HeaderActionMenu } from '../header/header_action_menu';
 
 interface AppMenuBarProps {
-  // TODO: get rid of observable
-  appMenuActions$: Observable<MountPoint | undefined>;
-
   /**
    * Whether the menu bar should be fixed (sticky) or static.
    */
@@ -55,13 +50,13 @@ const useAppMenuBarStyles = (euiTheme: UseEuiTheme['euiTheme']) =>
     return { root, fixed, static: staticStyle };
   }, [euiTheme]);
 
-export const AppMenuBar = ({ appMenuActions$, isFixed = true }: AppMenuBarProps) => {
-  const headerActionMenuMounter = useHeaderActionMenuMounter(appMenuActions$);
+export const AppMenuBar = ({ isFixed = true }: AppMenuBarProps) => {
+  const headerActionMenuMounter = useChromeUiState((state) => state.currentActionMenu);
   const { euiTheme } = useEuiTheme();
 
   const styles = useAppMenuBarStyles(euiTheme);
 
-  if (!headerActionMenuMounter.mount) return null;
+  if (!headerActionMenuMounter) return null;
 
   return (
     <div
@@ -69,7 +64,7 @@ export const AppMenuBar = ({ appMenuActions$, isFixed = true }: AppMenuBarProps)
       data-test-subj="kibanaProjectHeaderActionMenu"
       css={[styles.root, isFixed ? styles.fixed : styles.static]}
     >
-      <HeaderActionMenu mounter={headerActionMenuMounter} />
+      <HeaderActionMenu mounter={{ mount: headerActionMenuMounter }} />
     </div>
   );
 };

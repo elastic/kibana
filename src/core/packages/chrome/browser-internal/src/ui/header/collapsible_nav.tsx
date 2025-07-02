@@ -8,34 +8,33 @@
  */
 
 import {
-  EuiThemeProvider,
+  EuiButton,
   EuiCollapsibleNav,
   EuiCollapsibleNavGroup,
+  EuiCollapsibleNavProps,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiListGroup,
   EuiListGroupItem,
-  EuiCollapsibleNavProps,
-  EuiButton,
+  EuiThemeProvider,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
 import React, { useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import * as Rx from 'rxjs';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { AppCategory } from '@kbn/core-application-common';
-import type { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
+import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 import {
+  createEuiButtonItem,
   createEuiListItem,
+  createOverviewLink,
   createRecentNavLink,
   isModifiedOrPrevented,
-  createEuiButtonItem,
-  createOverviewLink,
 } from './nav_link';
 import { getCollapsibleNavStyles } from './get_collapsible_nav_styles';
+import { useChromeUiState } from '../../ui_store';
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
@@ -72,18 +71,14 @@ function setIsCategoryOpen(id: string, isOpen: boolean, storage: Storage) {
 }
 
 interface Props {
-  appId$: InternalApplicationStart['currentAppId$'];
   basePath: HttpStart['basePath'];
   id: string;
   isNavOpen: boolean;
   homeHref: string;
-  navLinks$: Rx.Observable<ChromeNavLink[]>;
-  recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
   storage?: Storage;
   closeNav: () => void;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
-  customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
   button: EuiCollapsibleNavProps['button'];
 }
 
@@ -95,6 +90,8 @@ const overviewIDs = [
   'management',
   'enterpriseSearch',
 ];
+
+const EMPTY: ChromeNavLink[] = [];
 
 export function CollapsibleNav({
   basePath,
@@ -108,7 +105,8 @@ export function CollapsibleNav({
   button,
   ...observables
 }: Props) {
-  const allLinks = useObservable(observables.navLinks$, []);
+  const allLinks = useChromeUiState((state) => state.navLinks ?? EMPTY);
+
   const allowedLinks = useMemo(
     () =>
       allLinks.filter(
@@ -130,9 +128,9 @@ export function CollapsibleNav({
     () => allLinks.filter((link) => overviewIDs.includes(link.id)),
     [allLinks]
   );
-  const recentlyAccessed = useObservable(observables.recentlyAccessed$, []);
-  const customNavLink = useObservable(observables.customNavLink$, undefined);
-  const appId = useObservable(observables.appId$, '');
+  const recentlyAccessed = useChromeUiState((state) => state.recentlyAccessed) ?? [];
+  const customNavLink = useChromeUiState((state) => state.customNavLink);
+  const appId = useChromeUiState((state) => state.currentAppId);
   const groupedNavLinks = groupBy(allowedLinks, (link) => link?.category?.id);
   const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
   const categoryDictionary = getAllCategories(allCategorizedLinks);

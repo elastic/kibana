@@ -22,12 +22,7 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { Observable } from 'rxjs';
 
-import { ObservableStore, ObsMap } from './chrome_ui_state';
-
-interface ChromeUiStateObservables extends ObsMap {
-  isVisible$: Observable<boolean>;
-}
-export type ChromeUiStore = ObservableStore<ChromeUiStateObservables>;
+import { ChromeUiStore } from './ui_store/chrome_ui_store';
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {

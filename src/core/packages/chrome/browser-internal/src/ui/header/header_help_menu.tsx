@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Component, Fragment } from 'react';
-import { combineLatest, Observable, Subscription } from 'rxjs';
+import React, { Fragment, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -19,24 +18,20 @@ import {
   EuiHeaderSectionItemButton,
   EuiIcon,
   EuiPopover,
+  EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSpacer,
-  EuiPopoverFooter,
-  withEuiTheme,
-  WithEuiThemeProps,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
-import type {
-  ChromeHelpExtension,
-  ChromeGlobalHelpExtensionMenuLink,
-} from '@kbn/core-chrome-browser';
 import type { ChromeHelpMenuLink } from '@kbn/core-chrome-browser/src';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import { css } from '@emotion/react';
 import { HeaderExtension } from './header_extension';
 import { isModifiedOrPrevented } from './nav_link';
+import { useChromeUiState } from '../../ui_store';
 
 const buildDefaultContentLinks = ({
   kibanaDocLink,
@@ -75,203 +70,95 @@ const buildDefaultContentLinks = ({
 
 interface Props {
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
-  globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
-  helpExtension$: Observable<ChromeHelpExtension | undefined>;
-  helpSupportUrl$: Observable<string>;
-  defaultContentLinks$: Observable<ChromeHelpMenuLink[]>;
   kibanaVersion: string;
   kibanaDocLink: string;
   docLinks: DocLinksStart;
   isServerless: boolean;
 }
 
-interface State {
-  isOpen: boolean;
-  helpExtension?: ChromeHelpExtension;
-  helpSupportUrl: string;
-  globalHelpExtensionMenuLinks: ChromeGlobalHelpExtensionMenuLink[];
-  defaultContentLinks: ChromeHelpMenuLink[];
-}
+export const HeaderHelpMenu: React.FC<Props> = (props) => {
+  const { navigateToUrl, kibanaVersion, kibanaDocLink, docLinks, isServerless } = props;
 
-class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
-  private subscription?: Subscription;
+  const { euiTheme } = useEuiTheme();
 
-  constructor(props: Props & WithEuiThemeProps) {
-    super(props);
+  const helpExtension = useChromeUiState((state) => state.helpExtension);
+  const helpSupportUrl = useChromeUiState((state) => state.helpSupportUrl);
+  const globalHelpExtensionMenuLinks = useChromeUiState(
+    (state) => state.globalHelpExtensionMenuLinks
+  );
+  let defaultContentLinks = useChromeUiState((state) => state.helpMenuLinks);
+  if (!defaultContentLinks || defaultContentLinks.length === 0)
+    defaultContentLinks = buildDefaultContentLinks({
+      kibanaDocLink,
+      docLinks,
+      helpSupportUrl,
+    });
 
-    this.state = {
-      isOpen: false,
-      helpExtension: undefined,
-      helpSupportUrl: '',
-      globalHelpExtensionMenuLinks: [],
-      defaultContentLinks: [],
-    };
-  }
+  const [isOpen, setIsOpen] = useState(false);
 
-  public componentDidMount() {
-    this.subscription = combineLatest(
-      this.props.helpExtension$,
-      this.props.helpSupportUrl$,
-      this.props.globalHelpExtensionMenuLinks$,
-      this.props.defaultContentLinks$
-    ).subscribe(
-      ([helpExtension, helpSupportUrl, globalHelpExtensionMenuLinks, defaultContentLinks]) => {
-        this.setState({
-          helpExtension,
-          helpSupportUrl,
-          globalHelpExtensionMenuLinks,
-          defaultContentLinks:
-            defaultContentLinks.length === 0
-              ? buildDefaultContentLinks({ ...this.props, helpSupportUrl })
-              : defaultContentLinks,
-        });
-      }
-    );
-  }
+  // Handlers
+  const closeMenu = useCallback(() => setIsOpen(false), []);
+  const onMenuButtonClick = useCallback(() => setIsOpen((o) => !o), []);
+  const createOnClickHandler = useCallback(
+    (href: string, navigate: Props['navigateToUrl']) =>
+      (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        if (!isModifiedOrPrevented(event) && event.button === 0) {
+          event.preventDefault();
+          closeMenu();
+          navigate(href);
+        }
+      },
+    [closeMenu]
+  );
 
-  public componentWillUnmount() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-      this.subscription = undefined;
-    }
-  }
-
-  public render() {
-    const { kibanaVersion, theme } = this.props;
-
-    const defaultContent = this.renderDefaultContent();
-    const globalCustomContent = this.renderGlobalCustomContent();
-    const customContent = this.renderCustomContent();
-
-    const euiThemePadding = css`
-      padding: ${theme.euiTheme.size.s};
-    `;
-
-    const button = (
-      <EuiHeaderSectionItemButton
-        aria-expanded={this.state.isOpen}
-        aria-haspopup="true"
-        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuButtonAriaLabel', {
-          defaultMessage: 'Help menu',
-        })}
-        onClick={this.onMenuButtonClick}
-      >
-        <EuiIcon type="question" size="m" />
-      </EuiHeaderSectionItemButton>
-    );
-
-    return (
-      <EuiPopover
-        anchorPosition="downRight"
-        button={button}
-        closePopover={this.closeMenu}
-        data-test-subj="helpMenuButton"
-        id="headerHelpMenu"
-        isOpen={this.state.isOpen}
-        repositionOnScroll
-      >
-        <EuiPopoverTitle>
-          <EuiFlexGroup responsive={false}>
-            <EuiFlexItem>
-              <h2>
-                <FormattedMessage
-                  id="core.ui.chrome.headerGlobalNav.helpMenuTitle"
-                  defaultMessage="Help"
-                />
-              </h2>
-            </EuiFlexItem>
-            {!this.props.isServerless && (
-              <EuiFlexItem
-                grow={false}
-                css={{ textTransform: 'none' }}
-                data-test-subj="kbnVersionString"
-              >
-                <FormattedMessage
-                  id="core.ui.chrome.headerGlobalNav.helpMenuVersion"
-                  defaultMessage="v {version}"
-                  values={{ version: kibanaVersion }}
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiPopoverTitle>
-
-        <div style={{ maxWidth: 240 }}>
-          {globalCustomContent}
-          {defaultContent}
-          {customContent && (
-            <>
-              <EuiPopoverFooter css={euiThemePadding} />
-              {customContent}
-            </>
-          )}
-        </div>
-      </EuiPopover>
-    );
-  }
-
-  private renderDefaultContent() {
-    const { defaultContentLinks } = this.state;
-
-    return (
-      <Fragment>
-        {defaultContentLinks.map(({ href, title, onClick: _onClick, dataTestSubj }, i) => {
-          const isLast = i === defaultContentLinks.length - 1;
-
-          if (href && _onClick) {
-            throw new Error(
-              'Only one of `href` and `onClick` should be provided for the help menu link.'
-            );
-          }
-
-          const hrefProps = href ? { href, target: '_blank' } : {};
-          const onClick = () => {
-            if (!_onClick) return;
-            _onClick();
-            this.closeMenu();
-          };
-
-          return (
-            <Fragment key={i}>
-              <EuiButtonEmpty
-                {...hrefProps}
-                onClick={onClick}
-                size="s"
-                flush="left"
-                data-test-subj={dataTestSubj}
-              >
-                {title}
-              </EuiButtonEmpty>
-              {!isLast && <EuiSpacer size="xs" />}
-            </Fragment>
+  // Render helpers
+  const renderDefaultContent = () => (
+    <Fragment>
+      {defaultContentLinks!.map(({ href, title, onClick: _onClick, dataTestSubj }, i) => {
+        const isLast = i === defaultContentLinks!.length - 1;
+        if (href && _onClick) {
+          throw new Error(
+            'Only one of `href` and `onClick` should be provided for the help menu link.'
           );
-        })}
-      </Fragment>
-    );
-  }
+        }
+        const hrefProps = href ? { href, target: '_blank' } : {};
+        const onClick = () => {
+          if (!_onClick) return;
+          _onClick();
+          closeMenu();
+        };
+        return (
+          <Fragment key={i}>
+            <EuiButtonEmpty
+              {...hrefProps}
+              onClick={onClick}
+              size="s"
+              flush="left"
+              data-test-subj={dataTestSubj}
+            >
+              {title}
+            </EuiButtonEmpty>
+            {!isLast && <EuiSpacer size="xs" />}
+          </Fragment>
+        );
+      })}
+    </Fragment>
+  );
 
-  private renderGlobalCustomContent() {
-    const { navigateToUrl } = this.props;
-    const { globalHelpExtensionMenuLinks } = this.state;
-
-    return globalHelpExtensionMenuLinks
+  const renderGlobalCustomContent = () =>
+    globalHelpExtensionMenuLinks
       .sort((a, b) => b.priority - a.priority)
       .map((link, index) => {
         const { linkType, content: text, href, external, ...rest } = link;
         return createCustomLink(index, text, true, {
           href,
-          onClick: external ? undefined : this.createOnClickHandler(href, navigateToUrl),
+          onClick: external ? undefined : createOnClickHandler(href, navigateToUrl),
           ...rest,
         });
       });
-  }
 
-  private renderCustomContent() {
-    const { helpExtension } = this.state;
-    if (!helpExtension) {
-      return null;
-    }
-    const { navigateToUrl } = this.props;
+  const renderCustomContent = () => {
+    if (!helpExtension) return null;
     const { appName, links, content } = helpExtension;
 
     const getFeedbackText = () =>
@@ -294,11 +181,7 @@ class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
                 defaultMessage="Documentation"
               />,
               addSpacer,
-              {
-                target: '_blank',
-                rel: 'noopener',
-                ...rest,
-              }
+              { target: '_blank', rel: 'noopener', ...rest }
             );
           }
           case 'github': {
@@ -324,12 +207,12 @@ class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
             const { linkType, content: text, href, external, ...rest } = link;
             return createCustomLink(index, text, addSpacer, {
               href,
-              onClick: this.createOnClickHandler(href, navigateToUrl),
+              onClick: createOnClickHandler(href, navigateToUrl),
               ...rest,
             });
           }
           default:
-            break;
+            return null;
         }
       });
 
@@ -343,36 +226,82 @@ class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
           <>
             {customLinks && <EuiSpacer size="xs" />}
             <HeaderExtension
-              extension={(domNode) => content(domNode, { hideHelpMenu: this.closeMenu })}
+              extension={(domNode) => content(domNode, { hideHelpMenu: closeMenu })}
             />
           </>
         )}
       </>
     );
-  }
-
-  private onMenuButtonClick = () => {
-    this.setState({
-      isOpen: !this.state.isOpen,
-    });
   };
 
-  private closeMenu = () => {
-    this.setState({
-      isOpen: false,
-    });
-  };
+  const euiThemePadding = css`
+    padding: ${euiTheme.size.s};
+  `;
 
-  private createOnClickHandler(href: string, navigate: Props['navigateToUrl']) {
-    return (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-      if (!isModifiedOrPrevented(event) && event.button === 0) {
-        event.preventDefault();
-        this.closeMenu();
-        navigate(href);
-      }
-    };
-  }
-}
+  const button = (
+    <EuiHeaderSectionItemButton
+      aria-expanded={isOpen}
+      aria-haspopup="true"
+      aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuButtonAriaLabel', {
+        defaultMessage: 'Help menu',
+      })}
+      onClick={onMenuButtonClick}
+    >
+      <EuiIcon type="question" size="m" />
+    </EuiHeaderSectionItemButton>
+  );
+
+  return (
+    <EuiPopover
+      anchorPosition="downRight"
+      button={button}
+      closePopover={closeMenu}
+      data-test-subj="helpMenuButton"
+      id="headerHelpMenu"
+      isOpen={isOpen}
+      repositionOnScroll
+    >
+      <EuiPopoverTitle>
+        <EuiFlexGroup responsive={false}>
+          <EuiFlexItem>
+            <h2>
+              <FormattedMessage
+                id="core.ui.chrome.headerGlobalNav.helpMenuTitle"
+                defaultMessage="Help"
+              />
+            </h2>
+          </EuiFlexItem>
+          {!isServerless && (
+            <EuiFlexItem
+              grow={false}
+              css={{ textTransform: 'none' }}
+              data-test-subj="kbnVersionString"
+            >
+              <FormattedMessage
+                id="core.ui.chrome.headerGlobalNav.helpMenuVersion"
+                defaultMessage="v {version}"
+                values={{ version: kibanaVersion }}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiPopoverTitle>
+
+      <div style={{ maxWidth: 240 }}>
+        {renderGlobalCustomContent()}
+        {renderDefaultContent()}
+        {renderCustomContent() && (
+          <>
+            <EuiPopoverFooter css={euiThemePadding} />
+            {renderCustomContent()}
+          </>
+        )}
+      </div>
+    </EuiPopover>
+  );
+};
+
+// ----------------------------
 
 const createGithubUrl = (labels: string[], title?: string) => {
   const url = new URL('https://github.com/elastic/kibana/issues/new?');
@@ -403,5 +332,3 @@ const createCustomLink = (
     </Fragment>
   );
 };
-
-export const HeaderHelpMenu = withEuiTheme(HelpMenu);

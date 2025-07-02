@@ -8,20 +8,18 @@
  */
 
 import React, { ReactNode } from 'react';
-import { map } from 'rxjs';
 import {
   ChromeLayout,
-  ChromeLayoutConfigProvider,
   ChromeLayoutConfig,
+  ChromeLayoutConfigProvider,
   SimpleDebugOverlay,
 } from '@kbn/core-chrome-layout-components';
-import useObservable from 'react-use/lib/useObservable';
-import { useStore } from 'zustand';
+import { useChromeUiState } from '@kbn/core-chrome-browser-internal/src/ui_store';
 import { GridLayoutGlobalStyles } from './grid_global_app_style';
 import type {
   LayoutService,
-  LayoutServiceStartDeps,
   LayoutServiceParams,
+  LayoutServiceStartDeps,
 } from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
@@ -68,9 +66,6 @@ export class GridLayout implements LayoutService {
 
     const appComponent = application.getComponent();
     const appBannerComponent = overlays.banners.getComponent();
-    const hasHeaderBanner$ = chrome.hasHeaderBanner$();
-    const chromeVisible$ = chrome.getIsVisible$();
-    const chromeStyle$ = chrome.getChromeStyle$();
     const debug = this.params.debug ?? false;
 
     const classicChromeHeader = chrome.getClassicHeaderComponentForGridLayout();
@@ -82,16 +77,12 @@ export class GridLayout implements LayoutService {
 
     // in project style, the project app menu is displayed at the top of application area
     const projectAppMenu = chrome.getProjectAppMenuComponent();
-    const hasAppMenu$ = application.currentActionMenu$.pipe(map((menu) => !!menu));
-
-    const store = chrome.getUiStore();
 
     return React.memo(() => {
-      // TODO: Get rid of observables https://github.com/elastic/kibana/issues/225265
-      const chromeVisible = useStore(store, (state) => state.isVisible$ ?? false);
-      const hasHeaderBanner = useObservable(hasHeaderBanner$, false);
-      const chromeStyle = useObservable(chromeStyle$, 'classic');
-      const hasAppMenu = useObservable(hasAppMenu$, false);
+      const chromeVisible = useChromeUiState((state) => state.isVisible);
+      const hasHeaderBanner = useChromeUiState((state) => !!state.headerBanner);
+      const chromeStyle = useChromeUiState((state) => state.chromeStyle);
+      const hasAppMenu = useChromeUiState((state) => !!state.currentActionMenu);
 
       const layoutConfig = layoutConfigs[chromeStyle];
 
