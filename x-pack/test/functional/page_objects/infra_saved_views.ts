@@ -55,7 +55,7 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
     },
 
     async createNewSavedView(name: string) {
-      await testSubjects.setValue('savedViewName', name);
+      await testSubjects.setValue('savedViewName', name, { clearWithKeyboard: true });
       await testSubjects.click('createSavedViewButton');
       await testSubjects.missingOrFail('createSavedViewButton', { timeout: 20000 });
       await retry.tryForTime(config.get('timeouts.try'), async () => {
