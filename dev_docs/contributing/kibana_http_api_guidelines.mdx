@@ -7,8 +7,62 @@ date: 2025-07-02
 tags: ['kibana', 'contributor', 'dev', 'http', 'api', 'rest', 'design']
 ---
 
-Kibana's HTTP APIs are the foundation for developers, partners, and customers to build powerful extensions, automations, and integrations with Kibana.
+Kibana's public HTTP APIs are the foundation for developers, partners, and customers to build powerful extensions, automations, and integrations with Kibana.
 
-These guidelines provide a set of best practices for designing HTTP APIs in Kibana that are consistent, predictable, and easy to use. Whether you're building new APIs or enhancing existing ones, following these guidelines will help ensure that your APIs integrate seamlessly with the rest of the Kibana ecosystem and provide a great developer experience.
+These guidelines provide a set of best practices for designing HTTP APIs that are consistent, predictable, and easy to use. Whether you're building new APIs or enhancing existing ones, following these guidelines will help ensure that your APIs provide a great user experience.
 
-For specific guidance on making your APIs Terraform-friendly, refer to the [Guidelines for Terraform friendly HTTP APIs](/kibana-dev-docs/contributing/http-api-tf-guidelines).
+<DocCallOut title="Some APIs need to be Terraform-friendly">
+  As an extension to the guidance in this document refer to the [Guidelines for Terraform friendly HTTP APIs](/kibana-dev-docs/contributing/http-api-tf-guidelines).
+</DocCallOut>
+
+## API design principles
+
+### Consistency
+
+Consistency is key to a great API-user experience. APIs should be consistent in their naming, structure, and behavior. Consistency may be domain-specific: it's always best to follow an established pattern. If no pattern exists, consider creating one paying close attention to:
+
+1. **Consistent naming**: Use the same suffix for IDs (e.g., `space_id`, `dashboard_id`, etc.).
+2. **Consistent structure**: Use the same structure for referencing resources in requests and responses in all related APIs.
+3. **Consistent validation**: Apply the same validation rules across all APIs.
+4. **Consistent error messages**: Use the same error messages for the same errors.
+
+This principle is embodied in the rest of this document, so read on for examples!
+
+### Optimize for a great API-user experience
+
+The important distinction here is to create a great _API_ user experience, as opposed to optimizing for _UI_ use cases as well. Front-ends have very different needs and constraints from public HTTP API clients. Our public HTTP APIs should be primitives that are simple to use and compose.
+
+For example, a UI might want to optimise it's network requests by bundling multiple requests into a single request, but an API client would be better designed to de-optimise and simplify the requests:
+
+A view or component in the UI might do the following for some, UI-specific purpose:
+```
+GET /some_related_resources_for_this_page?ids_only=true&page=1
+# Which returns:
+{
+  "a_ids": ["1", "2"],
+  "b_ids": ["2"]
+}
+```
+
+While API clients are better designed as:
+```
+# Request 1
+GET /resource_as?page=1
+{
+  "items": [{ id: "1", "name": "Resource A 1" }, { id: "2", "name": "Resource A 2" }],
+  "page": 1,
+  "total": 2
+}
+# Request 2
+GET /resource_bs?page=1
+{
+  "items": [{ id: "1", "name": "Resource B 1" }],
+  "page": 1,
+  "total": 1
+}
+```
+
+
+<DocCallOut title="Internal vs Public APIs">
+  We categorise Kibana APIs as either **internal** or **public**. See the [Internal vs Public APIs](#internal-vs-public-apis) section for more details.
+</DocCallOut>
