@@ -12,7 +12,6 @@ import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
-import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
