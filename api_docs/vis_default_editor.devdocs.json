@@ -1252,7 +1252,166 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "visDefaultEditor",
+        "id": "def-public.visEditorSidebarStyles",
+        "type": "Object",
+        "tags": [],
+        "label": "visEditorSidebarStyles",
+        "description": [],
+        "path": "src/platform/plugins/private/vis_default_editor/public/_sidebar.styles.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visDefaultEditor",
+            "id": "def-public.visEditorSidebarStyles.section",
+            "type": "Function",
+            "tags": [],
+            "label": "section",
+            "description": [],
+            "signature": [
+              "({ euiTheme }: ",
+              "UseEuiTheme",
+              "<{}>) => ",
+              "SerializedStyles"
+            ],
+            "path": "src/platform/plugins/private/vis_default_editor/public/_sidebar.styles.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "visDefaultEditor",
+                "id": "def-public.visEditorSidebarStyles.section.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ euiTheme }",
+                "description": [],
+                "signature": [
+                  "UseEuiTheme",
+                  "<{}>"
+                ],
+                "path": "src/platform/plugins/private/vis_default_editor/public/_sidebar.styles.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visDefaultEditor",
+            "id": "def-public.visEditorSidebarStyles.collapsible",
+            "type": "Function",
+            "tags": [],
+            "label": "collapsible",
+            "description": [],
+            "signature": [
+              "({ euiTheme, colorMode }: ",
+              "UseEuiTheme",
+              "<{}>) => ",
+              "SerializedStyles"
+            ],
+            "path": "src/platform/plugins/private/vis_default_editor/public/_sidebar.styles.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "visDefaultEditor",
+                "id": "def-public.visEditorSidebarStyles.collapsible.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ euiTheme, colorMode }",
+                "description": [],
+                "signature": [
+                  "UseEuiTheme",
+                  "<{}>"
+                ],
+                "path": "src/platform/plugins/private/vis_default_editor/public/_sidebar.styles.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visDefaultEditor",
+            "id": "def-public.visEditorSidebarStyles.collapsibleMarginBottom",
+            "type": "Function",
+            "tags": [],
+            "label": "collapsibleMarginBottom",
+            "description": [],
+            "signature": [
+              "({ euiTheme }: ",
+              "UseEuiTheme",
+              "<{}>) => ",
+              "SerializedStyles"
+            ],
+            "path": "src/platform/plugins/private/vis_default_editor/public/_sidebar.styles.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "visDefaultEditor",
+                "id": "def-public.visEditorSidebarStyles.collapsibleMarginBottom.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ euiTheme }",
+                "description": [],
+                "signature": [
+                  "UseEuiTheme",
+                  "<{}>"
+                ],
+                "path": "src/platform/plugins/private/vis_default_editor/public/_sidebar.styles.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visDefaultEditor",
+            "id": "def-public.visEditorSidebarStyles.aggGroupAccordionButtonContent",
+            "type": "Function",
+            "tags": [],
+            "label": "aggGroupAccordionButtonContent",
+            "description": [],
+            "signature": [
+              "(euiThemeContext: ",
+              "UseEuiTheme",
+              "<{}>) => ",
+              "SerializedStyles"
+            ],
+            "path": "src/platform/plugins/private/vis_default_editor/public/_sidebar.styles.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "visDefaultEditor",
+                "id": "def-public.visEditorSidebarStyles.aggGroupAccordionButtonContent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "euiThemeContext",
+                "description": [],
+                "signature": [
+                  "UseEuiTheme",
+                  "<{}>"
+                ],
+                "path": "src/platform/plugins/private/vis_default_editor/public/_sidebar.styles.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   },
   "server": {
     "classes": [],
