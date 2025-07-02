@@ -108,11 +108,11 @@ For Terraform to properly manage resources, your API must implement a complete s
 For every resource type, implement these HTTP endpoints:
 
 ```
-GET    /api/resource/{id}         # Read - retrieve an existing resource
-POST   /api/resource              # Create - create a new resource
-PUT    /api/resource/{id}         # Update - update an existing resource
-DELETE /api/resource/{id}         # Delete - remove an existing resource
-GET    /api/resource              # List - retrieve all resources (with pagination)
+GET    /api/resources/{id}         # Read - retrieve an existing resource
+POST   /api/resources              # Create - create a new resource
+PUT    /api/resources/{id}         # Update - update an existing resource
+DELETE /api/resources/{id}         # Delete - remove an existing resource
+GET    /api/resources              # List - retrieve all resources (with pagination)
 ```
 
 <DocCallOut title="Terraform import">
@@ -158,7 +158,7 @@ GET    /api/resource              # List - retrieve all resources (with paginati
 // Retrieve 1 resource
 router.get(
   {
-    path: '/api/resource/{id}',
+    path: '/api/resources/{id}',
     validate: false, // `get` should not have bodies
   },
   async (context, request, response) => {
@@ -170,7 +170,7 @@ router.get(
 // Create, update
 router.(post|put)(
   {
-    path: '/api/resource',
+    path: '/api/resources',
     validate: {
       body: schema.object({
         name: schema.string(),
@@ -187,7 +187,7 @@ router.(post|put)(
 // Delete
 router.delete(
   {
-    path: '/api/resource/{id}',
+    path: '/api/resources/{id}',
     validate: {
       params: schema.object({
         id: schema.string(),
@@ -203,7 +203,7 @@ router.delete(
 // List many resources
 router.get(
   {
-    path: '/api/resource',
+    path: '/api/resources',
     validate: {
       query: schema.object({
         page: schema.maybe(schema.number()),
@@ -713,9 +713,9 @@ When a Terraform configuration manages hundreds of similar resources, individual
 Add these bulk operation endpoints to complement your individual resource operations:
 
 ```
-POST   /api/resource/_bulk_create   # Create multiple resources
-POST   /api/resource/_bulk_update   # Update multiple resources
-POST   /api/resource/_bulk_delete   # Delete multiple resources
+POST   /api/resources/_bulk_create   # Create multiple resources
+POST   /api/resources/_bulk_update   # Update multiple resources
+POST   /api/resources/_bulk_delete   # Delete multiple resources
 ```
 
 #### Design principles for bulk APIs
