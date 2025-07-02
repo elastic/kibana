@@ -10,6 +10,12 @@ import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import type { SavedObjectAccessControl } from '../..';
 import type { SavedObjectsBaseOptions } from './base';
+
+export interface SavedObjectsChangeAccessControlObject {
+  type: string;
+  id: string;
+}
+
 /**
  * Options for the changing ownership of a saved object
  *

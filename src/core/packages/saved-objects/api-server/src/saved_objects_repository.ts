@@ -50,9 +50,9 @@ import type {
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteResponse,
-  SavedObjectsChangeOwnershipOptions,
-  SavedObjectsChangeOwnershipResponse,
-  SavedObjectsChangeOwnershipObject,
+  SavedObjectsChangeAccessControlOptions,
+  SavedObjectsChangeAccessControlResponse,
+  SavedObjectsChangeAccessControlObject,
 } from './apis';
 
 /**
@@ -563,7 +563,7 @@ export interface ISavedObjectsRepository {
   asScopedToNamespace(namespace: string): ISavedObjectsRepository;
 
   changeOwnership<T = unknown>(
-    objects: SavedObjectsChangeOwnershipObject[],
-    options: SavedObjectsChangeOwnershipOptions<T>
-  ): Promise<SavedObjectsChangeOwnershipResponse<T>>;
+    objects: SavedObjectsChangeAccessControlObject[],
+    options: SavedObjectsChangeAccessControlOptions<T>
+  ): Promise<SavedObjectsChangeAccessControlResponse>;
 }

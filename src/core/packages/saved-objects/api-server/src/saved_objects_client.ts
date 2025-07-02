@@ -47,9 +47,9 @@ import type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
-  SavedObjectsChangeOwnershipResponse,
-  SavedObjectsChangeOwnershipOptions,
-  SavedObjectsChangeOwnershipObject,
+  SavedObjectsChangeAccessControlResponse,
+  SavedObjectsChangeAccessControlOptions,
+  SavedObjectsChangeAccessControlObject,
 } from './apis';
 
 /**
@@ -447,7 +447,7 @@ export interface SavedObjectsClientContract {
    * @returns the {@link SavedObjectChangeOwnershipResponse}
    */
   changeOwnership<T = unknown>(
-    objects: SavedObjectsChangeOwnershipObject[],
-    options: SavedObjectsChangeOwnershipOptions<T>
-  ): Promise<SavedObjectsChangeOwnershipResponse<T>>;
+    objects: SavedObjectsChangeAccessControlObject[],
+    options: SavedObjectsChangeAccessControlOptions<T>
+  ): Promise<SavedObjectsChangeAccessControlResponse>;
 }
