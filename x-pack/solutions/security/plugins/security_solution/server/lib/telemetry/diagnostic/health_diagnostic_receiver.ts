@@ -79,7 +79,7 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
     try {
       const response = await this.client.search(
         {
-          index: diagnosticQuery.index,
+          index: await this.indexFor(diagnosticQuery),
           ...request,
         },
         { signal: abortSignal }
@@ -110,6 +110,7 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
     const controller = new AbortController();
     const abortSignal = controller.signal;
     const regex = /^[\s\r\n]*FROM/;
+    const indices = (await this.indexFor(diagnosticQuery)).join(',');
 
     const stopSub: rx.Subscription = stop$.subscribe(() => {
       controller.abort();
@@ -117,7 +118,7 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
 
     const query = regex.test(diagnosticQuery.query)
       ? diagnosticQuery.query
-      : `FROM ${diagnosticQuery.index} | ${diagnosticQuery.query}`;
+      : `FROM ${indices} | ${diagnosticQuery.query}`;
 
     try {
       const response = await this.client.helpers
@@ -143,7 +144,7 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
     });
     try {
       const request: EqlSearchRequest = {
-        index: diagnosticQuery.index,
+        index: await this.indexFor(diagnosticQuery),
         query: diagnosticQuery.query,
       };
 
@@ -186,5 +187,61 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
         throw new Error(result.message);
       })
     );
+  }
+
+  /**
+   * Returns the list of indices to query based on the provided tiers.
+   * When running in serverless or `query.index` is not managed by an ILM, returns
+   * the same `query.index`.
+   *
+   * @param query The health diagnostic query object.
+   * @returns A Promise resolving to an array of indices.
+   */
+  async indexFor(query: HealthDiagnosticQuery): Promise<string[]> {
+    if (query.tiers === undefined) {
+      this.logger.debug('No tiers defined in the query, returning index as is', {
+        queryName: query.name,
+      } as LogMeta);
+      return [query.index];
+    }
+    const tiers = query.tiers;
+
+    return (
+      await this.client.ilm
+        .explainLifecycle({
+          index: query.index,
+          only_managed: false,
+          filter_path: ['indices.*.phase'],
+        })
+        .then((response) => {
+          if (response.indices === undefined) {
+            this.logger.info(
+              'Got an empty response while explaining lifecycle. Asumming serverless.',
+              {
+                index: query.index,
+              } as LogMeta
+            );
+            return [query.index];
+          } else {
+            const indices = Object.entries(response.indices).map(([indexName, stats]) => {
+              if ('phase' in stats && stats.phase && stats.phase in tiers) {
+                return indexName;
+              } else {
+                // should not happen, but just in case
+                this.logger.debug('Index is not managed by an ILM', {
+                  index: query.index,
+                } as LogMeta);
+                return '';
+              }
+            });
+            this.logger.debug('Indices managed by ILM', {
+              queryName: query.name,
+              tiers: query.tiers,
+              indices,
+            });
+            return indices;
+          }
+        })
+    ).filter((indexName) => indexName !== '');
   }
 }

@@ -81,6 +81,12 @@ export interface HealthDiagnosticQuery {
    */
   index: string;
   /**
+   * Only include indices in the specified tiers. Note that if the `index`
+   * hasn't a life cycle management or we are on serverless, this will be
+   * ignored.
+   */
+  tiers?: string[];
+  /**
    * Specifies the query type, as defined by the QueryType enum.
    */
   type: QueryType;
