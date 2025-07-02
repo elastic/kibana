@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { base } from 'playwright/test';
+import { test as base } from 'playwright/test';
 import { EsArchiverFixture, coreWorkerFixtures, esArchiverFixture } from '../worker';
 import type { CoreWorkerFixtures } from '../worker/core_fixtures';
 import { RequestAuthFixture, requestAuthFixture } from '../worker/api_key';
@@ -23,10 +23,10 @@ interface ApiWorkerFixtures extends CoreWorkerFixtures {
 
 export const apiTest = base.extend<ApiWorkerFixtures>({
   // Remove built-in browser fixtures
-  page: [async (_, use) => await use(undefined), { scope: 'test' }],
-  browser: [async (_, use) => await use(undefined), { scope: 'worker' }],
-  context: [async (_, use) => await use(undefined), { scope: 'test' }],
-  request: [async (_, use) => await use(undefined), { scope: 'test' }],
+  page: [async (_: unknown, use) => await use(undefined), { scope: 'test' }],
+  browser: [async (_: unknown, use) => await use(undefined), { scope: 'worker' }],
+  context: [async (_: unknown, use) => await use(undefined), { scope: 'test' }],
+  request: [async (_: unknown, use) => await use(undefined), { scope: 'test' }],
 
   // Add custom fixtures
   ...coreWorkerFixtures,
