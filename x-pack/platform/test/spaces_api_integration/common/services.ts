@@ -9,7 +9,12 @@ import { services as apiIntegrationServices } from '../../api_integration/servic
 import { RoleScopedSupertestProvider } from '../deployment_agnostic/services/role_scoped_supertest';
 
 export const services = {
-  ...commonServices,
+  es: apiIntegrationServices.es,
+  esArchiver: apiIntegrationServices.esArchiver,
+  kibanaServer: apiIntegrationServices.kibanaServer,
+  retry: apiIntegrationServices.retry,
+  supertest: apiIntegrationServices.supertest,
+  supertestWithoutAuth: apiIntegrationServices.supertestWithoutAuth,
   usageAPI: apiIntegrationServices.usageAPI,
   spaces: apiIntegrationServices.spaces,
   roleScopedSupertest: RoleScopedSupertestProvider,

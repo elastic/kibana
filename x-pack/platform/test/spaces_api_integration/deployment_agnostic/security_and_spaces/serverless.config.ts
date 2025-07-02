@@ -9,7 +9,6 @@ import { createServerlessTestConfig } from '../default_configs/serverless.config
 import { services } from '../services';
 
 export default createServerlessTestConfig({
-  // @ts-expect-error
   services,
   serverlessProject: 'security',
   testFiles: [require.resolve('./apis/index.serverless')],
