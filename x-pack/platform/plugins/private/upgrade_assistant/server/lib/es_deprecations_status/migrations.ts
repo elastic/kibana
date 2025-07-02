@@ -122,7 +122,7 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
     }
   );
 
-  // If xpack.ml.enabled is set to false, ML settings key won't be pressent https://github.com/elastic/sdh-kibana/issues/5541
+  // If xpack.ml.enabled is set to false, ML settings key won't be pressent
   const mlSettingsDeprecations = (migrationsResponse.ml_settings || []).map((deprecationData) =>
     createBaseDeprecation(deprecationData, { deprecationType: 'ml_settings' })
   );
