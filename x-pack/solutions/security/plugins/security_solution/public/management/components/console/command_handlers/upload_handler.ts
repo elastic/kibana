@@ -79,10 +79,7 @@ export class UploadCommandHandler extends BaseCommandHandler {
           remainingText.startsWith(`${firstChar}${filename}${firstChar}`)
         ) {
           replacementLength = argChrLength + 1 + filename.length + 2;
-        } else if (
-          remainingText.startsWith(`${filename} `) ||
-          remainingText === filename
-        ) {
+        } else if (remainingText.startsWith(`${filename} `) || remainingText === filename) {
           replacementLength = argChrLength + 1 + filename.length;
         }
       }

@@ -67,14 +67,17 @@ export class CommandRegistry {
   /**
    * Calculate replacement length for deduplication for the given command.
    */
-  calculateReplacementLength(commandName: string, args: {
-    argChrLength: number;
-    argState: EnteredCommand['argState'];
-    selectorValue: string;
-    input: string;
-    startSearchIndexForNextArg: number;
-    charAfterArgName: string;
-  }): number {
+  calculateReplacementLength(
+    commandName: string,
+    args: {
+      argChrLength: number;
+      argState: EnteredCommand['argState'];
+      selectorValue: string;
+      input: string;
+      startSearchIndexForNextArg: number;
+      charAfterArgName: string;
+    }
+  ): number {
     const handler = this.handlers.get(commandName);
     if (handler && typeof handler.calculateReplacementLength === 'function') {
       return handler.calculateReplacementLength(args);
