@@ -326,6 +326,8 @@ src/platform/packages/private/kbn-ci-stats-core @elastic/kibana-operations
 src/platform/packages/private/kbn-ci-stats-reporter @elastic/kibana-operations
 src/platform/packages/private/kbn-code-owners @elastic/appex-qa
 src/platform/packages/private/kbn-config-mocks @elastic/kibana-core
+src/platform/packages/private/kbn-dot-text @elastic/kibana-operations
+src/platform/packages/private/kbn-dot-text-loader @elastic/kibana-operations
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-ftr-screenshot-filename @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/private/kbn-gen-ai-functional-testing @elastic/appex-ai-infra
