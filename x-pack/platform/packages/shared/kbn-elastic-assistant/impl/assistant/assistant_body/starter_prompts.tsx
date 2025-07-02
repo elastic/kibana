@@ -68,6 +68,7 @@ export const promptGroups = [
 export const StarterPrompts: React.FC<Props> = ({ connectorId, setUserPrompt }) => {
   const {
     assistantAvailability: { isAssistantEnabled },
+    assistantTelemetry,
     http,
     toasts,
   } = useAssistantContext();
@@ -93,11 +94,21 @@ export const StarterPrompts: React.FC<Props> = ({ connectorId, setUserPrompt }) 
     return formatPromptGroups(actualPrompts);
   }, [actualPrompts]);
 
-  const onSelectPrompt = useCallback(
-    (prompt: string) => {
-      setUserPrompt(prompt);
+  const trackPrompt = useCallback(
+    (promptTitle: string) => {
+      assistantTelemetry?.reportAssistantStarterPrompt({
+        promptTitle,
+      });
     },
-    [setUserPrompt]
+    [assistantTelemetry]
+  );
+
+  const onSelectPrompt = useCallback(
+    (prompt: string, title: string) => {
+      setUserPrompt(prompt);
+      trackPrompt(title);
+    },
+    [setUserPrompt, trackPrompt]
   );
 
   return (
@@ -109,7 +120,7 @@ export const StarterPrompts: React.FC<Props> = ({ connectorId, setUserPrompt }) 
             hasShadow={false}
             hasBorder
             data-test-subj={prompt}
-            onClick={() => onSelectPrompt(prompt)}
+            onClick={() => onSelectPrompt(prompt, title)}
             className={starterPromptInnerClassName}
           >
             <EuiSpacer size="s" />
