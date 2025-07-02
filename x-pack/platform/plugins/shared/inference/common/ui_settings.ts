@@ -27,7 +27,7 @@ const nerRuleSchema = schema.allOf([
   baseRuleSchema,
   schema.object({
     type: schema.literal('NER'),
-    modelId: schema.maybe(schema.string()),
+    modelId: schema.string(),
     allowedEntityClasses: schema.maybe(
       schema.arrayOf(
         schema.oneOf([
