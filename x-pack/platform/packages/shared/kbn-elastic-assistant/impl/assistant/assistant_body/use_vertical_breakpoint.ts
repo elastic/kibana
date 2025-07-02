@@ -5,27 +5,24 @@
  * 2.0.
  */
 
-import { useRef, useState, useEffect } from 'react';
-import debounce from 'lodash/debounce';
+import { useEffect } from 'react';
+import useRafState from 'react-use/lib/useRafState';
 
 export type VerticalBreakpoint = 'short' | 'medium' | 'tall';
 
 export function useVerticalBreakpoint(): VerticalBreakpoint {
-  const [height, setHeight] = useState(() => window.innerHeight);
-  const handleResizeRef = useRef<((event: UIEvent) => void) & { cancel: () => void }>();
+  const [height, setHeight] = useRafState(() => window.innerHeight);
 
   useEffect(() => {
-    const handleResize = debounce(() => {
+    const handleResize = () => {
       const newHeight = window.innerHeight;
       setHeight((prev) => (prev !== newHeight ? newHeight : prev));
-    }, 75) as ((event: UIEvent) => void) & { cancel: () => void };
-    handleResizeRef.current = handleResize;
+    };
     window.addEventListener('resize', handleResize, { passive: true });
     return () => {
       window.removeEventListener('resize', handleResize);
-      handleResize.cancel();
     };
-  }, []);
+  }, [setHeight]);
 
   if (height < 600) return 'short';
   if (height < 1100) return 'medium';
