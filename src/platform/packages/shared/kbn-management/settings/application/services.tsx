@@ -174,7 +174,7 @@ export const SettingsApplicationKibanaProvider: FC<
   };
 
   const getCapabilities = () => {
-    const { advancedSettings, globalSettings } = application.capabilities;
+    const { advancedSettings, globalSettings, solutionsFiltering } = application.capabilities;
     return {
       spaceSettings: {
         show: advancedSettings.show as boolean,
@@ -184,6 +184,7 @@ export const SettingsApplicationKibanaProvider: FC<
         show: globalSettings.show as boolean,
         save: globalSettings.save as boolean,
       },
+      solutionsFiltering: solutionsFiltering as unknown as boolean,
     };
   };
 
