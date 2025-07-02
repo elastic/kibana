@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { expect, ScoutPage } from '@kbn/scout';
+import { expect, ScoutPage } from '@kbn/scout-oblt';
 
 export class AnnotationsApp {
   constructor(private readonly page: ScoutPage) {}
