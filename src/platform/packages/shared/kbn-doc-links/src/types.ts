@@ -289,6 +289,7 @@ export interface DocLinks {
     readonly gapsTable: string;
     readonly ruleApiOverview: string;
     readonly configureAlertSuppression: string;
+    readonly ingestDataToSecurity: string;
   };
   readonly server: {
     readonly protocol: string;
@@ -299,6 +300,8 @@ export interface DocLinks {
   };
   readonly securitySolution: {
     readonly aiAssistant: string;
+    readonly cloudSecurityPosture: string;
+    readonly installElasticDefend: string;
     readonly artifactControl: string;
     readonly avcResults: string;
     readonly bidirectionalIntegrations: string;
@@ -334,6 +337,7 @@ export interface DocLinks {
       readonly riskScorePrerequisites: string;
       readonly entityRiskScoring: string;
       readonly assetCriticality: string;
+      readonly privilegedUserMonitoring: string;
     };
     readonly detectionEngineOverview: string;
     readonly signalsMigrationApi: string;
