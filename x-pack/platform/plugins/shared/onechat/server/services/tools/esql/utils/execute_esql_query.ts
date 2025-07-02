@@ -77,7 +77,9 @@ export const registeredToolCreator = (tool: EsqlToolDefinition): RegisteredTool 
         params: [params],
       });
 
-      return response;
+      return {
+        result: response,
+      };
     },
     meta: tool.meta,
   };

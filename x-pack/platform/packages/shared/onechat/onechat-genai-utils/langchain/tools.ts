@@ -92,9 +92,10 @@ export const toolToLangchain = ({
   return toTool(
     async (input) => {
       try {
-        const { result } = await tool.execute({ toolParams: input });
+        const toolReturn = await tool.execute({ toolParams: input });
+        const { result } = toolReturn;
         const content = typeof result === 'string' ? result : JSON.stringify(result);
-        return [content, result];
+        return [content, toolReturn];
       } catch (e) {
         logger.warn(`error calling tool ${tool.id}: ${e.message}`);
         throw e;

@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
-import type { AIMessageChunk, BaseMessage, ToolMessage } from '@langchain/core/messages';
+import { AIMessageChunk, BaseMessage, isToolMessage } from '@langchain/core/messages';
 import { EMPTY, mergeMap, of, OperatorFunction } from 'rxjs';
 import {
   MessageChunkEvent,
@@ -26,9 +26,11 @@ import {
   createToolResultEvent,
   extractTextContent,
   extractToolCalls,
+  extractToolReturn,
   toolIdentifierFromToolCall,
   ToolIdMapping,
 } from '@kbn/onechat-genai-utils/langchain';
+import type { StateType } from './graph';
 
 export type ConvertedEvents =
   | MessageChunkEvent
@@ -90,16 +92,19 @@ export const convertGraphEvents = ({
 
         // emit tool result events
         if (matchEvent(event, 'on_chain_end') && matchName(event, 'tools')) {
-          const toolMessages: ToolMessage[] = event.data.output.addedMessages ?? [];
+          const toolMessages = ((event.data.output as StateType).addedMessages ?? []).filter(
+            isToolMessage
+          );
 
           const toolResultEvents: ToolResultEvent[] = [];
           for (const toolMessage of toolMessages) {
             const toolId = toolCallIdToIdMap.get(toolMessage.tool_call_id);
+            const toolReturn = extractToolReturn(toolMessage);
             toolResultEvents.push(
               createToolResultEvent({
                 toolCallId: toolMessage.tool_call_id,
                 toolId: toolId ?? toStructuredToolIdentifier('unknown'),
-                result: extractTextContent(toolMessage),
+                result: JSON.stringify(toolReturn.result),
               })
             );
           }
