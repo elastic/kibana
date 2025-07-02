@@ -6,7 +6,7 @@
  */
 
 import type { RegisteredTool } from '@kbn/onechat-server';
-import type { ToolsServiceSetup } from '../services/tools';
+import type { BuiltinToolRegistry } from './builtin_registry';
 import {
   getDocumentByIdTool,
   executeEsqlTool,
@@ -18,7 +18,7 @@ import {
   indexExplorerTool,
 } from './retrieval';
 
-export const registerTools = ({ tools: registry }: { tools: ToolsServiceSetup }) => {
+export const registerBuiltinTools = ({ registry }: { registry: BuiltinToolRegistry }) => {
   const tools: Array<RegisteredTool<any, any>> = [
     getDocumentByIdTool(),
     executeEsqlTool(),

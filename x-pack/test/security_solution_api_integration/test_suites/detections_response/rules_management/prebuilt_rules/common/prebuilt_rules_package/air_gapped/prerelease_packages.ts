@@ -52,8 +52,13 @@ export default ({ getService }: FtrProviderContext): void => {
         retryService
       );
 
-      expect(fleetPackageInstallationResponse.items.length).toBe(1);
-      expect(fleetPackageInstallationResponse.items[0].id).toBe('rule_99.0.0'); // Name of the rule in package 99.0.0
+      expect(fleetPackageInstallationResponse.items.length).toBe(2);
+      expect(fleetPackageInstallationResponse.items).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: 'test-prebuilt-rule-a' }),
+          expect.objectContaining({ id: 'test-prebuilt-rule-b' }),
+        ])
+      ); // Name of the rule in package 99.0.0
 
       // Get the installed package and check if the version is 99.0.0
       const prebuiltRulesFleetPackage = await getPrebuiltRulesFleetPackage(supertest);
@@ -63,7 +68,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // Get status of our prebuilt rules (nothing should be instaled yet)
       const statusAfterPackageInstallation = await getPrebuiltRulesStatus(es, supertest);
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_installed).toBe(0);
-      expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_to_install).toBe(1); // 1 rule in package 99.0.0
+      expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_to_install).toBe(2); // 1 rule in package 99.0.0
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);
 
       // Install prebuilt rules
@@ -71,7 +76,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // Verify that status is updated after package installation
       const statusAfterRulesInstallation = await getPrebuiltRulesStatus(es, supertest);
-      expect(statusAfterRulesInstallation.stats.num_prebuilt_rules_installed).toBe(1); // 1 rule in package 99.0.0
+      expect(statusAfterRulesInstallation.stats.num_prebuilt_rules_installed).toBe(2); // 1 rule in package 99.0.0
       expect(statusAfterRulesInstallation.stats.num_prebuilt_rules_to_install).toBe(0);
       expect(statusAfterRulesInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);
 
@@ -79,7 +84,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const rulesResponse = await getInstalledRules(supertest);
 
       // Assert that installed rules are from package 99.0.0 and not from prerelease (beta) package
-      expect(rulesResponse.data.length).toBe(1);
+      expect(rulesResponse.data.length).toBe(2);
       expect(rulesResponse.data[0].name).not.toContain('beta');
       expect(rulesResponse.data[0].name).toContain('99.0.0');
     });
