@@ -40,10 +40,10 @@ describe('RunscriptCommandHandler', () => {
       };
 
       const enteredCommand: EnteredCommand = {
-        commandDefinition: {} as any,
+        commandDefinition: {},
         argsWithValueSelectors: {
-          ScriptName: {} as any,
-          CloudFile: {} as any,
+          ScriptName: {},
+          CloudFile: {},
         },
         argState: {},
       };
@@ -68,9 +68,9 @@ describe('RunscriptCommandHandler', () => {
       };
 
       const enteredCommand: EnteredCommand = {
-        commandDefinition: {} as any,
+        commandDefinition: {},
         argsWithValueSelectors: {
-          ScriptName: {} as any,
+          ScriptName: {},
         },
         argState: {
           ScriptName: [{ value: 'existing.sh', valueText: 'existing.sh' }],
@@ -92,7 +92,7 @@ describe('RunscriptCommandHandler', () => {
       };
 
       const enteredCommand: EnteredCommand = {
-        commandDefinition: {} as any,
+        commandDefinition: {},
         argsWithValueSelectors: undefined,
         argState: {},
       };
@@ -164,9 +164,9 @@ describe('RunscriptCommandHandler', () => {
       };
 
       const enteredCommand: EnteredCommand = {
-        commandDefinition: {} as any,
+        commandDefinition: {},
         argsWithValueSelectors: {
-          ScriptName: {} as any,
+          ScriptName: {},
         },
         argState: {
           ScriptName: [{ value: 'new.sh', valueText: 'new.sh' }],
@@ -186,7 +186,7 @@ describe('RunscriptCommandHandler', () => {
       };
 
       const enteredCommand: EnteredCommand = {
-        commandDefinition: {} as any,
+        commandDefinition: {},
         argsWithValueSelectors: undefined,
         argState: {},
       };

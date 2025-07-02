@@ -40,9 +40,9 @@ describe('UploadCommandHandler', () => {
       };
 
       const enteredCommand: EnteredCommand = {
-        commandDefinition: {} as any,
+        commandDefinition: {},
         argsWithValueSelectors: {
-          file: {} as any,
+          file: {},
         },
         argState: {},
       };
@@ -64,9 +64,9 @@ describe('UploadCommandHandler', () => {
       };
 
       const enteredCommand: EnteredCommand = {
-        commandDefinition: {} as any,
+        commandDefinition: {},
         argsWithValueSelectors: {
-          file: {} as any,
+          file: {},
         },
         argState: {
           file: [{ value: 'existing.txt', valueText: 'existing.txt' }],
@@ -88,7 +88,7 @@ describe('UploadCommandHandler', () => {
       };
 
       const enteredCommand: EnteredCommand = {
-        commandDefinition: {} as any,
+        commandDefinition: {},
         argsWithValueSelectors: undefined,
         argState: {},
       };
@@ -156,9 +156,9 @@ describe('UploadCommandHandler', () => {
       };
 
       const enteredCommand: EnteredCommand = {
-        commandDefinition: {} as any,
+        commandDefinition: {},
         argsWithValueSelectors: {
-          file: {} as any,
+          file: {},
         },
         argState: {
           file: [{ value: 'new.txt', valueText: 'new.txt' }],
@@ -181,10 +181,10 @@ describe('UploadCommandHandler', () => {
       };
 
       const enteredCommand: EnteredCommand = {
-        commandDefinition: {} as any,
+        commandDefinition: {},
         argsWithValueSelectors: {
-          file: {} as any,
-          path: {} as any,
+          file: {},
+          path: {},
         },
         argState: {
           file: [{ value: 'new.txt', valueText: 'new.txt' }],
@@ -206,7 +206,7 @@ describe('UploadCommandHandler', () => {
       };
 
       const enteredCommand: EnteredCommand = {
-        commandDefinition: {} as any,
+        commandDefinition: {},
         argsWithValueSelectors: undefined,
         argState: {},
       };
