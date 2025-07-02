@@ -17,7 +17,6 @@ apiTest.describe('Console APIs', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
       headers: {
         'kbn-xsrf': 'some-xsrf-token',
         'x-elastic-internal-origin': 'kibana',
-        'kbn-xsrf': 'true',
         ...adminApiCredentials.apiKeyHeader,
       },
       responseType: 'json',
@@ -37,7 +36,6 @@ apiTest.describe('Console APIs', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
       headers: {
         'kbn-xsrf': 'some-xsrf-token',
         'x-elastic-internal-origin': 'kibana',
-        'kbn-xsrf': 'true',
         ...adminApiCredentials.apiKeyHeader,
       },
       responseType: 'json',
