@@ -255,7 +255,9 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
               } else {
                 // should not happen, but just in case
                 this.logger.debug('Index is not managed by an ILM', {
-                  index: query.index,
+                  index: indexName,
+                  response,
+                  tiers,
                 } as LogMeta);
                 return '';
               }
