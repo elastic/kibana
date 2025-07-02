@@ -89,8 +89,11 @@ const runTests = (
       : undefined;
   });
 
+  const spacesToDeleteIds: string[] = [];
+
   after(async () => {
     await kibanaServer.savedObjects.cleanStandardList();
+    await Promise.all(spacesToDeleteIds.map((id) => kibanaServer.spaces.delete(id)));
   });
 
   beforeEach(() => {
@@ -214,6 +217,7 @@ const runTests = (
       );
       const NEW_SPACE = `edit-space-${uuid}`;
       await kibanaServer.spaces.create({ id: NEW_SPACE, name: `Edit Space ${uuid}` });
+      spacesToDeleteIds.push(NEW_SPACE);
 
       await editMonitor(
         legacy.id,
@@ -247,6 +251,7 @@ const runTests = (
       const SPACE2 = `multi-space2-${uuid}`;
       await kibanaServer.spaces.create({ id: SPACE1, name: `Multi Space 1 ${uuid}` });
       await kibanaServer.spaces.create({ id: SPACE2, name: `Multi Space 2 ${uuid}` });
+      spacesToDeleteIds.push(SPACE1, SPACE2);
 
       await editMonitor(
         multi.id,
@@ -285,6 +290,8 @@ const runTests = (
       );
       const DEL_SPACE = `del-space-${uuid}`;
       await kibanaServer.spaces.create({ id: DEL_SPACE, name: `Del Space ${uuid}` });
+      spacesToDeleteIds.push(DEL_SPACE);
+
       await editMonitor(
         legacy.id,
         { spaces: ['default', DEL_SPACE], name: `legacy-del-multi-${uuid}` },
@@ -310,6 +317,8 @@ const runTests = (
       uuid = uuidv4();
       SPACE_ID = `test-space-${uuid}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: `Test Space ${uuid}` });
+      spacesToDeleteIds.push(SPACE_ID);
+
       const otherSpacePrivateLocation = usePrivateLocations
         ? await privateLocationService.addTestPrivateLocation(SPACE_ID)
         : undefined;
@@ -417,6 +426,7 @@ const runTests = (
     it('should throw error if spaces list does not include the calling space on create', async () => {
       const INVALID_SPACE = `invalid-space-${uuidv4()}`;
       await kibanaServer.spaces.create({ id: INVALID_SPACE, name: `Invalid Space` });
+      spacesToDeleteIds.push(INVALID_SPACE);
       const monitorData = {
         ...getFixtureJson('http_monitor'),
         name: `invalid-create-${uuidv4()}`,
@@ -443,6 +453,7 @@ const runTests = (
     it('should throw error if spaces list does not include the calling space on edit', async () => {
       const EDIT_SPACE = `edit-space-${uuidv4()}`;
       await kibanaServer.spaces.create({ id: EDIT_SPACE, name: `Edit Space` });
+      spacesToDeleteIds.push(EDIT_SPACE);
       const monitorData = {
         ...getFixtureJson('http_monitor'),
         name: `edit-invalid-${uuidv4()}`,
