@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentProps, useCallback, useEffect } from 'react';
+import React, { type ComponentProps, useCallback, useEffect, useRef, useLayoutEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   useReactTable,
@@ -18,7 +18,7 @@ import {
   type Row,
   type ExpandedState,
 } from '@tanstack/react-table';
-import { useVirtualizer } from '@tanstack/react-virtual';
+import { useVirtualizer, defaultRangeExtractor } from '@tanstack/react-virtual';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { SelectionDropdown } from './group_selection_combobox/selection_dropdown';
 import {
@@ -84,6 +84,10 @@ export interface DataCascadeImplProps<G extends GroupNode, L extends LeafNode>
    */
   size?: CascadeRowProps<G>['rowGapSize'];
   tableTitleSlot: React.FC<{ rows: Array<Row<G>> }>;
+  /**
+   * @description Whether to cause the group root to stick to the top of the viewport.
+   */
+  stickyGroupRoot?: boolean;
 }
 
 export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
@@ -96,16 +100,17 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   leafContentSlot,
   size = 'm',
   tableTitleSlot: TableTitleSlot,
+  stickyGroupRoot = false,
   overscan = 10,
 }: DataCascadeImplProps<G, L>) {
-  // The scrollable element for your list
-  const parentRef = React.useRef(null);
-  const virtualizerItemSizeRef = React.useRef<Map<number, number>>(new Map());
-  const headerRowTranslationValueRef = React.useRef(0);
-  const dispatch = useDataCascadeDispatch();
+  const dispatch = useDataCascadeDispatch<G, L>();
   const state = useDataCascadeState<G, L>();
   const columnHelper = createColumnHelper<G>();
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
+
+  // The scrollable element for your list
+  const scrollElementRef = React.useRef(null);
+  const virtualizerItemSizeCacheRef = React.useRef<Map<number, number>>(new Map());
 
   useEffect(() => {
     dispatch({
@@ -190,7 +195,13 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
             const { rows } = _table.getGroupedRowModel();
 
             return (
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexGroup
+                justifyContent="spaceBetween"
+                alignItems="center"
+                css={({ euiTheme }) => ({
+                  padding: euiTheme.size.s,
+                })}
+              >
                 <EuiFlexItem>
                   <TableTitleSlot rows={rows} />
                 </EuiFlexItem>
@@ -232,57 +243,136 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   const headerColumns = table.getHeaderGroups()[0].headers;
   const { rows } = table.getRowModel();
 
+  const activeStickyIndexRef = useRef<number | null>(null);
+
+  /**
+   * @description range extractor, used to inform virtualizer about our rendering needs in relation to marking specific rows as sticky rows.
+   * see {@link https://tanstack.com/virtual/latest/docs/api/virtualizer#rangeextractor} for more details
+   */
+  const rangeExtractor = useCallback<
+    NonNullable<Parameters<typeof useVirtualizer>[0]['rangeExtractor']>
+  >(
+    (range) => {
+      if (!stickyGroupRoot) {
+        return defaultRangeExtractor(range);
+      }
+
+      const rangeStartRow = rows[range.startIndex];
+
+      // TODO: get buy in to make all item parents sticky, right now we only select the top most parent as sticky
+      activeStickyIndexRef.current = rangeStartRow.subRows?.length && rangeStartRow.getIsExpanded() ? rangeStartRow.index : rangeStartRow.getParentRows()[0]?.index ?? null;
+      const next = new Set([activeStickyIndexRef.current, ...defaultRangeExtractor(range)].filter(Boolean));
+      return Array.from(next).sort((a, b) => a - b);
+    },
+    [rows, stickyGroupRoot]
+  );
+
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
-    getScrollElement: () => parentRef.current,
     estimateSize: () => 0,
+    getScrollElement: () => scrollElementRef.current,
     overscan,
-    // onChange: (rowVirtualizerInstance) => {
-    // },
+    rangeExtractor,
+    onChange: (rowVirtualizerInstance) => {
+      // @ts-expect-error -- the itemsSizeCache property does exist,
+      // but it not included in the type definition
+      // because it is marked as a private property,
+      // see {@link https://github.com/TanStack/virtual/blob/v3.13.2/packages/virtual-core/src/index.ts#L360}
+      virtualizerItemSizeCacheRef.current = rowVirtualizerInstance.itemSizeCache;
+    },
   });
+
+  const virtualizedRowComputedTranslateValue = useRef(new Map());
 
   return (
     <div css={{ flex: '1 1 auto' }}>
       <AutoSizer>
         {(containerSize) => (
-          <div ref={parentRef} style={{ ...containerSize, overflowY: 'auto' }}>
-            <div style={{ height: rowVirtualizer.getTotalSize(), position: 'relative' }}>
-              <EuiFlexGroup direction="column" gutterSize="m">
-                <EuiFlexItem
-                  css={{
-                    position: 'sticky',
-                    top: -(rowVirtualizer.measurementsCache[0] || {}).size,
-                    zIndex: 1,
-                    willChange: 'transform',
-                  }}
-                >
-                  {headerColumns.map((header) => {
-                    return (
-                      <React.Fragment key={header.id}>
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-                      </React.Fragment>
-                    );
+          <div ref={scrollElementRef} style={{ ...containerSize, overflowY: 'auto' }}>
+            <EuiFlexGroup
+              direction="column"
+              gutterSize="none"
+              css={{ width: containerSize.width, position: 'relative' }}
+            >
+              <EuiFlexItem
+                css={({ euiTheme }) => ({
+                  position: 'sticky',
+                  willChange: 'transform',
+                  zIndex: euiTheme.levels.header,
+                  background: euiTheme.colors.backgroundBaseSubdued,
+                  ...((rowVirtualizer.scrollOffset ?? 0) > (virtualizerItemSizeCacheRef.current.get(0) ?? 0) / 4 ? {
+                    borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+                  }: {})
+                })}
+                style={{
+                  top: -(virtualizedRowComputedTranslateValue.current.get(0) ?? 0),
+                  transform: `translate3d(0, ${
+                    virtualizedRowComputedTranslateValue.current.get(0) ?? 0
+                  }px,  0)`,
+                }}
+              >
+                {headerColumns.map((header) => {
+                  return (
+                    <React.Fragment key={header.id}>
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                    </React.Fragment>
+                  );
+                })}
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <div
+                  css={({ euiTheme }) => ({
+                    padding: `0 ${euiTheme.size.s}`,
+                    background: euiTheme.colors.backgroundBaseSubdued,
                   })}
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <ul>
-                    {rowVirtualizer.getVirtualItems().map(function buildCascadeRows(virtualItem) {
-                      const row = rows[virtualItem.index];
-                      return (
-                        <CascadeRow<G>
-                          key={virtualItem.key}
-                          populateGroupNodeDataFn={fetchGroupNodeData}
-                          rowInstance={row}
-                          rowGapSize={size}
-                          virtualizerInstance={rowVirtualizer}
-                          virtualRow={virtualItem}
-                        />
-                      );
-                    })}
+                  style={{ height: rowVirtualizer.getTotalSize() }}
+                >
+                  <ul css={{ position: 'relative' }}>
+                    {rowVirtualizer
+                      .getVirtualItems()
+                      .map(function buildCascadeRows(virtualItem, renderIndex) {
+                        const row = rows[virtualItem.index];
+
+                        const isActiveSticky = stickyGroupRoot && activeStickyIndexRef.current === virtualItem.index;
+
+                        virtualizedRowComputedTranslateValue.current.set(
+                          renderIndex,
+                          // since the sticky index renders out of the document flow, we need to offset the start position with it's size
+                          isActiveSticky 
+                            ? virtualItem.start -
+                                (virtualizerItemSizeCacheRef.current.get(
+                                  activeStickyIndexRef.current!
+                                ) ?? 0)
+                            : virtualItem.start
+                        );
+
+                        return (
+                          <CascadeRow<G>
+                            key={virtualItem.key}
+                            isActiveSticky={isActiveSticky}
+                            innerRef={rowVirtualizer.measureElement}
+                            populateGroupNodeDataFn={fetchGroupNodeData}
+                            rowInstance={row}
+                            rowGapSize={size}
+                            virtualRow={virtualItem}
+                            virtualRowStyle={{
+                              ...(isActiveSticky ? {
+                                transition: 'transform 0s linear',
+                                transform: `translateY(${rowVirtualizer.scrollOffset! - virtualizedRowComputedTranslateValue.current.get(renderIndex)}px)`,
+                                top: virtualizedRowComputedTranslateValue.current.get(renderIndex) ?? 0,
+                              }: {
+                                transform: `translateY(${
+                                  virtualizedRowComputedTranslateValue.current.get(renderIndex) ?? 0
+                                }px)`,
+                              }),
+                            }}
+                          />
+                        );
+                      })}
                   </ul>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </div>
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </div>
         )}
       </AutoSizer>
