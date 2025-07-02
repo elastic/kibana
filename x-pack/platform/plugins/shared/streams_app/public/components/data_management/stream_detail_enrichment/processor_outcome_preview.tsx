@@ -349,7 +349,7 @@ const OutcomePreviewTable = () => {
       const hit = hits.find((h) => h.index === currentDoc.index);
       if (hit && hit !== currentDoc) {
         setExpandedDoc(hit);
-      } else {
+      } else if (!hit && currentDoc) {
         // if the current doc is not found in the hits, reset it
         setExpandedDoc(undefined);
       }
