@@ -1,0 +1,113 @@
+import { renderHook } from '@testing-library/react';
+import { useIsNavControlVisible } from './is_nav_control_visible';
+import { CoreStart } from '@kbn/core/public';
+import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
+import { of } from 'rxjs';
+import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
+
+describe("isNavControlVisible", () => {
+    it("returns true when the current app is discover and the ai assistant type is observability", () => {
+        const coreStart = {
+            application: {
+                currentAppId$: of('discover'),
+                applications$: of(new Map([
+                    ['discover', { id: 'discover', category: { id: 'kibana' } }],
+                ])),
+            },
+        } as unknown as CoreStart;
+
+        const pluginsStart = {
+            aiAssistantManagementSelection: {
+                aiAssistantType$: of(AIAssistantType.Observability),
+            },
+        } as unknown as ObservabilityAIAssistantAppPluginStartDependencies;
+
+        const { result } = renderHook(() => useIsNavControlVisible({ coreStart, pluginsStart }));
+
+        expect(result.current.isVisible).toBe(true);
+    })
+
+    it("returns false when the current app is discover and the ai assistant type is default", () => {
+        const coreStart = {
+            application: {
+                currentAppId$: of('discover'),
+                applications$: of(new Map([
+                    ['discover', { id: 'discover', category: { id: 'kibana' } }],
+                ])),
+            },
+        } as unknown as CoreStart;
+
+        const pluginsStart = {
+            aiAssistantManagementSelection: {
+                aiAssistantType$: of(AIAssistantType.Default),
+            },
+        } as unknown as ObservabilityAIAssistantAppPluginStartDependencies;
+
+        const { result } = renderHook(() => useIsNavControlVisible({ coreStart, pluginsStart }));
+
+        expect(result.current.isVisible).toBe(false);
+    })
+
+    it("returns true when the current app is observability and the ai assistant type is default", () => {
+        const coreStart = {
+            application: {
+                currentAppId$: of('observability'),
+                applications$: of(new Map([
+                    ['observability', { id: 'observability', category: { id: 'observability' } }],
+                ])),
+            },
+        } as unknown as CoreStart;
+
+        const pluginsStart = {
+            aiAssistantManagementSelection: {
+                aiAssistantType$: of(AIAssistantType.Default),
+            },
+        } as unknown as ObservabilityAIAssistantAppPluginStartDependencies;
+
+        const { result } = renderHook(() => useIsNavControlVisible({ coreStart, pluginsStart }));
+
+        expect(result.current.isVisible).toBe(true);
+    })
+
+    it("returns true when the current app is search and the ai assistant type is default", () => {
+        const coreStart = {
+            application: {
+                currentAppId$: of('search'),
+                applications$: of(new Map([
+                    ['search', { id: 'search', category: { id: 'enterpriseSearch' } }],
+                ])),
+            },
+        } as unknown as CoreStart;
+
+        const pluginsStart = {
+            aiAssistantManagementSelection: {
+                aiAssistantType$: of(AIAssistantType.Default),
+            },
+        } as unknown as ObservabilityAIAssistantAppPluginStartDependencies;
+
+        const { result } = renderHook(() => useIsNavControlVisible({ coreStart, pluginsStart }));
+
+        expect(result.current.isVisible).toBe(true);
+    })
+
+    it("returns false when the current app is security and the ai assistant type is observability", () => {
+        const coreStart = {
+            application: {
+                currentAppId$: of('security'),
+                applications$: of(new Map([
+                    ['security', { id: 'security', category: { id: 'securitySolution' } }],
+                ])),
+            },
+        } as unknown as CoreStart;
+
+        const pluginsStart = {
+            aiAssistantManagementSelection: {
+                aiAssistantType$: of(AIAssistantType.Observability),
+            },
+        } as unknown as ObservabilityAIAssistantAppPluginStartDependencies;
+
+        const { result } = renderHook(() => useIsNavControlVisible({ coreStart, pluginsStart }));
+
+        expect(result.current.isVisible).toBe(false);
+    })
+})
