@@ -30,7 +30,7 @@ export function ProductDocEntry() {
   const knowledgeBase = useKnowledgeBase();
   const selectedInferenceId: string | undefined = knowledgeBase.status.value?.currentInferenceId;
 
-  const [isInstalled, setInstalled] = useState<boolean>(true);
+  const [isInstalled, setInstalled] = useState<boolean>(false);
   const [isInstalling, setInstalling] = useState<boolean>(false);
 
   const { mutateAsync: installProductDoc } = useInstallProductDoc();
@@ -38,10 +38,11 @@ export function ProductDocEntry() {
   const { status, isLoading: isStatusLoading } = useGetProductDocStatus(selectedInferenceId);
 
   useEffect(() => {
+    if (isStatusLoading) return;
     if (status) {
-      setInstalled(status.overall === 'installed');
+      setInstalled(status.overall === 'installed' && status.inferenceId === selectedInferenceId);
     }
-  }, [status]);
+  }, [selectedInferenceId, status, isStatusLoading]);
 
   const onClickInstall = useCallback(() => {
     if (!selectedInferenceId) {
@@ -90,7 +91,7 @@ export function ProductDocEntry() {
 
   const content = useMemo(() => {
     if (isStatusLoading) {
-      return <></>;
+      return <EuiLoadingSpinner size="m" />;
     }
     if (isInstalling) {
       return (

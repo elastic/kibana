@@ -27,11 +27,15 @@ import {
 import { useInferenceEndpoints, UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
 import { KnowledgeBaseState, useKibana } from '@kbn/observability-ai-assistant-plugin/public';
 import { useInstallProductDoc } from '../../../hooks/use_install_product_doc';
-import { useAssistantSettings } from './settings_context';
 
 export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   const { overlays } = useKibana().services;
-  const { selectedInferenceId, setSelectedInferenceId } = useAssistantSettings();
+
+  const currentlyDeployedInferenceId = knowledgeBase.status.value?.currentInferenceId;
+
+  const [selectedInferenceId, setSelectedInferenceId] = useState<string>(
+    currentlyDeployedInferenceId || ''
+  );
 
   const [hasLoadedCurrentModel, setHasLoadedCurrentModel] = useState(false);
   const [isUpdatingModel, setIsUpdatingModel] = useState(false);
@@ -47,8 +51,7 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
     knowledgeBase.status?.value?.kbState === KnowledgeBaseState.MODEL_PENDING_ALLOCATION ||
     knowledgeBase.status?.value?.kbState === KnowledgeBaseState.MODEL_PENDING_DEPLOYMENT;
 
-  const isSelectedModelCurrentModel =
-    selectedInferenceId === knowledgeBase.status?.value?.endpoint?.inference_id;
+  const isSelectedModelCurrentModel = selectedInferenceId === currentlyDeployedInferenceId;
 
   const isKnowledgeBaseInLoadingState =
     knowledgeBase.isInstalling ||
@@ -58,11 +61,16 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
 
   useEffect(() => {
     if (!hasLoadedCurrentModel && modelOptions?.length && knowledgeBase.status?.value) {
-      const currentModel = knowledgeBase.status.value.currentInferenceId;
-      setSelectedInferenceId(currentModel || modelOptions[0].key);
+      setSelectedInferenceId(currentlyDeployedInferenceId || modelOptions[0].key);
       setHasLoadedCurrentModel(true);
     }
-  }, [hasLoadedCurrentModel, modelOptions, knowledgeBase.status?.value, setSelectedInferenceId]);
+  }, [
+    hasLoadedCurrentModel,
+    modelOptions,
+    knowledgeBase.status?.value,
+    setSelectedInferenceId,
+    currentlyDeployedInferenceId,
+  ]);
 
   useEffect(() => {
     if (isUpdatingModel && !knowledgeBase.isInstalling && !knowledgeBase.isPolling) {
