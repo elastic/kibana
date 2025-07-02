@@ -125,7 +125,6 @@ export function getSampleDashboardState(overrides?: Partial<DashboardState>): Da
       from: 'now-15m',
     },
     timeRestore: false,
-    viewMode: 'view',
     panels: [],
     ...overrides,
   };
