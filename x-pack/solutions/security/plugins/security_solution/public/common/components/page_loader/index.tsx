@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { registerTools } from './register_tools';
+import React from 'react';
+import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
+
+export const PageLoader = () => (
+  <EuiEmptyPrompt icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />} />
+);
