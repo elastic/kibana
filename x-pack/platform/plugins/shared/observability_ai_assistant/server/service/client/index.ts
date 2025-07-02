@@ -494,10 +494,9 @@ export class ObservabilityAIAssistantClient {
 
     this.dependencies.logger.debug(
       () =>
-        `Options for inference client for name: "${name}" before anonymization: ${JSON.stringify({
-          ...options,
-          messages,
-        })}`
+        `Options for inference client for name: "${name}" before anonymization: ${JSON.stringify(
+          options
+        )}`
     );
 
     if (stream) {
