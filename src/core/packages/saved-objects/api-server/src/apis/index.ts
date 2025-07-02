@@ -84,5 +84,6 @@ export type {
 export type {
   SavedObjectsChangeAccessControlOptions,
   SavedObjectsChangeAccessControlResponse,
-  SavedObjectsChangeOwnershipObject,
+  SavedObjectsChangeAccessControlResponseObject,
+  SavedObjectsChangeAccessControlObject,
 } from './change_access_control';

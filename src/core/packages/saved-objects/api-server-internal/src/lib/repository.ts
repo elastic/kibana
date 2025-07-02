@@ -52,9 +52,9 @@ import type {
   SavedObjectsBulkDeleteResponse,
   SavedObjectsFindInternalOptions,
   ISavedObjectsRepository,
-  SavedObjectsChangeOwnershipOptions,
-  SavedObjectsChangeOwnershipResponse,
-  SavedObjectsChangeOwnershipObject,
+  SavedObjectsChangeAccessControlOptions,
+  SavedObjectsChangeAccessControlResponse,
+  SavedObjectsChangeAccessControlObject,
 } from '@kbn/core-saved-objects-api-server';
 import type {
   ISavedObjectTypeRegistry,
@@ -583,9 +583,9 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   }
 
   async changeOwnership<T = unknown>(
-    objects: SavedObjectsChangeOwnershipObject[],
-    options: SavedObjectsChangeOwnershipOptions<T> = {}
-  ): Promise<SavedObjectsChangeOwnershipResponse<T>> {
+    objects: SavedObjectsChangeAccessControlObject[],
+    options: SavedObjectsChangeAccessControlOptions<T> = {}
+  ): Promise<SavedObjectsChangeAccessControlResponse> {
     return await performChangeOwnership({ objects, options }, this.apiExecutionContext);
   }
 }

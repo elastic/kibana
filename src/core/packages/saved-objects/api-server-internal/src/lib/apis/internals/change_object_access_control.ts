@@ -18,7 +18,7 @@ import {
 } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsChangeAccessControlResponse,
-  SavedObjectsChangeOwnershipObject,
+  SavedObjectsChangeAccessControlObject,
   SavedObjectsChangeAccessControlOptions,
 } from '@kbn/core-saved-objects-api-server';
 
@@ -42,7 +42,7 @@ export interface ChangeAccessControlParams<T = unknown> {
   client: ApiExecutionContext['client'];
   serializer: ISavedObjectsSerializer;
   getIndexForType: (type: string) => string;
-  objects: SavedObjectsChangeOwnershipObject[];
+  objects: SavedObjectsChangeAccessControlObject[];
   options: SavedObjectsChangeAccessControlOptions<T>;
   securityExtension?: ISavedObjectsSecurityExtension;
   actionType: ChangeAccessControlActionType;
