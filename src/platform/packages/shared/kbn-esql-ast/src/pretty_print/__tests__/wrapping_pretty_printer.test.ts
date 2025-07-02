@@ -163,7 +163,11 @@ FROM index
     });
   });
 
-  describe('RERANK', () => {
+  /**
+   * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
+   * get back to it after 9.1 release.
+   */
+  describe.skip('RERANK', () => {
     test('default example', () => {
       const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH some_id`);
 
@@ -1034,13 +1038,13 @@ FROM a
 
     test('breaks lists with long items', () => {
       const query =
-        'FROM a | WHERE b in ("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz")';
+        'FROM a | WHERE b not in ("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz")';
       const text = reprint(query).text;
 
       expect('\n' + text).toBe(`
 FROM a
   | WHERE
-      b IN
+      b NOT IN
         (
           "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
           "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",

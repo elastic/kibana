@@ -127,7 +127,7 @@ type ResponderDataForEndpointHost = Omit<ResponderActionData, 'handleResponseAct
  * @param endpointAgentId
  * @param enabled
  *
- * @private
+ * @internal
  */
 const useResponderDataForEndpointHost = (
   endpointAgentId: string,

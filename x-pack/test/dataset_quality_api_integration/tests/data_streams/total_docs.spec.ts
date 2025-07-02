@@ -31,7 +31,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when('Total docs', { config: 'basic' }, () => {
-    describe('authorization', () => {
+    describe('authorization', function () {
+      // This disables the forward-compatibility test for Kibana 8.19 with ES upgraded to 9.0.
+      // These versions are not expected to work together.
+      // The tests raise "unknown index privilege [read_failure_store]" error in ES 9.0.
+      this.onlyEsVersion('8.19 || >=9.1');
+
       it('should return a 403 when the user does not have sufficient privileges', async () => {
         const err = await expectToReject<DatasetQualityApiError>(() => callApiAs('noAccessUser'));
         expect(err.res.status).to.be(403);

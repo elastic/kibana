@@ -6,8 +6,6 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
-import { ESQLMessage, EditorError } from '@kbn/esql-ast';
-import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import Fs from 'fs/promises';
 import Path from 'path';
 import yargs, { Argv } from 'yargs';
@@ -20,7 +18,8 @@ import { KibanaClient } from '../util/kibana_client';
 import { selectConnector } from '../util/select_connector';
 import { syncBuiltDocs } from './sync_built_docs_repo';
 import { extractDocEntries } from './extract_doc_entries';
-import { generateDoc, FileToWrite } from './generate_doc';
+import { generateDoc } from './generate_doc';
+import { reportSyntaxErrors } from '../report_syntax_errors/report_syntax_errors';
 
 yargs(process.argv.slice(2))
   .command(
@@ -128,49 +127,10 @@ yargs(process.argv.slice(2))
             );
           }
 
-          log.info(`Checking syntax...`);
-          const syntaxErrors = (
-            await Promise.all(docFiles.map(async (file) => await findEsqlSyntaxError(file)))
-          ).flat();
-
-          log.warning(
-            `Please verify the following queries that had syntax errors\n${JSON.stringify(
-              syntaxErrors,
-              null,
-              2
-            )}`
-          );
+          await reportSyntaxErrors(outDir, log, docFiles);
         },
         { log: { defaultLevel: argv.logLevel as any }, flags: { allowUnexpected: true } }
       );
     }
   )
   .parse();
-
-interface SyntaxError {
-  query: string;
-  errors: Array<ESQLMessage | EditorError>;
-}
-
-const findEsqlSyntaxError = async (doc: FileToWrite): Promise<SyntaxError[]> => {
-  return Array.from(doc.content.matchAll(INLINE_ESQL_QUERY_REGEX)).reduce(
-    async (listP, [match, query]) => {
-      const list = await listP;
-      const { errors, warnings } = await validateQuery(query, {
-        // setting this to true, we don't want to validate the index / fields existence
-        ignoreOnMissingCallbacks: true,
-      });
-
-      const all = [...errors, ...warnings];
-      if (all.length) {
-        list.push({
-          errors: all,
-          query,
-        });
-      }
-
-      return list;
-    },
-    Promise.resolve([] as SyntaxError[])
-  );
-};

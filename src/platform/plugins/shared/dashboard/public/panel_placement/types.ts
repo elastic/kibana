@@ -11,7 +11,7 @@ import { MaybePromise } from '@kbn/utility-types';
 import { SerializedPanelState } from '@kbn/presentation-publishing';
 import type { GridData } from '../../server/content_management';
 import { PanelPlacementStrategy } from '../plugin_constants';
-import { DashboardLayout } from '../dashboard_api/types';
+import { DashboardLayout } from '../dashboard_api/layout_manager';
 
 export interface PanelPlacementSettings {
   strategy?: PanelPlacementStrategy;

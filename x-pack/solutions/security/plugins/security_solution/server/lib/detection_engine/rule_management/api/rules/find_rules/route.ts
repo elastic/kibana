@@ -59,6 +59,7 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
               start: query.gaps_range_start,
               end: query.gaps_range_end,
               statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
+              hasUnfilledIntervals: true,
             });
             ruleIds = ruleIdsWithGaps.ruleIds;
             if (ruleIds.length === 0) {

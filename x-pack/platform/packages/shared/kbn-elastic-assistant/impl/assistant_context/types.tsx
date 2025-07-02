@@ -53,6 +53,7 @@ export interface AssistantTelemetry {
     isEnabledKnowledgeBase: boolean;
   }) => void;
   reportAssistantQuickPrompt: (params: { promptTitle: string }) => void;
+  reportAssistantStarterPrompt: (params: { promptTitle: string }) => void;
   reportAssistantSettingToggled: (params: {
     assistantStreamingEnabled?: boolean;
     alertsCountUpdated?: boolean;
@@ -74,6 +75,7 @@ export interface AssistantAvailability {
   hasUpdateAIAssistantAnonymization: boolean;
   // When true, user has `Edit` privilege for `Global Knowledge Base`
   hasManageGlobalKnowledgeBase: boolean;
+  isStarterPromptsEnabled: boolean;
 }
 
 export type GetAssistantMessages = (commentArgs: {

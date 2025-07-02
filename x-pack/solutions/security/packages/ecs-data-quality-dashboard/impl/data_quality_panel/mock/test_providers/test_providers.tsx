@@ -20,6 +20,10 @@ import { of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@elastic/eui';
 
+import {
+  AssistantProviderProps,
+  useAssistantContextValue,
+} from '@kbn/elastic-assistant/impl/assistant_context';
 import { DataQualityProvider, DataQualityProviderProps } from '../../data_quality_context';
 import { ResultsRollupContext } from '../../contexts/results_rollup_context';
 import { IndicesCheckContext } from '../../contexts/indices_check_context';
@@ -55,6 +59,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
     hasUpdateAIAssistantAnonymization: true,
     hasManageGlobalKnowledgeBase: true,
     isAssistantEnabled: true,
+    isStarterPromptsEnabled: true,
   };
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -72,30 +77,36 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
   const chrome = chromeServiceMock.createStartContract();
   chrome.getChromeStyle$.mockReturnValue(of('classic'));
 
+  const docLinks = docLinksServiceMock.createStartContract();
+
+  const assistantProviderProps = {
+    actionTypeRegistry,
+    assistantAvailability: mockAssistantAvailability,
+    augmentMessageCodeBlocks: {
+      mount: jest.fn().mockReturnValue(() => {}),
+    },
+    basePath: 'https://localhost:5601/kbn',
+    docLinks,
+    getComments: mockGetComments,
+    http: mockHttp,
+    navigateToApp: mockNavigateToApp,
+    productDocBase: {
+      installation: { getStatus: jest.fn(), install: jest.fn(), uninstall: jest.fn() },
+    },
+    currentAppId: 'securitySolutionUI',
+    userProfileService: jest.fn() as unknown as UserProfileService,
+    getUrlForApp: jest.fn(),
+    chrome,
+  };
+
   return (
     <KibanaRenderContextProvider {...coreMock.createStart()}>
       <I18nProvider>
         <EuiThemeProvider>
           <QueryClientProvider client={queryClient}>
-            <AssistantProvider
-              actionTypeRegistry={actionTypeRegistry}
-              assistantAvailability={mockAssistantAvailability}
-              augmentMessageCodeBlocks={jest.fn()}
-              basePath={'https://localhost:5601/kbn'}
-              docLinks={docLinksServiceMock.createStartContract()}
-              getComments={mockGetComments}
-              http={mockHttp}
-              navigateToApp={mockNavigateToApp}
-              productDocBase={{
-                installation: { getStatus: jest.fn(), install: jest.fn(), uninstall: jest.fn() },
-              }}
-              currentAppId={'securitySolutionUI'}
-              userProfileService={jest.fn() as unknown as UserProfileService}
-              getUrlForApp={jest.fn()}
-              chrome={chrome}
-            >
+            <TestAssistantProvider assistantProviderProps={assistantProviderProps}>
               {children}
-            </AssistantProvider>
+            </TestAssistantProvider>
           </QueryClientProvider>
         </EuiThemeProvider>
       </I18nProvider>
@@ -106,6 +117,18 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
 TestExternalProvidersComponent.displayName = 'TestExternalProvidersComponent';
 
 export const TestExternalProviders = React.memo(TestExternalProvidersComponent);
+
+export const TestAssistantProvider = ({
+  assistantProviderProps,
+  children,
+}: {
+  assistantProviderProps: AssistantProviderProps;
+  children: React.ReactNode;
+}) => {
+  const assistantContextValue = useAssistantContextValue(assistantProviderProps);
+
+  return <AssistantProvider value={assistantContextValue}>{children}</AssistantProvider>;
+};
 
 export interface TestDataQualityProvidersProps {
   children: React.ReactNode;

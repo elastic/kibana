@@ -68,17 +68,17 @@ export const ListGroupGraphPopover = memo<ListGroupGraphPopoverProps>(
 
     return (
       <GraphPopover
-        panelPaddingSize="s"
+        panelPaddingSize="none"
         anchorPosition="rightCenter"
         isOpen={isOpen}
         anchorElement={anchorElement}
         closePopover={closePopover}
         data-test-subj={testSubject}
       >
-        <EuiListGroup gutterSize="none" bordered={false} flush={true}>
+        <EuiListGroup gutterSize="none" bordered={false} flush={true} size="l">
           {listItems.map((item, index) => {
             if (item.type === 'separator') {
-              return <EuiHorizontalRule key={index} margin="xs" />;
+              return <EuiHorizontalRule key={index} margin="none" size="full" />;
             }
             return (
               <ExpandPopoverListItem

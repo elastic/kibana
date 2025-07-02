@@ -83,7 +83,7 @@ export class TimeCache {
   /**
    * Get parsed min/max values
    * @returns {{min: number, max: number}}
-   * @private
+   * @internal
    */
   _getBounds(): CacheBounds {
     const bounds = this._timefilter.calculateBounds(this._timeRange!);

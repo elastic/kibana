@@ -10,7 +10,7 @@
 import { SavedObjectReference } from '@kbn/core/server';
 import { SavedDashboardPanel, SavedDashboardSection } from '../../../../dashboard_saved_object';
 import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
-import { getReferencesForPanelId } from '../../../../../common/dashboard_container/persistable_state/dashboard_container_references';
+import { getReferencesForPanelId } from '../../../../../common';
 
 export function transformPanelsOut(
   panelsJSON: string = '{}',
@@ -60,13 +60,19 @@ function transformPanelProperties(
       ? references.find((reference) => reference.name === panelRefName)
       : undefined;
 
+  const storedSavedObjectId = id ?? embeddableConfig.savedObjectId;
+  const savedObjectId = matchingReference ? matchingReference.id : storedSavedObjectId;
+
   return {
     gridData: rest,
-    id: matchingReference ? matchingReference.id : id,
-    panelConfig: embeddableConfig,
+    panelConfig: {
+      ...embeddableConfig,
+      // <8.19 savedObjectId and title stored as siblings to embeddableConfig
+      ...(savedObjectId !== undefined && { savedObjectId }),
+      ...(title !== undefined && { title }),
+    },
     panelIndex,
     panelRefName,
-    title,
     type: matchingReference ? matchingReference.type : type,
     version,
   };
