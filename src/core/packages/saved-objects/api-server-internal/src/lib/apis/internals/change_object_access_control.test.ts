@@ -12,13 +12,17 @@ import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
+import {
+  ISavedObjectsSecurityExtension,
+  SavedObjectAccessControl,
+} from '@kbn/core-saved-objects-server';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import {
   type ChangeAccessControlParams,
   changeObjectAccessControl,
 } from './change_object_access_control';
 import { mockGetBulkOperationError } from './update_objects_spaces.test.mock';
+import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
 
 jest.mock('../utils', () => ({
   getBulkOperationError: jest.fn(),
@@ -42,15 +46,23 @@ const BULK_ERROR = {
   statusCode: 400,
 };
 
+const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };
+const EXPECTED_VERSION_PROPS = { if_seq_no: 1, if_primary_term: 1 };
+const mockCurrentTime = new Date('2021-05-01T10:20:30Z');
+const mockSecurityExt = savedObjectsExtensionsMock.createSecurityExtension();
+
 describe('changeObjectAccessControl', () => {
+  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
+
   function setup(
     { objects = [] }: SetupParams,
     securityExtension?: ISavedObjectsSecurityExtension
   ) {
     const registry = typeRegistryMock.create();
     registry.supportsAccessControl.mockImplementation((type) => type === READ_ONLY_TYPE);
-    const client = elasticsearchClientMock.createElasticsearchClient();
+    client = elasticsearchClientMock.createElasticsearchClient();
     const serializer = new SavedObjectsSerializer(registry);
+
     return {
       mappings: { properties: {} }, // doesn't matter, only used as an argument to deleteLegacyUrlAliases which is mocked
       registry,
@@ -59,31 +71,42 @@ describe('changeObjectAccessControl', () => {
       serializer,
       logger: loggerMock.create(),
       getIndexForType: (type: string) => `index-for-${type}`,
-      securityExtension,
+      securityExtension: mockSecurityExt,
       objects,
     };
   }
 
   function mockMgetResults(
-    ...results: Array<{ found: false } | { found: true; namespaces: string[] }>
+    results: Array<
+      | { found: false }
+      | {
+          found: true;
+          namespaces: string[];
+          type?: string;
+          id?: string;
+          accessControl?: SavedObjectAccessControl;
+        }
+    >
   ) {
-    client.mget.mockResponseOnce({
-      docs: results.map((x) =>
-        x.found
-          ? {
-              _id: 'doesnt-matter',
-              _index: 'doesnt-matter',
-              _source: { namespaces: x.namespaces },
-              ...VERSION_PROPS,
-              found: true,
-            }
-          : {
-              _id: 'doesnt-matter',
-              _index: 'doesnt-matter',
-              found: false,
-            }
-      ),
-    });
+    const result = results.map((x) =>
+      x.found
+        ? {
+            _id: `${x.type ?? READ_ONLY_TYPE}:${x.id ?? 'id-unknown'}`,
+            _index: `index-for-${x.type ?? READ_ONLY_TYPE}`,
+            _source: { namespaces: x.namespaces, accessControl: x.accessControl },
+            _seq_no: VERSION_PROPS._seq_no,
+            _primary_term: VERSION_PROPS._primary_term,
+
+            found: true,
+          }
+        : {
+            _id: `unknown-type:${'id-unknown'}`,
+            _index: `index-for-unknown-type`,
+            found: false,
+          }
+    );
+
+    client.mget.mockResponseOnce({ docs: result });
   }
 
   /** Mocks the saved objects client so as to test unsupported server responding with 404 */
@@ -92,7 +115,7 @@ describe('changeObjectAccessControl', () => {
   }
 
   /** Asserts that mget is called for the given objects */
-  function expectMgetArgs(...objects: SavedObjectsUpdateObjectsSpacesObject[]) {
+  function expectMgetArgs(...objects: any[]) {
     const docs = objects.map(({ type, id }) => expect.objectContaining({ _id: `${type}:${id}` }));
     expect(client.mget).toHaveBeenCalledWith({ docs }, expect.anything());
   }
@@ -140,58 +163,100 @@ describe('changeObjectAccessControl', () => {
   beforeEach(() => {
     mockGetBulkOperationError.mockReset(); // reset calls and return undefined by default
   });
-  describe('changeOwnership', () => {
-    it('should throw an error if owner is not specified', async () => {
-      const params = setup({
-        objects: [{ type: READ_ONLY_TYPE, id: 'id-1' }],
-      });
+  describe('ownership changes', () => {
+    describe('validation', () => {
+      it('throws if owner is not specified', async () => {
+        const params = setup({
+          objects: [{ type: READ_ONLY_TYPE, id: 'id-1' }],
+        });
 
-      await expect(() =>
-        changeObjectAccessControl({
+        await expect(() =>
+          changeObjectAccessControl({
+            ...params,
+            options: {
+              owner: undefined,
+            },
+            actionType: 'changeOwnership',
+          })
+        ).rejects.toThrow(
+          'The "owner" field is required to change ownership of a saved object.: Bad Request'
+        );
+      });
+      it('returns error if no read-only objects are specified', async () => {
+        const params = setup({
+          objects: [{ type: NON_READ_ONLY_TYPE, id: 'id-1' }],
+        });
+
+        const result = await changeObjectAccessControl({
           ...params,
           options: {
-            owner: undefined,
+            owner: 'owner-1',
           },
           actionType: 'changeOwnership',
-        })
-      ).rejects.toThrow(
-        'The "owner" field is required to change ownership of a saved object.: Bad Request'
-      );
-    });
-    it('should throw an error if no read only objects are specified', async () => {
-      const params = setup({
-        objects: [{ type: NON_READ_ONLY_TYPE, id: 'id-1' }],
+        });
+        expect(result.objects[0]).toHaveProperty('error');
+        const error = result.objects[0].error;
+        expect(error).toBeTruthy();
+        expect(error!.message).toBe(
+          `The type ${NON_READ_ONLY_TYPE} does not support access control: Bad Request`
+        );
       });
-
-      const result = await changeObjectAccessControl({
-        ...params,
-        options: {
-          owner: 'owner-1',
-        },
-        actionType: 'changeOwnership',
-      });
-      expect(result.objects[0]).toHaveProperty('error');
-      expect(result.objects[0].error).toBe(
-        `[Error: The type "${NON_READ_ONLY_TYPE}" does not support access control.: Bad Request]`
-      );
     });
 
-    it('should allow partial ownership change', async () => {
-      const params = setup({
-        objects: [
-          { type: READ_ONLY_TYPE, id: 'id-1' },
-          { type: NON_READ_ONLY_TYPE, id: 'id-2' },
-        ],
+    describe('bulk and mget behavior', () => {
+      it('does not call bulk if no objects need to be updated', async () => {
+        const params = setup({
+          objects: [{ type: NON_READ_ONLY_TYPE, id: 'id-1' }],
+        });
+        mockMgetResults([{ found: true, namespaces: ['default'] }]);
+        const result = await changeObjectAccessControl({
+          ...params,
+          options: { owner: 'new-owner' },
+          actionType: 'changeOwnership',
+        });
+        expect(client.mget).not.toHaveBeenCalled();
+        expect(client.bulk).not.toHaveBeenCalled();
+        expect(result.objects[0]).toHaveProperty('error');
       });
+    });
 
-      const result = await changeObjectAccessControl({
-        ...params,
-        options: {
-          owner: 'new-owner',
-        },
-        actionType: 'changeOwnership',
+    describe('authorization of operations', () => {
+      it('successfully delegates to security extension', async () => {
+        const params = setup({
+          objects: [{ type: READ_ONLY_TYPE, id: 'id-1' }],
+        });
+        mockMgetResults([
+          {
+            found: true,
+            namespaces: ['default'],
+            type: READ_ONLY_TYPE,
+            id: 'id-1',
+            accessControl: {
+              owner: 'new-owner',
+            },
+          },
+        ]);
+        mockBulkResults({ error: false });
+        await changeObjectAccessControl({
+          ...params,
+          securityExtension: params.securityExtension,
+          options: { owner: 'new-owner', namespace: 'default' },
+          actionType: 'changeOwnership',
+        });
+        expect(mockSecurityExt.authorizeChangeOwnership).toHaveBeenCalledWith({
+          namespace: 'default',
+          objects: [
+            {
+              type: READ_ONLY_TYPE,
+              id: 'id-1',
+              accessControl: {
+                owner: 'new-owner',
+              },
+              existingNamespaces: ['default'],
+            },
+          ],
+        });
       });
-      expect(result).toHaveProperty('error');
     });
   });
 });
