@@ -195,6 +195,13 @@ export default function (providerContext: FtrProviderContext) {
         expect(packages[0].dataStreams[0].name).to.be('logs-apache.access-*');
       });
     });
+    it('rejects user does not have access to data streams', async function () {
+      const response = await supertestWithoutAuth
+        .get(`/api/fleet/epm/packages/installed?showOnlyActiveDataStreams=true`)
+        .auth(testUsers.fleet_all_int_all.username, testUsers.fleet_all_int_all.password)
+        .expect(403);
+      expect(response.body.message).to.contain('Unauthorized to query fleet datastreams');
+    });
     it('returns a 404 for a package that do not exists', async function () {
       await supertest.get('/api/fleet/epm/packages/notexists/99.99.99').expect(404);
     });

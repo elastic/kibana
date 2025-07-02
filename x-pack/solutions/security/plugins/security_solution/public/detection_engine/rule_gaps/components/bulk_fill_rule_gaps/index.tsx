@@ -42,7 +42,7 @@ const BulkFillRuleGapsModalComponent = ({
       <EuiCallOut
         size="s"
         iconType="warning"
-        title={i18n.BULK_FILL_RULE_GAPS_NOTIFIACTIONS_LIMITATIONS}
+        title={i18n.BULK_FILL_RULE_GAPS_NOTIFICATIONS_LIMITATIONS}
       />,
     ];
     if (rulesCount > 1) {

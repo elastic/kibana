@@ -38,6 +38,7 @@ export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
 export const DEFAULT_INDEX_KEY = 'securitySolution:defaultIndex' as const;
 export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern' as const;
 export const DEFAULT_DATA_VIEW_ID = 'security-solution' as const;
+export const DEFAULT_ALERT_DATA_VIEW_ID = 'security-solution-alert' as const;
 export const DEFAULT_TIME_FIELD = '@timestamp' as const;
 export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults' as const;
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults' as const;
@@ -509,14 +510,6 @@ export const MAX_BULK_FILL_RULE_GAPS_BULK_SIZE = 100;
  * Whether it is a Jest environment
  */
 export const JEST_ENVIRONMENT = typeof jest !== 'undefined';
-
-export const AI_FOR_SOC_INTEGRATIONS = [
-  'splunk',
-  'google_secops',
-  'microsoft_sentinel',
-  'sentinel_one',
-  'crowdstrike',
-];
 
 /*
  * The tag to mark promotion rules that are related to the AI for SOC integrations

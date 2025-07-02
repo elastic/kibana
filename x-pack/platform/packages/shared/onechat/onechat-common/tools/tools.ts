@@ -26,9 +26,13 @@ export interface StructuredToolIdentifier {
 export const serializedPartsSeparator = '::';
 
 /**
- * The singleton sourceId used for all builtIn tools.
+ * The singleton providerId used for all builtIn tools.
  */
 export const builtinToolProviderId = 'builtIn';
+/**
+ * The singleton providerId used for all Esql tools.
+ */
+export const esqlToolProviderId = 'esql';
 /**
  * Unknown sourceId used from converting plain Ids to structured or serialized ids.
  */

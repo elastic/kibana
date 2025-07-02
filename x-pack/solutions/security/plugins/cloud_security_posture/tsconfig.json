@@ -67,6 +67,7 @@
     "@kbn/management-settings-ids",
     "@kbn/expandable-flyout",
     "@kbn/code-editor-mock",
+    "@kbn/core-saved-objects-utils-server",
   ],
   "exclude": ["target/**/*"]
 }

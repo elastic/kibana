@@ -29,21 +29,21 @@ import { useFetchPrivilegedUserIndices } from '../hooks/use_fetch_privileged_use
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { CreateIndexModal } from './create_index_modal';
 
-const SELECT_INDEX_LABEL = i18n.translate(
+export const SELECT_INDEX_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.comboboxPlaceholder',
   {
     defaultMessage: 'Select index',
   }
 );
 
-const LOADING_ERROR_MESSAGE = i18n.translate(
+export const LOADING_ERROR_MESSAGE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.error',
   {
     defaultMessage: 'Error loading indices. Please try again later.',
   }
 );
 
-const DEBOUNCE_OPTIONS = { wait: 300 };
+export const DEBOUNCE_OPTIONS = { wait: 300 };
 
 export const IndexSelectorModal = ({
   onClose,

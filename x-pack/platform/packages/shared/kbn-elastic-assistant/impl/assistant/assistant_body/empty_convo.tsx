@@ -10,27 +10,42 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
+import { useAssistantContext } from '../../..';
+import { StarterPrompts } from './starter_prompts';
 import { SystemPrompt } from '../prompt_editor/system_prompt';
 import { SetupKnowledgeBaseButton } from '../../knowledge_base/setup_knowledge_base_button';
 import * as i18n from '../translations';
 
 interface Props {
+  connectorId?: string;
   currentSystemPromptId: string | undefined;
   isSettingsModalVisible: boolean;
   setIsSettingsModalVisible: Dispatch<SetStateAction<boolean>>;
   setCurrentSystemPromptId: (promptId: string | undefined) => void;
   allSystemPrompts: PromptResponse[];
+  setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
 }
+const starterPromptWrapperClassName = css`
+  max-width: 95%;
+`;
 
 export const EmptyConvo: React.FC<Props> = ({
   allSystemPrompts,
+  connectorId,
   currentSystemPromptId,
   isSettingsModalVisible,
   setCurrentSystemPromptId,
   setIsSettingsModalVisible,
+  setUserPrompt,
 }) => {
+  const { assistantAvailability } = useAssistantContext();
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="center" data-test-subj="emptyConvo">
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="spaceBetween"
+      data-test-subj="emptyConvo"
+      direction="column"
+    >
       <EuiFlexItem grow={false}>
         <EuiPanel
           hasShadow={false}
@@ -64,6 +79,11 @@ export const EmptyConvo: React.FC<Props> = ({
           </EuiFlexGroup>
         </EuiPanel>
       </EuiFlexItem>
+      {assistantAvailability.isStarterPromptsEnabled && (
+        <EuiFlexItem grow={false} css={starterPromptWrapperClassName}>
+          <StarterPrompts connectorId={connectorId} setUserPrompt={setUserPrompt} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

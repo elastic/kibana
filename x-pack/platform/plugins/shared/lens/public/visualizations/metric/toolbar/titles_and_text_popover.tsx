@@ -156,7 +156,7 @@ function ValueFontSizeOption({
             color="subdued"
             position="top"
             size="s"
-            type="questionInCircle"
+            type="question"
           />
         </span>
       }
@@ -227,7 +227,7 @@ function TitlesAlignmentOption({
             color="subdued"
             position="top"
             size="s"
-            type="questionInCircle"
+            type="question"
           />
         </span>
       }
@@ -274,7 +274,7 @@ function ValuesAlignmentOption({
             }}
             position="top"
             size="s"
-            type="questionInCircle"
+            type="question"
           />
         </span>
       }

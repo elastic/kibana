@@ -1085,6 +1085,8 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV3/investigation-guide-interactions",
                 "ui:siemV3/threat-intelligence",
                 "ui:siemV3/writeGlobalArtifacts",
+                "ui:siemV3/showEndpointExceptions",
+                "ui:siemV3/crudEndpointExceptions",
               ],
               "blocklist_all": Array [
                 "login:",
@@ -3737,6 +3739,8 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV3/investigation-guide-interactions",
                 "ui:siemV3/threat-intelligence",
                 "ui:siemV3/writeGlobalArtifacts",
+                "ui:siemV3/showEndpointExceptions",
+                "ui:siemV3/crudEndpointExceptions",
               ],
               "blocklist_all": Array [
                 "login:",

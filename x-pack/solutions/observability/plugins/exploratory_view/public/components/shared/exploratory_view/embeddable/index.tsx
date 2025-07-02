@@ -9,12 +9,12 @@ import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { AnalyticsServiceSetup, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { EuiErrorBoundary } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { useAppDataView } from './use_app_data_view';
 import type { ExploratoryViewPublicPluginsStart } from '../../../..';
 import type { ExploratoryEmbeddableProps, ExploratoryEmbeddableComponentProps } from './embeddable';
@@ -128,7 +128,7 @@ export function getExploratoryViewEmbeddable(
     }
 
     return (
-      <EuiErrorBoundary>
+      <KibanaErrorBoundary>
         <KibanaContextProvider services={services}>
           <Wrapper customHeight={props.customHeight} data-test-subj={props.dataTestSubj}>
             <ExploratoryViewEmbeddable
@@ -142,7 +142,7 @@ export function getExploratoryViewEmbeddable(
             />
           </Wrapper>
         </KibanaContextProvider>
-      </EuiErrorBoundary>
+      </KibanaErrorBoundary>
     );
   };
 }

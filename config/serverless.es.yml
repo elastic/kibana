@@ -109,6 +109,9 @@ xpack.searchNotebooks.catalog.url: https://elastic-enterprise-search.s3.us-east-
 # Semantic text UI
 xpack.index_management.dev.enableSemanticText: true
 
+# Search Homepage
+xpack.searchHomepage.enabled: true
+
 # AI Assistant config
 xpack.observabilityAIAssistant.enabled: true
 xpack.searchAssistant.enabled: true

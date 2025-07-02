@@ -87,10 +87,10 @@ function moveForkBranchToToplevel(
   forkCommand: ESQLCommand<'fork'>,
   validBranch: ESQLAstQueryExpression
 ) {
-  mutate.generic.commands.remove(root, forkCommand);
-
   // Find where the fork index is to insert the valid branch
   const forkIndex = root.commands.findIndex((cmd) => cmd.name === 'fork');
+  mutate.generic.commands.remove(root, forkCommand);
+
   validBranch.commands.reverse().forEach((command) => {
     mutate.generic.commands.insert(root, command, forkIndex);
   });

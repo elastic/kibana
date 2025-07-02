@@ -31,6 +31,7 @@ const { REPO_ROOT } = require('@kbn/repo-info');
       `${REPO_ROOT}/x-pack/solutions/observability/plugins/apm/docs/openapi/apm/bundled.yaml`,
       `${REPO_ROOT}/x-pack/solutions/observability/plugins/slo/docs/openapi/slo/bundled.yaml`,
       `${REPO_ROOT}/x-pack/solutions/observability/plugins/uptime/docs/openapi/uptime_apis.yaml`,
+      `${REPO_ROOT}/x-pack/solutions/observability/plugins/observability_ai_assistant_app/docs/openapi/observability_ai_assistant_app_apis.yaml`,
       `${REPO_ROOT}/x-pack/solutions/observability/plugins/synthetics/docs/openapi/synthetic_apis.yaml`,
 
       // Security solution

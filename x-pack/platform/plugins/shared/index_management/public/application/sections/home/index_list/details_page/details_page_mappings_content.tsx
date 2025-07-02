@@ -427,7 +427,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
             <EuiPanel grow={false} paddingSize="l" color="subdued">
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="iInCircle" />
+                  <EuiIcon type="info" />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiTitle size="xs">

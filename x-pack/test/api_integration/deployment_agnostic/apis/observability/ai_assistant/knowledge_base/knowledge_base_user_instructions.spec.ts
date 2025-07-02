@@ -8,15 +8,12 @@
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
-import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
+import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/context';
 import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import pRetry from 'p-retry';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { clearKnowledgeBase } from '../utils/knowledge_base';
-import {
-  LlmProxy,
-  createLlmProxy,
-} from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { LlmProxy, createLlmProxy } from '../utils/create_llm_proxy';
 import { clearConversations, getConversationCreatedEvent } from '../utils/conversation';
 import {
   deployTinyElserAndSetupKb,
@@ -274,6 +271,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(status).to.be(200);
 
         void proxy.interceptTitle('This is a conversation title');
+        void proxy.interceptQueryRewrite('This is the rewritten user prompt');
         void proxy.interceptWithResponse('I, the LLM, hear you!');
 
         const messages: Message[] = [
@@ -301,6 +299,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(createResponse.status).to.be(200);
 
         await proxy.waitForAllInterceptorsToHaveBeenCalled();
+
         const conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
         const conversationId = conversationCreatedEvent.conversation.id;
 
@@ -409,7 +408,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('includes private KB instructions in the system message sent to the LLM', async () => {
-        const simulatorPromise = proxy.interceptWithResponse('Hello from LLM Proxy');
+        void proxy.interceptQueryRewrite('This is the rewritten user prompt');
+        void proxy.interceptWithResponse('Hello from LLM Proxy');
         const messages: Message[] = [
           {
             '@timestamp': new Date().toISOString(),
@@ -432,10 +432,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         });
         await proxy.waitForAllInterceptorsToHaveBeenCalled();
-        const simulator = await simulatorPromise;
-        const requestData = simulator.requestBody;
-        expect(requestData.messages[0].content).to.contain(userInstructionText);
-        expect(requestData.messages[0].content).to.eql(systemMessage);
+
+        const { requestBody } = proxy.interceptedRequests[1];
+        expect(requestBody.messages[0].content).to.contain(userInstructionText);
+        expect(requestBody.messages[0].content).to.eql(systemMessage);
       });
     });
 

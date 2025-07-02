@@ -35,6 +35,7 @@ import type {
 import type {
   AssetCriticalityRecord,
   EntityAnalyticsPrivileges,
+  FindAssetCriticalityRecordsResponse,
   SearchPrivilegesIndicesResponse,
 } from '../../../common/api/entity_analytics';
 import {
@@ -53,6 +54,7 @@ import {
   RISK_ENGINE_CLEANUP_URL,
   RISK_ENGINE_SCHEDULE_NOW_URL,
   RISK_ENGINE_CONFIGURE_SO_URL,
+  ASSET_CRITICALITY_PUBLIC_LIST_URL,
 } from '../../../common/constants';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
@@ -300,6 +302,26 @@ export const useEntityAnalyticsRoutes = () => {
       });
     };
 
+    /**
+     * Get multiple asset criticality records
+     */
+    const fetchAssetCriticalityList = async (params: {
+      idField: string;
+      idValues: string[];
+    }): Promise<FindAssetCriticalityRecordsResponse> => {
+      const wrapWithQuotes = (each: string) => `"${each}"`;
+      const kueryValues = `${params.idValues.map(wrapWithQuotes).join(' OR ')}`;
+      const kuery = `${params.idField}: (${kueryValues})`;
+
+      return http.fetch<FindAssetCriticalityRecordsResponse>(ASSET_CRITICALITY_PUBLIC_LIST_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        query: {
+          kuery,
+        },
+      });
+    };
+
     const uploadAssetCriticalityFile = async (
       fileContent: string,
       fileName: string
@@ -397,6 +419,7 @@ export const useEntityAnalyticsRoutes = () => {
       createAssetCriticality,
       deleteAssetCriticality,
       fetchAssetCriticality,
+      fetchAssetCriticalityList,
       uploadAssetCriticalityFile,
       uploadPrivilegedUserMonitoringFile,
       initPrivilegedMonitoringEngine,

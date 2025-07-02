@@ -85,7 +85,7 @@ export const iconsSet: IconSet<AvailableMetricIcon> = [
   },
   {
     // @ts-ignore
-    value: 'iInCircle',
+    value: 'info',
     label: i18n.translate('xpack.observability.metric.iconSelect.infoLabel', {
       defaultMessage: 'Info',
     }),

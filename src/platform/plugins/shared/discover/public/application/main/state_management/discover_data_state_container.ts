@@ -25,7 +25,6 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
@@ -249,11 +248,10 @@ export function getDataStateContainer({
       .pipe(
         mergeMap(async ({ options }) => {
           const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
-          const { scopedProfilesManager$, currentDataView$ } = selectTabRuntimeState(
-            runtimeStateManager,
-            currentTabId
-          );
+          const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =
+            selectTabRuntimeState(runtimeStateManager, currentTabId);
           const scopedProfilesManager = scopedProfilesManager$.getValue();
+          const scopedEbtManager = scopedEbtManager$.getValue();
 
           const searchSessionId =
             (options.fetchMore && dataRequestParams.searchSessionId) ||
@@ -269,6 +267,7 @@ export function getDataStateContainer({
             internalState,
             savedSearch: savedSearchContainer.getState(),
             scopedProfilesManager,
+            scopedEbtManager,
           };
 
           abortController?.abort();
@@ -276,18 +275,14 @@ export function getDataStateContainer({
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
-            const fetchMoreStartTime = window.performance.now();
+            const fetchMoreTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchMore');
 
             await fetchMoreDocuments({
               ...commonFetchParams,
               abortController: abortControllerFetchMore,
             });
 
-            const fetchMoreDuration = window.performance.now() - fetchMoreStartTime;
-            reportPerformanceMetricEvent(services.analytics, {
-              eventName: 'discoverFetchMore',
-              duration: fetchMoreDuration,
-            });
+            fetchMoreTracker.reportEvent();
 
             return;
           }
@@ -326,7 +321,7 @@ export function getDataStateContainer({
 
           abortController = new AbortController();
           const prevAutoRefreshDone = autoRefreshDone;
-          const fetchAllStartTime = window.performance.now();
+          const fetchAllTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchAll');
 
           await fetchAll({
             ...commonFetchParams,
@@ -359,17 +354,14 @@ export function getDataStateContainer({
                     columns: false,
                     rowHeight: false,
                     breakdownField: false,
+                    hideChart: false,
                   },
                 })
               );
             },
           });
 
-          const fetchAllDuration = window.performance.now() - fetchAllStartTime;
-          reportPerformanceMetricEvent(services.analytics, {
-            eventName: 'discoverFetchAll',
-            duration: fetchAllDuration,
-          });
+          fetchAllTracker.reportEvent();
 
           // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
           // replacing this current one, call it to make sure we tell that the auto refresh is done

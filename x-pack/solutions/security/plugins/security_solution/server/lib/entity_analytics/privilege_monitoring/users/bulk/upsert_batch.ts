@@ -18,11 +18,13 @@ export const bulkUpsertBatch =
       index,
       operations: users.flatMap((u) => {
         const id = batch.existingUsers[u.username];
+        const timestamp = new Date().toISOString();
 
         if (!id) {
           return [
             { create: {} },
             {
+              '@timestamp': timestamp,
               user: { name: u.username, is_privileged: true },
               labels: { sources: ['csv'] },
             },

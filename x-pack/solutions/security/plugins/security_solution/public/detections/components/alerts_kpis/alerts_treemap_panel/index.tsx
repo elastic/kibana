@@ -20,7 +20,7 @@ import { KpiPanel } from '../common/components';
 import { useInspectButton } from '../common/hooks';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
-import { FieldSelection } from '../../../../common/components/field_selection';
+import { FieldSelection } from '../common/field_selection';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { DEFAULT_STACK_BY_FIELD0_SIZE, getAlertsRiskQuery } from './alerts_treemap/query';

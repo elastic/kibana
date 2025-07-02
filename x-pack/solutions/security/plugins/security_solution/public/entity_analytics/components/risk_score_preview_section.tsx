@@ -90,7 +90,7 @@ const MissingPermissionsCallout = () => {
     <EuiCallOut
       title={i18n.PREVIEW_MISSING_PERMISSIONS_TITLE}
       color="primary"
-      iconType="iInCircle"
+      iconType="info"
       data-test-subj="missing-risk-engine-preview-permissions"
     >
       <EuiText size="s">

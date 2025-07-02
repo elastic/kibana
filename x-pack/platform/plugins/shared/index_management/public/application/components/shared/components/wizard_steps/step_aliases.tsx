@@ -68,7 +68,7 @@ export const StepAliases: React.FunctionComponent<Props> = React.memo(
               flush="right"
               href={documentationService.getBulkIndexAlias()}
               target="_blank"
-              iconType="help"
+              iconType="question"
             >
               <FormattedMessage
                 id="xpack.idxMgmt.formWizard.stepAliases.docsButtonLabel"

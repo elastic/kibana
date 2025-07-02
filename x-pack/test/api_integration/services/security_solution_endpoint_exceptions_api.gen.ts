@@ -32,7 +32,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
 
   return {
     /**
-     * Create an endpoint exception list, which groups endpoint exception list items. If an endpoint exception list already exists, an empty response is returned.
+     * Create the exception list for Elastic Endpoint rule exceptions. When you create the exception list, it will have a `list_id` of `endpoint_list`. If the Elastic Endpoint exception list already exists, your request will return an empty response.
      */
     createEndpointList(kibanaSpace: string = 'default') {
       return supertest
@@ -42,7 +42,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Create an endpoint exception list item, and associate it with the endpoint exception list.
+     * Create an Elastic Endpoint exception list item, and associate it with the Elastic Endpoint exception list.
      */
     createEndpointListItem(props: CreateEndpointListItemProps, kibanaSpace: string = 'default') {
       return supertest
@@ -53,7 +53,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .send(props.body as object);
     },
     /**
-     * Delete an endpoint exception list item using the `id` or `item_id` field.
+     * Delete an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
      */
     deleteEndpointListItem(props: DeleteEndpointListItemProps, kibanaSpace: string = 'default') {
       return supertest
@@ -64,7 +64,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .query(props.query);
     },
     /**
-     * Get a list of all endpoint exception list items.
+     * Get a list of all Elastic Endpoint exception list items.
      */
     findEndpointListItems(props: FindEndpointListItemsProps, kibanaSpace: string = 'default') {
       return supertest
@@ -75,7 +75,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .query(props.query);
     },
     /**
-     * Get the details of an endpoint exception list item using the `id` or `item_id` field.
+     * Get the details of an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
      */
     readEndpointListItem(props: ReadEndpointListItemProps, kibanaSpace: string = 'default') {
       return supertest
@@ -86,7 +86,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .query(props.query);
     },
     /**
-     * Update an endpoint exception list item using the `id` or `item_id` field.
+     * Update an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
      */
     updateEndpointListItem(props: UpdateEndpointListItemProps, kibanaSpace: string = 'default') {
       return supertest

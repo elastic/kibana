@@ -23,8 +23,10 @@ export const AddInferenceFlyoutWrapper: React.FC<AddInferenceFlyoutWrapperProps>
     services: {
       http,
       notifications: { toasts },
+      serverless,
     },
   } = useKibana();
+
   const onSubmitSuccess = useCallback(() => {
     reloadFn();
   }, [reloadFn]);
@@ -33,6 +35,7 @@ export const AddInferenceFlyoutWrapper: React.FC<AddInferenceFlyoutWrapperProps>
     <InferenceFlyoutWrapper
       onFlyoutClose={onFlyoutClose}
       http={http}
+      enforceAdaptiveAllocations={!!serverless}
       toasts={toasts}
       onSubmitSuccess={onSubmitSuccess}
     />

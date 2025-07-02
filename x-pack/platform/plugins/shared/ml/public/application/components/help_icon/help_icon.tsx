@@ -12,7 +12,7 @@ import { EuiIcon, EuiToolTip } from '@elastic/eui';
 export const HelpIcon: FC<{ content: ReactNode | string }> = ({ content }) => {
   return (
     <EuiToolTip position="top" content={content}>
-      <EuiIcon type="questionInCircle" color={'subdued'} className="eui-alignTop" size="s" />
+      <EuiIcon type="question" color={'subdued'} className="eui-alignTop" size="s" />
     </EuiToolTip>
   );
 };

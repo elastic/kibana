@@ -11,14 +11,12 @@ import { EuiButtonGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface MetadataTypeSelectorProps {
-  setIsFlyoutDirty: (isDirty: boolean) => void;
   isAlways: boolean;
-  setIsAlways: (isAlways: boolean) => void;
+  onChange: (isAlways: boolean) => void;
 }
 export const MetadataTypeSelector: React.FC<MetadataTypeSelectorProps> = ({
-  setIsFlyoutDirty,
   isAlways,
-  setIsAlways,
+  onChange,
 }) => {
   return (
     <EuiButtonGroup
@@ -51,8 +49,7 @@ export const MetadataTypeSelector: React.FC<MetadataTypeSelectorProps> = ({
         },
       ]}
       onChange={(id) => {
-        setIsFlyoutDirty(true);
-        setIsAlways(id === 'always');
+        onChange(id === 'always');
       }}
       buttonSize="compressed"
       type="single"

@@ -6,7 +6,11 @@
  */
 
 import { appContextService } from '../app_context';
-import { FLEET_SERVER_PACKAGE } from '../../../common/constants';
+import {
+  FLEET_SERVER_PACKAGE,
+  SEARCH_AI_LAKE_PACKAGES,
+  SEARCH_AI_LAKE_ALLOWED_INSTALL_PACKAGES,
+} from '../../../common/constants';
 
 export function getFilteredSearchPackages() {
   const isElasticConnectorsServerlessEnabled = getElasticConnectorsServerlessEnabled();
@@ -35,6 +39,14 @@ export function getFilteredInstallPackages() {
   const excludePackages = appContextService.getConfig()?.internal?.registry?.excludePackages ?? [];
 
   return filtered.concat(excludePackages);
+}
+
+export function getAllowedSearchAiLakeInstallPackagesIfEnabled() {
+  const enabled =
+    appContextService.getConfig()?.internal?.registry?.searchAiLakePackageAllowlistEnabled;
+  return enabled
+    ? SEARCH_AI_LAKE_PACKAGES.concat(SEARCH_AI_LAKE_ALLOWED_INSTALL_PACKAGES)
+    : undefined;
 }
 
 export function getElasticConnectorsServerlessEnabled() {

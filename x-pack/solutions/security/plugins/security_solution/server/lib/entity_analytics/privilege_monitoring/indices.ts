@@ -13,12 +13,7 @@ export const PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING: MappingProperties = 
   user: {
     properties: {
       name: {
-        type: 'text',
-        fields: {
-          keyword: {
-            type: 'keyword',
-          },
-        },
+        type: 'keyword',
       },
     },
   },
@@ -36,6 +31,9 @@ export const PRIVILEGED_MONITOR_USERS_INDEX_MAPPING: MappingProperties = {
   },
   'user.is_privileged': {
     type: 'boolean',
+  },
+  'labels.sources': {
+    type: 'keyword',
   },
 };
 

@@ -15,10 +15,11 @@ Object {
     "test*",
   ],
   "latest": Object {
-    "lookbackPeriod": "24h",
+    "lookbackPeriod": "3h",
     "settings": Object {
-      "docsPerSecond": undefined,
+      "docsPerSecond": -1,
       "frequency": "1m",
+      "maxPageSearchSize": 500,
       "syncDelay": "1m",
       "syncField": "@timestamp",
       "timeout": "180s",
@@ -244,10 +245,11 @@ Object {
     "test*",
   ],
   "latest": Object {
-    "lookbackPeriod": "24h",
+    "lookbackPeriod": "3h",
     "settings": Object {
-      "docsPerSecond": undefined,
+      "docsPerSecond": -1,
       "frequency": "1m",
+      "maxPageSearchSize": 500,
       "syncDelay": "1m",
       "syncField": "@timestamp",
       "timeout": "180s",
@@ -483,10 +485,11 @@ Object {
     "test*",
   ],
   "latest": Object {
-    "lookbackPeriod": "24h",
+    "lookbackPeriod": "3h",
     "settings": Object {
-      "docsPerSecond": undefined,
+      "docsPerSecond": -1,
       "frequency": "1m",
+      "maxPageSearchSize": 500,
       "syncDelay": "1m",
       "syncField": "@timestamp",
       "timeout": "180s",

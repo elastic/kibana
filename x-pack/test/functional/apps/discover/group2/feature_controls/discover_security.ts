@@ -142,6 +142,7 @@ export default function (ctx: FtrProviderContext) {
 
       it('shows CSV reports', async () => {
         await exports.clickExportTopNavButton();
+        await exports.clickPopoverItem('CSV');
         await testSubjects.existOrFail('generateReportButton');
         await exports.closeExportFlyout();
       });

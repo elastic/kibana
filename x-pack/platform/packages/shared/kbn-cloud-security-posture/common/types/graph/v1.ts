@@ -17,7 +17,10 @@ import {
   labelNodeDataSchema,
   nodeColorSchema,
   nodeShapeSchema,
+  nodeDocumentDataSchema,
 } from '../../schema/graph/v1';
+
+export { DOCUMENT_TYPE_ALERT, DOCUMENT_TYPE_EVENT } from '../../schema/graph/v1';
 
 export type GraphRequest = Omit<TypeOf<typeof graphRequestSchema>, 'query.esQuery'> & {
   query: { esQuery?: { bool: Partial<BoolQuery> } };
@@ -44,3 +47,5 @@ export type LabelNodeDataModel = TypeOf<typeof labelNodeDataSchema>;
 export type EdgeDataModel = TypeOf<typeof edgeDataSchema>;
 
 export type NodeDataModel = EntityNodeDataModel | GroupNodeDataModel | LabelNodeDataModel;
+
+export type NodeDocumentDataModel = TypeOf<typeof nodeDocumentDataSchema>;

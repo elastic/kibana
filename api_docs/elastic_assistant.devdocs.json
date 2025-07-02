@@ -131,11 +131,11 @@
                 "section": "def-server.AssistantToolParams",
                 "text": "AssistantToolParams"
               },
-              ") => ",
+              ") => Promise<",
               "StructuredToolInterface",
               "<",
               "ToolInputSchemaBase",
-              ", any, any> | null"
+              ", any, any> | null>"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,

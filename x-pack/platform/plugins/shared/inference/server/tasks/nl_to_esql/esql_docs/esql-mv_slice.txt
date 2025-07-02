@@ -1,6 +1,6 @@
 # MV_SLICE
 
-The MV_SLICE function is used to extract a subset of a multivalued field using specified start and end index values.
+The `MV_SLICE` function extracts a subset of a multivalued field based on specified start and end index values. It is particularly useful when working with functions that produce multivalued columns in a known order, such as `SPLIT` or `MV_SORT`.
 
 ## Syntax
 
@@ -8,26 +8,44 @@ The MV_SLICE function is used to extract a subset of a multivalued field using s
 
 ### Parameters
 
-#### field
+#### `field`
 
-This is a multivalue expression. If `null`, the function will return `null`.
+- A multivalue expression. If `null`, the function returns `null`.
 
-#### start
+#### `start`
 
-This is the start position. If `null`, the function will return `null`. The start argument can be negative, where an index of -1 is used to specify the last value in the list.
+- The starting position of the slice. If `null`, the function returns `null`.
+- Can be negative, where `-1` refers to the last value in the list.
 
-#### end
+#### `end` (Optional)
 
-This is the end position (included). This parameter is optional; if omitted, the position at `start` is returned. The end argument can be negative, where an index of -1 is used to specify the last value in the list.
+- The ending position of the slice (inclusive). If omitted, only the value at the `start` position is returned.
+- Can be negative, where `-1` refers to the last value in the list.
 
 ## Examples
+
+Extracting specific slices from a multivalued field
 
 ```esql
 ROW a = [1, 2, 2, 3]
 | EVAL a1 = MV_SLICE(a, 1), a2 = MV_SLICE(a, 2, 3)
 ```
 
+This example extracts:
+- `a1` as the value starting at index `1` (second value in the list).
+- `a2` as the values from index `2` to `3` (third and fourth values in the list).
+
+Using negative indices to slice from the end of the list
+
 ```esql
 ROW a = [1, 2, 2, 3]
 | EVAL a1 = MV_SLICE(a, -2), a2 = MV_SLICE(a, -3, -1)
 ```
+
+This example extracts:
+- `a1` as the value starting at the second-to-last index (`-2`).
+- `a2` as the values from the third-to-last index (`-3`) to the last index (`-1`).
+
+## Notes
+
+- The order in which multivalued fields are read from underlying storage is not guaranteed. While it is often ascending, this behavior should not be relied upon.

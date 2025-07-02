@@ -60,7 +60,6 @@ import type { InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
 import { handleSystemColorModeChange } from './handle_system_colormode_change';
 
-const IS_LOCKED_KEY = 'core.chrome.isLocked';
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
 const SNAPSHOT_REGEX = /-snapshot/i;
 
@@ -276,7 +275,6 @@ export class ChromeService {
     const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(docLinks.links.kibana.askElastic);
-    const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
     // ChromeStyle is set to undefined by default, which means that no header will be rendered until
     // setChromeStyle(). This is to avoid a flickering between the "classic" and "project" header meanwhile
     // we load the user profile to check if the user opted out of the new solution navigation.
@@ -340,13 +338,6 @@ export class ChromeService {
       badge$.next(undefined);
       docTitle.reset();
     });
-
-    const setIsNavDrawerLocked = (isLocked: boolean) => {
-      isNavDrawerLocked$.next(isLocked);
-      localStorage.setItem(IS_LOCKED_KEY, `${isLocked}`);
-    };
-
-    const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
 
     const validateChromeStyle = () => {
       const chromeStyle = chromeStyleSubject$.getValue();
@@ -419,7 +410,66 @@ export class ChromeService {
       });
     }
 
-    const getHeaderComponent = () => {
+    /**
+     * Classic header is a header for the "classic" navigation with all solutions
+     * It can be customized to be used with either legacy fixed layout or new grid layout.
+     * In fixed layout it is fixed to the top of the page, with display: fixed; and should be responsible for rendering the banner
+     *
+     * @param isFixed
+     * @param includeBanner
+     */
+    const getClassicHeader = ({
+      isFixed,
+      includeBanner,
+      as,
+    }: {
+      /**
+       * Whether the header should be rendered as a header element, or as a div element.
+       */
+      as: 'header' | 'div';
+      /**
+       * Whether the header should be fixed to the top of the page, with display: fixed;
+       */
+      isFixed: boolean;
+      /**
+       * Whether the header should be also responsible the top banner, which is displayed above the header
+       */
+      includeBanner: boolean;
+    }) => (
+      <Header
+        /* customizable header variations */
+        as={as}
+        headerBanner$={includeBanner ? headerBanner$.pipe(takeUntil(this.stop$)) : null}
+        isFixed={isFixed}
+        /* consistent header properties */
+        isServerless={this.isServerless}
+        loadingCount$={http.getLoadingCount$()}
+        application={application}
+        badge$={badge$.pipe(takeUntil(this.stop$))}
+        basePath={http.basePath}
+        breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
+        breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$.pipe(takeUntil(this.stop$))}
+        customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
+        kibanaDocLink={docLinks.links.kibana.guide}
+        docLinks={docLinks}
+        forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
+        globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
+        helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
+        helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
+        helpMenuLinks$={helpMenuLinks$}
+        homeHref={http.basePath.prepend('/app/home')}
+        kibanaVersion={injectedMetadata.getKibanaVersion()}
+        navLinks$={navLinks.getNavLinks$()}
+        recentlyAccessed$={recentlyAccessed.get$()}
+        navControlsLeft$={navControls.getLeft$()}
+        navControlsCenter$={navControls.getCenter$()}
+        navControlsRight$={navControls.getRight$()}
+        navControlsExtension$={navControls.getExtension$()}
+        customBranding$={customBranding$}
+      />
+    );
+
+    const getLegacyHeaderComponentForFixedLayout = () => {
       const defaultChromeStyle = chromeStyleSubject$.getValue();
 
       const HeaderComponent = () => {
@@ -494,48 +544,42 @@ export class ChromeService {
           return <ProjectHeaderWithNavigationComponent />;
         }
 
-        return (
-          <Header
-            isServerless={this.isServerless}
-            loadingCount$={http.getLoadingCount$()}
-            application={application}
-            headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
-            badge$={badge$.pipe(takeUntil(this.stop$))}
-            basePath={http.basePath}
-            breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
-            breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$.pipe(takeUntil(this.stop$))}
-            customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
-            kibanaDocLink={docLinks.links.kibana.guide}
-            docLinks={docLinks}
-            forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
-            globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
-            helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
-            helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
-            helpMenuLinks$={helpMenuLinks$}
-            homeHref={http.basePath.prepend('/app/home')}
-            kibanaVersion={injectedMetadata.getKibanaVersion()}
-            navLinks$={navLinks.getNavLinks$()}
-            recentlyAccessed$={recentlyAccessed.get$()}
-            navControlsLeft$={navControls.getLeft$()}
-            navControlsCenter$={navControls.getCenter$()}
-            navControlsRight$={navControls.getRight$()}
-            navControlsExtension$={navControls.getExtension$()}
-            onIsLockedUpdate={setIsNavDrawerLocked}
-            isLocked$={getIsNavDrawerLocked$}
-            customBranding$={customBranding$}
-          />
-        );
+        return getClassicHeader({ isFixed: true, includeBanner: true, as: 'header' });
       };
 
       return <HeaderComponent />;
     };
 
+    const getClassicHeaderComponentForGridLayout = () => {
+      return getClassicHeader({ isFixed: false, includeBanner: false, as: 'div' });
+    };
+
     return {
+      // TODO: this service does too much and doesn't have to compose these headers components.
+      // let's get rid of this in the future https://github.com/elastic/kibana/issues/225264
+      getLegacyHeaderComponentForFixedLayout,
+      getClassicHeaderComponentForGridLayout,
+      getHeaderBanner: () => {
+        return (
+          <HeaderTopBanner
+            headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
+            position={'static'}
+          />
+        );
+      },
+      getChromelessHeader: () => {
+        return (
+          <div data-test-subj="kibanaHeaderChromeless">
+            <LoadingIndicator loadingCount$={http.getLoadingCount$()} showAsBar />
+          </div>
+        );
+      },
+
+      // chrome APIs
       navControls,
       navLinks,
       recentlyAccessed,
       docTitle,
-      getHeaderComponent,
 
       getIsVisible$: () => this.isVisible$,
 
@@ -591,8 +635,6 @@ export class ChromeService {
       setHelpSupportUrl: (url: string) => helpSupportUrl$.next(url),
 
       getHelpSupportUrl$: () => helpSupportUrl$.pipe(takeUntil(this.stop$)),
-
-      getIsNavDrawerLocked$: () => getIsNavDrawerLocked$,
 
       getCustomNavLink$: () => customNavLink$.pipe(takeUntil(this.stop$)),
 

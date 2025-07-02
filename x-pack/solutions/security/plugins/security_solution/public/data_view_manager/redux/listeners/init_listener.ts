@@ -49,7 +49,7 @@ export const createInitListener = (dependencies: {
         // Initialize default security data view first
         // Note: this is subject to change, as we might want to add specific data view just for alerts
 
-        const { defaultDataView } = await createDefaultDataView({
+        const { defaultDataView, alertDataView } = await createDefaultDataView({
           dataViewService: dependencies.dataViews,
           uiSettings: dependencies.uiSettings,
           spaces: dependencies.spaces,
@@ -66,7 +66,10 @@ export const createInitListener = (dependencies: {
         // NOTE: save default dataview id for the given space in the store.
         // this is used to identify the default selection in pickers across Kibana Space
         listenerApi.dispatch(
-          sharedDataViewManagerSlice.actions.setDefaultDataViewId(defaultDataView.id)
+          sharedDataViewManagerSlice.actions.setDataViewId({
+            defaultDataViewId: defaultDataView.id,
+            alertDataViewId: alertDataView.id,
+          })
         );
 
         // Preload the default data view for all the scopes
@@ -82,12 +85,21 @@ export const createInitListener = (dependencies: {
           // NOTE: only init default data view for slices that are not initialized yet
           .filter((scope) => !listenerApi.getState().dataViewManager[scope].dataViewId)
           .forEach((scope) => {
-            listenerApi.dispatch(
-              selectDataViewAsync({
-                id: defaultDataView.id,
-                scope,
-              })
-            );
+            if (scope === DataViewManagerScopeName.detections) {
+              listenerApi.dispatch(
+                selectDataViewAsync({
+                  id: alertDataView.id,
+                  scope,
+                })
+              );
+            } else {
+              listenerApi.dispatch(
+                selectDataViewAsync({
+                  id: defaultDataView.id,
+                  scope,
+                })
+              );
+            }
           });
 
         // NOTE: if there is a list of data views to preload other than default one (eg. coming in from the url storage)

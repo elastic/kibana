@@ -14,6 +14,8 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import type { OpenRuleDiffFlyoutParams } from '../../../../rule_management/hooks/use_prebuilt_rules_view_base_diff';
+import { isCustomizedPrebuiltRule } from '../../../../../../common/api/detection_engine';
 import { useScheduleRuleRun } from '../../../../rule_gaps/logic/use_schedule_rule_run';
 import type { TimeRange } from '../../../../rule_gaps/types';
 import { APP_UI_ID, SecurityPageName } from '../../../../../../common';
@@ -55,6 +57,8 @@ interface RuleActionsOverflowComponentProps {
   showBulkDuplicateExceptionsConfirmation: () => Promise<string | null>;
   showManualRuleRunConfirmation: () => Promise<TimeRange | null>;
   confirmDeletion: () => Promise<boolean>;
+  openRuleDiffFlyout: (params: OpenRuleDiffFlyoutParams) => void;
+  isRevertBaseVersionDisabled: boolean;
 }
 
 /**
@@ -67,6 +71,8 @@ const RuleActionsOverflowComponent = ({
   showBulkDuplicateExceptionsConfirmation,
   showManualRuleRunConfirmation,
   confirmDeletion,
+  openRuleDiffFlyout,
+  isRevertBaseVersionDisabled,
 }: RuleActionsOverflowComponentProps) => {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
   const {
@@ -177,6 +183,33 @@ const RuleActionsOverflowComponent = ({
             >
               {i18nActions.MANUAL_RULE_RUN}
             </EuiContextMenuItem>,
+            ...(isCustomizedPrebuiltRule(rule) // Don't display action if rule isn't a customized prebuilt rule
+              ? [
+                  <EuiContextMenuItem
+                    key={i18nActions.REVERT_RULE}
+                    toolTipContent={
+                      isRevertBaseVersionDisabled
+                        ? i18nActions.REVERT_RULE_TOOLTIP_CONTENT
+                        : undefined
+                    }
+                    toolTipProps={{
+                      title: isRevertBaseVersionDisabled
+                        ? i18nActions.REVERT_RULE_TOOLTIP_TITLE
+                        : undefined,
+                      'data-test-subj': 'rules-details-revert-rule-tooltip',
+                    }}
+                    icon="timeRefresh"
+                    disabled={!userHasPermissions || isRevertBaseVersionDisabled}
+                    data-test-subj="rules-details-revert-rule"
+                    onClick={() => {
+                      closePopover();
+                      openRuleDiffFlyout({ isReverting: true });
+                    }}
+                  >
+                    {i18nActions.REVERT_RULE}
+                  </EuiContextMenuItem>,
+                ]
+              : []),
             <EuiContextMenuItem
               key={i18nActions.DELETE_RULE}
               icon="trash"
@@ -207,6 +240,7 @@ const RuleActionsOverflowComponent = ({
       rule,
       canDuplicateRuleWithActions,
       userHasPermissions,
+      isRevertBaseVersionDisabled,
       startTransaction,
       closePopover,
       showBulkDuplicateExceptionsConfirmation,
@@ -217,6 +251,7 @@ const RuleActionsOverflowComponent = ({
       showManualRuleRunConfirmation,
       telemetry,
       scheduleRuleRun,
+      openRuleDiffFlyout,
       confirmDeletion,
       onRuleDeletedCallback,
     ]

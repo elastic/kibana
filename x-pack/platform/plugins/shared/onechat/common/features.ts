@@ -7,7 +7,9 @@
 
 export const ONECHAT_FEATURE_ID = 'onechat';
 export const ONECHAT_FEATURE_NAME = 'onechat';
-export const ONECHAT_APP_ID = 'onechat_app';
+export const ONECHAT_APP_ID = 'onechat';
+export const ONECHAT_PATH = '/app/chat';
+export const ONECHAT_TITLE = 'Chat';
 
 export const uiPrivileges = {
   show: 'show',

@@ -50,7 +50,7 @@ export const InnerLinkPanel = ({
     <EuiFlexGroup direction="column" data-test-subj={dataTestSubj}>
       <EuiFlexItem>
         <EuiFlexGroup direction="row">
-          <Icon type={color === 'primary' ? 'iInCircle' : 'help'} size="m" color={color} />
+          <Icon type={color === 'primary' ? 'info' : 'help'} size="m" color={color} />
           <EuiFlexItem>
             <Title data-test-subj="inner-link-panel-title" textcolor={color}>
               {title}

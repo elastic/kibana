@@ -34,16 +34,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Guided onboarding', () => {
-      it('The help link "Setup guides" is added', async () => {
-        await PageObjects.common.clickAndValidate(
-          'helpMenuButton',
-          'cloudOnboardingSetupGuideLink'
-        );
-        expect(
-          await find.byCssSelector('[data-test-subj="cloudOnboardingSetupGuideLink"]')
-        ).to.not.be(null);
-      });
-
       it('Can open "Connection details" overlay with ES URL and Cloud ID', async () => {
         await PageObjects.common.clickAndValidate('helpMenuButton', 'connectionDetailsHelpLink');
         expect(await find.byCssSelector('[data-test-subj="connectionDetailsHelpLink"]')).to.not.be(

@@ -396,14 +396,13 @@ class AgentPolicyService {
         }
         newAgentPolicy = updatedNewAgentPolicy;
       }
+      logger.debug(`Running of external callbacks for [${externalCallbackType}] done`);
       return newAgentPolicy;
     } catch (error) {
       logger.error(`Error running external callbacks for [${externalCallbackType}]`);
       logger.error(error);
       throw error;
     }
-
-    logger.debug(`Running of external callbacks for [${externalCallbackType}] done`);
   }
 
   public async create(
@@ -900,7 +899,6 @@ class AgentPolicyService {
         force: options?.force,
       });
     }
-
     return this._update(soClient, esClient, id, agentPolicy, options?.user, {
       bumpRevision: options?.bumpRevision ?? true,
       removeProtection: false,

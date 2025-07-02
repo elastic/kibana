@@ -300,7 +300,7 @@
         "label": "FieldName",
         "description": [],
         "signature": [
-          "({\n  fieldName,\n  fieldMapping,\n  fieldType,\n  fieldIconProps,\n  scripted = false,\n  highlight = '',\n}: Props) => React.JSX.Element"
+          "({\n  fieldName,\n  fieldMapping,\n  fieldType,\n  fieldIconProps,\n  displayNameOverride,\n  scripted = false,\n  highlight = '',\n}: Props) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-unified-doc-viewer/src/components/field_name/field_name.tsx",
         "deprecated": false,
@@ -311,7 +311,7 @@
             "id": "def-common.FieldName.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  fieldName,\n  fieldMapping,\n  fieldType,\n  fieldIconProps,\n  scripted = false,\n  highlight = '',\n}",
+            "label": "{\n  fieldName,\n  fieldMapping,\n  fieldType,\n  fieldIconProps,\n  displayNameOverride,\n  scripted = false,\n  highlight = '',\n}",
             "description": [],
             "signature": [
               "Props"

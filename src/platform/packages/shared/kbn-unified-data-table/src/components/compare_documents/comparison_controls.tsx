@@ -354,7 +354,7 @@ const SectionHeader = ({
           </EuiFlexItem>
           {description && (
             <EuiFlexItem grow={false} css={{ lineHeight: 0 }}>
-              <EuiIconTip type="questionInCircle" position="right" content={description} />
+              <EuiIconTip type="question" position="right" content={description} />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -432,7 +432,7 @@ const DiffOptionSwitch = ({
         {description && (
           <EuiFlexItem grow={false} css={{ lineHeight: 0 }}>
             <EuiIconTip
-              type="questionInCircle"
+              type="question"
               position="right"
               content={description}
               iconProps={disabled ? { tabIndex: -1 } : undefined}

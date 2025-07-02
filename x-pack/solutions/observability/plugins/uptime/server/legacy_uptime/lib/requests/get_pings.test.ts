@@ -164,6 +164,11 @@ describe('getAll', () => {
           ],
         },
         Object {
+          "context": Object {
+            "loggingOptions": Object {
+              "loggerName": "synthetics",
+            },
+          },
           "meta": true,
         },
       ]
@@ -224,6 +229,11 @@ describe('getAll', () => {
           ],
         },
         Object {
+          "context": Object {
+            "loggingOptions": Object {
+              "loggerName": "synthetics",
+            },
+          },
           "meta": true,
         },
       ]
@@ -284,6 +294,11 @@ describe('getAll', () => {
           ],
         },
         Object {
+          "context": Object {
+            "loggingOptions": Object {
+              "loggerName": "synthetics",
+            },
+          },
           "meta": true,
         },
       ]
@@ -349,6 +364,11 @@ describe('getAll', () => {
           ],
         },
         Object {
+          "context": Object {
+            "loggingOptions": Object {
+              "loggerName": "synthetics",
+            },
+          },
           "meta": true,
         },
       ]
@@ -455,6 +475,11 @@ describe('getAll', () => {
           ],
         },
         Object {
+          "context": Object {
+            "loggingOptions": Object {
+              "loggerName": "synthetics",
+            },
+          },
           "meta": true,
         },
       ]

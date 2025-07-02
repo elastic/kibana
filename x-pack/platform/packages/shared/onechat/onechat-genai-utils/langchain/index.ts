@@ -6,6 +6,7 @@
  */
 
 export {
+  isStreamEvent,
   matchGraphName,
   matchGraphNode,
   matchName,
@@ -15,4 +16,11 @@ export {
   createMessageEvent,
   createReasoningEvent,
 } from './graph_events';
-export { extractTextContent } from './messages';
+export { extractTextContent, extractToolCalls, type ToolCall } from './messages';
+export {
+  toolsToLangchain,
+  toolToLangchain,
+  toolIdentifierFromToolCall,
+  type ToolIdMapping,
+  type ToolsAndMappings,
+} from './tools';

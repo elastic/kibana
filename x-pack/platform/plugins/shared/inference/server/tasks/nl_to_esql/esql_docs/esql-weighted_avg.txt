@@ -1,6 +1,6 @@
-# WEIGHTED_AVG
+## WEIGHTED_AVG
 
-The WEIGHTED_AVG function calculates the weighted average of a numeric expression.
+Calculates the weighted average of a numeric expression.
 
 ## Syntax
 
@@ -8,13 +8,13 @@ The WEIGHTED_AVG function calculates the weighted average of a numeric expressio
 
 ### Parameters
 
-#### number
+#### `number`
 
-A numeric value that you want to calculate the weighted average for.
+A numeric value.
 
-#### weight
+#### `weight`
 
-A numeric value that represents the weight of the corresponding number.
+A numeric weight.
 
 ## Examples
 
@@ -26,10 +26,4 @@ FROM employees
 | SORT languages
 ```
 
-```esql
-FROM sales
-| STATS weighted_sales = WEIGHTED_AVG(revenue, units_sold) BY region
-| EVAL weighted_sales = ROUND(weighted_sales, 2)
-| KEEP weighted_sales, region
-| SORT region
-```
+This example calculates the weighted average of employee salaries using their heights as weights, grouped by languages. The result is rounded and sorted by language.

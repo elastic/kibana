@@ -16,7 +16,7 @@ import { promptSavedObjectType } from './saved_object_mappings';
 /**
  * Get prompts by feature (promptGroupId)
  * provide either model + provider or connector to avoid additional calls to get connector
- * @param actionsClient - actions client
+ * @param actionsClient - actions client (look up connector if connector is not provided)
  * @param connector - connector, provide if available. No need to provide model and provider in this case
  * @param connectorId - connector id
  * @param localPrompts - local prompts object
@@ -138,15 +138,20 @@ export const resolveProviderAndModel = async ({
 }: {
   providedProvider?: string;
   providedModel?: string;
-  connectorId: string;
-  actionsClient: PublicMethodsOf<ActionsClient>;
+  connectorId?: string;
+  actionsClient?: PublicMethodsOf<ActionsClient>;
   providedConnector?: Connector;
 }): Promise<{ provider?: string; model?: string }> => {
   let model = providedModel;
   let provider = providedProvider;
   if (!provider || !model || provider === 'inference') {
-    const connector = providedConnector ?? (await actionsClient.get({ id: connectorId }));
-
+    let connector = providedConnector;
+    if (!connector && connectorId != null && actionsClient) {
+      connector = await actionsClient.get({ id: connectorId });
+    }
+    if (!connector) {
+      return {};
+    }
     if (provider === 'inference' && connector.config) {
       provider = connector.config.provider || provider;
       model = connector.config.providerConfig?.model_id || model;

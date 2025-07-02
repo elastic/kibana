@@ -12,22 +12,13 @@ import { pick } from 'lodash';
 import moment, { Moment } from 'moment';
 
 import type { Reference } from '@kbn/content-management-utils';
-import {
-  convertPanelSectionMapsToPanelsArray,
-  generateNewPanelIds,
-} from '../../common/lib/dashboard_panel_converters';
 import type { DashboardAttributes } from '../../server';
 
 import type { DashboardState } from '../../common';
 import { LATEST_VERSION } from '../../common/content_management';
-import {
-  convertDashboardVersionToNumber,
-  convertNumberToDashboardVersion,
-} from '../services/dashboard_content_management_service/lib/dashboard_versioning';
 import { dataService, savedObjectsTaggingService } from '../services/kibana_services';
 import { DashboardApi } from './types';
-
-const LATEST_DASHBOARD_CONTAINER_VERSION = convertNumberToDashboardVersion(LATEST_VERSION);
+import { generateNewPanelIds } from './generate_new_panel_ids';
 
 export const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
   if (moment(time).isValid()) {
@@ -64,7 +55,6 @@ export const getSerializedState = ({
     filters,
     timeRestore,
     description,
-    sections,
 
     // Dashboard options
     useMargins,
@@ -78,10 +68,7 @@ export const getSerializedState = ({
   let { panels } = dashboardState;
   let prefixedPanelReferences = panelReferences;
   if (generateNewIds) {
-    const { panels: newPanels, references: newPanelReferences } = generateNewPanelIds(
-      panels,
-      panelReferences
-    );
+    const { newPanels, newPanelReferences } = generateNewPanelIds(panels, panelReferences);
     panels = newPanels;
     prefixedPanelReferences = newPanelReferences;
     //
@@ -98,7 +85,6 @@ export const getSerializedState = ({
     syncTooltips,
     hidePanelTitles,
   };
-  const savedPanels = convertPanelSectionMapsToPanelsArray(panels, sections, true);
 
   /**
    * Parse global time filter settings
@@ -116,14 +102,14 @@ export const getSerializedState = ({
     : undefined;
 
   const attributes: DashboardAttributes = {
-    version: convertDashboardVersionToNumber(LATEST_DASHBOARD_CONTAINER_VERSION),
+    version: LATEST_VERSION,
     controlGroupInput: controlGroupInput as DashboardAttributes['controlGroupInput'],
     kibanaSavedObjectMeta: { searchSource },
     description: description ?? '',
     refreshInterval,
     timeRestore,
     options,
-    panels: savedPanels,
+    panels,
     timeFrom,
     title,
     timeTo,

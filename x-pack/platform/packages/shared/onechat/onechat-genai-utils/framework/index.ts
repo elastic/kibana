@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export {
-  filterProviderTools,
-  type ByProviderIdRule,
-  type ToolFilterRule,
-  type ByToolIdRule,
-} from './compose_provider';
+export { filterProviderTools } from './compose_provider';

@@ -139,6 +139,7 @@ export class SyntheticsPrivateLocation {
     configs: PrivateConfig[],
     privateLocations: SyntheticsPrivateLocations,
     spaceId: string,
+    maintenanceWindows: MaintenanceWindow[],
     testRunId?: string,
     runOnce?: boolean
   ) {
@@ -168,7 +169,7 @@ export class SyntheticsPrivateLocation {
             newPolicyTemplate,
             spaceId,
             globalParams,
-            [],
+            maintenanceWindows,
             testRunId,
             runOnce
           );

@@ -11,10 +11,7 @@ import { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-function
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { SearchAlertsResult } from '@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts';
-import {
-  LlmProxy,
-  createLlmProxy,
-} from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
 import {
   getMessageAddedEvents,
   invokeChatCompleteWithFunctionRequest,
@@ -47,7 +44,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const kibanaServer = getService('kibanaServer');
 
-  describe('alerts', function () {
+  describe('tool: alerts', function () {
     // LLM Proxy is not yet support in MKI: https://github.com/elastic/obs-ai-assistant-team/issues/199
     this.tags(['skipCloud']);
     let proxy: LlmProxy;

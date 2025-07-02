@@ -354,7 +354,7 @@ const SecretFieldLabel = ({ fieldLabel }: { fieldLabel: string }) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiIconTip
-            type="iInCircle"
+            type="info"
             position="top"
             content={
               <FormattedMessage
@@ -430,7 +430,11 @@ function SecretInputField({
         </EuiText>
         <EuiSpacer size="s" />
         <EuiButtonEmpty
-          onClick={() => setIsReplacing(true)}
+          onClick={() => {
+            setIsReplacing(true);
+            setIsDirty(false);
+            onChange('');
+          }}
           color="primary"
           iconType="refresh"
           iconSide="left"
