@@ -2167,12 +2167,12 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.0.0.tgz#dba9f302c3a611440c88d7c34371a86e6f2285ae"
   integrity sha512-AIhCyMfRNz80CdKZEllVW4VgqfXQgv3wE875lt228MAmwd3tAwNh0mROp8++kWb0WJoLAYW4vypw873AMWqyEw==
 
-"@elastic/eui-amsterdam@npm:@elastic/eui@104.0.0-amsterdam.0":
-  version "104.0.0-amsterdam.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-104.0.0-amsterdam.0.tgz#9eb69d025bf50367dbed544f21c6d2adedc2dd45"
-  integrity sha512-mXZL4+TdFtfBYnB4GV3FMNgZTlywG4YFuqsUgE55ncdepsMRButzralO+i/8usdMIEFMmkEsUM8k/xgjxGQqWA==
+"@elastic/eui-amsterdam@npm:@elastic/eui@104.1.0-amsterdam.0":
+  version "104.1.0-amsterdam.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-104.1.0-amsterdam.0.tgz#f33bebccc49bc45741bafe21339d11cdca6a6ff9"
+  integrity sha512-o4yeyJnk5qaS61E781MQcgaCdc0ZB64fg08Ml2mTfnmKG/ekznSXpGdq2lAtNcfXDtdT0qDu2+A9yMSMPIlS6A==
   dependencies:
-    "@elastic/eui-theme-common" "2.0.0"
+    "@elastic/eui-theme-common" "2.1.0"
     "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -2208,26 +2208,26 @@
     uuid "^8.3.0"
     vfile "^4.2.1"
 
-"@elastic/eui-theme-borealis@3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-3.0.0.tgz#fa8ccbfff3c6d5cefb21bf650ab4dc98e3d66c22"
-  integrity sha512-KikBddzMXegz9jIhkWBCTe38TUwKi6BgFamIXrsUpZKZe2pJQfrsqv+E3Nqexj0qYj+XKVL+KaBKTfPcOa6uZA==
+"@elastic/eui-theme-borealis@3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-3.1.0.tgz#548d55460e1d7339eac66ca1e6ac302bbd0b3946"
+  integrity sha512-TKek3OcMlUA2dmOhIm+SUHM0rTA4irltcHQl5tmlrKCdh51sxSfP+a91VSYlfQFZt8rpZaZAxKq6Z+eGHy52mQ==
 
-"@elastic/eui-theme-common@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-2.0.0.tgz#248973f7161924943a2d6ad96c2ea82f0ca332f4"
-  integrity sha512-cLgC0Y/ugS/5nGeU3e4lQzM9+ObOaoMzNLv/kM5Tnjdezmrgt+6xeVxiBOEe64S99pXbjfSF6u3d/y4YloNOhg==
+"@elastic/eui-theme-common@2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-2.1.0.tgz#e48807a867e987543de14af0d6c3d99f57da5c2e"
+  integrity sha512-cKLuflczikSoUQkFViLjv9NBCoti/b8UNc6+sEDK7uuAgA5aYX5jUqH1x4A5dwZ3dBed0ekz23pL5Hv+C65bxQ==
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@104.0.2":
-  version "104.0.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-104.0.2.tgz#0182e71148d0977ae291b1a595407cbac2e26ce3"
-  integrity sha512-hNqadmHpCH9J64JiaMblF6DVpq8f57I+rT9GzSsT2e4PT05uyKm8iPo7054WSst5vOI0aF/cx6rYtmCN8qFPlw==
+"@elastic/eui@104.1.0":
+  version "104.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-104.1.0.tgz#59a2468d24bf0c9d5449750d2f623a44363cb15a"
+  integrity sha512-exxfm7aOPO1iJD7F7QKZROghFjJh0AuvaV65rR/evNEv52QxbF7zvpGmeQZiUC0fSlAhLbDGPoTbjzPjYTWDIg==
   dependencies:
-    "@elastic/eui-theme-common" "2.0.0"
+    "@elastic/eui-theme-common" "2.1.0"
     "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -5461,6 +5461,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dot-text-loader@link:src/platform/packages/private/kbn-dot-text-loader":
+  version "0.0.0"
+  uid ""
+
+"@kbn/dot-text@link:src/platform/packages/private/kbn-dot-text":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ebt-tools@link:src/platform/packages/shared/kbn-ebt-tools":
   version "0.0.0"
   uid ""
@@ -6022,6 +6030,10 @@
   uid ""
 
 "@kbn/inference-plugin@link:x-pack/platform/plugins/shared/inference":
+  version "0.0.0"
+  uid ""
+
+"@kbn/inference-tracing-config@link:x-pack/platform/packages/shared/kbn-inference-tracing-config":
   version "0.0.0"
   uid ""
 
@@ -6638,6 +6650,14 @@
   uid ""
 
 "@kbn/openapi-generator@link:src/platform/packages/shared/kbn-openapi-generator":
+  version "0.0.0"
+  uid ""
+
+"@kbn/opentelemetry-attributes@link:src/platform/packages/shared/kbn-opentelemetry-attributes":
+  version "0.0.0"
+  uid ""
+
+"@kbn/opentelemetry-utils@link:src/platform/packages/shared/kbn-opentelemetry-utils":
   version "0.0.0"
   uid ""
 
@@ -7741,6 +7761,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/streamlang@link:x-pack/platform/packages/shared/kbn-streamlang":
+  version "0.0.0"
+  uid ""
+
 "@kbn/streams-app-plugin@link:x-pack/platform/plugins/shared/streams_app":
   version "0.0.0"
   uid ""
@@ -7906,6 +7930,10 @@
   uid ""
 
 "@kbn/traced-es-client@link:src/platform/packages/shared/kbn-traced-es-client":
+  version "0.0.0"
+  uid ""
+
+"@kbn/tracing-config@link:src/platform/packages/shared/kbn-tracing-config":
   version "0.0.0"
   uid ""
 
@@ -9627,10 +9655,10 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.8.0.tgz#fe2aa90e6df050a11cd57f5c0f47b0641fd2cad3"
   integrity sha512-TYh1MRcm4JnvpqtqOwT9WYaBYY4KERHdToxs/suDTLviGRsQkIjS5yYROTYTSJQUnYLOn/TuOh5GoMwfLSU+Ew==
 
-"@opentelemetry/semantic-conventions@^1.29.0", "@opentelemetry/semantic-conventions@^1.32.0":
-  version "1.32.0"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.32.0.tgz#a15e8f78f32388a7e4655e7f539570e40958ca3f"
-  integrity sha512-s0OpmpQFSfMrmedAn9Lhg4KWJELHCU6uU9dtIJ28N8UGhf9Y55im5X8fEzwhwDwiSqN+ZPSNrDJF7ivf/AuRPQ==
+"@opentelemetry/semantic-conventions@^1.29.0", "@opentelemetry/semantic-conventions@^1.34.0":
+  version "1.34.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.34.0.tgz#8b6a46681b38a4d5947214033ac48128328c1738"
+  integrity sha512-aKcOkyrorBGlajjRdVoJWHTxfxO1vCNHLJVlSDaRHDIdjU+pX8IYQPvPDkYiujKLbRnWU+1TBwEt0QRgSm4SGA==
 
 "@paralleldrive/cuid2@^2.2.2":
   version "2.2.2"
@@ -25837,6 +25865,11 @@ p-timeout@^3.2.0:
   integrity sha512-rhIwUycgwwKcP9yTOOFK/AKsAopjjCakVqLHePO3CC6Mir1Z99xT+R63jZxAT5lFZLa2inS5h+ZS2GvR99/FBg==
   dependencies:
     p-finally "^1.0.0"
+
+p-timeout@^6.1.4:
+  version "6.1.4"
+  resolved "https://registry.yarnpkg.com/p-timeout/-/p-timeout-6.1.4.tgz#418e1f4dd833fa96a2e3f532547dd2abdb08dbc2"
+  integrity sha512-MyIV3ZA/PmyBN/ud8vV9XzwTrNtR4jFrObymZYnZqMmW0zA8Z17vnT0rBgFE/TlohB+YCHqXMgZzb3Csp49vqg==
 
 p-try@^2.0.0:
   version "2.2.0"
