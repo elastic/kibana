@@ -9,13 +9,15 @@
 
 import { visualizationsClient } from '../../content_management';
 
-/** Returns an object matching a given title */
-export async function findObjectByTitle(title: string) {
+/**
+ * Returns an object matching a given title
+ */
+export async function findVisualizationByTitle(title: string) {
   if (!title) {
     return;
   }
 
-  // Elastic search will return the most relevant results first, which means exact matches should come
+  // Elasticsearch will return the most relevant results first, which means exact matches should come
   // first, and so we shouldn't need to request everything. Using 10 just to be on the safe side.
   const response = await visualizationsClient.search(
     {
