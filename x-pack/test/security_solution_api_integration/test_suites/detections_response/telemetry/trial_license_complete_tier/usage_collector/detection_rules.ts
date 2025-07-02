@@ -382,6 +382,11 @@ export default ({ getService }: FtrProviderContext) => {
               disabled: 1,
               has_exceptions: 1,
             },
+            query_custom: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query_custom,
+              disabled: 1,
+              has_exceptions: 1,
+            },
             custom_total: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
               disabled: 1,
@@ -626,6 +631,11 @@ export default ({ getService }: FtrProviderContext) => {
             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
             eql: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
+              disabled: 1,
+              has_exceptions: 1,
+            },
+            eql_custom: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql_custom,
               disabled: 1,
               has_exceptions: 1,
             },
@@ -915,6 +925,11 @@ export default ({ getService }: FtrProviderContext) => {
               enabled: 1,
               has_exceptions: 1,
             },
+            threshold_custom: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threshold_custom,
+              enabled: 1,
+              has_exceptions: 1,
+            },
             custom_total: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
               enabled: 1,
@@ -1150,6 +1165,12 @@ export default ({ getService }: FtrProviderContext) => {
             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
             machine_learning: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.machine_learning,
+              disabled: 1,
+              has_exceptions: 1,
+            },
+            machine_learning_custom: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage
+                .machine_learning_custom,
               disabled: 1,
               has_exceptions: 1,
             },
@@ -1447,6 +1468,12 @@ export default ({ getService }: FtrProviderContext) => {
             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
             threat_match: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threat_match,
+              disabled: 1,
+              has_exceptions: 1,
+            },
+            threat_match_custom: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage
+                .threat_match_custom,
               disabled: 1,
               has_exceptions: 1,
             },
