@@ -4,13 +4,14 @@
   "description": "Kibana Buildkite",
   "scripts": {
     "test": "mocha",
-    "test:watch": "mocha --watch"
+    "test:watch": "mocha --watch",
+    "typecheck": "tsc --noEmit"
   },
   "overrides": {
     "serialize-javascript": "^6.0.2"
   },
   "dependencies": {
-    "@octokit/rest": "^18.10.0",
+    "@octokit/rest": "^22.0.0",
     "adm-zip": "^0.5.16",
     "axios": "^1.8.3",
     "globby": "^11.1.0",
