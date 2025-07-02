@@ -50,9 +50,7 @@ describe('UploadCommandHandler', () => {
 
       handler.initializeArgState(parsedInput, enteredCommand);
 
-      expect(enteredCommand.argState.file).toEqual([
-        { value: 'test.txt', valueText: 'test.txt' },
-      ]);
+      expect(enteredCommand.argState.file).toEqual([{ value: 'test.txt', valueText: 'test.txt' }]);
       expect(enteredCommand.argState.path).toEqual([
         { value: '/tmp/test.txt', valueText: '/tmp/test.txt' },
       ]);
