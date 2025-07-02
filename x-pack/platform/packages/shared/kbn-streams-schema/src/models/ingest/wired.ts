@@ -27,6 +27,7 @@ interface IngestWired {
   wired: {
     fields: FieldDefinition;
     routing: RoutingDefinition[];
+    draft?: boolean;
   };
 }
 
@@ -34,6 +35,7 @@ const IngestWired: z.Schema<IngestWired> = z.object({
   wired: z.object({
     fields: fieldDefinitionSchema,
     routing: routingDefinitionListSchema,
+    draft: z.boolean().optional(),
   }),
 });
 

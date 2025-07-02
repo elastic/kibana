@@ -21,6 +21,7 @@ describe('WiredStream', () => {
           wired: {
             fields: {},
             routing: [],
+            draft: false,
           },
         },
       },

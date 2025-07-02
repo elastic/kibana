@@ -101,6 +101,14 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       throw new StatusError('Unexpected starting state stream type', 400);
     }
 
+    if (
+      startingStateStreamDefinition &&
+      !startingStateStreamDefinition.ingest.wired.draft &&
+      this._definition.ingest.wired.draft
+    ) {
+      throw new StatusError('Cannot change a non-draft stream to a draft stream', 400);
+    }
+
     this._ownFieldsChanged =
       !startingStateStreamDefinition ||
       !_.isEqual(
@@ -125,6 +133,19 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     this._lifecycleChanged =
       !startingStateStreamDefinition ||
       !_.isEqual(this._definition.ingest.lifecycle, startingStateStreamDefinition.ingest.lifecycle);
+
+    const goFromDraftToNonDraft =
+      startingStateStreamDefinition &&
+      startingStateStreamDefinition.ingest.wired.draft &&
+      !this._definition.ingest.wired.draft;
+
+    if (goFromDraftToNonDraft) {
+      // everything is changed when going from draft to non-draft
+      this._ownFieldsChanged = true;
+      this._routingChanged = true;
+      this._processingChanged = true;
+      this._lifecycleChanged = true;
+    }
 
     const parentId = getParentId(this._definition.name);
     const cascadingChanges: StreamChange[] = [];
@@ -169,6 +190,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
                 wired: {
                   fields: {},
                   routing: [],
+                  draft: this._definition.ingest.wired.draft,
                 },
               },
             },
@@ -312,8 +334,10 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       }
     }
 
+    const isDraft = this._definition.ingest.wired.draft;
     // validate routing
     const children: Set<string> = new Set();
+    let draftChildrenArea = false;
     for (const routing of this._definition.ingest.wired.routing) {
       if (children.has(routing.destination)) {
         return {
@@ -335,6 +359,23 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           ],
         };
       }
+      const childDefinition = desiredState.get(routing.destination)?.definition;
+      // check that no draft stream is routed before a non-draft stream
+      if (childDefinition && Streams.WiredStream.Definition.is(childDefinition)) {
+        if (childDefinition.ingest.wired.draft) {
+          draftChildrenArea = true;
+        }
+        if (!childDefinition.ingest.wired.draft && draftChildrenArea) {
+          return {
+            isValid: false,
+            errors: [
+              new Error(
+                `Cannot route a non-draft stream "${routing.destination}" after a draft stream in the routing of "${this._definition.name}"`
+              ),
+            ],
+          };
+        }
+      }
       children.add(routing.destination);
     }
 
@@ -352,6 +393,19 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
             ),
           ],
         };
+      }
+      const isChild = children.has(stream.definition.name);
+      if (isChild && Streams.WiredStream.Definition.is(stream.definition)) {
+        if (isDraft && !stream.definition.ingest.wired.draft) {
+          return {
+            isValid: false,
+            errors: [
+              new Error(
+                `Cannot create a draft stream "${this._definition.name}" with a child stream "${stream.definition.name}" that is not a draft`
+              ),
+            ],
+          };
+        }
       }
     }
 
@@ -437,6 +491,14 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
   }
 
   protected async doDetermineCreateActions(): Promise<ElasticsearchAction[]> {
+    if (this._definition.ingest.wired.draft) {
+      return [
+        {
+          type: 'upsert_dot_streams_document',
+          request: this._definition,
+        },
+      ];
+    }
     return [
       {
         type: 'upsert_component_template',
@@ -501,6 +563,14 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     startingState: State,
     startingStateStream: WiredStream
   ): Promise<ElasticsearchAction[]> {
+    if (this._definition.ingest.wired.draft) {
+      return [
+        {
+          type: 'upsert_dot_streams_document',
+          request: this._definition,
+        },
+      ];
+    }
     const actions: ElasticsearchAction[] = [];
     if (this.hasChangedFields()) {
       actions.push({
@@ -579,6 +649,16 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
   }
 
   protected async doDetermineDeleteActions(): Promise<ElasticsearchAction[]> {
+    if (this._definition.ingest.wired.draft) {
+      return [
+        {
+          type: 'delete_dot_streams_document',
+          request: {
+            name: this._definition.name,
+          },
+        },
+      ];
+    }
     return [
       {
         type: 'delete_index_template',
