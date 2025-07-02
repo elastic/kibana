@@ -20,6 +20,7 @@ export class AccessControlService {
   constructor() {}
 
   setUserForOperation(user: AuthenticatedUser | null) {
+    console.log({ user });
     this.userForOperation = user;
   }
 
