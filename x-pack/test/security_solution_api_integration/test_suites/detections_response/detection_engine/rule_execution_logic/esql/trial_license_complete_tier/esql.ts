@@ -642,7 +642,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         describe('pagination', () => {
-          it.only('should create alerts from expanded values', async () => {
+          it('should create alerts from expanded values', async () => {
             const id = uuidv4();
             const rule: EsqlRuleCreateProps = {
               ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
