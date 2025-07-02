@@ -13,6 +13,7 @@ import type {
   AgentProfileCreateRequest,
   AgentProfileUpdateRequest,
   AgentProfileListOptions,
+  AgentProfileDeleteRequest,
 } from '../../../../common/agent_profiles';
 import type { AgentProfileClient } from './client';
 import type { ToolsServiceStart } from '../../tools';
@@ -23,6 +24,7 @@ export interface AgentProfileService {
   create(profile: AgentProfileCreateRequest): Promise<AgentProfile>;
   update(profile: AgentProfileUpdateRequest): Promise<AgentProfile>;
   list(options?: AgentProfileListOptions): Promise<AgentProfile[]>;
+  delete(options: AgentProfileDeleteRequest): Promise<boolean>;
 }
 
 export interface AgentProfileServiceOptions {
@@ -130,5 +132,9 @@ class AgentProfileServiceImpl implements AgentProfileService {
 
   async list(options?: AgentProfileListOptions): Promise<AgentProfile[]> {
     return this.client.list(options);
+  }
+
+  async delete(options: AgentProfileDeleteRequest): Promise<boolean> {
+    return this.client.delete(options);
   }
 }

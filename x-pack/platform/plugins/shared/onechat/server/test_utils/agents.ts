@@ -31,13 +31,14 @@ export type MockedAgent = Omit<AgentDefinition, 'handler'> & {
 export type AgentProfileClientMock = jest.Mocked<AgentProfileClient>;
 export type AgentProfileServiceMock = jest.Mocked<AgentProfileService>;
 
-export const createMockedAgentProfileClient = (): AgentProfileClientMock => {
+export const createMockedAgentProfileService = (): AgentProfileServiceMock => {
   return {
     has: jest.fn(),
     get: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     list: jest.fn(),
+    delete: jest.fn(),
   };
 };
 
@@ -82,14 +83,6 @@ export const createAgentsServiceStartMock = (): AgentsServiceStartMock => {
   return {
     registry: createInternalAgentRegistryMock(),
     execute: jest.fn(),
-    getProfileService: jest.fn().mockImplementation(() =>
-      Promise.resolve({
-        has: jest.fn(),
-        get: jest.fn(),
-        create: jest.fn(),
-        update: jest.fn(),
-        list: jest.fn(),
-      })
-    ),
+    getProfileService: jest.fn().mockImplementation(() => createMockedAgentProfileService()),
   };
 };

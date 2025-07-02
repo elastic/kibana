@@ -201,7 +201,7 @@ export function registerAgentProfileRoutes({
       })
     );
 
-  // (Optional) Delete agent profile
+  // Delete agent profile
   router.versioned
     .delete({
       path: '/api/chat/agents/profiles/{id}',
@@ -226,10 +226,14 @@ export function registerAgentProfileRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        // Not implemented in service/client yet, so just return 501
-        return response.customError({
-          statusCode: 501,
-          body: { message: 'Delete not implemented yet.' },
+        const { agents } = getInternalServices();
+        const service = await agents.getProfileService(request);
+
+        const result = await service.delete({ id: request.params.id });
+        return response.ok({
+          body: {
+            success: result,
+          },
         });
       })
     );
