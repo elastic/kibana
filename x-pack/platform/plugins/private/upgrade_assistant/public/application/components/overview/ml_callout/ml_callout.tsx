@@ -17,7 +17,7 @@ export const MachineLearningDisabledCallout: React.FunctionComponent = () => {
         title={
           <FormattedMessage
             id="xpack.upgradeAssistant.overview.mlCallout.title"
-            defaultMessage="Machine Learning is disabled"
+            defaultMessage="Machine Learning is disabled in your cluster"
           />
         }
         color="warning"
