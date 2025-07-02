@@ -76,7 +76,7 @@ export function registerAgentProfileRoutes({
       {
         version: '2023-10-31',
         validate: {
-          request: { params: schema.object({ id: schema.string() }, { unknowns: 'allow' }) },
+          request: { params: schema.object({ id: schema.string() }) },
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -170,7 +170,7 @@ export function registerAgentProfileRoutes({
         version: '2023-10-31',
         validate: {
           request: {
-            params: schema.object({ id: schema.string() }, { unknowns: 'allow' }),
+            params: schema.object({ id: schema.string() }),
             body: schema.object({
               name: schema.maybe(schema.string()),
               description: schema.maybe(schema.string()),
@@ -222,7 +222,7 @@ export function registerAgentProfileRoutes({
       {
         version: '2023-10-31',
         validate: {
-          request: { params: schema.object({ id: schema.string() }, { unknowns: 'allow' }) },
+          request: { params: schema.object({ id: schema.string() }) },
         },
       },
       wrapHandler(async (ctx, request, response) => {

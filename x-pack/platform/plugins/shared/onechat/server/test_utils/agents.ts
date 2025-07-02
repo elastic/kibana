@@ -82,7 +82,6 @@ export const createAgentsServiceStartMock = (): AgentsServiceStartMock => {
   return {
     registry: createInternalAgentRegistryMock(),
     execute: jest.fn(),
-    getProfileClient: jest.fn().mockImplementation(createMockedAgentProfileClient),
     getProfileService: jest.fn().mockImplementation(() =>
       Promise.resolve({
         has: jest.fn(),
