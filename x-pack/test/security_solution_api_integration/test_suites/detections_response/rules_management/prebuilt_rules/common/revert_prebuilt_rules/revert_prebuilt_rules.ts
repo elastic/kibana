@@ -14,7 +14,6 @@ import {
   deleteAllPrebuiltRuleAssets,
   installPrebuiltRules,
   getCustomQueryRuleParams,
-  getWebHookAction,
 } from '../../../../utils';
 import { revertPrebuiltRule } from '../../../../utils/rules/prebuilt_rules/revert_prebuilt_rule';
 
@@ -132,40 +131,19 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('does not modify `actions` field', async () => {
-        // create connector/action
-        const createConnector = async (payload: Record<string, unknown>) =>
-          (
-            await supertest
-              .post('/api/actions/action')
-              .set('kbn-xsrf', 'true')
-              .send(payload)
-              .expect(200)
-          ).body;
-
-        const createWebHookConnector = () => createConnector(getWebHookAction());
-
-        const webHookAction = await createWebHookConnector();
-
-        const defaultRuleAction = {
-          id: webHookAction.id,
-          action_type_id: '.webhook' as const,
-          group: 'default' as const,
-          params: {
-            body: '{"test":"a default action"}',
-          },
-          frequency: {
-            notifyWhen: 'onThrottleInterval' as const,
-            summary: true,
-            throttle: '1h' as const,
-          },
-          uuid: 'd487ec3d-05f2-44ad-8a68-11c97dc92202',
-        };
-
         const { body: customizedPrebuiltRule } = await securitySolutionApi.patchRule({
           body: {
             rule_id: 'rule_1',
             description: 'new description',
-            actions: [defaultRuleAction],
+            actions: [
+              // use a pre-configured connector
+              {
+                group: 'default',
+                id: 'my-test-email',
+                action_type_id: '.email',
+                params: {},
+              },
+            ],
           },
         });
 
@@ -181,7 +159,15 @@ export default ({ getService }: FtrProviderContext): void => {
               is_customized: false,
               type: 'external',
             },
-            actions: [defaultRuleAction],
+            actions: [
+              expect.objectContaining({
+                id: 'my-test-email',
+                action_type_id: '.email',
+                frequency: { notifyWhen: 'onActiveAlert', summary: true, throttle: null },
+                group: 'default',
+                params: {},
+              }),
+            ],
           }),
         ]);
       });

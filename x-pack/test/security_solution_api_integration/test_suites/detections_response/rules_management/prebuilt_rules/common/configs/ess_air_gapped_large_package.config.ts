@@ -10,15 +10,19 @@ import path from 'path';
 
 export const BUNDLED_PACKAGE_DIR = path.join(
   path.dirname(__filename),
-  './../fixtures/packages/large'
+  '../fixtures/packages/large'
 );
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../../configs/ess.config'));
+  const functionalConfig = await readConfigFile(
+    require.resolve('../../../../../../config/ess/config.base.basic')
+  );
 
   return {
     ...functionalConfig.getAll(),
-    testFiles: [require.resolve('../install_large_bundled_package')],
+    testFiles: [
+      require.resolve('../prebuilt_rules_package/air_gapped/install_large_bundled_package'),
+    ],
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
