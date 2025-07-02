@@ -23,7 +23,7 @@ import { useUIFieldActions } from '../../../../../hooks/use_field_actions';
 interface HoverPopoverActionProps {
   children: React.ReactChild;
   field: string;
-  fieldType?: DataViewField;
+  fieldMapping?: DataViewField;
   value: unknown;
   formattedValue?: string;
   title: string;
@@ -35,7 +35,7 @@ export const FieldHoverActionPopover = ({
   children,
   title,
   field,
-  fieldType,
+  fieldMapping: mapping,
   value,
   formattedValue,
   anchorPosition = 'upCenter',
@@ -43,7 +43,7 @@ export const FieldHoverActionPopover = ({
 }: HoverPopoverActionProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const leaveTimer = useRef<NodeJS.Timeout | null>(null);
-  const uiFieldActions = useUIFieldActions({ field, value, formattedValue, mapping: fieldType });
+  const uiFieldActions = useUIFieldActions({ field, value, formattedValue, mapping });
 
   const clearTimeoutIfExists = () => {
     if (leaveTimer.current) {

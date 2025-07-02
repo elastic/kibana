@@ -16,7 +16,7 @@ import { FieldHoverActionPopover } from './field_hover_popover_action';
 export interface FieldWithActionsProps {
   field: string;
   fieldMetadata?: PartialFieldMetadataPlain;
-  fieldType?: DataViewField;
+  fieldMapping?: DataViewField;
   formattedValue: string;
   label: string;
   value: string;
@@ -28,7 +28,7 @@ export interface FieldWithActionsProps {
 export function FieldWithActions({
   field,
   fieldMetadata,
-  fieldType,
+  fieldMapping,
   formattedValue,
   label,
   value,
@@ -79,7 +79,7 @@ export function FieldWithActions({
               title={value}
               value={value}
               field={field}
-              fieldType={fieldType}
+              fieldMapping={fieldMapping}
             >
               {fieldContent}
             </FieldHoverActionPopover>

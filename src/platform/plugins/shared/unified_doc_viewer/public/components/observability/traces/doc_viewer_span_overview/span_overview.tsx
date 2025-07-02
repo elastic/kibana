@@ -113,7 +113,7 @@ export function SpanOverview({
                     <SpanSummaryField
                       key={fieldId}
                       fieldId={fieldId}
-                      fieldType={dataViewFields[fieldId]}
+                      fieldMapping={dataViewFields[fieldId]}
                       fieldConfiguration={fieldConfigurations[fieldId]}
                       showActions={showActions}
                     />
@@ -134,7 +134,7 @@ export function SpanOverview({
                 <EuiFlexItem>
                   <Trace
                     fields={fieldConfigurations}
-                    fieldTypes={dataViewFields}
+                    fieldMappings={dataViewFields}
                     traceId={flattenedDoc[TRACE_ID_FIELD]}
                     docId={flattenedDoc[SPAN_ID_FIELD]}
                     displayType="span"

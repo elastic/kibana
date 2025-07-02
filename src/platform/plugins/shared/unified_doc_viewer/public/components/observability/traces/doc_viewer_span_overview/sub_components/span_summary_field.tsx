@@ -17,14 +17,14 @@ import { FieldConfiguration } from '../../resources/get_field_configuration';
 export interface SpanSummaryFieldProps {
   fieldId: string;
   fieldConfiguration: FieldConfiguration;
-  fieldType?: DataViewField;
+  fieldMapping?: DataViewField;
   showActions?: boolean;
 }
 
 export function SpanSummaryField({
   fieldConfiguration,
   fieldId,
-  fieldType,
+  fieldMapping,
   showActions = true,
 }: SpanSummaryFieldProps) {
   const { trace, loading } = useRootSpanContext();
@@ -53,7 +53,7 @@ export function SpanSummaryField({
         field={fieldId}
         value={fieldValue as string}
         formattedValue={fieldValue as string}
-        fieldType={fieldType}
+        fieldMapping={fieldMapping}
         fieldMetadata={fieldConfiguration.fieldMetadata}
         loading={isTransactionNameFieldWithoutValue && loading}
         showActions={showActions}

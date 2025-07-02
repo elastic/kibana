@@ -16,14 +16,14 @@ import { FieldWithActions } from '../../components/field_with_actions/field_with
 export interface TransactionSummaryFieldProps {
   fieldId: string;
   fieldConfiguration: FieldConfiguration;
-  fieldType?: DataViewField;
+  fieldMapping?: DataViewField;
   showActions?: boolean;
 }
 
 export function TransactionSummaryField({
   fieldConfiguration,
   fieldId,
-  fieldType,
+  fieldMapping,
   showActions = true,
 }: TransactionSummaryFieldProps) {
   if (!fieldConfiguration.value) {
@@ -36,7 +36,7 @@ export function TransactionSummaryField({
         data-test-subj={`unifiedDocViewerObservabilityTracesAttribute-${fieldId}`}
         label={fieldConfiguration.title}
         field={fieldId}
-        fieldType={fieldType}
+        fieldMapping={fieldMapping}
         value={fieldConfiguration.value as string}
         formattedValue={fieldConfiguration.value as string}
         fieldMetadata={fieldConfiguration.fieldMetadata}

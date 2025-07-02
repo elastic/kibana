@@ -104,7 +104,7 @@ export function TransactionOverview({
                   <TransactionSummaryField
                     key={fieldId}
                     fieldId={fieldId}
-                    fieldType={dataViewFields[fieldId]}
+                    fieldMapping={dataViewFields[fieldId]}
                     fieldConfiguration={fieldConfigurations[fieldId]}
                     showActions={showActions}
                   />
@@ -124,7 +124,7 @@ export function TransactionOverview({
                 {traceId && transactionId && (
                   <Trace
                     fields={fieldConfigurations}
-                    fieldTypes={dataViewFields}
+                    fieldMappings={dataViewFields}
                     traceId={traceId}
                     docId={transactionId}
                     displayType="transaction"

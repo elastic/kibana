@@ -23,7 +23,7 @@ import { FullScreenWaterfall } from './full_screen_waterfall';
 
 export interface TraceProps {
   fields: Record<string, FieldConfiguration>;
-  fieldTypes: Record<string, DataViewField | undefined>;
+  fieldMappings: Record<string, DataViewField | undefined>;
   traceId: string;
   displayType: 'span' | 'transaction';
   docId: string;
@@ -36,7 +36,7 @@ export interface TraceProps {
 export const Trace = ({
   traceId,
   fields,
-  fieldTypes,
+  fieldMappings,
   displayType,
   docId,
   dataView,
@@ -70,7 +70,7 @@ export const Trace = ({
             key={fieldId}
             fieldId={fieldId}
             fieldConfiguration={fields[fieldId]}
-            fieldType={fieldTypes[fieldId]}
+            fieldMapping={fieldMappings[fieldId]}
             showActions={showActions}
           />
         ))
@@ -79,7 +79,7 @@ export const Trace = ({
             key={fieldId}
             fieldId={fieldId}
             fieldConfiguration={fields[fieldId]}
-            fieldType={fieldTypes[fieldId]}
+            fieldMapping={fieldMappings[fieldId]}
             showActions={showActions}
           />
         ));
