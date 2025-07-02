@@ -124,8 +124,7 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/alerts-ui-shared",
     "@kbn/deeplinks-analytics",
-    "@kbn/core-http-server",
-    "@kbn/data-service-server",
+    "@kbn/core-http-server"
   ],
   "exclude": ["target/**/*"]
 }

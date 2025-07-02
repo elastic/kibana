@@ -10,7 +10,7 @@
 import type { Filter } from '@kbn/es-query';
 import type { RefreshInterval } from '@kbn/data-service-server';
 import type { QueryState } from '../query_state';
-import { TimeRange } from '../../../common/types';
+import type { TimeRange } from '../../../common/types';
 
 type QueryStateChangePartial = {
   [P in keyof QueryState]?: boolean;

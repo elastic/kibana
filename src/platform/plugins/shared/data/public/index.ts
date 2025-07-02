@@ -217,6 +217,16 @@ export const search = {
   tabifyGetColumns,
 };
 
+/*
+ * UI components
+ */
+
+/**
+ * Types to be shared externally
+ * @public
+ */
+export type { RefreshInterval } from '../common';
+
 export {
   createSavedQueryService,
   connectToQueryState,

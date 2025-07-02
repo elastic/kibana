@@ -13,7 +13,7 @@ import type {
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
 import { Serializable } from '@kbn/utility-types';
-import type { RefreshInterval } from '@kbn/data-service-server';
+import { RefreshInterval } from '@kbn/data-plugin/common';
 import { ControlGroupChainingSystem, ControlLabelPosition } from '@kbn/controls-plugin/common';
 
 import { DashboardContentType } from '../types';

@@ -14,8 +14,7 @@ import {
   getDiscoverFiltersFromState,
 } from './logs_explorer_url_schema';
 import type { DisplayOptions, ControlOptions } from './logs_explorer_schema_types';
-import { TimeRange, Query } from '@kbn/data-plugin/common/types';
-import type { RefreshInterval } from '@kbn/data-service-server';
+import { TimeRange, RefreshInterval, Query } from '@kbn/data-plugin/common/types';
 import { ALL_LOGS_DATA_VIEW_ID } from '@kbn/discover-utils/src/data_types';
 
 jest.mock('@kbn/discover-utils/src/data_types/logs/utils', () => ({

@@ -77,7 +77,6 @@
     "@kbn/presentation-panel-plugin",
     "@kbn/ui-actions-browser",
     "@kbn/deeplinks-analytics",
-    "@kbn/data-service-server",
   ],
   "exclude": ["target/**/*"]
 }

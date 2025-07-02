@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { TimeRange, Query } from '@kbn/data-plugin/common/types';
-import type { RefreshInterval } from '@kbn/data-service-server';
+import { TimeRange, RefreshInterval, Query } from '@kbn/data-plugin/common/types';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 

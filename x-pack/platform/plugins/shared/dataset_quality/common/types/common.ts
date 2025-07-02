@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { TimeRange } from '@kbn/data-plugin/common';
-import type { RefreshInterval } from '@kbn/data-service-server';
+import { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 import { DataStreamStatType } from '../data_streams_stats';
 import { Integration } from '../data_streams_stats/integration';
 

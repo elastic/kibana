@@ -86,8 +86,7 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/file-upload-common",
     "@kbn/file-upload",
-    "@kbn/charts-theme",
-    "@kbn/data-service-server"
+    "@kbn/charts-theme"
   ],
   "exclude": [
     "target/**/*",

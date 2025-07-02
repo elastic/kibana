@@ -95,8 +95,7 @@
     "@kbn/react-hooks",
     "@kbn/scout",
     "@kbn/react-kibana-mount",
-    "@kbn/css-utils",
-    "@kbn/data-service-server",
+    "@kbn/css-utils"
   ],
   "exclude": [
     "target/**/*",
