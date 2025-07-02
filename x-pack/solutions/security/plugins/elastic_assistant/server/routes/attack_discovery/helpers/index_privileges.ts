@@ -89,14 +89,14 @@ export const hasReadAttackDiscoveryAlertsPrivileges = async ({
   });
 };
 
-export const hasWriteAttackDiscoveryAlertsPrivileges = async ({
+export const hasReadWriteAttackDiscoveryAlertsPrivileges = async ({
   context,
   response,
 }: AttackDiscoveryAlertsPrivilegesParams): Promise<PrivilegesCheckResults> => {
-  const privileges = ['write', 'maintenance'];
+  const privileges = ['read', 'write', 'maintenance'];
   return hasAttackDiscoveryAlertsPrivileges({
     additionalErrorMessage:
-      'Without these privileges you cannot create, update or delete the Attack Discovery alerts.',
+      'Without these privileges you cannot create, read, update or delete the Attack Discovery alerts.',
     context,
     response,
     privileges,

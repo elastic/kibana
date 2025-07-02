@@ -19,7 +19,7 @@ import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/c
 import { AttackDiscoveryPostRequestBody } from '@kbn/elastic-assistant-common';
 
 import { updateAttackDiscoveryStatusToRunning } from '../helpers/helpers';
-import { hasWriteAttackDiscoveryAlertsPrivileges } from '../helpers/index_privileges';
+import { hasReadWriteAttackDiscoveryAlertsPrivileges } from '../helpers/index_privileges';
 
 jest.mock('../helpers/helpers', () => {
   const original = jest.requireActual('../helpers/helpers');
@@ -35,7 +35,7 @@ jest.mock('../helpers/index_privileges', () => {
 
   return {
     ...original,
-    hasWriteAttackDiscoveryAlertsPrivileges: jest.fn(),
+    hasReadWriteAttackDiscoveryAlertsPrivileges: jest.fn(),
   };
 });
 
@@ -92,7 +92,9 @@ describe('postAttackDiscoveryRoute', () => {
       currentAd: runningAd,
       attackDiscoveryId: mockCurrentAd.id,
     });
-    (hasWriteAttackDiscoveryAlertsPrivileges as jest.Mock).mockResolvedValue({ isSuccess: true });
+    (hasReadWriteAttackDiscoveryAlertsPrivileges as jest.Mock).mockResolvedValue({
+      isSuccess: true,
+    });
   });
 
   it('should handle successful request', async () => {
@@ -163,12 +165,14 @@ describe('postAttackDiscoveryRoute', () => {
     });
 
     it('should handle missing privileges', async () => {
-      (hasWriteAttackDiscoveryAlertsPrivileges as jest.Mock).mockImplementation(({ response }) => {
-        return Promise.resolve({
-          isSuccess: false,
-          response: response.forbidden({ body: { message: 'no privileges' } }),
-        });
-      });
+      (hasReadWriteAttackDiscoveryAlertsPrivileges as jest.Mock).mockImplementation(
+        ({ response }) => {
+          return Promise.resolve({
+            isSuccess: false,
+            response: response.forbidden({ body: { message: 'no privileges' } }),
+          });
+        }
+      );
 
       const response = await server.inject(
         postAttackDiscoveryRequest(mockRequestBody),

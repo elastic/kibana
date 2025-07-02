@@ -19,7 +19,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { performChecks } from '../../helpers';
 import { buildResponse } from '../../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../../types';
-import { hasWriteAttackDiscoveryAlertsPrivileges } from '../helpers/index_privileges';
+import { hasReadWriteAttackDiscoveryAlertsPrivileges } from '../helpers/index_privileges';
 
 export const postAttackDiscoveryBulkRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
@@ -85,7 +85,7 @@ export const postAttackDiscoveryBulkRoute = (
         }
 
         // Perform alerts access check
-        const privilegesCheckResponse = await hasWriteAttackDiscoveryAlertsPrivileges({
+        const privilegesCheckResponse = await hasReadWriteAttackDiscoveryAlertsPrivileges({
           context: ctx,
           response,
         });

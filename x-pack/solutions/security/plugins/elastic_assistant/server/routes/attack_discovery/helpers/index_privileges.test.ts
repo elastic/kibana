@@ -8,7 +8,7 @@
 import {
   AttackDiscoveryAlertsPrivilegesParams,
   hasReadAttackDiscoveryAlertsPrivileges,
-  hasWriteAttackDiscoveryAlertsPrivileges,
+  hasReadWriteAttackDiscoveryAlertsPrivileges,
 } from './index_privileges';
 
 const getSpaceIdMock = jest.fn();
@@ -72,39 +72,48 @@ describe('Index privileges', () => {
     });
   });
 
-  describe('hasWriteAttackDiscoveryAlertsPrivileges', () => {
+  describe('hasReadWriteAttackDiscoveryAlertsPrivileges', () => {
     it('returns success if all privileges are available', async () => {
-      const results = await hasWriteAttackDiscoveryAlertsPrivileges(defaultProps);
+      const results = await hasReadWriteAttackDiscoveryAlertsPrivileges(defaultProps);
       expect(results).toEqual({ isSuccess: true });
     });
 
     it('returns forbidden if privileges are missing', async () => {
       atSpaceMock.mockResolvedValueOnce({ hasAllRequested: false });
-      const results = await hasWriteAttackDiscoveryAlertsPrivileges(defaultProps);
+      const results = await hasReadWriteAttackDiscoveryAlertsPrivileges(defaultProps);
       expect(results).toEqual({
         isSuccess: false,
         response: {
           body: {
             message:
-              'Missing [write, maintenance] privileges for the [.alerts-security.attack.discovery.alerts, .internal.alerts-security.attack.discovery.alerts, .adhoc.alerts-security.attack.discovery.alerts, .internal.adhoc.alerts-security.attack.discovery.alerts] indices. Without these privileges you cannot create, update or delete the Attack Discovery alerts.',
+              'Missing [read, write, maintenance] privileges for the [.alerts-security.attack.discovery.alerts, .internal.alerts-security.attack.discovery.alerts, .adhoc.alerts-security.attack.discovery.alerts, .internal.adhoc.alerts-security.attack.discovery.alerts] indices. Without these privileges you cannot create, read, update or delete the Attack Discovery alerts.',
           },
         },
       });
     });
 
     it('calls atSpace with correct arguments', async () => {
-      await hasWriteAttackDiscoveryAlertsPrivileges(defaultProps);
+      await hasReadWriteAttackDiscoveryAlertsPrivileges(defaultProps);
       expect(getSpaceIdMock).toHaveBeenCalled();
       expect(atSpaceMock).toHaveBeenCalledWith('space1', {
         elasticsearch: {
           index: {
-            '.adhoc.alerts-security.attack.discovery.alerts-space1': ['write', 'maintenance'],
-            '.alerts-security.attack.discovery.alerts-space1': ['write', 'maintenance'],
-            '.internal.adhoc.alerts-security.attack.discovery.alerts-space1': [
+            '.adhoc.alerts-security.attack.discovery.alerts-space1': [
+              'read',
               'write',
               'maintenance',
             ],
-            '.internal.alerts-security.attack.discovery.alerts-space1': ['write', 'maintenance'],
+            '.alerts-security.attack.discovery.alerts-space1': ['read', 'write', 'maintenance'],
+            '.internal.adhoc.alerts-security.attack.discovery.alerts-space1': [
+              'read',
+              'write',
+              'maintenance',
+            ],
+            '.internal.alerts-security.attack.discovery.alerts-space1': [
+              'read',
+              'write',
+              'maintenance',
+            ],
           },
           cluster: [],
         },
