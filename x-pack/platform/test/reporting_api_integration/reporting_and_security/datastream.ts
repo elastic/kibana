@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('Data Stream', () => {
     before(async () => {
@@ -29,13 +30,13 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('uses the datastream configuration without set policy', async () => {
-      const { body } = await supertest
+      const response = await supertest
         .get(`/api/index_management/data_streams/.kibana-reporting`)
         .set('kbn-xsrf', 'xxx')
-        .set('x-elastic-internal-origin', 'xxx')
-        .expect(200);
+        .set('x-elastic-internal-origin', 'xxx');
+      log.info(response);
 
-      expect(body).toEqual({
+      expect(response.body).toEqual({
         _meta: {
           description: 'default kibana reporting template installed by elasticsearch',
           managed: true,
