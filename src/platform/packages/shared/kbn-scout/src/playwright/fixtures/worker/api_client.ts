@@ -13,11 +13,12 @@ import { coreWorkerFixtures } from '.';
 export interface ApiClientOptions {
   headers?: Record<string, string>;
   responseType?: 'json' | 'text';
-  body?: string;
+  body?: any;
 }
 
 export interface ApiClientResponse {
   statusCode: number;
+  statusMessage: string;
   headers: Record<string, string | string[]>;
   body: any;
 }
@@ -66,13 +67,30 @@ export const apiClientFixture = coreWorkerFixtures.extend<{}, { apiClient: ApiCl
             req = req.set('Accept', 'application/json');
           }
 
-          if (options.body) {
+          // Handle body and auto-set Content-Type if needed
+          if (options.body !== undefined) {
+            const isPlainObject =
+              typeof options.body === 'object' &&
+              options.body !== null &&
+              !Buffer.isBuffer(options.body) &&
+              !(options.body instanceof ArrayBuffer) &&
+              !(options.body instanceof Uint8Array);
+
+            const hasContentType =
+              options.headers &&
+              Object.keys(options.headers).some((k) => k.toLowerCase() === 'content-type');
+
+            if (isPlainObject && !hasContentType) {
+              req = req.set('Content-Type', 'application/json');
+            }
+
             req = req.send(options.body);
           }
 
           const res = await req;
           return {
             statusCode: res.status,
+            statusMessage: res.text,
             headers: res.headers,
             body: res.body,
           };

@@ -26,7 +26,7 @@ apiTest.describe('Painless APIs', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
       body: JSON.stringify(script),
     });
     expect(response.statusCode).toBe(200);
-    expect(response.body).toEqual({
+    expect(response.body).toStrictEqual({
       result: 'true',
     });
   });

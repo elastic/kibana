@@ -33,10 +33,9 @@ export interface RequestAuthFixture {
 }
 
 export const requestAuthFixture = coreWorkerFixtures.extend<
+  {},
   {
     requestAuth: RequestAuthFixture;
-  },
-  {
     defaultRoles: DefaultRolesFixture;
     apiClient: ApiClientFixture;
   }
@@ -68,7 +67,7 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
               'x-elastic-internal-origin': 'kibana',
               ...adminCookieHeader,
             },
-            json: {
+            body: {
               apiKeys: [{ id: apiKey.id, name: apiKey.name }],
               isAdmin: true,
             },
@@ -110,7 +109,7 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
             'x-elastic-internal-origin': 'kibana',
             ...adminCookieHeader,
           },
-          json: payload,
+          body: payload,
           responseType: 'json',
         });
 
