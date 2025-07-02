@@ -38,7 +38,7 @@ export async function excludeLicenseRestrictedRules<T extends { type: Type }>(
   return rules.filter((_rule, index) => validationResults[index].valid);
 }
 
-function getRulesWithAvailableTargetVersion(
+function getUpgradeTargets(
   currentRules: RuleVersionSpecifier[],
   targetRulesMap: Map<string, BasicRuleInfo>
 ): BasicRuleInfo[] {
@@ -64,6 +64,6 @@ export function getPossibleUpgrades(
   targetRulesMap: Map<string, BasicRuleInfo>,
   mlAuthz: MlAuthz
 ): Promise<RuleVersionSpecifier[]> {
-  const rulesWithTargetVersion = getRulesWithAvailableTargetVersion(currentRules, targetRulesMap);
-  return excludeLicenseRestrictedRules(rulesWithTargetVersion, mlAuthz);
+  const upgradeTargets = getUpgradeTargets(currentRules, targetRulesMap);
+  return excludeLicenseRestrictedRules(upgradeTargets, mlAuthz);
 }
