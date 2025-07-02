@@ -11,12 +11,13 @@ import {
   DATA_QUALITY_PATH,
   DETECTION_RESPONSE_PATH,
   SecurityPageName,
-  ENTITY_ANALYTICS_PATH,
+  ENTITY_ANALYTICS_PATH, AI_VALUE_PATH,
 } from '../../common/constants';
 import type { SecuritySubPluginRoutes } from '../app/types';
 
 import { StatefulOverview } from './pages/overview';
 import { DataQuality } from './pages/data_quality';
+import { AIValue } from './pages/ai_value';
 import { DetectionResponse } from './pages/detection_response';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { EntityAnalyticsPage } from '../entity_analytics/pages/entity_analytics_dashboard';
@@ -46,6 +47,12 @@ const DataQualityRoutes = () => (
   </PluginTemplateWrapper>
 );
 
+const AIValueRoutes = () => (
+  <PluginTemplateWrapper>
+    <AIValue />
+  </PluginTemplateWrapper>
+);
+
 export const routes: SecuritySubPluginRoutes = [
   {
     path: OVERVIEW_PATH,
@@ -68,5 +75,9 @@ export const routes: SecuritySubPluginRoutes = [
   {
     path: DATA_QUALITY_PATH,
     component: withSecurityRoutePageWrapper(DataQualityRoutes, SecurityPageName.dataQuality),
+  },
+  {
+    path: AI_VALUE_PATH,
+    component: withSecurityRoutePageWrapper(AIValueRoutes, SecurityPageName.aiValueDashboard),
   },
 ];

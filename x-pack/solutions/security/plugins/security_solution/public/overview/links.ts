@@ -12,9 +12,9 @@ import {
   ENTITY_ANALYTICS_PATH,
   OVERVIEW_PATH,
   SecurityPageName,
-  SECURITY_FEATURE_ID,
+  SECURITY_FEATURE_ID, AI_VALUE_PATH,
 } from '../../common/constants';
-import { DATA_QUALITY, DETECTION_RESPONSE, OVERVIEW, ENTITY_ANALYTICS } from '../app/translations';
+import { DATA_QUALITY, DETECTION_RESPONSE, OVERVIEW, ENTITY_ANALYTICS, AI_VALUE_DASHBOARD } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 import overviewPageImg from '../common/images/overview_page.png';
 import dataQualityDashboardPageImg from '../common/images/data_quality_dashboard_page.png';
@@ -89,4 +89,25 @@ export const ecsDataQualityDashboardLinks: LinkItem = {
       defaultMessage: 'Data Quality',
     }),
   ],
+};
+
+
+export const aiValueDashboardLinks: LinkItem = {
+  id: SecurityPageName.aiValueDashboard,
+  title: AI_VALUE_DASHBOARD,
+  description: i18n.translate(
+    'xpack.securitySolution.appLinks.aiValueDashboardDescription',
+    {
+      defaultMessage:
+        'See ROI for Security AI features',
+    }
+  ),
+  path: AI_VALUE_PATH,
+  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.external_detections`]],
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.aiValueDashboard', {
+      defaultMessage: 'AI Value',
+    }),
+  ],
+  globalNavPosition: 8,
 };

@@ -90,6 +90,7 @@ export const CASES_PATH = '/cases' as const;
 export const OVERVIEW_PATH = '/overview' as const;
 export const ONBOARDING_PATH = '/get_started' as const;
 export const DATA_QUALITY_PATH = '/data_quality' as const;
+export const AI_VALUE_PATH = '/ai_value' as const;
 export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
 export const ALERTS_PATH = '/alerts' as const;
