@@ -67,12 +67,6 @@ export const IntegrationStep = React.memo<IntegrationStepProps>(({ integrationSe
       description: (e: React.ChangeEvent<HTMLTextAreaElement>) =>
         setIntegrationValues({ description: e.target.value }),
       logo: (files: FileList | null) => {
-        // make sure the logo is a svg type in the case of drag and drop
-        if (!files?.[0].name.endsWith('.svg') || !files?.[0].type.startsWith('image/svg+xml')) {
-          setLogoError(i18n.NON_SVG_ERROR);
-          return;
-        }
-
         setLogoError(undefined);
         const logoFile = files?.[0];
         if (!logoFile) {
@@ -81,6 +75,11 @@ export const IntegrationStep = React.memo<IntegrationStepProps>(({ integrationSe
         }
         if (logoFile.size > MaxLogoSize) {
           setLogoError(`${logoFile.name} is too large, maximum size is 1Mb.`);
+          return;
+        }
+        // make sure the logo is a svg type in the case of drag and drop
+        if (!logoFile.name.endsWith('.svg') || !logoFile.type.startsWith('image/svg+xml')) {
+          setLogoError(i18n.NON_SVG_ERROR);
           return;
         }
         logoFile
