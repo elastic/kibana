@@ -103,6 +103,8 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
   const canSave = (application?.capabilities.uptime.save ?? false) as boolean;
   const canManagePrivateLocations = (application?.capabilities.uptime.canManagePrivateLocations ??
     false) as boolean;
+  const canManageSyntheticsTests = (application?.capabilities.uptime.canManageSyntheticsTests ??
+    false) as boolean;
 
   const value = useMemo(() => {
     return {
@@ -118,6 +120,7 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
       dateRangeEnd: dateRangeEnd ?? DATE_RANGE_END,
       isServerless,
       canManagePrivateLocations,
+      canManageSyntheticsTests,
     };
   }, [
     darkMode,
@@ -132,6 +135,7 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
     commonlyUsedRanges,
     isServerless,
     canManagePrivateLocations,
+    canManageSyntheticsTests,
   ]);
 
   return <SyntheticsSettingsContext.Provider value={value} children={children} />;

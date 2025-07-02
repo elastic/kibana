@@ -33,6 +33,7 @@ import {
 import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
 
 export const PRIVATE_LOCATION_WRITE_API = 'private-location-write';
+export const SYNTHETICS_TEST_WRITE_API = 'synthetics-test-write';
 
 const ruleTypes = [...UPTIME_RULE_TYPE_IDS, ...SYNTHETICS_RULE_TYPE_IDS];
 
@@ -47,7 +48,7 @@ const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = 
     {
       id: 'elastic_managed_locations_enabled',
       name: i18n.translate('xpack.synthetics.features.elasticManagedLocations.label', {
-        defaultMessage: 'Enabled',
+        defaultMessage: 'Managed locations enabled',
       }),
       includeIn: 'all',
       savedObject: {
@@ -65,7 +66,7 @@ const canManagePrivateLocationsPrivilege: SubFeaturePrivilegeGroupConfig = {
     {
       id: 'can_manage_private_locations',
       name: i18n.translate('xpack.synthetics.features.canManagePrivateLocations', {
-        defaultMessage: 'Can manage',
+        defaultMessage: 'Can manage private locations',
       }),
       includeIn: 'all',
       api: [PRIVATE_LOCATION_WRITE_API],
@@ -74,6 +75,25 @@ const canManagePrivateLocationsPrivilege: SubFeaturePrivilegeGroupConfig = {
         read: [],
       },
       ui: ['canManagePrivateLocations'],
+    },
+  ],
+};
+
+const canManageSyntheticsTestsPrivilege: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent' as SubFeaturePrivilegeGroupType,
+  privileges: [
+    {
+      id: 'can_manage_synthetics_tests',
+      name: i18n.translate('xpack.synthetics.features.canManageSyntheticsTests', {
+        defaultMessage: 'Can manage tests',
+      }),
+      includeIn: 'all',
+      api: [SYNTHETICS_TEST_WRITE_API],
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: ['canManageSyntheticsTests'],
     },
   ],
 };
@@ -173,6 +193,15 @@ export const syntheticsFeature = {
           'This feature allows you to manage your private locations, for example adding, or deleting them.',
       }),
       privilegeGroups: [canManagePrivateLocationsPrivilege],
+    },
+    {
+      name: i18n.translate('xpack.synthetics.features.app.tests', {
+        defaultMessage: 'Synthetics tests',
+      }),
+      description: i18n.translate('xpack.synthetics.features.app.testsDescription', {
+        defaultMessage: 'This feature allows you to modify tests for synthetics monitors.',
+      }),
+      privilegeGroups: [canManageSyntheticsTestsPrivilege],
     },
   ],
 };
