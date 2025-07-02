@@ -72,7 +72,7 @@ export const HighlightDetailsFlyout = ({ indexName, operation, shardName, onClos
                     defaultMessage: 'Total time',
                   })}{' '}
                   <EuiIconTip
-                    type="iInCircle"
+                    type="info"
                     color="subdued"
                     content={i18n.translate(
                       'xpack.searchProfiler.highlightDetails.totalTimeTooltip',
@@ -94,7 +94,7 @@ export const HighlightDetailsFlyout = ({ indexName, operation, shardName, onClos
                     defaultMessage: 'Self time',
                   })}{' '}
                   <EuiIconTip
-                    type="iInCircle"
+                    type="info"
                     color="subdued"
                     content={i18n.translate(
                       'xpack.searchProfiler.highlightDetails.selfTimeTooltip',
