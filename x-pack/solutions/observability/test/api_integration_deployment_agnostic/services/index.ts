@@ -9,8 +9,6 @@ import { services as commonDeploymentAgnosticServices } from '@kbn/test-suites-x
 import { services as xpackDeploymentAgnosticServices } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { RoleScopedSupertestProvider } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
 import { CustomRoleScopedSupertestProvider } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/custom_role_scoped_supertest';
-
-import type { DeploymentAgnosticCommonServices } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import type { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
 import { ApmApiProvider } from './apm_api';
 import { SloApiProvider } from './slo_api';
@@ -24,7 +22,7 @@ export type {
   SupertestWithoutAuthProviderType,
 } from '@kbn/ftr-common-functional-services';
 
-const allServices = {
+export const services = {
   // stateful services
   supertest: commonDeploymentAgnosticServices.supertest,
   es: commonDeploymentAgnosticServices.es,
@@ -56,9 +54,7 @@ const allServices = {
   // add any other required or extra services here
 };
 
-export const services = allServices as DeploymentAgnosticCommonServices;
-
-export type ObltDeploymentAgnosticCommonServices = DeploymentAgnosticCommonServices;
+export type ObltDeploymentAgnosticCommonServices = typeof services;
 
 // Import and re-export types and providers from canonical modules
 export type SupertestWithRoleScopeType = SupertestWithRoleScope;
