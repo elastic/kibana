@@ -153,7 +153,6 @@ export const SettingsApplicationKibanaProvider: FC<
   const getAllowlistedSettings = (scope: UiSettingsScope, solution: SolutionView | undefined) => {
     const { solutionsFiltering } = application.capabilities;
     const scopeClient = getScopeClient(scope);
-    debugger
     if (solutionsFiltering) {
       const filteredRawSettings = Object.fromEntries(
         Object.entries(scopeClient.getAll()).filter(
