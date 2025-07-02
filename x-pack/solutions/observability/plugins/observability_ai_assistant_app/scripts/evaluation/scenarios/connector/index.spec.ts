@@ -40,7 +40,7 @@ async function setUserInstructions(text: string) {
 
 describe('execute_connector function', () => {
   describe('no connectors available', () => {
-    it('sends an email', async () => {
+    it('does not send an email and fails gracefully', async () => {
       const conversation = await chatClient.complete({ messages: EMAIL_PROMPT });
       const result = await chatClient.evaluate(conversation, [
         `Does not use ${EXECUTE_CONNECTOR_FUNCTION_NAME} function.`,
