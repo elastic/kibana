@@ -121,7 +121,7 @@ To add a collapsible section:
 
 . Optionally, edit the label of the section.
 
-. Move any panels you want into the section by dragging and dropping them. +
+. Drag and drop any panels you want into the section. +
 +
 NOTE: The section must be expanded in order to place panels into it.
 
