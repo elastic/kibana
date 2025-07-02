@@ -42,6 +42,17 @@ export const createMockedAgentProfileService = (): AgentProfileServiceMock => {
   };
 };
 
+export const createMockedAgentProfileClient = (): AgentProfileClientMock => {
+  return {
+    has: jest.fn(),
+    get: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    list: jest.fn(),
+    delete: jest.fn(),
+  };
+};
+
 export const createMockedAgent = (parts: Partial<MockedAgent> = {}): MockedAgent => {
   return {
     type: AgentType.conversational,
