@@ -35,5 +35,4 @@ export type {
   ScoutPlaywrightOptions,
   ScoutTestOptions,
   Locator,
-  SynthtraceFixture,
 } from '@kbn/scout';
