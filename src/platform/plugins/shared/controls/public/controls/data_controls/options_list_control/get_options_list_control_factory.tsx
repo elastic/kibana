@@ -189,7 +189,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         stateManager,
         controlFetch$: (onReload: () => void) => controlGroupApi.controlFetch$(uuid, onReload),
       }).subscribe((result) => {
-        // if there was an error during fetch, set blocking error and return early
+        // if there was an error during fetch, set suggestion load error and return early
         if (Object.hasOwn(result, 'error')) {
           dataControl.api.setBlockingError((result as { error: Error }).error);
           return;
@@ -413,6 +413,11 @@ export const getOptionsListControlFactory = (): DataControlFactory<
               singleSelectSubscription.unsubscribe();
               validSearchStringSubscription.unsubscribe();
               hasSelectionsSubscription.unsubscribe();
+<<<<<<< HEAD
+=======
+              selectionsSubscription.unsubscribe();
+              errorsSubscription.unsubscribe();
+>>>>>>> f48e8142750 ([Dashboard][Controls] Do not recommend adhoc dataviews (#225705))
             };
           }, []);
 
