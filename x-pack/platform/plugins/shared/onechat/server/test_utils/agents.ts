@@ -13,7 +13,7 @@ import type {
   AgentProvider,
 } from '@kbn/onechat-server';
 import type { AgentsServiceStart, InternalAgentRegistry } from '../services/agents';
-import type { AgentProfileClient } from '../services/agents/profiles';
+import type { AgentProfileClient, AgentProfileService } from '../services/agents/profiles';
 
 export type AgentProviderMock = jest.Mocked<AgentProvider> & {
   id: string;
@@ -29,6 +29,7 @@ export type MockedAgent = Omit<AgentDefinition, 'handler'> & {
   providerId: string;
 };
 export type AgentProfileClientMock = jest.Mocked<AgentProfileClient>;
+export type AgentProfileServiceMock = jest.Mocked<AgentProfileService>;
 
 export const createMockedAgentProfileClient = (): AgentProfileClientMock => {
   return {
@@ -82,5 +83,14 @@ export const createAgentsServiceStartMock = (): AgentsServiceStartMock => {
     registry: createInternalAgentRegistryMock(),
     execute: jest.fn(),
     getProfileClient: jest.fn().mockImplementation(createMockedAgentProfileClient),
+    getProfileService: jest.fn().mockImplementation(() =>
+      Promise.resolve({
+        has: jest.fn(),
+        get: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        list: jest.fn(),
+      })
+    ),
   };
 };
