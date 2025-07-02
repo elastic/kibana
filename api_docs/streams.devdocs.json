@@ -484,7 +484,7 @@
             },
             "; }, undefined>; \"GET /api/streams/_status\": { endpoint: \"GET /api/streams/_status\"; handler: ServerRouteHandler<",
             "StreamsRouteHandlerResources",
-            ", undefined, { enabled: boolean; }>; security: ",
+            ", undefined, { enabled: boolean | \"conflict\"; }>; security: ",
             "RouteSecurity",
             "; }; \"POST /api/streams/_resync 2023-10-31\": ",
             {
@@ -1493,7 +1493,7 @@
           },
           "; }, undefined>; \"GET /api/streams/_status\": { endpoint: \"GET /api/streams/_status\"; handler: ServerRouteHandler<",
           "StreamsRouteHandlerResources",
-          ", undefined, { enabled: boolean; }>; security: ",
+          ", undefined, { enabled: boolean | \"conflict\"; }>; security: ",
           "RouteSecurity",
           "; }; \"POST /api/streams/_resync 2023-10-31\": ",
           {
