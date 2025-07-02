@@ -67,6 +67,7 @@ import {
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 
+import { SAVED_OBJECT_REF_NAME } from '@kbn/presentation-publishing';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import {
@@ -123,7 +124,6 @@ import {
 } from '../common/content_management';
 import type { VisualizeSavedObjectInputState } from './embeddable/types';
 import { registerActions } from './actions/register_actions';
-import { SAVED_OBJECT_REF_NAME } from '@kbn/presentation-publishing';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -421,7 +421,7 @@ export class VisualizationsPlugin
                   name: SAVED_OBJECT_REF_NAME,
                   type: VISUALIZE_EMBEDDABLE_TYPE,
                   id: savedObject.id,
-                }
+                },
               ],
             },
           },

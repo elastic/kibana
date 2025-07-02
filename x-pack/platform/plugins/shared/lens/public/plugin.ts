@@ -72,6 +72,7 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { SAVED_OBJECT_REF_NAME } from '@kbn/presentation-publishing';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -149,7 +150,6 @@ import {
   ACTION_EDIT_LENS_EMBEDDABLE,
   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
 } from './trigger_actions/open_lens_config/constants';
-import { SAVED_OBJECT_REF_NAME } from '@kbn/presentation-publishing';
 
 export type { SaveProps } from './app_plugin';
 
@@ -416,7 +416,7 @@ export class LensPlugin {
                     name: SAVED_OBJECT_REF_NAME,
                     type: LENS_EMBEDDABLE_TYPE,
                     id: savedObject.id,
-                  }
+                  },
                 ],
               },
             },

@@ -26,6 +26,7 @@ import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
+import { SAVED_OBJECT_REF_NAME } from '@kbn/presentation-publishing';
 import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
@@ -62,7 +63,6 @@ import { registerDiscoverEBTManagerAnalytics } from './ebt_manager/discover_ebt_
 import type { ProfilesManager } from './context_awareness';
 import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
 import { getProfilesInspectorView } from './context_awareness/inspector/get_profiles_inspector_view';
-import { SAVED_OBJECT_REF_NAME } from '@kbn/presentation-publishing';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -410,7 +410,7 @@ export class DiscoverPlugin
                   name: SAVED_OBJECT_REF_NAME,
                   type: SEARCH_EMBEDDABLE_TYPE,
                   id: savedObject.id,
-                }
+                },
               ],
             },
           },
