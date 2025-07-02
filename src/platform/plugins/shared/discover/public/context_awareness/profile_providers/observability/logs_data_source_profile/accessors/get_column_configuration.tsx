@@ -36,13 +36,13 @@ export const DataTableSummaryColumnHeaderLogsContext = ({
   columnDisplayName: string;
 }) => {
   const tooltipTitle = i18n.translate(
-    'unifiedDataTable.tableHeader.logsContext.sourceFieldIconTooltipTitle',
+    'discover.unifiedDataTable.tableHeader.logsContext.sourceFieldIconTooltipTitle',
     {
       defaultMessage: 'Summary including the following fields',
     }
   );
   const tooltipContent = i18n.translate(
-    'unifiedDataTable.tableHeader.logsContext.sourceFieldIconTooltip',
+    'discover.unifiedDataTable.tableHeader.logsContext.sourceFieldIconTooltip',
     {
       defaultMessage:
         'Displays the most relevant resource identifiers (service.name, host.name, kubernetes.pod.name, etc.)' +

@@ -36,13 +36,13 @@ export const DataTableSummaryColumnHeaderTracesContext = ({
   columnDisplayName: string;
 }) => {
   const tooltipTitle = i18n.translate(
-    'unifiedDataTable.tableHeader.tracesContext.sourceFieldIconTooltipTitle',
+    'discover.unifiedDataTable.tableHeader.tracesContext.sourceFieldIconTooltipTitle',
     {
       defaultMessage: 'Summary including the following fields',
     }
   );
   const tooltipContent = i18n.translate(
-    'unifiedDataTable.tableHeader.tracesContext.sourceFieldIconTooltip',
+    'discover.unifiedDataTable.tableHeader.tracesContext.sourceFieldIconTooltip',
     {
       defaultMessage:
         'Displays the most relevant resource identifiers (service.name, event.outcome, transaction.name, etc.)',
