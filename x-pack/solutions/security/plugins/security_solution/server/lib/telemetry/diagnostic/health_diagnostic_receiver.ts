@@ -70,6 +70,15 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
   ): Promise<void> {
     const controller = new AbortController();
     const abortSignal = controller.signal;
+    const index = await this.indexFor(diagnosticQuery);
+
+    if (index.length === 0) {
+      this.logger.warn('No indices found for the query', {
+        queryName: diagnosticQuery.name,
+      } as LogMeta);
+      collector$.next([]);
+      return;
+    }
 
     const stopSub: rx.Subscription = stop$.subscribe(() => {
       controller.abort();
@@ -79,7 +88,7 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
     try {
       const response = await this.client.search(
         {
-          index: await this.indexFor(diagnosticQuery),
+          index,
           ...request,
         },
         { signal: abortSignal }
@@ -110,7 +119,15 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
     const controller = new AbortController();
     const abortSignal = controller.signal;
     const regex = /^[\s\r\n]*FROM/;
-    const indices = (await this.indexFor(diagnosticQuery)).join(',');
+    const index = await this.indexFor(diagnosticQuery);
+
+    if (index.length === 0) {
+      this.logger.warn('No indices found for the query', {
+        queryName: diagnosticQuery.name,
+      } as LogMeta);
+      collector$.next([]);
+      return;
+    }
 
     const stopSub: rx.Subscription = stop$.subscribe(() => {
       controller.abort();
@@ -118,7 +135,7 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
 
     const query = regex.test(diagnosticQuery.query)
       ? diagnosticQuery.query
-      : `FROM ${indices} | ${diagnosticQuery.query}`;
+      : `FROM ${index.join(',')} | ${diagnosticQuery.query}`;
 
     try {
       const response = await this.client.helpers
@@ -138,13 +155,22 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
   ): Promise<void> {
     const controller = new AbortController();
     const abortSignal = controller.signal;
+    const index = await this.indexFor(diagnosticQuery);
+
+    if (index.length === 0) {
+      this.logger.warn('No indices found for the query', {
+        queryName: diagnosticQuery.name,
+      } as LogMeta);
+      collector$.next([]);
+      return;
+    }
 
     const stopSub: rx.Subscription = stop$.subscribe(() => {
       controller.abort();
     });
     try {
       const request: EqlSearchRequest = {
-        index: await this.indexFor(diagnosticQuery),
+        index,
         query: diagnosticQuery.query,
       };
 
@@ -238,7 +264,7 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
               queryName: query.name,
               tiers: query.tiers,
               indices,
-            });
+            } as LogMeta);
             return indices;
           }
         })
