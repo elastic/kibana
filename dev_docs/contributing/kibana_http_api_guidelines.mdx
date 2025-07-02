@@ -15,7 +15,7 @@ These guidelines provide a set of best practices for designing HTTP APIs that ar
   As an extension to the guidance in this document refer to the [Guidelines for Terraform friendly HTTP APIs](/kibana-dev-docs/contributing/http-api-tf-guidelines) if you would like to support an Infrastructure-as-Code (IaC) use case.
 </DocCallOut>
 
-## API design principles
+## Design principles
 
 ### Consistency
 
@@ -82,7 +82,11 @@ Getting your HTTP APIs into a stable state is a process based on feedback from a
   Linus Torvalds famously said of Kernel development: "WE DO NOT BREAK USERSPACE!" (along with some other expletives). We should adopt this kind of rigor and empathy when working with our _public_ HTTP APIs and always proiritise finding ways to avoid breaking our APIs.
 </DocCallOut>
 
-## API Conventions
+## Structure
+
+## Versioning
+
+## Conventions
 
 ### Pluralization
 
@@ -90,7 +94,7 @@ Prefer pluralization over singularization in HTTP API paths when referring to co
 
 ✅ DO
 ```
-GET /api/resources             # List
+GET /api/resources             # List resources
 GET /api/resources/{id}        # Get a single resource
 DELETE /api/resources/{id}     # Delete a resource
 PUT /api/resources/{id}        # Update a resource
@@ -99,7 +103,7 @@ POST /api/resources            # Create a resource
 
 ❌ DO NOT
 ```
-GET /api/resource             # List
+GET /api/resource             # List resources
 GET /api/resource/{id}        # Get a single resource
 DELETE /api/resource/{id}     # Delete a resource
 PUT /api/resource/{id}        # Update a resource
