@@ -56,7 +56,7 @@ const loadingPrompt = (
   />
 );
 
-const ruleTypeModalTitle = i18n.translate('responseOpsRuleForm.components.ruleTypeModal.title', {
+const ruleTypeModalTitle = i18n.translate('alertsUIShared.components.ruleTypeModal.title', {
   defaultMessage: 'Select rule type',
 });
 
