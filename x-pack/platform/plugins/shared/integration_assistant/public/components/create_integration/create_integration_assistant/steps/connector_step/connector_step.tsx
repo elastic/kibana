@@ -167,7 +167,7 @@ export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
         <EuiFlexGroup direction="row" gutterSize="xs" alignItems="flexStart">
           <EuiFlexItem grow={false} css={{ margin: euiTheme.size.xxs }}>
             <EuiText size="xs" color="subdued">
-              <EuiIcon type="iInCircle" size="s" className="eui-alignTop" />
+              <EuiIcon type="info" size="s" className="eui-alignTop" />
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>

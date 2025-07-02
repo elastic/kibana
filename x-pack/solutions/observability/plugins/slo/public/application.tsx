@@ -81,7 +81,7 @@ export const renderApp = ({
         prompt: i18n.translate('xpack.slo.starterPrompts.canYouCreateAnSlo.prompt', {
           defaultMessage: 'Can you create an SLO?',
         }),
-        icon: 'questionInCircle',
+        icon: 'question',
       },
     ],
   });

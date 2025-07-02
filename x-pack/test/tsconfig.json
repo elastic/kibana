@@ -109,7 +109,6 @@
     "@kbn/es",
     "@kbn/metrics-data-access-plugin",
     "@kbn/dataset-quality-plugin",
-    "@kbn/reporting-common",
     "@kbn/observability-logs-explorer-plugin",
     "@kbn/io-ts-utils",
     "@kbn/logs-explorer-plugin",
