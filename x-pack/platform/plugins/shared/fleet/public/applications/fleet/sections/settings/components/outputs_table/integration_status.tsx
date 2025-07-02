@@ -57,6 +57,7 @@ const CollapsiblePanel: React.FC<{
     }
     return undefined;
   }, [dataTestSubj]);
+  const hasChildren = React.Children.count(children) > 0;
   const { euiTheme } = useEuiTheme();
   return (
     <EuiPanel
@@ -99,11 +100,12 @@ const CollapsiblePanel: React.FC<{
           }
         `}
         id={id}
-        arrowDisplay="left"
+        arrowDisplay={hasChildren ? 'left' : 'none'}
         buttonClassName="ingest-integration-title-button"
         buttonContent={title}
         arrowProps={arrowProps}
         data-test-subj={dataTestSubj}
+        isDisabled={!hasChildren}
       >
         {children}
       </EuiAccordion>
@@ -252,6 +254,7 @@ export const IntegrationStatus: React.FunctionComponent<{
               <EuiAccordion
                 id={`${customAsset.type}:${customAsset.name}`}
                 key={`${customAsset.type}:${customAsset.name}`}
+                arrowDisplay={customAsset.error ? 'left' : 'none'}
                 buttonContent={
                   <EuiFlexGroup alignItems="baseline" gutterSize="xs">
                     <EuiFlexItem grow={false}>
