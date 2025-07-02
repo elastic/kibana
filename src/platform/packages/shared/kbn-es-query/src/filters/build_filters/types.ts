@@ -7,11 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  Filter as SerializableFilter,
+  FilterMeta as SerializableFilterMeta,
+} from '@kbn/es-query-server';
 import { ExistsFilter } from './exists_filter';
 import { PhrasesFilter, PhrasesFilterMeta } from './phrases_filter';
 import { PhraseFilter, PhraseFilterMeta, PhraseFilterMetaParams } from './phrase_filter';
 import { RangeFilter, RangeFilterMeta, RangeFilterParams } from './range_filter';
 import { MatchAllFilter, MatchAllFilterMeta } from './match_all_filter';
+
+export type { AggregateQuery, Query } from '@kbn/es-query-server';
 
 /**
  * A common type for filters supported by this package
@@ -68,40 +74,14 @@ export type FilterMetaParams =
   | number[];
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type FilterMeta = {
-  alias?: string | null;
-  disabled?: boolean;
-  negate?: boolean;
-  // controlledBy is there to identify who owns the filter
-  controlledBy?: string;
-  // allows grouping of filters
-  group?: string;
-  // index and type are optional only because when you create a new filter, there are no defaults
-  index?: string;
-  isMultiIndex?: boolean;
-  type?: string;
-  key?: string;
+export type FilterMeta = Omit<SerializableFilterMeta, 'params'> & {
   params?: FilterMetaParams;
-  value?: string;
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type Filter = {
-  $state?: {
-    store: FilterStateStore;
-  };
+export type Filter = Omit<SerializableFilter, 'meta'> & {
   meta: FilterMeta;
-  query?: Record<string, any>;
 };
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type Query = {
-  query: string | { [key: string]: any };
-  language: string;
-};
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type AggregateQuery = { esql: string };
 
 /**
  * An interface for a latitude-longitude pair
