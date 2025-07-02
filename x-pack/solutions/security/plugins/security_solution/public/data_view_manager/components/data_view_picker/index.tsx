@@ -130,7 +130,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
         },
       });
     },
-    [dataViewId, data.dataViews, dataViewFieldEditor, handleChangeDataView]
+    [dataViewId, data.dataViews, scope, dataViewFieldEditor, handleChangeDataView]
   );
 
   /**
