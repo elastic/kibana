@@ -23,10 +23,16 @@ deploy() {
   esac
 
   PROJECT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST-$PROJECT_TYPE"
+  PROJECT_JSON=""
   VAULT_KEY_NAME="$PROJECT_NAME"
+  if is_pr_with_label "ci:project-deploy-ai4soc"; then
+    PROJECT_JSON='"product_types": [{ "product_line": "ai_soc", "product_tier": "search_ai_lake" }],'
+  fi
+
   is_pr_with_label "ci:project-persist-deployment" && PROJECT_NAME="keep_$PROJECT_NAME"
   PROJECT_CREATE_CONFIGURATION='{
     "name": "'"$PROJECT_NAME"'",
+    '$PROJECT_JSON'
     "region_id": "aws-eu-west-1",
     "overrides": {
         "kibana": {
@@ -36,6 +42,7 @@ deploy() {
   }'
   PROJECT_UPDATE_CONFIGURATION='{
     "name": "'"$PROJECT_NAME"'",
+    '$PROJECT_JSON'
     "overrides": {
         "kibana": {
             "docker_image": "'"$KIBANA_IMAGE"'"
@@ -161,6 +168,7 @@ EOF
 
 is_pr_with_label "ci:project-deploy-elasticsearch" && deploy "elasticsearch"
 is_pr_with_label "ci:project-deploy-security" && deploy "security"
+is_pr_with_label "ci:project-deploy-ai4soc" && deploy "security"
 if is_pr_with_label "ci:project-deploy-observability" ; then
   # Only deploy observability if the PR is targeting main
   if [[ "$BUILDKITE_PULL_REQUEST_BASE_BRANCH" == "main" ]]; then
