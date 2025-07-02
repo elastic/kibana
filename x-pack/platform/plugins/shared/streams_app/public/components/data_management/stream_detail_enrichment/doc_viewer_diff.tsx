@@ -9,7 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useEffect, useState, useRef, useMemo, useLayoutEffect } from 'react';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
-import { XJsonLang, monaco } from '@kbn/monaco';
+import {
+  CODE_EDITOR_DEFAULT_THEME_ID,
+  XJsonLang,
+  defaultThemesResolvers,
+  monaco,
+} from '@kbn/monaco';
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { DEFAULT_MARGIN_BOTTOM, getTabContentAvailableHeight } from './get_height';
 
 function orderObjectKeys(obj: unknown): unknown {
@@ -44,6 +51,7 @@ function JsonDiffViewer({
   additionalDocViewerProps,
 }: DocViewRenderProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const euiTheme = useEuiTheme();
   const [editorHeight, setEditorHeight] = useState<number>(0);
 
   const originalSample = additionalDocViewerProps?.originalSample as Record<string, unknown>;
@@ -76,13 +84,14 @@ function JsonDiffViewer({
     if (!editorRef.current) {
       editorRef.current = monaco.editor.createDiffEditor(wrapperRef.current, {
         automaticLayout: true,
+        theme: CODE_EDITOR_DEFAULT_THEME_ID,
       });
     }
     editorRef.current.setModel({ original: oldModel, modified: newModel });
-    editorRef.current.updateOptions({
-      renderSideBySide: false,
+    const commonOptions: monaco.editor.IEditorOptions = {
+      lightbulb: { enabled: false },
       fontSize: 12,
-      lineNumbers: 'on',
+      lineNumbers: 'off',
       minimap: { enabled: false },
       overviewRulerBorder: false,
       readOnly: true,
@@ -90,8 +99,41 @@ function JsonDiffViewer({
       scrollBeyondLastLine: false,
       wordWrap: 'on',
       wrappingIndent: 'indent',
+    };
+    editorRef.current.updateOptions({
+      ...commonOptions,
+      renderSideBySide: false,
     });
+    editorRef.current.getOriginalEditor().updateOptions(commonOptions);
+    editorRef.current.getModifiedEditor().updateOptions(commonOptions);
   }, [originalValue, newValue, editorHeight]);
 
-  return <div ref={wrapperRef} style={{ width: '100%', height: editorHeight }} />;
+  useEffect(() => {
+    // register default theme code editor theme
+    Object.entries(defaultThemesResolvers).forEach(([themeId, themeResolver]) => {
+      monaco.editor.defineTheme(themeId, themeResolver(euiTheme));
+    });
+
+    // register theme configurations for supported languages
+    monaco.languages.getLanguages().forEach(({ id: languageId }) => {
+      let languageThemeResolver;
+      if (Boolean((languageThemeResolver = monaco.editor.getLanguageThemeResolver(languageId)))) {
+        monaco.editor.defineTheme(languageId, languageThemeResolver!(euiTheme));
+      }
+    });
+  }, [euiTheme]);
+
+  return (
+    <div
+      ref={wrapperRef}
+      className={css`
+        width: 100%;
+        height: ${editorHeight}px;
+        // https://github.com/microsoft/monaco-editor/issues/3873
+        .codicon-light-bulb {
+          display: none !important;
+        }
+      `}
+    />
+  );
 }

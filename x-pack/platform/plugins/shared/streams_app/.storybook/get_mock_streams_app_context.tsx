@@ -25,6 +25,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
 import { StreamsTelemetryService } from '../public/telemetry/service';
 
@@ -80,6 +81,7 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
         charts: {} as unknown as ChartsPluginStart,
         discover: {} as unknown as DiscoverStart,
         observabilityAIAssistant: {} as unknown as ObservabilityAIAssistantPublicStart,
+        unifiedDocViewer: {} as unknown as UnifiedDocViewerStart,
       },
     },
     services: {
