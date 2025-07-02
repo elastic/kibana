@@ -102,7 +102,7 @@ export const getFieldDefinition = <T extends SettingType>(
     type,
     userValue: savedValue,
     value: defaultValue,
-    solution,
+    solutions,
   } = setting;
 
   const { isCustom, isOverridden } = params;
@@ -145,7 +145,7 @@ export const getFieldDefinition = <T extends SettingType>(
     savedValue,
     type,
     unsavedFieldId: `${id}-unsaved`,
-    solution,
+    solutions,
   };
 
   // TODO: clintandrewhall - add validation (e.g. `select` contains non-empty `options`)
