@@ -235,6 +235,7 @@ export interface LangChainExecuteParams {
   contentReferencesStore: ContentReferencesStore;
   llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;
+  inferenceChatModelEnabled?: boolean;
   isOssModel?: boolean;
   conversationId?: string;
   context: AwaitedProperties<
@@ -265,6 +266,7 @@ export const langChainExecute = async ({
   actionTypeId,
   connectorId,
   contentReferencesStore,
+  inferenceChatModelEnabled,
   isOssModel,
   context,
   actionsClient,
@@ -331,6 +333,7 @@ export const langChainExecute = async ({
     esClient,
     llmTasks,
     inference,
+    inferenceChatModelEnabled,
     isStream,
     llmType: getLlmType(actionTypeId),
     isOssModel,

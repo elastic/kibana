@@ -101,7 +101,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
           />
         }
       >
-        <EuiIcon type="iInCircle" size="s" />
+        <EuiIcon type="info" size="s" />
       </EuiToolTip>
     );
   };

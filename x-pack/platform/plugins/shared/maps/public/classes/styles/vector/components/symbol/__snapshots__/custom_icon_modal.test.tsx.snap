@@ -94,7 +94,7 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
                      
                     <EuiIcon
                       color="subdued"
-                      type="questionInCircle"
+                      type="question"
                     />
                   </React.Fragment>
                 </EuiToolTip>
@@ -128,7 +128,7 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
                      
                     <EuiIcon
                       color="subdued"
-                      type="questionInCircle"
+                      type="question"
                     />
                   </React.Fragment>
                 </EuiToolTip>
