@@ -51,6 +51,7 @@ export const ColumnChart: FC<Props> = ({
               chartMargins: zeroSize,
               chartPaddings: zeroSize,
               crosshair: { band: { visible: false } },
+              axes: { gridLine: { horizontal: { visible: false }, vertical: { visible: false } } },
             }}
             locale={i18n.getLocale()}
           />

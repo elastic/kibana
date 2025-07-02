@@ -11,10 +11,26 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SSLCertType } from '../../../common/auth/constants';
 import { AuthFormTestProvider } from '../../connector_types/lib/test_utils';
+import { useConnectorContext } from '@kbn/triggers-actions-ui-plugin/public';
+import * as i18n from './translations';
 
 const certTypeDefaultValue: SSLCertType = SSLCertType.CRT;
 
+jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
+  useConnectorContext: jest.fn(),
+}));
+
 describe('SSLCertFields', () => {
+  beforeEach(() => {
+    (useConnectorContext as jest.Mock).mockReturnValue({
+      services: { isWebhookSslWithPfxEnabled: true },
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   const onSubmit = jest.fn();
 
   it('renders all fields for certType=CRT', async () => {
@@ -219,5 +235,35 @@ describe('SSLCertFields', () => {
         });
       });
     });
+  });
+});
+
+describe('validation with PFX disabled', () => {
+  beforeEach(() => {
+    (useConnectorContext as jest.Mock).mockReturnValue({
+      services: { isWebhookSslWithPfxEnabled: false },
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('does not render PFX tab when PFX is disabled', async () => {
+    render(
+      <AuthFormTestProvider onSubmit={jest.fn()}>
+        <SSLCertFields
+          readOnly={false}
+          certTypeDefaultValue={certTypeDefaultValue}
+          certType={SSLCertType.CRT}
+          isPfxEnabled={false}
+        />
+      </AuthFormTestProvider>
+    );
+
+    expect(await screen.findByTestId('sslCertFields')).toBeInTheDocument();
+    expect(await screen.findByTestId('webhookSSLPassphraseInput')).toBeInTheDocument();
+    expect(await screen.findByTestId('webhookCertTypeTabs')).toBeInTheDocument();
+    expect(screen.queryByText(i18n.CERT_TYPE_PFX)).not.toBeInTheDocument();
   });
 });

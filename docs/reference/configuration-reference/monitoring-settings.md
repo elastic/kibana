@@ -90,7 +90,11 @@ $$$monitoring-ui-enabled$$$ `monitoring.ui.enabled`
 :   Specifies the name of the indices that are shown on the [**Logs**](docs-content://deploy-manage/monitor/monitoring-data/elasticsearch-metrics.md#logs-monitor-page) page in **{{stack-monitor-app}}**. The default value is `filebeat-*`.
 
 `monitoring.ui.metricbeat.index`
-:   [8.1.1] Used as a workaround to avoid querying `metricbeat-*` indices which are now no longer queried. The default value is `metricbeat-*`.
+:   :::{admonition} Deprecated in 8.15.0
+    This setting was deprecated in 8.15.0.
+    :::
+
+    Used as a workaround to avoid querying `metricbeat-*` indices which are now no longer queried. The default value is `metricbeat-*`.
 
 `monitoring.ui.max_bucket_size`
 :   Specifies the number of term buckets to return out of the overall terms list when performing terms aggregations to retrieve index and node metrics. For more information about the `size` parameter, see [Terms Aggregation](elasticsearch://reference/aggregations/search-aggregations-bucket-terms-aggregation.md#search-aggregations-bucket-terms-aggregation-size). Defaults to `10000`.

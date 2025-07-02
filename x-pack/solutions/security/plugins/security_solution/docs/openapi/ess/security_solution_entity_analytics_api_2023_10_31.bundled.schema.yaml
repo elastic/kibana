@@ -329,8 +329,21 @@ paths:
               schema:
                 type: object
                 properties:
-                  ok:
-                    type: boolean
+                  error:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - status
+                  status:
+                    oneOf:
+                      - $ref: '#/components/schemas/EngineStatus'
+                      - enum:
+                          - not_found
+                        type: string
+                required:
+                  - status
           description: Successful response
       summary: Health check on Privilege Monitoring
       tags:
@@ -356,58 +369,48 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/_csv:
     post:
-      operationId: BulkUploadUsersCSV
+      operationId: PrivmonBulkUploadUsersCSV
       requestBody:
         content:
-          text/csv:
-            schema:
-              type: string
-        description: CSV file containing users to upsert
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  upserted_count:
-                    type: integer
-          description: Successful response
-      summary: Upsert multiple monitored users via CSV upload
-      tags:
-        - Security Entity Analytics API
-  /api/entity_analytics/monitoring/users/_json:
-    post:
-      operationId: BulkUploadUsersJSON
-      requestBody:
-        content:
-          text/json:
+          multipart/form-data:
             schema:
               type: object
               properties:
-                users:
-                  items:
-                    type: object
-                    properties:
-                      is_monitored:
-                        type: boolean
-                      user_name:
-                        type: string
-                  type: array
-        description: JSON file containing users to upsert
-        required: true
+                file:
+                  description: The CSV file to upload.
+                  format: binary
+                  type: string
+              required:
+                - file
       responses:
         '200':
           content:
             application/json:
               schema:
+                example:
+                  errors:
+                    - index: 1
+                      message: Invalid monitored field
+                      username: john.doe
+                  stats:
+                    failed: 1
+                    successful: 1
+                    total: 2
                 type: object
                 properties:
-                  upserted_count:
-                    type: integer
-          description: Successful response
-      summary: Upsert multiple monitored users via JSON upload
+                  errors:
+                    items:
+                      $ref: '#/components/schemas/PrivmonUserCsvUploadErrorItem'
+                    type: array
+                  stats:
+                    $ref: '#/components/schemas/PrivmonUserCsvUploadStats'
+                required:
+                  - errors
+                  - stats
+          description: Bulk upload successful
+        '413':
+          description: File too large
+      summary: Upsert multiple monitored users via CSV upload
       tags:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/{id}:
@@ -438,24 +441,6 @@ paths:
                   - success
           description: User deleted successfully
       summary: Delete a monitored user
-      tags:
-        - Security Entity Analytics API
-    get:
-      operationId: GetPrivMonUser
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MonitoredUserDoc'
-          description: User details retrieved
-      summary: Retrieve a monitored user by ID
       tags:
         - Security Entity Analytics API
     put:
@@ -504,6 +489,76 @@ paths:
       summary: List all monitored users
       tags:
         - Security Entity Analytics API
+  /api/entity_analytics/privileged_user_monitoring/pad/install:
+    post:
+      operationId: InstallPrivilegedAccessDetectionPackage
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Successful response
+      summary: >-
+        Installs the privileged access detection package for the Entity
+        Analytics privileged user monitoring experience
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/privileged_user_monitoring/pad/status:
+    get:
+      operationId: GetPrivilegedAccessDetectionPackageStatus
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobs:
+                    items:
+                      type: object
+                      properties:
+                        description:
+                          type: string
+                        job_id:
+                          type: string
+                        state:
+                          enum:
+                            - closing
+                            - closed
+                            - opened
+                            - failed
+                            - opening
+                          type: string
+                      required:
+                        - job_id
+                        - state
+                    type: array
+                  ml_module_setup_status:
+                    enum:
+                      - complete
+                      - incomplete
+                    type: string
+                  package_installation_status:
+                    enum:
+                      - complete
+                      - incomplete
+                    type: string
+                required:
+                  - package_installation_status
+                  - ml_module_setup_status
+                  - jobs
+          description: Privileged access detection status retrieved
+      summary: >-
+        Gets the status of the privileged access detection package for the
+        Entity Analytics privileged user monitoring experience
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/enable:
     post:
       operationId: InitEntityStore
@@ -519,6 +574,7 @@ paths:
                   pattern: '[smdh]$'
                   type: string
                 docsPerSecond:
+                  default: -1
                   description: The number of documents per second to process.
                   type: integer
                 enrichPolicyExecutionInterval:
@@ -541,12 +597,18 @@ paths:
                 indexPattern:
                   $ref: '#/components/schemas/IndexPattern'
                 lookbackPeriod:
-                  default: 24h
+                  default: 3h
                   description: >-
                     The amount of time the transform looks back to calculate the
                     aggregations.
                   pattern: '[smdh]$'
                   type: string
+                maxPageSearchSize:
+                  default: 500
+                  description: >-
+                    The initial page size to use for the composite aggregation
+                    of each checkpoint.
+                  type: integer
                 timeout:
                   default: 180s
                   description: The timeout for initializing the aggregating transform.
@@ -649,7 +711,7 @@ paths:
     post:
       operationId: InitEntityEngine
       parameters:
-        - description: The entity type of the engine (either 'user' or 'host').
+        - description: The entity type of the engine.
           in: path
           name: entityType
           required: true
@@ -667,6 +729,7 @@ paths:
                   pattern: '[smdh]$'
                   type: string
                 docsPerSecond:
+                  default: -1
                   description: The number of documents per second to process.
                   type: integer
                 enrichPolicyExecutionInterval:
@@ -685,12 +748,18 @@ paths:
                 indexPattern:
                   $ref: '#/components/schemas/IndexPattern'
                 lookbackPeriod:
-                  default: 24h
+                  default: 3h
                   description: >-
                     The amount of time the transform looks back to calculate the
                     aggregations.
                   pattern: '[smdh]$'
                   type: string
+                maxPageSearchSize:
+                  default: 500
+                  description: >-
+                    The initial page size to use for the composite aggregation
+                    of each checkpoint.
+                  type: integer
                 timeout:
                   default: 180s
                   description: The timeout for initializing the aggregating transform.
@@ -1116,6 +1185,20 @@ components:
               $ref: '#/components/schemas/AssetCriticalityLevel'
           required:
             - asset
+        entity:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: '#/components/schemas/AssetCriticalityLevel'
+              required:
+                - criticality
+            id:
+              type: string
+          required:
+            - id
         host:
           type: object
           properties:
@@ -1620,14 +1703,6 @@ components:
         labels:
           type: object
           properties:
-            monitoring:
-              type: object
-              properties:
-                privileged_users:
-                  enum:
-                    - monitored
-                    - deleted
-                  type: string
             source_indices:
               items:
                 type: string
@@ -1646,6 +1721,9 @@ components:
         user:
           type: object
           properties:
+            is_privileged:
+              description: Indicates if the user is privileged.
+              type: boolean
             name:
               type: string
     MonitoringEngineDescriptor:
@@ -1656,6 +1734,34 @@ components:
       required:
         - type
         - status
+    PrivmonUserCsvUploadErrorItem:
+      type: object
+      properties:
+        index:
+          nullable: true
+          type: integer
+        message:
+          type: string
+        username:
+          nullable: true
+          type: string
+      required:
+        - message
+        - index
+        - username
+    PrivmonUserCsvUploadStats:
+      type: object
+      properties:
+        failed:
+          type: integer
+        successful:
+          type: integer
+        total:
+          type: integer
+      required:
+        - successful
+        - failed
+        - total
     RiskEngineScheduleNowErrorResponse:
       type: object
       properties:

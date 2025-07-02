@@ -53,7 +53,7 @@ export interface VulnerabilitiesFindingTableDetailsFields {
 }
 
 export type VulnerabilitiesFindingDetailFields = Pick<Vulnerability, 'score'> &
-  Pick<CspVulnerabilityFinding, 'vulnerability' | 'resource'> &
+  Pick<CspVulnerabilityFinding, 'vulnerability' | 'resource' | 'event'> &
   VulnerabilitiesFindingTableDetailsFields;
 
 interface FindingsAggs {
@@ -91,6 +91,7 @@ export const useVulnerabilitiesFindings = (options: UseCspOptions) => {
           [VULNERABILITY.ID]: finding._source?.vulnerability?.id,
           [VULNERABILITY.SEVERITY]: finding._source?.vulnerability?.severity,
           [VULNERABILITY.PACKAGE_NAME]: finding._source?.package?.name,
+          event: finding._source?.event,
         })) as VulnerabilitiesFindingDetailFields[],
       };
     },

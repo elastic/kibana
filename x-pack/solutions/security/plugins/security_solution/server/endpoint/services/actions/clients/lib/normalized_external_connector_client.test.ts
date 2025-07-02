@@ -30,7 +30,8 @@ describe('`NormalizedExternalConnectorClient` class', () => {
   ])('should error if %s() is called prior calling .setup()', async (methodName, methodArgs) => {
     const testInstance = new NormalizedExternalConnectorClient(
       unsecuredActionsClientMock.create(),
-      logger
+      logger,
+      { spaceId: 'default' }
     );
 
     await expect(
@@ -171,11 +172,20 @@ describe('`NormalizedExternalConnectorClient` class', () => {
       );
     });
 
+    it(`should throw an error is initialized with no spaceId option`, async () => {
+      expect(() => {
+        new NormalizedExternalConnectorClient(actionPluginConnectorClient, logger);
+      }).toThrow(
+        "Initialization of NormalizedExternalConnectorClient with an unsecured connectors client requires an 'options.spaceId' to be defined"
+      );
+    });
+
     it('should call Action Plugin client `.execute()` with expected arguments', async () => {
       const testInstance = new NormalizedExternalConnectorClient(
         actionPluginConnectorClient,
         logger,
         {
+          spaceId: 'foo',
           relatedSavedObjects: [
             {
               id: 'so-id-1',
@@ -190,7 +200,7 @@ describe('`NormalizedExternalConnectorClient` class', () => {
       expect(actionPluginConnectorClient.execute).toHaveBeenCalledWith({
         id: 'connector-mock-id-1',
         requesterId: 'background_task',
-        spaceId: 'default',
+        spaceId: 'foo',
         params: executeInputOptions.params,
         relatedSavedObjects: [
           {
@@ -201,19 +211,28 @@ describe('`NormalizedExternalConnectorClient` class', () => {
       });
     });
 
-    it('should throw a ResponseActionClientError', async () => {
+    it('should throw a ResponseActionClientError if connector execute fails', async () => {
       (actionPluginConnectorClient.execute as jest.Mock).mockImplementation(async () => {
         throw new Error('oh oh');
       });
 
       const testInstance = new NormalizedExternalConnectorClient(
         actionPluginConnectorClient,
-        logger
+        logger,
+        { spaceId: 'default' }
       );
       testInstance.setup('foo');
 
       await expect(testInstance.execute(executeInputOptions)).rejects.toThrow(
         ResponseActionsClientError
+      );
+    });
+
+    it('should throw an error if `.execute()` is called without a spaceId', () => {
+      expect(() => {
+        new NormalizedExternalConnectorClient(actionPluginConnectorClient, logger);
+      }).toThrow(
+        "Initialization of NormalizedExternalConnectorClient with an unsecured connectors client requires an 'options.spaceId' to be defined"
       );
     });
   });

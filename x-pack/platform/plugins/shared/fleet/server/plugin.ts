@@ -667,11 +667,18 @@ export class FleetPlugin
       core,
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
+      config: {
+        taskInterval: config.syncIntegrations?.taskInterval,
+      },
     });
     this.automaticAgentUpgradeTask = new AutomaticAgentUpgradeTask({
       core,
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
+      config: {
+        taskInterval: config.autoUpgrades?.taskInterval,
+        retryDelays: config.autoUpgrades?.retryDelays,
+      },
     });
     this.lockManagerService = new LockManagerService(core, this.initializerContext.logger.get());
 
@@ -748,7 +755,7 @@ export class FleetPlugin
 
     const logger = appContextService.getLogger();
 
-    this.policyWatcher = new PolicyWatcher(core.savedObjects, logger);
+    this.policyWatcher = new PolicyWatcher(logger);
 
     this.policyWatcher.start(licenseService);
 

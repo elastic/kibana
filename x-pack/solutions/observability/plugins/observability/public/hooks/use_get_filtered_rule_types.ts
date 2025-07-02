@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import {
+  DEGRADED_DOCS_RULE_TYPE_ID,
+  ES_QUERY_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
+} from '@kbn/rule-data-utils';
 import { useMemo } from 'react';
-import { ES_QUERY_ID, ML_ANOMALY_DETECTION_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { usePluginContext } from './use_plugin_context';
 
 export function useGetFilteredRuleTypes() {
@@ -15,6 +19,7 @@ export function useGetFilteredRuleTypes() {
   return useMemo(() => {
     return [
       ES_QUERY_ID,
+      DEGRADED_DOCS_RULE_TYPE_ID,
       ML_ANOMALY_DETECTION_RULE_TYPE_ID,
       ...observabilityRuleTypeRegistry.list(),
     ];

@@ -18,6 +18,7 @@ import {
   addTab,
   closeTab,
   selectTab,
+  selectRecentlyClosedTab,
   insertTabAfter,
   replaceTabWith,
   closeOtherTabs,
@@ -25,25 +26,10 @@ import {
 } from '../../utils/manage_tabs';
 import type { TabItem, TabsServices, TabPreviewData } from '../../types';
 
-// TODO replace with real data when ready
-const RECENTLY_CLOSED_TABS_MOCK = [
-  {
-    label: 'Session 4',
-    id: '4',
-  },
-  {
-    label: 'Session 5',
-    id: '5',
-  },
-  {
-    label: 'Session 6',
-    id: '6',
-  },
-];
-
 export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> {
-  initialItems: TabItem[];
-  initialSelectedItemId?: string;
+  items: TabItem[];
+  selectedItemId?: string;
+  recentlyClosedItems: TabItem[];
   'data-test-subj'?: string;
   services: TabsServices;
   renderContent: (selectedItem: TabItem) => React.ReactNode;
@@ -58,8 +44,9 @@ export interface TabbedContentState {
 }
 
 export const TabbedContent: React.FC<TabbedContentProps> = ({
-  initialItems,
-  initialSelectedItemId,
+  items: managedItems,
+  selectedItemId: managedSelectedItemId,
+  recentlyClosedItems,
   maxItemsCount,
   services,
   renderContent,
@@ -69,14 +56,10 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 }) => {
   const tabsBarApi = useRef<TabsBarApi | null>(null);
   const [tabContentId] = useState(() => htmlIdGenerator()());
-  const [state, _setState] = useState<TabbedContentState>(() => {
-    return {
-      items: initialItems,
-      selectedItem:
-        (initialSelectedItemId && initialItems.find((item) => item.id === initialSelectedItemId)) ||
-        initialItems[0],
-    };
-  });
+  const state = useMemo(
+    () => prepareStateFromProps(managedItems, managedSelectedItemId),
+    [managedItems, managedSelectedItemId]
+  );
   const { items, selectedItem } = state;
   const stateRef = React.useRef<TabbedContentState>();
   stateRef.current = state;
@@ -88,10 +71,9 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       }
 
       const nextState = getNextState(stateRef.current);
-      _setState(nextState);
       onChanged(nextState);
     },
-    [_setState, onChanged]
+    [onChanged]
   );
 
   const onLabelEdited = useCallback(
@@ -106,6 +88,13 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   const onSelect = useCallback(
     async (item: TabItem) => {
       changeState((prevState) => selectTab(prevState, item));
+    },
+    [changeState]
+  );
+
+  const onSelectRecentlyClosed = useCallback(
+    async (item: TabItem) => {
+      changeState((prevState) => selectRecentlyClosedTab(prevState, item));
     },
     [changeState]
   );
@@ -142,6 +131,8 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   const onDuplicate = useCallback(
     (item: TabItem) => {
       const newItem = createItem();
+      newItem.duplicatedFromId = item.id;
+
       const copyLabel = i18n.translate('unifiedTabs.copyLabel', { defaultMessage: 'copy' });
       const escapedCopyLabel = escapeRegExp(copyLabel);
       const baseRegex = new RegExp(`\\s*\\(${escapedCopyLabel}\\)( \\d+)?$`);
@@ -194,7 +185,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           ref={tabsBarApi}
           items={items}
           selectedItem={selectedItem}
-          recentlyClosedItems={RECENTLY_CLOSED_TABS_MOCK}
+          recentlyClosedItems={recentlyClosedItems}
           maxItemsCount={maxItemsCount}
           tabContentId={tabContentId}
           getTabMenuItems={getTabMenuItems}
@@ -202,6 +193,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           onAdd={onAdd}
           onLabelEdited={onLabelEdited}
           onSelect={onSelect}
+          onSelectRecentlyClosed={onSelectRecentlyClosed}
           onReorder={onReorder}
           onClose={onClose}
           getPreviewData={getPreviewData}
@@ -220,3 +212,11 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     </EuiFlexGroup>
   );
 };
+
+function prepareStateFromProps(items: TabItem[], selectedItemId?: string): TabbedContentState {
+  const selectedItem = selectedItemId && items.find((item) => item.id === selectedItemId);
+  return {
+    items,
+    selectedItem: selectedItem || items[0],
+  };
+}

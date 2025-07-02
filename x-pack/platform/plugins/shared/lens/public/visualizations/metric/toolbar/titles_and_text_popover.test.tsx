@@ -54,7 +54,10 @@ describe('TitlesAndTextPopover', () => {
 
   const renderToolbarOptions = (state: MetricVisualizationState) => {
     return {
-      ...render(<TitlesAndTextPopover state={state} setState={mockSetState} />),
+      ...render(<TitlesAndTextPopover state={state} setState={mockSetState} />, {
+        // fails in concurrent mode
+        legacyRoot: true,
+      }),
     };
   };
 

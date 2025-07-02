@@ -121,13 +121,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
           expect(focusedTraceResponse?.status).to.be(200);
           focusedTrace = focusedTraceResponse?.body;
-          rootTransactionId = focusedTrace?.traceItems?.rootTransaction?.transaction?.id;
+          rootTransactionId = focusedTrace?.traceItems?.rootDoc?.id;
         });
 
         describe('focus on root transaction', () => {
           it('returns same root transaction and focused item', async () => {
-            expect(focusedTrace?.traceItems?.rootTransaction?.transaction?.id).to.eql(
-              focusedTrace?.traceItems?.focusedTraceDoc?.transaction?.id
+            expect(focusedTrace?.traceItems?.rootDoc?.id).to.eql(
+              focusedTrace?.traceItems?.focusedTraceDoc?.id
             );
           });
 
@@ -153,10 +153,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           let nodeParentSpanId: string | undefined;
           let nodeTransactionId: string | undefined;
           before(async () => {
-            nodeParentSpanId = focusedTrace?.traceItems?.focusedTraceTree?.[0]?.traceDoc?.span?.id;
+            nodeParentSpanId = focusedTrace?.traceItems?.focusedTraceTree?.[0]?.traceDoc?.id;
             nodeTransactionId =
-              focusedTrace?.traceItems?.focusedTraceTree?.[0]?.children?.[0]?.traceDoc?.transaction
-                ?.id;
+              focusedTrace?.traceItems?.focusedTraceTree?.[0]?.children?.[0]?.traceDoc?.id;
             const focusedTraceResponse = await fetchFocusedTrace({
               traceId,
               docId: nodeTransactionId,
@@ -166,19 +165,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
 
           it('focus on node transaction', () => {
-            expect(focusedTrace?.traceItems?.focusedTraceDoc?.transaction?.id).to.eql(
-              nodeTransactionId
-            );
+            expect(focusedTrace?.traceItems?.focusedTraceDoc?.id).to.eql(nodeTransactionId);
           });
 
           it('returns root transaction', async () => {
-            expect(focusedTrace?.traceItems?.rootTransaction?.transaction?.id).to.eql(
-              rootTransactionId
-            );
+            expect(focusedTrace?.traceItems?.rootDoc?.id).to.eql(rootTransactionId);
           });
 
           it('returns parent span', () => {
-            expect(focusedTrace?.traceItems?.parentDoc?.span?.id).to.eql(nodeParentSpanId);
+            expect(focusedTrace?.traceItems?.parentDoc?.id).to.eql(nodeParentSpanId);
           });
 
           it('has 2 children', () => {

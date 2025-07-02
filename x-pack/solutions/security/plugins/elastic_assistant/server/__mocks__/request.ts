@@ -49,25 +49,23 @@ import {
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
   PerformKnowledgeBaseEntryBulkActionRequestBody,
   PostEvaluateRequestBodyInput,
+  ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
 import {
   getAppendConversationMessagesSchemaMock,
   getCreateConversationSchemaMock,
+  getDeleteAllConversationsSchemaMock,
   getUpdateConversationSchemaMock,
 } from './conversations_schema.mock';
 import { getCreateKnowledgeBaseEntrySchemaMock } from './knowledge_base_entry_schema.mock';
 import {
-  PromptCreateProps,
-  PromptUpdateProps,
-} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
-import {
   AnonymizationFieldCreateProps,
   AnonymizationFieldUpdateProps,
-} from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import {
   AlertSummaryCreateProps,
   AlertSummaryUpdateProps,
-} from '@kbn/elastic-assistant-common/impl/schemas/alert_summary/bulk_crud_alert_summary_route.gen';
+  PromptCreateProps,
+  PromptUpdateProps,
+} from '@kbn/elastic-assistant-common/impl/schemas';
 
 export const requestMock = {
   create: httpServerMock.createKibanaRequest,
@@ -170,6 +168,13 @@ export const getCurrentUserPromptsRequest = () =>
     path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
   });
 
+export const getCurrentUserSecurityAIPromptsRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
+    query: { prompt_group_id: 'aiAssistant', prompt_ids: ['systemPrompt'] },
+  });
+
 export const getCurrentUserAlertSummaryRequest = () =>
   requestMock.create({
     method: 'get',
@@ -188,6 +193,13 @@ export const getDeleteConversationRequest = (id: string = '04128c15-0d1b-4716-a4
     method: 'delete',
     path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
     params: { id },
+  });
+
+export const getDeleteAllConversationsRequest = () =>
+  requestMock.create({
+    method: 'delete',
+    path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
+    body: getDeleteAllConversationsSchemaMock(),
   });
 
 export const getCreateConversationRequest = () =>

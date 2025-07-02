@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { ConfigType } from '../../../../config';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { registerSiemRuleMigrationsCreateRoute } from './create';
-import { registerSiemRuleMigrationsUpdateRoute } from './update';
+import { registerSiemRuleMigrationsUpdateRulesRoute } from './rules/update';
 import { registerSiemRuleMigrationsGetRoute } from './get';
 import { registerSiemRuleMigrationsStartRoute } from './start';
 import { registerSiemRuleMigrationsStatsRoute } from './stats';
@@ -24,27 +24,53 @@ import { registerSiemRuleMigrationsPrebuiltRulesRoute } from './get_prebuilt_rul
 import { registerSiemRuleMigrationsIntegrationsRoute } from './get_integrations';
 import { registerSiemRuleMigrationsGetMissingPrivilegesRoute } from './privileges/get_missing_privileges';
 import { registerSiemRuleMigrationsEvaluateRoute } from './evaluation/evaluate';
+import { registerSiemRuleMigrationsCreateRulesRoute } from './rules/create';
+import { registerSiemRuleMigrationsGetRulesRoute } from './rules/get';
+import { registerSiemRuleMigrationsDeleteRoute } from './delete';
+import { registerSiemRuleMigrationsIntegrationsStatsRoute } from './integrations_stats';
+import { registerSiemRuleMigrationsUpdateRoute } from './update';
 
 export const registerSiemRuleMigrationsRoutes = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   logger: Logger
 ) => {
+  /** Rules Migrations */
   registerSiemRuleMigrationsCreateRoute(router, logger);
+  registerSiemRuleMigrationsGetRoute(router, logger);
+  registerSiemRuleMigrationsDeleteRoute(router, logger);
   registerSiemRuleMigrationsUpdateRoute(router, logger);
+  /** *******/
+
+  /** Rules */
+  registerSiemRuleMigrationsCreateRulesRoute(router, logger);
+  registerSiemRuleMigrationsGetRulesRoute(router, logger);
+  registerSiemRuleMigrationsUpdateRulesRoute(router, logger);
+  /** *******/
+
+  /** Tasks **/
   registerSiemRuleMigrationsStatsAllRoute(router, logger);
   registerSiemRuleMigrationsPrebuiltRulesRoute(router, logger);
-  registerSiemRuleMigrationsGetRoute(router, logger);
   registerSiemRuleMigrationsStartRoute(router, logger);
   registerSiemRuleMigrationsStatsRoute(router, logger);
   registerSiemRuleMigrationsTranslationStatsRoute(router, logger);
   registerSiemRuleMigrationsStopRoute(router, logger);
-  registerSiemRuleMigrationsInstallRoute(router, logger);
-  registerSiemRuleMigrationsIntegrationsRoute(router, logger);
+  /** *******/
 
+  /** Install */
+  registerSiemRuleMigrationsInstallRoute(router, logger);
+  /** *******/
+
+  /** Integrations */
+  registerSiemRuleMigrationsIntegrationsRoute(router, logger);
+  registerSiemRuleMigrationsIntegrationsStatsRoute(router, logger);
+  /** *******/
+
+  /** Resources */
   registerSiemRuleMigrationsResourceUpsertRoute(router, logger);
   registerSiemRuleMigrationsResourceGetRoute(router, logger);
   registerSiemRuleMigrationsResourceGetMissingRoute(router, logger);
+  /** *******/
 
   registerSiemRuleMigrationsGetMissingPrivilegesRoute(router, logger);
 

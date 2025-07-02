@@ -9,14 +9,15 @@
 
 import deepEqual from 'fast-deep-equal';
 import { StateComparators } from './types';
+import { logStateDiff, shouldLogStateDiff } from './state_diff_logger';
 
 const referenceEquality = <T>(a: T, b: T) => a === b;
 const deepEquality = <T>(a: T, b: T) => deepEqual(a, b);
 
 export const runComparator = <StateType extends object = object>(
   comparator: StateComparators<StateType>[keyof StateType],
-  lastSavedState?: StateType,
-  latestState?: StateType,
+  lastSavedState?: Partial<StateType>,
+  latestState?: Partial<StateType>,
   lastSavedValue?: StateType[keyof StateType],
   latestValue?: StateType[keyof StateType]
 ): boolean => {
@@ -44,6 +45,7 @@ export const diffComparators = <StateType extends object = object>(
 
     if (!runComparator(comparator, lastSavedState, latestState, lastSavedValue, currentValue)) {
       acc[key as keyof StateType] = currentValue;
+      logStateDiff(key, lastSavedValue, currentValue);
     }
 
     return acc;
@@ -57,7 +59,8 @@ export const areComparatorsEqual = <StateType extends object = object>(
   comparators: StateComparators<StateType>,
   lastSavedState?: StateType,
   currentState?: StateType,
-  defaultState?: Partial<StateType>
+  defaultState?: Partial<StateType>,
+  getCustomLogLabel?: (key: string) => string
 ): boolean => {
   return Object.keys(comparators).every((key) => {
     const comparator = comparators[key as keyof StateType];
@@ -66,6 +69,16 @@ export const areComparatorsEqual = <StateType extends object = object>(
     const currentValue =
       currentState?.[key as keyof StateType] ?? defaultState?.[key as keyof StateType];
 
-    return runComparator(comparator, lastSavedState, currentState, lastSavedValue, currentValue);
+    const areEqual = runComparator(
+      comparator,
+      lastSavedState,
+      currentState,
+      lastSavedValue,
+      currentValue
+    );
+
+    if (!areEqual && shouldLogStateDiff())
+      logStateDiff(getCustomLogLabel ? getCustomLogLabel(key) : key, lastSavedValue, currentValue);
+    return areEqual;
   });
 };

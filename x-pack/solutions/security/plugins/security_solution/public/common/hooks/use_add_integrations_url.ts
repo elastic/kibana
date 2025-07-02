@@ -6,12 +6,12 @@
  */
 import { useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useNavigateTo, useGetAppUrl } from '@kbn/security-solution-navigation';
+import { useNavigateTo } from '@kbn/security-solution-navigation';
 import {
   ADD_DATA_PATH,
   ADD_THREAT_INTELLIGENCE_DATA_PATH,
   SECURITY_FEATURE_ID,
-  SecurityPageName,
+  CONFIGURATIONS_INTEGRATIONS_PATH,
 } from '../../../common/constants';
 import { isThreatIntelligencePath } from '../../helpers';
 
@@ -26,7 +26,6 @@ export const useAddIntegrationsUrl = () => {
     application: { capabilities },
   } = useKibana().services;
   const { pathname } = useLocation();
-  const { getAppUrl } = useGetAppUrl();
   const { navigateTo } = useNavigateTo();
 
   const isThreatIntelligence = isThreatIntelligencePath(pathname);
@@ -34,15 +33,10 @@ export const useAddIntegrationsUrl = () => {
     [`${SECURITY_FEATURE_ID}.configurations`],
   ]);
 
-  const integrationsConfigurationsPath = getAppUrl({
-    deepLinkId: SecurityPageName.configurationsIntegrations,
-    path: 'browse',
-  });
-
   const integrationsUrl = isThreatIntelligence
     ? ADD_THREAT_INTELLIGENCE_DATA_PATH
     : shouldGoToConfigurations
-    ? integrationsConfigurationsPath
+    ? CONFIGURATIONS_INTEGRATIONS_PATH
     : ADD_DATA_PATH;
 
   const href = useMemo(() => prepend(integrationsUrl), [prepend, integrationsUrl]);

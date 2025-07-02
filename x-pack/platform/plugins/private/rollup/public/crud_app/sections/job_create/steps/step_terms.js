@@ -22,7 +22,7 @@ import { documentationLinks } from '../../../services/documentation_links';
 
 import { FieldList } from '../../components';
 
-import { FieldChooser } from './components';
+import { FieldChooser, JobWizardStepAction } from './components';
 
 export class StepTerms extends Component {
   static propTypes = {
@@ -96,13 +96,13 @@ export class StepTerms extends Component {
             </EuiText>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false} className="rollupJobWizardStepActions">
+          <JobWizardStepAction>
             <EuiButtonEmpty
               size="s"
               flush="right"
               href={documentationLinks.apis.createRollupJobsRequest}
               target="_blank"
-              iconType="help"
+              iconType="question"
               data-test-subj="rollupJobCreateTermsDocsButton"
             >
               <FormattedMessage
@@ -110,7 +110,7 @@ export class StepTerms extends Component {
                 defaultMessage="Terms docs"
               />
             </EuiButtonEmpty>
-          </EuiFlexItem>
+          </JobWizardStepAction>
         </EuiFlexGroup>
 
         <EuiSpacer />

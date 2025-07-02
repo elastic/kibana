@@ -8,82 +8,15 @@
  */
 
 import { CharStreams, type Token } from 'antlr4';
-import { CommonTokenStream, type CharStream, type ErrorListener } from 'antlr4';
+import { CommonTokenStream, type CharStream } from 'antlr4';
 import { ESQLErrorListener } from './esql_error_listener';
 import { ESQLAstBuilderListener } from './esql_ast_builder_listener';
 import { GRAMMAR_ROOT_RULE } from './constants';
 import { attachDecorations, collectDecorations } from './formatting';
-import type { ESQLAst, ESQLAstQueryExpression, EditorError } from '../types';
 import { Builder } from '../builder';
 import { default as ESQLLexer } from '../antlr/esql_lexer';
 import { default as ESQLParser } from '../antlr/esql_parser';
-import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
-
-/**
- * Some changes to the grammar deleted the literal names for some tokens.
- * This is a workaround to restore the literals that were lost.
- *
- * See https://github.com/elastic/elasticsearch/pull/124177 for context.
- */
-const replaceSymbolsWithLiterals = (
-  symbolicNames: Array<string | null>,
-  literalNames: Array<string | null>
-) => {
-  const symbolReplacements: Map<string, string> = new Map([
-    ['LP', '('],
-    ['OPENING_BRACKET', '['],
-  ]);
-
-  for (let i = 0; i < symbolicNames.length; i++) {
-    const name = symbolicNames[i];
-    if (name && symbolReplacements.has(name)) {
-      literalNames[i] = `'${symbolReplacements.get(name)!}'`;
-    }
-  }
-};
-
-export const getLexer = (inputStream: CharStream, errorListener: ErrorListener<any>) => {
-  const lexer = new ESQLLexer(inputStream);
-  replaceSymbolsWithLiterals(lexer.symbolicNames, lexer.literalNames);
-
-  lexer.removeErrorListeners();
-  lexer.addErrorListener(errorListener);
-
-  return lexer;
-};
-
-export const getParser = (
-  inputStream: CharStream,
-  errorListener: ErrorListener<any>,
-  parseListener?: ESQLParserListener
-) => {
-  const lexer = getLexer(inputStream, errorListener);
-  const tokens = new CommonTokenStream(lexer);
-  const parser = new ESQLParser(tokens);
-  replaceSymbolsWithLiterals(parser.symbolicNames, parser.literalNames);
-
-  parser.removeErrorListeners();
-  parser.addErrorListener(errorListener);
-
-  if (parseListener) {
-    // @ts-expect-error the addParseListener API does exist and is documented here
-    // https://github.com/antlr/antlr4/blob/dev/doc/listeners.md
-    parser.addParseListener(parseListener);
-  }
-
-  return {
-    lexer,
-    tokens,
-    parser,
-  };
-};
-
-export const createParser = (src: string) => {
-  const errorListener = new ESQLErrorListener();
-  const parseListener = new ESQLAstBuilderListener(src);
-
-  return getParser(CharStreams.fromString(src), errorListener, parseListener);
-};
+import type { ESQLAst, ESQLAstQueryExpression, EditorError } from '../types';
 
 export interface ParseOptions {
   /**
@@ -117,67 +50,117 @@ export interface ParseResult {
   errors: EditorError[];
 }
 
-export const parse = (text: string | undefined, options: ParseOptions = {}): ParseResult => {
-  try {
-    if (text == null) {
-      const commands: ESQLAstQueryExpression['commands'] = [];
-      return { ast: commands, root: Builder.expression.query(commands), errors: [], tokens: [] };
+export class Parser {
+  public static readonly create = (src: string, options?: ParseOptions) => {
+    return new Parser(src, options);
+  };
+
+  public static readonly parse = (src: string, options?: ParseOptions): ParseResult => {
+    return Parser.create(src, options).parse();
+  };
+
+  public static readonly parseErrors = (src: string): EditorError[] => {
+    return Parser.create(src).parseErrors();
+  };
+
+  public readonly streams: CharStream;
+  public readonly lexer: ESQLLexer;
+  public readonly tokens: CommonTokenStream;
+  public readonly parser: ESQLParser;
+  public readonly errors = new ESQLErrorListener();
+  public readonly listener: ESQLAstBuilderListener;
+
+  constructor(public readonly src: string, public readonly options: ParseOptions = {}) {
+    this.listener = new ESQLAstBuilderListener(src);
+    const streams = (this.streams = CharStreams.fromString(src));
+    const lexer = (this.lexer = new ESQLLexer(streams));
+    const tokens = (this.tokens = new CommonTokenStream(lexer));
+    const parser = (this.parser = new ESQLParser(tokens));
+
+    lexer.removeErrorListeners();
+    lexer.addErrorListener(this.errors);
+
+    parser.removeErrorListeners();
+    parser.addErrorListener(this.errors);
+
+    if (this.listener) {
+      // The addParseListener API does exist and is documented here
+      // https://github.com/antlr/antlr4/blob/dev/doc/listeners.md
+      (parser as unknown as { addParseListener: any }).addParseListener(this.listener);
     }
-    const errorListener = new ESQLErrorListener();
-    const parseListener = new ESQLAstBuilderListener(text);
-    const { tokens, parser } = getParser(
-      CharStreams.fromString(text),
-      errorListener,
-      parseListener
-    );
-
-    parser[GRAMMAR_ROOT_RULE]();
-
-    const errors = errorListener.getErrors();
-    const { ast: commands } = parseListener.getAst();
-    const root = Builder.expression.query(commands, {
-      location: {
-        min: 0,
-        max: text.length - 1,
-      },
-    });
-
-    if (options.withFormatting) {
-      const decorations = collectDecorations(tokens);
-      attachDecorations(root, tokens.tokens, decorations.lines);
-    }
-
-    return { root, ast: commands, errors, tokens: tokens.tokens };
-  } catch (error) {
-    if (error !== 'Empty Stack')
-      // eslint-disable-next-line no-console
-      console.error(error);
-
-    const root = Builder.expression.query();
-
-    return {
-      root,
-      ast: root.commands,
-      errors: [
-        {
-          startLineNumber: 0,
-          endLineNumber: 0,
-          startColumn: 0,
-          endColumn: 0,
-          message: `Invalid query [${text}]`,
-          severity: 'error',
-        },
-      ],
-      tokens: [],
-    };
   }
-};
 
-export const parseErrors = (text: string) => {
-  const errorListener = new ESQLErrorListener();
-  const { parser } = getParser(CharStreams.fromString(text), errorListener);
+  public parse(): ParseResult {
+    const { src, options } = this;
 
-  parser[GRAMMAR_ROOT_RULE]();
+    try {
+      this.parser[GRAMMAR_ROOT_RULE]();
 
-  return errorListener.getErrors();
+      const errors = this.errors.getErrors();
+      const { ast: commands } = this.listener.getAst();
+      const root = Builder.expression.query(commands, {
+        location: {
+          min: 0,
+          max: src.length - 1,
+        },
+      });
+
+      if (options.withFormatting) {
+        const decorations = collectDecorations(this.tokens);
+        attachDecorations(root, this.tokens.tokens, decorations.lines);
+      }
+
+      return { root, ast: commands, errors, tokens: this.tokens.tokens };
+    } catch (error) {
+      if (error !== 'Empty Stack')
+        // eslint-disable-next-line no-console
+        console.error(error);
+
+      const root = Builder.expression.query();
+
+      return {
+        root,
+        ast: root.commands,
+        errors: [
+          {
+            startLineNumber: 0,
+            endLineNumber: 0,
+            startColumn: 0,
+            endColumn: 0,
+            message: `Invalid query [${src}]`,
+            severity: 'error',
+          },
+        ],
+        tokens: [],
+      };
+    }
+  }
+
+  public parseErrors(): EditorError[] {
+    this.parser[GRAMMAR_ROOT_RULE]();
+
+    return this.errors.getErrors();
+  }
+}
+
+/**
+ * @deprecated Use `Parser.create` instead.
+ */
+export const createParser = Parser.create;
+
+/**
+ * @deprecated Use `Parser.parseErrors` instead.
+ */
+export const parseErrors = Parser.parseErrors;
+
+/**
+ * @deprecated Use `Parser.parse` instead.
+ */
+export const parse = (src: string | undefined, options: ParseOptions = {}): ParseResult => {
+  if (src == null) {
+    const commands: ESQLAstQueryExpression['commands'] = [];
+    return { ast: commands, root: Builder.expression.query(commands), errors: [], tokens: [] };
+  }
+
+  return Parser.create(src, options).parse();
 };

@@ -11,8 +11,10 @@ import {
   getResourceName,
   resourceNames,
 } from '@kbn/observability-ai-assistant-plugin/server/service';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
 import { TINY_ELSER_INFERENCE_ID } from './model_and_inference';
+import { getConcreteWriteIndexFromAlias } from './knowledge_base';
 
 export async function runStartupMigrations(
   observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient
@@ -37,14 +39,25 @@ export async function createOrUpdateIndexAssets(
   expect(status).to.be(200);
 }
 
-export async function deleteIndexAssets(es: Client) {
+export async function deleteIndexAssets(
+  getService: DeploymentAgnosticFtrProviderContext['getService']
+) {
+  const es = getService('es');
+  const log = getService('log');
+
   // delete write indices
   const response = await es.indices.get({ index: getResourceName('*') });
   const indicesToDelete = Object.keys(response);
+
   if (indicesToDelete.length > 0) {
-    await es.indices.delete({ index: indicesToDelete, ignore_unavailable: true }).catch((err) => {
-      // ignore `IndexNotFoundException` error thrown by ES serverless: https://github.com/elastic/elasticsearch/blob/f1f745966f9c6b9d9fcad5242efb9a494d11e526/server/src/main/java/org/elasticsearch/cluster/metadata/Metadata.java#L2120-L2124
-    });
+    log.debug(`Deleting indices: ${indicesToDelete.join(', ')}`);
+    try {
+      await Promise.all(
+        indicesToDelete.map(async (index) => es.indices.delete({ index, ignore_unavailable: true }))
+      );
+    } catch (err) {
+      log.error(`Failed to delete indices: ${err}`);
+    }
   }
 
   await es.indices.deleteIndexTemplate({ name: getResourceName('*') }, { ignore: [404] });
@@ -52,11 +65,19 @@ export async function deleteIndexAssets(es: Client) {
 }
 
 export async function restoreIndexAssets(
-  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient,
-  es: Client
+  getService: DeploymentAgnosticFtrProviderContext['getService']
 ) {
-  await deleteIndexAssets(es);
-  await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+  const retry = getService('retry');
+  const es = getService('es');
+  const log = getService('log');
+
+  await retry.try(async () => {
+    log.debug('Restoring index assets');
+    await deleteIndexAssets(getService);
+    await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
+    expect(await getConcreteWriteIndexFromAlias(es)).to.be(resourceNames.concreteWriteIndexName.kb);
+  });
 }
 
 export async function getComponentTemplate(es: Client) {

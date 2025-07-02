@@ -61,6 +61,12 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
       core,
     } = resources;
 
+    /**
+     * Message is base64 encoded as it might include arbitrary error messages
+     * from user's terminal containing special characters that would otherwise
+     * break the request.
+     */
+    const decodedMessage = Buffer.from(message ?? '', 'base64').toString('utf-8');
     const coreStart = await core.start();
     const savedObjectsClient = coreStart.savedObjects.createInternalRepository();
 
@@ -88,7 +94,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
           ...observabilityOnboardingState.progress,
           [name]: {
             status,
-            message,
+            message: decodedMessage,
             payload,
           },
         },
@@ -100,7 +106,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
       flow_id: id,
       step: name,
       step_status: status,
-      step_message: message,
+      step_message: decodedMessage,
       payload,
     });
 
@@ -178,22 +184,8 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
       reason: 'Authorization is checked by the Saved Object client',
     },
   },
-  params: t.type({
-    body: t.type({
-      name: t.string,
-    }),
-  }),
   async handler(resources) {
-    const {
-      context,
-      params: {
-        body: { name },
-      },
-      core,
-      request,
-      plugins,
-      kibanaVersion,
-    } = resources;
+    const { context, core, request, plugins, kibanaVersion } = resources;
     const coreStart = await core.start();
     const {
       elasticsearch: { client },
@@ -217,10 +209,10 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
             progress: {},
           },
         }),
-        createShipperApiKey(client.asCurrentUser, `onboarding_ingest_${name}`),
+        createShipperApiKey(client.asCurrentUser, 'standalone-elastic-agent'),
         (
           await context.resolve(['core'])
-        ).core.security.authc.apiKeys.create(createInstallApiKey(`onboarding_install_${name}`)),
+        ).core.security.authc.apiKeys.create(createInstallApiKey('onboarding-install')),
         getAgentVersionInfo(fleetPluginStart, kibanaVersion),
       ]);
 

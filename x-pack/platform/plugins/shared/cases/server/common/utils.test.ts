@@ -150,6 +150,7 @@ describe('common utils', () => {
           "description": "A description",
           "duration": null,
           "external_service": null,
+          "incremental_id": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -206,6 +207,7 @@ describe('common utils', () => {
           "description": "A description",
           "duration": null,
           "external_service": null,
+          "incremental_id": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -266,6 +268,7 @@ describe('common utils', () => {
           "description": "A description",
           "duration": null,
           "external_service": null,
+          "incremental_id": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -332,6 +335,7 @@ describe('common utils', () => {
           "description": "A description",
           "duration": null,
           "external_service": null,
+          "incremental_id": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -393,6 +397,7 @@ describe('common utils', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-id-1",
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
@@ -437,6 +442,7 @@ describe('common utils', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-id-2",
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
@@ -485,6 +491,7 @@ describe('common utils', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-id-3",
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
@@ -537,6 +544,7 @@ describe('common utils', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-id-4",
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
@@ -618,6 +626,7 @@ describe('common utils', () => {
               "duration": null,
               "external_service": null,
               "id": "mock-id-1",
+              "incremental_id": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
@@ -687,6 +696,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "id": "mock-id-3",
+          "incremental_id": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -747,6 +757,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "id": "mock-id-3",
+          "incremental_id": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -830,6 +841,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "id": "mock-id-3",
+          "incremental_id": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -888,6 +900,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "id": "mock-id-1",
+          "incremental_id": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -951,6 +964,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "id": "mock-id-1",
+          "incremental_id": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {

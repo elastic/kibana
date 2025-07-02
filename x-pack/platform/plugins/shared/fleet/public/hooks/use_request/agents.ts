@@ -19,6 +19,10 @@ import type {
   PostRequestDiagnosticsResponse,
   DeleteAgentUploadResponse,
   UpdateAgentRequest,
+  MigrateSingleAgentRequest,
+  MigrateSingleAgentResponse,
+  BulkMigrateAgentsRequest,
+  BulkMigrateAgentsResponse,
 } from '../../../common/types';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -377,5 +381,31 @@ export function sendGetAgentStatusRuntimeField() {
 export function useGetAgentStatusRuntimeFieldQuery(options: Partial<{ enabled: boolean }> = {}) {
   return useQuery(['status_runtime_field'], () => sendGetAgentStatusRuntimeField(), {
     enabled: options.enabled,
+  });
+}
+export function useMigrateSingleAgent(options: MigrateSingleAgentRequest['body']) {
+  return sendRequest<MigrateSingleAgentResponse>({
+    path: agentRouteService.postMigrateSingleAgent(options.id),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: {
+      enrollment_token: options.enrollment_token,
+      uri: options.uri,
+      settings: options.settings ?? {},
+    },
+  });
+}
+
+export function useBulkMigrateAgents(options: BulkMigrateAgentsRequest['body']) {
+  return sendRequest<BulkMigrateAgentsResponse>({
+    path: agentRouteService.postBulkMigrateAgents(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: {
+      agents: options.agents,
+      uri: options.uri,
+      enrollment_token: options.enrollment_token,
+      settings: options.settings ?? {},
+    },
   });
 }

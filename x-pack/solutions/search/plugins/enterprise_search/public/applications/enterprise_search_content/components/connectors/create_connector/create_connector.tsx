@@ -185,6 +185,7 @@ export const CreateConnector: React.FC = () => {
           defaultMessage: 'Create a connector',
         }),
       }}
+      data-test-subj="searchCreateConnectorPage"
     >
       <EuiFlexGroup gutterSize="m">
         {/* Col 1 */}

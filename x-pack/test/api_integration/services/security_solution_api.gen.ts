@@ -27,11 +27,13 @@ import { ConfigureRiskEngineSavedObjectRequestBodyInput } from '@kbn/security-so
 import { CopyTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/copy_timeline/copy_timeline_route.gen';
 import { CreateAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
 import { CreateAssetCriticalityRecordRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/create_asset_criticality.gen';
+import { CreatePrivilegesImportIndexRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/create_index.gen';
 import { CreatePrivMonUserRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/users/create.gen';
 import { CreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
+import { CreateRuleMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
-  CreateRuleMigrationRequestParamsInput,
-  CreateRuleMigrationRequestBodyInput,
+  CreateRuleMigrationRulesRequestParamsInput,
+  CreateRuleMigrationRulesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { CreateTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/create_timelines/create_timelines_route.gen';
 import {
@@ -46,6 +48,7 @@ import {
 import { DeleteNoteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/delete_note/delete_note_route.gen';
 import { DeletePrivMonUserRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/users/delete.gen';
 import { DeleteRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/delete_rule/delete_rule_route.gen';
+import { DeleteRuleMigrationRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { DeleteTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/delete_timelines/delete_timelines_route.gen';
 import { DeprecatedTriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import { EndpointExecuteActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/execute/execute.gen';
@@ -83,7 +86,6 @@ import { GetEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin
 import { GetEntityStoreStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/status.gen';
 import { GetNotesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_notes/get_notes_route.gen';
 import { GetPolicyResponseRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/policy/policy_response.gen';
-import { GetPrivMonUserRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/users/get.gen';
 import { GetProtectionUpdatesNoteRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
 import {
   GetRuleExecutionEventsRequestQueryInput,
@@ -93,16 +95,17 @@ import {
   GetRuleExecutionResultsRequestQueryInput,
   GetRuleExecutionResultsRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
-import {
-  GetRuleMigrationRequestQueryInput,
-  GetRuleMigrationRequestParamsInput,
-} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import { GetRuleMigrationRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { GetRuleMigrationPrebuiltRulesRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
   GetRuleMigrationResourcesRequestQueryInput,
   GetRuleMigrationResourcesRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { GetRuleMigrationResourcesMissingRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
+  GetRuleMigrationRulesRequestQueryInput,
+  GetRuleMigrationRulesRequestParamsInput,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { GetRuleMigrationStatsRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { GetRuleMigrationTranslationStatsRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { GetTimelineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_timeline/get_timeline_route.gen';
@@ -164,6 +167,10 @@ import {
   UpdateRuleMigrationRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
+  UpdateRuleMigrationRulesRequestParamsInput,
+  UpdateRuleMigrationRulesRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
   UpdateWorkflowInsightRequestParamsInput,
   UpdateWorkflowInsightRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/workflow_insights/workflow_insights.gen';
@@ -220,20 +227,6 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    bulkUploadUsersCsv(kibanaSpace: string = 'default') {
-      return supertest
-        .post(routeWithNamespace('/api/entity_analytics/monitoring/users/_csv', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    bulkUploadUsersJson(kibanaSpace: string = 'default') {
-      return supertest
-        .post(routeWithNamespace('/api/entity_analytics/monitoring/users/_json', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
@@ -340,6 +333,17 @@ If a record already exists for the specified entity, that record is overwritten 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    createPrivilegesImportIndex(
+      props: CreatePrivilegesImportIndexProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .put(routeWithNamespace('/api/entity_analytics/monitoring/privileges/indices', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
     createPrivMonUser(props: CreatePrivMonUserProps, kibanaSpace: string = 'default') {
       return supertest
         .post(routeWithNamespace('/api/entity_analytics/monitoring/users', kibanaSpace))
@@ -414,13 +418,27 @@ For detailed information on Kibana actions and alerting, and additional API call
         .send(props.body as object);
     },
     /**
-     * Creates a new SIEM rules migration using the original vendor rules provided
+     * Creates a new rule migration and returns the corresponding migration_id
      */
     createRuleMigration(props: CreateRuleMigrationProps, kibanaSpace: string = 'default') {
       return supertest
+        .put(routeWithNamespace('/internal/siem_migrations/rules', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
+     * Adds original vendor rules to an already existing migration. Can be called multiple times to add more rules
+     */
+    createRuleMigrationRules(
+      props: CreateRuleMigrationRulesProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
         .post(
           routeWithNamespace(
-            replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
+            replaceParams('/internal/siem_migrations/rules/{migration_id}/rules', props.params),
             kibanaSpace
           )
         )
@@ -534,6 +552,21 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
+    },
+    /**
+     * Deletes a rule migration document stored in the system given the rule migration id
+     */
+    deleteRuleMigration(props: DeleteRuleMigrationProps, kibanaSpace: string = 'default') {
+      return supertest
+        .delete(
+          routeWithNamespace(
+            replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
      * Delete one or more Timelines or Timeline templates.
@@ -945,11 +978,11 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    getPrivMonUser(props: GetPrivMonUserProps, kibanaSpace: string = 'default') {
+    getPrivilegedAccessDetectionPackageStatus(kibanaSpace: string = 'default') {
       return supertest
         .get(
           routeWithNamespace(
-            replaceParams('/api/entity_analytics/monitoring/users/{id}', props.params),
+            '/api/entity_analytics/privileged_user_monitoring/pad/status',
             kibanaSpace
           )
         )
@@ -1018,7 +1051,7 @@ finalize it.
         .query(props.query);
     },
     /**
-     * Retrieves the rule documents stored in the system given the rule migration id
+     * Retrieves the rule migration document stored in the system given the rule migration id
      */
     getRuleMigration(props: GetRuleMigrationProps, kibanaSpace: string = 'default') {
       return supertest
@@ -1030,8 +1063,7 @@ finalize it.
         )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
      * Retrieves all related integrations
@@ -1039,6 +1071,16 @@ finalize it.
     getRuleMigrationIntegrations(kibanaSpace: string = 'default') {
       return supertest
         .get(routeWithNamespace('/internal/siem_migrations/rules/integrations', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+     * Retrieves the stats of all the integrations for all the rule migrations, including the number of rules associated with the integration
+     */
+    getRuleMigrationIntegrationsStats(kibanaSpace: string = 'default') {
+      return supertest
+        .get(routeWithNamespace('/internal/siem_migrations/rules/integrations/stats', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -1113,6 +1155,22 @@ finalize it.
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+     * Retrieves the the list of rules included in a migration given the migration id
+     */
+    getRuleMigrationRules(props: GetRuleMigrationRulesProps, kibanaSpace: string = 'default') {
+      return supertest
+        .get(
+          routeWithNamespace(
+            replaceParams('/internal/siem_migrations/rules/{migration_id}/rules', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
     },
     /**
      * Retrieves the stats of a SIEM rules migration using the migration id provided
@@ -1307,6 +1365,18 @@ providing you with the most current and effective threat detection capabilities.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    installPrivilegedAccessDetectionPackage(kibanaSpace: string = 'default') {
+      return supertest
+        .post(
+          routeWithNamespace(
+            '/api/entity_analytics/privileged_user_monitoring/pad/install',
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
     internalUploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
       return supertest
         .post(routeWithNamespace('/internal/asset_criticality/upload_csv', kibanaSpace))
@@ -1433,6 +1503,13 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    privmonBulkUploadUsersCsv(kibanaSpace: string = 'default') {
+      return supertest
+        .post(routeWithNamespace('/api/entity_analytics/monitoring/users/_csv', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
     privMonHealth(kibanaSpace: string = 'default') {
       return supertest
         .get(routeWithNamespace('/api/entity_analytics/monitoring/privileges/health', kibanaSpace))
@@ -1548,6 +1625,13 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .send(props.body as object)
         .query(props.query);
     },
+    runEntityAnalyticsMigrations(kibanaSpace: string = 'default') {
+      return supertest
+        .post(routeWithNamespace('/internal/entity_analytics/migrations/run', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
     /**
      * Run a shell command on an endpoint.
      */
@@ -1644,7 +1728,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
      */
     startRuleMigration(props: StartRuleMigrationProps, kibanaSpace: string = 'default') {
       return supertest
-        .put(
+        .post(
           routeWithNamespace(
             replaceParams('/internal/siem_migrations/rules/{migration_id}/start', props.params),
             kibanaSpace
@@ -1672,7 +1756,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
      */
     stopRuleMigration(props: StopRuleMigrationProps, kibanaSpace: string = 'default') {
       return supertest
-        .put(
+        .post(
           routeWithNamespace(
             replaceParams('/internal/siem_migrations/rules/{migration_id}/stop', props.params),
             kibanaSpace
@@ -1739,13 +1823,32 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .send(props.body as object);
     },
     /**
-     * Updates rules migrations attributes
+     * Updates rules migrations data
      */
     updateRuleMigration(props: UpdateRuleMigrationProps, kibanaSpace: string = 'default') {
       return supertest
-        .put(
+        .patch(
           routeWithNamespace(
             replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
+     * Updates rules migrations attributes
+     */
+    updateRuleMigrationRules(
+      props: UpdateRuleMigrationRulesProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .patch(
+          routeWithNamespace(
+            replaceParams('/internal/siem_migrations/rules/{migration_id}/rules', props.params),
             kibanaSpace
           )
         )
@@ -1817,6 +1920,9 @@ export interface CreateAlertsMigrationProps {
 export interface CreateAssetCriticalityRecordProps {
   body: CreateAssetCriticalityRecordRequestBodyInput;
 }
+export interface CreatePrivilegesImportIndexProps {
+  body: CreatePrivilegesImportIndexRequestBodyInput;
+}
 export interface CreatePrivMonUserProps {
   body: CreatePrivMonUserRequestBodyInput;
 }
@@ -1824,8 +1930,11 @@ export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
 }
 export interface CreateRuleMigrationProps {
-  params: CreateRuleMigrationRequestParamsInput;
   body: CreateRuleMigrationRequestBodyInput;
+}
+export interface CreateRuleMigrationRulesProps {
+  params: CreateRuleMigrationRulesRequestParamsInput;
+  body: CreateRuleMigrationRulesRequestBodyInput;
 }
 export interface CreateTimelinesProps {
   body: CreateTimelinesRequestBodyInput;
@@ -1849,6 +1958,9 @@ export interface DeletePrivMonUserProps {
 }
 export interface DeleteRuleProps {
   query: DeleteRuleRequestQueryInput;
+}
+export interface DeleteRuleMigrationProps {
+  params: DeleteRuleMigrationRequestParamsInput;
 }
 export interface DeleteTimelinesProps {
   body: DeleteTimelinesRequestBodyInput;
@@ -1937,9 +2049,6 @@ export interface GetNotesProps {
 export interface GetPolicyResponseProps {
   query: GetPolicyResponseRequestQueryInput;
 }
-export interface GetPrivMonUserProps {
-  params: GetPrivMonUserRequestParamsInput;
-}
 export interface GetProtectionUpdatesNoteProps {
   params: GetProtectionUpdatesNoteRequestParamsInput;
 }
@@ -1952,7 +2061,6 @@ export interface GetRuleExecutionResultsProps {
   params: GetRuleExecutionResultsRequestParamsInput;
 }
 export interface GetRuleMigrationProps {
-  query: GetRuleMigrationRequestQueryInput;
   params: GetRuleMigrationRequestParamsInput;
 }
 export interface GetRuleMigrationPrebuiltRulesProps {
@@ -1964,6 +2072,10 @@ export interface GetRuleMigrationResourcesProps {
 }
 export interface GetRuleMigrationResourcesMissingProps {
   params: GetRuleMigrationResourcesMissingRequestParamsInput;
+}
+export interface GetRuleMigrationRulesProps {
+  query: GetRuleMigrationRulesRequestQueryInput;
+  params: GetRuleMigrationRulesRequestParamsInput;
 }
 export interface GetRuleMigrationStatsProps {
   params: GetRuleMigrationStatsRequestParamsInput;
@@ -2088,6 +2200,10 @@ export interface UpdateRuleProps {
 export interface UpdateRuleMigrationProps {
   params: UpdateRuleMigrationRequestParamsInput;
   body: UpdateRuleMigrationRequestBodyInput;
+}
+export interface UpdateRuleMigrationRulesProps {
+  params: UpdateRuleMigrationRulesRequestParamsInput;
+  body: UpdateRuleMigrationRulesRequestBodyInput;
 }
 export interface UpdateWorkflowInsightProps {
   params: UpdateWorkflowInsightRequestParamsInput;

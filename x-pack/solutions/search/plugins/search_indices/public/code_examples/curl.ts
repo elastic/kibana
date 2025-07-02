@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { API_KEY_PLACEHOLDER, INDEX_PLACEHOLDER } from '../constants';
-import { CodeLanguage, IngestDataCodeDefinition } from '../types';
+import { CodeLanguage, IngestDataCodeDefinition, SearchCodeDefinition } from '../types';
 import { CreateIndexLanguageExamples } from './types';
 
 export const CURL_INFO: CodeLanguage = {
@@ -95,4 +95,16 @@ ${JSON.stringify(document)}`;
 --header 'Authorization: ApiKey ${apiKey ?? API_KEY_PLACEHOLDER}' \
 --header 'Content-Type: application/json' \
 --data-raw '${JSON.stringify({ properties: mappingProperties })}'`,
+};
+
+export const CurlSearchCodeExample: SearchCodeDefinition = {
+  searchCommand: ({
+    elasticsearchURL,
+    apiKey,
+    indexName,
+    queryObject,
+  }) => `curl -X POST "${elasticsearchURL}/${indexName}/_search" \
+--header 'Authorization: ApiKey ${apiKey ?? API_KEY_PLACEHOLDER}' \
+--header 'Content-Type: application/json' \
+--data-raw '${JSON.stringify(queryObject)}'`,
 };

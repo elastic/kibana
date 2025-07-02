@@ -7,6 +7,8 @@
 
 import { deepFreeze } from '@kbn/std';
 
+export const CROWDSTRIKE_HOST_INDEX_PATTERN = 'logs-crowdstrike.host-*';
+
 /**
  * List of all crowdstrike index patterns by integration
  */
@@ -15,7 +17,7 @@ export const CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION = deepFreeze({
     'logs-crowdstrike.alert-*',
     'logs-crowdstrike.falcon-*',
     'logs-crowdstrike.fdr-*',
-    'logs-crowdstrike.host-*',
+    CROWDSTRIKE_HOST_INDEX_PATTERN,
     'logs-crowdstrike.vulnerability-*',
   ],
 });

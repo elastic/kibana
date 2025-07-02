@@ -6,6 +6,7 @@
  */
 
 import { CasesDeepLinkId, CasesPublicStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
@@ -72,6 +73,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
+import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -89,6 +91,10 @@ import {
   createObservabilityRuleTypeRegistry,
 } from './rules/create_observability_rule_type_registry';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
+import {
+  CaseDetailsLocatorDefinition,
+  CasesOverviewLocatorDefinition,
+} from '../common/locators/cases';
 
 export interface ConfigSchema {
   unsafe: {
@@ -130,20 +136,22 @@ export interface ObservabilityPublicPluginsSetup {
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
-  cases: CasesPublicStart;
+  cases?: CasesPublicStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
+  dashboard: DashboardStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
-  exploratoryView: ExploratoryViewPublicStart;
+  exploratoryView?: ExploratoryViewPublicStart;
   fieldFormats: FieldFormatsStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   licenseManagement?: LicenseManagementUIPluginSetup;
+  logsDataAccess: LogsDataAccessPluginStart;
   navigation: NavigationPublicPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
@@ -238,6 +246,8 @@ export class Plugin
     );
 
     const rulesLocator = pluginsSetup.share.url.locators.create(new RulesLocatorDefinition());
+    pluginsSetup.share.url.locators.create(CaseDetailsLocatorDefinition());
+    pluginsSetup.share.url.locators.create(CasesOverviewLocatorDefinition());
 
     const ruleDetailsLocator = pluginsSetup.share.url.locators.create(
       new RuleDetailsLocatorDefinition()
@@ -401,7 +411,7 @@ export class Plugin
                 }));
 
               const casesLink: NavigationEntry[] = otherLinks
-                .filter((link) => link.id === 'cases')
+                .filter((link) => link.id === 'cases' && pluginsStart.cases)
                 .map((link) => ({
                   app: observabilityAppId,
                   label: link.title,

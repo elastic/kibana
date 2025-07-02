@@ -442,7 +442,9 @@ describe('SentinelOneActionsClient class', () => {
         applyEsClientSearchMock({
           esClientMock: classConstructorOptions.esClient,
           index: ENDPOINT_ACTIONS_INDEX,
-          response: actionRequestsSearchResponse,
+          response: jest
+            .fn(() => s1DataGenerator.toEsSearchResponse([]))
+            .mockReturnValueOnce(actionRequestsSearchResponse),
           pitUsage: true,
         });
 
@@ -651,7 +653,9 @@ describe('SentinelOneActionsClient class', () => {
         applyEsClientSearchMock({
           esClientMock: classConstructorOptions.esClient,
           index: ENDPOINT_ACTIONS_INDEX,
-          response: actionRequestsSearchResponse,
+          response: jest
+            .fn(() => s1DataGenerator.toEsSearchResponse([]))
+            .mockReturnValueOnce(actionRequestsSearchResponse),
           pitUsage: true,
         });
 
@@ -796,7 +800,9 @@ describe('SentinelOneActionsClient class', () => {
         applyEsClientSearchMock({
           esClientMock: classConstructorOptions.esClient,
           index: ENDPOINT_ACTIONS_INDEX,
-          response: actionRequestsSearchResponse,
+          response: jest
+            .fn(() => s1DataGenerator.toEsSearchResponse([]))
+            .mockReturnValueOnce(actionRequestsSearchResponse),
           pitUsage: true,
         });
 
@@ -910,11 +916,6 @@ describe('SentinelOneActionsClient class', () => {
     });
 
     describe('Telemetry', () => {
-      beforeEach(() => {
-        // @ts-expect-error
-        classConstructorOptions.endpointService.experimentalFeatures.responseActionsTelemetryEnabled =
-          true;
-      });
       describe('for Isolate and Release', () => {
         let s1ActivityHits: Array<SearchHit<SentinelOneActivityEsDoc>>;
 
@@ -952,7 +953,9 @@ describe('SentinelOneActionsClient class', () => {
           applyEsClientSearchMock({
             esClientMock: classConstructorOptions.esClient,
             index: ENDPOINT_ACTIONS_INDEX,
-            response: actionRequestsSearchResponse,
+            response: jest
+              .fn(() => s1DataGenerator.toEsSearchResponse([]))
+              .mockReturnValueOnce(actionRequestsSearchResponse),
             pitUsage: true,
           });
 
@@ -1052,7 +1055,9 @@ describe('SentinelOneActionsClient class', () => {
           applyEsClientSearchMock({
             esClientMock: classConstructorOptions.esClient,
             index: ENDPOINT_ACTIONS_INDEX,
-            response: actionRequestsSearchResponse,
+            response: jest
+              .fn(() => s1DataGenerator.toEsSearchResponse([]))
+              .mockReturnValueOnce(actionRequestsSearchResponse),
             pitUsage: true,
           });
 
@@ -1136,7 +1141,9 @@ describe('SentinelOneActionsClient class', () => {
           applyEsClientSearchMock({
             esClientMock: classConstructorOptions.esClient,
             index: ENDPOINT_ACTIONS_INDEX,
-            response: actionRequestsSearchResponse,
+            response: jest
+              .fn(() => s1DataGenerator.toEsSearchResponse([]))
+              .mockReturnValueOnce(actionRequestsSearchResponse),
             pitUsage: true,
           });
 
@@ -1573,7 +1580,7 @@ describe('SentinelOneActionsClient class', () => {
         response: s1DataGenerator.toEsSearchResponse([]),
       });
       await expect(s1ActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
-        'Action ID [abc] for agent ID [abc] is still pending'
+        'Action ID [abc] for agent ID [123] is still pending'
       );
     });
 

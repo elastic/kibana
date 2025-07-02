@@ -31,14 +31,9 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
       defaultIsCollapsed: false,
       children: [
         {
-          breadcrumbStatus: 'hidden',
-          children: [
-            {
-              link: 'discover',
-            },
-            defaultNavigationTree.dashboards(),
-          ],
+          link: 'discover',
         },
+        defaultNavigationTree.dashboards(),
         {
           breadcrumbStatus: 'hidden',
           children: [

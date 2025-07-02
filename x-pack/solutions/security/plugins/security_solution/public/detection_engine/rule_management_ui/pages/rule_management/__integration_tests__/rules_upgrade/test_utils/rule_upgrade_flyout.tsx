@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { render, act, fireEvent, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import type {
   DataViewField,
   DataViewFieldMap,
   DataViewSpec,
   FieldSpec,
 } from '@kbn/data-views-plugin/common';
+import userEvent from '@testing-library/user-event';
 import { invariant } from '../../../../../../../../common/utils/invariant';
 import { TIMELINES_URL } from '../../../../../../../../common/constants';
 import { RulesPage } from '../../..';
@@ -110,6 +111,7 @@ export function mockRuleUpgradeReviewData({
         target_rule: {
           rule_id: 'test-rule',
           type: ruleType,
+          threshold: { value: 30, field: ['fieldC'] }, // We use the `convertRuleToDiffable` util in the FieldUpgradeContext which needs relevant fields to convert
         },
         diff: {
           num_fields_with_updates: 2, // tested field + version field
@@ -207,9 +209,7 @@ export function mockKibanaFetchResponse(path: string, mockResponse: unknown): vo
 }
 
 async function openRuleUpgradeFlyout(): Promise<void> {
-  await act(async () => {
-    fireEvent.click(await screen.findByTestId('ruleName'));
-  });
+  await userEvent.click(await screen.findByTestId('ruleName'));
 }
 
 const createMockDataView = ({ id, title, fields }: DataViewSpec) =>

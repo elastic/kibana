@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
@@ -57,25 +57,23 @@ describe('Policy details artifacts list', () => {
       canCreateArtifactsByPolicy: true,
     });
     render = async (canWriteArtifact = true) => {
-      await act(async () => {
-        renderResult = mockedContext.render(
-          <PolicyArtifactsList
-            policy={policy}
-            apiClient={EventFiltersApiClient.getInstance(mockedContext.coreStart.http)}
-            searchableFields={[...SEARCHABLE_FIELDS]}
-            labels={POLICY_ARTIFACT_LIST_LABELS}
-            onDeleteActionCallback={handleOnDeleteActionCallbackMock}
-            canWriteArtifact={canWriteArtifact}
-            getPolicyArtifactsPath={getPolicyEventFiltersPath}
-            getArtifactPath={getEventFiltersListPath}
-            CardDecorator={undefined}
-          />
-        );
-        await waitFor(() => expect(mockedApi.responseProvider.eventFiltersList).toHaveBeenCalled());
-        await waitFor(() =>
-          expect(renderResult.queryByTestId('artifacts-collapsed-list-loader')).toBeFalsy()
-        );
-      });
+      renderResult = mockedContext.render(
+        <PolicyArtifactsList
+          policy={policy}
+          apiClient={EventFiltersApiClient.getInstance(mockedContext.coreStart.http)}
+          searchableFields={[...SEARCHABLE_FIELDS]}
+          labels={POLICY_ARTIFACT_LIST_LABELS}
+          onDeleteActionCallback={handleOnDeleteActionCallbackMock}
+          canWriteArtifact={canWriteArtifact}
+          getPolicyArtifactsPath={getPolicyEventFiltersPath}
+          getArtifactPath={getEventFiltersListPath}
+          CardDecorator={undefined}
+        />
+      );
+      await waitFor(() => expect(mockedApi.responseProvider.eventFiltersList).toHaveBeenCalled());
+      await waitFor(() =>
+        expect(renderResult.queryByTestId('artifacts-collapsed-list-loader')).toBeFalsy()
+      );
       return renderResult;
     };
 

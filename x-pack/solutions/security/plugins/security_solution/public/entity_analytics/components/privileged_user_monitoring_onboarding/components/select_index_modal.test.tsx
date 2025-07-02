@@ -28,29 +28,22 @@ jest.mock('../hooks/use_fetch_privileged_user_indices', () => ({
 
 describe('IndexSelectorModal', () => {
   const onCloseMock = jest.fn();
+  const onImportMock = jest.fn();
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
   it('renders the modal when isOpen is true', () => {
-    render(<IndexSelectorModal isOpen={true} onClose={onCloseMock} />, {
+    render(<IndexSelectorModal onClose={onCloseMock} onImport={onImportMock} />, {
       wrapper: TestProviders,
     });
 
     expect(screen.getByText('Select index')).toBeInTheDocument();
   });
 
-  it('does not render the modal when isOpen is false', () => {
-    render(<IndexSelectorModal isOpen={false} onClose={onCloseMock} />, {
-      wrapper: TestProviders,
-    });
-
-    expect(screen.queryByText('Select index')).not.toBeInTheDocument();
-  });
-
   it('calls onClose when the cancel button is clicked', () => {
-    render(<IndexSelectorModal isOpen={true} onClose={onCloseMock} />, {
+    render(<IndexSelectorModal onClose={onCloseMock} onImport={onImportMock} />, {
       wrapper: TestProviders,
     });
 
@@ -60,7 +53,7 @@ describe('IndexSelectorModal', () => {
   });
 
   it('displays the indices in the combo box', () => {
-    render(<IndexSelectorModal isOpen={true} onClose={onCloseMock} />, {
+    render(<IndexSelectorModal onClose={onCloseMock} onImport={onImportMock} />, {
       wrapper: TestProviders,
     });
 
@@ -77,7 +70,7 @@ describe('IndexSelectorModal', () => {
       error: new Error('Test error'),
     });
 
-    render(<IndexSelectorModal isOpen={true} onClose={onCloseMock} />, {
+    render(<IndexSelectorModal onClose={onCloseMock} onImport={onImportMock} />, {
       wrapper: TestProviders,
     });
 
@@ -91,7 +84,7 @@ describe('IndexSelectorModal', () => {
       error: null,
     });
 
-    render(<IndexSelectorModal isOpen={true} onClose={onCloseMock} />, {
+    render(<IndexSelectorModal onClose={onCloseMock} onImport={onImportMock} />, {
       wrapper: TestProviders,
     });
 

@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { render, waitFor } from '@testing-library/react';
-import { shallow } from 'enzyme';
-import type { ReactNode } from 'react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { render, waitFor, screen } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { TraceLink } from '.';
 import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
@@ -18,6 +16,7 @@ import {
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import * as hooks from '../../../hooks/use_fetcher';
 import * as useApmParamsHooks from '../../../hooks/use_apm_params';
+import { MemoryRouter } from 'react-router-dom';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
@@ -28,6 +27,15 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
       },
     },
   }),
+}));
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  Redirect: jest.fn(({ to }) => (
+    <a href={to} data-test-subj="redirect-link">
+      Test link
+    </a>
+  )),
 }));
 
 function Wrapper({ children }: { children?: ReactNode }) {
@@ -50,105 +58,97 @@ function Wrapper({ children }: { children?: ReactNode }) {
   );
 }
 
-const renderOptions = { wrapper: Wrapper };
-
 describe('TraceLink', () => {
-  afterAll(() => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders a transition page', async () => {
+  it('renders loading state while fetching trace', async () => {
     jest.spyOn(useApmParamsHooks as any, 'useApmParams').mockReturnValue({
-      path: {
-        traceId: 'x',
-      },
+      path: { traceId: 'x' },
       query: {
         rangeFrom: 'now-24h',
         rangeTo: 'now',
       },
     });
 
-    const component = render(<TraceLink />, renderOptions);
+    render(<TraceLink />, { wrapper: Wrapper });
+    waitFor(() => {});
 
-    const result = component.getByText('Fetching trace...');
-    await waitFor(() => {});
-    expect(result).toBeDefined();
+    expect(screen.getByText('Fetching trace...')).toBeInTheDocument();
   });
 
-  describe('when no transaction is found', () => {
-    it('renders a trace page', () => {
-      jest.spyOn(hooks, 'useFetcher').mockReturnValue({
-        data: { transaction: undefined },
-        status: hooks.FETCH_STATUS.SUCCESS,
-        refetch: jest.fn(),
-      });
-
-      jest.spyOn(useApmParamsHooks as any, 'useApmParams').mockReturnValue({
-        path: {
-          traceId: '123',
-        },
-        query: {
-          rangeFrom: 'now-24h',
-          rangeTo: 'now',
-        },
-      });
-
-      const component = shallow(<TraceLink />);
-
-      expect(component.prop('to')).toEqual(
-        '/traces?kuery=trace.id%20%3A%20%22123%22&rangeFrom=now-24h&rangeTo=now'
-      );
+  it('redirects to traces page when no transaction is found', () => {
+    jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+      data: { transaction: undefined },
+      status: hooks.FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
     });
+
+    jest.spyOn(useApmParamsHooks as any, 'useApmParams').mockReturnValue({
+      path: { traceId: '123' },
+      query: {
+        rangeFrom: 'now-24h',
+        rangeTo: 'now',
+      },
+    });
+
+    render(<TraceLink />, { wrapper: Wrapper });
+
+    const link = screen.getByTestId('redirect-link');
+    expect(link).toHaveAttribute(
+      'href',
+      '/traces?kuery=trace.id%20%3A%20%22123%22&rangeFrom=now-24h&rangeTo=now'
+    );
   });
 
-  describe('transaction page', () => {
-    it('renders with date range and waterfall params', () => {
-      const transaction = {
-        service: { name: 'foo' },
-        transaction: {
-          id: '456',
-          name: 'bar',
-          type: 'GET',
-        },
-        trace: { id: 123 },
-      };
-      jest.spyOn(hooks, 'useFetcher').mockReturnValue({
-        data: { transaction },
-        status: hooks.FETCH_STATUS.SUCCESS,
-        refetch: jest.fn(),
-      });
+  it('redirects to transaction page with date range and waterfall params', () => {
+    const transaction = {
+      service: { name: 'foo' },
+      transaction: {
+        id: '456',
+        name: 'bar',
+        type: 'GET',
+      },
+      trace: { id: 123 },
+    };
 
-      jest.spyOn(useApmParamsHooks as any, 'useApmParams').mockReturnValue({
-        path: {
-          traceId: '123',
-        },
-        query: {
-          rangeFrom: 'now-24h',
-          rangeTo: 'now',
-          waterfallItemId: '789',
-        },
-      });
-
-      const component = shallow(<TraceLink />);
-
-      expect(component.prop('to')).toEqual(
-        '/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET&rangeFrom=now-24h&rangeTo=now&waterfallItemId=789'
-      );
+    jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+      data: { transaction },
+      status: hooks.FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
     });
 
-    it('sets time range from data plugin when client does not pass it', () => {
-      jest.spyOn(useApmParamsHooks as any, 'useApmParams').mockReturnValue({
-        path: {
-          traceId: '123',
-        },
-        query: {},
-      });
-
-      const component = shallow(<TraceLink />);
-
-      expect(component.prop('to')).toEqual(
-        '/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET&rangeFrom=now-1h&rangeTo=now&waterfallItemId='
-      );
+    jest.spyOn(useApmParamsHooks as any, 'useApmParams').mockReturnValue({
+      path: { traceId: '123' },
+      query: {
+        rangeFrom: 'now-24h',
+        rangeTo: 'now',
+        waterfallItemId: '789',
+      },
     });
+
+    render(<TraceLink />, { wrapper: Wrapper });
+
+    const link = screen.getByTestId('redirect-link');
+    expect(link).toHaveAttribute(
+      'href',
+      '/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET&rangeFrom=now-24h&rangeTo=now&waterfallItemId=789'
+    );
+  });
+
+  it('uses time range from data plugin when not provided in query', () => {
+    jest.spyOn(useApmParamsHooks as any, 'useApmParams').mockReturnValue({
+      path: { traceId: '123' },
+      query: {},
+    });
+
+    render(<TraceLink />, { wrapper: Wrapper });
+
+    const link = screen.getByTestId('redirect-link');
+    expect(link).toHaveAttribute(
+      'href',
+      '/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET&rangeFrom=now-1h&rangeTo=now&waterfallItemId='
+    );
   });
 });

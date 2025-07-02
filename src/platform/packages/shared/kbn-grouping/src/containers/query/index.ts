@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import dedent from 'dedent';
 import { checkIsFlattenResults, getEmptyValue } from './helpers';
 import type { GroupingAggregation, ParsedGroupingAggregation } from '../..';
 import type { GroupingQueryArgs, GroupingQuery } from './types';
@@ -66,10 +67,9 @@ export const getGroupingQuery = ({
         type: 'keyword',
         script: {
           source:
-            // when size()==0 or size() > MAX_RUNTIME_FIELD_SIZE, emits a uniqueValue as the value to represent this group
-            `def groupValues = doc[params['selectedGroup']]; int count = groupValues.size(); if (count == 0 || count > ${MAX_RUNTIME_FIELD_SIZE} ) { emit(params['uniqueValue']); }` +
             /*
-             * condition to decide between joining values or flattening based on shouldFlattenMultiValueField and groupByField parameters
+             * when size()==0 or size() > MAX_RUNTIME_FIELD_SIZE, emits a uniqueValue as the value to represent this group
+             * else - condition to decide between joining values or flattening based on shouldFlattenMultiValueField and groupByField parameters
              * if shouldFlattenMultiValueField is true, and the selectedGroup field is an array, then emit each value in the array
              * this is usefull when we would like to group documents based on each uniqueValue
              * Else, join the values with uniqueValue. We cannot simply emit the value like doc[params['selectedGroup']].value,
@@ -80,9 +80,20 @@ export const getGroupingQuery = ({
              * Instead of joining with a "," we should join with a unique value to avoid splitting a value that happens to contain a ",".
              * We will format into a proper array in parseGroupingQuery
              */
-            (shouldFlattenMultiValueField
-              ? ` else { for (int i = 0; i < count && i < ${MAX_RUNTIME_FIELD_SIZE}; i++) { emit(groupValues[i]); } }`
-              : " else { emit(groupValues.join(params['uniqueValue']))}"),
+            dedent(`
+              def groupValues = [];
+              if (doc.containsKey(params['selectedGroup']) && !doc[params['selectedGroup']].empty) {
+                groupValues = doc[params['selectedGroup']];
+              }  
+              int count = groupValues.size();
+              if (count == 0 || count > ${MAX_RUNTIME_FIELD_SIZE} ) { emit(params['uniqueValue']); }
+              else {
+                ${
+                  shouldFlattenMultiValueField
+                    ? `for (int i = 0; i < count && i < ${MAX_RUNTIME_FIELD_SIZE}; i++) { emit(groupValues[i]); }`
+                    : `emit(groupValues.join(params['uniqueValue']));`
+                }
+              }`),
           params: {
             selectedGroup: groupByField,
             uniqueValue,

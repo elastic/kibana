@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import type { InstallSource } from '../../types';
+
 export interface IntegrationsData {
   package_name: string;
   package_version: string;
   updated_at: string;
   install_status: string;
+  install_source?: InstallSource;
 }
 
 export interface BaseCustomAssetsData {
@@ -34,6 +37,7 @@ export interface SyncIntegrationsData {
     name: string;
     hosts: string[];
     sync_integrations: boolean;
+    sync_uninstalled_integrations?: boolean;
   }>;
   integrations: IntegrationsData[];
   custom_assets: {

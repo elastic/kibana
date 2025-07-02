@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiFlyout,
   EuiFlyoutBody,
@@ -182,17 +181,12 @@ export const ReportDiagnostic = ({ apiClient, clientConfig }: Props) => {
       {configAllowsImageReports && (
         <div>
           {flyout}
-          <EuiButtonEmpty
-            data-test-subj="screenshotDiagnosticLink"
-            size="xs"
-            flush="left"
-            onClick={showFlyout}
-          >
+          <EuiButton data-test-subj="screenshotDiagnosticLink" size="s" onClick={showFlyout}>
             <FormattedMessage
               id="xpack.reporting.listing.diagnosticButton"
-              defaultMessage="Run screenshot diagnostics"
+              defaultMessage="Run diagnosis"
             />
-          </EuiButtonEmpty>
+          </EuiButton>
         </div>
       )}
     </div>

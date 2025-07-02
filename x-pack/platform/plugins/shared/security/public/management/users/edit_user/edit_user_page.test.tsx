@@ -52,9 +52,11 @@ describe('EditUserPage', () => {
     coreStart.http.get.mockResolvedValueOnce([]);
 
     const { findByText } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
-        <EditUserPage username={userMock.username} />
-      </Providers>
+      coreStart.rendering.addContext(
+        <Providers services={coreStart} authc={authc} history={history}>
+          <EditUserPage username={userMock.username} />
+        </Providers>
+      )
     );
 
     await findByText(/User has been deactivated/i);
@@ -72,9 +74,11 @@ describe('EditUserPage', () => {
     coreStart.http.get.mockResolvedValueOnce([]);
 
     const { findByRole, findByText } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
-        <EditUserPage username={userMock.username} />
-      </Providers>
+      coreStart.rendering.addContext(
+        <Providers services={coreStart} authc={authc} history={history}>
+          <EditUserPage username={userMock.username} />
+        </Providers>
+      )
     );
 
     await findByText(/User is deprecated/i);
@@ -93,9 +97,11 @@ describe('EditUserPage', () => {
     coreStart.http.get.mockResolvedValueOnce([]);
 
     const { findByRole, findByText } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
-        <EditUserPage username={userMock.username} />
-      </Providers>
+      coreStart.rendering.addContext(
+        <Providers services={coreStart} authc={authc} history={history}>
+          <EditUserPage username={userMock.username} />
+        </Providers>
+      )
     );
 
     await findByText(/User is built in/i);
@@ -123,9 +129,11 @@ describe('EditUserPage', () => {
     ]);
 
     const { findByText } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
-        <EditUserPage username={userMock.username} />
-      </Providers>
+      coreStart.rendering.addContext(
+        <Providers services={coreStart} authc={authc} history={history}>
+          <EditUserPage username={userMock.username} />
+        </Providers>
+      )
     );
 
     await findByText(/Role .deprecated_role. is deprecated. Use .new_role. instead/i);
@@ -142,9 +150,11 @@ describe('EditUserPage', () => {
     };
 
     const { findByRole, findAllByRole } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
-        <EditUserPage username={userMock.username} />
-      </Providers>
+      coreStart.rendering.addContext(
+        <Providers services={coreStart} authc={authc} history={history}>
+          <EditUserPage username={userMock.username} />
+        </Providers>
+      )
     );
 
     await findByRole('button', { name: 'Back to users' });

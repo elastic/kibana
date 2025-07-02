@@ -17,10 +17,7 @@ import {
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 import { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
-import {
-  createLlmProxy,
-  LlmProxy,
-} from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { createLlmProxy, LlmProxy } from '../utils/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
 import {
@@ -57,22 +54,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     async function getEvents(params: {
       screenContexts?: ObservabilityAIAssistantScreenContextRequest[];
     }) {
-      const supertestEditorWithCookieCredentials: SupertestWithRoleScope =
-        await roleScopedSupertest.getSupertestWithRoleScope('editor', {
-          useCookieHeader: true,
-          withInternalHeaders: true,
-        });
-
-      const response = await supertestEditorWithCookieCredentials
-        .post('/internal/observability_ai_assistant/chat/complete')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          messages,
-          connectorId,
-          persist: true,
-          screenContexts: params.screenContexts || [],
-          scopes: ['all'],
-        });
+      const response = await observabilityAIAssistantAPIClient.editor({
+        endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+        params: {
+          body: {
+            messages,
+            connectorId,
+            persist: true,
+            screenContexts: params.screenContexts || [],
+            scopes: ['all'],
+          },
+        },
+      });
 
       await proxy.waitForAllInterceptorsToHaveBeenCalled();
 

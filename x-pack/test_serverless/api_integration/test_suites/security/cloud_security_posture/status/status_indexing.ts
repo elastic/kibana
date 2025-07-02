@@ -11,12 +11,12 @@ import {
   FINDINGS_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { createPackagePolicy } from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
+import { createPackagePolicy } from '@kbn/test-suites-xpack-security/api_integration/apis/cloud_security_posture/helper';
 import {
   findingsMockData,
   vulnerabilityMockData,
-} from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/mock_data';
-import { EsIndexDataProvider } from '@kbn/test-suites-xpack/cloud_security_posture_api/utils';
+} from '@kbn/test-suites-xpack-security/api_integration/apis/cloud_security_posture/mock_data';
+import { EsIndexDataProvider } from '@kbn/test-suites-xpack-security/cloud_security_posture_api/utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../../shared/services';
 
@@ -74,7 +74,7 @@ export default function (providerContext: FtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
 
-      it(`Return kspm status indexing when logs-cloud_security_posture.findings_latest-default doesn't contain new kspm documents, but has newly connected agents`, async () => {
+      it(`Return kspm status indexing when security_solution-cloud_security_posture.misconfiguration_latest doesn't contain new kspm documents, but has newly connected agents`, async () => {
         await createPackagePolicy(
           supertestWithoutAuth,
           agentPolicyId,
@@ -102,7 +102,7 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-      it(`Return cspm status indexing when logs-cloud_security_posture.findings_latest-default doesn't contain new cspm documents, but has newly connected agents  `, async () => {
+      it(`Return cspm status indexing when security_solution-cloud_security_posture.misconfiguration_latest doesn't contain new cspm documents, but has newly connected agents  `, async () => {
         await createPackagePolicy(
           supertestWithoutAuth,
           agentPolicyId,

@@ -10,7 +10,7 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
-import { useShareTabsContext } from '../../context';
+import { useShareTypeContext } from '../../context';
 import { LinkContent } from './link_content';
 
 type ILinkTab = IModalTabDeclaration<{
@@ -58,7 +58,7 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
     shareableUrlLocatorParams,
     allowShortUrl,
     shareMenuItems,
-  } = useShareTabsContext('link');
+  } = useShareTypeContext('link');
 
   const setDashboardLink = useCallback(
     (url: string) => {

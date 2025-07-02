@@ -129,7 +129,7 @@ export const TemplateForm = ({
   };
 
   const {
-    template: { settings, mappings, aliases } = {},
+    template: { settings, mappings, aliases, data_stream_options: dataStreamOptions } = {},
     composedOf,
     _kbnMeta,
     ...logistics
@@ -218,13 +218,14 @@ export const TemplateForm = ({
             lifecycle: wizardData.logistics.lifecycle
               ? serializeAsESLifecycle(wizardData.logistics.lifecycle)
               : undefined,
+            ...(dataStreamOptions && { data_stream_options: dataStreamOptions }),
           },
           ignoreMissingComponentTemplates: initialTemplate.ignoreMissingComponentTemplates,
         };
 
         return cleanupTemplateObject(outputTemplate as TemplateDeserialized);
       },
-    []
+    [dataStreamOptions]
   );
 
   const onWizardContentChange = useCallback((content: Forms.Content<WizardContent>) => {
@@ -360,7 +361,10 @@ export const TemplateForm = ({
         </FormWizardStep>
 
         <FormWizardStep id={wizardSections.review.id} label={wizardSections.review.label}>
-          <StepReviewContainer getTemplateData={buildTemplateObject(indexTemplate)} />
+          <StepReviewContainer
+            getTemplateData={buildTemplateObject(indexTemplate)}
+            dataStreamOptions={dataStreamOptions}
+          />
         </FormWizardStep>
       </FormWizard>
     </>

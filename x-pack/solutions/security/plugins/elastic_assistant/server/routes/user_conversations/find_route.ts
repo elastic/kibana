@@ -15,7 +15,7 @@ import {
 import {
   FindConversationsRequestQuery,
   FindConversationsResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas/conversations/find_conversations_route.gen';
+} from '@kbn/elastic-assistant-common/impl/schemas';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';

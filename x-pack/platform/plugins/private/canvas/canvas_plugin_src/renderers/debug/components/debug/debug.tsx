@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiCode } from '@elastic/eui';
-import './debug.scss';
+import React, { useMemo } from 'react';
+import { EuiCode, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 const LimitRows = (key: string, value: any) => {
   if (key === 'rows') {
@@ -16,10 +16,34 @@ const LimitRows = (key: string, value: any) => {
   return value;
 };
 
-export const Debug = ({ payload }: { payload: unknown }) => (
-  <EuiCode className="canvasDebug">
-    <pre className="canvasDebug__content" data-test-subj="canvasDebug__content">
-      {JSON.stringify(payload, LimitRows, 2)}
-    </pre>
-  </EuiCode>
-);
+export const Debug = ({ payload }: { payload: unknown }) => {
+  const { wrapperStyles, contentStyles } = useStyles();
+
+  return (
+    <EuiCode css={wrapperStyles}>
+      <pre data-test-subj="canvasDebug__content" css={contentStyles} className="eui-scrollBar">
+        {JSON.stringify(payload, LimitRows, 2)}
+      </pre>
+    </EuiCode>
+  );
+};
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(() => {
+    return {
+      wrapperStyles: css({
+        padding: 0,
+        width: '100%',
+        height: '100%',
+      }),
+      contentStyles: css({
+        width: '100%',
+        height: '100%',
+        overflow: 'auto',
+        padding: euiTheme.size.base,
+      }),
+    };
+  }, [euiTheme]);
+  return styles;
+};

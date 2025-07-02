@@ -45,6 +45,7 @@ export interface IntegrationCardItem {
   descriptionLineClamp?: number;
   extraLabelsBadges?: React.ReactNode[];
   fromIntegrations?: string;
+  hasDataStreams?: boolean;
   icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
   id: string;
   installStatus?: EpmPackageInstallStatus;
@@ -67,6 +68,7 @@ export interface IntegrationCardItem {
   title: string;
   // Security Solution uses this prop to determine how many lines the card title should be truncated
   titleLineClamp?: number;
+  titleBadge?: React.ReactNode;
   url: string;
   version: string;
   type?: string;

@@ -56,6 +56,9 @@ If a setting is applicable to {{ech}} environments, its name is followed by this
 `csp.report_only.form_action`
 :   Add sources for the [Content Security Policy `form-action` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action) in reporting mode.
 
+`csp.report_only.object_src`
+:   Add sources for the [Content Security Policy `object-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/object-src) in reporting mode.
+
 `csp.report_uri`
 :   Add sources for the [Content Security Policy `report-uri` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri).
 
@@ -325,8 +328,15 @@ $$$server-compression$$$ `server.compression.enabled`
 :   Specifies an array of trusted hostnames, such as the {{kib}} host, or a reverse proxy sitting in front of it. This determines whether HTTP compression may be used for responses, based on the request `Referer` header. This setting may not be used when [`server.compression.enabled`](#server-compression) is set to `false`. **Default: `none`**
 
 `server.compression.brotli.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   Set to `true` to enable brotli (br) compression format. NOTE: Browsers not supporting brotli compression will fallback to using gzip instead. This setting may not be used when [`server.compression.enabled`](#server-compression) is set to `false`. **Default: `false`**
+:   Set to `true` to enable brotli (br) compression format.
+
+    :::{note}
+    Browsers not supporting brotli compression will fallback to using gzip instead. This setting may not be used when [`server.compression.enabled`](#server-compression) is set to `false`. **Default: `false`**
+    :::
+
+    :::{note}
     It is available in {{ecloud}} 8.6.0 and later versions.
+    :::
 
 $$$server-securityResponseHeaders-strictTransportSecurity$$$ `server.securityResponseHeaders.strictTransportSecurity` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Controls whether the [`Strict-Transport-Security`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are any text value or `null`. To disable, set to `null`. **Default:** `null`
@@ -547,7 +557,6 @@ $$$settings-explore-data-in-chart$$$ `xpack.discoverEnhanced.actions.exploreData
 
     ::::{admonition} Deprecated in 8.11.0.
     :class: warning
-
     Rollups are deprecated and will be removed in a future version. Use [downsampling](docs-content://manage-data/data-store/data-streams/downsampling-time-series-data-stream.md) instead.
     ::::
 

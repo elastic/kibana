@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type TabItem, UnifiedTabs } from '@kbn/unified-tabs';
-import React, { useState } from 'react';
-import { pick } from 'lodash';
+import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
+import React, { useCallback } from 'react';
 import { DiscoverSessionView, type DiscoverSessionViewProps } from '../session_view';
 import {
   createTabItem,
   internalStateActions,
   selectAllTabs,
+  selectRecentlyClosedTabs,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
@@ -24,19 +24,36 @@ import { usePreviewData } from './use_preview_data';
 export const TabsView = (props: DiscoverSessionViewProps) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
-  const allTabs = useInternalStateSelector(selectAllTabs);
+  const items = useInternalStateSelector(selectAllTabs);
+  const recentlyClosedItems = useInternalStateSelector(selectRecentlyClosedTabs);
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
-  const [initialItems] = useState<TabItem[]>(() => allTabs.map((tab) => pick(tab, 'id', 'label')));
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
+
+  const onChanged: UnifiedTabsProps['onChanged'] = useCallback(
+    (updateState) => dispatch(internalStateActions.updateTabs(updateState)),
+    [dispatch]
+  );
+
+  const createItem: UnifiedTabsProps['createItem'] = useCallback(
+    () => createTabItem(items),
+    [items]
+  );
+
+  const renderContent: UnifiedTabsProps['renderContent'] = useCallback(
+    () => <DiscoverSessionView key={currentTabId} {...props} />,
+    [currentTabId, props]
+  );
 
   return (
     <UnifiedTabs
       services={services}
-      initialItems={initialItems}
-      onChanged={(updateState) => dispatch(internalStateActions.updateTabs(updateState))}
-      createItem={() => createTabItem(allTabs)}
+      items={items}
+      selectedItemId={currentTabId}
+      recentlyClosedItems={recentlyClosedItems}
+      createItem={createItem}
       getPreviewData={getPreviewData}
-      renderContent={() => <DiscoverSessionView key={currentTabId} {...props} />}
+      renderContent={renderContent}
+      onChanged={onChanged}
     />
   );
 };

@@ -23,9 +23,6 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
   );
 
   return {
-    bootstrap: async ({ apmEsClient }) => {
-      apmEsClient.pipeline(apmEsClient.getPipeline(pipeline));
-    },
     generate: ({ range, clients: { apmEsClient } }) => {
       const transactionName = '240rpm/75% 1000ms';
 
@@ -106,6 +103,8 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
         )
       );
     },
+    setupPipeline: ({ apmEsClient }) =>
+      apmEsClient.setPipeline(apmEsClient.resolvePipelineType(pipeline)),
   };
 };
 

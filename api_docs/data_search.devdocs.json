@@ -159,7 +159,7 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; clear: () => void; destroy: () => void; save: () => Promise<void>; readonly state$: ",
+              "{ start: () => string; clear: () => void; save: () => Promise<void>; destroy: () => void; readonly state$: ",
               "Observable",
               "<",
               {
@@ -631,7 +631,7 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; clear: () => void; destroy: () => void; save: () => Promise<void>; readonly state$: ",
+              "{ start: () => string; clear: () => void; save: () => Promise<void>; destroy: () => void; readonly state$: ",
               "Observable",
               "<",
               {
@@ -1133,7 +1133,7 @@
         "label": "ISessionService",
         "description": [],
         "signature": [
-          "{ start: () => string; clear: () => void; destroy: () => void; save: () => Promise<void>; readonly state$: ",
+          "{ start: () => string; clear: () => void; save: () => Promise<void>; destroy: () => void; readonly state$: ",
           "Observable",
           "<",
           {
@@ -6660,7 +6660,7 @@
                   },
                   "; history: ",
                   "SearchRequest",
-                  "<Record<string, any>>[]; destroy: () => void; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
+                  "<Record<string, any>>[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -6838,7 +6838,7 @@
                     "section": "def-common.SearchSourceSearchOptions",
                     "text": "SearchSourceSearchOptions"
                   },
-                  " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; loadDataViewFields: (dataView: ",
+                  " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; loadDataViewFields: (dataView: ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -7228,60 +7228,6 @@
                 "trackAdoption": false
               }
             ]
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggType.Unnamed",
-            "type": "Function",
-            "tags": [
-              "class",
-              "private"
-            ],
-            "label": "Constructor",
-            "description": [
-              "\nGeneric AggType Constructor\n\nUsed to create the values exposed by the agg_types module.\n"
-            ],
-            "signature": [
-              "any"
-            ],
-            "path": "src/platform/plugins/shared/data/common/search/aggs/agg_type.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-common.AggType.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "config",
-                "description": [
-                  "- used to set the properties of the AggType"
-                ],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.AggTypeConfig",
-                    "text": "AggTypeConfig"
-                  },
-                  "<TAggConfig, ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.AggParamType",
-                    "text": "AggParamType"
-                  },
-                  "<TAggConfig>>"
-                ],
-                "path": "src/platform/plugins/shared/data/common/search/aggs/agg_type.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -10984,7 +10930,7 @@
                 "section": "def-common.SerializedSearchSourceFields",
                 "text": "SerializedSearchSourceFields"
               },
-              " & { indexRefName: string; }, references: ",
+              " & { indexRefName?: string | undefined; }, references: ",
               "SavedObjectReference",
               "[]) => ",
               {
@@ -15657,7 +15603,7 @@
             "section": "def-common.SerializedSearchSourceFields",
             "text": "SerializedSearchSourceFields"
           },
-          " & { indexRefName: string; }, references: ",
+          " & { indexRefName?: string | undefined; }, references: ",
           "SavedObjectReference",
           "[]) => ",
           {
@@ -15687,7 +15633,7 @@
                 "section": "def-common.SerializedSearchSourceFields",
                 "text": "SerializedSearchSourceFields"
               },
-              " & { indexRefName: string; }"
+              " & { indexRefName?: string | undefined; }"
             ],
             "path": "src/platform/plugins/shared/data/common/search/search_source/inject_references.ts",
             "deprecated": false,
@@ -33650,7 +33596,7 @@
           },
           "; history: ",
           "SearchRequest",
-          "<Record<string, any>>[]; destroy: () => void; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
+          "<Record<string, any>>[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -33828,7 +33774,7 @@
             "section": "def-common.SearchSourceSearchOptions",
             "text": "SearchSourceSearchOptions"
           },
-          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; loadDataViewFields: (dataView: ",
+          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; loadDataViewFields: (dataView: ",
           {
             "pluginId": "dataViews",
             "scope": "common",

@@ -102,6 +102,25 @@ describe('AlertsFilterByRuleTags', () => {
     expect(comboboxInput).toBeDisabled();
   });
 
+  it('should disable the combobox when no tags are available', async () => {
+    mockUseGetRuleTagsQuery.mockReturnValue({
+      tags: [],
+      isLoading: false,
+      isError: false,
+      ...ruleTagsBaseQueryResult,
+    });
+    render(
+      <AlertsFiltersFormContextProvider
+        value={{ ruleTypeIds: ['.es-query'], services: { http, notifications } }}
+      >
+        <AlertsFilterByRuleTags value={[]} onChange={jest.fn()} />
+      </AlertsFiltersFormContextProvider>
+    );
+    const comboboxInput = screen.getByTestId('comboBoxSearchInput');
+    expect(comboboxInput).toHaveAttribute('disabled');
+    expect(comboboxInput).toHaveAttribute('placeholder', 'No tags available');
+  });
+
   describe('filterMetadata', () => {
     it('should have the correct type id and component', () => {
       expect(filterMetadata.id).toEqual('ruleTags');
