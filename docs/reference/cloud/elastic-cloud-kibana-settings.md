@@ -1,6 +1,11 @@
 ---
 mapped_pages:
   - https://www.elastic.co/guide/en/cloud/current/ec-manage-kibana-settings.html#ec-kibana-config
+  - https://www.elastic.co/guide/en/cloud-enterprise/current/ece-kibana-logging-settings.html
+applies_to:
+  deployment:
+    ess: all
+    ece: all
 ---
 
 # Elastic Cloud Kibana settings [ec-manage-kibana-settings]
