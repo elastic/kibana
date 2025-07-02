@@ -129,7 +129,6 @@
     "@kbn/esql",
     "@kbn/apm-synthtrace-client",
     "@kbn/scout-oblt",
-    "@kbn/scout",
   ],
   "exclude": ["target/**/*"]
 }
