@@ -35,6 +35,14 @@ describe('AppContextService', () => {
     isSupported: jest.fn(),
     getTool: jest.fn(),
   };
+  const toolThree: AssistantTool = {
+    id: 'tool-three',
+    name: 'ToolThree',
+    description: 'Description 3',
+    sourceRegister: 'Source3',
+    isSupported: jest.fn(),
+    getTool: jest.fn(),
+  };
 
   beforeEach(() => {
     appContextService.stop();
