@@ -45,7 +45,7 @@ export const DataTableSummaryColumnHeaderTracesContext = ({
     'discover.unifiedDataTable.tableHeader.tracesContext.sourceFieldIconTooltip',
     {
       defaultMessage:
-        'Displays the most relevant resource identifiers (service.name, event.outcome, transaction.name, etc.)',
+        'Displays the most relevant resource identifiers (service.name, event.outcome, transaction.name, etc.).',
     }
   );
 
