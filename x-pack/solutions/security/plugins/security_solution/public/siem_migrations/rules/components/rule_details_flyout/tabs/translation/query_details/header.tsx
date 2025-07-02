@@ -23,7 +23,7 @@ export const QueryHeader: React.FC<QueryHeaderProps> = React.memo(({ title, tool
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip content={tooltip}>
-          <EuiIcon size="s" type="questionInCircle" color="subdued" />
+          <EuiIcon size="s" type="question" color="subdued" />
         </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>

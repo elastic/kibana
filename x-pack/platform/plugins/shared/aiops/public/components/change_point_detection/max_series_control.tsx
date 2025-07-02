@@ -51,7 +51,7 @@ export const MaxSeriesControl: FC<{
               defaultMessage: 'The maximum number of change points to visualize.',
             })}
           >
-            <EuiIcon type={'questionInCircle'} />
+            <EuiIcon type={'question'} />
           </EuiToolTip>
         }
         compressed

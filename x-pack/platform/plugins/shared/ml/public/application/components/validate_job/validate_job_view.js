@@ -33,7 +33,7 @@ import { getMostSevereMessageStatus } from '../../../../common/util/validation_u
 import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 
-const defaultIconType = 'questionInCircle';
+const defaultIconType = 'question';
 const getDefaultState = () => ({
   ui: {
     iconType: defaultIconType,
