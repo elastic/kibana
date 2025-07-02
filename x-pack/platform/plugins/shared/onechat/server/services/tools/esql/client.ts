@@ -57,7 +57,7 @@ class EsqlToolClientImpl {
       return tool;
     } catch (isToolNotFoundError) {
       throw createToolNotFoundError({
-        toolId: `tool::${id}`,
+        toolId: `${esqlToolProviderId}::${id}`,
         customMessage: `Tool with id ${id} not found`,
       });
     }
