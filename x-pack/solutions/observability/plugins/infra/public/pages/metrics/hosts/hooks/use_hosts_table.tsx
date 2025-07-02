@@ -311,7 +311,7 @@ export const useHostsTable = () => {
                 }
                 return (
                   <Popover
-                    icon="questionInCircle"
+                    icon="question"
                     data-test-subj="hostsView-tableRow-hasSystemMetrics-popover"
                   >
                     <EuiText size="xs">

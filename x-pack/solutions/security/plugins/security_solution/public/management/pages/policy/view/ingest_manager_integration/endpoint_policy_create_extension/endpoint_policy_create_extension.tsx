@@ -288,7 +288,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
               {showNote && (
                 <>
                   <EuiSpacer size="m" />
-                  <EuiCallOut iconType="iInCircle">
+                  <EuiCallOut iconType="info">
                     <EuiText size="s" data-test-subj="create-ensdpoint-policy-license-note">
                       <p>
                         {endpointPresetsMapping[endpointPreset].note}{' '}
