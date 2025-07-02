@@ -14,6 +14,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import { useQuery } from '@tanstack/react-query';
 import { fetchRuleTypeAlertFields, getDescription } from '@kbn/alerts-ui-shared/src/common/apis';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 
 export interface UseLoadRuleTypeAlertFieldsProps {
   http: HttpStart;
@@ -52,7 +53,11 @@ export const useLoadRuleTypeAlertFields = (props: UseLoadRuleTypeAlertFieldsProp
     queryKey: ['useLoadRuleTypeAlertFields', ruleTypeId],
     queryFn,
     select: (dataViewFields) => {
-      return dataViewFields?.map<ActionVariable>((d) => ({
+      const fields: DataViewField[] = Array.isArray(dataViewFields)
+        ? dataViewFields
+        : (dataViewFields as any)?.fields ?? [];
+
+      return fields.map<ActionVariable>((d) => ({
         name: d.name,
         description: getDescription(d.name, ecsFlat.current),
       }));
