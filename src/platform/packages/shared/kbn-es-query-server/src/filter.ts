@@ -1,0 +1,53 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { schema } from '@kbn/config-schema';
+import { FilterStateStore } from '@kbn/es-query';
+
+const filterStateStoreSchema = schema.oneOf(
+  [schema.literal(FilterStateStore.APP_STATE), schema.literal(FilterStateStore.GLOBAL_STATE)],
+  {
+    meta: {
+      description:
+        "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
+    },
+  }
+);
+
+export const filterMetaSchema = schema.object({
+  alias: schema.maybe(schema.nullable(schema.string())),
+  disabled: schema.maybe(schema.boolean()),
+  negate: schema.maybe(schema.boolean()),
+  controlledBy: schema.maybe(
+    schema.string({ meta: { description: 'Identifies the owner the filter.' } })
+  ),
+  group: schema.maybe(
+    schema.string({ meta: { description: 'The group to which this filter belongs.' } })
+  ),
+  index: schema.maybe(schema.string()),
+  isMultiIndex: schema.maybe(schema.boolean()),
+  type: schema.maybe(schema.string()),
+  key: schema.maybe(schema.string()),
+  // TODO Consider creating FilterMetaParams as a schema. This is hard because
+  // FilterMetaParams can be a `filterSchema` which is defined below.
+  // This would require a more complex schema definition that can handle recursive types.
+  // For now, we use `any` to allow flexibility.
+  params: schema.maybe(schema.any()),
+  value: schema.maybe(schema.string()),
+});
+
+export const filterSchema = schema.object({
+  meta: filterMetaSchema,
+  query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  $state: schema.maybe(
+    schema.object({
+      store: filterStateStoreSchema,
+    })
+  ),
+});
