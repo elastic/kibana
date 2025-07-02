@@ -128,7 +128,7 @@ export class StatusRuleExecutor {
       this.params.locations
     );
 
-    const { filtersStr } = parseArrayFilters({
+    const filtersStr = parseArrayFilters({
       configIds,
       filter: baseFilter,
       tags: this.params.tags,

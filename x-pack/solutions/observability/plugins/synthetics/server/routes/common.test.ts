@@ -17,7 +17,7 @@ describe('common utils', () => {
       undefined,
       ['synthetics-monitor-multi-space.attributes', 'legacy-monitor.attributes']
     );
-    expect(filters.filtersStr).toMatchInlineSnapshot(
+    expect(filters).toMatchInlineSnapshot(
       `"(synthetics-monitor-multi-space.attributes.config_id:(\\"1 4\\" OR \\"2 6\\" OR \\"5\\") OR legacy-monitor.attributes.config_id:(\\"1 4\\" OR \\"2 6\\" OR \\"5\\"))"`
     );
   });
@@ -30,7 +30,7 @@ describe('common utils', () => {
       undefined,
       ['synthetics-monitor-multi-space.attributes', 'legacy-monitor.attributes']
     );
-    expect(filters.filtersStr).toMatchInlineSnapshot(
+    expect(filters).toMatchInlineSnapshot(
       `"(synthetics-monitor-multi-space.attributes.tags:(\\"tag1\\" OR \\"tag2\\") OR legacy-monitor.attributes.tags:(\\"tag1\\" OR \\"tag2\\")) AND (synthetics-monitor-multi-space.attributes.config_id:(\\"1\\" OR \\"2\\") OR legacy-monitor.attributes.config_id:(\\"1\\" OR \\"2\\"))"`
     );
   });
@@ -48,7 +48,7 @@ describe('common utils', () => {
       undefined,
       ['synthetics-monitor-multi-space.attributes', 'legacy-monitor.attributes']
     );
-    expect(filters.filtersStr).toMatchInlineSnapshot(
+    expect(filters).toMatchInlineSnapshot(
       `"(synthetics-monitor-multi-space.attributes.tags:(\\"tag1\\" OR \\"tag2\\") OR legacy-monitor.attributes.tags:(\\"tag1\\" OR \\"tag2\\")) AND (synthetics-monitor-multi-space.attributes.project_id:(\\"project1\\" OR \\"project2\\") OR legacy-monitor.attributes.project_id:(\\"project1\\" OR \\"project2\\")) AND (synthetics-monitor-multi-space.attributes.type:(\\"type1\\" OR \\"type2\\") OR legacy-monitor.attributes.type:(\\"type1\\" OR \\"type2\\")) AND (synthetics-monitor-multi-space.attributes.locations.id:(\\"loc1\\" OR \\"loc2\\") OR legacy-monitor.attributes.locations.id:(\\"loc1\\" OR \\"loc2\\")) AND (synthetics-monitor-multi-space.attributes.schedule.number:(\\"schedule1\\" OR \\"schedule2\\") OR legacy-monitor.attributes.schedule.number:(\\"schedule1\\" OR \\"schedule2\\")) AND (synthetics-monitor-multi-space.attributes.id:(\\"query1\\" OR \\"query2\\") OR legacy-monitor.attributes.id:(\\"query1\\" OR \\"query2\\")) AND (synthetics-monitor-multi-space.attributes.config_id:(\\"1\\" OR \\"2\\") OR legacy-monitor.attributes.config_id:(\\"1\\" OR \\"2\\"))"`
     );
   });

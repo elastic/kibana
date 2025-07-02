@@ -109,7 +109,7 @@ describe('tlsRuleExecutor', () => {
       const getAllMock = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
 
       await tlsRule.getMonitors();
-      const { filtersStr } = parseArrayFilters({
+      const filtersStr = parseArrayFilters({
         monitorQueryIds: [monitorId],
       });
 
@@ -126,7 +126,7 @@ describe('tlsRuleExecutor', () => {
 
       await tlsRule.getMonitors();
 
-      const { filtersStr } = parseArrayFilters({
+      const filtersStr = parseArrayFilters({
         tags: [tag],
       });
 
@@ -145,7 +145,7 @@ describe('tlsRuleExecutor', () => {
 
       await tlsRule.getMonitors();
 
-      const { filtersStr } = parseArrayFilters({
+      const filtersStr = parseArrayFilters({
         monitorTypes: [monitorType],
       });
 

@@ -13,7 +13,7 @@ import { useLogicalAndFields } from '../../common/constants';
 import { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
-import { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
+import { PrivateLocation, ServiceLocation, ConfigKey } from '../../common/runtime_types';
 import {
   legacyMonitorAttributes,
   syntheticsMonitorAttributes,
@@ -103,19 +103,22 @@ export const getMonitorFilters = async (
   } = context.request.query;
   const locations = await parseLocationFilter(context, queryLocations);
 
-  return parseArrayFilters(
-    {
-      filter,
-      tags,
-      monitorTypes,
-      projects,
-      schedules,
-      monitorQueryIds,
-      locations,
-    },
-    useLogicalAndFor,
-    attributesList
-  );
+  return {
+    filtersStr: parseArrayFilters(
+      {
+        filter,
+        tags,
+        monitorTypes,
+        projects,
+        schedules,
+        monitorQueryIds,
+        locations,
+      },
+      useLogicalAndFor,
+      attributesList
+    ),
+    locationIds: locations,
+  };
 };
 
 export const parseArrayFilters = (
@@ -128,7 +131,8 @@ export const parseArrayFilters = (
     schedules,
     monitorQueryIds,
     locations,
-  }: Filters,
+    journeyIds,
+  }: Filters & { journeyIds?: string[] },
   useLogicalAndFor: MonitorsQuery['useLogicalAndFor'] = [],
   attributesList: string[] = [syntheticsMonitorAttributes, legacyMonitorAttributes]
 ) => {
@@ -144,7 +148,7 @@ export const parseArrayFilters = (
     return `(${filters.join(' OR ')})`;
   };
 
-  const filtersStr = [
+  return [
     filter,
     orAcrossAttributes({
       field: 'tags',
@@ -161,11 +165,10 @@ export const parseArrayFilters = (
     orAcrossAttributes({ field: 'schedule.number', values: schedules }),
     orAcrossAttributes({ field: 'id', values: monitorQueryIds }),
     orAcrossAttributes({ field: 'config_id', values: configIds }),
+    orAcrossAttributes({ field: ConfigKey.JOURNEY_ID, values: journeyIds }),
   ]
     .filter((f) => !!f)
     .join(' AND ');
-
-  return { filtersStr, locationIds: locations };
 };
 
 export const getSavedObjectKqlFilter = ({

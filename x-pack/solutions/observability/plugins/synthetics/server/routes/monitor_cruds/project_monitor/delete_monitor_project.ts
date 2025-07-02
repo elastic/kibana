@@ -6,12 +6,11 @@
  */
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { syntheticsMonitorAttributes } from '../../../../common/types/saved_objects';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import { SyntheticsRestApiRouteFactory } from '../../types';
-import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../../common/runtime_types';
+import { EncryptedSyntheticsMonitorAttributes } from '../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { getSavedObjectKqlFilter } from '../../common';
+import { parseArrayFilters } from '../../common';
 import { validateSpaceId } from '../services/validate_space_id';
 
 export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -40,12 +39,10 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
 
     await validateSpaceId(routeContext);
 
-    const deleteFilter = `${syntheticsMonitorAttributes}.${
-      ConfigKey.PROJECT_ID
-    }: "${decodedProjectName}" AND ${getSavedObjectKqlFilter({
-      field: 'journey_id',
-      values: monitorsToDelete.map((id: string) => `${id}`),
-    })}`;
+    const deleteFilter = parseArrayFilters({
+      projects: [decodedProjectName],
+      journeyIds: monitorsToDelete.map((id: string) => `${id}`),
+    });
 
     const { saved_objects: monitors } =
       await monitorConfigRepository.find<EncryptedSyntheticsMonitorAttributes>({

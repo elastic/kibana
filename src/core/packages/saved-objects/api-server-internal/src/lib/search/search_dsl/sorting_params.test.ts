@@ -97,9 +97,22 @@ describe('searchDsl/getSortParams', () => {
     });
     describe('sortField is simple non-root property with multiple types', () => {
       it('returns correct params', () => {
-        expect(() =>
-          getSortingParams(MAPPINGS, ['saved', 'pending'], 'title')
-        ).toThrowErrorMatchingSnapshot();
+        expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'title')).toEqual({
+          runtime_mappings: {
+            merged_title: {
+              script: {
+                source:
+                  "if (doc['saved.title'].size() != 0) { emit(doc['saved.title'].value); } else if (doc['pending.title'].size() != 0) { emit(doc['pending.title'].value); }",
+              },
+              type: 'keyword',
+            },
+          },
+          sort: [
+            {
+              merged_title: {},
+            },
+          ],
+        });
       });
     });
     describe('sortField is multi-field with single type', () => {
@@ -146,9 +159,22 @@ describe('searchDsl/getSortParams', () => {
     });
     describe('sortField is not-root multi-field with multiple types', () => {
       it('returns correct params', () => {
-        expect(() =>
-          getSortingParams(MAPPINGS, ['saved', 'pending'], 'title.raw')
-        ).toThrowErrorMatchingSnapshot();
+        expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'title.raw')).toEqual({
+          runtime_mappings: {
+            'merged_title.raw': {
+              script: {
+                source:
+                  "if (doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else if (doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); }",
+              },
+              type: 'keyword',
+            },
+          },
+          sort: [
+            {
+              'merged_title.raw': {},
+            },
+          ],
+        });
       });
     });
   });
@@ -198,9 +224,24 @@ describe('searchDsl/getSortParams', () => {
     });
     describe('sortFields is non-root simple property with multiple types', () => {
       it('returns correct params', () => {
-        expect(() =>
-          getSortingParams(MAPPINGS, ['saved', 'pending'], 'title', 'desc')
-        ).toThrowErrorMatchingSnapshot();
+        expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'title', 'desc')).toEqual({
+          runtime_mappings: {
+            merged_title: {
+              script: {
+                source:
+                  "if (doc['saved.title'].size() != 0) { emit(doc['saved.title'].value); } else if (doc['pending.title'].size() != 0) { emit(doc['pending.title'].value); }",
+              },
+              type: 'keyword',
+            },
+          },
+          sort: [
+            {
+              merged_title: {
+                order: 'desc',
+              },
+            },
+          ],
+        });
       });
     });
     describe('sortField is multi-field with single type', () => {
@@ -233,9 +274,24 @@ describe('searchDsl/getSortParams', () => {
     });
     describe('sortField is non-root multi-field with multiple types', () => {
       it('returns correct params', () => {
-        expect(() =>
-          getSortingParams(MAPPINGS, ['saved', 'pending'], 'title.raw', 'asc')
-        ).toThrowErrorMatchingSnapshot();
+        expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'title.raw', 'asc')).toEqual({
+          runtime_mappings: {
+            'merged_title.raw': {
+              script: {
+                source:
+                  "if (doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else if (doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); }",
+              },
+              type: 'keyword',
+            },
+          },
+          sort: [
+            {
+              'merged_title.raw': {
+                order: 'asc',
+              },
+            },
+          ],
+        });
       });
     });
   });

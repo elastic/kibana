@@ -18,9 +18,7 @@ import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_s
 import { isEmpty, isEqual } from 'lodash';
 import { parseArrayFilters } from '../routes/common';
 import {
-  legacyMonitorAttributes,
   legacySyntheticsMonitorTypeSingle,
-  syntheticsMonitorAttributes,
   syntheticsMonitorSavedObjectType,
   syntheticsMonitorSOTypes,
 } from '../../common/types/saved_objects';
@@ -222,40 +220,26 @@ export class MonitorConfigRepository {
     configIds?: string[];
     locations?: string[];
   }) {
-    const getDecrypted = async (soType: string) => {
-      // Handle legacy filter if the type is legacy
-      const attr =
-        soType === legacySyntheticsMonitorTypeSingle
-          ? legacyMonitorAttributes
-          : syntheticsMonitorAttributes;
-      const { filtersStr } = parseArrayFilters({ configIds, locations }, [], [attr]);
-      const finder =
-        await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
-          {
-            filter: filtersStr,
-            type: soType,
-            perPage: 500,
-            namespaces: [spaceId],
-          }
-        );
+    const filtersStr = parseArrayFilters({ configIds, locations });
+    const finder =
+      await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
+        {
+          filter: filtersStr,
+          type: syntheticsMonitorSOTypes,
+          perPage: 500,
+          namespaces: [spaceId],
+        }
+      );
 
-      const decryptedMonitors: Array<
-        SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>
-      > = [];
-      for await (const result of finder.find()) {
-        decryptedMonitors.push(...result.saved_objects);
-      }
+    const decryptedMonitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>> =
+      [];
+    for await (const result of finder.find()) {
+      decryptedMonitors.push(...result.saved_objects);
+    }
 
-      finder.close().catch(() => {});
+    finder.close().catch(() => {});
 
-      return decryptedMonitors;
-    };
-
-    const [decryptedMonitors, legacyDecryptedMonitors] = await Promise.all([
-      getDecrypted(syntheticsMonitorSavedObjectType),
-      getDecrypted(legacySyntheticsMonitorTypeSingle),
-    ]);
-    return [...decryptedMonitors, ...legacyDecryptedMonitors];
+    return decryptedMonitors;
   }
 
   async bulkDelete(

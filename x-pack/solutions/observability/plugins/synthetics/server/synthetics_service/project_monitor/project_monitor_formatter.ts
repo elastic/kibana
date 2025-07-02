@@ -6,8 +6,7 @@
  */
 import { SavedObjectsUpdateResponse, SavedObjectsClientContract } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
-import { getSavedObjectKqlFilter } from '../../routes/common';
+import { parseArrayFilters } from '../../routes/common';
 import { InvalidLocationError } from './normalizers/common_fields';
 import { SyntheticsServerSetup } from '../../types';
 import { RouteContext } from '../../routes/types';
@@ -97,7 +96,9 @@ export class ProjectMonitorFormatter {
     this.syntheticsMonitorClient = routeContext.syntheticsMonitorClient;
     this.monitors = monitors;
     this.server = routeContext.server;
-    this.projectFilter = `${syntheticsMonitorSavedObjectType}.attributes.${ConfigKey.PROJECT_ID}: "${this.projectId}"`;
+    this.projectFilter = parseArrayFilters({
+      projects: this.projectId,
+    });
     this.publicLocations = [];
     this.privateLocations = [];
   }
@@ -248,10 +249,7 @@ export class ProjectMonitorFormatter {
 
   public getProjectMonitorsForProject = async (): Promise<PreviousMonitorForUpdate[]> => {
     const journeyIds = this.monitors.map((monitor) => monitor.id);
-    const journeyFilter = getSavedObjectKqlFilter({
-      field: ConfigKey.JOURNEY_ID,
-      values: journeyIds,
-    });
+    const journeyFilter = parseArrayFilters({ journeyIds });
 
     const result = await this.routeContext.monitorConfigRepository.find<ExistingMonitor>({
       filter: `${this.projectFilter} AND ${journeyFilter}`,
