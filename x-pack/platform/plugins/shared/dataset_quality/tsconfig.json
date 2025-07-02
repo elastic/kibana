@@ -69,7 +69,7 @@
     "@kbn/unified-histogram",
     "@kbn/unified-search-plugin",
     "@kbn/usage-collection-plugin",
-    "@kbn/xstate-utils"
+    "@kbn/xstate-utils",
   ],
   "exclude": [
     "target/**/*"

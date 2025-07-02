@@ -9,9 +9,8 @@
 
 import { useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart, RefreshInterval } from '@kbn/data-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import type { RefreshInterval } from '@kbn/data-service-server';
 
 interface UseTimefilterProps {
   dateRangeFrom?: string;

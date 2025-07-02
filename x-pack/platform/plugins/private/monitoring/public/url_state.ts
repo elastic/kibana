@@ -7,8 +7,7 @@
 import { Subscription } from 'rxjs';
 import { History, createHashHistory } from 'history';
 import type { TimeRange } from '@kbn/es-query';
-import { RefreshInterval } from '@kbn/data-plugin/public';
-import { syncQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { RefreshInterval, syncQueryStateWithUrl } from '@kbn/data-plugin/public';
 import {
   createStateContainer,
   createKbnUrlStateStorage,

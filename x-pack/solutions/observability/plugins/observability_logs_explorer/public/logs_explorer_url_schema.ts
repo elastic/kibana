@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { TimeRange, Query } from '@kbn/data-plugin/common/types';
-import type { RefreshInterval } from '@kbn/data-service-server';
+import { TimeRange, RefreshInterval, Query } from '@kbn/data-plugin/common/types';
 import { DiscoverAppState } from '@kbn/discover-plugin/public';
 import { SMART_FALLBACK_FIELDS } from '@kbn/discover-utils';
 import { ExistsFilter, Filter, PhrasesFilter } from '@kbn/es-query';

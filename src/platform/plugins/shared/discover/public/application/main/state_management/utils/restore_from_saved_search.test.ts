@@ -8,8 +8,7 @@
  */
 
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import type { TimeRange } from '@kbn/data-plugin/common';
-import type { RefreshInterval } from '@kbn/data-service-server';
+import type { TimeRange, RefreshInterval } from '@kbn/data-plugin/common';
 import { savedSearchMock, savedSearchMockWithTimeField } from '../../../../__mocks__/saved_search';
 import { restoreStateFromSavedSearch } from './restore_from_saved_search';
 

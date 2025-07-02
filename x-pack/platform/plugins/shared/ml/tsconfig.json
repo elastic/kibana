@@ -141,6 +141,6 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/core-analytics-browser",
     "@kbn/deeplinks-analytics",
-    "@kbn/core-user-profile-browser"
+    "@kbn/core-user-profile-browser",
   ]
 }
