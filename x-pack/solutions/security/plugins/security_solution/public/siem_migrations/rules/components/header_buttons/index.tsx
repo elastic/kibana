@@ -65,7 +65,6 @@ export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
             selectedOptions={selectedMigrationOption}
             singleSelection={{ asPlainText: true }}
             isClearable={false}
-            css={{ width: '500rem' }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
