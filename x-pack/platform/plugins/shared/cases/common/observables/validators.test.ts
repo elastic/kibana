@@ -76,6 +76,12 @@ describe('validateDomain', () => {
     expect(result).toBeUndefined();
   });
 
+  it('should return undefined for a valid domain ending with "." (example.com.)', () => {
+    const result = validateDomain('example.com.');
+
+    expect(result).toBeUndefined();
+  });
+
   it('should return undefined for a valid sub-domain (sub.example.com)', () => {
     const result = validateDomain('sub.example.com');
 
