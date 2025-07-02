@@ -119,5 +119,50 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.PlaygroundSearchPage.expectQueryModeResultsCodeEditor();
       });
     });
+    describe('Update Saved Playground', function () {
+      before(async () => {
+        expect(testPlaygroundId).not.to.be(undefined);
+
+        await pageObjects.common.navigateToUrl('searchPlayground', `p/${testPlaygroundId}`, {
+          shouldUseHashForSubUrl: false,
+        });
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectPlaygroundNameHeader(
+          'FTR Search Playground'
+        );
+      });
+      it('should allow updating playground name', async () => {
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectUnSavedChangesBadegeNotExists();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToExist();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeDisabled();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.clickEditPlaygroundNameButton();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.setPlaygroundNameInEditModal(
+          'Test Search Playground'
+        );
+        await pageObjects.searchPlayground.SavedPlaygroundPage.savePlaygroundNameInModal();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectPlaygroundNameHeader(
+          'Test Search Playground'
+        );
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectUnSavedChangesBadegeExists();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeEnabled();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.clickSavedPlaygroundSaveButton();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectUnSavedChangesBadegeNotExists();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeDisabled();
+      });
+      it('should allow updating playground query fields', async () => {
+        await pageObjects.searchPlayground.PlaygroundSearchPage.selectPageMode(
+          'queryMode',
+          testPlaygroundId
+        );
+        await pageObjects.searchPlayground.PlaygroundSearchPage.expectQueryModeComponentsToExist();
+        await pageObjects.searchPlayground.PlaygroundSearchPage.expectFieldToBeSelected('author');
+        await pageObjects.searchPlayground.PlaygroundSearchPage.expectFieldToBeSelected('name');
+        await pageObjects.searchPlayground.PlaygroundSearchPage.clickFieldSwitch('author', true);
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectUnSavedChangesBadegeExists();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeEnabled();
+        await pageObjects.searchPlayground.PlaygroundSearchPage.clickFieldSwitch('author', false);
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectUnSavedChangesBadegeNotExists();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeDisabled();
+      });
+    });
   });
 }

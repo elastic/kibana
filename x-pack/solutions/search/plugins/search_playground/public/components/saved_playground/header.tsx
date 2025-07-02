@@ -96,7 +96,7 @@ export const SavedPlaygroundHeader: React.FC<SavedPlaygroundHeaderProps> = ({
             />
           )}
           {hasChanges ? (
-            <EuiBadge color="warning">
+            <EuiBadge color="warning" data-test-subj="playground-unsaved-changes-badge">
               <FormattedMessage
                 id="xpack.searchPlayground.header.unsavedChangesBadge"
                 defaultMessage="Unsaved changes"
