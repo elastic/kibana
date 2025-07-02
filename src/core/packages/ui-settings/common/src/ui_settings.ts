@@ -125,7 +125,7 @@ export interface UiSettingsParams<T = unknown> {
    * Note: this does not affect serverless settings, since spaces in serverless don't have solution views.
    * */
   solutions?: UiSettingsSolutions;
-};
+}
 
 /**
  * Describes the values explicitly set by user.
@@ -134,7 +134,7 @@ export interface UiSettingsParams<T = unknown> {
 export interface UserProvidedValues<T = any> {
   userValue?: T;
   isOverridden?: boolean;
-};
+}
 
 /**
  * Denotes the scope of the setting
