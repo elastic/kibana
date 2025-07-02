@@ -122,7 +122,7 @@ export const getAlertFieldsByRuleTypeIds = (router: IRouter<RacRequestHandlerCon
         const uniqueFields = mergeUniqueFieldsByName(otherFields, siemFields);
 
         const mappedFields = {
-          browserFields: fieldDescriptorToBrowserFieldMapper(uniqueFields),
+          alertFields: fieldDescriptorToBrowserFieldMapper(uniqueFields),
           fields: uniqueFields,
         };
 
