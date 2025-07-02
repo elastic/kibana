@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
+import type { Reference } from '@kbn/content-management-utils';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { LensAppLocatorParams } from '../../common/locator/locator';
@@ -82,7 +82,7 @@ export function getLocatorParams(
     activeVisualization: visualization.activeId
       ? visualizationMap[visualization.activeId]
       : undefined,
-  }) as Array<SavedObjectReference & SerializableRecord>;
+  }) as Array<Reference & SerializableRecord>;
 
   const serializableVisualization = visualization as LensAppState['visualization'] &
     SerializableRecord;

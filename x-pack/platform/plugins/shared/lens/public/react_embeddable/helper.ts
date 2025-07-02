@@ -17,7 +17,7 @@ import { isObject } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { RenderMode } from '@kbn/expressions-plugin/common';
-import { SavedObjectReference } from '@kbn/core/types';
+import type { Reference } from '@kbn/content-management-utils';
 import type {
   LensEmbeddableStartServices,
   LensRuntimeState,
@@ -72,7 +72,7 @@ export async function deserializeState(
     | 'uiSettings'
   >,
   rawState: LensSerializedState,
-  references?: SavedObjectReference[]
+  references?: Reference[]
 ) {
   const fallbackAttributes = createEmptyLensState().attributes;
   if (rawState.savedObjectId) {

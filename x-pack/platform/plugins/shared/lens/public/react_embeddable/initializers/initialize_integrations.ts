@@ -12,7 +12,7 @@ import {
 } from '@kbn/es-query';
 import { omit } from 'lodash';
 import type { HasSerializableState, SerializedPanelState } from '@kbn/presentation-publishing';
-import { SavedObjectReference } from '@kbn/core/types';
+import type { Reference } from '@kbn/content-management-utils';
 import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import { isTextBasedLanguage } from '../helper';
 import type { GetStateType, LensEmbeddableStartServices, LensRuntimeState } from '../types';
@@ -23,7 +23,7 @@ function cleanupSerializedState({
   references,
 }: {
   rawState: LensRuntimeState;
-  references: SavedObjectReference[];
+  references: Reference[];
 }) {
   const cleanedState = omit(rawState, 'searchSessionId');
   return {

@@ -205,7 +205,7 @@ function fromDocumentToSerializedState(
 const getDocToSave = (
   lastKnownDoc: LensDocument,
   saveProps: SaveProps,
-  references: SavedObjectReference[]
+  references: Reference[]
 ): LensDocument => {
   const docToSave = {
     ...removePinnedFilters(lastKnownDoc)!,

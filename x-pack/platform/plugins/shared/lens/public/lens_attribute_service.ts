@@ -5,24 +5,18 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import type { SavedObjectReference } from '@kbn/core/server';
+import type { Reference } from '@kbn/content-management-utils';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { noop } from 'lodash';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import type { LensPluginStartDependencies } from './plugin';
-import type {
-  LensSavedObject,
-  LensSavedObjectAttributes as LensSavedObjectAttributesWithoutReferences,
-} from '../common/content_management';
+import type { LensSavedObjectAttributes as LensSavedObjectAttributesWithoutReferences } from '../common/content_management';
 import { extract, inject } from '../common/embeddable_factory';
 import { SavedObjectIndexStore, checkForDuplicateTitle } from './persistence';
 import { DOC_TYPE } from '../common/constants';
 import { SharingSavedObjectProps } from './types';
 import { LensRuntimeState, LensSavedObjectAttributes } from './react_embeddable/types';
-
-type Reference = LensSavedObject['references'][number];
 
 type CheckDuplicateTitleProps = OnSaveProps & {
   id?: string;
@@ -45,11 +39,11 @@ export interface LensAttributesService {
   checkForDuplicateTitle: (props: CheckDuplicateTitleProps) => Promise<{ isDuplicate: boolean }>;
   injectReferences: (
     runtimeState: LensRuntimeState,
-    references: SavedObjectReference[] | undefined
+    references: Reference[] | undefined
   ) => LensRuntimeState;
   extractReferences: (runtimeState: LensRuntimeState) => {
     rawState: LensRuntimeState;
-    references: SavedObjectReference[];
+    references: Reference[];
   };
 }
 
