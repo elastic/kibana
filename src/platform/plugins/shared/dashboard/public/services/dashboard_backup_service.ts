@@ -30,14 +30,14 @@ const getPanelsGetError = (message: string) =>
     values: { message },
   });
 
-export type DASHBOARD_BACKUP_STATE = Partial<DashboardState> & {
+export type DashboardBackupState = Partial<DashboardState> & {
   viewMode?: ViewMode;
 };
 
 interface DashboardBackupServiceType {
   clearState: (id?: string) => void;
-  getState: (id: string | undefined) => DASHBOARD_BACKUP_STATE | undefined;
-  setState: (id: string | undefined, backupState: DASHBOARD_BACKUP_STATE) => void;
+  getState: (id: string | undefined) => DashboardBackupState | undefined;
+  setState: (id: string | undefined, backupState: DashboardBackupState) => void;
   getViewMode: () => ViewMode;
   storeViewMode: (viewMode: ViewMode) => void;
   getDashboardIdsWithUnsavedChanges: () => string[];
@@ -114,7 +114,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
     }
   }
 
-  public setState(id = DASHBOARD_PANELS_UNSAVED_ID, backupState: DASHBOARD_BACKUP_STATE) {
+  public setState(id = DASHBOARD_PANELS_UNSAVED_ID, backupState: DashboardBackupState) {
     try {
       const allSpaces = this.sessionStorage.get(DASHBOARD_STATE_SESSION_KEY) ?? {};
       set(allSpaces, [this.activeSpaceId, id], backupState);
@@ -162,12 +162,12 @@ class DashboardBackupService implements DashboardBackupServiceType {
     return hasUnsavedEdits(dashboards[id]);
   }
 
-  private getDashboards(): { [key: string]: DASHBOARD_BACKUP_STATE } {
+  private getDashboards(): { [key: string]: DashboardBackupState } {
     return this.sessionStorage.get(DASHBOARD_STATE_SESSION_KEY)?.[this.activeSpaceId] ?? {};
   }
 }
 
-function hasUnsavedEdits(backupState?: DASHBOARD_BACKUP_STATE) {
+function hasUnsavedEdits(backupState?: DashboardBackupState) {
   return backupState
     ? backupState.viewMode === 'edit' &&
         Object.keys(backupState).some(

@@ -26,7 +26,7 @@ import {
   tap,
 } from 'rxjs';
 import {
-  DASHBOARD_BACKUP_STATE,
+  DashboardBackupState,
   getDashboardBackupService,
 } from '../services/dashboard_backup_service';
 import { initializeLayoutManager } from './layout_manager';
@@ -125,7 +125,7 @@ export function initializeUnsavedChangesManager({
 
       // backup unsaved changes if configured to do so
       if (creationOptions?.useSessionStorageIntegration) {
-        const dashboardBackupState: DASHBOARD_BACKUP_STATE = omit(dashboardChanges ?? {}, [
+        const dashboardBackupState: DashboardBackupState = omit(dashboardChanges ?? {}, [
           'timeRange',
           'refreshInterval',
         ]);
