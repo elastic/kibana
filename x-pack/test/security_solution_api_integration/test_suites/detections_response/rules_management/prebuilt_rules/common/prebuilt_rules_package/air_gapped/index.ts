@@ -8,7 +8,8 @@
 import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
-  describe('Air-gapped environment with pre-bundled packages', () => {
+  describe('Air-gapped environment with pre-bundled packages', function () {
+    this.tags('skipFIPS');
     loadTestFile(require.resolve('./install_bundled_package'));
     loadTestFile(require.resolve('./prerelease_packages'));
   });

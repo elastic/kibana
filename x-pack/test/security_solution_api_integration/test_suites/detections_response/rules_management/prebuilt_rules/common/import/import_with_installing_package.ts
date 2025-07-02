@@ -32,8 +32,8 @@ export default ({ getService }: FtrProviderContext): void => {
     rule_id: PREBUILT_RULE_ID_A,
     version: 3,
     type: 'query',
-    name: 'Mock rule A from mock 90.0.0 package',
-    description: 'Mock rule A from mock 90.0.0 package',
+    name: 'Mock rule A from mock 99.0.0 package',
+    description: 'Mock rule A from mock 99.0.0 package',
     risk_score: 47,
     severity: 'medium',
     from: 'now-30m',
@@ -53,7 +53,7 @@ export default ({ getService }: FtrProviderContext): void => {
     rule_id: PREBUILT_RULE_ID_B,
     version: 3,
     type: 'eql',
-    name: 'Mock rule B from mock 90.0.0 package',
+    name: 'Mock rule B from mock 99.0.0 package',
     description: 'Custom description',
     tags: ['custom-tag'],
     risk_score: 47,
@@ -252,7 +252,7 @@ async function installMockPrebuiltRulesPackageWithTestRules(
   supertest: SuperTest.Agent
 ): Promise<void> {
   const buffer = fs.readFileSync(
-    path.join(path.dirname(__filename), './fixtures/packages/security_detection_engine-90.0.0.zip')
+    path.join(path.dirname(__filename), '../fixtures/packages/security_detection_engine-99.0.0.zip')
   );
   const response = await supertest
     .post('/api/fleet/epm/packages')
@@ -270,7 +270,7 @@ async function installMockPrebuiltRulesPackageWithTestRules(
 
 function deleteMockPrebuiltRulesPackage(supertest: SuperTest.Agent): SuperTest.Test {
   return supertest
-    .delete('/api/fleet/epm/packages/security_detection_engine/90.0.0')
+    .delete('/api/fleet/epm/packages/security_detection_engine/99.0.0')
     .set('kbn-xsrf', 'xxxx')
     .set('elastic-api-version', '2023-10-31')
     .send();
