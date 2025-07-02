@@ -262,7 +262,10 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
         width: tableColumnWidths.title,
         render: (objectTitle: string, job) => {
           return (
-            <div data-test-subj="reportingListItemObjectTitle">
+            <div
+              data-test-subj="reportingListItemObjectTitle"
+              css={({ euiTheme }: UseEuiTheme) => css({ paddingTop: euiTheme.size.s })}
+            >
               <EuiLink
                 data-test-subj={`viewReportingLink-${job.id}`}
                 onClick={() => this.setState({ selectedJob: job })}
@@ -397,7 +400,7 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
             ),
             'data-test-subj': 'reportViewInfoLink',
             type: 'icon',
-            icon: 'iInCircle',
+            icon: 'info',
             onClick: (job) => this.setState({ selectedJob: job }),
           },
           {

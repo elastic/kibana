@@ -75,6 +75,7 @@ import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/ap
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { PageLoader } from '../../../../common/components/page_loader';
 
 const QUERY_ID = 'UsersDetailsQueryId';
 const ES_USER_FIELD = 'user.name';
@@ -116,7 +117,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView } = useDataView();
+  const { dataView, status } = useDataView();
   const { dataViewSpec } = useDataViewSpec();
   const experimentalSelectedPatterns = useSelectedPatterns();
 
@@ -211,6 +212,10 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     enabled: canReadAssetCriticality,
     onChange: calculateEntityRiskScore,
   });
+
+  if (newDataViewPickerEnabled && status === 'pristine') {
+    return <PageLoader />;
+  }
 
   return (
     <>

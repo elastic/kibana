@@ -15,6 +15,10 @@ import {
 } from '@kbn/onechat-common/agents';
 import { extractTextContent } from './messages';
 
+export const isStreamEvent = (input: any): input is LangchainStreamEvent => {
+  return 'event' in input && 'name' in input;
+};
+
 export const matchGraphName = (event: LangchainStreamEvent, graphName: string): boolean => {
   return event.metadata.graphName === graphName;
 };

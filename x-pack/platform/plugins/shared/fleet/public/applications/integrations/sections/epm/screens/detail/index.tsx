@@ -173,7 +173,7 @@ export function Detail() {
   // edit readme state
 
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [shouldAllowEdit, setShouldAllowEdit] = useState(false);
+  const [isCustomPackage, setIsCustomPackage] = useState(false);
 
   // Package info state
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
@@ -301,7 +301,7 @@ export function Detail() {
     if (packageInfoIsFetchedAfterMount && packageInfoData?.item) {
       const packageInfoResponse = packageInfoData.item;
       setPackageInfo(packageInfoResponse);
-      setShouldAllowEdit(
+      setIsCustomPackage(
         (packageInfoResponse?.installationInfo?.install_source &&
           CUSTOM_INTEGRATION_SOURCES.includes(
             packageInfoResponse.installationInfo?.install_source
@@ -578,7 +578,7 @@ export function Detail() {
                           tourOffset={10}
                         >
                           <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
-                            {shouldAllowEdit && (
+                            {isCustomPackage && (
                               <EuiFlexItem grow={false}>
                                 <EditIntegrationButton
                                   handleEditIntegrationClick={handleEditIntegrationClick}
@@ -641,7 +641,7 @@ export function Detail() {
       versionLabel,
       versionOptions,
       handleEditIntegrationClick,
-      shouldAllowEdit,
+      isCustomPackage,
     ]
   );
 
@@ -859,6 +859,7 @@ export function Detail() {
               packageInfo={packageInfo}
               packageMetadata={packageInfoData?.metadata}
               startServices={services}
+              isCustomPackage={isCustomPackage}
             />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
