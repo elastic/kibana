@@ -34,7 +34,11 @@ export const CHANGES_FUNCTION_NAME = 'changes';
 
 export const RETRIEVE_DOCUMENTATION_NAME = 'retrieve_elastic_doc';
 
-// APM
+// APM tools
 export const GET_APM_DATASET_INFO_FUNCTION_NAME = 'get_apm_dataset_info';
 export const GET_APM_DOWNSTREAM_DEPENDENCIES_FUNCTION_NAME = 'get_apm_downstream_dependencies';
 export const GET_APM_SERVICES_LIST_FUNCTION_NAME = 'get_apm_services_list';
+
+// Deprecated tools
+export const GET_APM_TIMESERIES_FUNCTION_NAME = 'get_apm_timeseries';
+export const LENS_FUNCTION_NAME = 'lens';

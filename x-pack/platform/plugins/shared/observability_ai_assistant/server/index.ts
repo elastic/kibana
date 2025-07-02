@@ -45,6 +45,8 @@ export {
   GET_APM_DATASET_INFO_FUNCTION_NAME,
   GET_APM_DOWNSTREAM_DEPENDENCIES_FUNCTION_NAME,
   GET_APM_SERVICES_LIST_FUNCTION_NAME,
+  GET_APM_TIMESERIES_FUNCTION_NAME,
+  LENS_FUNCTION_NAME,
 } from '../common';
 
 export { streamIntoObservable } from './service/util/stream_into_observable';

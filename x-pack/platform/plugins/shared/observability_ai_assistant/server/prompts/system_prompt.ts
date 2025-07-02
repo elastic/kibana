@@ -261,9 +261,9 @@ export function getObservabilitySystemPrompt({
       );
     }
 
-    if (isFunctionAvailable('get_apm_downstream_dependencies')) {
+    if (isFunctionAvailable(GET_APM_DOWNSTREAM_DEPENDENCIES_FUNCTION_NAME)) {
       usage.push(
-        `**Service/APM Dependencies:** Use \`get_apm_downstream_dependencies\`. Extract the \`service.name\` correctly from the user query. Follow these steps:
+        `**Service/APM Dependencies:** Use \`${GET_APM_DOWNSTREAM_DEPENDENCIES_FUNCTION_NAME}\`. Extract the \`service.name\` correctly from the user query. Follow these steps:
           *  **Prioritize User-Specified Time:** First, you **MUST** scan the user's query for any statement of time (e.g., "last hour," "past 30 minutes," "between 2pm and 4pm yesterday"). 
           *  **Override Defaults:** If a time range is found in the query, you **MUST** use it. This user-provided time range **ALWAYS** takes precedence over and replaces any default or contextual time range (like \`now-15m\`).
           *  **Handle Missing Time:** If, and only if, the user provides no time range information in their query, you **MUST** ask them for the desired start and end times before proceeding. Do not use any default time range in this scenario.
