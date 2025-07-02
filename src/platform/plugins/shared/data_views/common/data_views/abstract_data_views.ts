@@ -235,6 +235,9 @@ export abstract class AbstractDataView {
     this.originalSavedObjectBody = this.getAsSavedObjectBody();
   };
 
+  /**
+   * Returns true if the data view is persisted, and false if the dataview is adhoc.
+   */
   isPersisted() {
     return typeof this.version === 'string';
   }
