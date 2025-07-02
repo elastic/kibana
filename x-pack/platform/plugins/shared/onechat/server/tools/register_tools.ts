@@ -17,7 +17,6 @@ import {
   listIndicesTool,
   indexExplorerTool,
 } from './retrieval';
-import { researcherTool } from '../services/agents/researcher';
 
 export const registerTools = ({ tools: registry }: { tools: ToolsServiceSetup }) => {
   const tools: Array<RegisteredTool<any, any>> = [
@@ -29,7 +28,6 @@ export const registerTools = ({ tools: registry }: { tools: ToolsServiceSetup })
     getIndexMappingsTool(),
     listIndicesTool(),
     indexExplorerTool(),
-    researcherTool(),
   ];
 
   tools.forEach((tool) => {

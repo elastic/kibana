@@ -27,7 +27,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 import { ObservabilityConfig } from '.';
-import { observabilityFeatureId } from '../common';
+import { OBSERVABILITY_TIERED_FEATURES, observabilityFeatureId } from '../common';
 import {
   kubernetesGuideConfig,
   kubernetesGuideId,
@@ -101,6 +101,8 @@ export class ObservabilityPlugin
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
 
     core.uiSettings.register(uiSettings);
+
+    core.pricing.registerProductFeatures(OBSERVABILITY_TIERED_FEATURES);
 
     if (config.annotations.enabled) {
       annotationsApiPromise = bootstrapAnnotations({

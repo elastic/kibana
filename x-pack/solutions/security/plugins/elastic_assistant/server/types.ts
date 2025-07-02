@@ -248,7 +248,7 @@ export interface AssistantTool {
   description: string;
   sourceRegister: string;
   isSupported: (params: AssistantToolParams) => boolean;
-  getTool: (params: AssistantToolParams) => StructuredToolInterface | null;
+  getTool: (params: AssistantToolParams) => Promise<StructuredToolInterface | null>;
 }
 
 export type AssistantToolLlm =
@@ -285,3 +285,14 @@ export interface AssistantToolParams {
   telemetry?: AnalyticsServiceSetup;
   createLlmInstance?: () => Promise<AssistantToolLlm>;
 }
+
+/**
+ * Helper type for working with AssistantToolParams when some properties are required.
+ *
+ *
+ * ```ts
+ * export type MyNewTypeWithAssistantContext = Require<AssistantToolParams, 'assistantContext'>
+ * ```
+ */
+
+export type Require<T extends object, P extends keyof T> = Omit<T, P> & Required<Pick<T, P>>;
