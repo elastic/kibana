@@ -46,15 +46,15 @@ xpack.fleet.internal.registry.excludePackages: [
 ]
 
 xpack.actions.enabledActionTypes: [
-  'email',
-  'webhook',
-  'Jira',
-  'MS Teams',
-  'OpsGenie',
-  'PagerDuty',
-  'Slack',
-  'IBM Resilient',
-  'ServiceNow',
-  'Tines',
-  'Torq'
+  '.email',
+  '.webhook',
+  '.jira',
+  '.teams',
+  '.opsgenie',
+  '.pagerduty',
+  '.slack',
+  '.resilient',
+  '.servicenow',
+  '.tines',
+  '.torq'
 ]
