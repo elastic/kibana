@@ -38,6 +38,7 @@ import { map } from 'lodash';
 import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import type { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_services/providers';
 import { getMlNodeCount } from '@kbn/ml-plugin/server/lib/node_utils';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
 import { GetElser } from '../../types';
 import {
