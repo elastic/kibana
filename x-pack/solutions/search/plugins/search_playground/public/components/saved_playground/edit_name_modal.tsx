@@ -53,7 +53,12 @@ export const EditPlaygroundNameModal = ({
   const isInvalid = nameError !== null;
 
   return (
-    <EuiModal initialFocus="[name=playgroundName]" aria-labelledby={modalTitleId} onClose={onClose}>
+    <EuiModal
+      initialFocus="[name=playgroundName]"
+      aria-labelledby={modalTitleId}
+      onClose={onClose}
+      data-test-subj="edit-playground-name-modal"
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
