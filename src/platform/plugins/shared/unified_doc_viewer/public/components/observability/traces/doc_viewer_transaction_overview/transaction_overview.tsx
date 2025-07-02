@@ -22,7 +22,7 @@ import {
 import { getFlattenedTransactionDocumentOverview } from '@kbn/discover-utils/src';
 import { useDataViewFields } from '../../../../hooks/use_data_view_fields';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
-import { transactionFields } from './resources/fields';
+import { transactionFields, allTransactionFields } from './resources/fields';
 import { getTransactionFieldConfiguration } from './resources/get_transaction_field_configuration';
 import { TransactionSummaryField } from './sub_components/transaction_summary_field';
 import { TransactionDurationSummary } from './sub_components/transaction_duration_summary';
@@ -65,7 +65,7 @@ export function TransactionOverview({
     [dataView, fieldFormats, hit]
   );
   const { dataViewFields } = useDataViewFields({
-    fields: transactionFields,
+    fields: allTransactionFields,
     dataView,
     columnsMeta,
   });
@@ -124,6 +124,7 @@ export function TransactionOverview({
                 {traceId && transactionId && (
                   <Trace
                     fields={fieldConfigurations}
+                    fieldTypes={dataViewFields}
                     traceId={traceId}
                     docId={transactionId}
                     displayType="transaction"
