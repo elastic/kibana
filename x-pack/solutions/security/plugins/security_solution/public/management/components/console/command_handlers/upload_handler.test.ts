@@ -30,6 +30,7 @@ describe('UploadCommandHandler', () => {
 
   describe('initializeArgState', () => {
     it('should NOT initialize arg state for file selectors from parsed input', () => {
+      // @ts-expect-error - Mock object missing input and hasArgs properties
       const parsedInput: ParsedCommandInterface = {
         name: 'upload',
         args: {
@@ -40,8 +41,10 @@ describe('UploadCommandHandler', () => {
       };
 
       const enteredCommand: EnteredCommand = {
+        // @ts-expect-error - Mock object missing required CommandDefinition properties
         commandDefinition: {},
         argsWithValueSelectors: {
+          // @ts-expect-error - Mock object missing required CommandArgDefinition properties
           file: {},
         },
         argState: {},
@@ -55,6 +58,7 @@ describe('UploadCommandHandler', () => {
     });
 
     it('should not overwrite existing arg state', () => {
+      // @ts-expect-error - Mock object missing input and hasArgs properties
       const parsedInput: ParsedCommandInterface = {
         name: 'upload',
         args: {
@@ -64,8 +68,10 @@ describe('UploadCommandHandler', () => {
       };
 
       const enteredCommand: EnteredCommand = {
+        // @ts-expect-error - Mock object missing required CommandDefinition properties
         commandDefinition: {},
         argsWithValueSelectors: {
+          // @ts-expect-error - Mock object missing required CommandArgDefinition properties
           file: {},
         },
         argState: {
@@ -81,6 +87,7 @@ describe('UploadCommandHandler', () => {
     });
 
     it('should handle enteredCommand without argsWithValueSelectors', () => {
+      // @ts-expect-error - Mock object missing input and hasArgs properties
       const parsedInput: ParsedCommandInterface = {
         name: 'upload',
         args: {},
@@ -88,6 +95,7 @@ describe('UploadCommandHandler', () => {
       };
 
       const enteredCommand: EnteredCommand = {
+        // @ts-expect-error - Mock object missing required CommandDefinition properties
         commandDefinition: {},
         argsWithValueSelectors: undefined,
         argState: {},
@@ -99,6 +107,7 @@ describe('UploadCommandHandler', () => {
 
   describe('reconstructCommandText', () => {
     it('should reconstruct command text with arguments', () => {
+      // @ts-expect-error - Mock object missing input and hasArgs properties
       const parsedInput: ParsedCommandInterface = {
         name: 'upload',
         args: {
@@ -115,6 +124,7 @@ describe('UploadCommandHandler', () => {
     });
 
     it('should handle values with spaces by adding quotes', () => {
+      // @ts-expect-error - Mock object missing input and hasArgs properties
       const parsedInput: ParsedCommandInterface = {
         name: 'upload',
         args: {
@@ -130,6 +140,7 @@ describe('UploadCommandHandler', () => {
     });
 
     it('should handle empty string values with quotes', () => {
+      // @ts-expect-error - Mock object missing input and hasArgs properties
       const parsedInput: ParsedCommandInterface = {
         name: 'upload',
         args: {
@@ -147,6 +158,7 @@ describe('UploadCommandHandler', () => {
 
   describe('syncState', () => {
     it('should sync selector values to parsed input', () => {
+      // @ts-expect-error - Mock object missing input and hasArgs properties
       const parsedInput: ParsedCommandInterface = {
         name: 'upload',
         args: {
@@ -156,8 +168,10 @@ describe('UploadCommandHandler', () => {
       };
 
       const enteredCommand: EnteredCommand = {
+        // @ts-expect-error - Mock object missing required CommandDefinition properties
         commandDefinition: {},
         argsWithValueSelectors: {
+          // @ts-expect-error - Mock object missing required CommandArgDefinition properties
           file: {},
         },
         argState: {
@@ -171,6 +185,7 @@ describe('UploadCommandHandler', () => {
     });
 
     it('should handle multiple selector values', () => {
+      // @ts-expect-error - Mock object missing input and hasArgs properties
       const parsedInput: ParsedCommandInterface = {
         name: 'upload',
         args: {
@@ -181,9 +196,12 @@ describe('UploadCommandHandler', () => {
       };
 
       const enteredCommand: EnteredCommand = {
+        // @ts-expect-error - Mock object missing required CommandDefinition properties
         commandDefinition: {},
         argsWithValueSelectors: {
+          // @ts-expect-error - Mock object missing required CommandArgDefinition properties
           file: {},
+          // @ts-expect-error - Mock object missing required CommandArgDefinition properties
           path: {},
         },
         argState: {
@@ -199,6 +217,7 @@ describe('UploadCommandHandler', () => {
     });
 
     it('should handle enteredCommand without argsWithValueSelectors', () => {
+      // @ts-expect-error - Mock object missing input and hasArgs properties
       const parsedInput: ParsedCommandInterface = {
         name: 'upload',
         args: {},
@@ -206,6 +225,7 @@ describe('UploadCommandHandler', () => {
       };
 
       const enteredCommand: EnteredCommand = {
+        // @ts-expect-error - Mock object missing required CommandDefinition properties
         commandDefinition: {},
         argsWithValueSelectors: undefined,
         argState: {},

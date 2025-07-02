@@ -30,6 +30,7 @@ describe('RunscriptCommandHandler', () => {
 
   describe('initializeArgState', () => {
     it('should initialize arg state from parsed input', () => {
+      // @ts-expect-error - Mock object missing input and hasArgs properties
       const parsedInput: ParsedCommandInterface = {
         name: 'runscript',
         args: {
@@ -40,9 +41,12 @@ describe('RunscriptCommandHandler', () => {
       };
 
       const enteredCommand: EnteredCommand = {
+        // @ts-expect-error - Mock object missing required CommandDefinition properties
         commandDefinition: {},
         argsWithValueSelectors: {
+          // @ts-expect-error - Mock object missing required CommandArgDefinition properties
           ScriptName: {},
+          // @ts-expect-error - Mock object missing required CommandArgDefinition properties
           CloudFile: {},
         },
         argState: {},
@@ -59,6 +63,7 @@ describe('RunscriptCommandHandler', () => {
     });
 
     it('should not overwrite existing arg state', () => {
+      // @ts-expect-error - Mock object missing input and hasArgs properties
       const parsedInput: ParsedCommandInterface = {
         name: 'runscript',
         args: {
@@ -68,8 +73,10 @@ describe('RunscriptCommandHandler', () => {
       };
 
       const enteredCommand: EnteredCommand = {
+        // @ts-expect-error - Mock object missing required CommandDefinition properties
         commandDefinition: {},
         argsWithValueSelectors: {
+          // @ts-expect-error - Mock object missing required CommandArgDefinition properties
           ScriptName: {},
         },
         argState: {
@@ -85,6 +92,7 @@ describe('RunscriptCommandHandler', () => {
     });
 
     it('should handle enteredCommand without argsWithValueSelectors', () => {
+      // @ts-expect-error - Mock object missing input and hasArgs properties
       const parsedInput: ParsedCommandInterface = {
         name: 'runscript',
         args: {},
@@ -92,6 +100,7 @@ describe('RunscriptCommandHandler', () => {
       };
 
       const enteredCommand: EnteredCommand = {
+        // @ts-expect-error - Mock object missing required CommandDefinition properties
         commandDefinition: {},
         argsWithValueSelectors: undefined,
         argState: {},
@@ -103,6 +112,7 @@ describe('RunscriptCommandHandler', () => {
 
   describe('reconstructCommandText', () => {
     it('should reconstruct command text with arguments', () => {
+      // @ts-expect-error - Mock object missing input and hasArgs properties
       const parsedInput: ParsedCommandInterface = {
         name: 'runscript',
         args: {
@@ -121,6 +131,7 @@ describe('RunscriptCommandHandler', () => {
     });
 
     it('should handle values with spaces by adding quotes', () => {
+      // @ts-expect-error - Mock object missing input and hasArgs properties
       const parsedInput: ParsedCommandInterface = {
         name: 'runscript',
         args: {
@@ -138,6 +149,7 @@ describe('RunscriptCommandHandler', () => {
     });
 
     it('should handle boolean arguments', () => {
+      // @ts-expect-error - Mock object missing input and hasArgs properties
       const parsedInput: ParsedCommandInterface = {
         name: 'runscript',
         args: {
@@ -155,6 +167,7 @@ describe('RunscriptCommandHandler', () => {
 
   describe('syncState', () => {
     it('should sync selector values to parsed input', () => {
+      // @ts-expect-error - Mock object missing input and hasArgs properties
       const parsedInput: ParsedCommandInterface = {
         name: 'runscript',
         args: {
@@ -164,8 +177,10 @@ describe('RunscriptCommandHandler', () => {
       };
 
       const enteredCommand: EnteredCommand = {
+        // @ts-expect-error - Mock object missing required CommandDefinition properties
         commandDefinition: {},
         argsWithValueSelectors: {
+          // @ts-expect-error - Mock object missing required CommandArgDefinition properties
           ScriptName: {},
         },
         argState: {
@@ -179,6 +194,7 @@ describe('RunscriptCommandHandler', () => {
     });
 
     it('should handle enteredCommand without argsWithValueSelectors', () => {
+      // @ts-expect-error - Mock object missing input and hasArgs properties
       const parsedInput: ParsedCommandInterface = {
         name: 'runscript',
         args: {},
@@ -186,6 +202,7 @@ describe('RunscriptCommandHandler', () => {
       };
 
       const enteredCommand: EnteredCommand = {
+        // @ts-expect-error - Mock object missing required CommandDefinition properties
         commandDefinition: {},
         argsWithValueSelectors: undefined,
         argState: {},

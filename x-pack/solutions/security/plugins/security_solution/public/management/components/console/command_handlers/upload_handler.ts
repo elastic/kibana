@@ -6,6 +6,8 @@
  */
 
 import { BaseCommandHandler } from './base_command_handler';
+import type { ParsedCommandInterface } from '../service/types';
+import type { EnteredCommand } from '../components/console_state/types';
 
 /**
  * Command handler for the 'upload' command that handles file upload functionality.
@@ -21,15 +23,14 @@ export class UploadCommandHandler extends BaseCommandHandler {
     return [];
   }
 
-  reconstructCommandText(parsedInput: ParsedCommandInterface): string {
-    const configuration: {
-      leftOfCursorText?: string;
-      rightOfCursorText?: string;
-      parsedInput: ParsedCommandInterface;
-    } = {
+  reconstructCommandText(parsedInput: ParsedCommandInterface): {
+    leftOfCursorText?: string;
+    rightOfCursorText?: string;
+    parsedInput: ParsedCommandInterface;
+  } {
+    return {
       parsedInput,
     };
-    return configuration;
   }
 
   // No special initializeArgState needed - let the standard selector system handle it
