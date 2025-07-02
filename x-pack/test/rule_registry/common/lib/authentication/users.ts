@@ -32,6 +32,7 @@ import {
   securitySolutionOnlyAllSpacesAllWithReadESIndices,
   stackAlertsOnlyReadSpacesAll as stackAlertsOnlyReadSpacesAllRole,
   stackAlertsOnlyAllSpacesAll as stackAlertsOnlyAllSpacesAllRole,
+  securitySolutionOnlyAllSpace2WithReadESIndices,
 } from './roles';
 import type { User } from './types';
 
@@ -170,6 +171,12 @@ export const secOnlySpacesAllEsReadAll: User = {
   username: 'sec_only_all_spaces_all_with_read_es_indices',
   password: 'sec_only_all_spaces_all_with_read_es_indices',
   roles: [securitySolutionOnlyAllSpacesAllWithReadESIndices.name],
+};
+
+export const secOnlySpaces2EsReadAll: User = {
+  username: 'sec_only_all_space2_with_read_es_indices',
+  password: 'sec_only_all_space2_with_read_es_indices',
+  roles: [securitySolutionOnlyAllSpace2WithReadESIndices.name],
 };
 
 export const obsOnlySpacesAll: User = {

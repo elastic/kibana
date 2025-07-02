@@ -17,6 +17,7 @@ import {
   superUser,
   secOnlySpacesAllEsReadAll,
   obsSecReadSpacesAll,
+  secOnlySpaces2EsReadAll,
 } from '../../../common/lib/authentication/users';
 import type { User } from '../../../common/lib/authentication/types';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -269,6 +270,10 @@ export default ({ getService }: FtrProviderContext) => {
         );
 
         expect(Object.keys(resp.alertFields)).toEqual(['base', 'event', 'kibana', 'signal']);
+      });
+
+      it(`${secOnlySpaces2EsReadAll.username} should NOT be able to get alert fields for siem rule types`, async () => {
+        await getAlertFieldsByFeatureId(secOnlySpaces2EsReadAll, ['siem.queryRule'], 'space2', 401);
       });
 
       it(`${secOnlyRead.username} should NOT be able to get alert fields for siem rule types due to lack of ES access`, async () => {
