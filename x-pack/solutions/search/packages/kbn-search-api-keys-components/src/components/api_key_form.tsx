@@ -92,7 +92,10 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = ({ hasTitle = true }) => {
             />
           </EuiButton>
           {showFlyout && (
-            <ApiKeyFlyoutWrapper onCancel={() => setShowFlyout(false)} onSuccess={updateApiKey} />
+            <ApiKeyFlyoutWrapper
+              onCancel={() => setShowFlyout(false)}
+              onSuccess={() => updateApiKey}
+            />
           )}
         </EuiFlexItem>
       )}
