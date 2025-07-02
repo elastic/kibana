@@ -8,7 +8,7 @@
 import { BaseCommandHandler } from './base_command_handler';
 import type { ParsedCommandInterface } from '../service/types';
 import type { EnteredCommand } from '../components/console_state/types';
-import { parseCommandInput } from '../service/parsed_command_input';
+
 /**
  * Command handler for the 'runscript' command that handles custom script execution.
  * Manages argument selectors for ScriptName and CloudFile parameters.
@@ -43,30 +43,26 @@ export class RunscriptCommandHandler extends BaseCommandHandler {
   }
 
   reconstructCommandText(parsedInput: ParsedCommandInterface): {
-    leftOfCursorText: string;
-    rightOfCursorText: string;
+    leftOfCursorText?: string;
+    rightOfCursorText?: string;
     parsedInput: ParsedCommandInterface;
   } {
-    let completeInputText = parsedInput.name; // Initialize with command name
-    // Add arguments with their values including updated selector values
+    let completeInputText = parsedInput.name;
     for (const [parsedInputArgName, argValues] of Object.entries(parsedInput.args)) {
       for (const value of argValues) {
         if (typeof value === 'boolean' && value) {
           completeInputText += ` --${parsedInputArgName}`;
         } else if (typeof value === 'string') {
-          // Add quotes if the value contains spaces
-          const quotedValue = value.includes(' ') ? `"${value}"` : value;
-          completeInputText += ` --${parsedInputArgName}=${quotedValue}`;
+          // Always quote string values for consistency
+          completeInputText += ` --${parsedInputArgName}="${value}"`;
         }
       }
-      const updatedFullParsedInput = parseCommandInput(completeInputText);
-
-      return {
-        leftOfCursorText: completeInputText,
-        rightOfCursorText: '',
-        parsedInput: updatedFullParsedInput,
-      };
     }
+    return {
+      leftOfCursorText: completeInputText,
+      rightOfCursorText: '',
+      parsedInput,
+    };
   }
 
   syncState(parsedInput: ParsedCommandInterface, enteredCommand: EnteredCommand): void {

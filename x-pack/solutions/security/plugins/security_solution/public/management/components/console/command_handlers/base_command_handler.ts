@@ -32,7 +32,11 @@ export interface CommandHandler {
    * Handle command text reconstruction when selector values change.
    * Returns the complete command text including all arguments with proper formatting.
    */
-  reconstructCommandText?(parsedInput: ParsedCommandInterface): string;
+  reconstructCommandText?(parsedInput: ParsedCommandInterface): {
+    leftOfCursorText?: string;
+    rightOfCursorText?: string;
+    parsedInput: ParsedCommandInterface;
+  };
 
   /**
    * Handle any additional state synchronization between parsed input and entered command.
@@ -53,8 +57,14 @@ export abstract class BaseCommandHandler implements CommandHandler {
     return [];
   }
 
-  reconstructCommandText(parsedInput: ParsedCommandInterface): string {
-    return {};
+  reconstructCommandText(parsedInput: ParsedCommandInterface): {
+    leftOfCursorText?: string;
+    rightOfCursorText?: string;
+    parsedInput: ParsedCommandInterface;
+  } {
+    return {
+      parsedInput,
+    };
   }
 
   initializeArgState(parsedInput: ParsedCommandInterface, enteredCommand: EnteredCommand) {}

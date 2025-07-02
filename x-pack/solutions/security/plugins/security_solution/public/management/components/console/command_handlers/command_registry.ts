@@ -45,7 +45,11 @@ export class CommandRegistry {
   /**
    * Reconstruct command text when selector values change.
    */
-  reconstructCommandText(parsedInput: ParsedCommandInterface): string | undefined {
+  reconstructCommandText(parsedInput: ParsedCommandInterface): {
+    leftOfCursorText?: string;
+    rightOfCursorText?: string;
+    parsedInput: ParsedCommandInterface;
+  } {
     const handler = this.handlers.get(parsedInput.name);
     return handler?.reconstructCommandText?.(parsedInput);
   }

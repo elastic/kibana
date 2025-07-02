@@ -61,15 +61,11 @@ const toInputCharacterDisplayString = (
   if (includeArgSelectorValues && item.isArgSelector) {
     // Handle file values: use the filename
     if (item.argState?.value instanceof File) {
-      const filename = item.argState.value.name;
-      const quotedFilename = filename.includes(' ') ? `"${filename}"` : filename;
-      response += `=${quotedFilename}`;
+      response += `="${item.argState.value.name}"`;
     }
     // Handle string values: use valueText if it exists and is not empty
     else if (item.argState?.valueText && item.argState.valueText.trim() !== '') {
-      const value = item.argState.valueText;
-      const quotedValue = value.includes(' ') ? `"${value}"` : value;
-      response += `=${quotedValue}`;
+      response += `="${item.argState.valueText}"`;
     }
     // For empty values, don't add anything (no ="" suffix)
   }
