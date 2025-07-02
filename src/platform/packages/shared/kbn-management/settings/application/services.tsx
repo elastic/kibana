@@ -160,9 +160,8 @@ export const SettingsApplicationKibanaProvider: FC<
           !client.isCustom(settingId) &&
           (!solutionsFiltering ||
             !solution ||
-            solution === 'classic' ||
-            !settingDef.solution ||
-            settingDef.solution === solution)
+            !settingDef.solutions ||
+            settingDef.solutions.includes(solution))
       )
     );
     return normalizeSettings(rawSettings);
