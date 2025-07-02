@@ -79,8 +79,10 @@ describe('CommandRegistry', () => {
 
     it('should call initializeArgState on registered handler', () => {
       registry.register(mockHandler);
-      const parsedInput = { name: 'mock', args: {}, hasArg: jest.fn() } as any;
-      const enteredCommand = {} as any;
+      // @ts-expect-error: Partial mock for test purposes
+      const parsedInput = { name: 'mock', args: {}, hasArg: jest.fn() };
+      // @ts-expect-error: enteredCommand can be any shape for test
+      const enteredCommand = {};
 
       registry.initializeArgState(parsedInput, enteredCommand);
 
@@ -89,7 +91,8 @@ describe('CommandRegistry', () => {
 
     it('should call reconstructCommandText on registered handler', () => {
       registry.register(mockHandler);
-      const parsedInput = { name: 'mock', args: {}, hasArg: jest.fn() } as any;
+      // @ts-expect-error: Partial mock for test purposes
+      const parsedInput = { name: 'mock', args: {}, hasArg: jest.fn() };
 
       const result = registry.reconstructCommandText(parsedInput);
 
@@ -99,8 +102,10 @@ describe('CommandRegistry', () => {
 
     it('should call syncState on registered handler', () => {
       registry.register(mockHandler);
-      const parsedInput = { name: 'mock', args: {}, hasArg: jest.fn() } as any;
-      const enteredCommand = {} as any;
+      // @ts-expect-error: Partial mock for test purposes
+      const parsedInput = { name: 'mock', args: {}, hasArg: jest.fn() };
+      // @ts-expect-error: enteredCommand can be any shape for test
+      const enteredCommand = {};
 
       registry.syncState(parsedInput, enteredCommand);
 
@@ -108,8 +113,10 @@ describe('CommandRegistry', () => {
     });
 
     it('should not throw when calling methods on unregistered commands', () => {
-      const parsedInput = { name: 'unknown', args: {}, hasArg: jest.fn() } as any;
-      const enteredCommand = {} as any;
+      // @ts-expect-error: Partial mock for test purposes
+      const parsedInput = { name: 'unknown', args: {}, hasArg: jest.fn() };
+      // @ts-expect-error: enteredCommand can be any shape for test
+      const enteredCommand = {};
 
       expect(() => registry.initializeArgState(parsedInput, enteredCommand)).not.toThrow();
       expect(() => registry.syncState(parsedInput, enteredCommand)).not.toThrow();
