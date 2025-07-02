@@ -833,7 +833,7 @@ export class Authenticator {
         );
         intermediateSessionStillNeedsToExist = true;
 
-        const updatedSessionValue = await this.session.update(
+        await this.session.update(
           request,
           {
             ...existingSessionValue,
