@@ -12,11 +12,7 @@ import Path from 'path';
 import { REPO_ROOT } from '../lib/paths.mjs';
 import { dedent } from '../lib/indent.mjs';
 import { cleanPaths } from '../lib/clean.mjs';
-import {
-  collectBazelPaths,
-  findPluginCleanPaths,
-  readCleanPatterns,
-} from '../lib/find_clean_paths.mjs';
+import { findPluginCleanPaths, readCleanPatterns } from '../lib/find_clean_paths.mjs';
 
 /** @type {import('../lib/command').Command} */
 export const command = {

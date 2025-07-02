@@ -11,6 +11,7 @@ import Path from 'path';
 import * as Fsp from 'fs/promises';
 
 import * as Peggy from '@kbn/peggy';
+import * as DotText from '@kbn/dot-text';
 import { asyncForEach } from '@kbn/std';
 import { TransformConfig, withFastAsyncTransform } from '@kbn/babel-transform';
 import { makeMatcher } from '@kbn/picomatcher';
@@ -187,6 +188,18 @@ export const BuildPackages: Task = {
                       Path.resolve(pkgDistPath, Path.relative(pkgSrcPath, result.config.path))
                     );
                   }
+
+                  return {
+                    ...rec,
+                    dest: rec.dest.withName(rec.dest.name + '.js'),
+                    content: result.source,
+                  };
+                }
+
+                case '.text': {
+                  const result = await DotText.getJsSource({
+                    path: rec.source.abs,
+                  });
 
                   return {
                     ...rec,
