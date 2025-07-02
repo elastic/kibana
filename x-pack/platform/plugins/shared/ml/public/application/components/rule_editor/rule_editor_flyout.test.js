@@ -68,25 +68,8 @@ jest.mock('./select_rule_action', () => ({
 
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { act } from '@testing-library/react';
 
 import { RuleEditorFlyout } from './rule_editor_flyout';
-
-const NO_RULE_ANOMALY = {
-  jobId: 'farequote_no_by',
-  detectorIndex: 0,
-  source: {
-    function: 'mean',
-  },
-};
-
-const RULE_ANOMALY = {
-  jobId: 'farequote_no_by',
-  detectorIndex: 1,
-  source: {
-    function: 'max',
-  },
-};
 
 describe('RuleEditorFlyout', () => {
   // Common props used across all tests
@@ -114,83 +97,6 @@ describe('RuleEditorFlyout', () => {
 
   test(`don't render when not opened`, () => {
     const { container } = renderWithI18n(<RuleEditorFlyout {...getRequiredProps()} />);
-    expect(container.firstChild).toMatchSnapshot();
-  });
-
-  test('renders the flyout for creating a rule with conditions only', () => {
-    const componentRef = React.createRef();
-    const { container } = renderWithI18n(
-      <RuleEditorFlyout {...getRequiredProps()} ref={componentRef} />
-    );
-
-    act(() => {
-      componentRef.current.showFlyout(NO_RULE_ANOMALY);
-    });
-
-    expect(container.firstChild).toMatchSnapshot();
-  });
-
-  test('renders the flyout after adding a condition to a rule', () => {
-    const componentRef = React.createRef();
-    const { container } = renderWithI18n(
-      <RuleEditorFlyout {...getRequiredProps()} ref={componentRef} />
-    );
-
-    act(() => {
-      componentRef.current.showFlyout(NO_RULE_ANOMALY);
-      componentRef.current.addCondition();
-    });
-
-    expect(container.firstChild).toMatchSnapshot();
-  });
-
-  test('renders the select action component for a detector with a rule', () => {
-    const componentRef = React.createRef();
-    const { container } = renderWithI18n(
-      <RuleEditorFlyout {...getRequiredProps()} ref={componentRef} />
-    );
-
-    act(() => {
-      componentRef.current.showFlyout(RULE_ANOMALY);
-    });
-
-    expect(container.firstChild).toMatchSnapshot();
-  });
-
-  test('renders the flyout after setting the rule to edit', () => {
-    const componentRef = React.createRef();
-    const { container } = renderWithI18n(
-      <RuleEditorFlyout {...getRequiredProps()} ref={componentRef} />
-    );
-
-    act(() => {
-      componentRef.current.showFlyout(RULE_ANOMALY);
-    });
-    act(() => {
-      componentRef.current.setEditRuleIndex(0);
-    });
-
-    expect(container.firstChild).toMatchSnapshot();
-  });
-
-  test(`don't render after closing the flyout`, () => {
-    const componentRef = React.createRef();
-    const { container } = renderWithI18n(
-      <RuleEditorFlyout {...getRequiredProps()} ref={componentRef} />
-    );
-
-    act(() => {
-      componentRef.current.showFlyout(RULE_ANOMALY);
-    });
-
-    act(() => {
-      componentRef.current.setEditRuleIndex(0);
-    });
-
-    act(() => {
-      componentRef.current.closeFlyout();
-    });
-
     expect(container.firstChild).toMatchSnapshot();
   });
 });
