@@ -47,8 +47,6 @@ const BULK_ERROR = {
 };
 
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };
-const EXPECTED_VERSION_PROPS = { if_seq_no: 1, if_primary_term: 1 };
-const mockCurrentTime = new Date('2021-05-01T10:20:30Z');
 const mockSecurityExt = savedObjectsExtensionsMock.createSecurityExtension();
 
 describe('changeObjectAccessControl', () => {
@@ -109,18 +107,6 @@ describe('changeObjectAccessControl', () => {
     client.mget.mockResponseOnce({ docs: result });
   }
 
-  /** Mocks the saved objects client so as to test unsupported server responding with 404 */
-  function mockMgetResultsNotFound() {
-    client.mget.mockResponseOnce({ docs: [] }, { statusCode: 404, headers: {} });
-  }
-
-  /** Asserts that mget is called for the given objects */
-  function expectMgetArgs(...objects: any[]) {
-    const docs = objects.map(({ type, id }) => expect.objectContaining({ _id: `${type}:${id}` }));
-    expect(client.mget).toHaveBeenCalledWith({ docs }, expect.anything());
-  }
-
-  /** Mocks the saved objects client so it returns the expected results */
   function mockBulkResults(...results: Array<{ error: boolean }>) {
     results.forEach(({ error }) => {
       if (error) {
@@ -134,30 +120,6 @@ describe('changeObjectAccessControl', () => {
       errors: false,
       took: 0,
     });
-  }
-
-  /** Asserts that bulk is called for the given objects */
-  function expectBulkArgs(
-    ...objectActions: Array<{
-      object: { type: string; id: string; namespaces?: string[] };
-      action: 'update' | 'delete';
-    }>
-  ) {
-    const operations = objectActions.flatMap(
-      ({ object: { type, id, namespaces = expect.any(Array) }, action }) => {
-        const operation = {
-          [action]: {
-            _id: `${type}:${id}`,
-            _index: `index-for-${type}`,
-            ...EXPECTED_VERSION_PROPS,
-          },
-        };
-        return action === 'update'
-          ? [operation, { doc: { namespaces, updated_at: mockCurrentTime.toISOString() } }] // 'update' uses an operation and document metadata
-          : [operation]; // 'delete' only uses an operation
-      }
-    );
-    expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ operations }));
   }
 
   beforeEach(() => {
