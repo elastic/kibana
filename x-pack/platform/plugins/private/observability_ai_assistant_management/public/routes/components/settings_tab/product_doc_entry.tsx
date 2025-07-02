@@ -18,15 +18,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKnowledgeBase } from '@kbn/ai-assistant';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useGetProductDocStatus } from '../../../hooks/use_get_product_doc_status';
 import { useInstallProductDoc } from '../../../hooks/use_install_product_doc';
 import { useUninstallProductDoc } from '../../../hooks/use_uninstall_product_doc';
-import { useAssistantSettings } from './settings_context';
 
 export function ProductDocEntry() {
   const { overlays } = useKibana().services;
-  const { selectedInferenceId } = useAssistantSettings();
+
+  const knowledgeBase = useKnowledgeBase();
+  const selectedInferenceId: string | undefined = knowledgeBase.status.value?.currentInferenceId;
 
   const [isInstalled, setInstalled] = useState<boolean>(true);
   const [isInstalling, setInstalling] = useState<boolean>(false);

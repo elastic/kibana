@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { REACT_QUERY_KEYS } from '../constants';
 import { useKibana } from './use_kibana';
 
-export function useGetProductDocStatus(inferenceId: string) {
+export function useGetProductDocStatus(inferenceId: string | undefined) {
   const { productDocBase } = useKibana().services;
 
   const { isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery({
