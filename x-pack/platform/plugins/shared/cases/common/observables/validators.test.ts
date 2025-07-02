@@ -88,8 +88,24 @@ describe('validateDomain', () => {
     expect(result).toBeUndefined();
   });
 
-  it('should return an error for an invalid domain', () => {
+  it('should return an error for a domain with a label starting with "-"', () => {
     const result = validateDomain('-invalid.com');
+
+    expect(result).toEqual({
+      code: 'ERR_NOT_VALID',
+    });
+  });
+
+  it('should return an error for a domain with a label ending with "-"', () => {
+    const result = validateDomain('invalid-.com');
+
+    expect(result).toEqual({
+      code: 'ERR_NOT_VALID',
+    });
+  });
+
+  it('should return an error for a domain with a label containing "--"', () => {
+    const result = validateDomain('invalid--domain.com');
 
     expect(result).toEqual({
       code: 'ERR_NOT_VALID',

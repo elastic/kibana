@@ -23,7 +23,7 @@ import {
  * (?=.{1,253}$)
  *    Ensures the total length of the domain name is between 1 and 253 characters.
  *
- * (([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)\.)+
+ * ((?!.*--)([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)\.)+
  *    Matches one or more labels separated by dots. Each label:
  *      - Begins and ends with an alphanumeric character (`[a-zA-Z0-9]`).
  *      - Can contain hyphens (`-`) but not consecutively or at the start/end.
@@ -32,7 +32,7 @@ import {
  * [a-zA-Z]{2,63}
  *    Ensures the top-level domain (TLD) is alphabetic and between 2 and 63 characters long
  */
-const DOMAIN_REGEX = /^(?=.{1,253}$)(([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)\.)+[a-zA-Z]{2,63}$/;
+const DOMAIN_REGEX = /^(?=.{1,253}$)((?!.*--)([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)\.)+[a-zA-Z]{2,63}$/;
 const GENERIC_REGEX = /^[a-zA-Z0-9._:/\\-]+$/;
 
 export interface ValidationError {
