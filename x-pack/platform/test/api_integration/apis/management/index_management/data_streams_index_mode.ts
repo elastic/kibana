@@ -14,6 +14,7 @@ import { datastreamsHelpers } from './lib/datastreams.helpers';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
+  const esVersion = getService('esVersion');
 
   const { createDataStream, deleteDataStream } = datastreamsHelpers(getService);
 
@@ -56,10 +57,14 @@ export default function ({ getService }: FtrProviderContext) {
       }> = [
         { enabled: true, prior_logs_usage: true, indexMode: 'logsdb' },
         { enabled: false, prior_logs_usage: true, indexMode: 'standard' },
-        // In stateful Kibana, if prior_logs_usage is set to true, the cluster.logsdb.enabled setting is false by default, so standard index mode
+        // In stateful Kibana, when cluster.logsb.enabled setting is not set, the index mode is always standard
+        // For versions 9.0+, if prior_logs_usage is set to false, the cluster.logsdb.enabled setting is true by default, so logsdb index mode
         { enabled: null, prior_logs_usage: true, indexMode: 'standard' },
-        // In stateful Kibana, if prior_logs_usage is set to false, the cluster.logsdb.enabled setting is true by default, so logsdb index mode
-        { enabled: null, prior_logs_usage: false, indexMode: 'logsdb' },
+        {
+          enabled: null,
+          prior_logs_usage: false,
+          indexMode: esVersion.matchRange('>=9.0.0') ? 'logsdb' : 'standard',
+        },
       ];
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
