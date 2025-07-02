@@ -159,8 +159,8 @@ class AgentProfileClientImpl implements AgentProfileClient {
       throw createAgentNotFoundError({ agentId: id });
     }
 
-    const result = await this.storage.getClient().delete({ id });
-    return result.result === 'deleted';
+    const deleteResponse = await this.storage.getClient().delete({ id });
+    return deleteResponse.result === 'deleted';
   }
 
   private async exists(agentId: string): Promise<boolean> {
