@@ -5,7 +5,9 @@
  * 2.0.
  */
 import {
+  EuiButtonIcon,
   EuiDataGrid,
+  EuiDataGridControlColumn,
   EuiDataGridProps,
   EuiDataGridRowHeightsOptions,
   EuiDataGridSorting,
@@ -26,6 +28,9 @@ export function PreviewTable({
   toolbarVisibility = false,
   setVisibleColumns,
   columnOrderHint = [],
+  selectableRow = false,
+  selectedRowIndex,
+  onRowSelected,
 }: {
   documents: SampleDocument[];
   displayColumns?: string[];
@@ -37,6 +42,9 @@ export function PreviewTable({
   columnOrderHint?: string[];
   sorting?: SimulationContext['previewColumnsSorting'];
   setSorting?: (sorting: SimulationContext['previewColumnsSorting']) => void;
+  selectableRow?: boolean;
+  selectedRowIndex?: number;
+  onRowSelected?: (selectedRowIndex: number) => void;
 }) {
   // Determine canonical column order
   const canonicalColumnOrder = useMemo(() => {
@@ -132,11 +140,33 @@ export function PreviewTable({
     }));
   }, [canonicalColumnOrder, setSorting, setVisibleColumns, visibleColumns.length]);
 
+  const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(
+    () => [
+      {
+        id: 'selection',
+        width: 36,
+        headerCellRender: () => null,
+        rowCellRender: ({ rowIndex }) => (
+          <EuiButtonIcon
+            onClick={() => {
+              if (selectableRow && onRowSelected) {
+                onRowSelected(rowIndex);
+              }
+            }}
+            iconType={selectedRowIndex === rowIndex && selectableRow ? 'minimize' : 'expand'}
+          />
+        ),
+      },
+    ],
+    [onRowSelected, selectableRow, selectedRowIndex]
+  );
+
   return (
     <EuiDataGrid
       aria-label={i18n.translate('xpack.streams.resultPanel.euiDataGrid.previewLabel', {
         defaultMessage: 'Preview',
       })}
+      leadingControlColumns={leadingControlColumns}
       columns={gridColumns}
       columnVisibility={{
         visibleColumns,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   EuiFilterButton,
   EuiFilterGroup,
@@ -19,10 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { Sample } from '@kbn/grok-ui';
-import { FlattenRecord, GrokProcessorDefinition, SampleDocument } from '@kbn/streams-schema';
-import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
-import { DataTableRecord } from '@kbn/discover-utils';
-import useAsync from 'react-use/lib/useAsync';
+import { GrokProcessorDefinition, SampleDocument } from '@kbn/streams-schema';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { useKibana } from '../../../hooks/use_kibana';
 import { PreviewTable } from '../preview_table';
@@ -46,6 +43,7 @@ import { WithUIAttributes } from './types';
 import { AssetImage } from '../../asset_image';
 import { docViewJson } from './doc_viewer_json';
 import { docViewDiff } from './doc_viewer_diff';
+import { DataTableRecordWithIndex, PreviewFlyout } from './preview_flyout';
 
 export const FLYOUT_WIDTH_KEY = 'streamsEnrichment:flyoutWidth';
 
@@ -200,7 +198,6 @@ const PreviewDocumentsGroupBy = () => {
 
 const OutcomePreviewTable = () => {
   const processors = useSimulatorSelector((state) => state.context.processors);
-  const streamName = useSimulatorSelector((state) => state.context.streamName);
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
   const previewColumnsSorting = useSimulatorSelector(
@@ -220,8 +217,8 @@ const OutcomePreviewTable = () => {
     selectOriginalPreviewRecords(snapshot.context)
   );
 
-  const { core, dependencies } = useKibana();
-  const { data, unifiedDocViewer } = dependencies.start;
+  const { dependencies } = useKibana();
+  const { unifiedDocViewer } = dependencies.start;
 
   const docViewsRegistry = useMemo(() => {
     const docViewers = unifiedDocViewer.registry.getAll();
@@ -331,29 +328,48 @@ const OutcomePreviewTable = () => {
   };
 
   const hits = useMemo(() => {
-    return previewDocuments.map((doc, idx) => recordToHit(idx, doc as FlattenRecord));
+    return previewDocuments.map((doc, index) =>
+      // make sure the ID is unique when remapping a new batch of preview documents so the document flyout will refresh properly
+      ({
+        raw: doc,
+        flattened: doc,
+        index,
+        id: `${index}-${Date.now()}`,
+      })
+    );
   }, [previewDocuments]);
 
-  const [currentDoc, setExpandedDoc] = React.useState<DataTableRecord | undefined>(hits[0]);
+  const [currentDoc, setExpandedDoc] = React.useState<DataTableRecordWithIndex | undefined>(
+    undefined
+  );
 
   useEffect(() => {
-    setExpandedDoc(hits[0]);
-  }, [hits]);
-
-  const { value: streamDataView } = useAsync(() =>
-    data.dataViews.create({
-      title: streamName,
-      timeFieldName: '@timestamp',
-    })
-  );
+    if (currentDoc) {
+      // if a current doc is set but not in the hits, update it to point to the newly mapped hit with the same index
+      const hit = hits.find((h) => h.index === currentDoc.index);
+      if (hit && hit !== currentDoc) {
+        setExpandedDoc(hit);
+      }
+    }
+  }, [currentDoc, hits]);
 
   const additionalDocViewerProps = useMemo(() => {
     return {
-      originalSample: originalSamples
-        ? originalSamples[Number(currentDoc?.id.split('-')[0])]
-        : undefined,
+      originalSample: originalSamples && currentDoc ? originalSamples[currentDoc.index] : undefined,
     };
-  }, [currentDoc?.id, originalSamples]);
+  }, [currentDoc, originalSamples]);
+
+  const onRowSelected = useCallback(
+    (rowIndex: number) => {
+      if (currentDoc && hits[rowIndex] === currentDoc) {
+        // If the same row is clicked, we collapse the flyout
+        setExpandedDoc(undefined);
+        return;
+      }
+      setExpandedDoc(hits[rowIndex]);
+    },
+    [currentDoc, hits]
+  );
 
   useEffect(() => {
     if (additionalDocViewerProps.originalSample) {
@@ -395,6 +411,9 @@ const OutcomePreviewTable = () => {
     <>
       <PreviewTable
         documents={previewDocuments as SampleDocument[]}
+        selectableRow
+        onRowSelected={onRowSelected}
+        selectedRowIndex={hits.findIndex((hit) => hit === currentDoc)}
         displayColumns={previewColumns}
         rowHeightsOptions={grokMode ? { defaultHeight: 'auto' } : undefined}
         toolbarVisibility
@@ -421,35 +440,7 @@ const OutcomePreviewTable = () => {
             : undefined
         }
       />
-      {currentDoc && streamDataView && (
-        <UnifiedDocViewerFlyout
-          data-test-subj="esqlRowDetailsFlyout"
-          flyoutWidthLocalStorageKey={FLYOUT_WIDTH_KEY}
-          flyoutType={'push'}
-          services={{
-            toastNotifications: core.notifications.toasts,
-          }}
-          isEsqlQuery={false}
-          hit={currentDoc}
-          additionalDocViewerProps={additionalDocViewerProps}
-          hits={hits}
-          dataView={streamDataView}
-          docViewsRegistry={docViewsRegistry}
-          columns={[]}
-          onAddColumn={() => {}}
-          onRemoveColumn={() => {}}
-          onClose={() => {}}
-          setExpandedDoc={setExpandedDoc}
-        />
-      )}
+      <PreviewFlyout currentDoc={currentDoc} hits={hits} setExpandedDoc={setExpandedDoc} />
     </>
   );
 };
-
-function recordToHit(idx: number, record: FlattenRecord): DataTableRecord {
-  return {
-    id: String(idx) + '-' + new Date().getTime(), // Unique ID for the record
-    raw: record,
-    flattened: record,
-  };
-}
