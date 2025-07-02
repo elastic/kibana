@@ -7,10 +7,10 @@
 
 import type { StructuredToolIdentifier } from '../tools/tools';
 import {
-  OneChatDefaultAgentId,
+  oneChatDefaultAgentId,
   toSerializedAgentIdentifier,
   type SerializedAgentIdentifier,
-  OneChatDefaultAgentProviderId,
+  oneChatAgentProviderIds,
 } from '../agents';
 import type { UserIdAndName } from '../base/users';
 
@@ -132,8 +132,8 @@ export const createEmptyConversation = (): Conversation => {
   return {
     id: 'new',
     agentId: toSerializedAgentIdentifier({
-      agentId: OneChatDefaultAgentId,
-      providerId: OneChatDefaultAgentProviderId,
+      agentId: oneChatDefaultAgentId,
+      providerId: oneChatAgentProviderIds.default,
     }),
     user: { id: '', username: '' },
     title: '',
