@@ -6,8 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { capitalize } from 'lodash';
-import { getSeverity, type MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
+import { type MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 
 export function getAnomalyDescription(anomaly: MlAnomaliesTableRecordExtended): {
   anomalyDescription: string;
@@ -16,9 +15,8 @@ export function getAnomalyDescription(anomaly: MlAnomaliesTableRecordExtended): 
   const source = anomaly.source;
 
   let anomalyDescription = i18n.translate('xpack.ml.anomalyDescription.anomalyInLabel', {
-    defaultMessage: '{anomalySeverity} anomaly in {anomalyDetector}',
+    defaultMessage: 'Anomaly in {anomalyDetector}',
     values: {
-      anomalySeverity: capitalize(getSeverity(anomaly.severity).label),
       anomalyDetector: anomaly.detector,
     },
   });
