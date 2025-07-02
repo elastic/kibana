@@ -123,6 +123,7 @@ export interface UiSettingsParams<T = unknown> {
    * This field is used to determine whether the setting should be displayed in the Advanced settings app.
    * If undefined or an empty list, the setting must be displayed in all solutions.
    * Note: this does not affect serverless settings, since spaces in serverless don't have solution views.
+   * */
   solutions?: UiSettingsSolutions;
 };
 
