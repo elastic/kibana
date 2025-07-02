@@ -5,9 +5,27 @@
  * 2.0.
  */
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+
 import { ImportedEvents } from './imported_events';
+
+jest.mock('../../../../capabilities/check_capabilities', () => ({
+  usePermissionCheck: () => [true, true],
+}));
+
+jest.mock('../../../../contexts/kibana/kibana_context', () => ({
+  useMlKibana: () => ({
+    services: {
+      mlServices: {
+        mlCapabilities: {
+          canCreateCalendar: jest.fn(() => true),
+          canDeleteCalendar: jest.fn(() => true),
+        },
+      },
+    },
+  }),
+}));
 
 const testProps = {
   events: [
@@ -28,8 +46,8 @@ const testProps = {
 
 describe('ImportedEvents', () => {
   test('Renders imported events', () => {
-    const wrapper = shallowWithIntl(<ImportedEvents {...testProps} />);
+    const { container } = renderWithI18n(<ImportedEvents {...testProps} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 });
