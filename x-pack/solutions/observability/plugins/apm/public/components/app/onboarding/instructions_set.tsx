@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
+import { css } from '@emotion/react';
 import type { INSTRUCTION_VARIANT, Instruction } from './instruction_variants';
 import { getDisplayText } from './instruction_variants';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -48,7 +49,11 @@ function InstructionTabs({
   };
 
   return (
-    <EuiTabs style={{ padding: `0 ${euiTheme.size.l}` }}>
+    <EuiTabs
+      css={css`
+        padding: 0 ${euiTheme.size.l};
+      `}
+    >
       {agentTabs.map((tab) => (
         <EuiTab
           key={tab.id}

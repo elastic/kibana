@@ -222,7 +222,7 @@
                 "section": "def-common.SerializedSearchSourceFields",
                 "text": "SerializedSearchSourceFields"
               },
-              "; columns?: string[] | undefined; browserTimezone: string; objectType: string; title: string; version: string; layout?: { id?: ",
+              "; columns?: string[] | undefined; browserTimezone: string; objectType: string; title: string; version: string; forceNow?: string | undefined; layout?: { id?: ",
               {
                 "pluginId": "screenshotting",
                 "scope": "common",
@@ -272,7 +272,15 @@
             "label": "runTask",
             "description": [],
             "signature": [
-              "(jobId: string, job: ",
+              "({ jobId, payload: job, taskInstanceFields, request, cancellationToken, stream, }: ",
+              {
+                "pluginId": "@kbn/reporting-server",
+                "scope": "server",
+                "docId": "kibKbnReportingServerPluginApi",
+                "section": "def-server.RunTaskOpts",
+                "text": "RunTaskOpts"
+              },
+              "<",
               {
                 "pluginId": "@kbn/reporting-export-types-csv-common",
                 "scope": "common",
@@ -280,19 +288,7 @@
                 "section": "def-common.TaskPayloadCSV",
                 "text": "TaskPayloadCSV"
               },
-              ", taskInstanceFields: ",
-              "TaskInstanceFields",
-              ", cancellationToken: ",
-              {
-                "pluginId": "@kbn/reporting-common",
-                "scope": "common",
-                "docId": "kibKbnReportingCommonPluginApi",
-                "section": "def-common.CancellationToken",
-                "text": "CancellationToken"
-              },
-              ", stream: ",
-              "Writable",
-              ") => Promise<",
+              ">) => Promise<",
               "TaskRunResult",
               ">"
             ],
@@ -303,84 +299,27 @@
               {
                 "parentPluginId": "@kbn/reporting-export-types-csv",
                 "id": "def-server.CsvSearchSourceExportType.runTask.$1",
-                "type": "string",
+                "type": "Object",
                 "tags": [],
-                "label": "jobId",
+                "label": "{\n    jobId,\n    payload: job,\n    taskInstanceFields,\n    request,\n    cancellationToken,\n    stream,\n  }",
                 "description": [],
                 "signature": [
-                  "string"
-                ],
-                "path": "src/platform/packages/private/kbn-reporting/export_types/csv/csv_searchsource.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/reporting-export-types-csv",
-                "id": "def-server.CsvSearchSourceExportType.runTask.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "job",
-                "description": [],
-                "signature": [
+                  {
+                    "pluginId": "@kbn/reporting-server",
+                    "scope": "server",
+                    "docId": "kibKbnReportingServerPluginApi",
+                    "section": "def-server.RunTaskOpts",
+                    "text": "RunTaskOpts"
+                  },
+                  "<",
                   {
                     "pluginId": "@kbn/reporting-export-types-csv-common",
                     "scope": "common",
                     "docId": "kibKbnReportingExportTypesCsvCommonPluginApi",
                     "section": "def-common.TaskPayloadCSV",
                     "text": "TaskPayloadCSV"
-                  }
-                ],
-                "path": "src/platform/packages/private/kbn-reporting/export_types/csv/csv_searchsource.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/reporting-export-types-csv",
-                "id": "def-server.CsvSearchSourceExportType.runTask.$3",
-                "type": "Object",
-                "tags": [],
-                "label": "taskInstanceFields",
-                "description": [],
-                "signature": [
-                  "TaskInstanceFields"
-                ],
-                "path": "src/platform/packages/private/kbn-reporting/export_types/csv/csv_searchsource.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/reporting-export-types-csv",
-                "id": "def-server.CsvSearchSourceExportType.runTask.$4",
-                "type": "Object",
-                "tags": [],
-                "label": "cancellationToken",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/reporting-common",
-                    "scope": "common",
-                    "docId": "kibKbnReportingCommonPluginApi",
-                    "section": "def-common.CancellationToken",
-                    "text": "CancellationToken"
-                  }
-                ],
-                "path": "src/platform/packages/private/kbn-reporting/export_types/csv/csv_searchsource.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/reporting-export-types-csv",
-                "id": "def-server.CsvSearchSourceExportType.runTask.$5",
-                "type": "Object",
-                "tags": [],
-                "label": "stream",
-                "description": [],
-                "signature": [
-                  "Writable"
+                  },
+                  ">"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/export_types/csv/csv_searchsource.ts",
                 "deprecated": false,
@@ -603,7 +542,7 @@
               "ReportingRequestHandlerContext",
               ", req: ",
               "KibanaRequest",
-              "<unknown, unknown, unknown, any>) => Promise<{ title: string; objectType: \"search\"; pagingStrategy: \"scroll\" | \"pit\"; version: string; layout?: { id?: ",
+              "<unknown, unknown, unknown, any>) => Promise<{ title: string; objectType: \"search\"; pagingStrategy: \"scroll\" | \"pit\"; version: string; forceNow?: string | undefined; layout?: { id?: ",
               {
                 "pluginId": "screenshotting",
                 "scope": "common",
@@ -692,7 +631,15 @@
             "label": "runTask",
             "description": [],
             "signature": [
-              "(jobId: string, job: ",
+              "({ jobId, payload: job, request, taskInstanceFields, cancellationToken, stream, }: ",
+              {
+                "pluginId": "@kbn/reporting-server",
+                "scope": "server",
+                "docId": "kibKbnReportingServerPluginApi",
+                "section": "def-server.RunTaskOpts",
+                "text": "RunTaskOpts"
+              },
+              "<",
               {
                 "pluginId": "@kbn/reporting-export-types-csv-common",
                 "scope": "common",
@@ -700,19 +647,7 @@
                 "section": "def-common.TaskPayloadCsvFromSavedObject",
                 "text": "TaskPayloadCsvFromSavedObject"
               },
-              ", taskInstanceFields: ",
-              "TaskInstanceFields",
-              ", cancellationToken: ",
-              {
-                "pluginId": "@kbn/reporting-common",
-                "scope": "common",
-                "docId": "kibKbnReportingCommonPluginApi",
-                "section": "def-common.CancellationToken",
-                "text": "CancellationToken"
-              },
-              ", stream: ",
-              "Writable",
-              ") => Promise<",
+              ">) => Promise<",
               "TaskRunResult",
               ">"
             ],
@@ -723,84 +658,27 @@
               {
                 "parentPluginId": "@kbn/reporting-export-types-csv",
                 "id": "def-server.CsvV2ExportType.runTask.$1",
-                "type": "string",
-                "tags": [],
-                "label": "jobId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/packages/private/kbn-reporting/export_types/csv/csv_v2.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/reporting-export-types-csv",
-                "id": "def-server.CsvV2ExportType.runTask.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "job",
+                "label": "{\n    jobId,\n    payload: job,\n    request,\n    taskInstanceFields,\n    cancellationToken,\n    stream,\n  }",
                 "description": [],
                 "signature": [
+                  {
+                    "pluginId": "@kbn/reporting-server",
+                    "scope": "server",
+                    "docId": "kibKbnReportingServerPluginApi",
+                    "section": "def-server.RunTaskOpts",
+                    "text": "RunTaskOpts"
+                  },
+                  "<",
                   {
                     "pluginId": "@kbn/reporting-export-types-csv-common",
                     "scope": "common",
                     "docId": "kibKbnReportingExportTypesCsvCommonPluginApi",
                     "section": "def-common.TaskPayloadCsvFromSavedObject",
                     "text": "TaskPayloadCsvFromSavedObject"
-                  }
-                ],
-                "path": "src/platform/packages/private/kbn-reporting/export_types/csv/csv_v2.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/reporting-export-types-csv",
-                "id": "def-server.CsvV2ExportType.runTask.$3",
-                "type": "Object",
-                "tags": [],
-                "label": "taskInstanceFields",
-                "description": [],
-                "signature": [
-                  "TaskInstanceFields"
-                ],
-                "path": "src/platform/packages/private/kbn-reporting/export_types/csv/csv_v2.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/reporting-export-types-csv",
-                "id": "def-server.CsvV2ExportType.runTask.$4",
-                "type": "Object",
-                "tags": [],
-                "label": "cancellationToken",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/reporting-common",
-                    "scope": "common",
-                    "docId": "kibKbnReportingCommonPluginApi",
-                    "section": "def-common.CancellationToken",
-                    "text": "CancellationToken"
-                  }
-                ],
-                "path": "src/platform/packages/private/kbn-reporting/export_types/csv/csv_v2.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/reporting-export-types-csv",
-                "id": "def-server.CsvV2ExportType.runTask.$5",
-                "type": "Object",
-                "tags": [],
-                "label": "stream",
-                "description": [],
-                "signature": [
-                  "Writable"
+                  },
+                  ">"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/export_types/csv/csv_v2.ts",
                 "deprecated": false,

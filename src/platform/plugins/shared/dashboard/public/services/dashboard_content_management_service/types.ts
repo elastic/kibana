@@ -18,7 +18,7 @@ import {
   SearchDashboardsArgs,
   SearchDashboardsResponse,
 } from './lib/find_dashboards';
-import { DashboardState } from '../../dashboard_api/types';
+import { DashboardState } from '../../../common';
 import { UpdateDashboardMetaProps } from './lib/update_dashboard_meta';
 
 export interface DashboardContentManagementService {

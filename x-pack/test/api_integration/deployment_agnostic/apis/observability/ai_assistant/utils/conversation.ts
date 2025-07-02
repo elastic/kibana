@@ -14,6 +14,7 @@ import {
   MessageRole,
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
+  type ConversationCreateRequest,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { Readable } from 'stream';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
@@ -179,4 +180,46 @@ export function getConversationUpdatedEvent(body: Readable | string) {
   }
 
   return conversationUpdatedEvent;
+}
+
+export const conversationCreate: ConversationCreateRequest = {
+  '@timestamp': new Date().toISOString(),
+  conversation: {
+    title: 'My title',
+  },
+  labels: {},
+  numeric_labels: {},
+  systemMessage: 'this is a system message',
+  messages: [
+    {
+      '@timestamp': new Date().toISOString(),
+      message: {
+        role: MessageRole.User,
+        content: 'My message',
+      },
+    },
+  ],
+  public: false,
+  archived: false,
+};
+
+export async function createConversation({
+  observabilityAIAssistantAPIClient,
+  user = 'editor',
+  isPublic = false,
+}: {
+  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
+  user?: 'admin' | 'editor' | 'viewer';
+  isPublic?: boolean;
+}) {
+  const response = await observabilityAIAssistantAPIClient[user]({
+    endpoint: 'POST /internal/observability_ai_assistant/conversation',
+    params: {
+      body: {
+        conversation: { ...conversationCreate, public: isPublic },
+      },
+    },
+  });
+
+  return response;
 }

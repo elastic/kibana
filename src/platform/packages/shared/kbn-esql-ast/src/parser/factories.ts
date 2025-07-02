@@ -11,63 +11,56 @@
  * In case of changes in the grammar, this script should be updated: esql_update_ast_script.js
  */
 
-import type {
-  Token,
-  ParserRuleContext,
-  TerminalNode,
-  RecognitionException,
-  ParseTree,
-} from 'antlr4';
+import type { ParseTree, ParserRuleContext, RecognitionException, TerminalNode } from 'antlr4';
 import {
+  FunctionContext,
+  IdentifierContext,
+  IdentifierOrParameterContext,
   IndexPatternContext,
+  InputDoubleParamsContext,
+  InputNamedOrPositionalDoubleParamsContext,
+  InputNamedOrPositionalParamContext,
+  InputParamContext,
   QualifiedNameContext,
+  QualifiedNamePatternContext,
+  SelectorStringContext,
+  StringContext,
   type ArithmeticUnaryContext,
   type DecimalValueContext,
   type InlineCastContext,
   type IntegerValueContext,
   type QualifiedIntegerLiteralContext,
-  QualifiedNamePatternContext,
-  FunctionContext,
-  IdentifierContext,
-  InputParamContext,
-  InputNamedOrPositionalParamContext,
-  IdentifierOrParameterContext,
-  StringContext,
-  InputNamedOrPositionalDoubleParamsContext,
-  InputDoubleParamsContext,
-  SelectorStringContext,
+  IndexStringContext,
 } from '../antlr/esql_parser';
-import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
-import type {
-  ESQLAstBaseItem,
-  ESQLLiteral,
-  ESQLList,
-  ESQLTimeInterval,
-  ESQLLocation,
-  ESQLFunction,
-  ESQLSource,
-  ESQLColumn,
-  ESQLCommandOption,
-  ESQLAstItem,
-  ESQLCommandMode,
-  ESQLInlineCast,
-  ESQLUnknownItem,
-  ESQLNumericLiteralType,
-  FunctionSubtype,
-  ESQLNumericLiteral,
-  ESQLOrderExpression,
-  InlineCastingType,
-  ESQLFunctionCallExpression,
-  ESQLIdentifier,
-  ESQLBinaryExpression,
-  BinaryExpressionOperator,
-  ESQLCommand,
-  ESQLParamKinds,
-  ESQLStringLiteral,
-} from '../types';
-import { parseIdentifier, getPosition } from './helpers';
 import { Builder, type AstNodeParserFields } from '../builder';
 import { LeafPrinter } from '../pretty_print';
+import type {
+  BinaryExpressionOperator,
+  ESQLAstBaseItem,
+  ESQLAstItem,
+  ESQLBinaryExpression,
+  ESQLColumn,
+  ESQLCommand,
+  ESQLCommandOption,
+  ESQLFunction,
+  ESQLFunctionCallExpression,
+  ESQLIdentifier,
+  ESQLInlineCast,
+  ESQLList,
+  ESQLLiteral,
+  ESQLLocation,
+  ESQLNumericLiteral,
+  ESQLNumericLiteralType,
+  ESQLParamKinds,
+  ESQLSource,
+  ESQLStringLiteral,
+  ESQLTimeInterval,
+  ESQLUnknownItem,
+  FunctionSubtype,
+  InlineCastingType,
+} from '../types';
+import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
+import { getPosition, parseIdentifier } from './helpers';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
@@ -85,13 +78,13 @@ export function createAstBaseItem<Name = string>(
   };
 }
 
-const createParserFields = (ctx: ParserRuleContext): AstNodeParserFields => ({
+export const createParserFields = (ctx: ParserRuleContext): AstNodeParserFields => ({
   text: ctx.getText(),
   location: getPosition(ctx.start, ctx.stop),
   incomplete: Boolean(ctx.exception),
 });
 
-const createParserFieldsFromTerminalNode = (node: TerminalNode): AstNodeParserFields => {
+export const createParserFieldsFromTerminalNode = (node: TerminalNode): AstNodeParserFields => {
   const text = node.getText();
   const symbol = node.symbol;
   const fields: AstNodeParserFields = {
@@ -127,7 +120,7 @@ export const createInlineCast = (ctx: InlineCastContext, value: ESQLInlineCast['
   );
 
 export const createList = (ctx: ParserRuleContext, values: ESQLLiteral[]): ESQLList =>
-  Builder.expression.literal.list({ values }, createParserFields(ctx));
+  Builder.expression.list.literal({ values }, createParserFields(ctx));
 
 export const createNumericLiteral = (
   ctx: DecimalValueContext | IntegerValueContext,
@@ -246,15 +239,17 @@ export function createFunction<Subtype extends FunctionSubtype>(
   name: string,
   ctx: ParserRuleContext,
   customPosition?: ESQLLocation,
-  subtype?: Subtype
+  subtype?: Subtype,
+  args: ESQLAstItem[] = [],
+  incomplete?: boolean
 ): ESQLFunction<Subtype> {
   const node: ESQLFunction<Subtype> = {
     type: 'function',
     name,
     text: ctx.getText(),
     location: customPosition ?? getPosition(ctx.start, ctx.stop),
-    args: [],
-    incomplete: Boolean(ctx.exception),
+    args,
+    incomplete: Boolean(ctx.exception) || !!incomplete,
   };
   if (subtype) {
     node.subtype = subtype;
@@ -352,21 +347,6 @@ export const createParam = (ctx: ParseTree) => {
       return Builder.param.named({ paramKind, value }, parserFields);
     }
   }
-};
-
-export const createOrderExpression = (
-  ctx: ParserRuleContext,
-  arg: ESQLColumn,
-  order: ESQLOrderExpression['order'],
-  nulls: ESQLOrderExpression['nulls']
-) => {
-  const node = Builder.expression.order(
-    arg as ESQLColumn,
-    { order, nulls },
-    createParserFields(ctx)
-  );
-
-  return node;
 };
 
 function walkFunctionStructure(
@@ -468,35 +448,23 @@ export function wrapIdentifierAsArray<T extends ParserRuleContext>(identifierCtx
   return Array.isArray(identifierCtx) ? identifierCtx : [identifierCtx];
 }
 
-export function createSetting(policyName: Token, mode: string): ESQLCommandMode {
-  return {
-    type: 'mode',
-    name: mode.replace('_', '').toLowerCase(),
-    text: mode,
-    location: getPosition(policyName, { stop: policyName.start + mode.length - 1 }), // unfortunately this is the only location we have
-    incomplete: false,
-  };
-}
+const visitQuotedString = (ctx: SelectorStringContext): ESQLStringLiteral => {
+  const unquotedCtx = ctx.UNQUOTED_SOURCE();
 
-/**
- * In https://github.com/elastic/elasticsearch/pull/103949 the ENRICH policy name
- * changed from rule to token type so we need to handle this specifically
- */
-export function createPolicy(token: Token, policy: string): ESQLSource {
-  return {
-    type: 'source',
-    name: policy,
-    text: policy,
-    sourceType: 'policy',
-    location: getPosition({
-      start: token.stop - policy.length + 1,
-      stop: token.stop,
-    }), // take into account ccq modes
-    incomplete: false,
-  };
-}
+  const valueUnquoted = unquotedCtx.getText();
+  const quotedString = LeafPrinter.string({ valueUnquoted });
 
-const visitUnquotedOrQuotedString = (ctx: SelectorStringContext): ESQLStringLiteral => {
+  return Builder.expression.literal.string(
+    valueUnquoted,
+    {
+      name: quotedString,
+      unquoted: true,
+    },
+    createParserFieldsFromTerminalNode(unquotedCtx)
+  );
+};
+
+const visitUnquotedOrQuotedString = (ctx: IndexStringContext): ESQLStringLiteral => {
   const unquotedCtx = ctx.UNQUOTED_SOURCE();
 
   if (unquotedCtx) {
@@ -522,30 +490,34 @@ export function visitSource(
 ): ESQLSource {
   const text = sanitizeSourceString(ctx);
 
-  let cluster: ESQLStringLiteral | undefined;
+  let prefix: ESQLStringLiteral | undefined;
   let index: ESQLStringLiteral | undefined;
   let selector: ESQLStringLiteral | undefined;
 
   if (ctx instanceof IndexPatternContext) {
     const clusterStringCtx = ctx.clusterString();
+    const unquotedIndexString = ctx.unquotedIndexString();
     const indexStringCtx = ctx.indexString();
     const selectorStringCtx = ctx.selectorString();
 
     if (clusterStringCtx) {
-      cluster = visitUnquotedOrQuotedString(clusterStringCtx);
+      prefix = visitQuotedString(clusterStringCtx);
+    }
+    if (unquotedIndexString) {
+      index = visitQuotedString(unquotedIndexString);
     }
     if (indexStringCtx) {
       index = visitUnquotedOrQuotedString(indexStringCtx);
     }
     if (selectorStringCtx) {
-      selector = visitUnquotedOrQuotedString(selectorStringCtx);
+      selector = visitQuotedString(selectorStringCtx);
     }
   }
 
   return Builder.expression.source.node(
     {
       sourceType: type,
-      cluster,
+      prefix,
       index,
       selector,
       name: text,

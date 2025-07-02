@@ -103,6 +103,7 @@ import {
 import { backfillAgentPolicyToV4 } from './model_versions/agent_policy_v4';
 import { backfillOutputPolicyToV7 } from './model_versions/outputs';
 import { packagePolicyV17AdvancedFieldsForEndpointV818 } from './model_versions/security_solution/v17_advanced_package_policy_fields';
+import { backfillPackagePolicyLatestRevision } from './model_versions/package_policy_latest_revision_backfill';
 
 /*
  * Saved object types and mappings
@@ -695,6 +696,7 @@ export const getSavedObjectTypes = (
           created_at: { type: 'date' },
           created_by: { type: 'keyword' },
           bump_agent_policy_revision: { type: 'boolean' },
+          latest_revision: { type: 'boolean' },
         },
       },
       modelVersions: {
@@ -875,6 +877,20 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '19': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                latest_revision: { type: 'boolean' },
+              },
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: backfillPackagePolicyLatestRevision,
+            },
+          ],
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -938,6 +954,7 @@ export const getSavedObjectTypes = (
           created_at: { type: 'date' },
           created_by: { type: 'keyword' },
           bump_agent_policy_revision: { type: 'boolean' },
+          latest_revision: { type: 'boolean' },
         },
       },
       modelVersions: {
@@ -977,6 +994,20 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '5': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                latest_revision: { type: 'boolean' },
+              },
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: backfillPackagePolicyLatestRevision,
+            },
+          ],
+        },
       },
     },
     [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -988,6 +1019,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           name: { type: 'keyword' },
           version: { type: 'keyword' },
@@ -1042,6 +1074,7 @@ export const getSavedObjectTypes = (
               },
             },
           },
+          previous_version: { type: 'keyword' },
         },
       },
       modelVersions: {
@@ -1071,6 +1104,24 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 additional_spaces_installed_kibana: { type: 'flattened', index: false },
+              },
+            },
+          ],
+        },
+        '4': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {}, // Empty to add dynamic:false
+            },
+          ],
+        },
+        '5': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                previous_version: { type: 'keyword' },
               },
             },
           ],
@@ -1277,6 +1328,7 @@ export const OUTPUT_INCLUDE_AAD_FIELDS = new Set([
 export const OUTPUT_ENCRYPTED_FIELDS = new Set([
   { key: 'ssl', dangerouslyExposeValue: true },
   { key: 'password', dangerouslyExposeValue: true },
+  { key: 'kibana_api_key', dangerouslyExposeValue: true },
 ]);
 
 export const FLEET_SERVER_HOST_ENCRYPTED_FIELDS = new Set([

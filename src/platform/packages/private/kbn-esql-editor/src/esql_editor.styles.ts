@@ -77,6 +77,7 @@ export const esqlEditorStyles = (
       marginTop: 0,
       marginLeft: 0,
       marginBottom: 0,
+      border: hasOutline ? euiTheme.border.thin : 'none',
       borderBottomLeftRadius: 0,
       borderBottomRightRadius: 0,
     },

@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { FindPromptsResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen';
+import { FindPromptsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import { useQuery } from '@tanstack/react-query';
 import { API_VERSIONS, ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND } from '@kbn/elastic-assistant-common';
-import { HttpSetup, IToasts } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { useAssistantContext } from '../../../assistant_context';
 
 export interface UseFetchPromptsParams {
@@ -73,29 +71,4 @@ export const useFetchPrompts = (payload?: UseFetchPromptsParams) => {
       enabled: isAssistantEnabled,
     }
   );
-};
-
-export const getPrompts = async ({
-  http,
-  signal,
-  toasts,
-}: {
-  http: HttpSetup;
-  toasts: IToasts;
-  signal?: AbortSignal | undefined;
-}) => {
-  try {
-    return await http.fetch<FindPromptsResponse>(ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND, {
-      method: 'GET',
-      version: API_VERSIONS.public.v1,
-      signal,
-    });
-  } catch (error) {
-    toasts.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
-      title: i18n.translate('xpack.elasticAssistant.prompts.getPromptsError', {
-        defaultMessage: 'Error fetching prompts',
-      }),
-    });
-    throw error;
-  }
 };

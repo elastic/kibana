@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { createPackagePolicyMock } from '../../../common/mocks';
 
-import { createAppContextStartContractMock } from '../../mocks';
+import { createAppContextStartContractMock, createSavedObjectClientMock } from '../../mocks';
 
 import { FleetError, PackagePolicyIneligibleForUpgradeError } from '../../errors';
 
@@ -140,7 +140,7 @@ describe('Upgrade', () => {
   describe('_getUpgradePackagePolicyInfo', () => {
     let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
     beforeEach(() => {
-      savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient = createSavedObjectClientMock();
     });
 
     function mockPackage(pkgName: string) {
@@ -155,12 +155,16 @@ describe('Upgrade', () => {
         },
       };
 
-      savedObjectsClient.get.mockResolvedValueOnce({
-        id: 'package-policy-id',
-        type: 'abcd',
-        references: [],
-        version: '1.3.2',
-        attributes,
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'package-policy-id',
+            type: 'abcd',
+            references: [],
+            version: '1.3.2',
+            attributes,
+          },
+        ],
       });
     }
 
@@ -208,7 +212,7 @@ describe('Upgrade', () => {
   describe('getUpgradeDryRunDiff', () => {
     let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
     beforeEach(() => {
-      savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient = createSavedObjectClientMock();
     });
     beforeEach(() => {
       appContextService.start(createAppContextStartContractMock());
@@ -279,7 +283,7 @@ describe('Upgrade', () => {
   describe('bulk upgrade', () => {
     let soClient: jest.Mocked<SavedObjectsClientContract>;
     beforeEach(() => {
-      soClient = savedObjectsClientMock.create();
+      soClient = createSavedObjectClientMock();
     });
     beforeEach(() => {
       appContextService.start(createAppContextStartContractMock());
@@ -348,7 +352,7 @@ describe('Upgrade', () => {
   describe('upgrade', () => {
     let soClient: jest.Mocked<SavedObjectsClientContract>;
     beforeEach(() => {
-      soClient = savedObjectsClientMock.create();
+      soClient = createSavedObjectClientMock();
     });
     beforeEach(() => {
       appContextService.start(createAppContextStartContractMock());
@@ -358,13 +362,15 @@ describe('Upgrade', () => {
       appContextService.stop();
     });
     it('should omit spaceIds when upgrading package policies with spaceIds', async () => {
-      soClient.get.mockImplementation((type, id) =>
+      soClient.bulkGet.mockImplementation((objects) =>
         Promise.resolve({
-          id,
-          type: 'abcd',
-          references: [],
-          version: '0.9.0',
-          attributes: { ...createPackagePolicyMock(), name: id, spaceIds: ['test'] },
+          saved_objects: objects.map(({ id }) => ({
+            id,
+            type: 'abcd',
+            references: [],
+            version: '0.9.0',
+            attributes: { ...createPackagePolicyMock(), name: id, spaceIds: ['test'] },
+          })),
         })
       );
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;

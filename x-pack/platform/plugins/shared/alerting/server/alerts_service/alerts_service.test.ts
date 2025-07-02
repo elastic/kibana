@@ -174,6 +174,7 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
             }),
         'index.mapping.ignore_malformed': true,
         'index.mapping.total_fields.limit': 2500,
+        'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
       },
       mappings: {
         dynamic: false,
@@ -473,14 +474,13 @@ describe('Alerts Service', () => {
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
             name: existingIndexTemplate.name,
-            body: {
-              ...existingIndexTemplate.index_template,
-              template: {
-                ...existingIndexTemplate.index_template.template,
-                settings: {
-                  ...existingIndexTemplate.index_template.template?.settings,
-                  'index.mapping.total_fields.limit': 2500,
-                },
+            ...existingIndexTemplate.index_template,
+            template: {
+              ...existingIndexTemplate.index_template.template,
+              settings: {
+                ...existingIndexTemplate.index_template.template?.settings,
+                'index.mapping.total_fields.limit': 2500,
+                'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
               },
             },
           });
@@ -698,6 +698,36 @@ describe('Alerts Service', () => {
           }
         });
 
+        test('should save the dynamic_templates', async () => {
+          const dynamicTemplates = [
+            {
+              strings_as_keywords: {
+                path_match: 'test-path',
+                match_mapping_type: 'string',
+                mapping: {
+                  type: 'keyword',
+                  ignore_above: 1024,
+                },
+              },
+            },
+          ] satisfies IRuleTypeAlerts['mappings']['dynamicTemplates'];
+
+          alertsService.register({
+            ...TestRegistrationContext,
+            mappings: {
+              ...TestRegistrationContext.mappings,
+              dynamicTemplates,
+            },
+          });
+          await retryUntil(
+            'context initialized',
+            async () => (await getContextInitialized(alertsService)) === true
+          );
+
+          const componentTemplate = clusterClient.cluster.putComponentTemplate.mock.calls[3][0];
+          expect(componentTemplate.template.mappings?.dynamic_templates).toEqual(dynamicTemplates);
+        });
+
         test('should correctly install resources for custom namespace on demand when isSpaceAware is true', async () => {
           alertsService.register({ ...TestRegistrationContext, isSpaceAware: true });
           await retryUntil(
@@ -901,6 +931,7 @@ describe('Alerts Service', () => {
                       },
                     }),
                 'index.mapping.ignore_malformed': true,
+                'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
                 'index.mapping.total_fields.limit': 2500,
               },
               mappings: {

@@ -8,14 +8,14 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
-import { IngestStreamGetResponse, isDescendantOf } from '@kbn/streams-schema';
+import { type Streams, isDescendantOf } from '@kbn/streams-schema';
 
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { AssetImage } from '../asset_image';
 import { StreamsList } from '../streams_list';
 import { useWiredStreams } from '../../hooks/use_wired_streams';
 
-export function ChildStreamList({ definition }: { definition?: IngestStreamGetResponse }) {
+export function ChildStreamList({ definition }: { definition?: Streams.ingest.all.GetResponse }) {
   const router = useStreamsAppRouter();
 
   const { wiredStreams } = useWiredStreams();
@@ -50,23 +50,24 @@ export function ChildStreamList({ definition }: { definition?: IngestStreamGetRe
                     'Create sub streams to split out data with different retention policies, schemas, and more.',
                 })}
               </EuiText>
-              <EuiFlexGroup justifyContent="center">
-                <EuiButton
-                  data-test-subj="streamsAppChildStreamListCreateChildStreamButton"
-                  iconType="plusInCircle"
-                  href={router.link('/{key}/{tab}/{subtab}', {
-                    path: {
-                      key: definition.stream.name,
-                      tab: 'management',
-                      subtab: 'route',
-                    },
-                  })}
-                >
-                  {i18n.translate('xpack.streams.entityDetailOverview.createChildStream', {
-                    defaultMessage: 'Create child stream',
-                  })}
-                </EuiButton>
-              </EuiFlexGroup>
+              {definition.privileges.manage && (
+                <EuiFlexGroup justifyContent="center">
+                  <EuiButton
+                    data-test-subj="streamsAppChildStreamListCreateChildStreamButton"
+                    iconType="plusInCircle"
+                    href={router.link('/{key}/management/{tab}', {
+                      path: {
+                        key: definition.stream.name,
+                        tab: 'route',
+                      },
+                    })}
+                  >
+                    {i18n.translate('xpack.streams.entityDetailOverview.createChildStream', {
+                      defaultMessage: 'Create child stream',
+                    })}
+                  </EuiButton>
+                </EuiFlexGroup>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -14,6 +14,7 @@ export interface PackagePolicyPackage {
   version: string;
   experimental_data_stream_features?: ExperimentalDataStreamFeature[];
   requires_root?: boolean;
+  type?: string;
 }
 
 export interface PackagePolicyConfigRecordEntry {

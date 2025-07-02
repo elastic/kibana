@@ -7,6 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export enum AuthzOptOutReason {
+  DelegateToESClient = 'Route delegates authorization to the scoped ES client',
+  DelegateToSOClient = 'Route delegates authorization to the scoped SO client',
+  ServeStaticFiles = 'Route serves static files that do not require authorization',
+}
+
+export class AuthzDisabled {
+  public static fromReason(reason: AuthzOptOutReason | string): { enabled: false; reason: string } {
+    return {
+      enabled: false,
+      reason,
+    };
+  }
+
+  static readonly delegateToESClient = AuthzDisabled.fromReason(
+    AuthzOptOutReason.DelegateToESClient
+  );
+  static readonly delegateToSOClient = AuthzDisabled.fromReason(
+    AuthzOptOutReason.DelegateToSOClient
+  );
+  static readonly serveStaticFiles = AuthzDisabled.fromReason(AuthzOptOutReason.ServeStaticFiles);
+}
+
 export const unwindNestedSecurityPrivileges = <
   T extends Array<string | { allOf?: string[]; anyOf?: string[] }>
 >(

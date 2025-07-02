@@ -97,7 +97,7 @@ function LoadingSloGrid({ gridSize }: { gridSize: number }) {
       <EuiFlexGrid gutterSize="m" columns={COLUMNS as EuiFlexGridProps['columns']}>
         {loaders.map((_, i) => (
           <EuiFlexItem key={i}>
-            <EuiPanel style={{ height: '200px' }} hasBorder={true}>
+            <EuiPanel css={{ height: '200px' }} hasBorder={true}>
               <EuiSkeletonText lines={2} />
             </EuiPanel>{' '}
           </EuiFlexItem>

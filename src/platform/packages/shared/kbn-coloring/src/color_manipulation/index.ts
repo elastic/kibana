@@ -29,3 +29,26 @@ export const getColorAlpha = (color?: string | null) =>
 
 export const makeColorWithAlpha = (color: string, newAlpha: number) =>
   chroma(color).alpha(newAlpha);
+
+export function getValidColor(color?: string | null): chroma.Color | undefined;
+export function getValidColor(
+  color?: string | null,
+  options?: { shouldBeCompatibleWithColorJs: true }
+): chroma.Color;
+export function getValidColor(
+  color?: string | null,
+  { shouldBeCompatibleWithColorJs }: { shouldBeCompatibleWithColorJs?: boolean } = {
+    shouldBeCompatibleWithColorJs: false,
+  }
+) {
+  const isValid = chroma.valid(color);
+  if (isValid) {
+    return chroma(color!);
+  }
+  // The fallback follows the preexisting fallback used from the `color` library
+  // https://github.com/Qix-/color/blob/e188999dee229c902102ec37e398ff4d868616e5/index.js#L38-L41
+  if (shouldBeCompatibleWithColorJs) {
+    return chroma('#000000');
+  }
+  return undefined;
+}

@@ -102,7 +102,7 @@ interface PreviewLinkProps {
   /**
    * Whether the preview link is in preview mode
    */
-  isPreview?: boolean;
+  isRulePreview?: boolean;
   /**
    * Optional data-test-subj value
    */
@@ -121,7 +121,7 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
   value,
   scopeId,
   ruleId,
-  isPreview,
+  isRulePreview,
   children,
   'data-test-subj': dataTestSubj = FLYOUT_PREVIEW_LINK_TEST_ID,
 }) => {
@@ -148,7 +148,7 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
   }
 
   // If the field is rule.id, and the ruleId is not provided or currently in rule preview, do not render link
-  if (field === SIGNAL_RULE_NAME_FIELD_NAME && (!ruleId || isPreview)) {
+  if (field === SIGNAL_RULE_NAME_FIELD_NAME && (!ruleId || isRulePreview)) {
     return <>{children ?? value}</>;
   }
 

@@ -10,8 +10,8 @@ import type { StateGraphArgs } from '@langchain/langgraph';
 import type { DateMath } from '@elastic/elasticsearch/lib/api/types';
 import type { DefendInsight, Replacements } from '@kbn/elastic-assistant-common';
 
-import { DefendInsightsPrompts } from '../nodes/helpers/prompts/incompatible_antivirus';
-import type { GraphState } from '../types';
+import type { DefendInsightsGraphState } from '../../../../langchain/graphs';
+import { DefendInsightsPrompts } from '../prompts/incompatible_antivirus';
 import {
   DEFAULT_MAX_GENERATION_ATTEMPTS,
   DEFAULT_MAX_HALLUCINATION_FAILURES,
@@ -28,7 +28,7 @@ export const getDefaultGraphState = ({
   start,
   end,
   prompts,
-}: Options): StateGraphArgs<GraphState>['channels'] => ({
+}: Options): StateGraphArgs<DefendInsightsGraphState>['channels'] => ({
   insights: {
     value: (current: DefendInsight[] | null, next?: DefendInsight[] | null) => next ?? current,
     default: () => null,
@@ -45,7 +45,7 @@ export const getDefaultGraphState = ({
     value: (current: string, next?: string) => next ?? current,
     default: () => prompts.continue,
   },
-  anonymizedEvents: {
+  anonymizedDocuments: {
     value: (current: Document[], next?: Document[]) => next ?? current,
     default: () => [],
   },

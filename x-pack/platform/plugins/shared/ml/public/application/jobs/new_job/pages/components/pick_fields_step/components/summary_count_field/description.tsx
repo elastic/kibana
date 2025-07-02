@@ -15,39 +15,42 @@ import { useMlKibana } from '../../../../../../../contexts/kibana';
 
 interface Props {
   validation: Validation;
+  titleId: string;
 }
 
-export const Description: FC<PropsWithChildren<Props>> = memo(({ children, validation }) => {
-  const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.summaryCountField.title', {
-    defaultMessage: 'Summary count field',
-  });
-  const {
-    services: { docLinks },
-  } = useMlKibana();
-  const docsUrl = docLinks.links.ml.aggregations;
-  return (
-    <EuiDescribedFormGroup
-      title={<h3>{title}</h3>}
-      description={
-        <FormattedMessage
-          id="xpack.ml.newJob.wizard.pickFieldsStep.summaryCountField.description"
-          defaultMessage="If the input data is {aggregated}, specify the field that contains the document count."
-          values={{
-            aggregated: (
-              <EuiLink href={docsUrl} target="_blank">
-                <FormattedMessage
-                  id="xpack.ml.newJob.wizard.pickFieldsStep.summaryCountField.aggregatedText"
-                  defaultMessage="aggregated"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      }
-    >
-      <EuiFormRow error={validation.message} isInvalid={validation.valid === false}>
-        <>{children}</>
-      </EuiFormRow>
-    </EuiDescribedFormGroup>
-  );
-});
+export const Description: FC<PropsWithChildren<Props>> = memo(
+  ({ children, validation, titleId }) => {
+    const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.summaryCountField.title', {
+      defaultMessage: 'Summary count field',
+    });
+    const {
+      services: { docLinks },
+    } = useMlKibana();
+    const docsUrl = docLinks.links.ml.aggregations;
+    return (
+      <EuiDescribedFormGroup
+        title={<h3 id={titleId}>{title}</h3>}
+        description={
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.pickFieldsStep.summaryCountField.description"
+            defaultMessage="If the input data is {aggregated}, specify the field that contains the document count."
+            values={{
+              aggregated: (
+                <EuiLink href={docsUrl} target="_blank">
+                  <FormattedMessage
+                    id="xpack.ml.newJob.wizard.pickFieldsStep.summaryCountField.aggregatedText"
+                    defaultMessage="aggregated"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        }
+      >
+        <EuiFormRow error={validation.message} isInvalid={validation.valid === false}>
+          <>{children}</>
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+    );
+  }
+);

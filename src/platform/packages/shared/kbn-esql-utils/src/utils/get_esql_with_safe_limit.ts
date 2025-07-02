@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { parse } from '@kbn/esql-ast';
 
 export function getESQLWithSafeLimit(esql: string, limit: number): string {
-  const { ast } = getAstAndSyntaxErrors(esql);
+  const { ast } = parse(esql);
   const sourceCommand = ast.find(({ name }) => ['from', 'metrics'].includes(name));
   if (!sourceCommand) {
     return esql;

@@ -43,6 +43,7 @@ import { i18n } from '@kbn/i18n';
 import { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { IconChartHeatmap } from '@kbn/chart-icons';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import {
   applyPaletteParams,
@@ -156,7 +157,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     overrides,
   }) => {
     const chartRef = useRef<Chart>(null);
-    const isDarkTheme = chartsThemeService.useDarkMode();
+    const isDarkTheme = useKibanaIsDarkMode();
     // legacy heatmap legend is handled by the uiState
     const [showLegend, setShowLegend] = useState<boolean>(() => {
       const bwcLegendStateDefault = args.legend.isVisible ?? true;

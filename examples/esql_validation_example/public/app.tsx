@@ -24,8 +24,11 @@ import {
 
 import type { CoreStart } from '@kbn/core/public';
 
-import { ESQLCallbacks, ESQLRealField, validateQuery } from '@kbn/esql-validation-autocomplete';
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import {
+  ESQLCallbacks,
+  ESQLFieldWithMetadata,
+  validateQuery,
+} from '@kbn/esql-validation-autocomplete';
 import type { StartDependencies } from './plugin';
 import { CodeSnippet } from './code_snippet';
 
@@ -57,7 +60,7 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
             [
               { name: 'doubleField', type: 'double' },
               { name: 'keywordField', type: 'keyword' },
-            ] as ESQLRealField[]
+            ] as ESQLFieldWithMetadata[]
         : undefined,
       getPolicies: callbacksEnabled.policies
         ? async () => [
@@ -77,16 +80,13 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
     if (currentQuery === '') {
       return;
     }
-    validateQuery(
-      currentQuery,
-      getAstAndSyntaxErrors,
-      { ignoreOnMissingCallbacks: ignoreErrors },
-      callbacks
-    ).then(({ errors: validationErrors, warnings: validationWarnings }) => {
-      // syntax errors come with a slight different format than other validation errors
-      setErrors(validationErrors.map((e) => ('severity' in e ? e.message : e.text)));
-      setWarnings(validationWarnings.map((e) => e.text));
-    });
+    validateQuery(currentQuery, { ignoreOnMissingCallbacks: ignoreErrors }, callbacks).then(
+      ({ errors: validationErrors, warnings: validationWarnings }) => {
+        // syntax errors come with a slight different format than other validation errors
+        setErrors(validationErrors.map((e) => ('severity' in e ? e.message : e.text)));
+        setWarnings(validationWarnings.map((e) => e.text));
+      }
+    );
   }, [currentQuery, ignoreErrors, callbacks]);
 
   const checkboxes = [
@@ -106,7 +106,7 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
 
   return (
     <EuiPage>
-      <EuiPageBody style={{ maxWidth: 800, margin: '0 auto' }}>
+      <EuiPageBody css={{ maxWidth: 800, margin: '0 auto' }}>
         <EuiPageHeader paddingSize="s" bottomBorder={true} pageTitle="ES|QL validation example" />
         <EuiPageSection paddingSize="s">
           <p>This app shows how to use the ES|QL validation API with all its options</p>

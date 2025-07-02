@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { HttpFetchOptions, HttpFetchQuery, HttpSetup } from '@kbn/core/public';
 import { FETCH_STATUS, AddInspectorRequest } from '@kbn/observability-shared-plugin/public';
@@ -72,7 +72,7 @@ class ApiService {
   }
 
   private parseApiUrl(apiUrl: string, spaceId?: string) {
-    if (spaceId) {
+    if (spaceId && spaceId !== 'default' && spaceId !== '*') {
       const basePath = kibanaService.coreSetup.http.basePath;
       return addSpaceIdToPath(basePath.serverBasePath, spaceId, apiUrl);
     }

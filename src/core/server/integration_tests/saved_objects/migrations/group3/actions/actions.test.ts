@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
-import * as Option from 'fp-ts/lib/Option';
+import * as Either from 'fp-ts/Either';
+import * as Option from 'fp-ts/Option';
 import { errors } from '@elastic/elasticsearch';
-import type { TaskEither } from 'fp-ts/lib/TaskEither';
+import type { TaskEither } from 'fp-ts/TaskEither';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
@@ -46,14 +46,14 @@ import {
   createBulkIndexOperationTuple,
   checkClusterRoutingAllocationEnabled,
 } from '@kbn/core-saved-objects-migration-server-internal';
-import { BASELINE_TEST_ARCHIVE_1K } from '../../kibana_migrator_archive_utils';
+import { BASELINE_TEST_ARCHIVE_SMALL } from '../../kibana_migrator_archive_utils';
 import { defaultKibanaIndex } from '../../kibana_migrator_test_kit';
 
 const { startES } = createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
   settings: {
     es: {
-      dataArchive: BASELINE_TEST_ARCHIVE_1K,
+      dataArchive: BASELINE_TEST_ARCHIVE_SMALL,
       license: 'basic',
       esArgs: ['http.max_content_length=10Kb'],
     },

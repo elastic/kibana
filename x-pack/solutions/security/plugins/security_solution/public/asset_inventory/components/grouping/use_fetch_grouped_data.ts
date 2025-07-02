@@ -11,8 +11,11 @@ import type { GenericBuckets, GroupingQuery, RootAggregation } from '@kbn/groupi
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import { showErrorToast } from '@kbn/cloud-security-posture';
+import { useMemo } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
-import { ASSET_INVENTORY_INDEX_PATTERN, QUERY_KEY_GROUPING_DATA } from '../../constants';
+import { QUERY_KEY_GROUPING_DATA } from '../../constants';
+import { useDataViewContext } from '../../hooks/data_view_context';
+import { addEmptyDataFilterQuery } from '../../utils/add_empty_data_filter';
 
 type NumberOrNull = number | null;
 
@@ -41,19 +44,29 @@ export interface AssetsGroupingAggregation {
   cloudProvider?: {
     buckets?: GenericBuckets[];
   };
-  source?: {
-    buckets?: GenericBuckets[];
-  };
 }
 
 export type AssetsRootGroupingAggregation = RootAggregation<AssetsGroupingAggregation>;
 
-export const getGroupedAssetsQuery = (query: GroupingQuery) => ({
-  ...query,
-  index: ASSET_INVENTORY_INDEX_PATTERN,
-  ignore_unavailable: true,
-  size: 0,
-});
+export const getGroupedAssetsQuery = (query: GroupingQuery, indexPattern?: string) => {
+  if (!indexPattern) {
+    throw new Error('Index pattern is required');
+  }
+
+  return {
+    ...query,
+    query: {
+      ...query?.query,
+      bool: {
+        ...query?.query?.bool,
+        must_not: addEmptyDataFilterQuery([]),
+      },
+    },
+    index: indexPattern,
+    ignore_unavailable: true,
+    size: 0,
+  };
+};
 
 export const useFetchGroupedData = ({
   query,
@@ -67,6 +80,12 @@ export const useFetchGroupedData = ({
     notifications: { toasts },
   } = useKibana().services;
 
+  const { dataView } = useDataViewContext();
+
+  const dataViewIndexPattern = useMemo(() => {
+    return dataView?.getIndexPattern();
+  }, [dataView]);
+
   return useQuery(
     [QUERY_KEY_GROUPING_DATA, { query }],
     async () => {
@@ -77,7 +96,7 @@ export const useFetchGroupedData = ({
           {},
           IKibanaSearchResponse<SearchResponse<{}, AssetsRootGroupingAggregation>>
         >({
-          params: getGroupedAssetsQuery(query),
+          params: getGroupedAssetsQuery(query, dataViewIndexPattern),
         })
       );
 
@@ -87,7 +106,7 @@ export const useFetchGroupedData = ({
     },
     {
       onError: (err: Error) => showErrorToast(toasts, err),
-      enabled,
+      enabled: enabled && !!dataViewIndexPattern,
       keepPreviousData: true,
     }
   );

@@ -8,7 +8,12 @@
 import { schema } from '@kbn/config-schema';
 import dateMath from '@kbn/datemath';
 import { MAX_OPEN_CASES, DEFAULT_MAX_OPEN_CASES } from './constants';
-import { CASES_CONNECTOR_TIME_WINDOW_REGEX } from '../../../common/constants';
+import {
+  CASES_CONNECTOR_TIME_WINDOW_REGEX,
+  MAX_ALERTS_PER_CASE,
+  MAX_DOCS_PER_PAGE,
+  MAX_TITLE_LENGTH,
+} from '../../../common/constants';
 
 const AlertSchema = schema.recordOf(schema.string(), schema.any(), {
   validate: (value) => {
@@ -39,7 +44,7 @@ const TimeWindowSchema = schema.string({
      * Acceptable format:
      * - First character should be a digit from 1 to 9
      * - All next characters should be a digit from 0 to 9
-     * - The last character should be d (day) or w (week)
+     * - The last character should be d (day), w (week), h (hour), m (minute)
      *
      * Example: 20d, 2w, etc
      */
@@ -54,7 +59,22 @@ const TimeWindowSchema = schema.string({
     if (!date || !date.isValid()) {
       return 'Not a valid time window';
     }
+
+    const timeSize = value.slice(0, -1);
+    const timeUnit = value.slice(-1);
+    const timeSizeAsNumber = Number(timeSize);
+
+    if (timeUnit === 'm' && timeSizeAsNumber < 5) {
+      return 'Time window should be at least 5 minutes';
+    }
   },
+});
+
+export const CasesGroupedAlertsSchema = schema.object({
+  alerts: schema.arrayOf(AlertSchema, { maxSize: MAX_ALERTS_PER_CASE }),
+  comments: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_DOCS_PER_PAGE / 2 })),
+  grouping: schema.recordOf(schema.string(), schema.any()),
+  title: schema.maybe(schema.string({ maxLength: MAX_TITLE_LENGTH })),
 });
 
 /**
@@ -66,6 +86,13 @@ export const CasesConnectorSecretsSchema = schema.object({});
 
 export const CasesConnectorRunParamsSchema = schema.object({
   alerts: schema.arrayOf(AlertSchema),
+  groupedAlerts: schema.nullable(
+    schema.arrayOf(CasesGroupedAlertsSchema, {
+      defaultValue: [],
+      minSize: 0,
+      maxSize: MAX_OPEN_CASES,
+    })
+  ),
   groupingBy: GroupingSchema,
   owner: schema.string(),
   rule: RuleSchema,
@@ -77,6 +104,7 @@ export const CasesConnectorRunParamsSchema = schema.object({
     max: MAX_OPEN_CASES,
   }),
   templateId: schema.nullable(schema.string()),
+  internallyManagedAlerts: schema.nullable(schema.boolean({ defaultValue: false })),
 });
 
 export const CasesConnectorRuleActionParamsSchema = schema.object({

@@ -59,6 +59,7 @@ export const createSamlSessionManager = (
     hostOptions: createKibanaHostOptions(config),
     log,
     isCloud: config.isCloud,
+    cloudHostName: config.cloudHostName,
     supportedRoles: {
       roles: supportedRoles,
       sourcePath: rolesDefinitionPath,

@@ -173,6 +173,9 @@
     "@kbn/core-feature-flags-browser-mocks",
     "@kbn/core-feature-flags-server",
     "@kbn/core-feature-flags-server-mocks",
+    "@kbn/core-pricing-browser",
+    "@kbn/core-pricing-server-internal",
+    "@kbn/core-pricing-common",
   ],
   "exclude": [
     "target/**/*",

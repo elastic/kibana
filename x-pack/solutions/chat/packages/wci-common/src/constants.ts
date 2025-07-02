@@ -9,4 +9,10 @@ export enum IntegrationType {
   salesforce = 'salesforce',
   index_source = 'index_source',
   external_server = 'external_server',
+  google_drive = 'google_drive',
+  sharepoint = 'sharepoint',
+  slack = 'slack',
+  confluence = 'confluence',
+  jira = 'jira',
+  github = 'github',
 }

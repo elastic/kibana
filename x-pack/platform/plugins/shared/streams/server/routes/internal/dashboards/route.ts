@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { DashboardAsset } from '../../../../common/assets';
 import { createServerRoute } from '../../create_server_route';
 import { SanitizedDashboardAsset } from '../../dashboards/route';
@@ -30,9 +31,7 @@ const suggestDashboardsRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({

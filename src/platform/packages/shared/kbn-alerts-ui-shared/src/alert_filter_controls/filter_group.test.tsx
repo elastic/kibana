@@ -41,7 +41,7 @@ const controlGroupMock = getControlGroupMock();
 
 const updateControlGroupInputMock = (newState: ControlGroupRuntimeState) => {
   act(() => {
-    controlGroupMock.snapshotRuntimeState.mockReturnValue(newState);
+    controlGroupMock.getInput.mockReturnValue(newState);
     controlGroupFilterStateMock$.next(newState);
   });
 };

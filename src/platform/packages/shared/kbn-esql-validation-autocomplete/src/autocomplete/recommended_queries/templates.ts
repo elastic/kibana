@@ -14,9 +14,11 @@ import { i18n } from '@kbn/i18n';
 export const getRecommendedQueries = ({
   fromCommand,
   timeField,
+  categorizationField,
 }: {
   fromCommand: string;
   timeField?: string;
+  categorizationField?: string;
 }) => {
   const queries = [
     {
@@ -33,6 +35,22 @@ export const getRecommendedQueries = ({
         }
       ),
       queryString: `${fromCommand}\n  | STATS count = COUNT(*) /* you can group by a field using the BY operator */`,
+    },
+    {
+      label: i18n.translate(
+        'kbn-esql-validation-autocomplete.recommendedQueries.searchExample.label',
+        {
+          defaultMessage: 'Search all fields',
+        }
+      ),
+      description: i18n.translate(
+        'kbn-esql-validation-autocomplete.recommendedQueries.searchExample.description',
+        {
+          defaultMessage: 'Use WHERE to filter/search data',
+        }
+      ),
+      queryString: `${fromCommand}\n  | WHERE QSTR("""term""") /* Search all fields using QSTR – e.g. WHERE QSTR("""debug""") */`,
+      sortText: 'D',
     },
     ...(timeField
       ? [
@@ -117,6 +135,23 @@ export const getRecommendedQueries = ({
           },
           {
             label: i18n.translate(
+              'kbn-esql-validation-autocomplete.recommendedQueries.categorize.label',
+              {
+                // TODO this item should be hidden if AIOps is disabled or we're not running with a platinum license
+                // the capability aiops.enabled can be used to check both of these conditions
+                defaultMessage: 'Detect change points',
+              }
+            ),
+            description: i18n.translate(
+              'kbn-esql-validation-autocomplete.recommendedQueries.categorize.description',
+              {
+                defaultMessage: 'Change point on count aggregation',
+              }
+            ),
+            queryString: `${fromCommand}\n | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart\n | STATS count = COUNT(*) BY buckets = BUCKET(${timeField}, 50, ?_tstart, ?_tend) \n | CHANGE_POINT count ON buckets `,
+          },
+          {
+            label: i18n.translate(
               'kbn-esql-validation-autocomplete.recommendedQueries.lastHour.label',
               {
                 defaultMessage: 'Total count vs count last hour',
@@ -136,6 +171,27 @@ export const getRecommendedQueries = ({
     | EVAL count_last_hour = CASE(key == "Last hour", count), count_rest = CASE(key == "Other", count)
     | EVAL total_visits = TO_DOUBLE(COALESCE(count_last_hour, 0::LONG) + COALESCE(count_rest, 0::LONG))
     | STATS count_last_hour = SUM(count_last_hour), total_visits  = SUM(total_visits)`,
+          },
+        ]
+      : []),
+    ...(categorizationField
+      ? // TODO this item should be hidden if AIOps is disabled or we're not running with a platinum license
+        // the capability aiops.enabled can be used to check both of these conditions
+        [
+          {
+            label: i18n.translate(
+              'kbn-esql-validation-autocomplete.recommendedQueries.patternAnalysis.label',
+              {
+                defaultMessage: 'Identify patterns',
+              }
+            ),
+            description: i18n.translate(
+              'kbn-esql-validation-autocomplete.recommendedQueries.patternAnalysis.description',
+              {
+                defaultMessage: 'Use the CATEGORIZE function to identify patterns in your logs',
+              }
+            ),
+            queryString: `${fromCommand}\n  | STATS Count=COUNT(*) BY Pattern=CATEGORIZE(${categorizationField})\n  | SORT Count DESC`,
           },
         ]
       : []),

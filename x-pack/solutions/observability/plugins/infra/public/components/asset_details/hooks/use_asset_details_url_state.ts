@@ -6,9 +6,9 @@
  */
 
 import * as rt from 'io-ts';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { constant, identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/pipeable';
+import { fold } from 'fp-ts/Either';
+import { constant, identity } from 'fp-ts/function';
 import { useCallback } from 'react';
 import {
   ALERT_STATUS_ACTIVE,
@@ -60,7 +60,6 @@ const TabIdRT = rt.union([
   rt.literal(ContentTabIds.LOGS),
   rt.literal(ContentTabIds.ANOMALIES),
   rt.literal(ContentTabIds.OSQUERY),
-  rt.literal(ContentTabIds.DASHBOARDS),
 ]);
 
 const AlertStatusRT = rt.union([

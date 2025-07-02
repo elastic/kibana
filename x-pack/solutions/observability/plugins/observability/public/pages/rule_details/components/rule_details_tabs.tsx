@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -46,6 +46,7 @@ interface Props {
   onEsQueryChange: (query: { bool: BoolQuery }) => void;
   onSetTabId: (tabId: TabId) => void;
   onControlApiAvailable?: (controlGroupHandler: FilterGroupHandler | undefined) => void;
+  controlApi?: FilterGroupHandler;
 }
 
 const tableColumns = getColumns();
@@ -60,10 +61,16 @@ export function RuleDetailsTabs({
   onSetTabId,
   onEsQueryChange,
   onControlApiAvailable,
+  controlApi,
 }: Props) {
   const {
     triggersActionsUi: { getRuleEventLogList: RuleEventLogList },
   } = useKibana().services;
+  const [filterControls, setFilterControls] = useState<Filter[] | undefined>();
+  const hasInitialControlLoadingFinished = useMemo(
+    () => controlApi && Array.isArray(filterControls),
+    [controlApi, filterControls]
+  );
 
   const ruleFilters = useRef<Filter[]>([
     {
@@ -93,13 +100,15 @@ export function RuleDetailsTabs({
             urlStorageKey={RULE_DETAILS_SEARCH_BAR_URL_STORAGE_KEY}
             defaultFilters={ruleFilters.current}
             disableLocalStorageSync={true}
+            filterControls={filterControls}
+            onFilterControlsChange={setFilterControls}
             onControlApiAvailable={onControlApiAvailable}
           />
           <EuiSpacer size="s" />
 
-          <EuiFlexGroup style={{ minHeight: 450 }} direction={'column'}>
+          <EuiFlexGroup css={{ minHeight: 450 }} direction={'column'}>
             <EuiFlexItem>
-              {esQuery && ruleTypeIds && (
+              {esQuery && ruleTypeIds && hasInitialControlLoadingFinished && (
                 <ObservabilityAlertsTable
                   id={RULE_DETAILS_PAGE_ID}
                   ruleTypeIds={ruleTypeIds}
@@ -120,7 +129,7 @@ export function RuleDetailsTabs({
       }),
       'data-test-subj': 'eventLogListTab',
       content: (
-        <EuiFlexGroup style={{ minHeight: 600 }} direction={'column'}>
+        <EuiFlexGroup css={{ minHeight: 600 }} direction={'column'}>
           <EuiFlexItem>
             {rule && ruleType ? <RuleEventLogList ruleId={rule.id} ruleType={ruleType} /> : null}
           </EuiFlexItem>

@@ -288,6 +288,54 @@
       },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
+        "id": "def-public.encodePath",
+        "type": "Function",
+        "tags": [],
+        "label": "encodePath",
+        "description": [],
+        "signature": [
+          "(path: string, pathParams?: Record<string, string> | undefined) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/encode_path.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/typed-react-router-config",
+            "id": "def-public.encodePath.$1",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/encode_path.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/typed-react-router-config",
+            "id": "def-public.encodePath.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "pathParams",
+            "description": [],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/encode_path.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/typed-react-router-config",
         "id": "def-public.Outlet",
         "type": "Function",
         "tags": [],

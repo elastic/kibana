@@ -13,13 +13,7 @@ import type { CoreStart } from '@kbn/core/public';
 export interface TabItem {
   id: string;
   label: string;
-}
-
-export interface TabMenuItemWithClick {
-  'data-test-subj': string;
-  name: string;
-  label: string;
-  onClick: () => void;
+  duplicatedFromId?: string; // ID of the tab from which this tab was duplicated
 }
 
 export interface TabsSizeConfig {
@@ -31,8 +25,9 @@ export interface TabsSizeConfig {
 
 // TODO status value for now matches EuiHealth colors for mocking simplicity, adjust when real data is available
 export enum TabStatus {
-  SUCCESS = 'success',
+  DEFAULT = 'default',
   RUNNING = 'running',
+  SUCCESS = 'success',
   ERROR = 'danger',
 }
 
@@ -40,6 +35,20 @@ export enum TabStatus {
 export interface TabPreviewData {
   query: AggregateQuery | Query;
   status: TabStatus;
+}
+
+export enum TabMenuItemName {
+  enterRenamingMode = 'enterRenamingMode',
+  duplicate = 'duplicate',
+  closeOtherTabs = 'closeOtherTabs',
+  closeTabsToTheRight = 'closeTabsToTheRight',
+}
+
+export interface TabMenuItemWithClick {
+  'data-test-subj': string;
+  name: TabMenuItemName | string;
+  label: string;
+  onClick: (() => void) | null; // `null` can be overridden inside tab menu
 }
 
 export type TabMenuItem = TabMenuItemWithClick | 'divider';

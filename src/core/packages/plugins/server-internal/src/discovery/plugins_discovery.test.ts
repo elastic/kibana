@@ -21,10 +21,11 @@ import { resolve } from 'path';
 import { ConfigService, Env } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { NodeInfo } from '@kbn/core-node-server';
+import type { KibanaGroup } from '@kbn/projects-solutions-groups';
+import { PluginType } from '@kbn/core-base-common';
 import { PluginsConfig, PluginsConfigType, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
-import { PluginType } from '@kbn/core-base-common';
 
 jest.mock('@kbn/repo-packages', () => ({
   ...jest.requireActual('@kbn/repo-packages'),
@@ -38,20 +39,30 @@ jest.mock('./plugin_manifest_from_plugin_package', () => ({
   })),
 }));
 
+const getPluginPackagesFilter = jest.requireActual('@kbn/repo-packages').getPluginPackagesFilter;
+
 const getPluginPackagesFilterMock: jest.Mock =
   jest.requireMock('@kbn/repo-packages').getPluginPackagesFilter;
 const pluginManifestFromPluginPackageMock: jest.Mock = jest.requireMock(
   './plugin_manifest_from_plugin_package'
 ).pluginManifestFromPluginPackage;
 
-function getMockPackage(id: string) {
+function getMockPackage(id: string, group: string = 'platform') {
+  const relativePath = `packages/${id}`;
   return {
     id,
     manifest: {
       id,
       type: 'plugin',
     },
-    directory: resolve(REPO_ROOT, `packages/${id}`),
+    group,
+    isPlugin: () => true,
+    getPluginCategories: () => ({
+      oss: false,
+    }),
+    getGroup: () => group,
+    directory: resolve(REPO_ROOT, relativePath),
+    normalizedRepoRelativeDir: relativePath,
   } as Package;
 }
 
@@ -648,6 +659,76 @@ describe('plugins discovery system', () => {
         type: 'return',
         value: plugin.manifest,
       });
+    });
+
+    it('does not filter if allowlistPluginGroups is not specified', async () => {
+      const foo = getMockPackage('foo');
+      const bar = getMockPackage('bar');
+      const obs = getMockPackage('obs', 'observability');
+      const sec = getMockPackage('sec', 'security');
+      coreContext.env = {
+        ...env,
+        pluginSearchPaths: [],
+        repoPackages: [foo, bar, obs, sec],
+      };
+
+      getPluginPackagesFilterMock.mockReturnValue(Boolean);
+
+      const filteredPluginsConfig: PluginsConfigType = {
+        ...pluginConfig,
+        allowlistPluginGroups: undefined, // we make it explicit to illustrate the purpose of the test
+      };
+
+      const { plugin$ } = discover({
+        config: new PluginsConfig(filteredPluginsConfig, coreContext.env),
+        coreContext,
+        instanceInfo,
+        nodeInfo,
+      });
+
+      const plugins = await firstValueFrom(plugin$.pipe(toArray()));
+
+      expect(plugins.length).toEqual(4);
+      // plugin discovery sorts them by name
+      expect(plugins[0].name).toEqual('bar');
+      expect(plugins[1].name).toEqual('foo');
+      expect(plugins[2].name).toEqual('obs');
+      expect(plugins[3].name).toEqual('sec');
+    });
+
+    it('filters out plugins that do not belong to included groups', async () => {
+      const foo = getMockPackage('foo');
+      const bar = getMockPackage('bar');
+      const obs = getMockPackage('obs', 'observability');
+      const sec = getMockPackage('sec', 'security');
+      coreContext.env = {
+        ...env,
+        pluginSearchPaths: [],
+        repoPackages: [foo, bar, obs, sec],
+      };
+
+      const allowlistPluginGroups: KibanaGroup[] = ['platform', 'observability'];
+      const filteredPluginsConfig: PluginsConfigType = {
+        ...pluginConfig,
+        allowlistPluginGroups,
+      };
+
+      getPluginPackagesFilterMock.mockImplementation(getPluginPackagesFilter);
+
+      const { plugin$ } = discover({
+        config: new PluginsConfig(filteredPluginsConfig, coreContext.env),
+        coreContext,
+        instanceInfo,
+        nodeInfo,
+      });
+
+      const plugins = await firstValueFrom(plugin$.pipe(toArray()));
+
+      expect(plugins.length).toEqual(3);
+      // plugin discovery sorts them by name
+      expect(plugins[0].name).toEqual('bar');
+      expect(plugins[1].name).toEqual('foo');
+      expect(plugins[2].name).toEqual('obs');
     });
   });
 

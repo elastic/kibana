@@ -44,7 +44,7 @@ Verify that node is healthy
 ```
 yarn start --server.port=5701 --elasticsearch.hosts=http://localhost:9500 --dev.basePathProxyTarget=5703
 ```
-- Login into http://localhost/5601/<YOUR_PATH>
+- Login into http://localhost/5701/<YOUR_PATH>
 
 ### Start Cluster A (main)
 
@@ -67,7 +67,7 @@ curl -k -u elastic:changeme http://localhost:9200
 yarn start
 ```
 
-- Login into http://localhost/5701/<YOUR_PATH>
+- Login into http://localhost/5601/<YOUR_PATH>
 
 To avoid issues, it might be needed to login to one of the kibana instances with an incognito session.
 
@@ -100,11 +100,29 @@ Save the responses as they will be required in Cluster A (see next section).
 
 ### Add Remote Cluster
 
-- Add a Remote Cluster to Cluster B. Navigate to *Stack Management > Remote Clusters* ([link](http://localhost:5601/app/management/data/remote_clusters)) and follow the steps to add cluster 'local':
+- Add a Remote Cluster to Cluster B. Navigate to *Stack Management > Remote Clusters* ([link](http://localhost:5701/app/management/data/remote_clusters)) and follow the steps to add cluster 'local':
 
 - Click "Add a remote cluster"
 - Choose a name, put `localhost:9300` for "Seed nodes", and save (check "Yes, I have setup trust")
 - Make sure the connection status is "Connected"
+
+- Equivalent Dev Tools API request
+```
+PUT /_cluster/settings
+{
+  "persistent" : {
+    "cluster" : {
+      "remote" : {
+        "local" : {
+          "seeds" : [
+            "localhost:9300"
+          ]
+        }
+      }
+    }
+  }
+}
+```
 
 ### Set up CCR
 
@@ -113,6 +131,16 @@ On cluster 1, navigate to *Stack Management > Cross-Cluster Replication* and c
 
   - Leader index `fleet-synced-integrations`
   - Follower index `fleet-synced-integrations-ccr-remote1`
+
+  - Equivalent Dev Tools API request
+
+  ```
+  PUT /fleet-synced-integrations-ccr-local/_ccr/follow
+{
+  "remote_cluster" : "local",
+  "leader_index" : "fleet-synced-integrations"
+}
+  ```
 
 ### Set up local ES output
 This configuration is required to kick off the integration sync. The local host needs to match the remote ES output configured on A (see next section). Note that `kibana.dev.yml` is read by both kibana instances so it's better to add it in the UI to avoid conflicts.
@@ -135,9 +163,9 @@ This configuration is required to kick off the integration sync. The local host 
   hosts: ["http://<local_ip>:9500"]
   sync_integrations: true
   kibana_url: "http://localhost:5701"
+  kibana_api_key: key
   secrets:
     service_token: token
-    kibana_api_key: key
 ```
 
 ## Verify sync
@@ -176,3 +204,17 @@ GET fleet-synced-integrations/_search
 ```
 GET remote1:metrics-*/_search
 ```
+
+## Cloud testing
+
+- Create 2 deployments in https://console.qa.cld.elstc.co called main and remote
+- Manage the deployments and add `xpack.fleet.enableExperimental: ['enableSyncIntegrationsOnRemote']` to kibana configuration to enable the feature flag
+
+- On remote cluster:
+  - Go to Stack Management / Remote Clusters
+  - Add a remote cluster, use the proxy address of the main cluster (Find in manage deployment UI / Security / Proxy address at the bottom)  
+  - Add a follower index in Cross Cluster Replication, leader index: `fleet-synced-integrations`, follower index: `fleet-synced-integrations-ccr-main`
+  - Resume replication
+- On main cluster:
+  - Add a remote elasticsearch output to point to the remote cluster, fill out required fields (hosts, service_token) and enable sync integrations (fill kibana url and API key)
+  - Monitor the integration sync status by clicking on the status badge in the outputs table

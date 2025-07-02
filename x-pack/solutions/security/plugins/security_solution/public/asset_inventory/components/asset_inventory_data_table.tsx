@@ -83,12 +83,6 @@ const columnHeaders: Record<string, string> = {
       defaultMessage: 'Type',
     }
   ),
-  [ASSET_FIELDS.ENTITY_SOURCE]: i18n.translate(
-    'xpack.securitySolution.assetInventory.allAssets.source',
-    {
-      defaultMessage: 'Source',
-    }
-  ),
   [ASSET_FIELDS.TIMESTAMP]: i18n.translate(
     'xpack.securitySolution.assetInventory.allAssets.lastSeen',
     {
@@ -103,10 +97,14 @@ const customCellRenderer = (rows: DataTableRecord[]): CustomCellRenderer => ({
     return <RiskBadge risk={risk} />;
   },
   [ASSET_FIELDS.ASSET_CRITICALITY]: ({ rowIndex }: EuiDataGridCellValueElementProps) => {
-    const criticality = rows[rowIndex].flattened[
-      ASSET_FIELDS.ASSET_CRITICALITY
-    ] as CriticalityLevelWithUnassigned;
-    return <AssetCriticalityBadge criticalityLevel={criticality} />;
+    const criticality = rows[rowIndex].flattened[ASSET_FIELDS.ASSET_CRITICALITY] as
+      | CriticalityLevelWithUnassigned
+      | 'deleted';
+    return (
+      <AssetCriticalityBadge
+        criticalityLevel={criticality === 'deleted' ? 'unassigned' : criticality}
+      />
+    );
   },
 });
 
@@ -119,7 +117,6 @@ const defaultColumns: AssetInventoryDefaultColumn[] = [
   { id: ASSET_FIELDS.ENTITY_NAME, width: 400 },
   { id: ASSET_FIELDS.ENTITY_ID },
   { id: ASSET_FIELDS.ENTITY_TYPE },
-  { id: ASSET_FIELDS.ENTITY_SOURCE },
   { id: ASSET_FIELDS.TIMESTAMP },
 ];
 
@@ -160,7 +157,7 @@ export const AssetInventoryDataTable = ({
       setExpandedDoc(doc); // Table is expecting the same doc ref to highlight the selected row
       openDynamicFlyout({
         entityDocId: doc.raw._id,
-        entityType: source.entity?.type,
+        entityType: source.entity?.EngineMetadata?.Type,
         entityName: source.entity?.name,
         scopeId: ASSET_INVENTORY_TABLE_ID,
         contextId: ASSET_INVENTORY_TABLE_ID,
@@ -324,7 +321,6 @@ export const AssetInventoryDataTable = ({
   const externalAdditionalControls = (
     <AdditionalControls
       total={totalHits}
-      dataView={dataView}
       title={title}
       columns={currentColumns}
       onAddColumn={onAddColumn}
@@ -348,7 +344,7 @@ export const AssetInventoryDataTable = ({
         <EuiProgress
           size="xs"
           color="accent"
-          style={{ opacity: isFetchingGridData ? 1 : 0 }}
+          css={{ opacity: isFetchingGridData ? 1 : 0 }}
           className={styles.gridProgressBar}
         />
         {dataViewIsLoading ? null : loadingState === DataLoadingState.loaded && totalHits === 0 ? (

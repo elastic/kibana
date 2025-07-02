@@ -6,6 +6,7 @@
  */
 
 import {
+  DURATION,
   SPAN_DURATION,
   TRANSACTION_DURATION,
   TRANSACTION_DURATION_HISTOGRAM,
@@ -17,9 +18,14 @@ const {
   latencyCorrelations,
   failedTransactionsCorrelations,
   dependencyLatency,
+  spanLatency,
 } = LatencyDistributionChartType;
 
-export function getDurationField(chartType: LatencyDistributionChartType, searchMetrics: boolean) {
+export function getDurationField(
+  chartType: LatencyDistributionChartType,
+  searchMetrics: boolean,
+  isOtel: boolean
+) {
   switch (chartType) {
     case transactionLatency:
       if (searchMetrics) {
@@ -31,7 +37,8 @@ export function getDurationField(chartType: LatencyDistributionChartType, search
     case failedTransactionsCorrelations:
       return TRANSACTION_DURATION;
     case dependencyLatency:
-      return SPAN_DURATION;
+    case spanLatency:
+      return isOtel ? DURATION : SPAN_DURATION;
     default:
       return TRANSACTION_DURATION;
   }

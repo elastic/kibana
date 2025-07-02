@@ -264,6 +264,7 @@ const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChan
           total_enrichment_duration_ms: normalizeDurations(metrics.enrichmentDurations),
           execution_gap_duration_s: normalizeGap(metrics.executionGap),
           gap_range: metrics.gapRange ?? undefined,
+          frozen_indices_queried_count: metrics.frozenIndicesQueriedCount,
         }
       : undefined,
     userError,

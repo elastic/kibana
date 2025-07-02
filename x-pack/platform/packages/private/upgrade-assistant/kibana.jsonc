@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/upgrade-assistant",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "private"
+}

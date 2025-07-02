@@ -21,9 +21,12 @@ import {
   mapVariableToColumn,
   getValuesFromQueryField,
   fixESQLQueryWithVariables,
+  getCategorizeColumns,
+  getArgsFromRenameFunction,
+  getCategorizeField,
 } from './query_parsing_helpers';
 import { monaco } from '@kbn/monaco';
-
+import { parse, walk } from '@kbn/esql-ast';
 describe('esql query helpers', () => {
   describe('getIndexPatternFromESQLQuery', () => {
     it('should return the index pattern string from esql queries', () => {
@@ -81,6 +84,9 @@ describe('esql query helpers', () => {
 
       const idxPattern18 = getIndexPatternFromESQLQuery('FROM """foo-{{mm-dd_yy}}"""');
       expect(idxPattern18).toBe('foo-{{mm-dd_yy}}');
+
+      const idxPattern19 = getIndexPatternFromESQLQuery('FROM foo-1::data');
+      expect(idxPattern19).toBe('foo-1::data');
     });
   });
 
@@ -599,6 +605,34 @@ describe('esql query helpers', () => {
       } as monaco.Position);
       expect(values).toEqual(undefined);
     });
+
+    it('should return undefined if the query has a questionmark at the last position', () => {
+      const queryString = 'FROM my_index | STATS COUNT() BY ?';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 1,
+        column: 34,
+      } as monaco.Position);
+      expect(values).toEqual(undefined);
+    });
+
+    it('should return undefined if the query has a questionmark at the second last position', () => {
+      const queryString = 'FROM my_index | STATS PERCENTILE(bytes, ?)';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 1,
+        column: 42,
+      } as monaco.Position);
+      expect(values).toEqual(undefined);
+    });
+
+    it('should return undefined if the query has a questionmark at the last cursor position', () => {
+      const queryString =
+        'FROM my_index | STATS COUNT() BY BUCKET(@timestamp, ?, ?_tstart, ?_tend)';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 1,
+        column: 52,
+      } as monaco.Position);
+      expect(values).toEqual(undefined);
+    });
   });
 
   describe('fixESQLQueryWithVariables', () => {
@@ -698,6 +732,127 @@ describe('esql query helpers', () => {
         },
       ];
       expect(fixESQLQueryWithVariables(esql, variables)).toEqual(expected);
+    });
+  });
+
+  describe('getCategorizeColumns', () => {
+    it('should return the columns used in categorize', () => {
+      const esql = 'FROM index | STATS COUNT() BY categorize(field1)';
+      const expected = ['categorize(field1)'];
+      expect(getCategorizeColumns(esql)).toEqual(expected);
+    });
+
+    it('should return the columns used in categorize for multiple breakdowns', () => {
+      const esql = 'FROM index | STATS COUNT() BY categorize(field1), field2';
+      const expected = ['categorize(field1)'];
+      expect(getCategorizeColumns(esql)).toEqual(expected);
+    });
+
+    it('should return the columns used in categorize for multiple breakdowns with BUCKET', () => {
+      const esql =
+        'FROM index | STATS count_per_day = COUNT() BY Pattern=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day)';
+      const expected = ['Pattern'];
+      expect(getCategorizeColumns(esql)).toEqual(expected);
+    });
+
+    it('should return the columns used in categorize if the result is stored in a new column', () => {
+      const esql = 'FROM index | STATS COUNT() BY pattern = categorize(field1)';
+      const expected = ['pattern'];
+      expect(getCategorizeColumns(esql)).toEqual(expected);
+    });
+
+    it('should return the columns used in categorize for a complex query', () => {
+      const esql =
+        'FROM index | STATS count_per_day = COUNT() BY Pattern=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day) | STATS COUNT() BY buckets, pattern = categorize(field1) | STATS Count=SUM(count_per_day), Trend=VALUES(count_per_day) BY Pattern';
+      const expected = ['Pattern'];
+      expect(getCategorizeColumns(esql)).toEqual(expected);
+    });
+
+    it('should return the columns used in categorize if there is a rename', () => {
+      const esql =
+        'FROM index | STATS COUNT() BY CATEGORIZE(field1) | RENAME `CATEGORIZE(field1)` AS pattern';
+      const expected = ['pattern'];
+      expect(getCategorizeColumns(esql)).toEqual(expected);
+
+      const esql1 =
+        'FROM index | STATS COUNT() BY pattern = CATEGORIZE(field1) | RENAME pattern AS meow';
+      const expected1 = ['meow'];
+      expect(getCategorizeColumns(esql1)).toEqual(expected1);
+    });
+
+    it('should return an empty array if no categorize is present', () => {
+      const esql = 'FROM index | STATS COUNT() BY field1';
+      const expected: string[] = [];
+      expect(getCategorizeColumns(esql)).toEqual(expected);
+    });
+  });
+
+  describe('getArgsFromRenameFunction', () => {
+    it('should return the args from an = rename function', () => {
+      const esql = 'FROM index | RENAME renamed = original';
+      const { root } = parse(esql);
+      let renameFunction;
+      walk(root, {
+        visitFunction: (node) => (renameFunction = node),
+      });
+
+      expect(getArgsFromRenameFunction(renameFunction!)).toMatchObject({
+        original: { name: 'original' },
+        renamed: { name: 'renamed' },
+      });
+    });
+
+    it('should return the args from an AS rename function', () => {
+      const esql = 'FROM index | RENAME original AS renamed';
+      const { root } = parse(esql);
+      let renameFunction;
+      walk(root, {
+        visitFunction: (node) => (renameFunction = node),
+      });
+
+      expect(getArgsFromRenameFunction(renameFunction!)).toMatchObject({
+        original: { name: 'original' },
+        renamed: { name: 'renamed' },
+      });
+    });
+  });
+
+  describe('getCategorizeField', () => {
+    it('should return the field used in categorize', () => {
+      const esql = 'FROM index | STATS COUNT() BY categorize(field1)';
+      const expected = ['field1'];
+      expect(getCategorizeField(esql)).toEqual(expected);
+    });
+
+    it('should return the field used in categorize for multiple breakdowns', () => {
+      const esql = 'FROM index | STATS COUNT() BY categorize(field1), field2';
+      const expected = ['field1'];
+      expect(getCategorizeField(esql)).toEqual(expected);
+    });
+
+    it('should return the field used in categorize for multiple breakdowns with BUCKET', () => {
+      const esql =
+        'FROM index | STATS count_per_day = COUNT() BY Pattern=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day)';
+      const expected = ['message'];
+      expect(getCategorizeField(esql)).toEqual(expected);
+    });
+
+    it('should return the field used in categorize if the result is stored in a new column', () => {
+      const esql = 'FROM index | STATS COUNT() BY pattern = categorize(field1)';
+      const expected = ['field1'];
+      expect(getCategorizeField(esql)).toEqual(expected);
+    });
+
+    it('should return the field used in categorize for a complex query', () => {
+      const esql =
+        'FROM index | STATS count_per_day = COUNT() BY Pattern=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day)  | STATS Count=SUM(count_per_day), Trend=VALUES(count_per_day) BY Pattern';
+      const expected = ['message'];
+      expect(getCategorizeField(esql)).toEqual(expected);
+    });
+    it('should return an empty array if no categorize is present', () => {
+      const esql = 'FROM index | STATS COUNT() BY field1';
+      const expected: string[] = [];
+      expect(getCategorizeField(esql)).toEqual(expected);
     });
   });
 });

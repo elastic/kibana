@@ -35,7 +35,12 @@ export function QuerySearchBar({
   range,
   setRange,
 }: Props) {
-  const { SearchBar } = useKibana().services.unifiedSearch.ui;
+  const {
+    unifiedSearch: {
+      ui: { SearchBar },
+    },
+    data: dataService,
+  } = useKibana().services;
 
   const { control } = useFormContext<CreateSLOForm>();
 
@@ -130,6 +135,8 @@ export function QuerySearchBar({
                       query,
                     };
                   });
+
+                  dataService.query.filterManager.setFilters(updatedFilters);
 
                   if (kqlQuerySchema.is(field.value)) {
                     field.onChange({

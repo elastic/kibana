@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiAvatar, EuiPageTemplate, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -47,7 +47,17 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
+      selectedSettingsTab: contextSettingsTab,
+      setSelectedSettingsTab,
     } = useAssistantContext();
+
+    useEffect(() => {
+      if (contextSettingsTab) {
+        // contextSettingsTab can be selected from Conversations > System Prompts > Add System Prompt
+        onTabChange?.(contextSettingsTab);
+      }
+    }, [onTabChange, contextSettingsTab, setSelectedSettingsTab]);
+
     const { data: connectors } = useLoadConnectors({
       http,
     });

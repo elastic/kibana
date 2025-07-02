@@ -10,8 +10,7 @@
     "browser": true,
     "configPath": [
       "xpack",
-      "search",
-      "homepage"
+      "searchHomepage"
     ],
     "requiredPlugins": [
       "share",
@@ -19,6 +18,7 @@
     "optionalPlugins": [
       "cloud",
       "console",
+      "searchNavigation",
       "usageCollection",
     ],
     "requiredBundles": [

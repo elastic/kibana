@@ -70,7 +70,7 @@ export const buildSpaceDataFilter = async (
         )
       )`;
 
-  logger.debug(`Filter for space id ${spaceId}:\n${spaceVisibleDataFilter}`);
+  logger.debug(`Filter for space id [${spaceId}]:\n${spaceVisibleDataFilter}`);
 
   return { filter: spaceVisibleDataFilter };
 };

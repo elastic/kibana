@@ -8,8 +8,8 @@
  */
 
 import { chain } from 'lodash';
-import * as Either from 'fp-ts/lib/Either';
-import * as Option from 'fp-ts/lib/Option';
+import * as Either from 'fp-ts/Either';
+import * as Option from 'fp-ts/Option';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
@@ -59,6 +59,7 @@ import type {
   DoneReindexingSyncState,
   LegacyCheckClusterRoutingAllocationState,
   CheckClusterRoutingAllocationState,
+  PostInitState,
 } from '../state';
 import { type TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
 import type { AliasAction, RetryableEsClientError } from '../actions';
@@ -408,7 +409,15 @@ describe('migrations v2 model', () => {
           const res: ResponseType<'INIT'> = Either.right({
             '.kibana_7.11.0_001': {
               aliases: { '.kibana': {}, '.kibana_7.11.0': {} },
-              mappings: mappingsWithUnknownType,
+              mappings: {
+                properties: {},
+                _meta: {
+                  mappingVersions: {
+                    someTypeWithMigrations: '8.8.0',
+                    someTypeWithModelVersions: '10.1.0',
+                  },
+                },
+              },
               settings: {},
             },
             '.kibana_3': {
@@ -417,7 +426,7 @@ describe('migrations v2 model', () => {
               settings: {},
             },
           });
-          const newState = model(
+          const newState: PostInitState = model(
             {
               ...initState,
               kibanaVersion: '7.12.0',
@@ -425,9 +434,19 @@ describe('migrations v2 model', () => {
               versionIndex: '.kibana_7.12.0_001',
             },
             res
-          );
+          ) as PostInitState;
 
           expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
+          expect((newState.sourceIndexMappings as Option.Some<IndexMapping>).value).toEqual({
+            _meta: {
+              mappingVersions: {
+                // notice how the logic defaulted to 10.0.0 for types that ONLY define 'migrations:' property
+                someTypeWithMigrations: '10.0.0',
+                someTypeWithModelVersions: '10.1.0',
+              },
+            },
+            properties: {},
+          });
           expect(newState.retryDelay).toEqual(2000);
         });
 
@@ -1343,9 +1362,18 @@ describe('migrations v2 model', () => {
             unknownDocs: [],
             errorsByType: {},
           });
-          const newState = model(cleanupUnknownAndExcluded, res) as PrepareCompatibleMigration;
+          const newState = model(cleanupUnknownAndExcluded, res);
 
           expect(newState.controlState).toEqual('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK');
+        });
+
+        test('CLEANUP_UNKNOWN_AND_EXCLUDED -> PREPARE_COMPATIBLE_MIGRATION', () => {
+          const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED'> = Either.right({
+            type: 'cleanup_not_needed' as const,
+          });
+          const newState = model(cleanupUnknownAndExcluded, res);
+
+          expect(newState.controlState).toEqual('PREPARE_COMPATIBLE_MIGRATION');
         });
       });
 

@@ -71,6 +71,7 @@ export const renderApp = (
     ml,
     fleet,
     uiActions,
+    searchNavigation,
   } = plugins;
 
   const productFeatures = features ?? { ...DEFAULT_PRODUCT_FEATURES };
@@ -82,7 +83,7 @@ export const renderApp = (
   const store = getContext().store;
   const indexMappingComponent = indexManagementPlugin?.getIndexMappingComponent({ history });
 
-  const connectorTypes = plugins.searchConnectors?.getConnectorTypes() || [];
+  const connectorTypes = plugins.contentConnectors?.getConnectorTypes() || [];
 
   const unmountKibanaLogic = mountKibanaLogic({
     application,
@@ -111,6 +112,7 @@ export const renderApp = (
       params.setHeaderActionMenu(
         HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store, params) : undefined
       ),
+    searchNavigation,
     security,
     setBreadcrumbs: chrome.setBreadcrumbs,
     setChromeIsVisible: chrome.setIsVisible,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { FormAction } from '../tasks/perform_user_actions';
 
@@ -20,7 +21,7 @@ interface FormEditingDescription {
 export interface ArtifactsFixtureType {
   title: string;
   pagePrefix: string;
-  tabId: string;
+  tabId: keyof typeof ENDPOINT_ARTIFACT_LISTS;
   nextTabId: string;
   artifactName: string;
   privilegePrefix: string;
@@ -36,11 +37,15 @@ export interface ArtifactsFixtureType {
   };
 
   createRequestBody: {
-    list_id: string;
+    list_id: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number];
     entries: object[];
     os_types: string[];
   };
 }
+
+export const getArtifactsListTestDataForArtifact = (
+  artifact: keyof typeof ENDPOINT_ARTIFACT_LISTS
+) => getArtifactsListTestsData().find(({ tabId }) => tabId === artifact) as ArtifactsFixtureType;
 
 export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
   {

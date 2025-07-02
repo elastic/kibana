@@ -25,7 +25,6 @@ const buildTableContext = (dataView: DataView, rows: DataTableRecord[]): DataTab
     getRowByIndex: jest.fn((index) => rows[index]),
     onFilter: jest.fn(),
     dataView,
-    isDarkMode: false,
     selectedDocsState: buildSelectedDocsState([]),
     pageIndex: 0,
     pageSize: 10,

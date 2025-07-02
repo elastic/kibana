@@ -69,6 +69,7 @@ export const INTEGRATION_CATEGORY_DISPLAY: {
   sdk_search: { title: 'SDK', parent_id: 'search' },
   search: { title: 'Elasticsearch', parent_id: undefined },
   security: { title: 'Security', parent_id: undefined },
+  siem: { title: 'SIEM', parent_id: 'security' },
   stream_processing: { title: 'Stream Processing', parent_id: 'observability' },
   support: { title: 'Support', parent_id: undefined },
   threat_intel: { title: 'Threat Intelligence', parent_id: 'security' },

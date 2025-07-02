@@ -6,12 +6,8 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
-import {
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-  httpServerMock,
-} from '@kbn/core/server/mocks';
+import type { ElasticsearchClientMock, ScopedClusterClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
 import { createMockEndpointAppContext, createRouteHandlerContext } from '../../mocks';
 import { applyActionsEsSearchMock } from '../../services/actions/mocks';
@@ -29,13 +25,16 @@ describe('when calling the Action Details route handler', () => {
 
   beforeEach(() => {
     const mockContext = createMockEndpointAppContext();
+
     (mockContext.service.getEndpointMetadataService as jest.Mock) = jest.fn().mockReturnValue({
       findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
     });
     mockScopedEsClient = elasticsearchServiceMock.createScopedClusterClient();
-    mockSavedObjectClient = savedObjectsClientMock.create();
+    mockScopedEsClient.asInternalUser =
+      mockContext.service.getInternalEsClient() as ElasticsearchClientMock;
+    mockSavedObjectClient =
+      mockContext.service.savedObjects.createInternalScopedSoClient() as jest.Mocked<SavedObjectsClientContract>;
     mockResponse = httpServerMock.createResponseFactory();
-
     actionDetailsRouteHandler = getActionDetailsRequestHandler(mockContext);
   });
 

@@ -43,9 +43,9 @@ export type { EmbeddableSetup, EmbeddableStart } from './types';
 export type { EnhancementRegistryDefinition } from './enhancements/types';
 
 export {
-  ReactEmbeddableRenderer,
+  EmbeddableRenderer,
   type DefaultEmbeddableApi,
-  type ReactEmbeddableFactory,
+  type EmbeddableFactory,
 } from './react_embeddable_system';
 
 export function plugin(initializerContext: PluginInitializerContext) {

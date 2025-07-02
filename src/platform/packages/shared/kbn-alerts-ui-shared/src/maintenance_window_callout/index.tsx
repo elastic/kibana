@@ -52,8 +52,8 @@ export function MaintenanceWindowCallout({
   } = kibanaServices;
 
   const isMaintenanceWindowDisabled =
-    !capabilities[MAINTENANCE_WINDOW_FEATURE_ID].show &&
-    !capabilities[MAINTENANCE_WINDOW_FEATURE_ID].save;
+    !capabilities[MAINTENANCE_WINDOW_FEATURE_ID]?.show &&
+    !capabilities[MAINTENANCE_WINDOW_FEATURE_ID]?.save;
   const { data: activeMaintenanceWindows = [] } = useFetchActiveMaintenanceWindows(kibanaServices, {
     enabled: !isMaintenanceWindowDisabled,
   });
@@ -132,7 +132,7 @@ export function MaintenanceWindowCallout({
             })
       }
       color="warning"
-      iconType="iInCircle"
+      iconType="info"
       data-test-subj="maintenanceWindowCallout"
     >
       {MAINTENANCE_WINDOW_RUNNING_DESCRIPTION}

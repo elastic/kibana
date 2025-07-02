@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { hasCapabilities } from './has_capabilities';
+import { hasCapabilities, existCapabilities } from './has_capabilities';
 
 const EMPTY_CAPABILITIES = { navLinks: {}, management: {}, catalogue: {} };
-const SAMPLE_CAPABILITY = { show: true, crud: true };
 
 describe('hasCapabilities', () => {
   it('returns true when no capabilities are required', () => {
@@ -16,59 +15,238 @@ describe('hasCapabilities', () => {
   });
 
   describe('when requiredCapabilities is a string', () => {
-    it('returns false when the capability is not present', () => {
-      expect(hasCapabilities(EMPTY_CAPABILITIES, 'missingCapability')).toEqual(false);
+    const requiredCapabilities = 'requiredCapability.show';
+
+    it('returns false when the capability is missing', () => {
+      expect(hasCapabilities(EMPTY_CAPABILITIES, requiredCapabilities)).toEqual(false);
     });
 
-    it('returns true when the capability is present', () => {
+    it('returns false when the capability is false', () => {
       const capabilities = {
         ...EMPTY_CAPABILITIES,
-        requiredCapability: SAMPLE_CAPABILITY,
+        requiredCapability: { show: false },
       };
-      expect(hasCapabilities(capabilities, 'requiredCapability')).toEqual(true);
+      expect(hasCapabilities(capabilities, requiredCapabilities)).toEqual(false);
+    });
+
+    it('returns true when the capability is true', () => {
+      const capabilities = {
+        ...EMPTY_CAPABILITIES,
+        requiredCapability: { show: true },
+      };
+      expect(hasCapabilities(capabilities, requiredCapabilities)).toEqual(true);
     });
   });
 
   describe('when requiredCapabilities is an array', () => {
     describe('when there is only one array (OR)', () => {
-      it('returns false when none of the capabilities are present', () => {
-        expect(
-          hasCapabilities(EMPTY_CAPABILITIES, ['missingCapability1', 'missingCapability2'])
-        ).toEqual(false);
+      const requiredCapabilities = ['requiredCapability.show', 'requiredCapability2.show'];
+
+      it('returns true when no capabilities are required', () => {
+        expect(hasCapabilities(EMPTY_CAPABILITIES, [])).toEqual(true);
       });
 
-      it('returns true when any of the capabilities are present', () => {
+      it('returns false when all of the capabilities are missing', () => {
+        const capabilities = EMPTY_CAPABILITIES;
+        expect(hasCapabilities(capabilities, requiredCapabilities)).toEqual(false);
+      });
+
+      it('returns true when any of the capabilities are true', () => {
         const capabilities = {
           ...EMPTY_CAPABILITIES,
-          requiredCapability: SAMPLE_CAPABILITY,
+          requiredCapability: { show: true },
         };
-        expect(hasCapabilities(capabilities, ['requiredCapability', 'missingCapability'])).toEqual(
-          true
-        );
+        expect(hasCapabilities(capabilities, requiredCapabilities)).toEqual(true);
+      });
+
+      it('returns false when all of the capabilities are false or missing', () => {
+        const capabilities = {
+          ...EMPTY_CAPABILITIES,
+          requiredCapability: { show: false },
+        };
+        expect(hasCapabilities(capabilities, requiredCapabilities)).toEqual(false);
       });
     });
 
-    describe('when there subArrays (And)', () => {
+    describe('when there subArrays (AND)', () => {
+      const requiredCapabilities = [['requiredCapability.show', 'requiredCapability2.show']];
+
+      it('returns true when no capabilities are required', () => {
+        expect(hasCapabilities(EMPTY_CAPABILITIES, [[]])).toEqual(true);
+      });
+
       it('returns false when one of the capabilities is not present', () => {
         const capabilities = {
           ...EMPTY_CAPABILITIES,
-          requiredCapability1: SAMPLE_CAPABILITY,
+          requiredCapability: { show: true },
         };
 
-        expect(
-          hasCapabilities(capabilities, [['requiredCapability1', 'requiredCapability2']])
-        ).toEqual(false);
+        expect(hasCapabilities(capabilities, requiredCapabilities)).toEqual(false);
       });
 
-      it('returns true when both capabilities are present', () => {
+      it('returns false when one of the capabilities is false', () => {
         const capabilities = {
           ...EMPTY_CAPABILITIES,
-          requiredCapability1: SAMPLE_CAPABILITY,
-          requiredCapability2: SAMPLE_CAPABILITY,
+          requiredCapability: { show: true },
+          requiredCapability2: { show: false },
         };
-        expect(
-          hasCapabilities(capabilities, [['requiredCapability1', 'requiredCapability2']])
-        ).toEqual(true);
+        expect(hasCapabilities(capabilities, requiredCapabilities)).toEqual(false);
+      });
+
+      it('returns true when both capabilities are true', () => {
+        const capabilities = {
+          ...EMPTY_CAPABILITIES,
+          requiredCapability: { show: true },
+          requiredCapability2: { show: true },
+        };
+        expect(hasCapabilities(capabilities, requiredCapabilities)).toEqual(true);
+      });
+    });
+
+    describe('when there are mixed strings and subArrays (AND and OR)', () => {
+      const requiredCapabilities = [
+        'requiredCapability.show',
+        ['requiredCapability2.show', 'requiredCapability3.show'],
+      ];
+
+      it('returns true when one of the OR capabilities is true', () => {
+        const capabilities = {
+          ...EMPTY_CAPABILITIES,
+          requiredCapability: { show: true },
+        };
+
+        expect(hasCapabilities(capabilities, requiredCapabilities)).toEqual(true);
+      });
+
+      it('returns true when the AND capabilities are true', () => {
+        const capabilities = {
+          ...EMPTY_CAPABILITIES,
+          requiredCapability: { show: false },
+          requiredCapability2: { show: true },
+          requiredCapability3: { show: true },
+        };
+        expect(hasCapabilities(capabilities, requiredCapabilities)).toEqual(true);
+      });
+
+      it('returns false when only one of the AND capabilities is true', () => {
+        const capabilities = {
+          ...EMPTY_CAPABILITIES,
+          requiredCapability2: { show: true },
+          requiredCapability3: { show: false },
+        };
+        expect(hasCapabilities(capabilities, requiredCapabilities)).toEqual(false);
+      });
+    });
+  });
+});
+
+describe('existCapabilities', () => {
+  it('returns true when no capabilities are required', () => {
+    expect(existCapabilities(EMPTY_CAPABILITIES)).toEqual(true);
+  });
+
+  describe('when requiredCapabilities is a string', () => {
+    const requiredCapabilities = 'requiredCapability.show';
+
+    it('returns false when the capability is missing', () => {
+      expect(existCapabilities(EMPTY_CAPABILITIES, requiredCapabilities)).toEqual(false);
+    });
+
+    it('returns true when the capability is false', () => {
+      const capabilities = {
+        ...EMPTY_CAPABILITIES,
+        requiredCapability: { show: false },
+      };
+      expect(existCapabilities(capabilities, requiredCapabilities)).toEqual(true);
+    });
+
+    it('returns true when the capability is true', () => {
+      const capabilities = {
+        ...EMPTY_CAPABILITIES,
+        requiredCapability: { show: true },
+      };
+      expect(existCapabilities(capabilities, requiredCapabilities)).toEqual(true);
+    });
+  });
+
+  describe('when requiredCapabilities is an array', () => {
+    describe('when there is only one array (OR)', () => {
+      const requiredCapabilities = ['requiredCapability.show', 'requiredCapability2.show'];
+
+      it('returns true when no capabilities are required', () => {
+        expect(existCapabilities(EMPTY_CAPABILITIES, [])).toEqual(true);
+      });
+
+      it('returns false when all of the capabilities are missing', () => {
+        const capabilities = EMPTY_CAPABILITIES;
+        expect(existCapabilities(capabilities, requiredCapabilities)).toEqual(false);
+      });
+
+      it('returns true when any of the capabilities exist', () => {
+        const capabilities = {
+          ...EMPTY_CAPABILITIES,
+          requiredCapability: { show: false },
+        };
+        expect(existCapabilities(capabilities, requiredCapabilities)).toEqual(true);
+      });
+    });
+
+    describe('when there subArrays (AND)', () => {
+      const requiredCapabilities = [['requiredCapability.show', 'requiredCapability2.show']];
+
+      it('returns true when no capabilities are required', () => {
+        expect(existCapabilities(EMPTY_CAPABILITIES, [[]])).toEqual(true);
+      });
+
+      it('returns false when one of the capabilities is not present', () => {
+        const capabilities = {
+          ...EMPTY_CAPABILITIES,
+          requiredCapability: { show: false },
+        };
+
+        expect(existCapabilities(capabilities, requiredCapabilities)).toEqual(false);
+      });
+
+      it('returns true when both capabilities exist', () => {
+        const capabilities = {
+          ...EMPTY_CAPABILITIES,
+          requiredCapability: { show: false },
+          requiredCapability2: { show: false },
+        };
+        expect(existCapabilities(capabilities, requiredCapabilities)).toEqual(true);
+      });
+    });
+
+    describe('when there are mixed strings and subArrays (AND and OR)', () => {
+      const requiredCapabilities = [
+        'requiredCapability.show',
+        ['requiredCapability2.show', 'requiredCapability3.show'],
+      ];
+
+      it('returns true when one of the OR capabilities exist', () => {
+        const capabilities = {
+          ...EMPTY_CAPABILITIES,
+          requiredCapability: { show: true },
+        };
+
+        expect(existCapabilities(capabilities, requiredCapabilities)).toEqual(true);
+      });
+
+      it('returns true when the AND capabilities exist', () => {
+        const capabilities = {
+          ...EMPTY_CAPABILITIES,
+          requiredCapability2: { show: false },
+          requiredCapability3: { show: false },
+        };
+        expect(existCapabilities(capabilities, requiredCapabilities)).toEqual(true);
+      });
+
+      it('returns false when only one of the AND capabilities exist', () => {
+        const capabilities = {
+          ...EMPTY_CAPABILITIES,
+          requiredCapability3: { show: false },
+        };
+        expect(existCapabilities(capabilities, requiredCapabilities)).toEqual(false);
       });
     });
   });

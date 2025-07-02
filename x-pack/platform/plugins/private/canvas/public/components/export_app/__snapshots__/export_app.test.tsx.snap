@@ -47,18 +47,82 @@ exports[`<ExportApp /> renders as expected 1`] = `
         </RoutingLink>
       </div>
       <div
-        className="canvasExport__stageContent"
+        css="unknown styles"
         data-shared-items-count={3}
       >
-        <WorkpadPage
-          isSelected={true}
-          registerLayout={[Function]}
-          unregisterLayout={[Function]}
+        <Insertion
+          cache={
+            Object {
+              "insert": [Function],
+              "inserted": Object {
+                "17hzfsv-ExportApp": true,
+              },
+              "key": "css",
+              "nonce": undefined,
+              "registered": Object {},
+              "sheet": StyleSheet {
+                "_alreadyInsertedOrderInsensitiveRule": true,
+                "_insertTag": [Function],
+                "before": null,
+                "container": <head>
+                  <style
+                    data-emotion="css"
+                    data-s=""
+                  >
+                    
+                    .css-721pd1-floatTopRight{position:absolute;top:-8px;right:-8px;}
+                  </style>
+                  <style
+                    data-emotion="css"
+                    data-s=""
+                  >
+                    
+                    .css-17hzfsv-ExportApp{}
+                  </style>
+                </head>,
+                "ctr": 1,
+                "insertionPoint": undefined,
+                "isSpeedy": false,
+                "key": "css",
+                "nonce": undefined,
+                "prepend": undefined,
+                "tags": Array [
+                  <style
+                    data-emotion="css"
+                    data-s=""
+                  >
+                    
+                    .css-17hzfsv-ExportApp{}
+                  </style>,
+                ],
+              },
+            }
+          }
+          isStringTag={true}
+          serialized={
+            Object {
+              "map": undefined,
+              "name": "17hzfsv-ExportApp",
+              "next": undefined,
+              "styles": ";label:ExportApp;",
+              "toString": [Function],
+            }
+          }
+        />
+        <div
+          className="canvasExport__stageContent css-17hzfsv-ExportApp"
+          data-shared-items-count={3}
         >
-          <div>
-            Page
-          </div>
-        </WorkpadPage>
+          <WorkpadPage
+            isSelected={true}
+            registerLayout={[Function]}
+            unregisterLayout={[Function]}
+          >
+            <div>
+              Page
+            </div>
+          </WorkpadPage>
+        </div>
       </div>
     </div>
   </div>
@@ -112,18 +176,82 @@ exports[`<ExportApp /> renders as expected 2`] = `
         </RoutingLink>
       </div>
       <div
-        className="canvasExport__stageContent"
+        css="unknown styles"
         data-shared-items-count={4}
       >
-        <WorkpadPage
-          isSelected={true}
-          registerLayout={[Function]}
-          unregisterLayout={[Function]}
+        <Insertion
+          cache={
+            Object {
+              "insert": [Function],
+              "inserted": Object {
+                "17hzfsv-ExportApp": true,
+              },
+              "key": "css",
+              "nonce": undefined,
+              "registered": Object {},
+              "sheet": StyleSheet {
+                "_alreadyInsertedOrderInsensitiveRule": true,
+                "_insertTag": [Function],
+                "before": null,
+                "container": <head>
+                  <style
+                    data-emotion="css"
+                    data-s=""
+                  >
+                    
+                    .css-721pd1-floatTopRight{position:absolute;top:-8px;right:-8px;}
+                  </style>
+                  <style
+                    data-emotion="css"
+                    data-s=""
+                  >
+                    
+                    .css-17hzfsv-ExportApp{}
+                  </style>
+                </head>,
+                "ctr": 1,
+                "insertionPoint": undefined,
+                "isSpeedy": false,
+                "key": "css",
+                "nonce": undefined,
+                "prepend": undefined,
+                "tags": Array [
+                  <style
+                    data-emotion="css"
+                    data-s=""
+                  >
+                    
+                    .css-17hzfsv-ExportApp{}
+                  </style>,
+                ],
+              },
+            }
+          }
+          isStringTag={true}
+          serialized={
+            Object {
+              "map": undefined,
+              "name": "17hzfsv-ExportApp",
+              "next": undefined,
+              "styles": ";label:ExportApp;",
+              "toString": [Function],
+            }
+          }
+        />
+        <div
+          className="canvasExport__stageContent css-17hzfsv-ExportApp"
+          data-shared-items-count={4}
         >
-          <div>
-            Page
-          </div>
-        </WorkpadPage>
+          <WorkpadPage
+            isSelected={true}
+            registerLayout={[Function]}
+            unregisterLayout={[Function]}
+          >
+            <div>
+              Page
+            </div>
+          </WorkpadPage>
+        </div>
       </div>
     </div>
   </div>

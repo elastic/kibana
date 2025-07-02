@@ -55,11 +55,7 @@ export const useBulkGetMaintenanceWindowsQuery = (
     ids,
     http,
     notifications: { toasts },
-    application: {
-      capabilities: {
-        maintenanceWindow: { show },
-      },
-    },
+    application: { capabilities },
     licensing,
   }: UseBulkGetMaintenanceWindowsQueryParams,
   {
@@ -69,6 +65,9 @@ export const useBulkGetMaintenanceWindowsQuery = (
 ) => {
   const { isAtLeastPlatinum } = useLicense({ licensing });
   const hasLicense = isAtLeastPlatinum();
+
+  // In AI4DSOC (searchAiLake tier) the maintenanceWindow capability is disabled
+  const show = Boolean(capabilities.maintenanceWindow?.show);
 
   return useQuery({
     queryKey: queryKeys.maintenanceWindowsBulkGet(ids),

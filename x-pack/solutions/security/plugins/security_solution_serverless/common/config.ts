@@ -35,8 +35,7 @@ export const productTypes = schema.arrayOf<SecurityProductType>(productType, {
 });
 export type SecurityProductTypes = TypeOf<typeof productTypes>;
 
-export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
+const commonConfigSchemaProps = {
   productTypes,
   /**
    * For internal use. A list of string values (comma delimited) that will enable experimental
@@ -53,6 +52,19 @@ export const configSchema = schema.object({
   enableExperimental: schema.arrayOf(schema.string(), {
     defaultValue: () => [],
   }),
-});
+  /**
+   * A list of APP IDs that are not accessible in the serverless environment.
+   * This is used to disable the apps in the UI and prevent users from accessing them.
+   */
+  inaccessibleApps: schema.arrayOf(schema.string(), { defaultValue: [] }),
+};
 
-export type ServerlessSecurityConfigSchema = TypeOf<typeof configSchema>;
+export const commonConfigSchema = schema.object(commonConfigSchemaProps);
+
+export type ServerlessSecurityPublicConfig = TypeOf<typeof commonConfigSchema>;
+
+// This is used to expose the common config schema properties to the browser
+// so that they can be used in the client-side code.
+export const exposeToBrowser = Object.fromEntries(
+  Object.keys(commonConfigSchemaProps).map((prop) => [prop, true])
+);

@@ -10,6 +10,7 @@ import { render } from '@testing-library/react';
 import { CasesTourSteps } from './cases_tour_steps';
 import { AlertsCasesTourSteps } from './tour_config';
 import { TestProviders } from '../../mock';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('./tour_step', () => ({
   GuidedOnboardingTourStep: jest
@@ -21,13 +22,17 @@ jest.mock('./tour_step', () => ({
 
 describe('cases tour steps', () => {
   it('Mounts with AlertsCasesTourSteps.createCase step active', () => {
-    const { getByTestId, queryByTestId } = render(<CasesTourSteps />, { wrapper: TestProviders });
+    const { getByTestId, queryByTestId } = render(<CasesTourSteps />, {
+      wrapper: TestProviders,
+    });
     expect(getByTestId(`step-${AlertsCasesTourSteps.createCase}`)).toBeInTheDocument();
     expect(queryByTestId(`step-${AlertsCasesTourSteps.submitCase}`)).not.toBeInTheDocument();
   });
-  it('On click next, AlertsCasesTourSteps.submitCase step active', () => {
-    const { getByTestId, queryByTestId } = render(<CasesTourSteps />, { wrapper: TestProviders });
-    getByTestId(`step-${AlertsCasesTourSteps.createCase}`).click();
+  it('On click next, AlertsCasesTourSteps.submitCase step active', async () => {
+    const { getByTestId, queryByTestId } = render(<CasesTourSteps />, {
+      wrapper: TestProviders,
+    });
+    await userEvent.click(getByTestId(`step-${AlertsCasesTourSteps.createCase}`));
     expect(getByTestId(`step-${AlertsCasesTourSteps.submitCase}`)).toBeInTheDocument();
     expect(queryByTestId(`step-${AlertsCasesTourSteps.createCase}`)).not.toBeInTheDocument();
   });

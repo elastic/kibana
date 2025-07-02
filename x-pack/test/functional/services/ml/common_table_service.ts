@@ -80,6 +80,12 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
       await testSubjects.existOrFail(`${this.tableTestSubj} loaded`, { timeout: 30 * 1000 });
     }
 
+    public async assertNonZeroRowCount() {
+      await this.waitForTableToLoad();
+      const rows = await this.parseTable();
+      expect(rows.length).to.not.eql(0, 'Table should have at least one row');
+    }
+
     async getSearchInput(): Promise<WebElementWrapper> {
       return await testSubjects.find(this.searchInputSubj);
     }

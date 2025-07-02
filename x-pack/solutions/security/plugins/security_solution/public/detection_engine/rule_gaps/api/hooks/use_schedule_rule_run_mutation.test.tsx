@@ -43,7 +43,7 @@ describe('Schedule rule run hook', () => {
       expect(res).toEqual(scheduleRuleRunMock);
       expect(fetchMock).toHaveBeenCalledTimes(1);
       expect(fetchMock).toHaveBeenCalledWith(INTERNAL_ALERTING_BACKFILL_SCHEDULE_API_PATH, {
-        body: `[{"rule_id":"rule-1","start":"${timeRange.startDate.toISOString()}","end":"${timeRange.endDate.toISOString()}"}]`,
+        body: `[{"rule_id":"rule-1","ranges":[{"start":"${timeRange.startDate.toISOString()}","end":"${timeRange.endDate.toISOString()}"}]}]`,
         method: 'POST',
         version: apiVersion,
       });

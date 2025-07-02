@@ -63,7 +63,6 @@ describe('internalRuleTypesRoute', () => {
         defaultScheduleInterval: '10m',
         doesSetRecoveryContext: false,
         hasAlertsMappings: true,
-        hasFieldsForAAD: false,
         validLegacyConsumers: [],
       } as RegistryAlertTypeWithAuth,
     ];
@@ -96,7 +95,6 @@ describe('internalRuleTypesRoute', () => {
         solution: 'stack',
         enabled_in_license: true,
         has_alerts_mappings: true,
-        has_fields_for_a_a_d: false,
       },
     ];
     rulesClient.listRuleTypes.mockResolvedValueOnce(listTypes);
@@ -124,7 +122,6 @@ describe('internalRuleTypesRoute', () => {
             "does_set_recovery_context": false,
             "enabled_in_license": true,
             "has_alerts_mappings": true,
-            "has_fields_for_a_a_d": false,
             "id": "1",
             "is_exportable": true,
             "minimum_license_required": "basic",
@@ -182,7 +179,6 @@ describe('internalRuleTypesRoute', () => {
         solution: 'stack',
         enabledInLicense: true,
         hasAlertsMappings: false,
-        hasFieldsForAAD: false,
         validLegacyConsumers: [],
       } as RegistryAlertTypeWithAuth,
     ];
@@ -240,7 +236,6 @@ describe('internalRuleTypesRoute', () => {
         solution: 'stack',
         enabledInLicense: true,
         hasAlertsMappings: false,
-        hasFieldsForAAD: false,
         validLegacyConsumers: [],
       } as RegistryAlertTypeWithAuth,
     ];

@@ -12,7 +12,7 @@ import {
   ChatCompletionEventType,
 } from '@kbn/inference-common';
 import { createOutputApi } from './create_output_api';
-import { createToolValidationError } from '../../server/chat_complete/errors';
+import { createToolValidationError } from '../chat_complete/errors';
 
 describe('createOutputApi', () => {
   let chatComplete: jest.Mock;

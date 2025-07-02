@@ -233,6 +233,11 @@ export class VegaBaseView {
 
       return result;
     };
+
+    const vegaSpec = this._parser.isVegaLite ? this._parser.vlspec : this._parser.spec;
+    const usermetaLoaderOptions = vegaSpec.usermeta?.embedOptions?.loader;
+    vegaLoader.options = usermetaLoaderOptions ?? {};
+
     config.loader = vegaLoader;
 
     const vegaLogger = logger(Warn);
@@ -433,7 +438,7 @@ export class VegaBaseView {
 
   /**
    * Parse start and end values, determining the mode, and if order should be reversed
-   * @private
+   * @internal
    */
   static _parseTimeRange(start, end) {
     const absStart = moment(start);

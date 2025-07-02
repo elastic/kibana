@@ -82,6 +82,7 @@ export async function changeDataView({
           columns: true,
           rowHeight: true,
           breakdownField: true,
+          hideChart: true,
         },
       })
     );
@@ -100,7 +101,7 @@ export async function changeDataView({
     appState.update(nextAppState);
 
     if (internalState.getState().expandedDoc) {
-      internalState.dispatch(internalStateActions.setExpandedDoc(undefined));
+      internalState.dispatch(internalStateActions.setExpandedDoc({ expandedDoc: undefined }));
     }
   }
 

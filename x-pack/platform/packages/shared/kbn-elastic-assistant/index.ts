@@ -97,6 +97,12 @@ export {
   KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
   /** The local storage key that specifies the maximum number of alerts to send as context */
   MAX_ALERTS_LOCAL_STORAGE_KEY,
+  /** The history view's end of the date range of attack discoveries */
+  HISTORY_END_LOCAL_STORAGE_KEY,
+  /** The history view's Search bar query that apply to the alerts sent as context to the LLM */
+  HISTORY_QUERY_LOCAL_STORAGE_KEY,
+  /** The history view's start date range of attack discoveries */
+  HISTORY_START_LOCAL_STORAGE_KEY,
   /** Search bar query that apply to the alerts sent as context to the LLM */
   QUERY_LOCAL_STORAGE_KEY,
   /** The local storage key that specifies whether the settings tour should be shown */
@@ -105,6 +111,7 @@ export {
   START_LOCAL_STORAGE_KEY,
 } from './impl/assistant_context/constants';
 
+export type { AIConnector } from './impl/connectorland/connector_selector';
 export { useLoadConnectors } from './impl/connectorland/use_load_connectors';
 
 export type {
@@ -154,7 +161,7 @@ export * from './impl/assistant/api/conversations/bulk_update_actions_conversati
 export { getConversationById } from './impl/assistant/api/conversations/conversations';
 
 export { UpgradeButtons } from './impl/upgrade/upgrade_buttons';
-export { getUserConversationsExist, getPrompts, bulkUpdatePrompts } from './impl/assistant/api';
+export { getUserConversationsExist, bulkUpdatePrompts } from './impl/assistant/api';
 
 export {
   /** A range slider component, typically used to configure the number of alerts sent as context */
@@ -168,3 +175,32 @@ export {
   /** Your anonymization settings will apply to these alerts (label) */
   YOUR_ANONYMIZATION_SETTINGS,
 } from './impl/knowledge_base/translations';
+export { SearchAILakeConfigurationsSettingsManagement } from './impl/assistant/settings/search_ai_lake_configurations_settings_management';
+export { CONVERSATIONS_TAB } from './impl/assistant/settings/const';
+export type { ManagementSettingsTabs } from './impl/assistant/settings/types';
+
+export { getNewSelectedPromptContext } from './impl/data_anonymization/get_new_selected_prompt_context';
+export { getCombinedMessage } from './impl/assistant/prompt/helpers';
+export { useChatComplete } from './impl/assistant/api/chat_complete/use_chat_complete';
+export { useFetchAnonymizationFields } from './impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
+
+export { useFindPrompts } from './impl/assistant/api/security_ai_prompts/use_find_prompts';
+
+export interface UseAssistantAvailability {
+  // True when searchAiLake configurations is available
+  hasSearchAILakeConfigurations: boolean;
+  // True when user is Enterprise. When false, the Assistant is disabled and unavailable
+  isAssistantEnabled: boolean;
+  // When true, the Assistant is hidden and unavailable
+  hasAssistantPrivilege: boolean;
+  // When true, user has `All` privilege for `Connectors and Actions` (show/execute/delete/save ui capabilities)
+  hasConnectorsAllPrivilege: boolean;
+  // When true, user has `Read` privilege for `Connectors and Actions` (show/execute ui capabilities)
+  hasConnectorsReadPrivilege: boolean;
+  // When true, user has `Edit` privilege for `AnonymizationFields`
+  hasUpdateAIAssistantAnonymization: boolean;
+  // When true, user has `Edit` privilege for `Global Knowledge Base`
+  hasManageGlobalKnowledgeBase: boolean;
+  // remove once product has signed off on prompt text
+  isStarterPromptsEnabled: boolean;
+}

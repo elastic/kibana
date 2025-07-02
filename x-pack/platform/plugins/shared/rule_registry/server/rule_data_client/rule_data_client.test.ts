@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { left, right } from 'fp-ts/lib/Either';
+import { left, right } from 'fp-ts/Either';
 import { errors } from '@elastic/elasticsearch';
 import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';

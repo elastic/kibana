@@ -174,7 +174,8 @@ describe('Event filter form', () => {
     cleanup();
   });
 
-  describe('Details and Conditions', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/214053
+  describe.skip('Details and Conditions', () => {
     it('should display sections', async () => {
       render();
       expect(renderResult.queryByText('Details')).not.toBeNull();

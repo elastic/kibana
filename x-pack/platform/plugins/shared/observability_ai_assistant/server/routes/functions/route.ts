@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { notImplemented } from '@hapi/boom';
+
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
-import { context as otelContext } from '@opentelemetry/api';
 import * as t from 'io-ts';
 import { v4 } from 'uuid';
 import { FunctionDefinition } from '../../../common/functions/types';
@@ -16,7 +15,6 @@ import { getSystemMessageFromInstructions } from '../../service/util/get_system_
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { assistantScopeType } from '../runtime_types';
 import { getDatasetInfo } from '../../functions/get_dataset_info';
-import { LangTracer } from '../../service/client/instrumentation/lang_tracer';
 
 const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/functions',
@@ -69,6 +67,8 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
 
     const availableFunctionNames = functionDefinitions.map((def) => def.name);
 
+    const anonymizationService = client.getAnonymizationService();
+
     return {
       functionDefinitions,
       systemMessage: getSystemMessageFromInstructions({
@@ -76,6 +76,7 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
         kbUserInstructions,
         apiUserInstructions: [],
         availableFunctionNames,
+        anonymizationInstruction: anonymizationService.getAnonymizationInstruction(),
       }),
     };
   },
@@ -112,7 +113,6 @@ const functionDatasetInfoRoute = createObservabilityAIAssistantServerRoute({
         return client.chat(operationName, {
           ...params,
           stream: true,
-          tracer: new LangTracer(otelContext.active()),
           connectorId,
         });
       },
@@ -159,10 +159,6 @@ const functionRecallRoute = createObservabilityAIAssistantServerRoute({
       body: { queries, categories },
     } = resources.params;
 
-    if (!client) {
-      throw notImplemented();
-    }
-
     const entries = await client.recall({ queries, categories });
     return { entries };
   },
@@ -174,8 +170,6 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
     body: t.type({
       title: t.string,
       text: nonEmptyStringRt,
-      confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
-      is_correction: toBooleanRt,
       public: toBooleanRt,
       labels: t.record(t.string, t.string),
     }),
@@ -188,25 +182,12 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
   handler: async (resources): Promise<void> => {
     const client = await resources.service.getClient({ request: resources.request });
 
-    if (!client) {
-      throw notImplemented();
-    }
-
-    const {
-      title,
-      confidence,
-      is_correction: isCorrection,
-      text,
-      public: isPublic,
-      labels,
-    } = resources.params.body;
+    const { title, text, public: isPublic, labels } = resources.params.body;
 
     return client.addKnowledgeBaseEntry({
       entry: {
         title,
-        confidence,
         id: v4(),
-        is_correction: isCorrection,
         text,
         public: isPublic,
         labels,

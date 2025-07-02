@@ -9,6 +9,7 @@ import { encode } from '@kbn/rison';
 
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/security-solution-plugin/common/constants';
 import { GET_STARTED_URL, hostDetailsUrl, userDetailsUrl } from '../urls/navigation';
+import { IS_SERVERLESS } from '../env_var_names_constants';
 
 export const visit = (
   url: string,
@@ -101,4 +102,20 @@ const disableNewFeaturesTours = (window: Window) => {
   tourStorageKeys.forEach((key) => {
     window.localStorage.setItem(key, JSON.stringify(tourConfig));
   });
+};
+
+// This should work on both classic and serverless navigation
+const navSearchText = {
+  onboarding: 'Security / Get started',
+  hosts: 'Security / Explore / Hosts',
+  rules: 'Security / Rules / Detection rules (SIEM)',
+} as const;
+
+export const navigateUsingGlobalSearch = (page: keyof typeof navSearchText) => {
+  const isServerless = Cypress.env(IS_SERVERLESS);
+  if (isServerless) {
+    cy.get('[data-test-subj="nav-search-reveal"]').click();
+  }
+  cy.get('[data-test-subj="nav-search-input"]').type(navSearchText[page]);
+  cy.get('[data-test-subj="nav-search-option"]').first().click();
 };

@@ -34,7 +34,7 @@ import { NewEnrollmentTokenModal } from '../../../components';
 import {
   useBreadcrumbs,
   usePagination,
-  useGetEnrollmentAPIKeys,
+  useGetEnrollmentAPIKeysQuery,
   useGetAgentPolicies,
   sendGetOneEnrollmentAPIKey,
   useStartServices,
@@ -96,16 +96,18 @@ const DeleteButton: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh:
   );
 };
 
+const NOT_HIDDEN_KUERY = 'not hidden:true';
+
 export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('enrollment_tokens');
   const [isModalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState('');
   const { pagination, setPagination, pageSizeOptions } = usePagination();
 
-  const enrollmentAPIKeysRequest = useGetEnrollmentAPIKeys({
+  const enrollmentAPIKeysRequest = useGetEnrollmentAPIKeysQuery({
     page: pagination.currentPage,
     perPage: pagination.pageSize,
-    kuery: search.trim() !== '' ? search : undefined,
+    kuery: search.trim() !== '' ? `(${search}) and (${NOT_HIDDEN_KUERY})` : NOT_HIDDEN_KUERY,
   });
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
@@ -126,7 +128,8 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     enrollmentAPIKeysRequest?.data?.items.filter((enrollmentKey) => {
       if (!agentPolicies.length || !enrollmentKey.policy_id) return false;
       const agentPolicy = agentPoliciesById[enrollmentKey.policy_id];
-      return !agentPolicy?.is_managed;
+      // Filter legacy enrollment api keys without the hidden flag
+      return !agentPolicy?.is_managed && !agentPolicy?.supports_agentless;
     }) || [];
 
   const columns = [
@@ -209,10 +212,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         const canUnenroll = apiKey.active && !agentPolicy?.is_managed;
         return (
           canUnenroll && (
-            <DeleteButton
-              apiKey={apiKey}
-              refresh={() => enrollmentAPIKeysRequest.resendRequest()}
-            />
+            <DeleteButton apiKey={apiKey} refresh={() => enrollmentAPIKeysRequest.refetch()} />
           )
         );
       },
@@ -220,7 +220,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
   ];
 
   const isLoading =
-    (enrollmentAPIKeysRequest.isLoading && enrollmentAPIKeysRequest.isInitialRequest) ||
+    enrollmentAPIKeysRequest.isInitialLoading ||
     (agentPoliciesRequest.isLoading && agentPoliciesRequest.isInitialRequest);
 
   return (
@@ -230,7 +230,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
           agentPolicies={agentPolicies}
           onClose={(key?: EnrollmentAPIKey) => {
             setModalOpen(false);
-            enrollmentAPIKeysRequest.resendRequest();
+            enrollmentAPIKeysRequest.refetch();
           }}
         />
       )}

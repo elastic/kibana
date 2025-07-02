@@ -24,7 +24,8 @@ import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import type { CommonAlertFieldsLatest } from '../../common/schemas';
 
 export const getCommonAlertFields = (
-  options: RuleExecutorOptions<any, any, any, any, any>
+  options: RuleExecutorOptions<any, any, any, any, any>,
+  dangerouslyCreateAlertsInAllSpaces?: boolean
 ): CommonAlertFieldsLatest => {
   return {
     [ALERT_RULE_PARAMETERS]: options.params,
@@ -36,7 +37,7 @@ export const getCommonAlertFields = (
     [ALERT_RULE_REVISION]: options.rule.revision,
     [ALERT_RULE_TYPE_ID]: options.rule.ruleTypeId,
     [ALERT_RULE_UUID]: options.rule.id,
-    [SPACE_IDS]: [options.spaceId],
+    [SPACE_IDS]: dangerouslyCreateAlertsInAllSpaces === true ? ['*'] : [options.spaceId],
     [ALERT_RULE_TAGS]: options.rule.tags,
     [TIMESTAMP]: options.startedAt.toISOString(),
   };

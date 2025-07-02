@@ -13,16 +13,16 @@ import type {
 } from '@kbn/core/server';
 import expect from '@kbn/expect';
 import { deepFreeze } from '@kbn/std';
-
 import {
   expectResponses,
   getUrlPrefix,
-} from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
+} from '@kbn/test-suites-xpack-platform/saved_object_api_integration/common/lib/saved_object_test_utils';
 import type {
   ExpectResponseBody,
   TestDefinition,
   TestSuite,
-} from '../../../saved_object_api_integration/common/lib/types';
+} from '@kbn/test-suites-xpack-platform/saved_object_api_integration/common/lib/types';
+
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 

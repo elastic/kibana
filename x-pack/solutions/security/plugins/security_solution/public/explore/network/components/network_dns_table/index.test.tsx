@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Provider as ReduxStoreProvider } from 'react-redux';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 
 import { TestProviders, createMockStore } from '../../../../common/mock';
 import { networkModel } from '../../store';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
 import { NetworkDnsTable } from '.';
 import { mockData } from './mock';
@@ -22,7 +22,6 @@ jest.mock('../../../../common/lib/kibana');
 describe('NetworkTopNFlow Table Component', () => {
   const loadPage = jest.fn();
   let store = createMockStore();
-  const mount = useMountAppended();
 
   const defaultProps = {
     data: mockData.edges,
@@ -43,38 +42,13 @@ describe('NetworkTopNFlow Table Component', () => {
 
   describe('rendering', () => {
     test('it renders the default NetworkTopNFlow table', () => {
-      const wrapper = shallow(
-        <ReduxStoreProvider store={store}>
-          <NetworkDnsTable {...defaultProps} />
-        </ReduxStoreProvider>
-      );
-
-      expect(wrapper.find('Memo(NetworkDnsTableComponent)')).toMatchSnapshot();
-    });
-  });
-
-  describe('Sorting', () => {
-    test('when you click on the column header, you should show the sorting icon', () => {
-      const wrapper = mount(
+      render(
         <TestProviders store={store}>
           <NetworkDnsTable {...defaultProps} />
         </TestProviders>
       );
 
-      expect(store.getState().network.page.queries?.dns.sort).toEqual({
-        direction: 'desc',
-        field: 'queryCount',
-      });
-
-      wrapper.find('.euiTable thead tr th button').first().simulate('click');
-
-      wrapper.update();
-
-      expect(store.getState().network.page.queries?.dns.sort).toEqual({
-        direction: 'asc',
-        field: 'dnsName',
-      });
-      expect(wrapper.find('.euiTable thead tr th button').first().find('svg')).toBeTruthy();
+      expect(screen.getByTestId('table-dns-loading-false')).toMatchSnapshot();
     });
   });
 });

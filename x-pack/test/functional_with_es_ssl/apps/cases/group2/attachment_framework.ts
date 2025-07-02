@@ -21,7 +21,7 @@ import {
   findAttachments,
   findCaseUserActions,
   findCases,
-} from '../../../../cases_api_integration/common/lib/api';
+} from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ = 'embeddablePanelAction-embeddable_addToExistingCase';

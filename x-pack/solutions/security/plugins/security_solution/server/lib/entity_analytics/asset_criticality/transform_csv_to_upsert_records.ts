@@ -28,7 +28,7 @@ class TransformCSVToUpsertRecords extends Transform {
     callback: (error: Error | null, data?: AssetCriticalityUpsertForBulkUpload | Error) => void
   ) {
     try {
-      const parseResult = parseAssetCriticalityCsvRow(chunk, this.experimentalFeatures);
+      const parseResult = parseAssetCriticalityCsvRow(chunk);
       if (isErrorResult(parseResult)) {
         return callback(null, new Error(parseResult.error));
       } else {

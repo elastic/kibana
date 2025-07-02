@@ -13,6 +13,7 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -22,6 +23,7 @@ import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import { AnimatedCounter } from './animated_counter';
 import { Generate } from '../generate';
 import * as i18n from './translations';
+import { useKibanaFeatureFlags } from '../../../use_kibana_feature_flags';
 
 interface Props {
   aiConnectorsCount: number | null; // null when connectors are not configured
@@ -41,7 +43,9 @@ const EmptyPromptComponent: React.FC<Props> = ({
   onGenerate,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const title = useMemo(
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
+
+  const currentTitle = useMemo(
     () => (
       <EuiFlexGroup
         alignItems="center"
@@ -84,7 +88,7 @@ const EmptyPromptComponent: React.FC<Props> = ({
                 content={i18n.RESPONSES_FROM_AI_SYSTEMS}
                 data-test-subj="responsesFromAiSystemsTooltip"
                 position="right"
-                type="iInCircle"
+                type="info"
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -94,7 +98,30 @@ const EmptyPromptComponent: React.FC<Props> = ({
     [alertsCount, euiTheme.size.xs]
   );
 
-  const body = useMemo(
+  const historyTitle = useMemo(
+    () => (
+      <EuiFlexGroup
+        alignItems="center"
+        data-test-subj="bodyContainer"
+        direction="column"
+        gutterSize="none"
+      >
+        <EuiFlexItem data-test-subj="emptyPromptAvatar" grow={false}>
+          <AssistantBeacon size="xl" backgroundColor="emptyShade" />
+          <EuiSpacer size="m" />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiTitle data-test-subj="historyTitle" size="m">
+            <h1>{i18n.NO_RESULTS_MATCH_YOUR_SEARCH}</h1>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    []
+  );
+
+  const currentBody = useMemo(
     () => (
       <EuiFlexGroup
         alignItems="center"
@@ -106,6 +133,42 @@ const EmptyPromptComponent: React.FC<Props> = ({
           <EuiText color="subdued" data-test-subj="startGeneratingDiscoveriesLabel">
             {i18n.START_GENERATING_DISCOVERIES}
           </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    []
+  );
+
+  const historyBody = useMemo(
+    () => (
+      <EuiFlexGroup
+        alignItems="center"
+        data-test-subj="historyBody"
+        direction="column"
+        gutterSize="none"
+        responsive={false}
+      >
+        <EuiFlexItem
+          css={css`
+            display: inline-flex;
+            text-align: left;
+          `}
+          grow={false}
+        >
+          <span>{i18n.HERE_ARE_SOME_THINGS_TO_TRY}</span>
+
+          <ul
+            css={css`
+              text-align: left;
+            `}
+          >
+            <li>
+              <span>{i18n.EXPAND_THE_TIME_RANGE}</span>
+            </li>
+            <li>
+              <span>{i18n.GENERATE_NEW_ATTACK_DISCOVERIES}</span>
+            </li>
+          </ul>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
@@ -128,7 +191,11 @@ const EmptyPromptComponent: React.FC<Props> = ({
       gutterSize="none"
     >
       <EuiFlexItem data-test-subj="emptyPromptContainer" grow={false}>
-        <EuiEmptyPrompt actions={actions} body={body} title={title} />
+        <EuiEmptyPrompt
+          actions={actions}
+          body={attackDiscoveryAlertsEnabled ? historyBody : currentBody}
+          title={attackDiscoveryAlertsEnabled ? historyTitle : currentTitle}
+        />
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>

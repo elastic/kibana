@@ -4,11 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Transaction } from '../../typings/es_schemas/ui/transaction';
-import type { Span } from '../../typings/es_schemas/ui/span';
-import type { APMError } from '../../typings/es_schemas/ui/apm_error';
+export interface ItemType {
+  url?: {
+    scheme?: string;
+    path?: string;
+  };
+  server?: {
+    address?: string;
+    port?: number;
+  };
+}
 
-export const buildUrl = (item: Transaction | Span | APMError) => {
+export const buildUrl = (item?: ItemType) => {
   // URL fields from Otel
   const urlScheme = item?.url?.scheme;
   const urlPath = item?.url?.path;

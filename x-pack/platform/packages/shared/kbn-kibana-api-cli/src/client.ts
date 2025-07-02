@@ -14,7 +14,7 @@ import { createProxyTransport } from './proxy_transport';
 import { getInternalKibanaHeaders } from './get_internal_kibana_headers';
 
 type FetchInputOptions = string | URL;
-type FetchInitOptions = globalThis.RequestInit;
+type FetchInitOptions = Omit<globalThis.RequestInit, 'body'> & { body: unknown };
 
 interface KibanaClientOptions {
   baseUrl: string;
@@ -99,14 +99,18 @@ export class KibanaClient {
       auth: null,
     };
 
+    const body = init?.body ? JSON.stringify(init?.body) : undefined;
+
     const response = await fetch(format(urlOptions), {
       ...init,
       headers: {
+        ['content-type']: 'application/json',
         ...getInternalKibanaHeaders(),
         Authorization: `Basic ${Buffer.from(formattedBaseUrl.auth!).toString('base64')}`,
         ...init?.headers,
       },
       signal: combineSignal(this.options.signal, init?.signal),
+      body,
     });
 
     if (init?.asRawResponse) {
@@ -114,7 +118,19 @@ export class KibanaClient {
     }
 
     if (response.status >= 400) {
-      throw new FetchResponseError(response);
+      const content = response.headers.get('content-type')?.includes('application/json')
+        ? await response
+            .json()
+            .then((jsonResponse) => {
+              if ('message' in jsonResponse) {
+                return jsonResponse.message;
+              }
+              return JSON.stringify(jsonResponse);
+            })
+            .catch(() => {})
+        : await response.text().catch(() => {});
+
+      throw new FetchResponseError(response, content ?? response.statusText);
     }
 
     return response.json() as Promise<T>;

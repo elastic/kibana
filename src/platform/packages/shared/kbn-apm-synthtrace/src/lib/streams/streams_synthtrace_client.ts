@@ -8,7 +8,7 @@
  */
 
 import { ESDocumentWithOperation } from '@kbn/apm-synthtrace-client';
-import { Condition, StreamUpsertRequest } from '@kbn/streams-schema';
+import { Condition, Streams } from '@kbn/streams-schema';
 import { Readable, Transform, pipeline } from 'stream';
 import { Required } from 'utility-types';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
@@ -24,7 +24,7 @@ export class StreamsSynthtraceClient extends SynthtraceEsClient<StreamsDocument>
       ...options,
       pipeline: streamsPipeline(),
     });
-    this.dataStreams = ['logs', 'logs.*'];
+    this.dataStreams = ['logs', 'logs.*', 'logs-generic-default'];
   }
 
   async forkStream(
@@ -42,7 +42,7 @@ export class StreamsSynthtraceClient extends SynthtraceEsClient<StreamsDocument>
 
   async putStream(
     streamName: string,
-    request: StreamUpsertRequest
+    request: Streams.all.UpsertRequest
   ): Promise<{ acknowledged: true; result: 'created' | 'updated' }> {
     return this.kibana!.fetch(`/api/streams/${streamName}`, {
       method: 'PUT',
@@ -86,7 +86,12 @@ function streamsRoutingTransform() {
   return new Transform({
     objectMode: true,
     transform(document: ESDocumentWithOperation<StreamsDocument>, encoding, callback) {
-      document._index = 'logs';
+      // 50-50 send to logs or to logs-generic-default
+      if (Math.random() > 0.5) {
+        document._index = 'logs-generic-default';
+      } else {
+        document._index = 'logs';
+      }
       callback(null, document);
     },
   });
