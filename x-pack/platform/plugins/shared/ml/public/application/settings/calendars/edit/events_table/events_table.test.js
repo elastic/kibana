@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { fireEvent } from '@testing-library/react';
 
 import { EventsTable } from './events_table';
 
@@ -47,5 +48,19 @@ describe('EventsTable', () => {
     const { container } = renderWithI18n(<EventsTable {...showSearchBarProps} />);
 
     expect(container.firstChild).toMatchSnapshot();
+  });
+
+  test('Calls onDeleteClick when delete button is clicked', () => {
+    const onDeleteClick = jest.fn();
+
+    const { getByTestId } = renderWithI18n(
+      <EventsTable {...testProps} onDeleteClick={onDeleteClick} />
+    );
+
+    const deleteButton = getByTestId('mlCalendarEventDeleteButton');
+
+    fireEvent.click(deleteButton);
+
+    expect(onDeleteClick).toHaveBeenCalledWith('test-event-one');
   });
 });
