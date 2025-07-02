@@ -26,16 +26,20 @@ import type {
   AIAssistantManagementSelectionPluginServerStart,
 } from './types';
 import { AIAssistantType } from '../common/ai_assistant_type';
-import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
+import { OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, SEARCH_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
+import { classicSetting } from './src/settings/classic_setting';
+import { observabilitySolutionSetting } from './src/settings/observability_setting';
+import { securitySolutionSetting } from './src/settings/security_setting';
+import { searchSolutionSetting } from './src/settings/search_setting';
 
 export class AIAssistantManagementSelectionPlugin
   implements
-    Plugin<
-      AIAssistantManagementSelectionPluginServerSetup,
-      AIAssistantManagementSelectionPluginServerStart,
-      AIAssistantManagementSelectionPluginServerDependenciesSetup,
-      AIAssistantManagementSelectionPluginServerDependenciesStart
-    >
+  Plugin<
+    AIAssistantManagementSelectionPluginServerSetup,
+    AIAssistantManagementSelectionPluginServerStart,
+    AIAssistantManagementSelectionPluginServerDependenciesSetup,
+    AIAssistantManagementSelectionPluginServerDependenciesStart
+  >
 {
   private readonly config: AIAssistantManagementSelectionConfig;
 
@@ -49,47 +53,30 @@ export class AIAssistantManagementSelectionPlugin
   ) {
     core.uiSettings.register({
       [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-        name: i18n.translate('aiAssistantManagementSelection.preferredAIAssistantTypeSettingName', {
-          defaultMessage: 'AI Assistant for Observability and Search visibility',
-        }),
-        category: [DEFAULT_APP_CATEGORIES.observability.id],
+        ...classicSetting,
         value: this.config.preferredAIAssistantType,
-        description: i18n.translate(
-          'aiAssistantManagementSelection.preferredAIAssistantTypeSettingDescription',
-          {
-            defaultMessage:
-              '<em>[technical preview]</em> Whether to show the AI Assistant menu item in Observability and Search, everywhere, or nowhere.',
-            values: {
-              em: (chunks) => `<em>${chunks}</em>`,
-            },
-          }
-        ),
-        schema: schema.oneOf(
-          [
-            schema.literal(AIAssistantType.Default),
-            schema.literal(AIAssistantType.Observability),
-            schema.literal(AIAssistantType.Never),
-          ],
-          { defaultValue: this.config.preferredAIAssistantType }
-        ),
-        options: [AIAssistantType.Default, AIAssistantType.Observability, AIAssistantType.Never],
-        type: 'select',
-        optionLabels: {
-          [AIAssistantType.Default]: i18n.translate(
-            'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueDefault',
-            { defaultMessage: 'Observability and Search only (default)' }
-          ),
-          [AIAssistantType.Observability]: i18n.translate(
-            'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueObservability',
-            { defaultMessage: 'Everywhere' }
-          ),
-          [AIAssistantType.Never]: i18n.translate(
-            'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueNever',
-            { defaultMessage: 'Nowhere' }
-          ),
-        },
-        requiresPageReload: true,
-        solutions: ['classic', 'oblt'],
+      },
+    });
+
+
+    core.uiSettings.register({
+      [OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+        ...observabilitySolutionSetting,
+        value: AIAssistantType.Never,
+      },
+    });
+
+    core.uiSettings.register({
+      [SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+        ...securitySolutionSetting,
+        value: AIAssistantType.Never,
+      },
+    });
+
+    core.uiSettings.register({
+      [SEARCH_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+        ...searchSolutionSetting,
+        value: AIAssistantType.Never,
       },
     });
 
@@ -161,5 +148,5 @@ export class AIAssistantManagementSelectionPlugin
     return {};
   }
 
-  public stop() {}
+  public stop() { }
 }
