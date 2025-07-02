@@ -47,8 +47,9 @@ const CollapsiblePanel: React.FC<{
   children: React.ReactNode;
   id: string;
   title: React.ReactNode;
+  isDisabled?: boolean;
   'data-test-subj'?: string;
-}> = ({ id, title, children, 'data-test-subj': dataTestSubj }) => {
+}> = ({ id, title, children, isDisabled, 'data-test-subj': dataTestSubj }) => {
   const arrowProps = useMemo<EuiAccordionProps['arrowProps']>(() => {
     if (dataTestSubj) {
       return {
@@ -57,7 +58,7 @@ const CollapsiblePanel: React.FC<{
     }
     return undefined;
   }, [dataTestSubj]);
-  const hasChildren = React.Children.count(children) > 0;
+
   const { euiTheme } = useEuiTheme();
   return (
     <EuiPanel
@@ -100,12 +101,12 @@ const CollapsiblePanel: React.FC<{
           }
         `}
         id={id}
-        arrowDisplay={hasChildren ? 'left' : 'none'}
+        arrowDisplay={isDisabled ? 'none' : 'left'}
         buttonClassName="ingest-integration-title-button"
         buttonContent={title}
         arrowProps={arrowProps}
         data-test-subj={dataTestSubj}
-        isDisabled={!hasChildren}
+        isDisabled={isDisabled}
       >
         {children}
       </EuiAccordion>
@@ -144,6 +145,7 @@ export const IntegrationStatus: React.FunctionComponent<{
       <CollapsiblePanel
         id={integration.package_name}
         data-test-subj={dataTestSubj}
+        isDisabled={!integration.error && !integration?.warning && !customAssets.length}
         title={
           <EuiTitle size="xs">
             <h3>
