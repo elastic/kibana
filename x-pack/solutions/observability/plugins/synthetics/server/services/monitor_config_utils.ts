@@ -10,7 +10,7 @@ import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-serve
 export function sortSavedObjectsByField<T>(
   objects: SavedObjectsFindResponse<T>['saved_objects'],
   sortField: string,
-  sortOrder: 'asc' | 'desc' = 'asc'
+  sortOrder: string = 'asc'
 ) {
   const fieldName = sortField.replace('.keyword', '');
   objects.sort((a, b) => {

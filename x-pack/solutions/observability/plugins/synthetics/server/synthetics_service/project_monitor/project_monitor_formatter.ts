@@ -339,14 +339,10 @@ export class ProjectMonitorFormatter {
 
   private getDecryptedMonitors = async (monitors: PreviousMonitorForUpdate[]) => {
     const configIds = monitors.map((monitor) => monitor[ConfigKey.CONFIG_ID]);
-    const monitorFilter = getSavedObjectKqlFilter({
-      field: ConfigKey.CONFIG_ID,
-      values: configIds,
-    });
 
     return await this.routeContext.monitorConfigRepository.findDecryptedMonitors({
-      filter: monitorFilter,
       spaceId: this.spaceId,
+      configIds,
     });
   };
 

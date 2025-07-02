@@ -168,7 +168,7 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
     const { savedObjectsClient } = route;
     const { query } = route.request.query;
 
-    const { filtersStr } = await getMonitorFilters(route, syntheticsMonitorAttributes);
+    const { filtersStr } = await getMonitorFilters(route, [syntheticsMonitorAttributes]);
     const { allLocations = [] } = await getAllLocations(route);
 
     // Find for new monitors
@@ -181,7 +181,9 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
       searchFields: SEARCH_FIELDS,
     });
 
-    const { filtersStr: legacyFilterStr } = await getMonitorFilters(route, legacyMonitorAttributes);
+    const { filtersStr: legacyFilterStr } = await getMonitorFilters(route, [
+      legacyMonitorAttributes,
+    ]);
 
     // Find for legacy monitors
     const legacyData = await savedObjectsClient.find<any>({

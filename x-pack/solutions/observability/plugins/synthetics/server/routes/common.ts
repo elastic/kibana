@@ -14,7 +14,10 @@ import { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
 import { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
-import { syntheticsMonitorAttributes } from '../../common/types/saved_objects';
+import {
+  legacyMonitorAttributes,
+  syntheticsMonitorAttributes,
+} from '../../common/types/saved_objects';
 
 const StringOrArraySchema = schema.maybe(
   schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
@@ -86,7 +89,7 @@ interface Filters {
 
 export const getMonitorFilters = async (
   context: RouteContext<Record<string, any>, OverviewStatusQuery>,
-  attr: string = syntheticsMonitorAttributes
+  attributesList?: string[]
 ) => {
   const {
     tags,
@@ -111,7 +114,7 @@ export const getMonitorFilters = async (
       locations,
     },
     useLogicalAndFor,
-    attr
+    attributesList
   );
 };
 
@@ -127,27 +130,37 @@ export const parseArrayFilters = (
     locations,
   }: Filters,
   useLogicalAndFor: MonitorsQuery['useLogicalAndFor'] = [],
-  attributes: string = syntheticsMonitorAttributes
+  attributesList: string[] = [syntheticsMonitorAttributes, legacyMonitorAttributes]
 ) => {
+  // Helper to generate OR between attributes for a single field
+  const orAcrossAttributes = (
+    opts: Omit<Parameters<typeof getSavedObjectKqlFilter>[0], 'attributes'>
+  ) => {
+    const filters = attributesList
+      .map((attributes) => getSavedObjectKqlFilter({ ...opts, attributes }))
+      .filter(Boolean);
+    if (filters.length === 0) return '';
+    if (filters.length === 1) return filters[0];
+    return `(${filters.join(' OR ')})`;
+  };
+
   const filtersStr = [
     filter,
-    getSavedObjectKqlFilter({
+    orAcrossAttributes({
       field: 'tags',
       values: tags,
       operator: useLogicalAndFor.includes('tags') ? 'AND' : 'OR',
-      attributes,
     }),
-    getSavedObjectKqlFilter({ field: 'project_id', values: projects, attributes }),
-    getSavedObjectKqlFilter({ field: 'type', values: monitorTypes, attributes }),
-    getSavedObjectKqlFilter({
+    orAcrossAttributes({ field: 'project_id', values: projects }),
+    orAcrossAttributes({ field: 'type', values: monitorTypes }),
+    orAcrossAttributes({
       field: 'locations.id',
       values: locations,
       operator: useLogicalAndFor.includes('locations') ? 'AND' : 'OR',
-      attributes,
     }),
-    getSavedObjectKqlFilter({ field: 'schedule.number', values: schedules, attributes }),
-    getSavedObjectKqlFilter({ field: 'id', values: monitorQueryIds, attributes }),
-    getSavedObjectKqlFilter({ field: 'config_id', values: configIds, attributes }),
+    orAcrossAttributes({ field: 'schedule.number', values: schedules }),
+    orAcrossAttributes({ field: 'id', values: monitorQueryIds }),
+    orAcrossAttributes({ field: 'config_id', values: configIds }),
   ]
     .filter((f) => !!f)
     .join(' AND ');
@@ -158,9 +171,9 @@ export const parseArrayFilters = (
 export const getSavedObjectKqlFilter = ({
   field,
   values,
+  attributes = syntheticsMonitorAttributes,
   operator = 'OR',
   searchAtRoot = false,
-  attributes = syntheticsMonitorAttributes,
 }: {
   field: string;
   values?: string | string[];

@@ -18,7 +18,6 @@ import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { toClientContract, updatePrivateLocationMonitors } from './helpers';
 import { PrivateLocation } from '../../../../common/runtime_types';
-import { parseArrayFilters } from '../../common';
 
 const EditPrivateLocationSchema = schema.object({
   label: schema.maybe(
@@ -86,14 +85,11 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
     const repo = new PrivateLocationRepository(routeContext);
 
     try {
-      const { filtersStr } = parseArrayFilters({
-        locations: [locationId],
-      });
       const [existingLocation, monitorsInLocation] = await Promise.all([
         repo.getPrivateLocation(locationId),
         routeContext.monitorConfigRepository.findDecryptedMonitors({
           spaceId: ALL_SPACES_ID,
-          filter: filtersStr,
+          locations: [locationId],
         }),
       ]);
 

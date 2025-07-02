@@ -18,6 +18,7 @@ import { SyntheticsServerSetup } from '../../types';
 import { randomUUID } from 'node:crypto';
 import { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { parseArrayFilters } from '../../routes/common';
 
 describe('tlsRuleExecutor', () => {
   const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
@@ -108,9 +109,12 @@ describe('tlsRuleExecutor', () => {
       const getAllMock = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
 
       await tlsRule.getMonitors();
+      const { filtersStr } = parseArrayFilters({
+        monitorQueryIds: [monitorId],
+      });
 
       expect(getAllMock).toHaveBeenCalledWith({
-        filter: `${commonFilter} AND synthetics-monitor-multi-space.attributes.id:(\"${monitorId}\")`,
+        filter: `${commonFilter} AND ${filtersStr}`,
       });
     });
 
@@ -122,8 +126,12 @@ describe('tlsRuleExecutor', () => {
 
       await tlsRule.getMonitors();
 
+      const { filtersStr } = parseArrayFilters({
+        tags: [tag],
+      });
+
       expect(getAllMock).toHaveBeenCalledWith({
-        filter: `${commonFilter} AND synthetics-monitor-multi-space.attributes.tags:(\"${tag}\")`,
+        filter: `${commonFilter} AND ${filtersStr}`,
       });
     });
 
@@ -137,8 +145,12 @@ describe('tlsRuleExecutor', () => {
 
       await tlsRule.getMonitors();
 
+      const { filtersStr } = parseArrayFilters({
+        monitorTypes: [monitorType],
+      });
+
       expect(getAllMock).toHaveBeenCalledWith({
-        filter: `${commonFilter} AND synthetics-monitor-multi-space.attributes.type:(\"${monitorType}\")`,
+        filter: `${commonFilter} AND ${filtersStr}`,
       });
     });
 

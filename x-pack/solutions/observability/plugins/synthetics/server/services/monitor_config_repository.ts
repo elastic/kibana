@@ -16,7 +16,7 @@ import {
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
 import { isEmpty, isEqual } from 'lodash';
-import { Logger } from '@kbn/logging';
+import { parseArrayFilters } from '../routes/common';
 import {
   legacyMonitorAttributes,
   legacySyntheticsMonitorTypeSingle,
@@ -32,7 +32,6 @@ import {
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../common/runtime_types';
-import { sortSavedObjectsByField } from './monitor_config_utils';
 
 const getSuccessfulResult = <T>(
   results: Array<PromiseSettledResult<T>>
@@ -49,8 +48,7 @@ const getSuccessfulResult = <T>(
 export class MonitorConfigRepository {
   constructor(
     private soClient: SavedObjectsClientContract,
-    private encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
-    private logger?: Logger // Replace with appropriate logger type
+    private encryptedSavedObjectsClient: EncryptedSavedObjectsClient
   ) {}
 
   async get(id: string) {
@@ -202,57 +200,39 @@ export class MonitorConfigRepository {
 
   async find<T>(
     options: Omit<SavedObjectsFindOptions, 'type'>,
-    types: string[] = syntheticsMonitorSOTypes,
     soClient: SavedObjectsClientContract = this.soClient
   ): Promise<SavedObjectsFindResponse<T>> {
-    const { page = 1, perPage = 5000, sortField, sortOrder = 'asc' } = options;
+    const { page = 1, perPage = 5000, sortField } = options;
 
-    // To correctly paginate from two sources, we need to fetch enough items
-    // from both to cover all items up to the current page.
-    const limit = page * perPage;
-
-    const promises: Array<Promise<SavedObjectsFindResponse<T>>> = types.map((type) => {
-      const opts = {
-        ...options,
-        type,
-        // We don't use pages here, we fetch all items up to the current page limit
-        page: 1,
-        perPage: limit,
-      };
-      return soClient.find<T>(this.handleLegacyOptions(opts, type));
-    });
-
-    const results = await Promise.all(promises);
-
-    // Combine all results from all types
-    const combinedObjects = results.flatMap((r) => r.saved_objects);
-
-    // Sort the combined results if a sortField is provided
-    if (sortField) {
-      sortSavedObjectsByField(combinedObjects, sortField, sortOrder);
-    }
-
-    const total = results.reduce((sum, r) => sum + r.total, 0);
-    const start = (page - 1) * perPage;
-    const paginatedObjects = combinedObjects.slice(start, start + perPage);
-
-    return {
+    return soClient.find<T>({
+      ...options,
+      type: syntheticsMonitorSOTypes,
       page,
-      per_page: perPage,
-      total,
-      saved_objects: paginatedObjects,
-    };
+      perPage,
+      sortField,
+    });
   }
 
-  async findDecryptedMonitors({ spaceId, filter }: { spaceId: string; filter?: string }) {
+  async findDecryptedMonitors({
+    spaceId,
+    configIds,
+    locations,
+  }: {
+    spaceId: string;
+    configIds?: string[];
+    locations?: string[];
+  }) {
     const getDecrypted = async (soType: string) => {
       // Handle legacy filter if the type is legacy
-      const legacyFilter =
-        soType === legacySyntheticsMonitorTypeSingle ? this.handleLegacyFilter(filter) : filter;
+      const attr =
+        soType === legacySyntheticsMonitorTypeSingle
+          ? legacyMonitorAttributes
+          : syntheticsMonitorAttributes;
+      const { filtersStr } = parseArrayFilters({ configIds, locations }, [], [attr]);
       const finder =
         await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
           {
-            filter: legacyFilter,
+            filter: filtersStr,
             type: soType,
             perPage: 500,
             namespaces: [spaceId],
@@ -304,20 +284,15 @@ export class MonitorConfigRepository {
     filter?: string;
     showFromAllSpaces?: boolean;
   } & Pick<SavedObjectsFindOptions, 'sortField' | 'sortOrder' | 'fields' | 'searchFields'>) {
-    const getConfigs = async (syntheticsMonitorType: string) => {
-      const findFilter =
-        syntheticsMonitorType === legacySyntheticsMonitorTypeSingle
-          ? this.handleLegacyFilter(filter)
-          : filter;
-
+    return withApmSpan('get_all_monitors', async () => {
       const finder = this.soClient.createPointInTimeFinder<T>({
-        type: syntheticsMonitorType,
+        type: [syntheticsMonitorSavedObjectType, legacySyntheticsMonitorTypeSingle],
         perPage: 5000,
         search,
         sortField,
         sortOrder,
         fields,
-        filter: findFilter,
+        filter,
         searchFields,
         ...(showFromAllSpaces && { namespaces: ['*'] }),
       });
@@ -330,42 +305,7 @@ export class MonitorConfigRepository {
       finder.close().catch(() => {});
 
       return hits;
-    };
-
-    return withApmSpan('get_all_monitors', async () => {
-      const [configs, legacyConfigs] = await Promise.all([
-        getConfigs(syntheticsMonitorSavedObjectType),
-        getConfigs(legacySyntheticsMonitorTypeSingle),
-      ]);
-      return [...configs, ...legacyConfigs];
     });
-  }
-
-  handleLegacyFilter = (filter?: string): string | undefined => {
-    if (!filter) {
-      return filter;
-    }
-    // Replace syntheticsMonitorAttributes with legacyMonitorAttributes in the filter
-    return filter.replace(new RegExp(syntheticsMonitorAttributes, 'g'), legacyMonitorAttributes);
-  };
-
-  handleLegacyOptions(options: Omit<SavedObjectsFindOptions, 'type'>, type: string) {
-    // convert the options to string and replace if the type is opposite of either of the synthetics monitor types
-    try {
-      const opts = JSON.stringify(options);
-      if (type === syntheticsMonitorSavedObjectType) {
-        return JSON.parse(
-          opts.replace(new RegExp(legacyMonitorAttributes, 'g'), syntheticsMonitorAttributes)
-        );
-      } else if (type === legacySyntheticsMonitorTypeSingle) {
-        return JSON.parse(
-          opts.replace(new RegExp(syntheticsMonitorAttributes, 'g'), legacyMonitorAttributes)
-        );
-      }
-    } catch (e) {
-      this.logger?.error(`Error parsing handleLegacyOptions: ${e}`);
-      return options;
-    }
   }
 
   getAggs = () => {};
