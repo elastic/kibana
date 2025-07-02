@@ -44,13 +44,15 @@ However, if you want to group some queries for easier troubleshooting, you can i
 client.search(searchParams, {
   context: {
     loggingOptions: {
-      loggerName: 'myqueries', // This request will be logged using the logger `elasticsearch.query.myqueries`
+      loggerName: 'myqueries', // <1>
     },
   },
 });
 ```
 
-The example above will log the request and response using the logger `elasticsearch.query.myqueries`. You can use this to create custom loggers for specific requests or groups of requests to make them easier to troubleshoot.
+1. This request will be logged using the logger `elasticsearch.query.myqueries`.
+
+Using custom loggers for specific requests or groups of requests can make them easier to troubleshoot.
 
 To see the logs, enable the `debug` log level for the logger you want to troubleshoot. For example, to see the logs for the `elasticsearch.query.myqueries` logger, add the following to your `kibana.yml`:
 
