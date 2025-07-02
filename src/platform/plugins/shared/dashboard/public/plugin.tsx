@@ -161,7 +161,7 @@ export class DashboardPlugin
             ]);
             return (
               (await getDashboardContentManagementService().loadDashboardState({ id: dashboardId }))
-                .dashboardInput?.filters ?? []
+                .dashboardState?.filters ?? []
             );
           },
         })

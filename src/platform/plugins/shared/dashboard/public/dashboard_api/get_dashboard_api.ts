@@ -103,7 +103,7 @@ export function getDashboardApi({
     viewModeManager,
     creationOptions,
     controlGroupManager,
-    lastSavedState: savedObjectResult?.dashboardInput ?? DEFAULT_DASHBOARD_STATE,
+    lastSavedState: savedObjectResult?.dashboardState ?? DEFAULT_DASHBOARD_STATE,
     layoutManager,
     savedObjectId$,
     settingsManager,

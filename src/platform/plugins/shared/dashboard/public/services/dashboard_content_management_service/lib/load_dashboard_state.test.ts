@@ -42,7 +42,7 @@ describe('Load dashboard state', () => {
     expect(result).toMatchObject({
       dashboardId: id,
       dashboardFound: true,
-      dashboardInput: {
+      dashboardState: {
         title: 'Test dashboard',
       },
     });

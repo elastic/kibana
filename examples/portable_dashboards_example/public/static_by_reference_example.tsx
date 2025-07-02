@@ -50,14 +50,14 @@ export const StaticByReferenceExample = ({
             const field = dataView.getFieldByName('machine.os.keyword');
             let filter: Filter;
             let creationOptions: DashboardCreationOptions = {
-              getInitialInput: () => ({ viewMode: 'view' }),
+              getDashboardState: () => ({ viewMode: 'view' }),
             };
             if (field) {
               filter = buildPhraseFilter(field, 'win xp', dataView);
               filter.meta.negate = true;
               creationOptions = {
                 ...creationOptions,
-                getInitialInput: () => ({ filters: [filter] }),
+                getDashboardState: () => ({ filters: [filter] }),
               };
             }
             return creationOptions; // if can't find the field, then just return no special creation options

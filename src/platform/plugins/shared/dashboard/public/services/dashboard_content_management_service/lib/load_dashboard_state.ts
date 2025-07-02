@@ -55,7 +55,7 @@ export const loadDashboardState = async ({
    */
   if (!savedObjectId) {
     return {
-      dashboardInput: newDashboardState,
+      dashboardState: newDashboardState,
       dashboardFound: true,
       newDashboardCreated: true,
       references: [],
@@ -101,7 +101,7 @@ export const loadDashboardState = async ({
 
   if (!rawDashboardContent || !rawDashboardContent.version) {
     return {
-      dashboardInput: newDashboardState,
+      dashboardState: newDashboardState,
       dashboardFound: false,
       dashboardId: savedObjectId,
       references: [],
@@ -149,7 +149,7 @@ export const loadDashboardState = async ({
     managed,
     references,
     resolveMeta,
-    dashboardInput: {
+    dashboardState: {
       ...DEFAULT_DASHBOARD_STATE,
       ...options,
       refreshInterval,
