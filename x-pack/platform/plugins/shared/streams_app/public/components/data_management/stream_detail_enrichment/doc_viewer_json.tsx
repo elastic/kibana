@@ -13,9 +13,12 @@ import { DEFAULT_MARGIN_BOTTOM, getTabContentAvailableHeight } from './get_heigh
 
 export const docViewJson = {
   id: 'doc_view_json',
-  title: i18n.translate('unifiedDocViewer.docViews.json.jsonTitle', {
-    defaultMessage: 'JSON',
-  }),
+  title: i18n.translate(
+    'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.docViews.json.jsonTitle',
+    {
+      defaultMessage: 'JSON',
+    }
+  ),
   order: 20,
   component: JsonDocViewer,
 };

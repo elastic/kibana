@@ -7,7 +7,7 @@
 
 import { createSelector } from 'reselect';
 
-import { SampleDocument } from '@kbn/streams-schema';
+import { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { isPlainObject, uniq } from 'lodash';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import { SimulationContext } from './types';
@@ -26,7 +26,7 @@ export const selectPreviewRecords = createSelector(
   ],
   (samples, previewDocsFilter, documents) => {
     if (!previewDocsFilter || !documents) {
-      return samples?.map(flattenObjectNestedLast) || EMPTY_ARRAY;
+      return (samples?.map(flattenObjectNestedLast) as FlattenRecord[]) || EMPTY_ARRAY;
     }
     const filterFn = getFilterSimulationDocumentsFn(previewDocsFilter);
     return documents.filter(filterFn).map((doc) => doc.value);
