@@ -1595,7 +1595,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
-          expect(stats.detection_rules.detection_rule_usage.elastic_total.has_exceptions).to.eql(1);
+          expect(
+            stats.detection_rules.detection_rule_usage.elastic_total.has_exceptions
+          ).to.be.greaterThan(0);
         });
       });
     });

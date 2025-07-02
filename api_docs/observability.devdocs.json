@@ -1173,7 +1173,7 @@
             "section": "def-common.UnknownAlertFields",
             "text": "UnknownAlertFields"
           },
-          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyStateHeight?: \"short\" | \"tall\" | \"flex\" | undefined; emptyStateVariant?: \"subdued\" | \"transparent\" | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
+          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyState?: { messageTitle?: string | undefined; messageBody?: string | undefined; height?: \"short\" | \"tall\" | \"flex\" | undefined; variant?: \"subdued\" | \"transparent\" | undefined; } | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -3459,7 +3459,7 @@
                 "section": "def-common.UnknownAlertFields",
                 "text": "UnknownAlertFields"
               },
-              ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyStateHeight?: \"short\" | \"tall\" | \"flex\" | undefined; emptyStateVariant?: \"subdued\" | \"transparent\" | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
+              ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyState?: { messageTitle?: string | undefined; messageBody?: string | undefined; height?: \"short\" | \"tall\" | \"flex\" | undefined; variant?: \"subdued\" | \"transparent\" | undefined; } | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
               {
                 "pluginId": "observability",
                 "scope": "public",
@@ -9772,7 +9772,7 @@
             "section": "def-common.UnknownAlertFields",
             "text": "UnknownAlertFields"
           },
-          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyStateHeight?: \"short\" | \"tall\" | \"flex\" | undefined; emptyStateVariant?: \"subdued\" | \"transparent\" | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
+          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyState?: { messageTitle?: string | undefined; messageBody?: string | undefined; height?: \"short\" | \"tall\" | \"flex\" | undefined; variant?: \"subdued\" | \"transparent\" | undefined; } | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -12044,7 +12044,7 @@
             "section": "def-common.UnknownAlertFields",
             "text": "UnknownAlertFields"
           },
-          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyStateHeight?: \"short\" | \"tall\" | \"flex\" | undefined; emptyStateVariant?: \"subdued\" | \"transparent\" | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
+          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyState?: { messageTitle?: string | undefined; messageBody?: string | undefined; height?: \"short\" | \"tall\" | \"flex\" | undefined; variant?: \"subdued\" | \"transparent\" | undefined; } | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -14401,7 +14401,7 @@
             "section": "def-common.UnknownAlertFields",
             "text": "UnknownAlertFields"
           },
-          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyStateHeight?: \"short\" | \"tall\" | \"flex\" | undefined; emptyStateVariant?: \"subdued\" | \"transparent\" | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
+          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyState?: { messageTitle?: string | undefined; messageBody?: string | undefined; height?: \"short\" | \"tall\" | \"flex\" | undefined; variant?: \"subdued\" | \"transparent\" | undefined; } | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
           {
             "pluginId": "observability",
             "scope": "public",
