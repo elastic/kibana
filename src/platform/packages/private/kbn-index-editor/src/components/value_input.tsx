@@ -7,13 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFieldText } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getInputComponentForType } from './value_inputs_factory';
+import { KibanaContextExtra } from '../types';
 
 interface ValueInputProps {
   value?: string;
   columnName?: string;
+  columns?: DatatableColumn[];
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
   onEnter?: (value: string) => void;
   onChange?: (value: string) => void;
@@ -24,33 +28,55 @@ interface ValueInputProps {
 export const ValueInput = ({
   value = '',
   columnName = '',
+  columns,
   onBlur,
   onEnter,
   onChange,
   autoFocus = false,
   className = '',
 }: ValueInputProps) => {
+  const {
+    services: { notifications },
+  } = useKibana<KibanaContextExtra>();
   const [editValue, setEditValue] = useState(value);
+  const [error, setError] = useState<string | null>(null);
+
+  const columnType = useMemo(() => {
+    if (!columns || !columnName) return;
+    const col = columns.find((c) => c.name === columnName);
+    return col?.meta?.type;
+  }, [columns, columnName]);
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
-      // Perform Validations
+      if (error) {
+        notifications.toasts.addDanger({
+          title: error,
+        });
+        return;
+      }
+
       onEnter?.(editValue);
     }
   };
 
   const onBlurHandler = (event: React.FocusEvent<HTMLInputElement>) => {
-    if (onBlur) {
-      onBlur(event);
+    if (error) {
+      notifications.toasts.addDanger({
+        title: error,
+      });
+      return;
     }
-    // Perform Validations ?
+    onBlur?.(event);
   };
 
+  const InputComponent = useMemo(() => getInputComponentForType(columnType), [columnType]);
+
   return (
-    <EuiFieldText
+    <InputComponent
       autoFocus={autoFocus}
-      compressed
       placeholder={columnName}
+      label={columnName}
       value={editValue}
       aria-label={i18n.translate('indexEditor.cellValueInput.aria', {
         defaultMessage: 'Value for {columnName}',
@@ -60,6 +86,7 @@ export const ValueInput = ({
         setEditValue(e.target.value);
         onChange?.(e.target.value);
       }}
+      onError={setError}
       onBlur={onBlurHandler}
       onKeyDown={onKeyDown}
       className={className}

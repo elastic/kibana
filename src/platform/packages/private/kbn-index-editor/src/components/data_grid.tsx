@@ -113,8 +113,15 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   );
 
   const CellValueRenderer = useMemo(() => {
-    return getCellValueRenderer(rows, editingCell, savingDocs, setEditingCell, onValueChange);
-  }, [rows, editingCell, setEditingCell, onValueChange, savingDocs]);
+    return getCellValueRenderer(
+      rows,
+      props.columns,
+      editingCell,
+      savingDocs,
+      setEditingCell,
+      onValueChange
+    );
+  }, [rows, props.columns, editingCell, setEditingCell, onValueChange, savingDocs]);
 
   const externalCustomRenderers: CustomCellRenderer = useMemo(() => {
     return activeColumns.reduce((acc, columnId) => {

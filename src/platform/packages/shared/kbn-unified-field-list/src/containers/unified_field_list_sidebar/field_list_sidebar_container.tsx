@@ -8,7 +8,6 @@
  */
 
 import React, {
-  memo,
   useCallback,
   useState,
   forwardRef,
@@ -91,7 +90,7 @@ const InternalUnifiedFieldListSidebarContainer: React.FC<
 };
 
 const UnifiedFieldListSidebarContainerWithRestorableState = withRestorableState(
-  memo(InternalUnifiedFieldListSidebarContainer)
+  InternalUnifiedFieldListSidebarContainer
 );
 
 type UnifiedFieldListSidebarContainerPropsWithRestorableState = ComponentProps<
@@ -183,9 +182,13 @@ const UnifiedFieldListSidebarContainer = forwardRef<
       localStorageKey: stateService.creationOptions.localStorageKeyPrefix
         ? `${stateService.creationOptions.localStorageKeyPrefix}:sidebarClosed`
         : undefined,
+      isInitiallyCollapsed: initialState?.isCollapsed,
     })
   );
-  const isSidebarCollapsed = useObservable(sidebarVisibility.isCollapsed$, false);
+  const isSidebarCollapsed = useObservable(
+    sidebarVisibility.isCollapsed$,
+    sidebarVisibility.initialValue
+  );
 
   const canEditDataView =
     Boolean(dataViewFieldEditor?.userPermissions.editIndexPattern()) ||

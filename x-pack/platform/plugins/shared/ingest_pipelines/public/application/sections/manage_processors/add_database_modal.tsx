@@ -159,7 +159,7 @@ export const AddDatabaseModal = ({
                     defaultMessage="Add your MaxMind license token to the keystore"
                   />
                 }
-                iconType="iInCircle"
+                iconType="info"
               >
                 <p>
                   <FormattedMessage
@@ -181,7 +181,7 @@ export const AddDatabaseModal = ({
                     defaultMessage="Add your IP Info license token to the keystore"
                   />
                 }
-                iconType="iInCircle"
+                iconType="info"
               >
                 <p>
                   <FormattedMessage

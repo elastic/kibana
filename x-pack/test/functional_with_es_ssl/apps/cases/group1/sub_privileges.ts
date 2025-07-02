@@ -6,6 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  createUsersAndRoles,
+  deleteUsersAndRoles,
+} from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/authentication';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   users,
@@ -15,10 +19,6 @@ import {
   casesNoDeleteUser,
   casesReadAndEditSettingsUser,
 } from '../common';
-import {
-  createUsersAndRoles,
-  deleteUsersAndRoles,
-} from '../../../../cases_api_integration/common/lib/authentication';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['security', 'header']);

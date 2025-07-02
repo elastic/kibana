@@ -182,6 +182,7 @@ export const FINDINGS_GROUPING_OPTIONS = {
   CLOUD_ACCOUNT_ID: 'cloud.account.id',
   ORCHESTRATOR_CLUSTER_NAME: 'orchestrator.cluster.name',
   ORCHESTRATOR_CLUSTER_ID: 'orchestrator.cluster.id',
+  NAMESPACE: 'data_stream.namespace',
 };
 
 export const VULNERABILITY_FIELDS = {
@@ -195,6 +196,7 @@ export const VULNERABILITY_FIELDS = {
   PACKAGE_VERSION: 'package.version',
   PACKAGE_FIXED_VERSION: 'package.fixed_version',
   CLOUD_ACCOUNT_NAME: 'cloud.account.name',
+  CLOUD_ACCOUNT_ID: 'cloud.account.id',
   CLOUD_PROVIDER: 'cloud.provider',
   DESCRIPTION: 'vulnerability.description',
   VENDOR: 'observer.vendor',
@@ -202,9 +204,8 @@ export const VULNERABILITY_FIELDS = {
 
 export const VULNERABILITY_GROUPING_OPTIONS = {
   NONE: 'none',
-  RESOURCE_NAME: VULNERABILITY_FIELDS.RESOURCE_NAME,
   RESOURCE_ID: VULNERABILITY_FIELDS.RESOURCE_ID,
-  CLOUD_ACCOUNT_NAME: VULNERABILITY_FIELDS.CLOUD_ACCOUNT_NAME,
+  CLOUD_ACCOUNT_ID: VULNERABILITY_FIELDS.CLOUD_ACCOUNT_ID,
   CVE: VULNERABILITY_FIELDS.VULNERABILITY_ID,
 } as const;
 

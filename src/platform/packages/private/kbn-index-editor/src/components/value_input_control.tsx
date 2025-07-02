@@ -12,6 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { isNil } from 'lodash';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { PendingSave } from '../index_update_service';
 import { ValueInput } from './value_input';
 
@@ -20,6 +21,7 @@ export type OnCellValueChange = (docId: string, update: any) => void;
 export const getCellValueRenderer =
   (
     rows: DataTableRecord[],
+    columns: DatatableColumn[],
     editingCell: { row: number | null; col: string | null },
     savingDocs: PendingSave | undefined,
     onEditStart: (update: { row: number | null; col: string | null }) => void,
@@ -40,9 +42,8 @@ export const getCellValueRenderer =
       cellValue = pendingSaveValue;
     } else if (row.flattened) {
       // Otherwise, use the value from the row
-      cellValue = row.flattened[columnId];
+      cellValue = row.flattened[columnId]?.toString();
     }
-
     if (cellValue == null) {
       return null;
     }
@@ -60,6 +61,7 @@ export const getCellValueRenderer =
               onValueChange(docId!, { [columnId]: value });
             }}
             columnName={columnId}
+            columns={columns}
             value={cellValue}
             autoFocus
           />

@@ -83,6 +83,7 @@ import {
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
+import { useScopedServices } from '../../../../components/scoped_services_provider';
 
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
@@ -110,10 +111,11 @@ function DiscoverDocumentsComponent({
   onFieldEdited?: () => void;
 }) {
   const services = useDiscoverServices();
+  const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
-  const { dataViews, capabilities, uiSettings, uiActions, ebtManager, fieldsMetadata } = services;
+  const { dataViews, capabilities, uiSettings, uiActions, fieldsMetadata } = services;
   const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
   const [
     dataSource,
@@ -193,17 +195,17 @@ function DiscoverDocumentsComponent({
   const onAddColumnWithTracking = useCallback(
     (columnName: string) => {
       onAddColumn(columnName);
-      void ebtManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
     },
-    [onAddColumn, ebtManager, fieldsMetadata]
+    [onAddColumn, scopedEBTManager, fieldsMetadata]
   );
 
   const onRemoveColumnWithTracking = useCallback(
     (columnName: string) => {
       onRemoveColumn(columnName);
-      void ebtManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
     },
-    [onRemoveColumn, ebtManager, fieldsMetadata]
+    [onRemoveColumn, scopedEBTManager, fieldsMetadata]
   );
 
   const docViewerRef = useRef<DocViewerApi>(null);
@@ -380,7 +382,7 @@ function DiscoverDocumentsComponent({
           size="xs"
           color="accent"
           position="absolute"
-          css={progressStyle}
+          css={styles.progress}
         />
       ) : null,
     [isDataLoading]
@@ -411,7 +413,7 @@ function DiscoverDocumentsComponent({
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       // class is used in tests
-      <div className="dscDocuments__loading" css={dscDocumentsLoadingCss}>
+      <div className="dscDocuments__loading" css={styles.dscDocumentsLoading}>
         <EuiText size="xs" color="subdued">
           <EuiLoadingSpinner />
           <EuiSpacer size="s" />
@@ -423,7 +425,7 @@ function DiscoverDocumentsComponent({
 
   return (
     // class is used in tests
-    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={containerStyles}>
+    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={styles.container}>
       <EuiScreenReaderOnly>
         <h2 id="documentsAriaLabel">
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
@@ -499,20 +501,20 @@ function DiscoverDocumentsComponent({
 
 export const DiscoverDocuments = memo(DiscoverDocumentsComponent);
 
-const containerStyles = css`
-  position: relative;
-  min-height: 0;
-`;
-
-const progressStyle = css`
-  z-index: 2;
-`;
-
-const dscDocumentsLoadingCss = css`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-  height: 100%;
-  width: 100%;
-`;
+const styles = {
+  container: css({
+    position: 'relative',
+    minHeight: 0,
+  }),
+  progress: css({
+    zIndex: 2,
+  }),
+  dscDocumentsLoading: css({
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    textAlign: 'center',
+    height: '100%',
+    width: '100%',
+  }),
+};
