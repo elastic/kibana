@@ -13,10 +13,10 @@ import { DeleteByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import type { Logger } from '@kbn/logging';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { getResourceName } from '.';
 import { knowledgeBaseIngestPipeline } from '../ai_assistant_data_clients/knowledge_base/ingest_pipeline';
 import { GetElser } from '../types';
-import { ELASTICSEARCH_ELSER_INFERENCE_ID } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
 
 /**
  * Creates a function that returns the ELSER model ID
@@ -156,7 +156,7 @@ export const ensureProductDocumentationInstalled = async ({
 }) => {
   try {
     const { status } = await productDocManager.getStatus({
-      inferenceId: ELASTICSEARCH_ELSER_INFERENCE_ID,
+      inferenceId: defaultInferenceEndpoints.ELSER,
     });
     if (status !== 'installed') {
       logger.debug(`Installing product documentation for AIAssistantService`);
@@ -164,7 +164,7 @@ export const ensureProductDocumentationInstalled = async ({
       try {
         await productDocManager.install({
           wait: true,
-          inferenceId: ELASTICSEARCH_ELSER_INFERENCE_ID,
+          inferenceId: defaultInferenceEndpoints.ELSER,
         });
         logger.debug(`Successfully installed product documentation for AIAssistantService`);
       } catch (e) {

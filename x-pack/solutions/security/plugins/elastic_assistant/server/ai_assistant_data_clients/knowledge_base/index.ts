@@ -68,10 +68,7 @@ import {
   loadSecurityLabs,
   getSecurityLabsDocsCount,
 } from '../../lib/langchain/content_loaders/security_labs_loader';
-import {
-  ASSISTANT_ELSER_INFERENCE_ID,
-  ELASTICSEARCH_ELSER_INFERENCE_ID,
-} from './field_maps_configuration';
+import { ASSISTANT_ELSER_INFERENCE_ID } from './field_maps_configuration';
 import { BulkOperationError } from '../../lib/data_stream/documents_data_writer';
 import { AUDIT_OUTCOME, KnowledgeBaseAuditAction, knowledgeBaseAuditEvent } from './audit_events';
 import { findDocuments } from '../find';
@@ -849,7 +846,7 @@ export const getInferenceEndpointId = async ({ esClient }: { esClient: Elasticse
   }
 
   // Fallback to the default inference endpoint
-  return ELASTICSEARCH_ELSER_INFERENCE_ID;
+  return defaultInferenceEndpoints.ELSER;
 };
 
 /**
