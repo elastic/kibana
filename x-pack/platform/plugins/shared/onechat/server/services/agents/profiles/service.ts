@@ -80,8 +80,6 @@ class AgentProfileServiceImpl implements AgentProfileService {
     const allTools = await registry.list({ request: this.request });
     const allProviders = new Set(allTools.map((t: any) => t.meta.providerId));
 
-    this.logger.info(`allProviders: ${JSON.stringify(Array.from(allProviders))}`);
-
     for (const selection of toolSelection) {
       const { provider, toolIds } = selection;
       if (!provider) {
@@ -115,11 +113,13 @@ class AgentProfileServiceImpl implements AgentProfileService {
             throw createBadRequestError(`Provider '${provider}' does not have any tools.`);
           }
         } else {
-          // Check each tool exists for the provider
-          const providerTools = allTools.filter((t: any) => t.meta.providerId === provider);
-          const providerToolIds = new Set(providerTools.map((t: any) => t.id));
+          // Check each tool exists for the provider using registry.has for efficiency
           for (const toolId of toolIds) {
-            if (!providerToolIds.has(toolId)) {
+            const exists = await registry.has({
+              toolId: { toolId, providerId: provider },
+              request: this.request,
+            });
+            if (!exists) {
               throw createBadRequestError(
                 `Tool id '${toolId}' does not exist for provider '${provider}'.`
               );
