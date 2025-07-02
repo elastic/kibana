@@ -17,18 +17,20 @@ export const createIndex = async ({
   manifestVersion,
   mappings,
   log,
+  elserInferenceId = internalElserInferenceId,
 }: {
   esClient: ElasticsearchClient;
   indexName: string;
   manifestVersion: string;
   mappings: MappingTypeMapping;
   log: Logger;
+  elserInferenceId?: string;
 }) => {
   log.debug(`Creating index ${indexName}`);
 
   const legacySemanticText = isLegacySemanticTextVersion(manifestVersion);
 
-  overrideInferenceId(mappings, internalElserInferenceId);
+  overrideInferenceId(mappings, elserInferenceId);
 
   await esClient.indices.create({
     index: indexName,

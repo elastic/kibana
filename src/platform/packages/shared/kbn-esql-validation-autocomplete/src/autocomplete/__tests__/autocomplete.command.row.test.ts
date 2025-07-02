@@ -8,7 +8,7 @@
  */
 
 import { Location } from '../../definitions/types';
-import { getNewVariableSuggestion } from '../factories';
+import { getNewUserDefinedColumnSuggestion } from '../factories';
 import { attachTriggerCommand, getFunctionSignaturesByReturnType, setup } from './helpers';
 
 describe('autocomplete.suggest', () => {
@@ -16,7 +16,7 @@ describe('autocomplete.suggest', () => {
     const functions = getFunctionSignaturesByReturnType(Location.ROW, 'any', { scalar: true });
     it('suggests functions and an assignment for new expressions', async () => {
       const { assertSuggestions } = await setup();
-      const expectedSuggestions = [getNewVariableSuggestion('var0'), ...functions];
+      const expectedSuggestions = [getNewUserDefinedColumnSuggestion('col0'), ...functions];
 
       await assertSuggestions('ROW /', expectedSuggestions);
       await assertSuggestions('ROW foo = "bar", /', expectedSuggestions);
@@ -24,16 +24,16 @@ describe('autocomplete.suggest', () => {
 
     it('suggests only functions after an assignment', async () => {
       const { assertSuggestions } = await setup();
-      await assertSuggestions('ROW var0 = /', functions);
+      await assertSuggestions('ROW col0 = /', functions);
     });
 
     it('suggests a comma and a pipe after a complete expression', async () => {
       const { assertSuggestions } = await setup();
       const expected = [', ', '| '].map(attachTriggerCommand);
 
-      await assertSuggestions('ROW var0 = 23 /', expected);
+      await assertSuggestions('ROW col0 = 23 /', expected);
       await assertSuggestions('ROW ABS(23) /', expected);
-      await assertSuggestions('ROW ABS(23), var0=234 /', expected);
+      await assertSuggestions('ROW ABS(23), col0=234 /', expected);
     });
   });
 });

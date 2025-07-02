@@ -528,7 +528,7 @@ components:
               all: true
           does_set_recovery_context: true
           has_alerts_mappings: true
-          has_fields_for_a_a_d: false
+          has_fields_for_a_a_d: true
         - id: xpack.ml.anomaly_detection_jobs_health
           name: Anomaly detection jobs health
           category: management

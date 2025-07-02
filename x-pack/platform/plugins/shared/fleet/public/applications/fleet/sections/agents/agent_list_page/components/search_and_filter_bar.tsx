@@ -15,6 +15,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { useIsFirstTimeAgentUserQuery } from '../../../../../integrations/sections/epm/screens/detail/hooks';
 
@@ -62,6 +63,7 @@ export interface SearchAndFilterBarProps {
   latestAgentActionErrors: number;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
+  onBulkMigrateClicked: (agents: Agent[]) => void;
 }
 
 export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps> = ({
@@ -93,13 +95,17 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   latestAgentActionErrors,
   sortField,
   sortOrder,
+  onBulkMigrateClicked,
 }) => {
   const authz = useAuthz();
 
   const { isFirstTimeAgentUser, isLoading: isFirstTimeAgentUserLoading } =
     useIsFirstTimeAgentUserQuery();
   const { cloud } = useStartServices();
-
+  const NO_TAGS_VALUE = i18n.translate('xpack.fleet.agentList.noTagsValue', {
+    defaultMessage: 'No Tags',
+  });
+  const tagsWithNoTagsIncluded = [...tags, NO_TAGS_VALUE];
   return (
     <>
       <EuiFlexGroup direction="column">
@@ -187,7 +193,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                   disabled={agentPolicies.length === 0}
                 />
                 <TagsFilter
-                  tags={tags}
+                  tags={tagsWithNoTagsIncluded}
                   selectedTags={selectedTags}
                   onSelectedTagsChange={onSelectedTagsChange}
                 />
@@ -225,6 +231,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                   agentPolicies={agentPolicies}
                   sortField={sortField}
                   sortOrder={sortOrder}
+                  onBulkMigrateClicked={(agents: Agent[]) => onBulkMigrateClicked(agents)}
                 />
               </EuiFlexItem>
             ) : null}

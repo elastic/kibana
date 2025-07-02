@@ -162,6 +162,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     value: '{{context.value}}',
                     host: '{{context.host}}',
                     group: '{{context.group}}',
+                    grouping: '{{context.grouping}}',
                   },
                 ],
               },
@@ -248,6 +249,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               value: 'container-0',
             },
           ]);
+        expect(resp.hits.hits[0]._source)
+          .property('kibana.alert.grouping')
+          .eql({
+            host: {
+              name: 'host-0',
+            },
+            container: {
+              id: 'container-0',
+            },
+          });
         expect(resp.hits.hits[0]._source).property('kibana.alert.evaluation.threshold').eql([0.2]);
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.parameters')
@@ -287,6 +298,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
         expect(resp.hits.hits[0]._source?.group).eql(
           '{"field":"host.name","value":"host-0"},{"field":"container.id","value":"container-0"}'
+        );
+        expect(resp.hits.hits[0]._source?.grouping).eql(
+          '{"host":{"name":"host-0"},"container":{"id":"container-0"}}'
         );
       });
     });

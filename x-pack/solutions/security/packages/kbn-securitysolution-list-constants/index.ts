@@ -95,7 +95,7 @@ export const ENDPOINT_ARTIFACT_LISTS = deepFreeze({
     name: 'Endpoint Security Blocklists List',
     description: 'Endpoint Security Blocklists List',
   },
-});
+} as const);
 
 /**
  * The IDs of all Endpoint artifact lists

@@ -57,6 +57,7 @@ import {
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   RULE_DETAILS_MANUAL_RULE_RUN_BTN,
   MANUAL_RULE_RUN_ACTION_BTN,
+  RULE_DETAILS_REVERT_RULE_BTN,
 } from '../screens/alerts_detection_rules';
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
@@ -72,6 +73,7 @@ import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
 import { goToRuleEditSettings } from './rule_details';
 import { goToActionsStepTab } from './create_new_rule';
 import { setKibanaSetting } from './api_calls/kibana_advanced_settings';
+import { REVERT_MODAL_CONFIRMATION_BTN } from '../screens/rule_updates';
 
 export const getRulesManagementTableRows = () => cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW);
 
@@ -147,6 +149,13 @@ export const manualRuleRunFromDetailsPage = () => {
   cy.get(RULE_DETAILS_MANUAL_RULE_RUN_BTN).click();
   cy.get(RULE_DETAILS_MANUAL_RULE_RUN_BTN).should('not.exist');
   cy.get(MODAL_CONFIRMATION_BTN).click();
+};
+
+export const revertRuleFromDetailsPage = () => {
+  cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click({ force: true });
+  cy.get(RULE_DETAILS_REVERT_RULE_BTN).click();
+  cy.get(RULE_DETAILS_REVERT_RULE_BTN).should('not.exist');
+  cy.get(REVERT_MODAL_CONFIRMATION_BTN).click();
 };
 
 export const exportRule = (name: string) => {
@@ -304,7 +313,7 @@ export const waitForRuleToUpdate = () => {
   cy.get(RULE_SWITCH_LOADER, { timeout: 300000 }).should('not.exist');
 };
 
-export const importRules = (rulesFile: string) => {
+export const importRules = (rulesFile: Cypress.FileReference | Cypress.FileReference[]) => {
   cy.get(RULE_IMPORT_MODAL).click();
   cy.get(INPUT_FILE).click();
   cy.get(INPUT_FILE).selectFile(rulesFile);
@@ -445,7 +454,9 @@ const selectOverwriteConnectorsRulesImport = () => {
   cy.get(RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX).should('be.checked');
 };
 
-export const importRulesWithOverwriteAll = (rulesFile: string) => {
+export const importRulesWithOverwriteAll = (
+  rulesFile: Cypress.FileReference | Cypress.FileReference[]
+) => {
   cy.get(RULE_IMPORT_MODAL).click();
   cy.get(INPUT_FILE).click({ force: true });
   cy.get(INPUT_FILE).selectFile(rulesFile);
@@ -516,13 +527,21 @@ export const disableAutoRefresh = () => {
   expectAutoRefreshIsDisabled();
 };
 
+export const enableAutoRefresh = () => {
+  openRefreshSettingsPopover();
+  cy.get(REFRESH_SETTINGS_SWITCH).click();
+  expectAutoRefreshIsEnabled();
+};
+
 export const mockGlobalClock = () => {
   /**
    * Ran into the error: timer created with setInterval() but cleared with cancelAnimationFrame()
    * There are no cancelAnimationFrames in the codebase that are used to clear a setInterval so
    * explicitly set the below overrides. see https://docs.cypress.io/api/commands/clock#Function-names
+   *
+   * Warning: timers need to be mocked after the first page load,
+   * otherwise plugin deep links won't be registered properly since they use rxjs debounceTime.
    */
-
   cy.clock(Date.now(), ['setInterval', 'clearInterval', 'Date']);
 };
 

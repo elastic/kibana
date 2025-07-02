@@ -53,7 +53,7 @@ export const AddDataTroubleshootingPopover = () => {
   } = useKibanaContextForPlugin();
   const addDataLinkHref = share.url.locators
     .get<ObservabilityOnboardingLocatorParams>(OBSERVABILITY_ONBOARDING_LOCATOR)
-    ?.getRedirectUrl({ category: 'logs' });
+    ?.getRedirectUrl({ category: 'host' });
 
   const onButtonClick = () => togglePopover();
 
@@ -62,7 +62,7 @@ export const AddDataTroubleshootingPopover = () => {
       button={
         <EuiBadge
           color="hollow"
-          iconType="iInCircle"
+          iconType="info"
           iconSide="left"
           onClick={onButtonClick}
           onClickAriaLabel={popoverContent.title}

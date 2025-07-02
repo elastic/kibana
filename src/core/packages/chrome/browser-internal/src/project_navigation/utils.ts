@@ -26,6 +26,7 @@ import type {
 } from '@kbn/core-chrome-browser/src';
 import type { Location } from 'history';
 import type { MouseEventHandler } from 'react';
+import { SideNavigationSection } from '@kbn/core-chrome-browser/src/project_navigation';
 import { getPresets } from './navigation_presets';
 
 const wrapIdx = (index: number): string => `[${index}]`;
@@ -106,7 +107,7 @@ function extractParentPaths(key: string, navTree: Record<string, ChromeProjectNa
   }
 
   return arr
-    .reduce<string[]>((acc, currentValue, currentIndex) => {
+    .reduce<string[]>((acc, _currentValue, currentIndex) => {
       acc.push(arr.slice(0, currentIndex + 1).join(''));
       return acc;
     }, [])
@@ -244,7 +245,7 @@ function getNodeStatus(
 function getTitleForNode(
   navNode: { title?: string; deepLink?: { title: string }; cloudLink?: CloudLinkId },
   { deepLink, cloudLinks }: { deepLink?: ChromeNavLink; cloudLinks: CloudLinks }
-): string {
+): string | undefined {
   if (navNode.title) {
     return navNode.title;
   }
@@ -257,7 +258,7 @@ function getTitleForNode(
     return cloudLinks[navNode.cloudLink]?.title ?? '';
   }
 
-  return '';
+  return; // title is optional in EuiCollapsibleNavItemProps
 }
 
 function validateNodeProps<
@@ -419,7 +420,7 @@ export const parseNavigationTree = (
 
   const onNodeInitiated = (
     navNode: ChromeProjectNavigationNode | RecentlyAccessedDefinition | null,
-    section: 'body' | 'footer' = 'body'
+    section: SideNavigationSection = 'body'
   ) => {
     if (navNode) {
       if (!isRecentlyAccessedDefinition(navNode)) {
@@ -437,7 +438,7 @@ export const parseNavigationTree = (
 
   const parseNodesArray = (
     nodes?: RootNavigationItemDefinition[],
-    section: 'body' | 'footer' = 'body',
+    section: SideNavigationSection = 'body',
     startIndex = 0
   ): void => {
     if (!nodes) return;
@@ -450,6 +451,7 @@ export const parseNavigationTree = (
 
   parseNodesArray(navigationTreeDef.body, 'body');
   parseNodesArray(navigationTreeDef.footer, 'footer', navigationTreeDef.body?.length ?? 0);
+  parseNodesArray(navigationTreeDef.callout, 'callout', navigationTreeDef.body?.length ?? 0);
 
   return { navigationTree, navigationTreeUI };
 };

@@ -6,6 +6,7 @@
  */
 
 import hash from 'object-hash';
+import { APM_AGENT_CONFIGURATION_INDEX } from '@kbn/apm-sources-access-plugin/server';
 import type {
   AgentConfiguration,
   AgentConfigurationIntake,
@@ -14,7 +15,6 @@ import type {
   APMIndexDocumentParams,
   APMInternalESClient,
 } from '../../../lib/helpers/create_es_client/create_internal_es_client';
-import { APM_AGENT_CONFIGURATION_INDEX } from '../apm_indices/apm_system_index_constants';
 
 export function createOrUpdateConfiguration({
   configurationId,

@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiCallOut,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { FormHook } from '../../../../../shared_imports';
@@ -62,6 +63,8 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
 }) => {
   let tabContent;
 
+  const pipelineTitleId = useGeneratedHtmlId();
+
   if (selectedTab === 'output') {
     tabContent = (
       <OutputTab
@@ -85,10 +88,15 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
   }
 
   return (
-    <EuiFlyout maxWidth={550} onClose={onClose} data-test-subj="testPipelineFlyout">
+    <EuiFlyout
+      maxWidth={550}
+      onClose={onClose}
+      data-test-subj="testPipelineFlyout"
+      aria-labelledby={pipelineTitleId}
+    >
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2 data-test-subj="title">
+          <h2 data-test-subj="title" id={pipelineTitleId}>
             <FormattedMessage
               id="xpack.ingestPipelines.testPipelineFlyout.title"
               defaultMessage="Test pipeline"

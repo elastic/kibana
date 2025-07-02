@@ -29,9 +29,9 @@ describe('defaultGroupStatsAggregations', () => {
     ]);
   });
 
-  it('should return values depending on the input field', () => {
-    const ruleAggregations = defaultGroupStatsAggregations('kibana.alert.rule.name');
-    expect(ruleAggregations).toEqual([
+  it('should return values depending for kibana.alert.rule.name input field', () => {
+    const aggregations = defaultGroupStatsAggregations('kibana.alert.rule.name');
+    expect(aggregations).toEqual([
       {
         unitsCount: {
           cardinality: {
@@ -44,13 +44,6 @@ describe('defaultGroupStatsAggregations', () => {
           terms: {
             field: 'kibana.alert.rule.description',
             size: 1,
-          },
-        },
-      },
-      {
-        countSeveritySubAggregation: {
-          cardinality: {
-            field: 'kibana.alert.severity',
           },
         },
       },
@@ -83,9 +76,11 @@ describe('defaultGroupStatsAggregations', () => {
         },
       },
     ]);
+  });
 
-    const hostAggregations = defaultGroupStatsAggregations('host.name');
-    expect(hostAggregations).toEqual([
+  it('should return values depending for host.name input field', () => {
+    const aggregations = defaultGroupStatsAggregations('host.name');
+    expect(aggregations).toEqual([
       {
         unitsCount: {
           cardinality: {
@@ -97,13 +92,6 @@ describe('defaultGroupStatsAggregations', () => {
         rulesCountAggregation: {
           cardinality: {
             field: 'kibana.alert.rule.rule_id',
-          },
-        },
-      },
-      {
-        countSeveritySubAggregation: {
-          cardinality: {
-            field: 'kibana.alert.severity',
           },
         },
       },
@@ -122,9 +110,11 @@ describe('defaultGroupStatsAggregations', () => {
         },
       },
     ]);
+  });
 
-    const userAggregations = defaultGroupStatsAggregations('user.name');
-    expect(userAggregations).toEqual([
+  it('should return values depending for user.name input field', () => {
+    const aggregations = defaultGroupStatsAggregations('user.name');
+    expect(aggregations).toEqual([
       {
         unitsCount: {
           cardinality: {
@@ -136,13 +126,6 @@ describe('defaultGroupStatsAggregations', () => {
         rulesCountAggregation: {
           cardinality: {
             field: 'kibana.alert.rule.rule_id',
-          },
-        },
-      },
-      {
-        countSeveritySubAggregation: {
-          cardinality: {
-            field: 'kibana.alert.severity',
           },
         },
       },
@@ -161,9 +144,11 @@ describe('defaultGroupStatsAggregations', () => {
         },
       },
     ]);
+  });
 
-    const sourceAggregations = defaultGroupStatsAggregations('source.ip');
-    expect(sourceAggregations).toEqual([
+  it('should return values depending for source.ip input field', () => {
+    const aggregations = defaultGroupStatsAggregations('source.ip');
+    expect(aggregations).toEqual([
       {
         unitsCount: {
           cardinality: {
@@ -175,13 +160,6 @@ describe('defaultGroupStatsAggregations', () => {
         rulesCountAggregation: {
           cardinality: {
             field: 'kibana.alert.rule.rule_id',
-          },
-        },
-      },
-      {
-        countSeveritySubAggregation: {
-          cardinality: {
-            field: 'kibana.alert.severity',
           },
         },
       },

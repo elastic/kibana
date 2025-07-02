@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import get from 'lodash/get';
-import sortBy from 'lodash/sortBy';
+import { get, sortBy } from 'lodash';
 
 import {
   ALERT_SUPPRESSION_DOCS_COUNT,

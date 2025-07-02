@@ -43,7 +43,7 @@ const DEFAULT_STACK_BY = NO_BREAKDOWN_STACK_BY_VALUE;
 const ID = 'eventsByDatasetOverview';
 const CHART_HEIGHT = 160;
 
-interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
+interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery'> {
   filterQuery?: string;
   filters: Filter[];
   headerChildren?: React.ReactNode;
@@ -54,7 +54,6 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   // Make a unique query type everywhere this query is used
   queryType: 'topN' | 'overview';
   showSpacer?: boolean;
-  toggleTopN?: () => void;
   hideQueryToggle?: boolean;
   sourcererScopeId?: SourcererScopeName;
   applyGlobalQueriesAndFilters?: boolean;
@@ -83,11 +82,9 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   paddingSize,
   query,
   queryType,
-  setQuery,
   showSpacer = true,
   sourcererScopeId,
   to,
-  toggleTopN,
   hideQueryToggle = false,
   applyGlobalQueriesAndFilters,
 }) => {
@@ -188,7 +185,6 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       headerChildren={headerContent}
       id={uniqueQueryId}
       paddingSize={paddingSize}
-      setQuery={setQuery}
       showSpacer={showSpacer}
       startDate={from}
       sourcererScopeId={sourcererScopeId}

@@ -327,7 +327,7 @@ describe('ruleActionsSettings', () => {
       validConsumers: ['stackAlerts', 'logs'],
       selectedRuleType: {
         ...ruleType,
-        hasFieldsForAAD: true,
+        hasAlertsMappings: true,
       },
       selectedRuleTypeModel: ruleModel,
     });
@@ -360,7 +360,7 @@ describe('ruleActionsSettings', () => {
       validConsumers: ['stackAlerts', 'logs'],
       selectedRuleType: {
         ...ruleType,
-        hasFieldsForAAD: true,
+        hasAlertsMappings: true,
       },
       selectedRuleTypeModel: ruleModel,
     });
@@ -402,7 +402,7 @@ describe('ruleActionsSettings', () => {
       validConsumers: ['stackAlerts', 'logs'],
       selectedRuleType: {
         ...ruleType,
-        hasFieldsForAAD: true,
+        hasAlertsMappings: true,
       },
       selectedRuleTypeModel: ruleModel,
     });

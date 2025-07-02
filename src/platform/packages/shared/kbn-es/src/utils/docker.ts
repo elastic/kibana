@@ -63,12 +63,12 @@ interface BaseOptions extends ImageOptions {
   files?: string | string[];
 }
 
-export const serverlessProjectTypes = new Set<string>(['es', 'oblt', 'security']);
+export const serverlessProjectTypes = new Set<string>(['es', 'oblt', 'security', 'chat']);
 export const isServerlessProjectType = (value: string): value is ServerlessProjectType => {
   return serverlessProjectTypes.has(value);
 };
 
-export type ServerlessProjectType = 'es' | 'oblt' | 'security';
+export type ServerlessProjectType = 'es' | 'oblt' | 'security' | 'chat';
 
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
   dockerCmd?: string;
@@ -398,6 +398,7 @@ const RETRYABLE_DOCKER_PULL_ERROR_MESSAGES = [
   'connection refused',
   'i/o timeout',
   'Client.Timeout',
+  'TLS handshake timeout',
 ];
 
 /**
@@ -425,13 +426,15 @@ ${message}`;
       retries: 2,
       onFailedAttempt: (error) => {
         // Only retry if retryable error messages are found in the error message.
-        if (
-          RETRYABLE_DOCKER_PULL_ERROR_MESSAGES.every(
-            (msg) => !error?.message?.includes('connection refused')
-          )
-        ) {
-          throw error;
+        for (const msg of RETRYABLE_DOCKER_PULL_ERROR_MESSAGES) {
+          if (error?.message?.includes(msg)) {
+            log.info(`Retrying due to error: ${error.message}`);
+            return;
+          }
         }
+
+        log.warning('Docker pull failed, error not retriable. Exiting.');
+        throw error;
       },
     }
   );

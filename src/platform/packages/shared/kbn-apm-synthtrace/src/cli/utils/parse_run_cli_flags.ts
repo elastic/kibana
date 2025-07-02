@@ -13,27 +13,30 @@ import path from 'path';
 import { LogLevel } from '../../lib/utils/create_logger';
 import { RunCliFlags } from '../run_synthtrace';
 
-function getParsedFile(flags: RunCliFlags) {
-  const { file, _ } = flags;
-  const parsedFile = (file || _[0]) as string;
+function getParsedFiles(flags: RunCliFlags) {
+  const { _: parsedFiles } = flags;
 
-  if (!parsedFile) {
-    throw new Error('Please specify a scenario to run');
+  if (!parsedFiles.length) {
+    throw new Error('Please specify at least one scenario to run');
   }
 
-  const filepath = [
-    path.resolve(parsedFile),
-    path.resolve(`${parsedFile}.ts`),
-    path.resolve(__dirname, '../../scenarios', parsedFile),
-    path.resolve(__dirname, '../../scenarios', `${parsedFile}.ts`),
-    path.resolve(__dirname, '../../scenarios', `${parsedFile}.js`),
-  ].find((p) => existsSync(p));
+  const filesPath = parsedFiles.map((parsedFile) => {
+    const foundPath = [
+      path.resolve(parsedFile),
+      path.resolve(`${parsedFile}.ts`),
+      path.resolve(__dirname, '../../scenarios', parsedFile),
+      path.resolve(__dirname, '../../scenarios', `${parsedFile}.ts`),
+      path.resolve(__dirname, '../../scenarios', `${parsedFile}.js`),
+    ].find((p) => existsSync(p));
 
-  if (!filepath) {
-    throw new Error(`Could not find scenario file: "${parsedFile}"`);
-  }
+    if (!foundPath) {
+      throw new Error(`Could not find scenario file for: "${parsedFile}"`);
+    }
 
-  return filepath;
+    return foundPath;
+  });
+
+  return filesPath;
 }
 
 export function parseRunCliFlags(flags: RunCliFlags) {
@@ -41,7 +44,7 @@ export function parseRunCliFlags(flags: RunCliFlags) {
   if (target?.includes('.kb.')) {
     throw new Error(`Target URL seems to be a Kibana URL, please provide Elasticsearch URL`);
   }
-  const parsedFile = getParsedFile(flags);
+  const parsedFiles = getParsedFiles(flags);
 
   let parsedLogLevel = verbose ? LogLevel.verbose : debug ? LogLevel.debug : LogLevel.info;
 
@@ -81,7 +84,7 @@ export function parseRunCliFlags(flags: RunCliFlags) {
     ),
     scenarioOpts: flags.scenarioOpts as unknown as Record<string, any>,
     logLevel: parsedLogLevel,
-    file: parsedFile,
+    files: parsedFiles,
   };
 }
 

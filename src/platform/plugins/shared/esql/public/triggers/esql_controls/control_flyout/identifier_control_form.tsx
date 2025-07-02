@@ -9,6 +9,7 @@
 
 import React, { useCallback, useState, useEffect } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import {
@@ -19,13 +20,16 @@ import {
 } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { ESQLVariableType } from '@kbn/esql-types';
+import {
+  ESQLVariableType,
+  EsqlControlType,
+  type ESQLControlState,
+  type ControlWidthOptions,
+} from '@kbn/esql-types';
 import { aggFunctionDefinitions } from '@kbn/esql-validation-autocomplete';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
-import type { ESQLControlState, ControlWidthOptions } from '../types';
 import { ControlWidth, ControlLabel } from './shared_form_components';
 import { getQueryForFields } from './helpers';
-import { EsqlControlType } from '../types';
 
 interface IdentifierControlFormProps {
   search: ISearchGeneric;
@@ -207,6 +211,13 @@ export function IdentifierControlForm({
           data-test-subj="esqlIdentifiersOptions"
           fullWidth
           compressed
+          isClearable
+          css={css`
+            .euiFormControlLayoutIcons {
+              align-items: flex-start;
+              padding-block-start: 1ch;
+            }
+          `}
         />
       </EuiFormRow>
 

@@ -10,3 +10,7 @@ import type { IndexSourceDefinition } from '@kbn/wci-common';
 export interface GenerateConfigurationResponse {
   definition: IndexSourceDefinition;
 }
+
+export interface SearchIndicesResponse {
+  indexNames: string[];
+}

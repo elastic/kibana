@@ -35,6 +35,7 @@ import { getParsedFilterQuery, termQuery } from '@kbn/observability-plugin/serve
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { errorCountParamsSchema } from '@kbn/response-ops-rule-params/error_count';
+import { unflattenObject } from '@kbn/object-utils';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
 import {
   ERROR_GROUP_ID,
@@ -65,7 +66,6 @@ import {
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
-import { unflattenObject } from '../utils/unflatten_object';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.ErrorCount];
 

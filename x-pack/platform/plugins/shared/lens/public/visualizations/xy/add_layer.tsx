@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   IconType,
-  transparentize,
   type UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
@@ -297,7 +296,7 @@ const chartOptionWrapperStyles = ({ euiTheme }: UseEuiTheme) => css`
   &:hover,
   &:focus {
     color: ${euiTheme.colors.primary};
-    background-color: ${transparentize(euiTheme.colors.primary, 0.1)};
+    background-color: ${euiTheme.colors.backgroundBasePrimary};
     span,
     .euiText {
       text-decoration: underline;

@@ -21,9 +21,7 @@ Clicking the link next to the check in the conversation tab of a pull request wi
 
 To view the results of a job execution in Buildkite, either click the link in the comment left by `@elasticmachine` or search for the `kibana-ci` check in the list at the bottom of the PR. This link will take you to the top-level page for the specific job execution that failed.
 
-:::{image} images/job_view.png
-:alt: Buildkite pipeline view showing a few test failures
-:::
+![Buildkite pipeline view showing a few test failures](images/job_view.png)
 
 1. **Git commit:** the git commit that caused this build.
 2. **Test Results:** A link to the test results screen, and shortcuts to the logs and jobs of the failed tests. Functional tests capture and store the log output from each specific test, and make it visible at these links.
@@ -34,13 +32,11 @@ To view the results of a job execution in Buildkite, either click the link in th
 
 The logs in Pipeline Steps contain `Info` level logging. To debug Functional UI tests it’s usually helpful to see the debug logging. You can go to the test failure details by clicking on the **logs** (1).
 
-:::{image} images/test_results.png
-:alt: Buildkite build screenshot
-:::
+![Buildkite build screenshot](images/test_results.png)
 
 Looking at the failure, we first look at the Error and stack trace. In the example below, this test failed to find an element within the timeout; `Error: retry.try timeout: TimeoutError: Waiting for element to be located By(css selector, [data-test-subj="createSpace"])`
 
-We know the test file from the stack trace was on line 50 of `test/accessibility/apps/spaces.ts` (this test and the stack trace context is kibana/x-pack/ so the file is {{kib-repo}}blob/master/x-pack/test/accessibility/apps/group1/spaces.ts#L50). The function to click on the element was called from a page object method in `test/functional/page_objects/space_selector_page.ts` {{kib-repo}}blob/master/x-pack/test/functional/page_objects/space_selector_page.ts#L58
+We know the test file from the stack trace was on line 50 of `test/accessibility/apps/spaces.ts` (this test and the stack trace context is kibana/x-pack/ so the file is [`x-pack/test/accessibility/apps/group1/spaces.ts`](https://github.com/elastic/kibana/blob/master/x-pack/test/accessibility/apps/group1/spaces.ts#L50). The function to click on the element was called from a page object method in [`test/functional/page_objects/space_selector_page.ts`](https://github.com/elastic/kibana/blob/master/x-pack/test/functional/page_objects/space_selector_page.ts#L58).
 
 ```
 [00:03:36]             │ debg --- retry.try error: Waiting for element to be located By(css selector, [data-test-subj="createSpace"])
@@ -69,15 +65,11 @@ Just above the `✖ fail:` line, there is a line `info Taking screenshot ...` wh
 
 Clicking the `[Download]` link for that png shows this image:
 
-:::{image} images/a11y_screenshot.png
-:alt: Kibana spaces page meets a11y validations a11y test for click on create space page.png
-:::
+![Kibana spaces page meets a11y validations a11y test for click on create space page.png](images/a11y_screenshot.png)
 
 If we use a running Kibana instance and inspect elements, we find that the `createSpace` data-test-subj attribute is on this button in the Spaces page in Stack Management:
 
-:::{image} images/inspect_element.png
-:alt: Kibana screenshot of Spaces page with developer tools open
-:::
+![Kibana screenshot of Spaces page with developer tools open](images/inspect_element.png)
 
 We know the test was not on the correct page to find the element to click. We see in the debug log the repeated attempts to find the element. If we scroll to the start of those repeated attempts, we see that the first thing the test did was this attempt to click on the `createSpace` element.
 

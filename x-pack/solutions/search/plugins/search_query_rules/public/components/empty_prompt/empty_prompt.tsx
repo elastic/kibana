@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import {
   EuiButton,
@@ -20,19 +20,37 @@ import {
   useEuiTheme,
   transparentize,
   EuiHorizontalRule,
+  EuiHideFor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { TryInConsoleButton } from '@kbn/try-in-console';
+import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../common/doc_links';
 
+import { CREATE_QUERY_RULE_SET_API_SNIPPET } from '../../../common/constants';
+
+import { useKibana } from '../../hooks/use_kibana';
+
 import queryRulesImg from '../../assets/query-rules-context-alt.svg';
+import queryRulesDarkImg from '../../assets/query-rules-context-alt-dark.svg';
 import backgroundPanelImg from '../../assets/query-rule-panel-background.svg';
+import { AnalyticsEvents } from '../../analytics/constants';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import backgroundPaneDarklImg from '../../assets/query-rule-panel-background-dark.svg';
 
 interface EmptyPromptProps {
   getStartedAction: () => void;
 }
 export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) => {
-  const { euiTheme } = useEuiTheme();
+  const usageTracker = useUsageTracker();
+  const { application, share, console: consolePlugin } = useKibana().services;
+  const { euiTheme, colorMode } = useEuiTheme();
+
+  useEffect(() => {
+    usageTracker?.load(AnalyticsEvents.emptyPromptLoaded);
+  }, [usageTracker]);
+
   const gradientOverlay = css({
     background: `linear-gradient(180deg, ${transparentize(
       euiTheme.colors.backgroundBasePlain,
@@ -55,7 +73,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
     position: 'relative',
   });
   const backgroundPanel = css({
-    backgroundImage: `url(${backgroundPanelImg})`,
+    backgroundImage: `url(${colorMode === 'DARK' ? backgroundPaneDarklImg : backgroundPanelImg})`,
     backgroundSize: '50%',
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'top right',
@@ -71,7 +89,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                 <h2>
                   <FormattedMessage
                     id="xpack.queryRules.emptyPrompt.title"
-                    defaultMessage="Improve your search experience with targeted business logic"
+                    defaultMessage="Add custom business logic with query rules"
                   />
                 </h2>
               </EuiTitle>
@@ -80,7 +98,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                 <p>
                   <FormattedMessage
                     id="xpack.queryRules.emptyPrompt.subtitle"
-                    defaultMessage="Add business logic to your queries to get customized results under different conditions."
+                    defaultMessage="Enhance search experiences with custom rules to filter and prioritize results based on your business logic."
                   />
                 </p>
               </EuiText>
@@ -91,7 +109,10 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                     data-test-subj="searchQueryRulesEmptyPromptGetStartedButton"
                     color="primary"
                     fill
-                    onClick={getStartedAction}
+                    onClick={() => {
+                      usageTracker?.click(AnalyticsEvents.gettingStartedButtonClicked);
+                      getStartedAction();
+                    }}
                   >
                     <FormattedMessage
                       id="xpack.queryRules.emptyPrompt.getStartedButton"
@@ -195,33 +216,61 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
             </EuiFlexItem>
 
             <EuiFlexItem grow css={positionRelative}>
-              <img src={queryRulesImg} alt="Query Rules" css={imgProps} />
+              <img
+                src={colorMode === 'DARK' ? queryRulesDarkImg : queryRulesImg}
+                alt="Query Rules"
+                css={imgProps}
+              />
               <div css={gradientOverlay}>&nbsp;</div>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiSplitPanel.Inner>
         <EuiHorizontalRule margin="none" />
         <EuiSplitPanel.Inner color="subdued" paddingSize="l">
-          <EuiTitle size="xxs">
-            <span>
-              <FormattedMessage
-                id="xpack.queryRules.emptyPrompt.footer"
-                defaultMessage="Prefer to use the APIs?"
-              />
-            </span>
-          </EuiTitle>
-          &nbsp;
-          <EuiLink
-            data-test-subj="searchQueryRulesEmptyPromptFooterLink"
-            href={docLinks.queryRulesApi}
-            target="_blank"
-            external
-          >
-            <FormattedMessage
-              id="xpack.queryRules.emptyPrompt.footerLink"
-              defaultMessage="Query Rules API documentation"
-            />
-          </EuiLink>
+          <EuiFlexGroup direction="row" alignItems="center">
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xxs">
+                  <span>
+                    <FormattedMessage
+                      id="xpack.queryRules.emptyPrompt.footer"
+                      defaultMessage="Prefer to use the APIs?"
+                    />
+                  </span>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiHideFor sizes={['xs', 's']}>
+                <EuiFlexItem grow={false}>
+                  <TryInConsoleButton
+                    application={application}
+                    sharePlugin={share ?? undefined}
+                    consolePlugin={consolePlugin ?? undefined}
+                    request={CREATE_QUERY_RULE_SET_API_SNIPPET}
+                    type="emptyButton"
+                    content={i18n.translate('xpack.queryRules.emptyPrompt.TryInConsoleLabel', {
+                      defaultMessage: 'Create in Console',
+                    })}
+                    showIcon
+                    data-test-subj={AnalyticsEvents.createInConsoleClicked}
+                  />
+                </EuiFlexItem>
+              </EuiHideFor>
+            </EuiFlexGroup>
+
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                data-test-subj="searchQueryRulesEmptyPromptFooterLink"
+                href={docLinks.queryRulesApi}
+                target="_blank"
+                external
+              >
+                <FormattedMessage
+                  id="xpack.queryRules.emptyPrompt.footerLink"
+                  defaultMessage="API reference"
+                />
+              </EuiLink>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
     </EuiFlexItem>

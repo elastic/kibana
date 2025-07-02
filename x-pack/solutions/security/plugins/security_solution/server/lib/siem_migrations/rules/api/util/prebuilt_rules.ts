@@ -7,15 +7,15 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine';
 import { createPrebuiltRuleObjectsClient } from '../../../../detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../../../detection_engine/prebuilt_rules/logic/rule_versions/fetch_rule_versions_triad';
 import { createPrebuiltRuleAssetsClient } from '../../../../detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../../../detection_engine/rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
-import type { RuleMigration } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { SiemRuleMigrationsClient } from '../../siem_rule_migrations_service';
 
-export const getUniquePrebuiltRuleIds = (migrationRules: RuleMigration[]): string[] => {
+export const getUniquePrebuiltRuleIds = (migrationRules: RuleMigrationRule[]): string[] => {
   const rulesIds = new Set<string>();
   migrationRules.forEach((rule) => {
     if (rule.elastic_rule?.prebuilt_rule_id) {

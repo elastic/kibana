@@ -7,7 +7,7 @@
 
 import ipaddr from 'ipaddr.js';
 import { parseAddressList } from 'email-addresses';
-import isString from 'lodash/isString';
+import { isString } from 'lodash';
 
 import {
   OBSERVABLE_TYPE_DOMAIN,
@@ -18,7 +18,7 @@ import {
 } from '../constants';
 
 const DOMAIN_REGEX = /^(?!-)[A-Za-z0-9-]{1,63}(?<!-)\.[A-Za-z]{2,}$/;
-const GENERIC_REGEX = /^[a-zA-Z0-9._:/\\]+$/;
+const GENERIC_REGEX = /^[a-zA-Z0-9._:/\\-]+$/;
 
 export interface ValidationError {
   code: string;

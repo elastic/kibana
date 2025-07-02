@@ -26,7 +26,7 @@ import type {
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { defaultOptions } from './constants';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { IUiSettingsClient, KibanaRequest } from '@kbn/core/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
 
@@ -117,6 +117,11 @@ describe('EntityStoreDataClient', () => {
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
   const esClientMock = clusterClientMock.asCurrentUser;
   const loggerMock = loggingSystemMock.createLogger();
+  const uiSettingsClientGetMock = jest.fn();
+  const uiSettingsClientMock = {
+    get: uiSettingsClientGetMock,
+  } as unknown as IUiSettingsClient;
+
   const dataClient = new EntityStoreDataClient({
     clusterClient: clusterClientMock,
     logger: loggerMock,
@@ -137,6 +142,7 @@ describe('EntityStoreDataClient', () => {
       },
     } as unknown as SecurityPluginStart,
     request: {} as KibanaRequest,
+    uiSettingsClient: uiSettingsClientMock,
   });
 
   const defaultSearchParams = {
@@ -437,6 +443,47 @@ describe('EntityStoreDataClient', () => {
       });
 
       expect(spyInit).toHaveBeenCalledWith(EntityType.host, expect.anything(), expect.anything());
+    });
+
+    it('enable all', async () => {
+      uiSettingsClientGetMock.mockReturnValue(true);
+      await dataClient.enable({
+        ...defaultOptions,
+      });
+
+      expect(spyInit).toHaveBeenCalledWith(EntityType.host, expect.anything(), expect.anything());
+      expect(spyInit).toHaveBeenCalledWith(EntityType.user, expect.anything(), expect.anything());
+      expect(spyInit).toHaveBeenCalledWith(
+        EntityType.service,
+        expect.anything(),
+        expect.anything()
+      );
+      expect(spyInit).toHaveBeenCalledWith(
+        EntityType.generic,
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('enable all without generic', async () => {
+      uiSettingsClientGetMock.mockReturnValue(false);
+
+      await dataClient.enable({
+        ...defaultOptions,
+      });
+
+      expect(spyInit).toHaveBeenCalledWith(EntityType.host, expect.anything(), expect.anything());
+      expect(spyInit).toHaveBeenCalledWith(EntityType.user, expect.anything(), expect.anything());
+      expect(spyInit).toHaveBeenCalledWith(
+        EntityType.service,
+        expect.anything(),
+        expect.anything()
+      );
+      expect(spyInit).not.toHaveBeenCalledWith(
+        EntityType.generic,
+        expect.anything(),
+        expect.anything()
+      );
     });
   });
 

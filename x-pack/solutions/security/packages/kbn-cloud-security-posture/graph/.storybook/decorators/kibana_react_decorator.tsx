@@ -44,7 +44,13 @@ const createMockStorage = () => ({
   set: action(STORAGE_SET_ACTION),
   remove: action(STORAGE_REMOVE_ACTION),
   clear: action(STORAGE_CLEAR_ACTION),
-  get: () => true,
+  get: (name: string) => {
+    if (name === 'typeahead:test-kuery') {
+      return [];
+    }
+
+    return true;
+  },
 });
 
 const uiSettings: Record<string, unknown> = {
@@ -111,7 +117,15 @@ const uiSettings: Record<string, unknown> = {
 };
 
 const services: Partial<KibanaServices> = {
+  appName: 'test',
   application: applicationServiceMock.createStartContract(),
+  unifiedSearch: {
+    autocomplete: {
+      getQuerySuggestions: () => [],
+      getAutocompleteSettings: () => {},
+      hasQuerySuggestions: () => false,
+    },
+  },
   uiSettings: {
     // @ts-ignore
     get: (key: string) => uiSettings[key],

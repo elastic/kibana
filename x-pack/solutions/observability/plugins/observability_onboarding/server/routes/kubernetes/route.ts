@@ -61,11 +61,12 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     const packageClient = fleetPluginStart.packageService.asScoped(request);
     const apiKeyPromise =
       config.serverless.enabled && params.body.pkgName === 'kubernetes_otel'
-        ? createManagedOtlpServiceApiKey(
+        ? createManagedOtlpServiceApiKey(client.asCurrentUser, `ingest-otel-k8s`)
+        : createShipperApiKey(
             client.asCurrentUser,
-            `ingest-otel-k8s-${new Date().toISOString()}`
-          )
-        : createShipperApiKey(client.asCurrentUser, `${params.body.pkgName}_onboarding`, true);
+            params.body.pkgName === 'kubernetes_otel' ? 'otel-kubernetes' : 'kubernetes',
+            true
+          );
 
     const [{ encoded: apiKeyEncoded }, elasticAgentVersionInfo] = await Promise.all([
       apiKeyPromise,

@@ -70,6 +70,125 @@
       },
       {
         "parentPluginId": "@kbn/wci-common",
+        "id": "def-common.contentRefBuilder",
+        "type": "Function",
+        "tags": [],
+        "label": "contentRefBuilder",
+        "description": [],
+        "signature": [
+          "({ sourceId, sourceType }: { sourceType: ",
+          {
+            "pluginId": "@kbn/wci-common",
+            "scope": "common",
+            "docId": "kibKbnWciCommonPluginApi",
+            "section": "def-common.ContentRefSourceType",
+            "text": "ContentRefSourceType"
+          },
+          "; sourceId: string; }) => (contentId: string) => ",
+          {
+            "pluginId": "@kbn/wci-common",
+            "scope": "common",
+            "docId": "kibKbnWciCommonPluginApi",
+            "section": "def-common.ContentRef",
+            "text": "ContentRef"
+          }
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.contentRefBuilder.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ sourceId, sourceType }",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wci-common",
+                "id": "def-common.contentRefBuilder.$1.sourceType",
+                "type": "string",
+                "tags": [],
+                "label": "sourceType",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/wci-common",
+                    "scope": "common",
+                    "docId": "kibKbnWciCommonPluginApi",
+                    "section": "def-common.ContentRefSourceType",
+                    "text": "ContentRefSourceType"
+                  }
+                ],
+                "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/wci-common",
+                "id": "def-common.contentRefBuilder.$1.sourceId",
+                "type": "string",
+                "tags": [],
+                "label": "sourceId",
+                "description": [],
+                "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-common",
+        "id": "def-common.parseContentRef",
+        "type": "Function",
+        "tags": [],
+        "label": "parseContentRef",
+        "description": [
+          "\nParses a serialized ref back."
+        ],
+        "signature": [
+          "(serializedRef: string) => ",
+          {
+            "pluginId": "@kbn/wci-common",
+            "scope": "common",
+            "docId": "kibKbnWciCommonPluginApi",
+            "section": "def-common.ContentRef",
+            "text": "ContentRef"
+          }
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.parseContentRef.$1",
+            "type": "string",
+            "tags": [],
+            "label": "serializedRef",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-common",
         "id": "def-common.parseToolName",
         "type": "Function",
         "tags": [],
@@ -107,9 +226,122 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wci-common",
+        "id": "def-common.serializeContentRef",
+        "type": "Function",
+        "tags": [],
+        "label": "serializeContentRef",
+        "description": [
+          "\nSerialize a {@link ContentRef} to a string representation."
+        ],
+        "signature": [
+          "(ref: ",
+          {
+            "pluginId": "@kbn/wci-common",
+            "scope": "common",
+            "docId": "kibKbnWciCommonPluginApi",
+            "section": "def-common.ContentRef",
+            "text": "ContentRef"
+          },
+          ") => string"
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.serializeContentRef.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "ref",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/wci-common",
+                "scope": "common",
+                "docId": "kibKbnWciCommonPluginApi",
+                "section": "def-common.ContentRef",
+                "text": "ContentRef"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/wci-common",
+        "id": "def-common.ContentRef",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentRef",
+        "description": [
+          "\nRepresents a reference to a content"
+        ],
+        "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.ContentRef.sourceType",
+            "type": "string",
+            "tags": [],
+            "label": "sourceType",
+            "description": [
+              "\nType of the source"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wci-common",
+                "scope": "common",
+                "docId": "kibKbnWciCommonPluginApi",
+                "section": "def-common.ContentRefSourceType",
+                "text": "ContentRefSourceType"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.ContentRef.sourceId",
+            "type": "string",
+            "tags": [],
+            "label": "sourceId",
+            "description": [
+              "\nId of the source"
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wci-common",
+            "id": "def-common.ContentRef.contentId",
+            "type": "string",
+            "tags": [],
+            "label": "contentId",
+            "description": [
+              "\nUnique ID this content (for this sourceId)."
+            ],
+            "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/wci-common",
         "id": "def-common.IndexSourceDefinition",
@@ -547,6 +779,18 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "@kbn/wci-common",
+        "id": "def-common.ContentRefSourceType",
+        "type": "string",
+        "tags": [],
+        "label": "ContentRefSourceType",
+        "description": [],
+        "path": "x-pack/solutions/chat/packages/wci-common/src/content_ref.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/wci-common",
         "id": "def-common.IntegrationConfiguration",

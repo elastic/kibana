@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const templateIndexPattern = 'bar-*';
   const es = getService('es');
 
-  // This test was inspired by https://github.com/elastic/kibana/blob/main/x-pack/test/api_integration/apis/monitoring/common/mappings_exist.js
+  // This test was inspired by https://github.com/elastic/kibana/blob/main/x-pack/platform/test/api_integration/apis/monitoring/common/mappings_exist.js
   describe('EPM - template', () => {
     beforeEach(async () => {
       appContextService.start({

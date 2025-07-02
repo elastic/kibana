@@ -48,6 +48,12 @@ export class IndexManagementLocatorDefinition
           path: location.path + getIndexListUri(params.filter, params.includeHiddenIndices),
         };
       }
+      case 'data_stream_index_list': {
+        return {
+          ...location,
+          path: location.path + getIndexListUri(`data_stream="${params.dataStreamName}"`, true),
+        };
+      }
       case 'data_streams_details': {
         return {
           ...location,

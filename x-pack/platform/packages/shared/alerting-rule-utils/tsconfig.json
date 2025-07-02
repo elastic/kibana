@@ -14,6 +14,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/alerts-as-data-utils"
+    "@kbn/alerts-as-data-utils",
+    "@kbn/object-utils"
   ]
 }

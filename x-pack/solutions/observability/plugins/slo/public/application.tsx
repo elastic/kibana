@@ -70,7 +70,7 @@ export const renderApp = ({
           defaultMessage: 'Getting started',
         }),
         prompt: i18n.translate('xpack.slo.starterPrompts.whatAreSlos.prompt', {
-          defaultMessage: 'What are SLOs?',
+          defaultMessage: 'What are Service Level Objectives (SLOs)?',
         }),
         icon: 'bullseye',
       },
@@ -81,7 +81,7 @@ export const renderApp = ({
         prompt: i18n.translate('xpack.slo.starterPrompts.canYouCreateAnSlo.prompt', {
           defaultMessage: 'Can you create an SLO?',
         }),
-        icon: 'questionInCircle',
+        icon: 'question',
       },
     ],
   });
@@ -140,9 +140,9 @@ export const renderApp = ({
 };
 
 function App() {
-  const { isServerless, experimentalFeatures } = usePluginContext();
+  const { isServerless } = usePluginContext();
 
-  const routes = getRoutes(isServerless, experimentalFeatures);
+  const routes = getRoutes(isServerless);
 
   return (
     <Routes enableExecutionContextTracking={true}>

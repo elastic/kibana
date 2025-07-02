@@ -10,23 +10,33 @@ jobs:
     name: 'Label and Backport'
     runs-on: ubuntu-latest
     if: |
-      github.event.pull_request.merged == true &&
-        (github.event.action == 'closed' ||
-          (github.event.action == 'labeled' &&
-            (github.event.label.name == 'backport:prev-minor' ||
-              github.event.label.name == 'backport:prev-major' ||
-              github.event.label.name == 'backport:current-major' ||
-              github.event.label.name == 'backport:all-open' ||
-              github.event.label.name == 'backport:version' ||
-              github.event.label.name == 'auto-backport')) ||
-          (github.event.action == 'unlabeled' &&
-            github.event.label.name == 'backport:skip' &&
-            (contains(github.event.pull_request.labels.*.name, 'backport:prev-minor') ||
-              contains(github.event.pull_request.labels.*.name, 'backport:prev-major') ||
-              contains(github.event.pull_request.labels.*.name, 'backport:current-major') ||
-              contains(github.event.pull_request.labels.*.name, 'backport:all-open') ||
-              contains(github.event.pull_request.labels.*.name, 'backport:version') ||
-              contains(github.event.pull_request.labels.*.name, 'auto-backport'))))
+      github.event.pull_request.merged == true && (
+        github.event.action == 'closed' || (
+          github.event.action == 'labeled' && (
+            github.event.label.name == 'backport:prev-minor' ||
+            github.event.label.name == 'backport:prev-major' ||
+            github.event.label.name == 'backport:current-major' ||
+            github.event.label.name == 'backport:all-open' ||
+            github.event.label.name == 'backport:version' ||
+            github.event.label.name == 'auto-backport'
+          )
+        ) || (
+          github.event.action == 'labeled' && contains(github.event.pull_request.labels.*.name, 'backport:version') && (
+            startsWith(github.event.label.name,'v7') ||
+            startsWith(github.event.label.name,'v8') ||
+            startsWith(github.event.label.name,'v9')
+          )
+        ) || (
+          github.event.action == 'unlabeled' && github.event.label.name == 'backport:skip' && (
+            contains(github.event.pull_request.labels.*.name, 'backport:prev-minor') ||
+            contains(github.event.pull_request.labels.*.name, 'backport:prev-major') ||
+            contains(github.event.pull_request.labels.*.name, 'backport:current-major') ||
+            contains(github.event.pull_request.labels.*.name, 'backport:all-open') ||
+            contains(github.event.pull_request.labels.*.name, 'backport:version') ||
+            contains(github.event.pull_request.labels.*.name, 'auto-backport')
+          )
+        )
+      )
     steps:
       - name: Checkout Actions
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2

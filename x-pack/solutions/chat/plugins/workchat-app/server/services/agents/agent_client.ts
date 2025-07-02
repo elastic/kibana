@@ -13,6 +13,7 @@ import { agentTypeName, type AgentAttributes } from '../../saved_objects/agents'
 import { WorkchatError } from '../../errors';
 import { createBuilder } from '../../utils/so_filters';
 import { savedObjectToModel, createRequestToRaw, updateToAttributes } from './convert_model';
+import { getRandomColorFromPalette } from '../../utils/color';
 
 interface AgentClientOptions {
   logger: Logger;
@@ -21,7 +22,7 @@ interface AgentClientOptions {
 }
 
 export type AgentUpdatableFields = Partial<
-  Pick<Agent, 'name' | 'description' | 'configuration' | 'public'>
+  Pick<Agent, 'name' | 'description' | 'configuration' | 'public' | 'avatar'>
 >;
 
 /**
@@ -46,6 +47,11 @@ export interface AgentClient {
    * Updates an agent and returns it.
    */
   update(agentId: string, fields: AgentUpdatableFields): Promise<Agent>;
+
+  /**
+   * Deletes an agent.
+   */
+  delete(agentId: string): Promise<boolean>;
 }
 
 export class AgentClientImpl implements AgentClient {
@@ -83,12 +89,15 @@ export class AgentClientImpl implements AgentClient {
   async create(createRequest: AgentCreateRequest): Promise<Agent> {
     const now = new Date();
     const id = createRequest.id ?? uuidv4();
+    const color = createRequest.avatar?.color ?? getRandomColorFromPalette();
     const attributes = createRequestToRaw({
       createRequest,
       id,
       user: this.user,
       creationDate: now,
+      color,
     });
+
     const created = await this.client.create<AgentAttributes>(agentTypeName, attributes, { id });
     return savedObjectToModel(created);
   }
@@ -106,6 +115,21 @@ export class AgentClientImpl implements AgentClient {
       ...conversationSo,
       attributes: updatedAttributes,
     });
+  }
+
+  async delete(agentId: string): Promise<boolean> {
+    let conversationSo: SavedObject<AgentAttributes>;
+    try {
+      conversationSo = await this._rawGet({ agentId });
+    } catch (e) {
+      if (e instanceof WorkchatError && e.statusCode === 404) {
+        return false;
+      } else {
+        throw e;
+      }
+    }
+    await this.client.delete(agentTypeName, conversationSo.id);
+    return true;
   }
 
   private async _rawGet({ agentId }: { agentId: string }): Promise<SavedObject<AgentAttributes>> {

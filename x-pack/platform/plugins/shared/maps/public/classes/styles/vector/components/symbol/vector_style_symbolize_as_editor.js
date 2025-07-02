@@ -7,11 +7,12 @@
 
 import React from 'react';
 
-import { EuiFormRow, EuiButtonGroup, EuiToolTip } from '@elastic/eui';
+import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { SYMBOLIZE_AS_TYPES, VECTOR_STYLES } from '../../../../../../common/constants';
 import { getDisabledByMessage } from '../get_vector_style_label';
+import { DisabledToolTip } from '../../disabled_tooltip';
 
 const SYMBOLIZE_AS_OPTIONS = [
   {
@@ -70,11 +71,6 @@ export function VectorStyleSymbolizeAsEditor({
   }
 
   return (
-    <EuiToolTip
-      anchorClassName="mapStyleFormDisabledTooltip"
-      content={getDisabledByMessage(disabledBy)}
-    >
-      {symbolizeAsForm}
-    </EuiToolTip>
+    <DisabledToolTip content={getDisabledByMessage(disabledBy)}>{symbolizeAsForm}</DisabledToolTip>
   );
 }

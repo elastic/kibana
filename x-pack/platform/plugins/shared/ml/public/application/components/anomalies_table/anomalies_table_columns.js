@@ -118,13 +118,13 @@ export function getColumns(
       name: (
         <span>
           {i18n.translate('xpack.ml.anomaliesTable.severityColumnName', {
-            defaultMessage: 'Severity',
+            defaultMessage: 'Score',
           })}
           &nbsp;
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             content={i18n.translate('xpack.ml.overview.anomalyDetection.tableSeverityTooltip', {
               defaultMessage:
@@ -207,7 +207,7 @@ export function getColumns(
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             content={i18n.translate('xpack.ml.overview.anomalyDetection.tableActualTooltip', {
               defaultMessage: 'The actual values in the anomaly record results.',
@@ -247,7 +247,7 @@ export function getColumns(
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             content={i18n.translate('xpack.ml.overview.anomalyDetection.tableTypicalTooltip', {
               defaultMessage: 'The typical values in the anomaly record results.',
@@ -318,12 +318,22 @@ export function getColumns(
         const examples = get(examplesByJobId, [item.jobId, item.entityValue], []);
         return (
           <EuiLink
-            className="mlAnomalyCategoryExamples__link"
+            css={{
+              width: '100%',
+            }}
             onClick={() => toggleRow(item, ANOMALIES_TABLE_TABS.CATEGORY_EXAMPLES)}
           >
             {examples.map((example, i) => {
               return (
-                <span key={`example${i}`} className="category-example">
+                <span
+                  key={`example${i}`}
+                  css={{
+                    display: 'block',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
                   {example}
                 </span>
               );

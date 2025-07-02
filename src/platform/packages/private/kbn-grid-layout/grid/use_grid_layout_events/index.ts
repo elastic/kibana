@@ -8,4 +8,4 @@
  */
 
 export { useGridLayoutPanelEvents } from './panel/events';
-export { useGridLayoutRowEvents } from './row/events';
+export { useGridLayoutSectionEvents } from './section/events';

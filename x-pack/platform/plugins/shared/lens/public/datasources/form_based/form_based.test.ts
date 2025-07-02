@@ -46,7 +46,6 @@ import {
   MedianIndexPatternColumn,
 } from './operations';
 import { createMockedFullReference } from './operations/mocks';
-import { cloneDeep } from 'lodash';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 import { createMockFramePublicAPI } from '../../mocks';
@@ -3901,7 +3900,6 @@ describe('IndexPattern Data Source', () => {
               ...state.layers.first.columns,
               newStatic: {
                 dataType: 'number',
-                isStaticValue: true,
                 isBucketed: false,
                 label: 'Static value: 0',
                 operationType: 'static_value',
@@ -4227,7 +4225,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should be false if datasource states differ', () => {
-      const differentPersistableState = cloneDeep(persistableState);
+      const differentPersistableState = structuredClone(persistableState);
       differentPersistableState.layers[layerId].columnOrder = ['something else'];
 
       expect(

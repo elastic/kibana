@@ -108,8 +108,10 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function () {
         it('loads the advanced wizard for the source data', async () => {
           await ml.testExecution.logTestStep('job creation loads the job management page');
-          await ml.navigation.navigateToMl();
-          await ml.navigation.navigateToJobManagement();
+          await ml.navigation.navigateToStackManagementMlSection(
+            'anomaly_detection',
+            'ml-jobs-list'
+          );
 
           await ml.testExecution.logTestStep(
             'job creation loads the new job source selection page'

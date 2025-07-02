@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { either } from 'fp-ts/lib/Either';
+import { either } from 'fp-ts/Either';
 import * as t from 'io-ts';
 
 import { Duration, DurationUnit } from '../models/duration';

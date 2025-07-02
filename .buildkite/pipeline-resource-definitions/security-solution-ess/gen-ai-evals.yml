@@ -1,0 +1,50 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bk-kibana-security-solution-ess-gen-ai-evals
+  description: "Executes Security GenAI Evals"
+spec:
+  type: buildkite-pipeline
+  owner: 'group:security-generative-ai'
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: "Kibana / ESS / Security Solution / Gen AI Evals"
+      description: "Executes Security GenAI Evals"
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#genai-security-dev'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+      allow_rebuilds: true
+      branch_configuration: main
+      cancel_intermediate_builds: false
+      default_branch: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/security_solution/gen_ai_evals.yml
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        trigger_mode: none
+        prefix_pull_request_fork_branch_names: false
+        skip_pull_request_builds_for_existing_commits: false
+        build_tags: false
+      teams:
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        security-generative_ai:
+          access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: READ_ONLY
+      schedules:
+        Weekly build:
+          cronline: 0 0 * * 1 GMT
+          message: Weekly Security GenAI Evals
+          branch: main
+      tags:
+        - kibana
+        - security-solution
+        - gen-ai-evals

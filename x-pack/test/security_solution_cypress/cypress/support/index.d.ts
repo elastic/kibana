@@ -24,6 +24,10 @@ declare namespace Cypress {
      * Reads current space id value. `undefined` is returned for default space.
      */
     currentSpace(): Chainable<string>;
+
+    getByTestSubjContains(
+      ...args: Parameters<Cypress.Chainable['get']>
+    ): Chainable<JQuery<HTMLElement>>;
   }
 }
 

@@ -8,7 +8,7 @@
  */
 
 import './model.test.mocks';
-import * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/Either';
 import { createContextMock, MockedMigratorContext } from '../test_helpers';
 import type { FetchIndexResponse, RetryableEsClientError } from '../../actions';
 import type { State, BaseState, FatalState, AllActionStates } from '../state';

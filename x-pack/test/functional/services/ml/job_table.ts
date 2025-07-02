@@ -162,7 +162,7 @@ export function MachineLearningJobTableProvider(
 
         if (tableEnvironment === 'stackMgmtJobList') {
           const $spaces = $tr
-            .findTestSubject('mlJobListColumnSpaces')
+            .findTestSubject('mlTableColumnSpaces')
             .find('.euiTableCellContent')
             .find('.euiAvatar--space');
           const spaces = [];
@@ -262,7 +262,7 @@ export function MachineLearningJobTableProvider(
       const testSubjStr =
         tableEnvironment === 'mlAnomalyDetection'
           ? 'mlDatePickerRefreshPageButton'
-          : 'mlRefreshJobListButton';
+          : 'mlDatePickerRefreshPageButton';
 
       await this.waitForRefreshButtonLoaded(testSubjStr);
       await testSubjects.click(`~${testSubjStr}`);

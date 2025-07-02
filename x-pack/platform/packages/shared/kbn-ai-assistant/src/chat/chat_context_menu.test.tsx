@@ -11,10 +11,10 @@ import { ChatContextMenu } from './chat_context_menu';
 import { useConfirmModal } from '../hooks';
 
 jest.mock('../hooks/use_confirm_modal', () => ({
-  useConfirmModal: jest.fn().mockReturnValue({
+  useConfirmModal: jest.fn(() => ({
     element: <div data-test-subj="confirmModal" />,
     confirm: jest.fn(() => Promise.resolve(true)),
-  }),
+  })),
 }));
 
 describe('ChatContextMenu', () => {
@@ -22,16 +22,19 @@ describe('ChatContextMenu', () => {
   const onCopyUrlClick = jest.fn();
   const onDeleteClick = jest.fn();
   const onDuplicateConversationClick = jest.fn();
+  const onArchiveConversation = jest.fn();
 
   const renderComponent = (props = {}) =>
     render(
       <ChatContextMenu
         isConversationOwnedByCurrentUser={true}
         conversationTitle="Test Conversation"
+        isArchived={false}
         onCopyToClipboardClick={onCopyToClipboardClick}
         onCopyUrlClick={onCopyUrlClick}
         onDeleteClick={onDeleteClick}
         onDuplicateConversationClick={onDuplicateConversationClick}
+        onArchiveConversation={onArchiveConversation}
         {...props}
       />
     );
@@ -49,8 +52,7 @@ describe('ChatContextMenu', () => {
 
   it('opens the popover on button click', () => {
     renderComponent();
-    const button = screen.getByTestId('observabilityAiAssistantChatContextMenuButtonIcon');
-    fireEvent.click(button);
+    fireEvent.click(screen.getByTestId('observabilityAiAssistantChatContextMenuButtonIcon'));
     expect(screen.getByText('Copy to clipboard')).toBeInTheDocument();
     expect(screen.getByText('Duplicate')).toBeInTheDocument();
   });
@@ -76,6 +78,20 @@ describe('ChatContextMenu', () => {
     expect(onDuplicateConversationClick).toHaveBeenCalled();
   });
 
+  it('calls onArchiveConversation when Archive is clicked (not archived)', () => {
+    renderComponent({ isArchived: false });
+    fireEvent.click(screen.getByTestId('observabilityAiAssistantChatContextMenuButtonIcon'));
+    fireEvent.click(screen.getByText('Archive'));
+    expect(onArchiveConversation).toHaveBeenCalled();
+  });
+
+  it('calls onArchiveConversation when Unarchive is clicked (already archived)', () => {
+    renderComponent({ isArchived: true });
+    fireEvent.click(screen.getByTestId('observabilityAiAssistantChatContextMenuButtonIcon'));
+    fireEvent.click(screen.getByText('Unarchive'));
+    expect(onArchiveConversation).toHaveBeenCalled();
+  });
+
   it('calls onDeleteClick when delete is confirmed', async () => {
     renderComponent();
     fireEvent.click(screen.getByTestId('observabilityAiAssistantChatContextMenuButtonIcon'));
@@ -97,10 +113,12 @@ describe('ChatContextMenu', () => {
     await waitFor(() => expect(onDeleteClick).not.toHaveBeenCalled());
   });
 
-  it('does not render delete option if isConversationOwnedByCurrentUser is false', () => {
+  it('does not render delete or archive options if isConversationOwnedByCurrentUser is false', () => {
     renderComponent({ isConversationOwnedByCurrentUser: false });
     fireEvent.click(screen.getByTestId('observabilityAiAssistantChatContextMenuButtonIcon'));
     expect(screen.queryByText('Delete')).not.toBeInTheDocument();
+    expect(screen.queryByText('Archive')).not.toBeInTheDocument();
+    expect(screen.queryByText('Unarchive')).not.toBeInTheDocument();
   });
 
   it('disables button when disabled prop is true', () => {

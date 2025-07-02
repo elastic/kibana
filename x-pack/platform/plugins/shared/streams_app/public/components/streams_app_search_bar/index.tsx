@@ -4,71 +4,49 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TimeRange } from '@kbn/es-query';
-import { SearchBar } from '@kbn/unified-search-plugin/public';
-import React, { useMemo } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { useKibana } from '../../hooks/use_kibana';
+import React from 'react';
+import { isEqual } from 'lodash';
+import { TimeRange } from '@kbn/es-query';
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
+import {
+  UncontrolledStreamsAppSearchBar,
+  UncontrolledStreamsAppSearchBarProps,
+} from './uncontrolled_streams_app_bar';
+import { useTimefilter } from '../../hooks/use_timefilter';
 
-export interface StreamsAppSearchBarProps {
-  query?: string;
-  dateRangeFrom?: string;
-  dateRangeTo?: string;
-  onQueryChange?: (payload: { dateRange?: TimeRange; query: string }) => void;
-  onQuerySubmit?: (payload: { dateRange?: TimeRange; query: string }, isUpdate?: boolean) => void;
-  onRefresh?: Required<React.ComponentProps<typeof SearchBar>>['onRefresh'];
-  placeholder?: string;
-  dataViews?: DataView[];
-  showSubmitButton?: boolean;
+export type StreamsAppSearchBarProps = UncontrolledStreamsAppSearchBarProps;
+
+// If the absolute time stays the same
+function needsRefresh(left: TimeRange, right: TimeRange) {
+  const forceNow = new Date();
+  const leftAbsolute = getAbsoluteTimeRange(left, { forceNow });
+  const rightAbsolute = getAbsoluteTimeRange(right, { forceNow });
+
+  return isEqual(leftAbsolute, rightAbsolute);
 }
 
-export function StreamsAppSearchBar({
-  dateRangeFrom,
-  dateRangeTo,
-  onQueryChange,
-  onQuerySubmit,
-  onRefresh,
-  query,
-  placeholder,
-  dataViews,
-  showSubmitButton = true,
-}: StreamsAppSearchBarProps) {
-  const {
-    dependencies: {
-      start: { unifiedSearch },
-    },
-  } = useKibana();
+export function StreamsAppSearchBar({ onQuerySubmit, ...props }: StreamsAppSearchBarProps) {
+  const { timeState, setTime, refresh } = useTimefilter();
 
-  const queryObj = useMemo(() => (query ? { query, language: 'kuery' } : undefined), [query]);
-
-  const showQueryInput = query === undefined;
+  function refreshOrSetTime(next: TimeRange) {
+    if (needsRefresh(timeState.timeRange, next)) {
+      refresh();
+    } else {
+      setTime(next);
+    }
+  }
 
   return (
-    <unifiedSearch.ui.SearchBar
-      appName="streamsApp"
-      onQuerySubmit={({ dateRange, query: nextQuery }, isUpdate) => {
-        onQuerySubmit?.(
-          { dateRange, query: (nextQuery?.query as string | undefined) ?? '' },
-          isUpdate
-        );
+    <UncontrolledStreamsAppSearchBar
+      onQuerySubmit={({ dateRange, query }, isUpdate) => {
+        if (dateRange) {
+          refreshOrSetTime(dateRange);
+        }
+        onQuerySubmit?.({ dateRange, query }, isUpdate);
       }}
-      onQueryChange={({ dateRange, query: nextQuery }) => {
-        onQueryChange?.({ dateRange, query: (nextQuery?.query as string | undefined) ?? '' });
-      }}
-      query={queryObj}
-      showQueryInput={showQueryInput}
-      showFilterBar={false}
-      showQueryMenu={false}
-      showDatePicker={Boolean(dateRangeFrom && dateRangeTo)}
-      showSubmitButton={showSubmitButton}
-      submitButtonStyle="iconOnly"
-      dateRangeFrom={dateRangeFrom}
-      dateRangeTo={dateRangeTo}
-      onRefresh={onRefresh}
-      displayStyle="inPage"
-      disableQueryLanguageSwitcher
-      placeholder={placeholder}
-      indexPatterns={dataViews}
+      dateRangeFrom={timeState.timeRange.from}
+      dateRangeTo={timeState.timeRange.to}
+      {...props}
     />
   );
 }

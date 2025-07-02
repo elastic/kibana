@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { fromKueryExpression, KueryNode, Query } from '@kbn/es-query';
 
 import useAsync from 'react-use/lib/useAsync';

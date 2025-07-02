@@ -28,14 +28,14 @@ export const apiCanAccessViewMode = (api: unknown): api is CanAccessViewMode => 
  * A function which will get the view mode from the API or the parent API. if this api has a view mode AND its
  * parent has a view mode, we consider the APIs version the source of truth.
  */
-export const getInheritedViewMode = (api?: CanAccessViewMode) => {
+export const getInheritedViewMode = (api?: unknown) => {
   if (apiPublishesViewMode(api)) return api.viewMode$.getValue();
   if (apiHasParentApi(api) && apiPublishesViewMode(api.parentApi)) {
     return api.parentApi.viewMode$.getValue();
   }
 };
 
-export const getViewModeSubject = (api?: CanAccessViewMode) => {
+export const getViewModeSubject = (api?: unknown) => {
   if (apiPublishesViewMode(api)) return api.viewMode$;
   if (apiHasParentApi(api) && apiPublishesViewMode(api.parentApi)) {
     return api.parentApi.viewMode$;

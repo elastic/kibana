@@ -6,12 +6,12 @@
  */
 
 import React, { type PropsWithChildren } from 'react';
-import { EuiText, useEuiTheme, COLOR_MODES_STANDARD, type EuiTextProps } from '@elastic/eui';
+import { EuiText, type EuiTextProps } from '@elastic/eui';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
 export type CardSubduedTextProps = PropsWithChildren<EuiTextProps>;
 export const CardSubduedText = React.memo<CardSubduedTextProps>(({ children, ...props }) => {
-  const { colorMode } = useEuiTheme();
-  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
+  const isDarkMode = useKibanaIsDarkMode();
   return (
     <EuiText {...props} color={isDarkMode ? 'text' : 'subdued'}>
       {children}

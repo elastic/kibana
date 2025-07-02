@@ -63,14 +63,15 @@ export async function fillGapById(context: RulesClientContext, params: FillGapBy
 
     const gapState = gap.getState();
 
-    const allGapsToSchedule =
-      gapState.unfilledIntervals.map((interval) => ({
-        ruleId: params.ruleId,
+    const allGapsToSchedule = {
+      ruleId: params.ruleId,
+      ranges: gapState.unfilledIntervals.map((interval) => ({
         start: interval.gte,
         end: interval.lte,
-      })) ?? [];
+      })),
+    };
 
-    if (allGapsToSchedule.length === 0) {
+    if (allGapsToSchedule.ranges.length === 0) {
       throw Boom.badRequest(`No unfilled intervals found for ruleId ${params.ruleId}`);
     }
 
@@ -81,7 +82,7 @@ export async function fillGapById(context: RulesClientContext, params: FillGapBy
       })
     );
 
-    const scheduleBackfillResponse = await scheduleBackfill(context, allGapsToSchedule);
+    const scheduleBackfillResponse = await scheduleBackfill(context, [allGapsToSchedule]);
 
     await eventLogClient.refreshIndex();
 

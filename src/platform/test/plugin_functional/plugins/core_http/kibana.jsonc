@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/core-http-plugin",
   "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "coreHttp",
     "server": true,

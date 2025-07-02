@@ -92,6 +92,9 @@ export const IGNORE_FILE_GLOBS = [
 
   // updatecli configuration for driving the UBI/Ironbank image updates
   'updatecli-compose.yaml',
+
+  // naming convention follow this pattern: kb-product-doc-{{productName}}-{{versionMajor}}.{{versionMinor}}.zip: https://github.com/elastic/kibana/blob/33993b7123bc0d6c85d9c42b15610cc0d5092281/docs/reference/configuration-reference/ai-assistant-settings.md
+  'x-pack/test/api_integration/deployment_agnostic/apis/observability/ai_assistant/complete/product_docs/**/*',
 ];
 
 /**

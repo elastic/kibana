@@ -20,11 +20,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DraggableProcessorListItem } from './processors_list';
 import { SortableList } from './sortable_list';
@@ -35,13 +36,13 @@ import {
   StreamEnrichmentContextProvider,
   useSimulatorSelector,
   useStreamEnrichmentEvents,
-  useStreamsEnrichmentSelector,
+  useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
 interface StreamDetailEnrichmentContentProps {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
 }
 
@@ -52,6 +53,8 @@ export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentConte
     streams: { streamsRepositoryClient },
   } = dependencies.start;
 
+  const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
+
   return (
     <StreamEnrichmentContextProvider
       definition={props.definition}
@@ -59,6 +62,7 @@ export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentConte
       core={core}
       data={data}
       streamsRepositoryClient={streamsRepositoryClient}
+      urlStateStorageContainer={urlStateStorageContainer}
     >
       <StreamDetailEnrichmentContentImpl />
     </StreamEnrichmentContextProvider>
@@ -70,8 +74,12 @@ export function StreamDetailEnrichmentContentImpl() {
 
   const { resetChanges, saveChanges } = useStreamEnrichmentEvents();
 
-  const hasChanges = useStreamsEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
-  const isSavingChanges = useStreamsEnrichmentSelector((state) =>
+  const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
+  const hasChanges = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
+  const canManage = useStreamEnrichmentSelector(
+    (state) => state.context.definition.privileges.manage
+  );
+  const isSavingChanges = useStreamEnrichmentSelector((state) =>
     state.matches({ ready: { stream: 'updating' } })
   );
 
@@ -81,7 +89,12 @@ export function StreamDetailEnrichmentContentImpl() {
     http: core.http,
     navigateToUrl: core.application.navigateToUrl,
     openConfirm: core.overlays.openConfirm,
+    shouldPromptOnReplace: false,
   });
+
+  if (!isReady) {
+    return null;
+  }
 
   return (
     <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
@@ -124,6 +137,7 @@ export function StreamDetailEnrichmentContentImpl() {
           onConfirm={saveChanges}
           isLoading={isSavingChanges}
           disabled={!hasChanges}
+          insufficientPrivileges={!canManage}
         />
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
@@ -134,8 +148,9 @@ const ProcessorsEditor = React.memo(() => {
   const { euiTheme } = useEuiTheme();
 
   const { reorderProcessors } = useStreamEnrichmentEvents();
+  const definition = useStreamEnrichmentSelector((state) => state.context.definition);
 
-  const processorsRefs = useStreamsEnrichmentSelector((state) =>
+  const processorsRefs = useStreamEnrichmentSelector((state) =>
     state.context.processorsRefs.filter((processorRef) =>
       processorRef.getSnapshot().matches('configured')
     )
@@ -222,6 +237,7 @@ const ProcessorsEditor = React.memo(() => {
           <SortableList onDragItem={handlerItemDrag}>
             {processorsRefs.map((processorRef, idx) => (
               <DraggableProcessorListItem
+                disableDrag={!definition.privileges.simulate}
                 key={processorRef.id}
                 idx={idx}
                 processorRef={processorRef}
@@ -230,7 +246,7 @@ const ProcessorsEditor = React.memo(() => {
             ))}
           </SortableList>
         )}
-        <AddProcessorPanel />
+        {definition.privileges.simulate && <AddProcessorPanel />}
       </EuiPanel>
       <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
         {!isEmpty(errors.ignoredFields) && (

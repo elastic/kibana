@@ -6,7 +6,6 @@
  */
 
 import { kqlQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { ServicesResponse } from '../../../common/service_map/types';
 import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
@@ -27,11 +26,7 @@ export async function getServiceStats({
 }: IEnvOptions & { maxNumberOfServices: number }): Promise<ServicesResponse[]> {
   const params = {
     apm: {
-      events: [
-        getProcessorEventForTransactions(searchAggregatedTransactions),
-        ProcessorEvent.metric as const,
-        ProcessorEvent.error as const,
-      ],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     track_total_hits: false,
     size: 0,

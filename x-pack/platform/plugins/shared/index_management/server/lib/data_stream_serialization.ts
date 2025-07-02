@@ -12,7 +12,8 @@ import type { DataStream, EnhancedDataStreamFromEs, Health } from '../../common'
 
 export function deserializeDataStream(
   dataStreamFromEs: EnhancedDataStreamFromEs,
-  isLogsdbEnabled: boolean
+  isLogsdbEnabled: boolean,
+  failureStoreSettings?: { enabled?: string[] | string }
 ): DataStream {
   const {
     name,
@@ -35,10 +36,37 @@ export function deserializeDataStream(
     next_generation_managed_by: nextGenerationManagedBy,
     index_mode: indexMode,
   } = dataStreamFromEs;
+
   const meteringStorageSize =
     meteringStorageSizeBytes !== undefined
       ? new ByteSizeValue(meteringStorageSizeBytes).toString()
       : undefined;
+
+  // Determine failure store status based on cluster settings and data stream configuration
+  let failureStoreEnabled = false;
+
+  // Check if data stream name matches any pattern in the cluster setting
+  if (failureStoreSettings?.enabled) {
+    const patterns = Array.isArray(failureStoreSettings.enabled)
+      ? failureStoreSettings.enabled
+      : [failureStoreSettings.enabled];
+
+    const matchesPattern = patterns.some((pattern) => {
+      const regex = new RegExp(pattern.replace(/\*/g, '.*'));
+      return regex.test(name);
+    });
+
+    if (matchesPattern) {
+      // If matches pattern, enable unless explicitly disabled
+      const isExplicitlyDisabled = dataStreamFromEs?.failure_store?.enabled === false;
+      failureStoreEnabled = !isExplicitlyDisabled;
+    }
+  }
+
+  // If explicitly enabled in data stream config, always enable
+  if (dataStreamFromEs?.failure_store?.enabled === true) {
+    failureStoreEnabled = true;
+  }
 
   return {
     name,
@@ -79,6 +107,7 @@ export function deserializeDataStream(
       globalMaxRetention,
     },
     nextGenerationManagedBy,
+    failureStoreEnabled,
     indexMode: (indexMode ??
       (isLogsdbEnabled && /^logs-[^-]+-[^-]+$/.test(name)
         ? LOGSDB_INDEX_MODE
@@ -88,7 +117,10 @@ export function deserializeDataStream(
 
 export function deserializeDataStreamList(
   dataStreamsFromEs: EnhancedDataStreamFromEs[],
-  isLogsdbEnabled: boolean
+  isLogsdbEnabled: boolean,
+  failureStoreSettings?: { enabled?: string[] | string }
 ): DataStream[] {
-  return dataStreamsFromEs.map((dataStream) => deserializeDataStream(dataStream, isLogsdbEnabled));
+  return dataStreamsFromEs.map((dataStream) =>
+    deserializeDataStream(dataStream, isLogsdbEnabled, failureStoreSettings)
+  );
 }

@@ -7,12 +7,8 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import {
-  createClient as createInferenceClient,
-  createChatModel,
-  type BoundInferenceClient,
-  type InferenceClient,
-} from './inference_client';
+import { BoundInferenceClient, InferenceClient } from '@kbn/inference-common';
+import { createClient as createInferenceClient, createChatModel } from './inference_client';
 import { registerRoutes } from './routes';
 import type { InferenceConfig } from './config';
 import {
@@ -34,6 +30,8 @@ export class InferencePlugin
     >
 {
   private logger: Logger;
+
+  private shutdownProcessor?: () => Promise<void>;
 
   constructor(context: PluginInitializerContext<InferenceConfig>) {
     this.logger = context.logger.get();
@@ -73,5 +71,9 @@ export class InferencePlugin
         });
       },
     };
+  }
+
+  async stop() {
+    await this.shutdownProcessor?.();
   }
 }

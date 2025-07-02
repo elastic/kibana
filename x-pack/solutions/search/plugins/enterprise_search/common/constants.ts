@@ -14,10 +14,12 @@ import {
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
   SEARCH_ELASTICSEARCH,
   SEARCH_VECTOR_SEARCH,
+  SEARCH_HOMEPAGE,
   SEARCH_SEMANTIC_SEARCH,
   SEARCH_AI_SEARCH,
   SEARCH_INDICES,
   SEARCH_INDICES_START,
+  SEARCH_INDEX_MANAGEMENT,
 } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
@@ -32,28 +34,28 @@ export const ENTERPRISE_SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSe
   defaultMessage: 'Enterprise Search',
 });
 
-export { SEARCH_INDICES_START, SEARCH_INDICES };
+export { SEARCH_INDICES_START, SEARCH_INDICES, SEARCH_INDEX_MANAGEMENT, SEARCH_HOMEPAGE };
 
-export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
+export const ENTERPRISE_SEARCH_HOME_PLUGIN = {
   ID: ENTERPRISE_SEARCH_APP_ID,
   NAME: SEARCH_PRODUCT_NAME,
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.overview.navTitle', {
-    defaultMessage: 'Overview',
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.home.navTitle', {
+    defaultMessage: 'Home',
   }),
-  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.overview.description', {
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.home.description', {
     defaultMessage: 'Create search experiences with a refined set of APIs and tools.',
   }),
   URL: '/app/elasticsearch/overview',
   LOGO: 'logoElasticsearch',
 };
 
-export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
+export const ENTERPRISE_SEARCH_DATA_PLUGIN = {
   ID: ENTERPRISE_SEARCH_CONTENT_APP_ID,
   NAME: SEARCH_PRODUCT_NAME,
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.content.navTitle', {
-    defaultMessage: 'Content',
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.build.navTitle', {
+    defaultMessage: 'Build',
   }),
-  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.content.description', {
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.data.description', {
     defaultMessage:
       'Enterprise search offers a number of ways to easily make your data searchable. Choose from the web crawler, Elasticsearch indices, API, direct uploads, or thrid party connectors.', // TODO: Make sure this content is correct.
   }),
@@ -203,6 +205,7 @@ export const ENTERPRISE_SEARCH_ELASTICSEARCH_URL = '/app/elasticsearch/elasticse
 export const WORKPLACE_SEARCH_URL = '/app/enterprise_search/workplace_search';
 export const CREATE_NEW_INDEX_URL = '/search_indices/new_index';
 export const PLAYGROUND_URL = '/playground';
+export const SEARCH_HOMEPAGE_URL = '/app/elasticsearch/home';
 
 export const MANAGE_API_KEYS_URL = '/app/management/security/api_keys';
 

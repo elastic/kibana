@@ -381,7 +381,7 @@
               "\nUsed for toast notifications."
             ],
             "signature": [
-              "NotificationsSetup"
+              "NotificationsStart"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
@@ -1361,7 +1361,7 @@
               "section": "def-common.DataView",
               "text": "DataView"
             },
-            ") => Promise<boolean>>"
+            ") => boolean>"
           ],
           "path": "x-pack/platform/plugins/shared/aiops/public/types/index.ts",
           "deprecated": false,
@@ -1460,7 +1460,23 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "aiops",
+        "id": "def-server.ConfigSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "ConfigSchema",
+        "description": [],
+        "signature": [
+          "{ readonly ui?: Readonly<{ enabled?: boolean | undefined; } & {}> | undefined; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/aiops/server/config_schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "aiops",

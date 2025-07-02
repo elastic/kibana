@@ -68,7 +68,7 @@ export const EditExample = () => {
     localStorage.setItem(
       INPUT_KEY,
       JSON.stringify({
-        ...controlGroupAPI.snapshotRuntimeState(),
+        ...controlGroupAPI.getInput(),
         disabledActions: controlGroupAPI.disabledActionIds$.getValue(), // not part of runtime
       })
     );

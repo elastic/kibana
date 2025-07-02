@@ -19,6 +19,10 @@ import {
 } from '../../../../../../common/endpoint/constants';
 import { SUB_ACTION } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 import type { NormalizedExternalConnectorClient } from '../../..';
+import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
+import { CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../common/endpoint/service/response_actions/crowdstrike';
+import { BaseDataGenerator } from '../../../../../../common/endpoint/data_generators/base_data_generator';
+import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -47,9 +51,20 @@ describe('CrowdstrikeActionsClient class', () => {
     classConstructorOptions = CrowdstrikeMock.createConstructorOptions();
     connectorActionsMock = classConstructorOptions.connectorActions;
     crowdstrikeActionsClient = new CrowdstrikeActionsClient(classConstructorOptions);
-    classConstructorOptions.esClient.search.mockResolvedValueOnce(
-      CrowdstrikeMock.createEventSearchResponse()
-    );
+
+    const esClientSearchCallback = classConstructorOptions.esClient.search.getMockImplementation();
+    classConstructorOptions.esClient.search.mockImplementation(async (...args) => {
+      const options = args[0];
+      if (options?.index?.[0] === 'logs-crowdstrike*') {
+        return CrowdstrikeMock.createEventSearchResponse();
+      }
+
+      if (esClientSearchCallback) {
+        return esClientSearchCallback(...args);
+      }
+
+      return BaseDataGenerator.toEsSearchResponse([]);
+    });
   });
 
   it.each([
@@ -313,5 +328,104 @@ describe('CrowdstrikeActionsClient class', () => {
 
       expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
     });
+  });
+
+  describe('and space awareness is enabled', () => {
+    beforeEach(() => {
+      // @ts-expect-error write to readonly property
+      classConstructorOptions.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
+        true;
+      getActionDetailsByIdMock.mockResolvedValue({});
+    });
+
+    afterEach(() => {
+      getActionDetailsByIdMock.mockReset();
+    });
+
+    it('should write action request doc with policy info', async () => {
+      await crowdstrikeActionsClient.release(createCrowdstrikeIsolationOptions());
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            agent: {
+              id: ['1-2-3'],
+              policy: [
+                {
+                  agentId: '1-2-3',
+                  agentPolicyId: '6f12b025-fcb0-4db4-99e5-4927e3502bb8',
+                  elasticAgentId: 'fleet-agent-id-123',
+                  integrationPolicyId: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+                },
+              ],
+            },
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should search for Crwodstrike agent ID using index names', async () => {
+      await expect(
+        crowdstrikeActionsClient.isolate(createCrowdstrikeIsolationOptions())
+      ).resolves.toBeTruthy();
+
+      expect(classConstructorOptions.esClient.search).toHaveBeenCalledWith({
+        _source: false,
+        collapse: {
+          field: 'device.id',
+          inner_hits: {
+            name: 'most_recent',
+            size: 1,
+            _source: ['agent', 'device.id', 'event.created'],
+            sort: [{ 'event.created': 'desc' }],
+          },
+        },
+        ignore_unavailable: true,
+        // Important: should NOT contain a index pattern below
+        index: [
+          'logs-crowdstrike.alert-default',
+          'logs-crowdstrike.falcon-default',
+          'logs-crowdstrike.fdr-default',
+          'logs-crowdstrike.host-default',
+          'logs-crowdstrike.vulnerability-default',
+        ],
+        query: {
+          bool: { filter: [{ terms: { 'device.id': ['1-2-3'] } }] },
+        },
+      });
+    });
+
+    it('should error if unable to find agent id in crowdstrike ingested data', async () => {
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient,
+        index: CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION.crowdstrike[0],
+        response: BaseDataGenerator.toEsSearchResponse([]),
+      });
+
+      await expect(
+        crowdstrikeActionsClient.isolate(createCrowdstrikeIsolationOptions())
+      ).rejects.toThrow('Unable to find elastic agent IDs for Crowdstrike agent ids: [1-2-3]');
+    });
+
+    it.each(responseActionsClientMock.getClientSupportedResponseActionMethodNames('crowdstrike'))(
+      'should error if %s is called with invalid agent ids',
+      async (method) => {
+        (
+          classConstructorOptions.endpointService.getInternalFleetServices().agent
+            .getByIds as jest.Mock
+        ).mockImplementation(async () => {
+          throw new AgentNotFoundError('Agent some-id not found');
+        });
+        const options = responseActionsClientMock.getOptionsForResponseActionMethod(method);
+
+        await expect(
+          // @ts-expect-error
+          crowdstrikeActionsClient[method](options)
+        ).rejects.toThrow('Agent some-id not found');
+
+        expect(classConstructorOptions.connectorActions.execute).not.toHaveBeenCalled();
+      }
+    );
   });
 });

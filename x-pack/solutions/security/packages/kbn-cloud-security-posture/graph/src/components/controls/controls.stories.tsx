@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { StoryFn, Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { ThemeProvider, css } from '@emotion/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { action } from '@storybook/addon-actions';
@@ -15,7 +15,24 @@ import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 
 export default {
   title: 'Components/Graph Components/Additional Components',
-  description: 'CDR - Graph visualization',
+  render: (props) => {
+    return (
+      <ThemeProvider theme={{ darkMode: false }}>
+        <ReactFlowProvider>
+          <ControlsComponent
+            css={css`
+              width: 42px;
+            `}
+            onZoomIn={action('zoomIn')}
+            onZoomOut={action('zoomOut')}
+            onFitView={action('fitView')}
+            onCenter={action('center')}
+            {...props}
+          />
+        </ReactFlowProvider>
+      </ThemeProvider>
+    );
+  },
   argTypes: {
     showZoom: {
       control: { type: 'boolean' },
@@ -28,30 +45,9 @@ export default {
     },
   },
   decorators: [GlobalStylesStorybookDecorator],
-} as Meta;
-
-const Template: StoryFn<ControlsProps> = (props) => {
-  return (
-    <ThemeProvider theme={{ darkMode: false }}>
-      <ReactFlowProvider>
-        <ControlsComponent
-          css={css`
-            width: 42px;
-          `}
-          onZoomIn={action('zoomIn')}
-          onZoomOut={action('zoomOut')}
-          onFitView={action('fitView')}
-          onCenter={action('center')}
-          {...props}
-        />
-      </ReactFlowProvider>
-    </ThemeProvider>
-  );
-};
+} satisfies Meta<typeof ControlsComponent>;
 
 export const Controls: StoryObj<ControlsProps> = {
-  render: Template,
-
   args: {
     showZoom: true,
     showFitView: true,

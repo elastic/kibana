@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MsearchMultisearchBody } from '@elastic/elasticsearch/lib/api/types';
+import { SearchSearchRequestBody } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
   ALL_VALUE,
@@ -285,7 +285,7 @@ function generateSearchQuery({
   dateRange: { range: DateRange; queryRange: DateRange };
   timeWindow: TimeWindow;
   budgetingMethod: BudgetingMethod;
-}): MsearchMultisearchBody {
+}): SearchSearchRequestBody {
   const unit = toMomentUnitOfTime(timeWindow.duration.unit);
   const timeWindowDurationInDays = moment.duration(timeWindow.duration.value, unit).asDays();
 
@@ -382,8 +382,8 @@ function generateSearchQuery({
 /**
  * queryRange is used for the filter range on the query,
  * while range is used for storing the actual range requested
- * For a rolling window, the query range starts 1 timeWindow duration before the actual range from.
- * For calednar window, the query range is the same as the range.
+ * For rolling SLO, the query range starts 1 timeWindow duration before the actual range from.
+ * For calendar aligned SLO, the query range is the same as the range.
  *
  * @param timeWindow
  * @param range
@@ -428,8 +428,10 @@ function getDateRange(
   }
 
   if (calendarAlignedTimeWindowSchema.is(timeWindow)) {
-    const now = moment();
+    // If range is provided, we use the lower bound to calculate the calendar aligned range.
+    const now = moment(range?.from ?? new Date());
     const unit = toCalendarAlignedTimeWindowMomentUnit(timeWindow);
+
     const from = moment.utc(now).startOf(unit);
     const to = moment.utc(now).endOf(unit);
 

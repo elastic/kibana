@@ -6,17 +6,24 @@
  */
 
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ConnectorProvider } from '../application/context/connector_context';
 import { CreateConnectorFlyout } from '../application/sections/action_connector_form';
 import { CreateConnectorFlyoutProps } from '../application/sections/action_connector_form/create_connector_flyout';
 import { ConnectorServices } from '../types';
 
+const queryClient = new QueryClient();
+
 export const getAddConnectorFlyoutLazy = (
   props: CreateConnectorFlyoutProps & { connectorServices: ConnectorServices }
 ) => {
   return (
-    <ConnectorProvider value={{ services: props.connectorServices }}>
-      <CreateConnectorFlyout {...props} />
-    </ConnectorProvider>
+    <QueryClientProvider client={queryClient}>
+      <ConnectorProvider
+        value={{ services: props.connectorServices, isServerless: !!props.isServerless }}
+      >
+        <CreateConnectorFlyout {...props} />
+      </ConnectorProvider>
+    </QueryClientProvider>
   );
 };

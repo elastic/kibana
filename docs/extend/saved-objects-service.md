@@ -38,7 +38,6 @@ export const dashboardVisualization: SavedObjectsType = {
   name: 'dashboard_visualization', <1>
   hidden: true,
   namespaceType: 'multiple-isolated', <2>
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     1: modelVersion1,
     2: modelVersion2,
@@ -140,7 +139,7 @@ Since {{es}} has a default limit of 1000 fields per index, plugins should carefu
 
 ### Writing Migrations by defining model versions [saved-objects-service-writing-migrations]
 
-Saved Objects support changes using `modelVersions``. The modelVersion API is a new way to define transformations (*`migrations'*) for your savedObject types, and will replace the legacy migration API after Kibana version `8.10.0`. The legacy migration API has been deprecated, meaning it is no longer possible to register migrations using the legacy system.
+Saved Objects support changes using `modelVersions`. The modelVersion API is a new way to define transformations (*'migrations'*) for your savedObject types, and will replace the legacy migration API after Kibana version `8.10.0`. The legacy migration API has been deprecated, meaning it is no longer possible to register migrations using the legacy system.
 
 Model versions are decoupled from the stack version and satisfy the requirements for zero downtime and backward-compatibility.
 
@@ -158,14 +157,15 @@ This map follows a similar `{ [version number] => version definition }` format a
 
 The first version must be numbered as version 1, incrementing by one for each new version.
 
-That way: - SO type versions are decoupled from stack versioning - SO type versions are independent between types
+That way:
+- SO type versions are decoupled from stack versioning
+- SO type versions are independent between types
 
 *a **valid** version numbering:*
 
 ```ts
 const myType: SavedObjectsType = {
   name: 'test',
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     1: modelVersion1, // valid: start with version 1
     2: modelVersion2, // valid: no gap between versions
@@ -179,7 +179,6 @@ const myType: SavedObjectsType = {
 ```ts
 const myType: SavedObjectsType = {
   name: 'test',
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     2: modelVersion2, // invalid: first version must be 1
     4: modelVersion3, // invalid: skipped version 3
@@ -198,7 +197,6 @@ const myType: SavedObjectsType = {
 ```ts
 const myType: SavedObjectsType = {
   name: 'test',
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     1: {
       changes: [
@@ -223,7 +221,9 @@ const myType: SavedObjectsType = {
 };
 ```
 
-**Note:** Having multiple changes of the same type for a given version is supported by design to allow merging different sources (to prepare for an eventual higher-level API)
+:::{note}
+Having multiple changes of the same type for a given version is supported by design to allow merging different sources (to prepare for an eventual higher-level API)
+:::
 
 *This definition would be perfectly valid:*
 
@@ -258,7 +258,7 @@ Describes the list of changes applied during this version.
 
 The current types of changes are:
 
-#### - mappings_addition [_mappings_addition]
+#### mappings_addition [_mappings_addition]
 
 Used to define new mappings introduced in a given version.
 
@@ -278,10 +278,12 @@ const change: SavedObjectsModelMappingsAdditionChange = {
 };
 ```
 
-**note:** *When adding mappings, the root `type.mappings` must also be updated accordingly (as it was done previously).*
+:::{note}
+When adding mappings, the root `type.mappings` must also be updated accordingly (as it was done previously).
+:::
 
 
-#### - mappings_deprecation [_mappings_deprecation]
+#### mappings_deprecation [_mappings_deprecation]
 
 Used to flag mappings as no longer being used and ready to be removed.
 
@@ -294,10 +296,12 @@ let change: SavedObjectsModelMappingsDeprecationChange = {
 };
 ```
 
-**note:** *It is currently not possible to remove fields from an existing index’s mapping (without reindexing into another index), so the mappings flagged with this change type won’t be deleted for now, but this should still be used to allow our system to clean the mappings once upstream (ES) unblock us.*
+:::{note}
+It is currently not possible to remove fields from an existing index’s mapping (without reindexing into another index), so the mappings flagged with this change type won’t be deleted for now, but this should still be used to allow our system to clean the mappings once upstream (ES) unblock us.
+:::
 
 
-#### - data_backfill [_data_backfill]
+#### data_backfill [_data_backfill]
 
 Used to populate fields (indexed or not) added in the same version.
 
@@ -312,10 +316,12 @@ let change: SavedObjectsModelDataBackfillChange = {
 };
 ```
 
-**note:** *Even if no check is performed to ensure it, this type of model change should only be used to backfill newly introduced fields.*
+:::{note}
+Even if no check is performed to ensure it, this type of model change should only be used to backfill newly introduced fields.
+:::
 
 
-#### - data_removal [_data_removal]
+#### data_removal [_data_removal]
 
 Used to remove data (unset fields) from all documents of the type.
 
@@ -328,26 +334,42 @@ let change: SavedObjectsModelDataRemovalChange = {
 };
 ```
 
-**note:** *Due to backward compatibility, field utilization must be stopped in a prior release before actual data removal (in case of rollback). Please refer to the field removal migration example below in this document*
+:::{note}
+Due to backward compatibility, field utilization must be stopped in a prior release before actual data removal (in case of rollback). Please refer to the field removal migration example below in this document
+:::
 
 
-#### - unsafe_transform [_unsafe_transform]
+#### unsafe_transform [_unsafe_transform]
 
 Used to execute an arbitrary transformation function.
 
 *Usage example:*
 
 ```ts
-let change: SavedObjectsModelUnsafeTransformChange = {
+// Please define your transform function on a separate const.
+// Use explicit types for the generic arguments, as shown below.
+// This will reduce the chances of introducing bugs.
+const transformFn: SavedObjectModelUnsafeTransformFn<BeforeType, AfterType> = (
+  doc: SavedObjectModelTransformationDoc<BeforeType>
+) => {
+  const attributes: AfterType = {
+    ...doc.attributes,
+    someAddedField: 'defaultValue',
+  };
+
+  return { document: { ...doc, attributes } };
+};
+
+// this is how you would specify a change in the changes: []
+const change: SavedObjectsModelUnsafeTransformChange = {
   type: 'unsafe_transform',
-  transformFn: (document) => {
-    document.attributes.someAddedField = 'defaultValue';
-    return { document };
-  },
+  transformFn: (typeSafeGuard) => typeSafeGuard(transformFn),
 };
 ```
 
-**note:** *Using such transformations is potentially unsafe, given the migration system will have no knowledge of which kind of operations will effectively be executed against the documents. Those should only be used when there’s no other way to cover one’s migration needs.* **Please reach out to the development team if you think you need to use this, as you theoretically shouldn’t.**
+:::{note}
+Using such transformations is potentially unsafe, given the migration system will have no knowledge of which kind of operations will effectively be executed against the documents. Those should only be used when there’s no other way to cover one’s migration needs. **Please reach out to the development team if you think you need to use this, as you theoretically shouldn’t.**
+:::
 
 
 
@@ -373,32 +395,36 @@ Forward compatibility schema can be implemented in two different ways.
 
 1. Using `config-schema`
 
-*Example of schema for a version having two fields: someField and anotherField*
+    *Example of schema for a version having two fields: someField and anotherField*
 
-```ts
-const versionSchema = schema.object(
-  {
-    someField: schema.maybe(schema.string()),
-    anotherField: schema.maybe(schema.string()),
-  },
-  { unknowns: 'ignore' }
-);
-```
+    ```ts
+    const versionSchema = schema.object(
+      {
+        someField: schema.maybe(schema.string()),
+        anotherField: schema.maybe(schema.string()),
+      },
+      { unknowns: 'ignore' }
+    );
+    ```
 
-**Important:** Note the `{ unknowns: 'ignore' }` in the schema’s options. This is required when using `config-schema` based schemas, as this what will evict the additional fields without throwing an error.
+    :::{important}
+    Note the `{ unknowns: 'ignore' }` in the schema’s options. This is required when using `config-schema` based schemas, as this what will evict the additional fields without throwing an error.
+    :::
 
 1. Using a plain javascript function
 
-*Example of schema for a version having two fields: someField and anotherField*
+    *Example of schema for a version having two fields: someField and anotherField*
 
-```ts
-const versionSchema: SavedObjectModelVersionEvictionFn = (attributes) => {
-  const knownFields = ['someField', 'anotherField'];
-  return pick(attributes, knownFields);
-}
-```
+    ```ts
+    const versionSchema: SavedObjectModelVersionEvictionFn = (attributes) => {
+      const knownFields = ['someField', 'anotherField'];
+      return pick(attributes, knownFields);
+    }
+    ```
 
-**note:** *Even if highly recommended, implementing this schema is not strictly required. Type owners can manage unknown fields and inter-version compatibility themselves in their service layer instead.*
+    :::{note}
+    Even if highly recommended, implementing this schema is not strictly required. Type owners can manage unknown fields and inter-version compatibility themselves in their service layer instead.
+    :::
 
 
 #### create [_create]
@@ -407,7 +433,9 @@ This is a direct replacement for [the old SavedObjectType.schemas](https://githu
 
 As a refresher the `create` schema is a `@kbn/config-schema` object-type schema, and is used to validate the properties of the document during `create` and `bulkCreate` operations.
 
-**note:** *Implementing this schema is optional, but still recommended, as otherwise there will be no validating when importing objects*
+:::{note}
+Implementing this schema is optional, but still recommended, as otherwise there will be no validating when importing objects.
+:::
 
 For implementation examples, refer to [Use case examples](#saved-objects-service-use-case-examples).
 
@@ -417,7 +445,9 @@ For implementation examples, refer to [Use case examples](#saved-objects-service
 
 These are example of the migration scenario currently supported (out of the box) by the system.
 
-**note:** *more complex scenarios (e.g field mutation by copy/sync) could already be implemented, but without the proper tooling exposed from Core, most of the work related to sync and compatibility would have to be implemented in the domain layer of the type owners, which is why we’re not documenting them yet.*
+:::{note}
+More complex scenarios (e.g field mutation by copy/sync) could already be implemented, but without the proper tooling exposed from Core, most of the work related to sync and compatibility would have to be implemented in the domain layer of the type owners, which is why we’re not documenting them yet.
+:::
 
 #### Adding a non-indexed field without default value [_adding_a_non_indexed_field_without_default_value]
 
@@ -429,7 +459,6 @@ The definition of the type at version 1 would look like:
 const myType: SavedObjectsType = {
   name: 'test',
   namespaceType: 'single',
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     // initial (and current) model version
     1: {
@@ -486,7 +515,6 @@ The full type definition after the addition of the new model version:
 const myType: SavedObjectsType = {
   name: 'test',
   namespaceType: 'single',
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     1: {
       changes: [],
@@ -575,7 +603,6 @@ the full type definition after the addition of the model version 2 would be:
 const myType: SavedObjectsType = {
   name: 'test',
   namespaceType: 'single',
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     1: {
       changes: [
@@ -671,7 +698,6 @@ The full type definition would look like:
 const myType: SavedObjectsType = {
   name: 'test',
   namespaceType: 'single',
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     1: {
       changes: [
@@ -729,7 +755,9 @@ const myType: SavedObjectsType = {
 };
 ```
 
-**Note:** *if the field was non-indexed, we would just not use the `mappings_addition` change or update the mappings (as done in example 1)*
+:::{note}
+If the field was non-indexed, we would just not use the `mappings_addition` change or update the mappings (as done in example 1)
+:::
 
 
 #### Removing an existing field [_removing_an_existing_field]
@@ -742,7 +770,6 @@ The definition of the type at version 1 would look like:
 const myType: SavedObjectsType = {
   name: 'test',
   namespaceType: 'single',
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     // initial (and current) model version
     1: {
@@ -807,7 +834,6 @@ The full type definition after the addition of the new model version:
 const myType: SavedObjectsType = {
   name: 'test',
   namespaceType: 'single',
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     // initial (and current) model version
     1: {
@@ -875,7 +901,6 @@ The full type definition after the data removal would look like:
 const myType: SavedObjectsType = {
   name: 'test',
   namespaceType: 'single',
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     // initial (and current) model version
     1: {
@@ -1087,7 +1112,3 @@ Which is why, when using this option, the API consumer needs to make sure that *
 #### Using `bulkUpdate` for fields with large `json` blobs [_using_bulkupdate_for_fields_with_large_json_blobs]
 
 The savedObjects `bulkUpdate` API will update documents client-side and then reindex the updated documents. These update operations are done in-memory, and cause memory constraint issues when updating many objects with large `json` blobs stored in some fields. As such, we recommend against using `bulkUpdate` for savedObjects that: - use arrays (as these tend to be large objects) - store large `json` blobs in some fields
-
-
-
-

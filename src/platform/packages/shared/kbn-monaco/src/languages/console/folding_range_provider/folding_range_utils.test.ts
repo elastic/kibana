@@ -14,25 +14,29 @@ describe('getFoldingRanges', () => {
   // 1  PUT /test/_doc/1
   // 2  {
   // 3    "some_key": {
-  // 4      "some_inner_key": """{
-  // 5        "multi_line": "json string"
-  // 6        }""",
-  // 7      "some_other_key": 123
-  // 8    },
-  // 9    "outer_key_2": [
-  // 10    1,
-  // 11    2,
-  // 12    3
-  // 13   ]
-  // 14 }
+  // 4      "some_inner_key": """
+  // 5        "multi_line_json": { // Should ignore this parenthesis
+  // 6          "foo": "bar"
+  // 7        } // Should ignore this parenthesis
+  // 8      """,
+  // 9      "some_other_key": 123
+  // 10   },
+  // 11   "outer_key_2": [
+  // 12     1,
+  // 13     2,
+  // 14     3
+  // 15   ]
+  // 16 }
 
   const SAMPLE_INPUT = [
     'PUT /test/_doc/1',
     '{  ',
     '  "some_key": {  ',
-    '    "some_inner_key": """{',
-    '      "multi_line": "json string"',
-    '      }""",',
+    '    "some_inner_key": """',
+    '      "multi_line_json": {',
+    '        "foo": "bar',
+    '      }',
+    '    """,',
     '    "some_other_key": 123',
     '  },',
     '  "outer_key_2": [',
@@ -45,14 +49,14 @@ describe('getFoldingRanges', () => {
 
   it('returns correct ranges for parentheses', () => {
     const expectedRanges = [
-      { start: 3, end: 7 },
-      { start: 2, end: 13 },
+      { start: 3, end: 9 },
+      { start: 2, end: 15 },
     ];
     expect(getFoldingRanges(SAMPLE_INPUT, '{', '}')).toEqual(expectedRanges);
   });
 
   it('returns correct ranges for square brackets', () => {
-    const expectedRanges = [{ start: 9, end: 12 }];
+    const expectedRanges = [{ start: 11, end: 14 }];
     expect(getFoldingRanges(SAMPLE_INPUT, '[', ']')).toEqual(expectedRanges);
   });
 });

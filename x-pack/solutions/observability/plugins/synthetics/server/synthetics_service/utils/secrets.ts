@@ -42,7 +42,7 @@ export function normalizeMonitorSecretAttributes(
   const normalizedMonitorAttributes = {
     ...defaultFields,
     ...monitor,
-    ...JSON.parse(monitor.secrets || ''),
+    ...JSON.parse(monitor.secrets || '{}'),
   };
   delete normalizedMonitorAttributes.secrets;
   return normalizedMonitorAttributes;

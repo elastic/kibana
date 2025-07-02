@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import type { LensAppServices } from './types';
 import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
+import { extract } from '../../common/embeddable_factory';
 import { LensSerializedState } from '../react_embeddable/types';
 
 export const redirectToDashboard = ({
-  embeddableInput,
+  embeddableInput: rawState,
   dashboardId,
   originatingApp,
   getOriginatingPath,
@@ -22,17 +24,19 @@ export const redirectToDashboard = ({
   getOriginatingPath?: (dashboardId: string) => string | undefined;
   stateTransfer: LensAppServices['stateTransfer'];
 }) => {
-  const state = {
-    input: embeddableInput,
-    type: LENS_EMBEDDABLE_TYPE,
-  };
+  const { references } = extract(rawState as unknown as EmbeddableStateWithType);
 
-  const path =
-    getOriginatingPath?.(dashboardId) ??
-    (dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`);
   const appId = originatingApp || 'dashboards';
-  stateTransfer.navigateToWithEmbeddablePackage(appId, {
-    state,
-    path,
+  stateTransfer.navigateToWithEmbeddablePackage<LensSerializedState>(appId, {
+    state: {
+      type: LENS_EMBEDDABLE_TYPE,
+      serializedState: {
+        rawState,
+        references,
+      },
+    },
+    path:
+      getOriginatingPath?.(dashboardId) ??
+      (dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`),
   });
 };

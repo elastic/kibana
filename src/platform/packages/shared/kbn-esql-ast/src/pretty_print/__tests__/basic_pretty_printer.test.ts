@@ -8,7 +8,7 @@
  */
 
 import { parse } from '../../parser';
-import { ESQLFunction } from '../../types';
+import { ESQLFunction, ESQLMap } from '../../types';
 import { Walker } from '../../walker';
 import { BasicPrettyPrinter, BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer';
 
@@ -141,6 +141,16 @@ describe('single line query', () => {
       });
     });
 
+    describe('ENRICH', () => {
+      test('policy name with colon', () => {
+        const { text } = reprint(
+          'FROM a | ENRICH _coordinator:woof ON category WITH col0 = category'
+        );
+
+        expect(text).toBe('FROM a | ENRICH _coordinator:woof ON category WITH col0 = category');
+      });
+    });
+
     describe('CHANGE_POINT', () => {
       test('value only', () => {
         const { text } = reprint(`FROM a | CHANGE_POINT value`);
@@ -179,6 +189,133 @@ describe('single line query', () => {
         );
       });
     });
+
+    /**
+     * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
+     * get back to it after 9.1 release.
+     */
+    describe.skip('RERANK', () => {
+      test('single field', () => {
+        const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK "query" ON field1 WITH some_id');
+      });
+
+      test('two fields', () => {
+        const { text } = reprint(`FROM a | RERANK "query" ON field1,field2 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK "query" ON field1, field2 WITH some_id');
+      });
+
+      test('param as query', () => {
+        const { text } = reprint(`FROM a | RERANK ?param ON field1,field2 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK ?param ON field1, field2 WITH some_id');
+      });
+
+      test('param as field part', () => {
+        const { text } = reprint(`FROM a | RERANK ?param ON nested.?par, field2 WITH some_id`);
+
+        expect(text).toBe('FROM a | RERANK ?param ON nested.?par, field2 WITH some_id');
+      });
+
+      test('param as inference ID', () => {
+        const { text } = reprint(`FROM a | RERANK ?param ON nested.?par, field2 WITH ?`);
+
+        expect(text).toBe('FROM a | RERANK ?param ON nested.?par, field2 WITH ?');
+      });
+    });
+
+    describe('FORK', () => {
+      test('from single line', () => {
+        const { text } =
+          reprint(`FROM index | FORK (WHERE keywordField != "" | LIMIT 100) (SORT doubleField ASC NULLS LAST)
+          `);
+
+        expect(text).toBe(
+          'FROM index | FORK (WHERE keywordField != "" | LIMIT 100) (SORT doubleField ASC NULLS LAST)'
+        );
+      });
+
+      test('from multiline', () => {
+        const { text } = reprint(`FROM index
+| FORK
+    (WHERE keywordField != "" | LIMIT 100)
+    (SORT doubleField ASC NULLS LAST)
+          `);
+
+        expect(text).toBe(
+          'FROM index | FORK (WHERE keywordField != "" | LIMIT 100) (SORT doubleField ASC NULLS LAST)'
+        );
+      });
+    });
+
+    describe('SAMPLE', () => {
+      test('from single line', () => {
+        const { text } = reprint(`FROM index | SAMPLE 0.1`);
+
+        expect(text).toBe('FROM index | SAMPLE 0.1');
+      });
+
+      test('from multiline', () => {
+        const { text } = reprint(`FROM index
+| SAMPLE 0.1
+          `);
+
+        expect(text).toBe('FROM index | SAMPLE 0.1');
+      });
+    });
+
+    describe('RRF', () => {
+      test('from single line', () => {
+        const { text } =
+          reprint(`FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score
+        `);
+
+        expect(text).toBe(
+          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score'
+        );
+      });
+
+      test('from multiline', () => {
+        const { text } = reprint(`FROM search-movies METADATA _score, _id, _index
+  | FORK
+    (WHERE semantic_title : "Shakespeare" | SORT _score)
+    (WHERE title : "Shakespeare" | SORT _score)
+  | RRF
+  | KEEP title, _score
+          `);
+
+        expect(text).toBe(
+          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score'
+        );
+      });
+    });
+
+    describe('COMPLETION', () => {
+      test('from single line', () => {
+        const { text } =
+          reprint(`FROM search-movies | COMPLETION result = "Shakespeare" WITH inferenceId
+        `);
+
+        expect(text).toBe(
+          'FROM search-movies | COMPLETION result = "Shakespeare" WITH inferenceId'
+        );
+      });
+
+      test('from multiline', () => {
+        const { text } = reprint(
+          `FROM kibana_sample_data_ecommerce
+                 | COMPLETION result = "prompt" WITH \`openai-completion\`
+                 | LIMIT 2
+          `
+        );
+
+        expect(text).toBe(
+          'FROM kibana_sample_data_ecommerce | COMPLETION result = "prompt" WITH `openai-completion` | LIMIT 2'
+        );
+      });
+    });
   });
 
   describe('expressions', () => {
@@ -210,13 +347,25 @@ describe('single line query', () => {
       test('quoted source', () => {
         const { text } = reprint('FROM "quoted"');
 
-        expect(text).toBe('FROM quoted');
+        expect(text).toBe('FROM "quoted"');
       });
 
       test('triple-quoted source', () => {
         const { text } = reprint('FROM """quoted"""');
 
-        expect(text).toBe('FROM quoted');
+        expect(text).toBe('FROM "quoted"');
+      });
+
+      test('source selector', () => {
+        const { text } = reprint('FROM index::selector');
+
+        expect(text).toBe('FROM index::selector');
+      });
+
+      test('single-double quoted pair source selector', () => {
+        const { text } = reprint('FROM "index::selector"');
+
+        expect(text).toBe('FROM "index::selector"');
       });
     });
 
@@ -412,6 +561,32 @@ describe('single line query', () => {
       });
     });
 
+    describe('map expressions', () => {
+      test('empty map', () => {
+        const src = 'ROW fn(1, {"foo": "bar"})';
+        const { root } = parse(src);
+        const node = Walker.match(root, { type: 'map' })! as ESQLMap;
+
+        node.entries = [];
+
+        const text = BasicPrettyPrinter.print(root);
+
+        expect(text).toBe('ROW FN(1, {})');
+      });
+
+      test('one entry in map expression', () => {
+        const { text } = reprint('ROW fn(1, {"booyaka": [1, 2, 42]})');
+
+        expect(text).toBe('ROW FN(1, {"booyaka": [1, 2, 42]})');
+      });
+
+      test('two entries in map expression', () => {
+        const { text } = reprint('ROW fn(1, {"foo": "bar", "baz": null})');
+
+        expect(text).toBe('ROW FN(1, {"foo": "bar", "baz": NULL})');
+      });
+    });
+
     describe('literals expressions', () => {
       test('null', () => {
         const { text } = reprint('ROW null');
@@ -477,37 +652,57 @@ describe('single line query', () => {
       });
     });
 
-    describe('list literal expressions', () => {
-      describe('integer list', () => {
-        test('one element list', () => {
-          expect(reprint('ROW [1]').text).toBe('ROW [1]');
+    describe('list expressions', () => {
+      describe('literal lists', () => {
+        describe('integer list', () => {
+          test('one element list', () => {
+            expect(reprint('ROW [1]').text).toBe('ROW [1]');
+          });
+
+          test('multiple elements', () => {
+            expect(reprint('ROW [1, 2]').text).toBe('ROW [1, 2]');
+            expect(reprint('ROW [1, 2, -1]').text).toBe('ROW [1, 2, -1]');
+          });
         });
 
-        test('multiple elements', () => {
-          expect(reprint('ROW [1, 2]').text).toBe('ROW [1, 2]');
-          expect(reprint('ROW [1, 2, -1]').text).toBe('ROW [1, 2, -1]');
+        describe('boolean list', () => {
+          test('one element list', () => {
+            expect(reprint('ROW [true]').text).toBe('ROW [TRUE]');
+          });
+
+          test('multiple elements', () => {
+            expect(reprint('ROW [TRUE, false]').text).toBe('ROW [TRUE, FALSE]');
+            expect(reprint('ROW [false, FALSE, false]').text).toBe('ROW [FALSE, FALSE, FALSE]');
+          });
+        });
+
+        describe('string list', () => {
+          test('one element list', () => {
+            expect(reprint('ROW ["a"]').text).toBe('ROW ["a"]');
+          });
+
+          test('multiple elements', () => {
+            expect(reprint('ROW ["a", "b"]').text).toBe('ROW ["a", "b"]');
+            expect(reprint('ROW ["foo", "42", "boden"]').text).toBe('ROW ["foo", "42", "boden"]');
+          });
         });
       });
 
-      describe('boolean list', () => {
+      describe('tuple lists', () => {
+        test('empty list', () => {
+          expect(reprint('FROM a | WHERE b IN ()').text).toBe('FROM a | WHERE b IN ()');
+          expect(reprint('FROM a | WHERE b NOT IN ()').text).toBe('FROM a | WHERE b NOT IN ()');
+        });
+
         test('one element list', () => {
-          expect(reprint('ROW [true]').text).toBe('ROW [TRUE]');
+          expect(reprint('FROM a | WHERE b IN (1)').text).toBe('FROM a | WHERE b IN (1)');
+          expect(reprint('FROM a | WHERE b NOT IN (1)').text).toBe('FROM a | WHERE b NOT IN (1)');
         });
 
-        test('multiple elements', () => {
-          expect(reprint('ROW [TRUE, false]').text).toBe('ROW [TRUE, FALSE]');
-          expect(reprint('ROW [false, FALSE, false]').text).toBe('ROW [FALSE, FALSE, FALSE]');
-        });
-      });
-
-      describe('string list', () => {
-        test('one element list', () => {
-          expect(reprint('ROW ["a"]').text).toBe('ROW ["a"]');
-        });
-
-        test('multiple elements', () => {
-          expect(reprint('ROW ["a", "b"]').text).toBe('ROW ["a", "b"]');
-          expect(reprint('ROW ["foo", "42", "boden"]').text).toBe('ROW ["foo", "42", "boden"]');
+        test('three element list', () => {
+          expect(reprint('FROM a | WHERE b IN ("a", "b", "c")').text).toBe(
+            'FROM a | WHERE b IN ("a", "b", "c")'
+          );
         });
       });
     });
@@ -609,6 +804,17 @@ describe('multiline query', () => {
     const text = multiline(query, { pipeTab: '' }).text;
 
     expect(text).toBe(query);
+  });
+
+  test('keeps FORK branches on single lines', () => {
+    const { text } = multiline(
+      `FROM index| FORK (WHERE keywordField != "" | LIMIT 100)(SORT doubleField ASC NULLS LAST)`
+    );
+
+    expect(text).toBe(`FROM index
+  | FORK
+    (WHERE keywordField != "" | LIMIT 100)
+    (SORT doubleField ASC NULLS LAST)`);
   });
 });
 

@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
-import { useObservable } from 'react-use/lib';
+import useObservable from 'react-use/lib/useObservable';
 
 import { SEARCH_INDICES_START } from '@kbn/deeplinks-search';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
