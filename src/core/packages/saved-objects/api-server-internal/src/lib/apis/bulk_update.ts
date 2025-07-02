@@ -150,6 +150,13 @@ export const performBulkUpdate = async <T>(
     };
   }
 
+  /*
+   * Gets the namespace ID for a given object defaulting to the current namespace.
+   *
+   * If the `objectNamespace` is defined, it will convert it to an ID using
+   * `SavedObjectsUtils.namespaceStringToId()`. Otherwise, it will use the current
+   * namespace ID.
+   */
   const getNamespaceId = (objectNamespace?: string) =>
     objectNamespace !== undefined
       ? SavedObjectsUtils.namespaceStringToId(objectNamespace)
@@ -262,7 +269,7 @@ export const performBulkUpdate = async <T>(
         ];
       } else if (registry.isSingleNamespace(type)) {
         // if `objectNamespace` is undefined, fall back to `options.namespace`
-        savedObjectNamespace = objectNamespace ?? namespace;
+        savedObjectNamespace = getNamespaceId(objectNamespace);
       }
 
       const document = getSavedObjectFromSource<T>(
@@ -361,7 +368,7 @@ export const performBulkUpdate = async <T>(
         return expectedResult.value as any;
       }
 
-      const { type, id, namespaces, documentToSave, esRequestIndex, rawMigratedUpdatedDoc } =
+      const { type, id, documentToSave, esRequestIndex, rawMigratedUpdatedDoc } =
         expectedResult.value;
       const response = bulkUpdateResponse?.items[esRequestIndex] ?? {};
       const rawResponse = Object.values(response)[0] as any;
@@ -376,11 +383,18 @@ export const performBulkUpdate = async <T>(
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const { [type]: attributes, references, updated_at, updated_by } = documentToSave;
 
-      const { originId } = rawMigratedUpdatedDoc._source;
+      const {
+        originId,
+        namespaces: docNamespaces,
+        namespace: docNamespace,
+      } = rawMigratedUpdatedDoc._source;
       return {
         id,
         type,
-        ...(namespaces && { namespaces }),
+        ...(registry.isMultiNamespace(type) && { namespaces: docNamespaces }),
+        ...(registry.isSingleNamespace(type) && {
+          namespaces: [SavedObjectsUtils.namespaceIdToString(docNamespace)],
+        }),
         ...(originId && { originId }),
         updated_at,
         updated_by,

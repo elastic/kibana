@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import type { ServerlessProjectType } from '../../../../common/constants/types';
 import * as i18n from './translations';
 import type { CasesActionParams } from './types';
 import { CASES_CONNECTOR_SUB_ACTION } from '../../../../common/constants';
@@ -48,13 +49,16 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     notifications: { toasts },
   } = useKibana().services;
 
+  const serverlessProjectType = cloud?.isServerlessEnabled
+    ? (cloud.serverless.projectType as ServerlessProjectType)
+    : undefined;
+
   const owner = getOwnerFromRuleConsumerProducer({
     consumer: featureId,
     producer: producerId,
     // This is a workaround for a very specific bug with the cases action in serverless security
     // More info here: https://github.com/elastic/kibana/issues/195599
-    isServerlessSecurity:
-      cloud?.isServerlessEnabled && cloud?.serverless.projectType === 'security',
+    serverlessProjectType,
   });
 
   const { dataView, isLoading: loadingAlertDataViews } = useAlertsDataView({
