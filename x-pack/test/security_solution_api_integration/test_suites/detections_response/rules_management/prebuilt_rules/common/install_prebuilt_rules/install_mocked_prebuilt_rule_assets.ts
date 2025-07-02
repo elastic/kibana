@@ -18,7 +18,6 @@ import {
   getPrebuiltRulesStatus,
   installPrebuiltRules,
   getInstalledRules,
-  getWebHookAction,
 } from '../../../../utils';
 import { deleteAllRules, deleteRule } from '../../../../../../../common/utils/security_solution';
 
@@ -204,40 +203,19 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
         await installPrebuiltRulesAndTimelines(es, supertest);
 
-        // create connector/action
-        const createConnector = async (payload: Record<string, unknown>) =>
-          (
-            await supertest
-              .post('/api/actions/action')
-              .set('kbn-xsrf', 'true')
-              .send(payload)
-              .expect(200)
-          ).body;
-
-        const createWebHookConnector = () => createConnector(getWebHookAction());
-
-        const webHookAction = await createWebHookConnector();
-
-        const defaultRuleAction = {
-          id: webHookAction.id,
-          action_type_id: '.webhook' as const,
-          group: 'default' as const,
-          params: {
-            body: '{"test":"a default action"}',
-          },
-          frequency: {
-            notifyWhen: 'onThrottleInterval' as const,
-            summary: true,
-            throttle: '1h' as const,
-          },
-          uuid: 'd487ec3d-05f2-44ad-8a68-11c97dc92202',
-        };
-
         await securitySolutionApi
           .patchRule({
             body: {
               rule_id: 'rule-1',
-              actions: [defaultRuleAction],
+              actions: [
+                // use a pre-configured connector
+                {
+                  group: 'default',
+                  id: 'my-test-email',
+                  action_type_id: '.email',
+                  params: {},
+                },
+              ],
             },
           })
           .expect(200);
@@ -257,7 +235,15 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         // Check the actions field of existing prebuilt rules is not overwritten
-        expect(prebuiltRule.actions).toEqual([defaultRuleAction]);
+        expect(prebuiltRule.actions).toEqual([
+          expect.objectContaining({
+            action_type_id: '.email',
+            frequency: { notifyWhen: 'onActiveAlert', summary: true, throttle: null },
+            group: 'default',
+            id: 'my-test-email',
+            params: {},
+          }),
+        ]);
       });
 
       it('should NOT overwrite existing exceptions lists', async () => {
