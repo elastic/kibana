@@ -18,7 +18,6 @@ import {
   getPrebuiltRulesStatus,
   installPrebuiltRules,
   getInstalledRules,
-  getWebHookAction,
 } from '../../../../utils';
 import { deleteAllRules, deleteRule } from '../../../../../../../common/utils/security_solution';
 
@@ -204,21 +203,16 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
         await installPrebuiltRulesAndTimelines(es, supertest);
 
-        const { body: hookAction } = await supertest
-          .post('/api/actions/connector')
-          .set('kbn-xsrf', 'true')
-          .send(getWebHookAction())
-          .expect(200);
-
         await securitySolutionApi
           .patchRule({
             body: {
               rule_id: 'rule-1',
               actions: [
+                // use a pre-configured connector
                 {
                   group: 'default',
-                  id: hookAction.id,
-                  action_type_id: hookAction.connector_type_id,
+                  id: 'my-test-email',
+                  action_type_id: '.email',
                   params: {},
                 },
               ],
@@ -243,10 +237,10 @@ export default ({ getService }: FtrProviderContext): void => {
         // Check the actions field of existing prebuilt rules is not overwritten
         expect(prebuiltRule.actions).toEqual([
           expect.objectContaining({
-            action_type_id: hookAction.connector_type_id,
+            action_type_id: '.email',
             frequency: { notifyWhen: 'onActiveAlert', summary: true, throttle: null },
             group: 'default',
-            id: hookAction.id,
+            id: 'my-test-email',
             params: {},
           }),
         ]);

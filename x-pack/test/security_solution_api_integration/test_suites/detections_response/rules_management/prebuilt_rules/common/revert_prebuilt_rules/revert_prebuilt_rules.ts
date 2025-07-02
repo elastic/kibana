@@ -14,7 +14,6 @@ import {
   deleteAllPrebuiltRuleAssets,
   installPrebuiltRules,
   getCustomQueryRuleParams,
-  getWebHookAction,
 } from '../../../../utils';
 import { revertPrebuiltRule } from '../../../../utils/rules/prebuilt_rules/revert_prebuilt_rule';
 
@@ -132,21 +131,16 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('does not modify `actions` field', async () => {
-        const { body: hookAction } = await supertest
-          .post('/api/actions/connector')
-          .set('kbn-xsrf', 'true')
-          .send(getWebHookAction())
-          .expect(200);
-
         const { body: customizedPrebuiltRule } = await securitySolutionApi.patchRule({
           body: {
             rule_id: 'rule_1',
             description: 'new description',
             actions: [
+              // use a pre-configured connector
               {
                 group: 'default',
-                id: hookAction.id,
-                action_type_id: hookAction.connector_type_id,
+                id: 'my-test-email',
+                action_type_id: '.email',
                 params: {},
               },
             ],
@@ -167,10 +161,10 @@ export default ({ getService }: FtrProviderContext): void => {
             },
             actions: [
               expect.objectContaining({
-                action_type_id: hookAction.connector_type_id,
+                id: 'my-test-email',
+                action_type_id: '.email',
                 frequency: { notifyWhen: 'onActiveAlert', summary: true, throttle: null },
                 group: 'default',
-                id: hookAction.id,
                 params: {},
               }),
             ],
