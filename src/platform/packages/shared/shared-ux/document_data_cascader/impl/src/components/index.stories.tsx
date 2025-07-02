@@ -33,7 +33,7 @@ export const GridImplementation: StoryObj<{ query: string }> = {
     });
 
     return (
-      <EuiFlexGroup direction="column" css={{ height: '100vmax' }}>
+      <EuiFlexGroup direction="column" css={{ height: 'calc(100svh - 2rem)' }}>
         <EuiFlexItem grow={false}>
           <EuiText>
             <div>
@@ -44,6 +44,7 @@ export const GridImplementation: StoryObj<{ query: string }> = {
         </EuiFlexItem>
         <EuiFlexItem>
           <DataCascade
+            stickyGroupRoot
             data={initData}
             cascadeGroups={getESQLStatsQueryMeta(args.query).groupByFields}
             tableTitleSlot={({ rows }) => (

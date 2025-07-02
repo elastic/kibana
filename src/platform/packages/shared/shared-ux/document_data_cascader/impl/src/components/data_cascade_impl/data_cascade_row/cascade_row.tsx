@@ -18,29 +18,32 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { flexRender, type Row } from '@tanstack/react-table';
-import { useVirtualizer, VirtualItem } from '@tanstack/react-virtual';
+import type { VirtualItem } from '@tanstack/react-virtual';
 import { type GroupNode } from '../../data_cascade_provider';
 
 export interface CascadeRowProps<T> {
+  innerRef: React.LegacyRef<HTMLLIElement>;
+  isActiveSticky: boolean;
   populateGroupNodeDataFn: (args: { row: Row<T> }) => Promise<void>;
   rowInstance: Row<T>;
   /**
    * The size of the component, can be 's' (small), 'm' (medium), or 'l' (large). Default is 'm'.
    */
   rowGapSize: keyof Pick<EuiThemeShape['size'], 's' | 'm' | 'l'>;
-  virtualizerInstance: ReturnType<typeof useVirtualizer>;
   virtualRow: VirtualItem;
+  virtualRowStyle: React.CSSProperties;
 }
 
 export function CascadeRow<G extends GroupNode>({
+  innerRef,
+  isActiveSticky,
   populateGroupNodeDataFn,
   rowInstance,
   virtualRow,
-  virtualizerInstance,
+  virtualRowStyle,
 }: CascadeRowProps<G>) {
   const { euiTheme } = useEuiTheme();
   const [isPendingRowGroupDataFetch, setRowGroupDataFetch] = React.useState<boolean>(false);
-  const cascadeRowRef = React.useRef<HTMLLIElement | null>(null);
 
   const fetchCascadeRowGroupNodeData = React.useCallback(() => {
     setRowGroupDataFetch(true);
@@ -65,14 +68,14 @@ export function CascadeRow<G extends GroupNode>({
       key={rowInstance.id}
       data-index={virtualRow.index}
       data-row-type={rowInstance.depth === 0 ? 'root' : 'sub-group'}
-      ref={(el) => virtualizerInstance.measureElement((cascadeRowRef.current = el))}
-      style={{
+      ref={innerRef}
+      style={virtualRowStyle}
+      css={{
         display: 'flex',
         position: 'absolute',
-        transform: `translateY(${virtualRow.start}px)`, // this should always be a `style` as it changes on scroll
+        zIndex: isActiveSticky ? euiTheme.levels.header : 'unset',
+        willChange: isActiveSticky ? 'transform, top' : 'unset',
         width: '100%',
-      }}
-      css={{
         padding: euiTheme.size.s,
         backgroundColor: euiTheme.colors.backgroundBaseSubdued,
         borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
