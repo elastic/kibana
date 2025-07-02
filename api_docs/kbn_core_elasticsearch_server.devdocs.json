@@ -568,6 +568,35 @@
       },
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
+        "id": "def-server.ElasticsearchRequestLoggingOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ElasticsearchRequestLoggingOptions",
+        "description": [
+          "\nOptions for configuring per-request logging.\n"
+        ],
+        "path": "src/core/packages/elasticsearch/server/src/client/client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.ElasticsearchRequestLoggingOptions.loggerName",
+            "type": "string",
+            "tags": [],
+            "label": "loggerName",
+            "description": [
+              "\nThe logger name to use for logging requests. It results in the logger name `elasticsearch.query.<loggerName>`.\nThis allows grouping logs by the logger name, and using different configurations for each logger."
+            ],
+            "path": "src/core/packages/elasticsearch/server/src/client/client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-elasticsearch-server",
         "id": "def-server.ElasticsearchServicePreboot",
         "type": "Interface",
         "tags": [],
