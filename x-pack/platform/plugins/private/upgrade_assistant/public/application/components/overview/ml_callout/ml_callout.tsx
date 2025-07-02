@@ -26,7 +26,7 @@ export const MachineLearningDisabledCallout: React.FunctionComponent = () => {
       >
         <FormattedMessage
           id="xpack.upgradeAssistant.overview.mlCallout.description"
-          defaultMessage="Machine Learning is disabled in your cluster. Upgrade Assistant will not be able to check for any Machine Learning deprecations or issues. Please enable Machine Learning in your cluster to use this feature."
+          defaultMessage="Upgrade Assistant will not be able to check for any Machine Learning deprecations or issues. Enable Machine Learning to use this feature."
         />
       </EuiCallOut>
     </>
