@@ -124,7 +124,6 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core-pricing-browser-mocks",
     "@kbn/esql",
-    "@kbn/apm-synthtrace-client",
   ],
   "exclude": [
     "target/**/*"
