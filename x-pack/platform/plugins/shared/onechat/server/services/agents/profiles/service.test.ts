@@ -122,6 +122,7 @@ describe('AgentProfileServiceImpl.validateToolSelection', () => {
   it('passes for valid tool id with provider', async () => {
     const tools = [toolA1, toolB];
     mockToolsService.registry.list = jest.fn().mockResolvedValue(tools);
+    mockToolsService.registry.has = jest.fn().mockResolvedValue(true); // For this test case
     const service = createAgentProfileService({
       client: { ...mockClient, create: jest.fn() },
       toolsService: mockToolsService,
