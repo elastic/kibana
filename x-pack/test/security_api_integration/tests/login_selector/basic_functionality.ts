@@ -31,6 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
   const security = getService('security');
+  const es = getService('es');
 
   const kibanaServerConfig = config.get('servers.kibana');
   const validUsername = kibanaServerConfig.username;
@@ -575,77 +576,194 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      it('should be able to have many pending SP initiated logins all successfully succeed', async () => {
-        const samlResponseMapByRequestId: Record<string, { samlResponse: string; cookie: any }> =
-          {};
-
-        let sharedCookie;
-        for (let i = 0; i < 10; i++) {
-          const samlHandshakeResponse: Response = await supertest
-            .post('/internal/security/login')
-            .ca(CA_CERT)
-            .set('kbn-xsrf', 'xxx')
-            .set('Cookie', sharedCookie ? sharedCookie.cookieString() : '')
-            .send({
-              providerType: 'saml',
-              providerName: 'saml2',
-              currentURL: `https://kibana.com/login?next=/abc/xyz/${i}`,
-            })
-            .expect(200);
-
-          if (!sharedCookie) {
-            sharedCookie = parseCookie(samlHandshakeResponse.headers['set-cookie'][0])!;
-          }
-
-          const cookie = parseCookie(samlHandshakeResponse.headers['set-cookie'][0])!;
-          const samlRequestId = await getSAMLRequestId(samlHandshakeResponse.body.location);
-          const samlResponse = await createSAMLResponse({
-            issuer: `http://www.elastic.co/saml2`,
-            inResponseTo: samlRequestId,
+      describe('SAML Multi tab', () => {
+        beforeEach(async () => {
+          // Wait for the index to be available
+          await es.cluster.health({
+            index: '.kibana_security_session*',
+            wait_for_status: 'yellow',
           });
 
-          samlResponseMapByRequestId[samlRequestId] = { samlResponse, cookie };
-        }
+          // Delete all sessions directly using the ES client
+          await es.deleteByQuery({
+            index: '.kibana_security_session*',
+            refresh: true, // Refresh index immediately after deletion
+            body: {
+              query: {
+                match_all: {}, // Delete all documents
+              },
+            },
+          });
 
-        const preparedCallbacks = [];
+          // Refresh the index to make sure changes are visible
+          await es.indices.refresh({ index: '.kibana_security_session*' });
+        });
 
-        for (const requestId of Object.keys(samlResponseMapByRequestId)) {
-          const samlValues = samlResponseMapByRequestId[requestId];
+        it('should be able to have many pending SP initiated logins all successfully succeed', async () => {
+          const samlResponseMapByRequestId: Record<string, { samlResponse: string; cookie: any }> =
+            {};
 
-          const callbackFunc = () => {
-            return supertest
-              .post('/api/security/saml/callback')
+          const beforeCookies = [];
+
+          let sharedCookie;
+
+          for (let i = 0; i < 10; i++) {
+            const samlHandshakeResponse: Response = await supertest
+              .post('/internal/security/login')
               .ca(CA_CERT)
-              .set('Cookie', samlValues.cookie.cookieString())
+              .set('kbn-xsrf', 'xxx')
+              .set('Cookie', sharedCookie ? sharedCookie.cookieString() : '')
               .send({
-                SAMLResponse: samlValues.samlResponse,
+                providerType: 'saml',
+                providerName: 'saml2',
+                currentURL: `https://kibana.com/login?next=/abc/xyz/${i}`,
+              })
+              .expect(200);
+
+            if (!sharedCookie) {
+              sharedCookie = parseCookie(samlHandshakeResponse.headers['set-cookie'][0])!;
+            }
+
+            const cookie = parseCookie(samlHandshakeResponse.headers['set-cookie'][0])!;
+            beforeCookies.push(cookie);
+
+            const samlRequestId = await getSAMLRequestId(samlHandshakeResponse.body.location);
+            const samlResponse = await createSAMLResponse({
+              issuer: `http://www.elastic.co/saml2`,
+              inResponseTo: samlRequestId,
+            });
+
+            samlResponseMapByRequestId[samlRequestId] = { samlResponse, cookie };
+          }
+          await es.indices.refresh({ index: '.kibana_security_session*' });
+
+          // Get all authenticated sessions from ES for verification
+          const sessionResponse = await es.search({
+            index: '.kibana_security_session*',
+            size: 100,
+            body: {
+              query: {
+                bool: {
+                  must: [
+                    {
+                      match_all: {},
+                    },
+                  ],
+                },
+              },
+            },
+          });
+
+          expect(sessionResponse.hits.total.value).to.equal(1);
+
+          const sources = sessionResponse.hits.hits.map((hit) => {
+            return {
+              id: hit._id,
+              idleTimeoutExpiration: hit._source.idleTimeoutExpiration,
+              isoExpirationDate: new Date(hit._source.idleTimeoutExpiration).toISOString(),
+            };
+          });
+
+          const {
+            id: intermediateSessionId,
+            idleTimeoutExpiration: intermediateIdleTimeoutExpiration,
+          } = sources[0];
+
+          const preparedCallbacks = [];
+
+          for (const requestId of Object.keys(samlResponseMapByRequestId)) {
+            const samlValues = samlResponseMapByRequestId[requestId];
+
+            const callbackFunc = () => {
+              // Add a random delay of up to 3 seconds to simulate real-world network conditions
+              const delay = Math.floor(Math.random() * 30000);
+              return new Promise<Response>((resolve) => {
+                setTimeout(() => {
+                  resolve(
+                    supertest
+                      .post('/api/security/saml/callback')
+                      .ca(CA_CERT)
+                      .set('Cookie', samlValues.cookie.cookieString())
+                      .send({
+                        SAMLResponse: samlValues.samlResponse,
+                      })
+                  );
+                }, 0);
               });
-          };
+            };
 
-          preparedCallbacks.push(callbackFunc);
-        }
+            preparedCallbacks.push(callbackFunc);
+          }
 
-        const responses = await Promise.all(
-          preparedCallbacks.map((func) => {
-            return func();
-          })
-        );
-        expect(
+          const responses = await Promise.all(
+            preparedCallbacks.map((func) => {
+              return func();
+            })
+          );
+
+          const locations = [];
+          const statusCodes = [];
+
           responses.map((response: Response) => {
-            return response.headers.location;
-          })
-        ).to.eql([
-          '/abc/xyz/0',
-          '/abc/xyz/1',
-          '/abc/xyz/2',
-          '/abc/xyz/3',
-          '/abc/xyz/4',
-          '/abc/xyz/5',
-          '/abc/xyz/6',
-          '/abc/xyz/7',
-          '/abc/xyz/8',
-          '/abc/xyz/9',
-        ]);
+            locations.push(response.headers.location);
+            statusCodes.push(response.statusCode);
+          });
+
+          // Sort locations to guarantee order
+          locations.sort();
+
+          // all URLs should have been redirected to the correct locations
+          expect(locations).to.eql([
+            '/abc/xyz/0',
+            '/abc/xyz/1',
+            '/abc/xyz/2',
+            '/abc/xyz/3',
+            '/abc/xyz/4',
+            '/abc/xyz/5',
+            '/abc/xyz/6',
+            '/abc/xyz/7',
+            '/abc/xyz/8',
+            '/abc/xyz/9',
+          ]);
+
+          // all status codes should be 302
+          expect(statusCodes).to.eql([302, 302, 302, 302, 302, 302, 302, 302, 302, 302]);
+
+          await es.indices.refresh({ index: '.kibana_security_session*' });
+          const finalSessionResponse = await es.search({
+            index: '.kibana_security_session*',
+            size: 100,
+            body: {
+              query: {
+                bool: {
+                  must: [
+                    {
+                      match_all: {},
+                    },
+                  ],
+                },
+              },
+            },
+          });
+
+          const finalSources = finalSessionResponse.hits.hits.map((hit) => {
+            return {
+              id: hit._id,
+              idleTimeoutExpiration: hit._source.idleTimeoutExpiration,
+              isoExpirationDate: new Date(hit._source.idleTimeoutExpiration).toISOString(),
+            };
+          });
+
+          expect(finalSources).to.have.length(11); // 10 sessions + 1 intermediate session
+
+          const intermediateSession = finalSources.filter((session) => {
+            return session.id === intermediateSessionId;
+          })[0];
+
+          expect(
+            intermediateSession.idleTimeoutExpiration > intermediateIdleTimeoutExpiration
+          ).to.be(true);
+        });
       });
     });
 
