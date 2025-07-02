@@ -12,6 +12,7 @@ import { regexWorkerFilename } from './regex_worker_task';
 let worker: Piscina | undefined;
 
 export function initRegexWorker() {
+  if (worker) return;
   worker = new Piscina({
     filename: require.resolve('./regex_worker_wrapper.js'),
     workerData: { fullpath: regexWorkerFilename },
@@ -25,7 +26,7 @@ export async function destroyRegexWorker(): Promise<void> {
   worker = undefined;
 }
 
-const REGEX_TTL_MS = 5000;
+const REGEX_TTL_MS = 1500;
 
 export async function runRegexTask(payload: RegexAnonymizationTask, ttl?: number) {
   if (!worker) throw new Error('Regex worker not initialised');
