@@ -15,6 +15,7 @@ running in no time. If you have any problems, file an issue in the https://githu
 * <<kibana-architecture>>
 * <<advanced>>
 * <<plugin-list>>
+* <<dependencies-versions>>
 * <<development-telemetry>>
 
 --
@@ -32,6 +33,8 @@ include::plugin/index.asciidoc[]
 include::advanced/index.asciidoc[]
 
 include::plugin-list.asciidoc[]
+
+include::dependencies-versions.asciidoc[]
 
 include::telemetry.asciidoc[]
 

@@ -201,7 +201,7 @@ const isWindowsWildcardPathValid = (path: string): boolean => {
     trimmedValue.length !== path.length ||
     firstCharacter === '^' ||
     lastCharacter === '\\' ||
-    !hasWildcard({ path, isWindowsPath: true })
+    !hasWildcardInPath({ path, isWindowsPath: true })
   ) {
     return false;
   } else {
@@ -221,7 +221,7 @@ const isLinuxMacWildcardPathValid = (path: string): boolean => {
     lastCharacter === '/' ||
     path.length > 1024 === true ||
     path.includes('//') === true ||
-    !hasWildcard({ path, isWindowsPath: false })
+    !hasWildcardInPath({ path, isWindowsPath: false })
   ) {
     return false;
   } else {
@@ -229,7 +229,7 @@ const isLinuxMacWildcardPathValid = (path: string): boolean => {
   }
 };
 
-const hasWildcard = ({
+const hasWildcardInPath = ({
   path,
   isWindowsPath,
 }: {

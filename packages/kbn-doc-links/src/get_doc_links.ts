@@ -24,9 +24,12 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const ELASTIC_WEBSITE_URL = meta.elasticWebsiteUrl;
   const ELASTIC_GITHUB = meta.elasticGithubUrl;
   const SEARCH_LABS_URL = meta.searchLabsUrl;
+  const API_DOCS = meta.apiDocsUrl;
 
   const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
   const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
+  const KIBANA_APIS = `${API_DOCS}doc/kibana/v8/`;
+  const KIBANA_SERVERLESS_APIS = `${API_DOCS}doc/serverless/`;
   const FLEET_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/fleet/${DOC_LINK_VERSION}/`;
   const INTEGRATIONS_DEV_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/integrations-developer/current/`;
   const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
@@ -466,7 +469,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       detectionsReq: `${SECURITY_SOLUTION_DOCS}detections-permissions-section.html`,
       networkMap: `${SECURITY_SOLUTION_DOCS}conf-map-ui.html`,
       troubleshootGaps: `${SECURITY_SOLUTION_DOCS}alerts-ui-monitor.html#troubleshoot-gaps`,
-      ruleApiOverview: `${SECURITY_SOLUTION_DOCS}rule-api-overview.html`,
+      ruleApiOverview: isServerless
+        ? `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`
+        : `${KIBANA_APIS}group/endpoint-security-detections-api`,
       configureAlertSuppression: `${SECURITY_SOLUTION_DOCS}alert-suppression.html#_configure_alert_suppression`,
     },
     securitySolution: {

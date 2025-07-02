@@ -20,63 +20,81 @@ describe('calculateDiff', () => {
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
+          "added": false,
           "count": 5,
+          "removed": false,
           "value": "This ",
         },
         Object {
           "added": true,
           "count": 4,
-          "removed": undefined,
+          "removed": false,
           "value": "one ",
         },
         Object {
+          "added": false,
           "count": 5,
+          "removed": false,
           "value": "is a ",
         },
         Object {
-          "added": true,
-          "count": 10,
-          "removed": undefined,
-          "value": "different ",
-        },
-        Object {
+          "added": false,
           "count": 1,
+          "removed": true,
           "value": "m",
         },
         Object {
-          "added": undefined,
+          "added": true,
+          "count": 4,
+          "removed": false,
+          "value": "diff",
+        },
+        Object {
+          "added": false,
           "count": 1,
-          "removed": true,
+          "removed": false,
           "value": "e",
         },
         Object {
+          "added": true,
+          "count": 6,
+          "removed": false,
+          "value": "rent m",
+        },
+        Object {
+          "added": false,
           "count": 1,
+          "removed": false,
           "value": "s",
         },
         Object {
-          "added": undefined,
+          "added": false,
           "count": 2,
           "removed": true,
           "value": "sa",
         },
         Object {
+          "added": false,
           "count": 1,
+          "removed": false,
           "value": "g",
         },
         Object {
-          "added": undefined,
+          "added": false,
           "count": 1,
           "removed": true,
           "value": "e",
         },
         Object {
+          "added": false,
           "count": 4,
+          "removed": false,
           "value": " val",
         },
         Object {
           "added": true,
           "count": 2,
-          "removed": undefined,
+          "removed": false,
           "value": "ue",
         },
       ]
@@ -88,21 +106,25 @@ describe('calculateDiff', () => {
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
+          "added": false,
           "count": 2,
+          "removed": false,
           "value": "This ",
         },
         Object {
           "added": true,
           "count": 2,
-          "removed": undefined,
+          "removed": false,
           "value": "one ",
         },
         Object {
+          "added": false,
           "count": 4,
+          "removed": false,
           "value": "is a ",
         },
         Object {
-          "added": undefined,
+          "added": false,
           "count": 1,
           "removed": true,
           "value": "message",
@@ -110,15 +132,17 @@ describe('calculateDiff', () => {
         Object {
           "added": true,
           "count": 1,
-          "removed": undefined,
+          "removed": false,
           "value": "different",
         },
         Object {
+          "added": false,
           "count": 1,
+          "removed": false,
           "value": " ",
         },
         Object {
-          "added": undefined,
+          "added": false,
           "count": 1,
           "removed": true,
           "value": "val",
@@ -126,7 +150,7 @@ describe('calculateDiff', () => {
         Object {
           "added": true,
           "count": 3,
-          "removed": undefined,
+          "removed": false,
           "value": "msg value",
         },
       ]
@@ -138,7 +162,7 @@ describe('calculateDiff', () => {
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
-          "added": undefined,
+          "added": false,
           "count": 1,
           "removed": true,
           "value": "This is a message val",
@@ -146,7 +170,7 @@ describe('calculateDiff', () => {
         Object {
           "added": true,
           "count": 1,
-          "removed": undefined,
+          "removed": false,
           "value": "This one is a different msg value",
         },
       ]
@@ -162,31 +186,37 @@ describe('calculateDiff', () => {
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
+          "added": false,
           "count": 1,
+          "removed": false,
           "value": "[
       ",
         },
         Object {
-          "added": undefined,
+          "added": false,
           "count": 1,
           "removed": true,
           "value": "  \\"gif\\",
       ",
         },
         Object {
+          "added": false,
           "count": 1,
+          "removed": false,
           "value": "  \\"png\\",
       ",
         },
         Object {
           "added": true,
           "count": 1,
-          "removed": undefined,
+          "removed": false,
           "value": "  \\"jpg\\"
       ",
         },
         Object {
+          "added": false,
           "count": 1,
+          "removed": false,
           "value": "]",
         },
       ]
@@ -203,12 +233,14 @@ describe('calculateDiff', () => {
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
+          "added": false,
           "count": 1,
+          "removed": false,
           "value": "[
       ",
         },
         Object {
-          "added": undefined,
+          "added": false,
           "count": 1,
           "removed": true,
           "value": "  \\"single value\\"
@@ -217,13 +249,15 @@ describe('calculateDiff', () => {
         Object {
           "added": true,
           "count": 2,
-          "removed": undefined,
+          "removed": false,
           "value": "  \\"multiple\\",
         \\"values\\"
       ",
         },
         Object {
+          "added": false,
           "count": 1,
+          "removed": false,
           "value": "]",
         },
       ]
@@ -236,12 +270,14 @@ describe('calculateDiff', () => {
     expect(result2).toMatchInlineSnapshot(`
       Array [
         Object {
+          "added": false,
           "count": 1,
+          "removed": false,
           "value": "[
       ",
         },
         Object {
-          "added": undefined,
+          "added": false,
           "count": 2,
           "removed": true,
           "value": "  \\"multiple\\",
@@ -251,12 +287,14 @@ describe('calculateDiff', () => {
         Object {
           "added": true,
           "count": 1,
-          "removed": undefined,
+          "removed": false,
           "value": "  \\"single value\\"
       ",
         },
         Object {
+          "added": false,
           "count": 1,
+          "removed": false,
           "value": "]",
         },
       ]

@@ -663,7 +663,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
     <React.Fragment>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>
+          <h2 id="space-assign-role-privilege-form-title">
             {isEditOperation.current
               ? i18n.translate('xpack.spaces.management.spaceDetails.roles.assignRoleButton', {
                   defaultMessage: 'Edit role privileges for space',

@@ -163,8 +163,7 @@ export function registerAPIRoutes({
         }
         return res.badRequest(e.message);
       }
-
-      return res.created({ body: result });
+      return res.ok({ body: result });
     }
   );
 

@@ -10,70 +10,201 @@ import { getStats } from '.';
 describe('getStats', () => {
   it('returns array of badges which corresponds to the field name', () => {
     const badgesRuleName = getStats('kibana.alert.rule.name', {
-      key: ['Rule name test', 'Some description'],
-      usersCountAggregation: {
-        value: 10,
-      },
+      key: [],
+      severitiesSubAggregation: { buckets: [{ key: 'medium', doc_count: 10 }] },
+      countSeveritySubAggregation: { value: 1 },
+      usersCountAggregation: { value: 3 },
+      hostsCountAggregation: { value: 5 },
       doc_count: 10,
     });
 
+    expect(badgesRuleName.length).toBe(4);
     expect(
       badgesRuleName.find(
-        (badge) => badge.badge != null && badge.title === 'Users:' && badge.badge.value === 10
+        (badge) => badge.title === 'Severity:' && badge.component != null && badge.badge == null
       )
     ).toBeTruthy();
     expect(
       badgesRuleName.find(
-        (badge) => badge.badge != null && badge.title === 'Alerts:' && badge.badge.value === 10
+        (badge) =>
+          badge.title === 'Users:' &&
+          badge.component == null &&
+          badge.badge != null &&
+          badge.badge.value === 3
+      )
+    ).toBeTruthy();
+    expect(
+      badgesRuleName.find(
+        (badge) =>
+          badge.title === 'Hosts:' &&
+          badge.component == null &&
+          badge.badge != null &&
+          badge.badge.value === 5
+      )
+    ).toBeTruthy();
+    expect(
+      badgesRuleName.find(
+        (badge) =>
+          badge.title === 'Alerts:' &&
+          badge.component == null &&
+          badge.badge != null &&
+          badge.badge.value === 10
       )
     ).toBeTruthy();
 
     const badgesHostName = getStats('host.name', {
       key: 'Host',
-      rulesCountAggregation: {
-        value: 3,
-      },
+      severitiesSubAggregation: { buckets: [{ key: 'medium', doc_count: 10 }] },
+      countSeveritySubAggregation: { value: 1 },
+      usersCountAggregation: { value: 5 },
+      rulesCountAggregation: { value: 3 },
       doc_count: 2,
     });
 
+    expect(badgesHostName.length).toBe(4);
     expect(
       badgesHostName.find(
-        (badge) => badge.badge != null && badge.title === 'Rules:' && badge.badge.value === 3
+        (badge) => badge.title === 'Severity:' && badge.component != null && badge.badge == null
+      )
+    ).toBeTruthy();
+    expect(
+      badgesHostName.find(
+        (badge) =>
+          badge.title === 'Users:' &&
+          badge.component == null &&
+          badge.badge != null &&
+          badge.badge.value === 5
+      )
+    ).toBeTruthy();
+    expect(
+      badgesHostName.find(
+        (badge) =>
+          badge.title === 'Rules:' &&
+          badge.component == null &&
+          badge.badge != null &&
+          badge.badge.value === 3
+      )
+    ).toBeTruthy();
+    expect(
+      badgesHostName.find(
+        (badge) =>
+          badge.title === 'Alerts:' &&
+          badge.component == null &&
+          badge.badge != null &&
+          badge.badge.value === 2
       )
     ).toBeTruthy();
 
     const badgesUserName = getStats('user.name', {
       key: 'User test',
-      hostsCountAggregation: {
-        value: 1,
-      },
+      severitiesSubAggregation: { buckets: [{ key: 'medium', doc_count: 10 }] },
+      countSeveritySubAggregation: { value: 1 },
+      rulesCountAggregation: { value: 2 },
+      hostsCountAggregation: { value: 1 },
       doc_count: 1,
     });
+
+    expect(badgesUserName.length).toBe(4);
     expect(
       badgesUserName.find(
-        (badge) => badge.badge != null && badge.title === `Hosts:` && badge.badge.value === 1
+        (badge) => badge.title === 'Severity:' && badge.component != null && badge.badge == null
+      )
+    ).toBeTruthy();
+    expect(
+      badgesUserName.find(
+        (badge) =>
+          badge.title === 'Hosts:' &&
+          badge.component == null &&
+          badge.badge != null &&
+          badge.badge.value === 1
+      )
+    ).toBeTruthy();
+    expect(
+      badgesUserName.find(
+        (badge) =>
+          badge.title === 'Rules:' &&
+          badge.component == null &&
+          badge.badge != null &&
+          badge.badge.value === 2
+      )
+    ).toBeTruthy();
+    expect(
+      badgesUserName.find(
+        (badge) =>
+          badge.title === 'Alerts:' &&
+          badge.component == null &&
+          badge.badge != null &&
+          badge.badge.value === 1
+      )
+    ).toBeTruthy();
+
+    const badgesSourceIp = getStats('source.ip', {
+      key: 'User test',
+      severitiesSubAggregation: { buckets: [{ key: 'medium', doc_count: 10 }] },
+      countSeveritySubAggregation: { value: 1 },
+      rulesCountAggregation: { value: 16 },
+      hostsCountAggregation: { value: 17 },
+      doc_count: 18,
+    });
+
+    expect(badgesSourceIp.length).toBe(4);
+    expect(
+      badgesSourceIp.find(
+        (badge) => badge.title === 'Severity:' && badge.component != null && badge.badge == null
+      )
+    ).toBeTruthy();
+    expect(
+      badgesSourceIp.find(
+        (badge) =>
+          badge.title === 'Hosts:' &&
+          badge.component == null &&
+          badge.badge != null &&
+          badge.badge.value === 17
+      )
+    ).toBeTruthy();
+    expect(
+      badgesSourceIp.find(
+        (badge) =>
+          badge.title === 'Rules:' &&
+          badge.component == null &&
+          badge.badge != null &&
+          badge.badge.value === 16
+      )
+    ).toBeTruthy();
+    expect(
+      badgesSourceIp.find(
+        (badge) =>
+          badge.title === 'Alerts:' &&
+          badge.component == null &&
+          badge.badge != null &&
+          badge.badge.value === 18
       )
     ).toBeTruthy();
   });
 
-  it('returns default badges if the field specific does not exist', () => {
+  it('should return default badges if the field specific does not exist', () => {
     const badges = getStats('process.name', {
       key: 'process',
-      rulesCountAggregation: {
-        value: 3,
-      },
+      severitiesSubAggregation: { buckets: [{ key: 'medium', doc_count: 10 }] },
+      countSeveritySubAggregation: { value: 1 },
+      rulesCountAggregation: { value: 3 },
       doc_count: 10,
     });
 
-    expect(badges.length).toBe(2);
+    expect(badges.length).toBe(3);
     expect(
       badges.find(
-        (badge) => badge.badge != null && badge.title === 'Rules:' && badge.badge.value === 3
+        (badge) => badge.title === 'Severity:' && badge.component != null && badge.badge == null
       )
     ).toBeTruthy();
     expect(
       badges.find(
-        (badge) => badge.badge != null && badge.title === 'Alerts:' && badge.badge.value === 10
+        (badge) => badge.title === 'Rules:' && badge.component == null && badge.badge?.value === 3
+      )
+    ).toBeTruthy();
+    expect(
+      badges.find(
+        (badge) => badge.title === 'Alerts:' && badge.component == null && badge.badge?.value === 10
       )
     ).toBeTruthy();
   });

@@ -8,6 +8,15 @@
  */
 
 require('./polyfills');
+// Optional prototype hardening. This must occur immediately after polyfills.
+if (typeof window.__kbnHardenPrototypes__ !== 'boolean') {
+  throw new Error(
+    'Invariant bootstrap failure: __kbnHardenPrototypes__ must be set to true or false'
+  );
+}
+if (window.__kbnHardenPrototypes__) {
+  require('@kbn/security-hardening/prototype');
+}
 
 export const Jquery = require('jquery');
 window.$ = window.jQuery = Jquery;

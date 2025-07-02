@@ -9,7 +9,6 @@
 
 import { SavedObjectReference } from '@kbn/core/types';
 import {
-  EmbeddableInput,
   EmbeddablePersistableStateService,
   EmbeddableStateWithType,
 } from '@kbn/embeddable-plugin/common/types';
@@ -22,7 +21,7 @@ import {
 } from './control_group_migrations';
 import { SerializableControlGroupState } from './types';
 
-const getPanelStatePrefix = (state: SerializedControlState) => `${state.explicitInput.id}:`;
+const getPanelStatePrefix = (panelId: string) => `${panelId}:`;
 
 export const createControlGroupInject = (
   persistableStateService: EmbeddablePersistableStateService
@@ -39,7 +38,7 @@ export const createControlGroupInject = (
           ...panel,
         };
         // Find the references for this panel
-        const prefix = getPanelStatePrefix(panel);
+        const prefix = getPanelStatePrefix(key);
 
         const filteredReferences = references
           .filter((reference) => reference.name.indexOf(prefix) === 0)
@@ -48,10 +47,18 @@ export const createControlGroupInject = (
         const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
 
         const { type, ...injectedState } = persistableStateService.inject(
-          { ...workingPanels[key].explicitInput, type: workingPanels[key].type },
+          /**
+           * Forcing the type here because `explicitInput` no longer has ID but we cannot backport
+           * https://github.com/elastic/kibana/pull/210927 to fix the type concerns because it might
+           * have larger impacts on legacy embeddables.
+           */
+          {
+            ...workingPanels[key].explicitInput,
+            type: workingPanels[key].type,
+          } as EmbeddableStateWithType,
           panelReferences
         );
-        workingPanels[key].explicitInput = injectedState as EmbeddableInput;
+        workingPanels[key].explicitInput = injectedState;
       }
     }
     return { ...workingState, panels: workingPanels } as unknown as EmbeddableStateWithType;
@@ -70,12 +77,17 @@ export const createControlGroupExtract = (
 
       // Run every panel through the state service to get the nested references
       for (const [key, panel] of Object.entries(workingState.panels)) {
-        const prefix = getPanelStatePrefix(panel);
+        const prefix = getPanelStatePrefix(key);
 
         const { state: panelState, references: panelReferences } = persistableStateService.extract({
           ...panel.explicitInput,
           type: panel.type,
-        });
+          /**
+           * Forcing the type here because `explicitInput` no longer has ID but we cannot backport
+           * https://github.com/elastic/kibana/pull/210927 to fix the type concerns because it might
+           * have larger impacts on legacy embeddables.
+           */
+        } as EmbeddableStateWithType);
 
         // Map reference to its embeddable id for lookup in inject
         const mappedReferences = panelReferences.map((reference) => ({
@@ -87,7 +99,7 @@ export const createControlGroupExtract = (
 
         const { type, ...restOfState } = panelState;
         (workingState.panels as ControlPanelsState<SerializedControlState>)[key].explicitInput =
-          restOfState as EmbeddableInput;
+          restOfState;
       }
     }
     return { state: workingState as EmbeddableStateWithType, references };

@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   describe('main', () => {
-    it('should return 201 with an updated dashboard', async () => {
+    it('should return 200 with an updated dashboard', async () => {
       const response = await supertest
         .put(`${PUBLIC_API_PATH}/be3733a0-9efe-11e7-acb3-3dab96693fab`)
         .set('kbn-xsrf', 'true')
@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
           ],
         });
 
-      expect(response.status).to.be(201);
+      expect(response.status).to.be(200);
 
       expect(response.body.item.id).to.be('be3733a0-9efe-11e7-acb3-3dab96693fab');
       expect(response.body.item.type).to.be('dashboard');

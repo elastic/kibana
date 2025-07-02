@@ -8,11 +8,15 @@
 import type { ComponentProps, ReactElement } from 'react';
 import React, { useMemo } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
+import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
+import { DataViewErrorComponent } from '../../../../common/components/with_data_view/data_view_error';
 import { StyledTableFlexGroup, StyledUnifiedTableFlexItem } from '../unified_components/styles';
 import { UnifiedTimeline } from '../unified_components';
 import { defaultUdtHeaders } from './column_headers/default_headers';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 
-export interface UnifiedTimelineBodyProps extends ComponentProps<typeof UnifiedTimeline> {
+export interface UnifiedTimelineBodyProps
+  extends Omit<ComponentProps<typeof UnifiedTimeline>, 'dataView'> {
   header: ReactElement;
 }
 
@@ -37,7 +41,9 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
     leadingControlColumns,
     onUpdatePageIndex,
   } = props;
-
+  const dataView = useGetScopedSourcererDataView({
+    sourcererScope: SourcererScopeName.timeline,
+  });
   const columnsHeader = useMemo(() => columns ?? defaultUdtHeaders, [columns]);
 
   return (
@@ -48,26 +54,31 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
         data-test-subj="unifiedTimelineBody"
       >
         <RootDragDropProvider>
-          <UnifiedTimeline
-            columns={columnsHeader}
-            rowRenderers={rowRenderers}
-            isSortEnabled={isSortEnabled}
-            timelineId={timelineId}
-            itemsPerPage={itemsPerPage}
-            itemsPerPageOptions={itemsPerPageOptions}
-            sort={sort}
-            events={events}
-            refetch={refetch}
-            dataLoadingState={dataLoadingState}
-            totalCount={totalCount}
-            onFetchMoreRecords={onFetchMoreRecords}
-            activeTab={activeTab}
-            updatedAt={updatedAt}
-            isTextBasedQuery={false}
-            trailingControlColumns={trailingControlColumns}
-            leadingControlColumns={leadingControlColumns}
-            onUpdatePageIndex={onUpdatePageIndex}
-          />
+          {dataView ? (
+            <UnifiedTimeline
+              columns={columnsHeader}
+              dataView={dataView}
+              rowRenderers={rowRenderers}
+              isSortEnabled={isSortEnabled}
+              timelineId={timelineId}
+              itemsPerPage={itemsPerPage}
+              itemsPerPageOptions={itemsPerPageOptions}
+              sort={sort}
+              events={events}
+              refetch={refetch}
+              dataLoadingState={dataLoadingState}
+              totalCount={totalCount}
+              onFetchMoreRecords={onFetchMoreRecords}
+              activeTab={activeTab}
+              updatedAt={updatedAt}
+              isTextBasedQuery={false}
+              trailingControlColumns={trailingControlColumns}
+              leadingControlColumns={leadingControlColumns}
+              onUpdatePageIndex={onUpdatePageIndex}
+            />
+          ) : (
+            <DataViewErrorComponent />
+          )}
         </RootDragDropProvider>
       </StyledUnifiedTableFlexItem>
     </StyledTableFlexGroup>

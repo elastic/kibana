@@ -165,6 +165,7 @@ kibana_vars=(
     server.name
     server.port
     server.protocol
+    server.prototypeHardening
     server.publicBaseUrl
     server.requestId.allowFromAnyIp
     server.requestId.ipAllowlist

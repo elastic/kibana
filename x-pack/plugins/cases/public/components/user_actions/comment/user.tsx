@@ -51,6 +51,18 @@ const getCommentFooterCss = (euiTheme?: EuiThemeComputed<{}>) => {
   `;
 };
 
+const createCommentActionCss = (euiTheme?: EuiThemeComputed<{}>) => {
+  if (!euiTheme) {
+    return css``;
+  }
+
+  return css`
+    [class*='euiTimelineItemEvent'] {
+      max-width: calc(100% - (${euiTheme.size.xl} + ${euiTheme.size.base}));
+    }
+  `;
+};
+
 const hasDraftComment = (
   applicationId = '',
   caseId: string,
@@ -92,6 +104,7 @@ export const createUserAttachmentUserActionBuilder = ({
         draftFooter:
           !isEdit && !isLoading && hasDraftComment(appId, caseId, comment.id, comment.comment),
       }),
+      css: createCommentActionCss(euiTheme),
       children: (
         <>
           <UserActionMarkdown

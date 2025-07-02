@@ -220,7 +220,7 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
       />
       {isSaveOpen && attributesJSON && (
         <LensSaveModalComponent
-          initialInput={attributesJSON as unknown as LensEmbeddableInput}
+          initialInput={{ attributes: attributesJSON } as LensEmbeddableInput}
           onClose={() => setIsSaveOpen(false)}
           // if we want to do anything after the viz is saved
           // right now there is no action, so an empty function

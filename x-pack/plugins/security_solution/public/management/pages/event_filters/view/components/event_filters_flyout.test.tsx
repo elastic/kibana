@@ -14,6 +14,8 @@ import userEvent, { type UserEvent } from '@testing-library/user-event';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 
+import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { useFetchIndex } from '../../../../../common/containers/source';
 import { getInitialExceptionFromEvent } from '../utils';
 import { useCreateArtifact } from '../../../../hooks/artifacts/use_create_artifact';
 import { useGetEndpointSpecificPolicies } from '../../../../services/policies/hooks';
@@ -26,6 +28,7 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 
 // mocked modules
 jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../common/containers/source');
 jest.mock('../../../../services/policies/hooks');
 jest.mock('../../../../services/policies/policies');
 jest.mock('../../../../hooks/artifacts/use_create_artifact');
@@ -194,6 +197,11 @@ describe('Event filter flyout', () => {
       return { isLoading: false, isRefetching: false };
     });
 
+    (useFetchIndex as jest.Mock).mockImplementation(() => [
+      false,
+      { indexPatterns: stubIndexPattern },
+    ]);
+
     render = (props) => {
       renderResult = mockedContext.render(
         <EventFiltersFlyout {...props} onCancel={onCancelMock} />
@@ -281,17 +289,29 @@ describe('Event filter flyout', () => {
       ],
       name: 'some name',
     };
+
     beforeEach(() => {
       const exception = exceptionsGenerator.generateEventFilterForCreate(exceptionOptions);
       (getInitialExceptionFromEvent as jest.Mock).mockImplementation(() => {
         return exception;
       });
     });
-    it('should change to "add event filter" button enabled', () => {
+
+    it('should display "Add event filter"/"Save" button disabled when form hasn\'t changed', () => {
       render();
+      const confirmButton = renderResult.getByTestId('add-exception-confirm-button');
+      expect(confirmButton.hasAttribute('disabled')).toBeTruthy();
+    });
+
+    it('should enable "Add event filter"/"Save" button when user enters/modifies filter name', async () => {
+      render();
+
+      await user.type(renderResult.getByTestId('eventFilters-form-name-input'), 'a');
+
       const confirmButton = renderResult.getByTestId('add-exception-confirm-button');
       expect(confirmButton.hasAttribute('disabled')).toBeFalsy();
     });
+
     it('should prevent close when submitting data', async () => {
       (useCreateArtifact as jest.Mock).mockImplementation(() => {
         return { isLoading: true, mutateAsync: jest.fn() };

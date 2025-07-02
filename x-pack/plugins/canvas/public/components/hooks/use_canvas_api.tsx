@@ -21,6 +21,10 @@ import { getSelectedPage } from '../../state/selectors/workpad';
 
 const reload$ = new Subject<void>();
 
+export function forceReload() {
+  reload$.next();
+}
+
 export const useCanvasApi: () => CanvasContainerApi = () => {
   const selectedPageId = useSelector(getSelectedPage);
   const dispatch = useDispatch();
@@ -41,9 +45,6 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
   const getCanvasApi = useCallback((): CanvasContainerApi => {
     return {
       reload$,
-      reload: () => {
-        reload$.next();
-      },
       viewMode: new BehaviorSubject<ViewMode>('edit'), // always in edit mode
       addNewPanel: async ({
         panelType,

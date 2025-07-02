@@ -12,8 +12,6 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
-import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
-import { getRuleGroups } from '../../model/rule_groups/get_rule_groups';
 
 export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -37,23 +35,32 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
         try {
           const ctx = await context.resolve(['core', 'alerting']);
           const soClient = ctx.core.savedObjects.client;
-          const rulesClient = ctx.alerting.getRulesClient();
+          const rulesClient = await ctx.alerting.getRulesClient();
           const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
           const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
-          const ruleVersionsMap = await fetchRuleVersionsTriad({
-            ruleAssetsClient,
-            ruleObjectsClient,
+          const currentRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
+          const latestRuleVersions = await ruleAssetsClient.fetchLatestVersions();
+          const currentRuleVersionsMap = new Map(
+            currentRuleVersions.map((rule) => [rule.rule_id, rule])
+          );
+          const latestRuleVersionsMap = new Map(
+            latestRuleVersions.map((rule) => [rule.rule_id, rule])
+          );
+          const installableRules = latestRuleVersions.filter(
+            (rule) => !currentRuleVersionsMap.has(rule.rule_id)
+          );
+          const upgradeableRules = currentRuleVersions.filter((rule) => {
+            const latestVersion = latestRuleVersionsMap.get(rule.rule_id);
+            return latestVersion != null && rule.version < latestVersion.version;
           });
-          const { currentRules, installableRules, upgradeableRules, totalAvailableRules } =
-            getRuleGroups(ruleVersionsMap);
 
           const body: GetPrebuiltRulesStatusResponseBody = {
             stats: {
-              num_prebuilt_rules_installed: currentRules.length,
+              num_prebuilt_rules_installed: currentRuleVersions.length,
               num_prebuilt_rules_to_install: installableRules.length,
               num_prebuilt_rules_to_upgrade: upgradeableRules.length,
-              num_prebuilt_rules_total_in_package: totalAvailableRules.length,
+              num_prebuilt_rules_total_in_package: latestRuleVersions.length,
             },
           };
 

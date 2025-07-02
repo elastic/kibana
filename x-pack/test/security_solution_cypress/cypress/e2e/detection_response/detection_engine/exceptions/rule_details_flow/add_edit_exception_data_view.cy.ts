@@ -47,7 +47,8 @@ import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 
 const DATAVIEW = 'auditbeat-exceptions-*';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/182447
+describe.skip(
   'Add exception using data views from rule details',
   { tags: ['@ess', '@serverless'] },
   () => {

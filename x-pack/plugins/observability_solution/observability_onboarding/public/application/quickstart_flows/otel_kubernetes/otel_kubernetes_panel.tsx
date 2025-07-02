@@ -60,7 +60,7 @@ kubectl create secret generic elastic-secret-otel \\
   --namespace ${namespace} \\
   --from-literal=elastic_endpoint='${data.elasticsearchUrl}' \\
   --from-literal=elastic_api_key='${data.apiKeyEncoded}'
-helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
+helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
   --namespace ${namespace} \\
   --values '${otelKubeStackValuesFileUrl}' \\
   --version '${OTEL_KUBE_STACK_VERSION}'`
@@ -298,7 +298,7 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
                     'xpack.observability_onboarding.otelKubernetesPanel.onceYourKubernetesInfrastructureLabel',
                     {
                       defaultMessage:
-                        'Analyse your Kubernetes cluster’s health and monitor your container workloads.',
+                        'Analyze your Kubernetes cluster’s health and monitor your container workloads.',
                     }
                   )}
                 </p>

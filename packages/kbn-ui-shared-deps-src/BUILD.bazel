@@ -31,6 +31,7 @@ webpack_cli(
     "//packages/kbn-crypto-browser",
     "//packages/kbn-es-query",
     "//packages/kbn-search-errors",
+    "//packages/kbn-security-hardening",
     "//packages/kbn-std",
     "//packages/kbn-safer-lodash-set",
     "//packages/kbn-peggy",

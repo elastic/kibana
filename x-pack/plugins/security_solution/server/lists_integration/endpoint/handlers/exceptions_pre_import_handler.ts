@@ -14,7 +14,7 @@ export const getExceptionsPreImportHandler = (): ValidatorCallback => {
   return async ({ data }) => {
     const hasEndpointArtifactListOrListItems = [...data.lists, ...data.items].some((item) => {
       if ('list_id' in item) {
-        return ALL_ENDPOINT_ARTIFACT_LIST_IDS.includes(item.list_id);
+        return (ALL_ENDPOINT_ARTIFACT_LIST_IDS as string[]).includes(item.list_id);
       }
 
       return false;

@@ -59,7 +59,8 @@ import {
 import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/220822
+describe.skip(
   'Add/edit exception from rule details',
   { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {

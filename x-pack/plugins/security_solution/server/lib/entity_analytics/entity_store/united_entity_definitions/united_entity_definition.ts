@@ -22,6 +22,7 @@ export class UnitedEntityDefinition {
   indexPatterns: string[];
   fields: UnitedDefinitionField[];
   namespace: string;
+  filter: string;
   entityManagerDefinition: EntityDefinition;
   fieldRetentionDefinition: FieldRetentionDefinition;
   indexMappings: MappingTypeMapping;
@@ -34,6 +35,7 @@ export class UnitedEntityDefinition {
     indexPatterns: string[];
     fields: UnitedDefinitionField[];
     namespace: string;
+    filter: string;
     syncDelay: string;
     frequency: string;
   }) {
@@ -44,13 +46,14 @@ export class UnitedEntityDefinition {
     this.frequency = opts.frequency;
     this.syncDelay = opts.syncDelay;
     this.namespace = opts.namespace;
+    this.filter = opts.filter;
     this.entityManagerDefinition = this.toEntityManagerDefinition();
     this.fieldRetentionDefinition = this.toFieldRetentionDefinition();
     this.indexMappings = this.toIndexMappings();
   }
 
   private toEntityManagerDefinition(): EntityDefinition {
-    const { entityType, namespace, indexPatterns, syncDelay, frequency } = this;
+    const { entityType, namespace, indexPatterns, syncDelay, frequency, filter } = this;
     const identityField = getIdentityFieldForEntityType(this.entityType);
     const metadata = this.fields
       .filter((field) => field.definition)
@@ -63,6 +66,7 @@ export class UnitedEntityDefinition {
       indexPatterns,
       identityFields: [identityField],
       displayNameTemplate: `{{${identityField}}}`,
+      filter,
       metadata,
       latest: {
         timestampField: '@timestamp',

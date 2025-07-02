@@ -342,7 +342,10 @@ export class DashboardContainer
     this.hasOverlays$ = dashboardApi.hasOverlays$;
     this.openOverlay = dashboardApi.openOverlay;
     this.hasRunMigrations$ = dashboardApi.hasRunMigrations$;
-    this.setLastSavedInput = dashboardApi.setLastSavedInput;
+    this.setLastSavedInput = (lastSavedInput: DashboardContainerInput) => {
+      dashboardApi.setLastSavedInput(lastSavedInput);
+      this.setPanels(lastSavedInput.panels);
+    };
     this.lastSavedInput$ = dashboardApi.lastSavedInput$;
     this.savedObjectId = dashboardApi.savedObjectId;
     this.setSavedObjectId = dashboardApi.setSavedObjectId;
@@ -749,6 +752,7 @@ export class DashboardContainer
     newSavedObjectId?: string,
     newCreationOptions?: Partial<DashboardCreationOptions>
   ) => {
+    this.restoredRuntimeState = undefined; // restored runtime state will be set in `initializeDashboard`, if necessary
     this.integrationSubscriptions.unsubscribe();
     this.integrationSubscriptions = new Subscription();
     this.stopSyncingWithUnifiedSearch?.();

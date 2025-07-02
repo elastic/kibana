@@ -270,6 +270,9 @@ export const EditorFooter = memo(function EditorFooter({
                     data-test-subj="ESQLEditor-documentation"
                     size="m"
                     onClick={() => toggleLanguageComponent()}
+                    aria-label={i18n.translate('esqlEditor.query.documentationAriaLabel', {
+                      defaultMessage: 'Open documentation',
+                    })}
                     css={css`
                       cursor: pointer;
                     `}

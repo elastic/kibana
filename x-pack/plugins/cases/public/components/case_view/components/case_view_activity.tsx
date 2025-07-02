@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
@@ -192,7 +193,12 @@ export const CaseViewActivity = ({
 
   return (
     <>
-      <EuiFlexItem grow={6}>
+      <EuiFlexItem
+        grow={6}
+        css={css`
+          max-width: 75%;
+        `}
+      >
         <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ACTIVITY} />
         <Description
           isLoadingDescription={isLoadingDescription}

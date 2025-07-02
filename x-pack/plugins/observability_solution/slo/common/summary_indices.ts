@@ -10,19 +10,24 @@ import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from './constants';
 
 export const getListOfSloSummaryIndices = (
   settings: GetSLOSettingsResponse,
-  clustersByName: Array<{ name: string; isConnected: boolean }>
-) => {
+  clustersByName: Array<{ name: string; isConnected: boolean }> = []
+): string[] => {
   const { useAllRemoteClusters, selectedRemoteClusters } = settings;
   if (!useAllRemoteClusters && selectedRemoteClusters.length === 0) {
-    return SLO_SUMMARY_DESTINATION_INDEX_PATTERN;
+    return [SLO_SUMMARY_DESTINATION_INDEX_PATTERN];
   }
 
-  const indices: string[] = [SLO_SUMMARY_DESTINATION_INDEX_PATTERN];
-  clustersByName.forEach(({ name, isConnected }) => {
-    if (isConnected && (useAllRemoteClusters || selectedRemoteClusters.includes(name))) {
-      indices.push(`${name}:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`);
-    }
-  });
+  if (useAllRemoteClusters) {
+    return [SLO_SUMMARY_DESTINATION_INDEX_PATTERN, `*:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`];
+  }
 
-  return indices.join(',');
+  return clustersByName.reduce(
+    (acc, { name, isConnected }) => {
+      if (isConnected && selectedRemoteClusters.includes(name)) {
+        acc.push(`${name}:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`);
+      }
+      return acc;
+    },
+    [SLO_SUMMARY_DESTINATION_INDEX_PATTERN]
+  );
 };

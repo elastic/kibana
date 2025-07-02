@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import LRUCache from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 import hash from 'object-hash';
 
 import dateMath from '@kbn/datemath';
@@ -37,7 +37,7 @@ export class OptionsListFetchCache {
   constructor() {
     this.cache = new LRUCache<string, OptionsListSuccessResponse>({
       max: REQUEST_CACHE_SIZE,
-      maxAge: REQUEST_CACHE_TTL,
+      ttl: REQUEST_CACHE_TTL,
     });
   }
 
@@ -123,6 +123,6 @@ export class OptionsListFetchCache {
   }
 
   public clearCache = () => {
-    this.cache.reset();
+    this.cache.clear();
   };
 }

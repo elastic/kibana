@@ -18,6 +18,8 @@ import type {
   SessionStorageCookieOptions,
 } from '@kbn/core-http-server';
 
+import { isDeepStrictEqual } from 'util';
+
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 
 class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> {
@@ -30,21 +32,41 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
   public async get(): Promise<T | null> {
     try {
       const session = await this.server.auth.test('security-cookie', this.request);
+
       // A browser can send several cookies, if it's not an array, just return the session value
-      if (!Array.isArray(session)) {
+      if (!Array.isArray(session.credentials)) {
         return session.credentials as T;
       }
 
       // If we have an array with one value, we're good also
-      if (session.length === 1) {
-        return session[0] as T;
+      if (session.credentials.length === 1) {
+        return session.credentials[0] as T;
       }
 
-      // Otherwise, we have more than one and won't be authing the user because we don't
-      // know which session identifies the actual user. There's potential to change this behavior
-      // to ensure all valid sessions identify the same user, or choose one valid one, but this
-      // is the safest option.
-      this.log.warn(`Found ${session.length} auth sessions when we were only expecting 1.`);
+      // If we have more than one session, return the first one if they are all the same
+      if (session.credentials.length > 1) {
+        this.log.warn(
+          `Found multiple auth sessions. Found:[${session.credentials.length}] sessions. Checking equality...`
+        );
+        const [firstSession, ...rest] = session.credentials;
+        const allEqual = rest.every((s) => {
+          return isDeepStrictEqual(s, firstSession);
+        });
+        if (allEqual) {
+          this.log.error(
+            `Found multiple auth sessions. Found:[${session.credentials.length}] equal sessions`
+          );
+          return firstSession as T;
+        }
+      }
+
+      // Otherwise, we have more than one session that are not the same as each other
+      // and won't be authing the user because we don't know which session identifies
+      // the actual user. There's potential to change this behavior to ensure all valid sessions
+      // identify the same user, or choose one valid one, but this is the safest option.
+      this.log.error(
+        `Found multiple auth sessions. Found:[${session.credentials.length}] unequal sessions`
+      );
       return null;
     } catch (error) {
       this.log.debug(String(error));

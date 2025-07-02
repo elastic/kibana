@@ -30,6 +30,4 @@ export type CanvasContainerApi = PublishesViewMode &
   HasType &
   HasSerializedChildState &
   PublishesReload &
-  Partial<HasAppContext & PublishesUnifiedSearch> & {
-    reload: () => void;
-  };
+  Partial<HasAppContext & PublishesUnifiedSearch>;

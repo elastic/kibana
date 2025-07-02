@@ -25,6 +25,9 @@
     "@kbn/core-theme-browser-mocks",
     "@kbn/core-i18n-browser-mocks",
     "@kbn/core-notifications-browser-mocks",
+    "@kbn/core-http-server-internal",
+    "@kbn/core-test-helpers-test-utils",
+    "@kbn/std",
   ],
   "exclude": [
     "target/**/*",

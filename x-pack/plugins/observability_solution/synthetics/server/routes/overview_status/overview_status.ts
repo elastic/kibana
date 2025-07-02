@@ -47,10 +47,7 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
    * latest ping for all enabled monitors.
    */
 
-  const { filtersStr, locationFilter: queryLocations } = await getMonitorFilters({
-    ...params,
-    context,
-  });
+  const { filtersStr, locationIds: queryLocations } = await getMonitorFilters(context);
 
   const allMonitors = await getAllMonitors({
     soClient: savedObjectsClient,

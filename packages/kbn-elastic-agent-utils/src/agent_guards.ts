@@ -9,6 +9,7 @@
 
 import {
   ANDROID_AGENT_NAMES,
+  ELASTIC_AGENT_NAMES,
   IOS_AGENT_NAMES,
   JAVA_AGENT_NAMES,
   OPEN_TELEMETRY_AGENT_NAMES,
@@ -17,12 +18,15 @@ import {
 
 import type {
   AndroidAgentName,
+  ElasticAgentName,
   IOSAgentName,
   JavaAgentName,
   OpenTelemetryAgentName,
   RumAgentName,
   ServerlessType,
 } from './agent_names';
+
+const ElasticAgentNamesSet = new Set(ELASTIC_AGENT_NAMES);
 
 export function getAgentName(
   agentName: string | null,
@@ -56,6 +60,9 @@ export function isOpenTelemetryAgentName(agentName: string): agentName is OpenTe
     OPEN_TELEMETRY_AGENT_NAMES.includes(agentName as OpenTelemetryAgentName)
   );
 }
+
+export const isElasticAgentName = (agentName: string): agentName is ElasticAgentName =>
+  ElasticAgentNamesSet.has(agentName as ElasticAgentName);
 
 export function isJavaAgentName(agentName?: string): agentName is JavaAgentName {
   return (

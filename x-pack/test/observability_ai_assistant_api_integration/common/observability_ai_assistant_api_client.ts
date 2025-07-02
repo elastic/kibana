@@ -34,6 +34,7 @@ export function createObservabilityAIAssistantApiClient(st: supertest.Agent) {
     options: {
       type?: 'form-data';
       endpoint: TEndpoint;
+      spaceId?: string;
     } & ObservabilityAIAssistantAPIClientRequestParamsOf<TEndpoint> & {
         params?: { query?: { _inspect?: boolean } };
       }
@@ -43,7 +44,8 @@ export function createObservabilityAIAssistantApiClient(st: supertest.Agent) {
     const params = 'params' in options ? (options.params as Record<string, any>) : {};
 
     const { method, pathname, version } = formatRequest(endpoint, params.path);
-    const url = format({ pathname, query: params?.query });
+    const pathnameWithSpaceId = options.spaceId ? `/s/${options.spaceId}${pathname}` : pathname;
+    const url = format({ pathname: pathnameWithSpaceId, query: params?.query });
 
     const headers: Record<string, string> = { 'kbn-xsrf': 'foo' };
 

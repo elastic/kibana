@@ -8,6 +8,7 @@
 import { useState, useCallback, useEffect, useReducer } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { isFailure, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import {
   Sort,
@@ -160,6 +161,10 @@ export const useMetricsK8sAnomaliesResults = (
     active = true,
   }: { request$?: BehaviorSubject<(() => Promise<unknown>) | undefined>; active?: boolean }
 ) => {
+  const {
+    services: { application },
+  } = useKibanaContextForPlugin();
+
   const [metricsK8sAnomalies, setMetricsK8sAnomalies] = useState<MetricsK8sAnomalies>([]);
   const initStateReducer = (stateDefaults: ReducerStateDefaults): ReducerState => {
     return {
@@ -175,12 +180,19 @@ export const useMetricsK8sAnomaliesResults = (
   };
   const [reducerState, dispatch] = useReducer(stateReducer, STATE_DEFAULTS, initStateReducer);
 
+  const mlCapabilities = application.capabilities.ml as { canGetJobs: boolean } | undefined;
+  const canGetAnomalies = mlCapabilities?.canGetJobs;
+
   const {
     data: response,
     status,
     refetch,
   } = useFetcher(
     async (callApi) => {
+      if (!canGetAnomalies) {
+        return;
+      }
+
       const apiResponse = await callApi(INFA_ML_GET_METRICS_K8S_ANOMALIES_PATH, {
         method: 'POST',
         body: JSON.stringify(
@@ -216,6 +228,7 @@ export const useMetricsK8sAnomaliesResults = (
       reducerState.timeRange.start,
       search,
       sourceId,
+      canGetAnomalies,
     ],
     {
       requestObservable$: request$,
