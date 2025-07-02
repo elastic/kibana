@@ -315,16 +315,6 @@ export class AdHocTaskRunner implements CancellableTask {
 
       const namespace = this.context.spaceIdToNamespace(spaceId);
 
-      this.logger.info(
-        `Initializing event logger with context ${JSON.stringify({
-          savedObjectId: adHocRunParamsId,
-          savedObjectType: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-          spaceId,
-          executionId: this.executionId,
-          taskScheduledAt: this.taskInstance.scheduledAt,
-          ...(namespace ? { namespace } : {}),
-        })}`
-      );
       this.alertingEventLogger.initialize({
         context: {
           savedObjectId: adHocRunParamsId,
@@ -367,7 +357,6 @@ export class AdHocTaskRunner implements CancellableTask {
       }
 
       const { rule, apiKeyToUse, schedule, start, end } = adHocRunData;
-      this.logger.info(`adHocRunData ${JSON.stringify(adHocRunData)}`);
       this.apiKeyToUse = apiKeyToUse;
 
       let ruleType: UntypedNormalizedRuleType;
@@ -437,7 +426,6 @@ export class AdHocTaskRunner implements CancellableTask {
       this.scheduleToRunIndex = (this.adHocRunSchedule ?? []).findIndex(
         (s: AdHocRunSchedule) => s.status === adHocRunStatus.PENDING
       );
-      this.logger.info(`scheduleToRunIndex: ${this.scheduleToRunIndex}`);
       if (this.scheduleToRunIndex > -1) {
         this.logger.debug(
           `Executing ad hoc run for rule ${ruleType.id}:${rule.id} for runAt ${
@@ -519,9 +507,6 @@ export class AdHocTaskRunner implements CancellableTask {
             updatedStatus = adHocRunStatus.ERROR;
           }
           this.adHocRunSchedule[this.scheduleToRunIndex].status = updatedStatus;
-          this.logger.info(
-            `acHocRunSchedule with updated status ${JSON.stringify(this.adHocRunSchedule)}`
-          );
         }
 
         // If execution failed due to decrypt error, we should stop running the task
@@ -581,7 +566,6 @@ export class AdHocTaskRunner implements CancellableTask {
   }
 
   async run(): Promise<RunResult> {
-    this.logger.info(`Running ad hoc task!`);
     let runMetrics: Result<RuleTaskStateAndMetrics, Error>;
     try {
       const runParams = await this.prepareToRun();
@@ -603,8 +587,6 @@ export class AdHocTaskRunner implements CancellableTask {
     if (this.cancelled) {
       return;
     }
-
-    this.logger.info(`Cancelling ad hoc task!`);
     this.cancelled = true;
     this.searchAbortController.abort();
     this.ruleTypeRunner.cancelRun();
