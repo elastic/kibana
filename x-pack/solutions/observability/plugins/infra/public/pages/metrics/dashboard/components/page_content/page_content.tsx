@@ -58,8 +58,8 @@ export const PageContent = ({
           <EuiLoadingSpinner size="xl" />
         ) : (
           <>
-            {entityId ? <EntityTable entityId={entityId} /> : null}
             <RenderDashboard dashboardId={dashboardId} kuery={kuery} />
+            {entityId ? <EntityTable entityId={entityId} /> : null}
           </>
         )}
       </EuiFlexItem>

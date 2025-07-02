@@ -216,7 +216,7 @@ function formatId(id: string): string {
 }
 
 function buildHref(id: string, parent?: string): string {
-  const href = `${parent ? `${parent}/` : ''}${id}`;
+  const href = `/${parent ? `${parent}/` : ''}${id}`;
 
   return href;
 }
