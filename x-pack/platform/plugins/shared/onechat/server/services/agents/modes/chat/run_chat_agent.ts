@@ -38,6 +38,7 @@ export const runChatAgent: RunChatAgentFn = async (
     toolSelection = [{ toolIds: ['*'] }],
     customInstructions,
     runId = uuidv4(),
+    agentId,
   },
   { logger, request, modelProvider, toolProvider, events }
 ) => {
@@ -73,6 +74,7 @@ export const runChatAgent: RunChatAgentFn = async (
       runName: chatAgentGraphName,
       metadata: {
         graphName: chatAgentGraphName,
+        agentId,
         runId,
       },
       recursionLimit: 10,

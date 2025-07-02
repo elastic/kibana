@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { from, filter, shareReplay } from 'rxjs';
 import { AgentHandlerContext } from '@kbn/onechat-server';
 import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
@@ -43,6 +44,8 @@ export const runResearcherAgent: RunResearcherAgentFn = async (
     conversation = [],
     toolSelection = [{ toolIds: ['*'] }],
     customInstructions,
+    runId = uuidv4(),
+    agentId,
     cycleBudget = defaultCycleBudget,
   },
   { logger, request, modelProvider, toolProvider, events }
@@ -84,6 +87,8 @@ export const runResearcherAgent: RunResearcherAgentFn = async (
       runName: agentGraphName,
       metadata: {
         graphName: agentGraphName,
+        agentId,
+        runId,
       },
       recursionLimit: cycleBudget * 10,
       callbacks: [],

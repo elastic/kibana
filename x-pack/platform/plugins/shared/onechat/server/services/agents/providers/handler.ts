@@ -33,6 +33,7 @@ export const createHandler = ({
         nextInput,
         conversation,
         runId,
+        agentId,
         toolSelection,
         customInstructions,
       },

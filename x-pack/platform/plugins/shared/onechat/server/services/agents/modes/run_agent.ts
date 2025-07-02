@@ -35,6 +35,10 @@ export interface RunAgentParams {
    * In case of nested calls (e.g calling from a tool), allows to define the runId.
    */
   runId?: string;
+  /**
+   * The agent this run is for. Used for tracing.
+   */
+  agentId?: string;
 }
 
 export interface RunAgentResponse {
