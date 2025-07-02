@@ -75,7 +75,7 @@ export const SettingsApplication = () => {
   const {
     spaceSettings: { save: canSaveSpaceSettings },
     globalSettings: { save: canSaveGlobalSettings, show: canShowGlobalSettings },
-    solutionsFiltering
+    solutionsFiltering,
   } = getCapabilities();
   if (!canSaveSpaceSettings || (!canSaveGlobalSettings && canShowGlobalSettings)) {
     setBadge(readOnlyBadge);

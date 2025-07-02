@@ -25,7 +25,12 @@ import type {
   AIAssistantManagementSelectionPluginServerStart,
 } from './types';
 import { AIAssistantType } from '../common/ai_assistant_type';
-import { OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, SEARCH_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
+import {
+  OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+  PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+  SEARCH_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+  SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+} from '../common/ui_setting_keys';
 import { classicSetting } from './src/settings/classic_setting';
 import { observabilitySolutionSetting } from './src/settings/observability_setting';
 import { securitySolutionSetting } from './src/settings/security_setting';
@@ -33,12 +38,12 @@ import { searchSolutionSetting } from './src/settings/search_setting';
 
 export class AIAssistantManagementSelectionPlugin
   implements
-  Plugin<
-    AIAssistantManagementSelectionPluginServerSetup,
-    AIAssistantManagementSelectionPluginServerStart,
-    AIAssistantManagementSelectionPluginServerDependenciesSetup,
-    AIAssistantManagementSelectionPluginServerDependenciesStart
-  >
+    Plugin<
+      AIAssistantManagementSelectionPluginServerSetup,
+      AIAssistantManagementSelectionPluginServerStart,
+      AIAssistantManagementSelectionPluginServerDependenciesSetup,
+      AIAssistantManagementSelectionPluginServerDependenciesStart
+    >
 {
   private readonly config: AIAssistantManagementSelectionConfig;
 
@@ -56,7 +61,6 @@ export class AIAssistantManagementSelectionPlugin
         value: this.config.preferredAIAssistantType,
       },
     });
-
 
     core.uiSettings.register({
       [OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
@@ -147,5 +151,5 @@ export class AIAssistantManagementSelectionPlugin
     return {};
   }
 
-  public stop() { }
+  public stop() {}
 }

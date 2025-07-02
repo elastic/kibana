@@ -12,15 +12,19 @@ import { type CoreSetup, Plugin, type CoreStart, PluginInitializerContext } from
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginSetup } from '@kbn/serverless/public';
-import { BehaviorSubject, Observable, of, switchMap } from 'rxjs';
+import { BehaviorSubject, Observable, switchMap } from 'rxjs';
 import type { BuildFlavor } from '@kbn/config';
-import { AIAssistantType } from '../common/ai_assistant_type';
-import { OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, SEARCH_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-
+import { AIAssistantType } from '../common/ai_assistant_type';
+import {
+  OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+  PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+  SEARCH_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+  SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+} from '../common/ui_setting_keys';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AIAssistantManagementSelectionPluginPublicSetup { }
+export interface AIAssistantManagementSelectionPluginPublicSetup {}
 
 export interface AIAssistantManagementSelectionPluginPublicStart {
   aiAssistantType$: Observable<AIAssistantType>;
@@ -32,25 +36,24 @@ export interface SetupDependencies {
   serverless?: ServerlessPluginSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StartDependencies {
-  spaces: SpacesPluginStart
+  spaces: SpacesPluginStart;
 }
 
 export class AIAssistantManagementPlugin
   implements
-  Plugin<
-    AIAssistantManagementSelectionPluginPublicSetup,
-    AIAssistantManagementSelectionPluginPublicStart,
-    SetupDependencies,
-    StartDependencies
-  >
+    Plugin<
+      AIAssistantManagementSelectionPluginPublicSetup,
+      AIAssistantManagementSelectionPluginPublicStart,
+      SetupDependencies,
+      StartDependencies
+    >
 {
   private readonly kibanaBranch: string;
   private readonly buildFlavor: BuildFlavor;
   private readonly config: {
     serverlessUiSettingsKey?: string;
-  }
+  };
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -105,15 +108,17 @@ export class AIAssistantManagementPlugin
   }
 
   public start(coreStart: CoreStart, plugins: StartDependencies) {
-
     const aiAssistantType$ = this.getAiAssistantType$(coreStart, plugins);
 
     return {
-      aiAssistantType$: aiAssistantType$,
+      aiAssistantType$,
     };
   }
 
-  private getAiAssistantType$(coreStart: CoreStart, plugins: StartDependencies): Observable<AIAssistantType> {
+  private getAiAssistantType$(
+    coreStart: CoreStart,
+    plugins: StartDependencies
+  ): Observable<AIAssistantType> {
     if (this.buildFlavor === 'serverless') {
       if (!this.config.serverlessUiSettingsKey) {
         throw new Error(
@@ -132,30 +137,30 @@ export class AIAssistantManagementPlugin
     const space$ = plugins.spaces.getActiveSpace$();
 
     return space$.pipe(
-      switchMap(value => {
+      switchMap((value) => {
         switch (value.solution) {
           case undefined:
           case 'classic':
-            return new BehaviorSubject(coreStart.uiSettings.get(
-              PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
-            ));
+            return new BehaviorSubject(
+              coreStart.uiSettings.get(PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY)
+            );
           case 'oblt':
-            return new BehaviorSubject(coreStart.uiSettings.get(
-              OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
-            ));
+            return new BehaviorSubject(
+              coreStart.uiSettings.get(OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY)
+            );
           case 'es':
-            return new BehaviorSubject(coreStart.uiSettings.get(
-              SEARCH_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
-            ));
+            return new BehaviorSubject(
+              coreStart.uiSettings.get(SEARCH_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY)
+            );
           case 'security':
-            return new BehaviorSubject(coreStart.uiSettings.get(
-              SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
-            ));
+            return new BehaviorSubject(
+              coreStart.uiSettings.get(SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY)
+            );
           case 'chat':
           default:
-            return new BehaviorSubject(AIAssistantType.Never)
+            return new BehaviorSubject(AIAssistantType.Never);
         }
       })
-    )
+    );
   }
 }

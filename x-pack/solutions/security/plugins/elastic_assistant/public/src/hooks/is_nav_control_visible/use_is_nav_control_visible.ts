@@ -24,12 +24,13 @@ function getVisibility(
     (appId && applications.get(appId)?.category?.id) || DEFAULT_APP_CATEGORIES.kibana.id;
 
   if (preferredAssistantType === AIAssistantType.Security) {
-    return DEFAULT_APP_CATEGORIES.observability.id !== categoryId &&
+    return (
+      DEFAULT_APP_CATEGORIES.observability.id !== categoryId &&
       DEFAULT_APP_CATEGORIES.enterpriseSearch.id !== categoryId
+    );
   }
 
-  return DEFAULT_APP_CATEGORIES.security.id === categoryId
-
+  return DEFAULT_APP_CATEGORIES.security.id === categoryId;
 }
 
 export function useIsNavControlVisible() {
