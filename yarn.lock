@@ -7757,6 +7757,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/streamlang@link:x-pack/platform/packages/shared/kbn-streamlang":
+  version "0.0.0"
+  uid ""
+
 "@kbn/streams-app-plugin@link:x-pack/platform/plugins/shared/streams_app":
   version "0.0.0"
   uid ""
