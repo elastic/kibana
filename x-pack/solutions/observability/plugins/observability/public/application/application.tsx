@@ -21,19 +21,15 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import PageNotFound from '../pages/404';
 import { PluginContext } from '../context/plugin_context/plugin_context';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
-import { routes, completeRoutes } from '../routes/routes';
-import { useKibana } from '../utils/kibana_react';
+import { useAppRoutes } from '../routes/routes';
 import { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
 import { HideableReactQueryDevTools } from './hideable_react_query_dev_tools';
 
 export function App() {
-  const { pricing } = useKibana().services;
-  const isCompleteOverviewEnabled = pricing.isFeatureAvailable('observability:complete_overview');
-  const allRoutes = {
-    ...(isCompleteOverviewEnabled ? { ...completeRoutes, ...routes } : { ...routes }),
-  };
+  const allRoutes = useAppRoutes();
   return (
     <>
       <Routes enableExecutionContextTracking={true}>
@@ -45,6 +41,9 @@ export function App() {
           };
           return <Route key={path} path={path} exact={exact} component={Wrapper} />;
         })}
+        <Route>
+          <PageNotFound />
+        </Route>
       </Routes>
     </>
   );
