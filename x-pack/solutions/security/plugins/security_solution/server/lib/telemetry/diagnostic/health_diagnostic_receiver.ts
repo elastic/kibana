@@ -250,13 +250,21 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
             return [query.index];
           } else {
             const indices = Object.entries(response.indices).map(([indexName, stats]) => {
-              if ('phase' in stats && stats.phase && stats.phase in tiers) {
-                return indexName;
+              if ('phase' in stats && stats.phase) {
+                if (tiers.includes(stats.phase)) {
+                  return indexName;
+                } else {
+                  this.logger.debug('Index is not in the expected phases', {
+                    phase: stats.phase,
+                    index: indexName,
+                    tiers,
+                  } as LogMeta);
+                  return '';
+                }
               } else {
                 // should not happen, but just in case
                 this.logger.debug('Index is not managed by an ILM', {
                   index: indexName,
-                  response,
                   tiers,
                 } as LogMeta);
                 return '';
