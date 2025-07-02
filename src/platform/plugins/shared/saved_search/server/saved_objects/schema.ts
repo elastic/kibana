@@ -8,6 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { refreshIntervalSchema } from '@kbn/data-service-server';
 import {
   MIN_SAVED_SEARCH_SAMPLE_SIZE,
   MAX_SAVED_SEARCH_SAMPLE_SIZE,
@@ -63,12 +64,7 @@ const SCHEMA_SEARCH_BASE = schema.object({
       to: schema.string(),
     })
   ),
-  refreshInterval: schema.maybe(
-    schema.object({
-      pause: schema.boolean(),
-      value: schema.number(),
-    })
-  ),
+  refreshInterval: schema.maybe(refreshIntervalSchema),
 
   // Display
   viewMode: schema.maybe(
