@@ -17,3 +17,5 @@ export const services = {
   spaces: apiIntegrationServices.spaces,
   roleScopedSupertest: RoleScopedSupertestProvider,
 };
+
+export type DeploymentAgnosticCommonServices = typeof services;

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { createServerlessTestConfig } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/default_configs/serverless.config.base';
-
+import { createServerlessTestConfig } from '../default_configs/serverless.config.base';
 import { services } from '../services';
 
 export default createServerlessTestConfig({

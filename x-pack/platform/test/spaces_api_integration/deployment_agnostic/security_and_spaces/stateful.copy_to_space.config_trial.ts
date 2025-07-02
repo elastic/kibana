@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { createStatefulTestConfig } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/default_configs/stateful.config.base';
-
+import { createStatefulTestConfig } from '../default_configs/stateful.config.base';
 import { services } from '../services';
 
 export default createStatefulTestConfig({

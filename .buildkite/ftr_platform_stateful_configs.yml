@@ -2,6 +2,8 @@ disabled:
   # Stateful base config for deployment-agnostic tests
   - x-pack/test/api_integration/deployment_agnostic/default_configs/stateful.config.base.ts
   - x-pack/test/api_integration/deployment_agnostic/default_configs/feature_flag.stateful.config.base.ts
+  - x-pack/platform/test/spaces_api_integration/deployment_agnostic/default_configs/serverless.config.base.ts
+  - x-pack/platform/test/spaces_api_integration/deployment_agnostic/default_configs/stateful.config.base.ts
 
   # Base config files, only necessary to inform config finding script
   - src/platform/test/functional/config.base.js
@@ -50,7 +52,6 @@ disabled:
 
   # Gen AI suites, running with their own pipeline
   - x-pack/test/functional_gen_ai/inference/config.ts
-
 
 defaultQueue: 'n2-4-spot'
 enabled:
