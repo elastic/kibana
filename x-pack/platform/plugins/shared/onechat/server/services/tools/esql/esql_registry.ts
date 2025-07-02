@@ -68,10 +68,7 @@ export class EsqlToolRegistryImpl implements EsqlToolRegistry {
       esClient: this.elasticsearch.client.asScoped(request).asInternalUser,
     });
 
-    const client = createClient({
-      storage,
-      esClient: this.elasticsearch.client.asScoped(request).asCurrentUser,
-    });
+    const client = createClient({ storage });
 
     return client;
   }
