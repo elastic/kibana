@@ -116,5 +116,7 @@
     "@kbn/reporting-export-types-png-common",
     "@kbn/reporting-server",
     "@kbn/lens-plugin",
+    "@kbn/mock-idp-utils",
+    "@kbn/es",
   ]
 }
