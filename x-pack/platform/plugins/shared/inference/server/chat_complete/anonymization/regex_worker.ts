@@ -18,6 +18,7 @@ export function initRegexWorker() {
     workerData: { fullpath: regexWorkerFilename },
     minThreads: 0,
     maxThreads: 3,
+    idleTimeout: 30000,
   });
 }
 
