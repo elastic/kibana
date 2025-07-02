@@ -15,6 +15,8 @@ export {
   createTextChunkEvent,
   createMessageEvent,
   createReasoningEvent,
+  createToolCallEvent,
+  createToolResultEvent,
 } from './graph_events';
 export { extractTextContent, extractToolCalls, type ToolCall } from './messages';
 export {

@@ -92,8 +92,9 @@ export const toolToLangchain = ({
   return toTool(
     async (input) => {
       try {
-        const toolReturn = await tool.execute({ toolParams: input });
-        return JSON.stringify(toolReturn.result);
+        const { result } = await tool.execute({ toolParams: input });
+        const content = typeof result === 'string' ? result : JSON.stringify(result);
+        return [content, result];
       } catch (e) {
         logger.warn(`error calling tool ${tool.id}: ${e.message}`);
         throw e;
@@ -101,13 +102,12 @@ export const toolToLangchain = ({
     },
     {
       name: toolId ?? tool.id,
-      description: tool.description,
       schema: tool.schema,
+      description: tool.description,
+      responseFormat: 'content_and_artifact',
       metadata: {
-        serializedToolId: toSerializedToolIdentifier({
-          toolId: tool.id,
-          providerId: tool.meta.providerId,
-        }),
+        toolId: tool.id,
+        providerId: tool.meta.providerId,
       },
     }
   );
