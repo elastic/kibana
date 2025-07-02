@@ -10,14 +10,12 @@ import {
   ALERTS_FUNCTION_NAME,
   CONTEXT_FUNCTION_NAME,
   ELASTICSEARCH_FUNCTION_NAME,
-  EXECUTE_QUERY_FUNCTION_NAME,
   GET_ALERTS_DATASET_INFO_FUNCTION_NAME,
   GET_APM_DATASET_INFO_FUNCTION_NAME,
   GET_APM_DOWNSTREAM_DEPENDENCIES_FUNCTION_NAME,
   GET_DATASET_INFO_FUNCTION_NAME,
   QUERY_FUNCTION_NAME,
   SUMMARIZE_FUNCTION_NAME,
-  VISUALIZE_QUERY_FUNCTION_NAME,
 } from '..';
 
 export function getObservabilitySystemPrompt({
@@ -195,27 +193,6 @@ export function getObservabilitySystemPrompt({
           *  **Generate Example:** Use the inferred criteria to call the \`${QUERY_FUNCTION_NAME}\` tool and generate a valid example query.
           *  **Present the Query:** Show the user the generated example.
           *  **Add Clarification:** Explain that since no direct match was found, you have generated an example based on your interpretation of their request.`
-      );
-    }
-
-    if (
-      isFunctionAvailable(VISUALIZE_QUERY_FUNCTION_NAME) ||
-      isFunctionAvailable(EXECUTE_QUERY_FUNCTION_NAME)
-    ) {
-      usage.push(`**Query Execution Workflow:** This is a critical, two-step workflow that you MUST follow automatically.
-    * **Trigger:** This workflow applies whenever a user asks for information that requires a query to be run (e.g., "list all errors," "what is the average CPU?", "how many users logged in?", etc.).
-    * **Step 1:** First, call the \`${QUERY_FUNCTION_NAME}\` tool to generate the necessary ES|QL query.
-    * **Step 2 (Automatic Execution):** After Step 1 returns the query, you **MUST IMMEDIATELY** call the appropriate tool to satisfy the user's original request.
-        * If the user's original request **was for a result, metric, list or question about the particular data ("what" questions)** and NOT a visualization, you **MUST** call the \`${EXECUTE_QUERY_FUNCTION_NAME}\` tool.
-        * If the user's original request **was for a table or chart**, you **MUST** call the \`${VISUALIZE_QUERY_FUNCTION_NAME}\` tool.
-    * **CRITICAL:** Do **NOT** ask the user for permission between Step 1 and Step 2. Treat this entire workflow as a single, non-interactive operation to fulfill the user's initial prompt.
-`);
-      usage.push(
-        `**Handling Visualization/Execution Results:** If a tool call results in a visualization being shown by the application, acknowledge it. If a tool returns data directly ${
-          isFunctionAvailable(EXECUTE_QUERY_FUNCTION_NAME)
-            ? `(like the \`${EXECUTE_QUERY_FUNCTION_NAME}\` tool might) `
-            : ''
-        }, summarize the key findings for the user.`
       );
     }
 
