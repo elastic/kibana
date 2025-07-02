@@ -27,7 +27,6 @@ import {
   ALERT_LINK_DASHBOARDS_LABEL_TOOLTIP_CONTENT,
 } from '../translations';
 import { LabelWithTooltip } from './label_with_tooltip';
-import { useDebounceFn } from '@kbn/react-hooks';
 
 export interface Props {
   contentManagement: ContentManagementPublicStart;
@@ -126,10 +125,11 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
 
   // Debounced search change handler to avoid excessive API calls
   // useMemo is used instead of useCallback to avoid an eslint warning about exhaustive dependencies
-  const onSearchChange = useDebounceFn(
-    debounce((value: string) => {
-      setSearchValue(value);
-    }, 300),
+  const onSearchChange = useMemo(
+    () =>
+      debounce((value: string) => {
+        setSearchValue(value);
+      }, 300),
     []
   );
 
@@ -139,7 +139,6 @@ export const RuleDashboards = ({ contentManagement }: Props) => {
   });
 
   const loadDashboards = useCallback(async () => {
-    console.log('Loading dashboards with search value:', searchValue);
     if (contentManagement) {
       setLoading(true);
       const dashboards = await dashboardServiceProvider(contentManagement)
