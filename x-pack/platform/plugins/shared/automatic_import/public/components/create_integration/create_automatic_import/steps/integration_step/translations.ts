@@ -55,6 +55,6 @@ export const LOGO_ERROR = i18n.translate('xpack.automaticImport.step.integration
 export const NON_SVG_ERROR = i18n.translate(
   'xpack.automaticImport.step.integration.logo.nonSvgError',
   {
-    defaultMessage: 'Only SVG files are allowed.',
+    defaultMessage: 'Only SVG files are allowed',
   }
 );
