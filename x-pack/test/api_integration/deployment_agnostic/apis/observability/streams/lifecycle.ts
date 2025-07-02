@@ -156,6 +156,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
       });
 
+      it('inherits on creation', async () => {
+        const rootDefinition = await getStream(apiClient, 'logs');
+        await putStream(apiClient, 'logs', {
+          dashboards: [],
+          queries: [],
+          stream: {
+            description: '',
+            ingest: {
+              ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
+              lifecycle: { dsl: { data_retention: '50d' } },
+            },
+          },
+        });
+        await putStream(apiClient, 'logs.inheritsatcreation', wiredPutBody);
+
+        await expectLifecycle(['logs.inheritsatcreation'], {
+          dsl: { data_retention: '50d' },
+          from: 'logs',
+        });
+      });
+
       it('inherits dsl', async () => {
         // create two branches, one that inherits from root and
         // another one that overrides the root lifecycle
