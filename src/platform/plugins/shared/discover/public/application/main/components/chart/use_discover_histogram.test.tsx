@@ -114,7 +114,7 @@ describe('useDiscoverHistogram', () => {
   }: {
     stateContainer?: DiscoverStateContainer;
     scopedProfilesManager?: ScopedProfilesManager;
-    options?: UseUnifiedHistogramOptions
+    options?: UseUnifiedHistogramOptions;
   } = {}) => {
     const Wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
       <DiscoverTestProvider
@@ -173,8 +173,8 @@ describe('useDiscoverHistogram', () => {
         options: {
           initialLayoutProps: {
             topPanelHeight: 100,
-          }
-        }
+          },
+        },
       });
       const params = hook.result.current;
       expect(params?.localStorageKeyPrefix).toBe('discover');
