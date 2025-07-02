@@ -124,5 +124,6 @@ export interface HealthDiagnosticQueryStats {
   numDocs: number;
   passed: boolean;
   failure?: string;
+  fieldNames: string[];
   circuitBreakers?: Record<string, unknown>;
 }

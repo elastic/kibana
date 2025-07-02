@@ -28,7 +28,7 @@ import {
   type HealthDiagnosticServiceSetup,
   type HealthDiagnosticServiceStart,
 } from './health_diagnostic_service.types';
-import { nextExecution, parseDiagnosticQueries } from './health_diagnostic_utils';
+import { fieldNames, nextExecution, parseDiagnosticQueries } from './health_diagnostic_utils';
 import type { CircuitBreaker } from './health_diagnostic_circuit_breakers.types';
 import type { CircuitBreakingQueryExecutor } from './health_diagnostic_receiver.types';
 import { CircuitBreakingQueryExecutorImpl } from './health_diagnostic_receiver';
@@ -143,12 +143,14 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
         traceId: randomUUID(),
         numDocs: 0,
         passed: false,
+        fieldNames: [],
       };
 
       try {
         const data: unknown[] = await this.queryExecutor.search(options);
 
         queryStats.numDocs += data.length;
+        queryStats.fieldNames = fieldNames(data);
         const queryResult: HealthDiagnosticQueryResult = {
           name: query.name,
           queryId: query.id,

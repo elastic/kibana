@@ -939,6 +939,15 @@ export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT: EventTypeOpts<Health
           description: 'Error message if the query execution failed.',
         },
       },
+      fieldNames: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description: 'Field names in the query result.',
+          },
+        },
+      },
       circuitBreakers: {
         type: 'pass_through',
         _meta: {
