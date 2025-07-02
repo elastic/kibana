@@ -13,7 +13,7 @@ import {
   PerformInstallResponse,
   UninstallResponse,
 } from '@kbn/product-doc-base-plugin/common/http_api/installation';
-import { RETRIEVE_DOCUMENTATION_NAME } from '@kbn/observability-ai-assistant-plugin/server';
+import { RETRIEVE_ELASTIC_DOC_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server';
 import { chatClient, kibanaClient, logger } from '../../services';
 
 const ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH = '/internal/product_doc_base/status';
@@ -56,7 +56,7 @@ describe('Retrieve documentation function', () => {
     const conversation = await chatClient.complete({ messages: prompt });
 
     const result = await chatClient.evaluate(conversation, [
-      `Uses the ${RETRIEVE_DOCUMENTATION_NAME} function before answering the question about the Elastic stack`,
+      `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about the Elastic stack`,
       'The assistant provides guidance on configuring HTTPS for Elasticsearch based on the retrieved documentation',
       'Does not hallucinate steps without first calling the retrieve_elastic_doc function',
       'Mentions Elasticsearch and HTTPS configuration steps consistent with the documentation',
@@ -70,7 +70,7 @@ describe('Retrieve documentation function', () => {
     const conversation = await chatClient.complete({ messages: prompt });
 
     const result = await chatClient.evaluate(conversation, [
-      `Uses the ${RETRIEVE_DOCUMENTATION_NAME} function before answering the question about Kibana`,
+      `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about Kibana`,
       'Accurately explains what Kibana Lens is and provides steps for creating a visualization',
       `Does not invent unsupported instructions, answers should reference what's found in the Kibana docs`,
     ]);
@@ -84,7 +84,7 @@ describe('Retrieve documentation function', () => {
     const conversation = await chatClient.complete({ messages: prompt });
 
     const result = await chatClient.evaluate(conversation, [
-      `Uses the ${RETRIEVE_DOCUMENTATION_NAME} function before answering the question about Observability`,
+      `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about Observability`,
       'Provides instructions based on the Observability docs for setting up APM instrumentation in a Node.js service',
       'Mentions steps like installing the APM agent, configuring it with the service name and APM Server URL, etc., as per the docs',
       'Does not provide hallucinated steps, should align with actual Observability documentation',

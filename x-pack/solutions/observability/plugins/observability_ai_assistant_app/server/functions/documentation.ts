@@ -6,7 +6,7 @@
  */
 
 import { DocumentationProduct } from '@kbn/product-doc-common';
-import { RETRIEVE_DOCUMENTATION_NAME } from '@kbn/observability-ai-assistant-plugin/server';
+import { RETRIEVE_ELASTIC_DOC_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server';
 import type { FunctionRegistrationParameters } from '.';
 
 export async function registerDocumentationFunction({
@@ -18,8 +18,8 @@ export async function registerDocumentationFunction({
 
   if (isProductDocAvailable) {
     functions.registerInstruction(({ availableFunctionNames }) => {
-      return availableFunctionNames.includes(RETRIEVE_DOCUMENTATION_NAME)
-        ? `When asked questions about the Elastic stack or products, You should use the ${RETRIEVE_DOCUMENTATION_NAME} function before answering,
+      return availableFunctionNames.includes(RETRIEVE_ELASTIC_DOC_FUNCTION_NAME)
+        ? `When asked questions about the Elastic stack or products, You should use the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering,
       to retrieve documentation related to the question. Consider that the documentation returned by the function
       is always more up to date and accurate than any own internal knowledge you might have.`
         : undefined;
@@ -28,7 +28,7 @@ export async function registerDocumentationFunction({
 
   functions.registerFunction(
     {
-      name: RETRIEVE_DOCUMENTATION_NAME,
+      name: RETRIEVE_ELASTIC_DOC_FUNCTION_NAME,
       isInternal: !isProductDocAvailable,
       description: `Use this function to retrieve documentation about Elastic products.
       You can retrieve documentation about the Elastic stack, such as Kibana and Elasticsearch,
