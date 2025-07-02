@@ -13,7 +13,7 @@ import {
   builtinToolProviderId,
 } from '@kbn/onechat-common';
 import type { RegisteredTool } from '@kbn/onechat-server';
-import type { RegisteredToolProviderWithId } from './types';
+import type { RegisteredToolProviderWithId } from '../types';
 
 export interface BuiltinToolRegistry extends RegisteredToolProviderWithId {
   register(tool: RegisteredTool): void;
@@ -23,7 +23,7 @@ export const createBuiltinToolRegistry = (): BuiltinToolRegistry => {
   return new BuiltinToolRegistryImpl();
 };
 
-export class BuiltinToolRegistryImpl implements BuiltinToolRegistry {
+class BuiltinToolRegistryImpl implements BuiltinToolRegistry {
   public readonly id = builtinToolProviderId;
 
   private tools: Map<string, RegisteredTool> = new Map();
