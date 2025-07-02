@@ -60,6 +60,7 @@ import type { InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
 import { handleSystemColorModeChange } from './handle_system_colormode_change';
 import { AppMenuBar } from './ui/project/app_menu';
+import { createChromeUiStore } from './ui_state/ui_state';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
 const SNAPSHOT_REGEX = /-snapshot/i;
@@ -611,7 +612,15 @@ export class ChromeService {
       });
     };
 
+    const store = createChromeUiStore({
+      isVisible$: this.isVisible$,
+    });
+
     return {
+      getUiStore: () => {
+        return store;
+      },
+
       // TODO: this service does too much and doesn't have to compose these headers components.
       // let's get rid of this in the future https://github.com/elastic/kibana/issues/225264
       getLegacyHeaderComponentForFixedLayout,

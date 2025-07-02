@@ -16,6 +16,7 @@ import {
   SimpleDebugOverlay,
 } from '@kbn/core-chrome-layout-components';
 import useObservable from 'react-use/lib/useObservable';
+import { useStore } from 'zustand';
 import { GridLayoutGlobalStyles } from './grid_global_app_style';
 import type {
   LayoutService,
@@ -83,9 +84,11 @@ export class GridLayout implements LayoutService {
     const projectAppMenu = chrome.getProjectAppMenuComponent();
     const hasAppMenu$ = application.currentActionMenu$.pipe(map((menu) => !!menu));
 
+    const store = chrome.getUiStore();
+
     return React.memo(() => {
       // TODO: Get rid of observables https://github.com/elastic/kibana/issues/225265
-      const chromeVisible = useObservable(chromeVisible$, false);
+      const chromeVisible = useStore(store, (state) => state.isVisible$ ?? false);
       const hasHeaderBanner = useObservable(hasHeaderBanner$, false);
       const chromeStyle = useObservable(chromeStyle$, 'classic');
       const hasAppMenu = useObservable(hasAppMenu$, false);
