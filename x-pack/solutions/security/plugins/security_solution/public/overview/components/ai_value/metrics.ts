@@ -68,7 +68,4 @@ export const formatThousands = (value: number) =>
     format: '0,0',
   });
 
-export const formatPercent = (value: number) =>
-  formatNumber(value, {
-    format: '0%', // percentage with 2 decimals
-  });
+export const formatPercent = (value: number) => `${formatNumber(value, { format: '0.00' })}%`;

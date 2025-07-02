@@ -67,8 +67,8 @@ export const AIValueMetrics: React.FC<Props> = (props) => {
           <li>{`alertStats.escalatedPercentage: ${formatPercent(
             alertStats.escalatedPercentage
           )}`}</li>
-          <li>{`detectionComparison: ${formatPercent(detectionComparison.aiPercentage)}`}</li>
-          <li>{`detectionComparison: ${formatPercent(
+          <li>{`aiPercentage: ${formatPercent(detectionComparison.aiPercentage)}`}</li>
+          <li>{`traditionalPercentage: ${formatPercent(
             detectionComparison.traditionalPercentage
           )}`}</li>
           <li>{`responseTimeTrend.averageBeforeAI: ${formatThousands(
