@@ -27,6 +27,40 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-pricing-server",
+            "id": "def-server.PricingServiceSetup.isFeatureAvailable",
+            "type": "Function",
+            "tags": [],
+            "label": "isFeatureAvailable",
+            "description": [
+              "\nCheck if a specific feature is available in the current pricing tier configuration.\nResolves asynchronously after the pricing service has been set up and all the plugins have registered their features.\n"
+            ],
+            "signature": [
+              "(featureId: string) => Promise<boolean>"
+            ],
+            "path": "src/core/packages/pricing/server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-pricing-server",
+                "id": "def-server.PricingServiceSetup.isFeatureAvailable.$1",
+                "type": "string",
+                "tags": [],
+                "label": "featureId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/pricing/server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-pricing-server",
             "id": "def-server.PricingServiceSetup.registerProductFeatures",
             "type": "Function",
             "tags": [],
