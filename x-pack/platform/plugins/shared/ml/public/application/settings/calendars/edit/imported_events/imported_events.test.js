@@ -48,6 +48,6 @@ describe('ImportedEvents', () => {
   test('Renders imported events', () => {
     const { container } = renderWithI18n(<ImportedEvents {...testProps} />);
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 });

@@ -28,7 +28,7 @@ describe('ActionsSection', () => {
 
     const { container } = renderWithI18n(<ActionsSection {...props} />);
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders with skip_result selected', () => {
@@ -39,7 +39,7 @@ describe('ActionsSection', () => {
 
     const { container } = renderWithI18n(<ActionsSection {...props} />);
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders with skip_result and skip_model_update selected', () => {
@@ -51,6 +51,6 @@ describe('ActionsSection', () => {
       />
     );
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 });

@@ -36,7 +36,7 @@ describe('EventsTable', () => {
   test('Renders events table with no search bar', () => {
     const { container } = renderWithI18n(<EventsTable {...testProps} />);
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('Renders events table with search bar', () => {
@@ -47,7 +47,7 @@ describe('EventsTable', () => {
 
     const { container } = renderWithI18n(<EventsTable {...showSearchBarProps} />);
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('Calls onDeleteClick when delete button is clicked', () => {

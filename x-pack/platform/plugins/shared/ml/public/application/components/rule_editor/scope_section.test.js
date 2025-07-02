@@ -55,7 +55,7 @@ describe('ScopeSection', () => {
 
     const { container } = renderWithI18n(<ScopeSection {...props} />);
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test(`don't render when no partitioning fields`, () => {
@@ -67,7 +67,7 @@ describe('ScopeSection', () => {
 
     const { container } = renderWithI18n(<ScopeSection {...props} />);
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('show NoFilterListsCallOut when no filter list IDs', () => {
@@ -80,7 +80,7 @@ describe('ScopeSection', () => {
 
     const { container } = renderWithI18n(<ScopeSection {...props} />);
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders when enabled with no scope supplied', () => {
@@ -92,7 +92,7 @@ describe('ScopeSection', () => {
 
     const { container } = renderWithI18n(<ScopeSection {...props} />);
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders when enabled with scope supplied', () => {
@@ -105,7 +105,7 @@ describe('ScopeSection', () => {
 
     const { container } = renderWithI18n(<ScopeSection {...props} />);
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 });
 
@@ -136,6 +136,6 @@ describe('ScopeSection false canGetFilters privilege', () => {
 
     const { container } = renderWithI18n(<ScopeSection {...props} />);
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 });

@@ -56,6 +56,6 @@ describe('CalendarListsHeader', () => {
 
     const { container } = renderWithI18n(<CalendarsListHeader {...props} />);
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 });

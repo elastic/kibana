@@ -41,7 +41,7 @@ describe('ConditionsSectionExpression', () => {
 
     const { container } = renderWithI18n(<ConditionsSection {...props} />);
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders when enabled with no conditions supplied', () => {
@@ -52,7 +52,7 @@ describe('ConditionsSectionExpression', () => {
 
     const { container } = renderWithI18n(<ConditionsSection {...props} />);
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders when enabled with empty conditions supplied', () => {
@@ -64,7 +64,7 @@ describe('ConditionsSectionExpression', () => {
 
     const { container } = renderWithI18n(<ConditionsSection {...props} />);
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders when enabled with one condition', () => {
@@ -76,7 +76,7 @@ describe('ConditionsSectionExpression', () => {
 
     const { container } = renderWithI18n(<ConditionsSection {...props} />);
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders when enabled with two conditions', () => {
@@ -88,7 +88,7 @@ describe('ConditionsSectionExpression', () => {
 
     const { container } = renderWithI18n(<ConditionsSection {...props} />);
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test(`don't render when not enabled with conditions`, () => {
@@ -100,6 +100,6 @@ describe('ConditionsSectionExpression', () => {
 
     const { container } = renderWithI18n(<ConditionsSection {...props} />);
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 });

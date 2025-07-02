@@ -47,6 +47,6 @@ describe('Filter Lists Header', () => {
 
     const { container } = renderWithI18n(<FilterListsHeader {...props} />);
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 });
