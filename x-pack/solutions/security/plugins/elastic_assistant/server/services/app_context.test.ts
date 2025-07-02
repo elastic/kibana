@@ -100,15 +100,15 @@ describe('AppContextService', () => {
   });
 
   it('get tools for multiple plugins', () => {
-      const pluginName1 = 'pluginName1';
-      const pluginName2 = 'pluginName2';
+    const pluginName1 = 'pluginName1';
+    const pluginName2 = 'pluginName2';
 
-      appContextService.start(mockAppContext);
-      appContextService.registerTools(pluginName2, [toolOne, toolThree]);
-      appContextService.registerTools(pluginName1, [toolOne]);
+    appContextService.start(mockAppContext);
+    appContextService.registerTools(pluginName2, [toolOne, toolThree]);
+    appContextService.registerTools(pluginName1, [toolOne]);
 
-      expect(appContextService.getRegisteredTools([pluginName1, pluginName2]).length).toEqual(2);
-    });
+    expect(appContextService.getRegisteredTools([pluginName1, pluginName2]).length).toEqual(2);
+  });
 
   describe('registering features', () => {
     it('should register and get features for a single plugin', () => {
