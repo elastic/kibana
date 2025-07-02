@@ -562,6 +562,13 @@ export interface ISavedObjectsRepository {
    */
   asScopedToNamespace(namespace: string): ISavedObjectsRepository;
 
+  /**
+   * Changes the ownership of one or more SavedObjects to a new owner.
+   *
+   * @param objects {@link SavedObjectsChangeAccessControlObject} - the objects to update
+   * @param options {@link SavedObjectsChangeAccessControlOptions} - object containing owner profile_uid that will be the new owner
+   * @returns the {@link SavedObjectsChangeAccessControlResponse}
+   */
   changeOwnership<T = unknown>(
     objects: SavedObjectsChangeAccessControlObject[],
     options: SavedObjectsChangeAccessControlOptions<T>
