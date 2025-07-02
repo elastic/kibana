@@ -155,9 +155,10 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                       <EuiFlexItem grow={false}>
                         <EuiButtonIcon
                           data-test-subj="query-toggle-header"
-                          aria-label={`${toggleAriaLabel || ''} ${i18n.QUERY_BUTTON_TITLE(
-                            toggleStatus
-                          )}`}
+                          aria-label={[
+                            toggleAriaLabel || '',
+                            i18n.QUERY_BUTTON_TITLE(toggleStatus),
+                          ].join(' ')}
                           color="text"
                           display="empty"
                           iconType={toggleStatus ? 'arrowDown' : 'arrowRight'}
