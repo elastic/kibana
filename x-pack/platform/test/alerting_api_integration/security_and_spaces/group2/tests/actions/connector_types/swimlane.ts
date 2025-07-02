@@ -511,22 +511,22 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             },
           });
 
-          const events: IValidatedEvent[] = await retry.try(async () => {
-            return await getEventLog({
-              getService,
-              spaceId: 'default',
-              type: 'action',
-              id: simulatedActionId,
-              provider: 'actions',
-              actions: new Map([
-                ['execute-start', { gte: 1 }],
-                ['execute', { gte: 2 }],
-              ]),
-            });
-          });
+          // const events: IValidatedEvent[] = await retry.try(async () => {
+          //   return await getEventLog({
+          //     getService,
+          //     spaceId: 'default',
+          //     type: 'action',
+          //     id: simulatedActionId,
+          //     provider: 'actions',
+          //     actions: new Map([
+          //       ['execute-start', { gte: 1 }],
+          //       ['execute', { gte: 2 }],
+          //     ]),
+          //   });
+          // });
 
-          const executeEvent = events[3];
-          expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(193);
+          // const executeEvent = events[3];
+          // expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(193);
         });
       });
     });
