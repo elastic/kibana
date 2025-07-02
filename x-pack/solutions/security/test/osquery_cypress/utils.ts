@@ -130,7 +130,7 @@ export const addIntegrationToAgentPolicy = async (
  * Check if the given version string is a valid artifact version
  * @param version Version string
  */
-const isValidArtifactVersion = (version: string) => !!version.match(/^\d+\.\d+\.\d+(-SNAPSHOT)?$/);
+// const isValidArtifactVersion = (version: string) => !!version.match(/^\d+\.\d+\.\d+(-SNAPSHOT)?$/);
 
 /**
  * Returns the Agent version that is available for install (will check `artifacts-api.elastic.co/v1/versions`)
