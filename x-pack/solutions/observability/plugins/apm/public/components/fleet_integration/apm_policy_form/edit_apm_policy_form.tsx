@@ -11,18 +11,19 @@ import type {
   PackagePolicy,
   PackagePolicyEditExtensionComponentProps,
   PackagePolicyVars,
+  PackageInfo,
 } from './typings';
 
 interface Props {
   policy: PackagePolicy;
   newPolicy: NewPackagePolicy;
   onChange: PackagePolicyEditExtensionComponentProps['onChange'];
+  packageInfo?: PackageInfo;
 }
 
-export function EditAPMPolicyForm({ newPolicy, onChange }: Props) {
+export function EditAPMPolicyForm({ newPolicy, onChange, packageInfo }: Props) {
   const [firstInput, ...restInputs] = newPolicy?.inputs;
   const vars = firstInput?.vars;
-
   function updateAPMPolicy(newVars: PackagePolicyVars, isValid: boolean) {
     onChange({
       isValid,
@@ -31,5 +32,5 @@ export function EditAPMPolicyForm({ newPolicy, onChange }: Props) {
       },
     });
   }
-  return <APMPolicyForm vars={vars} updateAPMPolicy={updateAPMPolicy} />;
+  return <APMPolicyForm vars={vars} updateAPMPolicy={updateAPMPolicy} packageInfo={packageInfo} />;
 }

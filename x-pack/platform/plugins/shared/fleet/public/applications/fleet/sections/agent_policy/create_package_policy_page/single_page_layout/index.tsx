@@ -489,6 +489,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             <ExtensionWrapper>
               <extensionView.Component
                 newPolicy={packagePolicy}
+                packageInfo={packageInfo}
                 onChange={handleExtensionViewOnChange}
               />
             </ExtensionWrapper>

@@ -21,14 +21,15 @@ import { getTLSSettings, isTLSFormValid } from './settings_definition/tls_settin
 import type { SettingsSection } from './settings_form';
 import { SettingsForm } from './settings_form';
 import { isSettingsFormValid, mergeNewVars } from './settings_form/utils';
-import type { PackagePolicyVars } from './typings';
+import type { PackagePolicyVars, PackageInfo } from './typings';
 
 interface Props {
   updateAPMPolicy: (newVars: PackagePolicyVars, isValid: boolean) => void;
   vars?: PackagePolicyVars;
+  packageInfo?: PackageInfo;
 }
 
-export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
+export function APMPolicyForm({ vars = {}, updateAPMPolicy, packageInfo }: Props) {
   const tailSamplingPoliciesDocsLink =
     useKibana().services.docLinks?.links.apm.tailSamplingPolicies;
   const {
@@ -144,6 +145,7 @@ export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
               settingsSection={settingsSection}
               vars={vars}
               onChange={handleFormChange}
+              packageInfo={packageInfo}
             />
             <EuiSpacer />
           </React.Fragment>

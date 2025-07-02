@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import type { PackagePolicyVars, SettingsRow } from '../typings';
+import type { PackagePolicyVars, SettingsRow, PackageInfo, RegistryVarsEntry } from '../typings';
 import { FormRowSetting } from './form_row_setting';
 import { validateSettingValue } from './utils';
 
@@ -28,10 +28,12 @@ function FormRow({
   initialSetting,
   vars,
   onChange,
+  packageInfo,
 }: {
   initialSetting: SettingsRow;
   vars?: PackagePolicyVars;
   onChange: FormRowOnChange;
+  packageInfo?: PackageInfo;
 }) {
   function getSettingFormRow(row: SettingsRow) {
     if (row.type === 'advanced_setting') {
@@ -49,6 +51,7 @@ function FormRow({
     if (!configEntry) {
       return null;
     }
+
     const { value, frozen } = configEntry;
     const { isValid, message } = validateSettingValue(row, value);
     return (
@@ -65,7 +68,13 @@ function FormRow({
               </EuiText>
             }
           >
-            <FormRowSetting row={row} onChange={onChange} value={value} isDisabled={frozen} />
+            <FormRowSetting
+              row={row}
+              onChange={onChange}
+              value={value}
+              isDisabled={frozen}
+              registryPolicyVar={getRegistryEntryVar(key, packageInfo)}
+            />
           </EuiFormRow>
         </EuiDescribedFormGroup>
         {row.settings &&
@@ -88,10 +97,11 @@ export interface SettingsSection {
 interface Props {
   settingsSection: SettingsSection;
   vars?: PackagePolicyVars;
+  packageInfo?: PackageInfo;
   onChange: FormRowOnChange;
 }
 
-export function SettingsForm({ settingsSection, vars, onChange }: Props) {
+export function SettingsForm({ settingsSection, vars, onChange, packageInfo }: Props) {
   const { title, subtitle, settings, isPlatinumLicence } = settingsSection;
   return (
     <EuiPanel>
@@ -132,12 +142,12 @@ export function SettingsForm({ settingsSection, vars, onChange }: Props) {
         )}
       </EuiFlexGroup>
       <EuiHorizontalRule margin="s" />
-
       {settings.map((setting) => {
         return FormRow({
           initialSetting: setting,
           vars,
           onChange,
+          packageInfo,
         });
       })}
     </EuiPanel>
@@ -154,6 +164,10 @@ function AdvancedOptions({ children }: { children: React.ReactNode }) {
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                aria-label={i18n.translate(
+                  'xpack.apm.advancedOptions.advancedoptionsButton.ariaLabel',
+                  { defaultMessage: 'Advanced options' }
+                )}
                 data-test-subj="apmAdvancedOptionsAdvancedOptionsButton"
                 iconType={isOpen ? 'arrowDown' : 'arrowRight'}
                 onClick={() => {
@@ -176,4 +190,19 @@ function AdvancedOptions({ children }: { children: React.ReactNode }) {
       )}
     </>
   );
+}
+
+function getRegistryEntryVar(key: string, packageInfo: PackageInfo | undefined) {
+  if (
+    packageInfo &&
+    packageInfo.policy_templates &&
+    packageInfo.policy_templates.length > 0 &&
+    'inputs' in packageInfo.policy_templates[0] &&
+    Array.isArray(packageInfo.policy_templates[0].inputs) &&
+    packageInfo.policy_templates[0].inputs.length > 0 &&
+    packageInfo.policy_templates[0].inputs[0].vars
+  ) {
+    const registryPolicyVars: RegistryVarsEntry[] = packageInfo.policy_templates[0].inputs[0].vars;
+    return registryPolicyVars.find((registryVar) => registryVar.name === key);
+  }
 }

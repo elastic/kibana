@@ -62,6 +62,8 @@ export interface PackagePolicyEditExtensionComponentProps {
   policy: PackagePolicy;
   /** The new (updated) integration policy that will be saved */
   newPolicy: NewPackagePolicy;
+  /** The packageInfo of the integration, if available */
+  packageInfo?: PackageInfo;
   /**
    * A callback that should be executed anytime a change to the Integration Policy needs to
    * be reported back to the Fleet Policy Edit page.
@@ -162,6 +164,8 @@ export type PackagePolicyCreateExtensionComponent =
 export interface PackagePolicyCreateExtensionComponentProps {
   /** The integration policy being created */
   newPolicy: NewPackagePolicy;
+  /** PackageInfo of the integration */
+  packageInfo: PackageInfo;
   /**
    * A callback that should be executed anytime a change to the Integration Policy needs to
    * be reported back to the Fleet Policy Edit page

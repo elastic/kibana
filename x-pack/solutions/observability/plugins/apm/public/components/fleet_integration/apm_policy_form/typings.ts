@@ -17,6 +17,9 @@ export type {
   NewPackagePolicy,
   PackagePolicy,
   PackagePolicyConfigRecordEntry,
+  PackageInfo,
+  RegistryVarsEntry,
+  RegistryPolicyTemplate,
 } from '@kbn/fleet-plugin/common';
 
 export type PackagePolicyVars = Record<string, PackagePolicyConfigRecordEntry>;

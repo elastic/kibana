@@ -452,6 +452,7 @@ export const EditPackagePolicyForm = memo<{
                   <extensionView.Component
                     policy={originalPackagePolicy}
                     newPolicy={packagePolicy}
+                    packageInfo={packageInfo}
                     onChange={handleExtensionViewOnChange}
                   />
                 )}

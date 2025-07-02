@@ -20,7 +20,7 @@ import styled from '@emotion/styled';
 import { CodeEditor } from '@kbn/code-editor';
 import { SecretFieldWrapper, SecretInputField, useSecretsStorage } from '@kbn/fleet-plugin/public';
 import type { FormRowOnChange } from '.';
-import type { SettingsRow } from '../typings';
+import type { SettingsRow, RegistryVarsEntry } from '../typings';
 
 const FixedHeightDiv = styled.div`
   height: 300px;
@@ -31,6 +31,7 @@ interface Props {
   value?: any;
   onChange: FormRowOnChange;
   isDisabled?: boolean;
+  registryPolicyVar?: RegistryVarsEntry;
 }
 
 const ENABLED_LABEL = i18n.translate('xpack.apm.fleet_integration.settings.enabledLabel', {
@@ -40,7 +41,7 @@ const DISABLED_LABEL = i18n.translate('xpack.apm.fleet_integration.settings.disa
   defaultMessage: 'Disabled',
 });
 
-export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
+export function FormRowSetting({ row, value, onChange, isDisabled, registryPolicyVar }: Props) {
   const secretsStorageEnabled = useSecretsStorage();
 
   switch (row.type) {
@@ -167,7 +168,7 @@ export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
         />
       );
 
-      if (secretsStorageEnabled) {
+      if (secretsStorageEnabled && registryPolicyVar?.secret) {
         return (
           <SecretFieldWrapper>
             <SecretInputField
@@ -196,14 +197,14 @@ export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
         );
       } else {
         return (
-          <EuiFieldText
-            data-test-subj={row.dataTestSubj}
-            disabled={isDisabled}
-            value={value}
-            prepend={isDisabled ? <EuiIcon type="lock" /> : undefined}
+          <EuiFieldPassword
+            type="dual"
+            value={value === undefined ? '' : value}
             onChange={(e) => {
               onChange(row.key, e.target.value);
             }}
+            disabled={isDisabled}
+            data-test-subj={row.dataTestSubj}
           />
         );
       }
