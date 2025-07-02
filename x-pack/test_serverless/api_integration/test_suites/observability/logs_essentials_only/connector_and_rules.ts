@@ -31,37 +31,22 @@ export default function ({ getService }: FtrProviderContext) {
         .get('/api/actions/connector_types')
         .set(svlCommonApi.getInternalRequestHeader())
         .expect(200);
-      const listIds = resp.body.map((item: { id: string }) => item.id);
+      const listIds = resp.body
+        .filter((item: { enabled: boolean }) => item.enabled)
+        .map((item: { id: string; enabled: boolean }) => item.id);
       expect(listIds).to.eql([
         '.email',
-        '.index',
         '.pagerduty',
-        '.swimlane',
-        '.server-log',
         '.slack',
         '.slack_api',
         '.webhook',
-        '.cases-webhook',
-        '.xmatters',
         '.servicenow',
-        '.servicenow-sir',
-        '.servicenow-itom',
         '.jira',
         '.teams',
         '.torq',
         '.opsgenie',
         '.tines',
-        '.gen-ai',
-        '.bedrock',
-        '.gemini',
-        '.d3security',
         '.resilient',
-        '.thehive',
-        '.xsoar',
-        '.sentinelone',
-        '.crowdstrike',
-        '.inference',
-        '.microsoft_defender_endpoint',
       ]);
     });
   });
