@@ -116,7 +116,7 @@ export const IndexSelectorModal = ({
   return isCreateIndexModalOpen ? (
     <CreateIndexModal onClose={hideCreateIndexModal} onCreate={onCreateIndex} />
   ) : (
-    <EuiModal onClose={onClose} maxWidth="624px">
+    <EuiModal onClose={onClose} maxWidth="624px" data-test-subj="index-selector-modal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <FormattedMessage
