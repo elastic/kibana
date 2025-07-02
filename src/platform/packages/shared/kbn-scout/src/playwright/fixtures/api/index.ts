@@ -22,13 +22,20 @@ interface ApiWorkerFixtures extends CoreWorkerFixtures {
 }
 
 export const apiTest = base.extend<ApiWorkerFixtures>({
-  // Remove built-in browser fixtures
-  page: [async (_: unknown, use) => await use(undefined), { scope: 'test' }],
-  browser: [async (_: unknown, use) => await use(undefined), { scope: 'worker' }],
-  context: [async (_: unknown, use) => await use(undefined), { scope: 'test' }],
-  request: [async (_: unknown, use) => await use(undefined), { scope: 'test' }],
-
-  // Add custom fixtures
+  // Remove built-in browser fixtures by overriding them with undefined and relaxing the types
+  page: [async (_: unknown, use: (value: undefined) => Promise<void>) => {
+    await use(undefined);
+  }, { scope: 'test' }] as any,
+  browser: [async (_: unknown, use: (value: undefined) => Promise<void>) => {
+    await use(undefined);
+  }, { scope: 'worker' }] as any,
+  context: [async (_: unknown, use: (value: undefined) => Promise<void>) => {
+    await use(undefined);
+  }, { scope: 'test' }] as any,
+  request: [async (_: unknown, use: (value: undefined) => Promise<void>) => {
+    await use(undefined);
+  }, { scope: 'test' }] as any,
+  // Add api testing fixtures
   ...coreWorkerFixtures,
   ...apiClientFixture,
   ...defaultRolesFixture,
