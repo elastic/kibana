@@ -953,3 +953,28 @@ export const deleteActivityAnalytics = async (es: Client): Promise<void> => {
     conflicts: 'proceed',
   });
 };
+
+export const deleteAllCaseAnalyticsIndices = async (es: Client) => {
+  await Promise.all([
+    deleteCasesAnalyticsIndex(es),
+    deleteAttachmentsAnalyticsIndex(es),
+    deleteCommentsAnalyticsIndex(es),
+    deleteActivityAnalyticsIndex(es),
+  ]);
+};
+
+export const deleteCasesAnalyticsIndex = async (es: Client): Promise<void> => {
+  await es.indices.delete({ index: '.internal.cases' });
+};
+
+export const deleteAttachmentsAnalyticsIndex = async (es: Client): Promise<void> => {
+  await es.indices.delete({ index: '.internal.cases-attachments' });
+};
+
+export const deleteCommentsAnalyticsIndex = async (es: Client): Promise<void> => {
+  await es.indices.delete({ index: '.internal.cases-comments' });
+};
+
+export const deleteActivityAnalyticsIndex = async (es: Client): Promise<void> => {
+  await es.indices.delete({ index: '.internal.cases-activity' });
+};

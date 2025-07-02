@@ -11,7 +11,7 @@ import {
   CaseStatuses,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import { OBSERVABLE_TYPE_IPV4, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
 import {
   runActivityBackfillTask,
   runAttachmentsBackfillTask,
@@ -19,7 +19,6 @@ import {
   runCommentsBackfillTask,
 } from '../../../../../common/lib/api/analytics';
 import {
-  addObservable,
   createCase,
   createConfiguration,
   createComment,
@@ -77,7 +76,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const postCaseRequest = getPostCaseRequest({
         category: 'foobar',
-        assignees: [{ uid: 'mscott@theoffice.com' }],
         customFields: [
           {
             key: 'test_custom_field',
@@ -88,18 +86,6 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const caseToBackfill = await createCase(supertest, postCaseRequest, 200);
-
-      await addObservable({
-        supertest,
-        caseId: caseToBackfill.id,
-        params: {
-          observable: {
-            value: '127.0.0.1',
-            typeKey: OBSERVABLE_TYPE_IPV4.key,
-            description: 'observable description',
-          },
-        },
-      });
 
       await runCasesBackfillTask(supertest);
 
@@ -229,11 +215,10 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       });
 
-      const caseToDelete = await createCase(supertest, getPostCaseRequest(), 200, authSpace1);
+      const caseToDelete = await createCase(supertest, getPostCaseRequest(), 200);
       await deleteCases({
         supertest,
         caseIDs: [caseToDelete.id],
-        auth: authSpace1,
       });
 
       await runActivityBackfillTask(supertest);

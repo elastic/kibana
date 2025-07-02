@@ -31,6 +31,7 @@ import {
   updateCase,
   deleteCases,
   deleteAllCaseAnalyticsItems,
+  deleteAllCaseAnalyticsIndices,
 } from '../../../../../common/lib/api';
 import {
   getPostCaseRequest,
@@ -56,6 +57,10 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest,
         auth: authSpace1,
       });
+    });
+
+    after(async () => {
+      await deleteAllCaseAnalyticsIndices(esClient);
     });
 
     it('should sync the cases index', async () => {
