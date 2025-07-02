@@ -101,7 +101,7 @@ export const changeObjectAccessControl = async <T>(
     }
     if (!registry.supportsAccessControl(type)) {
       const error = SavedObjectsErrorHelpers.createBadRequestError(
-        `The type "${type}" does not support access control.`
+        `The type ${type} does not support access control`
       );
       return left({ id, type, error });
     }
@@ -148,6 +148,7 @@ export const changeObjectAccessControl = async <T>(
     const { type, id, esRequestIndex: index } = element.value;
 
     const preflightResult = index !== undefined ? bulkGetResponse?.body.docs[index] : undefined;
+
     return {
       type,
       id,
@@ -157,6 +158,7 @@ export const changeObjectAccessControl = async <T>(
       accessControl: preflightResult?._source?.accessControl ?? {},
     };
   });
+
   let authorizationResult: CheckAuthorizationResult<string> | undefined;
   if (actionType === 'changeOwnership') {
     authorizationResult = await securityExtension?.authorizeChangeOwnership({
