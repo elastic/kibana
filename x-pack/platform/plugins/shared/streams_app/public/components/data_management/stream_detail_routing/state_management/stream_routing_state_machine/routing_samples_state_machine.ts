@@ -45,10 +45,7 @@ export interface RoutingSamplesContext {
 export type RoutingSamplesEvent =
   | { type: 'routingSamples.refresh' }
   | { type: 'routingSamples.retry' }
-  | {
-      type: 'routingSamples.updateOptions';
-      options: Partial<Pick<RoutingSamplesInput, 'condition'>>;
-    };
+  | { type: 'routingSamples.updateCondition'; condition?: Condition };
 
 export type RoutingSamplesActorRef = ActorRefFrom<typeof routingSamplesMachine>;
 
@@ -69,6 +66,190 @@ interface CollectorParams {
 const SAMPLES_SIZE = 100;
 const PROBABILITY_THRESHOLD = 100000;
 const SEARCH_TIMEOUT_MS = 10000; // 10 seconds
+
+export const routingSamplesMachine = setup({
+  types: {
+    input: {} as RoutingSamplesInput,
+    context: {} as RoutingSamplesContext,
+    events: {} as RoutingSamplesEvent,
+  },
+  actors: {
+    collectDocuments: getPlaceholderFor(createDocumentsCollectorActor),
+    collectDocumentsCount: getPlaceholderFor(createDocumentsCountCollectorActor),
+  },
+  actions: {
+    updateCondition: assign((_, params: { condition?: Condition }) => ({
+      condition: params.condition,
+    })),
+    storeDocuments: assign((_, params: { documents: SampleDocument[] }) => {
+      return {
+        documents: params.documents,
+        documentsError: undefined,
+      };
+    }),
+    storeDocumentsError: assign((_, params: { error: Error }) => ({
+      documentsError: params.error,
+    })),
+    storeDocumentCounts: assign((_, params: { count: string }) => ({
+      approximateMatchingPercentage: params.count,
+      approximateMatchingPercentageError: undefined,
+    })),
+    storeDocumentCountsError: assign((_, params: { error: Error }) => ({
+      approximateMatchingPercentageError: params.error,
+    })),
+  },
+}).createMachine({
+  /** @xstate-layout N4IgpgJg5mDOIC5QCcD2BXALgSwHZQGUBDAWwAcAbOAYjSz0NMrgDpkwAzd2ACwG0ADAF1EoMqljYcqXKJAAPRAGYAHCpYBGAGwAWNQFYl+gJwB2U1oBMAGhABPRPsvrTK-To0rVAlZdUBff1s6HHxicipYWgxQxgjWdDIIIkwwAHkyaVxYQREkEHFJLLlFBFVjFi1jYwFjJS0VHQEteq1bBwRLLVMWYxVTY08dGt9GrUDgmIZw5lgWDjBMAGMeBhYIVCX0EjBcTDmKVCIIBmoN3DAWPAA3VABrS6XUCiolzAARTe3d-dy5Qqk2BkJUQGg0lgELHqSghWg0wwESmM7UQEPUjR0+hMzVM+nMSgmIBC0yYkXmixWaw2Wx2ewORxO+GoYGQaGQLEoKQ4qGQJBYTxeYDenxpPxywn+EkBwPypTBEKhLVh8JqSJRZScLAG5g0Sg0WP0Aks+sJxLCpNYC2Wq3w6y+tP2LBZbOi9HN8Tm7EwyDsf3yAOKstB4J0LER+nBlj0pma+ja9lRcahOkxuOGDQE7lNU3ds3J1qp9p+AGEMHSWIdjqdzpcbvdHs9Xh8i3TS+g9n6xFLA6A5frISnBpZqhYNAJweqseoBDOVFpaoaVBoLNm3XE81bKbbqd89m3y5XGVBmayeRyKFyeXyBU2Rbv9vvMJ2Ct2gbIgwgwYaWIPwSO4eONgJggWhJjOtS6OYKaGqYq6xDMZKbjaUB2qKe5lo6zo8q68EWp6iw+s+AZviCn4aIMLDGjocLDpiNROOq876Cwho+PiKgzqmgRBCAuCoBAcByGa66RJKRQkR+ShNJougGEYZgWEBHQALRYr0mYwlY1FGDGOhwSSHr5luUBidK769oguhKD+wyePCsJzko6p6ixxjUU0ljDq4qhxvpuaIRSyGofe8D+q+MoWSBFG-kuOgOS06pghUtTUTimbGFGuJ+SJlqBYWaGOoeDCmT2CiIKYSI2YMsXxU5wGwr0VT6I0-ZRhl4w8cJCG5QW24to6sDoEsSxwKFXbiRFZWflJkKgZ5zUzuYnnxh0DUmKmeq+LGWgdZMa7dXMSH5SFTqnsgJUSZFurSXNlgLQIS1dOqzg9DUKYceROhKAM2UHUZQU7g6j5jS+E3mVNVQaFVdlxc0jnqtR6h3Q9oHGFYViZr9eH-cdQMYfSVb4Bdk2lBVFQxfZcMJcBcI9POd0QqorjNFjhlHX1BXAywg3DaNxPg3KTQ9F45GqO5pieaYk5qbiPiWLioEWHirMbnlHP3lzWHnWFYOkfCD0sCLdRjDoEvy4xEtQm5+oee9tTcf4QA */
+  id: 'routingSamples',
+  context: ({ input }) => ({
+    condition: input.condition,
+    start: input.start,
+    end: input.end,
+    definition: input.definition,
+    approximateMatchingPercentage: undefined,
+    documents: [],
+    documentsError: undefined,
+    approximateMatchingPercentageError: undefined,
+  }),
+  on: {
+    'routingSamples.refresh': {
+      target: '.fetching',
+    },
+    'routingSamples.updateCondition': {
+      target: '.fetching',
+      actions: [{ type: 'updateCondition', params: ({ event }) => event }],
+    },
+  },
+  initial: 'fetching',
+  states: {
+    fetching: {
+      type: 'parallel',
+      states: {
+        documents: {
+          initial: 'loading',
+          states: {
+            loading: {
+              invoke: {
+                id: 'collectDocuments',
+                src: 'collectDocuments',
+                input: ({ context }) => ({
+                  condition: context.condition,
+                  start: context.start,
+                  end: context.end,
+                  definition: context.definition,
+                }),
+                onSnapshot: {
+                  guard: ({ event }) => event.snapshot.context !== undefined,
+                  actions: [
+                    {
+                      type: 'storeDocuments',
+                      params: ({ event }) => ({ documents: event.snapshot.context ?? [] }),
+                    },
+                  ],
+                },
+                onDone: {
+                  target: 'success',
+                },
+                onError: {
+                  target: 'error',
+                  actions: [
+                    {
+                      type: 'storeDocumentsError',
+                      params: ({ event }) => ({ error: event.error as Error }),
+                    },
+                  ],
+                },
+              },
+            },
+            success: {
+              type: 'final',
+            },
+            error: {
+              on: {
+                'routingSamples.retry': {
+                  target: 'loading',
+                },
+              },
+            },
+          },
+        },
+        documentCounts: {
+          initial: 'loading',
+          states: {
+            loading: {
+              invoke: {
+                id: 'collectDocumentsCount',
+                src: 'collectDocumentsCount',
+                input: ({ context }) => ({
+                  condition: context.condition,
+                  start: context.start,
+                  end: context.end,
+                  definition: context.definition,
+                }),
+                onSnapshot: {
+                  guard: ({ event }) => event.snapshot.context !== undefined,
+                  actions: [
+                    {
+                      type: 'storeDocumentCounts',
+                      params: ({ event }) => ({ count: event.snapshot.context ?? '' }),
+                    },
+                  ],
+                },
+                onDone: {
+                  target: 'success',
+                },
+                onError: {
+                  target: 'error',
+                  actions: [
+                    {
+                      type: 'storeDocumentCountsError',
+                      params: ({ event }) => ({ error: event.error as Error }),
+                    },
+                  ],
+                },
+              },
+            },
+            success: {
+              type: 'final',
+            },
+            error: {
+              on: {
+                'routingSamples.retry': 'loading',
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+});
+
+export interface RoutingSamplesMachineDeps {
+  data: DataPublicPluginStart;
+}
+
+export const createRoutingSamplesMachineImplementations = ({
+  data,
+}: RoutingSamplesMachineDeps): MachineImplementationsFrom<typeof routingSamplesMachine> => ({
+  actors: {
+    collectDocuments: createDocumentsCollectorActor({ data }),
+    collectDocumentsCount: createDocumentsCountCollectorActor({ data }),
+  },
+});
+
+export function createDocumentsCollectorActor({ data }: Pick<RoutingSamplesMachineDeps, 'data'>) {
+  return fromObservable<SampleDocument[], SearchParams>(({ input }) => {
+    return collectDocuments({ data, searchParams: input });
+  });
+}
+
+export function createDocumentsCountCollectorActor({
+  data,
+}: Pick<RoutingSamplesMachineDeps, 'data'>) {
+  return fromObservable<string | undefined, SearchParams>(({ input }) => {
+    return collectDocumentCounts({ data, searchParams: input });
+  });
+}
 
 /**
  * Creates a timestamp range query object for Elasticsearch
@@ -122,13 +303,6 @@ function processCondition(condition?: Condition): Condition | undefined {
     : convertedCondition;
 }
 
-/**
- * Validates if the search result contains hits
- */
-function isValidSearchResult(result: IEsSearchResponse): boolean {
-  return !isEmpty(result.rawResponse.hits?.hits);
-}
-
 function handleTimeoutError(error: Error) {
   if (error.name === 'TimeoutError') {
     return throwError(() => new Error('Document count search timed out after 10 seconds'));
@@ -171,6 +345,57 @@ function buildDocumentsSearchParams({ condition, start, end, definition }: Searc
 }
 
 /**
+ * Builds search parameters for document count query
+ */
+function buildDocumentCountSearchParams({ start, end, definition }: SearchParams) {
+  return {
+    index: definition.stream.name,
+    body: {
+      query: createTimestampRangeQuery(start, end),
+      size: 0,
+      track_total_hits: true,
+    },
+  };
+}
+
+/**
+ * Builds search parameters for document count query
+ */
+function buildDocumentCountProbabilitySearchParams({
+  condition,
+  definition,
+  docCount,
+  end,
+  start,
+}: SearchParams & { docCount?: number }) {
+  const finalCondition = processCondition(condition);
+  const runtimeMappings = getRuntimeMappings(definition, finalCondition);
+  const query = finalCondition ? conditionToQueryDsl(finalCondition) : { match_all: {} };
+  const probability = calculateProbability(docCount);
+
+  return {
+    index: definition.stream.name,
+    body: {
+      runtime_mappings: runtimeMappings,
+      query: createTimestampRangeQuery(start, end),
+      size: 0,
+      aggs: {
+        sample: {
+          random_sampler: {
+            probability,
+          },
+          aggs: {
+            matching_docs: {
+              filter: query,
+            },
+          },
+        },
+      },
+    },
+  };
+}
+
+/**
  * Calculates sampling probability based on document count
  */
 function calculateProbability(docCount?: number): number {
@@ -187,17 +412,14 @@ function calculateProbability(docCount?: number): number {
  */
 function collectDocuments({ data, searchParams }: CollectorParams): Observable<SampleDocument[]> {
   const abortController = new AbortController();
-  const params = buildDocumentsSearchParams({
-    ...searchParams,
-    definition: searchParams.definition,
-  });
+  const params = buildDocumentsSearchParams(searchParams);
 
   return new Observable((observer) => {
     const subscription = data.search
       .search({ params }, { abortSignal: abortController.signal })
       .pipe(
         timeout(SEARCH_TIMEOUT_MS),
-        filter(isValidSearchResult),
+        filter((result) => !isEmpty(result.rawResponse.hits?.hits)),
         map(extractDocumentsFromResult),
         catchError(handleTimeoutError)
       )
@@ -218,24 +440,12 @@ function collectDocumentCounts({
   searchParams,
 }: CollectorParams): Observable<string | undefined> {
   const abortController = new AbortController();
-  const { condition, start, end, definition } = searchParams;
-  const finalCondition = processCondition(condition);
-  const runtimeMappings = getRuntimeMappings(definition, finalCondition);
-  const query = finalCondition ? conditionToQueryDsl(finalCondition) : { match_all: {} };
 
-  // First get document count for sample rate calculation
-  const countParams = {
-    index: definition.stream.name,
-    body: {
-      query: createTimestampRangeQuery(start, end),
-      size: 0,
-      track_total_hits: true,
-    },
-  };
+  const params = buildDocumentCountSearchParams(searchParams);
 
   return new Observable((observer) => {
     const subscription = data.search
-      .search({ params: countParams }, { abortSignal: abortController.signal })
+      .search({ params }, { abortSignal: abortController.signal })
       .pipe(
         filter((result) => !isRunningResponse(result)),
         timeout(SEARCH_TIMEOUT_MS),
@@ -247,31 +457,10 @@ function collectDocumentCounts({
               ? countResult.rawResponse.hits.total.value
               : countResult.rawResponse.hits.total;
 
-          const probability = calculateProbability(docCount);
-
           return data.search
             .search(
               {
-                params: {
-                  index: definition.stream.name,
-                  body: {
-                    runtime_mappings: runtimeMappings,
-                    query: createTimestampRangeQuery(start, end),
-                    size: 0,
-                    aggs: {
-                      sample: {
-                        random_sampler: {
-                          probability,
-                        },
-                        aggs: {
-                          matching_docs: {
-                            filter: query,
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
+                params: buildDocumentCountProbabilitySearchParams({ ...searchParams, docCount }),
               },
               { abortSignal: abortController.signal }
             )
@@ -303,197 +492,5 @@ function collectDocumentCounts({
       abortController.abort();
       subscription.unsubscribe();
     };
-  });
-}
-
-export const routingSamplesMachine = setup({
-  types: {
-    input: {} as RoutingSamplesInput,
-    context: {} as RoutingSamplesContext,
-    events: {} as RoutingSamplesEvent,
-  },
-  actors: {
-    collectDocuments: getPlaceholderFor(createDocumentsCollectorActor),
-    collectDocumentsCount: getPlaceholderFor(createDocumentsCountCollectorActor),
-  },
-  actions: {
-    updateOptions: assign(({ context, event }) => {
-      if (event.type !== 'updateOptions') return {};
-      return {
-        ...event.options,
-      };
-    }),
-    storeDocuments: assign((_, params: { documents: SampleDocument[] }) => {
-      return {
-        documents: params.documents,
-        documentsError: undefined,
-      };
-    }),
-    storeDocumentsError: assign(({ event }) => {
-      return {
-        documentsError: event.error as Error,
-      };
-    }),
-    storeDocumentCounts: assign((_, params: { count: string }) => {
-      return {
-        approximateMatchingPercentage: params.count,
-        approximateMatchingPercentageError: undefined,
-      };
-    }),
-    storeDocumentCountsError: assign(({ event }) => {
-      return {
-        approximateMatchingPercentageError: event.error as Error,
-      };
-    }),
-    clearData: assign(() => ({
-      documents: [],
-      approximateMatchingPercentage: undefined,
-      documentsError: undefined,
-      approximateMatchingPercentageError: undefined,
-    })),
-  },
-  guards: {
-    hasValidTimeRange: ({ context }) => Boolean(context.start && context.end),
-  },
-}).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QCcD2BXALgSwHZQGUBDAWwAcAbOAYjSz0NMrgDpkwAzd2ACwG0ADAF1EoMqljYcqXKJAAPRAGYAHCpYBGAGwAWNQFYl+gJwB2U1oBMAGhABPRPsvrTK-To0rVAlZdUBff1s6HHxicipYWgxQxgjWdDIIIkwwAHkyaVxYQREkEHFJLLlFBFVjFi1jYwFjJS0VHQEteq1bBwRLLVMWYxVTY08dGt9GrUDgmIZw5lgWDjBMAGMeBhYIVCX0EjBcTDmKVCIIBmoN3DAWPAA3VABrS6XUCiolzAARTe3d-dy5Qqk2BkJUQGg0lgELHqSghWg0wwESmM7UQEPUjR0+hMzVM+nMSgmIBC0yYkXmixWaw2Wx2ewORxO+GoYGQaGQLEoKQ4qGQJBYTxeYDenxpPxywn+EkBwPypTBEKhLVh8JqSJRZScLAG5g0Sg0WP0Aks+sJxLCpNYC2Wq3w6y+tP2LBZbOi9HN8Tm7EwyDsf3yAOKstB4J0LER+nBlj0pma+ja9lRcahOkxuOGDQE7lNU3ds3J1qp9p+AGEMHSWIdjqdzpcbvdHs9Xh8i3TS+g9n6xFLA6A5frISnBpZqhYNAJweqseoBDOVFpaoaVBoLNm3XE81bKbbqd89m3y5XGVBmayeRyKFyeXyBU2Rbv9vvMJ2Ct2gbIgwgwYaWIPwSO4eONgJggWhJjOtS6OYKaGqYq6xDMZKbjaUB2qKe5lo6zo8q68EWp6iw+s+AZviCn4aIMLDGjocLDpiNROOq876Cwho+PiKgzqmgRBCAuCoBAcByGa66RJKRQkR+ShNJougGEYZgWEBHQALRYr0mYwlY1FGDGOhwSSHr5luUBidK769oguhKD+wyePCsJzko6p6ixxjUU0ljDq4qhxvpuaIRSyGofe8D+q+MoWSBFG-kuOgOS06pghUtTUTimbGFGuJ+SJlqBYWaGOoeDCmT2CiIKYSI2YMsXxU5wGwr0VT6I0-ZRhl4w8cJCG5QW24to6sDoEsSxwKFXbiRFZWflJkKgZ5zUzuYnnxh0DUmKmeq+LGWgdZMa7dXMSH5SFTqnsgJUSZFurSXNlgLQIS1dOqzg9DUKYceROhKAM2UHUZQU7g6j5jS+E3mVNVQaFVdlxc0jnqtR6h3Q9oHGFYViZr9eH-cdQMYfSVb4Bdk2lBVFQxfZcMJcBcI9POd0QqorjNFjhlHX1BXAywg3DaNxPg3KTQ9F45GqO5pieaYk5qbiPiWLioEWHirMbnlHP3lzWHnWFYOkfCD0sCLdRjDoEvy4xEtQm5+oee9tTcf4QA */
-  id: 'routingSamples',
-  context: ({ input }) => ({
-    condition: input.condition,
-    start: input.start,
-    end: input.end,
-    definition: input.definition,
-    approximateMatchingPercentage: undefined,
-    documents: [],
-    documentsError: undefined,
-    approximateMatchingPercentageError: undefined,
-  }),
-  on: {
-    'routingSamples.refresh': {
-      target: '.fetching',
-    },
-    'routingSamples.updateOptions': {
-      target: '.fetching',
-      actions: ['updateOptions'],
-    },
-  },
-  initial: 'fetching',
-  states: {
-    fetching: {
-      type: 'parallel',
-      states: {
-        documents: {
-          initial: 'loading',
-          states: {
-            loading: {
-              invoke: {
-                id: 'collectDocuments',
-                src: 'collectDocuments',
-                input: ({ context }) => ({
-                  condition: context.condition,
-                  start: context.start,
-                  end: context.end,
-                  definition: context.definition,
-                }),
-                onSnapshot: {
-                  guard: ({ event }) => event.snapshot.context !== undefined,
-                  actions: [
-                    {
-                      type: 'storeDocuments',
-                      params: ({ event }) => ({ documents: event.snapshot.context ?? [] }),
-                    },
-                  ],
-                },
-                onDone: {
-                  target: 'success',
-                },
-                onError: {
-                  target: 'error',
-                  actions: ['storeDocumentsError'],
-                },
-              },
-            },
-            success: {
-              type: 'final',
-            },
-            error: {
-              on: {
-                'routingSamples.retry': {
-                  target: 'loading',
-                },
-              },
-            },
-          },
-        },
-        documentCounts: {
-          initial: 'loading',
-          states: {
-            loading: {
-              invoke: {
-                id: 'collectDocumentsCount',
-                src: 'collectDocumentsCount',
-                input: ({ context }) => ({
-                  condition: context.condition,
-                  start: context.start,
-                  end: context.end,
-                  definition: context.definition,
-                }),
-                onSnapshot: {
-                  guard: ({ event }) => event.snapshot.context !== undefined,
-                  actions: [
-                    {
-                      type: 'storeDocumentCounts',
-                      params: ({ event }) => ({ count: event.snapshot.context ?? '' }),
-                    },
-                  ],
-                },
-                onDone: {
-                  target: 'success',
-                },
-                onError: {
-                  target: 'error',
-                  actions: ['storeDocumentCountsError'],
-                },
-              },
-            },
-            success: {
-              type: 'final',
-            },
-            error: {
-              on: {
-                'routingSamples.retry': 'loading',
-              },
-            },
-          },
-        },
-      },
-    },
-  },
-});
-
-export interface RoutingSamplesMachineDeps {
-  data: DataPublicPluginStart;
-}
-
-export const createRoutingSamplesMachineImplementations = ({
-  data,
-}: RoutingSamplesMachineDeps): MachineImplementationsFrom<typeof routingSamplesMachine> => ({
-  actors: {
-    collectDocuments: createDocumentsCollectorActor({ data }),
-    collectDocumentsCount: createDocumentsCountCollectorActor({ data }),
-  },
-});
-
-export function createDocumentsCollectorActor({ data }: Pick<RoutingSamplesMachineDeps, 'data'>) {
-  return fromObservable<SampleDocument[], SearchParams>(({ input }) => {
-    return collectDocuments({ data, searchParams: input });
-  });
-}
-
-export function createDocumentsCountCollectorActor({
-  data,
-}: Pick<RoutingSamplesMachineDeps, 'data'>) {
-  return fromObservable<string | undefined, SearchParams>(({ input }) => {
-    return collectDocumentCounts({ data, searchParams: input });
   });
 }
