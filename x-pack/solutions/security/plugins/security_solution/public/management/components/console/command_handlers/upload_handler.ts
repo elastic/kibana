@@ -40,6 +40,8 @@ export class UploadCommandHandler extends BaseCommandHandler {
 
   // Simple syncState - just pass File objects through for execution
   syncState(parsedInput: ParsedCommandInterface, enteredCommand: EnteredCommand): void {
+    if (!enteredCommand.argsWithValueSelectors) return;
+
     for (const argName of Object.keys(enteredCommand.argsWithValueSelectors)) {
       if (parsedInput.hasArg(argName)) {
         const argumentValues = enteredCommand.argState[argName] ?? [];

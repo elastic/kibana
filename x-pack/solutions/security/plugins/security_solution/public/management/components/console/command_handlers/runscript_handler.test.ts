@@ -115,7 +115,9 @@ describe('RunscriptCommandHandler', () => {
 
       const result = handler.reconstructCommandText(parsedInput);
 
-      expect(result).toBe('runscript --ScriptName=test.sh --CloudFile=cloud.sh --param=value');
+      expect(result.leftOfCursorText).toBe(
+        'runscript --ScriptName="test.sh" --CloudFile="cloud.sh" --param="value"'
+      );
     });
 
     it('should handle values with spaces by adding quotes', () => {
@@ -130,7 +132,9 @@ describe('RunscriptCommandHandler', () => {
 
       const result = handler.reconstructCommandText(parsedInput);
 
-      expect(result).toBe('runscript --ScriptName="test script.sh" --param="value with spaces"');
+      expect(result.leftOfCursorText).toBe(
+        'runscript --ScriptName="test script.sh" --param="value with spaces"'
+      );
     });
 
     it('should handle boolean arguments', () => {
@@ -145,7 +149,7 @@ describe('RunscriptCommandHandler', () => {
 
       const result = handler.reconstructCommandText(parsedInput);
 
-      expect(result).toBe('runscript --ScriptName=test.sh --verbose');
+      expect(result.leftOfCursorText).toBe('runscript --ScriptName="test.sh" --verbose');
     });
   });
 

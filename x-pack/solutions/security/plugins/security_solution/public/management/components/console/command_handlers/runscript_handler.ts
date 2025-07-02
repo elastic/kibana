@@ -66,6 +66,7 @@ export class RunscriptCommandHandler extends BaseCommandHandler {
   }
 
   syncState(parsedInput: ParsedCommandInterface, enteredCommand: EnteredCommand): void {
+    if (!enteredCommand.argsWithValueSelectors) return;
     // Ensure selector values are always reflected in parsed input
     for (const argName of Object.keys(enteredCommand.argsWithValueSelectors)) {
       if (parsedInput.hasArg(argName)) {
