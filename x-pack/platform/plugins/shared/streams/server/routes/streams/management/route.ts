@@ -30,7 +30,10 @@ export const forkStreamsRoute = createServerRoute({
     path: z.object({
       name: z.string(),
     }),
-    body: z.object({ stream: z.object({ name: z.string() }), if: conditionSchema }),
+    body: z.object({
+      stream: z.object({ name: z.string(), draft: z.boolean().optional() }),
+      if: conditionSchema,
+    }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<{ acknowledged: true }> => {
     const { streamsClient } = await getScopedClients({
@@ -40,6 +43,7 @@ export const forkStreamsRoute = createServerRoute({
     return await streamsClient.forkStream({
       parent: params.path.name,
       if: params.body.if,
+      draft: params.body.stream.draft ?? false,
       name: params.body.stream.name,
     });
   },

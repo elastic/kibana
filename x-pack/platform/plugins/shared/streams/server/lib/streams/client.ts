@@ -299,10 +299,12 @@ export class StreamsClient {
   async forkStream({
     parent,
     name,
+    draft,
     if: condition,
   }: {
     parent: string;
     name: string;
+    draft: boolean;
     if: Condition;
   }): Promise<ForkStreamResponse> {
     const parentDefinition = Streams.WiredStream.Definition.parse(await this.getStream(parent));
@@ -340,6 +342,7 @@ export class StreamsClient {
               lifecycle: { inherit: {} },
               processing: [],
               wired: {
+                draft,
                 fields: {},
                 routing: [],
               },
