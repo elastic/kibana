@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { registerTools } from './register_tools';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-streamlang'],
+};
