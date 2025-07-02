@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { EuiText } from '@elastic/eui';
-import { ENTERPRISE_SEARCH_APP_ID } from '@kbn/deeplinks-search';
+import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
 import type { ClassicNavItem } from './types';
@@ -17,7 +17,7 @@ export const BaseClassicNavItems: ClassicNavItem[] = [
   {
     'data-test-subj': 'searchSideNav-Home',
     deepLink: {
-      link: ENTERPRISE_SEARCH_APP_ID,
+      link: SEARCH_HOMEPAGE,
       shouldShowActiveForSubroutes: true,
     },
     id: 'home',

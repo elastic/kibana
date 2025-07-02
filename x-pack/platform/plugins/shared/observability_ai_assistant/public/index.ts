@@ -63,7 +63,6 @@ export {
 } from '../common/functions/visualize_esql';
 
 export {
-  FunctionVisibility,
   MessageRole,
   KnowledgeBaseEntryRole,
   concatenateChatCompletionChunks,
