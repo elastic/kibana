@@ -64,7 +64,7 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
             mlAuthz
           );
 
-          const upgradableRulesTags = upgradableRules.reduce<string[]>((tags, rule) => {
+          const upgradeableRulesTags = upgradableRules.reduce<string[]>((tags, rule) => {
             const ruleTags = currentRuleVersionsMap.get(rule.rule_id)?.tags;
             if (ruleTags) {
               tags.push(...ruleTags);
@@ -81,7 +81,7 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
             },
             aggregated_fields: {
               upgradeable_rules: {
-                tags: [...new Set(upgradableRulesTags)],
+                tags: [...new Set(upgradeableRulesTags)],
               },
             },
           };

@@ -114,15 +114,15 @@ async function calculateUpgradeableRulesDiff({
         sortOrder: sort.order,
       });
 
-  const upgradableRules = await getPossibleUpgrades(
+  const upgradeableRules = await getPossibleUpgrades(
     currentRuleVersions,
     latestVersionsMap,
     mlAuthz
   );
 
-  const totalUpgradeableRules = upgradableRules.length;
+  const totalUpgradeableRules = upgradeableRules.length;
 
-  const pagedRuleIds = upgradableRules
+  const pagedRuleIds = upgradeableRules
     .slice((page - 1) * perPage, page * perPage)
     .map((rule) => rule.rule_id);
 
