@@ -1148,8 +1148,11 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     this.accessControlService.setUserForOperation(this.getCurrentUserFunc());
     const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
-    this.assertObjectsArrayNotEmpty(objects, action);
     const { auditAction, authzAction } = this.decodeSecurityAction(action);
+    const typeRegistry = await this.typeRegistryFunc();
+
+    this.assertObjectsArrayNotEmpty(objects, action);
+
     const objectsNotSupportingAccessControl = objects.every(
       ({ type }) => !typeRegistry.supportsAccessControl(type)
     );
@@ -1158,12 +1161,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       const errMessage = `Unable to ${authzAction} for types ${[
         ...objects.map(({ type }) => type),
       ].join(', ')}`;
-      throw new Error(errMessage);
+      throw SavedObjectsErrorHelpers.decorateBadRequestError(new Error(errMessage));
     }
 
     const spacesToAuthorize = new Set<string>([namespaceString]);
-
-    const typeRegistry = await this.typeRegistryFunc();
 
     const { typesRequiringAccessControl } =
       this.accessControlService.getTypesRequiringAccessControlPrivilegeCheck({

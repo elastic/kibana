@@ -6593,7 +6593,7 @@ describe('access control', () => {
       });
     });
 
-    test('does not invoke access management if objects do not support accessControl ', async () => {
+    test('throws error if all objects are non access-control objects', async () => {
       const { securityExtension } = setup();
       const objects = [
         {
@@ -6610,14 +6610,19 @@ describe('access control', () => {
         },
       ];
 
-      expect(
-        await securityExtension.authorizeChangeOwnership({
+      await expect(
+        securityExtension.authorizeChangeOwnership({
           namespace,
           objects,
         })
-      ).toEqual({
-        status: 'fully_authorized',
-        typeMap: new Map(),
+      ).rejects.toMatchObject({
+        output: {
+          payload: {
+            message: expect.stringContaining(
+              'Unable to manage_access_control for types non_read_only, visualization'
+            ),
+          },
+        },
       });
     });
   });
