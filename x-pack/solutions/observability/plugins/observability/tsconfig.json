@@ -124,5 +124,7 @@
     "@kbn/core-http-browser",
     "@kbn/esql"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }
