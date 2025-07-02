@@ -209,7 +209,7 @@ const componentStyles = {
       verticalAlign: 'top',
 
       '.euiDataGridRowCell__popover &': {
-        fontSize: `${euiTheme.font.scale.m}rem`,
+        fontSize: `${euiTheme.font.scale.s}rem`,
       },
     }),
   docViewerValueHighlighted: ({ euiTheme }: UseEuiTheme) =>
