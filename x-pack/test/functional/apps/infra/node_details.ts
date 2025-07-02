@@ -644,7 +644,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         before(async () => {
           // Close the metric popover if it is open
           await browser.pressKeys(browser.keys.ESCAPE);
-          await pageObjects.assetDetails.clickOverviewTab();
+          const overviewTab = await pageObjects.assetDetails.getOverviewTab();
+          // Use clickMouseButton to ensure the tab is visible
+          await overviewTab.clickMouseButton();
         });
 
         [
@@ -822,7 +824,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Metadata Tab', () => {
           before(async () => {
-            await pageObjects.assetDetails.clickMetadataTab();
+            // Close the metric popover if it is open
+            await browser.pressKeys(browser.keys.ESCAPE);
+            const metadataTab = await pageObjects.assetDetails.getMetadataTab();
+            // Use clickMouseButton to ensure the tab is visible
+            await metadataTab.clickMouseButton();
           });
 
           it('should show metadata table', async () => {
