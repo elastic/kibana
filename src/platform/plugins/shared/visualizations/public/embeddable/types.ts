@@ -55,7 +55,7 @@ export type VisualizeEditorInput = Omit<VisualizeRuntimeState, 'vis'> & {
 
 export type VisualizeSavedObjectInputState = SerializedTitles &
   Partial<DynamicActionsSerializedState> & {
-    savedObjectId: string;
+    savedObjectId?: string;
     timeRange?: TimeRange;
     uiState?: any;
   };

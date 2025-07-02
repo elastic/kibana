@@ -412,9 +412,7 @@ export class VisualizationsPlugin
           {
             panelType: VISUALIZE_EMBEDDABLE_TYPE,
             serializedState: {
-              rawState: {
-                savedObjectId: savedObject.id,
-              },
+              rawState: {},
               references: [
                 ...savedObject.references,
                 {

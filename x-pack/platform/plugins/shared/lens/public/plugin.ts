@@ -407,9 +407,7 @@ export class LensPlugin {
             {
               panelType: LENS_EMBEDDABLE_TYPE,
               serializedState: {
-                rawState: {
-                  savedObjectId: savedObject.id,
-                },
+                rawState: {},
                 references: [
                   ...savedObject.references,
                   {
