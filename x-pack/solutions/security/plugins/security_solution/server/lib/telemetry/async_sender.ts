@@ -69,7 +69,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
     telemetryUsageCounter?: IUsageCounter,
     analytics?: AnalyticsServiceSetup
   ): void {
-    this.logger.l(`Setting up ${AsyncTelemetryEventsSender.name}`);
+    this.logger.debug('Setting up service');
 
     this.ensureStatus(ServiceStatus.CREATED);
 
@@ -86,7 +86,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
   }
 
   public start(telemetryStart?: TelemetryPluginStart): void {
-    this.logger.l(`Starting ${AsyncTelemetryEventsSender.name}`);
+    this.logger.debug('Starting service');
 
     this.ensureStatus(ServiceStatus.CONFIGURED);
 
@@ -132,13 +132,11 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
             );
           }
         },
-        error: (err) => {
-          this.logger.warn('Unexpected error sending events to channel', {
-            error: JSON.stringify(err),
-          } as LogMeta);
+        error: (error) => {
+          this.logger.warn('Unexpected error sending events to channel', { error });
         },
         complete: () => {
-          this.logger.l('Shutting down');
+          this.logger.debug('Shutting down');
           this.finished$.next();
         },
       });
@@ -148,7 +146,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
   }
 
   public async stop(): Promise<void> {
-    this.logger.l(`Stopping ${AsyncTelemetryEventsSender.name}`);
+    this.logger.debug('Stopping service');
 
     this.ensureStatus(ServiceStatus.CONFIGURED, ServiceStatus.STARTED);
 
@@ -231,9 +229,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
         if (inflightEventsCounter < this.getConfigFor(channel).inflightEventsThreshold) {
           return rx.of(event);
         }
-        this.logger.l(
-          `>> Dropping event ${event} (channel: ${channel}, inflightEventsCounter: ${inflightEventsCounter})`
-        );
+        this.logger.debug('Dropping event', { event, channel, inflightEventsCounter } as LogMeta);
         this.senderUtils?.incrementCounter(TelemetryCounter.DOCS_DROPPED, 1, channel);
 
         return rx.EMPTY;
@@ -370,23 +366,21 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
           if (r.status < 400) {
             return { events: events.length, channel };
           } else {
-            this.logger.l('Unexpected response', {
+            this.logger.warn('Unexpected response', {
               status: r.status,
             } as LogMeta);
             throw newFailure(`Got ${r.status}`, channel, events.length);
           }
         })
-        .catch((err) => {
+        .catch((error) => {
           this.senderUtils?.incrementCounter(
             TelemetryCounter.RUNTIME_ERROR,
             events.length,
             channel
           );
 
-          this.logger.warn('Runtime error', {
-            error: err.message,
-          } as LogMeta);
-          throw newFailure(`Error posting events: ${err}`, channel, events.length);
+          this.logger.warn('Runtime error', { error });
+          throw newFailure(`Error posting events: ${error}`, channel, events.length);
         });
     } catch (err: unknown) {
       if (isFailure(err)) {

@@ -237,6 +237,14 @@ export const internalStateSlice = createSlice({
       withTab(state, action, (tab) => {
         tab.uiState.fieldList = action.payload.fieldListUiState;
       }),
+
+    setLayoutUiState: (
+      state,
+      action: TabAction<{ layoutUiState: Partial<TabState['uiState']['layout']> }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.uiState.layout = action.payload.layoutUiState;
+      }),
   },
   extraReducers: (builder) => {
     builder.addCase(loadDataViewList.fulfilled, (state, action) => {
