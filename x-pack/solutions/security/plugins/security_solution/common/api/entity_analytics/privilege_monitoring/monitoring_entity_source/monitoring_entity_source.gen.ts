@@ -34,7 +34,11 @@ export const CreateMonitoringEntitySource = z.object({
       })
     )
     .optional(),
-  filter: z.object({}).optional(),
+  filter: z
+    .object({
+      kuery: z.union([z.string(), z.object({})]).optional(),
+    })
+    .optional(),
 });
 
 export type UpdatedMonitoringEntitySource = z.infer<typeof UpdatedMonitoringEntitySource>;
@@ -54,7 +58,11 @@ export const UpdatedMonitoringEntitySource = z.object({
       })
     )
     .optional(),
-  filter: z.object({}).optional(),
+  filter: z
+    .object({
+      kuery: z.union([z.string(), z.object({})]).optional(),
+    })
+    .optional(),
 });
 
 export type MonitoringEntitySource = z.infer<typeof MonitoringEntitySource>;
@@ -73,7 +81,11 @@ export const MonitoringEntitySource = z.object({
       })
     )
     .optional(),
-  filter: z.object({}).optional(),
+  filter: z
+    .object({
+      kuery: z.union([z.string(), z.object({})]).optional(),
+    })
+    .optional(),
 });
 
 export type CreateEntitySourceRequestBody = z.infer<typeof CreateEntitySourceRequestBody>;

@@ -147,6 +147,11 @@ components:
                   type: string                
         filter:
           type: object
+          properties:
+            kuery:
+              oneOf:
+                - type: string
+                - type: object
 
     UpdatedMonitoringEntitySource:
       type: object
@@ -183,6 +188,11 @@ components:
                   type: string                
         filter:
           type: object
+          properties:
+            kuery:
+              oneOf:
+                - type: string
+                - type: object
 
     MonitoringEntitySource:
       type: object
@@ -218,3 +228,8 @@ components:
                   type: string        
         filter:
           type: object
+          properties:
+            kuery:
+              oneOf:
+                - type: string
+                - type: object
