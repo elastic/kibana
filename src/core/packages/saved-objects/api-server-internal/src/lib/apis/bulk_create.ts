@@ -114,13 +114,21 @@ export const performBulkCreate = async <T>(
 
     const method = requestId && overwrite ? 'index' : 'create';
     const requiresNamespacesCheck = requestId && registry.isMultiNamespace(type);
-
+    const typeSupportsAccessControl = registry.supportsAccessControl(type);
+    const accessControlToWrite =
+      typeSupportsAccessControl && createdBy
+        ? {
+            owner: createdBy,
+            accessMode: options.accessControl?.accessMode,
+          }
+        : undefined;
     return right({
       method,
       object: {
         ...object,
         id,
         managed: setManaged({ optionsManaged, objectManaged }),
+        accessControl: accessControlToWrite,
       },
       ...(requiresNamespacesCheck && { preflightCheckIndex: preflightCheckIndexCounter++ }),
     }) as ExpectedResult;
@@ -237,6 +245,7 @@ export const performBulkCreate = async <T>(
         ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
         ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
         managed: setManaged({ optionsManaged, objectManaged: object.managed }),
+        accessControl: object.accessControl,
         updated_at: time,
         created_at: time,
         ...(createdBy && { created_by: createdBy }),

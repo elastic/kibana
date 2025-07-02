@@ -6413,13 +6413,13 @@ describe('access control', () => {
         type: 'dashboard',
         id: '1',
         existingNamespaces: [],
-        accessControl: { owner: 'fake_profile_id', accessMode: 'read_only' as const },
+        accessControl: { owner: 'fake_owner_id', accessMode: 'read_only' as const },
       },
       {
         type: 'visualization',
         id: '2',
         existingNamespaces: [],
-        accessControl: { owner: 'fake_profile_id', accessMode: 'read_only' as const },
+        accessControl: { owner: 'fake_owner_id', accessMode: 'read_only' as const },
       },
     ];
 
@@ -6546,6 +6546,79 @@ describe('access control', () => {
           unauthorizedSpaces: [namespace],
         })
       );
+    });
+
+    test('allows operation when user is admin but not owner', async () => {
+      const currentUser = {
+        username: 'admin_user',
+        profile_uid: 'admin_123',
+      };
+      const { securityExtension, checkPrivileges } = setup();
+      getCurrentUser.mockReturnValue(currentUser);
+      setupSimpleCheckPrivsMockResolve(checkPrivileges, 'dashboard', 'manage_access_control', true);
+
+      expect(
+        await securityExtension.authorizeChangeOwnership({
+          namespace,
+          objects: objectsWithExistingNamespaces,
+        })
+      ).toEqual({
+        status: 'fully_authorized',
+        typeMap: new Map(),
+      });
+    });
+
+    test('allows operation when user is not admin but owner', async () => {
+      const currentUser = {
+        username: 'fake_owner',
+        profile_uid: 'fake_owner_id',
+      };
+      const { securityExtension, checkPrivileges } = setup();
+      getCurrentUser.mockReturnValue(currentUser);
+      setupSimpleCheckPrivsMockResolve(
+        checkPrivileges,
+        'dashboard',
+        'manage_access_control',
+        false
+      );
+
+      expect(
+        await securityExtension.authorizeChangeOwnership({
+          namespace,
+          objects: objectsWithExistingNamespaces,
+        })
+      ).toEqual({
+        status: 'fully_authorized',
+        typeMap: new Map(),
+      });
+    });
+
+    test('does not invoke access management if objects do not support accessControl ', async () => {
+      const { securityExtension } = setup();
+      const objects = [
+        {
+          type: 'non_read_only',
+          id: '1',
+          existingNamespaces: [],
+          accessControl: { owner: 'fake_owner_id', accessMode: 'read_only' as const },
+        },
+        {
+          type: 'visualization',
+          id: '2',
+          existingNamespaces: [],
+          accessControl: { owner: 'fake_owner_id', accessMode: 'read_only' as const },
+        },
+      ];
+
+      expect(
+        await securityExtension.authorizeChangeOwnership({
+          namespace,
+          objects,
+        })
+      ).toEqual({
+        status: 'fully_authorized',
+        typeMap: new Map(),
+      });
     });
   });
 });

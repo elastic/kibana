@@ -20,7 +20,6 @@ export class AccessControlService {
   constructor() {}
 
   setUserForOperation(user: AuthenticatedUser | null) {
-    console.log({ user });
     this.userForOperation = user;
   }
 
@@ -66,9 +65,11 @@ export class AccessControlService {
   enforceAccessControl<A extends string>({
     authorizationResult,
     typesRequiringAccessControl,
+    currentSpace,
   }: {
     authorizationResult: CheckAuthorizationResult<A>;
     typesRequiringAccessControl: Set<string>;
+    currentSpace: string;
   }) {
     if (authorizationResult.status === 'unauthorized') {
       const typeList = [...typesRequiringAccessControl].sort().join(',');
@@ -90,7 +91,8 @@ export class AccessControlService {
         // Check if user has global authorization or authorization in at least one space
         if (
           !accessControlAuth.isGloballyAuthorized &&
-          (!accessControlAuth.authorizedSpaces || accessControlAuth.authorizedSpaces.length === 0)
+          (!accessControlAuth.authorizedSpaces ||
+            !accessControlAuth.authorizedSpaces.includes(currentSpace))
         ) {
           unauthorizedTypes.push(type);
         }

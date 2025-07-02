@@ -421,7 +421,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         { authzAction: 'manage_access_control', auditAction: AuditAction.UPDATE_OBJECTS_OWNER },
       ],
       [
-        SecurityAction.CHANGE_ACCESS_MODE, // TODO: specify operation
+        SecurityAction.CHANGE_ACCESS_MODE,
         {
           authzAction: 'manage_access_control',
           auditAction: AuditAction.UPDATE_OBJECTS_ACCESS_MODE,
@@ -487,7 +487,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       actions.size === 0 &&
       (!typesRequiringAccessControl || typesRequiringAccessControl.size === 0)
     ) {
-      throw new Error('No actions or access control types specified for authorization check'); // TODO: Fix code flow
+      throw new Error('No actions or access control types specified for authorization check');
     }
     const typesArray = [...types];
     const actionsArray = [...actions];
@@ -1149,6 +1149,17 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
     this.assertObjectsArrayNotEmpty(objects, action);
+    const { auditAction, authzAction } = this.decodeSecurityAction(action);
+    const objectsNotSupportingAccessControl = objects.every(
+      ({ type }) => !typeRegistry.supportsAccessControl(type)
+    );
+
+    if (objectsNotSupportingAccessControl) {
+      const errMessage = `Unable to ${authzAction} for types ${[
+        ...objects.map(({ type }) => type),
+      ].join(', ')}`;
+      throw new Error(errMessage);
+    }
 
     const spacesToAuthorize = new Set<string>([namespaceString]);
 
@@ -1159,7 +1170,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         objects,
         typeRegistry,
       });
-    const { auditAction, authzAction } = this.decodeSecurityAction(action);
+
     if (typesRequiringAccessControl.size > 0) {
       const authorizationResult = await this.checkAuthorization({
         types: new Set(typesRequiringAccessControl),
@@ -1172,6 +1183,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         this.accessControlService.enforceAccessControl({
           typesRequiringAccessControl,
           authorizationResult,
+          currentSpace: namespaceString,
         });
       } catch (err) {
         errMessage = err;
