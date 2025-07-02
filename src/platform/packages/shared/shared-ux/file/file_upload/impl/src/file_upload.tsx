@@ -158,9 +158,7 @@ export const FileUpload = <Kind extends string = string>({
       uploadState.clear$.subscribe(() => {
         ref.current?.removeFiles();
       }),
-      uploadState.done$.subscribe((n) => {
-        return n && onDone(n);
-      }),
+      uploadState.done$.subscribe((n) => n && onDone(n)),
       uploadState.error$.subscribe((e) => e && onError?.(e)),
       uploadState.uploading$.subscribe((uploading) =>
         uploading ? onUploadStart?.() : onUploadEnd?.()

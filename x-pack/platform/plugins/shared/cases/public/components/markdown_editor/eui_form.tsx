@@ -20,12 +20,15 @@ import {
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { UploadState } from '@kbn/shared-ux-file-upload/src/upload_state';
+import { constructFileKindIdByOwner } from '../../../common/files';
+import { type Owner } from '../../../common/constants/types';
 import * as i18n from '../../common/translations';
 import type { MarkdownEditorRef } from './editor';
 import { MarkdownEditor } from './editor';
 import { CommentEditorContext } from './context';
 import { useMarkdownSessionStorage } from './use_markdown_session_storage';
 import { useImagePasteUpload } from './use_image_paste_upload';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 /* eslint-disable react/no-unused-prop-types */
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
@@ -63,11 +66,16 @@ export const MarkdownEditorForm = React.memo(
       },
       ref
     ) => {
+      const { owner: ownerList } = useCasesContext();
+      const owner = ownerList[0];
+      const fileKindId = constructFileKindIdByOwner(owner as Owner);
+
       const { isUploading, uploadState } = useImagePasteUpload({
         editorRef: ref,
         field,
         caseId,
-        owner: ['observability'],
+        owner,
+        fileKindId,
       });
 
       const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
@@ -111,9 +119,7 @@ export const MarkdownEditorForm = React.memo(
                   ref={ref}
                   ariaLabel={idAria}
                   editorId={id}
-                  onChange={(e) => {
-                    field.setValue(e);
-                  }}
+                  onChange={field.setValue}
                   value={field.value}
                   disabledUiPlugins={disabledUiPlugins}
                   data-test-subj={`${dataTestSubj}-markdown-editor`}

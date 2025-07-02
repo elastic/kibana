@@ -18,15 +18,26 @@ interface UseImagePasteUploadArgs {
   editorRef: React.ForwardedRef<MarkdownEditorRef | null>;
   field: FieldHook<string>;
   caseId?: string;
-  owner: string[];
+  owner: string;
+  fileKindId: string;
 }
 
-export function useImagePasteUpload({ editorRef, field, caseId, owner }: UseImagePasteUploadArgs): {
+function getUploadPlaceholderCopy(filename: string) {
+  return `<!-- uploading "${filename}" -->`;
+}
+
+export function useImagePasteUpload({
+  editorRef,
+  field,
+  caseId,
+  owner,
+  fileKindId,
+}: UseImagePasteUploadArgs): {
   isUploading: boolean;
   uploadState: UploadState;
 } {
   const { client } = useFilesContext();
-  const kind = client.getFileKind('observabilityFilesCases');
+  const kind = client.getFileKind(fileKindId);
 
   const uploadState = useMemo(
     () =>
@@ -46,12 +57,11 @@ export function useImagePasteUpload({ editorRef, field, caseId, owner }: UseImag
       ? null
       : editorRef.current?.textarea ?? null;
 
-  // Replace the temporary placeholder with the final markdown once the file upload completes
   const replacePlaceholder = useCallback(
     (file: DoneNotification) => {
       if (!textarea) return;
       const newText = textarea.value.replace(
-        'uploading...',
+        getUploadPlaceholderCopy(file.fileJSON.name),
         `![${file.fileJSON.name}](/api/files/files/${kind.id}/${file.id}/blob)`
       );
       field.setValue(newText);
@@ -72,7 +82,6 @@ export function useImagePasteUpload({ editorRef, field, caseId, owner }: UseImag
     },
   });
 
-  // Subscribe to the various upload observables
   useEffect(() => {
     const subs: Subscription[] = [];
     if (!uploadState.done$.observed) {
@@ -101,10 +110,17 @@ export function useImagePasteUpload({ editorRef, field, caseId, owner }: UseImag
 
   // Insert the temporary placeholder whilst the file is uploading
   useEffect(() => {
-    if (!textarea || uploadingFile === null || placeholderInserted || !caseId) return;
+    if (
+      !textarea ||
+      uploadingFile === null ||
+      placeholderInserted ||
+      !caseId ||
+      !uploadingFile.fileJSON
+    )
+      return;
 
     const { selectionStart, selectionEnd } = textarea;
-    const placeholder = 'uploading...';
+    const placeholder = getUploadPlaceholderCopy(uploadingFile.fileJSON.name);
     const before = field.value.slice(0, selectionStart);
     const after = field.value.slice(selectionEnd);
     field.setValue(before + placeholder + after);
@@ -127,7 +143,7 @@ export function useImagePasteUpload({ editorRef, field, caseId, owner }: UseImag
           if (uploadState.hasFiles()) {
             uploadState.upload({
               caseIds: [caseId],
-              owner: owner[0],
+              owner,
             });
           }
         }

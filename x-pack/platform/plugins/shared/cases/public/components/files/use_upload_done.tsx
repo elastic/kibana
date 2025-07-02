@@ -21,7 +21,7 @@ export const useUploadDone = function ({
   onFailure,
 }: {
   caseId?: string;
-  owner: string[];
+  owner: string;
   onSuccess: () => void;
   onFailure: (error: Error) => void;
 }) {
@@ -38,7 +38,7 @@ export const useUploadDone = function ({
       try {
         await createAttachments({
           caseId,
-          caseOwner: owner[0],
+          caseOwner: owner,
           attachments: [
             {
               type: AttachmentType.externalReference,
