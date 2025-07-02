@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import type { ElementRef } from 'react';
 import React, { memo, forwardRef, useCallback, useRef, useState, useImperativeHandle } from 'react';
 import type { EuiMarkdownEditorProps, EuiMarkdownAstNode } from '@elastic/eui';
@@ -69,6 +70,13 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
 
     return (
       <EuiMarkdownEditor
+        // prevent images from displaying at full scale
+        css={css`
+          .euiMarkdownEditorPreview img {
+            max-width: 100%;
+            height: auto;
+          }
+        `}
         ref={editorRef}
         aria-label={ariaLabel}
         editorId={editorId}

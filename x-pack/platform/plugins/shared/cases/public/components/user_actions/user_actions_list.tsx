@@ -26,6 +26,12 @@ const getCommentListCss = (euiTheme: EuiThemeComputed<{}>) => css`
     transition: 0.8s;
   }
 
+  // prevent images from displaying at full scale
+  & .euiMarkdownFormat img {
+    max-width: 100%;
+    height: auto;
+  }
+
   & .draftFooter {
     & .euiCommentEvent__body {
       padding: 0;
