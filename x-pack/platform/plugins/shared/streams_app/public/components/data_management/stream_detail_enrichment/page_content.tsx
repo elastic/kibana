@@ -89,6 +89,7 @@ export function StreamDetailEnrichmentContentImpl() {
     http: core.http,
     navigateToUrl: core.application.navigateToUrl,
     openConfirm: core.overlays.openConfirm,
+    shouldPromptOnReplace: false,
   });
 
   if (!isReady) {

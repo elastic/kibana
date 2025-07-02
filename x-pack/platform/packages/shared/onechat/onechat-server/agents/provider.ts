@@ -6,8 +6,10 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
+import type { Logger } from '@kbn/logging';
 import {
   AgentType,
+  AgentMode,
   type ConversationRound,
   type RoundInput,
   type ChatAgentEvent,
@@ -66,6 +68,10 @@ export interface AgentHandlerContext {
    * Event emitter that can be used to emits custom events
    */
   events: AgentEventEmitter;
+  /**
+   * Logger scoped to this execution
+   */
+  logger: Logger;
 }
 
 /**
@@ -80,7 +86,19 @@ export interface AgentEventEmitter {
 // conversational
 
 export interface ConversationalAgentParams {
+  /**
+   * Agent mode to use for this round.
+   * Defaults to `normal`.
+   */
+  agentMode?: AgentMode;
+  /**
+   * Previous rounds of conversation.
+   * Defaults to an empty list (new conversation)
+   */
   conversation?: ConversationRound[];
+  /**
+   * The input triggering this round.
+   */
   nextInput: RoundInput;
 }
 
