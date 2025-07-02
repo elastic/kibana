@@ -11,20 +11,20 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 
-interface UseFieldTypesProps<T extends object> {
-  doc: T;
+interface UseFieldTypesProps {
+  fields: string[];
   dataView: DataView;
   columnsMeta?: DataTableColumnsMeta;
 }
 
-export const useFieldTypes = <T extends object>({
-  doc,
+export const useDataViewFields = ({
+  fields,
   dataView,
   columnsMeta,
-}: UseFieldTypesProps<T>): { docFieldTypes: Record<string, DataViewField | undefined> } => {
-  const docFieldTypes = useMemo(
+}: UseFieldTypesProps): { dataViewFields: Record<string, DataViewField | undefined> } => {
+  const dataViewFields = useMemo(
     () =>
-      Object.keys(doc).reduce((acc, fieldName) => {
+      fields.reduce((acc, fieldName) => {
         acc[fieldName] = getDataViewFieldOrCreateFromColumnMeta({
           fieldName,
           dataView,
@@ -33,8 +33,8 @@ export const useFieldTypes = <T extends object>({
 
         return acc;
       }, {} as Record<string, DataViewField | undefined>),
-    [doc, dataView, columnsMeta]
+    [fields, dataView, columnsMeta]
   );
 
-  return { docFieldTypes };
+  return { dataViewFields };
 };
