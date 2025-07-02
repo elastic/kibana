@@ -14,3 +14,4 @@ export { notesDefaultProductFeaturesConfig } from './src/notes/product_feature_c
 export { siemMigrationsDefaultProductFeaturesConfig } from './src/siem_migrations/product_feature_config';
 export { exceptionsDefaultProductFeaturesConfig } from './src/exceptions/product_feature_config';
 export { createEnabledProductFeaturesConfigMap } from './src/helpers';
+export { rulesDefaultProductFeaturesConfig } from './src/rules/product_feature_config';

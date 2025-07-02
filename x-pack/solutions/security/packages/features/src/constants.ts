@@ -26,6 +26,7 @@ export const CASES_FEATURE_ID_V2 = 'securitySolutionCasesV2' as const;
 export const CASES_FEATURE_ID_V3 = 'securitySolutionCasesV3' as const;
 
 export const EXCEPTIONS_FEATURE_ID = 'securitySolutionExceptions' as const;
+export const RULES_FEATURE_ID = 'securitySolutionRules' as const;
 
 export const SECURITY_SOLUTION_CASES_APP_ID = 'securitySolutionCases' as const;
 

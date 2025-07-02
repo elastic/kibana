@@ -146,6 +146,13 @@ export enum ProductFeatureExceptionsFeatureKey {
   exceptions = 'exceptions',
 }
 
+export enum ProductFeatureRulesFeatureKey {
+  /**
+   * Enables Exceptions
+   */
+  rules = 'rules',
+}
+
 export enum ProductFeatureNotesFeatureKey {
   /**
    * Enables Notes
@@ -169,6 +176,7 @@ export const ProductFeatureKey = {
   ...ProductFeatureTimelineFeatureKey,
   ...ProductFeatureNotesFeatureKey,
   ...ProductFeatureExceptionsFeatureKey,
+  ...ProductFeatureRulesFeatureKey,
 };
 // We need to merge the value and the type and export both to replicate how enum works.
 export type ProductFeatureKeyType =
@@ -179,7 +187,8 @@ export type ProductFeatureKeyType =
   | ProductFeatureSiemMigrationsKey
   | ProductFeatureTimelineFeatureKey
   | ProductFeatureNotesFeatureKey
-  | ProductFeatureExceptionsFeatureKey;
+  | ProductFeatureExceptionsFeatureKey
+  | ProductFeatureRulesFeatureKey;
 
 export const ALL_PRODUCT_FEATURE_KEYS = Object.freeze(Object.values(ProductFeatureKey));
 

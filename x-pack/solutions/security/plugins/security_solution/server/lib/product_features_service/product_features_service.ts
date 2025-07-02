@@ -16,7 +16,7 @@ import {
   getAssistantFeature,
   getAttackDiscoveryFeature,
   getCasesFeature,
-  getExceptionsFeature,
+  getRulesFeature,
   getSecurityFeature,
   getCasesV2Feature,
   getCasesV3Feature,
@@ -49,9 +49,9 @@ export class ProductFeaturesService {
   private securityAssistantProductFeatures: ProductFeatures;
   private attackDiscoveryProductFeatures: ProductFeatures;
   private timelineProductFeatures: ProductFeatures;
-  private exceptionsProductFeatures: ProductFeatures;
   private notesProductFeatures: ProductFeatures;
   private siemMigrationsProductFeatures: ProductFeatures;
+  private rulesProductFeatures: ProductFeatures;
 
   private productFeatures?: Set<ProductFeatureKeyType>;
 
@@ -168,16 +168,27 @@ export class ProductFeaturesService {
       notesFeature.baseKibanaSubFeatureIds
     );
 
-    const exceptionsFeature = getExceptionsFeature({
+    const rulesFeature = getRulesFeature({
       savedObjects: securityExceptionsSavedObjects,
       experimentalFeatures: {},
     });
-    this.exceptionsProductFeatures = new ProductFeatures(
+    this.rulesProductFeatures = new ProductFeatures(
       this.logger,
-      exceptionsFeature.subFeaturesMap,
-      exceptionsFeature.baseKibanaFeature,
-      exceptionsFeature.baseKibanaSubFeatureIds
+      rulesFeature.subFeaturesMap,
+      rulesFeature.baseKibanaFeature,
+      rulesFeature.baseKibanaSubFeatureIds
     );
+
+    // const exceptionsFeature = getExceptionsFeature({
+    //   savedObjects: securityExceptionsSavedObjects,
+    //   experimentalFeatures: {},
+    // });
+    // this.exceptionsProductFeatures = new ProductFeatures(
+    //   this.logger,
+    //   exceptionsFeature.subFeaturesMap,
+    //   exceptionsFeature.baseKibanaFeature,
+    //   exceptionsFeature.baseKibanaSubFeatureIds
+    // );
 
     const siemMigrationsFeature = getSiemMigrationsFeature();
     this.siemMigrationsProductFeatures = new ProductFeatures(
@@ -195,7 +206,8 @@ export class ProductFeaturesService {
     this.casesProductFeatures.init(featuresSetup);
     this.casesProductV2Features.init(featuresSetup);
     this.casesProductFeaturesV3.init(featuresSetup);
-    this.exceptionsProductFeatures.init(featuresSetup);
+    // this.exceptionsProductFeatures.init(featuresSetup);
+    this.rulesProductFeatures.init(featuresSetup);
     this.securityAssistantProductFeatures.init(featuresSetup);
     this.attackDiscoveryProductFeatures.init(featuresSetup);
     this.timelineProductFeatures.init(featuresSetup);
@@ -223,11 +235,14 @@ export class ProductFeaturesService {
     const timelineProductFeaturesConfig = configurator.timeline();
     this.timelineProductFeatures.setConfig(timelineProductFeaturesConfig);
 
+    const rulesFeaturesConfig = configurator.rules();
+    this.rulesProductFeatures.setConfig(rulesFeaturesConfig);
+
     const notesProductFeaturesConfig = configurator.notes();
     this.notesProductFeatures.setConfig(notesProductFeaturesConfig);
 
-    const exceptionsProductFeaturesConfig = configurator.exceptions();
-    this.exceptionsProductFeatures.setConfig(exceptionsProductFeaturesConfig);
+    // const exceptionsProductFeaturesConfig = configurator.exceptions();
+    // this.exceptionsProductFeatures.setConfig(exceptionsProductFeaturesConfig);
 
     let siemMigrationsProductFeaturesConfig = new Map();
     if (!this.experimentalFeatures.siemMigrationsDisabled) {
@@ -244,7 +259,8 @@ export class ProductFeaturesService {
         ...timelineProductFeaturesConfig.keys(),
         ...notesProductFeaturesConfig.keys(),
         ...siemMigrationsProductFeaturesConfig.keys(),
-        ...exceptionsProductFeaturesConfig.keys(),
+        // ...exceptionsProductFeaturesConfig.keys(),
+        ...rulesFeaturesConfig.keys(),
       ]) as readonly ProductFeatureKeyType[]
     );
   }
@@ -267,8 +283,7 @@ export class ProductFeaturesService {
       this.attackDiscoveryProductFeatures.isActionRegistered(action) ||
       this.timelineProductFeatures.isActionRegistered(action) ||
       this.notesProductFeatures.isActionRegistered(action) ||
-      this.siemMigrationsProductFeatures.isActionRegistered(action) ||
-      this.exceptionsProductFeatures.isActionRegistered(action)
+      this.siemMigrationsProductFeatures.isActionRegistered(action)
     );
   }
 
