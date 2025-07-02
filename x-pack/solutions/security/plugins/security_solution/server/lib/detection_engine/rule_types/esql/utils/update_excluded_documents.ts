@@ -53,14 +53,12 @@ export const updateExcludedDocuments = ({
       }, new Set()).size === 1;
 
     if (lastId) {
-      if (excludeSingleDocument) {
-        sourceDocuments[documentIds[0]] = sourceDocuments[lastId].filter(
-          (doc) => doc._index === lastIndex
-        );
-      } else if (lastIndex) {
-        sourceDocuments[lastId] = sourceDocuments[lastId].filter((doc) => doc._index !== lastIndex);
-      } else {
+      if (lastIndex === undefined) {
         sourceDocuments[lastId]?.pop();
+      } else {
+        sourceDocuments[lastId] = sourceDocuments[lastId].filter((doc) => {
+          return excludeSingleDocument ? doc._index === lastIndex : doc._index !== lastIndex;
+        });
       }
     }
   }
