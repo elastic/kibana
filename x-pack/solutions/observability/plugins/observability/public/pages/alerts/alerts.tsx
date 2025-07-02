@@ -136,6 +136,7 @@ function InternalAlertsPage() {
     meta: {
       rangeFrom: alertSearchBarStateProps.rangeFrom,
       rangeTo: alertSearchBarStateProps.rangeTo,
+      description: '[ttfmp_alerts] The Observability Alerts page has loaded a table of alerts.',
     },
   });
 
