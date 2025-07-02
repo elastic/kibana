@@ -235,6 +235,9 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
                     data-test-subj="ruleDetailsEditButton"
                     iconType={'pencil'}
                     onClick={onEditRuleClick}
+                    aria-label={i18n.translate('xpack.triggersActionsUI.ruleDetails.editButton', {
+                      defaultMessage: 'Edit Rule',
+                    })}
                   />
                 </EuiFlexItem>
               )
