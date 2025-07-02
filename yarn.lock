@@ -3927,6 +3927,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/bfetch-error@link:src/platform/packages/shared/kbn-bfetch-error":
+  version "0.0.0"
+  uid ""
+
+"@kbn/bfetch-explorer-plugin@link:examples/bfetch_explorer":
+  version "0.0.0"
+  uid ""
+
+"@kbn/bfetch-plugin@link:src/platform/plugins/shared/bfetch":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cache-cli@link:src/platform/packages/shared/kbn-cache-cli":
   version "0.0.0"
   uid ""
