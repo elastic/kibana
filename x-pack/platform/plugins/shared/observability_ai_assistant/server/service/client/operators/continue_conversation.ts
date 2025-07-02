@@ -47,7 +47,7 @@ import { extractMessages } from './extract_messages';
 
 const MAX_FUNCTION_RESPONSE_TOKEN_COUNT = 4000;
 
-const END_TURN = 'exit_loop';
+const EXIT_LOOP_FUNCTION_NAME = 'exit_loop';
 
 function executeFunctionAndCatchError({
   name,
@@ -151,10 +151,10 @@ function getFunctionOptions({
 
   if (functionLimitExceeded) {
     return {
-      functionCall: END_TURN,
+      functionCall: EXIT_LOOP_FUNCTION_NAME,
       functions: [
         {
-          name: END_TURN,
+          name: EXIT_LOOP_FUNCTION_NAME,
           description: `You've run out of tool calls. Call this tool, and explain to the user you've run out of budget.`,
           parameters: {
             type: 'object',
@@ -324,7 +324,7 @@ export function continueConversation({
           if (event.type === StreamingChatResponseEventType.MessageAdd) {
             const message = event.message;
 
-            if (message.message.function_call?.name === END_TURN) {
+            if (message.message.function_call?.name === EXIT_LOOP_FUNCTION_NAME) {
               const args = JSON.parse(message.message.function_call.arguments ?? '{}') as {
                 response: string;
               };
