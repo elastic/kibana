@@ -18,7 +18,8 @@ import { addMonitorAPIHelper, omitMonitorKeys } from './create_monitor';
 import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  describe('EnableDefaultAlerting', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/225448
+  describe.skip('EnableDefaultAlerting', function () {
     const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const retry = getService('retry');

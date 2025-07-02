@@ -2134,6 +2134,8 @@
             "signature": [
               "{ services: { logSourcesService: ",
               "LogSourcesService",
+              "; logDataService: ",
+              "LogDataService",
               "; }; } | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
