@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { Subject, Observable } from 'rxjs';
 import { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
-import type { ChatAgentEvent } from '@kbn/onechat-common';
+import { ChatAgentEvent } from '@kbn/onechat-common';
 import type { CallAgentResponse } from '../../common/http_api/agents';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';

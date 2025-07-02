@@ -7,7 +7,7 @@
 
 import { PublishingSubject } from '@kbn/presentation-publishing';
 import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '@kbn/ui-actions-enhanced-plugin/public';
-import { DynamicActionsSerializedState } from '../../plugin';
+import { DynamicActionsSerializedState } from '../types';
 
 export type HasDynamicActions = Partial<{
   enhancements: { dynamicActions: DynamicActionManager };

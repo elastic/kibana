@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { isEmpty } from 'lodash/fp';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import {
@@ -27,7 +27,6 @@ import type { SavedQuery } from '@kbn/data-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import useToggle from 'react-use/lib/useToggle';
-import { isDataView } from '../../../../common/components/query_bar';
 import type {
   AlertSuppressionMissingFieldsStrategy,
   EqlOptionalFields,
@@ -68,6 +67,7 @@ import {
   EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_LABEL,
 } from '../../../rule_creation/components/eql_query_edit/translations';
 import { useDataView } from './three_way_diff/final_edit/fields/hooks/use_data_view';
+import { matchFiltersToIndexPattern } from '../../../../common/components/query_bar/match_filters_to_index_pattern';
 
 interface SavedQueryNameProps {
   savedQueryName: string;
@@ -97,29 +97,16 @@ export const Filters = ({
     ? { dataViewId }
     : { indexPatterns: index ?? defaultIndexPattern };
   const { dataView } = useDataView(useDataViewParams);
+
   const isEsql = filters.some((filter) => filter?.query?.language === 'esql');
-  const searchBarFilters = useMemo(() => {
-    if (!index || isDataView(index) || isEsql) {
-      return filters;
-    }
-    const filtersWithUpdatedMetaIndex = filters.map((filter) => {
-      return {
-        ...filter,
-        meta: {
-          ...filter.meta,
-          index: index.join(','),
-        },
-      };
-    });
 
-    return filtersWithUpdatedMetaIndex;
-  }, [filters, index, isEsql]);
-
-  if (!dataView) {
+  if (!dataView?.id || isEsql) {
     return null;
   }
 
-  const flattenedFilters = mapAndFlattenFilters(searchBarFilters);
+  const flattenedFilters = mapAndFlattenFilters(filters);
+  const matchedFilters = matchFiltersToIndexPattern(dataView.id, flattenedFilters);
+
   const styles = filtersStyles;
 
   return (
@@ -130,7 +117,7 @@ export const Filters = ({
       responsive={false}
       gutterSize="xs"
     >
-      <FilterItems filters={flattenedFilters} indexPatterns={[dataView]} readOnly />
+      <FilterItems filters={matchedFilters} indexPatterns={[dataView]} readOnly />
     </EuiFlexGroup>
   );
 };
@@ -298,7 +285,7 @@ const UnavailableMlJobLink: React.FC<UnavailableMlJobLinkProps> = ({ jobId }) =>
 
   const button = (
     <EuiButtonIcon
-      iconType="questionInCircle"
+      iconType="question"
       onClick={togglePopover}
       aria-label={i18n.MACHINE_LEARNING_JOB_NOT_AVAILABLE}
     />

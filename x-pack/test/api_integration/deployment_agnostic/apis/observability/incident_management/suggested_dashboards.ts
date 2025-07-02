@@ -12,6 +12,7 @@ import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { ALERTS_API_URLS } from '@kbn/observability-plugin/common/constants';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -207,7 +208,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const alertId = firstHit._id;
 
       const { body } = await supertestWithoutAuth
-        .get(`/internal/observability/alerts/related_dashboards?alertId=${alertId}`)
+        .get(`${ALERTS_API_URLS.INTERNAL_RELATED_DASHBOARDS}?alertId=${alertId}`)
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
@@ -459,6 +460,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   panelIndex: '8db7a201-95c8-4211-89b5-1288e18c8f2e',
                   type: 'lens',
                   panelConfig: {
+                    title: '',
                     enhancements: { dynamicActions: { events: [] } },
                     syncColors: false,
                     syncCursor: true,

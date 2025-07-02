@@ -31,7 +31,11 @@ elif [[ "$UNAME" == "Darwin" ]]; then
 fi
 echo " -- Running on OS: $OS"
 
-NODE_VARIANT=""
+NODE_VARIANT="node-glibc-217/"
+if [[ "${CI_FORCE_NODE_POINTER_COMPRESSION:-}" = "true" ]]; then
+  NODE_VARIANT="node-pointer-compression/"
+  echo ' -- Using Node.js variant with pointer compression enabled'
+fi
 nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/${NODE_VARIANT}dist/v$NODE_VERSION/node-v$NODE_VERSION-${OS}-${classifier}"
 
 echo " -- node: version=v${NODE_VERSION} dir=$NODE_DIR"

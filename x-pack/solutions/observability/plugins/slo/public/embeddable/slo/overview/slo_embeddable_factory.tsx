@@ -71,7 +71,7 @@ export const getOverviewEmbeddableFactory = ({
     const dynamicActionsManager = deps.embeddableEnhanced?.initializeEmbeddableDynamicActions(
       uuid,
       () => titleManager.api.title$.getValue(),
-      state
+      initialState
     );
 
     const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
@@ -82,12 +82,15 @@ export const getOverviewEmbeddableFactory = ({
     const reload$ = new Subject<boolean>();
 
     function serializeState() {
+      const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
+        dynamicActionsManager?.serializeState() ?? {};
       return {
         rawState: {
           ...titleManager.getLatestState(),
           ...sloStateManager.getLatestState(),
-          ...dynamicActionsManager?.getLatestState(),
+          ...dynamicActionsState,
         },
+        references: dynamicActionsReferences ?? [],
       };
     }
 

@@ -35,13 +35,18 @@ export const TYPE = 'fleet:sync-integrations-task';
 export const VERSION = '1.0.5';
 const TITLE = 'Fleet Sync Integrations Task';
 const SCOPE = ['fleet'];
-const INTERVAL = '5m';
+const DEFAULT_INTERVAL = '5m';
 const TIMEOUT = '5m';
+
+interface SyncIntegrationsTaskConfig {
+  taskInterval?: string;
+}
 
 interface SyncIntegrationsTaskSetupContract {
   core: CoreSetup;
   taskManager: TaskManagerSetupContract;
   logFactory: LoggerFactory;
+  config: SyncIntegrationsTaskConfig;
 }
 
 interface SyncIntegrationsTaskStartContract {
@@ -52,10 +57,12 @@ export class SyncIntegrationsTask {
   private logger: Logger;
   private wasStarted: boolean = false;
   private abortController = new AbortController();
+  private taskInterval: string;
 
   constructor(setupContract: SyncIntegrationsTaskSetupContract) {
-    const { core, taskManager, logFactory } = setupContract;
+    const { core, taskManager, logFactory, config } = setupContract;
     this.logger = logFactory.get(this.taskId);
+    this.taskInterval = config.taskInterval ?? DEFAULT_INTERVAL;
 
     taskManager.registerTaskDefinitions({
       [TYPE]: {
@@ -82,7 +89,7 @@ export class SyncIntegrationsTask {
     }
 
     this.wasStarted = true;
-    this.logger.info(`[SyncIntegrationsTask] Started with interval of [${INTERVAL}]`);
+    this.logger.info(`[SyncIntegrationsTask] Started with interval of [${this.taskInterval}]`);
 
     try {
       await taskManager.ensureScheduled({
@@ -90,7 +97,7 @@ export class SyncIntegrationsTask {
         taskType: TYPE,
         scope: SCOPE,
         schedule: {
-          interval: INTERVAL,
+          interval: this.taskInterval,
         },
         state: {},
         params: { version: VERSION },
@@ -124,6 +131,7 @@ export class SyncIntegrationsTask {
     this.logger.info(`[runTask()] started`);
 
     if (!canEnableSyncIntegrations()) {
+      this.logger.debug(`[SyncIntegrationsTask] Remote synced integration cannot be enabled.`);
       return;
     }
 
@@ -230,6 +238,7 @@ export class SyncIntegrationsTask {
         package_version: item.attributes.version,
         updated_at: item.updated_at ?? new Date().toISOString(),
         install_status: item.attributes.install_status,
+        install_source: item.attributes.install_source,
       };
     });
 

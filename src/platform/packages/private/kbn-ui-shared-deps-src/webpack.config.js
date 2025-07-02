@@ -64,6 +64,10 @@ module.exports = {
         use: [require.resolve('@kbn/peggy-loader')],
       },
       {
+        test: /\.text$/,
+        use: [require.resolve('@kbn/dot-text-loader')],
+      },
+      {
         test: /\.css$/,
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },

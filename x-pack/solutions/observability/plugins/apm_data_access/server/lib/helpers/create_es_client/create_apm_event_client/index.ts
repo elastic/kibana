@@ -157,11 +157,13 @@ export class APMEventClient {
 
   async search<TParams extends APMEventESSearchRequest>(
     operationName: string,
-    params: TParams
+    params: TParams,
+    options?: { skipProcessorEventFilter?: boolean }
   ): Promise<TypedSearchResponse<TParams>> {
     const { index, filters } = getRequestBase({
       apm: params.apm,
       indices: this.indices,
+      skipProcessorEventFilter: options?.skipProcessorEventFilter,
     });
 
     if (this.excludedDataTiers.length > 0) {

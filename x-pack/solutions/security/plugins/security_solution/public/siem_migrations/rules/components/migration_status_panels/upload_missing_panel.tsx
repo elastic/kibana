@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import type { SpacerSize } from '@elastic/eui/src/components/spacer/spacer';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { useKibana } from '../../../../common/lib/kibana/use_kibana';
 import type { RuleMigrationResourceBase } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { PanelText } from '../../../../common/components/panel_text';
 import { useGetMissingResources } from '../../service/hooks/use_get_missing_resources';

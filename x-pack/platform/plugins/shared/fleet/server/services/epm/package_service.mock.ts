@@ -22,6 +22,7 @@ const createClientMock = (): jest.Mocked<PackageClient> => ({
   getPackageFieldsMetadata: jest.fn(),
   getPackages: jest.fn(),
   reinstallEsAssets: jest.fn(),
+  getInstalledPackages: jest.fn().mockReturnValue(Promise.resolve({ items: [], total: 0 })),
 });
 
 const createServiceMock = (): DeeplyMockedKeys<PackageService> => ({

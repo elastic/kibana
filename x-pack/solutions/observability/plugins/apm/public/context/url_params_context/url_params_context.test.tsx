@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/react';
-import { mount } from 'enzyme';
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { History, Location } from 'history';
 import moment from 'moment-timezone';
-import * as React from 'react';
 import { MemoryRouter, Router } from '@kbn/shared-ux-router';
 import type { UrlParams } from './types';
 import { UrlParamsContext, UrlParamsProvider } from './url_params_context';
 
-function mountParams(location: Location) {
-  return mount(
+function renderParams(location: Location) {
+  return render(
     <MemoryRouter initialEntries={[location]}>
       <UrlParamsProvider>
         <UrlParamsContext.Consumer>
           {({ urlParams }: { urlParams: UrlParams }) => (
-            <span id="data">{JSON.stringify(urlParams, null, 2)}</span>
+            <span data-test-subj="url-params">{JSON.stringify(urlParams, null, 2)}</span>
           )}
         </UrlParamsContext.Consumer>
       </UrlParamsProvider>
@@ -28,8 +28,8 @@ function mountParams(location: Location) {
   );
 }
 
-function getDataFromOutput(wrapper: ReturnType<typeof mount>) {
-  return JSON.parse(wrapper.find('#data').text());
+function getUrlParams(): UrlParams {
+  return JSON.parse(screen.getByTestId('url-params').textContent || '');
 }
 
 describe('UrlParamsContext', () => {
@@ -41,14 +41,14 @@ describe('UrlParamsContext', () => {
     moment.tz.setDefault('');
   });
 
-  it('should read values in from location', () => {
+  it('reads values from location', () => {
     const location = {
       pathname: '/test/pathname',
       search: '?rangeFrom=2010-03-15T12:00:00Z&rangeTo=2010-04-10T12:00:00Z&transactionId=123abc',
     } as Location;
 
-    const wrapper = mountParams(location);
-    const params = getDataFromOutput(wrapper);
+    renderParams(location);
+    const params = getUrlParams();
 
     expect([params.start, params.end]).toEqual([
       '2010-03-15T12:00:00.000Z',
@@ -56,17 +56,14 @@ describe('UrlParamsContext', () => {
     ]);
   });
 
-  it('should update param values if location has changed', () => {
+  it('updates param values when location changes', () => {
     const location = {
       pathname: '/test/updated',
       search: '?rangeFrom=2009-03-15T12:00:00Z&rangeTo=2009-04-10T12:00:00Z&transactionId=UPDATED',
     } as Location;
 
-    const wrapper = mountParams(location);
-
-    // force an update
-    wrapper.setProps({ abc: 123 });
-    const params = getDataFromOutput(wrapper);
+    renderParams(location);
+    const params = getUrlParams();
 
     expect([params.start, params.end]).toEqual([
       '2009-03-15T12:00:00.000Z',
@@ -74,7 +71,7 @@ describe('UrlParamsContext', () => {
     ]);
   });
 
-  it('should parse relative time ranges on mount', () => {
+  it('parses relative time ranges on mount', () => {
     const location = {
       pathname: '/test/updated',
       search: '?rangeFrom=now-1d%2Fd&rangeTo=now-1d%2Fd&transactionId=UPDATED',
@@ -82,11 +79,8 @@ describe('UrlParamsContext', () => {
 
     const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(0);
 
-    const wrapper = mountParams(location);
-
-    // force an update
-    wrapper.setProps({ abc: 123 });
-    const params = getDataFromOutput(wrapper);
+    renderParams(location);
+    const params = getUrlParams();
 
     expect([params.start, params.end]).toEqual([
       '1969-12-31T00:00:00.000Z',
@@ -96,103 +90,87 @@ describe('UrlParamsContext', () => {
     nowSpy.mockRestore();
   });
 
-  it('should refresh the time range with new values', async () => {
-    const calls = [];
+  it('refreshes the time range with new values', async () => {
+    const user = userEvent.setup();
     const history = {
-      location: {
-        pathname: '/test',
-      },
+      location: { pathname: '/test' },
       listen: jest.fn(),
     } as unknown as History;
 
-    const wrapper = mount(
+    render(
       <Router history={history}>
         <UrlParamsProvider>
           <UrlParamsContext.Consumer>
-            {({ urlParams, refreshTimeRange }) => {
-              calls.push({ urlParams });
-              return (
-                <React.Fragment>
-                  <span id="data">{JSON.stringify(urlParams, null, 2)}</span>
-                  <button
-                    onClick={() =>
-                      refreshTimeRange({
-                        rangeFrom: '2005-09-20T12:00:00Z',
-                        rangeTo: '2005-10-21T12:00:00Z',
-                      })
-                    }
-                  />
-                </React.Fragment>
-              );
-            }}
+            {({ urlParams, refreshTimeRange }) => (
+              <>
+                <span data-test-subj="url-params">{JSON.stringify(urlParams, null, 2)}</span>
+                <button
+                  onClick={() =>
+                    refreshTimeRange({
+                      rangeFrom: '2005-09-20T12:00:00Z',
+                      rangeTo: '2005-10-21T12:00:00Z',
+                    })
+                  }
+                  data-test-subj="refresh-button"
+                />
+              </>
+            )}
           </UrlParamsContext.Consumer>
         </UrlParamsProvider>
       </Router>
     );
 
-    await waitFor(() => {});
+    await user.click(screen.getByTestId('refresh-button'));
 
-    expect(calls.length).toBe(1);
-
-    wrapper.find('button').simulate('click');
-
-    await waitFor(() => {});
-
-    expect(calls.length).toBe(2);
-
-    const params = getDataFromOutput(wrapper);
-
-    expect([params.start, params.end]).toEqual([
-      '2005-09-20T12:00:00.000Z',
-      '2005-10-21T12:00:00.000Z',
-    ]);
+    await waitFor(() => {
+      const params = getUrlParams();
+      expect([params.start, params.end]).toEqual([
+        '2005-09-20T12:00:00.000Z',
+        '2005-10-21T12:00:00.000Z',
+      ]);
+    });
   });
 
-  it('should refresh the time range with new values if time range is relative', async () => {
+  it('refreshes the time range with relative values', async () => {
+    const user = userEvent.setup();
     const history = {
-      location: {
-        pathname: '/test',
-      },
+      location: { pathname: '/test' },
       listen: jest.fn(),
     } as unknown as History;
 
     jest.spyOn(Date, 'now').mockImplementation(() => new Date('2000-06-15T12:00:00Z').getTime());
 
-    const wrapper = mount(
+    render(
       <Router history={history}>
         <UrlParamsProvider>
           <UrlParamsContext.Consumer>
-            {({ urlParams, refreshTimeRange }) => {
-              return (
-                <React.Fragment>
-                  <span id="data">{JSON.stringify(urlParams, null, 2)}</span>
-                  <button
-                    onClick={() =>
-                      refreshTimeRange({
-                        rangeFrom: 'now-1d/d',
-                        rangeTo: 'now-1d/d',
-                      })
-                    }
-                  />
-                </React.Fragment>
-              );
-            }}
+            {({ urlParams, refreshTimeRange }) => (
+              <>
+                <span data-test-subj="url-params">{JSON.stringify(urlParams, null, 2)}</span>
+                <button
+                  onClick={() =>
+                    refreshTimeRange({
+                      rangeFrom: 'now-1d/d',
+                      rangeTo: 'now-1d/d',
+                    })
+                  }
+                  data-test-subj="refresh-button"
+                />
+              </>
+            )}
           </UrlParamsContext.Consumer>
         </UrlParamsProvider>
       </Router>
     );
 
-    await waitFor(() => {});
+    await user.click(screen.getByTestId('refresh-button'));
 
-    wrapper.find('button').simulate('click');
-
-    await waitFor(() => {});
-
-    const params = getDataFromOutput(wrapper);
-
-    expect([params.start, params.end]).toEqual([
-      '2000-06-14T00:00:00.000Z',
-      '2000-06-14T23:59:59.999Z',
-    ]);
+    await waitFor(() => {
+      const params = getUrlParams();
+      expect([params.start, params.end]).toEqual([
+        '2000-06-14T00:00:00.000Z',
+        '2000-06-14T23:59:59.999Z',
+      ]);
+    });
   });
 });

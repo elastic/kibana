@@ -70,6 +70,73 @@ import { metadataSuggestion } from './commands/metadata';
 
 import type { GetColumnsByTypeFn, SuggestionRawDefinition } from './types';
 
+/**
+ * This function returns a list of closing brackets that can be appended to
+ * a partial query to make it valid.
+ *
+ * A known limitation of this is that is not aware of commas "," or pipes "|"
+ * so it is not yet helpful on a multiple commands errors (a workaround is to pass each command here...)
+ * @param text
+ * @returns
+ */
+export function getBracketsToClose(text: string) {
+  const stack = [];
+  const pairs: Record<string, string> = { '"""': '"""', '/*': '*/', '(': ')', '[': ']', '"': '"' };
+  const pairsReversed: Record<string, string> = {
+    '"""': '"""',
+    '*/': '/*',
+    ')': '(',
+    ']': '[',
+    '"': '"',
+  };
+
+  for (let i = 0; i < text.length; i++) {
+    for (const openBracket in pairs) {
+      if (!Object.hasOwn(pairs, openBracket)) {
+        continue;
+      }
+
+      const substr = text.slice(i, i + openBracket.length);
+      if (pairsReversed[substr] && pairsReversed[substr] === stack[stack.length - 1]) {
+        stack.pop();
+        break;
+      } else if (substr === openBracket) {
+        stack.push(substr);
+        break;
+      }
+    }
+  }
+  return stack.reverse().map((bracket) => pairs[bracket]);
+}
+
+/**
+ * This function attempts to correct the syntax of a partial query to make it valid.
+ *
+ * We are generally dealing with incomplete queries when the user is typing. But,
+ * having an AST is helpful so we heuristically correct the syntax so it can be parsed.
+ *
+ * @param _query
+ * @param context
+ * @returns
+ */
+export function correctQuerySyntax(_query: string) {
+  let query = _query;
+  // check if all brackets are closed, otherwise close them
+  const bracketsToAppend = getBracketsToClose(query);
+
+  const endsWithBinaryOperatorRegex =
+    /(?:\+|\/|==|>=|>|in|<=|<|like|:|%|\*|-|not in|not like|not rlike|!=|rlike|and|or|not|=|as)\s+$/i;
+  const endsWithCommaRegex = /,\s+$/;
+
+  if (endsWithBinaryOperatorRegex.test(query) || endsWithCommaRegex.test(query)) {
+    query += ` ${EDITOR_MARKER}`;
+  }
+
+  query += bracketsToAppend.join('');
+
+  return query;
+}
+
 function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
   return args.flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg)).filter(isFunctionItem);
 }
@@ -603,7 +670,11 @@ export function checkFunctionInvocationComplete(
   if (!argLengthCheck) {
     return { complete: false, reason: 'tooFewArgs' };
   }
-  if (fnDefinition.name === 'in' && Array.isArray(func.args[1]) && !func.args[1].length) {
+  if (
+    (fnDefinition.name === 'in' || fnDefinition.name === 'not in') &&
+    Array.isArray(func.args[1]) &&
+    !func.args[1].length
+  ) {
     return { complete: false, reason: 'tooFewArgs' };
   }
 

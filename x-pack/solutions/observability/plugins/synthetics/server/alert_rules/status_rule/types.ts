@@ -52,7 +52,7 @@ export interface MonitorSummaryStatusRule {
   configId: string;
   hostName: string;
   monitorId: string;
-  checkedAt: string;
+  checkedAt?: string;
   monitorUrl: string;
   locationId: string;
   monitorType: string;
@@ -70,6 +70,6 @@ export interface MonitorSummaryStatusRule {
   stateId?: string;
   lastErrorMessage?: string;
   lastErrorStack?: string | null;
-  timestamp: string;
+  timestamp?: string;
   labels?: Record<string, string>;
 }

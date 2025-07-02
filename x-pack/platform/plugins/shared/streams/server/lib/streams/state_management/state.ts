@@ -6,6 +6,7 @@
  */
 
 import { difference, intersection, isEqual } from 'lodash';
+import { isLockAcquisitionError } from '@kbn/lock-manager';
 import { StatusError } from '../errors/status_error';
 import { FailedToApplyRequestedChangesError } from './errors/failed_to_apply_requested_changes_error';
 import { FailedToDetermineElasticsearchActionsError } from './errors/failed_to_determine_elasticsearch_actions_error';
@@ -20,6 +21,7 @@ import type {
 } from './stream_active_record/stream_active_record';
 import { streamFromDefinition } from './stream_active_record/stream_from_definition';
 import type { StateDependencies, StreamChange } from './types';
+import { ConcurrentAccessError } from './errors/concurrent_access_error';
 
 interface Changes {
   created: string[];
@@ -81,19 +83,29 @@ export class State {
         elasticsearchActions,
       };
     } else {
-      try {
-        await desiredState.commitChanges(startingState);
-        return { status: 'success', changes: desiredState.changes(startingState) };
-      } catch (error) {
-        await desiredState.attemptRollback(startingState, error);
-        return {
-          status: 'failed_with_rollback',
-          error: new StatusError(
-            `Failed to apply changes but successfully rolled back to previous state: ${error.message}`,
-            error.statusCode ?? 500
-          ),
-        };
-      }
+      const lmService = dependencies.lockManager;
+      return lmService
+        .withLock('streams/apply_changes', async () => {
+          try {
+            await desiredState.commitChanges(startingState);
+            return { status: 'success' as const, changes: desiredState.changes(startingState) };
+          } catch (error) {
+            await desiredState.attemptRollback(startingState, error);
+            return {
+              status: 'failed_with_rollback' as const,
+              error: new StatusError(
+                `Failed to apply changes but successfully rolled back to previous state: ${error.message}`,
+                error.statusCode ?? 500
+              ),
+            };
+          }
+        })
+        .catch((error) => {
+          if (isLockAcquisitionError(error)) {
+            throw new ConcurrentAccessError('Could not acquire lock for applying changes');
+          }
+          throw error;
+        });
     }
   }
 

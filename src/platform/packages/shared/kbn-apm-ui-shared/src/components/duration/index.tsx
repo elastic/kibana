@@ -25,6 +25,7 @@ export function Duration({ duration, parent }: DurationProps) {
   if (!parent) {
     <EuiText size="xs">{asDuration(duration)}</EuiText>;
   }
+
   return (
     <EuiText size="xs">
       {asDuration(duration)} &nbsp;

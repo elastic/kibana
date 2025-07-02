@@ -84,6 +84,10 @@ import type { EndpointMetadataService } from '../endpoint/services/metadata';
 import { createEndpointMetadataServiceTestContextMock } from '../endpoint/services/metadata/mocks';
 import { createPolicyDataStreamsIfNeeded as _createPolicyDataStreamsIfNeeded } from './handlers/create_policy_datastreams';
 import { createTelemetryConfigProviderMock } from '../../common/telemetry_config/mocks';
+import { FleetPackagePolicyGenerator } from '../../common/endpoint/data_generators/fleet_package_policy_generator';
+import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../common/endpoint/service/response_actions/constants';
+import { pick } from 'lodash';
+import { ENDPOINT_ACTIONS_INDEX } from '../../common/endpoint/constants';
 
 jest.mock('uuid', () => ({
   v4: (): string => 'NEW_UUID',
@@ -1173,10 +1177,11 @@ describe('Fleet integrations', () => {
     let removedPolicies: PostDeletePackagePoliciesResponse;
     let policyId: string;
     let fakeArtifact: ExceptionListSchema;
+
     const invokeDeleteCallback = async (): Promise<void> => {
       const callback = getPackagePolicyDeleteCallback(endpointServicesMock);
       await callback(
-        deletePackagePolicyMock(),
+        removedPolicies,
         endpointServicesMock.savedObjects.createInternalScopedSoClient(),
         endpointServicesMock.getInternalEsClient()
       );
@@ -1248,6 +1253,118 @@ describe('Fleet integrations', () => {
       expect(
         endpointServicesMock.savedObjects.createInternalScopedSoClient().delete
       ).toBeCalledWith('policy-settings-protection-updates-note', 'id', { force: true });
+    });
+
+    describe('and with space awareness feature enabled', () => {
+      beforeEach(() => {
+        // @ts-expect-error
+        endpointServicesMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
+
+        const packagePolicyGenerator = new FleetPackagePolicyGenerator('seed');
+        const packageNames = Object.values(RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES).flat();
+
+        removedPolicies = packageNames
+          .concat('some-other-package-name')
+          .map((packageName, index) => {
+            return {
+              ...pick(
+                packagePolicyGenerator.generate({
+                  id: `policy-${index}`,
+                  package: { name: packageName, title: packageName, version: '9.1.0' },
+                }),
+                ['id', 'name', 'package']
+              ),
+              success: true,
+            };
+          });
+      });
+
+      it('should not update response actions if spaces feature is disabled', async () => {
+        // @ts-expect-error
+        endpointServicesMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = false;
+        await invokeDeleteCallback();
+
+        expect(endpointServicesMock.getInternalEsClient().updateByQuery).not.toHaveBeenCalled();
+      });
+
+      it('should check only policies whose package.name matches a package that supports response actions', async () => {
+        await invokeDeleteCallback();
+
+        expect(endpointServicesMock.getInternalEsClient().updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: {
+              bool: {
+                filter: {
+                  terms: {
+                    'agent.policy.integrationPolicyId': removedPolicies
+                      .filter((policy) => policy.package!.name !== 'some-other-package-name')
+                      .map((policy) => policy.id),
+                  },
+                },
+              },
+            },
+          })
+        );
+      });
+
+      it('should only process policies that were successfully deleted', async () => {
+        let endpointPolicyId = '';
+        removedPolicies.forEach((policy) => {
+          if (policy.package?.name !== 'endpoint') {
+            policy.success = false;
+          } else {
+            endpointPolicyId = policy.id;
+          }
+        });
+
+        await invokeDeleteCallback();
+
+        expect(endpointServicesMock.getInternalEsClient().updateByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: {
+              bool: {
+                filter: {
+                  terms: {
+                    'agent.policy.integrationPolicyId': [endpointPolicyId],
+                  },
+                },
+              },
+            },
+          })
+        );
+      });
+
+      it('should call updateByQuery() with expected arguments', async () => {
+        await invokeDeleteCallback();
+
+        expect(endpointServicesMock.getInternalEsClient().updateByQuery).toHaveBeenCalledWith({
+          conflicts: 'proceed',
+          ignore_unavailable: true,
+          index: ENDPOINT_ACTIONS_INDEX,
+          query: {
+            bool: {
+              filter: {
+                terms: {
+                  'agent.policy.integrationPolicyId': removedPolicies
+                    .filter((policy) => policy.package!.name !== 'some-other-package-name')
+                    .map((policy) => policy.id),
+                },
+              },
+            },
+          },
+          refresh: false,
+          script: {
+            lang: 'painless',
+            source: `
+if (ctx._source.containsKey('tags')) {
+  ctx._source.tags.add('INTEGRATION-POLICY-DELETED');
+} else {
+  ctx._source.tags = ['INTEGRATION-POLICY-DELETED'];
+}
+`,
+          },
+        });
+      });
     });
   });
 });

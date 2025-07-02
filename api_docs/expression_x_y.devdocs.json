@@ -70,6 +70,21 @@
       },
       {
         "parentPluginId": "expressionXY",
+        "id": "def-public.PointVisibilityOptions",
+        "type": "Object",
+        "tags": [],
+        "label": "PointVisibilityOptions",
+        "description": [],
+        "signature": [
+          "{ readonly ALWAYS: \"always\"; readonly NEVER: \"never\"; readonly AUTO: \"auto\"; }"
+        ],
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
         "id": "def-public.XYCurveTypes",
         "type": "Object",
         "tags": [],
@@ -3162,6 +3177,21 @@
       },
       {
         "parentPluginId": "expressionXY",
+        "id": "def-common.PointVisibility",
+        "type": "Type",
+        "tags": [],
+        "label": "PointVisibility",
+        "description": [],
+        "signature": [
+          "\"never\" | \"auto\" | \"always\""
+        ],
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
         "id": "def-common.ReferenceLineDecorationConfigFn",
         "type": "Type",
         "tags": [],
@@ -3674,6 +3704,21 @@
         "description": [],
         "signature": [
           "{ readonly DATA: \"data\"; readonly REFERENCELINE: \"referenceLine\"; readonly ANNOTATIONS: \"annotations\"; }"
+        ],
+        "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.PointVisibilityOptions",
+        "type": "Object",
+        "tags": [],
+        "label": "PointVisibilityOptions",
+        "description": [],
+        "signature": [
+          "{ readonly ALWAYS: \"always\"; readonly NEVER: \"never\"; readonly AUTO: \"auto\"; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/constants.ts",
         "deprecated": false,

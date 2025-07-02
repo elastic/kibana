@@ -17,10 +17,10 @@ describe('alertDeletePreviewApiCall', () => {
     jest.clearAllMocks();
   });
 
-  it('sends the correct HTTP request and parses the response', async () => {
-    http.post.mockResolvedValue(null);
+  it('sends the correct HTTP request and parses the response is empty', async () => {
+    http.post.mockResolvedValue(undefined);
 
-    await createAlertDeleteSchedule({
+    const res = await createAlertDeleteSchedule({
       services: { http },
       requestBody: {
         activeAlertDeleteThreshold: 10,
@@ -28,6 +28,34 @@ describe('alertDeletePreviewApiCall', () => {
         categoryIds: ['management'],
       },
     });
+
+    expect(res).toBeUndefined();
+
+    expect(http.post).toHaveBeenCalledWith(
+      expect.stringContaining('/internal/alerting/rules/settings/_alert_delete_schedule'),
+      expect.objectContaining({
+        body: JSON.stringify({
+          active_alert_delete_threshold: 10,
+          inactive_alert_delete_threshold: 1,
+          category_ids: ['management'],
+        }),
+      })
+    );
+  });
+
+  it('sends the correct HTTP request and parses the response if response is string', async () => {
+    http.post.mockResolvedValue(`task is already running`);
+
+    const res = await createAlertDeleteSchedule({
+      services: { http },
+      requestBody: {
+        activeAlertDeleteThreshold: 10,
+        inactiveAlertDeleteThreshold: 1,
+        categoryIds: ['management'],
+      },
+    });
+
+    expect(res).toBe(`task is already running`);
 
     expect(http.post).toHaveBeenCalledWith(
       expect.stringContaining('/internal/alerting/rules/settings/_alert_delete_schedule'),

@@ -14,48 +14,32 @@ import type { RuleMigrationStats } from '../../types';
 
 export const SIEM_MIGRATIONS_SELECT_MIGRATION_BUTTON_ID = 'siemMigrationsSelectMigrationButton';
 
+const migrationStatsToComboBoxOption = (
+  stats: RuleMigrationStats
+): EuiComboBoxOptionOption<string> => ({
+  value: stats.id,
+  label: stats.name,
+  'data-test-subj': `migrationSelectionOption-${stats.id}`,
+});
+
 export interface HeaderButtonsProps {
-  /**
-   * Available rule migrations stats
-   */
+  /** Available rule migrations stats */
   ruleMigrationsStats: RuleMigrationStats[];
-
-  /**
-   * Selected rule migration id
-   */
+  /** Selected rule migration id */
   selectedMigrationId: string | undefined;
-
-  /**
-   * Handles migration selection changes
-   * @param selectedId Selected migration id
-   * @returns
-   */
+  /** Handles migration selection changes */
   onMigrationIdChange: (selectedId?: string) => void;
 }
-
 export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
   ({ ruleMigrationsStats, selectedMigrationId, onMigrationIdChange }) => {
-    const migrationOptions = useMemo(() => {
-      const options: Array<EuiComboBoxOptionOption<string>> = ruleMigrationsStats.map(
-        ({ id, number }) => ({
-          value: id,
-          'data-test-subj': `migrationSelectionOption-${number}`,
-          label: i18n.SIEM_MIGRATIONS_OPTION_LABEL(number),
-        })
-      );
-      return options;
-    }, [ruleMigrationsStats]);
+    const migrationOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
+      () => ruleMigrationsStats.map(migrationStatsToComboBoxOption),
+      [ruleMigrationsStats]
+    );
+
     const selectedMigrationOption = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
       const stats = ruleMigrationsStats.find(({ id }) => id === selectedMigrationId);
-      return stats
-        ? [
-            {
-              value: selectedMigrationId,
-              'data-test-subj': `migrationSelectionOption-${stats.number}`,
-              label: i18n.SIEM_MIGRATIONS_OPTION_LABEL(stats.number),
-            },
-          ]
-        : [];
+      return stats ? [migrationStatsToComboBoxOption(stats)] : [];
     }, [ruleMigrationsStats, selectedMigrationId]);
 
     const onChange = (selected: Array<EuiComboBoxOptionOption<string>>) => {
@@ -67,7 +51,7 @@ export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
     }
 
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxxs">
             <h6>{i18n.SIEM_MIGRATIONS_OPTION_TITLE}</h6>
@@ -81,6 +65,7 @@ export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
             selectedOptions={selectedMigrationOption}
             singleSelection={{ asPlainText: true }}
             isClearable={false}
+            css={{ width: '500rem' }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

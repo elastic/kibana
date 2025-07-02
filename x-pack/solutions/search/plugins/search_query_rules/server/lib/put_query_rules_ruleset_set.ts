@@ -5,13 +5,24 @@
  * 2.0.
  */
 
-import { QueryRulesPutRulesetResponse } from '@elastic/elasticsearch/lib/api/types';
+import {
+  QueryRulesPutRulesetResponse,
+  QueryRulesQueryRuleset,
+} from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 export const putRuleset = async (
   client: ElasticsearchClient,
-  rulesetId: string
+  rulesetId: string,
+  rules?: QueryRulesQueryRuleset['rules']
 ): Promise<QueryRulesPutRulesetResponse> => {
+  if (rules && rules.length > 0) {
+    return client.queryRules.putRuleset({
+      ruleset_id: rulesetId,
+      rules,
+    });
+  }
+  // TODO: remove this with updated ruleset creation
   // Adding mandatory default "criteria" and "actions" values, we should manage temporary empty values before release
   return client.queryRules.putRuleset({
     ruleset_id: rulesetId,

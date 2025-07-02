@@ -15,11 +15,13 @@ import { FieldWithActions } from '../../components/field_with_actions/field_with
 export interface TransactionSummaryFieldProps {
   fieldId: string;
   fieldConfiguration: FieldConfiguration;
+  showActions?: boolean;
 }
 
 export function TransactionSummaryField({
   fieldConfiguration,
   fieldId,
+  showActions = true,
 }: TransactionSummaryFieldProps) {
   if (!fieldConfiguration.value) {
     return null;
@@ -34,6 +36,7 @@ export function TransactionSummaryField({
         value={fieldConfiguration.value as string}
         formattedValue={fieldConfiguration.value as string}
         fieldMetadata={fieldConfiguration.fieldMetadata}
+        showActions={showActions}
       >
         <div>
           {fieldConfiguration.content(fieldConfiguration.value, fieldConfiguration.formattedValue)}

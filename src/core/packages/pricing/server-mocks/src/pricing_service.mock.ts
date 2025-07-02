@@ -13,6 +13,7 @@ import type { PricingService } from '@kbn/core-pricing-server-internal';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<PricingServiceSetup> = {
+    isFeatureAvailable: jest.fn(),
     registerProductFeatures: jest.fn(),
   };
   return setupContract;

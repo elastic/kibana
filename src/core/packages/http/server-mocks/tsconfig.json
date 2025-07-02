@@ -22,6 +22,8 @@
     "@kbn/repo-info",
     "@kbn/config",
     "@kbn/core-base-server-internal",
+    "@kbn/core-http-context-server-mocks",
+    "@kbn/core-execution-context-server-mocks",
   ],
   "exclude": [
     "target/**/*",

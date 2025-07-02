@@ -38,5 +38,6 @@ export { UnifiedDocViewerLogsOverview } from './components/lazy_doc_viewer_logs_
 
 export { UnifiedDocViewerObservabilityTracesSpanOverview } from './components/observability/traces/doc_viewer_span_overview/lazy_doc_viewer_obs_traces_span_overview';
 export { UnifiedDocViewerObservabilityTracesTransactionOverview } from './components/observability/traces/doc_viewer_transaction_overview/lazy_doc_viewer_obs_traces_transaction_overview';
+export { UnifiedDocViewerObservabilityAttributesOverview } from './components/observability/attributes/doc_viewer_attributes_overview/lazy_doc_viewer_obs_attributes_overview';
 
 export const plugin = () => new UnifiedDocViewerPublicPlugin();

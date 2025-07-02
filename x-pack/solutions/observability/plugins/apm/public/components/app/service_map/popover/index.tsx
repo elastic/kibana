@@ -185,7 +185,7 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
                     defaultMessage: 'The KQL filter is not applied in the displayed stats.',
                   })}
                 >
-                  <EuiIcon tabIndex={0} type="iInCircle" />
+                  <EuiIcon tabIndex={0} type="info" />
                 </EuiToolTip>
               )}
             </h3>

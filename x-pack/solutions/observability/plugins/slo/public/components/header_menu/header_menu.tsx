@@ -53,14 +53,6 @@ export function HeaderMenu(): React.ReactElement | null {
                 defaultMessage: 'Manage SLOs',
               })}
             </EuiHeaderLink>
-            <EuiHeaderLink
-              color="primary"
-              href={http.basePath.prepend('/app/observability/annotations')}
-            >
-              {i18n.translate('xpack.slo.home.annotations', {
-                defaultMessage: 'Annotations',
-              })}
-            </EuiHeaderLink>
           </EuiHeaderLinks>
         </EuiFlexItem>
       </EuiFlexGroup>

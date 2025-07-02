@@ -14,7 +14,7 @@ import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/sele
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { OptionsListSuggestions } from '../../../../../common/options_list/types';
 import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
@@ -36,7 +36,7 @@ export const OptionsListPopoverSuggestions = ({
   } = useOptionsListContext();
 
   const { euiTheme } = useEuiTheme();
-  const styles = useMemoizedStyles(optionListPopoverSuggestionsStyles);
+  const styles = useMemoCss(optionListPopoverSuggestionsStyles);
 
   const [
     sort,

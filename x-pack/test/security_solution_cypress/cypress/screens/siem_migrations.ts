@@ -20,11 +20,14 @@ export const UPLOAD_RULES_BTN = getDataTestSubjectSelector('startMigrationUpload
 export const UPLOAD_RULES_FLYOUT = getDataTestSubjectSelector('uploadRulesFlyout');
 export const UPLOAD_RULES_FILE_PICKER = getDataTestSubjectSelector('rulesFilePicker');
 export const UPLOAD_RULES_FILE_BTN = getDataTestSubjectSelector('uploadFileButton');
+export const MIGRATION_NAME_INPUT = getDataTestSubjectSelector('migrationNameInput');
+export const MIGRATION_PANEL_NAME = getDataTestSubjectSelector('migrationPanelTitleName');
 
 export const START_MIGRATION_FROM_FLYOUT_BTN = getDataTestSubjectSelector('startMigrationButton');
 
 export const RULE_MIGRATIONS_GROUP_PANEL = getDataTestSubjectSelector('ruleMigrationPanelGroup');
 export const ONBOARDING_RULE_MIGRATIONS_LIST = getDataTestSubjectSelectorStartWith('migration-');
+
 export const ONBOARDING_TRANSLATIONS_RESULT_TABLE = {
   TABLE: getDataTestSubjectSelector('translationsResults'),
   TRANSLATION_STATUS: (status: string) => getDataTestSubjectSelector(`translationStatus-${status}`),
@@ -63,5 +66,24 @@ export const RULE_MIGRATION_PROGRESS_BAR_TEXT = `${RULE_MIGRATION_PROGRESS_BAR} 
 export const REPROCESS_FAILED_RULES_BTN = getDataTestSubjectSelector('reprocessFailedRulesButton');
 
 export const FAKE_BEDROCK_SELECTOR = getDataTestSubjectSelector(
-  `connector-${bedrockConnectorAPIPayload.name}`
+  `connector-option-${bedrockConnectorAPIPayload.name}`
 );
+
+const START_MIGRATION_MODAL_PREFIX = 'startMigrationModal';
+export const START_MIGRATION_MODAL = {
+  MODAL: getDataTestSubjectSelector(START_MIGRATION_MODAL_PREFIX),
+  CONNECTOR_SELECTOR: getDataTestSubjectSelector(
+    `${START_MIGRATION_MODAL_PREFIX}-ConnectorSelector`
+  ),
+  PREBUILT_RULES_MATCH_SWITCH: getDataTestSubjectSelector(
+    `${START_MIGRATION_MODAL_PREFIX}-PrebuiltRulesMatchingSwitch`
+  ),
+  START_MIGRATION_BTN: getDataTestSubjectSelector(`${START_MIGRATION_MODAL_PREFIX}-Translate`),
+};
+
+export const ONBOARDING_MIGRATION_ACTIONS = {
+  OPEN_ACTIONS_MENU: getDataTestSubjectSelector('openMigrationOptionsButton'),
+  RENAME_BTN: getDataTestSubjectSelector('renameMigrationItem'),
+  RENAME_INPUT: getDataTestSubjectSelector('euiInlineEditModeInput'),
+  RENAME_CONFIRM: getDataTestSubjectSelector('euiInlineEditModeSaveButton'),
+};
