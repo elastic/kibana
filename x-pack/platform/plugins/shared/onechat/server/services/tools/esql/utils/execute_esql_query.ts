@@ -53,7 +53,7 @@ function createSchemaFromParams(params: EsqlToolDefinition['params']): z.ZodObje
     schemaFields[key] = field;
   }
 
-  const schema = z.object(schemaFields).describe('Parameters needed to execute the query')
+  const schema = z.object(schemaFields).describe('Parameters needed to execute the query');
   return schema;
 }
 
