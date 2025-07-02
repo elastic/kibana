@@ -8,7 +8,7 @@
  */
 
 import type {
-  SavedObjectsChangeOwnershipObject,
+  SavedObjectsChangeAccessControlObject,
   SavedObjectsChangeAccessControlOptions,
   SavedObjectsChangeAccessControlResponse,
 } from '@kbn/core-saved-objects-api-server';
@@ -17,7 +17,7 @@ import { changeObjectAccessControl } from './internals/change_object_access_cont
 import type { ApiExecutionContext } from './types';
 
 export interface PerformChangeAccessModeParams<T = unknown> {
-  objects: SavedObjectsChangeOwnershipObject[];
+  objects: SavedObjectsChangeAccessControlObject[];
   options: SavedObjectsChangeAccessControlOptions<T>;
 }
 
