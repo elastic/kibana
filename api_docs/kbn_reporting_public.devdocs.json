@@ -1935,6 +1935,23 @@
             "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.KibanaContext.license$",
+            "type": "Object",
+            "tags": [],
+            "label": "license$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              "ILicense",
+              ">"
+            ],
+            "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
