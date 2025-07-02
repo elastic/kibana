@@ -25,18 +25,18 @@ import { Observable } from 'rxjs';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import { LocatorPublic, SharePluginSetup } from '@kbn/share-plugin/public';
 import { SerializableRecord } from '@kbn/utility-types';
-import { ReportDiagnostic } from './report_diagnostic';
-import { mockConfig } from '../__test__/report_listing.test.helpers';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { EuiThemeProvider } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { IlmPolicyStatusContextProvider } from '../../lib/ilm_policy_status_context';
 import { dataService } from '@kbn/controls-plugin/public/services/kibana_services';
 import { shareService } from '@kbn/dashboard-plugin/public/services/kibana_services';
 import { IlmPolicyMigrationStatus } from '@kbn/reporting-common/types';
 import { HttpSetupMock } from '@kbn/core-http-browser-mocks';
-import { act } from 'react-dom/test-utils';
+
+import { IlmPolicyStatusContextProvider } from '../../lib/ilm_policy_status_context';
+import { mockConfig } from '../__test__/report_listing.test.helpers';
+import { ReportDiagnostic } from './report_diagnostic';
 
 jest.mock('./report_exports_table', () => {
   return () => <div data-test-subj="reportExportsTable">{'Render Report Exports Table'}</div>;
@@ -127,7 +127,16 @@ describe('Reporting tabs', () => {
             application,
             uiSettings: uiSettingsClient,
             data: dataService,
-            share: shareService,
+            share: {
+              shareService,
+              url: {
+                ...sharePluginMock.createStartContract().url,
+                locators: {
+                  get: () => ilmLocator,
+                },
+              },
+            },
+            notifications: notificationServiceMock.createStartContract(),
           }}
         >
           <InternalApiClientProvider apiClient={updatedReportingAPIClient} http={http}>
@@ -152,7 +161,7 @@ describe('Reporting tabs', () => {
   });
 
   it('renders exports components', async () => {
-    await act(async () => render(renderComponent(props)));
+    render(renderComponent(props));
 
     expect(await screen.findByTestId('reportingTabs-exports')).toBeInTheDocument();
     expect(await screen.findByTestId('reportingTabs-schedules')).toBeInTheDocument();
@@ -172,9 +181,7 @@ describe('Reporting tabs', () => {
       },
     };
 
-    await act(async () => {
-      render(renderComponent({ ...props, ...updatedProps }));
-    });
+    render(renderComponent({ ...props, ...updatedProps }));
 
     expect(await screen.findAllByRole('tab')).toHaveLength(2);
   });
@@ -202,10 +209,8 @@ describe('Reporting tabs', () => {
         },
       };
 
-      await act(async () => {
-        // @ts-expect-error we don't need to provide all props for the test
-        render(renderComponent({ ...props, shareService: updatedShareService }));
-      });
+      // @ts-expect-error we don't need to provide all props for the test
+      render(renderComponent({ ...props, shareService: updatedShareService }));
 
       expect(await screen.findByTestId('ilmPolicyLink')).toBeInTheDocument();
     });
@@ -233,10 +238,8 @@ describe('Reporting tabs', () => {
       };
       const newConfig = { ...mockConfig, statefulSettings: { enabled: false } };
 
-      await act(async () => {
-        // @ts-expect-error we don't need to provide all props for the test
-        render(renderComponent({ ...props, shareService: updatedShareService, config: newConfig }));
-      });
+      // @ts-expect-error we don't need to provide all props for the test
+      render(renderComponent({ ...props, shareService: updatedShareService, config: newConfig }));
 
       expect(screen.queryByTestId('ilmPolicyLink')).not.toBeInTheDocument();
     });
@@ -244,9 +247,7 @@ describe('Reporting tabs', () => {
 
   describe('Screenshotting Diagnostic', () => {
     it('shows screenshotting diagnostic link if config is stateful', async () => {
-      await act(async () => {
-        render(renderComponent(props));
-      });
+      render(renderComponent(props));
 
       expect(await screen.findByTestId('screenshotDiagnosticLink')).toBeInTheDocument();
     });
@@ -261,14 +262,12 @@ describe('Reporting tabs', () => {
         },
       };
 
-      await act(async () => {
-        render(
-          renderComponent({
-            ...props,
-            config: mockNoImageConfig,
-          })
-        );
-      });
+      render(
+        renderComponent({
+          ...props,
+          config: mockNoImageConfig,
+        })
+      );
 
       expect(screen.queryByTestId('screenshotDiagnosticLink')).not.toBeInTheDocument();
     });
