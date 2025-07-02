@@ -8,6 +8,6 @@
  */
 
 export const PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY = 'aiAssistant:preferredAIAssistantType';
-export const OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY = 'aiAssistant:preferredAIAssistantType:observability';
+export const OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY = 'aiAssistant:preferredAIAssistantType:oblt';
 export const SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY = 'aiAssistant:preferredAIAssistantType:security';
-export const SEARCH_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY = 'aiAssistant:preferredAIAssistantType:search';
+export const SEARCH_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY = 'aiAssistant:preferredAIAssistantType:es';

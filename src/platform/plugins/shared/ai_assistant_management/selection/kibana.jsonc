@@ -13,12 +13,13 @@
       "aiAssistantManagementSelection"
     ],
     "requiredPlugins": [
-      "management"
+      "management",
+      "spaces"
     ],
     "optionalPlugins": [
       "home",
       "serverless",
-      "features"
+      "features",
     ],
     "requiredBundles": [
       "kibanaReact"

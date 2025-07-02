@@ -16,7 +16,6 @@ import {
   Plugin,
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { AIAssistantManagementSelectionConfig } from './config';
 import type {
@@ -62,21 +61,21 @@ export class AIAssistantManagementSelectionPlugin
     core.uiSettings.register({
       [OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
         ...observabilitySolutionSetting,
-        value: AIAssistantType.Never,
+        value: AIAssistantType.Observability,
       },
     });
 
     core.uiSettings.register({
       [SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
         ...securitySolutionSetting,
-        value: AIAssistantType.Never,
+        value: AIAssistantType.Security,
       },
     });
 
     core.uiSettings.register({
       [SEARCH_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
         ...searchSolutionSetting,
-        value: AIAssistantType.Never,
+        value: AIAssistantType.Observability,
       },
     });
 

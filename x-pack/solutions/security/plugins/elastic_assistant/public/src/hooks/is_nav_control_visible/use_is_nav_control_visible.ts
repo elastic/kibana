@@ -16,13 +16,20 @@ function getVisibility(
   applications: ReadonlyMap<string, PublicAppInfo>,
   preferredAssistantType: AIAssistantType
 ) {
-  // The "Global assistant" stack management setting for the security assistant still needs to be developed.
-  // In the meantime, while testing, show the Security assistant everywhere except in Observability.
+  if (preferredAssistantType === AIAssistantType.Never) {
+    return false;
+  }
 
   const categoryId =
     (appId && applications.get(appId)?.category?.id) || DEFAULT_APP_CATEGORIES.kibana.id;
 
-  return DEFAULT_APP_CATEGORIES.security.id === categoryId;
+  if (preferredAssistantType === AIAssistantType.Security) {
+    return DEFAULT_APP_CATEGORIES.observability.id !== categoryId &&
+      DEFAULT_APP_CATEGORIES.enterpriseSearch.id !== categoryId
+  }
+
+  return DEFAULT_APP_CATEGORIES.security.id === categoryId
+
 }
 
 export function useIsNavControlVisible() {

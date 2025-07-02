@@ -21,6 +21,7 @@ const configSchema = schema.object({
     ],
     { defaultValue: AIAssistantType.Default }
   ),
+  serverlessUiSettingsKey: schema.nullable(schema.string()),
 });
 
 export type AIAssistantManagementSelectionConfig = TypeOf<typeof configSchema>;
@@ -29,5 +30,6 @@ export const config: PluginConfigDescriptor<AIAssistantManagementSelectionConfig
   schema: configSchema,
   exposeToBrowser: {
     preferredAIAssistantType: true,
+    serverlessUiSettingsKey: true,
   },
 };

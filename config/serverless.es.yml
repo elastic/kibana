@@ -118,6 +118,7 @@ xpack.searchAssistant.enabled: true
 xpack.searchAssistant.ui.enabled: true
 xpack.observabilityAIAssistant.scope: "search"
 aiAssistantManagementSelection.preferredAIAssistantType: "observability"
+aiAssistantManagementSelection.serverlessUiSettingsKey: "aiAssistant:preferredAIAssistantType:es"
 
 # Query Rules UI
 xpack.searchQueryRules.enabled: false

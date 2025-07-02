@@ -34,7 +34,6 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
   const settingsKeys = [
     aiAssistantSimulatedFunctionCalling,
     ...(knowledgeBase.status.value?.enabled ? [aiAssistantSearchConnectorIndexPattern] : []),
-    ...(config.visibilityEnabled ? [aiAssistantPreferredAIAssistantType] : []),
   ];
 
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
