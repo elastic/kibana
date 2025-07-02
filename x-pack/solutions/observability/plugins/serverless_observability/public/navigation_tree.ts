@@ -11,9 +11,11 @@ import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 export const createNavigationTree = ({
   streamsAvailable,
   overviewAvailable = true,
+  isCasesAvailable = true,
 }: {
   streamsAvailable?: boolean;
   overviewAvailable?: boolean;
+  isCasesAvailable?: boolean;
 }): NavigationTreeDefinition => {
   return {
     body: [
@@ -54,18 +56,22 @@ export const createNavigationTree = ({
           {
             link: 'observability-overview:alerts',
           },
-          {
-            link: 'observability-overview:cases',
-            renderAs: 'item',
-            children: [
-              {
-                link: 'observability-overview:cases_configure',
-              },
-              {
-                link: 'observability-overview:cases_create',
-              },
-            ],
-          },
+          ...(isCasesAvailable
+            ? [
+                {
+                  link: 'observability-overview:cases' as const,
+                  renderAs: 'item' as const,
+                  children: [
+                    {
+                      link: 'observability-overview:cases_configure' as const,
+                    },
+                    {
+                      link: 'observability-overview:cases_create' as const,
+                    },
+                  ],
+                },
+              ]
+            : []),
           {
             title: i18n.translate('xpack.serverlessObservability.nav.slo', {
               defaultMessage: 'SLOs',

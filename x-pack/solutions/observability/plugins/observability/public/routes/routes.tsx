@@ -19,24 +19,24 @@ import { RulesPage } from '../pages/rules/rules';
 import { RuleDetailsPage } from '../pages/rule_details/rule_details';
 import { RulePage } from '../pages/rules/rule';
 import {
-  ALERTS_PATH,
   ALERT_DETAIL_PATH,
-  CASES_PATH,
-  EXPLORATORY_VIEW_PATH,
-  LANDING_PATH,
-  OVERVIEW_PATH,
-  ROOT_PATH,
-  RULES_LOGS_PATH,
-  RULES_PATH,
-  RULE_DETAIL_PATH,
+  ALERTS_PATH,
   ANNOTATIONS_PATH,
-  OLD_SLOS_PATH,
-  OLD_SLOS_WELCOME_PATH,
-  OLD_SLOS_OUTDATED_DEFINITIONS_PATH,
-  OLD_SLO_DETAIL_PATH,
-  OLD_SLO_EDIT_PATH,
+  CASES_PATH,
   CREATE_RULE_PATH,
   EDIT_RULE_PATH,
+  EXPLORATORY_VIEW_PATH,
+  LANDING_PATH,
+  OLD_SLO_DETAIL_PATH,
+  OLD_SLO_EDIT_PATH,
+  OLD_SLOS_OUTDATED_DEFINITIONS_PATH,
+  OLD_SLOS_PATH,
+  OLD_SLOS_WELCOME_PATH,
+  OVERVIEW_PATH,
+  ROOT_PATH,
+  RULE_DETAIL_PATH,
+  RULES_LOGS_PATH,
+  RULES_PATH,
 } from '../../common/locators/paths';
 import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
 
@@ -62,7 +62,7 @@ function SimpleRedirect({ to, redirectToApp }: { to: string; redirectToApp?: str
   return null;
 }
 
-export const completeRoutes = {
+const completeRoutes = {
   [ROOT_PATH]: {
     handler: () => {
       return <SimpleRedirect to={OVERVIEW_PATH} />;
@@ -83,9 +83,16 @@ export const completeRoutes = {
     params: {},
     exact: true,
   },
+  [CASES_PATH]: {
+    handler: () => {
+      return <CasesPage />;
+    },
+    params: {},
+    exact: false,
+  },
 };
 
-export const routes = {
+const routes = {
   [LANDING_PATH]: {
     handler: () => {
       return (
@@ -97,13 +104,7 @@ export const routes = {
     params: {},
     exact: true,
   },
-  [CASES_PATH]: {
-    handler: () => {
-      return <CasesPage />;
-    },
-    params: {},
-    exact: false,
-  },
+
   [ALERTS_PATH]: {
     handler: () => {
       return <AlertsPage />;
@@ -202,4 +203,12 @@ export const routes = {
     params: {},
     exact: true,
   },
+};
+
+export const useAppRoutes = () => {
+  const { pricing } = useKibana().services;
+  const isCompleteOverviewEnabled = pricing.isFeatureAvailable('observability:complete_overview');
+  return {
+    ...(isCompleteOverviewEnabled ? { ...completeRoutes, ...routes } : { ...routes }),
+  };
 };

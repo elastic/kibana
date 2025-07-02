@@ -11,12 +11,15 @@ import React, { Fragment } from 'react';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
 }
 
 export function SloDetailsAlerts({ slo }: Props) {
+  const { data, http, notifications, fieldFormats, application, licensing, cases, settings } =
+    useKibana().services;
   return (
     <Fragment>
       <EuiSpacer size="l" />
@@ -36,6 +39,16 @@ export function SloDetailsAlerts({ slo }: Props) {
               },
             }}
             initialPageSize={100}
+            services={{
+              data,
+              http,
+              notifications,
+              fieldFormats,
+              application,
+              licensing,
+              cases,
+              settings,
+            }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

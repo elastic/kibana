@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { pricingServiceMock } from '@kbn/core-pricing-browser-mocks';
 import { noop } from 'lodash';
 import React, { ReactNode } from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { Observable } from 'rxjs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
@@ -18,10 +17,11 @@ import { themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
-import { renderApp, App } from '.';
+import { renderApp } from './application';
 import { mockService } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { createMemoryHistory } from 'history';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { useAppRoutes } from '../routes/routes';
 
 describe('renderApp', () => {
   const originalConsole = global.console;
@@ -144,9 +144,7 @@ describe('renderApp', () => {
     return (
       <KibanaRenderContextProvider {...core}>
         <KibanaContextProvider services={{ pricing: pricingStart }}>
-          <MemoryRouter initialEntries={['/overview']}>
-            <App />
-          </MemoryRouter>
+          {children}
         </KibanaContextProvider>
       </KibanaRenderContextProvider>
     );
@@ -161,8 +159,11 @@ describe('renderApp', () => {
       return true;
     });
 
-    render(<App />, { wrapper: AppWrapper });
-    expect(document.body.textContent).toContain('Unable to load page');
+    const { result } = renderHook(() => useAppRoutes(), { wrapper: AppWrapper });
+    expect(result.current).not.toBeNull();
+    // Optionally, check for expected keys:
+    expect(Object.keys(result.current)).toContain('/overview');
+    expect(Object.keys(result.current)).toContain('/cases');
   });
 
   it('should adjust routes for essentials', () => {
@@ -174,7 +175,9 @@ describe('renderApp', () => {
       return true;
     });
 
-    render(<App />, { wrapper: AppWrapper });
-    expect(document.body.textContent).not.toContain('Unable to load page');
+    const { result } = renderHook(useAppRoutes, { wrapper: AppWrapper });
+    expect(result.current).not.toBeNull();
+    expect(Object.keys(result.current)).toContain('/landing');
+    expect(Object.keys(result.current)).not.toContain('/cases');
   });
 });

@@ -44,3 +44,6 @@ xpack.fleet.internal.registry.excludePackages: [
   'profiler_agent',
   'synthetics_dashboards',
 ]
+
+
+xpack.cases.enabled: false
