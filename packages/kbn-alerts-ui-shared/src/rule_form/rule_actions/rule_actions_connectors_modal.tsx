@@ -328,6 +328,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
         overflow: responsiveOverflow,
       }}
       data-test-subj="ruleActionsConnectorsModal"
+      aria-label={ACTION_TYPE_MODAL_TITLE}
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle size="s">{ACTION_TYPE_MODAL_TITLE}</EuiModalHeaderTitle>
