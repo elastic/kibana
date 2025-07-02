@@ -19,7 +19,7 @@ import {
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { VisualizationSavedObject } from '../../common/content_management';
-import { saveWithConfirmation, checkForDuplicateTitle } from './saved_objects_utils';
+import { checkForDuplicateTitle, saveWithConfirmation } from './saved_objects_utils';
 import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
 import type {
   VisSavedObject,
@@ -359,20 +359,27 @@ export async function saveVisualization(
   }
 
   try {
-    await checkForDuplicateTitle(
-      savedObject,
-      copyOnSave,
-      isTitleDuplicateConfirmed,
-      onTitleDuplicate,
-      services
-    );
-    const createOpt = {
-      migrationVersion: savedObject.migrationVersion,
-      references: extractedRefs.references,
-    };
+    if (onTitleDuplicate) {
+      // Only checks dups if onTitleDuplicate is passed.
+      // The save action is done from multiple places. In some cases like the embeddable,
+      // the title dup check is done before save is called and in other places we need to check.
+      await checkForDuplicateTitle(
+        savedObject,
+        copyOnSave,
+        isTitleDuplicateConfirmed,
+        onTitleDuplicate
+      );
+    }
 
     const resp = confirmOverwrite
-      ? await saveWithConfirmation(attributes, savedObject, createOpt, services)
+      ? await saveWithConfirmation(
+          attributes,
+          savedObject,
+          {
+            references: extractedRefs.references,
+          },
+          services
+        )
       : savedObject.id
       ? await visualizationsClient.update({
           id: savedObject.id,

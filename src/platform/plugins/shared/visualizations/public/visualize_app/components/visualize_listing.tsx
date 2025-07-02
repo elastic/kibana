@@ -209,12 +209,10 @@ const useTableListViewProps = (
                       id,
                       title: value,
                       lastSavedTitle: content.title,
-                      getEsType: () => content.type,
                     },
                     false,
                     false,
-                    () => {},
-                    startServices
+                    () => {}
                   );
                 } catch (e) {
                   return i18n.translate(
@@ -233,7 +231,7 @@ const useTableListViewProps = (
         },
       ],
     }),
-    [startServices]
+    []
   );
 
   const deleteItems = useCallback(
