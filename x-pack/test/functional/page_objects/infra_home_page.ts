@@ -35,6 +35,8 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
       await datePickerInput.pressKeys(browser.keys.ESCAPE);
 
+      await datePickerInput.pressKeys(browser.keys.ESCAPE);
+
       await this.waitForLoading();
     },
 
