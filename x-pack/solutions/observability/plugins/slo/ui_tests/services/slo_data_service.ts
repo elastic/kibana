@@ -6,7 +6,7 @@
  */
 
 import { cli, DEFAULTS } from '@kbn/data-forge';
-import { KbnClient } from '@kbn/scout';
+import { KbnClient } from '@kbn/scout-oblt';
 
 export class SLODataService {
   constructor(

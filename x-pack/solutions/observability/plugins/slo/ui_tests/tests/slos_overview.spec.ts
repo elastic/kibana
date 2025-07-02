@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
 
 import { SLODataService } from '../services/slo_data_service';
