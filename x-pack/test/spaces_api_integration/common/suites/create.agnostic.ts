@@ -86,7 +86,6 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
         // Disabled features are automatically added to the space when a solution is set
         'apm',
         'infrastructure',
-        'inventory',
         'logs',
         'observabilityCases',
         'observabilityCasesV2',
@@ -101,6 +100,7 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
         'securitySolutionTimeline',
         'siem',
         'siemV2',
+        'siemV3',
         'slo',
         'streams',
         'uptime',

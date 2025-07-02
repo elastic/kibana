@@ -9,51 +9,48 @@
 
 import React from 'react';
 import { EmptyIndexListPrompt } from './empty_index_list_prompt';
-import { shallow } from 'enzyme';
-import sinon from 'sinon';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-
-jest.mock('react-router-dom', () => ({
-  useHistory: () => ({
-    createHref: jest.fn(),
-  }),
-}));
+import { render, screen } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
 
 describe('EmptyIndexListPrompt', () => {
-  it('should render normally', () => {
-    const component = shallow(
-      <EmptyIndexListPrompt
-        onRefresh={() => {}}
-        createAnyway={() => {}}
-        addDataUrl={'http://elastic.co'}
-        navigateToApp={async (appId) => {}}
-        canSaveIndexPattern={true}
-      />
+  it('should render normally', async () => {
+    render(
+      <I18nProvider>
+        <EmptyIndexListPrompt
+          onRefresh={jest.fn()}
+          createAnyway={jest.fn()}
+          addDataUrl={'http://elastic.co'}
+          navigateToApp={jest.fn()}
+          canSaveIndexPattern
+        />
+      </I18nProvider>
     );
 
-    expect(component).toMatchSnapshot();
+    const emptyStatePanel = screen.getByTestId('indexPatternEmptyState');
+    expect(emptyStatePanel).toBeInTheDocument();
+
+    const refreshButton = screen.getByTestId('refreshIndicesButton');
+    expect(refreshButton).toBeInTheDocument();
   });
 
-  describe('props', () => {
-    describe('onRefresh', () => {
-      it('is called when refresh button is clicked', () => {
-        const onRefreshHandler = sinon.stub();
+  it('calls onRefresh when refresh button is clicked', async () => {
+    const onRefresh = jest.fn();
+    render(
+      <I18nProvider>
+        <EmptyIndexListPrompt
+          onRefresh={onRefresh}
+          createAnyway={jest.fn()}
+          addDataUrl={'http://elastic.co'}
+          navigateToApp={jest.fn()}
+          canSaveIndexPattern
+        />
+      </I18nProvider>
+    );
 
-        const component = mountWithIntl(
-          <EmptyIndexListPrompt
-            onRefresh={onRefreshHandler}
-            createAnyway={() => {}}
-            addDataUrl={'http://elastic.co'}
-            navigateToApp={async (appId) => {}}
-            canSaveIndexPattern={true}
-          />
-        );
+    const refreshButton = screen.getByTestId('refreshIndicesButton');
+    await userEvent.click(refreshButton);
 
-        findTestSubject(component, 'refreshIndicesButton').simulate('click');
-
-        sinon.assert.calledOnce(onRefreshHandler);
-      });
-    });
+    expect(onRefresh).toHaveBeenCalledTimes(1);
   });
 });

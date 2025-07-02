@@ -403,3 +403,16 @@ export const updateMigration = async ({
     { version: '1', body: JSON.stringify(body), signal }
   );
 };
+
+export interface DeleteMigrationParams {
+  /** `id` of the migration to delete */
+  migrationId: string;
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+export const deleteMigration = async ({ migrationId, signal }: DeleteMigrationParams) => {
+  return KibanaServices.get().http.delete<unknown>(
+    replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }),
+    { version: '1', signal }
+  );
+};

@@ -11,7 +11,13 @@ import React from 'react';
 import SemVer from 'semver/classes/semver';
 
 import { idForWarning, WarningFlyoutStep } from './warning_step';
-import { IndexWarning } from '../../../../../../../../../common/types';
+import {
+  EnrichedDeprecationInfo,
+  IndexWarning,
+  ReindexAction,
+} from '../../../../../../../../../common/types';
+import { ReindexState } from '../../../use_reindex';
+import { LoadingState } from '../../../../../../types';
 
 const kibanaVersion = new SemVer('8.0.0');
 
@@ -25,6 +31,9 @@ jest.mock('../../../../../../../app_context', () => {
           core: {
             docLinks: docLinksServiceMock.createStartContract(),
           },
+          api: {
+            useLoadNodeDiskSpace: jest.fn(() => ({ data: [] })),
+          },
         },
       };
     },
@@ -32,20 +41,39 @@ jest.mock('../../../../../../../app_context', () => {
 });
 
 describe('WarningFlyoutStep', () => {
+  const meta = {
+    indexName: 'foo',
+    reindexName: 'reindexed-foo',
+    aliases: [],
+    isInDataStream: false,
+    isFrozen: false,
+    isReadonly: false,
+    isClosedIndex: false,
+    isFollowerIndex: false,
+  };
   const defaultProps = {
     warnings: [] as IndexWarning[],
-    back: jest.fn(),
+    closeFlyout: jest.fn(),
     confirm: jest.fn(),
     flow: 'reindex' as const,
-    meta: {
-      indexName: 'foo',
-      reindexName: 'reindexed-foo',
-      aliases: [],
-      isFrozen: false,
-      isReadonly: false,
-      isInDataStream: false,
-      isFollowerIndex: false,
-    },
+    meta,
+    reindexState: {
+      loadingState: LoadingState.Success,
+      meta,
+      hasRequiredPrivileges: true,
+      reindexTaskPercComplete: null,
+      errorMessage: null,
+    } as ReindexState,
+    deprecation: {
+      index: 'foo',
+      correctiveAction: {
+        type: 'reindex',
+      } as ReindexAction,
+      level: 'critical',
+      message: 'foo',
+      resolveDuringUpgrade: false,
+      type: 'index_settings',
+    } as EnrichedDeprecationInfo,
   };
 
   it('renders', () => {

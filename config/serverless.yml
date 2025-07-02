@@ -266,3 +266,7 @@ xpack.dataUsage.enableExperimental: ['dataUsageDisabled']
 
 ## Content Connectors in stack management
 xpack.contentConnectors.enabled: true
+
+## Enable Kibana Product Intercept
+xpack.product_intercept.enabled: true
+xpack.product_intercept.interval: '90d'

@@ -12,6 +12,7 @@ import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/ser
 import type { BuildFlavor } from '@kbn/config';
 import { EntityDiscoveryApiKeyType } from '@kbn/entityManager-plugin/server/saved_objects';
 import { MonitoringEntitySourceDataClient } from './lib/entity_analytics/privilege_monitoring/monitoring_entity_source_data_client';
+import { PadPackageInstallationClient } from './lib/entity_analytics/privilege_monitoring/privileged_access_detection/pad_package_installation_client';
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import type { Immutable } from '../common/endpoint/types';
 import type { EndpointAuthz } from '../common/endpoint/types/authz';
@@ -273,6 +274,15 @@ export class RequestContextFactory implements IRequestContextFactory {
           clusterClient: coreContext.elasticsearch.client,
           namespace: getSpaceId(),
           soClient: coreContext.savedObjects.client,
+        });
+      }),
+      getPadPackageInstallationClient: memoize(() => {
+        return new PadPackageInstallationClient({
+          clusterClient: coreContext.elasticsearch.client,
+          soClient: coreContext.savedObjects.client,
+          logger: options.logger,
+          namespace: getSpaceId(),
+          dataViewsService,
         });
       }),
       getEntityStoreDataClient: memoize(() => {

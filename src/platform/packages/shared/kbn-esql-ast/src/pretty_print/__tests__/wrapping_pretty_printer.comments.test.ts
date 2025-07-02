@@ -103,7 +103,11 @@ FROM index
     });
   });
 
-  describe('RERANK', () => {
+  /**
+   * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
+   * get back to it after 9.1 release.
+   */
+  describe.skip('RERANK', () => {
     test('comments around all elements', () => {
       assertReprint(
         `FROM a
@@ -443,7 +447,7 @@ ROW
   describe('list tuple expressions', () => {
     test('numeric list literal, surrounded from three sides', () => {
       assertReprint(`FROM a | WHERE b IN ()`);
-      assertReprint(`FROM a | WHERE b IN (/* 1 */ 123456789 /* 2 */)`);
+      assertReprint(`FROM a | WHERE b NOT IN (/* 1 */ 123456789 /* 2 */)`);
       assertReprint(`FROM a
   | WHERE
       b IN
