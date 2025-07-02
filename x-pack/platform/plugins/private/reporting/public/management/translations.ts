@@ -268,6 +268,20 @@ export const SCHEDULED_REPORT_FORM_FAILURE_TOAST_MESSAGE = i18n.translate(
   }
 );
 
+export const SCHEDULED_REPORT_NO_REPORT_TYPES_TITLE = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.noReportTypesTitle',
+  {
+    defaultMessage: 'Scheduled reports are not supported here yet',
+  }
+);
+
+export const SCHEDULED_REPORT_NO_REPORT_TYPES_MESSAGE = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.noReportTypesMessage',
+  {
+    defaultMessage: 'Report types in this page are not supported for scheduled reports yet.',
+  }
+);
+
 export const CANNOT_LOAD_REPORTING_HEALTH_TITLE = i18n.translate(
   'xpack.reporting.scheduledReportingForm.cannotLoadReportingHealthTitle',
   {
