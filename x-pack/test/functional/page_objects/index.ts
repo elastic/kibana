@@ -18,6 +18,7 @@ import { SearchProfilerPageProvider } from '@kbn/test-suites-xpack-platform/func
 import { CanvasPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/canvas_page';
 import { GisPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/gis_page';
 import { LensPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/lens_page';
+import { UpgradeAssistantFlyoutObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/upgrade_assistant_page';
 import { ApiKeysPageProvider } from './api_keys_page';
 import { AssetDetailsProvider } from './asset_details';
 import { BannersPageObject } from './banners_page';
@@ -50,16 +51,17 @@ import { ShareSavedObjectsToSpacePageProvider } from './share_saved_objects_to_s
 import { SnapshotRestorePageProvider } from './snapshot_restore_page';
 import { StatusPageObject } from './status_page';
 import { TagManagementPageObject } from './tag_management_page';
-import { UpgradeAssistantFlyoutObject } from './upgrade_assistant_page';
 import { UptimePageObject } from './uptime_page';
 import { UserProfilePageProvider } from './user_profile_page';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
 import { SearchSynonymsPageProvider } from './search_synonyms_page';
+import { SearchQueryRulesPageProvider } from './search_query_rules_page';
 import { SearchClassicNavigationProvider } from './search_classic_navigation';
 import { SearchStartProvider } from './search_start';
 import { SearchApiKeysProvider } from './search_api_keys';
 import { SearchIndexDetailPageProvider } from './search_index_details_page';
 import { SearchOverviewProvider } from './search_overview_page';
+import { SearchHomePageProvider } from './search_homepage';
 import { SearchNavigationProvider } from './search_navigation';
 
 // just like services, PageObjects are defined as a map of
@@ -106,9 +108,11 @@ export const pageObjects = {
   searchIndexDetailsPage: SearchIndexDetailPageProvider,
   searchNavigation: SearchNavigationProvider,
   searchOverview: SearchOverviewProvider,
+  searchHomePage: SearchHomePageProvider,
   searchProfiler: SearchProfilerPageProvider,
   searchPlayground: SearchPlaygroundPageProvider,
   searchSynonyms: SearchSynonymsPageProvider,
+  searchQueryRules: SearchQueryRulesPageProvider,
   searchSessionsManagement: SearchSessionsPageProvider,
   security: SecurityPageObject,
   shareSavedObjectsToSpace: ShareSavedObjectsToSpacePageProvider,

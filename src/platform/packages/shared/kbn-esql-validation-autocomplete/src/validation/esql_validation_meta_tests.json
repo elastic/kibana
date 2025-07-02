@@ -152,79 +152,85 @@
   "testCases": [
     {
       "query": "",
-      "error": [],
+      "error": [
+        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}"
+      ],
       "warning": []
     },
     {
       "query": " ",
-      "error": [],
+      "error": [
+        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}"
+      ],
       "warning": []
     },
     {
       "query": "     ",
-      "error": [],
+      "error": [
+        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}"
+      ],
       "warning": []
     },
     {
       "query": "eval",
       "error": [
-        "SyntaxError: mismatched input 'eval' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'eval' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "stats",
       "error": [
-        "SyntaxError: mismatched input 'stats' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'stats' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "rename",
       "error": [
-        "SyntaxError: mismatched input 'rename' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'rename' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "limit",
       "error": [
-        "SyntaxError: mismatched input 'limit' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'limit' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "keep",
       "error": [
-        "SyntaxError: mismatched input 'keep' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'keep' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "drop",
       "error": [
-        "SyntaxError: mismatched input 'drop' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'drop' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "mv_expand",
       "error": [
-        "SyntaxError: mismatched input 'mv_expand' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'mv_expand' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "dissect",
       "error": [
-        "SyntaxError: mismatched input 'dissect' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'dissect' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "grok",
       "error": [
-        "SyntaxError: mismatched input 'grok' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'grok' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
@@ -9334,7 +9340,7 @@
     {
       "query": "f",
       "error": [
-        "SyntaxError: mismatched input 'f' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'f' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
