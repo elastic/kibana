@@ -29,7 +29,7 @@ export const services = {
   sloApi: SloApiProvider,
 };
 
-export type DeploymentAgnosticCommonServices = typeof services;
+export type ObltDeploymentAgnosticCommonServices = typeof services;
 export type SupertestWithRoleScopeType = SupertestWithRoleScope;
 export { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
 export { CustomRoleScopedSupertestProvider } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/custom_role_scoped_supertest';

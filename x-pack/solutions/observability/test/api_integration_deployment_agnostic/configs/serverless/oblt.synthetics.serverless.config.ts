@@ -7,8 +7,9 @@
 
 import { createServerlessTestConfig } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/default_configs/serverless.config.base';
 import { services } from '../../services';
+import type { ObltDeploymentAgnosticCommonServices } from '../../services';
 
-export default createServerlessTestConfig({
+export default createServerlessTestConfig<ObltDeploymentAgnosticCommonServices>({
   serverlessProject: 'oblt',
   testFiles: [require.resolve('./oblt.synthetics.index.ts')],
   services,

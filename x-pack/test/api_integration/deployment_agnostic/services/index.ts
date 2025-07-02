@@ -29,5 +29,6 @@ export const services = {
   // create a new deployment-agnostic service and load here
 };
 
-export type SupertestWithRoleScopeType = SupertestWithRoleScope;
 export type DeploymentAgnosticCommonServices = typeof services;
+
+export type SupertestWithRoleScopeType = SupertestWithRoleScope;

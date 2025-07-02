@@ -7,8 +7,9 @@
 
 import { createStatefulFeatureFlagTestConfig } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/default_configs/feature_flag.stateful.config.base';
 import { services } from '../../services';
+import type { ObltDeploymentAgnosticCommonServices } from '../../services';
 
-export default createStatefulFeatureFlagTestConfig({
+export default createStatefulFeatureFlagTestConfig<ObltDeploymentAgnosticCommonServices>({
   testFiles: [require.resolve('./oblt.index.ts')],
   kbnServerArgs: ['--xpack.actions.preconfigured'],
   services,

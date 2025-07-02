@@ -7,8 +7,9 @@
 
 import { createStatefulTestConfig } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/default_configs/stateful.config.base';
 import { services } from '../../services';
+import type { ObltDeploymentAgnosticCommonServices } from '../../services';
 
-export default createStatefulTestConfig({
+export default createStatefulTestConfig<ObltDeploymentAgnosticCommonServices>({
   testFiles: [require.resolve('./oblt.ai_assistant.index.ts')],
   services,
   junit: {
