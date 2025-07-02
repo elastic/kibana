@@ -161,6 +161,8 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           ...(dockerRegistryPort
             ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
             : []),
+          // @ts-expect-error
+          ...(options?.kbnTestServer?.serverArgs ?? []),
         ],
       },
     };

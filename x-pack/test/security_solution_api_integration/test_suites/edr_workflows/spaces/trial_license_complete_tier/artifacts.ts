@@ -346,6 +346,25 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         describe('and user does NOT have global artifact management privilege', () => {
+          it('should error if attempting to create a global artifact', async () => {
+            const { body } = await supertestArtifactManager
+              .post(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
+              .set('elastic-api-version', '2023-10-31')
+              .set('x-elastic-internal-origin', 'kibana')
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+              .send(
+                Object.assign(exceptionItemToCreateExceptionItem(spaceOneGlobalArtifact.artifact), {
+                  item_id: undefined,
+                })
+              )
+              .expect(403);
+
+            expect(body.message).to.eql(
+              `EndpointArtifactError: Endpoint authorization failure. Management of global artifacts requires additional privilege (global artifact management)`
+            );
+          });
+
           it('should error when attempting to create artifact with additional owner space id tags', async () => {
             await supertestArtifactManager
               .post(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
@@ -472,6 +491,29 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         describe('and user has privilege to manage global artifacts', () => {
+          it('should allow creating global artifact', async () => {
+            const { body } = await supertestGlobalArtifactManager
+              .post(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
+              .set('elastic-api-version', '2023-10-31')
+              .set('x-elastic-internal-origin', 'kibana')
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log))
+              .send(
+                Object.assign(exceptionItemToCreateExceptionItem(spaceOneGlobalArtifact.artifact), {
+                  item_id: undefined,
+                })
+              )
+              .expect(200);
+
+            const itemCreated = body as ExceptionListItemSchema;
+
+            afterEachDataCleanup.push({
+              cleanup: () => {
+                return endpointArtifactTestResources.deleteExceptionItem(itemCreated);
+              },
+            });
+          });
+
           it('should allow creating artifact with additional owner space id tags', async () => {
             const { body } = await supertestGlobalArtifactManager
               .post(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))

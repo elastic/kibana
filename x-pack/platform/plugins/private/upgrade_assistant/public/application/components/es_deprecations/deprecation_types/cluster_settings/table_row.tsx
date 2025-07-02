@@ -14,6 +14,7 @@ import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { DeprecationTableColumns, Status } from '../../../types';
 import { ClusterSettingsResolutionCell } from './resolution_table_cell';
 import { RemoveClusterSettingsFlyout, RemoveClusterSettingsFlyoutProps } from './flyout';
+import { ClusterSettingsActionsCell } from './actions_table_cell';
 
 const { useGlobalFlyout } = GlobalFlyout;
 
@@ -101,11 +102,15 @@ export const ClusterSettingsTableRow: React.FunctionComponent<Props> = ({
             key={field}
             truncateText={false}
             data-test-subj={`clusterSettingsTableCell-${field}`}
+            align={field === 'actions' ? 'right' : 'left'}
           >
             <EsDeprecationsTableCells
               fieldName={field}
               deprecation={deprecation}
               resolutionTableCell={<ClusterSettingsResolutionCell status={status} />}
+              actionsTableCell={
+                <ClusterSettingsActionsCell openFlyout={() => setShowFlyout(true)} />
+              }
             />
           </EuiTableRowCell>
         );

@@ -136,7 +136,7 @@ login.withCustomKibanaPrivileges = (kibanaPrivileges: FeaturesPrivileges) => {
  * @param username
  * @param password
  *
- * @private
+ * @internal
  */
 const sendApiLoginRequest = (
   username: string,

@@ -26,6 +26,7 @@ import {
   ALERT_RULE_REVISION,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_START,
   ALERT_STATUS,
   ALERT_URL,
   ALERT_UUID,
@@ -210,6 +211,7 @@ export const transformToAlertDocuments = ({
       ...baseAlertDocument,
 
       '@timestamp': now.toISOString(),
+      [ALERT_START]: now.toISOString(),
       [ALERT_ATTACK_DISCOVERY_USER_ID]: authenticatedUser.profile_uid,
       [ALERT_ATTACK_DISCOVERY_USER_NAME]: authenticatedUser.username,
       [ALERT_ATTACK_DISCOVERY_USERS]: [

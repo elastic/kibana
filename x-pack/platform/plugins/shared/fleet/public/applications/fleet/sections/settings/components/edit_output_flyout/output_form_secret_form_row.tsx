@@ -142,7 +142,7 @@ export const SecretFormRow: React.FC<{
             'This value will be stored as a secret, meaning once saved the value cannot be viewed again',
         })}
       >
-        <EuiIcon type="questionInCircle" />
+        <EuiIcon type="question" />
       </EuiToolTip>
     </>
   );
