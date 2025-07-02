@@ -396,57 +396,12 @@ src/platform/packages/shared/deeplinks/observability @elastic/obs-ux-management-
 src/platform/packages/shared/deeplinks/search @elastic/search-kibana
 src/platform/packages/shared/deeplinks/security @elastic/security-solution
 src/platform/packages/shared/deeplinks/shared @elastic/appex-sharedux
-<<<<<<< HEAD
 src/platform/packages/private/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/private/default-nav/devtools @elastic/kibana-management
 src/platform/packages/private/default-nav/management @elastic/kibana-management
 src/platform/packages/private/default-nav/ml @elastic/ml-ui
 src/platform/packages/shared/kbn-management/delete_managed_assets_callout @elastic/kibana-management
 packages/kbn-dependency-usage @elastic/kibana-security
-=======
-src/platform/packages/shared/home/sample_data_card @elastic/appex-sharedux
-src/platform/packages/shared/home/sample_data_tab @elastic/appex-sharedux
-src/platform/packages/shared/home/sample_data_types @elastic/appex-sharedux
-src/platform/packages/shared/kbn-actions-types @elastic/response-ops
-src/platform/packages/shared/kbn-aiops-utils @elastic/ml-ui
-src/platform/packages/shared/kbn-alerting-types @elastic/response-ops
-src/platform/packages/shared/kbn-alerts-as-data-utils @elastic/response-ops
-src/platform/packages/shared/kbn-alerts-ui-shared @elastic/response-ops
-src/platform/packages/shared/kbn-ambient-storybook-types @elastic/kibana-operations
-src/platform/packages/shared/kbn-ambient-ui-types @elastic/kibana-operations
-src/platform/packages/shared/kbn-analytics @elastic/kibana-core
-src/platform/packages/shared/kbn-apm-data-view @elastic/obs-ux-infra_services-team
-src/platform/packages/shared/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
-src/platform/packages/shared/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
-src/platform/packages/shared/kbn-apm-types-shared @elastic/obs-ux-infra_services-team
-src/platform/packages/shared/kbn-apm-ui-shared @elastic/obs-ux-infra_services-team
-src/platform/packages/shared/kbn-apm-utils @elastic/obs-ux-infra_services-team
-src/platform/packages/shared/kbn-avc-banner @elastic/security-defend-workflows
-src/platform/packages/shared/kbn-axe-config @elastic/appex-qa
-src/platform/packages/shared/kbn-babel-register @elastic/kibana-operations
-src/platform/packages/shared/kbn-cache-cli @elastic/kibana-operations
-src/platform/packages/shared/kbn-calculate-auto @elastic/obs-ux-management-team
-src/platform/packages/shared/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
-src/platform/packages/shared/kbn-cases-components @elastic/response-ops
-src/platform/packages/shared/kbn-cbor @elastic/kibana-operations
-src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting-investigations
-src/platform/packages/shared/kbn-chart-icons @elastic/kibana-visualizations
-src/platform/packages/shared/kbn-charts-theme @elastic/kibana-visualizations
-src/platform/packages/shared/kbn-coloring @elastic/kibana-visualizations
-src/platform/packages/shared/kbn-config @elastic/kibana-core
-src/platform/packages/shared/kbn-config-schema @elastic/kibana-core
-src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-data-discovery
-src/platform/packages/shared/kbn-crypto @elastic/kibana-security
-src/platform/packages/shared/kbn-crypto-browser @elastic/kibana-core
-src/platform/packages/shared/kbn-css-utils @elastic/appex-sharedux
-src/platform/packages/shared/kbn-custom-icons @elastic/obs-ux-logs-team
-src/platform/packages/shared/kbn-cypress-config @elastic/kibana-operations
-src/platform/packages/shared/kbn-cypress-test-helper @elastic/security-solution
-src/platform/packages/shared/kbn-data-grid-in-table-search @elastic/kibana-data-discovery
-src/platform/packages/shared/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
-src/platform/packages/shared/kbn-data-view-utils @elastic/kibana-data-discovery
-src/platform/packages/shared/kbn-datemath @elastic/kibana-data-discovery
->>>>>>> 7d203012892 (Load huggingface content datasets (#224543))
 src/platform/packages/shared/kbn-dev-cli-errors @elastic/kibana-operations
 src/platform/packages/shared/kbn-dev-cli-runner @elastic/kibana-operations
 src/platform/packages/shared/kbn-dev-proc-runner @elastic/kibana-operations
