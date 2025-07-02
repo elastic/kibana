@@ -5872,6 +5872,21 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.EVENT_CATEGORY_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "EVENT_CATEGORY_FIELD",
+        "description": [],
+        "signature": [
+          "\"event.category\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.EVENT_ORIGINAL_FIELD",
         "type": "string",
         "tags": [],

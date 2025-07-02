@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { MappingField } from '../utils/mappings';
 
 export interface MatchResult {
   id: string;
@@ -25,32 +26,52 @@ export const performMatchSearch = async ({
   esClient,
 }: {
   term: string;
-  fields: string[];
+  fields: MappingField[];
   index: string;
   size: number;
   esClient: ElasticsearchClient;
 }): Promise<PerformMatchSearchResponse> => {
+  const textFields = fields.filter((field) => field.type === 'text');
+  const semanticTextFields = fields.filter((field) => field.type === 'semantic_text');
+
   const response = await esClient.search<any>({
     index,
     size,
     retriever: {
       rrf: {
-        retrievers: fields.map((field) => {
-          return {
-            standard: {
-              query: {
-                match: {
-                  [field]: term,
+        rank_window_size: size * 2,
+        retrievers: [
+          ...(textFields.length > 0
+            ? [
+                {
+                  standard: {
+                    query: {
+                      multi_match: {
+                        query: term,
+                        fields: textFields.map((field) => field.path),
+                      },
+                    },
+                  },
+                },
+              ]
+            : []),
+          ...semanticTextFields.map((field) => {
+            return {
+              standard: {
+                query: {
+                  match: {
+                    [field.path]: term,
+                  },
                 },
               },
-            },
-          };
-        }),
+            };
+          }),
+        ],
       },
     },
     highlight: {
       number_of_fragments: 5,
-      fields: fields.reduce((memo, field) => ({ ...memo, [field]: {} }), {}),
+      fields: fields.reduce((memo, field) => ({ ...memo, [field.path]: {} }), {}),
     },
   });
 

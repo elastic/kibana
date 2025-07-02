@@ -131,11 +131,13 @@ const IntegrationPostureDashboard = ({
   notInstalledConfig,
   isIntegrationInstalled,
   dashboardType,
+  activeNamespace,
 }: {
   complianceData: ComplianceDashboardDataV2 | undefined;
   notInstalledConfig: CspNoDataPageProps;
   isIntegrationInstalled?: boolean;
   dashboardType: PosturePolicyTemplate;
+  activeNamespace?: string;
 }) => {
   const noFindings = !complianceData || complianceData.stats.totalFindings === 0;
 
@@ -183,9 +185,17 @@ const IntegrationPostureDashboard = ({
   // there are findings, displays dashboard even if integration is not installed
   return (
     <>
-      <SummarySection complianceData={complianceData!} dashboardType={dashboardType} />
+      <SummarySection
+        complianceData={complianceData!}
+        dashboardType={dashboardType}
+        activeNamespace={activeNamespace}
+      />
       <EuiSpacer />
-      <BenchmarksSection complianceData={complianceData!} dashboardType={dashboardType} />
+      <BenchmarksSection
+        complianceData={complianceData!}
+        dashboardType={dashboardType}
+        activeNamespace={activeNamespace}
+      />
       <EuiSpacer />
     </>
   );
@@ -244,7 +254,7 @@ const TabContent = ({
   activeNamespace,
 }: {
   selectedPostureTypeTab: PosturePolicyTemplate;
-  activeNamespace: string;
+  activeNamespace?: string;
 }) => {
   const { data: getSetupStatus } = useCspSetupStatusApi({
     refetchInterval: (data) => {
@@ -310,6 +320,7 @@ const TabContent = ({
               complianceData={getDashboardData.data}
               notInstalledConfig={getNotInstalledConfig(policyTemplate, integrationLink)}
               isIntegrationInstalled={setupStatus !== 'not-installed'}
+              activeNamespace={activeNamespace}
             />
           </Route>
 
@@ -319,6 +330,7 @@ const TabContent = ({
               complianceData={getDashboardData.data}
               notInstalledConfig={getNotInstalledConfig(policyTemplate, integrationLink)}
               isIntegrationInstalled={setupStatus !== 'not-installed'}
+              activeNamespace={activeNamespace}
             />
           </Route>
         </Routes>
@@ -353,7 +365,7 @@ export const ComplianceDashboard = () => {
   }, [location.pathname]);
 
   const { activeNamespace, updateActiveNamespace } = useActiveNamespace({
-    postureType: currentTabUrlState,
+    postureType: currentTabUrlState || POSTURE_TYPE_CSPM,
   });
 
   const getCspmDashboardData = useCspmStatsApi(
@@ -423,7 +435,7 @@ export const ComplianceDashboard = () => {
             content: (
               <TabContent
                 selectedPostureTypeTab={selectedTab || POSTURE_TYPE_CSPM}
-                activeNamespace={activeNamespace}
+                activeNamespace={cloudSecurityNamespaceSupportEnabled ? activeNamespace : undefined}
               />
             ),
           },
@@ -439,7 +451,7 @@ export const ComplianceDashboard = () => {
             content: (
               <TabContent
                 selectedPostureTypeTab={selectedTab || POSTURE_TYPE_KSPM}
-                activeNamespace={activeNamespace}
+                activeNamespace={cloudSecurityNamespaceSupportEnabled ? activeNamespace : undefined}
               />
             ),
           },
@@ -453,6 +465,7 @@ export const ComplianceDashboard = () => {
     history,
     services.data.query.queryString,
     services.data.query.filterManager,
+    cloudSecurityNamespaceSupportEnabled,
   ]);
 
   // if there is more than one namespace, show the namespace selector in the header
