@@ -229,7 +229,11 @@ export function getObservabilitySystemPrompt({
 
     if (isKnowledgeBaseReady && isFunctionAvailable(SUMMARIZE_FUNCTION_NAME)) {
       usage.push(
-        `**Summarization and Memory:** Use the \`${SUMMARIZE_FUNCTION_NAME}\` tool **only** when the user asks you to store, remember, save, or keep information. This function saves information permanently for retrieval in future sessions, not just for the current conversation (i.e don't just "keep something in mind" and **call the \`${SUMMARIZE_FUNCTION_NAME}\` to do it for you). Summaries **MUST** be generated in English.`
+        `**Summarization and Memory:** You **MUST** use the \`${SUMMARIZE_FUNCTION_NAME}\` tool to save information for long-term use. Follow these steps:
+          * **Listen for Keywords:** Use this tool **only** when the user explicitly says phrases like "remember," "store," "save," or "keep" something.
+          * **Understand the Goal:** This function creates a permanent memory that can be accessed in future conversations.
+          * **Take Action:** When you detect a keyword, your primary action is to call the \`${SUMMARIZE_FUNCTION_NAME}\` tool. Do not just say that you will remember something.
+          * **Language:** All summaries **MUST** be in English.`
       );
     }
 
