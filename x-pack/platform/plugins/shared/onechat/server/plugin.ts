@@ -13,7 +13,6 @@ import type { OnechatConfig } from './config';
 import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
 import { ServiceManager } from './services';
-import { registerTools } from './tools';
 import type {
   OnechatPluginSetup,
   OnechatPluginStart,
@@ -51,8 +50,6 @@ export class OnechatPlugin
     });
 
     registerFeatures({ features: pluginsSetup.features });
-
-    registerTools({ tools: serviceSetups.tools });
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { registerTools } from './register_tools';
+export { createBuiltinToolRegistry, type BuiltinToolRegistry } from './builtin_registry';
+export { registerBuiltinTools } from './register_tools';
