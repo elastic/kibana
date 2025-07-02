@@ -27,7 +27,7 @@ const UNSAFE_HEADERS = [
   'keep-alive',
 ];
 
-const UNSAFE_HEADERS_PATTERNS = [/^proxy-/i];
+const UNSAFE_HEADERS_PATTERNS = [/^proxy-/i, /^:/];
 
 export function stripUnsafeHeaders(headers: Headers): Headers {
   return omitBy(
@@ -35,8 +35,6 @@ export function stripUnsafeHeaders(headers: Headers): Headers {
     (_value, header: string) =>
       header &&
       (UNSAFE_HEADERS.includes(header) ||
-        UNSAFE_HEADERS_PATTERNS.some((pattern) => pattern.test(header)) ||
-        // remove psuedo-headers that are prefixed with a colon
-        header.startsWith(':'))
+        UNSAFE_HEADERS_PATTERNS.some((pattern) => pattern.test(header)))
   );
 }
