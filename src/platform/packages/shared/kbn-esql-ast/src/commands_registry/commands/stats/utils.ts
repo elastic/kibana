@@ -6,14 +6,31 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { i18n } from '@kbn/i18n';
-import type { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLSingleAstItem } from '../../../types';
-import { isColumn, isFunctionExpression, isIdentifier, isSource } from '../../../ast/helpers';
+import type {
+  ESQLAstItem,
+  ESQLCommand,
+  ESQLFunction,
+  ESQLSingleAstItem,
+  ESQLBinaryExpression,
+  BinaryExpressionWhereOperator,
+} from '../../../types';
+import {
+  isColumn,
+  isFunctionExpression,
+  isIdentifier,
+  isSource,
+  isBinaryExpression,
+  isParamLiteral,
+  isLiteral,
+} from '../../../ast/helpers';
 import { isOptionNode } from '../../../ast/util';
+import { Walker } from '../../../walker';
 import { findPreviousWord, getLastNonWhitespaceChar } from '../../utils/autocomplete';
 import { ISuggestionItem } from '../../types';
-import { TRIGGER_SUGGESTION_COMMAND, EDITOR_MARKER } from '../../constants';
-import { TIME_SYSTEM_PARAMS } from '../../../definitions/literats';
+import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
+import { EDITOR_MARKER } from '../../../parser/constants';
+import { getFunctionDefinition } from '../../../definitions/functions_helpers';
+import { FunctionDefinitionTypes } from '../../../definitions/types';
 
 export function isMarkerNode(node: ESQLAstItem | undefined): boolean {
   if (Array.isArray(node)) {
@@ -35,7 +52,7 @@ function mapToNonMarkerNode(arg: ESQLAstItem): ESQLAstItem {
   return Array.isArray(arg) ? arg.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode) : arg;
 }
 
-function isAssignment(arg: ESQLAstItem): arg is ESQLFunction {
+export function isAssignment(arg: ESQLAstItem): arg is ESQLFunction {
   return isFunctionExpression(arg) && arg.name === '=';
 }
 
@@ -43,6 +60,11 @@ function isAssignmentComplete(node: ESQLFunction | undefined) {
   const assignExpression = removeMarkerArgFromArgsList(node)?.args?.[1];
   return Boolean(assignExpression && Array.isArray(assignExpression) && assignExpression.length);
 }
+
+const isFieldExpression = (
+  node: unknown
+): node is ESQLBinaryExpression<BinaryExpressionWhereOperator> =>
+  isBinaryExpression(node) && node.name === '=';
 
 const noCaseCompare = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 
@@ -136,21 +158,72 @@ export const whereCompleteItem: ISuggestionItem = {
   command: TRIGGER_SUGGESTION_COMMAND,
 };
 
-export const getDateHistogramCompletionItem: (histogramBarTarget?: number) => ISuggestionItem = (
-  histogramBarTarget: number = 50
-) => ({
-  label: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.addDateHistogram', {
-    defaultMessage: 'Add date histogram',
-  }),
-  text: `BUCKET($0, ${histogramBarTarget}, ${TIME_SYSTEM_PARAMS.join(', ')})`,
-  asSnippet: true,
-  kind: 'Issue',
-  detail: i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.autocomplete.addDateHistogramDetail',
-    {
-      defaultMessage: 'Add date histogram using bucket()',
+function isAggregation(arg: ESQLAstItem): arg is ESQLFunction {
+  return (
+    isFunctionExpression(arg) &&
+    getFunctionDefinition(arg.name)?.type === FunctionDefinitionTypes.AGG
+  );
+}
+
+function isNotAnAggregation(arg: ESQLAstItem): arg is ESQLFunction {
+  return (
+    isFunctionExpression(arg) &&
+    getFunctionDefinition(arg.name)?.type !== FunctionDefinitionTypes.AGG
+  );
+}
+
+const isFunctionOperatorParam = (fn: ESQLFunction): boolean =>
+  !!fn.operator && isParamLiteral(fn.operator);
+
+export const isWhereExpression = (
+  node: unknown
+): node is ESQLBinaryExpression<BinaryExpressionWhereOperator> =>
+  isBinaryExpression(node) && node.name === 'where';
+
+export function checkAggExistence(arg: ESQLFunction): boolean {
+  if (isWhereExpression(arg)) {
+    return checkAggExistence(arg.args[0] as ESQLFunction);
+  }
+
+  if (isFieldExpression(arg)) {
+    const agg = arg.args[1];
+    const firstFunction = Walker.match(agg, { type: 'function' });
+
+    if (!firstFunction) {
+      return false;
     }
-  ),
-  sortText: '1',
-  command: TRIGGER_SUGGESTION_COMMAND,
-});
+
+    return checkAggExistence(firstFunction as ESQLFunction);
+  }
+
+  // TODO the grouping function check may not
+  // hold true for all future cases
+  if (isAggregation(arg) || isFunctionOperatorParam(arg)) {
+    return true;
+  }
+
+  if (isNotAnAggregation(arg)) {
+    return (arg as ESQLFunction).args.filter(isFunctionExpression).some(checkAggExistence);
+  }
+
+  return false;
+}
+
+// now check that:
+// * the agg function is at root level
+// * or if it's a operators function, then all operands are agg functions or literals
+// * or if it's a eval function then all arguments are agg functions or literals
+// * or if a named param is used
+export function checkFunctionContent(arg: ESQLFunction) {
+  // TODO the grouping function check may not
+  // hold true for all future cases
+  if (isAggregation(arg) || isFunctionOperatorParam(arg)) {
+    return true;
+  }
+  return (arg as ESQLFunction).args.every(
+    (subArg): boolean =>
+      isLiteral(subArg) ||
+      isAggregation(subArg) ||
+      (isNotAnAggregation(subArg) ? checkFunctionContent(subArg) : false)
+  );
+}

@@ -8,7 +8,7 @@
  */
 
 export type { SuggestionRawDefinition, ItemKind } from './src/autocomplete/types';
-export type { FunctionDefinition, CommandDefinition, Literals } from './src/definitions/types';
+export type { FunctionDefinition, Literals } from './src/definitions/types';
 export type { ESQLCallbacks } from './src/shared/types';
 
 /**
@@ -35,8 +35,6 @@ export {
   getAllFunctions,
   isSupportedFunction,
   getFunctionDefinition,
-  getCommandDefinition,
-  getAllCommands,
   getColumnForASTNode as lookupColumn,
   shouldBeQuotedText,
   printFunctionSignature,
@@ -51,8 +49,6 @@ export {
   isAssignmentComplete,
   isSingleItem,
 } from './src/shared/helpers';
-export { timeUnits } from './src/definitions/literals';
-export { aggFunctionDefinitions } from './src/definitions/generated/aggregation_functions';
 export { getFunctionSignatures } from './src/definitions/helpers';
 
 export {
@@ -60,9 +56,3 @@ export {
   getPolicyHelper,
   getSourcesHelper,
 } from './src/shared/resources_helpers';
-
-export { getRecommendedQueries } from './src/autocomplete/recommended_queries/templates';
-
-export { getRecommendedQueriesTemplatesFromExtensions } from './src/autocomplete/recommended_queries/suggestions';
-
-export { esqlFunctionNames } from './src/definitions/generated/function_names';

@@ -17,10 +17,10 @@ import {
   type ESQLFunction,
   type ESQLSingleAstItem,
 } from '@kbn/esql-ast';
+import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
 import { isList } from '@kbn/esql-ast/src/ast/helpers';
 import { ESQLAstExpression } from '@kbn/esql-ast/src/types';
 import { FunctionDefinitionTypes } from '../definitions/types';
-import { EDITOR_MARKER } from './constants';
 import {
   isColumnItem,
   isSourceItem,

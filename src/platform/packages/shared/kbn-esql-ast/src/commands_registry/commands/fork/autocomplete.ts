@@ -13,14 +13,9 @@ import {
   getCommandAutocompleteDefinitions,
 } from '../../utils/autocomplete/complete_items';
 import { pipePrecedesCurrentWord } from '../../../definitions/shared';
-import {
-  type ISuggestionItem,
-  type GetColumnsByTypeFn,
-  type ICommandContext,
-  ESQLFieldWithMetadata,
-} from '../../types';
+import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import { CommandRegistry } from '../..';
+import { esqlCommandRegistry } from '../..';
 
 // ToDo: this is hardcoded, we should find a better way to take care of the fork commands
 const FORK_AVAILABLE_COMMANDS = [
@@ -45,9 +40,7 @@ const FORK_AVAILABLE_COMMANDS = [
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
-  getColumnsByType: GetColumnsByTypeFn,
-  getSuggestedUserDefinedColumnName: (extraFieldNames?: string[] | undefined) => string,
-  getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  callbacks?: ICommandCallbacks,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
   if (/FORK\s+$/i.test(query)) {
@@ -70,10 +63,7 @@ export async function autocomplete(
 
   // within a branch
   if (activeBranch?.commands.length === 0 || pipePrecedesCurrentWord(query)) {
-    // ToDo: Test this
-    // return getCommandAutocompleteDefinitions(getCommandsByName(FORK_AVAILABLE_COMMANDS));
     return getCommandAutocompleteDefinitions(FORK_AVAILABLE_COMMANDS);
-    return [];
   }
 
   const subCommand = activeBranch?.commands[activeBranch.commands.length - 1];
@@ -82,34 +72,16 @@ export async function autocomplete(
     return [];
   }
 
-  const esqlCommandRegistry = new CommandRegistry();
-  const forkMethods = esqlCommandRegistry.getCommandMethods('fork');
-  // const commandDef = getCommandDefinition(subCommand?.name);
-
-  // return commandDef.suggest({
-  //   ...params,
-  //   command: subCommand as ESQLCommand,
-  //   definition: commandDef,
-  // });
-
-  return (
-    forkMethods?.autocomplete(
-      query,
-      subCommand as ESQLCommand,
-      getColumnsByType,
-      getSuggestedUserDefinedColumnName,
-      getColumnsForQuery,
-      context
-    ) || []
-  );
+  const forkMethods = esqlCommandRegistry.getCommandMethods(subCommand.name);
+  return forkMethods?.autocomplete(query, subCommand as ESQLCommand, callbacks, context) || [];
 }
 
 const newBranchSuggestion: ISuggestionItem = {
   kind: 'Issue',
-  label: i18n.translate('kbn-esql-validation-autocomplete.esql.suggestions.newBranchLabel', {
+  label: i18n.translate('kbn-esql-ast.esql.suggestions.newBranchLabel', {
     defaultMessage: 'New branch',
   }),
-  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.suggestions.newBranchDetail', {
+  detail: i18n.translate('kbn-esql-ast.esql.suggestions.newBranchDetail', {
     defaultMessage: 'Add a new branch to the fork',
   }),
   text: '($0)',

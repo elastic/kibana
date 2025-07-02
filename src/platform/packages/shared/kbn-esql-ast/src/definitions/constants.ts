@@ -13,152 +13,104 @@ import type { Literals } from './types';
 export const timeUnitsToSuggest: Literals[] = [
   {
     name: 'year',
-    description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.year',
-      {
-        defaultMessage: 'Year',
-      }
-    ),
+    description: i18n.translate('kbn-esql-ast.esql.definitions.dateDurationDefinition.year', {
+      defaultMessage: 'Year',
+    }),
   },
   {
     name: 'years',
-    description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.years',
-      {
-        defaultMessage: 'Years (Plural)',
-      }
-    ),
+    description: i18n.translate('kbn-esql-ast.esql.definitions.dateDurationDefinition.years', {
+      defaultMessage: 'Years (Plural)',
+    }),
   },
   {
     name: 'quarter',
-    description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.quarter',
-      {
-        defaultMessage: 'Quarter',
-      }
-    ),
+    description: i18n.translate('kbn-esql-ast.esql.definitions.dateDurationDefinition.quarter', {
+      defaultMessage: 'Quarter',
+    }),
   },
   {
     name: 'quarters',
-    description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.quarters',
-      {
-        defaultMessage: 'Quarters (Plural)',
-      }
-    ),
+    description: i18n.translate('kbn-esql-ast.esql.definitions.dateDurationDefinition.quarters', {
+      defaultMessage: 'Quarters (Plural)',
+    }),
   },
   {
     name: 'month',
-    description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.month',
-      {
-        defaultMessage: 'Month',
-      }
-    ),
+    description: i18n.translate('kbn-esql-ast.esql.definitions.dateDurationDefinition.month', {
+      defaultMessage: 'Month',
+    }),
   },
   {
     name: 'months',
-    description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.months',
-      {
-        defaultMessage: 'Months (Plural)',
-      }
-    ),
+    description: i18n.translate('kbn-esql-ast.esql.definitions.dateDurationDefinition.months', {
+      defaultMessage: 'Months (Plural)',
+    }),
   },
   {
     name: 'week',
-    description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.week',
-      {
-        defaultMessage: 'Week',
-      }
-    ),
+    description: i18n.translate('kbn-esql-ast.esql.definitions.dateDurationDefinition.week', {
+      defaultMessage: 'Week',
+    }),
   },
   {
     name: 'weeks',
-    description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.weeks',
-      {
-        defaultMessage: 'Weeks (Plural)',
-      }
-    ),
+    description: i18n.translate('kbn-esql-ast.esql.definitions.dateDurationDefinition.weeks', {
+      defaultMessage: 'Weeks (Plural)',
+    }),
   },
   {
     name: 'day',
-    description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.day',
-      {
-        defaultMessage: 'Day',
-      }
-    ),
+    description: i18n.translate('kbn-esql-ast.esql.definitions.dateDurationDefinition.day', {
+      defaultMessage: 'Day',
+    }),
   },
   {
     name: 'days',
-    description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.days',
-      {
-        defaultMessage: 'Days (Plural)',
-      }
-    ),
+    description: i18n.translate('kbn-esql-ast.esql.definitions.dateDurationDefinition.days', {
+      defaultMessage: 'Days (Plural)',
+    }),
   },
   {
     name: 'hour',
-    description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.hour',
-      {
-        defaultMessage: 'Hour',
-      }
-    ),
+    description: i18n.translate('kbn-esql-ast.esql.definitions.dateDurationDefinition.hour', {
+      defaultMessage: 'Hour',
+    }),
   },
   {
     name: 'hours',
-    description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.hours',
-      {
-        defaultMessage: 'Hours (Plural)',
-      }
-    ),
+    description: i18n.translate('kbn-esql-ast.esql.definitions.dateDurationDefinition.hours', {
+      defaultMessage: 'Hours (Plural)',
+    }),
   },
   {
     name: 'minute',
-    description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.minute',
-      {
-        defaultMessage: 'Minute',
-      }
-    ),
+    description: i18n.translate('kbn-esql-ast.esql.definitions.dateDurationDefinition.minute', {
+      defaultMessage: 'Minute',
+    }),
   },
   {
     name: 'minutes',
-    description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.minutes',
-      {
-        defaultMessage: 'Minutes (Plural)',
-      }
-    ),
+    description: i18n.translate('kbn-esql-ast.esql.definitions.dateDurationDefinition.minutes', {
+      defaultMessage: 'Minutes (Plural)',
+    }),
   },
   {
     name: 'second',
-    description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.second',
-      {
-        defaultMessage: 'Second',
-      }
-    ),
+    description: i18n.translate('kbn-esql-ast.esql.definitions.dateDurationDefinition.second', {
+      defaultMessage: 'Second',
+    }),
   },
   {
     name: 'seconds',
-    description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.seconds',
-      {
-        defaultMessage: 'Seconds (Plural)',
-      }
-    ),
+    description: i18n.translate('kbn-esql-ast.esql.definitions.dateDurationDefinition.seconds', {
+      defaultMessage: 'Seconds (Plural)',
+    }),
   },
   {
     name: 'millisecond',
     description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.millisecond',
+      'kbn-esql-ast.esql.definitions.dateDurationDefinition.millisecond',
       {
         defaultMessage: 'Millisecond',
       }
@@ -167,7 +119,7 @@ export const timeUnitsToSuggest: Literals[] = [
   {
     name: 'milliseconds',
     description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.dateDurationDefinition.milliseconds',
+      'kbn-esql-ast.esql.definitions.dateDurationDefinition.milliseconds',
       {
         defaultMessage: 'Milliseconds (Plural)',
       }
@@ -188,39 +140,6 @@ export const timeUnits: string[] = [
   'y',
   'yr',
 ];
-
-export const chronoLiterals: Literals[] = [
-  'ALIGNED_DAY_OF_WEEK_IN_MONTH',
-  'ALIGNED_DAY_OF_WEEK_IN_YEAR',
-  'ALIGNED_WEEK_OF_MONTH',
-  'ALIGNED_WEEK_OF_YEAR',
-  'AMPM_OF_DAY',
-  'CLOCK_HOUR_OF_AMPM',
-  'CLOCK_HOUR_OF_DAY',
-  'DAY_OF_MONTH',
-  'DAY_OF_WEEK',
-  'DAY_OF_YEAR',
-  'EPOCH_DAY',
-  'ERA',
-  'HOUR_OF_AMPM',
-  'HOUR_OF_DAY',
-  'INSTANT_SECONDS',
-  'MICRO_OF_DAY',
-  'MICRO_OF_SECOND',
-  'MILLI_OF_DAY',
-  'MILLI_OF_SECOND',
-  'MINUTE_OF_DAY',
-  'MINUTE_OF_HOUR',
-  'MONTH_OF_YEAR',
-  'NANO_OF_DAY',
-  'NANO_OF_SECOND',
-  'OFFSET_SECONDS',
-  'PROLEPTIC_MONTH',
-  'SECOND_OF_DAY',
-  'SECOND_OF_MINUTE',
-  'YEAR',
-  'YEAR_OF_ERA',
-].map((name) => ({ name: `"${name}"`, description: '' }));
 
 export const FULL_TEXT_SEARCH_FUNCTIONS = ['match', 'match_operator', 'qstr', 'kql'];
 export const UNSUPPORTED_COMMANDS_BEFORE_QSTR = new Set([

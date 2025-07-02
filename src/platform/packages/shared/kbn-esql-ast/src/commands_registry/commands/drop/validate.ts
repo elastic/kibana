@@ -9,9 +9,8 @@
 import { i18n } from '@kbn/i18n';
 import { isColumn } from '../../../ast/helpers';
 import type { ESQLColumn, ESQLCommand, ESQLMessage } from '../../../types';
-import type { ICommandContext } from '../../types';
 
-export const validate = (command: ESQLCommand, context?: ICommandContext): ESQLMessage[] => {
+export const validate = (command: ESQLCommand): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
   const wildcardItems = command.args.filter((arg) => isColumn(arg) && arg.name === '*');
   if (wildcardItems.length) {
@@ -19,7 +18,7 @@ export const validate = (command: ESQLCommand, context?: ICommandContext): ESQLM
       ...wildcardItems.map((column) => ({
         location: (column as ESQLColumn).location,
         text: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.dropAllColumnsError',
+          'kbn-esql-ast.esql.validation.dropAllColumnsError',
           {
             defaultMessage: 'Removing all fields is not allowed [*]',
           }
@@ -34,7 +33,7 @@ export const validate = (command: ESQLCommand, context?: ICommandContext): ESQLM
     messages.push({
       location: (droppingTimestamp as ESQLColumn).location,
       text: i18n.translate(
-        'kbn-esql-validation-autocomplete.esql.validation.dropTimestampWarning',
+        'kbn-esql-ast.esql.validation.dropTimestampWarning',
         {
           defaultMessage: 'Drop [@timestamp] will remove all time filters to the search results',
         }

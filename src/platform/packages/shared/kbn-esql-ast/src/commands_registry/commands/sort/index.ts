@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ICommandMethods } from '../..';
+import type { ICommandMethods } from '../../registry';
 import { autocomplete } from './autocomplete';
 import type { ICommandContext } from '../../types';
 
@@ -19,7 +19,7 @@ export const sortCommand = {
   name: 'sort',
   methods: sortCommandMethods,
   metadata: {
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sortDoc', {
+    description: i18n.translate('kbn-esql-ast.esql.definitions.sortDoc', {
       defaultMessage:
         'Sorts all results by the specified fields. By default, null values are treated as being larger than any other value. With an ascending sort order, null values are sorted last, and with a descending sort order, null values are sorted first. You can change that by providing NULLS FIRST or NULLS LAST',
     }),

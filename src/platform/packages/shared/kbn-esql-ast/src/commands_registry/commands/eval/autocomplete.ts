@@ -16,12 +16,11 @@ import { suggestForExpression, getExpressionPosition } from '../../utils/autocom
 import { isExpressionComplete, getExpressionType } from '../../utils/validate';
 import {
   type ISuggestionItem,
-  type GetColumnsByTypeFn,
   type ICommandContext,
   Location,
-  ESQLFieldWithMetadata,
+  ICommandCallbacks,
 } from '../../types';
-import { EDITOR_MARKER } from '../../constants';
+import { EDITOR_MARKER } from '../../../parser/constants';
 import { isColumn, isFunctionExpression, isIdentifier, isSource } from '../../../ast/helpers';
 
 function isAssignment(arg: ESQLAstItem): arg is ESQLFunction {
@@ -43,11 +42,12 @@ function isMarkerNode(node: ESQLAstItem | undefined): boolean {
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
-  getColumnsByType: GetColumnsByTypeFn,
-  getSuggestedUserDefinedColumnName: (extraFieldNames?: string[] | undefined) => string,
-  getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  callbacks?: ICommandCallbacks,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
+  if (!callbacks?.getByType) {
+    return [];
+  }
   let expressionRoot = /,\s*$/.test(query)
     ? undefined
     : (command.args[command.args.length - 1] as ESQLSingleAstItem | undefined);
@@ -65,19 +65,24 @@ export async function autocomplete(
 
   const suggestions = await suggestForExpression({
     innerText: query,
-    getColumnsByType,
+    getColumnsByType: callbacks?.getByType,
     expressionRoot,
     location: Location.EVAL,
   });
 
   const positionInExpression = getExpressionPosition(query, expressionRoot);
   if (positionInExpression === 'empty_expression' && !insideAssignment) {
-    suggestions.push(getNewUserDefinedColumnSuggestion(getSuggestedUserDefinedColumnName()));
+    suggestions.push(
+      getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
+    );
   }
 
   if (
     // don't suggest finishing characters if incomplete expression
-    isExpressionComplete(getExpressionType(expressionRoot), query) &&
+    isExpressionComplete(
+      getExpressionType(expressionRoot, context?.fields, context?.userDefinedColumns),
+      query
+    ) &&
     // don't suggest finishing characters if the expression is a column
     // because "EVAL columnName" is a useless expression
     expressionRoot &&

@@ -10,20 +10,13 @@ import type { ESQLCommand } from '../../../types';
 import { isColumn } from '../../../ast/helpers';
 import { pipeCompleteItem, commaCompleteItem } from '../../utils/autocomplete/complete_items';
 import { getLastNonWhitespaceChar, handleFragment, columnExists } from '../../utils/autocomplete';
-import {
-  type ISuggestionItem,
-  type GetColumnsByTypeFn,
-  type ICommandContext,
-  ESQLFieldWithMetadata,
-} from '../../types';
+import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
-  getColumnsByType: GetColumnsByTypeFn,
-  getSuggestedUserDefinedColumnName: (extraFieldNames?: string[] | undefined) => string,
-  getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  callbacks?: ICommandCallbacks,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
   if (
@@ -35,7 +28,7 @@ export async function autocomplete(
   }
 
   const alreadyDeclaredFields = command.args.filter(isColumn).map((arg) => arg.name);
-  const fieldSuggestions = await getColumnsByType('any', alreadyDeclaredFields);
+  const fieldSuggestions = (await callbacks?.getByType?.('any', alreadyDeclaredFields)) ?? [];
 
   return handleFragment(
     query,

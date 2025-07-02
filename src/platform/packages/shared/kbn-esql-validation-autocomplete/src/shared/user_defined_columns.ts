@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAst, ESQLAstItem, ESQLCommand, ESQLFunction } from '@kbn/esql-ast';
+import { ESQLAst, ESQLAstItem, ESQLCommand, ESQLFunction } from '@kbn/esql-ast';
+import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
 import { Visitor } from '@kbn/esql-ast/src/visitor';
 import type { ESQLUserDefinedColumn, ESQLFieldWithMetadata } from '../validation/types';
-import { EDITOR_MARKER } from './constants';
 import { isColumnItem, isFunctionItem, getExpressionType } from './helpers';
 
 function addToUserDefinedColumnOccurrences(

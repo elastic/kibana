@@ -8,8 +8,10 @@
  */
 
 import { getFunctionDefinition, getFunctionSignatures } from '@kbn/esql-validation-autocomplete';
-import { modeDescription } from '@kbn/esql-validation-autocomplete/src/autocomplete/commands/enrich/util';
-import { ENRICH_MODES } from '@kbn/esql-validation-autocomplete/src/definitions/commands_helpers';
+import {
+  modeDescription,
+  ENRICH_MODES,
+} from '@kbn/esql-ast/src/commands_registry/commands/enrich/util';
 import { getHoverItem } from '../hover';
 import { policies, setupTestbed } from './fixtures';
 

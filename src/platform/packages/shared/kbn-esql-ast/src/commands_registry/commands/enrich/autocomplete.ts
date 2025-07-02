@@ -16,11 +16,10 @@ import { findFinalWord, findPreviousWord } from '../../utils/autocomplete';
 import { unescapeColumnName } from '../../utils/validate';
 import {
   type ISuggestionItem,
-  type GetColumnsByTypeFn,
   type ICommandContext,
   Location,
   ESQLPolicy,
-  ESQLFieldWithMetadata,
+  ICommandCallbacks,
 } from '../../types';
 import {
   Position,
@@ -40,9 +39,7 @@ import { buildFieldsDefinitions } from '../../../definitions/functions_helpers';
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
-  getColumnsByType: GetColumnsByTypeFn,
-  getSuggestedUserDefinedColumnName: (extraFieldNames?: string[] | undefined) => string,
-  getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  callbacks?: ICommandCallbacks,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
   const pos = getPosition(query, command);
@@ -132,7 +129,7 @@ export async function autocomplete(
       const suggestions: ISuggestionItem[] = [];
       suggestions.push(
         getNewUserDefinedColumnSuggestion(
-          getSuggestedUserDefinedColumnName(policyMetadata.enrichFields)
+          callbacks?.getSuggestedUserDefinedColumnName?.(policyMetadata.enrichFields) || ''
         )
       );
       suggestions.push(...(await getFieldSuggestionsForWithClause()));

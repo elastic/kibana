@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ICommandMethods } from '../..';
+import type { ICommandMethods } from '../../registry';
 import { autocomplete } from './autocomplete';
 import { validate } from './validate';
 import type { ICommandContext } from '../../types';
@@ -21,7 +21,7 @@ export const enrichCommand = {
   name: 'enrich',
   methods: enrichCommandMethods,
   metadata: {
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.enrichDoc', {
+    description: i18n.translate('kbn-esql-ast.esql.definitions.enrichDoc', {
       defaultMessage:
         'Enrich table with another table. Before you can use enrich, you need to create and execute an enrich policy.',
     }),

@@ -17,7 +17,7 @@ import {
 import type { ESQLAstItem, ESQLColumn, ESQLIdentifier, ESQLFunction } from '../../../types';
 import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn, ICommandContext } from '../../types';
 import type { SupportedDataType, FunctionDefinition } from '../../../definitions/types';
-import { SINGLE_BACKTICK, DOUBLE_TICKS_REGEX } from '../../constants';
+import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK } from '../../../parser/constants';
 import { lastItem } from '../../../visitor/utils';
 import { getFunctionDefinition } from '../../../definitions/functions_helpers';
 /**

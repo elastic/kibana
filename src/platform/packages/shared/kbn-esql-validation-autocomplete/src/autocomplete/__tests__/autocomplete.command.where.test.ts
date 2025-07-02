@@ -6,10 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { getDateLiterals, pipeCompleteItem, FULL_TEXT_SEARCH_FUNCTIONS } from '@kbn/esql-ast';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
-import { pipeCompleteItem } from '../complete_items';
-import { getDateLiterals } from '../factories';
+import { ESQL_COMMON_NUMERIC_TYPES } from '@kbn/esql-ast/src/definitions/types';
 import { log10ParameterTypes, powParameterTypes } from './constants';
 import {
   attachTriggerCommand,
@@ -18,7 +17,6 @@ import {
   getFunctionSignaturesByReturnType,
   setup,
 } from './helpers';
-import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../shared/constants';
 import { Location } from '../../definitions/types';
 
 const allEvalFns = getFunctionSignaturesByReturnType(Location.WHERE, 'any', {

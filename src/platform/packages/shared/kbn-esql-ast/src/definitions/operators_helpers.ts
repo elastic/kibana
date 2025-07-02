@@ -81,7 +81,7 @@ function isArrayType(type: string): type is ArrayType {
   return type.endsWith('[]');
 }
 
-export function getSupportedTypesForBinaryOperators(
+function getSupportedTypesForBinaryOperators(
   fnDef: FunctionDefinition | undefined,
   previousType: string
 ) {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ICommandMethods } from '../..';
+import type { ICommandMethods } from '../../registry';
 import { autocomplete } from './autocomplete';
 import { columnsAfter } from './columns_after';
 import { validate } from './validate';
@@ -23,7 +23,7 @@ export const dissectCommand = {
   name: 'dissect',
   methods: dissectCommandMethods,
   metadata: {
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.dissectDoc', {
+    description: i18n.translate('kbn-esql-ast.esql.definitions.dissectDoc', {
       defaultMessage:
         'Extracts multiple string values from a single string input, based on a pattern',
     }),

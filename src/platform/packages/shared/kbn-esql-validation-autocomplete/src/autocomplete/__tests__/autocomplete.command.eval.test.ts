@@ -6,7 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { timeUnitsToSuggest } from '@kbn/esql-ast';
+import { ESQL_COMMON_NUMERIC_TYPES } from '@kbn/esql-ast/src/definitions/types';
 import {
   setup,
   getFunctionSignaturesByReturnType,
@@ -16,9 +17,7 @@ import {
   AssertSuggestionsFn,
   fields,
 } from './helpers';
-import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
 import { Location } from '../../definitions/types';
-import { timeUnitsToSuggest } from '../../definitions/literals';
 import { roundParameterTypes } from './constants';
 
 describe('autocomplete.suggest', () => {

@@ -13,7 +13,7 @@ import * as mutate from '../../../mutate';
 import { LeafPrinter } from '../../../pretty_print/leaf_printer';
 import { pipeCompleteItem, commaCompleteItem } from '../../utils/autocomplete/complete_items';
 import { buildFieldsDefinitionsWithMetadata } from '../../../definitions/functions_helpers';
-import { ICommand } from '../..';
+import { ICommand } from '../../registry';
 import { ESQLAstJoinCommand, ESQLCommand, ESQLCommandOption } from '../../../types';
 import {
   ESQLFieldWithMetadata,
@@ -124,7 +124,7 @@ export const getFieldSuggestions = async (
   for (const commonField of intersection) {
     commonField.sortText = '1';
     commonField.documentation = {
-      value: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.join.sharedField', {
+      value: i18n.translate('kbn-esql-ast.esql.autocomplete.join.sharedField', {
         defaultMessage: 'Field shared between the source and the lookup index',
       }),
     };
@@ -136,7 +136,7 @@ export const getFieldSuggestions = async (
     }
 
     detail += i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.autocomplete.join.commonFieldNote',
+      'kbn-esql-ast.esql.autocomplete.join.commonFieldNote',
       {
         defaultMessage: '(common field)',
       }

@@ -7,21 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCommand } from '../../../types';
-import {
-  type ISuggestionItem,
-  type GetColumnsByTypeFn,
-  type ICommandContext,
-  ESQLFieldWithMetadata,
-} from '../../types';
+import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { pipeCompleteItem } from '../../utils/autocomplete/complete_items';
-import { buildConstantsDefinitions } from '../../../definitions/literats';
+import { buildConstantsDefinitions } from '../../../definitions/literals_helpers';
 
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
-  getColumnsByType: GetColumnsByTypeFn,
-  getSuggestedUserDefinedColumnName: (extraFieldNames?: string[] | undefined) => string,
-  getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  callbacks?: ICommandCallbacks,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
   if (/[0-9]\s+$/.test(query)) {

@@ -34,7 +34,7 @@ import { Location } from '../../commands_registry/types';
 const bucketDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.GROUPING,
   name: 'bucket',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.bucket', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.bucket', {
     defaultMessage:
       'Creates groups of values - buckets - out of a datetime or numeric input.\nThe size of the buckets can either be provided directly, or chosen based on a recommended count and values range.',
   }),
@@ -1530,7 +1530,7 @@ const bucketDefinition: FunctionDefinition = {
 const categorizeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.GROUPING,
   name: 'categorize',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.categorize', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.categorize', {
     defaultMessage: 'Groups text messages into categories of similarly formatted text values.',
   }),
   preview: false,

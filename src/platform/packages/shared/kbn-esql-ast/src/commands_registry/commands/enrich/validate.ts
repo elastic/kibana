@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { getMessageFromId } from '../../utils/validate/errors';
-import type { ESQLSource, ESQLCommand, ESQLMessage } from '../../../types';
+import type { ESQLSource, ESQLCommand, ESQLMessage, ESQLAst } from '../../../types';
 import { ENRICH_MODES } from './util';
 import type { ESQLPolicy, ICommandContext } from '../../types';
 
@@ -15,7 +15,11 @@ function hasWildcard(name: string) {
   return /\*/.test(name);
 }
 
-export const validate = (command: ESQLCommand, context?: ICommandContext): ESQLMessage[] => {
+export const validate = (
+  command: ESQLCommand,
+  ast: ESQLAst,
+  context?: ICommandContext
+): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
   const source = command.args[0] as ESQLSource;
   const cluster = source.prefix;

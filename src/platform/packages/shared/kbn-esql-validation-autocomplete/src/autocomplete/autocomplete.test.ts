@@ -6,13 +6,19 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { commandDefinitions as unmodifiedCommandDefinitions } from '../definitions/commands';
-import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
-import { timeUnitsToSuggest } from '../definitions/literals';
+import {
+  esqlCommandRegistry,
+  getSafeInsertText,
+  TIME_SYSTEM_PARAMS,
+  timeUnitsToSuggest,
+  TRIGGER_SUGGESTION_COMMAND,
+  scalarFunctionDefinitions,
+  getRecommendedQueriesTemplates,
+  METADATA_FIELDS,
+} from '@kbn/esql-ast';
+import { ESQL_STRING_TYPES } from '@kbn/esql-ast/src/definitions/types';
+import { getDateHistogramCompletionItem } from '@kbn/esql-ast/src/commands_registry/utils/autocomplete/complete_items';
 import { Location } from '../definitions/types';
-import { METADATA_FIELDS } from '../shared/constants';
-import { ESQL_STRING_TYPES } from '../shared/esql_types';
 import {
   attachTriggerCommand,
   createCompletionContext,
@@ -29,21 +35,14 @@ import {
 } from './__tests__/helpers';
 import { suggest } from './autocomplete';
 import { editorExtensions } from '../__tests__/helpers';
-import { getDateHistogramCompletionItem } from './commands/stats/util';
-import { getSafeInsertText, TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND } from './factories';
-import { getRecommendedQueries } from './recommended_queries/templates';
-import { mapRecommendedQueriesFromExtensions } from './recommended_queries/suggestions';
-
-const commandDefinitions = unmodifiedCommandDefinitions.filter(
-  ({ name, hidden }) => !hidden && name !== 'rrf'
-);
+import { mapRecommendedQueriesFromExtensions } from './utils/recommended_queries_helpers';
 
 const getRecommendedQueriesSuggestionsFromTemplates = (
   fromCommand: string,
   timeField?: string,
   categorizationField?: string
 ) =>
-  getRecommendedQueries({
+  getRecommendedQueriesTemplates({
     fromCommand,
     timeField,
     categorizationField,
@@ -104,12 +103,13 @@ describe('autocomplete', () => {
       ...mapRecommendedQueriesFromExtensions(editorExtensions.recommendedQueries),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
-    const commands = commandDefinitions
+    const commands = esqlCommandRegistry
+      ?.getAllCommands()
       .filter(({ name }) => !sourceCommands.includes(name))
-      .map(({ name, types }) => {
-        if (types && types.length) {
+      .map(({ name, metadata }) => {
+        if (metadata.types && metadata.types.length) {
           const cmds: string[] = [];
-          for (const type of types) {
+          for (const type of metadata.types) {
             const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' ';
             cmds.push(cmd);
           }
@@ -266,12 +266,13 @@ describe('autocomplete', () => {
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
-    const commands = commandDefinitions
+    const commands = esqlCommandRegistry
+      ?.getAllCommands()
       .filter(({ name }) => !sourceCommands.includes(name))
-      .map(({ name, types }) => {
-        if (types && types.length) {
+      .map(({ name, metadata }) => {
+        if (metadata.types && metadata.types.length) {
           const cmds: string[] = [];
-          for (const type of types) {
+          for (const type of metadata.types) {
             const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' ';
             cmds.push(cmd);
           }
@@ -494,12 +495,13 @@ describe('autocomplete', () => {
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
-    const commands = commandDefinitions
+    const commands = esqlCommandRegistry
+      ?.getAllCommands()
       .filter(({ name }) => !sourceCommands.includes(name))
-      .map(({ name, types }) => {
-        if (types && types.length) {
+      .map(({ name, metadata }) => {
+        if (metadata.types && metadata.types.length) {
           const cmds: string[] = [];
-          for (const type of types) {
+          for (const type of metadata.types) {
             const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' ';
             cmds.push(cmd);
           }

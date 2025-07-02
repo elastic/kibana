@@ -120,6 +120,12 @@ export interface ESQLPolicy {
   enrichFields: string[];
 }
 
+export interface ICommandCallbacks {
+  getByType?: GetColumnsByTypeFn;
+  getSuggestedUserDefinedColumnName?: (extraFieldNames?: string[] | undefined) => string;
+  getColumnsForQuery?: (query: string) => Promise<ESQLFieldWithMetadata[]>;
+}
+
 export interface ICommandContext {
   userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
   fields: Map<string, ESQLFieldWithMetadata>;

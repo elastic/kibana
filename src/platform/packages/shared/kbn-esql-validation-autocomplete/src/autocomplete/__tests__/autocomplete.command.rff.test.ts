@@ -6,19 +6,19 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import { setup } from './helpers';
 
-jest.mock('../../definitions/commands', () => {
-  const actual = jest.requireActual('../../definitions/commands');
-  const modifiedDefinitions = actual.commandDefinitions.map((def: any) =>
-    def.name === 'rrf' ? { ...def, hidden: false } : def
-  );
-  return {
-    ...actual,
-    commandDefinitions: modifiedDefinitions,
-  };
-});
+// jest.mock('../../definitions/commands', () => {
+//   const actual = jest.requireActual('../../definitions/commands');
+//   const commandDefinitions = esqlCommandRegistry.getAllCommandNames();
+//   const modifiedDefinitions = actual.commandDefinitions.map((def: any) =>
+//     def.name === 'rrf' ? { ...def, hidden: false } : def
+//   );
+//   return {
+//     ...actual,
+//     commandDefinitions: modifiedDefinitions,
+//   };
+// });
 
 describe('autocomplete.suggest', () => {
   describe('RRF', () => {

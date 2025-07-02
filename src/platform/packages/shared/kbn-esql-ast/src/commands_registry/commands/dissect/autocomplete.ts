@@ -6,48 +6,73 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { i18n } from '@kbn/i18n';
 import type { ESQLCommand } from '../../../types';
-import { Location } from '../../types';
+import { ICommandCallbacks } from '../../types';
 import {
   pipeCompleteItem,
-  commaCompleteItem,
-  getNewUserDefinedColumnSuggestion,
+  colonCompleteItem,
+  semiColonCompleteItem,
 } from '../../utils/autocomplete/complete_items';
-import {
-  type ISuggestionItem,
-  type GetColumnsByTypeFn,
-  type ICommandContext,
-  ESQLFieldWithMetadata,
-} from '../../types';
+import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import { getFunctionSuggestions } from '../../../definitions/functions_helpers';
-import { isRestartingExpression } from '../../../definitions/shared';
+import { buildConstantsDefinitions } from '../../../definitions/literals_helpers';
+import { ESQL_STRING_TYPES } from '../../../ast/helpers';
+
+const appendSeparatorCompletionItem: ISuggestionItem = {
+  command: TRIGGER_SUGGESTION_COMMAND,
+  detail: i18n.translate('kbn-esql-ast.esql.definitions.appendSeparatorDoc', {
+    defaultMessage:
+      'The character(s) that separate the appended fields. Default to empty string ("").',
+  }),
+  kind: 'Reference',
+  label: 'APPEND_SEPARATOR',
+  sortText: '1',
+  text: 'APPEND_SEPARATOR = ',
+};
 
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
-  getColumnsByType: GetColumnsByTypeFn,
-  getSuggestedUserDefinedColumnName: (extraFieldNames?: string[] | undefined) => string,
-  getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  callbacks?: ICommandCallbacks,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
-  // ROW col0 = /
-  if (/=\s*$/.test(query)) {
-    return getFunctionSuggestions({ location: Location.ROW });
-  }
+  const commandArgs = command.args.filter((arg) => !Array.isArray(arg) && arg.type !== 'unknown');
 
-  // ROW col0 = 23 /
-  else if (command.args.length > 0 && !isRestartingExpression(query)) {
+  // DISSECT field/
+  if (commandArgs.length === 1 && /\s$/.test(query)) {
+    return buildConstantsDefinitions(
+      ['"%{firstWord}"'],
+      i18n.translate('kbn-esql-ast.esql.autocomplete.aPatternString', {
+        defaultMessage: 'A pattern string',
+      }),
+      undefined,
+      {
+        advanceCursorAndOpenSuggestions: true,
+      }
+    );
+  }
+  // DISSECT field pattern /
+  else if (commandArgs.length === 2) {
     return [
       { ...pipeCompleteItem, command: TRIGGER_SUGGESTION_COMMAND },
-      { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
+      appendSeparatorCompletionItem,
     ];
   }
+  // DISSECT field APPEND_SEPARATOR = /
+  else if (/append_separator\s*=\s*$/i.test(query)) {
+    return [colonCompleteItem, semiColonCompleteItem];
+  }
+  // DISSECT field APPEND_SEPARATOR = ":" /
+  else if (commandArgs.some((arg) => !Array.isArray(arg) && arg.type === 'option')) {
+    return [{ ...pipeCompleteItem, command: TRIGGER_SUGGESTION_COMMAND }];
+  }
 
-  // ROW /
-  // ROW foo = "bar", /
-  return [
-    getNewUserDefinedColumnSuggestion(getSuggestedUserDefinedColumnName()),
-    ...getFunctionSuggestions({ location: Location.ROW }),
-  ];
+  // DISSECT /
+  const fieldSuggestions = (await callbacks?.getByType?.(ESQL_STRING_TYPES)) ?? [];
+  return fieldSuggestions.map((sug) => ({
+    ...sug,
+    text: `${sug.text} `,
+    command: TRIGGER_SUGGESTION_COMMAND,
+  }));
 }

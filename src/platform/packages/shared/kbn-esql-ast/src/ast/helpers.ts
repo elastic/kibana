@@ -19,7 +19,6 @@ import type {
   ESQLIntegerLiteral,
   ESQLList,
   ESQLLiteral,
-  ESQLNumericLiteralType,
   ESQLParamLiteral,
   ESQLProperNode,
   ESQLSource,
@@ -144,29 +143,3 @@ export const binaryExpressionGroup = (node: ESQLAstNode): BinaryExpressionGroup 
   }
   return BinaryExpressionGroup.unknown;
 };
-
-/**
- * Handles numeric types in ES|QL.
- */
-export const ESQL_NUMERIC_DECIMAL_TYPES = [
-  'double',
-  'unsigned_long',
-  'long',
-  'counter_long',
-  'counter_double',
-] as const;
-
-export const ESQL_NUMBER_TYPES = [
-  'integer',
-  'counter_integer',
-  ...ESQL_NUMERIC_DECIMAL_TYPES,
-] as const;
-
-export function isNumericType(type: unknown): type is ESQLNumericLiteralType {
-  return (
-    typeof type === 'string' &&
-    [...ESQL_NUMBER_TYPES, 'decimal'].includes(type as (typeof ESQL_NUMBER_TYPES)[number])
-  );
-}
-
-export const ESQL_STRING_TYPES = ['keyword', 'text'] as const;

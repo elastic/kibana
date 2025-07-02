@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ICommandMethods } from '../..';
+import type { ICommandMethods } from '../../registry';
 import { autocomplete } from './autocomplete';
 import { columnsAfter } from './columns_after';
 import type { ICommandContext } from '../../types';
@@ -21,7 +21,7 @@ export const keepCommand = {
   name: 'keep',
   methods: keepCommandMethods,
   metadata: {
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.keepDoc', {
+    description: i18n.translate('kbn-esql-ast.esql.definitions.keepDoc', {
       defaultMessage:
         'Rearranges fields in the Results table by applying the keep clauses in fields',
     }),

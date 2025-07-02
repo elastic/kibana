@@ -6,14 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { Location } from '../../types';
+import { ICommandCallbacks, Location } from '../../types';
 import type { ESQLCommand } from '../../../types';
-import {
-  type ISuggestionItem,
-  type GetColumnsByTypeFn,
-  type ICommandContext,
-  ESQLFieldWithMetadata,
-} from '../../types';
+import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { pipeCompleteItem, commaCompleteItem } from '../../utils/autocomplete/complete_items';
 import {
   handleFragment,
@@ -29,11 +24,12 @@ const noCaseCompare = (a: string, b: string) => a.toLowerCase() === b.toLowerCas
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
-  getColumnsByType: GetColumnsByTypeFn,
-  getSuggestedUserDefinedColumnName: (extraFieldNames?: string[] | undefined) => string,
-  getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  callbacks?: ICommandCallbacks,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
+  if (!callbacks?.getByType) {
+    return [];
+  }
   const prependSpace = (s: ISuggestionItem) => ({ ...s, text: ' ' + s.text });
 
   const commandText = query.slice(command.location.min);
@@ -122,13 +118,14 @@ export async function autocomplete(
     }
   }
 
-  const fieldSuggestions = await getColumnsByType('any', [], {
-    openSuggestions: true,
-  });
+  const fieldSuggestions =
+    (await callbacks?.getByType('any', [], {
+      openSuggestions: true,
+    })) ?? [];
   const functionSuggestions = await getFieldsOrFunctionsSuggestions(
     ['any'],
     Location.SORT,
-    getColumnsByType,
+    callbacks?.getByType,
     {
       functions: true,
       fields: false,

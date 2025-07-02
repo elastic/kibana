@@ -18,7 +18,14 @@ import {
   type ESQLSingleAstItem,
   type ESQLSource,
   type ESQLTimeInterval,
+  esqlCommandRegistry,
+  operatorsDefinitions,
+  aggFunctionDefinitions,
+  groupingFunctionDefinitions,
+  scalarFunctionDefinitions,
+  timeUnits,
 } from '@kbn/esql-ast';
+import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK } from '@kbn/esql-ast/src/parser/constants';
 import {
   ESQLIdentifier,
   ESQLInlineCast,
@@ -29,17 +36,10 @@ import {
 import { uniqBy } from 'lodash';
 
 import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';
-import { operatorsDefinitions } from '../definitions/all_operators';
-import { commandDefinitions } from '../definitions/commands';
-import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
-import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
-import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
-import { timeUnits } from '../definitions/literals';
 import type { FieldType } from '../definitions/types';
 import {
   ArrayType,
-  CommandDefinition,
   FunctionDefinition,
   FunctionDefinitionTypes,
   FunctionParameter,
@@ -53,8 +53,6 @@ import type {
   ESQLUserDefinedColumn,
   ReferenceMaps,
 } from '../validation/types';
-import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK } from './constants';
-import { removeMarkerArgFromArgsList } from './context';
 import { getTestFunctions } from './test_functions';
 import type { ESQLCallbacks, ReasonTypes } from './types';
 import { collectUserDefinedColumns } from './user_defined_columns';
@@ -99,15 +97,6 @@ export function isAssignment(arg: ESQLAstItem): arg is ESQLFunction {
   return isFunctionItem(arg) && arg.name === '=';
 }
 
-export function isAssignmentComplete(node: ESQLFunction | undefined) {
-  const assignExpression = removeMarkerArgFromArgsList(node)?.args?.[1];
-  return Boolean(assignExpression && Array.isArray(assignExpression) && assignExpression.length);
-}
-
-export function isIncompleteItem(arg: ESQLAstItem): boolean {
-  return !arg || (!Array.isArray(arg) && arg.incomplete);
-}
-
 export const within = (position: number, location: ESQLLocation | undefined) =>
   Boolean(location && location.min <= position && location.max >= position);
 
@@ -116,7 +105,6 @@ export function isSourceCommand({ label }: { label: string }) {
 }
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
-let commandLookups: Map<string, CommandDefinition<string>> | undefined;
 
 function buildFunctionLookup() {
   // we always refresh if we have test functions
@@ -178,33 +166,6 @@ export function getFunctionDefinition(name: string) {
 }
 
 const unwrapStringLiteralQuotes = (value: string) => value.slice(1, -1);
-
-function buildCommandLookup(): Map<string, CommandDefinition<string>> {
-  if (!commandLookups) {
-    commandLookups = commandDefinitions.reduce((memo, def) => {
-      memo.set(def.name, def);
-      return memo;
-    }, new Map<string, CommandDefinition<string>>());
-  }
-  return commandLookups!;
-}
-
-export function getCommandDefinition<CommandName extends string>(
-  name: CommandName
-): CommandDefinition<CommandName> {
-  return buildCommandLookup().get(name.toLowerCase()) as unknown as CommandDefinition<CommandName>;
-}
-
-export function getAllCommands() {
-  return Array.from(buildCommandLookup().values());
-}
-
-export function getCommandsByName(names: string[]): Array<CommandDefinition<string>> {
-  const commands = buildCommandLookup();
-  return names.map((name) => commands.get(name)).filter((command) => command) as Array<
-    CommandDefinition<string>
-  >;
-}
 
 function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQLLiteral) {
   if (item.literalType === argType) {
@@ -948,22 +909,17 @@ export async function getCurrentQueryAvailableFields(
   const cacheCopy = new Map<string, ESQLFieldWithMetadata>();
   previousPipeFields.forEach((field) => cacheCopy.set(field.name, field));
   const lastCommand = commands[commands.length - 1];
-  const commandDef = getCommandDefinition(lastCommand.name);
+  const commandDefinition = esqlCommandRegistry.getCommandByName(lastCommand.name);
 
-  // If the command has a fieldsSuggestionsAfter function, use it to get the fields
-  if (commandDef.fieldsSuggestionsAfter) {
+  // If the command has a columnsAfter function, use it to get the fields
+  if (commandDefinition?.methods.columnsAfter) {
     const userDefinedColumns = collectUserDefinedColumns([lastCommand], cacheCopy, query);
-    const arrayOfUserDefinedColumns: ESQLFieldWithMetadata[] = transformMapToESQLFields(
-      userDefinedColumns ?? new Map<string, ESQLUserDefinedColumn[]>()
-    );
 
-    return commandDef.fieldsSuggestionsAfter(
-      lastCommand,
-      previousPipeFields,
-      arrayOfUserDefinedColumns
-    );
+    return commandDefinition.methods.columnsAfter(lastCommand, previousPipeFields, {
+      userDefinedColumns,
+    });
   } else {
-    // If the command doesn't have a fieldsSuggestionsAfter function, use the default behavior
+    // If the command doesn't have a columnsAfter function, use the default behavior
     const userDefinedColumns = collectUserDefinedColumns(commands, cacheCopy, query);
     const arrayOfUserDefinedColumns: ESQLFieldWithMetadata[] = transformMapToESQLFields(
       userDefinedColumns ?? new Map<string, ESQLUserDefinedColumn[]>()

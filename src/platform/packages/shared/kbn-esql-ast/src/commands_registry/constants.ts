@@ -12,11 +12,4 @@ export const TRIGGER_SUGGESTION_COMMAND = {
   id: 'editor.action.triggerSuggest',
 };
 
-export const EDITOR_MARKER = 'marker_esql_editor';
-
-export const SINGLE_TICK_REGEX = /`/g;
-export const DOUBLE_BACKTICK = '``';
-export const SINGLE_BACKTICK = '`';
-export const DOUBLE_TICKS_REGEX = /``/g;
-
 export const ESQL_VARIABLES_PREFIX = '?';

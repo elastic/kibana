@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ICommandMethods } from '../..';
+import type { ICommandMethods } from '../../registry';
 import { autocomplete } from './autocomplete';
 import type { ICommandContext } from '../../types';
 
@@ -20,7 +20,7 @@ export const timeseriesCommand = {
   methods: timeseriesCommandMethods,
   metadata: {
     hidden: true,
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.metricsDoc', {
+    description: i18n.translate('kbn-esql-ast.esql.definitions.metricsDoc', {
       defaultMessage:
         'A metrics-specific source command, use this command to load data from TSDB indices. ' +
         'Similar to STATS command on can calculate aggregate statistics, such as average, count, and sum, over the incoming search results set. ' +

@@ -15,20 +15,13 @@ import {
 } from '../../../definitions/sources_helpers';
 import { metadataSuggestion, getMetadataSuggestions } from '../../options/metadata';
 import { withinQuotes } from '../../utils/autocomplete';
-import {
-  type ISuggestionItem,
-  type GetColumnsByTypeFn,
-  type ICommandContext,
-  ESQLFieldWithMetadata,
-} from '../../types';
+import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { getOverlapRange, isRestartingExpression } from '../../../definitions/shared';
 
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
-  getColumnsByType: GetColumnsByTypeFn,
-  getSuggestedUserDefinedColumnName: (extraFieldNames?: string[] | undefined) => string,
-  getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  callbacks?: ICommandCallbacks,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
   if (withinQuotes(query)) {

@@ -8,15 +8,14 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommand, ESQLMessage } from '../../../types';
-import type { ICommandContext } from '../../types';
 
-export const validate = (command: ESQLCommand, context?: ICommandContext): ESQLMessage[] => {
+export const validate = (command: ESQLCommand): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
   if (command.args.length < 2) {
     messages.push({
       location: command.location,
-      text: i18n.translate('kbn-esql-validation-autocomplete.esql.validation.forkTooFewBranches', {
+      text: i18n.translate('kbn-esql-ast.esql.validation.forkTooFewBranches', {
         defaultMessage: '[FORK] Must include at least two branches.',
       }),
       type: 'error',

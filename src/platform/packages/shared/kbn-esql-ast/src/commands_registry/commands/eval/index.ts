@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ICommandMethods } from '../..';
+import type { ICommandMethods } from '../../registry';
 import { autocomplete } from './autocomplete';
 import type { ICommandContext } from '../../types';
 
@@ -19,7 +19,7 @@ export const evalCommand = {
   name: 'eval',
   methods: evalCommandMethods,
   metadata: {
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.evalDoc', {
+    description: i18n.translate('kbn-esql-ast.esql.definitions.evalDoc', {
       defaultMessage:
         'Calculates an expression and puts the resulting value into a search results field.',
     }),

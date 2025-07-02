@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ICommandMethods } from '../..';
+import type { ICommandMethods } from '../../registry';
 import { autocomplete } from './autocomplete';
 import { validate } from './validate';
 import type { ICommandContext } from '../../types';
@@ -26,7 +26,7 @@ export const joinCommand = {
       // {
       //   name: 'left',
       //   description: i18n.translate(
-      //     'kbn-esql-validation-autocomplete.esql.definitions.joinLeftDoc',
+      //     'kbn-esql-ast.esql.definitions.joinLeftDoc',
       //     {
       //       defaultMessage:
       //         'Join index with another index, keep only matching documents from the right index',
@@ -36,7 +36,7 @@ export const joinCommand = {
       // {
       //   name: 'right',
       //   description: i18n.translate(
-      //     'kbn-esql-validation-autocomplete.esql.definitions.joinRightDoc',
+      //     'kbn-esql-ast.esql.definitions.joinRightDoc',
       //     {
       //       defaultMessage:
       //         'Join index with another index, keep only matching documents from the left index',
@@ -46,14 +46,14 @@ export const joinCommand = {
       {
         name: 'lookup',
         description: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.definitions.joinLookupDoc',
+          'kbn-esql-ast.esql.definitions.joinLookupDoc',
           {
             defaultMessage: 'Join with a "lookup" mode index',
           }
         ),
       },
     ],
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.joinDoc', {
+    description: i18n.translate('kbn-esql-ast.esql.definitions.joinDoc', {
       defaultMessage: 'Join table with another table.',
     }),
     declaration: `LOOKUP JOIN <lookup_index> ON <field_name>`,

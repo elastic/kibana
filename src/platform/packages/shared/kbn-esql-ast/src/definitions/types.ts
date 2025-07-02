@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLFunction, ESQLMessage } from '../types';
+import type { ESQLFunction, ESQLMessage, ESQLNumericLiteralType } from '../types';
 import { Location } from '../commands_registry/types';
 
 /**
@@ -394,3 +394,31 @@ export interface ValidationErrors {
 
 export type ErrorTypes = keyof ValidationErrors;
 export type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];
+
+/**
+ * Handles numeric types in ES|QL.
+ */
+export const ESQL_COMMON_NUMERIC_TYPES = ['double', 'long', 'integer'] as const;
+
+export const ESQL_NUMERIC_DECIMAL_TYPES = [
+  'double',
+  'unsigned_long',
+  'long',
+  'counter_long',
+  'counter_double',
+] as const;
+
+export const ESQL_NUMBER_TYPES = [
+  'integer',
+  'counter_integer',
+  ...ESQL_NUMERIC_DECIMAL_TYPES,
+] as const;
+
+export function isNumericType(type: unknown): type is ESQLNumericLiteralType {
+  return (
+    typeof type === 'string' &&
+    [...ESQL_NUMBER_TYPES, 'decimal'].includes(type as (typeof ESQL_NUMBER_TYPES)[number])
+  );
+}
+
+export const ESQL_STRING_TYPES = ['keyword', 'text'] as const;

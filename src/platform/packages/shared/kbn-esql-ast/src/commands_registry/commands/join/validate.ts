@@ -13,12 +13,17 @@ import type {
   ESQLProperNode,
   ESQLSource,
   ESQLIdentifier,
+  ESQLAst,
 } from '../../../types';
 import { isBinaryExpression, isIdentifier, isSource } from '../../../ast/helpers';
 import type { ICommandContext } from '../../types';
 import { errors } from '../../utils/validate/errors';
 
-export const validate = (command: ESQLCommand, context?: ICommandContext): ESQLMessage[] => {
+export const validate = (
+  command: ESQLCommand,
+  ast: ESQLAst,
+  context?: ICommandContext
+): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
   const { commandType, args } = command as ESQLAstJoinCommand;
   const joinSources = context?.joinSources || [];

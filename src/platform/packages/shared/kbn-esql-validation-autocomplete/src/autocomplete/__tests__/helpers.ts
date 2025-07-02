@@ -6,23 +6,25 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import {
+  getSafeInsertText,
+  TRIGGER_SUGGESTION_COMMAND,
+  operatorsDefinitions,
+  aggFunctionDefinitions,
+  groupingFunctionDefinitions,
+  scalarFunctionDefinitions,
+  timeUnitsToSuggest,
+} from '@kbn/esql-ast';
 import { camelCase } from 'lodash';
-import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
-import { operatorsDefinitions } from '../../definitions/all_operators';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
-import { aggFunctionDefinitions } from '../../definitions/generated/aggregation_functions';
-import { timeUnitsToSuggest } from '../../definitions/literals';
 import {
   FunctionDefinitionTypes,
   Location,
   getLocationFromCommandOrOptionName,
 } from '../../definitions/types';
-import { groupingFunctionDefinitions } from '../../definitions/generated/grouping_functions';
 import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext, SuggestionRawDefinition } from '../types';
-import { TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND, getSafeInsertText } from '../factories';
 import { ESQLFieldWithMetadata } from '../../validation/types';
 import {
   FieldType,
@@ -265,11 +267,6 @@ export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]
     return timeUnitsToSuggest.map(({ name }) => `1 ${name}`).filter((s) => !/s$/.test(s));
   }
   return [];
-}
-
-export function getDateLiteralsByFieldType(_requestedType: FieldType | FieldType[]) {
-  const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
-  return requestedType.includes('date') ? [TIME_PICKER_SUGGESTION, ...TIME_SYSTEM_PARAMS] : [];
 }
 
 export function createCustomCallbackMocks(

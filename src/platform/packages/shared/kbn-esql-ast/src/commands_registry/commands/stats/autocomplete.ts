@@ -7,14 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType } from '@kbn/esql-types';
-import { Location } from '../../types';
+import { ICommandCallbacks, Location } from '../../types';
 import type { ESQLCommand, ESQLCommandOption, ESQLColumn, ESQLFunction } from '../../../types';
-import {
-  type ISuggestionItem,
-  type GetColumnsByTypeFn,
-  type ICommandContext,
-  ESQLFieldWithMetadata,
-} from '../../types';
+import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { getFunctionSuggestions } from '../../../definitions/functions_helpers';
 import {
   pipeCompleteItem,
@@ -88,11 +83,12 @@ function suggestColumns(
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
-  getColumnsByType: GetColumnsByTypeFn,
-  getSuggestedUserDefinedColumnName: (extraFieldNames?: string[] | undefined) => string,
-  getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  callbacks?: ICommandCallbacks,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
+  if (!callbacks?.getByType) {
+    return [];
+  }
   const pos = getPosition(query, command);
 
   const lastCharacterTyped = query[query.length - 1];
@@ -108,7 +104,7 @@ export async function autocomplete(
       return [
         ...controlSuggestions,
         ...getFunctionSuggestions({ location: Location.STATS }),
-        getNewUserDefinedColumnSuggestion(getSuggestedUserDefinedColumnName()),
+        getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
       ];
 
     case 'expression_after_assignment':
@@ -132,7 +128,7 @@ export async function autocomplete(
 
       const suggestions = await suggestForExpression({
         innerText: query,
-        getColumnsByType,
+        getColumnsByType: callbacks?.getByType,
         expressionRoot,
         location: Location.STATS_WHERE,
         preferredExpressionType: 'boolean',
@@ -140,7 +136,11 @@ export async function autocomplete(
 
       // Is this a complete boolean expression?
       // If so, we can call it done and suggest a pipe
-      const expressionType = getExpressionType(expressionRoot);
+      const expressionType = getExpressionType(
+        expressionRoot,
+        context?.fields,
+        context?.userDefinedColumns
+      );
       if (expressionType === 'boolean' && isExpressionComplete(expressionType, query)) {
         suggestions.push(pipeCompleteItem, { ...commaCompleteItem, text: ', ' }, byCompleteItem);
       }
@@ -152,7 +152,7 @@ export async function autocomplete(
       const histogramBarTarget = context?.histogramBarTarget ?? 0;
 
       const columnSuggestions = pushItUpInTheList(
-        await getColumnsByType('any', [], { openSuggestions: true }),
+        await callbacks?.getByType('any', [], { openSuggestions: true }),
         true
       );
 
@@ -172,7 +172,7 @@ export async function autocomplete(
       const ignored = alreadyUsedColumns(command);
 
       const columnSuggestions = pushItUpInTheList(
-        await getColumnsByType('any', ignored, { openSuggestions: true }),
+        await callbacks.getByType('any', ignored, { openSuggestions: true }),
         true
       );
 
@@ -185,7 +185,9 @@ export async function autocomplete(
         query
       );
 
-      suggestions.push(getNewUserDefinedColumnSuggestion(getSuggestedUserDefinedColumnName()));
+      suggestions.push(
+        getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
+      );
 
       return suggestions;
     }

@@ -8,27 +8,22 @@
  */
 import { i18n } from '@kbn/i18n';
 import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-types';
-import type { ESQLSingleAstItem, ESQLFunction, ESQLCommand } from '../../../types';
+import type { ESQLSingleAstItem, ESQLFunction } from '../../../types';
 import type {
   ISuggestionItem,
   GetColumnsByTypeFn,
   ESQLUserDefinedColumn,
   ICommandContext,
 } from '../../types';
-import { SINGLE_TICK_REGEX, DOUBLE_BACKTICK } from '../../constants';
 import { Location } from '../../types';
 import {
   getDateLiterals,
   getCompatibleLiterals,
   buildConstantsDefinitions,
-} from '../../../definitions/literats';
+} from '../../../definitions/literals_helpers';
+import { SINGLE_TICK_REGEX, DOUBLE_BACKTICK } from '../../../parser/constants';
 import { type SupportedDataType, isParameterType } from '../../../definitions/types';
 import { getOverlapRange } from '../../../definitions/shared';
-import {
-  UNSUPPORTED_COMMANDS_BEFORE_MATCH,
-  UNSUPPORTED_COMMANDS_BEFORE_QSTR,
-} from '../../../definitions/constants';
-import { EDITOR_MARKER } from '../../constants';
 import { getExpressionType, getColumnByName, isParamExpressionType } from '../validate';
 import { getFunctionSuggestions } from '../../../definitions/functions_helpers';
 import { logicalOperators } from '../../../definitions/all_operators';
@@ -61,12 +56,9 @@ export const buildUserDefinedColumnsDefinitions = (
     label,
     text: getSafeInsertText(label),
     kind: 'Variable',
-    detail: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.autocomplete.variableDefinition',
-      {
-        defaultMessage: `Column specified by the user within the ES|QL query`,
-      }
-    ),
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.variableDefinition', {
+      defaultMessage: `Column specified by the user within the ES|QL query`,
+    }),
     sortText: 'D',
   }));
 
@@ -332,19 +324,16 @@ export async function suggestForExpression({
   expressionRoot,
   innerText,
   getColumnsByType,
-  previousCommands,
   location,
   preferredExpressionType,
+  context,
 }: {
   expressionRoot: ESQLSingleAstItem | undefined;
   location: Location;
   preferredExpressionType?: SupportedDataType;
   innerText: string;
   getColumnsByType: GetColumnsByTypeFn;
-  /**
-   * The AST for the query behind the cursor.
-   */
-  previousCommands?: ESQLCommand[];
+  context?: ICommandContext;
 }): Promise<ISuggestionItem[]> {
   const suggestions: ISuggestionItem[] = [];
 
@@ -356,7 +345,11 @@ export async function suggestForExpression({
     case 'after_literal':
     case 'after_column':
     case 'after_function':
-      const expressionType = getExpressionType(expressionRoot);
+      const expressionType = getExpressionType(
+        expressionRoot,
+        context?.fields,
+        context?.userDefinedColumns
+      );
 
       if (!isParameterType(expressionType)) {
         break;
@@ -433,7 +426,8 @@ export async function suggestForExpression({
           location,
           rootOperator: rightmostOperator,
           preferredExpressionType,
-          getExpressionType,
+          getExpressionType: (expression) =>
+            getExpressionType(expression, context?.fields, context?.userDefinedColumns),
           getColumnsByType,
         }))
       );
@@ -441,26 +435,13 @@ export async function suggestForExpression({
       break;
 
     case 'empty_expression':
-      // Don't suggest MATCH, QSTR or KQL after unsupported commands
-      const priorCommands = previousCommands?.map((a) => a.name) ?? [];
-      const ignored = [];
-      if (priorCommands.some((c) => UNSUPPORTED_COMMANDS_BEFORE_MATCH.has(c))) {
-        ignored.push('match');
-      }
-      if (priorCommands.some((c) => UNSUPPORTED_COMMANDS_BEFORE_QSTR.has(c))) {
-        ignored.push('kql', 'qstr');
-      }
-      const last = previousCommands?.[previousCommands.length - 1];
-      let columnSuggestions: ISuggestionItem[] = [];
-      if (!last?.text?.endsWith(`:${EDITOR_MARKER}`)) {
-        columnSuggestions = await getColumnsByType('any', [], {
-          advanceCursor: true,
-          openSuggestions: true,
-        });
-      }
+      const columnSuggestions: ISuggestionItem[] = await getColumnsByType('any', [], {
+        advanceCursor: true,
+        openSuggestions: true,
+      });
       suggestions.push(
         ...pushItUpInTheList(columnSuggestions, true),
-        ...getFunctionSuggestions({ location, ignored })
+        ...getFunctionSuggestions({ location })
       );
 
       break;
@@ -501,40 +482,28 @@ export function getControlSuggestion(
 ): ISuggestionItem[] {
   return [
     {
-      label: i18n.translate(
-        'kbn-esql-validation-autocomplete.esql.autocomplete.createControlLabel',
-        {
-          defaultMessage: 'Create control',
-        }
-      ),
+      label: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlLabel', {
+        defaultMessage: 'Create control',
+      }),
       text: '',
       kind: 'Issue',
-      detail: i18n.translate(
-        'kbn-esql-validation-autocomplete.esql.autocomplete.createControlDetailLabel',
-        {
-          defaultMessage: 'Click to create',
-        }
-      ),
+      detail: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlDetailLabel', {
+        defaultMessage: 'Click to create',
+      }),
       sortText: '1',
       command: {
         id: `esql.control.${type}.create`,
-        title: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.autocomplete.createControlDetailLabel',
-          {
-            defaultMessage: 'Click to create',
-          }
-        ),
+        title: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlDetailLabel', {
+          defaultMessage: 'Click to create',
+        }),
       },
     } as ISuggestionItem,
     ...(variables?.length
       ? buildConstantsDefinitions(
           variables,
-          i18n.translate(
-            'kbn-esql-validation-autocomplete.esql.autocomplete.namedParamDefinition',
-            {
-              defaultMessage: 'Named parameter',
-            }
-          ),
+          i18n.translate('kbn-esql-ast.esql.autocomplete.namedParamDefinition', {
+            defaultMessage: 'Named parameter',
+          }),
           '1A'
         )
       : []),

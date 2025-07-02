@@ -9,12 +9,12 @@
 import { i18n } from '@kbn/i18n';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { ISuggestionItem } from '../../types';
-import { CommandRegistry } from '../..';
+import { esqlCommandRegistry } from '../..';
 import { buildDocumentation } from '../../../definitions/documentation_util';
-import { TIME_SYSTEM_PARAMS } from '../../../definitions/literats';
+import { TIME_SYSTEM_PARAMS } from '../../../definitions/literals_helpers';
 
 const techPreviewLabel = i18n.translate(
-  'kbn-esql-validation-autocomplete.esql.autocomplete.techPreviewLabel',
+  'kbn-esql-ast.esql.autocomplete.techPreviewLabel',
   {
     defaultMessage: `Technical Preview`,
   }
@@ -45,16 +45,28 @@ export const pipeCompleteItem: ISuggestionItem = {
   label: '|',
   text: '| ',
   kind: 'Keyword',
-  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.pipeDoc', {
+  detail: i18n.translate('kbn-esql-ast.esql.autocomplete.pipeDoc', {
     defaultMessage: 'Pipe (|)',
   }),
   sortText: 'C',
   command: TRIGGER_SUGGESTION_COMMAND,
 };
 
+export const allStarConstant: ISuggestionItem = {
+  label: i18n.translate('kbn-esql-ast.esql.autocomplete.allStarConstantDoc', {
+    defaultMessage: 'All (*)',
+  }),
+  text: '*',
+  kind: 'Constant',
+  detail: i18n.translate('kbn-esql-ast.esql.autocomplete.allStarConstantDoc', {
+    defaultMessage: 'All (*)',
+  }),
+  sortText: '1',
+};
+
 export const commaCompleteItem = buildCharCompleteItem(
   ',',
-  i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.commaDoc', {
+  i18n.translate('kbn-esql-ast.esql.autocomplete.commaDoc', {
     defaultMessage: 'Comma (,)',
   }),
   { sortText: 'B', quoted: false }
@@ -83,7 +95,7 @@ export const getNewUserDefinedColumnSuggestion = (label: string): ISuggestionIte
     label,
     text: `${label} = `,
     kind: 'Variable',
-    detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.newVarDoc', {
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.newVarDoc', {
       defaultMessage: 'Define a new column',
     }),
     sortText: '1',
@@ -92,7 +104,7 @@ export const getNewUserDefinedColumnSuggestion = (label: string): ISuggestionIte
 };
 
 export const assignCompletionItem: ISuggestionItem = {
-  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.newVarDoc', {
+  detail: i18n.translate('kbn-esql-ast.esql.autocomplete.newVarDoc', {
     defaultMessage: 'Define a new column',
   }),
   command: TRIGGER_SUGGESTION_COMMAND,
@@ -103,7 +115,7 @@ export const assignCompletionItem: ISuggestionItem = {
 };
 
 export const asCompletionItem: ISuggestionItem = {
-  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.asDoc', {
+  detail: i18n.translate('kbn-esql-ast.esql.definitions.asDoc', {
     defaultMessage: 'As',
   }),
   kind: 'Reference',
@@ -114,7 +126,7 @@ export const asCompletionItem: ISuggestionItem = {
 
 export const colonCompleteItem = buildCharCompleteItem(
   ':',
-  i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.colonDoc', {
+  i18n.translate('kbn-esql-ast.esql.autocomplete.colonDoc', {
     defaultMessage: 'Colon (:)',
   }),
   { sortText: 'A', quoted: true, advanceCursorAndOpenSuggestions: true }
@@ -122,7 +134,7 @@ export const colonCompleteItem = buildCharCompleteItem(
 
 export const semiColonCompleteItem = buildCharCompleteItem(
   ';',
-  i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.semiColonDoc', {
+  i18n.translate('kbn-esql-ast.esql.autocomplete.semiColonDoc', {
     defaultMessage: 'Semi colon (;)',
   }),
   { sortText: 'A', quoted: true, advanceCursorAndOpenSuggestions: true }
@@ -133,7 +145,7 @@ export const listCompleteItem: ISuggestionItem = {
   text: '( $0 )',
   asSnippet: true,
   kind: 'Operator',
-  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.listDoc', {
+  detail: i18n.translate('kbn-esql-ast.esql.autocomplete.listDoc', {
     defaultMessage: 'List of items ( ...)',
   }),
   sortText: 'A',
@@ -142,7 +154,6 @@ export const listCompleteItem: ISuggestionItem = {
 
 export const getCommandAutocompleteDefinitions = (commands: string[]): ISuggestionItem[] => {
   const suggestions: ISuggestionItem[] = [];
-  const esqlCommandRegistry = new CommandRegistry();
 
   for (const command of commands) {
     const commandDefinition = esqlCommandRegistry.getCommandByName(command);
@@ -189,14 +200,14 @@ export const getCommandAutocompleteDefinitions = (commands: string[]): ISuggesti
 export const getDateHistogramCompletionItem: (histogramBarTarget?: number) => ISuggestionItem = (
   histogramBarTarget: number = 50
 ) => ({
-  label: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.addDateHistogram', {
+  label: i18n.translate('kbn-esql-ast.esql.autocomplete.addDateHistogram', {
     defaultMessage: 'Add date histogram',
   }),
   text: `BUCKET($0, ${histogramBarTarget}, ${TIME_SYSTEM_PARAMS.join(', ')})`,
   asSnippet: true,
   kind: 'Issue',
   detail: i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.autocomplete.addDateHistogramDetail',
+    'kbn-esql-ast.esql.autocomplete.addDateHistogramDetail',
     {
       defaultMessage: 'Add date histogram using bucket()',
     }

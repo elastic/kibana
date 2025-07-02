@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { getMessageFromId } from '../../utils/validate/errors';
-import type { ESQLColumn, ESQLCommand, ESQLMessage } from '../../../types';
+import type { ESQLAst, ESQLColumn, ESQLCommand, ESQLMessage } from '../../../types';
 import type { ICommandContext } from '../../types';
 import type { FieldType } from '../../../definitions/types';
 
-export const validate = (command: ESQLCommand, context?: ICommandContext): ESQLMessage[] => {
+export const validate = (
+  command: ESQLCommand,
+  ast: ESQLAst,
+  context?: ICommandContext
+): ESQLMessage[] => {
   const acceptedColumnTypes: FieldType[] = ['keyword', 'text'];
   const astCol = command.args[0] as ESQLColumn;
   const columnRef = context?.fields.get(astCol.name);

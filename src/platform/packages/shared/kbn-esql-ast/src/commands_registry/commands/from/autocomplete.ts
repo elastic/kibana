@@ -16,23 +16,16 @@ import {
 import { metadataSuggestion, getMetadataSuggestions } from '../../options/metadata';
 import { getRecommendedQueriesSuggestions } from '../../options/recommended_queries';
 import { withinQuotes } from '../../utils/autocomplete';
-import {
-  type ISuggestionItem,
-  type GetColumnsByTypeFn,
-  type ICommandContext,
-  ESQLFieldWithMetadata,
-} from '../../types';
+import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { getOverlapRange, isRestartingExpression } from '../../../definitions/shared';
 
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
-  getColumnsByType: GetColumnsByTypeFn,
-  getSuggestedUserDefinedColumnName: (extraFieldNames?: string[] | undefined) => string,
-  getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  callbacks?: ICommandCallbacks,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
-  if (withinQuotes(query)) {
+  if (withinQuotes(query) || !callbacks?.getByType) {
     return [];
   }
 
@@ -64,7 +57,7 @@ export async function autocomplete(
     suggestions.push(
       ...(await getRecommendedQueriesSuggestions(
         context?.editorExtensions ?? { recommendedFields: [], recommendedQueries: [] },
-        getColumnsByType
+        callbacks?.getByType
       ))
     );
   }
@@ -80,7 +73,7 @@ export async function autocomplete(
 
     const recommendedQuerySuggestions = await getRecommendedQueriesSuggestions(
       context?.editorExtensions ?? { recommendedFields: [], recommendedQueries: [] },
-      getColumnsByType
+      callbacks?.getByType
     );
     const additionalSuggestions = await additionalSourcesSuggestions(
       query,

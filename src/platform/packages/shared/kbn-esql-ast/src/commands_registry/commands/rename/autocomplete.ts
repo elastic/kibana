@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCommand } from '../../../types';
-import {
-  type ISuggestionItem,
-  type GetColumnsByTypeFn,
-  type ICommandContext,
-  ESQLFieldWithMetadata,
-} from '../../types';
+import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import {
   pipeCompleteItem,
   asCompletionItem,
@@ -25,9 +20,7 @@ import { columnExists } from '../../utils/autocomplete';
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
-  getColumnsByType: GetColumnsByTypeFn,
-  getSuggestedUserDefinedColumnName: (extraFieldNames?: string[] | undefined) => string,
-  getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  callbacks?: ICommandCallbacks,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
   if (/(?:rename|,)\s+\S+\s+a$/i.test(query)) {
@@ -54,13 +47,16 @@ export async function autocomplete(
     return [];
   }
 
-  const suggestions = await getColumnsByType('any', [], {
-    advanceCursor: true,
-    openSuggestions: true,
-  });
+  const suggestions =
+    (await callbacks?.getByType?.('any', [], {
+      advanceCursor: true,
+      openSuggestions: true,
+    })) ?? [];
 
   if (!/=\s+$/i.test(query)) {
-    suggestions.push(getNewUserDefinedColumnSuggestion(getSuggestedUserDefinedColumnName()));
+    suggestions.push(
+      getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
+    );
   }
 
   return suggestions;

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ICommandMethods } from '../..';
+import type { ICommandMethods } from '../../registry';
 import { autocomplete } from './autocomplete';
 import { columnsAfter } from './columns_after';
 import { validate } from './validate';
@@ -25,7 +25,7 @@ export const changePointCommand = {
   metadata: {
     preview: true,
     description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.changePointDoc',
+      'kbn-esql-ast.esql.definitions.changePointDoc',
       {
         defaultMessage: 'Detect change point in the query results',
       }

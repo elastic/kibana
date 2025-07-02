@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Walker, parse, type ESQLAstItem } from '@kbn/esql-ast';
+import { Walker, parse, type ESQLAstItem, TIME_SYSTEM_PARAMS } from '@kbn/esql-ast';
 import {
   ESQLAstQueryExpression,
   ESQLFunction,
@@ -23,16 +23,14 @@ import {
   type ESQLCallbacks,
 } from '@kbn/esql-validation-autocomplete';
 import { getFieldsByTypeRetriever } from '@kbn/esql-validation-autocomplete/src/autocomplete/autocomplete';
-import { modeDescription } from '@kbn/esql-validation-autocomplete/src/autocomplete/commands/enrich/util';
 import {
-  TIME_SYSTEM_DESCRIPTIONS,
-  TIME_SYSTEM_PARAMS,
-} from '@kbn/esql-validation-autocomplete/src/autocomplete/factories';
+  modeDescription,
+  ENRICH_MODES,
+} from '@kbn/esql-ast/src/commands_registry/commands/enrich/util';
 import {
   getQueryForFields,
   getValidSignaturesAndTypesToSuggestNext,
 } from '@kbn/esql-validation-autocomplete/src/autocomplete/helper';
-import { ENRICH_MODES } from '@kbn/esql-validation-autocomplete/src/definitions/commands_helpers';
 import { within } from '@kbn/esql-validation-autocomplete/src/shared/helpers';
 import { getPolicyHelper } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
 import { i18n } from '@kbn/i18n';
@@ -43,6 +41,21 @@ import { getVariablesHoverContent } from './helpers';
 const ACCEPTABLE_TYPES_HOVER = i18n.translate('monaco.esql.hover.acceptableTypes', {
   defaultMessage: 'Acceptable types',
 });
+
+const TIME_SYSTEM_DESCRIPTIONS = {
+  '?_tstart': i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamStart',
+    {
+      defaultMessage: 'The start time from the date picker',
+    }
+  ),
+  '?_tend': i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamEnd',
+    {
+      defaultMessage: 'The end time from the date picker',
+    }
+  ),
+};
 
 export type HoverMonacoModel = Pick<monaco.editor.ITextModel, 'getValue'>;
 

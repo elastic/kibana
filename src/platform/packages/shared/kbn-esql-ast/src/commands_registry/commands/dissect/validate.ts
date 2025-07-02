@@ -9,7 +9,13 @@
 import { getMessageFromId } from '../../utils/validate/errors';
 import { isOptionNode } from '../../../ast/util';
 import { isLiteral, isInlineCast } from '../../../ast/helpers';
-import type { ESQLColumn, ESQLCommand, ESQLMessage, ESQLCommandOption } from '../../../types';
+import type {
+  ESQLColumn,
+  ESQLCommand,
+  ESQLMessage,
+  ESQLCommandOption,
+  ESQLAst,
+} from '../../../types';
 import type { ICommandContext } from '../../types';
 import type { FieldType } from '../../../definitions/types';
 
@@ -36,7 +42,11 @@ const validateColumnForGrokDissect = (command: ESQLCommand, context?: ICommandCo
   return [];
 };
 
-export const validate = (command: ESQLCommand, context?: ICommandContext): ESQLMessage[] => {
+export const validate = (
+  command: ESQLCommand,
+  ast: ESQLAst,
+  context?: ICommandContext
+): ESQLMessage[] => {
   const messages: ESQLMessage[] = validateColumnForGrokDissect(command, context);
 
   const appendSeparatorClause = command.args.find((arg) => isOptionNode(arg)) as

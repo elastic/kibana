@@ -6,24 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import {
-  ESQLAstItem,
-  ESQLCommand,
-  ESQLFunction,
-  ESQLMessage,
-  ESQLSource,
-  ESQLAstCommand,
-  ESQLAst,
-} from '@kbn/esql-ast';
-import { ESQLControlVariable } from '@kbn/esql-types';
-import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
-import type {
-  ESQLPolicy,
-  ReferenceMaps,
-  ESQLFieldWithMetadata,
-  ESQLUserDefinedColumn,
-} from '../validation/types';
-import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
+import { ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
+import type { ESQLPolicy } from '../validation/types';
 
 /**
  * All supported field types in ES|QL. This is all the types
@@ -77,10 +61,6 @@ export const dataTypes = [
 
 export type SupportedDataType = (typeof dataTypes)[number];
 
-export const isSupportedDataType = (
-  type: string | FunctionParameterType
-): type is SupportedDataType => dataTypes.includes(type as SupportedDataType);
-
 /**
  * This is a set of array types. These aren't official ES|QL types, but they are
  * currently used in the function definitions in a couple of specific scenarios.
@@ -117,21 +97,12 @@ export type ArrayType = (typeof arrayTypes)[number];
  */
 export type FunctionParameterType = Exclude<SupportedDataType, 'unsupported'> | ArrayType | 'any';
 
-export const isParameterType = (str: string | undefined): str is FunctionParameterType =>
-  typeof str !== undefined &&
-  str !== 'unsupported' &&
-  ([...dataTypes, ...arrayTypes, 'any'] as string[]).includes(str as string);
-
 /**
  * This is the return type of a function definition.
  *
  * TODO: remove `any`
  */
 export type FunctionReturnType = Exclude<SupportedDataType, 'unsupported'> | 'unknown' | 'any';
-
-export const isReturnType = (str: string | FunctionParameterType): str is FunctionReturnType =>
-  str !== 'unsupported' &&
-  (dataTypes.includes(str as SupportedDataType) || str === 'unknown' || str === 'any');
 
 export interface Signature {
   params: FunctionParameter[];
@@ -269,158 +240,6 @@ export interface FunctionDefinition {
 }
 
 export type GetPolicyMetadataFn = (name: string) => Promise<ESQLPolicy | undefined>;
-
-export interface CommandSuggestParams<CommandName extends string> {
-  /**
-   * The text of the query to the left of the cursor.
-   */
-  innerText: string;
-  /**
-   * The AST node of this command.
-   */
-  command: ESQLCommand<CommandName>;
-  /**
-   * Get suggestions for columns by type. This includes fields from any sources as well as
-   * user-defined columns in the query.
-   */
-  getColumnsByType: GetColumnsByTypeFn;
-  /**
-   * Gets the names of all columns
-   */
-  getAllColumnNames: () => string[];
-  /**
-   * Check for the existence of a column by name.
-   * @param column
-   * @returns
-   */
-  columnExists: (column: string) => boolean;
-  /**
-   * Gets the name that should be used for the next userDefinedColumn.
-   *
-   * @param extraFieldNames — names that should be recognized as columns
-   * but that won't be found in the current table from Elasticsearch. This is currently only
-   * used to recognize enrichment fields from a policy in the ENRICH command.
-   * @returns
-   */
-  getSuggestedUserDefinedColumnName: (extraFieldNames?: string[]) => string;
-  /**
-   * Examine the AST to determine the type of an expression.
-   * @param expression
-   * @returns
-   */
-  getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown';
-  /**
-   * Get a list of system preferences (currently the target value for the histogram bar)
-   * @returns
-   */
-  getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>;
-  /**
-   * The definition for the current command.
-   */
-  definition: CommandDefinition<CommandName>;
-  /**
-   * Fetch a list of all available sources
-   * @returns
-   */
-  getSources: () => Promise<ESQLSourceResult[]>;
-  /**
-   * Fetch suggestions for all available policies
-   */
-  getPolicies: () => Promise<SuggestionRawDefinition[]>;
-  /**
-   * Get metadata for a policy by name
-   */
-  getPolicyMetadata: GetPolicyMetadataFn;
-  /**
-   * Inspect the AST and returns the sources that are used in the query.
-   * @param type
-   * @returns
-   */
-  getSourcesFromQuery: (type: 'index' | 'policy') => ESQLSource[];
-  /**
-   * Generate a list of recommended queries
-   * @returns
-   */
-  getRecommendedQueriesSuggestions: (
-    queryString: string,
-    prefix?: string
-  ) => Promise<SuggestionRawDefinition[]>;
-  /**
-   * The AST for the query behind the cursor.
-   */
-  previousCommands?: ESQLCommand[];
-  callbacks?: ESQLCallbacks;
-  getVariables?: () => ESQLControlVariable[] | undefined;
-  supportsControls?: boolean;
-  references?: {
-    fields: Map<string, ESQLFieldWithMetadata>;
-    userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
-  };
-}
-
-export type CommandSuggestFunction<CommandName extends string> = (
-  params: CommandSuggestParams<CommandName>
-) => Promise<SuggestionRawDefinition[]> | SuggestionRawDefinition[];
-
-export interface CommandDefinition<CommandName extends string> {
-  name: CommandName;
-
-  /**
-   * A description of what the command does. Displayed in the autocomplete.
-   */
-  description: string;
-
-  /**
-   * The pattern for declaring this command statement. Displayed in the autocomplete.
-   */
-  declaration: string;
-
-  /**
-   * A list of examples of how to use the command. Displayed in the autocomplete.
-   */
-  examples: string[];
-
-  /**
-   * Command name prefix, such as "LEFT" or "RIGHT" for JOIN command.
-   */
-  types?: CommandTypeDefinition[];
-
-  /**
-   * Displays a Technical preview label in the autocomplete
-   */
-  preview?: boolean;
-
-  /**
-   * Whether to show or hide in autocomplete suggestion list. We generally use
-   * this for commands that are not yet ready to be advertised.
-   */
-  hidden?: boolean;
-
-  /**
-   * This method is run when the command is being validated, but it does not
-   * prevent the default behavior. If you need a full override, we are currently
-   * doing those directly in the validateCommand function in the validation module.
-   */
-  validate?: (
-    command: ESQLCommand<CommandName>,
-    references: ReferenceMaps,
-    ast: ESQLAst
-  ) => ESQLMessage[];
-
-  /**
-   * This method is called to load suggestions when the cursor is within this command.
-   */
-  suggest: CommandSuggestFunction<CommandName>;
-
-  /**
-   * This method is called to define the fields available after this command is applied.
-   */
-  fieldsSuggestionsAfter?: (
-    lastCommand: ESQLAstCommand,
-    previousCommandFields: ESQLFieldWithMetadata[],
-    userDefinedColumns: ESQLFieldWithMetadata[]
-  ) => ESQLFieldWithMetadata[];
-}
 
 export interface CommandTypeDefinition {
   name: string;

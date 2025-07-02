@@ -30,7 +30,7 @@ export const metadataSuggestion: ISuggestionItem = {
   label: 'METADATA',
   text: 'METADATA ',
   kind: 'Reference',
-  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.metadataDoc', {
+  detail: i18n.translate('kbn-esql-ast.esql.definitions.metadataDoc', {
     defaultMessage: 'Metadata',
   }),
   sortText: '1',

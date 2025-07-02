@@ -37,7 +37,7 @@ import { isLiteral } from '../../ast/helpers';
 const absDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'abs',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.abs', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.abs', {
     defaultMessage: 'Returns the absolute value.',
   }),
   preview: false,
@@ -105,7 +105,7 @@ const absDefinition: FunctionDefinition = {
 const acosDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'acos',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.acos', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.acos', {
     defaultMessage: 'Returns the arccosine of `n` as an angle, expressed in radians.',
   }),
   preview: false,
@@ -170,7 +170,7 @@ const acosDefinition: FunctionDefinition = {
 const asinDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'asin',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.asin', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.asin', {
     defaultMessage:
       'Returns the arcsine of the input\nnumeric expression as an angle, expressed in radians.',
   }),
@@ -236,7 +236,7 @@ const asinDefinition: FunctionDefinition = {
 const atanDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'atan',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.atan', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.atan', {
     defaultMessage:
       'Returns the arctangent of the input\nnumeric expression as an angle, expressed in radians.',
   }),
@@ -302,7 +302,7 @@ const atanDefinition: FunctionDefinition = {
 const atan2Definition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'atan2',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.atan2', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.atan2', {
     defaultMessage:
       'The angle between the positive x-axis and the ray from the\norigin to the point (x , y) in the Cartesian plane, expressed in radians.',
   }),
@@ -568,7 +568,7 @@ const atan2Definition: FunctionDefinition = {
 const bitLengthDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'bit_length',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.bit_length', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.bit_length', {
     defaultMessage: 'Returns the bit length of a string.',
   }),
   preview: false,
@@ -615,7 +615,7 @@ const bitLengthDefinition: FunctionDefinition = {
 const byteLengthDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'byte_length',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.byte_length', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.byte_length', {
     defaultMessage: 'Returns the byte length of a string.',
   }),
   preview: false,
@@ -662,7 +662,7 @@ const byteLengthDefinition: FunctionDefinition = {
 const cbrtDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'cbrt',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.cbrt', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.cbrt', {
     defaultMessage:
       'Returns the cube root of a number. The input can be any numeric value, the return value is always a double.\nCube roots of infinities are null.',
   }),
@@ -728,7 +728,7 @@ const cbrtDefinition: FunctionDefinition = {
 const ceilDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'ceil',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.ceil', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.ceil', {
     defaultMessage: 'Round a number up to the nearest integer.',
   }),
   preview: false,
@@ -793,7 +793,7 @@ const ceilDefinition: FunctionDefinition = {
 const cidrMatchDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'cidr_match',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.cidr_match', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.cidr_match', {
     defaultMessage:
       'Returns true if the provided IP is contained in one of the provided CIDR blocks.',
   }),
@@ -853,7 +853,7 @@ const cidrMatchDefinition: FunctionDefinition = {
 const coalesceDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'coalesce',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.coalesce', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.coalesce', {
     defaultMessage:
       'Returns the first of its arguments that is not null. If all arguments are null, it returns `null`.',
   }),
@@ -1142,7 +1142,7 @@ const coalesceDefinition: FunctionDefinition = {
 const concatDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'concat',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.concat', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.concat', {
     defaultMessage: 'Concatenates two or more strings.',
   }),
   preview: false,
@@ -1233,7 +1233,7 @@ const concatDefinition: FunctionDefinition = {
 const cosDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'cos',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.cos', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.cos', {
     defaultMessage: 'Returns the cosine of an angle.',
   }),
   preview: false,
@@ -1298,7 +1298,7 @@ const cosDefinition: FunctionDefinition = {
 const coshDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'cosh',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.cosh', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.cosh', {
     defaultMessage: 'Returns the hyperbolic cosine of a number.',
   }),
   preview: false,
@@ -1363,7 +1363,7 @@ const coshDefinition: FunctionDefinition = {
 const dateDiffDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'date_diff',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.date_diff', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.date_diff', {
     defaultMessage:
       'Subtracts the `startTimestamp` from the `endTimestamp` and returns the difference in multiples of `unit`.\nIf `startTimestamp` is later than the `endTimestamp`, negative values are returned.',
   }),
@@ -1613,7 +1613,7 @@ const dateDiffDefinition: FunctionDefinition = {
 const dateExtractDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'date_extract',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.date_extract', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.date_extract', {
     defaultMessage: 'Extracts parts of a date, like year, month, day, hour.',
   }),
   preview: false,
@@ -1733,7 +1733,7 @@ const dateExtractDefinition: FunctionDefinition = {
 const dateFormatDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'date_format',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.date_format', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.date_format', {
     defaultMessage: 'Returns a string representation of a date, in the provided format.',
   }),
   preview: false,
@@ -1840,7 +1840,7 @@ const dateFormatDefinition: FunctionDefinition = {
 const dateParseDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'date_parse',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.date_parse', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.date_parse', {
     defaultMessage:
       'Returns a date by parsing the second argument using the format specified in the first argument.',
   }),
@@ -1926,7 +1926,7 @@ const dateParseDefinition: FunctionDefinition = {
 const dateTruncDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'date_trunc',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.date_trunc', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.date_trunc', {
     defaultMessage:
       'Rounds down a date to the closest interval since epoch, which starts at `0001-01-01T00:00:00Z`.',
   }),
@@ -2016,7 +2016,7 @@ const dateTruncDefinition: FunctionDefinition = {
 const eDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'e',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.e', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.e', {
     defaultMessage: 'Returns Euler’s number.',
   }),
   preview: false,
@@ -2045,7 +2045,7 @@ const eDefinition: FunctionDefinition = {
 const endsWithDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'ends_with',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.ends_with', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.ends_with', {
     defaultMessage:
       'Returns a boolean that indicates whether a keyword string ends with another string.',
   }),
@@ -2131,7 +2131,7 @@ const endsWithDefinition: FunctionDefinition = {
 const expDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'exp',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.exp', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.exp', {
     defaultMessage: 'Returns the value of e raised to the power of the given number.',
   }),
   preview: false,
@@ -2196,7 +2196,7 @@ const expDefinition: FunctionDefinition = {
 const floorDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'floor',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.floor', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.floor', {
     defaultMessage: 'Round a number down to the nearest integer.',
   }),
   preview: false,
@@ -2261,7 +2261,7 @@ const floorDefinition: FunctionDefinition = {
 const fromBase64Definition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'from_base64',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.from_base64', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.from_base64', {
     defaultMessage: 'Decode a base64 string.',
   }),
   preview: false,
@@ -2306,7 +2306,7 @@ const fromBase64Definition: FunctionDefinition = {
 const greatestDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'greatest',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.greatest', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.greatest', {
     defaultMessage:
       'Returns the maximum value from multiple columns. This is similar to `MV_MAX`\nexcept it is intended to run on multiple columns at once.',
   }),
@@ -2547,7 +2547,7 @@ const greatestDefinition: FunctionDefinition = {
 const hashDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'hash',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.hash', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.hash', {
     defaultMessage:
       'Computes the hash of the input using various algorithms such as MD5, SHA, SHA-224, SHA-256, SHA-384, SHA-512.',
   }),
@@ -2635,7 +2635,7 @@ const hashDefinition: FunctionDefinition = {
 const hypotDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'hypot',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.hypot', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.hypot', {
     defaultMessage:
       'Returns the hypotenuse of two numbers. The input can be any numeric values, the return value is always a double.\nHypotenuses of infinities are null.',
   }),
@@ -2901,7 +2901,7 @@ const hypotDefinition: FunctionDefinition = {
 const ipPrefixDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'ip_prefix',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.ip_prefix', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.ip_prefix', {
     defaultMessage: 'Truncates an IP to a given prefix length.',
   }),
   preview: false,
@@ -2948,7 +2948,7 @@ const ipPrefixDefinition: FunctionDefinition = {
 const knnDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'knn',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.knn', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.knn', {
     defaultMessage:
       'Finds the k nearest vectors to a query vector, as measured by a similarity metric. knn function finds nearest vectors through approximate search on indexed dense_vectors.',
   }),
@@ -2977,7 +2977,7 @@ const knnDefinition: FunctionDefinition = {
 const kqlDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'kql',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.kql', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.kql', {
     defaultMessage:
       'Performs a KQL query. Returns true if the provided KQL query string matches the row.',
   }),
@@ -3017,7 +3017,7 @@ const kqlDefinition: FunctionDefinition = {
 const leastDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'least',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.least', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.least', {
     defaultMessage:
       'Returns the minimum value from multiple columns. This is similar to `MV_MIN` except it is intended to run on multiple columns at once.',
   }),
@@ -3258,7 +3258,7 @@ const leastDefinition: FunctionDefinition = {
 const leftDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'left',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.left', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.left', {
     defaultMessage:
       'Returns the substring that extracts *length* chars from *string* starting from the left.',
   }),
@@ -3314,7 +3314,7 @@ const leftDefinition: FunctionDefinition = {
 const lengthDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'length',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.length', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.length', {
     defaultMessage: 'Returns the character length of a string.',
   }),
   preview: false,
@@ -3361,7 +3361,7 @@ const lengthDefinition: FunctionDefinition = {
 const locateDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'locate',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.locate', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.locate', {
     defaultMessage:
       'Returns an integer that indicates the position of a keyword substring within another string.\nReturns `0` if the substring cannot be found.\nNote that string positions start from `1`.',
   }),
@@ -3527,7 +3527,7 @@ const locateDefinition: FunctionDefinition = {
 const logDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'log',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.log', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.log', {
     defaultMessage:
       'Returns the logarithm of a value to a base. The input can be any numeric value, the return value is always a double.\n\nLogs of zero, negative numbers, and base of one return `null` as well as a warning.',
   }),
@@ -3835,7 +3835,7 @@ const logDefinition: FunctionDefinition = {
           type: 'warning' as const,
           code: 'logOfNegativeValue',
           text: i18n.translate(
-            'kbn-esql-validation-autocomplete.esql.divide.warning.logOfNegativeValue',
+            'kbn-esql-ast.esql.divide.warning.logOfNegativeValue',
             {
               defaultMessage: 'Log of a negative number results in null: {value}',
               values: {
@@ -3859,7 +3859,7 @@ const logDefinition: FunctionDefinition = {
 const log10Definition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'log10',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.log10', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.log10', {
     defaultMessage:
       'Returns the logarithm of a value to base 10. The input can be any numeric value, the return value is always a double.\n\nLogs of 0 and negative numbers return `null` as well as a warning.',
   }),
@@ -3927,7 +3927,7 @@ const log10Definition: FunctionDefinition = {
           type: 'warning' as const,
           code: 'logOfNegativeValue',
           text: i18n.translate(
-            'kbn-esql-validation-autocomplete.esql.divide.warning.logOfNegativeValue',
+            'kbn-esql-ast.esql.divide.warning.logOfNegativeValue',
             {
               defaultMessage: 'Log of a negative number results in null: {value}',
               values: {
@@ -3948,7 +3948,7 @@ const log10Definition: FunctionDefinition = {
 const ltrimDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'ltrim',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.ltrim', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.ltrim', {
     defaultMessage: 'Removes leading whitespaces from a string.',
   }),
   preview: false,
@@ -3995,7 +3995,7 @@ const ltrimDefinition: FunctionDefinition = {
 const matchDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'match',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.match', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.match', {
     defaultMessage:
       'Use `MATCH` to perform a match query on the specified field.\nUsing `MATCH` is equivalent to using the `match` query in the Elasticsearch Query DSL.',
   }),
@@ -4740,7 +4740,7 @@ const matchDefinition: FunctionDefinition = {
 const matchPhraseDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'match_phrase',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.match_phrase', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.match_phrase', {
     defaultMessage:
       'Use `MATCH_PHRASE` to perform a `match_phrase` on the\nspecified field.\nUsing `MATCH_PHRASE` is equivalent to using the `match_phrase` query in the Elasticsearch Query DSL.',
   }),
@@ -4810,7 +4810,7 @@ const matchPhraseDefinition: FunctionDefinition = {
 const md5Definition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'md5',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.md5', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.md5', {
     defaultMessage: 'Computes the MD5 hash of the input.',
   }),
   preview: false,
@@ -4857,7 +4857,7 @@ const md5Definition: FunctionDefinition = {
 const multiMatchDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'multi_match',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.multi_match', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.multi_match', {
     defaultMessage:
       'Use `MULTI_MATCH` to perform a multi-match query on the specified field.\nThe multi_match query builds on the match query to allow multi-field queries.',
   }),
@@ -5553,7 +5553,7 @@ const multiMatchDefinition: FunctionDefinition = {
 const mvAppendDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'mv_append',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_append', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.mv_append', {
     defaultMessage: 'Concatenates values of two multi-value fields.',
   }),
   preview: false,
@@ -5835,7 +5835,7 @@ const mvAppendDefinition: FunctionDefinition = {
 const mvAvgDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'mv_avg',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_avg', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.mv_avg', {
     defaultMessage:
       'Converts a multivalued field into a single valued field containing the average of all of the values.',
   }),
@@ -5901,7 +5901,7 @@ const mvAvgDefinition: FunctionDefinition = {
 const mvConcatDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'mv_concat',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_concat', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.mv_concat', {
     defaultMessage:
       'Converts a multivalued string expression into a single valued column containing the concatenation of all values separated by a delimiter.',
   }),
@@ -5990,7 +5990,7 @@ const mvConcatDefinition: FunctionDefinition = {
 const mvCountDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'mv_count',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_count', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.mv_count', {
     defaultMessage:
       'Converts a multivalued expression into a single valued column containing a count of the number of values.',
   }),
@@ -6166,7 +6166,7 @@ const mvCountDefinition: FunctionDefinition = {
 const mvDedupeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'mv_dedupe',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_dedupe', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.mv_dedupe', {
     defaultMessage: 'Remove duplicate values from a multivalued field.',
   }),
   preview: false,
@@ -6341,7 +6341,7 @@ const mvDedupeDefinition: FunctionDefinition = {
 const mvFirstDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'mv_first',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_first', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.mv_first', {
     defaultMessage:
       'Converts a multivalued expression into a single valued column containing the\nfirst value. This is most useful when reading from a function that emits\nmultivalued columns in a known order like `SPLIT`.',
   }),
@@ -6517,7 +6517,7 @@ const mvFirstDefinition: FunctionDefinition = {
 const mvLastDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'mv_last',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_last', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.mv_last', {
     defaultMessage:
       'Converts a multivalue expression into a single valued column containing the last\nvalue. This is most useful when reading from a function that emits multivalued\ncolumns in a known order like `SPLIT`.',
   }),
@@ -6693,7 +6693,7 @@ const mvLastDefinition: FunctionDefinition = {
 const mvMaxDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'mv_max',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_max', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.mv_max', {
     defaultMessage:
       'Converts a multivalued expression into a single valued column containing the maximum value.',
   }),
@@ -6832,7 +6832,7 @@ const mvMaxDefinition: FunctionDefinition = {
 const mvMedianDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'mv_median',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_median', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.mv_median', {
     defaultMessage:
       'Converts a multivalued field into a single valued field containing the median value.',
   }),
@@ -6902,7 +6902,7 @@ const mvMedianAbsoluteDeviationDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'mv_median_absolute_deviation',
   description: i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.definitions.mv_median_absolute_deviation',
+    'kbn-esql-ast.esql.definitions.mv_median_absolute_deviation',
     {
       defaultMessage:
         'Converts a multivalued field into a single valued field containing the median absolute deviation.\n\nIt is calculated as the median of each data point’s deviation from the median of the entire sample. That is, for a random variable `X`, the median absolute deviation is `median(|median(X) - X|)`.',
@@ -6972,7 +6972,7 @@ const mvMedianAbsoluteDeviationDefinition: FunctionDefinition = {
 const mvMinDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'mv_min',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_min', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.mv_min', {
     defaultMessage:
       'Converts a multivalued expression into a single valued column containing the minimum value.',
   }),
@@ -7111,7 +7111,7 @@ const mvMinDefinition: FunctionDefinition = {
 const mvPercentileDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'mv_percentile',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_percentile', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.mv_percentile', {
     defaultMessage:
       'Converts a multivalued field into a single valued field containing the value at which a certain percentage of observed values occur.',
   }),
@@ -7275,7 +7275,7 @@ const mvPseriesWeightedSumDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'mv_pseries_weighted_sum',
   description: i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.definitions.mv_pseries_weighted_sum',
+    'kbn-esql-ast.esql.definitions.mv_pseries_weighted_sum',
     {
       defaultMessage:
         'Converts a multivalued expression into a single-valued column by multiplying every element on the input list by its corresponding term in P-Series and computing the sum.',
@@ -7320,7 +7320,7 @@ const mvPseriesWeightedSumDefinition: FunctionDefinition = {
 const mvSliceDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'mv_slice',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_slice', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.mv_slice', {
     defaultMessage:
       'Returns a subset of the multivalued field using the start and end index values.\nThis is most useful when reading from a function that emits multivalued columns\nin a known order like `SPLIT` or `MV_SORT`.',
   }),
@@ -7649,7 +7649,7 @@ const mvSliceDefinition: FunctionDefinition = {
 const mvSortDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'mv_sort',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_sort', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.mv_sort', {
     defaultMessage: 'Sorts a multivalued field in lexicographical order.',
   }),
   preview: false,
@@ -7834,7 +7834,7 @@ const mvSortDefinition: FunctionDefinition = {
 const mvSumDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'mv_sum',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_sum', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.mv_sum', {
     defaultMessage:
       'Converts a multivalued field into a single valued field containing the sum of all of the values.',
   }),
@@ -7900,7 +7900,7 @@ const mvSumDefinition: FunctionDefinition = {
 const mvZipDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'mv_zip',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mv_zip', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.mv_zip', {
     defaultMessage:
       'Combines the values from two multivalued fields with a delimiter that joins them together.',
   }),
@@ -8148,7 +8148,7 @@ const mvZipDefinition: FunctionDefinition = {
 const nowDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'now',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.now', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.now', {
     defaultMessage: 'Returns current date and time.',
   }),
   preview: false,
@@ -8177,7 +8177,7 @@ const nowDefinition: FunctionDefinition = {
 const piDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'pi',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.pi', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.pi', {
     defaultMessage: 'Returns Pi, the ratio of a circle’s circumference to its diameter.',
   }),
   preview: false,
@@ -8206,7 +8206,7 @@ const piDefinition: FunctionDefinition = {
 const powDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'pow',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.pow', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.pow', {
     defaultMessage: 'Returns the value of `base` raised to the power of `exponent`.',
   }),
   preview: false,
@@ -8474,7 +8474,7 @@ const powDefinition: FunctionDefinition = {
 const qstrDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'qstr',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.qstr', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.qstr', {
     defaultMessage:
       'Performs a query string query. Returns true if the provided query string matches the row.',
   }),
@@ -8533,7 +8533,7 @@ const qstrDefinition: FunctionDefinition = {
 const repeatDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'repeat',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.repeat', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.repeat', {
     defaultMessage:
       'Returns a string constructed by concatenating `string` with itself the specified `number` of times.',
   }),
@@ -8589,7 +8589,7 @@ const repeatDefinition: FunctionDefinition = {
 const replaceDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'replace',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.replace', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.replace', {
     defaultMessage:
       'The function substitutes in the string `str` any match of the regular expression `regex`\nwith the replacement string `newStr`.',
   }),
@@ -8775,7 +8775,7 @@ const replaceDefinition: FunctionDefinition = {
 const reverseDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'reverse',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.reverse', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.reverse', {
     defaultMessage: 'Returns a new string representing the input string in reverse order.',
   }),
   preview: false,
@@ -8823,7 +8823,7 @@ const reverseDefinition: FunctionDefinition = {
 const rightDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'right',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.right', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.right', {
     defaultMessage:
       'Return the substring that extracts *length* chars from *str* starting from the right.',
   }),
@@ -8879,7 +8879,7 @@ const rightDefinition: FunctionDefinition = {
 const roundDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'round',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.round', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.round', {
     defaultMessage:
       'Rounds a number to the specified number of decimal places.\nDefaults to 0, which returns the nearest integer. If the\nprecision is a negative number, rounds to the number of digits left\nof the decimal point.',
   }),
@@ -9067,7 +9067,7 @@ const roundDefinition: FunctionDefinition = {
 const roundToDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'round_to',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.round_to', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.round_to', {
     defaultMessage: 'Rounds down to one of a list of fixed points.',
   }),
   preview: false,
@@ -9270,7 +9270,7 @@ const roundToDefinition: FunctionDefinition = {
 const rtrimDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'rtrim',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.rtrim', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.rtrim', {
     defaultMessage: 'Removes trailing whitespaces from a string.',
   }),
   preview: false,
@@ -9317,7 +9317,7 @@ const rtrimDefinition: FunctionDefinition = {
 const scalbDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'scalb',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.scalb', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.scalb', {
     defaultMessage:
       "Returns the result of `d * 2 ^ scaleFactor`,\nSimilar to Java's `scalb` function. Result is rounded as if\nperformed by a single correctly rounded floating-point multiply\nto a member of the double value set.",
   }),
@@ -9463,7 +9463,7 @@ const scalbDefinition: FunctionDefinition = {
 const sha1Definition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'sha1',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sha1', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.sha1', {
     defaultMessage: 'Computes the SHA1 hash of the input.',
   }),
   preview: false,
@@ -9510,7 +9510,7 @@ const sha1Definition: FunctionDefinition = {
 const sha256Definition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'sha256',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sha256', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.sha256', {
     defaultMessage: 'Computes the SHA256 hash of the input.',
   }),
   preview: false,
@@ -9557,7 +9557,7 @@ const sha256Definition: FunctionDefinition = {
 const signumDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'signum',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.signum', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.signum', {
     defaultMessage:
       'Returns the sign of the given number.\nIt returns `-1` for negative numbers, `0` for `0` and `1` for positive numbers.',
   }),
@@ -9623,7 +9623,7 @@ const signumDefinition: FunctionDefinition = {
 const sinDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'sin',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sin', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.sin', {
     defaultMessage: 'Returns the sine of an angle.',
   }),
   preview: false,
@@ -9688,7 +9688,7 @@ const sinDefinition: FunctionDefinition = {
 const sinhDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'sinh',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sinh', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.sinh', {
     defaultMessage: 'Returns the hyperbolic sine of a number.',
   }),
   preview: false,
@@ -9753,7 +9753,7 @@ const sinhDefinition: FunctionDefinition = {
 const spaceDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'space',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.space', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.space', {
     defaultMessage: 'Returns a string made of `number` spaces.',
   }),
   preview: false,
@@ -9788,7 +9788,7 @@ const spaceDefinition: FunctionDefinition = {
 const splitDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'split',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.split', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.split', {
     defaultMessage: 'Split a single valued string into multiple strings.',
   }),
   preview: false,
@@ -9873,7 +9873,7 @@ const splitDefinition: FunctionDefinition = {
 const sqrtDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'sqrt',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sqrt', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.sqrt', {
     defaultMessage:
       'Returns the square root of a number. The input can be any numeric value, the return value is always a double.\nSquare roots of negative numbers and infinities are null.',
   }),
@@ -9939,7 +9939,7 @@ const sqrtDefinition: FunctionDefinition = {
 const stContainsDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_contains',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_contains', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_contains', {
     defaultMessage:
       'Returns whether the first geometry contains the second geometry.\nThis is the inverse of the ST_WITHIN function.',
   }),
@@ -10087,7 +10087,7 @@ const stContainsDefinition: FunctionDefinition = {
 const stDisjointDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_disjoint',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_disjoint', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_disjoint', {
     defaultMessage:
       'Returns whether the two geometries or geometry columns are disjoint.\nThis is the inverse of the ST_INTERSECTS function.\nIn mathematical terms: ST_Disjoint(A, B) ⇔ A ⋂ B = ∅',
   }),
@@ -10235,7 +10235,7 @@ const stDisjointDefinition: FunctionDefinition = {
 const stDistanceDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_distance',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_distance', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_distance', {
     defaultMessage:
       'Computes the distance between two points.\nFor cartesian geometries, this is the pythagorean distance in the same units as the original coordinates.\nFor geographic geometries, this is the circular distance along the great circle in meters.',
   }),
@@ -10293,7 +10293,7 @@ const stDistanceDefinition: FunctionDefinition = {
 const stEnvelopeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_envelope',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_envelope', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_envelope', {
     defaultMessage: 'Determines the minimum bounding box of the supplied geometry.',
   }),
   preview: true,
@@ -10360,7 +10360,7 @@ const stEnvelopeDefinition: FunctionDefinition = {
 const stGeohashDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_geohash',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_geohash', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_geohash', {
     defaultMessage:
       'Calculates the `geohash` of the supplied geo_point at the specified precision.\nThe result is long encoded. Use ST_GEOHASH_TO_STRING to convert the result to a string.\n\nThese functions are related to the `geo_grid` query\nand the `geohash_grid` aggregation.',
   }),
@@ -10425,7 +10425,7 @@ const stGeohashToLongDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_geohash_to_long',
   description: i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.definitions.st_geohash_to_long',
+    'kbn-esql-ast.esql.definitions.st_geohash_to_long',
     {
       defaultMessage:
         'Converts an input value representing a geohash grid-ID in string format into a long.',
@@ -10475,7 +10475,7 @@ const stGeohashToStringDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_geohash_to_string',
   description: i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.definitions.st_geohash_to_string',
+    'kbn-esql-ast.esql.definitions.st_geohash_to_string',
     {
       defaultMessage:
         'Converts an input value representing a geohash grid-ID in long format into a string.',
@@ -10526,7 +10526,7 @@ const stGeohashToStringDefinition: FunctionDefinition = {
 const stGeohexDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_geohex',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_geohex', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_geohex', {
     defaultMessage:
       'Calculates the `geohex`, the H3 cell-id, of the supplied geo_point at the specified precision.\nThe result is long encoded. Use ST_GEOHEX_TO_STRING to convert the result to a string.\n\nThese functions are related to the `geo_grid` query\nand the `geohex_grid` aggregation.',
   }),
@@ -10593,7 +10593,7 @@ const stGeohexToLongDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_geohex_to_long',
   description: i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.definitions.st_geohex_to_long',
+    'kbn-esql-ast.esql.definitions.st_geohex_to_long',
     {
       defaultMessage:
         'Converts an input value representing a geohex grid-ID in string format into a long.',
@@ -10643,7 +10643,7 @@ const stGeohexToStringDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_geohex_to_string',
   description: i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.definitions.st_geohex_to_string',
+    'kbn-esql-ast.esql.definitions.st_geohex_to_string',
     {
       defaultMessage:
         'Converts an input value representing a Geohex grid-ID in long format into a string.',
@@ -10692,7 +10692,7 @@ const stGeohexToStringDefinition: FunctionDefinition = {
 const stGeotileDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_geotile',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_geotile', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_geotile', {
     defaultMessage:
       'Calculates the `geotile` of the supplied geo_point at the specified precision.\nThe result is long encoded. Use ST_GEOTILE_TO_STRING to convert the result to a string.\n\nThese functions are related to the `geo_grid` query\nand the `geotile_grid` aggregation.',
   }),
@@ -10757,7 +10757,7 @@ const stGeotileToLongDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_geotile_to_long',
   description: i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.definitions.st_geotile_to_long',
+    'kbn-esql-ast.esql.definitions.st_geotile_to_long',
     {
       defaultMessage:
         'Converts an input value representing a geotile grid-ID in string format into a long.',
@@ -10807,7 +10807,7 @@ const stGeotileToStringDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_geotile_to_string',
   description: i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.definitions.st_geotile_to_string',
+    'kbn-esql-ast.esql.definitions.st_geotile_to_string',
     {
       defaultMessage:
         'Converts an input value representing a geotile grid-ID in long format into a string.',
@@ -10858,7 +10858,7 @@ const stGeotileToStringDefinition: FunctionDefinition = {
 const stIntersectsDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_intersects',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_intersects', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_intersects', {
     defaultMessage:
       'Returns true if two geometries intersect.\nThey intersect if they have any point in common, including their interior points\n(points along lines or within polygons).\nThis is the inverse of the ST_DISJOINT function.\nIn mathematical terms: ST_Intersects(A, B) ⇔ A ⋂ B ≠ ∅',
   }),
@@ -11006,7 +11006,7 @@ const stIntersectsDefinition: FunctionDefinition = {
 const stWithinDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_within',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_within', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_within', {
     defaultMessage:
       'Returns whether the first geometry is within the second geometry.\nThis is the inverse of the ST_CONTAINS function.',
   }),
@@ -11154,7 +11154,7 @@ const stWithinDefinition: FunctionDefinition = {
 const stXDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_x',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_x', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_x', {
     defaultMessage:
       'Extracts the `x` coordinate from the supplied point.\nIf the points is of type `geo_point` this is equivalent to extracting the `longitude` value.',
   }),
@@ -11202,7 +11202,7 @@ const stXDefinition: FunctionDefinition = {
 const stXmaxDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_xmax',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_xmax', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_xmax', {
     defaultMessage:
       'Extracts the maximum value of the `x` coordinates from the supplied geometry.\nIf the geometry is of type `geo_point` or `geo_shape` this is equivalent to extracting the maximum `longitude` value.',
   }),
@@ -11270,7 +11270,7 @@ const stXmaxDefinition: FunctionDefinition = {
 const stXminDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_xmin',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_xmin', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_xmin', {
     defaultMessage:
       'Extracts the minimum value of the `x` coordinates from the supplied geometry.\nIf the geometry is of type `geo_point` or `geo_shape` this is equivalent to extracting the minimum `longitude` value.',
   }),
@@ -11338,7 +11338,7 @@ const stXminDefinition: FunctionDefinition = {
 const stYDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_y',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_y', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_y', {
     defaultMessage:
       'Extracts the `y` coordinate from the supplied point.\nIf the points is of type `geo_point` this is equivalent to extracting the `latitude` value.',
   }),
@@ -11386,7 +11386,7 @@ const stYDefinition: FunctionDefinition = {
 const stYmaxDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_ymax',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_ymax', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_ymax', {
     defaultMessage:
       'Extracts the maximum value of the `y` coordinates from the supplied geometry.\nIf the geometry is of type `geo_point` or `geo_shape` this is equivalent to extracting the maximum `latitude` value.',
   }),
@@ -11454,7 +11454,7 @@ const stYmaxDefinition: FunctionDefinition = {
 const stYminDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'st_ymin',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_ymin', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_ymin', {
     defaultMessage:
       'Extracts the minimum value of the `y` coordinates from the supplied geometry.\nIf the geometry is of type `geo_point` or `geo_shape` this is equivalent to extracting the minimum `latitude` value.',
   }),
@@ -11522,7 +11522,7 @@ const stYminDefinition: FunctionDefinition = {
 const startsWithDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'starts_with',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.starts_with', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.starts_with', {
     defaultMessage:
       'Returns a boolean that indicates whether a keyword string starts with another string.',
   }),
@@ -11608,7 +11608,7 @@ const startsWithDefinition: FunctionDefinition = {
 const substringDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'substring',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.substring', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.substring', {
     defaultMessage:
       'Returns a substring of a string, specified by a start position and an optional length.',
   }),
@@ -11678,7 +11678,7 @@ const substringDefinition: FunctionDefinition = {
 const tanDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'tan',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.tan', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.tan', {
     defaultMessage: 'Returns the tangent of an angle.',
   }),
   preview: false,
@@ -11743,7 +11743,7 @@ const tanDefinition: FunctionDefinition = {
 const tanhDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'tanh',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.tanh', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.tanh', {
     defaultMessage: 'Returns the hyperbolic tangent of a number.',
   }),
   preview: false,
@@ -11808,7 +11808,7 @@ const tanhDefinition: FunctionDefinition = {
 const tauDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'tau',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.tau', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.tau', {
     defaultMessage: 'Returns the ratio of a circle’s circumference to its radius.',
   }),
   preview: false,
@@ -11837,7 +11837,7 @@ const tauDefinition: FunctionDefinition = {
 const termDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'term',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.term', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.term', {
     defaultMessage:
       'Performs a Term query on the specified field. Returns true if the provided term matches the row.',
   }),
@@ -11925,7 +11925,7 @@ const toAggregateMetricDoubleDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_aggregate_metric_double',
   description: i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.definitions.to_aggregate_metric_double',
+    'kbn-esql-ast.esql.definitions.to_aggregate_metric_double',
     { defaultMessage: 'Encode a numeric to an aggregate_metric_double.' }
   ),
   preview: false,
@@ -11952,7 +11952,7 @@ const toAggregateMetricDoubleDefinition: FunctionDefinition = {
 const toBase64Definition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_base64',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_base64', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_base64', {
     defaultMessage: 'Encode a string to a base64 string.',
   }),
   preview: false,
@@ -11997,7 +11997,7 @@ const toBase64Definition: FunctionDefinition = {
 const toBooleanDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_boolean',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_boolean', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_boolean', {
     defaultMessage:
       'Converts an input value to a boolean value.\nA string value of `true` will be case-insensitive converted to the Boolean `true`.\nFor anything else, including the empty string, the function will return `false`.\nThe numerical value of `0` will be converted to `false`, anything else will be converted to `true`.',
   }),
@@ -12094,7 +12094,7 @@ const toCartesianpointDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_cartesianpoint',
   description: i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.definitions.to_cartesianpoint',
+    'kbn-esql-ast.esql.definitions.to_cartesianpoint',
     {
       defaultMessage:
         'Converts an input value to a `cartesian_point` value.\nA string will only be successfully converted if it respects the\nWKT Point format.',
@@ -12155,7 +12155,7 @@ const toCartesianshapeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_cartesianshape',
   description: i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.definitions.to_cartesianshape',
+    'kbn-esql-ast.esql.definitions.to_cartesianshape',
     {
       defaultMessage:
         'Converts an input value to a `cartesian_shape` value.\nA string will only be successfully converted if it respects the\nWKT format.',
@@ -12225,7 +12225,7 @@ const toCartesianshapeDefinition: FunctionDefinition = {
 const toDateNanosDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_date_nanos',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_date_nanos', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_date_nanos', {
     defaultMessage: 'Converts an input to a nanosecond-resolution date value (aka date_nanos).',
   }),
   preview: false,
@@ -12322,7 +12322,7 @@ const toDateNanosDefinition: FunctionDefinition = {
 const toDateperiodDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_dateperiod',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_dateperiod', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_dateperiod', {
     defaultMessage: 'Converts an input value into a `date_period` value.',
   }),
   preview: false,
@@ -12379,7 +12379,7 @@ const toDateperiodDefinition: FunctionDefinition = {
 const toDatetimeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_datetime',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_datetime', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_datetime', {
     defaultMessage:
       "Converts an input value to a date value.\nA string will only be successfully converted if it’s respecting the format `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`.\nTo convert dates in other formats, use `DATE_PARSE`.",
   }),
@@ -12488,7 +12488,7 @@ const toDatetimeDefinition: FunctionDefinition = {
 const toDegreesDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_degrees',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_degrees', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_degrees', {
     defaultMessage: 'Converts a number in radians to degrees.',
   }),
   preview: false,
@@ -12553,7 +12553,7 @@ const toDegreesDefinition: FunctionDefinition = {
 const toDoubleDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_double',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_double', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_double', {
     defaultMessage:
       'Converts an input value to a double value. If the input parameter is of a date type,\nits value will be interpreted as milliseconds since the Unix epoch,\nconverted to double. Boolean `true` will be converted to double `1.0`, `false` to `0.0`.',
   }),
@@ -12691,7 +12691,7 @@ const toDoubleDefinition: FunctionDefinition = {
 const toGeopointDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_geopoint',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_geopoint', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_geopoint', {
     defaultMessage:
       'Converts an input value to a `geo_point` value.\nA string will only be successfully converted if it respects the\nWKT Point format.',
   }),
@@ -12747,7 +12747,7 @@ const toGeopointDefinition: FunctionDefinition = {
 const toGeoshapeDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_geoshape',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_geoshape', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_geoshape', {
     defaultMessage:
       'Converts an input value to a `geo_shape` value.\nA string will only be successfully converted if it respects the\nWKT format.',
   }),
@@ -12815,7 +12815,7 @@ const toGeoshapeDefinition: FunctionDefinition = {
 const toIntegerDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_integer',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_integer', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_integer', {
     defaultMessage:
       'Converts an input value to an integer value.\nIf the input parameter is of a date type, its value will be interpreted as milliseconds\nsince the Unix epoch, converted to integer.\nBoolean `true` will be converted to integer `1`, `false` to `0`.',
   }),
@@ -12931,7 +12931,7 @@ const toIntegerDefinition: FunctionDefinition = {
 const toIpDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_ip',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_ip', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_ip', {
     defaultMessage: 'Converts an input string to an IP value.',
   }),
   preview: false,
@@ -12990,7 +12990,7 @@ const toIpDefinition: FunctionDefinition = {
 const toLongDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_long',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_long', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_long', {
     defaultMessage:
       'Converts an input value to a long value. If the input parameter is of a date type,\nits value will be interpreted as milliseconds since the Unix epoch, converted to long.\nBoolean `true` will be converted to long `1`, `false` to `0`.',
   }),
@@ -13128,7 +13128,7 @@ const toLongDefinition: FunctionDefinition = {
 const toLowerDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_lower',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_lower', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_lower', {
     defaultMessage: 'Returns a new string representing the input string converted to lower case.',
   }),
   preview: false,
@@ -13176,7 +13176,7 @@ const toLowerDefinition: FunctionDefinition = {
 const toRadiansDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_radians',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_radians', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_radians', {
     defaultMessage: 'Converts a number in degrees to radians.',
   }),
   preview: false,
@@ -13241,7 +13241,7 @@ const toRadiansDefinition: FunctionDefinition = {
 const toStringDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_string',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_string', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_string', {
     defaultMessage: 'Converts an input value into a string.',
   }),
   preview: false,
@@ -13416,7 +13416,7 @@ const toStringDefinition: FunctionDefinition = {
 const toTimedurationDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_timeduration',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_timeduration', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_timeduration', {
     defaultMessage: 'Converts an input value into a `time_duration` value.',
   }),
   preview: false,
@@ -13474,7 +13474,7 @@ const toUnsignedLongDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_unsigned_long',
   description: i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.definitions.to_unsigned_long',
+    'kbn-esql-ast.esql.definitions.to_unsigned_long',
     {
       defaultMessage:
         'Converts an input value to an unsigned long value. If the input parameter is of a date type,\nits value will be interpreted as milliseconds since the Unix epoch, converted to unsigned long.\nBoolean `true` will be converted to unsigned long `1`, `false` to `0`.',
@@ -13584,7 +13584,7 @@ const toUnsignedLongDefinition: FunctionDefinition = {
 const toUpperDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_upper',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_upper', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_upper', {
     defaultMessage: 'Returns a new string representing the input string converted to upper case.',
   }),
   preview: false,
@@ -13629,7 +13629,7 @@ const toUpperDefinition: FunctionDefinition = {
 const toVersionDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'to_version',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_version', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.to_version', {
     defaultMessage: 'Converts an input string to a version value.',
   }),
   preview: false,
@@ -13684,7 +13684,7 @@ const toVersionDefinition: FunctionDefinition = {
 const trimDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'trim',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.trim', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.trim', {
     defaultMessage: 'Removes leading and trailing whitespaces from a string.',
   }),
   preview: false,
@@ -13731,7 +13731,7 @@ const trimDefinition: FunctionDefinition = {
 const caseDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: 'case',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.case', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.case', {
     defaultMessage:
       'Accepts pairs of conditions and values. The function returns the value that belongs to the first condition that evaluates to `true`. If the number of arguments is odd, the last argument is the default value which is returned when no condition matches.',
   }),

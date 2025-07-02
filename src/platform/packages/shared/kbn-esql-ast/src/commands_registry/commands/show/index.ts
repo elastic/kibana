@@ -7,24 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ICommandMethods } from '../..';
+import type { ICommandMethods } from '../../registry';
 import { autocomplete } from './autocomplete';
 import type { ICommandContext } from '../../types';
 
-const sampleCommandMethods: ICommandMethods<ICommandContext> = {
+const showCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
 };
 
-export const sampleCommand = {
-  name: 'sample',
-  methods: sampleCommandMethods,
+export const showCommand = {
+  name: 'show',
+  methods: showCommandMethods,
   metadata: {
-    preview: true,
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sampleDoc', {
-      defaultMessage:
-        'Samples a percentage of the results, optionally with a seed for reproducibility.',
+    description: i18n.translate('kbn-esql-ast.esql.definitions.showDoc', {
+      defaultMessage: 'Returns information about the deployment and its capabilities',
     }),
-    declaration: `SAMPLE <percentage>`,
-    examples: [],
+    declaration: 'SHOW item',
+    examples: ['SHOW INFO'],
   },
 };

@@ -33,7 +33,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'wrongArgumentType':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.wrongArgumentType',
+          'kbn-esql-ast.esql.validation.wrongArgumentType',
           {
             defaultMessage:
               'Argument of [{name}] must be [{argType}], found value [{value}] type [{givenType}]',
@@ -48,14 +48,14 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'unknownColumn':
       return {
-        message: i18n.translate('kbn-esql-validation-autocomplete.esql.validation.unknownColumn', {
+        message: i18n.translate('kbn-esql-ast.esql.validation.unknownColumn', {
           defaultMessage: 'Unknown column [{name}]',
           values: { name: out.name },
         }),
       };
     case 'unknownIndex':
       return {
-        message: i18n.translate('kbn-esql-validation-autocomplete.esql.validation.unknownIndex', {
+        message: i18n.translate('kbn-esql-ast.esql.validation.unknownIndex', {
           defaultMessage: 'Unknown index [{name}]',
           values: { name: out.name },
         }),
@@ -63,7 +63,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'unknownFunction':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.missingFunction',
+          'kbn-esql-ast.esql.validation.missingFunction',
           {
             defaultMessage: 'Unknown function [{name}]',
             values: { name: out.name },
@@ -73,7 +73,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'wrongArgumentNumber':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.wrongArgumentExactNumber',
+          'kbn-esql-ast.esql.validation.wrongArgumentExactNumber',
           {
             defaultMessage:
               'Error: [{fn}] function expects exactly {numArgs, plural, one {one argument} other {{numArgs} arguments}}, got {passedArgs}.',
@@ -88,7 +88,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'wrongArgumentNumberTooMany':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.wrongArgumentTooManyNumber',
+          'kbn-esql-ast.esql.validation.wrongArgumentTooManyNumber',
           {
             defaultMessage:
               'Error: [{fn}] function expects {extraArgs, plural, =0 {} other {no more than }}{numArgs, plural, one {one argument} other {{numArgs} arguments}}, got {passedArgs}.',
@@ -104,7 +104,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'wrongArgumentNumberTooFew':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.wrongArgumentTooFewNumber',
+          'kbn-esql-ast.esql.validation.wrongArgumentTooFewNumber',
           {
             defaultMessage:
               'Error: [{fn}] function expects {missingArgs, plural, =0 {} other {at least }}{numArgs, plural, one {one argument} other {{numArgs} arguments}}, got {passedArgs}.',
@@ -120,7 +120,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'noNestedArgumentSupport':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.noNestedArgumentSupport',
+          'kbn-esql-ast.esql.validation.noNestedArgumentSupport',
           {
             defaultMessage:
               "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [{name}] of type [{argType}]",
@@ -130,7 +130,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'shadowFieldType':
       return {
-        message: i18n.translate('kbn-esql-validation-autocomplete.esql.validation.typeOverwrite', {
+        message: i18n.translate('kbn-esql-ast.esql.validation.typeOverwrite', {
           defaultMessage:
             'Column [{field}] of type {fieldType} has been overwritten as new type: {newType}',
           values: { field: out.field, fieldType: out.fieldType, newType: out.newType },
@@ -140,7 +140,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'unsupportedColumnTypeForCommand':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.unsupportedColumnTypeForCommand',
+          'kbn-esql-ast.esql.validation.unsupportedColumnTypeForCommand',
           {
             defaultMessage:
               '{command} only supports values of type [{type}]. Found [{column}] of type [{givenType}]',
@@ -156,7 +156,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'unknownDissectKeyword':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.unknownDissectKeyword',
+          'kbn-esql-ast.esql.validation.unknownDissectKeyword',
           {
             defaultMessage: 'Expected [APPEND_SEPARATOR] in [DISSECT] but found [{keyword}]',
             values: {
@@ -168,7 +168,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'unsupportedFunctionForCommand':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.unsupportedFunctionForCommand',
+          'kbn-esql-ast.esql.validation.unsupportedFunctionForCommand',
           {
             defaultMessage: '{command} does not support function {name}',
             values: {
@@ -181,7 +181,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'unsupportedFunctionForCommandOption':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.unsupportedFunctionforCommandOption',
+          'kbn-esql-ast.esql.validation.unsupportedFunctionforCommandOption',
           {
             defaultMessage: '{command} {option} does not support function {name}',
             values: {
@@ -196,7 +196,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       return {
         type: 'error',
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.fnUnsupportedAfterCommand',
+          'kbn-esql-ast.esql.validation.fnUnsupportedAfterCommand',
           {
             defaultMessage: '[{function}] function cannot be used after {command}',
             values: {
@@ -210,7 +210,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'unknownInterval':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.unknownInterval',
+          'kbn-esql-ast.esql.validation.unknownInterval',
           {
             defaultMessage: `Unexpected time interval qualifier: ''{value}''`,
             values: {
@@ -222,7 +222,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'unsupportedTypeForCommand':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.unsupportedTypeForCommand',
+          'kbn-esql-ast.esql.validation.unsupportedTypeForCommand',
           {
             defaultMessage: '{command} does not support [{type}] in expression [{value}]',
             values: {
@@ -235,7 +235,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'unknownPolicy':
       return {
-        message: i18n.translate('kbn-esql-validation-autocomplete.esql.validation.unknownPolicy', {
+        message: i18n.translate('kbn-esql-ast.esql.validation.unknownPolicy', {
           defaultMessage: 'Unknown policy [{name}]',
           values: {
             name: out.name,
@@ -245,7 +245,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'unknownAggregateFunction':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.unknowAggregateFunction',
+          'kbn-esql-ast.esql.validation.unknowAggregateFunction',
           {
             defaultMessage:
               'Expected an aggregate function or group but got [{value}] of type [{type}]',
@@ -259,7 +259,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'wildcardNotSupportedForCommand':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.wildcardNotSupportedForCommand',
+          'kbn-esql-ast.esql.validation.wildcardNotSupportedForCommand',
           {
             defaultMessage: 'Using wildcards (*) in {command} is not allowed [{value}]',
             values: {
@@ -272,7 +272,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'noWildcardSupportAsArg':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.wildcardNotSupportedForFunction',
+          'kbn-esql-ast.esql.validation.wildcardNotSupportedForFunction',
           {
             defaultMessage: 'Using wildcards (*) in {name} is not allowed',
             values: {
@@ -284,7 +284,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'unsupportedFieldType':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.unsupportedFieldType',
+          'kbn-esql-ast.esql.validation.unsupportedFieldType',
           {
             defaultMessage:
               'Field [{field}] cannot be retrieved, it is unsupported or not indexed; returning null',
@@ -298,7 +298,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'unsupportedMode':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.unsupportedSettingValue',
+          'kbn-esql-ast.esql.validation.unsupportedSettingValue',
           {
             defaultMessage:
               'Unrecognized value [{value}] for {command}, mode needs to be one of [{expected}]',
@@ -314,7 +314,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'unsupportedLiteralOption':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.unsupportedLiteralOption',
+          'kbn-esql-ast.esql.validation.unsupportedLiteralOption',
           {
             defaultMessage:
               'Invalid option [{value}] for {name}. Supported options: [{supportedOptions}].',
@@ -330,7 +330,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'expectedConstant':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.expectedConstantValue',
+          'kbn-esql-ast.esql.validation.expectedConstantValue',
           {
             defaultMessage: 'Argument of [{fn}] must be a constant, received [{given}]',
             values: {
@@ -344,7 +344,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'metadataBracketsDeprecation':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.metadataBracketsDeprecation',
+          'kbn-esql-ast.esql.validation.metadataBracketsDeprecation',
           {
             defaultMessage:
               "Square brackets '[]' need to be removed from FROM METADATA declaration",
@@ -355,7 +355,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'unknownMetadataField':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.wrongMetadataArgumentType',
+          'kbn-esql-ast.esql.validation.wrongMetadataArgumentType',
           {
             defaultMessage:
               'Metadata field [{value}] is not available. Available metadata fields are: [{availableFields}]',
@@ -370,7 +370,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'wrongDissectOptionArgumentType':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.wrongDissectOptionArgumentType',
+          'kbn-esql-ast.esql.validation.wrongDissectOptionArgumentType',
           {
             defaultMessage:
               'Invalid value for DISSECT APPEND_SEPARATOR: expected a string, but was [{value}]',
@@ -383,7 +383,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'noAggFunction':
       return {
-        message: i18n.translate('kbn-esql-validation-autocomplete.esql.validation.noAggFunction', {
+        message: i18n.translate('kbn-esql-ast.esql.validation.noAggFunction', {
           defaultMessage:
             'At least one aggregation function required in [{command}], found [{expression}]',
           values: {
@@ -396,7 +396,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'expressionNotAggClosed':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.expressionNotAggClosed',
+          'kbn-esql-ast.esql.validation.expressionNotAggClosed',
           {
             defaultMessage:
               'Cannot combine aggregation and non-aggregation values in [{command}], found [{expression}]',
@@ -411,7 +411,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'aggInAggFunction':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.aggInAggFunction',
+          'kbn-esql-ast.esql.validation.aggInAggFunction',
           {
             defaultMessage:
               'The aggregation function [{nestedAgg}] cannot be used as an argument in another aggregation function',
@@ -424,7 +424,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'onlyWhereCommandSupported':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.onlyWhereCommandSupported',
+          'kbn-esql-ast.esql.validation.onlyWhereCommandSupported',
           {
             defaultMessage: '[{fn}] function is only supported in WHERE commands',
             values: { fn: out.fn.toUpperCase() },
@@ -434,7 +434,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
     case 'invalidJoinIndex':
       return {
         message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.invalidJoinIndex',
+          'kbn-esql-ast.esql.validation.invalidJoinIndex',
           {
             defaultMessage:
               '[{identifier}] index is not a valid JOIN index.' +
@@ -445,7 +445,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       };
     case 'tooManyForks':
       return {
-        message: i18n.translate('kbn-esql-validation-autocomplete.esql.validation.tooManyForks', {
+        message: i18n.translate('kbn-esql-ast.esql.validation.tooManyForks', {
           defaultMessage: '[FORK] a query cannot have more than one FORK command.',
         }),
       };
@@ -486,7 +486,7 @@ export const errors = {
   unexpected: (
     location: ESQLLocation,
     message: string = i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.validation.errors.unexpected.message',
+      'kbn-esql-ast.esql.validation.errors.unexpected.message',
       {
         defaultMessage: 'Unexpected error, this should never happen.',
       }
@@ -550,7 +550,7 @@ export const errors = {
 };
 
 export function getUnknownTypeLabel() {
-  return i18n.translate('kbn-esql-validation-autocomplete.esql.validation.unknownColumnType', {
+  return i18n.translate('kbn-esql-ast.esql.validation.unknownColumnType', {
     defaultMessage: 'Unknown type',
   });
 }

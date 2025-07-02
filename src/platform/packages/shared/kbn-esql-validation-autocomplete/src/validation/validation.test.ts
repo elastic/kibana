@@ -6,7 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import {
+  aggFunctionDefinitions,
+  scalarFunctionDefinitions,
+  timeUnitsToSuggest,
+  timeUnits,
+} from '@kbn/esql-ast';
 import { readFile, writeFile } from 'fs/promises';
 import { camelCase } from 'lodash';
 import capitalize from 'lodash/capitalize';
@@ -19,10 +24,7 @@ import {
   policies,
   unsupported_field,
 } from '../__tests__/helpers';
-import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
-import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
-import { timeUnits, timeUnitsToSuggest } from '../definitions/literals';
 import {
   FieldType,
   FunctionDefinition,

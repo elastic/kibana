@@ -10,20 +10,19 @@ import { i18n } from '@kbn/i18n';
 import { ESQLCommand } from '../../../types';
 import { ESQLPolicy, ISuggestionItem } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import { timeUnitsToSuggest } from '../../../definitions/constants';
 import { getSafeInsertText } from '../../utils/autocomplete';
 
 export const ENRICH_MODES = [
   {
     name: 'any',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.ccqAnyDoc', {
+    description: i18n.translate('kbn-esql-ast.esql.definitions.ccqAnyDoc', {
       defaultMessage: 'Enrich takes place on any cluster',
     }),
   },
   {
     name: 'coordinator',
     description: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.ccqCoordinatorDoc',
+      'kbn-esql-ast.esql.definitions.ccqCoordinatorDoc',
       {
         defaultMessage: 'Enrich takes place on the coordinating cluster receiving an ES|QL',
       }
@@ -31,7 +30,7 @@ export const ENRICH_MODES = [
   },
   {
     name: 'remote',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.ccqRemoteDoc', {
+    description: i18n.translate('kbn-esql-ast.esql.definitions.ccqRemoteDoc', {
       defaultMessage: 'Enrich takes place on the cluster hosting the target index.',
     }),
   },
@@ -44,7 +43,7 @@ export const buildPoliciesDefinitions = (
     label,
     text: getSafeInsertText(label, { dashSupported: true }) + ' ',
     kind: 'Class',
-    detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.policyDefinition', {
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.policyDefinition', {
       defaultMessage: `Policy defined on {count, plural, one {index} other {indices}}: {indices}`,
       values: {
         count: sourceIndices.length,
@@ -54,14 +53,6 @@ export const buildPoliciesDefinitions = (
     sortText: 'D',
     command: TRIGGER_SUGGESTION_COMMAND,
   }));
-
-export function getUnitDuration(unit: number = 1) {
-  const filteredTimeLiteral = timeUnitsToSuggest.filter(({ name }) => {
-    const result = /s$/.test(name);
-    return unit > 1 ? result : !result;
-  });
-  return filteredTimeLiteral.map(({ name }) => `${unit} ${name}`);
-}
 
 export const getPolicyMetadata = (policies: Map<string, ESQLPolicy>, policyName: string) => {
   return policies.get(policyName);
@@ -122,13 +113,13 @@ export const getPosition = (innerText: string, command: ESQLCommand): Position |
 };
 
 export const noPoliciesAvailableSuggestion: ISuggestionItem = {
-  label: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.noPoliciesLabel', {
+  label: i18n.translate('kbn-esql-ast.esql.autocomplete.noPoliciesLabel', {
     defaultMessage: 'No available policy',
   }),
   text: '',
   kind: 'Issue',
   detail: i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.autocomplete.noPoliciesLabelsFound',
+    'kbn-esql-ast.esql.autocomplete.noPoliciesLabelsFound',
     {
       defaultMessage: 'Click to create',
     }
@@ -136,14 +127,14 @@ export const noPoliciesAvailableSuggestion: ISuggestionItem = {
   sortText: 'D',
   command: {
     id: 'esql.policies.create',
-    title: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.createNewPolicy', {
+    title: i18n.translate('kbn-esql-ast.esql.autocomplete.createNewPolicy', {
       defaultMessage: 'Click to create',
     }),
   },
 };
 
 export const modeDescription = i18n.translate(
-  'kbn-esql-validation-autocomplete.esql.definitions.ccqMode',
+  'kbn-esql-ast.esql.definitions.ccqMode',
   {
     defaultMessage: 'Cross-cluster query mode',
   }
@@ -154,7 +145,7 @@ export const modeSuggestions: ISuggestionItem[] = ENRICH_MODES?.map(({ name, des
   text: `_${name}:$0`,
   asSnippet: true,
   kind: 'Reference',
-  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.ccqModeDoc', {
+  detail: i18n.translate('kbn-esql-ast.esql.definitions.ccqModeDoc', {
     defaultMessage: 'Cross-cluster query mode - ${description}',
     values: {
       description,
@@ -168,7 +159,7 @@ export const onSuggestion: ISuggestionItem = {
   label: 'ON',
   text: 'ON ',
   kind: 'Reference',
-  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.onDoc', {
+  detail: i18n.translate('kbn-esql-ast.esql.definitions.onDoc', {
     defaultMessage: 'On',
   }),
   sortText: '1',
@@ -179,7 +170,7 @@ export const withSuggestion: ISuggestionItem = {
   label: 'WITH',
   text: 'WITH ',
   kind: 'Reference',
-  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.withDoc', {
+  detail: i18n.translate('kbn-esql-ast.esql.definitions.withDoc', {
     defaultMessage: 'With',
   }),
   sortText: '1',
@@ -195,7 +186,7 @@ export const buildMatchingFieldsDefinition = (
     text: getSafeInsertText(label) + ' ',
     kind: 'Variable',
     detail: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.autocomplete.matchingFieldDefinition',
+      'kbn-esql-ast.esql.autocomplete.matchingFieldDefinition',
       {
         defaultMessage: `Use to match on {matchingField} on the policy`,
         values: {

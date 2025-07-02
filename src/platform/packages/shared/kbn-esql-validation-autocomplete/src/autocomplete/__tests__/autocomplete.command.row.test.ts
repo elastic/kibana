@@ -8,7 +8,7 @@
  */
 
 import { Location } from '../../definitions/types';
-import { getNewUserDefinedColumnSuggestion } from '../factories';
+import { getNewUserDefinedColumnSuggestion } from '@kbn/esql-ast';
 import { attachTriggerCommand, getFunctionSignaturesByReturnType, setup } from './helpers';
 
 describe('autocomplete.suggest', () => {

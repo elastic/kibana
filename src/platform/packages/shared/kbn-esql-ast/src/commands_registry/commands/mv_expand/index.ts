@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ICommandMethods } from '../..';
+import type { ICommandMethods } from '../../registry';
 import { autocomplete } from './autocomplete';
 import type { ICommandContext } from '../../types';
 
@@ -19,7 +19,7 @@ export const mvExpandCommand = {
   name: 'mv_expand',
   methods: mvExpandCommandMethods,
   metadata: {
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mvExpandDoc', {
+    description: i18n.translate('kbn-esql-ast.esql.definitions.mvExpandDoc', {
       defaultMessage: 'Expands multivalued fields into one row per value, duplicating other fields',
     }),
     declaration: 'MV_EXPAND column',

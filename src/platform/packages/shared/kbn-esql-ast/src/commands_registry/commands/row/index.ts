@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ICommandMethods } from '../..';
+import type { ICommandMethods } from '../../registry';
 import { autocomplete } from './autocomplete';
 import type { ICommandContext } from '../../types';
 
@@ -19,7 +19,7 @@ export const rowCommand = {
   name: 'row',
   methods: rowCommandMethods,
   metadata: {
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.rowDoc', {
+    description: i18n.translate('kbn-esql-ast.esql.definitions.rowDoc', {
       defaultMessage:
         'Produces a row with one or more columns with values that you specify. This can be useful for testing.',
     }),

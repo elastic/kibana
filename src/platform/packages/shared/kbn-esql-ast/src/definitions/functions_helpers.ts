@@ -29,7 +29,7 @@ import { isParamExpressionType } from '../commands_registry/utils/validate';
 import { removeFinalUnknownIdentiferArg } from './shared';
 
 const techPreviewLabel = i18n.translate(
-  'kbn-esql-validation-autocomplete.esql.autocomplete.techPreviewLabel',
+  'kbn-esql-ast.esql.autocomplete.techPreviewLabel',
   {
     defaultMessage: `Technical Preview`,
   }
@@ -63,7 +63,7 @@ export const buildFieldsDefinitions = (
     label,
     text: getSafeInsertText(label),
     kind: 'Variable',
-    detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.fieldDefinition', {
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.fieldDefinition', {
       defaultMessage: `Field specified by the input table`,
     }),
     sortText: 'D',

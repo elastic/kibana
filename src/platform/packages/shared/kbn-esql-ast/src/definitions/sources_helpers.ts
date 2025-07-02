@@ -15,7 +15,8 @@ import {
   pipeCompleteItem,
   commaCompleteItem,
 } from '../commands_registry/utils/autocomplete/complete_items';
-import { TRIGGER_SUGGESTION_COMMAND, EDITOR_MARKER } from '../commands_registry/constants';
+import { EDITOR_MARKER } from '../parser/constants';
+import { TRIGGER_SUGGESTION_COMMAND } from '../commands_registry/constants';
 import { metadataSuggestion } from '../commands_registry/options/metadata';
 
 function hasWildcard(name: string) {
@@ -117,10 +118,10 @@ export const buildSourcesDefinitions = (
     isSnippet: isIntegration,
     kind: isIntegration ? 'Class' : 'Issue',
     detail: isIntegration
-      ? i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.integrationDefinition', {
+      ? i18n.translate('kbn-esql-ast.esql.autocomplete.integrationDefinition', {
           defaultMessage: `Integration`,
         })
-      : i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.sourceDefinition', {
+      : i18n.translate('kbn-esql-ast.esql.autocomplete.sourceDefinition', {
           defaultMessage: '{type}',
           values: {
             type: type ?? 'Index',
@@ -253,12 +254,9 @@ export const specialIndicesToSuggestions = (
       label: index.name,
       text: index.name + ' ',
       kind: 'Issue',
-      detail: i18n.translate(
-        'kbn-esql-validation-autocomplete.esql.autocomplete.specialIndexes.indexType.index',
-        {
-          defaultMessage: 'Index',
-        }
-      ),
+      detail: i18n.translate('kbn-esql-ast.esql.autocomplete.specialIndexes.indexType.index', {
+        defaultMessage: 'Index',
+      }),
       sortText: '0-INDEX-' + index.name,
       command: TRIGGER_SUGGESTION_COMMAND,
     });
@@ -269,12 +267,9 @@ export const specialIndicesToSuggestions = (
           label: alias,
           text: alias + ' $0',
           kind: 'Issue',
-          detail: i18n.translate(
-            'kbn-esql-validation-autocomplete.esql.autocomplete.specialIndexes.indexType.alias',
-            {
-              defaultMessage: 'Alias',
-            }
-          ),
+          detail: i18n.translate('kbn-esql-ast.esql.autocomplete.specialIndexes.indexType.alias', {
+            defaultMessage: 'Alias',
+          }),
           sortText: '1-ALIAS-' + alias,
           command: TRIGGER_SUGGESTION_COMMAND,
         });

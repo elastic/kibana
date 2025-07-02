@@ -8,9 +8,9 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommand } from '../../../types';
-import { ESQL_NUMBER_TYPES } from '../../../ast/helpers';
+import { ESQL_NUMBER_TYPES } from '../../../definitions/types';
 import { pipeCompleteItem } from '../../utils/autocomplete/complete_items';
-import type { ISuggestionItem, GetColumnsByTypeFn } from '../../types';
+import type { ISuggestionItem, ICommandCallbacks } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { buildUserDefinedColumnsDefinitions, findFinalWord } from '../../utils/autocomplete';
 
@@ -66,7 +66,7 @@ export const onSuggestion: ISuggestionItem = {
   label: 'ON',
   text: 'ON ',
   kind: 'Reference',
-  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.onDoc', {
+  detail: i18n.translate('kbn-esql-ast.esql.definitions.onDoc', {
     defaultMessage: 'On',
   }),
   sortText: '1',
@@ -77,7 +77,7 @@ export const asSuggestion: ISuggestionItem = {
   label: 'AS',
   text: 'AS ',
   kind: 'Reference',
-  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.asDoc', {
+  detail: i18n.translate('kbn-esql-ast.esql.definitions.asDoc', {
     defaultMessage: 'As',
   }),
   sortText: '2',
@@ -87,16 +87,17 @@ export const asSuggestion: ISuggestionItem = {
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
-  getColumnsByType: GetColumnsByTypeFn
+  callbacks?: ICommandCallbacks
 ): Promise<ISuggestionItem[]> {
   const pos = getPosition(query, command);
 
   switch (pos) {
     case Position.VALUE:
-      const numericFields = await getColumnsByType(ESQL_NUMBER_TYPES, [], {
-        advanceCursor: true,
-        openSuggestions: true,
-      });
+      const numericFields =
+        (await callbacks?.getByType?.(ESQL_NUMBER_TYPES, [], {
+          advanceCursor: true,
+          openSuggestions: true,
+        })) ?? [];
       const lastWord = findFinalWord(query);
       if (lastWord !== '') {
         numericFields.forEach((fieldSuggestion) => {
@@ -111,10 +112,11 @@ export async function autocomplete(
       return [onSuggestion, asSuggestion, pipeCompleteItem];
     }
     case Position.ON_COLUMN: {
-      const onFields = await getColumnsByType('any', [], {
-        advanceCursor: true,
-        openSuggestions: true,
-      });
+      const onFields =
+        (await callbacks?.getByType?.('any', [], {
+          advanceCursor: true,
+          openSuggestions: true,
+        })) ?? [];
       return onFields;
     }
     case Position.AFTER_ON_CLAUSE:

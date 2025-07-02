@@ -76,3 +76,33 @@ export { EsqlQuery } from './src/query';
 export * as mutate from './src/mutate';
 
 export { singleItems, resolveItem, lastItem, firstItem } from './src/visitor/utils';
+
+export { esqlCommandRegistry } from './src/commands_registry';
+
+export * from './src/commands_registry/utils/autocomplete/complete_items';
+export * from './src/commands_registry/constants';
+export { METADATA_FIELDS } from './src/commands_registry/options/metadata';
+export {
+  getFieldsOrFunctionsSuggestions,
+  getControlSuggestionIfSupported,
+  getControlSuggestion,
+  getSafeInsertText,
+} from './src/commands_registry/utils/autocomplete';
+export { getSuggestionsToRightOfOperatorExpression } from './src/definitions/operators_helpers';
+export {
+  buildFieldsDefinitionsWithMetadata,
+  getFunctionSuggestions,
+} from './src/definitions/functions_helpers';
+export {
+  getDateLiterals,
+  getCompatibleLiterals,
+  TIME_SYSTEM_PARAMS,
+} from './src/definitions/literals_helpers';
+export * from './src/definitions/constants';
+export * from './src/definitions/all_operators';
+export { aggFunctionDefinitions } from './src/definitions/generated/aggregation_functions';
+export { esqlFunctionNames } from './src/definitions/generated/function_names';
+export { groupingFunctionDefinitions } from './src/definitions/generated/grouping_functions';
+export { scalarFunctionDefinitions } from './src/definitions/generated/scalar_functions';
+export * from './src/commands_registry/options/recommended_queries';
+export { getRecommendedQueriesTemplates } from './src/commands_registry/options/recommended_queries/templates';

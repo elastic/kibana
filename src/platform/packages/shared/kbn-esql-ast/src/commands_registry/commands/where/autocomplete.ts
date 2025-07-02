@@ -12,32 +12,37 @@ import { suggestForExpression } from '../../utils/autocomplete';
 import { isExpressionComplete, getExpressionType } from '../../utils/validate';
 import {
   type ISuggestionItem,
-  type GetColumnsByTypeFn,
   type ICommandContext,
   Location,
-  ESQLFieldWithMetadata,
+  ICommandCallbacks,
 } from '../../types';
 
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
-  getColumnsByType: GetColumnsByTypeFn,
-  getSuggestedUserDefinedColumnName: (extraFieldNames?: string[] | undefined) => string,
-  getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  callbacks?: ICommandCallbacks,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
+  if (!callbacks?.getByType) {
+    return [];
+  }
   const expressionRoot = command.args[0] as ESQLSingleAstItem | undefined;
   const suggestions = await suggestForExpression({
     innerText: query,
-    getColumnsByType,
+    getColumnsByType: callbacks.getByType,
     expressionRoot,
     location: Location.WHERE,
     preferredExpressionType: 'boolean',
+    context,
   });
 
   // Is this a complete boolean expression?
   // If so, we can call it done and suggest a pipe
-  const expressionType = getExpressionType(expressionRoot);
+  const expressionType = getExpressionType(
+    expressionRoot,
+    context?.fields,
+    context?.userDefinedColumns
+  );
   if (expressionType === 'boolean' && isExpressionComplete(expressionType, query)) {
     suggestions.push(pipeCompleteItem);
   }

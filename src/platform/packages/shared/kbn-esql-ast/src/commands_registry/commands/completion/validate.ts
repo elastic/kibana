@@ -7,13 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ESQLAstCompletionCommand, ESQLCommand, ESQLMessage } from '../../../types';
+import type { ESQLAst, ESQLAstCompletionCommand, ESQLCommand, ESQLMessage } from '../../../types';
 import type { ICommandContext } from '../../types';
 import { getExpressionType } from '../../utils/validate';
 
 const supportedPromptTypes = ['text', 'keyword', 'unknown', 'param'];
 
-export const validate = (command: ESQLCommand, context?: ICommandContext): ESQLMessage[] => {
+export const validate = (
+  command: ESQLCommand,
+  ast: ESQLAst,
+  context?: ICommandContext
+): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
   const { prompt, location, targetField } = command as ESQLAstCompletionCommand;
@@ -28,7 +32,7 @@ export const validate = (command: ESQLCommand, context?: ICommandContext): ESQLM
     messages.push({
       location: 'location' in prompt ? prompt?.location : location,
       text: i18n.translate(
-        'kbn-esql-validation-autocomplete.esql.validation.completionUnsupportedFieldType',
+        'kbn-esql-ast.esql.validation.completionUnsupportedFieldType',
         {
           defaultMessage:
             '[COMPLETION] prompt must be of type [text] but is [{promptExpressionType}]',

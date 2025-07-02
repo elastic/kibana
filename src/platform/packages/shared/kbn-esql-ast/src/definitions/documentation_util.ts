@@ -10,14 +10,14 @@
 import { i18n } from '@kbn/i18n';
 
 const declarationLabel = i18n.translate(
-  'kbn-esql-validation-autocomplete.esql.autocomplete.declarationLabel',
+  'kbn-esql-ast.esql.autocomplete.declarationLabel',
   {
     defaultMessage: 'Declaration:',
   }
 );
 
 const examplesLabel = i18n.translate(
-  'kbn-esql-validation-autocomplete.esql.autocomplete.examplesLabel',
+  'kbn-esql-ast.esql.autocomplete.examplesLabel',
   {
     defaultMessage: 'Examples:',
   }

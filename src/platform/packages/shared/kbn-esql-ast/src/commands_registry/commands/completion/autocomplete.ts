@@ -23,12 +23,12 @@ import {
 } from '../../utils/autocomplete';
 import {
   type ISuggestionItem,
-  type GetColumnsByTypeFn,
   Location,
   type ICommandContext,
-  ESQLFieldWithMetadata,
+  type ICommandCallbacks,
 } from '../../types';
-import { TRIGGER_SUGGESTION_COMMAND, EDITOR_MARKER, ESQL_VARIABLES_PREFIX } from '../../constants';
+import { TRIGGER_SUGGESTION_COMMAND, ESQL_VARIABLES_PREFIX } from '../../constants';
+import { EDITOR_MARKER } from '../../../parser/constants';
 import { getExpressionType, isExpressionComplete } from '../../utils/validate';
 import { getFunctionDefinition } from '../../../definitions/functions_helpers';
 
@@ -41,7 +41,11 @@ export enum CompletionPosition {
   AFTER_TARGET_ID = 'after_target_id',
 }
 
-function getPosition(query: string, command: ESQLCommand): CompletionPosition | undefined {
+function getPosition(
+  query: string,
+  command: ESQLCommand,
+  context?: ICommandContext
+): CompletionPosition | undefined {
   const { prompt, inferenceId, targetField } = command as ESQLAstCompletionCommand;
 
   if (inferenceId.incomplete && /WITH\s*$/i.test(query)) {
@@ -53,7 +57,11 @@ function getPosition(query: string, command: ESQLCommand): CompletionPosition | 
   }
 
   const expressionRoot = prompt?.text !== EDITOR_MARKER ? prompt : undefined;
-  const expressionType = getExpressionType(expressionRoot);
+  const expressionType = getExpressionType(
+    expressionRoot,
+    context?.fields,
+    context?.userDefinedColumns
+  );
 
   if (isExpressionComplete(expressionType, query)) {
     return CompletionPosition.AFTER_PROMPT;
@@ -86,7 +94,7 @@ const defaultPrompt: ISuggestionItem = {
 };
 
 const withCompletionItem: ISuggestionItem = {
-  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.completionWithDoc', {
+  detail: i18n.translate('kbn-esql-ast.esql.definitions.completionWithDoc', {
     defaultMessage: 'Provide additional parameters for the LLM prompt.',
   }),
   kind: 'Reference',
@@ -100,12 +108,9 @@ function inferenceEndpointToCompletionItem(
   inferenceEndpoint: InferenceEndpointAutocompleteItem
 ): ISuggestionItem {
   return {
-    detail: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.definitions.completionInferenceIdDoc',
-      {
-        defaultMessage: 'Inference endpoint used for the completion',
-      }
-    ),
+    detail: i18n.translate('kbn-esql-ast.esql.definitions.completionInferenceIdDoc', {
+      defaultMessage: 'Inference endpoint used for the completion',
+    }),
     kind: 'Reference',
     label: inferenceEndpoint.inference_id,
     sortText: '1',
@@ -117,14 +122,15 @@ function inferenceEndpointToCompletionItem(
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
-  getColumnsByType: GetColumnsByTypeFn,
-  getSuggestedUserDefinedColumnName: (extraFieldNames?: string[] | undefined) => string,
-  getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  callbacks?: ICommandCallbacks,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
+  if (!callbacks?.getByType) {
+    return [];
+  }
   const { prompt } = command as ESQLAstCompletionCommand;
 
-  const position = getPosition(query, command);
+  const position = getPosition(query, command, context);
 
   switch (position) {
     case CompletionPosition.AFTER_COMPLETION:
@@ -133,7 +139,7 @@ export async function autocomplete(
         await getFieldsOrFunctionsSuggestions(
           ['text', 'keyword', 'unknown'],
           Location.COMPLETION,
-          getColumnsByType,
+          callbacks?.getByType,
           {
             functions: true,
             fields: true,
@@ -166,7 +172,9 @@ export async function autocomplete(
       }
 
       if (position !== CompletionPosition.AFTER_TARGET_ID) {
-        suggestions.push(getNewUserDefinedColumnSuggestion(getSuggestedUserDefinedColumnName()));
+        suggestions.push(
+          getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
+        );
       }
 
       return suggestions;

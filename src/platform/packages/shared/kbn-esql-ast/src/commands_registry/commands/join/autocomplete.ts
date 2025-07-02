@@ -8,26 +8,22 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommand } from '../../../types';
-import {
-  type ISuggestionItem,
-  type GetColumnsByTypeFn,
-  type ICommandContext,
-  ESQLFieldWithMetadata,
-} from '../../types';
+import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { pipeCompleteItem, commaCompleteItem } from '../../utils/autocomplete/complete_items';
 import { getFullCommandMnemonics, getPosition, suggestFields } from './utils';
 import { specialIndicesToSuggestions } from '../../../definitions/sources_helpers';
-import { CommandRegistry } from '../..';
+import { esqlCommandRegistry } from '../..';
 
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
-  getColumnsByType: GetColumnsByTypeFn,
-  getSuggestedUserDefinedColumnName: (extraFieldNames?: string[] | undefined) => string,
-  getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  callbacks?: ICommandCallbacks,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
+  if (!callbacks?.getByType || !callbacks?.getColumnsForQuery) {
+    return [];
+  }
   let commandText: string = query;
 
   if (command.location) {
@@ -40,7 +36,6 @@ export async function autocomplete(
     case 'type':
     case 'after_type':
     case 'mnemonic': {
-      const esqlCommandRegistry = new CommandRegistry();
       const joinCommandDefinition = esqlCommandRegistry.getCommandByName('join');
       const allMnemonics = getFullCommandMnemonics(joinCommandDefinition!);
       const filteredMnemonics = allMnemonics.filter(([mnemonic]) =>
@@ -80,7 +75,7 @@ export async function autocomplete(
         label: 'ON',
         text: 'ON ',
         detail: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.autocomplete.join.onKeyword',
+          'kbn-esql-ast.esql.autocomplete.join.onKeyword',
           {
             defaultMessage: 'Specify JOIN field conditions',
           }
@@ -94,7 +89,13 @@ export async function autocomplete(
     }
 
     case 'after_on': {
-      return await suggestFields(query, command, getColumnsByType, getColumnsForQuery, context);
+      return await suggestFields(
+        query,
+        command,
+        callbacks?.getByType,
+        callbacks?.getColumnsForQuery,
+        context
+      );
     }
 
     case 'condition': {
@@ -106,8 +107,8 @@ export async function autocomplete(
       const fields = await suggestFields(
         query,
         command,
-        getColumnsByType,
-        getColumnsForQuery,
+        callbacks?.getByType,
+        callbacks?.getColumnsForQuery,
         context
       );
 

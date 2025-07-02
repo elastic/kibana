@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ESQLCommand, ESQLMessage } from '../../../types';
-import { isColumn, isNumericType } from '../../../ast/helpers';
+import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
+import { isColumn } from '../../../ast/helpers';
+import { isNumericType } from '../../../definitions/types';
 import { isOptionNode } from '../../../ast/util';
 import type { ICommandContext } from '../../types';
 
-export const validate = (command: ESQLCommand, context?: ICommandContext): ESQLMessage[] => {
+export const validate = (
+  command: ESQLCommand,
+  ast: ESQLAst,
+  context?: ICommandContext
+): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
   // validate change point value column
@@ -32,14 +37,11 @@ export const validate = (command: ESQLCommand, context?: ICommandContext): ESQLM
     if (valueColumnType && !isNumericType(valueColumnType)) {
       messages.push({
         location: command.location,
-        text: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.changePointUnsupportedFieldType',
-          {
-            defaultMessage:
-              'CHANGE_POINT only supports numeric types values, found [{columnName}] of type [{valueColumnType}]',
-            values: { columnName, valueColumnType },
-          }
-        ),
+        text: i18n.translate('kbn-esql-ast.esql.validation.changePointUnsupportedFieldType', {
+          defaultMessage:
+            'CHANGE_POINT only supports numeric types values, found [{columnName}] of type [{valueColumnType}]',
+          values: { columnName, valueColumnType },
+        }),
         type: 'error',
         code: 'changePointUnsupportedFieldType',
       });
@@ -53,13 +55,10 @@ export const validate = (command: ESQLCommand, context?: ICommandContext): ESQLM
   if (!onColumn && !hasDefaultOnColumn) {
     messages.push({
       location: command.location,
-      text: i18n.translate(
-        'kbn-esql-validation-autocomplete.esql.validation.changePointOnFieldMissing',
-        {
-          defaultMessage: '[CHANGE_POINT] Default {defaultOnColumnName} column is missing',
-          values: { defaultOnColumnName },
-        }
-      ),
+      text: i18n.translate('kbn-esql-ast.esql.validation.changePointOnFieldMissing', {
+        defaultMessage: '[CHANGE_POINT] Default {defaultOnColumnName} column is missing',
+        values: { defaultOnColumnName },
+      }),
       type: 'error',
       code: 'changePointOnFieldMissing',
     });

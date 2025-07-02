@@ -9,22 +9,15 @@
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommand } from '../../../types';
 import { pipeCompleteItem } from '../../utils/autocomplete/complete_items';
-import {
-  type ISuggestionItem,
-  type GetColumnsByTypeFn,
-  type ICommandContext,
-  ESQLFieldWithMetadata,
-} from '../../types';
+import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import { buildConstantsDefinitions } from '../../../definitions/literats';
+import { buildConstantsDefinitions } from '../../../definitions/literals_helpers';
 import { ESQL_STRING_TYPES } from '../../../ast/helpers';
 
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
-  getColumnsByType: GetColumnsByTypeFn,
-  getSuggestedUserDefinedColumnName: (extraFieldNames?: string[] | undefined) => string,
-  getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  callbacks?: ICommandCallbacks,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
   const commandArgs = command.args.filter((arg) => !Array.isArray(arg) && arg.type !== 'unknown');
@@ -33,7 +26,7 @@ export async function autocomplete(
   if (commandArgs.length === 1 && /\s$/.test(query)) {
     return buildConstantsDefinitions(
       ['"%{WORD:firstWord}"'],
-      i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.aPatternString', {
+      i18n.translate('kbn-esql-ast.esql.autocomplete.aPatternString', {
         defaultMessage: 'A pattern string',
       }),
       undefined,
@@ -48,7 +41,7 @@ export async function autocomplete(
   }
 
   // GROK /
-  const fieldSuggestions = await getColumnsByType(ESQL_STRING_TYPES);
+  const fieldSuggestions = (await callbacks?.getByType?.(ESQL_STRING_TYPES)) || [];
   return fieldSuggestions.map((sug) => ({
     ...sug,
     text: `${sug.text} `,

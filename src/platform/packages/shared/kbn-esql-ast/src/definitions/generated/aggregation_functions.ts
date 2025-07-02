@@ -34,7 +34,7 @@ import { Location } from '../../commands_registry/types';
 const avgDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'avg',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.avg', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.avg', {
     defaultMessage: 'The average of a numeric field.',
   }),
   preview: false,
@@ -83,7 +83,7 @@ const avgDefinition: FunctionDefinition = {
 const countDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'count',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.count', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.count', {
     defaultMessage: 'Returns the total number (count) of input values.',
   }),
   preview: false,
@@ -226,7 +226,7 @@ const countDefinition: FunctionDefinition = {
 const countDistinctDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'count_distinct',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.count_distinct', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.count_distinct', {
     defaultMessage: 'Returns the approximate number of distinct values.',
   }),
   preview: false,
@@ -796,7 +796,7 @@ const countDistinctDefinition: FunctionDefinition = {
 const maxDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'max',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.max', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.max', {
     defaultMessage: 'The maximum value of a field.',
   }),
   preview: false,
@@ -915,7 +915,7 @@ const maxDefinition: FunctionDefinition = {
 const medianDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'median',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.median', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.median', {
     defaultMessage:
       'The value that is greater than half of all values and less than half of all values, also known as the 50% `PERCENTILE`.',
   }),
@@ -966,7 +966,7 @@ const medianAbsoluteDeviationDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'median_absolute_deviation',
   description: i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.definitions.median_absolute_deviation',
+    'kbn-esql-ast.esql.definitions.median_absolute_deviation',
     {
       defaultMessage:
         'Returns the median absolute deviation, a measure of variability. It is a robust statistic, meaning that it is useful for describing data that may have outliers, or may not be normally distributed. For such data it can be more descriptive than standard deviation.\n\nIt is calculated as the median of each data point’s deviation from the median of the entire sample. That is, for a random variable `X`, the median absolute deviation is `median(|median(X) - X|)`.',
@@ -1018,7 +1018,7 @@ const medianAbsoluteDeviationDefinition: FunctionDefinition = {
 const minDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'min',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.min', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.min', {
     defaultMessage: 'The minimum value of a field.',
   }),
   preview: false,
@@ -1137,7 +1137,7 @@ const minDefinition: FunctionDefinition = {
 const percentileDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'percentile',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.percentile', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.percentile', {
     defaultMessage:
       'Returns the value at which a certain percentage of observed values occur. For example, the 95th percentile is the value which is greater than 95% of the observed values and the 50th percentile is the `MEDIAN`.',
   }),
@@ -1301,7 +1301,7 @@ const percentileDefinition: FunctionDefinition = {
 const sampleDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'sample',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sample', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.sample', {
     defaultMessage: 'Collects sample values for a field.',
   }),
   preview: false,
@@ -1527,7 +1527,7 @@ const sampleDefinition: FunctionDefinition = {
 const stCentroidAggDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'st_centroid_agg',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_centroid_agg', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_centroid_agg', {
     defaultMessage: 'Calculate the spatial centroid over a field with spatial point geometry type.',
   }),
   preview: true,
@@ -1563,7 +1563,7 @@ const stCentroidAggDefinition: FunctionDefinition = {
 const stExtentAggDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'st_extent_agg',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_extent_agg', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.st_extent_agg', {
     defaultMessage:
       'Calculate the spatial extent over a field with geometry type. Returns a bounding box for all values of the field.',
   }),
@@ -1622,7 +1622,7 @@ const stExtentAggDefinition: FunctionDefinition = {
 const stdDevDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'std_dev',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.std_dev', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.std_dev', {
     defaultMessage: 'The population standard deviation of a numeric field.',
   }),
   preview: false,
@@ -1671,7 +1671,7 @@ const stdDevDefinition: FunctionDefinition = {
 const sumDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'sum',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sum', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.sum', {
     defaultMessage: 'The sum of a numeric expression.',
   }),
   preview: false,
@@ -1720,7 +1720,7 @@ const sumDefinition: FunctionDefinition = {
 const topDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'top',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.top', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.top', {
     defaultMessage: 'Collects the top values for a field. Includes repeated values.',
   }),
   preview: false,
@@ -1916,7 +1916,7 @@ const topDefinition: FunctionDefinition = {
 const valuesDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'values',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.values', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.values', {
     defaultMessage:
       'Returns unique values as a multivalued field. The order of the returned values isn’t guaranteed.\nIf you need the values returned in order use\n`MV_SORT`.',
   }),
@@ -2075,7 +2075,7 @@ const valuesDefinition: FunctionDefinition = {
 const weightedAvgDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'weighted_avg',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.weighted_avg', {
+  description: i18n.translate('kbn-esql-ast.esql.definitions.weighted_avg', {
     defaultMessage: 'The weighted average of a numeric expression.',
   }),
   preview: false,

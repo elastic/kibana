@@ -6,10 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { getFunctionSuggestions } from '@kbn/esql-ast';
+import { ESQL_STRING_TYPES } from '@kbn/esql-ast/src/definitions/types';
 import { getFieldNamesByType, setup } from './helpers';
-import { ESQL_STRING_TYPES } from '../../shared/esql_types';
-import { getFunctionSuggestions } from '../factories';
 import { Location } from '../../definitions/types';
 
 // Suggest new user-defined column

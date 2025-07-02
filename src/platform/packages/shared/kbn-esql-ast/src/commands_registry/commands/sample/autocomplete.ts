@@ -6,42 +6,23 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { i18n } from '@kbn/i18n';
 import type { ESQLCommand } from '../../../types';
-import {
-  type ISuggestionItem,
-  type GetColumnsByTypeFn,
-  type ICommandContext,
-  ESQLFieldWithMetadata,
-} from '../../types';
+import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { pipeCompleteItem } from '../../utils/autocomplete/complete_items';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
+import { buildConstantsDefinitions } from '../../../definitions/literals_helpers';
 
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
-  getColumnsByType: GetColumnsByTypeFn,
-  getSuggestedUserDefinedColumnName: (extraFieldNames?: string[] | undefined) => string,
-  getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  callbacks?: ICommandCallbacks,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
-  // SHOW INFO /
-  if (/INFO\s+$/i.test(query)) {
-    return [{ ...pipeCompleteItem, command: TRIGGER_SUGGESTION_COMMAND }];
+  // test for a number and at least one whitespace char at the end of the query
+  if (/[0-9]\s+$/.test(query)) {
+    return [pipeCompleteItem];
   }
-  // SHOW LOLZ /
-  else if (/SHOW\s+\S+\s+$/i.test(query)) {
-    return [];
-  }
-  // SHOW /
-  return [
-    {
-      text: 'INFO',
-      detail: i18n.translate('kbn-esql-validation-autocomplete.esql.show.info.detail', {
-        defaultMessage: 'Get information about the Elasticsearch cluster.',
-      }),
-      kind: 'Method',
-      label: 'INFO',
-    },
-  ];
+
+  return buildConstantsDefinitions(['.1', '.01', '.001'], '', undefined, {
+    advanceCursorAndOpenSuggestions: true,
+  });
 }

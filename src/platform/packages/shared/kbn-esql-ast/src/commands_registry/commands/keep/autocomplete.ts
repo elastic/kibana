@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCommand } from '../../../types';
-import {
-  type ISuggestionItem,
-  type GetColumnsByTypeFn,
-  type ICommandContext,
-  ESQLFieldWithMetadata,
-} from '../../types';
+import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { pipeCompleteItem, commaCompleteItem } from '../../utils/autocomplete/complete_items';
 import { columnExists, getLastNonWhitespaceChar, handleFragment } from '../../utils/autocomplete';
@@ -21,9 +16,7 @@ import { isColumn } from '../../../ast/helpers';
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
-  getColumnsByType: GetColumnsByTypeFn,
-  getSuggestedUserDefinedColumnName: (extraFieldNames?: string[] | undefined) => string,
-  getColumnsForQuery: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  callbacks?: ICommandCallbacks,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
   if (
@@ -35,7 +28,7 @@ export async function autocomplete(
   }
 
   const alreadyDeclaredFields = command.args.filter(isColumn).map((arg) => arg.parts.join('.'));
-  const fieldSuggestions = await getColumnsByType('any', alreadyDeclaredFields);
+  const fieldSuggestions = (await callbacks?.getByType?.('any', alreadyDeclaredFields)) ?? [];
 
   return handleFragment(
     query,

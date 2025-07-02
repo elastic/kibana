@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLMessage, isIdentifier } from '@kbn/esql-ast';
+import {
+  ESQLAstItem,
+  ESQLCommand,
+  ESQLFunction,
+  ESQLMessage,
+  isIdentifier,
+  UNSUPPORTED_COMMANDS_BEFORE_MATCH,
+  UNSUPPORTED_COMMANDS_BEFORE_QSTR,
+} from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
 import { isList } from '@kbn/esql-ast/src/ast/helpers';
 import {
@@ -20,10 +28,6 @@ import {
   isAssignment,
 } from '../..';
 import { FunctionParameter, FunctionDefinitionTypes } from '../definitions/types';
-import {
-  UNSUPPORTED_COMMANDS_BEFORE_MATCH,
-  UNSUPPORTED_COMMANDS_BEFORE_QSTR,
-} from '../shared/constants';
 import {
   isValidLiteralOption,
   checkFunctionArgMatchesDefinition,
