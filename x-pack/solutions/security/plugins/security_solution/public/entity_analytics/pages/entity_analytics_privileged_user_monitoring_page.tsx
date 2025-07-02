@@ -39,6 +39,7 @@ import { usePrivilegedMonitoringEngineStatus } from '../api/hooks/use_privileged
 import { PrivilegedUserMonitoringManageDataSources } from '../components/privileged_user_monitoring_manage_data_sources';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { PageLoader } from '../../common/components/page_loader';
 
 type PageState =
   | { type: 'fetchingEngineStatus' }
@@ -179,6 +180,10 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
   const fullHeightCSS = css`
     min-height: calc(100vh - 240px);
   `;
+
+  if (newDataViewPickerEnabled && status === 'pristine') {
+    return <PageLoader />;
+  }
 
   if (!indicesExist) {
     return <EmptyPrompt />;
