@@ -5022,6 +5022,70 @@
             "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts"
           },
           {
+            "plugin": "inference",
+            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/like.test.ts"
+          },
+          {
+            "plugin": "inference",
+            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/like.test.ts"
+          },
+          {
+            "plugin": "inference",
+            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/like.test.ts"
+          },
+          {
+            "plugin": "inference",
+            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/like.test.ts"
+          },
+          {
+            "plugin": "inference",
+            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/like.test.ts"
+          },
+          {
+            "plugin": "inference",
+            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/like.test.ts"
+          },
+          {
+            "plugin": "inference",
+            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/timespan_literals.test.ts"
+          },
+          {
+            "plugin": "inference",
+            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/timespan_literals.test.ts"
+          },
+          {
+            "plugin": "inference",
+            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/timespan_literals.test.ts"
+          },
+          {
+            "plugin": "inference",
+            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/timespan_literals.test.ts"
+          },
+          {
+            "plugin": "inference",
+            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/timespan_literals.test.ts"
+          },
+          {
+            "plugin": "inference",
+            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/timespan_literals.test.ts"
+          },
+          {
+            "plugin": "inference",
+            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/timespan_literals.test.ts"
+          },
+          {
+            "plugin": "inference",
+            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/timespan_literals.test.ts"
+          },
+          {
+            "plugin": "inference",
+            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/timespan_literals.test.ts"
+          },
+          {
+            "plugin": "inference",
+            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/timespan_literals.test.ts"
+          },
+          {
             "plugin": "@kbn/securitysolution-utils",
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/esql/compute_if_esql_query_aggregating.ts"
           },
@@ -5060,70 +5124,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/assistant/tools/esql/graphs/generate_esql/nodes/validate_esql_in_last_message_node/utils.ts"
-          },
-          {
-            "plugin": "inference",
-            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/like.test.ts"
-          },
-          {
-            "plugin": "inference",
-            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/like.test.ts"
-          },
-          {
-            "plugin": "inference",
-            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/like.test.ts"
-          },
-          {
-            "plugin": "inference",
-            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/like.test.ts"
-          },
-          {
-            "plugin": "inference",
-            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/like.test.ts"
-          },
-          {
-            "plugin": "inference",
-            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/like.test.ts"
-          },
-          {
-            "plugin": "inference",
-            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/timespan_literals.test.ts"
-          },
-          {
-            "plugin": "inference",
-            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/timespan_literals.test.ts"
-          },
-          {
-            "plugin": "inference",
-            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/timespan_literals.test.ts"
-          },
-          {
-            "plugin": "inference",
-            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/timespan_literals.test.ts"
-          },
-          {
-            "plugin": "inference",
-            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/timespan_literals.test.ts"
-          },
-          {
-            "plugin": "inference",
-            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/timespan_literals.test.ts"
-          },
-          {
-            "plugin": "inference",
-            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/timespan_literals.test.ts"
-          },
-          {
-            "plugin": "inference",
-            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/timespan_literals.test.ts"
-          },
-          {
-            "plugin": "inference",
-            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/timespan_literals.test.ts"
-          },
-          {
-            "plugin": "inference",
-            "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/timespan_literals.test.ts"
           },
           {
             "plugin": "@kbn/esql-utils",

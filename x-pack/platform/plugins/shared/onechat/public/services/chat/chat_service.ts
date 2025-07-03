@@ -29,7 +29,8 @@ export class ChatService {
     mode,
   }: ChatParams): Observable<ChatEvent> {
     return defer(() => {
-      return this.http.post('/internal/onechat/chat?stream=true', {
+      return this.http.post('/internal/onechat/chat', {
+        query: { stream: true },
         asResponse: true,
         rawResponse: true,
         body: JSON.stringify({ agentId, mode, connectorId, conversationId, nextMessage }),
