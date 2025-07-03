@@ -73,8 +73,6 @@ const connectorTypeSchema = schema.object({
   maxAttempts: schema.maybe(schema.number({ min: MIN_MAX_ATTEMPTS, max: MAX_MAX_ATTEMPTS })),
 });
 
-export const DEFAULT_USAGE_API_URL = 'https://usage-api.usage-api/api/v1/usage';
-
 // We leverage enabledActionTypes list by allowing the other plugins to overwrite it by using "setEnabledConnectorTypes" in the plugin setup.
 // The list can be overwritten only if it's not already been set in the config.
 const enabledConnectorTypesSchema = schema.arrayOf(
@@ -198,15 +196,17 @@ export const configSchema = schema.object({
       max: schema.maybe(schema.number({ min: MIN_QUEUED_MAX, defaultValue: DEFAULT_QUEUED_MAX })),
     })
   ),
-  usage: schema.object({
-    url: schema.string({ defaultValue: DEFAULT_USAGE_API_URL }),
-    enabled: schema.maybe(schema.boolean({ defaultValue: true })),
-    ca: schema.maybe(
-      schema.object({
-        path: schema.string(),
-      })
-    ),
-  }),
+  usage: schema.maybe(
+    schema.object({
+      url: schema.maybe(schema.string()),
+      enabled: schema.maybe(schema.boolean()),
+      ca: schema.maybe(
+        schema.object({
+          path: schema.string(),
+        })
+      ),
+    })
+  ),
   webhook: schema.maybe(
     schema.object({
       ssl: schema.object({
