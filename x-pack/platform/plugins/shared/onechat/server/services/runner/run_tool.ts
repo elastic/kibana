@@ -6,6 +6,7 @@
  */
 
 import type { ZodObject } from '@kbn/zod';
+import { createBadRequestError } from '@kbn/onechat-common';
 import type {
   ToolHandlerContext,
   ScopedRunnerRunToolsParams,
@@ -28,19 +29,26 @@ export const runTool = async <TParams = Record<string, unknown>, TResult = unkno
 
   const context = forkContextForToolRun({ parentContext: parentManager.context, toolId });
   const manager = parentManager.createChild(context);
-
   const { toolsService, request } = manager.deps;
 
   const tool = (await toolsService.registry.get({ toolId, request })) as RegisteredToolWithMeta<
     ZodObject<any>,
     TResult
   >;
+
+  const validation = tool.schema.safeParse(toolParams);
+  if (validation.error) {
+    throw createBadRequestError(
+      `Tool ${toolId} was called with invalid parameters: ${validation.error.message}`
+    );
+  }
+
   const toolHandlerContext = createToolHandlerContext<TParams>({ toolExecutionParams, manager });
-  const toolResult = await tool.handler(toolParams as Record<string, any>, toolHandlerContext);
+  const toolReturn = await tool.handler(validation.data as Record<string, any>, toolHandlerContext);
 
   return {
     runId: manager.context.runId,
-    ...toolResult,
+    ...toolReturn,
   };
 };
 

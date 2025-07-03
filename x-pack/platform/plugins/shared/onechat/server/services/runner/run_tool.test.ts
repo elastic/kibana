@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
 import type { ScopedRunnerRunToolsParams, OnechatToolEvent } from '@kbn/onechat-server';
 import {
   createScopedRunnerDepsMock,
@@ -28,7 +29,11 @@ describe('runTool', () => {
       toolsService: { registry },
     } = runnerDeps;
 
-    tool = createMockedTool({});
+    tool = createMockedTool({
+      schema: z.object({
+        foo: z.string(),
+      }),
+    });
     registry.get.mockResolvedValue(tool);
   });
 
@@ -54,6 +59,30 @@ describe('runTool', () => {
     });
   });
 
+  it('throws if the tool parameters do not match the schema', async () => {
+    const {
+      toolsService: { registry },
+    } = runnerDeps;
+    tool = createMockedTool({
+      schema: z.object({
+        bar: z.string(),
+      }),
+    });
+    registry.get.mockResolvedValue(tool);
+
+    const params: ScopedRunnerRunToolsParams = {
+      toolId: 'test-tool',
+      toolParams: { foo: 'bar' },
+    };
+
+    await expect(
+      runTool({
+        toolExecutionParams: params,
+        parentManager: runnerManager,
+      })
+    ).rejects.toThrowError(/Tool test-tool was called with invalid parameters/);
+  });
+
   it('calls the tool handler with the expected parameters', async () => {
     const params: ScopedRunnerRunToolsParams = {
       toolId: 'test-tool',
@@ -69,10 +98,27 @@ describe('runTool', () => {
     expect(tool.handler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
   });
 
+  it('truncates the parameters not defined on the schema', async () => {
+    const params: ScopedRunnerRunToolsParams = {
+      toolId: 'test-tool',
+      toolParams: { foo: 'bar', extra: true },
+    };
+
+    await runTool({
+      toolExecutionParams: params,
+      parentManager: runnerManager,
+    });
+
+    expect(tool.handler).toHaveBeenCalledTimes(1);
+    expect(tool.handler).toHaveBeenCalledWith({ foo: 'bar' }, expect.any(Object));
+  });
+
   it('returns the expected value', async () => {
     const params: ScopedRunnerRunToolsParams = {
       toolId: 'test-tool',
-      toolParams: {},
+      toolParams: {
+        foo: 'bar',
+      },
     };
 
     tool.handler.mockReturnValue({ result: { test: true, over: 9000 } });
@@ -91,7 +137,9 @@ describe('runTool', () => {
   it('exposes a context with the expected shape to the tool handler', async () => {
     const params: ScopedRunnerRunToolsParams = {
       toolId: 'test-tool',
-      toolParams: {},
+      toolParams: {
+        foo: 'bar',
+      },
     };
 
     tool.handler.mockImplementation((toolParams, context) => {
@@ -121,7 +169,9 @@ describe('runTool', () => {
 
     const params: ScopedRunnerRunToolsParams = {
       toolId: 'test-tool',
-      toolParams: {},
+      toolParams: {
+        foo: 'bar',
+      },
       onEvent: (event) => {
         emittedEvents.push(event);
       },
