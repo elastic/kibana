@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import path from 'path';
+import fs from 'fs';
 import type { Client } from '@elastic/elasticsearch';
 import type SuperTest from 'supertest';
 import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
@@ -54,6 +57,7 @@ export const installPrebuiltRulesPackageViaFleetAPI = async (
 
   return fleetResponse;
 };
+
 /**
  * Installs prebuilt rules package `security_detection_engine`, passing in the version
  * of the package as a parameter to the url.
@@ -94,4 +98,34 @@ export const installPrebuiltRulesPackageByVersion = async (
   await refreshSavedObjectIndices(es);
 
   return fleetResponse as InstallPackageResponse;
+};
+
+export const MOCK_SECURITY_DETECTION_ENGINE_PACKAGE_PATH = path.join(
+  path.dirname(__filename),
+  './fixtures/packages/mock-security_detection_engine-99.0.0.zip'
+);
+
+/**
+ * Installs a prepared mock prebuilt rules package `security_detection_engine`.
+ * Installing it up front prevents installing the real package when making API requests.
+ */
+export const installMockPrebuiltRulesPackage = async (
+  es: Client,
+  supertest: SuperTest.Agent
+): Promise<InstallPackageResponse> => {
+  const buffer = fs.readFileSync(MOCK_SECURITY_DETECTION_ENGINE_PACKAGE_PATH);
+  const response = await supertest
+    .post(`/api/fleet/epm/packages`)
+    .set('kbn-xsrf', 'xxxx')
+    .set('elastic-api-version', '2023-10-31')
+    .type('application/zip')
+    .send(buffer)
+    .expect(200);
+
+  expect((response.body as InstallPackageResponse).items).toBeDefined();
+  expect((response.body as InstallPackageResponse).items.length).toBeGreaterThan(0);
+
+  await refreshSavedObjectIndices(es);
+
+  return response.body;
 };
