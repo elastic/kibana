@@ -318,6 +318,12 @@ export class ApiService {
       },
     });
   }
+  public async getMLEnabled() {
+    return await this.sendRequest({
+      path: `${API_BASE_PATH}/ml_enabled`,
+      method: 'get',
+    });
+  }
 
   public useLoadRemoteClusters() {
     return this.useRequest<string[]>({
