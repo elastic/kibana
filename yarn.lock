@@ -6349,6 +6349,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/mcp-dev-server@link:src/platform/packages/shared/kbn-mcp-dev-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/metrics-data-access-plugin@link:x-pack/solutions/observability/plugins/metrics_data_access":
   version "0.0.0"
   uid ""
