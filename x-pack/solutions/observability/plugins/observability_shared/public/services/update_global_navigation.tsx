@@ -19,7 +19,14 @@ export function updateGlobalNavigation({
   deepLinks: AppDeepLink[];
   updater$: Subject<AppUpdater>;
 }) {
-  const { apm, metrics, uptime, synthetics, slo } = capabilities.navLinks;
+  const {
+    apm,
+    metrics,
+    uptime,
+    synthetics,
+    slo,
+    'observability-overview': obsOverview,
+  } = capabilities.navLinks;
   /* logs is a special case.
    * It is not a nav link but still exists as a
    * Kibana feature privilege with attached rule types */
@@ -31,6 +38,7 @@ export function updateGlobalNavigation({
     uptime,
     synthetics,
     slo,
+    obsOverview,
   }).some((visible) => visible);
 
   const updatedDeepLinks = deepLinks
