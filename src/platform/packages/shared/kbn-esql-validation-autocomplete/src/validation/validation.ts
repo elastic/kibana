@@ -230,46 +230,62 @@ function validateCommand(
     messages.push(...commandDefinition.methods.validate(command, ast, context));
   }
 
-  // Now validate arguments
-  for (const arg of command.args) {
-    if (!Array.isArray(arg)) {
-      if (isFunctionItem(arg)) {
-        messages.push(
-          ...validateFunction({
-            fn: arg,
-            parentCommand: command.name,
-            parentOption: undefined,
-            references,
-            parentAst: ast,
-            currentCommandIndex,
-          })
-        );
-      } else if (isOptionItem(arg)) {
-        messages.push(...validateOption(arg, command, references));
-      } else if (isColumnItem(arg) || isIdentifier(arg)) {
-        if (command.name === 'stats' || command.name === 'inlinestats') {
-          messages.push(errors.unknownAggFunction(arg));
-        } else {
-          messages.push(...validateColumnForCommand(arg, command.name, references));
+  switch (commandDefinition.name) {
+    case 'join':
+      break;
+    case 'fork': {
+      for (const arg of command.args.flat()) {
+        if (!Array.isArray(arg) && arg.type === 'query') {
+          // all the args should be commands
+          arg.commands.forEach((subCommand) => {
+            messages.push(...validateCommand(subCommand, references, ast, currentCommandIndex));
+          });
         }
-      } else if (isTimeIntervalItem(arg)) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'unsupportedTypeForCommand',
-            values: {
-              command: command.name.toUpperCase(),
-              type: 'date_period',
-              value: arg.name,
-            },
-            locations: arg.location,
-          })
-        );
       }
     }
-  }
+    default: {
+      // Now validate arguments
+      for (const arg of command.args) {
+        if (!Array.isArray(arg)) {
+          if (isFunctionItem(arg)) {
+            messages.push(
+              ...validateFunction({
+                fn: arg,
+                parentCommand: command.name,
+                parentOption: undefined,
+                references,
+                parentAst: ast,
+                currentCommandIndex,
+              })
+            );
+          } else if (isOptionItem(arg)) {
+            messages.push(...validateOption(arg, command, references));
+          } else if (isColumnItem(arg) || isIdentifier(arg)) {
+            if (command.name === 'stats' || command.name === 'inlinestats') {
+              messages.push(errors.unknownAggFunction(arg));
+            } else {
+              messages.push(...validateColumnForCommand(arg, command.name, references));
+            }
+          } else if (isTimeIntervalItem(arg)) {
+            messages.push(
+              getMessageFromId({
+                messageId: 'unsupportedTypeForCommand',
+                values: {
+                  command: command.name.toUpperCase(),
+                  type: 'date_period',
+                  value: arg.name,
+                },
+                locations: arg.location,
+              })
+            );
+          }
+        }
+      }
 
-  const sources = command.args.filter((arg) => isSourceItem(arg)) as ESQLSource[];
-  messages.push(...validateSources(sources, references));
+      const sources = command.args.filter((arg) => isSourceItem(arg)) as ESQLSource[];
+      messages.push(...validateSources(sources, references));
+    }
+  }
 
   // no need to check for mandatory options passed
   // as they are already validated at syntax level

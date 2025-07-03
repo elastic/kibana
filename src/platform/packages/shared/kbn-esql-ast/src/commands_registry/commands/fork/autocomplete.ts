@@ -69,8 +69,10 @@ export async function autocomplete(
     return [];
   }
 
-  const forkMethods = esqlCommandRegistry.getCommandMethods(subCommand.name);
-  return forkMethods?.autocomplete(query, subCommand as ESQLCommand, callbacks, context) || [];
+  const subCommandMethods = esqlCommandRegistry.getCommandMethods(subCommand.name);
+  return (
+    subCommandMethods?.autocomplete(query, subCommand as ESQLCommand, callbacks, context) || []
+  );
 }
 
 const newBranchSuggestion: ISuggestionItem = {

@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ESQLCommand, ESQLMessage } from '../../../types';
+import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
+import { ICommandContext } from '../../types';
 
-export const validate = (command: ESQLCommand): ESQLMessage[] => {
+export const validate = (
+  command: ESQLCommand,
+  ast: ESQLAst,
+  context?: ICommandContext
+): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
   if (command.args.length < 2) {
@@ -22,6 +27,11 @@ export const validate = (command: ESQLCommand): ESQLMessage[] => {
       code: 'forkTooFewBranches',
     });
   }
+
+  context?.fields.set('_fork', {
+    name: '_fork',
+    type: 'keyword',
+  });
 
   return messages;
 };
