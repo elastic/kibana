@@ -97,6 +97,7 @@ export class AnalyticsIndex {
       ...(isServerless
         ? {}
         : {
+            hidden: true,
             number_of_shards: CAI_NUMBER_OF_SHARDS,
             auto_expand_replicas: CAI_AUTO_EXPAND_REPLICAS,
             refresh_interval: CAI_REFRESH_INTERVAL,
