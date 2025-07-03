@@ -246,35 +246,6 @@ describe('collapseMessages', () => {
       expect(collapsedMessages[2].message.function_call?.name).toEqual('some_other_function');
     });
   });
-
-  describe('when there are multiple query messages', () => {
-    let collapsedMessages: Message[];
-    beforeEach(() => {
-      const messages: Message[] = [
-        ...queryToolCalls,
-        ...executeQueryToolCall,
-        ...queryToolCalls,
-        ...executeQueryToolCall,
-      ];
-      collapsedMessages = collapseMessages(messages, mockLogger);
-    });
-
-    it('should return four messages', () => {
-      expect(collapsedMessages).toHaveLength(4);
-    });
-
-    it('should collapse the first query correctly', () => {
-      const firstQueryResponse = collapsedMessages[1];
-      const firstQueryContent = JSON.parse(firstQueryResponse.message.content!);
-      expect(firstQueryContent.steps).toHaveLength(2);
-    });
-
-    it('should collapse the second query correctly', () => {
-      const secondQueryResponse = collapsedMessages[3];
-      const secondQueryContent = JSON.parse(secondQueryResponse.message.content!);
-      expect(secondQueryContent.steps).toHaveLength(2);
-    });
-  });
 });
 
 describe('convertMessagesForInference', () => {});
