@@ -23,10 +23,16 @@ interface UseImagePasteUploadArgs {
   fileKindId: string;
 }
 
+/**
+ * Returns a placeholder string for the file that is being uploaded
+ */
 function getUploadPlaceholderCopy(filename: string, extension?: string) {
   return `<!-- uploading "${filename}${extension ? `.${extension}` : ''}" -->`;
 }
 
+/**
+ * Returns a markdown link for the file
+ */
 function generateMarkdownLink(
   filename: string,
   id: string,
