@@ -30,7 +30,7 @@ const configSchema = schema.object({
       schema.literal(SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY),
       schema.literal(SEARCH_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY),
     ],
-    { defaultValue: undefined}
+    { defaultValue: PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY}
   ),
 });
 
