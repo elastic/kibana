@@ -91,29 +91,12 @@ export class ReportingPageObject extends FtrService {
     `);
   }
 
-  async getResponseHelper(fullUrl: string, baseUrl: string): Promise<SuperTest.Response> {
-    this.log.debug(`getResponseHelper for ${fullUrl}`);
-    const urlWithoutBase = fullUrl.replace(baseUrl, '');
+  async getResponse(fullUrl: string): Promise<SuperTest.Response> {
+    this.log.debug(`getResponse for ${fullUrl}`);
+    const parsedUrl = new URL(fullUrl);
+    const urlWithoutBase = `${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`;
     const res = await this.security.testUserSupertest.get(urlWithoutBase);
     return res ?? '';
-  }
-
-  async getResponse(fullUrl: string): Promise<SuperTest.Response> {
-    const kibanaServerConfig = this.config.get('servers.kibana');
-    try {
-      const baseURLWithPort = formatUrl({
-        ...kibanaServerConfig,
-        auth: false,
-      });
-      return await this.getResponseHelper(fullUrl, baseURLWithPort);
-    } catch (err) {
-      const { port, ...restKibanaServerConfig } = kibanaServerConfig;
-      const baseURLWithoutPort = formatUrl({
-        ...restKibanaServerConfig,
-        auth: false,
-      });
-      return await this.getResponseHelper(fullUrl, baseURLWithoutPort);
-    }
   }
 
   async getReportInfo(jobId: string) {
