@@ -14,12 +14,14 @@ import type { DataViewManagerScopeName } from '../constants';
  * for the Security Solution. It caches the browser fields to improve performance
  * when accessing the fields multiple times across multiple scopes.
  */
+
 type DataViewTitle = ReturnType<DataView['getIndexPattern']>;
 class SecurityBrowserFieldsManager {
   private static instance: SecurityBrowserFieldsManager;
-  private fieldBrowserCache = new Map<
-    DataViewManagerScopeName,
-    Record<DataViewTitle, { browserFields: BrowserFields }>
+  private scopeToDataViewIndexPatternsCache = new Map<DataViewManagerScopeName, DataViewTitle>();
+  private dataViewIndexPatternsToBrowserFieldsCache = new Map<
+    DataViewTitle,
+    { browserFields: BrowserFields }
   >();
 
   constructor() {
@@ -50,6 +52,32 @@ class SecurityBrowserFieldsManager {
     return { browserFields };
   }
 
+  private getCachedBrowserFields(
+    title: DataViewTitle,
+    scope: DataViewManagerScopeName
+  ): { browserFields: BrowserFields } | undefined {
+    // Check if the scope is already mapped to a dataView title
+    if (this.scopeToDataViewIndexPatternsCache.has(scope)) {
+      const cachedTitle = this.scopeToDataViewIndexPatternsCache.get(scope);
+      if (cachedTitle === title) {
+        // If the title matches, return the cached browser fields
+        const cachedResult = this.dataViewIndexPatternsToBrowserFieldsCache.get(cachedTitle);
+        if (cachedResult) {
+          return cachedResult;
+        }
+      }
+    }
+    // If the title does not match or is not cached, update the mapping
+    this.scopeToDataViewIndexPatternsCache.set(scope, title);
+    // Check if the browser fields for this title are already cached
+    if (this.dataViewIndexPatternsToBrowserFieldsCache.has(title)) {
+      const cachedResult = this.dataViewIndexPatternsToBrowserFieldsCache.get(title);
+      if (cachedResult) {
+        return cachedResult;
+      }
+    }
+    return undefined;
+  }
   /**
    *
    * @param dataView - The dataView containing the fields to be processed.
@@ -62,39 +90,46 @@ class SecurityBrowserFieldsManager {
     scope?: DataViewManagerScopeName
   ): { browserFields: BrowserFields } {
     const { fields } = dataView;
+    // If the dataView has no fields, return an empty browserFields object
     if (!fields || fields.length === 0) {
       return { browserFields: {} };
     }
 
-    const title = dataView.getIndexPattern();
+    const indexPatterns = dataView.getIndexPattern();
 
-    // Caching path
-    if (scope) {
-      const cachedResult = this.fieldBrowserCache.get(scope);
-      // Confirm if the cache exists and matches the current dataView for the scope
-      // The dataView.id is consistent even if the patterns change, so we use the title (index pattern) as the key
-      if (cachedResult && cachedResult[title]) {
-        return cachedResult[title];
+    // Caching depends on the scope and title
+    if (scope && indexPatterns) {
+      const cachedResult = this.getCachedBrowserFields(indexPatterns, scope);
+      if (cachedResult) {
+        // If the browser fields for this indexPatterns are cached, return them
+        return cachedResult;
       }
-
-      // If the index patterns (title) for the dataView have changed or is not cached, build the browser fields
+      // If the browser fields for this indexPatterns are not cached, build them
       const result = this.buildBrowserFields(fields);
-      this.fieldBrowserCache.set(scope, { [title]: result });
-      return result;
-    } else {
-      // non-caching path
-
-      const result = this.buildBrowserFields(fields);
+      this.dataViewIndexPatternsToBrowserFieldsCache.set(indexPatterns, result);
       return result;
     }
+
+    // If scope is not provided or title is not defined, return the browser fields without caching
+    return this.buildBrowserFields(fields);
   }
 
   public removeFromCache(scope: DataViewManagerScopeName): void {
-    this.fieldBrowserCache.delete(scope);
+    const indexPatterns = this.scopeToDataViewIndexPatternsCache.get(scope);
+    if (indexPatterns) {
+      this.scopeToDataViewIndexPatternsCache.delete(scope);
+      const scopesUsingIndexPatterns = Array.from(this.scopeToDataViewIndexPatternsCache.values());
+
+      if (!scopesUsingIndexPatterns.includes(indexPatterns)) {
+        // If no other scope is using this indexPatterns, remove it from the browser fields cache
+        this.dataViewIndexPatternsToBrowserFieldsCache.delete(indexPatterns);
+      }
+    }
   }
 
   public clearCache(): void {
-    this.fieldBrowserCache.clear();
+    this.scopeToDataViewIndexPatternsCache.clear();
+    this.dataViewIndexPatternsToBrowserFieldsCache.clear();
   }
 }
 
