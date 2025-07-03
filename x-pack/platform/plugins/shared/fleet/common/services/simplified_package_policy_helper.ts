@@ -66,7 +66,7 @@ export interface FormattedCreatePackagePolicyResponse {
 
 export function packagePolicyToSimplifiedPackagePolicy(packagePolicy: PackagePolicy) {
   const formattedPackagePolicy = packagePolicy as unknown as FormattedPackagePolicy;
-  formattedPackagePolicy.inputs = formatInputs(packagePolicy.inputs, false);
+  formattedPackagePolicy.inputs = formatInputs(packagePolicy.inputs);
   if (packagePolicy.vars) {
     formattedPackagePolicy.vars = formatVars(packagePolicy.vars);
   }
@@ -208,20 +208,21 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
   }
 
   Object.entries(inputs).forEach(([inputId, val]) => {
-    const { streams = {}, vars: inputLevelVars } = val;
+    const { enabled, streams = {}, vars: inputLevelVars } = val;
 
     const { input: packagePolicyInput, streams: streamsMap } = inputMap.get(inputId) ?? {};
+
     if (!packagePolicyInput || !streamsMap) {
       throw new PackagePolicyValidationError(`Input not found: ${inputId}`);
     }
 
-    packagePolicyInput.enabled = isInputAllowedForDeploymentMode(
+    const isInputAllowed = isInputAllowedForDeploymentMode(
       packagePolicyInput,
       packagePolicy?.supports_agentless ? 'agentless' : 'default',
       packageInfo
-    )
-      ? packagePolicyInput.enabled
-      : false;
+    );
+
+    packagePolicyInput.enabled = !isInputAllowed || enabled === false ? false : true;
 
     if (inputLevelVars) {
       assignVariables(inputLevelVars, packagePolicyInput.vars, `${inputId}`);
@@ -234,7 +235,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
         throw new PackagePolicyValidationError(`Stream not found ${inputId}: ${streamId}`);
       }
 
-      if (streamEnabled === false || packagePolicyInput.enabled === false) {
+      if (streamEnabled === false || isInputAllowed === false) {
         packagePolicyStream.enabled = false;
       } else {
         packagePolicyStream.enabled = true;
