@@ -517,6 +517,7 @@ export class SearchInterceptor {
               isPartial: esqlResponse.is_partial,
               isRunning: esqlResponse.is_running,
               requestParams,
+              isRestored,
               warning,
             };
           default:

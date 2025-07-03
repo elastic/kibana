@@ -12,6 +12,7 @@ import type { CoreStart, HttpStart, I18nStart, IUiSettingsClient } from '@kbn/co
 import { CoreSetup } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { ISessionsClient, SearchUsageCollector } from '../../..';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from '../constants';
 import type { SearchSessionsMgmtAPI } from './lib/api';
@@ -65,4 +66,19 @@ export function registerSearchSessionsMgmt(
       return mgmtApp.mountManagementSection();
     },
   });
+}
+
+export function getOpenBackgroundSearchFlyoutFn(
+  coreSetup: CoreSetup<IManagementSectionsPluginsStart>,
+  deps: IManagementSectionsPluginsSetup,
+  config: SearchSessionsConfigSchema,
+  kibanaVersion: string
+) {
+  return async () => {
+    const { SearchSessionsMgmtAppFlyout: MgmtAppFlyout } = await import('./flyout');
+    const mgmtApp = new MgmtAppFlyout(coreSetup, deps, config, kibanaVersion);
+    const flyout = await mgmtApp.getFlyout();
+    const [coreStart] = await coreSetup.getStartServices();
+    coreStart.overlays.openFlyout(toMountPoint(flyout, coreStart));
+  };
 }

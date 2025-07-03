@@ -8,7 +8,14 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiPageHeader,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import type { SearchSessionsMgmtAPI } from '../lib/api';
@@ -66,5 +73,21 @@ export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) 
       <EuiSpacer size="l" />
       <SearchSessionsMgmtTable data-test-subj="search-sessions-mgmt-table" {...tableProps} />
     </>
+  );
+}
+
+export function SearchSessionsMgmtFlyout({ documentation, ...tableProps }: Props) {
+  return (
+    <EuiFlyout onClose={() => console('close-di-close')}>
+      <EuiFlyoutHeader>
+        <FormattedMessage
+          id="data.mgmt.searchSessions.main.sectionTitle"
+          defaultMessage="Search Sessions"
+        />
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <SearchSessionsMgmtTable data-test-subj="search-sessions-mgmt-table" {...tableProps} />
+      </EuiFlyoutBody>
+    </EuiFlyout>
   );
 }
