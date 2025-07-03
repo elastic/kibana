@@ -68,6 +68,11 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
     }
   }, [visualizationResponse?.loading]);
 
+  // Reset hasStartedLoading when any filter changes to allow fresh error detection
+  useEffect(() => {
+    setHasStartedLoading(false);
+  }, [timerange.from, timerange.to, filterQuery, effectiveSpaceId]);
+
   // Only show error state if:
   // 1. Loading has started at least once (hasStartedLoading)
   // 2. Loading is now complete (loading === false)
