@@ -39,10 +39,10 @@ const renderRuleDiffComponent = ({
     <RuleDiffTab
       oldRule={oldRule}
       newRule={newRule}
-      leftSideRuleLabel={'mock left label'}
-      rightSideRuleLabel={'mock right label'}
-      leftSideRuleDescription={'mock left description'}
-      rightSideRuleDescription={'mock right description'}
+      leftDiffSideLabel={'mock left label'}
+      rightDiffSideLabel={'mock right label'}
+      leftDiffSideDescription={'mock left description'}
+      rightDiffSideDescription={'mock right description'}
     />
   );
 };
@@ -79,10 +79,10 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
         <RuleDiffTab
           oldRule={oldRule}
           newRule={newRule}
-          leftSideRuleLabel={'mock left label'}
-          rightSideRuleLabel={'mock right label'}
-          leftSideRuleDescription={'mock left description'}
-          rightSideRuleDescription={'mock right description'}
+          leftDiffSideLabel={'mock left label'}
+          rightDiffSideLabel={'mock right label'}
+          leftDiffSideDescription={'mock left description'}
+          rightDiffSideDescription={'mock right description'}
         />,
         {
           wrapper: ThemeWrapper,
@@ -177,10 +177,10 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
       <RuleDiffTab
         oldRule={{ ...oldRule }}
         newRule={{ ...newRule, actions: [], exceptions_list: [] }}
-        leftSideRuleLabel={'mock left label'}
-        rightSideRuleLabel={'mock right label'}
-        leftSideRuleDescription={'mock left description'}
-        rightSideRuleDescription={'mock right description'}
+        leftDiffSideLabel={'mock left label'}
+        rightDiffSideLabel={'mock right label'}
+        leftDiffSideDescription={'mock left description'}
+        rightDiffSideDescription={'mock right description'}
       />
     );
     expect(screen.queryAllByText('"actions":', { exact: false })).toHaveLength(0);
@@ -194,10 +194,10 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
           actions: [{ ...testAction, id: 'my-other-action' }],
           exceptions_list: [testExceptionListItem],
         }}
-        leftSideRuleLabel={'mock left label'}
-        rightSideRuleLabel={'mock right label'}
-        leftSideRuleDescription={'mock left description'}
-        rightSideRuleDescription={'mock right description'}
+        leftDiffSideLabel={'mock left label'}
+        rightDiffSideLabel={'mock right label'}
+        leftDiffSideDescription={'mock left description'}
+        rightDiffSideDescription={'mock right description'}
       />
     );
     expect(screen.queryAllByText('"actions":', { exact: false })).toHaveLength(0);

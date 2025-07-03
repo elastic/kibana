@@ -132,10 +132,10 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
           <RuleDiffTab
             oldRule={baseRule}
             newRule={currentRule}
-            leftSideRuleLabel={i18n.BASE_VERSION_LABEL}
-            rightSideRuleLabel={i18n.CURRENT_VERSION_LABEL}
-            leftSideRuleDescription={i18n.BASE_VERSION_DESCRIPTION}
-            rightSideRuleDescription={i18n.CURRENT_VERSION_DESCRIPTION}
+            leftDiffSideLabel={i18n.BASE_VERSION_LABEL}
+            rightDiffSideLabel={i18n.CURRENT_VERSION_LABEL}
+            leftDiffSideDescription={i18n.BASE_VERSION_DESCRIPTION}
+            rightDiffSideDescription={i18n.CURRENT_VERSION_DESCRIPTION}
           />
         </div>
       ),
