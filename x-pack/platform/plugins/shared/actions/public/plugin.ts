@@ -21,7 +21,6 @@ export interface ActionsPublicPluginSetup {
 export interface Config {
   email: {
     domain_allowlist: string[];
-    recipient_allowlist: string[];
     services: {
       enabled: string[];
     };
