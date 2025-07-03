@@ -53,10 +53,17 @@ interface DocUpdate {
   value: Record<string, any>;
 }
 
+interface ColumnAddition {
+  name: string;
+}
+
 type Action =
   | { type: 'add'; payload: DocUpdate }
   | { type: 'undo' }
-  | { type: 'saved'; payload: any };
+  | { type: 'saved'; payload: { response: any; updates: DocUpdate[] } }
+  | { type: 'add-column'; payload: ColumnAddition }
+  | { type: 'discard-unsaved-columns' }
+  | { type: 'new-row-added'; payload: Record<string, any> };
 
 export type PendingSave = Map<DocUpdate['id'], DocUpdate['value']>;
 
@@ -94,11 +101,6 @@ export class IndexUpdateService {
   /** ES Documents */
   private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([]);
   public readonly rows$: Observable<DataTableRecord[]> = this._rows$.asObservable();
-
-  // Holds runtime field definitions reactively
-  private _pendingFieldsToBeSaved$ = new BehaviorSubject<string[]>([]);
-  public readonly pendingFieldsToBeSaved$: Observable<any[]> =
-    this._pendingFieldsToBeSaved$.asObservable();
 
   private readonly _totalHits$ = new BehaviorSubject<number>(0);
   public readonly totalHits$: Observable<number> = this._totalHits$.asObservable();
@@ -167,15 +169,42 @@ export class IndexUpdateService {
     shareReplay({ bufferSize: 1, refCount: true })
   );
 
+  private _latestPendingColumnsToBeSaved: ColumnAddition[] = [];
+  public readonly pendingColumnsToBeSaved$: Observable<ColumnAddition[]> = this.actions$.pipe(
+    scan((acc: ColumnAddition[], action) => {
+      if (action.type === 'add-column') {
+        return [...acc, action.payload];
+      }
+      if (action.type === 'saved') {
+        // Filter out columns that were saved with a value
+        return acc.filter((column) =>
+          action.payload.updates.every((update) => update.value[column.name] === undefined)
+        );
+      }
+      if (action.type === 'new-row-added') {
+        // Filter out columns that were populated when adding a new row
+        return acc.filter((column) => action.payload[column.name] === undefined);
+      }
+      if (action.type === 'discard-unsaved-columns') {
+        return [];
+      }
+      return acc;
+    }, []),
+    tap((columns) => {
+      this._latestPendingColumnsToBeSaved = columns;
+    }),
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
+
   public readonly dataTableColumns$: Observable<DatatableColumn[]> = combineLatest([
     this.dataView$,
-    this.pendingFieldsToBeSaved$,
+    this.pendingColumnsToBeSaved$.pipe(startWith([])),
   ]).pipe(
-    map(([dataView, pendingFieldsToBeSaved]) => {
-      for (const field of pendingFieldsToBeSaved) {
-        if (!dataView.fields.getByName(field)) {
+    map(([dataView, pendingColumnsToBeSaved]) => {
+      for (const column of pendingColumnsToBeSaved) {
+        if (!dataView.fields.getByName(column.name)) {
           dataView.fields.add({
-            name: field,
+            name: column.name,
             type: KBN_FIELD_TYPES.UNKNOWN,
             aggregatable: true,
             searchable: true,
@@ -255,15 +284,8 @@ export class IndexUpdateService {
         )
         .subscribe({
           next: ({ updates, response, rows, dataView }) => {
-            // Updates the pending fields to be saved
-            const unsavedColumns = this._pendingFieldsToBeSaved$.value.filter((pendingField) => {
-              return !updates.some((update) => update.value[pendingField] !== undefined);
-            });
-
-            this._pendingFieldsToBeSaved$.next(unsavedColumns);
-
             // Clear the buffer after successful update
-            this.actions$.next({ type: 'saved', payload: response });
+            this.actions$.next({ type: 'saved', payload: { response, updates } });
 
             // TODO do we need to re-fetch docs using _mget, in order to retrieve a full doc update?
 
@@ -382,7 +404,7 @@ export class IndexUpdateService {
   }
 
   public getPendingFieldsToBeSaved(): string[] {
-    return this._pendingFieldsToBeSaved$.getValue();
+    return this._latestPendingColumnsToBeSaved.map((col) => col.name);
   }
 
   // Add a new index
@@ -394,12 +416,7 @@ export class IndexUpdateService {
     const response = await this.bulkUpdate([{ value: newRow }]);
 
     if (!response.errors) {
-      // Update the pending fields to be saved if it corresponds
-      const unsavedColumns = this._pendingFieldsToBeSaved$.value.filter((pendingField) => {
-        return !Object.keys(newRow).includes(pendingField);
-      });
-
-      this._pendingFieldsToBeSaved$.next(unsavedColumns);
+      this.actions$.next({ type: 'new-row-added', payload: newRow });
     }
     return response;
   }
@@ -459,17 +476,16 @@ export class IndexUpdateService {
     this.actions$.next({ type: 'undo' });
   }
 
-  public addNewField(filedName: string) {
-    const current = this._pendingFieldsToBeSaved$.getValue();
-    this._pendingFieldsToBeSaved$.next([...current, filedName]);
+  public addNewColumn(filedName: string) {
+    this.actions$.next({ type: 'add-column', payload: { name: filedName } });
   }
 
   public setExitAttemptWithUnsavedFields(value: boolean) {
     this._exitAttemptWithUnsavedFields$.next(value);
   }
 
-  public deleteUnsavedFields() {
-    this._pendingFieldsToBeSaved$.next([]);
+  public deleteUnsavedColumns() {
+    this.actions$.next({ type: 'discard-unsaved-columns' });
   }
 
   public destroy() {

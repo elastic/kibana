@@ -50,7 +50,7 @@ export const AddColumnPanel: React.FC<AddColumnPanelProps> = ({ onHide }) => {
         return;
       }
 
-      indexUpdateService.addNewField(columnName);
+      indexUpdateService.addNewColumn(columnName);
       notifications.toasts.addSuccess({
         title: i18n.translate('indexEditor.addColumn.success', {
           defaultMessage: 'Column {columnName} has been partially added',

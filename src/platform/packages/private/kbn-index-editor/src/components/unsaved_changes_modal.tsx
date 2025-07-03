@@ -28,10 +28,10 @@ export const UnsavedChangesModal: React.FC<UnsavedChangesModal> = ({ onClose }) 
     false
   );
 
-  const pendingFieldsToBeSaved = useObservable(indexUpdateService.pendingFieldsToBeSaved$, []);
+  const pendingColumnsToBeSaved = useObservable(indexUpdateService.pendingColumnsToBeSaved$, []);
 
   const closeWithoutSaving = () => {
-    indexUpdateService.deleteUnsavedFields();
+    indexUpdateService.deleteUnsavedColumns();
     onClose();
   };
 
@@ -66,8 +66,8 @@ export const UnsavedChangesModal: React.FC<UnsavedChangesModal> = ({ onClose }) 
       />
       <EuiSpacer size="s" />
       <ul>
-        {pendingFieldsToBeSaved.map((field) => (
-          <li key={field}>{field}</li>
+        {pendingColumnsToBeSaved.map((column) => (
+          <li key={column.name}>{column.name}</li>
         ))}
       </ul>
       <EuiSpacer size="s" />
