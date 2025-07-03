@@ -16,17 +16,25 @@ export interface SavedObjectsChangeAccessControlObject {
   id: string;
 }
 
+export interface SavedObjectsChangeOwnershipOptions<Attributes = unknown>
+  extends SavedObjectsBaseOptions {
+  owner?: SavedObjectAccessControl['owner'];
+}
+
+export interface SavedObjectsChangeAccessModeOptions<Attributes = unknown>
+  extends SavedObjectsBaseOptions {
+  accessMode?: SavedObjectAccessControl['accessMode'];
+}
+
 /**
  * Options for the changing ownership of a saved object
  *
  * @public
  */
 
-export interface SavedObjectsChangeAccessControlOptions<Attributes = unknown>
-  extends SavedObjectsBaseOptions {
-  owner?: SavedObjectAccessControl['owner'];
-  accessMode?: SavedObjectAccessControl['accessMode'];
-}
+export type SavedObjectsChangeAccessControlOptions<Attributes = unknown> = SavedObjectsBaseOptions &
+  SavedObjectsChangeOwnershipOptions &
+  SavedObjectsChangeAccessModeOptions;
 
 /**
  * Return type of the Saved Objects `changeOwnership()` method.

@@ -9,8 +9,8 @@
 
 import type {
   SavedObjectsChangeAccessControlObject,
-  SavedObjectsChangeAccessControlOptions,
   SavedObjectsChangeAccessControlResponse,
+  SavedObjectsChangeOwnershipOptions,
 } from '@kbn/core-saved-objects-api-server';
 
 import { changeObjectAccessControl } from './internals/change_object_access_control';
@@ -18,15 +18,29 @@ import type { ApiExecutionContext } from './types';
 
 export interface PerformChangeOwnershipParams<T = unknown> {
   objects: SavedObjectsChangeAccessControlObject[];
-  options: SavedObjectsChangeAccessControlOptions<T>;
+  options: SavedObjectsChangeOwnershipOptions<T>;
 }
 
+export const isSavedObjectsChangeOwnershipOptions = <Attributes = unknown>(
+  options: unknown
+): options is SavedObjectsChangeOwnershipOptions<Attributes> => {
+  return (
+    typeof options === 'object' &&
+    options !== null &&
+    'owner' in options &&
+    typeof options.owner === 'string'
+  );
+};
 export const performChangeOwnership = async <T>(
   { objects, options }: PerformChangeOwnershipParams<T>,
   { registry, helpers, allowedTypes, client, serializer, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObjectsChangeAccessControlResponse> => {
   const { common: commonHelper } = helpers;
   const { securityExtension } = extensions;
+
+  if (!isSavedObjectsChangeOwnershipOptions(options)) {
+    throw new Error('Invalid options provided to change ownership');
+  }
 
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
   return changeObjectAccessControl({

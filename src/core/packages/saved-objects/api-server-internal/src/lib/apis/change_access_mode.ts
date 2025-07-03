@@ -11,6 +11,7 @@ import type {
   SavedObjectsChangeAccessControlObject,
   SavedObjectsChangeAccessControlOptions,
   SavedObjectsChangeAccessControlResponse,
+  SavedObjectsChangeAccessModeOptions,
 } from '@kbn/core-saved-objects-api-server';
 
 import { changeObjectAccessControl } from './internals/change_object_access_control';
@@ -21,12 +22,27 @@ export interface PerformChangeAccessModeParams<T = unknown> {
   options: SavedObjectsChangeAccessControlOptions<T>;
 }
 
+export const isSavedObjectsChangeAccessModeOptions = <Attributes = unknown>(
+  options: unknown
+): options is SavedObjectsChangeAccessModeOptions<Attributes> => {
+  return (
+    typeof options === 'object' &&
+    options !== null &&
+    (typeof (options as any).accessMode === 'undefined' ||
+      (options as any).accessMode === 'read_only')
+  );
+};
+
 export const performChangeAccessMode = async <T>(
   { objects, options }: PerformChangeAccessModeParams<T>,
   { registry, helpers, allowedTypes, client, serializer, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObjectsChangeAccessControlResponse> => {
   const { common: commonHelper } = helpers;
   const { securityExtension } = extensions;
+
+  if (!isSavedObjectsChangeAccessModeOptions(options)) {
+    throw new Error('Invalid options provided to change access mode');
+  }
 
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
   return changeObjectAccessControl({

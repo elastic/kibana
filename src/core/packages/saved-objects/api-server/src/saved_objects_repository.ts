@@ -50,7 +50,8 @@ import type {
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteResponse,
-  SavedObjectsChangeAccessControlOptions,
+  SavedObjectsChangeOwnershipOptions,
+  SavedObjectsChangeAccessModeOptions,
   SavedObjectsChangeAccessControlResponse,
   SavedObjectsChangeAccessControlObject,
 } from './apis';
@@ -566,11 +567,22 @@ export interface ISavedObjectsRepository {
    * Changes the ownership of one or more SavedObjects to a new owner.
    *
    * @param objects {@link SavedObjectsChangeAccessControlObject} - the objects to update
-   * @param options {@link SavedObjectsChangeAccessControlOptions} - object containing owner profile_uid that will be the new owner
+   * @param options {@link SavedObjectsChangeOwnershipOptions} - object containing owner profile_uid that will be the new owner
    * @returns the {@link SavedObjectsChangeAccessControlResponse}
    */
   changeOwnership<T = unknown>(
     objects: SavedObjectsChangeAccessControlObject[],
-    options: SavedObjectsChangeAccessControlOptions<T>
+    options: SavedObjectsChangeOwnershipOptions<T>
+  ): Promise<SavedObjectsChangeAccessControlResponse>;
+
+  /**
+   * Changes the access mode of one or more SavedObjects to a new access mode.
+   *
+   * @param objects {@link SavedObjectsChangeAccessControlObject} - the objects to update
+   * @param options {@link SavedObjectsChangeAccessControlOptions} - object containing access mode. If empty, is considered to be marked as editable
+   */
+  changeAccessMode<T = unknown>(
+    objects: SavedObjectsChangeAccessControlObject[],
+    options: SavedObjectsChangeAccessModeOptions<T>
   ): Promise<SavedObjectsChangeAccessControlResponse>;
 }

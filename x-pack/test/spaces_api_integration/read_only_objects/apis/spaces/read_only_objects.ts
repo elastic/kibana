@@ -146,7 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
           .put('/read_only_objects/transfer')
           .set('kbn-xsrf', 'true')
           .set('cookie', testUserCookie.cookieString())
-          .send({ objectId, type: 'read_only_type', newOwner: 'new_owner' })
+          .send({ objects: [{ id: objectId, type: 'read_only_type' }], newOwner: 'new_owner' })
           .expect(200);
         const getResponse = await supertestWithoutAuth
           .get(`/read_only_objects/${objectId}`)
@@ -177,7 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
           .put('/read_only_objects/transfer')
           .set('kbn-xsrf', 'true')
           .set('cookie', testUserCookie.cookieString())
-          .send({ objectId, type: 'read_only_type', newOwner: 'new_owner' })
+          .send({ objects: [{ id: objectId, type: 'read_only_type' }], newOwner: 'new_owner' })
           .expect(403);
 
         expect(transferResponse.body).to.have.property('message');
@@ -201,7 +201,7 @@ export default function ({ getService }: FtrProviderContext) {
           .put('/read_only_objects/transfer')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ objectId, type: 'read_only_type', newOwner: 'new_owner' })
+          .send({ objects: [{ id: objectId, type: 'read_only_type' }], newOwner: 'new_owner' })
           .expect(200);
 
         const getResponse = await supertestWithoutAuth
@@ -211,6 +211,56 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(getResponse.body.accessControl).to.have.property('owner', 'new_owner');
+      });
+
+      it('should allow bulk transfer ownership of allowed objects', async () => {
+        const { cookie: testUserCookie, profileUid } = await loginAsTestUser();
+        const { cookie: adminCookie } = await login(adminTestUser.username, adminTestUser.password);
+        const firstCreate = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', testUserCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
+        const firstObjectId = firstCreate.body.id;
+
+        const secondCreate = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', testUserCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
+        const secondObjectId = secondCreate.body.id;
+
+        await supertestWithoutAuth
+          .put('/read_only_objects/transfer')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', testUserCookie.cookieString())
+          .send({
+            objects: [
+              { id: firstObjectId, type: firstCreate.body.type },
+              { id: secondObjectId, type: secondCreate.body.type },
+            ],
+            newOwner: 'new_owner',
+          })
+          .expect(200);
+        {
+          const getResponse = await supertestWithoutAuth
+            .get(`/read_only_objects/${firstObjectId}`)
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .expect(200);
+
+          expect(getResponse.body.accessControl).to.have.property('owner', 'new_owner');
+        }
+        {
+          const getResponse = await supertestWithoutAuth
+            .get(`/read_only_objects/${secondObjectId}`)
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .expect(200);
+          expect(getResponse.body.accessControl).to.have.property('owner', 'new_owner');
+        }
       });
     });
   });
