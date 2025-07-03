@@ -50,10 +50,9 @@ const generate = async (deps: ApiKeyManagerDependencies) => {
   } else {
     const apiKey = await generateAPIKey(request, deps);
 
-    const soClient = core.savedObjects.createInternalRepository([
-      PrivilegeMonitoringApiKeyType.name,
-      monitoringEntitySourceType.name,
-    ]);
+    const soClient = core.savedObjects.getScopedClient(request, {
+      includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, monitoringEntitySourceType.name],
+    });
 
     await soClient.create(PrivilegeMonitoringApiKeyType.name, apiKey, {
       id: getPrivmonEncryptedSavedObjectId(namespace),

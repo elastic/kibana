@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 
 import { promptType } from '@kbn/security-ai-prompts';
 import { referenceDataSavedObjectType } from './endpoint/lib/reference_data';
@@ -23,6 +23,10 @@ import {
   monitoringEntitySourceType,
 } from './lib/entity_analytics/privilege_monitoring/saved_objects';
 import { PrivilegeMonitoringApiKeyType } from './lib/entity_analytics/privilege_monitoring/auth/saved_object';
+import type {
+  SecuritySolutionPluginCoreSetupDependencies,
+  SecuritySolutionPluginSetupDependencies,
+} from './plugin_contract';
 
 const types = [
   noteType,
@@ -62,4 +66,24 @@ export const notesSavedObjectTypes = [noteType.name];
 
 export const initSavedObjects = (savedObjects: CoreSetup['savedObjects']) => {
   types.forEach((type) => savedObjects.registerType(type));
+};
+
+export const initEncryptedSavedObjects = ({
+  core,
+  plugins,
+  logger,
+}: {
+  core: SecuritySolutionPluginCoreSetupDependencies;
+  plugins: SecuritySolutionPluginSetupDependencies;
+  logger: Logger;
+}) => {
+  if (!plugins.encryptedSavedObjects) {
+    logger.warn('EncryptedSavedObjects plugin not available; skipping registration.');
+    return;
+  }
+  plugins.encryptedSavedObjects.registerType({
+    type: PrivilegeMonitoringApiKeyType.name,
+    attributesToEncrypt: new Set(['apiKey']),
+    attributesToIncludeInAAD: new Set(['id', 'name']),
+  });
 };
