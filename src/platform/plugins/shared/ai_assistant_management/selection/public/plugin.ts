@@ -136,21 +136,12 @@ export class AIAssistantManagementPlugin
       switchMap((value) => {
         switch (value.solution) {
           case undefined:
+          case 'oblt':
+          case 'es':
+          case 'security':
           case 'classic':
             return new BehaviorSubject(
               coreStart.uiSettings.get(PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY)
-            );
-          case 'oblt':
-            return new BehaviorSubject(
-              coreStart.uiSettings.get(OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY)
-            );
-          case 'es':
-            return new BehaviorSubject(
-              coreStart.uiSettings.get(SEARCH_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY)
-            );
-          case 'security':
-            return new BehaviorSubject(
-              coreStart.uiSettings.get(SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY)
             );
           case 'chat':
           default:

@@ -102,16 +102,16 @@ describe('AI Assistant Management Selection Plugin', () => {
       expect(allCalls).toEqual([
         ['aiAssistant:preferredAIAssistantType'],
         ['aiAssistant:preferredAIAssistantType'],
-        ['aiAssistant:preferredAIAssistantType:es'],
-        ['aiAssistant:preferredAIAssistantType:oblt'],
-        ['aiAssistant:preferredAIAssistantType:security'],
+        ['aiAssistant:preferredAIAssistantType'],
+        ['aiAssistant:preferredAIAssistantType'],
+        ['aiAssistant:preferredAIAssistantType'],
       ]);
       expect(collected).toEqual([
         AIAssistantType.Default,
         AIAssistantType.Default,
-        AIAssistantType.Observability,
-        AIAssistantType.Observability,
-        AIAssistantType.Security,
+        AIAssistantType.Default,
+        AIAssistantType.Default,
+        AIAssistantType.Default,
       ]);
     });
   });

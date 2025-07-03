@@ -35,53 +35,59 @@ import { classicSetting } from './src/settings/classic_setting';
 import { observabilitySolutionSetting } from './src/settings/observability_setting';
 import { securitySolutionSetting } from './src/settings/security_setting';
 import { searchSolutionSetting } from './src/settings/search_setting';
+import type { BuildFlavor } from '@kbn/config';
 
 export class AIAssistantManagementSelectionPlugin
   implements
-    Plugin<
-      AIAssistantManagementSelectionPluginServerSetup,
-      AIAssistantManagementSelectionPluginServerStart,
-      AIAssistantManagementSelectionPluginServerDependenciesSetup,
-      AIAssistantManagementSelectionPluginServerDependenciesStart
-    >
+  Plugin<
+    AIAssistantManagementSelectionPluginServerSetup,
+    AIAssistantManagementSelectionPluginServerStart,
+    AIAssistantManagementSelectionPluginServerDependenciesSetup,
+    AIAssistantManagementSelectionPluginServerDependenciesStart
+  >
 {
   private readonly config: AIAssistantManagementSelectionConfig;
+  private readonly buildFlavor: BuildFlavor;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
+    this.buildFlavor = initializerContext.env.packageInfo.buildFlavor;
   }
 
   public setup(
     core: CoreSetup,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
-    core.uiSettings.register({
-      [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-        ...classicSetting,
-        value: this.config.preferredAIAssistantType,
-      },
-    });
+    if (this.buildFlavor === 'serverless') {
+      core.uiSettings.register({
+        [OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+          ...observabilitySolutionSetting,
+          value: AIAssistantType.Observability,
+        },
+      });
 
-    core.uiSettings.register({
-      [OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-        ...observabilitySolutionSetting,
-        value: AIAssistantType.Observability,
-      },
-    });
+      core.uiSettings.register({
+        [SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+          ...securitySolutionSetting,
+          value: AIAssistantType.Security,
+        },
+      });
 
-    core.uiSettings.register({
-      [SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-        ...securitySolutionSetting,
-        value: AIAssistantType.Security,
-      },
-    });
+      core.uiSettings.register({
+        [SEARCH_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+          ...searchSolutionSetting,
+          value: AIAssistantType.Observability,
+        },
+      });
+    } else {
+      core.uiSettings.register({
+        [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+          ...classicSetting,
+          value: this.config.preferredAIAssistantType,
+        },
+      });
+    }
 
-    core.uiSettings.register({
-      [SEARCH_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-        ...searchSolutionSetting,
-        value: AIAssistantType.Observability,
-      },
-    });
 
     core.capabilities.registerProvider(() => {
       return {
@@ -151,5 +157,5 @@ export class AIAssistantManagementSelectionPlugin
     return {};
   }
 
-  public stop() {}
+  public stop() { }
 }
