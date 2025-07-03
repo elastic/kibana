@@ -38,7 +38,7 @@ export class Plugin {
             },
           },
           savedSearchId: { type: 'keyword' },
-          ...mappings.properties,
+          title: { type: 'text' },
           uiStateJSON: { type: 'text' },
           version: { type: 'integer' },
           visState: { type: 'text' },
