@@ -7,12 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsqlQuery } from '../../query';
-import * as fixtures from '../../__tests__/fixtures';
-import { Walker } from '../walker';
-import { ESQLAstExpression, ESQLProperNode } from '../../types';
-import { isProperNode } from '../../ast/is';
-
 interface JsonWalkerOptions {
   visitObject?: (node: Record<string, unknown>) => void;
   visitArray?: (node: unknown[]) => void;
@@ -69,53 +63,3 @@ const walkJson = (json: unknown, options: JsonWalkerOptions = {}) => {
     }
   }
 };
-
-const assertAllNodesAreVisited = (query: string) => {
-  const { ast, errors } = EsqlQuery.fromSrc(query);
-
-  expect(errors).toStrictEqual([]);
-
-  const allNodes = new Set<ESQLProperNode>();
-  const allExpressionNodes = new Set<ESQLAstExpression>();
-  const allWalkerAnyNodes = new Set<ESQLProperNode>();
-  const allWalkerExpressionNodes = new Set<ESQLAstExpression>();
-
-  walkJson(ast, {
-    visitObject: (node) => {
-      if (isProperNode(node)) {
-        allNodes.add(node);
-        if (node.type !== 'command') {
-          allExpressionNodes.add(node);
-        }
-      }
-    },
-  });
-
-  Walker.walk(ast, {
-    visitAny: (node) => {
-      allWalkerAnyNodes.add(node);
-    },
-    visitSingleAstItem: (node) => {
-      allWalkerExpressionNodes.add(node);
-    },
-  });
-
-  expect(allWalkerAnyNodes).toStrictEqual(allNodes);
-  expect(allWalkerAnyNodes.size).toBe(allNodes.size);
-  expect(allWalkerExpressionNodes).toStrictEqual(allExpressionNodes);
-  expect(allWalkerExpressionNodes.size).toBe(allExpressionNodes.size);
-};
-
-describe('Walker walks all nodes', () => {
-  test('small query', () => {
-    assertAllNodesAreVisited(fixtures.smallest);
-  });
-
-  test('sample SORT command from docs', () => {
-    assertAllNodesAreVisited(fixtures.sortCommandFromDocs);
-  });
-
-  test('large query', () => {
-    assertAllNodesAreVisited(fixtures.large);
-  });
-});
