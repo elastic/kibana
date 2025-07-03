@@ -48,7 +48,6 @@ import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { RollupPageObject } from './rollup_page';
 import { SearchSessionsPageProvider } from './search_sessions_management_page';
 import { ShareSavedObjectsToSpacePageProvider } from './share_saved_objects_to_space_page';
-import { SnapshotRestorePageProvider } from './snapshot_restore_page';
 import { StatusPageObject } from './status_page';
 import { TagManagementPageObject } from './tag_management_page';
 import { UptimePageObject } from './uptime_page';
@@ -116,7 +115,6 @@ export const pageObjects = {
   searchSessionsManagement: SearchSessionsPageProvider,
   security: SecurityPageObject,
   shareSavedObjectsToSpace: ShareSavedObjectsToSpacePageProvider,
-  snapshotRestore: SnapshotRestorePageProvider,
   spaceSelector: SpaceSelectorPageObject,
   statusPage: StatusPageObject,
   tagManagement: TagManagementPageObject,
