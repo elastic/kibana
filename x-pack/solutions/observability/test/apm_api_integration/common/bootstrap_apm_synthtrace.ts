@@ -4,47 +4,41 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ApmSynthtraceEsClient,
-  ApmSynthtraceKibanaClient,
-  createLogger,
-  LogLevel,
-} from '@kbn/apm-synthtrace';
+import { getSynthtraceClients, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import url from 'url';
 import { kbnTestConfig } from '@kbn/test';
+import { Client } from '@elastic/elasticsearch';
 import { InheritedFtrProviderContext } from './ftr_provider_context';
 
 export async function getApmSynthtraceEsClient(
   context: InheritedFtrProviderContext,
-  kibanaClient: ApmSynthtraceKibanaClient
+  kibanaServerUrl: string
 ) {
   const es = context.getService('es');
 
-  const kibanaVersion = await kibanaClient.fetchLatestApmPackageVersion();
-  await kibanaClient.installApmPackage(kibanaVersion);
+  const getSynthtraceClientsFn = (opts?: { esClient: Client }) =>
+    getSynthtraceClients({
+      options: {
+        logger: createLogger(LogLevel.info),
+        kibana: {
+          target: url
+            .format({
+              ...url.parse(kibanaServerUrl),
+              auth: `elastic:${kbnTestConfig.getUrlParts().password}`,
+            })
+            .slice(0, -1),
+        },
+        client: opts?.esClient || es,
+        refreshAfterIndex: true,
+        includePipelineSerialization: false,
+      },
+      synthClients: ['apmEsClient'],
+    });
 
-  const esClient = new ApmSynthtraceEsClient({
-    client: es,
-    logger: createLogger(LogLevel.info),
-    version: kibanaVersion,
-    refreshAfterIndex: true,
-  });
-
-  return esClient;
-}
-
-export function getApmSynthtraceKibanaClient(kibanaServerUrl: string) {
-  const kibanaServerUrlWithAuth = url
-    .format({
-      ...url.parse(kibanaServerUrl),
-      auth: `elastic:${kbnTestConfig.getUrlParts().password}`,
-    })
-    .slice(0, -1);
-
-  const kibanaClient = new ApmSynthtraceKibanaClient({
-    target: kibanaServerUrlWithAuth,
-    logger: createLogger(LogLevel.debug),
-  });
-
-  return kibanaClient;
+  return {
+    getClient: async (opts?: { esClient?: Client }) => {
+      const { apmEsClient } = await getSynthtraceClientsFn(opts);
+      return apmEsClient;
+    },
+  };
 }

@@ -62,7 +62,7 @@ export async function getSynthtraceClients<
   const {
     options,
     packageVersion,
-    skipBootstrap = false,
+    skipBootstrap = true,
     synthClients = [
       'apmEsClient',
       'infraEsClient',

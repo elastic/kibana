@@ -7,13 +7,7 @@
 
 import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
-import {
-  ApmSynthtraceEsClient,
-  ApmSynthtraceKibanaClient,
-  LogsSynthtraceEsClient,
-  createLogger,
-  LogLevel,
-} from '@kbn/apm-synthtrace';
+import { LogsSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import { FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import supertest from 'supertest';
@@ -21,7 +15,7 @@ import { format, UrlObject } from 'url';
 import { MachineLearningAPIProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ml/api';
 import { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
-import { getApmSynthtraceEsClient, getApmSynthtraceKibanaClient } from './bootstrap_apm_synthtrace';
+import { getApmSynthtraceEsClient } from './bootstrap_apm_synthtrace';
 import {
   FtrProviderContext,
   InheritedFtrProviderContext,
@@ -79,14 +73,10 @@ export interface CreateTest {
   services: InheritedServices & {
     apmFtrConfig: () => ApmFtrConfig;
     registry: ({ getService }: FtrProviderContext) => ReturnType<typeof RegistryProvider>;
-    logSynthtraceEsClient: (
+    apmSynthtraceEsClient: (
       context: InheritedFtrProviderContext
-    ) => Promise<LogsSynthtraceEsClient>;
-    synthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
-    apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
-    synthtraceKibanaClient: (
-      context: InheritedFtrProviderContext
-    ) => Promise<ApmSynthtraceKibanaClient>;
+    ) => ReturnType<typeof getApmSynthtraceEsClient>;
+
     apmApiClient: (context: InheritedFtrProviderContext) => ApmApiClient;
     ml: ({ getService }: FtrProviderContext) => ReturnType<typeof MachineLearningAPIProvider>;
   };
@@ -110,7 +100,6 @@ export function createTestConfig(
     const kibanaServer = servers.kibana as UrlObject;
     const kibanaServerUrl = format(kibanaServer);
     const esServer = servers.elasticsearch as UrlObject;
-    const synthtraceKibanaClient = getApmSynthtraceKibanaClient(kibanaServerUrl);
 
     return {
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
@@ -122,7 +111,7 @@ export function createTestConfig(
         apmFtrConfig: () => config,
         registry: RegistryProvider,
         apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => {
-          return getApmSynthtraceEsClient(context, synthtraceKibanaClient);
+          return getApmSynthtraceEsClient(context, kibanaServerUrl);
         },
         logSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
           new LogsSynthtraceEsClient({
@@ -130,7 +119,6 @@ export function createTestConfig(
             logger: createLogger(LogLevel.info),
             refreshAfterIndex: true,
           }),
-        synthtraceKibanaClient: () => synthtraceKibanaClient,
         apmApiClient: async (context: InheritedFtrProviderContext) => {
           const { username, password } = servers.kibana;
           const esUrl = format(esServer);

@@ -7,14 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createLogger, LogLevel, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { createLogger, LogLevel, getSynthtraceClients } from '@kbn/apm-synthtrace';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function LogSynthtraceEsClientProvider({ getService }: FtrProviderContext) {
-  return new LogsSynthtraceEsClient({
-    client: getService('es'),
-    logger: createLogger(LogLevel.info),
-    refreshAfterIndex: true,
-  });
+  const esClient = getService('es');
+
+  const getSynthtraceClientsFn = () =>
+    getSynthtraceClients({
+      options: {
+        logger: createLogger(LogLevel.info),
+        client: esClient,
+        refreshAfterIndex: true,
+        includePipelineSerialization: false,
+      },
+      synthClients: ['logsEsClient'],
+    });
+
+  return {
+    async getClient() {
+      const { logsEsClient } = await getSynthtraceClientsFn();
+      return logsEsClient;
+    },
+  };
 }

@@ -6,7 +6,6 @@
  */
 
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { ApmSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { createEsClientForFtrConfig } from '@kbn/test';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
@@ -32,7 +31,6 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const log = getService('log');
   const bettertest = getBettertest(supertest);
   const config = getService('config');
-  const synthtraceKibanaClient = getService('synthtraceKibanaClient');
   const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   const retry = getService('retry');
 
@@ -74,13 +72,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
     api_key: string;
   }) {
     const esClient = createEsClientWithApiKey({ id, apiKey });
-    const kibanaVersion = await synthtraceKibanaClient.fetchLatestApmPackageVersion();
-    return new ApmSynthtraceEsClient({
-      client: esClient,
-      logger: createLogger(LogLevel.info),
-      version: kibanaVersion,
-      refreshAfterIndex: true,
-    });
+    return apmSynthtraceEsClient.getClient({ esClient });
   }
 
   // FLAKY: https://github.com/elastic/kibana/issues/177384
@@ -103,7 +95,8 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
 
       async function cleanAll() {
         try {
-          await apmSynthtraceEsClient.clean();
+          const apmEsClient = await apmSynthtraceEsClient.getClient();
+          await apmEsClient.clean();
           await es.security.invalidateApiKey({ name: API_KEY_NAME });
           await deleteAgentPolicyAndPackagePolicyByName({
             bettertest,

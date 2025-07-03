@@ -23,7 +23,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const rules = getService('rules');
   const toasts = getService('toasts');
   const esClient = getService('es');
-  const apmSynthtraceKibanaClient = getService('apmSynthtraceKibanaClient');
+  const synthtraceClient = getService('synthtraceClient');
   const filterBar = getService('filterBar');
   const esArchiver = getService('esArchiver');
 
@@ -166,11 +166,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       esQueryRuleId = createdESRule.id;
 
-      const version = (await apmSynthtraceKibanaClient.installApmPackage()).version;
-      apmSynthtraceEsClient = await getApmSynthtraceEsClient({
-        client: esClient,
-        packageVersion: version,
-      });
+      const clients = await synthtraceClient.getClients(['apmEsClient']);
+      apmSynthtraceEsClient = clients.apmEsClient;
+
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
         .instance('instance');

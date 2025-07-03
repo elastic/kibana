@@ -6,7 +6,12 @@
  */
 
 import { FtrConfigProviderContext, GenericFtrProviderContext } from '@kbn/test';
-import { createLogger, LogLevel, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import {
+  createLogger,
+  getSynthtraceClients,
+  LogLevel,
+  LogsSynthtraceEsClient,
+} from '@kbn/apm-synthtrace';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { FtrProviderContext as InheritedFtrProviderContext } from '../../ftr_provider_context';
@@ -46,11 +51,25 @@ export default async function createTestConfig({
     services: {
       ...services,
       logSynthtraceEsClient: (context: FtrProviderContext) => {
-        return new LogsSynthtraceEsClient({
-          client: context.getService('es'),
-          logger: createLogger(LogLevel.info),
-          refreshAfterIndex: true,
-        });
+        const esClient = context.getService('es');
+
+        const getSynthtraceClientsFn = () =>
+          getSynthtraceClients({
+            options: {
+              logger: createLogger(LogLevel.info),
+              client: esClient,
+              refreshAfterIndex: true,
+              includePipelineSerialization: false,
+            },
+            synthClients: ['logsEsClient'],
+          });
+
+        return {
+          async getClient() {
+            const { logsEsClient } = await getSynthtraceClientsFn();
+            return logsEsClient;
+          },
+        };
       },
     },
     pageObjects,
