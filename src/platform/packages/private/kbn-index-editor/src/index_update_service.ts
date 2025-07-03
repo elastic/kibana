@@ -169,7 +169,7 @@ export class IndexUpdateService {
     shareReplay({ bufferSize: 1, refCount: true })
   );
 
-  private _latestPendingColumnsToBeSaved: ColumnAddition[] = [];
+  private _pendingColumnsToBeSaved$ = new BehaviorSubject<ColumnAddition[]>([]);
   public readonly pendingColumnsToBeSaved$: Observable<ColumnAddition[]> = this.actions$.pipe(
     scan((acc: ColumnAddition[], action) => {
       if (action.type === 'add-column') {
@@ -190,9 +190,6 @@ export class IndexUpdateService {
       }
       return acc;
     }, []),
-    tap((columns) => {
-      this._latestPendingColumnsToBeSaved = columns;
-    }),
     shareReplay({ bufferSize: 1, refCount: true })
   );
 
@@ -384,6 +381,13 @@ export class IndexUpdateService {
           },
         })
     );
+
+    // Subscribe to pendingColumnsToBeSaved$ and update _pendingColumnsToBeSaved$
+    this._subscription.add(
+      this.pendingColumnsToBeSaved$.subscribe((columns) => {
+        this._pendingColumnsToBeSaved$.next(columns);
+      })
+    );
   }
 
   public refresh() {
@@ -404,7 +408,7 @@ export class IndexUpdateService {
   }
 
   public getPendingFieldsToBeSaved(): string[] {
-    return this._latestPendingColumnsToBeSaved.map((col) => col.name);
+    return this._pendingColumnsToBeSaved$.getValue().map((col) => col.name);
   }
 
   // Add a new index
