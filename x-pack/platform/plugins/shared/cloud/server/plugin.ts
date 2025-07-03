@@ -14,7 +14,7 @@ import { schema } from '@kbn/config-schema';
 import { parseNextURL } from '@kbn/std';
 
 import camelcaseKeys from 'camelcase-keys';
-import { KibanaProductTier, KibanaSolution } from '@kbn/projects-solutions-groups';
+import type { KibanaProductTier, KibanaSolution } from '@kbn/projects-solutions-groups';
 import type { CloudConfigType } from './config';
 
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
