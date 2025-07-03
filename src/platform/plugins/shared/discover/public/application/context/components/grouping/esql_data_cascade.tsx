@@ -120,6 +120,7 @@ export const ESQLDataCascade = ({
       })}
     >
       <DataCascade<DataTableRecord>
+        stickyGroupRoot
         data={initialData}
         cascadeGroups={cascadeGroups}
         tableTitleSlot={({ rows }) => (
