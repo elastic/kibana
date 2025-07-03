@@ -31,7 +31,7 @@ function getUploadPlaceholderCopy(filename: string, extension?: string) {
 }
 
 /**
- * Returns a markdown link for the file
+ * Returns a markdown link for the file with a link to the asset
  */
 function generateMarkdownLink(
   filename: string,
@@ -101,9 +101,9 @@ export function useImagePasteUpload({
   });
 
   useEffect(() => {
-    const subs: Subscription[] = [];
+    const subscriptions: Subscription[] = [];
     if (!uploadState.done$.observed) {
-      subs.push(
+      subscriptions.push(
         uploadState.files$.subscribe((files: FileState[]) => {
           if (files.length && files[0].status !== 'uploaded') setUploadingFile(files[0]);
         }),
@@ -122,7 +122,7 @@ export function useImagePasteUpload({
     }
 
     return () => {
-      subs.forEach((s) => s.unsubscribe?.());
+      subscriptions.forEach((s) => s.unsubscribe?.());
     };
   }, [uploadState, replacePlaceholder, onDone]);
 
@@ -151,7 +151,7 @@ export function useImagePasteUpload({
   useEffect(() => {
     if (!textarea || !caseId) return;
 
-    const handlePaste = (e: ClipboardEvent) => {
+    const handlePaste: (e: ClipboardEvent) => void = (e) => {
       const items = e.clipboardData?.items;
       if (!items) return;
       for (const item of items) {
@@ -169,9 +169,9 @@ export function useImagePasteUpload({
     };
 
     listenerRef.current = handlePaste;
-    textarea.addEventListener('paste', handlePaste as EventListener);
+    textarea.addEventListener('paste', handlePaste);
     return () => {
-      textarea.removeEventListener('paste', handlePaste as EventListener);
+      textarea.removeEventListener('paste', handlePaste);
     };
   }, [textarea, uploadState, caseId, owner]);
 
