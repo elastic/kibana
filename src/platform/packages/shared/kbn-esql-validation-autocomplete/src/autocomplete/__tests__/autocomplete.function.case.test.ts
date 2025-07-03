@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQL_COMMON_NUMERIC_TYPES } from '@kbn/esql-ast/src/definitions/types';
-import { Location } from '../../definitions/types';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import {
   AssertSuggestionsFn,
   getFieldNamesByType,

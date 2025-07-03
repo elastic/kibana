@@ -15,13 +15,12 @@ import {
   ESQLSource,
   isESQLNamedParamLiteral,
 } from '@kbn/esql-ast/src/types';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import {
-  ESQLFieldWithMetadata,
-  collectUserDefinedColumns,
-  getFunctionDefinition,
   getFunctionSignatures,
-  type ESQLCallbacks,
-} from '@kbn/esql-validation-autocomplete';
+  getFunctionDefinition,
+} from '@kbn/esql-ast/src/definitions/functions_helpers';
+import { collectUserDefinedColumns, type ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
 import { getFieldsByTypeRetriever } from '@kbn/esql-validation-autocomplete/src/autocomplete/autocomplete';
 import {
   modeDescription,

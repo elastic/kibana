@@ -8,12 +8,12 @@
  */
 import { i18n } from '@kbn/i18n';
 import { TRIGGER_SUGGESTION_COMMAND } from '@kbn/esql-ast';
-import { SuggestionRawDefinition } from './types';
+import { ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
 
 export const buildValueDefinitions = (
   values: string[],
   options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean }
-): SuggestionRawDefinition[] =>
+): ISuggestionItem[] =>
   values.map((value) => ({
     label: `"${value}"`,
     text: `"${value}"${options?.addComma ? ',' : ''}${

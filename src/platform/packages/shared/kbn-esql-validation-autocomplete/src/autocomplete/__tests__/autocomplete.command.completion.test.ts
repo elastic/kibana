@@ -8,8 +8,8 @@
  */
 import { getFunctionSuggestions } from '@kbn/esql-ast';
 import { ESQL_STRING_TYPES } from '@kbn/esql-ast/src/definitions/types';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import { getFieldNamesByType, setup } from './helpers';
-import { Location } from '../../definitions/types';
 
 // Suggest new user-defined column
 // Suggest fields of string types

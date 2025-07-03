@@ -94,6 +94,7 @@ export { getSuggestionsToRightOfOperatorExpression } from './src/definitions/ope
 export {
   buildFieldsDefinitionsWithMetadata,
   getFunctionSuggestions,
+  getFunctionSignatures,
 } from './src/definitions/functions_helpers';
 
 export * from './src/definitions/constants';

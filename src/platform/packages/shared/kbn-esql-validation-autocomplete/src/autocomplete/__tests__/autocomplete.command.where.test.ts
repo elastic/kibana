@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { pipeCompleteItem, FULL_TEXT_SEARCH_FUNCTIONS } from '@kbn/esql-ast';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import { getDateLiterals } from '@kbn/esql-ast/src/definitions/literals_helpers';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { ESQL_COMMON_NUMERIC_TYPES } from '@kbn/esql-ast/src/definitions/types';
@@ -18,7 +19,6 @@ import {
   getFunctionSignaturesByReturnType,
   setup,
 } from './helpers';
-import { Location } from '../../definitions/types';
 
 const allEvalFns = getFunctionSignaturesByReturnType(Location.WHERE, 'any', {
   scalar: true,

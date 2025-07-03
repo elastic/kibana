@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { handleFragment, columnExists } from '../../../definitions/autocomplete_helpers';
-import { unescapeColumnName } from '../../../definitions/expressions_helpers';
+import { unescapeColumnName } from '../../../definitions/shared';
 import * as mutate from '../../../mutate';
 import { LeafPrinter } from '../../../pretty_print/leaf_printer';
 import { pipeCompleteItem, commaCompleteItem } from '../../utils/complete_items';

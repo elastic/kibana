@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { RecommendedQuery } from '@kbn/esql-types';
-import type { SuggestionRawDefinition } from '../types';
+import type { ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
 
 /**
  * This function maps the recommended queries from the extensions to the autocomplete suggestions.
  * @param recommendedQueriesExtensions, the recommended queries extensions to map
- * @returns SuggestionRawDefinition[], the mapped suggestions
+ * @returns ISuggestionItem[], the mapped suggestions
  */
 export const mapRecommendedQueriesFromExtensions = (
   recommendedQueriesExtensions: RecommendedQuery[]
-): SuggestionRawDefinition[] => {
-  const suggestions: SuggestionRawDefinition[] = recommendedQueriesExtensions.map((extension) => {
+): ISuggestionItem[] => {
+  const suggestions: ISuggestionItem[] = recommendedQueriesExtensions.map((extension) => {
     return {
       label: extension.name,
       text: extension.query,

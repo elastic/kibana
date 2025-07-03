@@ -18,13 +18,17 @@ import {
 } from '@kbn/esql-ast';
 import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
 import { getColumnForASTNode } from '@kbn/esql-ast/src/definitions/shared';
-import { uniqBy } from 'lodash';
 import {
-  FunctionDefinitionTypes,
-  type FunctionDefinition,
-  type FunctionReturnType,
   type SupportedDataType,
-} from '../definitions/types';
+  type FunctionReturnType,
+  FunctionDefinitionTypes,
+  FunctionDefinition,
+} from '@kbn/esql-ast/src/definitions/types';
+import {
+  ESQLUserDefinedColumn,
+  ESQLFieldWithMetadata,
+} from '@kbn/esql-ast/src/commands_registry/types';
+import { uniqBy } from 'lodash';
 import { compareTypesWithLiterals } from '../shared/esql_types';
 import {
   getFunctionDefinition,
@@ -34,7 +38,7 @@ import {
   isLiteralItem,
   isTimeIntervalItem,
 } from '../shared/helpers';
-import { ESQLFieldWithMetadata, ESQLUserDefinedColumn, ReferenceMaps } from '../validation/types';
+import { ReferenceMaps } from '../validation/types';
 
 /**
  * This function returns a list of closing brackets that can be appended to

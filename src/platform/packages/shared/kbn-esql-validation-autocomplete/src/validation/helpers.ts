@@ -21,9 +21,11 @@ import {
 } from '@kbn/esql-ast';
 import { mutate, synth } from '@kbn/esql-ast';
 import { getMessageFromId } from '@kbn/esql-ast/src/definitions/errors';
-import { FunctionDefinition } from '../definitions/types';
+import { ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
+import { FunctionDefinition } from '@kbn/esql-ast/src/definitions/types';
+
 import { getAllArrayTypes, getAllArrayValues } from '../shared/helpers';
-import type { ESQLPolicy, ReferenceMaps } from './types';
+import type { ReferenceMaps } from './types';
 
 export function buildQueryForFieldsFromSource(queryString: string, ast: ESQLAst) {
   const firstCommand = ast[0];

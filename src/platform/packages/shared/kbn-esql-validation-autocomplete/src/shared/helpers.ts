@@ -19,7 +19,21 @@ import {
   type ESQLTimeInterval,
   esqlCommandRegistry,
   timeUnits,
+  getFunctionSignatures,
 } from '@kbn/esql-ast';
+import {
+  type FieldType,
+  type FunctionParameterType,
+  type ArrayType,
+  type FunctionDefinition,
+  FunctionDefinitionTypes,
+  type FunctionParameter,
+  type FunctionReturnType,
+} from '@kbn/esql-ast/src/definitions/types';
+import type {
+  ESQLFieldWithMetadata,
+  ESQLUserDefinedColumn,
+} from '@kbn/esql-ast/src/commands_registry/types';
 import { getColumnForASTNode } from '@kbn/esql-ast/src/definitions/shared';
 import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
 import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
@@ -36,22 +50,8 @@ import {
 import { uniqBy } from 'lodash';
 
 import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';
-import { getFunctionSignatures } from '../definitions/helpers';
-import type { FieldType } from '../definitions/types';
-import {
-  ArrayType,
-  FunctionDefinition,
-  FunctionDefinitionTypes,
-  FunctionParameter,
-  FunctionParameterType,
-  FunctionReturnType,
-  getLocationFromCommandOrOptionName,
-} from '../definitions/types';
-import type {
-  ESQLFieldWithMetadata,
-  ESQLUserDefinedColumn,
-  ReferenceMaps,
-} from '../validation/types';
+import { getLocationFromCommandOrOptionName } from './types';
+import type { ReferenceMaps } from '../validation/types';
 import { getTestFunctions } from './test_functions';
 import type { ESQLCallbacks, ReasonTypes } from './types';
 import { collectUserDefinedColumns } from './user_defined_columns';

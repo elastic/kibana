@@ -7,28 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { getSafeInsertText, TRIGGER_SUGGESTION_COMMAND, timeUnitsToSuggest } from '@kbn/esql-ast';
+import {
+  fieldTypes,
+  FieldType,
+  SupportedDataType,
+  FunctionParameterType,
+  FunctionReturnType,
+  FunctionDefinitionTypes,
+} from '@kbn/esql-ast/src/definitions/types';
+import {
+  Location,
+  ESQLFieldWithMetadata,
+  ISuggestionItem,
+} from '@kbn/esql-ast/src/commands_registry/types';
 import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
 import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
 import { camelCase } from 'lodash';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
-import {
-  FunctionDefinitionTypes,
-  Location,
-  getLocationFromCommandOrOptionName,
-} from '../../definitions/types';
+import { getLocationFromCommandOrOptionName } from '../../shared/types';
 import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
-import type { EditorContext, SuggestionRawDefinition } from '../types';
-import { ESQLFieldWithMetadata } from '../../validation/types';
-import {
-  FieldType,
-  fieldTypes,
-  FunctionParameterType,
-  FunctionReturnType,
-  SupportedDataType,
-} from '../../definitions/types';
+import type { EditorContext } from '../types';
 import {
   joinIndices,
   timeseriesIndices,
@@ -46,7 +47,7 @@ export interface Integration {
   }>;
 }
 
-export type PartialSuggestionWithText = Partial<SuggestionRawDefinition> & { text: string };
+export type PartialSuggestionWithText = Partial<ISuggestionItem> & { text: string };
 
 export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
   text: '',
@@ -350,10 +351,7 @@ export type AssertSuggestionOrderFn = (
   order: string
 ) => Promise<void>;
 
-export type SuggestFn = (
-  query: string,
-  opts?: SuggestOptions
-) => Promise<SuggestionRawDefinition[]>;
+export type SuggestFn = (query: string, opts?: SuggestOptions) => Promise<ISuggestionItem[]>;
 
 export const setup = async (caret = '/') => {
   if (caret.length !== 1) {

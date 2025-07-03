@@ -23,6 +23,10 @@ import { getMessageFromId, errors } from '@kbn/esql-ast/src/definitions/errors';
 import { sourceExists } from '@kbn/esql-ast/src/definitions/sources_helpers';
 import { ErrorTypes } from '@kbn/esql-ast/src/definitions/types';
 import type { ESQLIdentifier } from '@kbn/esql-ast/src/types';
+import type {
+  ESQLFieldWithMetadata,
+  ESQLUserDefinedColumn,
+} from '@kbn/esql-ast/src/commands_registry/types';
 import {
   areFieldAndUserDefinedColumnTypesCompatible,
   getColumnExists,
@@ -44,13 +48,7 @@ import {
   retrievePoliciesFields,
   retrieveSources,
 } from './resources';
-import type {
-  ESQLFieldWithMetadata,
-  ESQLUserDefinedColumn,
-  ReferenceMaps,
-  ValidationOptions,
-  ValidationResult,
-} from './types';
+import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
 
 /**
  * ES|QL validation public API

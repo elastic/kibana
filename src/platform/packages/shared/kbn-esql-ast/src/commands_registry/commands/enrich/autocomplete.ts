@@ -13,7 +13,7 @@ import {
   getNewUserDefinedColumnSuggestion,
 } from '../../utils/complete_items';
 import { findFinalWord, findPreviousWord } from '../../../definitions/autocomplete_helpers';
-import { unescapeColumnName } from '../../../definitions/expressions_helpers';
+import { unescapeColumnName } from '../../../definitions/shared';
 import {
   type ISuggestionItem,
   type ICommandContext,

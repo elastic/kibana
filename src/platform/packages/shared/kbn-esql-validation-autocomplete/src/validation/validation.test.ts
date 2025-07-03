@@ -6,7 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { timeUnitsToSuggest, timeUnits } from '@kbn/esql-ast';
+import { timeUnitsToSuggest, timeUnits, getFunctionSignatures } from '@kbn/esql-ast';
+import {
+  fieldTypes as _fieldTypes,
+  FieldType,
+  dataTypes,
+  SupportedDataType,
+  FunctionDefinition,
+} from '@kbn/esql-ast/src/definitions/types';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
 import { readFile, writeFile } from 'fs/promises';
@@ -21,14 +28,6 @@ import {
   policies,
   unsupported_field,
 } from '../__tests__/helpers';
-import { getFunctionSignatures } from '../definitions/helpers';
-import {
-  FieldType,
-  FunctionDefinition,
-  SupportedDataType,
-  fieldTypes as _fieldTypes,
-  dataTypes,
-} from '../definitions/types';
 import { nonNullable } from '../shared/helpers';
 import { Setup, setup } from './__tests__/helpers';
 import { validationFromCommandTestSuite as runFromTestSuite } from './__tests__/test_suites/validation.command.from';

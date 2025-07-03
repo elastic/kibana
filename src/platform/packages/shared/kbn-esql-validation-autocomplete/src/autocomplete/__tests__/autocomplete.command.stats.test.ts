@@ -8,8 +8,13 @@
  */
 import { ESQLVariableType } from '@kbn/esql-types';
 import { getDateHistogramCompletionItem, allStarConstant } from '@kbn/esql-ast';
-import { ESQL_NUMBER_TYPES, ESQL_COMMON_NUMERIC_TYPES } from '@kbn/esql-ast/src/definitions/types';
-import { FieldType, FunctionReturnType, Location } from '../../definitions/types';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
+import {
+  ESQL_NUMBER_TYPES,
+  ESQL_COMMON_NUMERIC_TYPES,
+  FieldType,
+  FunctionReturnType,
+} from '@kbn/esql-ast/src/definitions/types';
 import { roundParameterTypes } from './constants';
 import {
   setup,

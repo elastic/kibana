@@ -7,36 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLMessage, ESQLLocation } from '@kbn/esql-ast';
+import type { ESQLMessage } from '@kbn/esql-ast';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
+import { ESQLPolicy, ESQLUserDefinedColumn } from '@kbn/esql-ast/src/commands_registry/types';
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
-import { FieldType, SupportedDataType } from '../definitions/types';
 import type { EditorError } from '../types';
-
-export interface ESQLUserDefinedColumn {
-  name: string;
-  // invalid expressions produce columns of type "unknown"
-  // also, there are some cases where we can't yet infer the type of
-  // a valid expression as with `CASE` which can return union types
-  type: SupportedDataType | 'unknown';
-  location: ESQLLocation;
-}
-
-export interface ESQLFieldWithMetadata {
-  name: string;
-  type: FieldType;
-  isEcs?: boolean;
-  hasConflict?: boolean;
-  metadata?: {
-    description?: string;
-  };
-}
-
-export interface ESQLPolicy {
-  name: string;
-  sourceIndices: string[];
-  matchField: string;
-  enrichFields: string[];
-}
 
 export interface ReferenceMaps {
   sources: Set<string>;

@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { SuggestionRawDefinition, ItemKind } from './src/autocomplete/types';
-export type { FunctionDefinition, Literals } from './src/definitions/types';
 export type { ESQLCallbacks } from './src/shared/types';
 
 /**
@@ -23,11 +21,6 @@ export { suggest } from './src/autocomplete/autocomplete';
  * Some utility functions that can be useful to build more feature
  * for the ES|QL language
  */
-export type {
-  ESQLUserDefinedColumn,
-  ESQLFieldWithMetadata,
-  ESQLPolicy,
-} from './src/validation/types';
 export { collectUserDefinedColumns } from './src/shared/user_defined_columns';
 export {
   getAllFunctions,
@@ -44,7 +37,6 @@ export {
   isAssignment,
   isSingleItem,
 } from './src/shared/helpers';
-export { getFunctionSignatures } from './src/definitions/helpers';
 
 export {
   getFieldsByTypeHelper,

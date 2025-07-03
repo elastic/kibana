@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Location } from '../../definitions/types';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import { ESQL_NUMBER_TYPES, ESQL_STRING_TYPES } from '@kbn/esql-ast/src/definitions/types';
 import { EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS } from './autocomplete.command.sort.test';
 import { AVG_TYPES, EXPECTED_FOR_EMPTY_EXPRESSION } from './autocomplete.command.stats.test';

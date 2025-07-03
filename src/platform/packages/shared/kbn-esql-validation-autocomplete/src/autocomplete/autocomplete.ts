@@ -32,16 +32,28 @@ import {
 } from '@kbn/esql-ast';
 import { comparisonFunctions } from '@kbn/esql-ast/src/definitions/all_operators';
 import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
-import { isNumericType } from '@kbn/esql-ast/src/definitions/types';
+import {
+  isNumericType,
+  FunctionParameterType,
+  FunctionDefinitionTypes,
+  FunctionParameter,
+} from '@kbn/esql-ast/src/definitions/types';
 import {
   getDateLiterals,
   getCompatibleLiterals,
 } from '@kbn/esql-ast/src/definitions/literals_helpers';
 import { getExpressionType } from '@kbn/esql-ast/src/definitions/expressions_helpers';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
+import {
+  ESQLUserDefinedColumn,
+  ESQLFieldWithMetadata,
+  GetColumnsByTypeFn,
+  ISuggestionItem,
+  ItemKind,
+} from '@kbn/esql-ast/src/commands_registry/types';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import { isList } from '@kbn/esql-ast/src/ast/helpers';
-import type { EditorContext, ItemKind, SuggestionRawDefinition, GetColumnsByTypeFn } from './types';
+import type { EditorContext } from './types';
 import {
   getFunctionDefinition,
   isColumnItem,
@@ -57,7 +69,6 @@ import {
   collectUserDefinedColumns,
   excludeUserDefinedColumnsFromCurrentCommand,
 } from '../shared/user_defined_columns';
-import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../validation/types';
 import { buildValueDefinitions } from './factories';
 import { getAstContext } from '../shared/context';
 import { getFieldsByTypeHelper, getSourcesHelper } from '../shared/resources_helpers';
@@ -70,12 +81,7 @@ import {
   extractTypeFromASTArg,
   correctQuerySyntax,
 } from './helper';
-import {
-  FunctionParameter,
-  FunctionDefinitionTypes,
-  getLocationFromCommandOrOptionName,
-  FunctionParameterType,
-} from '../definitions/types';
+import { getLocationFromCommandOrOptionName } from '../shared/types';
 import { mapRecommendedQueriesFromExtensions } from './utils/recommended_queries_helpers';
 import { getCommandContext } from './get_command_context';
 
@@ -86,7 +92,7 @@ export async function suggest(
   offset: number,
   context: EditorContext,
   resourceRetriever?: ESQLCallbacks
-): Promise<SuggestionRawDefinition[]> {
+): Promise<ISuggestionItem[]> {
   // Partition out to inner ast / ast context for the latest command
   const innerText = fullText.substring(0, offset);
   const correctedQuery = correctQuerySyntax(innerText);
@@ -117,7 +123,7 @@ export async function suggest(
     let suggestions = getCommandAutocompleteDefinitions(commands);
     if (!ast.length) {
       // Display the recommended queries if there are no commands (empty state)
-      const recommendedQueriesSuggestions: SuggestionRawDefinition[] = [];
+      const recommendedQueriesSuggestions: ISuggestionItem[] = [];
       if (getSources) {
         let fromCommand = '';
         const sources = await getSources();
@@ -165,7 +171,7 @@ export async function suggest(
 
   // ToDo: Reconsider where it belongs when this is resolved https://github.com/elastic/kibana/issues/216492
   const lastCharacterTyped = innerText[innerText.length - 1];
-  let controlSuggestions: SuggestionRawDefinition[] = [];
+  let controlSuggestions: ISuggestionItem[] = [];
   if (lastCharacterTyped === ESQL_VARIABLES_PREFIX) {
     controlSuggestions = getControlSuggestionIfSupported(
       Boolean(supportsControls),
@@ -390,7 +396,7 @@ async function getFunctionArgsSuggestions(
   offset: number,
   getVariables?: () => ESQLControlVariable[] | undefined,
   supportsControls?: boolean
-): Promise<SuggestionRawDefinition[]> {
+): Promise<ISuggestionItem[]> {
   const fnDefinition = getFunctionDefinition(node.name);
   // early exit on no hit
   if (!fnDefinition) {
@@ -449,7 +455,7 @@ async function getFunctionArgsSuggestions(
     });
   }
 
-  const suggestions: SuggestionRawDefinition[] = [];
+  const suggestions: ISuggestionItem[] = [];
   const noArgDefined = !arg;
   const isUnknownColumn =
     arg &&
@@ -616,7 +622,7 @@ async function getFunctionArgsSuggestions(
     // Suggest comparison functions for boolean conditions
     if (canBeBooleanCondition) {
       suggestions.push(
-        ...comparisonFunctions.map<SuggestionRawDefinition>(({ name, description }) => ({
+        ...comparisonFunctions.map<ISuggestionItem>(({ name, description }) => ({
           label: name,
           text: name,
           kind: 'Function' as ItemKind,
