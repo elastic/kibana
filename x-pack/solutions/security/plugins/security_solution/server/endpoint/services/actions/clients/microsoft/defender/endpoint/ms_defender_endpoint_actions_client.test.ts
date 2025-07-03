@@ -1120,9 +1120,7 @@ describe('MS Defender response actions client', () => {
           applyEsClientSearchMock({
             esClientMock: clientConstructorOptionsMock.esClient,
             index: ENDPOINT_ACTIONS_INDEX,
-            response: jest
-              .fn(() => generator.toEsSearchResponse([]))
-              .mockReturnValueOnce(actionRequestsSearchResponse),
+            response: actionRequestsSearchResponse,
             pitUsage: true,
           });
 
@@ -1198,9 +1196,7 @@ describe('MS Defender response actions client', () => {
           applyEsClientSearchMock({
             esClientMock: clientConstructorOptionsMock.esClient,
             index: ENDPOINT_ACTIONS_INDEX,
-            response: jest
-              .fn(() => generator.toEsSearchResponse([]))
-              .mockReturnValueOnce(actionRequestsSearchResponse),
+            response: actionRequestsSearchResponse,
             pitUsage: true,
           });
 
