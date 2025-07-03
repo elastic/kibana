@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { formatNumber } from '@elastic/eui';
-export const MINUTES_SAVED_PER_ALERT = 4;
+export const MINUTES_SAVED_PER_ALERT = 8;
 export const HOURLY_ANALYST_RATE = 70;
 
 // Define AlertData type if not already imported
