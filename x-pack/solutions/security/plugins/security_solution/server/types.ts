@@ -45,6 +45,7 @@ import type { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privi
 import type { ApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
 import type { ProductFeaturesService } from './lib/product_features_service';
 import type { MonitoringEntitySourceDataClient } from './lib/entity_analytics/privilege_monitoring/monitoring_entity_source_data_client';
+import type { MlAuthz } from './lib/machine_learning/authz';
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
@@ -77,6 +78,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getInferenceClient: () => InferenceClient;
   getAssetInventoryClient: () => AssetInventoryDataClient;
   getProductFeatureService: () => ProductFeaturesService;
+  getMlAuthz: () => MlAuthz;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{

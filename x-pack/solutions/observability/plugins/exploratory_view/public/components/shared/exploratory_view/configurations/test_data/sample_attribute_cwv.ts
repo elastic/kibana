@@ -50,7 +50,6 @@ export const sampleAttributeCoreWebVital = {
                   otherBucket: true,
                   size: 10,
                 },
-                scale: 'ordinal',
                 sourceField: 'user_agent.os.name',
               },
               'y-axis-column-1': {
@@ -64,7 +63,6 @@ export const sampleAttributeCoreWebVital = {
                 isBucketed: false,
                 label: 'Average',
                 operationType: 'count',
-                scale: 'ratio',
                 sourceField: RECORDS_FIELD,
               },
               'y-axis-column-2': {
@@ -77,7 +75,6 @@ export const sampleAttributeCoreWebVital = {
                 isBucketed: false,
                 label: 'Poor',
                 operationType: 'count',
-                scale: 'ratio',
                 sourceField: RECORDS_FIELD,
               },
               'y-axis-column-layer0-0': {
@@ -91,7 +88,6 @@ export const sampleAttributeCoreWebVital = {
                 isBucketed: false,
                 label: 'Good',
                 operationType: 'count',
-                scale: 'ratio',
                 sourceField: RECORDS_FIELD,
               },
             },
