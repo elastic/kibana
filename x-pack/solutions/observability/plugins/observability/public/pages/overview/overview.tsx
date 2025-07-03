@@ -63,6 +63,13 @@ export function OverviewPage() {
     triggersActionsUi: { getAlertSummaryWidget: AlertSummaryWidget },
     kibanaVersion,
     serverless: isServerless,
+    data,
+    notifications,
+    fieldFormats,
+    application,
+    licensing,
+    cases,
+    settings,
   } = useKibana().services;
 
   const { ObservabilityPageTemplate } = usePluginContext();
@@ -92,8 +99,8 @@ export function OverviewPage() {
   const appsWithoutData = Object.keys(hasDataMap)
     .sort()
     .reduce((acc, app) => {
-      const data = hasDataMap[app as keyof HasDataMap];
-      if (data?.status === 'success' && !data?.hasData) {
+      const hasData = hasDataMap[app as keyof HasDataMap];
+      if (hasData?.status === 'success' && !hasData?.hasData) {
         const appName = appLabels[app as DataContextApps];
 
         return `${acc}${appName}, `;
@@ -244,6 +251,16 @@ export function OverviewPage() {
                   initialPageSize={ALERTS_PER_PAGE}
                   columns={tableColumns}
                   showInspectButton
+                  services={{
+                    data,
+                    http,
+                    notifications,
+                    fieldFormats,
+                    application,
+                    licensing,
+                    cases,
+                    settings,
+                  }}
                 />
               </SectionContainer>
             </EuiFlexItem>
