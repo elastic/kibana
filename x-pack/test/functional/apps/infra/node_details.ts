@@ -147,8 +147,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await pageObjects.header.waitUntilLoadingHasFinished();
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/192891
-  describe.skip('Node Details', () => {
+  describe('Node Details', () => {
     let synthEsClient: InfraSynthtraceEsClient;
     before(async () => {
       synthEsClient = await getInfraSynthtraceEsClient(esClient);
@@ -667,7 +666,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('Overview Tab', () => {
         before(async () => {
-          await pageObjects.assetDetails.clickOverviewTab();
+          // Close the metric popover if it is open
+          await browser.pressKeys(browser.keys.ESCAPE);
+          const overviewTab = await pageObjects.assetDetails.getOverviewTab();
+          // Use clickMouseButton to ensure the tab is visible
+          await overviewTab.clickMouseButton();
         });
 
         [
@@ -874,7 +877,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Metadata Tab', () => {
           before(async () => {
-            await pageObjects.assetDetails.clickMetadataTab();
+            // Close the metric popover if it is open
+            await browser.pressKeys(browser.keys.ESCAPE);
+            const metadataTab = await pageObjects.assetDetails.getMetadataTab();
+            // Use clickMouseButton to ensure the tab is visible
+            await metadataTab.clickMouseButton();
           });
 
           it('should show metadata table', async () => {
