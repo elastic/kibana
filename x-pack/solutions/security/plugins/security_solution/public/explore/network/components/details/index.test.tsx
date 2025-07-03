@@ -42,6 +42,7 @@ describe('IP Overview Component', () => {
       indexPatterns: [],
       jobNameById: {},
       scopeId: SourcererScopeName.default,
+      isFlyoutOpen: false,
     };
 
     test('it renders the default IP Overview', () => {

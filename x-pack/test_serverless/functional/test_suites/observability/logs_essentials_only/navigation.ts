@@ -25,5 +25,18 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         deepLinkId: 'slo',
       });
     });
+
+    it('does not show the Cases entry', async () => {
+      await svlCommonNavigation.expectExists();
+      await svlCommonNavigation.sidenav.expectLinkMissing({
+        deepLinkId: 'observability-overview:cases',
+      });
+    });
+
+    it('shows 404 when loading cases', async () => {
+      await svlCommonNavigation.expectExists();
+      await svlObltNavigation.navigateToObsCases();
+      await svlObltNavigation.expectNotFoundPage();
+    });
   });
 }
