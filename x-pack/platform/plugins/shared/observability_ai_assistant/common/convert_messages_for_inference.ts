@@ -27,7 +27,7 @@ function safeJsonParse(jsonString: string | undefined, logger: Pick<Logger, 'err
   }
 }
 
-function collapseMessages(messages: Message[], logger: Pick<Logger, 'error'>) {
+export function collapseMessages(messages: Message[], logger: Pick<Logger, 'error'>) {
   const collapsed: Message[] = [];
 
   for (let i = 0; i < messages.length; i++) {
