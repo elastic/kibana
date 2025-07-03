@@ -69,21 +69,20 @@ export const initSavedObjects = (savedObjects: CoreSetup['savedObjects']) => {
 };
 
 export const initEncryptedSavedObjects = ({
-  core,
-  plugins,
+  encryptedSavedObjects,
   logger,
 }: {
-  core: SecuritySolutionPluginCoreSetupDependencies;
-  plugins: SecuritySolutionPluginSetupDependencies;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup | undefined;
   logger: Logger;
 }) => {
-  if (!plugins.encryptedSavedObjects) {
+  if (!encryptedSavedObjects) {
     logger.warn('EncryptedSavedObjects plugin not available; skipping registration.');
     return;
   }
-  plugins.encryptedSavedObjects.registerType({
+  encryptedSavedObjects.registerType({
     type: PrivilegeMonitoringApiKeyType.name,
     attributesToEncrypt: new Set(['apiKey']),
     attributesToIncludeInAAD: new Set(['id', 'name']),
   });
+};
 };
