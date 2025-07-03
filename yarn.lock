@@ -2281,10 +2281,10 @@
     progress "^1.1.8"
     through2 "^2.0.0"
 
-"@elastic/monaco-esql@^3.1.2":
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.2.tgz#83a698293473673db2c4925ed6498da4638be25a"
-  integrity sha512-R/Xk1Yi+SuANcu/+D6LZjvNaSTFeTXPL4UewgWzMK5z2LSwuix+5rcyHDB5xxoZ5cJ9yJOeVpAMUoGFXRXxOoQ==
+"@elastic/monaco-esql@^3.1.4":
+  version "3.1.4"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.4.tgz#a400bf7fb5058e7df5f37ce556a62dcc6c214f41"
+  integrity sha512-B504Q0SM3GysR7aGBj5O1U5/Y5j5fw0B+tbhmL8j8Gw5vogNG+/7TzwggPL39PjeRfpLqjiqu3DtWNNqjAlxcw==
 
 "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
@@ -6349,6 +6349,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/mcp-dev-server@link:src/platform/packages/shared/kbn-mcp-dev-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/metrics-data-access-plugin@link:x-pack/solutions/observability/plugins/metrics_data_access":
   version "0.0.0"
   uid ""
@@ -7693,7 +7697,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/spaces-test-plugin@link:x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin":
+"@kbn/spaces-test-plugin@link:x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin":
   version "0.0.0"
   uid ""
 
@@ -13412,7 +13416,7 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@xyflow/react@^12.7.0":
+"@xyflow/react@^12.7.1":
   version "12.8.1"
   resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.8.1.tgz#bf16e34bd9592fa4200d002d408329ee97aa0714"
   integrity sha512-t5Rame4Gc/540VcOZd28yFe9Xd8lyjKUX+VTiyb1x4ykNXZH5zyDmsu+lj9je2O/jGBVb0pj1Vjcxrxyn+Xk2g==

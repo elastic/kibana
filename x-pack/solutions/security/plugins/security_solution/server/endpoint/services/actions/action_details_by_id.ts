@@ -27,7 +27,16 @@ import { NotFoundError } from '../../errors';
 export const getActionDetailsById = async <T extends ActionDetails = ActionDetails>(
   endpointService: EndpointAppContextService,
   spaceId: string,
-  actionId: string
+  actionId: string,
+  {
+    bypassSpaceValidation = false,
+  }: Partial<{
+    /**
+     * if `true`, then no space validations will be done on the action retrieved. Default is `false`.
+     * USE IT CAREFULLY!
+     */
+    bypassSpaceValidation: boolean;
+  }> = {}
 ): Promise<T> => {
   let normalizedActionRequest: ReturnType<typeof mapToNormalizedActionRequest> | undefined;
   let actionResponses: FetchActionResponsesResult;
@@ -36,7 +45,7 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
     // Get both the Action Request(s) and action Response(s)
     const [actionRequestEsDoc, actionResponseResult] = await Promise.all([
       // Get the action request(s)
-      fetchActionRequestById(endpointService, spaceId, actionId),
+      fetchActionRequestById(endpointService, spaceId, actionId, { bypassSpaceValidation }),
 
       // Get all responses
       fetchActionResponses({
