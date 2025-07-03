@@ -21,9 +21,7 @@ export const PrivilegeMonitoringApiKeyType: SavedObjectsType = {
   namespaceType: 'multiple-isolated',
   mappings: {
     dynamic: false,
-    properties: {
-      apiKey: { type: 'binary' },
-    },
+    properties: {},
   },
   management: {
     importableAndExportable: false,
