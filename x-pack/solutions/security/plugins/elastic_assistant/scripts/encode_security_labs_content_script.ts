@@ -10,7 +10,7 @@
 import * as fs from 'fs/promises';
 
 import * as path from 'path';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import { existsSync } from 'fs';
 import {
   ENCODED_FILE_MICROMATCH_PATTERN,
@@ -30,7 +30,7 @@ export const deleteFilesByPattern = async ({
 }): Promise<void> => {
   try {
     console.log(`Deleting files matching pattern "${pattern}" in directory "${directoryPath}"`);
-    const files = await globby(pattern, { cwd: directoryPath });
+    const files = await fastGlob(pattern, { cwd: directoryPath });
 
     if (files.length === 0) {
       console.log(`No files found matching pattern "${pattern}" in directory "${directoryPath}".`);
@@ -72,7 +72,7 @@ export const encodeSecurityLabsContent = async () => {
     pattern: ENCODED_FILE_MICROMATCH_PATTERN,
   });
 
-  const files = await globby(PLAIN_TEXT_FILE_MICROMATCH_PATTERN, {
+  const files = await fastGlob(PLAIN_TEXT_FILE_MICROMATCH_PATTERN, {
     cwd: SECURITY_LABS_DIR,
   });
   files.forEach((file) => {

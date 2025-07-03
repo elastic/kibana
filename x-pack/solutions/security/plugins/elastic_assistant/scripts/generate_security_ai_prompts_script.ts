@@ -11,7 +11,7 @@ import { Prompt } from '@kbn/security-ai-prompts';
 import * as fs from 'fs/promises';
 import { existsSync, mkdirSync } from 'fs';
 import * as path from 'path';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import { v4 as uuidv4 } from 'uuid';
 
 import { localPrompts } from '../server/lib/prompt/local_prompt_object';
@@ -43,7 +43,7 @@ export const deleteFilesByPattern = async ({
 }): Promise<void> => {
   try {
     console.log(`Deleting files matching pattern "${pattern}" in directory "${directoryPath}"`);
-    const files = await globby(pattern, { cwd: directoryPath });
+    const files = await fastGlob(pattern, { cwd: directoryPath });
 
     if (files.length === 0) {
       console.log(`No files found matching pattern "${pattern}" in directory "${directoryPath}".`);

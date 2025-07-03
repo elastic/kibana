@@ -10,7 +10,7 @@
 /* eslint-disable no-console */
 
 import { resolve } from 'path';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import execa from 'execa';
 import chalk from 'chalk';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -24,7 +24,7 @@ export const lint = async (config: LinterConfig) => {
   const { rootDir, sourceGlob } = config;
 
   const sourceFilesGlob = resolve(rootDir, sourceGlob);
-  const schemaPaths = await globby([sourceFilesGlob]);
+  const schemaPaths = await fastGlob([sourceFilesGlob]);
 
   console.log(chalk.bold(`Linting API route schemas`));
 

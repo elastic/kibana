@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const globbyMock = jest.fn();
-jest.doMock('globby', () => globbyMock);
+export const fastGlobMock = jest.fn();
+jest.doMock('fast-glob', () => fastGlobMock);
 
 export const readFileMock = jest.fn();
 jest.doMock('fs/promises', () => ({

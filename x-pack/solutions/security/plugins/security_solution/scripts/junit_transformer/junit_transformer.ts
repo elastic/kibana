@@ -19,7 +19,7 @@ run(command, {
     string: ['pathPattern', 'rootDirectory', 'reportName'],
     boolean: ['writeInPlace'],
     help: `
-        --pathPattern      Required, glob passed to globby to select files to operate on
+        --pathPattern      Required, glob passed to fast-glob to select files to operate on
         --rootDirectory    Required, path of the kibana repo. Used to calcuate the file path of each spec file relative to the Kibana repo
         --reportName       Required, used as a prefix for the classname. Eventually shows up in the title of flaky test Github issues
         --writeInPlace     Defaults to false. If passed, rewrite the file in place with transformations. If false, the script will pass the transformed XML as a string to stdout

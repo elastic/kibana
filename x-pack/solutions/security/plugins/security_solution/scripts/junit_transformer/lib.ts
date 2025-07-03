@@ -15,7 +15,7 @@ import { relative } from 'path';
 import * as t from 'io-ts';
 import { isLeft } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import del from 'del';
 
 // Function to remove specific fields from an XML object in order to
@@ -192,7 +192,7 @@ export async function command({ flags, log }: CommandArgs) {
   // and remove duplicated reports.
   const xmlResultFiles: string[] = [];
 
-  for (const path of await globby(flags.pathPattern)) {
+  for (const path of await fastGlob(flags.pathPattern)) {
     // Read the file
     const source: string = await fs.readFile(path, 'utf8');
 

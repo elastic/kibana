@@ -8,7 +8,7 @@
  */
 
 import fs from 'fs/promises';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import { resolve } from 'path';
 
 /**
@@ -17,7 +17,7 @@ import { resolve } from 'path';
  * @param folderPath target directory
  */
 export async function removeGenArtifacts(folderPath: string) {
-  const artifactsPath = await globby([resolve(folderPath, './**/*.gen.ts')]);
+  const artifactsPath = await fastGlob([resolve(folderPath, './**/*.gen.ts')]);
 
   await Promise.all(artifactsPath.map((artifactPath) => fs.unlink(artifactPath)));
 }

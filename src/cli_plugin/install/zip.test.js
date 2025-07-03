@@ -12,7 +12,7 @@ import os from 'os';
 import fs from 'fs';
 
 import del from 'del';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 
 import { analyzeArchive, extractArchive } from './zip';
 
@@ -55,7 +55,7 @@ describe('kibana cli', function () {
         const archive = path.resolve(repliesPath, 'test_plugin.zip');
         await extractArchive(archive, tempPath, 'kibana/test-plugin');
 
-        expect(globby.sync('**/*', { cwd: tempPath, onlyFiles: false })).toMatchInlineSnapshot(`
+        expect(fastGlob.sync('**/*', { cwd: tempPath, onlyFiles: false })).toMatchInlineSnapshot(`
           Array [
             "bin",
             "kibana.json",
@@ -78,7 +78,7 @@ describe('kibana cli', function () {
 
         await extractArchive(archivePath, tempPath, 'kibana/test-plugin/bin');
 
-        expect(globby.sync('**/*', { cwd: tempPath, onlyFiles: false })).toMatchInlineSnapshot(`
+        expect(fastGlob.sync('**/*', { cwd: tempPath, onlyFiles: false })).toMatchInlineSnapshot(`
           Array [
             "executable",
             "not-executable",

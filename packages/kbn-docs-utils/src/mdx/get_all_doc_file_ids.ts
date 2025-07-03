@@ -9,14 +9,14 @@
 
 import Fsp from 'fs/promises';
 
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import { asyncMapWithLimit } from '@kbn/std';
 import Yaml from 'js-yaml';
 
 const FM_SEP_RE = /^---$/m;
 
 export async function getAllDocFileIds(outputDir: string) {
-  const paths = await globby(['**/*.mdx'], {
+  const paths = await fastGlob(['**/*.mdx'], {
     cwd: outputDir,
     absolute: true,
     unique: true,

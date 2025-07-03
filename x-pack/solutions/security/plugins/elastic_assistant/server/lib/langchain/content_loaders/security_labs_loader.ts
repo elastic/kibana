@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import { Logger } from '@kbn/core/server';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { resolve } from 'path';
@@ -73,7 +73,7 @@ export const loadSecurityLabs = async (
 
 export const getSecurityLabsDocsCount = async ({ logger }: { logger: Logger }): Promise<number> => {
   try {
-    return await globby(ENCODED_FILE_MICROMATCH_PATTERN, {
+    return await fastGlob(ENCODED_FILE_MICROMATCH_PATTERN, {
       cwd: resolve(__dirname, '../../../knowledge_base/security_labs'),
     }).then((files) => files.length);
   } catch (e) {

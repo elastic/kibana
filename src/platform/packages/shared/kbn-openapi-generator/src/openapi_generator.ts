@@ -12,7 +12,7 @@
 import SwaggerParser from '@apidevtools/swagger-parser';
 import chalk from 'chalk';
 import fs from 'fs/promises';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import { resolve } from 'path';
 import { fixEslint } from './lib/fix_eslint';
 import { formatOutput } from './lib/format_output';
@@ -52,7 +52,7 @@ export const generate = async (config: GeneratorConfig) => {
 
   console.log(`👀  Searching for source files`);
   const sourceFilesGlob = resolve(rootDir, sourceGlob);
-  const schemaPaths = await globby([sourceFilesGlob]);
+  const schemaPaths = await fastGlob([sourceFilesGlob]);
 
   console.log(`🕵️‍♀️   Found ${schemaPaths.length} schemas, parsing`);
   let parsedSources: ParsedSource[] = await Promise.all(

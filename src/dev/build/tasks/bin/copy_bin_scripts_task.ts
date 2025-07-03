@@ -10,7 +10,7 @@
 import Mustache from 'mustache';
 import { join } from 'path';
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import { copyAll, Task } from '../../lib';
 
 export const CopyBinScripts: Task = {
@@ -27,7 +27,7 @@ export const CopyBinScripts: Task = {
           select: ['*.bat'],
         });
       } else {
-        globby
+        fastGlob
           .sync(['*'], {
             ignore: ['*.bat'],
             cwd: scriptsSrc,

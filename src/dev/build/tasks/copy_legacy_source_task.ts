@@ -10,7 +10,7 @@
 import { resolve } from 'path';
 
 import { getPackages } from '@kbn/repo-packages';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import Piscina from 'piscina';
 
 import { Task } from '../lib';
@@ -55,9 +55,9 @@ export const CopyLegacySource: Task = {
       filename: resolve(__dirname, 'copy_source_worker.js'),
     });
 
-    const globbyOptions = { cwd: config.resolveFromRepo('.') };
+    const fastGlobOptions = { cwd: config.resolveFromRepo('.') };
     const promises = [];
-    for await (const source of globby.stream(select, globbyOptions)) {
+    for await (const source of fastGlob.stream(select, fastGlobOptions)) {
       promises.push(piscina.run({ source }));
     }
     await Promise.all(promises);

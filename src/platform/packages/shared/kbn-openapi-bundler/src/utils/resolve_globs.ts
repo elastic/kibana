@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import { resolve } from 'path';
 
 export async function resolveGlobs(globs: string[]): Promise<string[]> {
   const normalizedGlobs = globs.map((glob) => resolve(glob));
-  const filePaths = await globby(normalizedGlobs);
+  const filePaths = await fastGlob(normalizedGlobs);
 
   return filePaths;
 }

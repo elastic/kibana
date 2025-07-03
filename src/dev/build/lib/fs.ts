@@ -17,7 +17,7 @@ import { createGunzip } from 'zlib';
 import { inspect } from 'util';
 
 import archiver from 'archiver';
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import cpy from 'cpy';
 import del from 'del';
 import * as tar from 'tar';
@@ -178,7 +178,7 @@ export async function copyAll(
   // we must update access and modified file times after the file copy
   // has completed, otherwise the copy action can effect modify times.
   if (time) {
-    const copiedDirectories = await globby(select, {
+    const copiedDirectories = await fastGlob(select, {
       cwd: destination,
       dot,
       onlyDirectories: true,

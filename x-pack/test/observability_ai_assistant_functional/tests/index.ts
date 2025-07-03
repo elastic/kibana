@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import path from 'path';
 import { createUsersAndRoles } from '../common/users/create_users_and_roles';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -18,7 +18,7 @@ export default function observabilityAIAssistantFunctionalTests({
 }: FtrProviderContext) {
   describe('Observability AI Assistant Functional tests', function () {
     const filePattern = '**/*.spec.ts';
-    const tests = globby.sync(filePattern, { cwd });
+    const tests = fastGlob.sync(filePattern, { cwd });
 
     // Creates roles and users before running tests
     before(async () => {

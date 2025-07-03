@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import globby from 'globby';
+import fastGlob from 'fast-glob';
 import path from 'path';
 import { FtrProviderContext } from '../common/ftr_provider_context';
 
@@ -32,7 +32,7 @@ export default function apmApiIntegrationTests({ getService, loadTestFile }: Ftr
   // Failing: See https://github.com/elastic/kibana/issues/176948
   describe('APM API tests', function () {
     const filePattern = getGlobPattern();
-    const tests = globby.sync(filePattern, { cwd });
+    const tests = fastGlob.sync(filePattern, { cwd });
 
     if (envGrepFiles) {
       // eslint-disable-next-line no-console
