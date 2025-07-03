@@ -8,7 +8,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SortOrder, SortCombinations } from '@elastic/elasticsearch/lib/api/types';
+import type { SortCombinations, SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsPitParams } from '@kbn/core-saved-objects-api-server/src/apis';
 import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 
@@ -20,7 +20,7 @@ export function getSortingParams(
   sortField?: string,
   sortOrder?: SortOrder,
   pit?: SavedObjectsPitParams
-): { sort?: SortCombinations[] } {
+): { sort?: SortCombinations[]; runtime_mappings?: Record<string, any> } {
   if (!sortField) {
     // if we are performing a PIT search, we must sort by some criteria
     // in order to get the 'sort' property for each of the results.
@@ -45,22 +45,46 @@ export function getSortingParams(
 
   if (types.length > 1) {
     const rootField = getProperty(mappings, sortField);
-    if (!rootField) {
-      throw Boom.badRequest(
-        `Unable to sort multiple types by field ${sortField}, not a root property`
-      );
-    }
+    if (rootField) {
+      return {
+        sort: [
+          {
+            [sortField]: {
+              order: sortOrder,
+              unmapped_type: rootField.type,
+            },
+          },
+        ],
+      };
+    } else {
+      // rootField not found, create a runtime field that merges the sort fields from all types
+      const mergedFieldName = `merged_${sortField}`;
+      const scriptLines = types.map((t, idx) => {
+        const fieldName = `${t}.${sortField}`;
+        return idx === 0
+          ? `if (doc['${fieldName}'].size() != 0) { emit(doc['${fieldName}'].value); }`
+          : `else if (doc['${fieldName}'].size() != 0) { emit(doc['${fieldName}'].value); }`;
+      });
+      const scriptSource = scriptLines.join(' ');
 
-    return {
-      sort: [
-        {
-          [sortField]: {
-            order: sortOrder,
-            unmapped_type: rootField.type,
+      return {
+        runtime_mappings: {
+          [mergedFieldName]: {
+            type: 'keyword',
+            script: {
+              source: scriptSource,
+            },
           },
         },
-      ],
-    };
+        sort: [
+          {
+            [mergedFieldName]: {
+              order: sortOrder,
+            },
+          },
+        ],
+      };
+    }
   }
 
   const [typeField] = types;
