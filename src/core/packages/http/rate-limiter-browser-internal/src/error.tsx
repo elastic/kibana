@@ -12,14 +12,15 @@ import React, { useCallback, useMemo, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { getRetryAfter } from './utils';
 
-interface ServerOverloadedErrorProps {
+interface RateLimiterErrorProps {
   error: IHttpFetchError;
 }
 
-export function ServerOverloadedError({ error }: ServerOverloadedErrorProps) {
-  const retryAfter = useMemo(() => error.response?.headers.get('Retry-After') ?? '', [error]);
-  const [counter, setCounter] = useState(retryAfter ? parseInt(retryAfter, 10) : 0);
+export function RateLimiterError({ error }: RateLimiterErrorProps) {
+  const retryAfter = useMemo(() => getRetryAfter(error), [error]);
+  const [counter, setCounter] = useState(retryAfter);
   const handleReload = useCallback(() => {
     window.location.reload();
   }, []);
@@ -27,10 +28,7 @@ export function ServerOverloadedError({ error }: ServerOverloadedErrorProps) {
   useInterval(() => setCounter(counter - 1), counter > 0 ? 1000 : null);
 
   return (
-    <EuiPage
-      css={{ minHeight: '100vh', alignItems: 'center' }}
-      data-test-subj="serverOverloadedScreen"
-    >
+    <EuiPage css={{ minHeight: '100vh', alignItems: 'center' }} data-test-subj="rateLimiterScreen">
       <EuiPageBody>
         <EuiPageSection alignment="center">
           <EuiEmptyPrompt
@@ -39,7 +37,7 @@ export function ServerOverloadedError({ error }: ServerOverloadedErrorProps) {
             title={
               <h2>
                 <FormattedMessage
-                  id="core.fatalErrors.serverIsOverloadedTitle"
+                  id="core.http.rateLimiter.errorPageTitle"
                   defaultMessage="Server is overloaded"
                 />
               </h2>
@@ -47,7 +45,7 @@ export function ServerOverloadedError({ error }: ServerOverloadedErrorProps) {
             body={
               <p>
                 <FormattedMessage
-                  id="core.fatalErrors.serverIsOverloadedPageDescription"
+                  id="core.http.rateLimiter.errorPageDescription"
                   defaultMessage="Try refreshing the page. If that doesn't work, wait a few seconds and try again."
                 />
               </p>
@@ -61,7 +59,7 @@ export function ServerOverloadedError({ error }: ServerOverloadedErrorProps) {
                 data-test-subj="reload"
               >
                 <FormattedMessage
-                  id="core.fatalErrors.reloadButtonLabel"
+                  id="core.http.rateLimiter.reloadButtonLabel"
                   defaultMessage="Reload{timeout, plural, =0 {} other { (#)}}"
                   values={{ timeout: counter }}
                 />

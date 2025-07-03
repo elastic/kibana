@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import { render } from 'react-dom';
 import { ReplaySubject, first, tap } from 'rxjs';
 
@@ -15,17 +15,11 @@ import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
+import type { FatalError, FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
-import { type IHttpFetchError, isServerOverloadedError } from '@kbn/core-http-browser';
 import { FatalErrorScreen } from './fatal_error_screen';
 import { formatError, formatStack } from './utils';
-import { GenericError, ServerOverloadedError } from './errors';
-import { FatalError } from './fatal_error';
-
-function isServerOverloaded(errors: FatalError[]): errors is Array<FatalError<IHttpFetchError>> {
-  return !!errors.length && errors.every((value) => isServerOverloadedError(value.error));
-}
+import { GenericError } from './generic_error';
 
 /** @internal */
 export interface FatalErrorsServiceSetupDeps {
@@ -39,6 +33,7 @@ export interface FatalErrorsServiceSetupDeps {
 export class FatalErrorsService {
   private readonly error$ = new ReplaySubject<FatalError>();
   private fatalErrors?: FatalErrorsSetup;
+  private handlers = new Map<(error: FatalError) => boolean, (errors: FatalError[]) => ReactNode>();
 
   /**
    *
@@ -76,6 +71,8 @@ export class FatalErrorsService {
 
         throw error;
       },
+
+      catch: this.handlers.set.bind(this.handlers),
     };
 
     this.setupGlobalErrorHandlers();
@@ -109,7 +106,7 @@ export class FatalErrorsService {
       >
         <FatalErrorScreen error$={this.error$}>
           {(errors) =>
-            (isServerOverloaded(errors) && <ServerOverloadedError error={errors[0].error} />) || (
+            this.renderCustomError(errors) || (
               <GenericError
                 buildNumber={injectedMetadata.getKibanaBuildNumber()}
                 errors={errors}
@@ -121,6 +118,16 @@ export class FatalErrorsService {
       </KibanaRootContextProvider>,
       container
     );
+  }
+
+  private renderCustomError(errors: FatalError[]) {
+    for (const [condition, handler] of this.handlers) {
+      if (errors.length && errors.every((error) => condition(error))) {
+        return handler(errors);
+      }
+    }
+
+    return null;
   }
 
   private setupGlobalErrorHandlers() {
