@@ -17,7 +17,7 @@ import {
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
-import { ESQL_STRING_TYPES } from '../../../ast/helpers';
+import { ESQL_STRING_TYPES } from '../../../definitions/types';
 
 const appendSeparatorCompletionItem: ISuggestionItem = {
   command: TRIGGER_SUGGESTION_COMMAND,

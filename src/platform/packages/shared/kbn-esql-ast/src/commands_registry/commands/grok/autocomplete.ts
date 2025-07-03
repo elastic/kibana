@@ -12,7 +12,7 @@ import { pipeCompleteItem } from '../../utils/complete_items';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
-import { ESQL_STRING_TYPES } from '../../../ast/helpers';
+import { ESQL_STRING_TYPES } from '../../../definitions/types';
 
 export async function autocomplete(
   query: string,
