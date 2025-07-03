@@ -8,14 +8,8 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { stackMonitoringCommonSchema } from '../common';
 
-export const stackMonitoringCommonSchema = schema.object({
-  duration: schema.string(),
-  threshold: schema.maybe(schema.number()),
-  limit: schema.maybe(schema.string()),
-  filterQuery: schema.maybe(schema.string({})),
-  filterQueryText: schema.maybe(schema.string({})),
-});
+export const clusterHealthParamsSchema = stackMonitoringCommonSchema;
 
-export type StackMonitoringType = TypeOf<typeof stackMonitoringCommonSchema>;
+export type ClusterHealthParams = TypeOf<typeof clusterHealthParamsSchema>;

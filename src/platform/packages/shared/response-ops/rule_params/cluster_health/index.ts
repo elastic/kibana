@@ -6,16 +6,5 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-
-export const stackMonitoringCommonSchema = schema.object({
-  duration: schema.string(),
-  threshold: schema.maybe(schema.number()),
-  limit: schema.maybe(schema.string()),
-  filterQuery: schema.maybe(schema.string({})),
-  filterQueryText: schema.maybe(schema.string({})),
-});
-
-export type StackMonitoringType = TypeOf<typeof stackMonitoringCommonSchema>;
+export { clusterHealthParamsSchema, type ClusterHealthParams } from './latest';
+export { clusterHealthParamsSchema as clusterHealthParamsSchemaV1 } from './v1';
