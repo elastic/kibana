@@ -77,14 +77,14 @@ export class AccessControlService {
     }
 
     const { typeMap } = authorizationResult;
-    const unauthorizedTypes: string[] = [];
+    const unauthorizedTypes: Set<string> = new Set();
 
     for (const type of typesRequiringAccessControl) {
       const typeAuth = typeMap.get(type);
 
       // If no authorization entry exists for this type, or no 'manage_access_control' privilege
       if (!typeAuth || !typeAuth['manage_access_control' as A]) {
-        unauthorizedTypes.push(type);
+        unauthorizedTypes.add(type);
       } else {
         const accessControlAuth = typeAuth['manage_access_control' as A];
 
@@ -94,14 +94,14 @@ export class AccessControlService {
           (!accessControlAuth.authorizedSpaces ||
             !accessControlAuth.authorizedSpaces.includes(currentSpace))
         ) {
-          unauthorizedTypes.push(type);
+          unauthorizedTypes.add(type);
         }
       }
     }
 
     // If we found unauthorized types, throw an error
-    if (unauthorizedTypes.length > 0) {
-      const typeList = unauthorizedTypes.sort().join(',');
+    if (unauthorizedTypes.size > 0) {
+      const typeList = [...unauthorizedTypes].sort().join(',');
       throw new Error(`Access denied: Unable to manage access control for ${typeList}`);
     }
   }
