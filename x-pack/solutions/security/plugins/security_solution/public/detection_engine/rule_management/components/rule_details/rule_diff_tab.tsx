@@ -122,19 +122,19 @@ const normalizeRule = (originalRule: RuleResponse): RuleResponse => {
 interface RuleDiffTabProps {
   oldRule: RuleResponse;
   newRule: RuleResponse;
-  leftSideRuleLabel: string;
-  rightSideRuleLabel: string;
-  leftSideRuleDescription: string;
-  rightSideRuleDescription: string;
+  leftDiffSideLabel: string;
+  rightDiffSideLabel: string;
+  leftDiffSideDescription: string;
+  rightDiffSideDescription: string;
 }
 
 export const RuleDiffTab = ({
   oldRule,
   newRule,
-  leftSideRuleLabel,
-  rightSideRuleLabel,
-  leftSideRuleDescription,
-  rightSideRuleDescription,
+  leftDiffSideLabel,
+  rightDiffSideLabel,
+  leftDiffSideDescription,
+  rightDiffSideDescription,
 }: RuleDiffTabProps) => {
   const [oldSource, newSource] = useMemo(() => {
     const visibleNewRuleProperties = omit(normalizeRule(newRule), ...HIDDEN_PROPERTIES);
@@ -157,19 +157,19 @@ export const RuleDiffTab = ({
           <EuiFlexGroup alignItems="baseline" gutterSize="xs">
             <EuiIconTip
               color="subdued"
-              content={leftSideRuleDescription}
+              content={leftDiffSideDescription}
               type="info"
               size="m"
               display="block"
             />
             <EuiTitle size="xxxs">
-              <h6>{leftSideRuleLabel}</h6>
+              <h6>{leftDiffSideLabel}</h6>
             </EuiTitle>
           </EuiFlexGroup>
           <EuiFlexGroup alignItems="baseline" gutterSize="xs">
-            <EuiIconTip color="subdued" content={rightSideRuleDescription} type="info" size="m" />
+            <EuiIconTip color="subdued" content={rightDiffSideDescription} type="info" size="m" />
             <EuiTitle size="xxxs">
-              <h6>{rightSideRuleLabel}</h6>
+              <h6>{rightDiffSideLabel}</h6>
             </EuiTitle>
           </EuiFlexGroup>
         </EuiFlexGroup>
