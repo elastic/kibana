@@ -147,7 +147,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
   SearchBarInjectedDeps;
 
-interface State<QT extends Query | AggregateQuery = Query> {
+export interface SearchBarState<QT extends Query | AggregateQuery = Query> {
   isFiltersVisible: boolean;
   openQueryBarMenu: boolean;
   showSavedQueryPopover: boolean;
@@ -157,9 +157,9 @@ interface State<QT extends Query | AggregateQuery = Query> {
   dateRangeTo: string;
 }
 
-class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends Component<
+export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends Component<
   SearchBarProps<QT> & WithEuiThemeProps,
-  State<QT | Query>
+  SearchBarState<QT | Query>
 > {
   public static defaultProps = {
     showQueryMenu: true,
@@ -177,7 +177,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
 
   public static getDerivedStateFromProps(
     nextProps: SearchBarProps,
-    prevState: State<AggregateQuery | Query>
+    prevState: SearchBarState<AggregateQuery | Query>
   ) {
     if (isEqual(prevState.currentProps, nextProps)) {
       return null;
@@ -204,7 +204,13 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         query: '',
         language: nextProps.query.language,
       };
-    } else if (nextProps.query && !isOfQueryType(nextProps.query)) {
+    } else if (
+      nextProps.query &&
+      isOfAggregateQueryType(nextProps.query) &&
+      nextProps.query.esql !== get(prevState, 'currentProps.query.esql')
+    ) {
+      // this code is just overriding the query with a new one in case the query has changed in props
+      // without the props check it would override any edits to the query, if e.g. results were returned and isLoading switches from true to false
       nextQuery = nextProps.query;
     }
 
@@ -260,7 +266,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     query: this.props.query ? { ...this.props.query } : undefined,
     dateRangeFrom: get(this.props, 'dateRangeFrom', 'now-15m'),
     dateRangeTo: get(this.props, 'dateRangeTo', 'now'),
-  } as State<QT>;
+  } as SearchBarState<QT>;
 
   public isDirty = () => {
     if (!this.props.showDatePicker && this.state.query && this.props.query) {
