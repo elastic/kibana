@@ -60,27 +60,21 @@ export const AIValueMetrics: React.FC<Props> = (props) => {
         <ul>
           <li>{`Hours saved: ${formatThousandsDecimal(hoursSaved)}`}</li>
           <li>{`Cost savings: ${formatDollars(costSavings)}`}</li>
-          <li>{`alertStats.escalated: ${formatThousands(alertStats.escalated)}`}</li>
-          <li>{`alertStats.filteredPercentage: ${formatPercent(
-            alertStats.filteredPercentage
-          )}`}</li>
-          <li>{`alertStats.escalatedPercentage: ${formatPercent(
-            alertStats.escalatedPercentage
-          )}`}</li>
+          <li>{`Alerts escalated: ${formatThousands(alertStats.escalated)}`}</li>
+          <li>{`Alerts filteredPercentage: ${formatPercent(alertStats.filteredPercentage)}`}</li>
+          <li>{`Alerts escalatedPercentage: ${formatPercent(alertStats.escalatedPercentage)}`}</li>
           <li>{`aiPercentage: ${formatPercent(detectionComparison.aiPercentage)}`}</li>
           <li>{`traditionalPercentage: ${formatPercent(
             detectionComparison.traditionalPercentage
           )}`}</li>
-          <li>{`responseTimeTrend.averageBeforeAI: ${formatThousands(
+          <li>{`Response time averageBeforeAI: ${formatThousands(
             responseTimeTrend.averageBeforeAI
           )}`}</li>
-          <li>{`responseTimeTrend.averageAfterAI: ${formatThousands(
+          <li>{`Response time averageAfterAI: ${formatThousands(
             responseTimeTrend.averageAfterAI
           )}`}</li>
-          <li>{`responseTimeTrend.improvement: ${formatThousands(
-            responseTimeTrend.improvement
-          )}`}</li>
-          <li>{`responseTimeTrend.improvementPercent: ${formatPercent(
+          <li>{`Response time improvement: ${formatThousands(responseTimeTrend.improvement)}`}</li>
+          <li>{`Response time improvementPercent: ${formatPercent(
             responseTimeTrend.improvementPercent
           )}`}</li>
         </ul>
