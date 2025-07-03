@@ -1111,7 +1111,7 @@ x-pack/solutions/security/test
 x-pack/test
 x-pack/test_serverless
 x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
-x-pack/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
+x-pack/platform/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
 x-pack/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
 x-pack/test/functional_execution_context/plugins/alerts @elastic/kibana-core
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
@@ -1927,7 +1927,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test/cloud_integration @elastic/kibana-core
 /x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 /src/platform/test/server_integration @elastic/kibana-core
-/x-pack/test/functional_cors @elastic/kibana-core
+/x-pack/platform/test/functional_cors @elastic/kibana-core
 /x-pack/test/stack_functional_integration/apps/telemetry @elastic/kibana-core
 /src/platform/test/plugin_functional/plugins/core* @elastic/kibana-core
 /src/platform/test/plugin_functional/platform/plugins/shared/telemetry @elastic/kibana-core

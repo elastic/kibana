@@ -6,7 +6,7 @@
     "version": "kibana"
   },
   "scripts": {
-    "kbn": "node ../../../../../scripts/kbn.js",
-    "build": "rm -rf './target' && ../../../../../node_modules/.bin/tsc"
+    "kbn": "node ../../../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && ../../../../../../node_modules/.bin/tsc"
   }
 }
