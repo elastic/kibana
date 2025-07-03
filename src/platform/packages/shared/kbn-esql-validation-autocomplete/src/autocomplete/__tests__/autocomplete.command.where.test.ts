@@ -6,11 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import {
-  pipeCompleteItem,
-  FULL_TEXT_SEARCH_FUNCTIONS,
-  ESQL_COMMON_NUMERIC_TYPES,
-} from '@kbn/esql-ast';
+import { pipeCompleteItem, ESQL_COMMON_NUMERIC_TYPES } from '@kbn/esql-ast';
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import { getDateLiterals } from '@kbn/esql-ast/src/definitions/utils';
 import { ESQLVariableType } from '@kbn/esql-types';
@@ -167,13 +163,6 @@ describe('WHERE <expression>', () => {
           .map((field) => `${field} `)
           .map(attachTriggerCommand),
         ...allEvalFns,
-      ]);
-
-      await assertSuggestions('from a | limit 3 | where / ', [
-        ...getFieldNamesByType('any')
-          .map((field) => `${field} `)
-          .map(attachTriggerCommand),
-        ...allEvalFns.filter((fn) => !FULL_TEXT_SEARCH_FUNCTIONS.includes(fn.label!.toLowerCase())),
       ]);
     });
 

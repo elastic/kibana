@@ -134,7 +134,7 @@ export async function autocomplete(
 
   return await handleFragment(
     query,
-    columnExists,
+    (fragment: string) => columnExists(fragment, context),
     (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
       // SORT fie<suggest>
       return [

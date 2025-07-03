@@ -8,8 +8,15 @@
  */
 import type { ESQLCommand } from '../../../types';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
-import { pipeCompleteItem } from '../../utils/complete_items';
-import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
+import {
+  pipeCompleteItem,
+  commaCompleteItem,
+  getNewUserDefinedColumnSuggestion,
+} from '../../utils/complete_items';
+import { Location } from '../../types';
+import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
+import { getFunctionSuggestions } from '../../../definitions/utils';
+import { isRestartingExpression } from '../../../definitions/utils/shared';
 
 export async function autocomplete(
   query: string,
@@ -17,11 +24,23 @@ export async function autocomplete(
   callbacks?: ICommandCallbacks,
   context?: ICommandContext
 ): Promise<ISuggestionItem[]> {
-  if (/[0-9]\s+$/.test(query)) {
-    return [pipeCompleteItem];
+  // ROW col0 = /
+  if (/=\s*$/.test(query)) {
+    return getFunctionSuggestions({ location: Location.ROW });
   }
 
-  return buildConstantsDefinitions(['10', '100', '1000'], '', undefined, {
-    advanceCursorAndOpenSuggestions: true,
-  });
+  // ROW col0 = 23 /
+  else if (command.args.length > 0 && !isRestartingExpression(query)) {
+    return [
+      { ...pipeCompleteItem, command: TRIGGER_SUGGESTION_COMMAND },
+      { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
+    ];
+  }
+
+  // ROW /
+  // ROW foo = "bar", /
+  return [
+    getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
+    ...getFunctionSuggestions({ location: Location.ROW }),
+  ];
 }

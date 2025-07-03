@@ -16,6 +16,7 @@ export const getCommandContext = async (
   callbacks?: ESQLCallbacks
 ) => {
   const getSources = getSourcesHelper(callbacks);
+  const helpers = getPolicyHelper(callbacks);
   switch (commandName) {
     case 'completion':
       const inferenceEndpoints =
@@ -24,7 +25,6 @@ export const getCommandContext = async (
         inferenceEndpoints,
       };
     case 'enrich':
-      const helpers = getPolicyHelper(callbacks);
       const policies = await helpers.getPolicies();
       const policiesMap = new Map(policies.map((policy) => [policy.name, policy]));
       return {
@@ -45,10 +45,21 @@ export const getCommandContext = async (
         supportsControls: callbacks?.canSuggestVariables?.() ?? false,
       };
     case 'stats':
-      const histogramBarTarget = (await callbacks?.getPreferences?.())?.histogramBarTarget || 1000;
+      const histogramBarTarget = (await callbacks?.getPreferences?.())?.histogramBarTarget || 50;
       return {
         histogramBarTarget,
         supportsControls: callbacks?.canSuggestVariables?.() ?? false,
+        variables: await callbacks?.getVariables?.(),
+      };
+    case 'fork':
+      const enrichPolicies = await helpers.getPolicies();
+      return {
+        histogramBarTarget: (await callbacks?.getPreferences?.())?.histogramBarTarget || 50,
+        joinSources: (await callbacks?.getJoinIndices?.())?.indices || [],
+        supportsControls: callbacks?.canSuggestVariables?.() ?? false,
+        policies: new Map(enrichPolicies.map((policy) => [policy.name, policy])),
+        inferenceEndpoints:
+          (await callbacks?.getInferenceEndpoints?.('completion'))?.inferenceEndpoints || [],
       };
     case 'ts':
       const timeseriesSources = await callbacks?.getTimeseriesIndices?.();

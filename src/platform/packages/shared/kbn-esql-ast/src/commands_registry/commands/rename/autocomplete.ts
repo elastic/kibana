@@ -32,7 +32,7 @@ export async function autocomplete(
   const match = query.match(/(?:rename|,)\s+(\S+)\s+a?$/i);
   if (match) {
     const leftSideOfRename = match[1];
-    return columnExists(leftSideOfRename) ? [asCompletionItem] : [assignCompletionItem];
+    return columnExists(leftSideOfRename, context) ? [asCompletionItem] : [assignCompletionItem];
   }
 
   if (/(?:rename|,)\s+\S+\s+a?$/i.test(query)) {

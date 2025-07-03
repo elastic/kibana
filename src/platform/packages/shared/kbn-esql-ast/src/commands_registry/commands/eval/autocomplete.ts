@@ -71,6 +71,7 @@ export async function autocomplete(
     getColumnsByType: callbacks?.getByType,
     expressionRoot,
     location: Location.EVAL,
+    context,
   });
 
   const positionInExpression = getExpressionPosition(query, expressionRoot);

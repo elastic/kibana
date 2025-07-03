@@ -169,7 +169,7 @@ export const suggestFields = async (
 
   return handleFragment(
     innerText,
-    (fragment) => columnExists(fragment) || lookupIndexFieldExists(fragment),
+    (fragment) => columnExists(fragment, context) || lookupIndexFieldExists(fragment),
     (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
       // fie<suggest>
       return fieldSuggestions.map((suggestion) => {

@@ -45,11 +45,12 @@ function alreadyUsedColumns(command: ESQLCommand) {
 function suggestColumns(
   columnSuggestions: ISuggestionItem[],
   otherSuggestions: ISuggestionItem[],
-  innerText: string
+  innerText: string,
+  context?: ICommandContext
 ) {
   return handleFragment(
     innerText,
-    (fragment) => columnExists(fragment),
+    (fragment) => columnExists(fragment, context),
     async (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
       // fie<suggest>
       return [
@@ -132,6 +133,7 @@ export async function autocomplete(
         expressionRoot,
         location: Location.STATS_WHERE,
         preferredExpressionType: 'boolean',
+        context,
       });
 
       // Is this a complete boolean expression?
@@ -162,7 +164,8 @@ export async function autocomplete(
           ...getFunctionSuggestions({ location: Location.STATS_BY }),
           getDateHistogramCompletionItem(histogramBarTarget),
         ],
-        query
+        query,
+        context
       );
     }
 
@@ -182,7 +185,8 @@ export async function autocomplete(
           ...getFunctionSuggestions({ location: Location.STATS_BY }),
           getDateHistogramCompletionItem(histogramBarTarget),
         ],
-        query
+        query,
+        context
       );
 
       suggestions.push(

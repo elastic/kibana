@@ -188,7 +188,7 @@ export async function autocomplete(
 
       if (
         !lastWord.length &&
-        !columnExists(prompt.text) &&
+        !columnExists(prompt.text, context) &&
         !prompt.text.startsWith(ESQL_VARIABLES_PREFIX)
       ) {
         return [assignCompletionItem];

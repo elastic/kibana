@@ -36,7 +36,7 @@ export async function autocomplete(
 
   return handleFragment(
     query,
-    (fragment) => columnExists(fragment),
+    (fragment) => columnExists(fragment, context),
     (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
       // KEEP fie<suggest>
       return fieldSuggestions.map((suggestion) => {
