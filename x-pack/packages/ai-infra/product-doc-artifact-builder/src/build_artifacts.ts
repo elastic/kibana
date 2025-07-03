@@ -100,7 +100,7 @@ const buildArtifact = async ({
   stackVersion: string;
   buildFolder: string;
   targetFolder: string;
-  sourceClient: ElasticsearchClient8;
+  sourceClient: Client;
   embeddingClient: Client;
   log: ToolingLog;
   inferenceId: string;
