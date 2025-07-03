@@ -178,6 +178,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
         projectId: this.config.serverless?.project_id,
         projectName: this.config.serverless?.project_name,
         projectType: this.config.serverless?.project_type,
+        productTier: this.config.serverless?.product_tier,
       },
       performanceUrl,
       usersAndRolesUrl,

@@ -90,6 +90,11 @@ export interface CloudStart {
      * Will always be present if `isServerlessEnabled` is `true`
      */
     projectType?: KibanaSolution;
+    /**
+     * The serverless product tier.
+     * Only present if the current project type has product tiers defined.
+     */
+    productTier?: KibanaProductTier;
   };
 }
 
