@@ -15,7 +15,7 @@ import { type Filter } from '@kbn/es-query';
 import type { DataView, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataCascade, getESQLStatsQueryMeta } from '@kbn/document-data-cascader';
+import { DataCascade, getESQLStatsQueryMeta } from '@kbn/shared-ux-document-data-cascade';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { EuiBadge, EuiDescriptionList, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,7 +23,7 @@ import { useAppStateSelector } from '../../../main/state_management/discover_app
 import type { DiscoverStateContainer } from '../../../main/state_management/discover_state';
 import { getDataGroupingQuery } from './query_builder';
 
-export { getESQLStatsQueryMeta } from '@kbn/document-data-cascader';
+export { getESQLStatsQueryMeta } from '@kbn/shared-ux-document-data-cascade';
 
 const DEFAULT_FILTERS: Filter[] = [];
 
