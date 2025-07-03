@@ -73,6 +73,7 @@ export class ServiceManager {
       security,
       elasticsearch,
       getRunner,
+      toolsService: tools,
     });
 
     const runnerFactory = new RunnerFactoryImpl({

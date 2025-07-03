@@ -6,12 +6,17 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { SecurityServiceStart, ElasticsearchServiceStart } from '@kbn/core/server';
+import type {
+  SecurityServiceStart,
+  ElasticsearchServiceStart,
+  KibanaRequest,
+} from '@kbn/core/server';
 import type { Runner } from '@kbn/onechat-server';
 import type { AgentsServiceSetup, AgentsServiceStart } from './types';
+import type { ToolsServiceStart } from '../tools';
 import { createInternalRegistry } from './utils';
 import { createDefaultAgentProvider, creatProfileProvider } from './providers';
-import { createClient, createStorage } from './profiles';
+import { createClient, createStorage, createAgentProfileService } from './profiles';
 
 export interface AgentsServiceSetupDeps {
   logger: Logger;
@@ -21,6 +26,7 @@ export interface AgentsServiceStartDeps {
   security: SecurityServiceStart;
   elasticsearch: ElasticsearchServiceStart;
   getRunner: () => Runner;
+  toolsService: ToolsServiceStart;
 }
 
 export class AgentsService {
@@ -38,9 +44,9 @@ export class AgentsService {
     }
 
     const { logger } = this.setupDeps;
-    const { getRunner, security, elasticsearch } = startDeps;
+    const { getRunner, security, elasticsearch, toolsService } = startDeps;
 
-    const getProfileClient: AgentsServiceStart['getProfileClient'] = async (request) => {
+    const getProfileClient = async (request: KibanaRequest) => {
       const authUser = security.authc.getCurrentUser(request);
       if (!authUser) {
         throw new Error('No user bound to the provided request');
@@ -53,6 +59,16 @@ export class AgentsService {
       return createClient({ user, storage });
     };
 
+    const getProfileService: AgentsServiceStart['getProfileService'] = async (request) => {
+      const client = await getProfileClient(request);
+      return createAgentProfileService({
+        client,
+        toolsService,
+        logger: logger.get('agentProfileService'),
+        request,
+      });
+    };
+
     const defaultAgentProvider = createDefaultAgentProvider();
     const profileAgentsProvider = creatProfileProvider({ getProfileClient });
 
@@ -63,7 +79,7 @@ export class AgentsService {
 
     return {
       registry,
-      getProfileClient,
+      getProfileService,
       execute: async (args) => {
         return getRunner().runAgent(args);
       },
