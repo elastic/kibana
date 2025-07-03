@@ -7,7 +7,7 @@
 
 import { detectRegexEntities } from './detect_regex_entities';
 import { getEntityHash } from './get_entity_hash';
-import type { AnonymizationRule } from './detect_regex_entities';
+import { RegexAnonymizationRule } from '../../../common/types';
 
 describe('getEntityHash', () => {
   it('returns the same hash for differently cased emails when normalize=true', () => {
@@ -36,34 +36,24 @@ describe('detectRegexEntities', () => {
   } as any;
 
   // Test rules - similar to what would be in the anonymization.spec.ts
-  const testRules: AnonymizationRule[] = [
+  const testRules: RegexAnonymizationRule[] = [
     {
-      id: 'email-rule',
       entityClass: 'EMAIL',
       type: 'regex',
       pattern: '\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b',
       enabled: true,
-      builtIn: true,
-      description: 'Email detection',
-      normalize: true,
     },
     {
-      id: 'url-rule',
       entityClass: 'URL',
       type: 'regex',
       pattern: '\\bhttps?://[^\\s]+\\b',
       enabled: true,
-      builtIn: true,
-      description: 'URL detection',
     },
     {
-      id: 'ip-rule',
       entityClass: 'IP',
       type: 'regex',
       pattern: '\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b',
       enabled: true,
-      builtIn: true,
-      description: 'IP address detection',
     },
   ];
 
@@ -74,8 +64,7 @@ describe('detectRegexEntities', () => {
     expect(entities[0].entity).toBe('TEST@Example.Com');
     expect(entities[0].class_name).toBe('EMAIL');
 
-    // Confirm normalization by comparing hash to expected
-    const expectedHash = getEntityHash('test@example.com', 'EMAIL', true);
+    const expectedHash = getEntityHash('TEST@Example.Com', 'EMAIL');
     expect(entities[0].hash).toBe(expectedHash);
   });
 

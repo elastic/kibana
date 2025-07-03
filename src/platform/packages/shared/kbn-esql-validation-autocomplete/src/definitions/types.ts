@@ -134,44 +134,7 @@ export const isReturnType = (str: string | FunctionParameterType): str is Functi
   (dataTypes.includes(str as SupportedDataType) || str === 'unknown' || str === 'any');
 
 export interface Signature {
-  params: Array<{
-    name: string;
-    type: FunctionParameterType;
-    optional?: boolean;
-    supportsWildcard?: boolean;
-    /**
-     * If set, this parameter does not accept a field. It only accepts a constant,
-     * though a function can be used to create the value. (e.g. now() for dates or concat() for strings)
-     */
-    constantOnly?: boolean;
-    /**
-     * Default to false. If set to true, this parameter does not accept a function or literal, only fields.
-     */
-    fieldsOnly?: boolean;
-    /**
-     * if provided this means that the value must be one
-     * of the options in the array iff the value is a literal.
-     *
-     * String values are case insensitive.
-     *
-     * If the value is not a literal, this field is ignored because
-     * we can't check the return value of a function to see if it
-     * matches one of the options prior to runtime.
-     */
-    acceptedValues?: string[];
-    /**
-     * Must only be included _in addition to_ acceptedValues.
-     *
-     * If provided this is the list of suggested values that
-     * will show up in the autocomplete. If omitted, the acceptedValues
-     * will be used as suggestions.
-     *
-     * This is useful for functions that accept
-     * values that we don't want to show as suggestions.
-     */
-    literalSuggestions?: string[];
-    mapParams?: string;
-  }>;
+  params: FunctionParameter[];
   minParams?: number;
   returnType: FunctionReturnType;
   // Not used yet, but we will in the future.
@@ -469,4 +432,45 @@ export interface Literals {
   description: string;
 }
 
-export type FunctionParameter = FunctionDefinition['signatures'][number]['params'][number];
+export interface FunctionParameter {
+  name: string;
+  type: FunctionParameterType;
+  optional?: boolean;
+  supportsWildcard?: boolean;
+
+  /**
+   * If set, this parameter does not accept a field. It only accepts a constant,
+   * though a function can be used to create the value. (e.g. now() for dates or concat() for strings)
+   */
+  constantOnly?: boolean;
+
+  /**
+   * Default to false. If set to true, this parameter does not accept a function or literal, only fields.
+   */
+  fieldsOnly?: boolean;
+
+  /**
+   * if provided this means that the value must be one
+   * of the options in the array iff the value is a literal.
+   *
+   * String values are case insensitive.
+   *
+   * If the value is not a literal, this field is ignored because
+   * we can't check the return value of a function to see if it
+   * matches one of the options prior to runtime.
+   */
+  acceptedValues?: string[];
+
+  /**
+   * Must only be included _in addition to_ acceptedValues.
+   *
+   * If provided this is the list of suggested values that
+   * will show up in the autocomplete. If omitted, the acceptedValues
+   * will be used as suggestions.
+   *
+   * This is useful for functions that accept
+   * values that we don't want to show as suggestions.
+   */
+  literalSuggestions?: string[];
+  mapParams?: string;
+}

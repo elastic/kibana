@@ -88,7 +88,7 @@ export const Trace = ({
           rangeTo={rangeTo}
           dataView={dataView}
           tracesIndexPattern={tracesIndexPattern}
-          onCloseFullScreen={() => {
+          onExitFullScreen={() => {
             setShowFullScreenWaterfall(false);
           }}
         />

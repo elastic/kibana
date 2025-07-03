@@ -19,6 +19,7 @@ import { getErrorMarks } from '../marks/get_error_marks';
 import { AccordionWaterfall } from './accordion_waterfall';
 import type {
   IWaterfall,
+  IWaterfallGetRelatedErrorsHref,
   IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
 
@@ -39,6 +40,7 @@ interface Props {
   displayLimit?: number;
   isEmbeddable?: boolean;
   scrollElement?: Element;
+  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
 }
 
 function getWaterfallMaxLevel(waterfall: IWaterfall) {
@@ -79,6 +81,7 @@ export function Waterfall({
   displayLimit,
   isEmbeddable,
   scrollElement,
+  getRelatedErrorsHref,
 }: Props) {
   const { euiTheme } = useEuiTheme();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
@@ -186,6 +189,7 @@ export function Waterfall({
             displayLimit={displayLimit}
             isEmbeddable={isEmbeddable}
             scrollElement={scrollElement}
+            getRelatedErrorsHref={getRelatedErrorsHref}
           />
         )}
       </WaterfallItemsContainer>

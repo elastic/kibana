@@ -18,9 +18,17 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pMap from 'p-map';
 import moment from 'moment';
+import { MaintenanceWindowClient } from '@kbn/alerting-plugin/server/maintenance_window_client';
+import { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
+import { isEmpty } from 'lodash';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/common';
 import { registerCleanUpTask } from './private_location/clean_up_task';
 import { SyntheticsServerSetup } from '../types';
-import { syntheticsMonitorType, syntheticsParamType } from '../../common/types/saved_objects';
+import {
+  legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorSavedObjectType,
+  syntheticsParamType,
+} from '../../common/types/saved_objects';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
@@ -295,7 +303,7 @@ export class SyntheticsService {
 
     return await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
       {
-        type: syntheticsMonitorType,
+        type: [legacySyntheticsMonitorTypeSingle, syntheticsMonitorSavedObjectType],
         perPage: pageSize,
         namespaces: [ALL_SPACES_ID],
       }
@@ -326,11 +334,11 @@ export class SyntheticsService {
     };
   }
 
-  async inspectConfig(config?: ConfigData) {
-    if (!config) {
+  async inspectConfig(config: ConfigData | null, mws: MaintenanceWindow[]) {
+    if (!config || isEmpty(config)) {
       return null;
     }
-    const monitors = this.formatConfigs(config);
+    const monitors = this.formatConfigs(config, mws);
     const license = await this.getLicense();
 
     const output = await this.getOutput({ inspect: true });
@@ -344,13 +352,13 @@ export class SyntheticsService {
     return null;
   }
 
-  async addConfigs(configs: ConfigData[]) {
+  async addConfigs(configs: ConfigData[], mws: MaintenanceWindow[]) {
     try {
       if (configs.length === 0 || !this.isAllowed) {
         return;
       }
 
-      const monitors = this.formatConfigs(configs);
+      const monitors = this.formatConfigs(configs, mws);
       const license = await this.getLicense();
 
       const output = await this.getOutput();
@@ -376,13 +384,13 @@ export class SyntheticsService {
     }
   }
 
-  async editConfig(monitorConfig: ConfigData[], isEdit = true) {
+  async editConfig(monitorConfig: ConfigData[], isEdit = true, mws: MaintenanceWindow[]) {
     try {
       if (monitorConfig.length === 0 || !this.isAllowed) {
         return;
       }
       const license = await this.getLicense();
-      const monitors = this.formatConfigs(monitorConfig);
+      const monitors = this.formatConfigs(monitorConfig, mws);
 
       const output = await this.getOutput();
       if (output) {
@@ -411,6 +419,7 @@ export class SyntheticsService {
     let output: ServiceData['output'] | null = null;
 
     const paramsBySpace = await this.getSyntheticsParams();
+    const maintenanceWindows = await this.getMaintenanceWindows();
     const finder = await this.getSOClientFinder({ pageSize: PER_PAGE });
 
     const bucketsByLocation: Record<string, MonitorFields[]> = {};
@@ -462,7 +471,11 @@ export class SyntheticsService {
           }
 
           const monitors = result.saved_objects.filter(({ error }) => !error);
-          const formattedConfigs = this.normalizeConfigs(monitors, paramsBySpace);
+          const formattedConfigs = this.normalizeConfigs(
+            monitors,
+            paramsBySpace,
+            maintenanceWindows
+          );
 
           this.logger.debug(
             `${formattedConfigs.length} monitors will be pushed to synthetics service.`
@@ -504,7 +517,7 @@ export class SyntheticsService {
     if (!configs) {
       return;
     }
-    const monitors = this.formatConfigs(configs);
+    const monitors = this.formatConfigs(configs, []);
     if (monitors.length === 0) {
       return;
     }
@@ -545,7 +558,7 @@ export class SyntheticsService {
 
         const data = {
           output,
-          monitors: this.formatConfigs(configs),
+          monitors: this.formatConfigs(configs, []),
           license,
         };
         return await this.apiClient.delete(data);
@@ -557,7 +570,6 @@ export class SyntheticsService {
 
   async deleteAllConfigs() {
     const license = await this.getLicense();
-    const paramsBySpace = await this.getSyntheticsParams();
     const finder = await this.getSOClientFinder({ pageSize: 100 });
     const output = await this.getOutput();
     if (!output) {
@@ -565,7 +577,7 @@ export class SyntheticsService {
     }
 
     for await (const result of finder.find()) {
-      const monitors = this.normalizeConfigs(result.saved_objects, paramsBySpace);
+      const monitors = this.normalizeConfigs(result.saved_objects, {}, []);
       const hasPublicLocations = monitors.some((config) =>
         config.locations.some(({ isServiceManaged }) => isServiceManaged)
       );
@@ -636,7 +648,24 @@ export class SyntheticsService {
     return paramsBySpace;
   }
 
-  formatConfigs(configData: ConfigData[] | ConfigData) {
+  async getMaintenanceWindows() {
+    const { savedObjects } = this.server.coreStart;
+    const soClient = savedObjects.createInternalRepository([MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE]);
+
+    const maintenanceWindowClient = new MaintenanceWindowClient({
+      savedObjectsClient: soClient,
+      getUserName: async () => '',
+      uiSettings: this.server.coreStart.uiSettings.asScopedToClient(soClient),
+      logger: this.logger,
+    });
+    const mws = await maintenanceWindowClient.find({
+      page: 0,
+      perPage: 1000,
+    });
+    return mws.data;
+  }
+
+  formatConfigs(configData: ConfigData[] | ConfigData, mws: MaintenanceWindow[]) {
     const configDataList = Array.isArray(configData) ? configData : [configData];
 
     return configDataList.map((config) => {
@@ -651,20 +680,22 @@ export class SyntheticsService {
         Object.keys(asHeartbeatConfig) as ConfigKey[],
         asHeartbeatConfig as Partial<MonitorFields>,
         this.logger,
-        params ?? {}
+        params ?? {},
+        mws
       );
     });
   }
 
   normalizeConfigs(
     monitors: Array<SavedObject<SyntheticsMonitorWithSecretsAttributes>>,
-    paramsBySpace: Record<string, Record<string, string>>
+    paramsBySpace: Record<string, Record<string, string>>,
+    mws: MaintenanceWindow[]
   ) {
     const configDataList = (monitors ?? []).map((monitor) => {
       const attributes = monitor.attributes as unknown as MonitorFields;
       const monitorSpace = monitor.namespaces?.[0] ?? DEFAULT_SPACE_ID;
 
-      const params = paramsBySpace[monitorSpace];
+      const params = paramsBySpace[monitorSpace] ?? {};
 
       return {
         params: { ...params, ...(paramsBySpace?.[ALL_SPACES_ID] ?? {}) },
@@ -675,7 +706,7 @@ export class SyntheticsService {
       };
     });
 
-    return this.formatConfigs(configDataList) as MonitorFields[];
+    return this.formatConfigs(configDataList, mws) as MonitorFields[];
   }
   checkMissingSchedule(state: Record<string, string>) {
     try {
@@ -685,7 +716,7 @@ export class SyntheticsService {
       if (lastRunAt) {
         // log if it has missed last schedule
         const diff = moment(current).diff(lastRunAt, 'minutes');
-        const syncInterval = Number((this.config.syncInterval ?? '5m').split('m')[0]);
+        const syncInterval = Number((this.config.syncInterval ?? '5m').split('m')[0]) + 5;
         if (diff > syncInterval) {
           const message = `Synthetics monitor sync task has missed its schedule, it last ran ${diff} minutes ago.`;
           this.logger.warn(message);

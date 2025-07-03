@@ -29,16 +29,21 @@ import {
   InvestigationFields,
   TimelineTemplateId,
   TimelineTemplateTitle,
+  AlertSuppression,
 } from '../../model/rule_schema/common_attributes.gen';
+import { ThresholdAlertSuppression } from '../../model/rule_schema/specific_attributes/threshold_attributes.gen';
 
 export type BulkEditSkipReason = z.infer<typeof BulkEditSkipReason>;
 export const BulkEditSkipReason = z.literal('RULE_NOT_MODIFIED');
+
+export type BulkGapsFillingSkipReason = z.infer<typeof BulkGapsFillingSkipReason>;
+export const BulkGapsFillingSkipReason = z.literal('NO_GAPS_TO_FILL');
 
 export type BulkActionSkipResult = z.infer<typeof BulkActionSkipResult>;
 export const BulkActionSkipResult = z.object({
   id: z.string(),
   name: z.string().optional(),
-  skip_reason: BulkEditSkipReason,
+  skip_reason: z.union([BulkEditSkipReason, BulkGapsFillingSkipReason]),
 });
 
 export type RuleDetailsInError = z.infer<typeof RuleDetailsInError>;
@@ -56,6 +61,9 @@ export const BulkActionsDryRunErrCode = z.enum([
   'ESQL_INDEX_PATTERN',
   'MANUAL_RULE_RUN_FEATURE',
   'MANUAL_RULE_RUN_DISABLED_RULE',
+  'THRESHOLD_RULE_TYPE_IN_SUPPRESSION',
+  'UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD',
+  'RULE_FILL_GAPS_DISABLED_RULE',
 ]);
 export type BulkActionsDryRunErrCodeEnum = typeof BulkActionsDryRunErrCode.enum;
 export const BulkActionsDryRunErrCodeEnum = BulkActionsDryRunErrCode.enum;
@@ -193,6 +201,26 @@ export const BulkManualRuleRun = BulkActionBase.merge(
   })
 );
 
+export type BulkManualRuleFillGaps = z.infer<typeof BulkManualRuleFillGaps>;
+export const BulkManualRuleFillGaps = BulkActionBase.merge(
+  z.object({
+    action: z.literal('fill_gaps'),
+    /**
+     * Object that describes applying a manual gap fill action for the specified time range.
+     */
+    fill_gaps: z.object({
+      /**
+       * Start date of the manual gap fill
+       */
+      start_date: z.string(),
+      /**
+       * End date of the manual gap fill
+       */
+      end_date: z.string(),
+    }),
+  })
+);
+
 /**
   * Defines the maximum interval in which a rule’s actions are executed.
 > info
@@ -214,6 +242,7 @@ export const BulkActionType = z.enum([
   'duplicate',
   'edit',
   'run',
+  'fill_gaps',
 ]);
 export type BulkActionTypeEnum = typeof BulkActionType.enum;
 export const BulkActionTypeEnum = BulkActionType.enum;
@@ -233,6 +262,9 @@ export const BulkActionEditType = z.enum([
   'add_investigation_fields',
   'delete_investigation_fields',
   'set_investigation_fields',
+  'delete_alert_suppression',
+  'set_alert_suppression',
+  'set_alert_suppression_for_threshold',
 ]);
 export type BulkActionEditTypeEnum = typeof BulkActionEditType.enum;
 export const BulkActionEditTypeEnum = BulkActionEditType.enum;
@@ -357,6 +389,41 @@ export const BulkActionEditPayloadTimeline = z.object({
   }),
 });
 
+export type BulkActionEditPayloadSetAlertSuppression = z.infer<
+  typeof BulkActionEditPayloadSetAlertSuppression
+>;
+export const BulkActionEditPayloadSetAlertSuppression = z.object({
+  type: z.literal('set_alert_suppression'),
+  value: AlertSuppression,
+});
+
+export type BulkActionEditPayloadSetAlertSuppressionForThreshold = z.infer<
+  typeof BulkActionEditPayloadSetAlertSuppressionForThreshold
+>;
+export const BulkActionEditPayloadSetAlertSuppressionForThreshold = z.object({
+  type: z.literal('set_alert_suppression_for_threshold'),
+  value: ThresholdAlertSuppression,
+});
+
+export type BulkActionEditPayloadDeleteAlertSuppression = z.infer<
+  typeof BulkActionEditPayloadDeleteAlertSuppression
+>;
+export const BulkActionEditPayloadDeleteAlertSuppression = z.object({
+  type: z.literal('delete_alert_suppression'),
+});
+
+export const BulkActionEditPayloadAlertSuppressionInternal = z.union([
+  BulkActionEditPayloadSetAlertSuppression,
+  BulkActionEditPayloadSetAlertSuppressionForThreshold,
+  BulkActionEditPayloadDeleteAlertSuppression,
+]);
+
+export type BulkActionEditPayloadAlertSuppression = z.infer<
+  typeof BulkActionEditPayloadAlertSuppressionInternal
+>;
+export const BulkActionEditPayloadAlertSuppression =
+  BulkActionEditPayloadAlertSuppressionInternal as z.ZodType<BulkActionEditPayloadAlertSuppression>;
+
 export const BulkActionEditPayloadInternal = z.union([
   BulkActionEditPayloadTags,
   BulkActionEditPayloadIndexPatterns,
@@ -364,6 +431,7 @@ export const BulkActionEditPayloadInternal = z.union([
   BulkActionEditPayloadTimeline,
   BulkActionEditPayloadRuleActions,
   BulkActionEditPayloadSchedule,
+  BulkActionEditPayloadAlertSuppression,
 ]);
 
 export type BulkActionEditPayload = z.infer<typeof BulkActionEditPayloadInternal>;
@@ -407,6 +475,7 @@ export const PerformRulesBulkActionRequestBody = z.union([
   BulkExportRules,
   BulkDuplicateRules,
   BulkManualRuleRun,
+  BulkManualRuleFillGaps,
   BulkEditRules,
 ]);
 export type PerformRulesBulkActionRequestBodyInput = z.input<

@@ -59,6 +59,12 @@ export const createLensEmbeddableFactory = (
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const titleManager = initializeTitleManager(initialState.rawState);
 
+      const dynamicActionsManager = services.embeddableEnhanced?.initializeEmbeddableDynamicActions(
+        uuid,
+        () => titleManager.api.title$.getValue(),
+        initialState
+      );
+
       const initialRuntimeState = await deserializeState(
         services,
         initialState.rawState,
@@ -113,16 +119,20 @@ export const createLensEmbeddableFactory = (
         parentApi
       );
 
-      const integrationsConfig = initializeIntegrations(getLatestState, services);
+      const integrationsConfig = initializeIntegrations(
+        getLatestState,
+        dynamicActionsManager?.serializeState,
+        services
+      );
       const actionsConfig = initializeActionApi(
         uuid,
         initialRuntimeState,
         getLatestState,
         parentApi,
         searchContextConfig.api,
-        titleManager.api.title$,
         internalApi,
-        services
+        services,
+        dynamicActionsManager
       );
 
       /**

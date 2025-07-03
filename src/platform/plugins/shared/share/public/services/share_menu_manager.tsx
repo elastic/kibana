@@ -16,7 +16,7 @@ import type { ShowShareMenuOptions } from '../types';
 import type { ShareRegistry } from './share_menu_registry';
 import type { ShareConfigs } from '../types';
 import { ShareMenu } from '../components/share_tabs';
-import { ExportMenu } from '../components/export_popover';
+import { ExportMenu } from '../components/export_integrations';
 
 interface ShareMenuManagerStartDeps {
   core: CoreStart;

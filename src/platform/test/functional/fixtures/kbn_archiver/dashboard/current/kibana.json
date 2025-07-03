@@ -840,36 +840,6 @@
 {
   "attributes": {
     "description": "",
-    "hits": 0,
-    "kibanaSavedObjectMeta": {
-      "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
-    },
-    "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
-    "panelsJSON": "[{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"6cfbe6cc-1872-4cb4-9455-a02eeb75127e\"},\"panelIndex\":\"6cfbe6cc-1872-4cb4-9455-a02eeb75127e\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_6cfbe6cc-1872-4cb4-9455-a02eeb75127e\"}]",
-    "timeRestore": false,
-    "title": "dashboard with missing index pattern",
-    "version": 1
-  },
-  "coreMigrationVersion": "8.0.1",
-  "id": "502e63a0-9e93-11ea-853e-adc0effaf76d",
-  "migrationVersion": {
-    "dashboard": "8.0.1"
-  },
-  "references": [
-    {
-      "id": "47b5cf60-9e93-11ea-853e-adc0effaf76d",
-      "name": "6cfbe6cc-1872-4cb4-9455-a02eeb75127e:panel_6cfbe6cc-1872-4cb4-9455-a02eeb75127e",
-      "type": "visualization"
-    }
-  ],
-  "type": "dashboard",
-  "updated_at": "2020-05-25T15:16:27.743Z",
-  "version": "WzI2OSwxXQ=="
-}
-
-{
-  "attributes": {
-    "description": "",
     "kibanaSavedObjectMeta": {
       "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
     },

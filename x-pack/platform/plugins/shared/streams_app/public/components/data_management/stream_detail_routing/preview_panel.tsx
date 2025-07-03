@@ -80,7 +80,7 @@ export function PreviewPanel() {
   if (isIdle) {
     content = (
       <EuiEmptyPrompt
-        icon={<AssetImage />}
+        icon={<AssetImage type="yourPreviewWillAppearHere" />}
         titleSize="s"
         title={
           <h2>

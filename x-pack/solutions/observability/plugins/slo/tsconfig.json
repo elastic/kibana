@@ -30,7 +30,6 @@
     "@kbn/embeddable-plugin",
     "@kbn/embeddable-enhanced-plugin",
     "@kbn/lens-plugin",
-    "@kbn/ui-theme",
     "@kbn/es-query",
     "@kbn/react-kibana-mount",
     "@kbn/cases-plugin",

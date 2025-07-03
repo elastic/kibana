@@ -21,11 +21,7 @@ export function SuppressionInfoIcon(): JSX.Element {
   const { docLinks } = useKibana().services;
 
   const button = (
-    <EuiButtonIcon
-      iconType="questionInCircle"
-      onClick={togglePopover}
-      aria-label="Open help popover"
-    />
+    <EuiButtonIcon iconType="question" onClick={togglePopover} aria-label="Open help popover" />
   );
 
   return (
