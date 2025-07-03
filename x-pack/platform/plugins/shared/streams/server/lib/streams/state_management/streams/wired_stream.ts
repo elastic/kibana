@@ -490,7 +490,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
   }
 
-  protected async doDetermineCreateActions(): Promise<ElasticsearchAction[]> {
+  protected async doDetermineCreateActions(desiredState: State): Promise<ElasticsearchAction[]> {
     if (this._definition.ingest.wired.draft) {
       return [
         {
@@ -520,6 +520,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         stream: this._definition.name,
         request: generateReroutePipeline({
           definition: this._definition,
+          state: desiredState,
         }),
       },
       {
@@ -600,6 +601,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         stream: this._definition.name,
         request: generateReroutePipeline({
           definition: this._definition,
+          state: desiredState,
         }),
       });
     }

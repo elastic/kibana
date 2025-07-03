@@ -14,10 +14,17 @@ import {
   isErrorLifecycle,
   isDslLifecycle,
   Streams,
+  getParentId,
+  conditionToESQL,
 } from '@kbn/streams-schema';
 import React from 'react';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { css } from '@emotion/react';
+import {
+  GrokProcessorDefinition,
+  isGrokProcessorDefinition,
+} from '@kbn/streams-schema/src/models/ingest/processors';
+import { useAbortableAsync } from '@kbn/react-hooks';
 import { useKibana } from '../../hooks/use_kibana';
 import { getIndexPatterns } from '../../util/hierarchy_helpers';
 
@@ -133,24 +140,54 @@ export function DiscoverBadgeButton({
 }) {
   const {
     dependencies: {
-      start: { share },
+      start: {
+        share,
+        streams: { streamsRepositoryClient },
+      },
     },
   } = useKibana();
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
   const dataStreamExists =
     Streams.WiredStream.GetResponse.is(definition) || definition.data_stream_exists;
-  const indexPatterns = getIndexPatterns(definition.stream);
-  const esqlQuery = indexPatterns ? `FROM ${indexPatterns.join(', ')}` : undefined;
+
+  const { value: parent } = useAbortableAsync(
+    async ({ signal }) => {
+      if (Streams.WiredStream.GetResponse.is(definition)) {
+        const parentId = getParentId(definition.stream.name);
+        if (parentId) {
+          const response = await streamsRepositoryClient.fetch(
+            'GET /api/streams/{name} 2023-10-31',
+            {
+              params: { path: { name: parentId } },
+              signal,
+            }
+          );
+          if (Streams.WiredStream.GetResponse.is(response)) {
+            return response;
+          }
+          throw new Error('the parent stream is not a wired stream');
+        }
+      }
+      return undefined;
+    },
+    [definition, streamsRepositoryClient]
+  );
+
+  const esqlQuery = definitionToESQLQuery(definition, parent);
+
+  const discoverLink = discoverLocator?.useUrl(
+    {
+      query: {
+        esql: esqlQuery!,
+      },
+    },
+    undefined,
+    [esqlQuery]
+  );
 
   if (!discoverLocator || !dataStreamExists || !esqlQuery) {
     return null;
   }
-
-  const discoverLink = discoverLocator.useUrl({
-    query: {
-      esql: esqlQuery,
-    },
-  });
 
   return (
     <EuiButtonIcon
@@ -164,4 +201,61 @@ export function DiscoverBadgeButton({
       )}
     />
   );
+}
+
+function definitionToESQLQuery(
+  definition: Streams.ingest.all.GetResponse,
+  parent?: Streams.WiredStream.GetResponse
+): string | undefined {
+  if (!Streams.WiredStream.GetResponse.is(definition) || !definition.stream.ingest.wired.draft) {
+    const indexPatterns = getIndexPatterns(definition.stream);
+    return indexPatterns ? `FROM ${indexPatterns.join(', ')}` : undefined;
+  }
+
+  if (!parent) {
+    // If we don't have a parent, we can't construct the ESQL query
+    return undefined;
+  }
+
+  // This is a draft stream, which means we need to construct it as ESQL.
+  // * Field mappings on this level need to go into INSIST_🐔 calls
+  // * Processing steps need to be converted to ESQL syntax
+  // * The routing condition of the parent needs to be turned into a WHERE clause
+  const { stream } = definition;
+  const { ingest } = stream;
+  const { wired } = ingest;
+
+  // TODO - we need to fetch the mappings for fields that are used for routing as well to add here
+  const mappings = Object.entries(wired.fields)
+    .map(([fieldName, field]) => {
+      // TODO - this only works for keyword - oh well. leave for now, since we are blocked by Elasticsearch here
+      return `INSIST_🐔 ${fieldName}`;
+    })
+    .join(' | ');
+  const processingSteps = ingest.processing
+    .map((step) => {
+      if (isGrokProcessorDefinition(step)) {
+        const grok = (step as GrokProcessorDefinition).grok;
+        return `GROK ${grok.field} "${grok.patterns[0]}"`;
+      }
+      if ('rename' in step) {
+        return `RENAME ${step.rename.field} AS ${step.rename.target_field}`;
+      }
+    })
+    .join(' | ');
+  const routingCondition = parent.stream.ingest.wired.routing.find(
+    (r) => r.destination === definition.stream.name
+  )?.if;
+  // TODO - if there are other draft streams in the routing list of the parent before this one, we need to include their mappings as well and then negate the routing condition to avoid doublematches
+  const routingConditionClause = routingCondition
+    ? `WHERE ${conditionToESQL(routingCondition)}`
+    : '';
+
+  // TODO: Handle the case where the parent is a draft stream too - in this case we would need to
+  //      include the parent stream's mappings and processing steps as well and start from the parent of the parent and so on.
+  const indexPatterns = getIndexPatterns(parent.stream);
+
+  return [`FROM ${parent.stream}`, mappings, routingConditionClause, processingSteps]
+    .filter(Boolean)
+    .join(' | ');
 }

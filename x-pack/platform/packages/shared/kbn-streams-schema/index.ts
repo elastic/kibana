@@ -137,3 +137,4 @@ export type {
 } from './src/api/significant_events';
 
 export { conditionToQueryDsl } from './src/helpers/condition_to_query_dsl';
+export { conditionToESQL } from './src/helpers/condition_to_esql';
