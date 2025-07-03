@@ -159,7 +159,11 @@ export function SignificantEventFlyoutContents({
             {...validationMessages.kql}
           >
             <UncontrolledStreamsAppSearchBar
-              query={queryValues.kql ? { language: 'kuery', ...queryValues.kql } : undefined}
+              query={
+                queryValues.kql
+                  ? { language: 'kuery', ...queryValues.kql }
+                  : { language: 'kuery', query: '' }
+              }
               showQueryInput
               onQueryChange={() => {
                 setTouched((prev) => ({ ...prev, kql: true }));
