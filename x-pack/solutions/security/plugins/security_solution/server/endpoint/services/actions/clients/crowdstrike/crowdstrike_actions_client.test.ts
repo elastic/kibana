@@ -659,13 +659,26 @@ describe('CrowdstrikeActionsClient class', () => {
         });
       });
 
-      // FIXME: What is the correct way to create a failed CS action response
-      it.skip('should send `runscript` action response telemetry event for failed action', async () => {
+      it('should send `runscript` action response telemetry event for failed action', async () => {
         const actionResponse = {
           actionId: '456-pqr-789',
-          status: 'error',
-          message: 'Failed to run script on host',
-          serviceMessage: 'Failed to run script on host',
+          status: 'ok',
+          data: {
+            combined: {
+              resources: {
+                '1-2-3-cs-agent': {
+                  stdout: '',
+                  stderr: '',
+                  errors: [
+                    {
+                      code: '500',
+                      message: 'Failed to run script on host',
+                    },
+                  ],
+                },
+              },
+            },
+          },
         };
         (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce(actionResponse);
 
