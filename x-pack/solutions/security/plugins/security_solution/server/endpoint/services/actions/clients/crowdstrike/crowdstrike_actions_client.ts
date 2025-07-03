@@ -173,7 +173,9 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     const agentIdsFound: string[] = [];
     const fleetAgentIdToCrowdstrikeAgentIdMap: Record<string, string> =
       crowdstrikeEsResults.hits.hits.reduce((acc, esDoc) => {
-        const doc = esDoc.inner_hits?.most_recent.hits.hits[0]._source;
+        console.log('esDoc::: ', JSON.stringify(esDoc));
+        const searchHits = esDoc.inner_hits?.most_recent.hits.hits;
+        const doc = searchHits?.length ? searchHits[0]._source : undefined;
 
         if (doc) {
           agentIdsFound.push(doc.device.id);
@@ -257,6 +259,8 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     );
 
     const actionSendResponse = await this.connectorActionsClient.execute(executeOptions);
+
+    console.log('actionSendResponse:: ', actionSendResponse);
 
     if (actionSendResponse.status === 'error') {
       this.log.error(stringify(actionSendResponse));
@@ -485,6 +489,8 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         throw error;
       }
     }
+
+    console.log('here:::::');
 
     const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
 
