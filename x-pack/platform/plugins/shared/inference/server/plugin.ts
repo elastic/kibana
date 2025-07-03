@@ -47,8 +47,8 @@ export class InferencePlugin
     coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>,
     pluginsSetup: InferenceSetupDependencies
   ): InferenceServerSetup {
-    // const { [aiAssistantAnonymizationRules]: anonymizationRules, ...restSettings } = uiSettings;
-    coreSetup.uiSettings.register(uiSettings);
+    const { [aiAssistantAnonymizationRules]: anonymizationRules, ...restSettings } = uiSettings;
+    coreSetup.uiSettings.register(restSettings);
     const router = coreSetup.http.createRouter();
 
     registerRoutes({
