@@ -15,5 +15,4 @@ export type {
   DeanonymizedMessage,
   RegexAnonymizationRule,
   NamedEntityRecognitionRule,
-  RegexAnonymizationTask,
 } from './types';

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/**
+ * @jest-environment node
+ */
 
 import { MlInferenceResponseResult } from '@elastic/elasticsearch/lib/api/types';
 import { anonymizeMessages } from './anonymize_messages';
@@ -16,7 +19,6 @@ import {
 } from '@kbn/inference-common';
 import { messageToAnonymizationRecords } from './message_to_anonymization_records';
 import { getEntityMask } from './get_entity_mask';
-import { initRegexWorker } from './regex_worker';
 
 const mockEsClient = {
   ml: {
@@ -27,7 +29,6 @@ const mockEsClient = {
 describe('anonymizeMessages', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    initRegexWorker();
   });
 
   const setupMockResponse = (entities: MlInferenceResponseResult[]) => {

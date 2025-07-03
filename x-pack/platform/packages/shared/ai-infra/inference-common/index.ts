@@ -69,7 +69,6 @@ export {
   type AnonymizationOutput,
   type DeanonymizationOutput,
   type DeanonymizedMessage,
-  type RegexAnonymizationTask,
 } from './src/chat_complete';
 
 export type { BoundInferenceClient, InferenceClient } from './src/inference_client';

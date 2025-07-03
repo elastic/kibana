@@ -42,7 +42,7 @@ export async function anonymizeRecords({
   );
 
   for (const rule of regexRules) {
-    state = await executeRegexRule({
+    state = executeRegexRule({
       rule,
       state,
     });
