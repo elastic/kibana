@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './search_configuration_schema';
-export * from './stack_monitoring_common_schema';
-export { dataViewSpecSchema, type DataViewSpec } from './data_view_spec_schema';
-export { MAX_GROUPS } from './constants';
-export { ComparatorFns } from './utils';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+
+export const stackMonitoringCommonSchema = schema.object({
+  duration: schema.string(),
+  threshold: schema.maybe(schema.number()),
+  limit: schema.maybe(schema.string()),
+  filterQuery: schema.maybe(schema.string({})),
+  filterQueryText: schema.maybe(schema.string({})),
+});
+
+export type StackMonitoringCommonSchemaType = TypeOf<typeof stackMonitoringCommonSchema>;
