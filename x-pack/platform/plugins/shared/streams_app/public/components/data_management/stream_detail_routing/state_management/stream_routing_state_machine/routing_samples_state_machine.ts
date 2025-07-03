@@ -41,8 +41,6 @@ export interface RoutingSamplesMachineDeps {
 export type RoutingSamplesActorRef = ActorRefFrom<typeof routingSamplesMachine>;
 export type RoutingSamplesActorSnapshot = SnapshotFrom<typeof routingSamplesMachine>;
 
-// Shared interfaces
-
 export interface RoutingSamplesInput {
   condition?: Condition;
   definition: Streams.WiredStream.GetResponse;
@@ -71,7 +69,6 @@ interface CollectorParams {
   input: RoutingSamplesInput;
 }
 
-// Helper functions
 const SAMPLES_SIZE = 100;
 const PROBABILITY_THRESHOLD = 100000;
 const SEARCH_TIMEOUT_MS = 10000; // 10 seconds
@@ -265,6 +262,93 @@ function createTimeUpdatesActor({ timeState$ }: Pick<RoutingSamplesMachineDeps, 
   );
 }
 
+function collectDocuments({ data, input }: CollectorParams): Observable<SampleDocument[]> {
+  const abortController = new AbortController();
+
+  const { start, end } = getAbsoluteTimestamps(data);
+  const params = buildDocumentsSearchParams({ ...input, start, end });
+
+  return new Observable((observer) => {
+    const subscription = data.search
+      .search({ params }, { abortSignal: abortController.signal })
+      .pipe(
+        timeout(SEARCH_TIMEOUT_MS),
+        map((result) => result.rawResponse.hits.hits.map((hit) => hit._source)),
+        catchError(handleTimeoutError)
+      )
+      .subscribe(observer);
+
+    return () => {
+      abortController.abort();
+      subscription.unsubscribe();
+    };
+  });
+}
+
+const percentageFormatter = getPercentageFormatter({ precision: 2 });
+
+function collectDocumentCounts({ data, input }: CollectorParams): Observable<string | undefined> {
+  const abortController = new AbortController();
+
+  const { start, end } = getAbsoluteTimestamps(data);
+  const searchParams = { ...input, start, end };
+  const params = buildDocumentCountSearchParams(searchParams);
+
+  return new Observable((observer) => {
+    const subscription = data.search
+      .search({ params }, { abortSignal: abortController.signal })
+      .pipe(
+        filter((result) => !isRunningResponse(result)),
+        timeout(SEARCH_TIMEOUT_MS),
+        switchMap((countResult) => {
+          const docCount =
+            !countResult.rawResponse.hits.total || isNumber(countResult.rawResponse.hits.total)
+              ? countResult.rawResponse.hits.total
+              : countResult.rawResponse.hits.total.value;
+
+          return data.search
+            .search(
+              {
+                params: buildDocumentCountProbabilitySearchParams({
+                  ...searchParams,
+                  docCount,
+                }),
+              },
+              { abortSignal: abortController.signal }
+            )
+            .pipe(
+              filter((result) => !isRunningResponse(result)),
+              timeout(SEARCH_TIMEOUT_MS),
+              map((result) => {
+                // Aggregations don't return partial results so we just wait until the end
+                if (result.rawResponse.aggregations) {
+                  // We need to divide this by the sampling / probability factor:
+                  // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-random-sampler-aggregation.html#random-sampler-special-cases
+                  const sampleAgg = result.rawResponse.aggregations.sample as {
+                    doc_count: number;
+                    probability: number;
+                    matching_docs: { doc_count: number };
+                  };
+                  const randomSampleDocCount = sampleAgg.doc_count / sampleAgg.probability;
+                  const matchingDocCount = sampleAgg.matching_docs.doc_count;
+                  return percentageFormatter.format(matchingDocCount / randomSampleDocCount);
+                }
+                return undefined;
+              }),
+              catchError(handleTimeoutError)
+            );
+        }),
+        catchError(handleTimeoutError)
+      )
+      .subscribe(observer);
+
+    return () => {
+      abortController.abort();
+      subscription.unsubscribe();
+    };
+  });
+}
+
 const createTimestampRangeQuery = (start: number, end: number) => ({
   range: {
     '@timestamp': {
@@ -412,91 +496,4 @@ function calculateProbability(docCount?: number): number {
   const probability = PROBABILITY_THRESHOLD / docCount;
   // Values between 0.5 and 1 are not supported by the random sampler
   return probability <= 0.5 ? probability : 1;
-}
-
-function collectDocuments({ data, input }: CollectorParams): Observable<SampleDocument[]> {
-  const abortController = new AbortController();
-
-  const { start, end } = getAbsoluteTimestamps(data);
-  const params = buildDocumentsSearchParams({ ...input, start, end });
-
-  return new Observable((observer) => {
-    const subscription = data.search
-      .search({ params }, { abortSignal: abortController.signal })
-      .pipe(
-        timeout(SEARCH_TIMEOUT_MS),
-        map((result) => result.rawResponse.hits.hits.map((hit) => hit._source)),
-        catchError(handleTimeoutError)
-      )
-      .subscribe(observer);
-
-    return () => {
-      abortController.abort();
-      subscription.unsubscribe();
-    };
-  });
-}
-
-const percentageFormatter = getPercentageFormatter({ precision: 2 });
-
-function collectDocumentCounts({ data, input }: CollectorParams): Observable<string | undefined> {
-  const abortController = new AbortController();
-
-  const { start, end } = getAbsoluteTimestamps(data);
-  const searchParams = { ...input, start, end };
-  const params = buildDocumentCountSearchParams(searchParams);
-
-  return new Observable((observer) => {
-    const subscription = data.search
-      .search({ params }, { abortSignal: abortController.signal })
-      .pipe(
-        filter((result) => !isRunningResponse(result)),
-        timeout(SEARCH_TIMEOUT_MS),
-        switchMap((countResult) => {
-          const docCount =
-            !countResult.rawResponse.hits.total || isNumber(countResult.rawResponse.hits.total)
-              ? countResult.rawResponse.hits.total
-              : countResult.rawResponse.hits.total.value;
-
-          return data.search
-            .search(
-              {
-                params: buildDocumentCountProbabilitySearchParams({
-                  ...searchParams,
-                  docCount,
-                }),
-              },
-              { abortSignal: abortController.signal }
-            )
-            .pipe(
-              filter((result) => !isRunningResponse(result)),
-              timeout(SEARCH_TIMEOUT_MS),
-              map((result) => {
-                // Aggregations don't return partial results so we just wait until the end
-                if (result.rawResponse.aggregations) {
-                  // We need to divide this by the sampling / probability factor:
-                  // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-random-sampler-aggregation.html#random-sampler-special-cases
-                  const sampleAgg = result.rawResponse.aggregations.sample as {
-                    doc_count: number;
-                    probability: number;
-                    matching_docs: { doc_count: number };
-                  };
-                  const randomSampleDocCount = sampleAgg.doc_count / sampleAgg.probability;
-                  const matchingDocCount = sampleAgg.matching_docs.doc_count;
-                  return percentageFormatter.format(matchingDocCount / randomSampleDocCount);
-                }
-                return undefined;
-              }),
-              catchError(handleTimeoutError)
-            );
-        }),
-        catchError(handleTimeoutError)
-      )
-      .subscribe(observer);
-
-    return () => {
-      abortController.abort();
-      subscription.unsubscribe();
-    };
-  });
 }

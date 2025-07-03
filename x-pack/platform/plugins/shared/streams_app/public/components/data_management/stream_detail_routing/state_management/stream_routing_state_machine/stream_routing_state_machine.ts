@@ -10,7 +10,6 @@ import {
   and,
   enqueueActions,
   setup,
-  sendTo,
   ActorRefFrom,
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
@@ -198,9 +197,6 @@ export const streamRoutingMachine = setup({
                 'routingRule.fork': {
                   guard: 'canForkStream',
                   target: 'forking',
-                },
-                'routingSamples.refresh': {
-                  actions: [sendTo('routingSamplesMachine', { type: 'routingSamples.refresh' })],
                 },
               },
             },
