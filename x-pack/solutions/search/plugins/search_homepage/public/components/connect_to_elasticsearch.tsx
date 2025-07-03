@@ -5,9 +5,6 @@
  * 2.0.
  */
 import {
-  EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCopy,
   EuiFieldText,
@@ -22,18 +19,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ConnectToElasticsearchSidePanel } from './connect_to_elasticsearch_side_panel';
 import { AISearchCapabilities } from './ai_search_capabilities/ai_search_capabilities';
-import { useKibana } from '../hooks/use_kibana';
-import { useGetApiKeys } from '../hooks/api/use_api_key';
 import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
 import { ApiKeyForm } from './api_key_form';
 
 export const ConnectToElasticsearch = () => {
-  const { share } = useKibana().services;
-  const { data } = useGetApiKeys();
   const elasticsearchUrl = useElasticsearchUrl();
-  const locator = share?.url?.locators.get('MANAGEMENT_APP_LOCATOR');
-  const manageKeysLink = locator?.useUrl({ sectionId: 'security', appId: 'api_keys' });
-  const createApiKeyLink = locator?.useUrl({ sectionId: 'security', appId: 'api_keys/create' });
 
   return (
     <EuiFlexGroup gutterSize="xl">

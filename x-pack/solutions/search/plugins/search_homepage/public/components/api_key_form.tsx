@@ -9,19 +9,9 @@ import React, { useState } from 'react';
 import { EuiBadge, EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ApiKeyFlyoutWrapper } from '@kbn/search-api-keys-components';
+import { ApiKeyFlyoutWrapper, useSearchApiKey, Status } from '@kbn/search-api-keys-components';
 import { useGetApiKeys } from '../hooks/api/use_api_key';
-import { useSearchApiKey } from '@kbn/search-api-keys-components';
 import { useKibana } from '../hooks/use_kibana';
-
-export enum Status {
-  uninitialized = 'uninitialized',
-  loading = 'loading',
-  showCreateButton = 'showCreateButton',
-  showHiddenKey = 'showHiddenKey',
-  showPreviewKey = 'showPreviewKey',
-  showUserPrivilegesError = 'showUserPrivilegesError',
-}
 
 interface ApiKeyFormProps {
   hasTitle?: boolean;
@@ -29,9 +19,9 @@ interface ApiKeyFormProps {
 
 export const ApiKeyForm: React.FC<ApiKeyFormProps> = () => {
   const { share } = useKibana().services;
-  const [showFlyout, setShowFlyout] = useState(false);
   const { status, updateApiKey } = useSearchApiKey();
   const { data } = useGetApiKeys();
+  const [showFlyout, setShowFlyout] = useState(false);
   const locator = share?.url?.locators.get('MANAGEMENT_APP_LOCATOR');
   const manageKeysLink = locator?.useUrl({ sectionId: 'security', appId: 'api_keys' });
 
