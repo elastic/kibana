@@ -27,11 +27,7 @@ export interface EsqlToolClient {
   delete(toolId: string): Promise<boolean>;
 }
 
-export const createClient = ({
-  storage
-}: {
-  storage: EsqlToolStorage;
-}): EsqlToolClient => {
+export const createClient = ({ storage }: { storage: EsqlToolStorage }): EsqlToolClient => {
   return new EsqlToolClientImpl({ storage });
 };
 
