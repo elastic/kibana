@@ -366,8 +366,9 @@ export const chatCompleteSuite = (
 
           const observable = supertestToObservable(response);
           const events = await lastValueFrom(observable.pipe(toArray()));
-          // no longer not streaming
-          expect(events.length).to.be.greaterThan(3);
+          // Should have multiple chunk events (confirming it's streaming)
+          const chunkEvents = events.filter((event) => event.type === 'chatCompletionChunk');
+          expect(chunkEvents.length).to.be.greaterThan(1);
           const messageEvent = events.find((event) => event.type === 'chatCompletionMessage');
           expect(messageEvent.deanonymized_input).to.be(undefined);
           expect(messageEvent.deanonymized_output).to.be(undefined);
