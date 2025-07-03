@@ -8,16 +8,6 @@
 import { getFindAttackDiscoveryAlertsAggregation } from '.';
 
 describe('getFindAttackDiscoveryAlertsAggregation', () => {
-  it('returns the expected alert_ids terms aggregation', () => {
-    const result = getFindAttackDiscoveryAlertsAggregation();
-    expect(result.alert_ids).toEqual({
-      terms: {
-        field: 'kibana.alert.attack_discovery.alert_ids',
-        size: 1000,
-      },
-    });
-  });
-
   it('returns the expected api_config_name terms aggregation', () => {
     const result = getFindAttackDiscoveryAlertsAggregation();
     expect(result.api_config_name).toEqual({
