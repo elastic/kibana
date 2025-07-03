@@ -38,7 +38,7 @@ export class Plugin {
             },
           },
           savedSearchId: { type: 'keyword' },
-          title: { type: 'text' },
+          ...mappings.properties,
           uiStateJSON: { type: 'text' },
           version: { type: 'integer' },
           visState: { type: 'text' },
@@ -78,6 +78,43 @@ export class Plugin {
       namespaceType: 'multiple',
       management,
       mappings,
+    });
+    core.savedObjects.registerType({
+      name: 'sortTestingType',
+      hidden: false,
+      namespaceType: 'multiple',
+      management,
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          titleKeyword: { type: 'keyword' },
+          textWithKeyword: {
+            type: 'text',
+            fields: {
+              keyword: { type: 'keyword' },
+            },
+          },
+        },
+      },
+    });
+
+    core.savedObjects.registerType({
+      name: 'sortTestingType2',
+      hidden: false,
+      namespaceType: 'multiple',
+      management,
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          titleKeyword: { type: 'keyword' },
+          textWithKeyword: {
+            type: 'text',
+            fields: {
+              keyword: { type: 'keyword' },
+            },
+          },
+        },
+      },
     });
   }
 

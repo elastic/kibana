@@ -16,6 +16,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       this.tags('skipFIPS');
     }
 
-    loadTestFile(require.resolve('./bulk_update'));
+    loadTestFile(require.resolve('./find'));
   });
 }

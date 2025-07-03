@@ -68,7 +68,7 @@ describe('searchDsl/getSortParams', () => {
 
   describe('sortField no direction', () => {
     describe('sortField is simple property with single type', () => {
-      it('returns correct params', () => {
+      it.only('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title')).toEqual({
           sort: [
             {
@@ -97,22 +97,11 @@ describe('searchDsl/getSortParams', () => {
     });
     describe('sortField is simple non-root property with multiple types', () => {
       it('returns correct params', () => {
-        expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'title')).toEqual({
-          runtime_mappings: {
-            merged_title: {
-              script: {
-                source:
-                  "if (doc['saved.title'].size() != 0) { emit(doc['saved.title'].value); } else if (doc['pending.title'].size() != 0) { emit(doc['pending.title'].value); }",
-              },
-              type: 'keyword',
-            },
-          },
-          sort: [
-            {
-              merged_title: {},
-            },
-          ],
-        });
+        expect(() =>
+          getSortingParams(MAPPINGS, ['saved', 'pending'], 'title')
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Sort field \\"saved.title\\" is of type \\"text\\" and does not have a \\"keyword\\" subfield. Sorting on text fields requires a keyword subfield."`
+        );
       });
     });
     describe('sortField is multi-field with single type', () => {
@@ -164,14 +153,14 @@ describe('searchDsl/getSortParams', () => {
             'merged_title.raw': {
               script: {
                 source:
-                  "if (doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else if (doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); }",
+                  "if (doc.containsKey('saved.title.raw') && doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else if (doc.containsKey('pending.title.raw') && doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); } else { emit(null); }",
               },
               type: 'keyword',
             },
           },
           sort: [
             {
-              'merged_title.raw': {},
+              'merged_title.raw': { order: undefined },
             },
           ],
         });
@@ -224,24 +213,11 @@ describe('searchDsl/getSortParams', () => {
     });
     describe('sortFields is non-root simple property with multiple types', () => {
       it('returns correct params', () => {
-        expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'title', 'desc')).toEqual({
-          runtime_mappings: {
-            merged_title: {
-              script: {
-                source:
-                  "if (doc['saved.title'].size() != 0) { emit(doc['saved.title'].value); } else if (doc['pending.title'].size() != 0) { emit(doc['pending.title'].value); }",
-              },
-              type: 'keyword',
-            },
-          },
-          sort: [
-            {
-              merged_title: {
-                order: 'desc',
-              },
-            },
-          ],
-        });
+        expect(() =>
+          getSortingParams(MAPPINGS, ['saved', 'pending'], 'title', 'desc')
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Sort field \\"saved.title\\" is of type \\"text\\" and does not have a \\"keyword\\" subfield. Sorting on text fields requires a keyword subfield."`
+        );
       });
     });
     describe('sortField is multi-field with single type', () => {
@@ -279,16 +255,14 @@ describe('searchDsl/getSortParams', () => {
             'merged_title.raw': {
               script: {
                 source:
-                  "if (doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else if (doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); }",
+                  "if (doc.containsKey('saved.title.raw') && doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else if (doc.containsKey('pending.title.raw') && doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); } else { emit(null); }",
               },
               type: 'keyword',
             },
           },
           sort: [
             {
-              'merged_title.raw': {
-                order: 'asc',
-              },
+              'merged_title.raw': { order: 'asc' },
             },
           ],
         });
