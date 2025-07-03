@@ -1111,7 +1111,7 @@
         "label": "ObservabilityAlertsTable",
         "description": [],
         "signature": [
-          "(props: Omit<{ id: string; columns?: ",
+          "(props: { id: string; columns?: ",
           "EuiDataGridColumn",
           "[] | undefined; query: Pick<",
           "QueryDslQueryContainer",
@@ -3383,7 +3383,7 @@
           "EuiDataGridRowHeightsOptions",
           " | undefined; onFullScreenChange?: ((isFullScreen: boolean) => void) | undefined; ref?: React.LegacyRef<",
           "AlertsTableImperativeApi",
-          "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; }, \"services\"> & { hideLazyLoader?: boolean | undefined; }) => React.JSX.Element"
+          "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; } & { hideLazyLoader?: boolean | undefined; }) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/observability/plugins/observability/public/components/alerts_table/alerts_table_lazy.tsx",
         "deprecated": false,
@@ -3397,7 +3397,7 @@
             "label": "props",
             "description": [],
             "signature": [
-              "Omit<{ id: string; columns?: ",
+              "{ id: string; columns?: ",
               "EuiDataGridColumn",
               "[] | undefined; query: Pick<",
               "QueryDslQueryContainer",
@@ -5669,7 +5669,7 @@
               "EuiDataGridRowHeightsOptions",
               " | undefined; onFullScreenChange?: ((isFullScreen: boolean) => void) | undefined; ref?: React.LegacyRef<",
               "AlertsTableImperativeApi",
-              "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; }, \"services\"> & { hideLazyLoader?: boolean | undefined; }"
+              "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; } & { hideLazyLoader?: boolean | undefined; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/components/alerts_table/alerts_table_lazy.tsx",
             "deprecated": false,
@@ -7927,7 +7927,8 @@
                 "docId": "kibCasesPluginApi",
                 "section": "def-public.CasesPublicStart",
                 "text": "CasesPublicStart"
-              }
+              },
+              " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
             "deprecated": false,
