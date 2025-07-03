@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { UploadState } from '@kbn/shared-ux-file-upload/src/upload_state';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import { type Owner } from '../../../common/constants/types';
 import * as i18n from '../../common/translations';
@@ -46,8 +45,6 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   initialValue?: string;
 };
 
-const context = React.createContext<UploadState | null>(null);
-
 export const MarkdownEditorForm = React.memo(
   forwardRef<MarkdownEditorRef, MarkdownEditorFormProps>(
     (
@@ -70,7 +67,7 @@ export const MarkdownEditorForm = React.memo(
       const owner = ownerList[0];
       const fileKindId = constructFileKindIdByOwner(owner as Owner);
 
-      const { isUploading, uploadState } = useImagePasteUpload({
+      const { isUploading } = useImagePasteUpload({
         editorRef: ref,
         field,
         caseId,
@@ -101,49 +98,47 @@ export const MarkdownEditorForm = React.memo(
       );
 
       return (
-        <context.Provider value={uploadState}>
-          <CommentEditorContext.Provider value={commentEditorContextValue}>
-            <EuiFormRow
-              data-test-subj={dataTestSubj}
-              describedByIds={idAria ? [idAria] : undefined}
-              fullWidth
-              error={errorMessage}
-              helpText={field.helpText}
-              isInvalid={isInvalid}
-              label={field.label}
-              labelAppend={field.labelAppend}
+        <CommentEditorContext.Provider value={commentEditorContextValue}>
+          <EuiFormRow
+            data-test-subj={dataTestSubj}
+            describedByIds={idAria ? [idAria] : undefined}
+            fullWidth
+            error={errorMessage}
+            helpText={field.helpText}
+            isInvalid={isInvalid}
+            label={field.label}
+            labelAppend={field.labelAppend}
+          >
+            <>
+              {isUploading && <EuiProgress size="m" />}
+              <MarkdownEditor
+                ref={ref}
+                ariaLabel={idAria}
+                editorId={id}
+                onChange={field.setValue}
+                value={field.value}
+                disabledUiPlugins={disabledUiPlugins}
+                data-test-subj={`${dataTestSubj}-markdown-editor`}
+              />
+            </>
+          </EuiFormRow>
+          {bottomRightContent && (
+            <EuiFlexGroup
+              css={css`
+                padding: ${euiTheme.size.m} 0;
+              `}
+              justifyContent={'flexEnd'}
             >
-              <>
-                {isUploading && <EuiProgress size="m" />}
-                <MarkdownEditor
-                  ref={ref}
-                  ariaLabel={idAria}
-                  editorId={id}
-                  onChange={field.setValue}
-                  value={field.value}
-                  disabledUiPlugins={disabledUiPlugins}
-                  data-test-subj={`${dataTestSubj}-markdown-editor`}
-                />
-              </>
-            </EuiFormRow>
-            {bottomRightContent && (
-              <EuiFlexGroup
-                css={css`
-                  padding: ${euiTheme.size.m} 0;
-                `}
-                justifyContent={'flexEnd'}
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiText color="danger" size="s">
-                    {hasConflicts && conflictWarningText}
-                  </EuiText>
-                  <EuiSpacer size="s" />
-                  {bottomRightContent}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
-          </CommentEditorContext.Provider>
-        </context.Provider>
+              <EuiFlexItem grow={false}>
+                <EuiText color="danger" size="s">
+                  {hasConflicts && conflictWarningText}
+                </EuiText>
+                <EuiSpacer size="s" />
+                {bottomRightContent}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+        </CommentEditorContext.Provider>
       );
     }
   )
