@@ -15,7 +15,7 @@ import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 import { PrivilegeMonitoringApiKeyType, getPrivmonEncryptedSavedObjectId } from './saved_object';
-import { monitoringEntitySourceType, privilegeMonitoringTypeName } from '../saved_objects';
+import { monitoringEntitySourceType } from '../saved_objects';
 
 export interface ApiKeyManager {
   generate: () => Promise<void>;
