@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { SavedObjectsType } from '@kbn/core/server';
+import type { EncryptedSavedObjectTypeRegistration } from '@kbn/encrypted-saved-objects-plugin/server';
 import { v5 as uuidv5 } from 'uuid';
 
 const PRIVMON_API_KEY_SO_ID = 'd2ee7992-cb4d-473a-8f1a-44ba187d4ac9';
@@ -27,4 +28,10 @@ export const PrivilegeMonitoringApiKeyType: SavedObjectsType = {
     importableAndExportable: false,
     displayName: 'Privilege Monitoring API key',
   },
+};
+
+export const PrivilegeMonitoringApiKeyEncryptionParams: EncryptedSavedObjectTypeRegistration = {
+  type: SO_PRIVILEGE_MONITORING_API_KEY_TYPE,
+  attributesToEncrypt: new Set(['apiKey']),
+  attributesToIncludeInAAD: new Set(['id', 'name']),
 };

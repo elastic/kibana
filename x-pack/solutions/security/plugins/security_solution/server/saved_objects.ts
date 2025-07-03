@@ -8,6 +8,7 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 
 import { promptType } from '@kbn/security-ai-prompts';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { referenceDataSavedObjectType } from './endpoint/lib/reference_data';
 import { protectionUpdatesNoteType } from './endpoint/lib/protection_updates_note/saved_object_mappings';
 import { noteType, pinnedEventType, timelineType } from './lib/timeline/saved_object_mappings';
@@ -22,11 +23,10 @@ import {
   privilegeMonitoringType,
   monitoringEntitySourceType,
 } from './lib/entity_analytics/privilege_monitoring/saved_objects';
-import { PrivilegeMonitoringApiKeyType } from './lib/entity_analytics/privilege_monitoring/auth/saved_object';
-import type {
-  SecuritySolutionPluginCoreSetupDependencies,
-  SecuritySolutionPluginSetupDependencies,
-} from './plugin_contract';
+import {
+  PrivilegeMonitoringApiKeyEncryptionParams,
+  PrivilegeMonitoringApiKeyType,
+} from './lib/entity_analytics/privilege_monitoring/auth/saved_object';
 
 const types = [
   noteType,
@@ -79,10 +79,5 @@ export const initEncryptedSavedObjects = ({
     logger.warn('EncryptedSavedObjects plugin not available; skipping registration.');
     return;
   }
-  encryptedSavedObjects.registerType({
-    type: PrivilegeMonitoringApiKeyType.name,
-    attributesToEncrypt: new Set(['apiKey']),
-    attributesToIncludeInAAD: new Set(['id', 'name']),
-  });
-};
+  encryptedSavedObjects.registerType(PrivilegeMonitoringApiKeyEncryptionParams);
 };
