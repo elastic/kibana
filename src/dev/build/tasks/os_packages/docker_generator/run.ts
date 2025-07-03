@@ -152,8 +152,8 @@ export async function runDockerGenerator(
   // into kibana-docker folder
   for (const [, dockerTemplate] of Object.entries(dockerTemplates)) {
     let filename: string;
-    if (!dockerTemplate.name.includes('kibana.yml') && flags.architecture === 'aarch64') {
-      filename = `${dockerTemplate.name}.arm64`;
+    if (!dockerTemplate.name.includes('kibana.yml')) {
+      filename = `${dockerTemplate.name}.${artifactArchitecture}`;
     } else {
       filename = dockerTemplate.name;
     }
@@ -189,7 +189,7 @@ export async function runDockerGenerator(
   // In order to do this we just call the file we
   // created from the templates/build_docker_sh.template.js
   // and we just run that bash script
-  const dockerBuildScript = `build_docker.sh${flags.architecture === 'aarch64' ? '.arm64' : ''}`;
+  const dockerBuildScript = `build_docker.sh.${artifactArchitecture}`;
   await chmodAsync(`${resolve(dockerBuildDir, dockerBuildScript)}`, '755');
 
   // Only build images on native targets
