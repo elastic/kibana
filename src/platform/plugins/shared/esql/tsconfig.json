@@ -25,7 +25,6 @@
     "@kbn/usage-collection-plugin",
     "@kbn/content-management-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/esql-validation-autocomplete",
     "@kbn/monaco",
     "@kbn/search-types",
     "@kbn/react-kibana-context-render",
