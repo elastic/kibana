@@ -127,7 +127,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
     >
       <QueryRuleFlyoutHeader ruleId={ruleId} createMode={createMode} />
       <EuiFlyoutBody css={QueryRuleFlyoutBody}>
-        <EuiFlexGroup gutterSize="none" css={QueryRuleFlyoutPanel(euiTheme)}>
+        <EuiFlexGroup gutterSize="none" css={QueryRuleFlyoutPanel}>
           <EuiFlexItem grow>
             <EuiPanel
               hasBorder={false}
@@ -253,7 +253,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               />
             </EuiPanel>
           </EuiFlexItem>
-          <EuiFlexItem grow css={QueryRuleFlyoutPanel(euiTheme)}>
+          <EuiFlexItem grow css={QueryRuleFlyoutPanel}>
             <EuiPanel
               hasBorder={false}
               hasShadow={false}
