@@ -14,7 +14,7 @@ import React, {
 } from 'react';
 import {
   EuiFieldText,
-  EuiFlyoutBody,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiLink,
@@ -134,13 +134,18 @@ export const FeedbackFlyoutBody = ({
     font-weight: ${euiTheme.font.weight.semiBold};
   `;
 
+  const bodyCss = css`
+    padding-top: ${euiTheme.size.m};
+  `;
+
   const Label = ({ children }: PropsWithChildren) => (
     <EuiText size="xs" css={semiBoldTextCss}>
       {children}
     </EuiText>
   );
+
   return (
-    <EuiFlyoutBody data-test-subj="feedbackFlyoutBody">
+    <EuiFlexItem css={bodyCss} data-test-subj="feedbackFlyoutBody">
       <EuiForm component="form">
         <EuiFormRow
           helpText={
@@ -233,6 +238,6 @@ export const FeedbackFlyoutBody = ({
           />
         </EuiFormRow>
       </EuiForm>
-    </EuiFlyoutBody>
+    </EuiFlexItem>
   );
 };

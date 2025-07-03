@@ -10,7 +10,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyoutFooter,
   EuiIconTip,
   EuiText,
   useEuiTheme,
@@ -26,13 +25,12 @@ interface Props {
 export const FeedbackFlyoutFooter = ({ isSendFeedbackButtonDisabled, submitFeedback }: Props) => {
   const { euiTheme } = useEuiTheme();
 
-  const footerBackgroundCss = css`
-    background-color: ${euiTheme.colors.backgroundBasePlain};
-    border-top: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+  const footerCss = css`
+    padding-top: ${euiTheme.size.m};
   `;
 
   return (
-    <EuiFlyoutFooter css={footerBackgroundCss} data-test-subj="feedbackFlyoutFooter">
+    <EuiFlexItem grow={false} css={footerCss} data-test-subj="feedbackFlyoutFooter">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
@@ -75,6 +73,6 @@ export const FeedbackFlyoutFooter = ({ isSendFeedbackButtonDisabled, submitFeedb
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiFlyoutFooter>
+    </EuiFlexItem>
   );
 };

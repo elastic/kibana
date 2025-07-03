@@ -6,14 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutHeader,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -29,8 +22,12 @@ export const FeedbackFlyoutHeader = ({ closeFlyout }: Props) => {
     font-weight: ${euiTheme.font.weight.semiBold};
   `;
 
+  const headerCss = css`
+    padding-bottom: ${euiTheme.size.l};
+  `;
+
   return (
-    <EuiFlyoutHeader hasBorder data-test-subj="feedbackFlyoutHeader">
+    <EuiFlexItem css={headerCss} grow={false} data-test-subj="feedbackFlyoutHeader">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
@@ -56,6 +53,6 @@ export const FeedbackFlyoutHeader = ({ closeFlyout }: Props) => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiFlyoutHeader>
+    </EuiFlexItem>
   );
 };
