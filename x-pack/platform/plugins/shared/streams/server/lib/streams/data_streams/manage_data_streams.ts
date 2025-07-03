@@ -11,6 +11,7 @@ import {
   IngestStreamLifecycleDSL,
   IngestStreamLifecycleDisabled,
   IngestStreamLifecycleILM,
+  isDisabledLifecycle,
   isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
@@ -171,6 +172,10 @@ export async function updateDataStreamsLifecycle({
                 }),
               { logger }
             );
+          } else if (isDisabledLifecycle(templateLifecycle)) {
+            await retryTransientEsErrors(() => esClient.indices.deleteDataLifecycle({ name }), {
+              logger,
+            });
           }
 
           await putDataStreamsSettings({ esClient, names, logger, lifecycle: { inherit: {} } });
