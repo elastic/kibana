@@ -48,6 +48,7 @@ export const ConfigSchema = schema.object({
       enabled: schema.boolean({ defaultValue: true }),
     }),
   }),
+  enabled: schema.boolean({ defaultValue: true }),
 });
 
 export type ConfigType = TypeOf<typeof ConfigSchema>;
