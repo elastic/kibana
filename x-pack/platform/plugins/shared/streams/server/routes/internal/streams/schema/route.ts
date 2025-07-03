@@ -5,12 +5,21 @@
  * 2.0.
  */
 import { getFlattenedObject } from '@kbn/std';
-import { SampleDocument, fieldDefinitionConfigSchema, Streams } from '@kbn/streams-schema';
+import {
+  SampleDocument,
+  fieldDefinitionConfigSchema,
+  Streams,
+  getInheritedFieldsFromAncestors,
+  getParentId,
+  isNamespacedEcsField,
+} from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { addAliasesForNamespacedFields } from '../../../../lib/streams/component_templates/logs_layer';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
+import { definitionToESQLQuery } from './definition_to_esql';
 
 const UNMAPPED_SAMPLE_SIZE = 500;
 
@@ -41,22 +50,52 @@ export const unmappedFieldsRoute = createServerRoute({
       size: UNMAPPED_SAMPLE_SIZE,
     };
 
-    const [streamDefinition, ancestors, results] = await Promise.all([
-      streamsClient.getStream(params.path.name),
+    const [streamDefinition, ancestors] = await Promise.all([
+      streamsClient.getStoredStreamDefinition(params.path.name),
       streamsClient.getAncestors(params.path.name),
-      scopedClusterClient.asCurrentUser.search({
-        index: params.path.name,
-        ...searchBody,
-      }),
     ]);
+    const isDraft =
+      Streams.WiredStream.Definition.is(streamDefinition) && streamDefinition.ingest.wired.draft;
 
     const sourceFields = new Set<string>();
+
+    const results = await scopedClusterClient.asCurrentUser.search({
+      index: isDraft ? getParentId(params.path.name) : params.path.name,
+      ...searchBody,
+    });
 
     results.hits.hits.forEach((hit) => {
       Object.keys(getFlattenedObject(hit._source as Record<string, unknown>)).forEach((field) => {
         sourceFields.add(field);
       });
     });
+    if (isDraft) {
+      // If the stream is a draft, we need to build the parent and the stream as get responses, construct the ESQL query and run that
+      const inheritedFields = addAliasesForNamespacedFields(
+        streamDefinition,
+        getInheritedFieldsFromAncestors(ancestors)
+      );
+
+      const streamResponse = {
+        stream: streamDefinition,
+        inherited_fields: inheritedFields,
+      } as Streams.WiredStream.GetResponse;
+      const parentResponse = {
+        stream: ancestors[ancestors.length - 1],
+      } as Streams.WiredStream.GetResponse;
+
+      const response = await scopedClusterClient.asCurrentUser.esql.query({
+        query: `${definitionToESQLQuery(streamResponse, parentResponse, {
+          includeSource: true,
+        })} | LIMIT ${UNMAPPED_SAMPLE_SIZE}`,
+      });
+
+      response.columns.forEach((column) => {
+        if (isNamespacedEcsField(column.name)) {
+          sourceFields.add(column.name);
+        }
+      });
+    }
 
     // Mapped fields from the stream's definition and inherited from ancestors
     const mappedFields = new Set<string>();

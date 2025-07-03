@@ -56,6 +56,7 @@ export type ForkStreamResponse = APIReturnType<'POST /api/streams/{name}/_fork 2
 export interface ForkStreamInput {
   definition: Streams.WiredStream.GetResponse;
   if: Condition;
+  draft?: boolean;
   destination: string;
 }
 export function createForkStreamActor({
@@ -77,6 +78,7 @@ export function createForkStreamActor({
             if: input.if,
             stream: {
               name: input.destination,
+              draft: input.draft,
             },
           },
         },

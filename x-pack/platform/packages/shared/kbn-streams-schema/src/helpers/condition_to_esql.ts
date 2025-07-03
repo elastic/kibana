@@ -16,8 +16,8 @@ import {
 
 function formatValue(value: string | number | boolean): string {
   if (typeof value === 'string') {
-    const escaped = value.replace(/'/g, "\\'");
-    return `'${escaped}'`;
+    const escaped = value.replace(/"/g, '\\"');
+    return `"${escaped}"`;
   }
   return String(value);
 }
@@ -31,7 +31,7 @@ function clauseToESQL(cond: FilterCondition): string {
     }
     case 'eq': {
       const v = formatValue((cond as any).value);
-      return `${f} = ${v}`;
+      return `${f} == ${v}`;
     }
     case 'exists':
       return `(${f} IS NOT NULL)`;

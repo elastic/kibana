@@ -26,17 +26,21 @@ import {
 } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
+import { Streams, getParentId } from '@kbn/streams-schema';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import { useTimefilter } from '../../hooks/use_timefilter';
+import { definitionToESQLQuery } from '../../util/definition_to_esql';
 
 export function DocumentsColumn({
   indexPattern,
   numDataPoints,
+  stream,
 }: {
   indexPattern: string;
   numDataPoints: number;
+  stream: Streams.all.Definition;
 }) {
   const {
     dependencies: {
@@ -47,6 +51,8 @@ export function DocumentsColumn({
   } = useKibana();
   const chartBaseTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
+
+  const isDraft = Streams.WiredStream.Definition.is(stream) && stream.ingest.wired.draft;
 
   const LoadingPlaceholder: React.FC = React.useCallback(
     () => (
@@ -88,13 +94,42 @@ export function DocumentsColumn({
 
   const minInterval = Math.floor((timeState.end - timeState.start) / numDataPoints);
 
+  const currentStreamAndParent = useStreamsAppFetch(
+    async ({ signal }) => {
+      if (isDraft) {
+        return Promise.all([
+          streamsRepositoryClient.fetch('GET /api/streams/{name} 2023-10-31', {
+            params: { path: { name: stream.name } },
+            signal,
+          }),
+          streamsRepositoryClient.fetch('GET /api/streams/{name} 2023-10-31', {
+            params: { path: { name: getParentId(stream.name)! } },
+            signal,
+          }),
+        ]);
+      }
+      return undefined;
+    },
+    [streamsRepositoryClient, isDraft, stream.name]
+  );
+
   const histogramQueryFetch = useStreamsAppFetch(
     async ({ signal, timeState: { start, end } }) => {
+      if (isDraft && !currentStreamAndParent.value) {
+        return undefined;
+      }
       return streamsRepositoryClient.fetch('POST /internal/streams/esql', {
         params: {
           body: {
             operationName: 'get_doc_count_for_stream',
-            query: `FROM ${indexPattern} | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`,
+            query: `${
+              isDraft
+                ? definitionToESQLQuery(
+                    currentStreamAndParent.value![0] as Streams.WiredStream.GetResponse,
+                    currentStreamAndParent.value![1] as Streams.WiredStream.GetResponse
+                  )
+                : `FROM ${indexPattern}`
+            } | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`,
             start,
             end,
           },
@@ -102,7 +137,7 @@ export function DocumentsColumn({
         signal,
       });
     },
-    [streamsRepositoryClient, indexPattern, minInterval],
+    [isDraft, currentStreamAndParent.value, streamsRepositoryClient, indexPattern, minInterval],
     {
       withTimeRange: true,
     }

@@ -23,7 +23,7 @@ export function generateReroutePipeline({ definition, state }: GenerateReroutePi
       .filter(({ destination }) => {
         const d = state.get(destination);
         return (
-          d && Streams.WiredStream.Definition.is(d.definition) && d.definition.ingest.wired.draft
+          d && Streams.WiredStream.Definition.is(d.definition) && !d.definition.ingest.wired.draft
         );
       })
       .map((child) => {

@@ -49,13 +49,23 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
   private _routingChanged: boolean = false;
   private _processingChanged: boolean = false;
   private _lifecycleChanged: boolean = false;
+  private _fromDraftToNonDraft: boolean = false;
 
-  constructor(definition: Streams.WiredStream.Definition, dependencies: StateDependencies) {
+  constructor(
+    definition: Streams.WiredStream.Definition,
+    dependencies: StateDependencies,
+    fromDraftToNonDraft = false
+  ) {
     super(definition, dependencies);
+    this._fromDraftToNonDraft = fromDraftToNonDraft;
   }
 
   clone(): StreamActiveRecord<Streams.WiredStream.Definition> {
-    return new WiredStream(cloneDeep(this._definition), this.dependencies);
+    return new WiredStream(
+      cloneDeep(this._definition),
+      this.dependencies,
+      this._fromDraftToNonDraft
+    );
   }
 
   toPrintable(): PrintableStream {
@@ -65,7 +75,12 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       lifecycleChanged: this._lifecycleChanged,
       routingChanged: this._routingChanged,
       ownFieldsChanged: this._ownFieldsChanged,
+      fromDraftToNonDraft: this._fromDraftToNonDraft,
     };
+  }
+
+  public isFromDraftToNonDraft(): boolean {
+    return this._fromDraftToNonDraft;
   }
 
   protected async doHandleUpsertChange(
@@ -80,8 +95,22 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         Streams.WiredStream.Definition.is(definition) &&
         isDescendantOf(definition.name, this._definition.name);
 
+      const childGoesFromDraftToNonDraft =
+        Streams.WiredStream.Definition.is(definition) &&
+        isChildOf(this._definition.name, definition.name) &&
+        !definition.ingest.wired.draft &&
+        (startingState.get(definition.name) as WiredStream)?._definition.ingest.wired.draft;
+
+      if (childGoesFromDraftToNonDraft) {
+        // if a child goes from draft to non-draft, we need to ensure the update the routing
+        this._routingChanged = true;
+      }
+
       return {
-        changeStatus: ancestorHasChanged && !this.isDeleted() ? 'upserted' : this.changeStatus,
+        changeStatus:
+          (ancestorHasChanged || childGoesFromDraftToNonDraft) && !this.isDeleted()
+            ? 'upserted'
+            : this.changeStatus,
         cascadingChanges: [],
       };
     }
@@ -140,11 +169,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       !this._definition.ingest.wired.draft;
 
     if (goFromDraftToNonDraft) {
-      // everything is changed when going from draft to non-draft
-      this._ownFieldsChanged = true;
-      this._routingChanged = true;
-      this._processingChanged = true;
-      this._lifecycleChanged = true;
+      this._fromDraftToNonDraft = true;
     }
 
     const parentId = getParentId(this._definition.name);
@@ -564,6 +589,9 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     startingState: State,
     startingStateStream: WiredStream
   ): Promise<ElasticsearchAction[]> {
+    if (this._fromDraftToNonDraft) {
+      return this.doDetermineCreateActions(desiredState);
+    }
     if (this._definition.ingest.wired.draft) {
       return [
         {

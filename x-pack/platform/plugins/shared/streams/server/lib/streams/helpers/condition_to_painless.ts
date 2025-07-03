@@ -84,9 +84,11 @@ function binaryToPainless(condition: BinaryFilterCondition) {
     case 'contains':
       return `((${safePainlessField(condition)} instanceof Number && ${safePainlessField(
         condition
-      )}.toString().contains(${encodeValue(String(condition.value))})) || ${safePainlessField(
-        condition
-      )}.contains(${encodeValue(String(condition.value))}))`;
+      )}.toString().toLowerCase().contains(${encodeValue(
+        String(condition.value)
+      )}.toLowerCase())) || ${safePainlessField(condition)}.toLowerCase().contains(${encodeValue(
+        String(condition.value)
+      )}.toLowerCase()))`;
     default:
       return `((${safePainlessField(condition)} instanceof Number && ${safePainlessField(
         condition

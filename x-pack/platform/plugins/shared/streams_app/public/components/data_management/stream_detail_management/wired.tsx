@@ -7,7 +7,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiToolTip } from '@elastic/eui';
+import { useAbortController } from '@kbn/react-hooks';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
@@ -15,6 +16,7 @@ import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { Wrapper } from './wrapper';
+import { useKibana } from '../../../hooks/use_kibana';
 
 const wiredStreamManagementSubTabs = ['route', 'enrich', 'schemaEditor', 'lifecycle'] as const;
 
@@ -37,7 +39,9 @@ export function WiredStreamDetailManagement({
 
   const tabs = {
     lifecycle: {
-      content: (
+      content: definition.stream.ingest.wired.draft ? (
+        <StreamMaterialize definition={definition} refreshDefinition={refreshDefinition} />
+      ) : (
         <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
       ),
       label: (
@@ -87,4 +91,72 @@ export function WiredStreamDetailManagement({
   }
 
   return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
+}
+
+function StreamMaterialize({
+  definition,
+  refreshDefinition,
+}: {
+  definition: Streams.WiredStream.GetResponse;
+  refreshDefinition: () => void;
+}) {
+  const {
+    core: { notifications },
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+  } = useKibana();
+  const { signal } = useAbortController();
+  return (
+    <EuiEmptyPrompt
+      color="primary"
+      iconType="info"
+      titleSize="s"
+      title={<h2>Draft stream</h2>}
+      body={
+        <>
+          <p>
+            This stream is currently in draft mode. You can materialize it to apply changes at
+            ingest time. Be aware that materializing a draft stream will make historic data
+            unavailable for processing, and it will not be possible to revert this action.
+          </p>
+          <EuiButton
+            fill
+            onClick={() => {
+              streamsRepositoryClient
+                .fetch('PUT /api/streams/{name}/_ingest 2023-10-31', {
+                  params: {
+                    path: { name: definition.stream.name },
+                    body: {
+                      ingest: {
+                        ...definition.stream.ingest,
+                        wired: {
+                          ...definition.stream.ingest.wired,
+                          draft: false, // Set draft to false to materialize the stream
+                        },
+                      },
+                    },
+                  },
+                  signal,
+                })
+                .then(() => {
+                  refreshDefinition();
+                })
+                .catch((error) => {
+                  notifications.toasts.addError(error, {
+                    title: i18n.translate('xpack.streams.streamDetailManagement.materializeError', {
+                      defaultMessage: 'Failed to materialize stream',
+                    }),
+                  });
+                });
+            }}
+          >
+            Materialize
+          </EuiButton>
+        </>
+      }
+    />
+  );
 }

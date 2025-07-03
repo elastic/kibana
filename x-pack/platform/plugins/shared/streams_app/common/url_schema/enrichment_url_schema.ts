@@ -6,6 +6,7 @@
  */
 
 import { Filter, TimeRange } from '@kbn/es-query';
+import { ProcessorDefinition } from '@kbn/streams-schema';
 import { SampleDocument, sampleDocument } from '@kbn/streams-schema/src/shared/record_types';
 import { z } from '@kbn/zod';
 
@@ -30,6 +31,8 @@ const baseDataSourceSchema = z.object({
  */
 export interface RandomSamplesDataSource extends BaseDataSource {
   type: 'random-samples';
+  forDraftStream?: boolean; // Optional field to indicate if this is for a draft stream
+  processingSteps?: ProcessorDefinition[];
 }
 
 const randomSamplesDataSourceSchema = baseDataSourceSchema.extend({

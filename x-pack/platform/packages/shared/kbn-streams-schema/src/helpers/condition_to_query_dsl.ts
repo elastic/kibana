@@ -31,11 +31,15 @@ function conditionToClause(condition: FilterCondition) {
     case 'lte':
       return { range: { [condition.field]: { lte: condition.value } } };
     case 'contains':
-      return { wildcard: { [condition.field]: `*${condition.value}*` } };
+      return {
+        wildcard: { [condition.field]: { value: `*${condition.value}*`, case_insensitive: true } },
+      };
     case 'startsWith':
-      return { prefix: { [condition.field]: condition.value } };
+      return { prefix: { [condition.field]: { value: condition.value, case_insensitive: true } } };
     case 'endsWith':
-      return { wildcard: { [condition.field]: `*${condition.value}` } };
+      return {
+        wildcard: { [condition.field]: { value: `*${condition.value}`, case_insensitive: true } },
+      };
     case 'notExists':
       return { bool: { must_not: { exists: { field: condition.field } } } };
     default:

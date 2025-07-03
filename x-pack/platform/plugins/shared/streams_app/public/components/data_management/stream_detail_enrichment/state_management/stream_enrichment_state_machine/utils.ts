@@ -116,12 +116,23 @@ export function getUpsertWiredFields(
   return { ...originalFieldDefinition, ...simulationMappedFieldDefinition };
 }
 
-export const spawnDataSource = <TAssignArgs extends AssignArgs<any, any, any, any>>(
+export const spawnDataSource = <
+  TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>
+>(
   dataSource: EnrichmentDataSource,
   assignArgs: TAssignArgs
 ) => {
   const { spawn, context, self } = assignArgs;
   const dataSourceWithUIAttributes = dataSourceConverter.toUIDefinition(dataSource);
+
+  if (
+    dataSourceWithUIAttributes.type === 'random-samples' &&
+    Streams.WiredStream.GetResponse.is(context.definition) &&
+    context.definition.stream.ingest.wired.draft
+  ) {
+    dataSourceWithUIAttributes.forDraftStream = true;
+    dataSourceWithUIAttributes.processingSteps = context.definition.stream.ingest.processing;
+  }
 
   return spawn('dataSourceMachine', {
     id: dataSourceWithUIAttributes.id,

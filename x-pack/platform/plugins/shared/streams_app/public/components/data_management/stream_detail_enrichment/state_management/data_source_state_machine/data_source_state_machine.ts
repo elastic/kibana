@@ -190,9 +190,10 @@ export const dataSourceMachine = setup({
 export const createDataSourceMachineImplementations = ({
   data,
   toasts,
+  streamsRepositoryClient,
 }: DataSourceMachineDeps): MachineImplementationsFrom<typeof dataSourceMachine> => ({
   actors: {
-    collectData: createDataCollectorActor({ data }),
+    collectData: createDataCollectorActor({ data, streamsRepositoryClient }),
   },
   actions: {
     notifyDataCollectionFailure: createDataCollectionFailureNofitier({ toasts }),

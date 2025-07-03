@@ -9,10 +9,12 @@ import { ActorRef, Snapshot } from 'xstate5';
 import { IToasts } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { SampleDocument } from '@kbn/streams-schema';
+import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { EnrichmentDataSourceWithUIAttributes } from '../../types';
 
 export interface DataSourceMachineDeps {
   data: DataPublicPluginStart;
+  streamsRepositoryClient: StreamsRepositoryClient;
   toasts: IToasts;
 }
 

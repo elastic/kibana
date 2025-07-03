@@ -81,7 +81,10 @@ export function Wrapper({
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <DiscoverBadgeButton definition={definition} />
               {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
-              <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+              {!Streams.WiredStream.GetResponse.is(definition) ||
+              !definition.stream.ingest.wired.draft ? (
+                <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+              ) : null}
             </EuiFlexGroup>
           </EuiFlexGroup>
         }

@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFormRow, EuiFieldText, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RoutingConditionEditor } from '../condition_editor';
 import { AddRoutingRuleControls } from './control_bars';
@@ -45,6 +45,18 @@ export function NewRoutingStreamEntry() {
               autoFocus
               compressed
               onChange={(e) => changeRule({ destination: e.target.value })}
+            />
+          </EuiFormRow>
+          <EuiFormRow fullWidth label="As draft">
+            <EuiSwitch
+              showLabel={false}
+              label=""
+              checked={currentRule.draft ?? false}
+              onChange={() => {
+                changeRule({
+                  draft: !currentRule.draft,
+                });
+              }}
             />
           </EuiFormRow>
           <RoutingConditionEditor

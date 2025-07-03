@@ -34,6 +34,7 @@ import {
   isNamespacedEcsField,
   FieldDefinition,
   Streams,
+  getParentId,
 } from '@kbn/streams-schema';
 import { mapValues, uniq, omit, isEmpty, uniqBy, some } from 'lodash';
 import { StreamsClient } from '../../../../lib/streams/client';
@@ -150,12 +151,18 @@ export const simulateProcessing = async ({
   scopedClusterClient,
   streamsClient,
 }: SimulateProcessingDeps) => {
+  const stream = await streamsClient.getStream(params.path.name);
+
+  let draft = false;
+  if (Streams.WiredStream.Definition.is(stream) && stream.ingest.wired.draft) {
+    draft = true;
+  }
   /* 0. Retrieve required data to prepare the simulation */
-  const [stream, { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps }] =
-    await Promise.all([
-      streamsClient.getStream(params.path.name),
-      getStreamIndex(scopedClusterClient, streamsClient, params.path.name),
-    ]);
+  const { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps } = await getStreamIndex(
+    scopedClusterClient,
+    streamsClient,
+    draft ? getParentId(params.path.name)! : params.path.name
+  );
 
   /* 1. Prepare data for either simulation types (ingest, pipeline), prepare simulation body for the mandatory pipeline simulation */
   const simulationData = prepareSimulationData(params);

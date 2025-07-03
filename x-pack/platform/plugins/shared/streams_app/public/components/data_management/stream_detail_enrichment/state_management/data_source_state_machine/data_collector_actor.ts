@@ -6,7 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SampleDocument } from '@kbn/streams-schema';
+import {
+  ProcessorDefinition,
+  SampleDocument,
+  Streams,
+  getParentId,
+  isNamespacedEcsField,
+} from '@kbn/streams-schema';
 import { ErrorActorEvent, fromObservable } from 'xstate5';
 import type { errors as esErrors } from '@elastic/elasticsearch';
 import { Filter, Query, TimeRange, buildEsQuery } from '@kbn/es-query';
@@ -14,9 +20,13 @@ import { Observable, filter, map, of } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { IEsSearchResponse } from '@kbn/search-types';
 import { pick } from 'lodash';
+import { getESQLResults } from '@kbn/esql-utils';
+import { RecursiveRecord } from '@kbn/streams-schema/src/shared/record_types';
+import { flattenObjectNestedLast } from '@kbn/object-utils';
 import { getFormattedError } from '../../../../../util/errors';
 import { DataSourceMachineDeps } from './types';
 import { EnrichmentDataSourceWithUIAttributes } from '../../types';
+import { definitionToESQLQuery } from '../../../../../util/definition_to_esql';
 
 export interface SamplesFetchInput {
   dataSource: EnrichmentDataSourceWithUIAttributes;
@@ -35,15 +45,31 @@ interface CollectKqlDataParams extends SearchParamsOptions {
   data: DataSourceMachineDeps['data'];
 }
 
-type CollectorParams = Pick<CollectKqlDataParams, 'data' | 'index'>;
+interface CollectDraftESQLDataParams extends SearchParamsOptions {
+  data: DataSourceMachineDeps['data'];
+  streamsRepositoryClient: DataSourceMachineDeps['streamsRepositoryClient'];
+  processingSteps?: ProcessorDefinition[];
+}
+
+type CollectorParams = Pick<
+  CollectDraftESQLDataParams,
+  'data' | 'index' | 'streamsRepositoryClient'
+>;
 
 /**
  * Creates a data collector actor that fetches sample documents based on the data source type
  */
-export function createDataCollectorActor({ data }: Pick<DataSourceMachineDeps, 'data'>) {
+export function createDataCollectorActor({
+  data,
+  streamsRepositoryClient,
+}: Pick<DataSourceMachineDeps, 'data' | 'streamsRepositoryClient'>) {
   return fromObservable<SampleDocument[], SamplesFetchInput>(({ input }) => {
     const { dataSource, streamName } = input;
-    return getDataCollectorForDataSource(dataSource)({ data, index: streamName });
+    return getDataCollectorForDataSource(dataSource)({
+      data,
+      streamsRepositoryClient,
+      index: streamName,
+    });
   });
 }
 
@@ -52,7 +78,13 @@ export function createDataCollectorActor({ data }: Pick<DataSourceMachineDeps, '
  */
 function getDataCollectorForDataSource(dataSource: EnrichmentDataSourceWithUIAttributes) {
   if (dataSource.type === 'random-samples') {
-    return (args: CollectorParams) => collectKqlData(args);
+    return (args: CollectorParams) => {
+      if (!dataSource.forDraftStream) {
+        return collectKqlData(args);
+      }
+      // For draft streams, we need to fetch the data via ESQL with the extra processing steps from the parent
+      return collectDraftEsqlData({ ...args, processingSteps: dataSource.processingSteps });
+    };
   }
   if (dataSource.type === 'kql-samples') {
     return (args: CollectorParams) =>
@@ -62,6 +94,75 @@ function getDataCollectorForDataSource(dataSource: EnrichmentDataSourceWithUIAtt
     return () => of(dataSource.documents);
   }
   return () => of<SampleDocument[]>([]);
+}
+
+function collectDraftEsqlData(params: CollectDraftESQLDataParams): Observable<SampleDocument[]> {
+  const { data, index, streamsRepositoryClient, processingSteps } = params;
+  const abortController = new AbortController();
+
+  const parentId = getParentId(index);
+
+  return new Observable((observer) => {
+    Promise.all([
+      streamsRepositoryClient.fetch('GET /api/streams/{name} 2023-10-31', {
+        params: {
+          path: { name: parentId! },
+        },
+        signal: abortController.signal,
+      }),
+      streamsRepositoryClient.fetch('GET /api/streams/{name} 2023-10-31', {
+        params: { path: { name: index } },
+        signal: abortController.signal,
+      }),
+    ])
+      .then(([parent, self]) => {
+        if (
+          !Streams.WiredStream.GetResponse.is(parent) ||
+          !Streams.WiredStream.GetResponse.is(self)
+        ) {
+          throw new Error('The parent or the stream itself is not a wired stream');
+        }
+        const esqlQuery = `${definitionToESQLQuery(self, parent, {
+          includeSource: true,
+        })!} | LIMIT ${params.size ?? 100}`;
+        return getESQLResults({
+          esqlQuery,
+          search: data.search.search,
+          signal: abortController.signal,
+          dropNullColumns: true,
+        });
+      })
+      .then(({ response }) => {
+        if (response.columns) {
+          const columns = response.columns.map((col) => ({
+            name: col.name,
+            type: col.type,
+          }));
+          const sourceColumnIndex = columns.findIndex((col) => col.name === '_source');
+          const sourceColumn = columns[sourceColumnIndex];
+          observer.next(
+            response.values.map((row) => {
+              const doc: SampleDocument = flattenObjectNestedLast(
+                row[sourceColumnIndex] as RecursiveRecord
+              ) as RecursiveRecord;
+              row.forEach((value, i) => {
+                if (columns[i] !== sourceColumn && isNamespacedEcsField(columns[i].name)) {
+                  doc[columns[i].name] = value as RecursiveRecord;
+                }
+              });
+              return doc;
+            })
+          );
+        } else {
+          throw new Error('ESQL response does not contain columns');
+        }
+        observer.complete();
+      });
+
+    return () => {
+      abortController.abort();
+    };
+  });
 }
 
 /**

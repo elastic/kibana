@@ -180,6 +180,7 @@ export const streamRoutingMachine = setup({
                   return {
                     definition: context.definition,
                     if: currentRoutingRule.if,
+                    draft: currentRoutingRule.draft,
                     destination: currentRoutingRule.destination,
                   };
                 },

@@ -10,6 +10,7 @@ import { EuiButtonIcon, EuiContextMenu, EuiPopover, useGeneratedHtmlId } from '@
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { Streams } from '@kbn/streams-schema';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { SchemaEditorFlyout } from './flyout';
 import { useSchemaEditorContext } from './schema_editor_context';
@@ -32,6 +33,8 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
   const panels = useMemo(() => {
     const { onFieldUnmap, onFieldUpdate, stream, withFieldSimulation } = schemaEditorContext;
 
+    const isDraft = Streams.WiredStream.Definition.is(stream) && stream.ingest.wired.draft;
+
     let actions = [];
 
     const openFlyout = (props: { isEditingByDefault: boolean } = { isEditingByDefault: false }) => {
@@ -43,7 +46,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
               onClose={() => overlay.close()}
               onSave={onFieldUpdate}
               stream={stream}
-              withFieldSimulation={withFieldSimulation}
+              withFieldSimulation={withFieldSimulation && !isDraft}
               {...props}
             />
           </StreamsAppContextProvider>,

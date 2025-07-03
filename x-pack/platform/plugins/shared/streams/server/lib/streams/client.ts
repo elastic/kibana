@@ -444,7 +444,7 @@ export class StreamsClient {
     }
   }
 
-  private async getStoredStreamDefinition(name: string): Promise<Streams.all.Definition> {
+  public async getStoredStreamDefinition(name: string): Promise<Streams.all.Definition> {
     return await Promise.all([
       this.dependencies.storageClient.get({ id: name }).then((response) => {
         return this.getStreamDefinitionFromSource(response._source);

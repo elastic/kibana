@@ -15,9 +15,11 @@ import {
   Direction,
   Criteria,
   useEuiTheme,
+  EuiBadge,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
+import { Streams } from '@kbn/streams-schema';
 import { buildStreamRows, TableRow, SortableField } from './utils';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
@@ -89,6 +91,10 @@ export function StreamsTreeTable({
                   href={router.link('/{key}', { path: { key: item.name } })}
                 >
                   {item.name}
+                  {Streams.WiredStream.Definition.is(item.stream) &&
+                  item.stream.ingest.wired.draft ? (
+                    <EuiBadge>draft</EuiBadge>
+                  ) : null}
                 </EuiLink>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -111,8 +117,9 @@ export function StreamsTreeTable({
           sortable: false,
           dataType: 'number',
           render: (_: unknown, item: TableRow) =>
-            item.data_stream ? (
-              <DocumentsColumn indexPattern={item.name} numDataPoints={25} />
+            item.data_stream ||
+            (Streams.WiredStream.Definition.is(item.stream) && item.stream.ingest.wired.draft) ? (
+              <DocumentsColumn indexPattern={item.name} numDataPoints={25} stream={item.stream} />
             ) : null,
         },
         {
@@ -124,9 +131,10 @@ export function StreamsTreeTable({
           align: 'left',
           sortable: (row: TableRow) => row.rootRetentionMs,
           dataType: 'number',
-          render: (_: unknown, item: TableRow) => (
-            <RetentionColumn lifecycle={item.effective_lifecycle} />
-          ),
+          render: (_: unknown, item: TableRow) =>
+            Streams.WiredStream.Definition.is(item.stream) && !item.stream.ingest.wired.draft ? (
+              <RetentionColumn lifecycle={item.effective_lifecycle} />
+            ) : null,
         },
       ]}
       itemId="name"
