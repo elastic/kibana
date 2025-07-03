@@ -91,7 +91,7 @@ export const getVisualization = ({
           layerId: state.layerId,
           accessors: state.regionAccessor ? [{ columnId: state.regionAccessor }] : [],
           supportsMoreColumns: !state.regionAccessor,
-          filterOperations: (op: OperationMetadata) => op.isBucketed && op.dataType === 'string',
+          filterOperations: (op: OperationMetadata) => (op.isBucketed && op.dataType === 'string') || false,
           enableDimensionEditor: true,
           requiredMinDimensionCount: 1,
           dataTestSubj: 'lnsChoropleth_regionKeyDimensionPanel',

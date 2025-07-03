@@ -164,7 +164,7 @@ export function columnToOperation(
   uniqueLabel?: string,
   dataView?: IndexPattern | DataView
 ): OperationDescriptor {
-  const { dataType, label, isBucketed, operationType, timeShift, reducedTimeRange } = column;
+  const { dataType, label, operationType, timeShift, reducedTimeRange } = column;
 
   const operationDefinition = operationDefinitionMap[operationType];
   if (!operationDefinition) {
@@ -182,7 +182,7 @@ export function columnToOperation(
 
   return {
     dataType: normalizeOperationDataType(dataType),
-    isBucketed,
+    isBucketed: isBucketed(column),
     scale,
     label: uniqueLabel || label,
     isStaticValue: operationType === 'static_value',

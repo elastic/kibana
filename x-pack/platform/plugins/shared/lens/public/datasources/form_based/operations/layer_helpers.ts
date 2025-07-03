@@ -363,8 +363,8 @@ export function insertNewColumn({
       // like we do for fullReferences to show a seamless transition
     }
     const possibleOperation = operationDefinition.getPossibleOperation(indexPattern);
-    const isBucketed = Boolean(possibleOperation?.isBucketed);
-    const addOperationFn = isBucketed ? addBucket : addMetric;
+    const isBucketedColumn = Boolean(possibleOperation?.isBucketed);
+    const addOperationFn = isBucketedColumn ? addBucket : addMetric;
     const buildColumnFn = columnParams
       ? operationDefinition.buildColumn({ ...baseOptions, layer }, columnParams)
       : operationDefinition.buildColumn({ ...baseOptions, layer });
@@ -418,9 +418,9 @@ export function insertNewColumn({
     if (!possibleOperation) {
       throw new Error(`Can't create operation ${op} because it's incompatible with the data view`);
     }
-    const isBucketed = Boolean(possibleOperation.isBucketed);
+    const isBucketedColumn = Boolean(possibleOperation.isBucketed);
 
-    const addOperationFn = isBucketed ? addBucket : addMetric;
+    const addOperationFn = isBucketedColumn ? addBucket : addMetric;
     const buildColumnFn = columnParams
       ? operationDefinition.buildColumn(
           { ...baseOptions, layer: tempLayer, referenceIds },
@@ -450,8 +450,8 @@ export function insertNewColumn({
         `Tried to create an invalid operation ${operationDefinition.type} using previously selected field ${invalidField.name}`
       );
     }
-    const isBucketed = Boolean(possibleOperation.isBucketed);
-    if (isBucketed) {
+    const isBucketedColumn = Boolean(possibleOperation.isBucketed);
+    if (isBucketedColumn) {
       return updateDefaultLabels(
         addBucket(
           layer,
@@ -496,8 +496,8 @@ export function insertNewColumn({
   }
 
   const newColumn = operationDefinition.buildColumn({ ...baseOptions, layer, field }, columnParams);
-  const isBucketed = Boolean(possibleOperation.isBucketed);
-  const addOperationFn = isBucketed ? addBucket : addMetric;
+  const isBucketedColumn = Boolean(possibleOperation.isBucketed);
+  const addOperationFn = isBucketedColumn ? addBucket : addMetric;
   return updateDefaultLabels(
     addOperationFn(layer, newColumn, columnId, visualizationGroups, targetGroup, respectOrder),
     indexPattern
