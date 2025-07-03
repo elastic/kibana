@@ -244,7 +244,7 @@ describe('config validation', () => {
   describe('email.recipient_allowlist', () => {
     const config: Record<string, unknown> = {};
     test('validates no email config at all', () => {
-      let result = configSchema.validate(config);
+      const result = configSchema.validate(config);
       expect(result.email === undefined);
     });
 
