@@ -40,15 +40,13 @@ export interface EsqlToolProperties {
   name: string;
   description: string;
   query: string;
-  params: Array<
-    Record<
+  params: Record<
       string,
       {
         type: string;
         description: string;
       }
-    >
-  >;
+    >;
   meta: ToolDescriptorMeta;
 }
 

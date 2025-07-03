@@ -65,8 +65,7 @@ export interface EsqlToolDefinition extends ToolDescriptor {
    * Parameters that can be used in the query.
    * Each parameter has a key identifier and metadata about its type and usage.
    */
-  params: Array<
-    Record<
+  params: Record<
       string,
       {
         /**
@@ -79,7 +78,6 @@ export interface EsqlToolDefinition extends ToolDescriptor {
          */
         description: string;
       }
-    >
   >;
 }
 
@@ -109,12 +107,11 @@ export interface EsqlTool<RunInput extends ZodObject<any> = ZodObject<any>, RunO
    * Parameters that can be used in the query.
    * Each parameter has a key identifier and metadata about its type and usage.
    */
-  params: Array<
-    Record<
+  params: Record<
       string,
       {
         /**
-         * The data type of the parameter.
+         * The data types of the parameter.
          */
         type: FieldTypes;
 
@@ -123,7 +120,6 @@ export interface EsqlTool<RunInput extends ZodObject<any> = ZodObject<any>, RunO
          */
         description: string;
       }
-    >
   >;
 }
 

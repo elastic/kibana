@@ -18,10 +18,9 @@ function toRegisteredTool<
 function createSchemaFromParams(params: EsqlToolDefinition['params']): z.ZodObject<any> {
   const schemaFields: Record<string, z.ZodTypeAny> = {};
 
-  for (const param of params) {
+  for (const [key, param] of Object.entries(params)) {
     let field: z.ZodTypeAny;
-    const [[key, value]] = Object.entries(param);
-    switch (value.type) {
+    switch (param.type) {
       case 'text':
       case 'keyword':
         field = z.string();
@@ -48,7 +47,7 @@ function createSchemaFromParams(params: EsqlToolDefinition['params']): z.ZodObje
         break;
     }
 
-    field = field.describe(value.description);
+    field = field.describe(param.description);
 
     schemaFields[key] = field;
   }
@@ -69,7 +68,6 @@ export const registeredToolCreator = (tool: EsqlToolDefinition): RegisteredTool 
     schema: esqlSchema,
     handler: async (params, { esClient }) => {
       const client = esClient.asCurrentUser;
-
       const paramArray = Object.entries(params).map(([key, value]) => ({ [key]: value }));
 
       const response = await client.transport.request({
