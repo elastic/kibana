@@ -13,7 +13,7 @@ import {
   EuiPanel,
   htmlIdGenerator,
   euiScrollBarStyles,
-  UseEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { PanelLoader } from '@kbn/panel-loader';
