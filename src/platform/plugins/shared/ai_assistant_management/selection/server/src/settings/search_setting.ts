@@ -46,5 +46,5 @@ export const searchSolutionSetting: Omit<
     [AIAssistantType.Never]: HIDE_ASSISTANT,
   },
   requiresPageReload: true,
-  solutions: ['es'],
+  solutionViews: ['es'],
 };

@@ -46,5 +46,5 @@ export const securitySolutionSetting: Omit<
     [AIAssistantType.Never]: HIDE_ASSISTANT,
   },
   requiresPageReload: true,
-  solutions: ['security'],
+  solutionViews: ['security'],
 };
