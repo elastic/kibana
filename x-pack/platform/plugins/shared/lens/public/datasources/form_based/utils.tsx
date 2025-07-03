@@ -785,7 +785,8 @@ function collectFiltersFromMetrics(layer: FormBasedLayer, columnIds: string[]) {
     const column = layer.columns[colId];
     const operationDefinition = operationDefinitionMap[column?.operationType];
     return (
-      column && !isBucketed(column) &&
+      column &&
+      !isBucketed(column) &&
       // global filters for formulas are picked up by referenced columns
       !isColumnOfType<FormulaIndexPatternColumn>('formula', column) &&
       operationDefinition?.filterable

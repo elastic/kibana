@@ -866,9 +866,8 @@ function createSuggestionWithDefaultDateHistogram(
 function createSimplifiedTableSuggestions(state: FormBasedPrivateState, layerId: string) {
   const layer = state.layers[layerId];
 
-  const [availableBucketedColumns, availableMetricColumns] = partition(
-    layer.columnOrder,
-    (colId) => isBucketed(layer.columns[colId])
+  const [availableBucketedColumns, availableMetricColumns] = partition(layer.columnOrder, (colId) =>
+    isBucketed(layer.columns[colId])
   );
   const topLevelMetricColumns = availableMetricColumns.filter(
     (columnId) => !isReferenced(layer, columnId)

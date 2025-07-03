@@ -136,7 +136,7 @@ describe('state_helpers', () => {
     it('should recursively modify a formula and update the math ast', () => {
       const source = {
         dataType: 'number' as const,
-        
+
         label: '5 + moving_average(sum(bytes), window=5)',
         operationType: 'formula' as const,
         params: {
@@ -148,7 +148,7 @@ describe('state_helpers', () => {
       const math = {
         customLabel: true,
         dataType: 'number' as const,
-        
+
         operationType: 'math' as const,
         label: 'Part of 5 + moving_average(sum(bytes), window=5)',
         references: ['formulaX1'],
@@ -163,7 +163,7 @@ describe('state_helpers', () => {
       const sum = {
         customLabel: true,
         dataType: 'number' as const,
-        
+
         label: 'Part of 5 + moving_average(sum(bytes), window=5)',
         operationType: 'sum' as const,
         sourceField: 'bytes',
@@ -171,7 +171,7 @@ describe('state_helpers', () => {
       const movingAvg = {
         customLabel: true,
         dataType: 'number' as const,
-        
+
         label: 'Part of 5 + moving_average(sum(bytes), window=5)',
         operationType: 'moving_average' as const,
         params: { window: 5 },
@@ -273,7 +273,6 @@ describe('state_helpers', () => {
           col1: {
             label: 'Average of bytes',
             dataType: 'number',
-            
 
             // Private
             operationType: 'average',
@@ -300,7 +299,6 @@ describe('state_helpers', () => {
           col1: {
             label: 'Average of bytes',
             dataType: 'number',
-            
 
             // Private
             operationType: 'average',
@@ -328,7 +326,6 @@ describe('state_helpers', () => {
           col1: {
             label: 'Date histogram of timestamp',
             dataType: 'date',
-            
 
             // Private
             operationType: 'date_histogram',
@@ -359,7 +356,6 @@ describe('state_helpers', () => {
           col1: {
             label: 'Date histogram of timestamp',
             dataType: 'date',
-            
 
             // Private
             operationType: 'date_histogram',
@@ -371,7 +367,6 @@ describe('state_helpers', () => {
           col3: {
             label: 'Reference',
             dataType: 'number',
-            
 
             operationType: 'cumulative_sum',
             references: ['col2'],
@@ -398,7 +393,6 @@ describe('state_helpers', () => {
           col1: {
             label: 'Date histogram of timestamp',
             dataType: 'date',
-            
 
             // Private
             operationType: 'date_histogram',
@@ -410,7 +404,6 @@ describe('state_helpers', () => {
           col3: {
             label: 'Count of records',
             dataType: 'document',
-            
 
             // Private
             operationType: 'count',
@@ -437,7 +430,6 @@ describe('state_helpers', () => {
           col1: {
             label: 'Cumulative sum of count of records',
             dataType: 'number',
-            
 
             // Private
             operationType: 'cumulative_sum',
@@ -446,7 +438,6 @@ describe('state_helpers', () => {
           col2: {
             label: 'Count of records',
             dataType: 'document',
-            
 
             // Private
             operationType: 'count',
@@ -494,7 +485,6 @@ describe('state_helpers', () => {
               col1: {
                 label: 'Date histogram of timestamp',
                 dataType: 'date',
-                
 
                 // Private
                 operationType: 'date_histogram',
@@ -524,7 +514,6 @@ describe('state_helpers', () => {
               col1: {
                 label: 'Date histogram of timestamp',
                 dataType: 'date',
-                
 
                 // Private
                 operationType: 'date_histogram',
@@ -554,7 +543,6 @@ describe('state_helpers', () => {
               col1: {
                 label: 'Top values of source',
                 dataType: 'string',
-                
 
                 // Private
                 operationType: 'terms',
@@ -598,7 +586,6 @@ describe('state_helpers', () => {
               col1: {
                 label: 'Average of bytes',
                 dataType: 'number',
-                
 
                 // Private
                 operationType: 'average',
@@ -607,7 +594,6 @@ describe('state_helpers', () => {
               col2: {
                 label: 'Count of records',
                 dataType: 'document',
-                
 
                 // Private
                 operationType: 'count',
@@ -634,7 +620,6 @@ describe('state_helpers', () => {
               col1: {
                 label: 'Date histogram of timestamp',
                 dataType: 'date',
-                
 
                 // Private
                 operationType: 'date_histogram',
@@ -743,7 +728,7 @@ describe('state_helpers', () => {
           columns: {
             col1: {
               dataType: 'number',
-              
+
               label: '',
 
               operationType: 'testReference',
@@ -781,7 +766,6 @@ describe('state_helpers', () => {
               col1: {
                 label: 'Date histogram of timestamp',
                 dataType: 'date',
-                
 
                 // Private
                 operationType: 'date_histogram',
@@ -841,7 +825,6 @@ describe('state_helpers', () => {
           col1: {
             label: 'Average of bytes',
             dataType: 'number',
-            
 
             // Private
             operationType: 'average',
@@ -850,7 +833,6 @@ describe('state_helpers', () => {
           col2: {
             label: 'Max of bytes',
             dataType: 'number',
-            
 
             // Private
             operationType: 'max',
@@ -884,7 +866,6 @@ describe('state_helpers', () => {
               col1: {
                 label: 'Date histogram of timestamp',
                 dataType: 'date',
-                
 
                 // Private
                 operationType: 'date_histogram',
@@ -914,7 +895,6 @@ describe('state_helpers', () => {
               col1: {
                 label: 'Date histogram of timestamp',
                 dataType: 'date',
-                
 
                 // Private
                 operationType: 'date_histogram',
@@ -950,7 +930,7 @@ describe('state_helpers', () => {
               col1: {
                 label: 'My formula',
                 dataType: 'number',
-                
+
                 customLabel: true,
 
                 // Private
@@ -983,7 +963,6 @@ describe('state_helpers', () => {
               col1: {
                 label: 'Date histogram of timestamp',
                 dataType: 'date',
-                
 
                 // Private
                 operationType: 'date_histogram',
@@ -1017,7 +996,6 @@ describe('state_helpers', () => {
               col1: {
                 label: 'Date histogram of timestamp',
                 dataType: 'date',
-                
 
                 // Private
                 operationType: 'date_histogram',
@@ -1056,7 +1034,6 @@ describe('state_helpers', () => {
               col1: {
                 label: 'Filters',
                 dataType: 'string',
-                
 
                 // Private
                 operationType: 'filters',
@@ -1091,7 +1068,6 @@ describe('state_helpers', () => {
                   label: 'My custom label',
                   customLabel: true,
                   dataType: 'date',
-                  
 
                   // Private
                   operationType: 'date_histogram',
@@ -1127,7 +1103,6 @@ describe('state_helpers', () => {
                   label: 'My custom label',
                   customLabel: true,
                   dataType: 'date',
-                  
 
                   // Private
                   operationType: 'date_histogram',
@@ -1162,7 +1137,6 @@ describe('state_helpers', () => {
                   label: 'My custom label',
                   customLabel: true,
                   dataType: 'date',
-                  
 
                   // Private
                   operationType: 'date_histogram',
@@ -1197,7 +1171,7 @@ describe('state_helpers', () => {
                 col1: {
                   label: 'Top values of source',
                   dataType: 'string',
-                  
+
                   operationType: 'terms',
                   sourceField: 'source',
                   params: {
@@ -1229,7 +1203,7 @@ describe('state_helpers', () => {
                   label: 'MY CUSTOM LABEL',
                   customLabel: true,
                   dataType: 'string',
-                  
+
                   operationType: 'terms',
                   sourceField: 'source',
                   params: {
@@ -1260,7 +1234,7 @@ describe('state_helpers', () => {
                 col1: {
                   label: 'Average of bytes',
                   dataType: 'number',
-                  
+
                   operationType: 'average',
                   sourceField: 'bytes',
                 },
@@ -1288,7 +1262,7 @@ describe('state_helpers', () => {
                   customLabel: true,
                   dataType: 'number',
                   operationType: 'formula',
-                  
+
                   params: { isFormulaBroken: false, formula: 'average(bytes)' },
                   references: [],
                 } as FormulaIndexPatternColumn,
@@ -1316,7 +1290,7 @@ describe('state_helpers', () => {
                   customLabel: true,
                   dataType: 'number',
                   operationType: 'formula',
-                  
+
                   params: { isFormulaBroken: false, formula: 'average(bytes)' },
                   references: [],
                 } as FormulaIndexPatternColumn,
@@ -1344,7 +1318,7 @@ describe('state_helpers', () => {
                   customLabel: true,
                   dataType: 'number',
                   operationType: 'formula',
-                  
+
                   params: { isFormulaBroken: false, formula: 'average(bytes)' },
                   references: [],
                 } as FormulaIndexPatternColumn,
@@ -1371,7 +1345,7 @@ describe('state_helpers', () => {
                   label: 'MyDefaultLabel',
                   dataType: 'number',
                   operationType: 'counter_rate',
-                  
+
                   references: ['col2'],
                   timeScale: 's',
                   timeShift: '',
@@ -1404,7 +1378,6 @@ describe('state_helpers', () => {
       const termsColumn: TermsIndexPatternColumn = {
         label: 'Top values of source',
         dataType: 'string',
-        
 
         // Private
         operationType: 'terms',
@@ -1425,7 +1398,7 @@ describe('state_helpers', () => {
             col2: {
               label: 'Count',
               dataType: 'number',
-              
+
               sourceField: '___records___',
               operationType: 'count',
             },
@@ -1447,7 +1420,7 @@ describe('state_helpers', () => {
             col2: expect.objectContaining({
               label: 'Average of bytes',
               dataType: 'number',
-              
+
               sourceField: 'bytes',
               operationType: 'average',
             }),
@@ -1463,7 +1436,6 @@ describe('state_helpers', () => {
         label: 'Top values of source',
         customLabel: true,
         dataType: 'string',
-        
 
         // Private
         operationType: 'terms',
@@ -1484,7 +1456,7 @@ describe('state_helpers', () => {
             willBeReference: {
               label: 'Count of records',
               dataType: 'number',
-              
+
               sourceField: '___records___',
               operationType: 'count',
             },
@@ -1509,13 +1481,13 @@ describe('state_helpers', () => {
             },
             id1: expect.objectContaining({
               dataType: 'number',
-              
+
               sourceField: '___records___',
               operationType: 'count',
             }),
             willBeReference: expect.objectContaining({
               dataType: 'number',
-              
+
               operationType: 'cumulative_sum',
             }),
           },
@@ -1529,7 +1501,6 @@ describe('state_helpers', () => {
       const termsColumn: TermsIndexPatternColumn = {
         label: 'Top values of source',
         dataType: 'string',
-        
 
         // Private
         operationType: 'terms',
@@ -1567,7 +1538,7 @@ describe('state_helpers', () => {
           label: 'Count',
           customLabel: true,
           dataType: 'number' as const,
-          
+
           sourceField: '___records___',
           operationType: 'count' as const,
         };
@@ -1608,7 +1579,7 @@ describe('state_helpers', () => {
               label: 'Count',
               customLabel: true,
               dataType: 'number' as const,
-              
+
               sourceField: 'bytes',
               operationType: 'count' as const,
             },
@@ -1640,7 +1611,7 @@ describe('state_helpers', () => {
           label: 'Count',
           customLabel: true,
           dataType: 'number' as const,
-          
+
           sourceField: '___records___',
           operationType: 'count' as const,
         };
@@ -1693,7 +1664,7 @@ describe('state_helpers', () => {
             col1: {
               label: 'Avg',
               dataType: 'number' as const,
-              
+
               sourceField: 'bytes',
               operationType: 'average' as const,
             },
@@ -1734,7 +1705,7 @@ describe('state_helpers', () => {
             col1: {
               label: 'Max',
               dataType: 'number' as const,
-              
+
               sourceField: 'bytes',
               operationType: 'max' as const,
             },
@@ -1775,7 +1746,7 @@ describe('state_helpers', () => {
             col1: {
               label: 'Count',
               dataType: 'number' as const,
-              
+
               sourceField: '___records___',
               operationType: 'count' as const,
             },
@@ -1815,7 +1786,7 @@ describe('state_helpers', () => {
             col1: {
               label: 'Count',
               dataType: 'number' as const,
-              
+
               sourceField: '___records___',
               operationType: 'count' as const,
             },
@@ -1857,7 +1828,7 @@ describe('state_helpers', () => {
           buildColumn: jest.fn((args) => {
             return {
               label: 'Test reference',
-              
+
               dataType: 'number',
 
               operationType: 'secondTest',
@@ -1886,7 +1857,6 @@ describe('state_helpers', () => {
               label: 'Count',
               customLabel: true,
               dataType: 'number' as const,
-              
 
               operationType: 'count' as const,
               sourceField: '___records___',
@@ -1894,7 +1864,6 @@ describe('state_helpers', () => {
             invalid: {
               label: 'Test reference',
               dataType: 'number',
-              
 
               operationType: 'testReference',
               references: [],
@@ -1902,7 +1871,6 @@ describe('state_helpers', () => {
             output: {
               label: 'Test reference',
               dataType: 'number',
-              
 
               operationType: 'testReference',
               references: ['ref1', 'invalid'],
@@ -1938,7 +1906,6 @@ describe('state_helpers', () => {
               label: 'Count',
               customLabel: true,
               dataType: 'number' as const,
-              
 
               operationType: 'count' as const,
               sourceField: '___records___',
@@ -1946,7 +1913,6 @@ describe('state_helpers', () => {
             invalid: {
               label: 'Test reference',
               dataType: 'number',
-              
 
               operationType: 'testReference',
               references: [],
@@ -1954,7 +1920,6 @@ describe('state_helpers', () => {
             output: {
               label: 'Test reference',
               dataType: 'number',
-              
 
               operationType: 'testReference',
               references: ['ref1', 'invalid'],
@@ -1977,7 +1942,7 @@ describe('state_helpers', () => {
         const math = {
           customLabel: true,
           dataType: 'number' as const,
-          
+
           label: 'math',
           operationType: 'math' as const,
         };
@@ -1987,7 +1952,7 @@ describe('state_helpers', () => {
           columns: {
             source: {
               dataType: 'number' as const,
-              
+
               label: 'Formula',
               operationType: 'formula' as const,
               params: {
@@ -1999,7 +1964,7 @@ describe('state_helpers', () => {
             formulaX0: {
               customLabel: true,
               dataType: 'number' as const,
-              
+
               label: 'formulaX0',
               operationType: 'sum' as const,
               sourceField: 'bytes',
@@ -2013,7 +1978,7 @@ describe('state_helpers', () => {
             formulaX2: {
               customLabel: true,
               dataType: 'number' as const,
-              
+
               label: 'formulaX2',
               operationType: 'moving_average' as const,
               params: { window: 5 },
@@ -2057,7 +2022,7 @@ describe('state_helpers', () => {
             fieldReused: {
               label: 'Date histogram',
               dataType: 'date' as const,
-              
+
               operationType: 'date_histogram' as const,
               sourceField: 'timestamp',
               params: { interval: 'auto' },
@@ -2065,7 +2030,7 @@ describe('state_helpers', () => {
             output: {
               label: 'Test reference',
               dataType: 'number',
-              
+
               operationType: 'testReference',
               references: ['fieldReused'],
             },
@@ -2108,7 +2073,6 @@ describe('state_helpers', () => {
           label: 'Custom label',
           customLabel: true,
           dataType: 'string' as const,
-          
 
           operationType: 'filters' as const,
           params: {
@@ -2126,7 +2090,6 @@ describe('state_helpers', () => {
             col2: {
               label: 'Test reference',
               dataType: 'number',
-              
 
               operationType: 'testReference',
               references: ['col1'],
@@ -2155,7 +2118,6 @@ describe('state_helpers', () => {
         const expectedCol = {
           label: 'Count of records -3h',
           dataType: 'number' as const,
-          
 
           operationType: 'count' as const,
           sourceField: '___records___',
@@ -2170,7 +2132,6 @@ describe('state_helpers', () => {
             col2: {
               label: 'Default label',
               dataType: 'number',
-              
 
               operationType: 'testReference',
               references: ['col1'],
@@ -2201,7 +2162,7 @@ describe('state_helpers', () => {
       it('should promote only the field when going from reference to field-based operation (case a3)', () => {
         const expectedColumn = {
           dataType: 'number' as const,
-          
+
           sourceField: 'bytes',
           operationType: 'average' as const,
           filter: { language: 'kuery', query: 'bytes > 4000' },
@@ -2216,7 +2177,7 @@ describe('state_helpers', () => {
             ref: {
               label: 'Reference',
               dataType: 'number',
-              
+
               operationType: 'differences',
               references: ['metric'],
               filter: { language: 'kuery', query: 'bytes > 4000' },
@@ -2247,7 +2208,7 @@ describe('state_helpers', () => {
           columns: {
             metric: {
               dataType: 'number' as const,
-              
+
               sourceField: 'source',
               operationType: 'unique_count' as const,
               filter: { language: 'kuery', query: 'bytes > 4000' },
@@ -2258,7 +2219,7 @@ describe('state_helpers', () => {
             ref: {
               label: 'Reference',
               dataType: 'number',
-              
+
               operationType: 'differences',
               references: ['metric'],
               filter: { language: 'kuery', query: 'bytes > 4000' },
@@ -2299,7 +2260,7 @@ describe('state_helpers', () => {
                 customLabel: true,
                 dataType: 'number',
                 operationType: 'formula',
-                
+
                 params: {
                   isFormulaBroken: false,
                   formula: 'average(bytes)',
@@ -2352,7 +2313,6 @@ describe('state_helpers', () => {
             label: 'Asdf',
             customLabel: true,
             dataType: 'number' as const,
-            
 
             operationType: 'sum' as const,
             sourceField: 'bytes',
@@ -2360,7 +2320,6 @@ describe('state_helpers', () => {
           col2: {
             label: 'Test reference',
             dataType: 'number',
-            
 
             operationType: 'testReference',
             references: ['col1'],
@@ -2418,7 +2377,6 @@ describe('state_helpers', () => {
       const termsColumn: TermsIndexPatternColumn = {
         label: 'Top 5 values of source',
         dataType: 'string',
-        
 
         // Private
         operationType: 'terms',
@@ -2440,7 +2398,7 @@ describe('state_helpers', () => {
               col2: {
                 label: 'Count of records',
                 dataType: 'number',
-                
+
                 sourceField: '___records___',
                 operationType: 'count',
               },
@@ -2473,7 +2431,6 @@ describe('state_helpers', () => {
       const termsColumn: TermsIndexPatternColumn = {
         label: 'Top values of source',
         dataType: 'string',
-        
 
         // Private
         operationType: 'terms',
@@ -2494,7 +2451,7 @@ describe('state_helpers', () => {
             col2: {
               label: 'Count',
               dataType: 'number',
-              
+
               sourceField: '___records___',
               operationType: 'count',
             },
@@ -2518,7 +2475,6 @@ describe('state_helpers', () => {
           col1: {
             label: 'Count',
             dataType: 'number',
-            
 
             operationType: 'count',
             sourceField: '___records___',
@@ -2526,7 +2482,6 @@ describe('state_helpers', () => {
           col2: {
             label: 'Test reference',
             dataType: 'number',
-            
 
             operationType: 'testReference',
             references: ['col1'],
@@ -2546,7 +2501,6 @@ describe('state_helpers', () => {
           col1: {
             label: 'Count',
             dataType: 'number',
-            
 
             operationType: 'count',
             sourceField: '___records___',
@@ -2554,7 +2508,6 @@ describe('state_helpers', () => {
           col2: {
             label: 'Changed label',
             dataType: 'number',
-            
 
             operationType: 'testReference',
             references: ['col1'],
@@ -2566,7 +2519,7 @@ describe('state_helpers', () => {
         {
           label: 'Changed label',
           dataType: 'number',
-          
+
           operationType: 'testReference',
           references: ['col1'],
         },
@@ -2574,7 +2527,7 @@ describe('state_helpers', () => {
           col2: {
             label: 'Default label',
             dataType: 'number',
-            
+
             operationType: 'testReference',
             references: ['col1'],
           },
@@ -2591,7 +2544,6 @@ describe('state_helpers', () => {
           col1: {
             label: 'Count',
             dataType: 'number',
-            
 
             operationType: 'count',
             sourceField: '___records___',
@@ -2599,7 +2551,6 @@ describe('state_helpers', () => {
           col2: {
             label: 'Test reference',
             dataType: 'number',
-            
 
             operationType: 'testReference',
             references: ['col1'],
@@ -2607,7 +2558,6 @@ describe('state_helpers', () => {
           col3: {
             label: 'Test reference 2',
             dataType: 'number',
-            
 
             operationType: 'testReference',
             references: ['col2'],
@@ -2625,7 +2575,6 @@ describe('state_helpers', () => {
       const currentColumn: DateHistogramIndexPatternColumn = {
         label: 'Value of timestamp',
         dataType: 'date',
-        
 
         // Private
         operationType: 'date_histogram',
@@ -2658,7 +2607,7 @@ describe('state_helpers', () => {
       const currentColumn: AvgIndexPatternColumn = {
         label: 'Avg of bytes',
         dataType: 'number',
-        
+
         // Private
         operationType: 'average',
         sourceField: 'bytes',
@@ -2704,7 +2653,6 @@ describe('state_helpers', () => {
             col1: {
               label: 'Value of timestamp',
               dataType: 'string',
-              
 
               // Private
               operationType: 'date_histogram',
@@ -2727,7 +2675,6 @@ describe('state_helpers', () => {
             col1: {
               label: 'Top values of category',
               dataType: 'string',
-              
 
               // Private
               operationType: 'terms',
@@ -2743,7 +2690,6 @@ describe('state_helpers', () => {
             col2: {
               label: 'Average of bytes',
               dataType: 'number',
-              
 
               // Private
               operationType: 'average',
@@ -2752,7 +2698,6 @@ describe('state_helpers', () => {
             col3: {
               label: 'Date histogram of timestamp',
               dataType: 'date',
-              
 
               // Private
               operationType: 'date_histogram',
@@ -2776,7 +2721,7 @@ describe('state_helpers', () => {
               label: 'count',
               dataType: 'number',
               operationType: 'count',
-              
+
               sourceField: '___records___',
               customLabel: true,
             },
@@ -2785,7 +2730,7 @@ describe('state_helpers', () => {
               dataType: 'date',
               operationType: 'date_histogram',
               sourceField: 'timestamp',
-              
+
               params: {
                 interval: 'auto',
               },
@@ -2794,7 +2739,7 @@ describe('state_helpers', () => {
               label: 'Formula',
               dataType: 'number',
               operationType: 'formula',
-              
+
               params: {
                 formula: 'count() + count()',
                 isFormulaBroken: false,
@@ -2805,7 +2750,7 @@ describe('state_helpers', () => {
               label: 'countX0',
               dataType: 'number',
               operationType: 'count',
-              
+
               sourceField: '___records___',
               customLabel: true,
             },
@@ -2813,7 +2758,7 @@ describe('state_helpers', () => {
               label: 'math',
               dataType: 'number',
               operationType: 'math',
-              
+
               params: {
                 tinymathAst: {
                   type: 'function',
@@ -2910,7 +2855,7 @@ describe('state_helpers', () => {
         columns: {
           col1: {
             dataType: 'string',
-            
+
             label: '',
             operationType: 'terms',
             sourceField: 'fieldA',
@@ -2922,7 +2867,7 @@ describe('state_helpers', () => {
           } as TermsIndexPatternColumn,
           col2: {
             dataType: 'number',
-            
+
             label: '',
             operationType: 'average',
             sourceField: 'xxx',
@@ -2945,7 +2890,7 @@ describe('state_helpers', () => {
             label: '',
             dataType: 'number',
             operationType: 'moving_average',
-            
+
             references: ['col2'],
             timeScale: undefined,
             filter: undefined,
@@ -2955,7 +2900,7 @@ describe('state_helpers', () => {
           } as MovingAverageIndexPatternColumn,
           col2: {
             dataType: 'number',
-            
+
             label: '',
             operationType: 'average',
             sourceField: 'xxx',
@@ -2974,7 +2919,7 @@ describe('state_helpers', () => {
         columns: {
           col1: {
             dataType: 'string',
-            
+
             label: '',
             operationType: 'date_histogram',
             sourceField: 'fieldC',
@@ -2984,7 +2929,7 @@ describe('state_helpers', () => {
           } as DateHistogramIndexPatternColumn,
           col2: {
             dataType: 'number',
-            
+
             label: '',
             operationType: 'average',
             sourceField: 'fieldB',
@@ -3013,7 +2958,7 @@ describe('state_helpers', () => {
         columns: {
           col1: {
             dataType: 'date',
-            
+
             label: '',
             operationType: 'date_histogram',
             sourceField: 'fieldD',
@@ -3043,7 +2988,7 @@ describe('state_helpers', () => {
         columns: {
           col1: {
             dataType: 'string',
-            
+
             label: '',
             operationType: 'terms',
             sourceField: 'fieldA',
@@ -3055,7 +3000,7 @@ describe('state_helpers', () => {
           } as TermsIndexPatternColumn,
           col2: {
             dataType: 'number',
-            
+
             label: '',
             operationType: 'average',
             sourceField: 'fieldD',
@@ -3076,7 +3021,7 @@ describe('state_helpers', () => {
         columns: {
           col1: {
             dataType: 'string',
-            
+
             label: '',
             operationType: 'terms',
             sourceField: 'fieldA',
@@ -3088,7 +3033,7 @@ describe('state_helpers', () => {
           } as TermsIndexPatternColumn,
           col2: {
             dataType: 'number',
-            
+
             label: '',
             operationType: 'min',
             sourceField: 'fieldC',
@@ -3140,7 +3085,6 @@ describe('state_helpers', () => {
               references: [],
               label: '',
               dataType: 'number',
-              
             },
           },
         },
@@ -3169,14 +3113,12 @@ describe('state_helpers', () => {
               references: ['col2'],
               label: '',
               dataType: 'number',
-              
             },
             col2: {
               operationType: 'testReference',
               references: [],
               label: '',
               dataType: 'number',
-              
             },
           },
         },
@@ -3210,7 +3152,6 @@ describe('state_helpers', () => {
               references: [],
               label: '',
               dataType: 'number',
-              
             },
           },
           incompleteColumns: {
@@ -3243,7 +3184,6 @@ describe('state_helpers', () => {
               references: [],
               label: '',
               dataType: 'number',
-              
             },
           },
         },
@@ -3262,7 +3202,7 @@ describe('state_helpers', () => {
               operationType: 'testReference',
               references: [],
               dataType: 'number',
-              
+
               label: '',
             },
           },
@@ -3286,7 +3226,7 @@ describe('state_helpers', () => {
         columns: {
           col1: {
             dataType: 'date',
-            
+
             label: '',
             operationType: 'date_histogram',
             sourceField: 'fieldD',
@@ -3309,7 +3249,6 @@ describe('state_helpers', () => {
             label: 'My Op',
             customLabel: true,
             dataType: 'string',
-            
 
             // Private
             operationType: 'terms',
@@ -3335,7 +3274,6 @@ describe('state_helpers', () => {
             label: 'My Op',
             customLabel: true,
             dataType: 'string',
-            
 
             // Private
             operationType: 'terms',
@@ -3365,14 +3303,12 @@ describe('state_helpers', () => {
             references: ['col2'],
             label: '',
             dataType: 'number',
-            
           },
           col2: {
             operationType: 'testReference',
             references: [],
             label: '',
             dataType: 'number',
-            
           },
         },
       };
@@ -3389,14 +3325,12 @@ describe('state_helpers', () => {
             references: ['col2'],
             label: '',
             dataType: 'number',
-            
           },
           col2: {
             operationType: 'testReference',
             references: [],
             label: '',
             dataType: 'number',
-            
           },
         },
       };
@@ -3415,14 +3349,12 @@ describe('state_helpers', () => {
             references: ['col2'],
             label: '',
             dataType: 'number',
-            
           },
           col2: {
             operationType: 'testReference',
             references: [],
             label: '',
             dataType: 'number',
-            
           },
         },
       };
@@ -3439,14 +3371,12 @@ describe('state_helpers', () => {
             references: ['col2'],
             label: '',
             dataType: 'number',
-            
           },
           col2: {
             operationType: 'testReference',
             references: [],
             label: '',
             dataType: 'number',
-            
           },
         },
       };
@@ -3457,7 +3387,7 @@ describe('state_helpers', () => {
       const math = {
         customLabel: true,
         dataType: 'number' as const,
-        
+
         label: 'math',
         operationType: 'math' as const,
       };
@@ -3467,7 +3397,7 @@ describe('state_helpers', () => {
         columns: {
           source: {
             dataType: 'number' as const,
-            
+
             label: 'Formula',
             operationType: 'formula' as const,
             params: {
@@ -3479,7 +3409,7 @@ describe('state_helpers', () => {
           formulaX0: {
             customLabel: true,
             dataType: 'number' as const,
-            
+
             label: 'formulaX0',
             operationType: 'sum' as const,
             sourceField: 'bytes',
@@ -3493,7 +3423,7 @@ describe('state_helpers', () => {
           formulaX2: {
             customLabel: true,
             dataType: 'number' as const,
-            
+
             label: 'formulaX2',
             operationType: 'moving_average' as const,
             params: { window: 5 },

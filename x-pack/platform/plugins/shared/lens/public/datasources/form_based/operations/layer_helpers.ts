@@ -1201,9 +1201,8 @@ function addBucket(
   targetGroup?: string,
   respectOrder?: boolean
 ): FormBasedLayer {
-  const [buckets, metrics] = partition(
-    layer.columnOrder,
-    (colId) => isBucketed(layer.columns[colId])
+  const [buckets, metrics] = partition(layer.columnOrder, (colId) =>
+    isBucketed(layer.columns[colId])
   );
 
   const oldDateHistogramIndex = layer.columnOrder.findIndex(
