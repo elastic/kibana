@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -39,8 +39,18 @@ import { SearchMode } from '../search_mode/search_mode';
 import { SearchQueryMode } from '../query_mode/search_query_mode';
 
 import { SavedPlaygroundFetchError } from './saved_playground_fetch_error';
+import { EditPlaygroundNameModal } from './edit_name_modal';
+import { DeletePlaygroundModal } from './delete_playground_modal';
+
+enum SavedPlaygroundModals {
+  None,
+  EditName,
+  Delete,
+  Copy,
+}
 
 export const SavedPlayground = () => {
+  const [shownModal, setShownModal] = useState<SavedPlaygroundModals>(SavedPlaygroundModals.None);
   const models = useLLMsModels();
   const { playgroundId, pageMode, viewMode } = useSavedPlaygroundParameters();
   const { application } = useKibana().services;
@@ -113,6 +123,7 @@ export const SavedPlayground = () => {
     if (!isDirty) return false;
     return isSavedPlaygroundFormDirty(dirtyFields);
   }, [isDirty, dirtyFields]);
+  const onCloseModal = useCallback(() => setShownModal(SavedPlaygroundModals.None), []);
 
   const handleModeChange = (id: PlaygroundViewMode) =>
     navigateToView(pageMode ?? PlaygroundPageMode.Search, id, location.search);
@@ -142,6 +153,9 @@ export const SavedPlayground = () => {
         onModeChange={handleModeChange}
         isActionsDisabled={false}
         onSelectPageModeChange={handlePageModeChange}
+        onEditName={() => setShownModal(SavedPlaygroundModals.EditName)}
+        onDeletePlayground={() => setShownModal(SavedPlaygroundModals.Delete)}
+        onCopyPlayground={() => setShownModal(SavedPlaygroundModals.Copy)}
       />
       <Routes>
         {showSetupPage ? (
@@ -168,6 +182,16 @@ export const SavedPlayground = () => {
           </>
         )}
       </Routes>
+      {shownModal === SavedPlaygroundModals.EditName && (
+        <EditPlaygroundNameModal playgroundName={playgroundName} onClose={onCloseModal} />
+      )}
+      {shownModal === SavedPlaygroundModals.Delete && (
+        <DeletePlaygroundModal
+          playgroundId={playgroundId}
+          playgroundName={playgroundName}
+          onClose={onCloseModal}
+        />
+      )}
     </>
   );
 };

@@ -6,5 +6,6 @@
  */
 
 export enum SearchPlaygroundMutationKeys {
+  DeletePlayground = 'searchPlaygroundDeletePlayground',
   UpdatePlayground = 'searchPlaygroundUpdatePlayground',
 }

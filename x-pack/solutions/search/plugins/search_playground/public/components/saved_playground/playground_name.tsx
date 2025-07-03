@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EditPlaygroundNameModal } from './edit_name_modal';
 
 export interface PlaygroundNameProps {
   playgroundName: string;
+  onEditName: () => void;
 }
 
 const EDIT_NAME_LABEL = i18n.translate(
@@ -20,31 +20,21 @@ const EDIT_NAME_LABEL = i18n.translate(
   { defaultMessage: 'Edit playground name' }
 );
 
-export const PlaygroundName = ({ playgroundName }: PlaygroundNameProps) => {
-  const [showEditModal, setShowEditModal] = useState<boolean>(false);
+export const PlaygroundName = ({ playgroundName, onEditName }: PlaygroundNameProps) => {
   return (
-    <>
-      <EuiTitle css={css({ whiteSpace: 'nowrap' })} data-test-subj="playgroundName" size="xs">
-        <h2>
-          {playgroundName}
-          <EuiButtonIcon
-            aria-label={EDIT_NAME_LABEL}
-            color="text"
-            data-test-subj="edit-playground-name-button"
-            display="empty"
-            iconType="pencil"
-            size="s"
-            onClick={() => setShowEditModal(true)}
-          />
-        </h2>
-      </EuiTitle>
-
-      {showEditModal && (
-        <EditPlaygroundNameModal
-          playgroundName={playgroundName}
-          onClose={() => setShowEditModal(false)}
+    <EuiTitle css={css({ whiteSpace: 'nowrap' })} data-test-subj="playgroundName" size="xs">
+      <h2>
+        {playgroundName}
+        <EuiButtonIcon
+          aria-label={EDIT_NAME_LABEL}
+          color="text"
+          data-test-subj="edit-playground-name-button"
+          display="empty"
+          iconType="pencil"
+          size="s"
+          onClick={onEditName}
         />
-      )}
-    </>
+      </h2>
+    </EuiTitle>
   );
 };
