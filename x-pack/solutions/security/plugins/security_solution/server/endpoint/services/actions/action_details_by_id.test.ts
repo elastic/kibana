@@ -179,4 +179,19 @@ describe('When using `getActionDetailsById()', () => {
       })
     );
   });
+
+  it('should not validate against spaces when `bypassSpaceValidation` is `true`', async () => {
+    // @ts-expect-error
+    endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
+    (
+      endpointAppContextService.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+    ).mockResolvedValue(undefined);
+    await getActionDetailsById(endpointAppContextService, 'default', '123', {
+      bypassSpaceValidation: true,
+    });
+
+    expect(
+      endpointAppContextService.getInternalFleetServices().ensureInCurrentSpace
+    ).not.toHaveBeenCalled();
+  });
 });
