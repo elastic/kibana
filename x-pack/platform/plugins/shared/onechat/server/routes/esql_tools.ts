@@ -153,13 +153,13 @@ export function registerESQLToolsRoutes({
               name: schema.maybe(schema.string()),
               description: schema.string(),
               query: schema.string(),
-              params:schema.recordOf(
-                  schema.string(),
-                  schema.object({
-                    type: paramValueTypeSchema,
-                    description: schema.string(),
-                  })
-                ),
+              params: schema.recordOf(
+                schema.string(),
+                schema.object({
+                  type: paramValueTypeSchema,
+                  description: schema.string(),
+                })
+              ),
               meta: schema.object({
                 tags: schema.arrayOf(schema.string()),
               }),
@@ -236,14 +236,14 @@ export function registerESQLToolsRoutes({
               description: schema.maybe(schema.string()),
               query: schema.maybe(schema.string()),
               params: schema.maybe(
-                  schema.recordOf(
-                    schema.string(),
-                    schema.object({
-                      type: paramValueTypeSchema,
-                      description: schema.string(),
-                    })
-                  )
-                ),
+                schema.recordOf(
+                  schema.string(),
+                  schema.object({
+                    type: paramValueTypeSchema,
+                    description: schema.string(),
+                  })
+                )
+              ),
               meta: schema.maybe(
                 schema.object({
                   tags: schema.arrayOf(schema.string(), { defaultValue: [] }),

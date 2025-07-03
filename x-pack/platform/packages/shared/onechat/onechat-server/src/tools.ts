@@ -66,18 +66,18 @@ export interface EsqlToolDefinition extends ToolDescriptor {
    * Each parameter has a key identifier and metadata about its type and usage.
    */
   params: Record<
-      string,
-      {
-        /**
-         * The data types of the parameter. Must be one of these
-         */
-        type: FieldTypes;
+    string,
+    {
+      /**
+       * The data types of the parameter. Must be one of these
+       */
+      type: FieldTypes;
 
-        /**
-         * Description of the parameter's purpose or expected values.
-         */
-        description: string;
-      }
+      /**
+       * Description of the parameter's purpose or expected values.
+       */
+      description: string;
+    }
   >;
 }
 
@@ -108,18 +108,18 @@ export interface EsqlTool<RunInput extends ZodObject<any> = ZodObject<any>, RunO
    * Each parameter has a key identifier and metadata about its type and usage.
    */
   params: Record<
-      string,
-      {
-        /**
-         * The data types of the parameter.
-         */
-        type: FieldTypes;
+    string,
+    {
+      /**
+       * The data types of the parameter.
+       */
+      type: FieldTypes;
 
-        /**
-         * Description of the parameter's purpose or expected values.
-         */
-        description: string;
-      }
+      /**
+       * Description of the parameter's purpose or expected values.
+       */
+      description: string;
+    }
   >;
 }
 
