@@ -151,13 +151,6 @@ export function getSortingParams(
     }
   }
 
-  // Add check for text fields: must have keyword subfield
-  if (field.type === 'text' && !key.endsWith('.keyword')) {
-    if (field.fields && field.fields.keyword) {
-      key = `${key}.keyword`;
-    }
-  }
-
   return {
     sort: [
       {
