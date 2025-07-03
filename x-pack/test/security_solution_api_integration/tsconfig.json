@@ -69,6 +69,7 @@
     "@kbn/security-plugin-types-common",
     "@kbn/scout-info",
     "@kbn/babel-register",
-    "@kbn/response-ops-rule-params"
+    "@kbn/response-ops-rule-params",
+    "@kbn/config-schema"
   ]
 }
