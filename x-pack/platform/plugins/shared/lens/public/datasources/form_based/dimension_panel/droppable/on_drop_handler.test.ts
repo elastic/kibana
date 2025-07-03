@@ -28,7 +28,7 @@ const dimensionGroups = [
     supportsMoreColumns: true,
     hideGrouping: true,
     groupLabel: '',
-    filterOperations: (op: OperationMetadata) => op.isBucketed  ?? false,
+    filterOperations: (op: OperationMetadata) => op.isBucketed ?? false,
   },
   {
     accessors: [{ columnId: 'col1' }, { columnId: 'col2' }, { columnId: 'col3' }],
@@ -500,7 +500,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
               col1: {
                 label: 'Test reference',
                 dataType: 'number',
-                        operationType: 'cumulative_sum',
+                operationType: 'cumulative_sum',
                 references: ['ref1', 'ref2'],
               },
               ref1: mockedColumns.count,
@@ -564,14 +564,14 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
               col1: {
                 label: 'Test reference',
                 dataType: 'number',
-                        operationType: 'cumulative_sum',
+                operationType: 'cumulative_sum',
                 references: ['ref1', 'ref2'],
               },
               ref1: mockedColumns.count,
               ref2: {
                 label: 'Unique count of bytes',
                 dataType: 'number',
-                        sourceField: 'bytes',
+                sourceField: 'bytes',
                 operationType: 'unique_count',
               },
             },
@@ -991,14 +991,14 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                       dataType: 'number',
                       operationType: 'count',
                       label: '',
-                                    sourceField: '___records___',
+                      sourceField: '___records___',
                       customLabel: true,
                     },
                     col6: {
                       dataType: 'number',
                       operationType: 'count',
                       label: '',
-                                    sourceField: '___records___',
+                      sourceField: '___records___',
                       customLabel: true,
                     },
                   },
@@ -1028,13 +1028,13 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   dataType: 'number',
                   operationType: 'count',
                   label: '',
-                            sourceField: '___records___',
+                  sourceField: '___records___',
                 }),
                 col6: expect.objectContaining({
                   dataType: 'number',
                   operationType: 'count',
                   label: '',
-                            sourceField: '___records___',
+                  sourceField: '___records___',
                 }),
               },
             },
@@ -1435,7 +1435,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
               columns: {
                 col1: testState.layers.first.columns.col1,
                 col2: {
-                            label: 'Top 10 values of bytes',
+                  label: 'Top 10 values of bytes',
                   operationType: 'terms',
                   sourceField: 'bytes',
                   dataType: 'number',
@@ -1450,7 +1450,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                 },
                 col3: testState.layers.first.columns.col3,
                 col4: {
-                            label: 'Unique count of src',
+                  label: 'Unique count of src',
                   filter: undefined,
                   operationType: 'unique_count',
                   sourceField: 'src',
@@ -1687,7 +1687,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   ...props.state.layers.second.columns,
                   col5: {
                     dataType: 'date',
-                                label: 'Minimum of timestampLabel',
+                    label: 'Minimum of timestampLabel',
                     operationType: 'min',
                     params: {
                       emptyAsNull: true,
@@ -1729,7 +1729,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   ...props.state.layers.second.columns,
                   col5: {
                     dataType: 'date',
-                                label: 'Minimum of timestampLabel',
+                    label: 'Minimum of timestampLabel',
                     operationType: 'min',
                     params: {
                       emptyAsNull: true,
@@ -1771,7 +1771,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   ...props.state.layers.second.columns,
                   newCol: {
                     dataType: 'date',
-                                label: 'Minimum of timestampLabel',
+                    label: 'Minimum of timestampLabel',
                     operationType: 'min',
                     params: {
                       emptyAsNull: true,
@@ -1808,7 +1808,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   ...props.state.layers.second.columns,
                   newCol: {
                     dataType: 'date',
-                                label: 'Minimum of timestampLabel',
+                    label: 'Minimum of timestampLabel',
                     operationType: 'min',
                     params: {
                       emptyAsNull: true,
@@ -1845,7 +1845,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   ...props.state.layers.first.columns,
                   col1: {
                     dataType: 'number',
-                                label: 'bytes',
+                    label: 'bytes',
                     operationType: 'range',
                     params: {
                       includeEmptyRows: true,
@@ -1869,7 +1869,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   ...props.state.layers.second.columns,
                   col5: {
                     dataType: 'date',
-                                label: 'Minimum of timestampLabel',
+                    label: 'Minimum of timestampLabel',
                     operationType: 'min',
                     params: {
                       emptyAsNull: true,
@@ -1924,7 +1924,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   ...props.state.layers.second.columns,
                   col4: {
                     dataType: 'string',
-                                label: 'Top values of dest + 1 other',
+                    label: 'Top values of dest + 1 other',
                     operationType: 'terms',
                     params: {
                       orderBy: {
@@ -1986,7 +1986,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   ...props.state.layers.second.columns,
                   col4: {
                     dataType: 'string',
-                                label: 'Top values of dest + 1 other',
+                    label: 'Top values of dest + 1 other',
                     operationType: 'terms',
                     params: {
                       orderBy: {
@@ -2024,14 +2024,14 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                       label: 'Part of count()',
                       dataType: 'number',
                       operationType: 'count',
-                                    sourceField: '___records___',
+                      sourceField: '___records___',
                       customLabel: true,
                     },
                     firstColumn: {
                       label: 'count()',
                       dataType: 'number',
                       operationType: 'formula',
-                                    params: { formula: 'count()' },
+                      params: { formula: 'count()' },
                       references: ['firstColumnX0'],
                     } as FormulaIndexPatternColumn,
                   },
@@ -2045,14 +2045,14 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                       label: 'Part of count()',
                       dataType: 'number',
                       operationType: 'count',
-                                    sourceField: '___records___',
+                      sourceField: '___records___',
                       customLabel: true,
                     },
                     second: {
                       label: 'count()',
                       dataType: 'number',
                       operationType: 'formula',
-                                    params: { formula: 'count()' },
+                      params: { formula: 'count()' },
                       references: ['secondX0'],
                     } as FormulaIndexPatternColumn,
                   },
@@ -2098,7 +2098,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   ...props.state.layers.second.columns,
                   newColumn: {
                     dataType: 'number',
-                                label: 'count()',
+                    label: 'count()',
                     operationType: 'formula',
                     params: {
                       formula: 'count()',
@@ -2110,7 +2110,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                     customLabel: true,
                     dataType: 'number',
                     filter: undefined,
-                                label: 'Part of count()',
+                    label: 'Part of count()',
                     operationType: 'count',
                     params: {
                       emptyAsNull: false,
@@ -2152,7 +2152,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   ...props.state.layers.second.columns,
                   second: {
                     dataType: 'number',
-                                label: 'count()',
+                    label: 'count()',
                     operationType: 'formula',
                     params: {
                       formula: 'count()',
@@ -2164,7 +2164,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                     customLabel: true,
                     dataType: 'number',
                     filter: undefined,
-                                label: 'Part of count()',
+                    label: 'Part of count()',
                     operationType: 'count',
                     params: {
                       emptyAsNull: false,

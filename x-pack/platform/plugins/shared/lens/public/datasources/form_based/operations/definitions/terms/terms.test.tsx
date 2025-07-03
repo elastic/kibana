@@ -124,7 +124,7 @@ describe('terms', () => {
         col1: {
           label: 'Top 3 values of source',
           dataType: 'string',
-                    operationType: 'terms',
+          operationType: 'terms',
           params: {
             orderBy: { type: 'alphabetical' },
             size: 3,
@@ -135,7 +135,7 @@ describe('terms', () => {
         col2: {
           label: 'Count of records',
           dataType: 'number',
-                    sourceField: '___records___',
+          sourceField: '___records___',
           operationType: 'count',
         },
       },
@@ -151,7 +151,7 @@ describe('terms', () => {
       operationType: 'terms',
       sourceField,
       label: 'Top values of source',
-            dataType: 'string',
+      dataType: 'string',
       params: {
         size: 5,
         orderBy: {
@@ -311,7 +311,7 @@ describe('terms', () => {
               dataType: 'number',
               operationType: 'max',
               sourceField: 'price',
-                          },
+            },
             orderBy: {
               type: 'custom',
             },
@@ -439,7 +439,7 @@ describe('terms', () => {
         operationType: 'terms',
         sourceField: 'source',
         label: 'Top 5 values of source',
-                dataType: 'string',
+        dataType: 'string',
         params: {
           size: 5,
           orderBy: {
@@ -465,7 +465,7 @@ describe('terms', () => {
         operationType: 'terms',
         sourceField: 'bytes',
         label: 'Top 5 values of bytes',
-                dataType: 'number',
+        dataType: 'number',
         params: {
           size: 5,
           orderBy: {
@@ -492,7 +492,7 @@ describe('terms', () => {
         operationType: 'terms',
         sourceField: 'bytes',
         label: 'Top 5 values of bytes',
-                dataType: 'number',
+        dataType: 'number',
         params: {
           size: 5,
           orderBy: {
@@ -515,7 +515,7 @@ describe('terms', () => {
         operationType: 'terms',
         sourceField: 'bytes',
         label: 'Top 5 values of bytes',
-                dataType: 'number',
+        dataType: 'number',
         params: {
           size: 5,
           orderBy: {
@@ -540,7 +540,7 @@ describe('terms', () => {
         operationType: 'terms',
         sourceField: 'bytes',
         label: 'Top 5 values of bytes',
-                dataType: 'number',
+        dataType: 'number',
         params: {
           size: 5,
           orderBy: {
@@ -562,7 +562,7 @@ describe('terms', () => {
         operationType: 'terms',
         sourceField: 'bytes',
         label: 'Top 5 values of bytes',
-                dataType: 'number',
+        dataType: 'number',
         params: {
           size: 5,
           orderBy: {
@@ -597,7 +597,7 @@ describe('terms', () => {
         })
       ).toEqual({
         dataType: 'string',
-                scale: 'ordinal',
+        scale: 'ordinal',
       });
 
       expect(
@@ -615,7 +615,7 @@ describe('terms', () => {
         })
       ).toEqual({
         dataType: 'number',
-                scale: 'ordinal',
+        scale: 'ordinal',
       });
 
       expect(
@@ -628,7 +628,7 @@ describe('terms', () => {
         })
       ).toEqual({
         dataType: 'boolean',
-                scale: 'ordinal',
+        scale: 'ordinal',
       });
 
       expect(
@@ -641,7 +641,7 @@ describe('terms', () => {
         })
       ).toEqual({
         dataType: 'ip',
-                scale: 'ordinal',
+        scale: 'ordinal',
       });
     });
 
@@ -737,7 +737,7 @@ describe('terms', () => {
             col1: {
               label: 'Count',
               dataType: 'number',
-                            sourceField: '___records___',
+              sourceField: '___records___',
               operationType: 'count',
             },
           },
@@ -766,7 +766,7 @@ describe('terms', () => {
             col1: {
               label: 'Last value of a',
               dataType: 'number',
-                            sourceField: 'a',
+              sourceField: 'a',
               operationType: 'last_value',
               params: {
                 sortField: 'datefield',
@@ -797,7 +797,7 @@ describe('terms', () => {
             col1: {
               label: 'Last value of a',
               dataType: 'number',
-                            sourceField: 'a',
+              sourceField: 'a',
               operationType: 'last_value',
               params: {
                 sortField: 'datefield',
@@ -874,7 +874,7 @@ describe('terms', () => {
       const initialColumn: TermsIndexPatternColumn = {
         label: 'Top value of category',
         dataType: 'string',
-        
+
         // Private
         operationType: 'terms',
         params: {
@@ -893,7 +893,7 @@ describe('terms', () => {
             col1: {
               label: 'Count',
               dataType: 'number',
-                            sourceField: '___records___',
+              sourceField: '___records___',
               operationType: 'count',
             },
           },
@@ -908,7 +908,7 @@ describe('terms', () => {
       const initialColumn: TermsIndexPatternColumn = {
         label: 'Top value of category',
         dataType: 'string',
-        
+
         // Private
         operationType: 'terms',
         params: {
@@ -925,7 +925,7 @@ describe('terms', () => {
             col1: {
               label: 'Last Value',
               dataType: 'number',
-                            sourceField: 'bytes',
+              sourceField: 'bytes',
               operationType: 'last_value',
               params: {
                 sortField: 'time',
@@ -949,7 +949,7 @@ describe('terms', () => {
       const initialColumn: TermsIndexPatternColumn = {
         label: 'Top value of category',
         dataType: 'string',
-        
+
         // Private
         operationType: 'terms',
         params: {
@@ -966,13 +966,13 @@ describe('terms', () => {
             col1: {
               label: 'Cumulative sum',
               dataType: 'number',
-                            operationType: 'cumulative_sum',
+              operationType: 'cumulative_sum',
               references: ['referenced'],
             },
             referenced: {
               label: '',
               dataType: 'number',
-                            operationType: 'count',
+              operationType: 'count',
               sourceField: '___records___',
             },
           },
@@ -995,7 +995,7 @@ describe('terms', () => {
             col2: {
               label: 'Top value of category',
               dataType: 'string',
-              
+
               // Private
               operationType: 'terms',
               params: {
@@ -1025,7 +1025,7 @@ describe('terms', () => {
             col2: {
               label: 'Top value of category',
               dataType: 'string',
-              
+
               // Private
               operationType: 'terms',
               params: {
@@ -1038,7 +1038,7 @@ describe('terms', () => {
             col1: {
               label: 'Value of timestamp',
               dataType: 'date',
-              
+
               // Private
               operationType: 'date_histogram',
               params: {
@@ -1066,7 +1066,7 @@ describe('terms', () => {
             col2: {
               label: 'Top value of category',
               dataType: 'string',
-              
+
               // Private
               operationType: 'terms',
               params: {
@@ -1093,7 +1093,7 @@ describe('terms', () => {
       const initialColumn: TermsIndexPatternColumn = {
         label: 'Top value of category',
         dataType: 'string',
-        
+
         // Private
         operationType: 'terms',
         params: {
@@ -1112,7 +1112,7 @@ describe('terms', () => {
             col1: {
               label: 'Count',
               dataType: 'number',
-                            sourceField: '___records___',
+              sourceField: '___records___',
               operationType: 'count',
             },
           },
@@ -1135,7 +1135,7 @@ describe('terms', () => {
         termsOperation.getDefaultLabel(
           {
             dataType: 'string',
-            
+
             // Private
             operationType: 'terms',
             params: {
@@ -1156,7 +1156,7 @@ describe('terms', () => {
         termsOperation.getDefaultLabel(
           {
             dataType: 'string',
-            
+
             // Private
             operationType: 'terms',
             params: {
@@ -1177,7 +1177,7 @@ describe('terms', () => {
         termsOperation.getDefaultLabel(
           {
             dataType: 'string',
-            
+
             // Private
             operationType: 'terms',
             params: {
@@ -1199,7 +1199,7 @@ describe('terms', () => {
         termsOperation.getDefaultLabel(
           {
             dataType: 'string',
-            
+
             // Private
             operationType: 'terms',
             params: {
@@ -1281,7 +1281,7 @@ describe('terms', () => {
       layer.columns.col1 = {
         label: 'Top value of unsupported',
         dataType: 'string',
-                operationType: 'terms',
+        operationType: 'terms',
         params: {
           orderBy: { type: 'alphabetical' },
           size: 3,
@@ -1311,7 +1311,7 @@ describe('terms', () => {
       layer.columns.col1 = {
         label: 'Top value of timestamp',
         dataType: 'date',
-                operationType: 'terms',
+        operationType: 'terms',
         params: {
           orderBy: { type: 'alphabetical' },
           size: 3,
@@ -1341,7 +1341,7 @@ describe('terms', () => {
       const col1: TermsIndexPatternColumn = {
         label: 'Top value of geo.src + 1 other',
         dataType: 'string',
-                operationType: 'terms',
+        operationType: 'terms',
         params: {
           orderBy: { type: 'alphabetical' },
           size: 3,
@@ -1373,7 +1373,7 @@ describe('terms', () => {
       layer.columns.col1 = {
         label: 'Top value of geo.src + 1 other',
         dataType: 'date',
-                operationType: 'terms',
+        operationType: 'terms',
         params: {
           orderBy: { type: 'alphabetical' },
           size: 3,
@@ -1850,7 +1850,7 @@ describe('terms', () => {
         label: 'MyCustomLabel',
         customLabel: true,
         dataType: 'string',
-                operationType: 'terms',
+        operationType: 'terms',
         params: {
           orderBy: { type: 'alphabetical' },
           size: 3,
@@ -2382,7 +2382,7 @@ describe('terms', () => {
                 label: 'Median of bytes',
                 dataType: 'number',
                 operationType: 'median',
-                                sourceField: 'bytes',
+                sourceField: 'bytes',
               },
             },
           },
@@ -2444,7 +2444,7 @@ describe('terms', () => {
                 label: 'Median of bytes',
                 dataType: 'number',
                 operationType: 'median',
-                                sourceField: 'bytes',
+                sourceField: 'bytes',
               },
             },
           },
@@ -2483,7 +2483,7 @@ describe('terms', () => {
               ...(currentLayer.columns.col1 as TermsIndexPatternColumn).params,
               orderAgg: expect.objectContaining({
                 dataType: 'number',
-                                label: 'Average of bytes',
+                label: 'Average of bytes',
                 operationType: 'average',
                 sourceField: 'bytes',
               }),
@@ -2509,7 +2509,7 @@ describe('terms', () => {
                 label: 'Median of bytes',
                 dataType: 'number',
                 operationType: 'median',
-                                sourceField: 'bytes',
+                sourceField: 'bytes',
               },
             },
           },
@@ -2588,7 +2588,7 @@ describe('terms', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 operationType: 'count',
-                                sourceField: '___records___',
+                sourceField: '___records___',
               },
             },
           },
@@ -2670,7 +2670,7 @@ describe('terms', () => {
         columns: {
           col1: {
             dataType: 'boolean',
-                        label: 'Top 5 values of bytes',
+            label: 'Top 5 values of bytes',
             operationType: 'terms',
             params: {
               missingBucket: false,
@@ -2782,13 +2782,13 @@ describe('terms', () => {
             ...layer.columns,
             col2: {
               dataType: 'number',
-                            operationType: 'count',
+              operationType: 'count',
               label: 'Count',
               sourceField: 'document',
             },
             col3: {
               dataType: 'number',
-                            operationType: 'count',
+              operationType: 'count',
               label: 'Count',
               sourceField: 'document',
               timeShift: '1d',
