@@ -38,11 +38,6 @@ export const getApiKeyManager = (deps: ApiKeyManagerDependencies) => {
   };
 };
 
-const getClient = async (deps: ApiKeyManagerDependencies) => {
-  const apiKey = await getApiKey(deps);
-  return apiKey ? getClientFromApiKey(deps, apiKey) : undefined;
-};
-
 const generate = async (deps: ApiKeyManagerDependencies) => {
   const { core, encryptedSavedObjects, request, namespace } = deps;
   if (!encryptedSavedObjects) {
@@ -96,10 +91,9 @@ const getRequestFromApiKey = async (apiKey: PrivilegeMonitoringAPIKey) => {
     api_key: apiKey.apiKey,
   });
 };
-const getClientFromApiKey = (
-  deps: ApiKeyManagerDependencies,
-  apiKey: PrivilegeMonitoringAPIKey
-) => {
+const getClient = async (deps: ApiKeyManagerDependencies) => {
+  const apiKey = await getApiKey(deps);
+  if (!apiKey) return undefined;
   const fakeRequest = getFakeKibanaRequest({
     id: apiKey.id,
     api_key: apiKey.apiKey,
