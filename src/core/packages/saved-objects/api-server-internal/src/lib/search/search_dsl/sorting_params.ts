@@ -8,11 +8,36 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SortCombinations, SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import { MappingProperty, SortCombinations, SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsPitParams } from '@kbn/core-saved-objects-api-server/src/apis';
 import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsFieldMapping } from '@kbn/core-saved-objects-server';
 
 const TOP_LEVEL_FIELDS = ['_id', '_score'];
+
+const isValidKeywordField = (fieldMapping?: SavedObjectsFieldMapping): boolean => {
+  if (!fieldMapping) {
+    return false;
+  }
+  if (fieldMapping?.type === 'keyword') {
+    return true;
+  }
+  if (fieldMapping.type === 'text' && fieldMapping.fields) {
+    return Object.values(fieldMapping.fields).some(
+      (subField: MappingProperty) => subField?.type === 'keyword'
+    );
+  }
+  return false;
+};
+
+const getKeywordField = (fieldMapping?: SavedObjectsFieldMapping): string | undefined => {
+  if (fieldMapping && fieldMapping.type === 'text' && fieldMapping.fields) {
+    const field = Object.entries(fieldMapping.fields).find(
+      ([_, subField]: [string, MappingProperty]) => subField?.type === 'keyword'
+    );
+    return field ? field[0] : undefined;
+  }
+};
 
 export function getSortingParams(
   mappings: IndexMapping,
@@ -46,15 +71,10 @@ export function getSortingParams(
   if (types.length > 1) {
     const rootField = getProperty(mappings, sortField);
     if (rootField) {
-      // If rootField is text with keyword, use keyword for sorting
-      let sortKey = sortField;
-      if (rootField.type === 'text' && rootField.fields && rootField.fields.keyword) {
-        sortKey = `${sortField}.keyword`;
-      }
       return {
         sort: [
           {
-            [sortKey]: {
+            [sortField]: {
               order: sortOrder,
               unmapped_type: rootField.type,
             },
@@ -68,11 +88,7 @@ export function getSortingParams(
         // Throw error if any field is text without keyword subfield
         for (const t of types) {
           const fieldMapping = getProperty(mappings, `${t}.${sortField}`);
-          if (
-            fieldMapping &&
-            fieldMapping.type === 'text' &&
-            (!fieldMapping.fields || !fieldMapping.fields.keyword)
-          ) {
+          if (!isValidKeywordField(fieldMapping)) {
             throw Boom.badRequest(
               `Sort field "${t}.${sortField}" is of type "text" and does not have a "keyword" subfield. Sorting on text fields requires a keyword subfield.`
             );
@@ -87,13 +103,9 @@ export function getSortingParams(
           const fieldName = `${t}.${sortField}`;
           const fieldMapping = getProperty(mappings, fieldName);
           let scriptField = fieldName;
-          if (
-            fieldMapping &&
-            fieldMapping.type === 'text' &&
-            fieldMapping.fields &&
-            fieldMapping.fields.keyword
-          ) {
-            scriptField = `${fieldName}.keyword`;
+          const keywordSubField = getKeywordField(fieldMapping);
+          if (keywordSubField) {
+            scriptField = `${fieldName}.${keywordSubField}`;
           }
           const prefix = idx === 0 ? 'if' : 'else if';
           return `${prefix} (doc.containsKey('${scriptField}') && doc['${scriptField}'].size() != 0) { emit(doc['${scriptField}'].value); }`;
