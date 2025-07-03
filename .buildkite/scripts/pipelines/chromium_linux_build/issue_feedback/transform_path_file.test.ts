@@ -57,7 +57,6 @@ const runnerOptions = {
 };
 
 describe('transform_path_file', () => {
-
   it('throws an error if options are missing', () => {
     expect(() => {
       applyTransform(pathFileTransform, {}, pathFileContents, runnerOptions);
