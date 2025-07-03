@@ -858,9 +858,13 @@ export class DataGridService extends FtrService {
     await this.testSubjects.click('unifiedDataTableCompareSelectedDocuments');
   }
 
+  public async isComparisonModeActive() {
+    return await this.testSubjects.exists('unifiedDataTableCompareDocuments');
+  }
+
   public async waitForComparisonModeToLoad() {
-    await this.retry.try(async () => {
-      return await this.testSubjects.exists('unifiedDataTableCompareDocuments');
+    await this.retry.waitFor('comparison mode', async () => {
+      return await this.isComparisonModeActive();
     });
   }
 
@@ -909,6 +913,16 @@ export class DataGridService extends FtrService {
     await this.openComparisonSettingsMenu();
     const menuEntry = await this.testSubjects.find(`unifiedDataTableDiffMode-${diffMode}`);
     await menuEntry.click();
+  }
+
+  public async getComparisonDiffMode() {
+    await this.openComparisonSettingsMenu();
+    const modes = await this.testSubjects.findAll('^unifiedDataTableDiffMode-');
+    for (const mode of modes) {
+      if ((await mode.getAttribute('aria-current')) === 'true') {
+        return await mode.getVisibleText();
+      }
+    }
   }
 
   public async getComparisonDiffSegments(rowIndex: number, cellIndex: number) {

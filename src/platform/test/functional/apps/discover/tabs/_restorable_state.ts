@@ -253,6 +253,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await dataGrid.getInTableSearchTerm()).to.be(searchTerm);
         });
       });
+
+      it('should restore the comparison mode', async () => {
+        const expectState = async (state: boolean, diffMode?: string) => {
+          await retry.try(async () => {
+            expect(await dataGrid.isComparisonModeActive()).to.be(state);
+            if (state && diffMode) {
+              expect(await dataGrid.getComparisonDiffMode()).to.be(diffMode);
+            }
+          });
+        };
+
+        await expectState(false);
+
+        await dataGrid.selectRow(1);
+        await dataGrid.selectRow(3);
+        await dataGrid.clickCompareSelectedButton();
+        await expectState(true, 'Full value');
+        await dataGrid.selectComparisonDiffMode('words');
+        await expectState(true, 'By word');
+
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await expectState(false);
+        await dataGrid.selectRow(1);
+        await dataGrid.selectRow(2);
+        await dataGrid.clickCompareSelectedButton();
+        await expectState(true, 'By word');
+        await dataGrid.selectComparisonDiffMode('lines');
+        await expectState(true, 'By line');
+
+        await unifiedTabs.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
+        await expectState(true, 'By word');
+
+        await unifiedTabs.selectTab(1);
+        await discover.waitUntilTabIsLoaded();
+        await expectState(true, 'By line');
+      });
     });
   });
 }
