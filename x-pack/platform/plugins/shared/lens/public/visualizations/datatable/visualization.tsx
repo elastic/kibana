@@ -328,7 +328,9 @@ export const getDatatableVisualization = ({
                   !column?.isTransposed
                 );
               }
-              return Boolean(datasource!.getOperationForColumnId(c)?.isBucketed) && !column?.isTransposed;
+              return (
+                Boolean(datasource!.getOperationForColumnId(c)?.isBucketed) && !column?.isTransposed
+              );
             })
             .map((accessor) => {
               const {

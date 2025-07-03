@@ -62,7 +62,6 @@ import {
   WAFFLE_SMALL_VALUES,
 } from '../../user_messages_ids';
 import { convertToRuntimeState } from './runtime_state';
-import { b } from '@faker-js/faker/dist/airline-BUL6NtOJ';
 
 const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
   defaultMessage: 'Metric',
