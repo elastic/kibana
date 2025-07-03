@@ -10,6 +10,6 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { stackMonitoringCommonSchema } from '../common';
 
-export const clusterHealthParamsSchema = stackMonitoringCommonSchema;
+export const clusterHealthParamsSchema = stackMonitoringCommonSchema.extends({});
 
 export type ClusterHealthParams = TypeOf<typeof clusterHealthParamsSchema>;

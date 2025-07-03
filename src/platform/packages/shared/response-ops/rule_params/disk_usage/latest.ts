@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { stackMonitoringCommonSchema } from '../common';
-
-export const cpuUsageParamsSchema = stackMonitoringCommonSchema.extends({});
-
-export type CpuUsageParams = TypeOf<typeof cpuUsageParamsSchema>;
+export * from './v1';

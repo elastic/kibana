@@ -7,9 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { stackMonitoringCommonSchema } from '../common';
-
-export const cpuUsageParamsSchema = stackMonitoringCommonSchema.extends({});
-
-export type CpuUsageParams = TypeOf<typeof cpuUsageParamsSchema>;
+export { esVersionMismatchParamsSchema, type EsVersionMismatchParams } from './latest';
+export { esVersionMismatchParamsSchema as esVersionMismatchParamsSchemaV1 } from './v1';

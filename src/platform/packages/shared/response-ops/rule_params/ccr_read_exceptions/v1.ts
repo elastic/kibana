@@ -10,6 +10,6 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { stackMonitoringCommonSchema } from '../common';
 
-export const ccrReadExceptionsParamsSchema = stackMonitoringCommonSchema;
+export const ccrReadExceptionsParamsSchema = stackMonitoringCommonSchema.extends({});
 
 export type CcrReadExceptionsParams = TypeOf<typeof ccrReadExceptionsParamsSchema>;

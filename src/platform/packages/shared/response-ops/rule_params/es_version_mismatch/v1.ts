@@ -10,6 +10,6 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { stackMonitoringCommonSchema } from '../common';
 
-export const cpuUsageParamsSchema = stackMonitoringCommonSchema.extends({});
+export const esVersionMismatchParamsSchema = stackMonitoringCommonSchema.extends({});
 
-export type CpuUsageParams = TypeOf<typeof cpuUsageParamsSchema>;
+export type EsVersionMismatchParams = TypeOf<typeof esVersionMismatchParamsSchema>;
