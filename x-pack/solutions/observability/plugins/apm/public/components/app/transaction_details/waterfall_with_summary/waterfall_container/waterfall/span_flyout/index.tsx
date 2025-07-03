@@ -271,6 +271,7 @@ function SpanFlyoutBody({
             <Duration
               duration={span.span.duration.us}
               parent={{ duration: totalDuration, type: 'transaction', loading: false }}
+              showTooltip={true}
             />
             {span.span.composite && (
               <CompositeSpanDurationSummaryItem
