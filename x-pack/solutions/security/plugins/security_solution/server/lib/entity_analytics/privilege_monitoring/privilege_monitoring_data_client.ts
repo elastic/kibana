@@ -711,7 +711,7 @@ export class PrivilegeMonitoringDataClient {
       index: indexName,
       size: batchSize,
       _source: ['user.name'],
-      sort: [{ 'user.name': 'asc' }],
+      sort: [{ 'user.name.keyword': 'asc' }],
       search_after: searchAfter,
       query,
     });
