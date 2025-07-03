@@ -14,10 +14,10 @@ export const ABOUT_PANEL_DETAILS_TAB = i18n.translate(
   }
 );
 
-export const ABOUT_PANEL_DETAILS_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.details.stepAboutRule.detailsFieldLabel',
+export const ABOUT_PANEL_DESCRIPTION_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.details.stepAboutRule.descriptionFieldLabel',
   {
-    defaultMessage: 'Details',
+    defaultMessage: 'Description',
   }
 );
 

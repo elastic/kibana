@@ -16,18 +16,18 @@ import {
 import React from 'react';
 import { css } from '@emotion/css';
 
-interface RuleDiffHeaderBarProps {
-  leftSideRuleLabel: string;
-  rightSideRuleLabel: string;
-  leftSideRuleDescription: string;
-  rightSideRuleDescription: string;
+export interface RuleDiffHeaderBarProps {
+  leftDiffSideLabel: string;
+  rightDiffSideLabel: string;
+  leftDiffSideDescription: string;
+  rightDiffSideDescription: string;
 }
 
 export const RuleDiffHeaderBar = ({
-  leftSideRuleLabel,
-  rightSideRuleLabel,
-  leftSideRuleDescription,
-  rightSideRuleDescription,
+  leftDiffSideLabel,
+  rightDiffSideLabel,
+  leftDiffSideDescription,
+  rightDiffSideDescription,
 }: RuleDiffHeaderBarProps) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -44,19 +44,19 @@ export const RuleDiffHeaderBar = ({
         <EuiFlexGroup alignItems="baseline" gutterSize="xs">
           <EuiIconTip
             color="subdued"
-            content={leftSideRuleDescription}
+            content={leftDiffSideDescription}
             type="info"
             size="m"
             display="block"
           />
           <EuiTitle size="xxs">
-            <h6>{leftSideRuleLabel}</h6>
+            <h6>{leftDiffSideLabel}</h6>
           </EuiTitle>
         </EuiFlexGroup>
         <EuiFlexGroup alignItems="baseline" gutterSize="xs">
-          <EuiIconTip color="subdued" content={rightSideRuleDescription} type="info" size="m" />
+          <EuiIconTip color="subdued" content={rightDiffSideDescription} type="info" size="m" />
           <EuiTitle size="xxs">
-            <h6>{rightSideRuleLabel}</h6>
+            <h6>{rightDiffSideLabel}</h6>
           </EuiTitle>
         </EuiFlexGroup>
       </EuiFlexGroup>

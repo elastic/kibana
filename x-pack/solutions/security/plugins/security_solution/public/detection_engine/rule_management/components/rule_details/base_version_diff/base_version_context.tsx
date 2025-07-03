@@ -9,7 +9,6 @@ import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useContext, useMemo, useState } from 'react';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
-import type { OpenRuleDiffFlyoutParams } from './use_prebuilt_rules_view_base_diff';
 import { usePrebuiltRulesViewBaseDiff } from './use_prebuilt_rules_view_base_diff';
 
 export interface PrebuiltRuleBaseVersionState {
@@ -19,7 +18,8 @@ export interface PrebuiltRuleBaseVersionState {
 }
 
 export interface PrebuiltRuleBaseVersionActions {
-  openBaseVersionFlyout: (params: OpenRuleDiffFlyoutParams) => void;
+  openCustomizationsPreviewFlyout: () => void;
+  openCustomizationsRevertFlyout: () => void;
   setBaseVersionRule: Dispatch<SetStateAction<RuleResponse | null>>;
 }
 
@@ -43,7 +43,8 @@ export const PrebuiltRuleBaseVersionFlyoutContextProvider = ({
 
   const {
     baseVersionFlyout,
-    openBaseVersionFlyout,
+    openCustomizationsPreviewFlyout,
+    openCustomizationsRevertFlyout,
     doesBaseVersionExist,
     isLoading,
     modifiedFields,
@@ -51,10 +52,11 @@ export const PrebuiltRuleBaseVersionFlyoutContextProvider = ({
 
   const actions = useMemo<PrebuiltRuleBaseVersionActions>(
     () => ({
-      openBaseVersionFlyout,
+      openCustomizationsPreviewFlyout,
+      openCustomizationsRevertFlyout,
       setBaseVersionRule: setRule,
     }),
-    [openBaseVersionFlyout]
+    [openCustomizationsPreviewFlyout, openCustomizationsRevertFlyout]
   );
 
   const providerValue = useMemo<PrebuiltRuleBaseVersionContextType>(

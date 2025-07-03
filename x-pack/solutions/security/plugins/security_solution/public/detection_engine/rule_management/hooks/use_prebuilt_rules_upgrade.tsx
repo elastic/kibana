@@ -304,10 +304,10 @@ export function usePrebuiltRulesUpgrade({
         <PerFieldRuleDiffTab
           header={headerCallout}
           ruleDiff={ruleUpgradeState.diff}
-          leftSideRuleLabel={i18n.CURRENT_RULE_VERSION}
-          rightSideRuleLabel={i18n.ELASTIC_UPDATE_VERSION}
-          leftSideRuleDescription={i18n.CURRENT_VERSION_DESCRIPTION}
-          rightSideRuleDescription={i18n.UPDATED_VERSION_DESCRIPTION}
+          leftDiffSideLabel={i18n.CURRENT_RULE_VERSION}
+          rightDiffSideLabel={i18n.ELASTIC_UPDATE_VERSION}
+          leftDiffSideDescription={i18n.CURRENT_VERSION_DESCRIPTION}
+          rightDiffSideDescription={i18n.UPDATED_VERSION_DESCRIPTION}
         />
       );
 

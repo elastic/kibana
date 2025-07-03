@@ -19,6 +19,7 @@ import {
   getRevertRuleErrorStatusCode,
   useRevertPrebuiltRule,
 } from '../../../logic/prebuilt_rules/use_revert_prebuilt_rule';
+import { DiffLayout } from '../../../model/rule_details/rule_field_diff';
 
 export const PREBUILT_RULE_BASE_VERSION_FLYOUT_ANCHOR = 'baseVersionPrebuiltRulePreview';
 
@@ -32,7 +33,6 @@ interface PrebuiltRulesBaseVersionFlyoutComponentProps {
   diff: PartialRuleDiff;
   closeFlyout: () => void;
   isReverting: boolean;
-  onRevert?: () => void;
 }
 
 export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVersionFlyout({
@@ -41,7 +41,6 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
   diff,
   closeFlyout,
   isReverting,
-  onRevert,
 }: PrebuiltRulesBaseVersionFlyoutComponentProps): JSX.Element {
   const isOutdated = useConcurrencyControl(currentRule);
 
@@ -71,19 +70,8 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
       if (statusCode !== 409) {
         closeFlyout();
       }
-    } finally {
-      if (onRevert) {
-        onRevert();
-      }
     }
-  }, [
-    closeFlyout,
-    currentRule.id,
-    currentRule.revision,
-    currentRule.version,
-    onRevert,
-    revertPrebuiltRule,
-  ]);
+  }, [closeFlyout, currentRule.id, currentRule.revision, currentRule.version, revertPrebuiltRule]);
 
   const ruleActions = useMemo(() => {
     return isReverting ? (
@@ -92,6 +80,8 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
         isDisabled={isLoading || isOutdated}
         fill
         data-test-subj="revertPrebuiltRuleFromFlyoutButton"
+        iconType="arrowStart"
+        iconSide="left"
       >
         {i18n.REVERT_BUTTON_LABEL}
       </EuiButton>
@@ -120,11 +110,11 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
           <PerFieldRuleDiffTab
             header={headerCallout}
             ruleDiff={diff}
-            leftSideRuleLabel={i18n.BASE_VERSION_LABEL}
-            rightSideRuleLabel={i18n.CURRENT_VERSION_LABEL}
-            leftSideRuleDescription={i18n.BASE_VERSION_DESCRIPTION}
-            rightSideRuleDescription={i18n.CURRENT_VERSION_DESCRIPTION}
-            displayCurrentVersionRightSide={true}
+            leftDiffSideLabel={i18n.BASE_VERSION_LABEL}
+            rightDiffSideLabel={i18n.CURRENT_VERSION_LABEL}
+            leftDiffSideDescription={i18n.BASE_VERSION_DESCRIPTION}
+            rightDiffSideDescription={i18n.CURRENT_VERSION_DESCRIPTION}
+            diffLayout={DiffLayout.RightToLeft}
           />
         </TabContentPadding>
       ),

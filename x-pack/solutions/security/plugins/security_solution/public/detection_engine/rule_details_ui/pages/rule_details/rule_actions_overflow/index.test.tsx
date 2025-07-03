@@ -56,7 +56,7 @@ const usePrebuiltRuleBaseVersionContextMock = usePrebuiltRuleBaseVersionContext 
 describe('RuleActionsOverflow', () => {
   beforeEach(() => {
     usePrebuiltRuleBaseVersionContextMock.mockReturnValue({
-      actions: { openBaseVersionFlyout: jest.fn() },
+      actions: { openCustomizationsRevertFlyout: jest.fn() },
       state: { doesBaseVersionExist: true },
     });
   });
@@ -323,7 +323,7 @@ describe('RuleActionsOverflow', () => {
 
     test('it disabled the revert action when isRevertBaseVersionDisabled is true', async () => {
       usePrebuiltRuleBaseVersionContextMock.mockReturnValue({
-        actions: { openBaseVersionFlyout: jest.fn() },
+        actions: { openCustomizationsRevertFlyout: jest.fn() },
         state: { doesBaseVersionExist: false },
       });
       const { getByTestId } = render(

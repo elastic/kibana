@@ -151,7 +151,7 @@ import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { RuleDefinitionSection } from '../../../rule_management/components/rule_details/rule_definition_section';
 import { RuleScheduleSection } from '../../../rule_management/components/rule_details/rule_schedule_section';
-import { CustomizedPrebuiltRuleBadge } from '../../../rule_management/components/rule_details/customized_prebuilt_rule_badge';
+import { ModifiedRuleBadge } from '../../../rule_management/components/rule_details/modified_rule_badge';
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 // eslint-disable-next-line no-restricted-imports
@@ -658,7 +658,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 subtitle={subTitle}
                 subtitle2={
                   <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="flexStart">
-                    <CustomizedPrebuiltRuleBadge rule={rule} />
+                    <ModifiedRuleBadge rule={rule} />
                     <EuiFlexGroup alignItems="center" gutterSize="xs">
                       <EuiFlexItem grow={false}>
                         {ruleStatusI18n.STATUS}

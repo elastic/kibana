@@ -38,7 +38,7 @@ describe('StepAboutRuleToggleDetails', () => {
   beforeEach(() => {
     stepDataMock = mockAboutStepRule();
     usePrebuiltRuleBaseVersionContextMock.mockReturnValue({
-      actions: { openBaseVersionFlyout: jest.fn() },
+      actions: { openCustomizationsPreviewFlyout: jest.fn() },
       state: { doesBaseVersionExist: true, modifiedFields: new Set() },
     });
   });

@@ -29,7 +29,8 @@ import type { AboutStepRule, AboutStepRuleDetails } from '../../../common/types'
 import * as i18n from './translations';
 import { fullHeight } from './styles';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
-import { CustomizedPrebuiltRulePerFieldBadge } from '../../../rule_management/components/rule_details/customized_prebuilt_rule_per_field_badge';
+import { ModifiedFieldBadge } from '../../../rule_management/components/rule_details/modified_field_badge';
+import { RuleFieldName } from '../../../rule_management/components/rule_details/rule_field_name';
 
 const detailsOption: EuiButtonGroupOptionProps = {
   id: 'details',
@@ -117,26 +118,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                   <div ref={resizeRef} className={fullHeight}>
                     <VerticalOverflowContainer maxHeight={120}>
                       <VerticalOverflowContent maxHeight={120}>
-                        <EuiDescriptionList
-                          listItems={[
-                            {
-                              title: (
-                                <EuiFlexGroup gutterSize="xs" alignItems="center">
-                                  {i18n.ABOUT_PANEL_DETAILS_LABEL}
-                                  <CustomizedPrebuiltRulePerFieldBadge field={'description'} />
-                                </EuiFlexGroup>
-                              ),
-                              description: (
-                                <EuiText
-                                  size="s"
-                                  data-test-subj="stepAboutRuleDetailsToggleDescriptionText"
-                                >
-                                  {stepDataDetails.description}
-                                </EuiText>
-                              ),
-                            },
-                          ]}
-                        />
+                        <RuleDescription description={stepDataDetails.description} />
                       </VerticalOverflowContent>
                     </VerticalOverflowContainer>
                     <EuiSpacer size="m" />
@@ -152,7 +134,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
               >
                 <VerticalOverflowContent maxHeight={aboutPanelHeight}>
                   <EuiFlexGroup gutterSize="xs" direction="column" alignItems="flexStart">
-                    <CustomizedPrebuiltRulePerFieldBadge field={'note'} />
+                    <ModifiedFieldBadge fieldName={'note'} />
                     <MarkdownRenderer>{stepDataDetails.note}</MarkdownRenderer>
                   </EuiFlexGroup>
                 </VerticalOverflowContent>
@@ -165,7 +147,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
               >
                 <VerticalOverflowContent maxHeight={aboutPanelHeight}>
                   <EuiFlexGroup gutterSize="xs" direction="column" alignItems="flexStart">
-                    <CustomizedPrebuiltRulePerFieldBadge field={'setup'} />
+                    <ModifiedFieldBadge fieldName={'setup'} />
                     <MarkdownRenderer>{stepDataDetails.setup}</MarkdownRenderer>
                   </EuiFlexGroup>
                 </VerticalOverflowContent>
@@ -222,3 +204,24 @@ function VerticalOverflowContent({
     </div>
   );
 }
+
+const RuleDescription = ({ description }: { description: string }) => (
+  <EuiDescriptionList
+    listItems={[
+      {
+        title: (
+          <RuleFieldName
+            label={i18n.ABOUT_PANEL_DESCRIPTION_LABEL}
+            fieldName="description"
+            showModifiedFields
+          />
+        ),
+        description: (
+          <EuiText size="s" data-test-subj="stepAboutRuleDetailsToggleDescriptionText">
+            {description}
+          </EuiText>
+        ),
+      },
+    ]}
+  />
+);

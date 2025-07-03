@@ -89,7 +89,7 @@ const RuleActionsOverflowComponent = ({
   }, [navigateToApp]);
 
   const {
-    actions: { openBaseVersionFlyout },
+    actions: { openCustomizationsRevertFlyout },
     state: { doesBaseVersionExist },
   } = usePrebuiltRuleBaseVersionContext();
 
@@ -202,7 +202,7 @@ const RuleActionsOverflowComponent = ({
                     data-test-subj="rules-details-revert-rule"
                     onClick={() => {
                       closePopover();
-                      openBaseVersionFlyout({ isReverting: true });
+                      openCustomizationsRevertFlyout();
                     }}
                   >
                     {i18nActions.REVERT_RULE}
@@ -250,7 +250,7 @@ const RuleActionsOverflowComponent = ({
       showManualRuleRunConfirmation,
       telemetry,
       scheduleRuleRun,
-      openBaseVersionFlyout,
+      openCustomizationsRevertFlyout,
       confirmDeletion,
       onRuleDeletedCallback,
     ]

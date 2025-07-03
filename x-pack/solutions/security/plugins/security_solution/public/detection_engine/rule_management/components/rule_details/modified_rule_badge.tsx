@@ -11,16 +11,14 @@ import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { isCustomizedPrebuiltRule } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
 import { usePrebuiltRuleBaseVersionContext } from './base_version_diff/base_version_context';
+import { PrebuiltRuleDiffBadge } from './prebuilt_rule_diff_badge';
 
-interface CustomizedPrebuiltRuleBadgeProps {
+interface ModifiedRuleBadgeProps {
   rule: RuleResponse | null;
 }
 
-export const CustomizedPrebuiltRuleBadge: React.FC<CustomizedPrebuiltRuleBadgeProps> = ({
-  rule,
-}) => {
+export const ModifiedRuleBadge: React.FC<ModifiedRuleBadgeProps> = ({ rule }) => {
   const {
-    actions: { openBaseVersionFlyout },
     state: { doesBaseVersionExist },
   } = usePrebuiltRuleBaseVersionContext();
 
@@ -35,18 +33,10 @@ export const CustomizedPrebuiltRuleBadge: React.FC<CustomizedPrebuiltRuleBadgePr
       content={!doesBaseVersionExist && i18n.MODIFIED_PREBUILT_DIFF_TOOLTIP_CONTENT}
     >
       {doesBaseVersionExist ? (
-        <EuiBadge
-          data-test-subj="modified-prebuilt-rule-badge"
-          color="hollow"
-          iconType="expand"
-          iconSide="right"
-          onClick={() => openBaseVersionFlyout({ isReverting: false })}
-          iconOnClick={() => openBaseVersionFlyout({ isReverting: false })}
-          onClickAriaLabel={i18n.MODIFIED_PREBUILT_RULE_LABEL}
-          iconOnClickAriaLabel={i18n.MODIFIED_PREBUILT_RULE_LABEL}
-        >
-          {i18n.MODIFIED_PREBUILT_RULE_LABEL}
-        </EuiBadge>
+        <PrebuiltRuleDiffBadge
+          label={i18n.MODIFIED_PREBUILT_RULE_LABEL}
+          dataTestSubj="modified-prebuilt-rule-badge"
+        />
       ) : (
         <EuiBadge data-test-subj="modified-prebuilt-rule-badge" color="hollow">
           {i18n.MODIFIED_PREBUILT_RULE_LABEL}

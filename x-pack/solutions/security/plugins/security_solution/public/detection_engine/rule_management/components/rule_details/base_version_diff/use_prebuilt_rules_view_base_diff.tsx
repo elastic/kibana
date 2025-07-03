@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { useBoolean } from '@kbn/react-hooks';
 import { isCustomizedPrebuiltRule } from '../../../../../../common/api/detection_engine/model/rule_schema/utils';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine';
 import { useFetchPrebuiltRuleBaseVersionQuery } from '../../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rule_base_version_query';
@@ -13,21 +14,14 @@ import { PrebuiltRulesBaseVersionFlyout } from './base_version_flyout';
 
 export const PREBUILT_RULE_BASE_VERSION_FLYOUT_ANCHOR = 'baseVersionPrebuiltRulePreview';
 
-export interface OpenRuleDiffFlyoutParams {
-  isReverting?: boolean;
-}
-
 interface UsePrebuiltRulesViewBaseDiffProps {
   rule: RuleResponse | null;
-  onRevert?: () => void;
 }
 
-export const usePrebuiltRulesViewBaseDiff = ({
-  rule,
-  onRevert,
-}: UsePrebuiltRulesViewBaseDiffProps) => {
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-  const [isReverting, setIsReverting] = useState(false);
+export const usePrebuiltRulesViewBaseDiff = ({ rule }: UsePrebuiltRulesViewBaseDiffProps) => {
+  const [isFlyoutOpen, { off: closeFlyout, on: openFlyout }] = useBoolean(false);
+  const [isReverting, { off: setRevertingFalse, on: setRevertingTrue }] = useBoolean(false);
+
   const enabled = useMemo(() => rule != null && isCustomizedPrebuiltRule(rule), [rule]);
   const { data, isLoading, error } = useFetchPrebuiltRuleBaseVersionQuery({
     id: rule?.id,
@@ -37,15 +31,15 @@ export const usePrebuiltRulesViewBaseDiff = ({
   // Handle when we receive an error when the base_version doesn't exist
   const doesBaseVersionExist: boolean = useMemo(() => !error && data != null, [data, error]);
 
-  const openBaseVersionFlyout = useCallback(
-    ({ isReverting: renderRevertFeatures = false }: OpenRuleDiffFlyoutParams) => {
-      setIsReverting(renderRevertFeatures);
-      setIsFlyoutOpen(true);
-    },
-    []
-  );
+  const openCustomizationsPreviewFlyout = useCallback(() => {
+    setRevertingFalse();
+    openFlyout();
+  }, [openFlyout, setRevertingFalse]);
 
-  const closeFlyout = useCallback(() => setIsFlyoutOpen(false), []);
+  const openCustomizationsRevertFlyout = useCallback(() => {
+    setRevertingTrue();
+    openFlyout();
+  }, [openFlyout, setRevertingTrue]);
 
   const modifiedFields = useMemo(
     () => new Set(Object.keys(data?.diff.fields ?? {})),
@@ -61,10 +55,10 @@ export const usePrebuiltRulesViewBaseDiff = ({
           baseRule={data.base_version}
           isReverting={isReverting}
           closeFlyout={closeFlyout}
-          onRevert={onRevert}
         />
       ) : null,
-    openBaseVersionFlyout,
+    openCustomizationsPreviewFlyout,
+    openCustomizationsRevertFlyout,
     doesBaseVersionExist,
     isLoading,
     modifiedFields,
