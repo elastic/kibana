@@ -124,6 +124,6 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     schema: schema.arrayOf(schema.oneOf([regexRuleSchema, nerRuleSchema])),
     type: 'json',
     requiresPageReload: true,
-    solution: 'oblt',
+    solutionViews: ['oblt'],
   },
 };
