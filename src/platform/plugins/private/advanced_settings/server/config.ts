@@ -13,7 +13,6 @@ import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 const configSchema = schema.object({
   globalSettingsEnabled: schema.boolean({ defaultValue: true }),
   advancedSettingsEnabled: schema.boolean({ defaultValue: true }),
-  solutionsFilteringEnabled: schema.boolean({ defaultValue: true }),
 });
 
 export type AdvancedSettingsConfig = TypeOf<typeof configSchema>;

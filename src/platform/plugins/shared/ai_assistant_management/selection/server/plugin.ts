@@ -89,7 +89,7 @@ export class AIAssistantManagementSelectionPlugin
           ),
         },
         requiresPageReload: true,
-        solutions: ['classic', 'oblt'],
+        solutionViews: ['classic', 'oblt'],
       },
     });
 

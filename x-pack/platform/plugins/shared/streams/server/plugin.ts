@@ -225,7 +225,7 @@ export class StreamsPlugin
         type: 'boolean',
         schema: schema.boolean(),
         requiresPageReload: true,
-        solutions: ['classic', 'oblt'],
+        solutionViews: ['classic', 'oblt'],
       },
     });
 

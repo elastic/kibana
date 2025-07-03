@@ -120,11 +120,11 @@ export interface UiSettingsParams<T = unknown> {
    */
   scope?: UiSettingsScope;
   /** A list of solutions where this setting is applicable.
-   * This field is used to determine whether the setting should be displayed in the Advanced settings app.
+   * This field is used to determine whether the setting should be displayed in the stateful Advanced settings app.
    * If undefined or an empty list, the setting must be displayed in all solutions.
    * Note: this does not affect serverless settings, since spaces in serverless don't have solution views.
    * */
-  solutions?: UiSettingsSolutions;
+  solutionViews?: UiSettingsSolutions;
 }
 
 /**

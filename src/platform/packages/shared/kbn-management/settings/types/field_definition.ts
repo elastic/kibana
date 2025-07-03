@@ -89,10 +89,10 @@ export interface FieldDefinition<
   /** An identifier of the field when it has an unsaved change. */
   unsavedFieldId: string;
   /** The solutions where this setting is applicable.
-   * If undefined, the setting must be displayed in all solutions.
+   * If undefined or an empty array, the setting must be displayed in all solutions.
    * @see {@link UiSettingsSolutions}
    */
-  solutions?: UiSettingsSolutions;
+  solutionViews?: UiSettingsSolutions;
 }
 
 /**

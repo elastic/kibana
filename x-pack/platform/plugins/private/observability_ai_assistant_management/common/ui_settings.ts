@@ -59,7 +59,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     schema: schema.boolean(),
     type: 'boolean',
     requiresPageReload: true,
-    solutions: ['classic', 'oblt'],
+    solutionViews: ['classic', 'oblt'],
   },
   [aiAssistantSearchConnectorIndexPattern]: {
     category: ['observability'],
@@ -78,7 +78,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     schema: schema.string(),
     type: 'string',
     requiresPageReload: true,
-    solutions: ['classic', 'oblt'],
+    solutionViews: ['classic', 'oblt'],
   },
   [aiAssistantAnonymizationRules]: {
     category: ['observability'],
