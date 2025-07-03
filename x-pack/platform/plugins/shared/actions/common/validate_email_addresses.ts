@@ -88,7 +88,7 @@ function validateEmailAddress(
 function validateEmailAddress_(
   allowedDomains: string[] | null,
   address: string,
-  recipientAllowList: string[] | null,
+  recipientAllowlist: string[] | null,
   { isSender = false }
 ): ValidatedEmail {
   const emailAddresses = parseAddressList(address);
@@ -118,7 +118,7 @@ function validateEmailAddress_(
     }
   }
 
-  if (!isSender && recipientAllowList != null) {
+  if (!isSender && recipientAllowlist != null) {
     for (const emailAddress of emailAddresses) {
       let flattenEmailAddresses = [];
 
@@ -131,7 +131,7 @@ function validateEmailAddress_(
       }
 
       for (const _address of flattenEmailAddresses) {
-        if (isAddressMatchingSomePattern(_address, recipientAllowList)) {
+        if (isAddressMatchingSomePattern(_address, recipientAllowlist)) {
           return { address, valid: true };
         }
       }

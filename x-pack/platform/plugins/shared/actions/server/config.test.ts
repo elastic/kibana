@@ -271,23 +271,13 @@ describe('config validation', () => {
 
     test('validates email config with recipient_allowlist', () => {
       config.email = {
-        recipient_allowlist: [
-          'a.com',
-          'b.c.com',
-          'd.e.f.com',
-          '*.bar@a.com',
-          'foo.bar@b.com',
-          '*@d.e.f.com',
-        ],
+        recipient_allowlist: ['*.bar@a.com', 'foo.*@b.com', '*@d.e.f.com'],
       };
 
       const result = configSchema.validate(config);
       expect(result.email?.recipient_allowlist).toEqual([
-        'a.com',
-        'b.c.com',
-        'd.e.f.com',
         '*.bar@a.com',
-        'foo.bar@b.com',
+        'foo.*@b.com',
         '*@d.e.f.com',
       ]);
     });

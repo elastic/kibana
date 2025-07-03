@@ -7,12 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { escapeRegExp } from 'lodash';
-
 export const matchWildcardPattern = ({ pattern, str }: { pattern: string; str: string }) => {
-  // Escape special regex characters in the pattern except for '*'
-  const regexStr = '^' + pattern.split('*').map(escapeRegExp).join('.*') + '$';
-  const regex = new RegExp(regexStr, 'i');
-  const result = regex.test(str);
-  return result;
+  const text = str.toLowerCase();
+  const parts = pattern.toLowerCase().split('*');
+
+  if (parts.length === 1) {
+    return text === parts[0];
+  }
+
+  let pos = 0;
+
+  if (!text.startsWith(parts[0])) {
+    return false;
+  }
+  pos = parts[0].length;
+
+  for (let i = 1; i < parts.length - 1; i++) {
+    const found = text.indexOf(parts[i], pos);
+    if (found === -1) {
+      return false;
+    }
+    pos = found + parts[i].length;
+  }
+
+  const lastPart = parts[parts.length - 1];
+
+  // Check if last part fits without overlapping previous matches
+  // for example, "a*ab" shoud not match "ab" even though it ends with "ab"
+  return text.endsWith(lastPart) && pos <= text.length - lastPart.length;
 };

@@ -14,30 +14,22 @@ export default function emailTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);
 
-  const allowedEmailAddresses = ['foo.bar@example.org', 'user@test.com'];
-  const fromEmailAddress = 'sender@domain.co'; // Wouldn't pass recipient_allowlist
+  const getCopyOfAllowedEmailAddresses = () => ['foo.bar@example.org', 'user@test.com'];
+  const from = 'sender@domain.co'; // Wouldn't pass recipient_allowlist
 
   describe('email connector', () => {
     afterEach(() => objectRemover.removeAll());
 
-    it('does ignore recipient_allowlist on "from" field', async () => {
-      const { status, body } = await createConnector(fromEmailAddress);
-      expect(status).to.be(200);
-
-      const { message = 'no message returned' } = body || {};
-      expect(message).to.match(/no message returned/);
-    });
-
-    it('succeeds with allowed recipient emails', async () => {
-      const conn = await createConnector(fromEmailAddress);
+    it('succeeds with allowed recipients domains', async () => {
+      const conn = await createConnector();
       expect(conn.status).to.be(200);
 
       const { id } = conn.body;
       expect(id).to.be.a('string');
 
-      const to = allowedEmailAddresses;
-      const cc = allowedEmailAddresses;
-      const bcc = allowedEmailAddresses;
+      const to = getCopyOfAllowedEmailAddresses();
+      const cc = getCopyOfAllowedEmailAddresses();
+      const bcc = getCopyOfAllowedEmailAddresses();
 
       const ccNames = cc.map((email) => `Jimmy Jack <${email}>`);
 
@@ -50,7 +42,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       const { message } = data || {};
       const { from: fromMsg } = message || {};
 
-      expect(fromMsg?.address).to.be(fromEmailAddress);
+      expect(fromMsg?.address).to.be(from);
       expect(addressesFromMessage(message, 'to')).to.eql(to);
       expect(addressesFromMessage(message, 'cc')).to.eql(cc);
       expect(addressesFromMessage(message, 'bcc')).to.eql(bcc);
@@ -62,15 +54,15 @@ export default function emailTest({ getService }: FtrProviderContext) {
     });
 
     it('throws when invalid "to", "cc" or "bcc" used', async () => {
-      const conn = await createConnector(fromEmailAddress);
+      const conn = await createConnector();
       expect(conn.status).to.be(200);
 
       const { id } = conn.body || {};
       expect(id).to.be.a('string');
 
-      const to = allowedEmailAddresses;
-      const cc = allowedEmailAddresses;
-      const bcc = allowedEmailAddresses;
+      const to = getCopyOfAllowedEmailAddresses();
+      const cc = getCopyOfAllowedEmailAddresses();
+      const bcc = getCopyOfAllowedEmailAddresses();
 
       to.push('to.foo@example.org');
       cc.push('invalidcc@domain.co');
@@ -86,10 +78,11 @@ export default function emailTest({ getService }: FtrProviderContext) {
     });
   });
 
-  async function createConnector(
-    from: string,
-    hasAuth: boolean = true
-  ): Promise<{ status: number; body: any }> {
+  async function createConnector({
+    hasAuth = true,
+  }: {
+    hasAuth?: boolean;
+  } = {}): Promise<{ status: number; body: any }> {
     const connector: any = {
       name: `An email connector from ${__filename}`,
       connector_type_id: '.email',
@@ -125,12 +118,12 @@ export default function emailTest({ getService }: FtrProviderContext) {
   ): Promise<{ status: number; body: any }> {
     const subject = 'email-subject';
     const message = 'email-message';
-    const response = await supertest
+    const { status, body } = await supertest
       .post(`/api/actions/connector/${id}/_execute`)
       .set('kbn-xsrf', 'foo')
       .send({ params: { to, cc, bcc, subject, message } });
 
-    return { status: response.status, body: response.body };
+    return { status, body };
   }
 }
 
