@@ -30,6 +30,9 @@ export type PrimitiveOrArrayOfPrimitives =
 export interface CombineQueries {
   config: EsQueryConfig;
   dataProviders: DataProvider[];
+  /**
+   * @deprecated Use `newDataViewPickerEnabledDataView` instead. Which accepts a DataView instance instead of a DataViewSpec.
+   */
   dataViewSpec?: DataViewSpec;
   newDataViewPickerEnabledDataView?: DataView;
   browserFields: BrowserFields;
@@ -214,6 +217,9 @@ export const convertToBuildEsQuery = ({
 }: {
   config: EsQueryConfig;
   newDataViewPickerEnabledDataView?: DataView;
+  /**
+   * @deprecated Use `newDataViewPickerEnabledDataView` instead. Which accepts a DataView instance instead of a DataViewSpec.
+   */
   dataViewSpec?: DataViewSpec; // Ignored but kept for type compatibility
   queries: Query[];
   filters: Filter[];

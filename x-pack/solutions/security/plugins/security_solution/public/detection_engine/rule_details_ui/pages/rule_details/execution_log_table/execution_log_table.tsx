@@ -244,9 +244,10 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   // Cache UUID field from data view as it can be expensive to iterate all data view fields
   const uuidDataViewField = useMemo(
     () =>
-      experimentalDataView?.fields?.getByName(EXECUTION_UUID_FIELD_NAME) ||
-      oldSourcererDataView.fields?.[EXECUTION_UUID_FIELD_NAME],
-    [experimentalDataView, oldSourcererDataView]
+      newDataViewPickerEnabled
+        ? experimentalDataView?.fields?.getByName(EXECUTION_UUID_FIELD_NAME)
+        : oldSourcererDataView.fields?.[EXECUTION_UUID_FIELD_NAME],
+    [experimentalDataView?.fields, newDataViewPickerEnabled, oldSourcererDataView.fields]
   );
 
   // Callbacks
