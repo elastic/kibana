@@ -2,6 +2,8 @@ disabled:
   # Stateful base config for deployment-agnostic tests
   - x-pack/test/api_integration/deployment_agnostic/default_configs/stateful.config.base.ts
   - x-pack/test/api_integration/deployment_agnostic/default_configs/feature_flag.stateful.config.base.ts
+  - x-pack/platform/test/spaces_api_integration/deployment_agnostic/default_configs/serverless.config.base.ts
+  - x-pack/platform/test/spaces_api_integration/deployment_agnostic/default_configs/stateful.config.base.ts
 
   # Base config files, only necessary to inform config finding script
   - src/platform/test/functional/config.base.js
@@ -50,7 +52,6 @@ disabled:
 
   # Gen AI suites, running with their own pipeline
   - x-pack/test/functional_gen_ai/inference/config.ts
-
 
 defaultQueue: 'n2-4-spot'
 enabled:
@@ -246,9 +247,9 @@ enabled:
   - x-pack/test/functional/apps/ml/stack_management_jobs/config.ts
   - x-pack/test/functional/apps/ml/memory_usage/config.ts
   - x-pack/test/functional/apps/monitoring/config.ts
-  - x-pack/test/functional/apps/painless_lab/config.ts
+  - x-pack/platform/test/functional/apps/painless_lab/config.ts
   - x-pack/test/functional/apps/remote_clusters/config.ts
-  - x-pack/test/functional/apps/reporting_management/config.ts
+  - x-pack/platform/test/functional/apps/reporting_management/config.ts
   - x-pack/test/functional/apps/rollup_job/config.ts
   - x-pack/test/functional/apps/saved_objects_management/config.ts
   - x-pack/test/functional/apps/saved_query_management/config.ts
@@ -263,7 +264,7 @@ enabled:
   - x-pack/test/functional/apps/transform/edit_clone/config.ts
   - x-pack/test/functional/apps/transform/permissions/config.ts
   - x-pack/test/functional/apps/transform/feature_controls/config.ts
-  - x-pack/test/functional/apps/upgrade_assistant/config.ts
+  - x-pack/platform/test/functional/apps/upgrade_assistant/config.ts
   - x-pack/test/functional/apps/user_profiles/config.ts
   - x-pack/test/functional/apps/visualize/config.ts
   - x-pack/platform/test/functional/apps/watcher/config.ts
@@ -271,7 +272,7 @@ enabled:
   - x-pack/test/functional/config.ccs.ts
   - x-pack/test/functional/config.firefox.js
   - x-pack/platform/test/functional/config.firefox.ts
-  - x-pack/test/functional/config.upgrade_assistant.ts
+  - x-pack/platform/test/functional/config.upgrade_assistant.ts
   - x-pack/test/functional_cloud/config.ts
   - x-pack/test/functional_cloud/saml.config.ts
   - x-pack/test/functional_solution_sidenav/config.ts
@@ -327,9 +328,9 @@ enabled:
   - x-pack/test/security_functional/user_profiles.config.ts
   - x-pack/test/security_functional/expired_session.config.ts
   - x-pack/test/session_view/basic/config.ts
-  - x-pack/test/spaces_api_integration/security_and_spaces/config_basic.ts
-  - x-pack/test/spaces_api_integration/security_and_spaces/config_trial.ts
-  - x-pack/test/spaces_api_integration/spaces_only/config.ts
+  - x-pack/platform/test/spaces_api_integration/security_and_spaces/config_basic.ts
+  - x-pack/platform/test/spaces_api_integration/security_and_spaces/config_trial.ts
+  - x-pack/platform/test/spaces_api_integration/spaces_only/config.ts
   - x-pack/platform/test/task_manager_claimer_update_by_query/config.ts
   - x-pack/test/ui_capabilities/security_and_spaces/config.ts
   - x-pack/test/ui_capabilities/spaces_only/config.ts
