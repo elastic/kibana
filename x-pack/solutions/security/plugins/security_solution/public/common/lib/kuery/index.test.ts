@@ -7,7 +7,8 @@
 
 import expect from '@kbn/expect';
 import type { DataProvider } from '../../../../common/types/timeline';
-import { buildGlobalQuery, convertToBuildEsQuery } from '.';
+import { DataProviderTypeEnum } from '../../../../common/api/timeline';
+import { convertToBuildEsQuery, buildGlobalQuery, combineQueries } from '.';
 import { mockDataViewSpec } from '../../mock';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
@@ -305,5 +306,392 @@ describe('buildGlobalQuery', () => {
     const query = buildGlobalQuery(providers, {});
 
     expect(query).to.equal('host.name : (p1 OR p2)');
+  });
+});
+
+describe('combineQueries', () => {
+  const config = {
+    allowLeadingWildcards: true,
+    queryStringOptions: {
+      analyze_wildcard: true,
+    },
+    ignoreFilterIfFieldNotInIndex: false,
+    dateFormatTZ: 'Browser',
+  };
+
+  const browserFields = {};
+
+  describe('AND mode (filter)', () => {
+    it('should combine KQL data provider with KQL search query using AND', () => {
+      const dataProviders: DataProvider[] = [
+        {
+          and: [],
+          enabled: true,
+          id: 'test-id',
+          name: 'test',
+          excluded: false,
+          kqlQuery: '',
+          type: DataProviderTypeEnum.default,
+          queryMatch: {
+            field: 'event.action',
+            value: 'start',
+            operator: ':',
+            displayField: 'event.action',
+            displayValue: 'start',
+          },
+        },
+      ];
+
+      const result = combineQueries({
+        config,
+        dataProviders,
+        dataView: createStubDataView({ spec: {} }),
+        dataViewSpec: mockDataViewSpec,
+        browserFields,
+        filters: [],
+        kqlQuery: { query: 'event.action : stop', language: 'kuery' },
+        kqlMode: 'filter',
+      });
+
+      expect(result).not.to.be(null);
+      expect(result?.baseKqlQuery.query).to.equal(
+        '(event.action : "start") AND (event.action : stop)'
+      );
+      expect(result?.filterQuery).to.be.a('string');
+      expect(result?.kqlError).to.be(undefined);
+    });
+
+    it('should combine KQL data provider with Lucene search query using AND', () => {
+      const dataProviders: DataProvider[] = [
+        {
+          and: [],
+          enabled: true,
+          id: 'test-id',
+          name: 'test',
+          excluded: false,
+          kqlQuery: '',
+          type: DataProviderTypeEnum.default,
+          queryMatch: {
+            field: 'event.action',
+            value: 'start',
+            operator: ':',
+            displayField: 'event.action',
+            displayValue: 'start',
+          },
+        },
+      ];
+
+      const result = combineQueries({
+        config,
+        dataProviders,
+        dataView: createStubDataView({ spec: {} }),
+        dataViewSpec: mockDataViewSpec,
+        browserFields,
+        filters: [],
+        kqlQuery: { query: 'event.action: start OR rename', language: 'lucene' },
+        kqlMode: 'filter',
+      });
+
+      expect(result).not.to.be(null);
+      expect(result?.baseKqlQuery.query).to.equal(
+        '(event.action : "start") AND (event.action: start OR rename)'
+      );
+      expect(result?.baseKqlQuery.language).to.equal('lucene');
+      expect(result?.filterQuery).to.be.a('string');
+      expect(result?.kqlError).to.be(undefined);
+    });
+  });
+
+  describe('OR mode (search)', () => {
+    it('should combine KQL data provider with KQL search query using OR', () => {
+      const dataProviders: DataProvider[] = [
+        {
+          and: [],
+          enabled: true,
+          id: 'test-id',
+          name: 'test',
+          excluded: false,
+          kqlQuery: '',
+          type: DataProviderTypeEnum.default,
+          queryMatch: {
+            field: 'event.action',
+            value: 'start',
+            operator: ':',
+            displayField: 'event.action',
+            displayValue: 'start',
+          },
+        },
+      ];
+
+      const result = combineQueries({
+        config,
+        dataProviders,
+        dataView: createStubDataView({ spec: {} }),
+        dataViewSpec: mockDataViewSpec,
+        browserFields,
+        filters: [],
+        kqlQuery: { query: 'event.action : stop', language: 'kuery' },
+        kqlMode: 'search',
+      });
+
+      expect(result).not.to.be(null);
+      expect(result?.baseKqlQuery.query).to.equal(
+        '(event.action : "start") OR (event.action : stop)'
+      );
+      expect(result?.filterQuery).to.be.a('string');
+
+      // Verify the ES query has OR structure
+      const esQuery = JSON.parse(result?.filterQuery || '{}');
+      expect(esQuery.bool).to.have.property('should');
+      expect(esQuery.bool.should).to.be.an('array');
+      expect(esQuery.bool.minimum_should_match).to.equal(1);
+    });
+
+    it('should combine KQL data provider with Lucene search query using OR', () => {
+      const dataProviders: DataProvider[] = [
+        {
+          and: [],
+          enabled: true,
+          id: 'test-id',
+          name: 'test',
+          excluded: false,
+          kqlQuery: '',
+          type: DataProviderTypeEnum.default,
+          queryMatch: {
+            field: 'event.action',
+            value: 'start',
+            operator: ':',
+            displayField: 'event.action',
+            displayValue: 'start',
+          },
+        },
+      ];
+
+      const result = combineQueries({
+        config,
+        dataProviders,
+        dataView: createStubDataView({ spec: {} }),
+        dataViewSpec: mockDataViewSpec,
+        browserFields,
+        filters: [],
+        kqlQuery: { query: 'event.action: start OR rename', language: 'lucene' },
+        kqlMode: 'search',
+      });
+
+      expect(result).not.to.be(null);
+      expect(result?.baseKqlQuery.query).to.equal(
+        '(event.action : "start") OR (event.action: start OR rename)'
+      );
+      expect(result?.baseKqlQuery.language).to.equal('lucene');
+      expect(result?.filterQuery).to.be.a('string');
+
+      // Verify the ES query has OR structure
+      const esQuery = JSON.parse(result?.filterQuery || '{}');
+      expect(esQuery.bool).to.have.property('should');
+      expect(esQuery.bool.should).to.be.an('array');
+      expect(esQuery.bool.minimum_should_match).to.equal(1);
+    });
+
+    it('should apply filters with AND logic on top of OR queries', () => {
+      const dataProviders: DataProvider[] = [
+        {
+          and: [],
+          enabled: true,
+          id: 'test-id',
+          name: 'test',
+          excluded: false,
+          kqlQuery: '',
+          type: DataProviderTypeEnum.default,
+          queryMatch: {
+            field: 'event.action',
+            value: 'start',
+            operator: ':',
+            displayField: 'event.action',
+            displayValue: 'start',
+          },
+        },
+      ];
+
+      const filters = [
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'exists',
+            key: '_id',
+            value: 'exists',
+          },
+          query: {
+            exists: {
+              field: '_id',
+            },
+          },
+        },
+      ];
+
+      const result = combineQueries({
+        config,
+        dataProviders,
+        dataView: createStubDataView({ spec: {} }),
+        dataViewSpec: mockDataViewSpec,
+        browserFields,
+        filters,
+        kqlQuery: { query: 'event.action : stop', language: 'kuery' },
+        kqlMode: 'search',
+      });
+
+      expect(result).not.to.be(null);
+      expect(result?.filterQuery).to.be.a('string');
+
+      // Verify filters are applied with AND logic
+      const esQuery = JSON.parse(result?.filterQuery || '{}');
+      expect(esQuery.bool).to.have.property('must');
+      expect(esQuery.bool.must).to.be.an('array');
+      // The structure has changed - filters are in the must array, and the OR queries are in a nested structure
+      expect(esQuery.bool.must[0]).to.be.an('object');
+      expect(esQuery.bool.must[1]).to.be.an('object');
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should return null when all inputs are empty', () => {
+      const result = combineQueries({
+        config,
+        dataProviders: [],
+        dataView: createStubDataView({ spec: {} }),
+        dataViewSpec: mockDataViewSpec,
+        browserFields,
+        filters: [],
+        kqlQuery: { query: '', language: 'kuery' },
+        kqlMode: 'filter',
+      });
+
+      expect(result).to.be(null);
+    });
+
+    it('should handle only filters (no data providers or search query)', () => {
+      const filters = [
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'exists',
+            key: '_id',
+            value: 'exists',
+          },
+          query: {
+            exists: {
+              field: '_id',
+            },
+          },
+        },
+      ];
+
+      const result = combineQueries({
+        config,
+        dataProviders: [],
+        dataView: createStubDataView({ spec: {} }),
+        dataViewSpec: mockDataViewSpec,
+        browserFields,
+        filters,
+        kqlQuery: { query: '', language: 'kuery' },
+        kqlMode: 'filter',
+      });
+
+      expect(result).not.to.be(null);
+      expect(result?.baseKqlQuery.query).to.equal('');
+      expect(result?.filterQuery).to.be.a('string');
+    });
+
+    it('should handle only data providers (no search query)', () => {
+      const dataProviders: DataProvider[] = [
+        {
+          and: [],
+          enabled: true,
+          id: 'test-id',
+          name: 'test',
+          excluded: false,
+          kqlQuery: '',
+          type: DataProviderTypeEnum.default,
+          queryMatch: {
+            field: 'event.action',
+            value: 'start',
+            operator: ':',
+            displayField: 'event.action',
+            displayValue: 'start',
+          },
+        },
+      ];
+
+      const result = combineQueries({
+        config,
+        dataProviders,
+        dataView: createStubDataView({ spec: {} }),
+        dataViewSpec: mockDataViewSpec,
+        browserFields,
+        filters: [],
+        kqlQuery: { query: '', language: 'kuery' },
+        kqlMode: 'filter',
+      });
+
+      expect(result).not.to.be(null);
+      expect(result?.baseKqlQuery.query).to.equal('(event.action : "start")');
+      expect(result?.filterQuery).to.be.a('string');
+    });
+
+    it('should handle only search query (no data providers)', () => {
+      const result = combineQueries({
+        config,
+        dataProviders: [],
+        dataView: createStubDataView({ spec: {} }),
+        dataViewSpec: mockDataViewSpec,
+        browserFields,
+        filters: [],
+        kqlQuery: { query: 'event.action : stop', language: 'kuery' },
+        kqlMode: 'filter',
+      });
+
+      expect(result).not.to.be(null);
+      expect(result?.baseKqlQuery.query).to.equal('(event.action : stop)');
+      expect(result?.filterQuery).to.be.a('string');
+    });
+
+    it('should handle disabled data providers', () => {
+      const dataProviders: DataProvider[] = [
+        {
+          and: [],
+          enabled: false,
+          id: 'test-id',
+          name: 'test',
+          excluded: false,
+          kqlQuery: '',
+          type: DataProviderTypeEnum.default,
+          queryMatch: {
+            field: 'event.action',
+            value: 'start',
+            operator: ':',
+            displayField: 'event.action',
+            displayValue: 'start',
+          },
+        },
+      ];
+
+      const result = combineQueries({
+        config,
+        dataProviders,
+        dataView: createStubDataView({ spec: {} }),
+        dataViewSpec: mockDataViewSpec,
+        browserFields,
+        filters: [],
+        kqlQuery: { query: 'event.action : stop', language: 'kuery' },
+        kqlMode: 'filter',
+      });
+
+      expect(result).not.to.be(null);
+      // Should only have the search query since data provider is disabled
+      expect(result?.baseKqlQuery.query).to.equal('(event.action : stop)');
+    });
   });
 });
