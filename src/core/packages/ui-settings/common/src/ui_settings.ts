@@ -119,16 +119,12 @@ export interface UiSettingsParams<T = unknown> {
    * scoped to a namespace. The default value is 'namespace'
    */
   scope?: UiSettingsScope;
-  /** The solutions where this setting is applicable.
-   * This field is used to determine whether the setting should be displayed in the Advanced settings app.
-   * If undefined, the setting must be displayed in all solutions.
-   * Example scenarios:
-   * - Setting in stateful security solution and serverless security project - solutions: ['classic', 'security'] and include setting in serverless security allowlist
-   * - Setting only in stateful classic - solutions: ['classic'] and not include setting in serverless allowlist
-   * - Setting only in stateful security/oblt/es - solutions: ['security', 'oblt', 'es'] and not include setting in serverless allowlist
-   * - Setting only in serverless - The setting should be allowlisted and registered from a serverless plugin or registered conditionally
-   *   based on whether we are in serverless. Don't specify `solutions` as spaces in serverless don't have solution views.*/
-  solutions?: UiSettingsSolutions;
+  /** A list of solutions where this setting is applicable.
+   * This field is used to determine whether the setting should be displayed in the stateful Advanced settings app.
+   * If undefined or an empty list, the setting must be displayed in all solutions.
+   * Note: this does not affect serverless settings, since spaces in serverless don't have solution views.
+   * */
+  solutionViews?: UiSettingsSolutions;
 }
 
 /**

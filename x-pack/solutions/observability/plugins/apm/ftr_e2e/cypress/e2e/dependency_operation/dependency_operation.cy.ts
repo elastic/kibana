@@ -43,6 +43,7 @@ describe('Dependency operation', () => {
 
   it('opens the action menu popup when clicking the investigate button', () => {
     cy.visitKibana(dependencyOperationHref);
+    cy.contains('1 Error');
     cy.getByTestSubj('apmActionMenuButtonInvestigateButton').click();
     cy.getByTestSubj('apmActionMenuInvestigateButtonPopup');
   });

@@ -22,12 +22,12 @@ type Settings = {
 export const getSettingsMock = (
   requiresPageReload: boolean = false,
   readonly: boolean = false,
-  solutions?: UiSettingsSolutions
+  solutionViews?: UiSettingsSolutions
 ): Settings => {
   const defaults = {
     requiresPageReload,
     readonly,
-    solutions,
+    solutionViews,
   };
 
   return {
@@ -139,12 +139,12 @@ export const getSettingsMock = (
 export const getGlobalSettingsMock = (
   requiresPageReload: boolean = false,
   readonly: boolean = false,
-  solutions?: UiSettingsSolutions
+  solutionViews?: UiSettingsSolutions
 ) => {
   const defaults = {
     requiresPageReload,
     readonly,
-    solutions,
+    solutionViews,
   };
   return {
     globalString: {
