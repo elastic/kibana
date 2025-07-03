@@ -88,6 +88,7 @@
     "@kbn/std",
     "@kbn/css-utils",
     "@kbn/controls-schemas",
+    "@kbn/controls-constants",
   ],
   "exclude": ["target/**/*"]
 }
