@@ -868,6 +868,7 @@ x-pack/platform/packages/shared/kbn-profiler-cli @elastic/obs-knowledge-team
 x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-kibana
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/obs-ux-management-team
+x-pack/platform/packages/shared/kbn-streamlang @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-streams-schema @elastic/streams-program-team
 x-pack/platform/packages/shared/logs-overview @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/ml/aiops_common @elastic/ml-ui
@@ -1885,6 +1886,9 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/solutions/security/test/api_integration/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/solutions/security/test/api_integration/services/index.ts @elastic/appex-qa
 /x-pack/solutions/security/test/alerting_api_integration/ftr_provider_context.d.ts @elastic/appex-qa
+/x-pack/test/apm_api_integration  @elastic/appex-qa # temporarily due to SKA tests relocation
+/x-pack/test/common/utils/observability  @elastic/appex-qa # temporarily due to SKA tests relocation
+/x-pack/test/common/utils/uptime  @elastic/appex-qa # temporarily due to SKA tests relocation
 
 # Core
 /src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json @elastic/kibana-core @elastic/kibana-data-discovery
@@ -2292,7 +2296,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/test/accessibility/apps/group3/license_management.ts @elastic/kibana-management
 /x-pack/test/accessibility/apps/group3/remote_clusters.ts @elastic/kibana-management
 /x-pack/test/accessibility/apps/group3/rollup_jobs.ts @elastic/kibana-management
-/x-pack/test/accessibility/apps/group3/upgrade_assistant.ts @elastic/kibana-core
+/x-pack/test/accessibility/apps/group3/upgrade_assistant.ts @elastic/kibana-management
 /x-pack/test/accessibility/apps/group3/watcher.ts @elastic/kibana-management
 
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/kibana-management
