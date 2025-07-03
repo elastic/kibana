@@ -647,6 +647,18 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'aiAssistant:preferredAIAssistantType:es': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'aiAssistant:preferredAIAssistantType:security': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'aiAssistant:preferredAIAssistantType:oblt': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:searchExcludedDataTiers': {
     type: 'array',
     items: {
