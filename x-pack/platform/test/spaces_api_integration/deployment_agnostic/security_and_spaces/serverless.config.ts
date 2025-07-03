@@ -6,10 +6,10 @@
  */
 
 import { createServerlessTestConfig } from '../../../api_integration_deployment_agnostic/default_configs/serverless.config.base';
-import { services } from '../services';
+import { deploymentAgnosticSpacesServices } from '../services';
 
-export default createServerlessTestConfig({
-  services,
+export default createServerlessTestConfig<typeof deploymentAgnosticSpacesServices>({
+  services: deploymentAgnosticSpacesServices,
   serverlessProject: 'security',
   testFiles: [require.resolve('./apis/index.serverless')],
   junit: {

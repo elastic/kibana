@@ -6,10 +6,10 @@
  */
 
 import { createStatefulTestConfig } from '../../../api_integration_deployment_agnostic/default_configs/stateful.config.base';
-import { services } from '../services';
+import { deploymentAgnosticSpacesServices } from '../services';
 
-export default createStatefulTestConfig({
-  services,
+export default createStatefulTestConfig<typeof deploymentAgnosticSpacesServices>({
+  services: deploymentAgnosticSpacesServices,
   testFiles: [require.resolve('./apis/copy_to_space/index_trial')],
   junit: {
     reportName:

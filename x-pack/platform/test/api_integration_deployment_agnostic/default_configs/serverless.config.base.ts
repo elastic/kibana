@@ -17,7 +17,7 @@ import path from 'path';
 import { DeploymentAgnosticCommonServices, services } from '../services';
 import { LOCAL_PRODUCT_DOC_PATH } from './common_paths';
 
-interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
+interface CreateTestConfigOptions<T> {
   serverlessProject: ServerlessProjectType;
   esServerArgs?: string[];
   kbnServerArgs?: string[];

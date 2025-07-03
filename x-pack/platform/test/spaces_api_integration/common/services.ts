@@ -17,5 +17,6 @@ export const services = {
   supertestWithoutAuth: apiIntegrationServices.supertestWithoutAuth,
   usageAPI: apiIntegrationServices.usageAPI,
   spaces: apiIntegrationServices.spaces,
-  roleScopedSupertest: RoleScopedSupertestProvider,
+  // custom role scoped service for spaces API integration tests
+  spacesRoleScopedSupertest: RoleScopedSupertestProvider,
 };

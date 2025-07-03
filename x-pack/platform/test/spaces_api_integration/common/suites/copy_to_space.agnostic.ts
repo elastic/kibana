@@ -107,7 +107,7 @@ interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
 export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProviderContext) {
   const testDataLoader = getTestDataLoader(context);
   const es = context.getService('es');
-  const roleScopedSupertest = context.getService('roleScopedSupertest');
+  const spacesRoleScopedSupertest = context.getService('spacesRoleScopedSupertest');
 
   const collectSpaceContents = async () => {
     const response = await getAggregatedSpaceData(es, [
@@ -813,7 +813,7 @@ export function copyToSpaceTestSuiteFactory(context: DeploymentAgnosticFtrProvid
           // test data only allows for the following spaces as the copy origin
           expect(['default', 'space_1']).to.contain(spaceId);
           await testDataLoader.createFtrSpaces();
-          supertest = await roleScopedSupertest.getSupertestWithRoleScope(user!);
+          supertest = await spacesRoleScopedSupertest.getSupertestWithRoleScope(user!);
         });
 
         after(async () => {
