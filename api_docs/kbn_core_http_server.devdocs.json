@@ -15204,6 +15204,14 @@
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/benchmarks/benchmarks.test.ts"
               },
               {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/get/find_attack_discoveries.test.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/get/get_attack_discovery_generations.test.ts"
+              },
+              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/http/router-server-mocks/src/versioned_router_mock_route.test.ts"
               },

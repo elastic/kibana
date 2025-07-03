@@ -442,7 +442,8 @@
                 "docId": "kibCasesPluginApi",
                 "section": "def-public.CasesPublicStart",
                 "text": "CasesPublicStart"
-              }
+              },
+              " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
