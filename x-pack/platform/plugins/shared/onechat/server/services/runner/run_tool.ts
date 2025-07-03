@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { ZodObject } from '@kbn/zod';
 import type {
   ToolHandlerContext,
   ScopedRunnerRunToolsParams,
   RunToolReturn,
 } from '@kbn/onechat-server';
+import type { RegisteredToolWithMeta } from '../tools/types';
 import { internalProviderToPublic } from '../tools/utils';
 import { forkContextForToolRun } from './utils/run_context';
 import { createToolEventEmitter } from './utils/events';
@@ -29,13 +31,16 @@ export const runTool = async <TParams = Record<string, unknown>, TResult = unkno
 
   const { toolsService, request } = manager.deps;
 
-  const tool = await toolsService.registry.get({ toolId, request });
+  const tool = (await toolsService.registry.get({ toolId, request })) as RegisteredToolWithMeta<
+    ZodObject<any>,
+    TResult
+  >;
   const toolHandlerContext = createToolHandlerContext<TParams>({ toolExecutionParams, manager });
   const toolResult = await tool.handler(toolParams as Record<string, any>, toolHandlerContext);
 
   return {
     runId: manager.context.runId,
-    result: toolResult as TResult,
+    ...toolResult,
   };
 };
 

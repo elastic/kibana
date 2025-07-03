@@ -75,7 +75,7 @@ describe('runTool', () => {
       toolParams: {},
     };
 
-    tool.handler.mockReturnValue({ test: true, over: 9000 });
+    tool.handler.mockReturnValue({ result: { test: true, over: 9000 } });
 
     const result = await runTool({
       toolExecutionParams: params,
@@ -95,7 +95,7 @@ describe('runTool', () => {
     };
 
     tool.handler.mockImplementation((toolParams, context) => {
-      return 'foo';
+      return { result: 'foo' };
     });
 
     await runTool({
@@ -132,7 +132,7 @@ describe('runTool', () => {
         type: 'test-event',
         data: { foo: 'bar' },
       });
-      return 42;
+      return { result: 42 };
     });
 
     await runTool({

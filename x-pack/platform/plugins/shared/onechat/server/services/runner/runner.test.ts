@@ -41,7 +41,7 @@ describe('Onechat runner', () => {
     });
 
     it('can be invoked through a scoped runner', async () => {
-      tool.handler.mockReturnValue({ someProp: 'someValue' });
+      tool.handler.mockReturnValue({ result: { someProp: 'someValue' } });
 
       const params: ScopedRunnerRunToolsParams = {
         toolId: 'test-tool',
@@ -61,7 +61,7 @@ describe('Onechat runner', () => {
     });
 
     it('can be invoked through a runner', async () => {
-      tool.handler.mockReturnValue({ someProp: 'someValue' });
+      tool.handler.mockReturnValue({ result: { someProp: 'someValue' } });
 
       const { request, ...otherRunnerDeps } = runnerDeps;
 
