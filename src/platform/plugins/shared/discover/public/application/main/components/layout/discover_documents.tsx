@@ -52,6 +52,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
@@ -439,10 +440,9 @@ function DiscoverDocumentsComponent({
   );
 
   const cascadeGroups = useMemo(() => {
-    if (!isEsqlMode) return [];
-    // @ts-expect-error - query type is a non-discriminating union type, so we need to narrow it down
-    return getESQLStatsQueryMeta(query.esql || '').groupByFields;
-  }, [isEsqlMode, query]);
+    if (!isOfAggregateQueryType(query)) return [];
+    return getESQLStatsQueryMeta(query.esql).groupByFields;
+  }, [query]);
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
