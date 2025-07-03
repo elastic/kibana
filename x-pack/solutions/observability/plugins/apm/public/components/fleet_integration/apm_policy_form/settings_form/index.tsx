@@ -193,16 +193,14 @@ function AdvancedOptions({ children }: { children: React.ReactNode }) {
 }
 
 function getRegistryEntryVar(key: string, packageInfo: PackageInfo | undefined) {
-  if (
-    packageInfo &&
-    packageInfo.policy_templates &&
-    packageInfo.policy_templates.length > 0 &&
-    'inputs' in packageInfo.policy_templates[0] &&
-    Array.isArray(packageInfo.policy_templates[0].inputs) &&
-    packageInfo.policy_templates[0].inputs.length > 0 &&
-    packageInfo.policy_templates[0].inputs[0].vars
-  ) {
-    const registryPolicyVars: RegistryVarsEntry[] = packageInfo.policy_templates[0].inputs[0].vars;
+  if (!packageInfo) {
+    return undefined;
+  }
+  const { policy_templates: policyTemplates = [] } = packageInfo || {};
+  const inputs = 'inputs' in policyTemplates[0] ? policyTemplates[0].inputs : undefined;
+
+  if (inputs && Array.isArray(inputs) && inputs.length > 0 && inputs[0]?.vars) {
+    const registryPolicyVars: RegistryVarsEntry[] = inputs[0].vars;
     return registryPolicyVars.find((registryVar) => registryVar.name === key);
   }
 }

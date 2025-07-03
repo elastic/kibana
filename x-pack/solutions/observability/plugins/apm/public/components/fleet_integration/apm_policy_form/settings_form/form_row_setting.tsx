@@ -103,7 +103,7 @@ export function FormRowSetting({ row, value, onChange, isDisabled, registryPolic
       return (
         <EuiComboBox
           aria-label={i18n.translate(
-            'xpack.apm.formRowSetting.selectorcreateoptionsComboBox.ariaLabel',
+            'xpack.apm.formRowSetting.selectOrCreateOptionsComboBox.ariaLabel',
             { defaultMessage: 'Select or create options' }
           )}
           data-test-subj={row.dataTestSubj}
@@ -191,7 +191,7 @@ export function FormRowSetting({ row, value, onChange, isDisabled, registryPolic
               isDirty={false}
               setIsDirty={() => {}}
               getInputComponent={getTextField}
-              isEditPage={true}
+              isEditPage
             />
           </SecretFieldWrapper>
         );
@@ -199,7 +199,7 @@ export function FormRowSetting({ row, value, onChange, isDisabled, registryPolic
         return (
           <EuiFieldPassword
             type="dual"
-            value={value === undefined ? '' : value}
+            value={value ?? ''}
             onChange={(e) => {
               onChange(row.key, e.target.value);
             }}
