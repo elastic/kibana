@@ -1560,6 +1560,7 @@
     "@kbn/managed-vscode-config-cli": "link:packages/kbn-managed-vscode-config-cli",
     "@kbn/management-storybook-config": "link:src/platform/packages/shared/kbn-management/storybook/config",
     "@kbn/manifest": "link:packages/kbn-manifest",
+    "@kbn/mcp-dev-server": "link:src/platform/packages/shared/kbn-mcp-dev-server",
     "@kbn/mock-idp-plugin": "link:packages/kbn-mock-idp-plugin",
     "@kbn/mock-idp-utils": "link:src/platform/packages/private/kbn-mock-idp-utils",
     "@kbn/observability-synthetics-test-data": "link:x-pack/solutions/observability/packages/synthetics-test-data",
