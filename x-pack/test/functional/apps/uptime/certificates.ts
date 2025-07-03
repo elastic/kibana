@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { makeCheck } from '@kbn/test-suites-xpack-observability/api_integration/apis/uptime/rest/helper/make_checks';
-import { getSha256 } from '@kbn/test-suites-xpack-observability/api_integration/apis/uptime/rest/helper/make_tls';
+import { makeCheck } from '../../../common/utils/uptime/helper/make_checks';
+import { getSha256 } from '../../../common/utils/uptime/helper/make_tls';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { UPTIME_HEARTBEAT_DATA } from './overview';
 
