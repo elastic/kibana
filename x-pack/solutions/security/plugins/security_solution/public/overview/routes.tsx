@@ -11,7 +11,8 @@ import {
   DATA_QUALITY_PATH,
   DETECTION_RESPONSE_PATH,
   SecurityPageName,
-  ENTITY_ANALYTICS_PATH, AI_VALUE_PATH,
+  ENTITY_ANALYTICS_PATH,
+  AI_VALUE_PATH,
 } from '../../common/constants';
 import type { SecuritySubPluginRoutes } from '../app/types';
 
@@ -78,6 +79,6 @@ export const routes: SecuritySubPluginRoutes = [
   },
   {
     path: AI_VALUE_PATH,
-    component: withSecurityRoutePageWrapper(AIValueRoutes, SecurityPageName.aiValueDashboard),
+    component: withSecurityRoutePageWrapper(AIValueRoutes, SecurityPageName.aiValue),
   },
 ];

@@ -18,12 +18,9 @@ export const DATA_QUALITY = i18n.translate(
   }
 );
 
-export const AI_VALUE_DASHBOARD = i18n.translate(
-  'xpack.securitySolution.navigation.aiValueDashboard',
-  {
-    defaultMessage: 'Value Dashboard',
-  }
-);
+export const AI_VALUE_DASHBOARD = i18n.translate('xpack.securitySolution.navigation.aiValue', {
+  defaultMessage: 'Value Dashboard',
+});
 
 export const ENTITY_ANALYTICS_RISK_SCORE = i18n.translate(
   'xpack.securitySolution.navigation.entityRiskScore',

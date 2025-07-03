@@ -10,7 +10,7 @@
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
-  aiValueDashboard = 'value_dashboard',
+  aiValue = 'ai_value',
   assetInventory = 'asset_inventory',
   attackDiscovery = 'attack_discovery',
   blocklist = 'blocklist',

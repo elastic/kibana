@@ -6,7 +6,7 @@
  */
 import type { CoreStart } from '@kbn/core/public';
 
-import { aiValueDashboardLinks } from '../../overview/links';
+import { aiValueLinks } from '../../overview/links';
 import { configurationsLinks } from '../../configurations/links';
 import { links as attackDiscoveryLinks } from '../../attack_discovery/links';
 import { links as assetInventoryLinks } from '../../asset_inventory/links';
@@ -26,7 +26,7 @@ import { entityAnalyticsLinks } from '../../entity_analytics/links';
 
 export const appLinks: AppLinkItems = Object.freeze([
   dashboardsLinks,
-  aiValueDashboardLinks,
+  aiValueLinks,
   alertsLink,
   alertSummaryLink,
   attackDiscoveryLinks,
@@ -51,7 +51,7 @@ export const getFilteredLinks = async (
 
   return Object.freeze([
     dashboardsLinks,
-    aiValueDashboardLinks,
+    aiValueLinks,
     alertsLink,
     alertSummaryLink,
     attackDiscoveryLinks,

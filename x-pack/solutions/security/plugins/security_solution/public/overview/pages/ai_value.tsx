@@ -118,7 +118,7 @@ const AIValueComponent = () => {
         <EmptyPrompt />
       )}
 
-      <SpyRoute pageName={SecurityPageName.aiValueDashboard} />
+      <SpyRoute pageName={SecurityPageName.aiValue} />
     </>
   );
 };
