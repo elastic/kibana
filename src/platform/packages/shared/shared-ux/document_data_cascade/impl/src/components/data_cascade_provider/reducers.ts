@@ -58,16 +58,16 @@ export type IDispatchAction<G extends GroupNode, L extends Record<string, any>> 
     };
 
 export interface IStoreState<G extends GroupNode, L extends LeafNode> {
-  groupNodes: G[];
-  leafNodes: Map<string, L[]>;
+  readonly groupNodes: G[];
+  readonly leafNodes: Map<string, L[]>;
   /**
    * The available columns that can be used to group the data.
    */
-  groupByColumns: string[];
+  readonly groupByColumns: string[];
   /**
    * The currently selected group by column. in the order in which they are nested
    */
-  currentGroupByColumns: string[];
+  readonly currentGroupByColumns: string[];
 }
 
 export const storeReducer = <G extends GroupNode = GroupNode, L extends LeafNode = LeafNode>(

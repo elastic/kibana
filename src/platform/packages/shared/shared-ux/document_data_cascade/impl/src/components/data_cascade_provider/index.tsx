@@ -68,7 +68,11 @@ export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
     [cascadeGroups]
   );
 
-  const [state, dispatch] = useReducer(storeReducer, initialState.current, createInitialState);
+  const [state, dispatch] = useReducer<typeof storeReducer<G, L>, StoreContextState>(
+    storeReducer,
+    initialState.current,
+    createInitialState
+  );
 
   return <StoreContext.Provider value={{ state, dispatch }}>{children}</StoreContext.Provider>;
 }
