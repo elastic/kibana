@@ -39,11 +39,11 @@ export default function ({ getService }: FtrProviderContext) {
         'x-pack/platform/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
       )
     );
-    after(() => {
+    after(() =>
       esArchiver.unload(
         'x-pack/platform/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-      );
-    });
+      )
+    );
 
     describe('sorting', () => {
       it('sorts by keyword field for single type', async () => {
