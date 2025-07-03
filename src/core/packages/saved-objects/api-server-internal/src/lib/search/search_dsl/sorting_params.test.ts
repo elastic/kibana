@@ -68,7 +68,7 @@ describe('searchDsl/getSortParams', () => {
 
   describe('sortField no direction', () => {
     describe('sortField is simple property with single type', () => {
-      it.only('returns correct params', () => {
+      it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title')).toEqual({
           sort: [
             {
