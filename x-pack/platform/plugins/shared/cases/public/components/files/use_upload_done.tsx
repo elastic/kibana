@@ -13,6 +13,7 @@ import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 import { AttachmentType, ExternalReferenceStorageType } from '../../../common';
 import * as translations from './translations';
+import { type CaseAttachmentsWithoutOwner } from '../../types';
 
 export const useUploadDone = function ({
   caseId,
@@ -33,33 +34,42 @@ export const useUploadDone = function ({
         return;
       }
 
-      const file = chosenFiles[0];
+      const {
+        id,
+        fileJSON: { name, extension, mimeType, created },
+      } = chosenFiles[0];
 
       try {
+        if (!extension || !mimeType) {
+          const error = new Error(translations.FAILED_UPLOAD);
+          onFailure(error);
+          throw error;
+        }
+        const attachments: CaseAttachmentsWithoutOwner = [
+          {
+            type: AttachmentType.externalReference,
+            externalReferenceId: id,
+            externalReferenceStorage: {
+              type: ExternalReferenceStorageType.savedObject,
+              soType: FILE_SO_TYPE,
+            },
+            externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
+            externalReferenceMetadata: {
+              files: [
+                {
+                  name,
+                  extension,
+                  mimeType,
+                  created,
+                },
+              ],
+            },
+          },
+        ];
         await createAttachments({
           caseId,
           caseOwner: owner,
-          attachments: [
-            {
-              type: AttachmentType.externalReference,
-              externalReferenceId: file.id,
-              externalReferenceStorage: {
-                type: ExternalReferenceStorageType.savedObject,
-                soType: FILE_SO_TYPE,
-              },
-              externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
-              externalReferenceMetadata: {
-                files: [
-                  {
-                    name: file.fileJSON.name,
-                    extension: file.fileJSON.extension ?? '',
-                    mimeType: file.fileJSON.mimeType ?? '',
-                    created: file.fileJSON.created,
-                  },
-                ],
-              },
-            },
-          ],
+          attachments,
         });
 
         onSuccess();
@@ -67,7 +77,7 @@ export const useUploadDone = function ({
         // error toast is handled inside  createAttachments
 
         // we need to delete the file if attachment creation failed
-        return deleteFileAttachments({ caseId, fileIds: [file.id] });
+        return deleteFileAttachments({ caseId, fileIds: [id] });
       }
     },
     [caseId, owner, onFailure, onSuccess, createAttachments]
