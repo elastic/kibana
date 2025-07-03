@@ -6,7 +6,13 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { IngestStreamLifecycle, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
+import {
+  IngestStreamLifecycle,
+  isDslLifecycle,
+  isIlmLifecycle,
+  isInheritLifecycle,
+} from '@kbn/streams-schema';
+import { IndicesSimulateTemplateTemplate } from '@elastic/elasticsearch/lib/api/types';
 import { omit } from 'lodash';
 import { retryTransientEsErrors } from '../helpers/retry';
 
@@ -129,39 +135,99 @@ export async function updateDataStreamsLifecycle({
   isServerless: boolean;
 }) {
   try {
-    await retryTransientEsErrors(
-      () =>
-        esClient.indices.putDataLifecycle({
-          name: names,
-          data_retention: isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined,
-        }),
-      { logger }
-    );
+    if (isIlmLifecycle(lifecycle)) {
+      await putDataStreamsSettings({ esClient, names, logger, lifecycle });
+    } else if (isDslLifecycle(lifecycle)) {
+      await retryTransientEsErrors(
+        () =>
+          esClient.indices.putDataLifecycle({
+            name: names,
+            data_retention: lifecycle.dsl.data_retention,
+          }),
+        { logger }
+      );
 
-    // if we transition from ilm to dsl or vice versa, the rolled over backing
-    // indices need to be updated or they'll retain the lifecycle configuration
-    // set at the time of creation.
-    // this is not needed for serverless since only dsl is allowed.
-    if (isServerless) {
-      return;
+      if (!isServerless) {
+        // we don't need overrides for serverless since it only allows DSL
+        await putDataStreamsSettings({ esClient, names, logger, lifecycle });
+      }
+    } else if (isInheritLifecycle(lifecycle)) {
+      // inheriting a lifecycle here means falling back to the template configuration
+      // so we need to update streams individually
+      await Promise.all(
+        names.map(async (name) => {
+          const { template } = (await retryTransientEsErrors(
+            () => esClient.indices.simulateIndexTemplate({ name }),
+            {
+              logger,
+            }
+          )) as {
+            template: IndicesSimulateTemplateTemplate & {
+              lifecycle?: { enabled: boolean; data_retention?: string };
+            };
+          };
+
+          const hasEffectiveIlm =
+            template.settings.index?.lifecycle?.name &&
+            getBoolean(template.settings.index.lifecycle.prefer_ilm);
+          const hasEffectiveDsl = !hasEffectiveIlm && getBoolean(template.lifecycle?.enabled);
+
+          if (hasEffectiveDsl) {
+            await retryTransientEsErrors(
+              () =>
+                esClient.indices.putDataLifecycle({
+                  name,
+                  data_retention: template.lifecycle!.data_retention,
+                }),
+              { logger }
+            );
+          }
+
+          await putDataStreamsSettings({ esClient, names, logger, lifecycle });
+        })
+      );
     }
-
-    const isIlm = isIlmLifecycle(lifecycle);
-    await retryTransientEsErrors(
-      () =>
-        // TODO: use client method once available
-        esClient.transport.request({
-          method: 'PUT',
-          path: `/_data_stream/${names.join(',')}/_settings`,
-          body: {
-            'index.lifecycle.name': isIlm ? lifecycle.ilm.policy : null,
-            'index.lifecycle.prefer_ilm': isIlm,
-          },
-        }),
-      { logger }
-    );
   } catch (err: any) {
     logger.error(`Error updating data stream lifecycle: ${err.message}`);
     throw err;
   }
+}
+
+async function putDataStreamsSettings({
+  esClient,
+  names,
+  logger,
+  lifecycle,
+}: {
+  esClient: ElasticsearchClient;
+  names: string[];
+  logger: Logger;
+  lifecycle: IngestStreamLifecycle;
+}) {
+  const isIlm = isIlmLifecycle(lifecycle);
+  const isInherit = isInheritLifecycle(lifecycle);
+
+  await retryTransientEsErrors(
+    () =>
+      // TODO: use client method once available
+      esClient.transport.request({
+        method: 'PUT',
+        path: `/_data_stream/${names.join(',')}/_settings`,
+        body: {
+          'index.lifecycle.name': isIlm ? lifecycle.ilm.policy : null,
+          'index.lifecycle.prefer_ilm': isInherit ? null : isIlm,
+        },
+      }),
+    { logger }
+  );
+}
+
+function getBoolean(value: boolean | string | undefined): boolean {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  if (typeof value === 'string') {
+    return value === 'true';
+  }
+  return false;
 }

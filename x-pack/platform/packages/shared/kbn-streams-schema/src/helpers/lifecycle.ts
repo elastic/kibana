@@ -7,21 +7,26 @@
 
 import { Streams } from '../models/streams';
 import {
+  IngestStreamLifecycleDSL,
+  IngestStreamLifecycleILM,
   isInheritLifecycle,
-  WiredIngestStreamEffectiveLifecycle,
 } from '../models/ingest/lifecycle';
 import { isDescendantOf, isChildOf, getSegments } from '../shared/hierarchy';
 
 export function findInheritedLifecycle(
   definition: Streams.WiredStream.Definition,
   ancestors: Streams.WiredStream.Definition[]
-): WiredIngestStreamEffectiveLifecycle {
+): (IngestStreamLifecycleDSL | IngestStreamLifecycleILM) & { from: string } {
   const originDefinition = [...ancestors, definition]
     .sort((a, b) => getSegments(a.name).length - getSegments(b.name).length)
     .findLast(({ ingest }) => !isInheritLifecycle(ingest.lifecycle));
 
   if (!originDefinition) {
     throw new Error('Unable to find inherited lifecycle');
+  }
+
+  if (isInheritLifecycle(originDefinition.ingest.lifecycle)) {
+    throw new Error('Wired streams can only inherit DSL or ILM');
   }
 
   return { ...originDefinition.ingest.lifecycle, from: originDefinition.name };

@@ -462,7 +462,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               }
             : undefined,
         });
-        await esClient.indices.createDataStream({ name });
+        await esClient.index({ index: name, document: { '@timestamp': new Date() } });
 
         clean = async () => {
           await esClient.indices.deleteDataStream({ name });
@@ -470,15 +470,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         };
       };
 
-      it('cannot update to inherit lifecycle', async () => {
-        const indexName = 'unwired-stream-inherit';
+      it('inherit falls back to template dsl configuration', async () => {
+        const indexName = 'unwired-stream-inherit-dsl';
         await createDataStream(indexName, { dsl: { data_retention: '77d' } });
 
         // initially set to inherit which is a noop
         await putStream(apiClient, indexName, unwiredPutBody);
+        await esClient.indices.rollover({ alias: indexName });
         await expectLifecycle([indexName], { dsl: { data_retention: '77d' } });
 
-        // update to dsl
+        // update lifecycle
         await putStream(apiClient, indexName, {
           dashboards: [],
           queries: [],
@@ -492,9 +493,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         await expectLifecycle([indexName], { dsl: { data_retention: '2d' } });
 
-        // fail to set inherit
-        await putStream(apiClient, indexName, unwiredPutBody, 400);
-        await expectLifecycle([indexName], { dsl: { data_retention: '2d' } });
+        // inherit sets the lifecycle back to the template configuration
+        await putStream(apiClient, indexName, unwiredPutBody, 200);
+        await expectLifecycle([indexName], { dsl: { data_retention: '77d' } });
       });
 
       it('overrides dsl retention', async () => {
@@ -575,6 +576,49 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
           await expectLifecycle([indexName], { ilm: { policy: 'my-policy' } });
+        });
+
+        it('inherit falls back to template dsl or ilm configuration', async () => {
+          const indexName = 'unwired-stream-inherit-dsl-ilm';
+          await createDataStream(indexName, { ilm: { policy: 'my-policy' } });
+
+          // initially set to inherit which is a noop
+          await putStream(apiClient, indexName, unwiredPutBody);
+          await esClient.indices.rollover({ alias: indexName });
+          await expectLifecycle([indexName], { ilm: { policy: 'my-policy' } });
+
+          // update lifecycle
+          await putStream(apiClient, indexName, {
+            dashboards: [],
+            queries: [],
+            stream: {
+              description: '',
+              ingest: {
+                ...unwiredPutBody.stream.ingest,
+                lifecycle: { dsl: { data_retention: '2d' } },
+              },
+            },
+          });
+          await expectLifecycle([indexName], { dsl: { data_retention: '2d' } });
+
+          // inherit sets the lifecycle back to the template configuration
+          await putStream(apiClient, indexName, unwiredPutBody, 200);
+          await expectLifecycle([indexName], { ilm: { policy: 'my-policy' } });
+
+          // update the template to use a new ilm policy
+          await createDataStream(indexName, { ilm: { policy: 'my-updated-policy' } });
+          await esClient.indices.rollover({ alias: indexName });
+
+          // since inherit gives control back to the template, new write indices should
+          // pick up the updated template
+          const {
+            data_streams: [{ indices }],
+          } = await esClient.indices.getDataStream({ name: indexName });
+          expect(indices[indices.length - 1].ilm_policy).to.eql('my-updated-policy');
+          expect(indices.slice(0, -1).every((index) => index.ilm_policy === 'my-policy')).to.eql(
+            true,
+            'all indices up until the update should use the former policy'
+          );
         });
       }
     });
