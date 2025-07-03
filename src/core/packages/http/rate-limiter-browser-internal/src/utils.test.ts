@@ -8,16 +8,16 @@
  */
 
 import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
-import { isServerOverloadedError } from './utils';
+import { getRetryAfter, isRateLimiterError } from './utils';
 
-describe('isServerOverloadedError', () => {
+describe('isRateLimiterError', () => {
   it('should return `false` for non-fetch errors', () => {
-    expect(isServerOverloadedError(new Error('test'))).toBe(false);
+    expect(isRateLimiterError(new Error('test'))).toBe(false);
   });
 
   it('should return `false` for fetch errors without response', () => {
     const error = createHttpFetchError('Server is overloaded');
-    expect(isServerOverloadedError(error)).toBe(false);
+    expect(isRateLimiterError(error)).toBe(false);
   });
 
   it('should return `false` for fetch errors with response but without status 429', () => {
@@ -31,7 +31,7 @@ describe('isServerOverloadedError', () => {
       } as Response
     );
 
-    expect(isServerOverloadedError(error)).toBe(false);
+    expect(isRateLimiterError(error)).toBe(false);
   });
 
   it('should return `false` for fetch errors with response but without "RateLimit" header', () => {
@@ -45,7 +45,7 @@ describe('isServerOverloadedError', () => {
       } as Response
     );
 
-    expect(isServerOverloadedError(error)).toBe(false);
+    expect(isRateLimiterError(error)).toBe(false);
   });
 
   it('should return `false` for fetch errors with response status 429 and "RateLimit" header without "elu"', () => {
@@ -61,7 +61,7 @@ describe('isServerOverloadedError', () => {
       } as Response
     );
 
-    expect(isServerOverloadedError(error)).toBe(false);
+    expect(isRateLimiterError(error)).toBe(false);
   });
 
   it('should return `true` for fetch errors with response status 429 and "RateLimit" header containing "elu"', () => {
@@ -77,6 +77,19 @@ describe('isServerOverloadedError', () => {
       } as Response
     );
 
-    expect(isServerOverloadedError(error)).toBe(true);
+    expect(isRateLimiterError(error)).toBe(true);
+  });
+});
+
+describe('getRetryAfter', () => {
+  it.each`
+    response                                                        | expected
+    ${undefined}                                                    | ${0}
+    ${new Response()}                                               | ${0}
+    ${new Response(undefined, { headers: { 'Retry-After': '1' } })} | ${1}
+  `('should return $expected', ({ response, expected }) => {
+    const error = createHttpFetchError('Server is overloaded', undefined, undefined, response);
+
+    expect(getRetryAfter(error)).toBe(expected);
   });
 });

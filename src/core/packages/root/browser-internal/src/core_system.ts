@@ -260,7 +260,7 @@ export class CoreSystem {
         fatalErrors: this.fatalErrorsSetup,
         executionContext,
       });
-      this.httpRateLimiter.setup({ http });
+      this.httpRateLimiter.setup({ fatalErrors: this.fatalErrorsSetup, http });
       const security = this.security.setup();
       const userProfile = this.userProfile.setup();
       this.chrome.setup({ analytics });

@@ -12,9 +12,9 @@ import { pick } from 'lodash';
 import { act } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
-import { ServerOverloadedError } from './server_overloaded_error';
+import { RateLimiterError } from './error';
 
-describe('ServerOverloadedError', () => {
+describe('RateLimiterError', () => {
   let resetWindow: () => void;
   let result: ReturnType<typeof renderWithI18n>;
 
@@ -38,7 +38,7 @@ describe('ServerOverloadedError', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     result = renderWithI18n(
-      <ServerOverloadedError
+      <RateLimiterError
         error={createHttpFetchError(
           'Server is overloaded',
           undefined,
@@ -55,7 +55,7 @@ describe('ServerOverloadedError', () => {
   });
 
   it('should render a generic error screen', async () => {
-    expect(result.queryByTestId('serverOverloadedScreen')).toBeTruthy();
+    expect(result.queryByTestId('rateLimiterScreen')).toBeTruthy();
     expect(result.queryByText('Server is overloaded')).toBeTruthy();
   });
 

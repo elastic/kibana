@@ -12,6 +12,7 @@
   ],
   "kbn_references": [
     "@kbn/core-base-browser-internal",
+    "@kbn/core-fatal-errors-browser",
     "@kbn/core-http-browser-internal",
     "@kbn/core-http-browser",
   ],

@@ -30,4 +30,4 @@ export type {
   IHttpInterceptController,
 } from './src/types';
 
-export { isHttpFetchError, isServerOverloadedError } from './src/utils';
+export { isHttpFetchError } from './src/utils';

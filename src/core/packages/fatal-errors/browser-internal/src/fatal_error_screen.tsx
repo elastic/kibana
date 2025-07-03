@@ -9,7 +9,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { type Observable, scan } from 'rxjs';
-import type { FatalError } from './fatal_error';
+import type { FatalError } from '@kbn/core-fatal-errors-browser';
 
 interface FatalErrorScreenProps {
   error$: Observable<FatalError>;

@@ -19,8 +19,8 @@ import {
   EuiPageSection,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FatalError } from '../fatal_error';
-import { formatStack, formatMessage } from '../utils';
+import { FatalError } from '@kbn/core-fatal-errors-browser';
+import { formatStack, formatMessage } from './utils';
 
 interface GenericErrorProps {
   buildNumber: number;
