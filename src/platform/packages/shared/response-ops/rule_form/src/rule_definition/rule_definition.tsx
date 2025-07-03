@@ -344,6 +344,7 @@ export const RuleDefinition = () => {
                         position="right"
                         type="question"
                         content={ALERT_DELAY_HELP_TEXT}
+                        aria-label={ALERT_DELAY_HELP_TEXT}
                       />
                     </p>
                   </EuiText>
