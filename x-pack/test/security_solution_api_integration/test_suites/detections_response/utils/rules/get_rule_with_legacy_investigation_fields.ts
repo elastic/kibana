@@ -79,8 +79,8 @@ export const getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray = (
   rewrites?: Partial<CreateRuleRequestBody<RuleParamsWithDefaultValue>>
 ): CreateRuleRequestBody<RuleParamsWithDefaultValue> => ({
   ...baseBody,
+  name: 'Test investigation fields empty array',
   params: {
-    name: 'Test investigation fields empty array',
     ...baseParams,
     ruleId: 'rule-with-legacy-investigation-fields-empty-array',
     investigationFields: [],
