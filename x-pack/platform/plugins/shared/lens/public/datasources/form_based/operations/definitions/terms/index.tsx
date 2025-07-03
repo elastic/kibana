@@ -57,6 +57,7 @@ import {
 } from './constants';
 import { IncludeExcludeRow } from './include_exclude_options';
 import { shouldShowTimeSeriesOption } from '../../../pure_utils';
+import { isBucketed } from '../../../utils';
 
 export function supportsRarityRanking(field?: IndexPatternField) {
   // these es field types can't be sorted by rarity

@@ -62,6 +62,7 @@ import {
   WAFFLE_SMALL_VALUES,
 } from '../../user_messages_ids';
 import { convertToRuntimeState } from './runtime_state';
+import { b } from '@faker-js/faker/dist/airline-BUL6NtOJ';
 
 const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
   defaultMessage: 'Metric',
@@ -88,8 +89,8 @@ function isPartitionVisConfiguration(
   return context.type === 'lnsPie';
 }
 
-const bucketedOperations = (op: OperationMetadata) => op.isBucketed;
-const numberMetricOperations = (op: OperationMetadata) =>
+const bucketedOperations = (op: OperationMetadata) => op.isBucketed || false;
+const numberMetricOperations = (op: OperationMetadata): boolean =>
   !op.isBucketed && op.dataType === 'number' && !op.isStaticValue;
 
 export const isCollapsed = (columnId: string, layer: PieLayerState) =>

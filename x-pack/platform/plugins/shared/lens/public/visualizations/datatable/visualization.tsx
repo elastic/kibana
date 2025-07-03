@@ -328,7 +328,7 @@ export const getDatatableVisualization = ({
                   !column?.isTransposed
                 );
               }
-              return datasource!.getOperationForColumnId(c)?.isBucketed && !column?.isTransposed;
+              return Boolean(datasource!.getOperationForColumnId(c)?.isBucketed) && !column?.isTransposed;
             })
             .map((accessor) => {
               const {
@@ -360,7 +360,7 @@ export const getDatatableVisualization = ({
               };
             }),
           supportsMoreColumns: true,
-          filterOperations: (op) => op.isBucketed,
+          filterOperations: (op) => op.isBucketed || false,
           dataTestSubj: 'lnsDatatable_rows',
           enableDimensionEditor: true,
           hideGrouping: true,
@@ -392,7 +392,7 @@ export const getDatatableVisualization = ({
             })
             .map((accessor) => ({ columnId: accessor })),
           supportsMoreColumns: true,
-          filterOperations: (op) => op.isBucketed,
+          filterOperations: (op) => op.isBucketed || false,
           dataTestSubj: 'lnsDatatable_columns',
           enableDimensionEditor: true,
           hideGrouping: true,
@@ -422,7 +422,7 @@ export const getDatatableVisualization = ({
                   state.columns.find((col) => col.columnId === c)?.isMetric
                 );
               }
-              return !operation?.isBucketed;
+              return !operation?.isBucketed || false;
             })
             .map((accessor) => {
               const {

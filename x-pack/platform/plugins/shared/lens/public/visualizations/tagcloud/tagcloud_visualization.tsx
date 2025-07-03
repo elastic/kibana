@@ -160,7 +160,7 @@ export const getTagcloudVisualization = ({
               ]
             : [],
           supportsMoreColumns: !state.tagAccessor,
-          filterOperations: (op: OperationMetadata) => op.isBucketed,
+          filterOperations: (op: OperationMetadata) => op.isBucketed || false,
           enableDimensionEditor: true,
           required: true,
           requiredMinDimensionCount: 1,
