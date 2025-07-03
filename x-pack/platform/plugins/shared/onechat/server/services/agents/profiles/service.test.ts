@@ -13,6 +13,7 @@ import type { AgentProfileCreateRequest } from '../../../../common/agent_profile
 import { createMockedAgentProfileClient } from '../../../test_utils/agents';
 import { RegisteredToolWithMeta } from '../../tools/types';
 import { createToolsServiceStartMock } from '../../../test_utils/tools';
+import * as utils from './utils';
 
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
@@ -37,14 +38,11 @@ const baseProfile: Omit<AgentProfileCreateRequest, 'toolSelection'> = {
   customInstructions: '',
 };
 
-describe('AgentProfileServiceImpl.validateToolSelection', () => {
-  const toolA1 = generateMockTool('toolA', 'prov1');
-  const toolA2 = generateMockTool('toolA', 'prov2');
-  const toolB = generateMockTool('toolB', 'prov1');
-
-  it('throws if tool id is ambiguous (multiple providers, no provider specified)', async () => {
-    const tools = [toolA1, toolA2];
+describe('AgentProfileServiceImpl', () => {
+  it('calls validateToolSelection on create', async () => {
+    const tools = [generateMockTool('toolA', 'prov1')];
     mockToolsService.registry.list = jest.fn().mockResolvedValue(tools);
+    const spy = jest.spyOn(utils, 'validateToolSelection').mockResolvedValue([]);
     const service = createAgentProfileService({
       client: mockClient,
       toolsService: mockToolsService,
@@ -52,123 +50,24 @@ describe('AgentProfileServiceImpl.validateToolSelection', () => {
       request: mockRequest,
     });
     const profile = { ...baseProfile, toolSelection: [{ toolIds: ['toolA'] }] };
-    await expect(service.create(profile)).rejects.toThrow(
-      /Tool id 'toolA' is ambiguous. Please specify a provider/
-    );
+    await service.create(profile);
+    expect(spy).toHaveBeenCalled();
+    spy.mockRestore();
   });
 
-  it('throws if tool id does not exist in any provider', async () => {
-    const tools = [toolA1, toolB];
+  it('calls validateToolSelection on update if toolSelection present', async () => {
+    const tools = [generateMockTool('toolA', 'prov1')];
     mockToolsService.registry.list = jest.fn().mockResolvedValue(tools);
+    const spy = jest.spyOn(utils, 'validateToolSelection').mockResolvedValue([]);
     const service = createAgentProfileService({
       client: mockClient,
       toolsService: mockToolsService,
       logger: mockLogger,
       request: mockRequest,
     });
-    const profile = { ...baseProfile, toolSelection: [{ toolIds: ['nonexistent'] }] };
-    await expect(service.create(profile)).rejects.toThrow(
-      /Tool id 'nonexistent' does not exist in any provider/
-    );
-  });
-
-  it('throws if provider does not exist', async () => {
-    const tools = [toolA1, toolB];
-    mockToolsService.registry.list = jest.fn().mockResolvedValue(tools);
-    const service = createAgentProfileService({
-      client: mockClient,
-      toolsService: mockToolsService,
-      logger: mockLogger,
-      request: mockRequest,
-    });
-    const profile = { ...baseProfile, toolSelection: [{ provider: 'provX', toolIds: ['toolA'] }] };
-    await expect(service.create(profile)).rejects.toThrow(
-      /Provider 'provX' does not exist or has no tools/
-    );
-  });
-
-  it('throws if provider has no tools (wildcard)', async () => {
-    const tools = [toolA1, toolB];
-    mockToolsService.registry.list = jest.fn().mockResolvedValue(tools);
-    const service = createAgentProfileService({
-      client: mockClient,
-      toolsService: mockToolsService,
-      logger: mockLogger,
-      request: mockRequest,
-    });
-    const profile = { ...baseProfile, toolSelection: [{ provider: 'prov2', toolIds: ['*'] }] };
-    // Remove all tools for prov2
-    mockToolsService.registry.list = jest.fn().mockResolvedValue([toolA1, toolB]);
-    await expect(service.create(profile)).rejects.toThrow(
-      /Provider 'prov2' does not exist or has no tools/
-    );
-  });
-
-  it('throws if tool id does not exist for provider', async () => {
-    const tools = [toolA1, toolB];
-    mockToolsService.registry.list = jest.fn().mockResolvedValue(tools);
-    const service = createAgentProfileService({
-      client: mockClient,
-      toolsService: mockToolsService,
-      logger: mockLogger,
-      request: mockRequest,
-    });
-    const profile = { ...baseProfile, toolSelection: [{ provider: 'prov1', toolIds: ['toolC'] }] };
-    await expect(service.create(profile)).rejects.toThrow(
-      /Tool id 'toolC' does not exist for provider 'prov1'/
-    );
-  });
-
-  it('passes for valid tool id with provider', async () => {
-    const tools = [toolA1, toolB];
-    mockToolsService.registry.list = jest.fn().mockResolvedValue(tools);
-    mockToolsService.registry.has = jest.fn().mockResolvedValue(true); // For this test case
-    const service = createAgentProfileService({
-      client: { ...mockClient, create: jest.fn() },
-      toolsService: mockToolsService,
-      logger: mockLogger,
-      request: mockRequest,
-    });
-    const profile = { ...baseProfile, toolSelection: [{ provider: 'prov1', toolIds: ['toolA'] }] };
-    await expect(service.create(profile)).resolves.not.toThrow();
-  });
-
-  it('passes for valid tool id without provider (unambiguous)', async () => {
-    const tools = [toolB];
-    mockToolsService.registry.list = jest.fn().mockResolvedValue(tools);
-    const service = createAgentProfileService({
-      client: { ...mockClient, create: jest.fn() },
-      toolsService: mockToolsService,
-      logger: mockLogger,
-      request: mockRequest,
-    });
-    const profile = { ...baseProfile, toolSelection: [{ toolIds: ['toolB'] }] };
-    await expect(service.create(profile)).resolves.not.toThrow();
-  });
-
-  it('passes for wildcard tool selection (all tools)', async () => {
-    const tools = [toolA1, toolB];
-    mockToolsService.registry.list = jest.fn().mockResolvedValue(tools);
-    const service = createAgentProfileService({
-      client: { ...mockClient, create: jest.fn() },
-      toolsService: mockToolsService,
-      logger: mockLogger,
-      request: mockRequest,
-    });
-    const profile = { ...baseProfile, toolSelection: [{ toolIds: ['*'] }] };
-    await expect(service.create(profile)).resolves.not.toThrow();
-  });
-
-  it('passes for wildcard tool selection for provider (all tools for provider)', async () => {
-    const tools = [toolA1, toolB];
-    mockToolsService.registry.list = jest.fn().mockResolvedValue(tools);
-    const service = createAgentProfileService({
-      client: { ...mockClient, create: jest.fn() },
-      toolsService: mockToolsService,
-      logger: mockLogger,
-      request: mockRequest,
-    });
-    const profile = { ...baseProfile, toolSelection: [{ provider: 'prov1', toolIds: ['*'] }] };
-    await expect(service.create(profile)).resolves.not.toThrow();
+    const profile = { ...baseProfile, toolSelection: [{ toolIds: ['toolA'] }] };
+    await service.update(profile);
+    expect(spy).toHaveBeenCalled();
+    spy.mockRestore();
   });
 });

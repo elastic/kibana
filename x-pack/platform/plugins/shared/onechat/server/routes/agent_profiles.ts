@@ -13,6 +13,13 @@ import { ONECHAT_AGENT_API_UI_SETTING_ID } from '../../common/constants';
 const TECHNICAL_PREVIEW_WARNING =
   'Elastic Agent API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.';
 
+const TOOL_SELECTION_SCHEMA = schema.arrayOf(
+  schema.object({
+    provider: schema.maybe(schema.string()),
+    toolIds: schema.arrayOf(schema.string()),
+  })
+);
+
 export function registerAgentProfileRoutes({
   router,
   getInternalServices,
@@ -120,12 +127,7 @@ export function registerAgentProfileRoutes({
               name: schema.string(),
               description: schema.string(),
               customInstructions: schema.string(),
-              toolSelection: schema.arrayOf(
-                schema.object({
-                  provider: schema.maybe(schema.string()),
-                  toolIds: schema.arrayOf(schema.string()),
-                })
-              ),
+              toolSelection: TOOL_SELECTION_SCHEMA,
             }),
           },
         },
@@ -170,14 +172,7 @@ export function registerAgentProfileRoutes({
               name: schema.maybe(schema.string()),
               description: schema.maybe(schema.string()),
               customInstructions: schema.maybe(schema.string()),
-              toolSelection: schema.maybe(
-                schema.arrayOf(
-                  schema.object({
-                    provider: schema.maybe(schema.string()),
-                    toolIds: schema.arrayOf(schema.string()),
-                  })
-                )
-              ),
+              toolSelection: schema.maybe(TOOL_SELECTION_SCHEMA),
             }),
           },
         },

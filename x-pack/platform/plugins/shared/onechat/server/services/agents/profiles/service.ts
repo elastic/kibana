@@ -17,6 +17,7 @@ import type {
 } from '../../../../common/agent_profiles';
 import type { AgentProfileClient } from './client';
 import type { ToolsServiceStart } from '../../tools';
+import { validateToolSelection } from './utils';
 
 export interface AgentProfileService {
   has(agentId: string): Promise<boolean>;
@@ -63,71 +64,34 @@ class AgentProfileServiceImpl implements AgentProfileService {
 
   async create(profile: AgentProfileCreateRequest): Promise<AgentProfile> {
     this.logger.debug('Creating agent profile');
-    await this.validateToolSelection(profile.toolSelection);
+    const errors = await validateToolSelection({
+      toolRegistry: this.toolsService.registry,
+      request: this.request,
+      toolSelection: profile.toolSelection,
+    });
+    if (errors.length > 0) {
+      throw createBadRequestError(
+        `Tool selection validation failed:\n` + errors.map((e) => `- ${e}`).join('\n')
+      );
+    }
     return this.client.create(profile);
   }
 
   async update(profile: AgentProfileUpdateRequest): Promise<AgentProfile> {
     this.logger.debug('Updating agent profile');
     if (profile.toolSelection) {
-      await this.validateToolSelection(profile.toolSelection);
-    }
-    return this.client.update(profile);
-  }
-
-  private async validateToolSelection(toolSelection: AgentProfileCreateRequest['toolSelection']) {
-    const registry = this.toolsService.registry;
-    const allTools = await registry.list({ request: this.request });
-    const allProviders = new Set(allTools.map((t: any) => t.meta.providerId));
-
-    for (const selection of toolSelection) {
-      const { provider, toolIds } = selection;
-      if (!provider) {
-        // If provider is not specified, check for ambiguity
-        for (const toolId of toolIds) {
-          if (toolId === '*') continue;
-          const matchingTools = allTools.filter((t: any) => t.id === toolId);
-          if (matchingTools.length > 1) {
-            const matchingProviders = Array.from(
-              new Set(matchingTools.map((t: any) => t.meta.providerId))
-            );
-            throw createBadRequestError(
-              `Tool id '${toolId}' is ambiguous. Please specify a provider. Matching providers: [${matchingProviders.join(
-                ', '
-              )}]`
-            );
-          }
-          if (matchingTools.length === 0) {
-            throw createBadRequestError(`Tool id '${toolId}' does not exist in any provider.`);
-          }
-        }
-      } else {
-        // Provider specified
-        if (!allProviders.has(provider)) {
-          throw createBadRequestError(`Provider '${provider}' does not exist or has no tools.`);
-        }
-        if (toolIds.length === 1 && toolIds[0] === '*') {
-          // Check provider has at least one tool
-          const providerTools = allTools.filter((t: any) => t.meta.providerId === provider);
-          if (providerTools.length === 0) {
-            throw createBadRequestError(`Provider '${provider}' does not have any tools.`);
-          }
-        } else {
-          // Check each tool exists for the provider using registry.has for efficiency
-          for (const toolId of toolIds) {
-            const exists = await registry.has({
-              toolId: { toolId, providerId: provider },
-              request: this.request,
-            });
-            if (!exists) {
-              throw createBadRequestError(
-                `Tool id '${toolId}' does not exist for provider '${provider}'.`
-              );
-            }
-          }
-        }
+      const errors = await validateToolSelection({
+        toolRegistry: this.toolsService.registry,
+        request: this.request,
+        toolSelection: profile.toolSelection,
+      });
+      if (errors.length > 0) {
+        throw createBadRequestError(
+          `Tool selection validation failed:\n` + errors.map((e) => `- ${e}`).join('\n')
+        );
       }
     }
+    return this.client.update(profile);
   }
 
   async list(options?: AgentProfileListOptions): Promise<AgentProfile[]> {
