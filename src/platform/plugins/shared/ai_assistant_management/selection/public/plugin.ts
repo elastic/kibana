@@ -16,12 +16,7 @@ import { BehaviorSubject, Observable, switchMap } from 'rxjs';
 import type { BuildFlavor } from '@kbn/config';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { AIAssistantType } from '../common/ai_assistant_type';
-import {
-  OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
-  PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
-  SEARCH_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
-  SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
-} from '../common/ui_setting_keys';
+import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AIAssistantManagementSelectionPluginPublicSetup {}
