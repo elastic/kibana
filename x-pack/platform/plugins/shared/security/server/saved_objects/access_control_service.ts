@@ -12,8 +12,6 @@ import type {
 } from '@kbn/core-saved-objects-server/src/extensions/security';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
-import type { SavedObjectAudit } from './saved_objects_security_extension';
-
 export class AccessControlService {
   private userForOperation: AuthenticatedUser | null = null;
 
@@ -21,20 +19,6 @@ export class AccessControlService {
 
   setUserForOperation(user: AuthenticatedUser | null) {
     this.userForOperation = user;
-  }
-
-  isObjectOwner(object: SavedObjectAudit): boolean {
-    const currentUser = this.userForOperation;
-
-    if (!currentUser) {
-      return false;
-    }
-
-    if (!object.accessControl) {
-      return true;
-    }
-
-    return object.accessControl.owner === currentUser.profile_uid;
   }
 
   getTypesRequiringAccessControlPrivilegeCheck<A extends string>({
