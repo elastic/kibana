@@ -200,7 +200,6 @@ function getKey(packageName: string | undefined, integrationName: string | undef
 }
 
 function renderIntegrationOption(
-  // TODO_SEE_WHAT_MIGHT_GET_BROKEN_HERE
   option: EuiComboBoxOptionOption<Integration>
 ): JSX.Element | string {
   const { label, value } = option;
