@@ -16,12 +16,13 @@ import {
   EuiTextColor,
   EuiToolTip,
   useResizeObserver,
+  euiFontSize,
   type UseEuiTheme,
 } from '@elastic/eui';
 import React, { Fragment, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { IgnoredReason } from '@kbn/discover-utils';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 export const DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT = 110;
 
@@ -111,7 +112,7 @@ export const TableFieldValue = ({
   isDetails,
   isHighlighted,
 }: TableFieldValueProps) => {
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
 
   const truncationHeight = DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT;
 
@@ -200,8 +201,11 @@ export const TableFieldValue = ({
 };
 
 const componentStyles = {
-  docViewerValue: ({ euiTheme }: UseEuiTheme) =>
-    css({
+  docViewerValue: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+    const { fontSize } = euiFontSize(themeContext, 's');
+
+    return css({
       wordBreak: 'break-all',
       wordWrap: 'break-word',
       whiteSpace: 'pre-wrap',
@@ -209,9 +213,10 @@ const componentStyles = {
       verticalAlign: 'top',
 
       '.euiDataGridRowCell__popover &': {
-        fontSize: euiTheme.font.scale.s,
+        fontSize,
       },
-    }),
+    });
+  },
   docViewerValueHighlighted: ({ euiTheme }: UseEuiTheme) =>
     css({
       fontWeight: euiTheme.font.weight.bold,

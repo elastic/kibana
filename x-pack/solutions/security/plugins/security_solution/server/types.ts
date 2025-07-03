@@ -22,6 +22,7 @@ import type { Readable } from 'stream';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { InferenceClient } from '@kbn/inference-common';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { PadPackageInstallationClient } from './lib/entity_analytics/privilege_monitoring/privileged_access_detection/pad_package_installation_client';
 import type { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import type { Immutable } from '../common/endpoint/types';
 import { AppClient } from './client';
@@ -44,6 +45,7 @@ import type { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privi
 import type { ApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
 import type { ProductFeaturesService } from './lib/product_features_service';
 import type { MonitoringEntitySourceDataClient } from './lib/entity_analytics/privilege_monitoring/monitoring_entity_source_data_client';
+import type { MlAuthz } from './lib/machine_learning/authz';
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
@@ -71,10 +73,12 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getEntityStoreDataClient: () => EntityStoreDataClient;
   getPrivilegeMonitoringDataClient: () => PrivilegeMonitoringDataClient;
   getMonitoringEntitySourceDataClient: () => MonitoringEntitySourceDataClient;
+  getPadPackageInstallationClient: () => PadPackageInstallationClient;
   getSiemRuleMigrationsClient: () => SiemRuleMigrationsClient;
   getInferenceClient: () => InferenceClient;
   getAssetInventoryClient: () => AssetInventoryDataClient;
   getProductFeatureService: () => ProductFeaturesService;
+  getMlAuthz: () => MlAuthz;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{

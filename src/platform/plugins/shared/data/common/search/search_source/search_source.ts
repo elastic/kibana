@@ -224,7 +224,7 @@ export class SearchSource {
   /**
    * Internal, do not use. Overrides all search source fields with the new field array.
    *
-   * @private
+   * @internal
    * @param newFields New field array.
    */
   private setFields(newFields: SearchSourceFields) {

@@ -15,7 +15,6 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiSpacer,
-  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,7 +27,6 @@ import {
   ToggleField,
 } from '../../../../../shared_imports';
 
-import { documentationService } from '../../../../services/documentation';
 import { DataStream } from '../../../../../../common';
 import { useAppContext } from '../../../../app_context';
 import { updateDSFailureStore } from '../../../../services/api';
@@ -125,22 +123,7 @@ export const ConfigureFailureStoreModal: React.FunctionComponent<Props> = ({
         <EuiModalBody>
           <FormattedMessage
             id="xpack.idxMgmt.dataStreams.configureFailureStoreModal.modalDescriptionText"
-            defaultMessage="A failure store is a secondary index within a data stream, used to store failed documents. {docLink}."
-            values={{
-              docLink: (
-                <EuiLink
-                  href={documentationService.getDataStreamsFailureStoreLink()}
-                  target="_blank"
-                  external
-                  data-test-subj="failureStoreDocLink"
-                >
-                  <FormattedMessage
-                    id="xpack.idxMgmt.dataStreams.configureFailureStoreModal.modalDescriptionLinkText"
-                    defaultMessage="Learn more"
-                  />
-                </EuiLink>
-              ),
-            }}
+            defaultMessage="A failure store is a secondary index within a data stream, used to store failed documents."
           />
           <EuiSpacer />
 

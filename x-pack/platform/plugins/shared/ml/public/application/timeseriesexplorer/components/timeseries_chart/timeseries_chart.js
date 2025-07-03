@@ -11,19 +11,20 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component, useContext } from 'react';
+import React, { Component, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { isEqual, reduce, each, get } from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
 
-import { EuiPopover } from '@elastic/eui';
+import { EuiPopover, useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import {
   getFormattedSeverityScore,
   getSeverityWithLow,
-  ML_SEVERITY_COLORS,
+  getThemeResolvedSeverityColor,
+  ML_ANOMALY_THRESHOLD,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { context } from '@kbn/kibana-react-plugin/public';
@@ -87,24 +88,6 @@ const ZOOM_INTERVAL_OPTIONS = [
   { duration: moment.duration(1, 'M'), label: '1M' },
 ];
 
-// Set up the color scale to use for indicating score.
-const anomalyColorScale = d3.scale
-  .threshold()
-  .domain([3, 25, 50, 75, 100])
-  .range([
-    ML_SEVERITY_COLORS.LOW,
-    ML_SEVERITY_COLORS.WARNING,
-    ML_SEVERITY_COLORS.MINOR,
-    ML_SEVERITY_COLORS.MAJOR,
-    ML_SEVERITY_COLORS.CRITICAL,
-  ]);
-
-// Create a gray-toned version of the color scale to use under the context chart mask.
-const anomalyGrayScale = d3.scale
-  .threshold()
-  .domain([3, 25, 50, 75, 100])
-  .range(['#dce7ed', '#b0c5d6', '#b1a34e', '#b17f4e', '#c88686']);
-
 function getChartHeights(height) {
   const actualHeight = height < minSvgHeight ? minSvgHeight : height;
   const focusChartHeight = Math.round(actualHeight * percentFocusChartHeight);
@@ -138,6 +121,7 @@ function getSvgHeight(showAnnotations, incomingHeight) {
 class TimeseriesChartIntl extends Component {
   static propTypes = {
     annotation: PropTypes.object,
+    anomalyColorScale: PropTypes.func.isRequired,
     autoZoomDuration: PropTypes.number,
     bounds: PropTypes.object,
     contextAggregationInterval: PropTypes.object,
@@ -1441,16 +1425,6 @@ class TimeseriesChartIntl extends Component {
         return;
       }
 
-      // Set the color of the swimlane cells according to whether they are inside the selection.
-      contextGroup.selectAll('.swimlane-cell').style('fill', (d) => {
-        const cellMs = d.date.getTime();
-        if (cellMs < selectionMin || cellMs > selectionMax) {
-          return anomalyGrayScale(d.score);
-        } else {
-          return anomalyColorScale(d.score);
-        }
-      });
-
       that.selectedBounds = { min: moment(selectionMin), max: moment(selectionMax) };
       contextChartSelected({ from: selectedBounds[0], to: selectedBounds[1] });
     }
@@ -1525,7 +1499,7 @@ class TimeseriesChartIntl extends Component {
       .attr('width', cellWidth)
       .attr('height', swlHeight)
       .style('fill', (d) => {
-        return anomalyColorScale(d.score);
+        return this.props.anomalyColorScale(d.score);
       });
   };
 
@@ -1632,7 +1606,7 @@ class TimeseriesChartIntl extends Component {
           defaultMessage: 'anomaly score',
         }),
         value: getFormattedSeverityScore(score),
-        color: anomalyColorScale(score),
+        color: this.props.anomalyColorScale(score),
         seriesIdentifier: {
           key: seriesKey,
         },
@@ -2062,6 +2036,27 @@ class TimeseriesChartIntl extends Component {
 export const TimeseriesChart = (props) => {
   const annotationUpdatesService = useContext(MlAnnotationUpdatesContext);
   const annotationProp = useObservable(annotationUpdatesService.isAnnotationInitialized$());
+  const { euiTheme } = useEuiTheme();
+
+  const anomalyColorScale = useMemo(
+    () =>
+      d3.scale
+        .threshold()
+        .domain([
+          ML_ANOMALY_THRESHOLD.WARNING,
+          ML_ANOMALY_THRESHOLD.MINOR,
+          ML_ANOMALY_THRESHOLD.MAJOR,
+          ML_ANOMALY_THRESHOLD.CRITICAL,
+        ])
+        .range([
+          getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.LOW, euiTheme),
+          getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.WARNING, euiTheme),
+          getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.MINOR, euiTheme),
+          getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.MAJOR, euiTheme),
+          getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.CRITICAL, euiTheme),
+        ]),
+    [euiTheme]
+  );
 
   if (annotationProp === undefined) {
     return null;
@@ -2070,6 +2065,7 @@ export const TimeseriesChart = (props) => {
   return (
     <TimeseriesChartIntl
       annotation={annotationProp}
+      anomalyColorScale={anomalyColorScale}
       {...props}
       annotationUpdatesService={annotationUpdatesService}
     />

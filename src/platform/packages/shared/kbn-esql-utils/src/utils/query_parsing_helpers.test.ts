@@ -23,6 +23,7 @@ import {
   fixESQLQueryWithVariables,
   getCategorizeColumns,
   getArgsFromRenameFunction,
+  getCategorizeField,
 } from './query_parsing_helpers';
 import { monaco } from '@kbn/monaco';
 import { parse, walk } from '@kbn/esql-ast';
@@ -813,6 +814,45 @@ describe('esql query helpers', () => {
         original: { name: 'original' },
         renamed: { name: 'renamed' },
       });
+    });
+  });
+
+  describe('getCategorizeField', () => {
+    it('should return the field used in categorize', () => {
+      const esql = 'FROM index | STATS COUNT() BY categorize(field1)';
+      const expected = ['field1'];
+      expect(getCategorizeField(esql)).toEqual(expected);
+    });
+
+    it('should return the field used in categorize for multiple breakdowns', () => {
+      const esql = 'FROM index | STATS COUNT() BY categorize(field1), field2';
+      const expected = ['field1'];
+      expect(getCategorizeField(esql)).toEqual(expected);
+    });
+
+    it('should return the field used in categorize for multiple breakdowns with BUCKET', () => {
+      const esql =
+        'FROM index | STATS count_per_day = COUNT() BY Pattern=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day)';
+      const expected = ['message'];
+      expect(getCategorizeField(esql)).toEqual(expected);
+    });
+
+    it('should return the field used in categorize if the result is stored in a new column', () => {
+      const esql = 'FROM index | STATS COUNT() BY pattern = categorize(field1)';
+      const expected = ['field1'];
+      expect(getCategorizeField(esql)).toEqual(expected);
+    });
+
+    it('should return the field used in categorize for a complex query', () => {
+      const esql =
+        'FROM index | STATS count_per_day = COUNT() BY Pattern=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day)  | STATS Count=SUM(count_per_day), Trend=VALUES(count_per_day) BY Pattern';
+      const expected = ['message'];
+      expect(getCategorizeField(esql)).toEqual(expected);
+    });
+    it('should return an empty array if no categorize is present', () => {
+      const esql = 'FROM index | STATS COUNT() BY field1';
+      const expected: string[] = [];
+      expect(getCategorizeField(esql)).toEqual(expected);
     });
   });
 });

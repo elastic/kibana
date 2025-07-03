@@ -11,13 +11,13 @@ import {
   ESQLCommandOption,
   Walker,
   isIdentifier,
+  isList,
   type ESQLAst,
   type ESQLAstItem,
   type ESQLCommand,
   type ESQLFunction,
   type ESQLSingleAstItem,
 } from '@kbn/esql-ast';
-import { isList } from '@kbn/esql-ast/src/ast/helpers';
 import { ESQLAstExpression } from '@kbn/esql-ast/src/types';
 import { FunctionDefinitionTypes } from '../definitions/types';
 import { EDITOR_MARKER } from './constants';
@@ -122,6 +122,12 @@ function findAstPosition(ast: ESQLAst, offset: number) {
   let node: ESQLSingleAstItem | undefined;
 
   Walker.walk(command, {
+    visitSource: (_node, parent, walker) => {
+      if (_node.location.max >= offset && _node.text !== EDITOR_MARKER) {
+        node = _node as ESQLSingleAstItem;
+        walker.abort();
+      }
+    },
     visitAny: (_node) => {
       if (
         _node.type === 'function' &&

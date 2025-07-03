@@ -16,9 +16,9 @@ import {
   type ESQLFunction,
   type ESQLSingleAstItem,
   Walker,
+  isList,
 } from '@kbn/esql-ast';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
-import { isList } from '@kbn/esql-ast/src/ast/helpers';
 import { isNumericType } from '../shared/esql_types';
 import type { EditorContext, ItemKind, SuggestionRawDefinition, GetColumnsByTypeFn } from './types';
 import {
@@ -284,8 +284,18 @@ export function getFieldsByTypeRetriever(
         ...options,
         supportsControls: canSuggestVariables && !lastCharIsQuestionMark,
       };
+      const editorExtensions = (await resourceRetriever?.getEditorExtensions?.(queryForFields)) ?? {
+        recommendedQueries: [],
+        recommendedFields: [],
+      };
+      const recommendedFieldsFromExtensions = editorExtensions.recommendedFields;
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitionsWithMetadata(fields, updatedOptions, getVariables);
+      return buildFieldsDefinitionsWithMetadata(
+        fields,
+        recommendedFieldsFromExtensions,
+        updatedOptions,
+        getVariables
+      );
     },
     getFieldsMap: helpers.getFieldsMap,
   };
