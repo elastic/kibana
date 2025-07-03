@@ -125,6 +125,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                 "requiresPageReload": false,
                 "savedValue": true,
                 "solution": undefined,
+                "technicalPreview": undefined,
                 "type": "boolean",
                 "unsavedFieldId": "Usage collection-unsaved",
               }
