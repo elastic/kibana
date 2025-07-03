@@ -26,6 +26,7 @@ import { ViewCodeAction } from '../view_code/view_code_action';
 import { PlaygroundPageMode, PlaygroundViewMode } from '../../types';
 import { useSearchPlaygroundFeatureFlag } from '../../hooks/use_search_playground_feature_flag';
 
+import { PlaygroundMoreOptionsMenu } from './playground_more_options';
 import { PlaygroundName } from './playground_name';
 import { SavedPlaygroundSaveButton } from './saved_button';
 
@@ -37,6 +38,9 @@ interface SavedPlaygroundHeaderProps {
   isActionsDisabled?: boolean;
   playgroundName: string;
   hasChanges: boolean;
+  onEditName: () => void;
+  onDeletePlayground: () => void;
+  onCopyPlayground: () => void;
 }
 
 export const SavedPlaygroundHeader: React.FC<SavedPlaygroundHeaderProps> = ({
@@ -47,6 +51,9 @@ export const SavedPlaygroundHeader: React.FC<SavedPlaygroundHeaderProps> = ({
   onSelectPageModeChange,
   playgroundName,
   hasChanges,
+  onEditName,
+  onDeletePlayground,
+  onCopyPlayground,
 }) => {
   const isSearchModeEnabled = useSearchPlaygroundFeatureFlag();
   const { euiTheme } = useEuiTheme();
@@ -83,7 +90,7 @@ export const SavedPlaygroundHeader: React.FC<SavedPlaygroundHeaderProps> = ({
     >
       <EuiPageHeaderSection>
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          <PlaygroundName playgroundName={playgroundName} />
+          <PlaygroundName playgroundName={playgroundName} onEditName={onEditName} />
           {isSearchModeEnabled && (
             <EuiSelect
               data-test-subj="page-mode-select"
@@ -123,6 +130,7 @@ export const SavedPlaygroundHeader: React.FC<SavedPlaygroundHeaderProps> = ({
           <ViewCodeAction selectedPageMode={pageMode} />
           <EuiSpacer />
           <SavedPlaygroundSaveButton hasChanges={hasChanges} />
+          <PlaygroundMoreOptionsMenu onDeletePlayground={onDeletePlayground} />
         </EuiFlexGroup>
       </EuiPageHeaderSection>
     </EuiPageTemplate.Header>
