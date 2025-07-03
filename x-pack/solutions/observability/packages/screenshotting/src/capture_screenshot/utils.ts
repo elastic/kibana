@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import html2canvas from 'html2canvas';
-import { CaptureOptions } from './types';
-
-function waitForDomStability(
+export const waitForDomStability = async (
   iframe: HTMLIFrameElement,
   idleFor = 4000,
   timeout = 90000
-): Promise<void> {
+): Promise<void> => {
   return new Promise((resolve) => {
     const doc = iframe.contentDocument;
     if (!doc) return resolve();
@@ -38,9 +35,9 @@ function waitForDomStability(
       resolve();
     }, timeout);
   });
-}
+};
 
-function waitForIdle(iframe: HTMLIFrameElement, timeout = 90000): Promise<void> {
+export const waitForIdle = async (iframe: HTMLIFrameElement, timeout = 90000): Promise<void> => {
   return new Promise((resolve) => {
     const win = iframe.contentWindow;
 
@@ -59,13 +56,13 @@ function waitForIdle(iframe: HTMLIFrameElement, timeout = 90000): Promise<void> 
       setTimeout(() => resolve(), timeout);
     }
   });
-}
+};
 
-async function waitForNoLoadingCharts(
+export const waitForNoLoadingCharts = async (
   iframe: HTMLIFrameElement,
   timeout = 90000,
   stableFor = 4000
-): Promise<void> {
+): Promise<void> => {
   const start = Date.now();
   let lastChange = Date.now();
 
@@ -98,13 +95,13 @@ async function waitForNoLoadingCharts(
 
     poll();
   });
-}
+};
 
-async function waitForSelector(
+export const waitForSelector = async (
   iframe: HTMLIFrameElement,
   selector: string,
   timeout = 90000
-): Promise<HTMLElement | null> {
+): Promise<HTMLElement | null> => {
   const start = Date.now();
   return new Promise((resolve) => {
     const check = () => {
@@ -121,63 +118,23 @@ async function waitForSelector(
     };
     setTimeout(check, 300);
   });
-}
+};
 
-const getSelectorForUrl = (url: string) => {
+export const getSelectorForUrl = (url: string) => {
   if (url.includes('/app/discover')) return '.kbnAppWrapper';
   if (url.includes('/app/dashboards')) return '.kbnAppWrapper';
   if (url.includes('/app/r')) return '.kbnAppWrapper';
   return 'main';
 };
 
-export async function captureScreenshot(
-  url: string,
-  options: CaptureOptions = {}
-): Promise<string | null> {
-  const { timeout = 90000, idleFor = 4000, stableFor = 4000 } = options;
-
-  const iframe = document.createElement('iframe');
-
-  Object.assign(iframe.style, {
-    position: 'absolute',
-    width: '1200px',
-    height: '600px',
-    pointerEvents: 'none',
-    visibility: 'hidden',
-  });
-
-  document.body.appendChild(iframe);
-
-  return new Promise((resolve) => {
-    const selector = getSelectorForUrl(url);
-
-    iframe.onload = async () => {
-      const element = await waitForSelector(iframe, selector, timeout);
-      if (!element) {
-        cleanup();
-        return resolve(null);
+export const canvasToBlob = (canvas: HTMLCanvasElement, type = 'image/png'): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error('failed to generate blob'));
+        return;
       }
-
-      await waitForDomStability(iframe, idleFor, timeout);
-      await waitForIdle(iframe, timeout);
-      await waitForNoLoadingCharts(iframe, timeout, stableFor);
-
-      try {
-        const canvas = await html2canvas(element);
-        const image = canvas.toDataURL('image/png');
-        cleanup();
-        resolve(image);
-      } catch (err) {
-        // html2canvas failed
-        cleanup();
-        resolve(null);
-      }
-    };
-
-    iframe.src = url;
-
-    const cleanup = () => {
-      document.body.removeChild(iframe);
-    };
+      resolve(blob);
+    }, type);
   });
-}
+};

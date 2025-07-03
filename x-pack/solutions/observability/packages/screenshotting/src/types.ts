@@ -5,8 +5,29 @@
  * 2.0.
  */
 
-export interface CaptureOptions {
+import type { BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
+
+export interface CaptureScreenshotOptions {
   timeout?: number;
   idleFor?: number;
   stableFor?: number;
 }
+
+export interface CaptureResult {
+  image: string;
+  blob: Blob;
+}
+
+interface SaveScreenshotDeps {
+  filesClient?: FilesClient;
+}
+
+export interface SaveScreenshotOptions {
+  caseId: string;
+  owner: string[];
+  appName?: string;
+  pageName?: string;
+  dependencies: SaveScreenshotDeps;
+}
+
+export const FILE_KIND_DELIMITER = 'FilesCases';

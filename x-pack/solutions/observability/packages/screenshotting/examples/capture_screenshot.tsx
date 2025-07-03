@@ -8,9 +8,10 @@
 import { EuiButton, EuiFieldText, EuiFlexGroup, EuiImage, EuiSpacer } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { captureScreenshot } from '..';
+import { captureScreenshot, saveScreenshot } from '..';
+import { SaveScreenshotOptions } from '../src/types';
 
-export const CaptureScreenshotExample = () => {
+export const CaptureScreenshotExample = ({ options }: { options: SaveScreenshotOptions }) => {
   const [screenshot, setScreenshot] = useState<string | null>(null);
   const [isTakingScreenshot, setIsTakingScreenshot] = useState(false);
   const [url, setUrl] = useState<string>('');
@@ -19,9 +20,10 @@ export const CaptureScreenshotExample = () => {
     setIsTakingScreenshot(true);
     setScreenshot(null);
 
-    const image = await captureScreenshot(url);
-    if (image) {
-      setScreenshot(image);
+    const captureResult = await captureScreenshot(url);
+    if (captureResult) {
+      await saveScreenshot(url, captureResult.blob, { ...options });
+      setScreenshot(captureResult.image);
     }
 
     setIsTakingScreenshot(false);
@@ -44,7 +46,7 @@ export const CaptureScreenshotExample = () => {
         >
           {i18n.translate(
             'app_not_found_in_i18nrc.captureScreenshotExample.takeScreenshotButtonLabel',
-            { defaultMessage: 'Take Screenshot' }
+            { defaultMessage: 'Capture Screenshot' }
           )}
         </EuiButton>
         {screenshot && (

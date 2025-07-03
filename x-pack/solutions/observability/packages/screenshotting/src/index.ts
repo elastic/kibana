@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export * from './capture_screenshot';
+export * from './capture_screenshot/capture';
+export * from './save_screenshot/save';
+export { type CaptureScreenshotOptions, type SaveScreenshotOptions } from './types';
