@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
 import type {
   ScopedRunnerRunToolsParams,
   ScopedRunnerRunAgentParams,
@@ -36,7 +37,11 @@ describe('Onechat runner', () => {
         toolsService: { registry },
       } = runnerDeps;
 
-      tool = createMockedTool({});
+      tool = createMockedTool({
+        schema: z.object({
+          foo: z.string(),
+        }),
+      });
       registry.get.mockResolvedValue(tool);
     });
 
