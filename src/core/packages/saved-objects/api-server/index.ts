@@ -65,6 +65,8 @@ export type {
   SavedObjectsChangeAccessControlOptions,
   SavedObjectsChangeAccessControlResponse,
   SavedObjectsChangeAccessControlObject,
+  SavedObjectsChangeOwnershipOptions,
+  SavedObjectsChangeAccessModeOptions,
 } from './src/apis';
 
 export type {

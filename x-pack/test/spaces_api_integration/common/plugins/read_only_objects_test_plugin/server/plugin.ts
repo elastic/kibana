@@ -182,28 +182,24 @@ export class ReadOnlyObjectsPlugin implements Plugin<void, void, SetupDeps> {
         validate: {
           body: schema.object({
             newOwner: schema.string(),
-            objectId: schema.string(),
-            type: schema.oneOf([
-              schema.literal(READ_ONLY_TYPE),
-              schema.literal(NON_READ_ONLY_TYPE),
-            ]),
+            objects: schema.arrayOf(
+              schema.object({
+                type: schema.oneOf([
+                  schema.literal(READ_ONLY_TYPE),
+                  schema.literal(NON_READ_ONLY_TYPE),
+                ]),
+                id: schema.string(),
+              })
+            ),
           }),
         },
       },
       async (context, request, response) => {
         const soClient = (await context.core).savedObjects.client;
         try {
-          const result = await soClient.changeOwnership(
-            [
-              {
-                type: request.body.type,
-                id: request.body.objectId,
-              },
-            ],
-            {
-              owner: request.body.newOwner,
-            }
-          );
+          const result = await soClient.changeOwnership(request.body.objects, {
+            owner: request.body.newOwner,
+          });
           return response.ok({
             body: result,
           });
