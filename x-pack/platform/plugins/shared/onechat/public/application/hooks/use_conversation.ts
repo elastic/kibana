@@ -19,6 +19,7 @@ import { queryKeys } from '../query_keys';
 import { appPaths } from '../utils/app_paths';
 import { useNavigation } from './use_navigation';
 import { useOnechatServices } from './use_onechat_service';
+import { useConversationId } from './use_conversation_id';
 
 const createActions = ({
   queryClient,
@@ -116,7 +117,8 @@ const createActions = ({
   };
 };
 
-export const useConversation = ({ conversationId }: { conversationId: string | undefined }) => {
+export const useConversation = () => {
+  const conversationId = useConversationId();
   const { conversationsService } = useOnechatServices();
   const queryClient = useQueryClient();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);

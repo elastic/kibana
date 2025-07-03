@@ -15,7 +15,7 @@ import {
   keys,
   useEuiTheme,
 } from '@elastic/eui';
-import { chatCommonLabels } from './i18n';
+import { conversationsCommonLabels } from './i18n';
 
 interface ConversationInputFormProps {
   disabled: boolean;
@@ -78,7 +78,7 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({
           value={message}
           onChange={handleChange}
           onKeyDown={handleTextAreaKeyDown}
-          placeholder={chatCommonLabels.userInputBox.placeholder}
+          placeholder={conversationsCommonLabels.userInputBox.placeholder}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

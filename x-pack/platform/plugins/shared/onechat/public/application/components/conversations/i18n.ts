@@ -7,24 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const chatCommonLabels = {
-  chat: {
-    conversations: {
-      conversationsListTitle: i18n.translate(
-        'xpack.onechat.chat.conversations.conversationListTitle',
-        {
-          defaultMessage: 'Conversations',
-        }
-      ),
-      newConversationLabel: i18n.translate(
-        'xpack.onechat.chat.conversations.newConversationLabel',
-        {
-          defaultMessage: 'New conversation',
-        }
-      ),
-    },
+export const conversationsCommonLabels = {
+  header: {
+    newConversationTitle: i18n.translate('xpack.onechat.newConversationTitle', {
+      defaultMessage: 'New conversation',
+    }),
+    createNewConversationButtonLabel: i18n.translate(
+      'xpack.onechat.createNewConversationButtonLabel',
+      { defaultMessage: 'New' }
+    ),
+    actionsMenuTitle: i18n.translate('xpack.onechat.actionsMenuTitle', {
+      defaultMessage: 'Actions',
+    }),
   },
-
   userInputBox: {
     placeholder: i18n.translate('xpack.onechat.userInputBox.placeholder', {
       defaultMessage: 'Ask anything',

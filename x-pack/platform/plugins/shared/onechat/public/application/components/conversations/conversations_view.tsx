@@ -6,27 +6,62 @@
  */
 
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React from 'react';
+import React, { useState } from 'react';
+import { useConversation } from '../../hooks/use_conversation';
 import { Conversation } from './conversation';
-import { ConversationHeader } from './conversation_header';
+import { ConversationActions } from './conversation_actions';
+import { ConversationSidebar } from './conversation_sidebar';
+import { ConversationSidebarToggle } from './conversation_sidebar_toggle';
+import { ConversationTitle } from './conversation_title';
 
-export const OnechatConversationsView: React.FC<{ conversationId?: string }> = ({
-  conversationId,
-}) => {
+export const OnechatConversationsView: React.FC<{}> = () => {
+  const { conversation } = useConversation();
+  const hasActiveConversation = Boolean(conversation);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
 
-  const pageSectionContentClassName = css`
-    width: 100%;
-    display: flex;
-    flex-grow: 1;
-    padding-top: 0;
-    padding-bottom: 0;
-    height: 100%;
-    max-block-size: calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)));
+  const backgroundStyles = css`
     background-color: ${euiTheme.colors.backgroundBasePlain};
+  `;
+  const fullSizeStyles = css`
+    width: 100%;
+    height: 100%;
+  `;
+
+  const headerHeight = `calc(${euiTheme.size.xxl} * 2)`;
+  const headerStyles = css`
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    position: relative;
+    border: none;
+    max-block-size: ${headerHeight};
+    ${backgroundStyles}
+  `;
+  const sideColumnWidth = `minmax(calc(${euiTheme.size.xxl} * 2), 1fr)`;
+  const contentMaxWidth = `calc(${euiTheme.size.xl} * 25)`;
+  const headerGridStyles = css`
+    display: grid;
+    grid-template-columns: ${sideColumnWidth} minmax(auto, ${contentMaxWidth}) ${sideColumnWidth};
+    align-items: center;
+    width: 100%;
+  `;
+  const mainContentStyles = css`
+    ${fullSizeStyles}
+    ${backgroundStyles}
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  `;
+  const conversationContainerStyles = css`
+    ${fullSizeStyles}
+    max-inline-size: ${contentMaxWidth};
+    max-block-size: calc(
+      100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)) - ${headerHeight}
+    );
   `;
 
   return (
@@ -37,16 +72,41 @@ export const OnechatConversationsView: React.FC<{ conversationId?: string }> = (
       grow={false}
       panelled={false}
     >
-      <KibanaPageTemplate.Section paddingSize="none" grow contentProps={{ css: 'height: 100%' }}>
+      {isSidebarOpen && (
+        <KibanaPageTemplate.Sidebar data-test-subj="onechatSidebar">
+          <ConversationSidebar />
+        </KibanaPageTemplate.Sidebar>
+      )}
+
+      {hasActiveConversation && (
+        <KibanaPageTemplate.Header css={headerStyles} bottomBorder={false}>
+          <div css={headerGridStyles}>
+            <ConversationSidebarToggle
+              isSidebarOpen={isSidebarOpen}
+              onToggle={() => {
+                setIsSidebarOpen((open) => !open);
+              }}
+            />
+            <ConversationTitle />
+            <ConversationActions />
+          </div>
+        </KibanaPageTemplate.Header>
+      )}
+      <KibanaPageTemplate.Section
+        paddingSize="none"
+        grow
+        contentProps={{
+          css: mainContentStyles,
+        }}
+      >
         <EuiFlexGroup
-          className={pageSectionContentClassName}
+          css={conversationContainerStyles}
           direction="column"
-          gutterSize="none"
+          gutterSize="l"
           justifyContent="center"
           responsive={false}
         >
-          <ConversationHeader conversationId={conversationId} />
-          <Conversation agentId={oneChatDefaultAgentId} conversationId={conversationId} />
+          <Conversation agentId={oneChatDefaultAgentId} />
         </EuiFlexGroup>
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>

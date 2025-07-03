@@ -5,46 +5,39 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useEffect } from 'react';
-import { css } from '@emotion/css';
-import { EuiFlexItem, EuiPanel, useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
+import { EuiFlexItem, EuiPanel, useEuiScrollBar } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useChat } from '../../hooks/use_chat';
 import { useConversation } from '../../hooks/use_conversation';
+import { useConversationId } from '../../hooks/use_conversation_id';
 import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
 import { ConversationInputForm } from './conversation_input_form';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
 
-const fullHeightClassName = css`
+const fullHeightStyles = css`
   height: 100%;
 `;
-
-const conversationPanelClass = css`
+const roundsContainerStyles = css`
   min-height: 100%;
-  max-width: 850px;
   margin-left: auto;
   margin-right: auto;
 `;
 
-const scrollContainerClassName = (scrollBarStyles: string) => css`
-  overflow-y: auto;
-  ${scrollBarStyles}
-`;
-
 interface ConversationProps {
   agentId: string;
-  conversationId: string | undefined;
 }
 
-export const Conversation: React.FC<ConversationProps> = ({ agentId, conversationId }) => {
-  const { conversation } = useConversation({ conversationId });
-  const { sendMessage } = useChat({
-    conversationId,
-    agentId,
-  });
+export const Conversation: React.FC<ConversationProps> = ({ agentId }) => {
+  const { conversation } = useConversation();
+  const { sendMessage } = useChat({ agentId });
+  const conversationId = useConversationId();
 
-  const theme = useEuiTheme();
-  const scrollBarStyles = euiScrollBarStyles(theme);
+  const scrollContainerStyles = css`
+    overflow-y: auto;
+    ${useEuiScrollBar()}
+  `;
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -71,9 +64,9 @@ export const Conversation: React.FC<ConversationProps> = ({ agentId, conversatio
 
   return (
     <>
-      <EuiFlexItem grow className={scrollContainerClassName(scrollBarStyles)}>
-        <div ref={scrollContainerRef} className={fullHeightClassName}>
-          <EuiPanel hasBorder={false} hasShadow={false} className={conversationPanelClass}>
+      <EuiFlexItem grow css={scrollContainerStyles}>
+        <div ref={scrollContainerRef} css={fullHeightStyles}>
+          <EuiPanel hasBorder={false} hasShadow={false} css={roundsContainerStyles}>
             <ConversationRounds conversationRounds={conversation?.rounds ?? []} />
           </EuiPanel>
         </div>

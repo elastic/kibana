@@ -16,7 +16,7 @@ import {
   useEuiTheme,
   keys,
 } from '@elastic/eui';
-import { chatCommonLabels } from './i18n';
+import { conversationsCommonLabels } from './i18n';
 
 interface NewConversationPromptProps {
   onSubmit: (message: string) => void;
@@ -97,7 +97,7 @@ export const NewConversationPrompt: React.FC<NewConversationPromptProps> = ({ on
                     value={message}
                     onChange={handleChange}
                     onKeyDown={handleTextAreaKeyDown}
-                    placeholder={chatCommonLabels.userInputBox.placeholder}
+                    placeholder={conversationsCommonLabels.userInputBox.placeholder}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
