@@ -42,6 +42,10 @@ export const FIELDS_BROWSER = i18n.translate('responseOpsAlertsFieldsBrowser.fie
   defaultMessage: 'Fields',
 });
 
+export const FIELDS_SEARCH = i18n.translate('responseOpsAlertsFieldsBrowser.fieldBrowserSearch', {
+  defaultMessage: 'Search',
+});
+
 export const DESCRIPTION = i18n.translate('responseOpsAlertsFieldsBrowser.descriptionLabel', {
   defaultMessage: 'Description',
 });
@@ -86,6 +90,13 @@ export const FILTER_PLACEHOLDER = i18n.translate(
 export const NO_FIELDS_MATCH = i18n.translate('responseOpsAlertsFieldsBrowser.noFieldsMatchLabel', {
   defaultMessage: 'No fields match',
 });
+
+export const FILTER_OPTIONS_LABEL = i18n.translate(
+  'responseOpsAlertsFieldsBrowser.filterOptionsLabel',
+  {
+    defaultMessage: 'Search field for filtering options',
+  }
+);
 
 export const NO_FIELDS_MATCH_INPUT = (searchInput: string) =>
   i18n.translate('responseOpsAlertsFieldsBrowser.noFieldsMatchInputLabel', {
