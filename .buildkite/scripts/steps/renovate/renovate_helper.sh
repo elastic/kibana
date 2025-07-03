@@ -14,7 +14,7 @@ echo --- Additional helpers
 # We only want the deploy label on the main branch instead of all branches in the Renovate group
 if [ "$GITHUB_PR_BRANCH" = "feature/213293/renovate-helper-scripts" ] && ! is_pr_with_label "ci:cloud-deploy"; then
   echo "Adding deploy label to main chainguard PR"
-  git config --global user.name kibanamachine
-  git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
+  # git config --global user.name kibanamachine
+  # git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
   gh api "repos/elastic/kibana/issues/${GITHUB_PR_NUMBER}/labels" --method POST -f "labels[]=ci:cloud-deploy"
 fi
