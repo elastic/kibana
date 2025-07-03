@@ -190,7 +190,7 @@ export function registerESQLToolsRoutes({
           name: request.body.name || request.body.id,
           description: request.body.description,
           query: request.body.query,
-          params: request.body.params || [{}],
+          params: request.body.params || {},
           meta: {
             tags: request.body.meta.tags || [],
             providerId: esqlToolProviderId,
