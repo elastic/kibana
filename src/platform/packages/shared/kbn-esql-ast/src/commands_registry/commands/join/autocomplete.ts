@@ -74,12 +74,9 @@ export async function autocomplete(
       const suggestion: ISuggestionItem = {
         label: 'ON',
         text: 'ON ',
-        detail: i18n.translate(
-          'kbn-esql-ast.esql.autocomplete.join.onKeyword',
-          {
-            defaultMessage: 'Specify JOIN field conditions',
-          }
-        ),
+        detail: i18n.translate('kbn-esql-ast.esql.autocomplete.join.onKeyword', {
+          defaultMessage: 'Specify JOIN field conditions',
+        }),
         kind: 'Keyword',
         sortText: '0-ON',
         command: TRIGGER_SUGGESTION_COMMAND,

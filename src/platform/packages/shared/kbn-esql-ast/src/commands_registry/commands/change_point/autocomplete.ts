@@ -12,7 +12,10 @@ import { ESQL_NUMBER_TYPES } from '../../../definitions/types';
 import { pipeCompleteItem } from '../../utils/complete_items';
 import type { ISuggestionItem, ICommandCallbacks } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import { buildUserDefinedColumnsDefinitions, findFinalWord } from '../../../definitions/utils/autocomplete';
+import {
+  buildUserDefinedColumnsDefinitions,
+  findFinalWord,
+} from '../../../definitions/utils/autocomplete';
 
 export enum Position {
   VALUE = 'value',

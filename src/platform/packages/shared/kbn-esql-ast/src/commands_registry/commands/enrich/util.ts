@@ -21,12 +21,9 @@ export const ENRICH_MODES = [
   },
   {
     name: 'coordinator',
-    description: i18n.translate(
-      'kbn-esql-ast.esql.definitions.ccqCoordinatorDoc',
-      {
-        defaultMessage: 'Enrich takes place on the coordinating cluster receiving an ES|QL',
-      }
-    ),
+    description: i18n.translate('kbn-esql-ast.esql.definitions.ccqCoordinatorDoc', {
+      defaultMessage: 'Enrich takes place on the coordinating cluster receiving an ES|QL',
+    }),
   },
   {
     name: 'remote',
@@ -118,12 +115,9 @@ export const noPoliciesAvailableSuggestion: ISuggestionItem = {
   }),
   text: '',
   kind: 'Issue',
-  detail: i18n.translate(
-    'kbn-esql-ast.esql.autocomplete.noPoliciesLabelsFound',
-    {
-      defaultMessage: 'Click to create',
-    }
-  ),
+  detail: i18n.translate('kbn-esql-ast.esql.autocomplete.noPoliciesLabelsFound', {
+    defaultMessage: 'Click to create',
+  }),
   sortText: 'D',
   command: {
     id: 'esql.policies.create',
@@ -133,12 +127,9 @@ export const noPoliciesAvailableSuggestion: ISuggestionItem = {
   },
 };
 
-export const modeDescription = i18n.translate(
-  'kbn-esql-ast.esql.definitions.ccqMode',
-  {
-    defaultMessage: 'Cross-cluster query mode',
-  }
-);
+export const modeDescription = i18n.translate('kbn-esql-ast.esql.definitions.ccqMode', {
+  defaultMessage: 'Cross-cluster query mode',
+});
 
 export const modeSuggestions: ISuggestionItem[] = ENRICH_MODES?.map(({ name, description }) => ({
   label: `_${name}`,
@@ -185,15 +176,12 @@ export const buildMatchingFieldsDefinition = (
     label,
     text: getSafeInsertText(label) + ' ',
     kind: 'Variable',
-    detail: i18n.translate(
-      'kbn-esql-ast.esql.autocomplete.matchingFieldDefinition',
-      {
-        defaultMessage: `Use to match on {matchingField} on the policy`,
-        values: {
-          matchingField,
-        },
-      }
-    ),
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.matchingFieldDefinition', {
+      defaultMessage: `Use to match on {matchingField} on the policy`,
+      values: {
+        matchingField,
+      },
+    }),
     sortText: 'D',
     command: TRIGGER_SUGGESTION_COMMAND,
   }));

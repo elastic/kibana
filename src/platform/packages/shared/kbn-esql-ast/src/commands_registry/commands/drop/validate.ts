@@ -17,12 +17,9 @@ export const validate = (command: ESQLCommand): ESQLMessage[] => {
     messages.push(
       ...wildcardItems.map((column) => ({
         location: (column as ESQLColumn).location,
-        text: i18n.translate(
-          'kbn-esql-ast.esql.validation.dropAllColumnsError',
-          {
-            defaultMessage: 'Removing all fields is not allowed [*]',
-          }
-        ),
+        text: i18n.translate('kbn-esql-ast.esql.validation.dropAllColumnsError', {
+          defaultMessage: 'Removing all fields is not allowed [*]',
+        }),
         type: 'error' as const,
         code: 'dropAllColumnsError',
       }))
@@ -32,12 +29,9 @@ export const validate = (command: ESQLCommand): ESQLMessage[] => {
   if (droppingTimestamp) {
     messages.push({
       location: (droppingTimestamp as ESQLColumn).location,
-      text: i18n.translate(
-        'kbn-esql-ast.esql.validation.dropTimestampWarning',
-        {
-          defaultMessage: 'Drop [@timestamp] will remove all time filters to the search results',
-        }
-      ),
+      text: i18n.translate('kbn-esql-ast.esql.validation.dropTimestampWarning', {
+        defaultMessage: 'Drop [@timestamp] will remove all time filters to the search results',
+      }),
       type: 'warning',
       code: 'dropTimestampWarning',
     });

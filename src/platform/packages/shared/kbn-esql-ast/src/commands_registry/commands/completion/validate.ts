@@ -31,14 +31,11 @@ export const validate = (
   if (!supportedPromptTypes.includes(promptExpressionType)) {
     messages.push({
       location: 'location' in prompt ? prompt?.location : location,
-      text: i18n.translate(
-        'kbn-esql-ast.esql.validation.completionUnsupportedFieldType',
-        {
-          defaultMessage:
-            '[COMPLETION] prompt must be of type [text] but is [{promptExpressionType}]',
-          values: { promptExpressionType },
-        }
-      ),
+      text: i18n.translate('kbn-esql-ast.esql.validation.completionUnsupportedFieldType', {
+        defaultMessage:
+          '[COMPLETION] prompt must be of type [text] but is [{promptExpressionType}]',
+        values: { promptExpressionType },
+      }),
       type: 'error',
       code: 'completionUnsupportedFieldType',
     });

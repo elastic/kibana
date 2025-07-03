@@ -16,11 +16,7 @@ import type {
   ICommandContext,
 } from '../../commands_registry/types';
 import { Location } from '../../commands_registry/types';
-import {
-  getDateLiterals,
-  getCompatibleLiterals,
-  buildConstantsDefinitions,
-} from './literals';
+import { getDateLiterals, getCompatibleLiterals, buildConstantsDefinitions } from './literals';
 import { SINGLE_TICK_REGEX, DOUBLE_BACKTICK } from '../../parser/constants';
 import { type SupportedDataType, isParameterType } from '../types';
 import { getOverlapRange } from './shared';

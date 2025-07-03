@@ -49,17 +49,14 @@ export const validate = (command: ESQLCommand): ESQLMessage[] => {
       messages.push(
         ...noAggsExpressions.map((fn) => ({
           location: fn.location,
-          text: i18n.translate(
-            'kbn-esql-ast.esql.validation.statsNoAggFunction',
-            {
-              defaultMessage:
-                'At least one aggregation function required in [{commandName}], found [{expression}]',
-              values: {
-                expression: fn.text,
-                commandName,
-              },
-            }
-          ),
+          text: i18n.translate('kbn-esql-ast.esql.validation.statsNoAggFunction', {
+            defaultMessage:
+              'At least one aggregation function required in [{commandName}], found [{expression}]',
+            values: {
+              expression: fn.text,
+              commandName,
+            },
+          }),
           type: 'error' as const,
           code: 'statsNoAggFunction',
         }))
@@ -75,17 +72,14 @@ export const validate = (command: ESQLCommand): ESQLMessage[] => {
         messages.push(
           ...invalidExpressions.map((fn) => ({
             location: fn.location,
-            text: i18n.translate(
-              'kbn-esql-ast.esql.validation.noCombinationOfAggAndNonAggValues',
-              {
-                defaultMessage:
-                  'Cannot combine aggregation and non-aggregation values in [{commandName}], found [{expression}]',
-                values: {
-                  expression: fn.text,
-                  commandName,
-                },
-              }
-            ),
+            text: i18n.translate('kbn-esql-ast.esql.validation.noCombinationOfAggAndNonAggValues', {
+              defaultMessage:
+                'Cannot combine aggregation and non-aggregation values in [{commandName}], found [{expression}]',
+              values: {
+                expression: fn.text,
+                commandName,
+              },
+            }),
             type: 'error' as const,
             code: 'statsNoCombinationOfAggAndNonAggValues',
           }))

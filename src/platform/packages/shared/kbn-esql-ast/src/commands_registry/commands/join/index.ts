@@ -45,12 +45,9 @@ export const joinCommand = {
       // },
       {
         name: 'lookup',
-        description: i18n.translate(
-          'kbn-esql-ast.esql.definitions.joinLookupDoc',
-          {
-            defaultMessage: 'Join with a "lookup" mode index',
-          }
-        ),
+        description: i18n.translate('kbn-esql-ast.esql.definitions.joinLookupDoc', {
+          defaultMessage: 'Join with a "lookup" mode index',
+        }),
       },
     ],
     description: i18n.translate('kbn-esql-ast.esql.definitions.joinDoc', {

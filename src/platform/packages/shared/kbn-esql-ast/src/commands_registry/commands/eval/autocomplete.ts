@@ -12,7 +12,10 @@ import {
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
 } from '../../utils/complete_items';
-import { suggestForExpression, getExpressionPosition } from '../../../definitions/utils/autocomplete';
+import {
+  suggestForExpression,
+  getExpressionPosition,
+} from '../../../definitions/utils/autocomplete';
 import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
 import {
   type ISuggestionItem,

@@ -21,12 +21,9 @@ export const validate = (
   if (!isRrfImmediatelyAfterFork(ast)) {
     messages.push({
       location: command.location,
-      text: i18n.translate(
-        'kbn-esql-ast.esql.validation.rrfMissingScoreMetadata',
-        {
-          defaultMessage: '[RRF] Must be immediately preceded by a FORK command.',
-        }
-      ),
+      text: i18n.translate('kbn-esql-ast.esql.validation.rrfMissingScoreMetadata', {
+        defaultMessage: '[RRF] Must be immediately preceded by a FORK command.',
+      }),
       type: 'error',
       code: 'rrfNotImmediatelyAfterFork',
     });

@@ -24,12 +24,9 @@ export const changePointCommand = {
   methods: changePointCommandMethods,
   metadata: {
     preview: true,
-    description: i18n.translate(
-      'kbn-esql-ast.esql.definitions.changePointDoc',
-      {
-        defaultMessage: 'Detect change point in the query results',
-      }
-    ),
+    description: i18n.translate('kbn-esql-ast.esql.definitions.changePointDoc', {
+      defaultMessage: 'Detect change point in the query results',
+    }),
     declaration: `CHANGE_POINT <value> ON <field_name> AS <type>, <pvalue>`,
     examples: [
       '… | CHANGE_POINT value',

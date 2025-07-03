@@ -9,7 +9,11 @@
 import type { ESQLCommand } from '../../../types';
 import { isColumn } from '../../../ast/helpers';
 import { pipeCompleteItem, commaCompleteItem } from '../../utils/complete_items';
-import { getLastNonWhitespaceChar, handleFragment, columnExists } from '../../../definitions/utils/autocomplete';
+import {
+  getLastNonWhitespaceChar,
+  handleFragment,
+  columnExists,
+} from '../../../definitions/utils/autocomplete';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 
