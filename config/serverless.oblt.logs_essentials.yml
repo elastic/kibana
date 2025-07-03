@@ -61,3 +61,4 @@ xpack.actions.enabledActionTypes: [
 ]
 
 xpack.alerting.enabledRuleTypes: ['observability.rules.custom_threshold','.es-query','datasetQuality.degradedDocs']
+xpack.cases.enabled: false
