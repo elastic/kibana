@@ -53,7 +53,7 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = () => {
           iconSide="left"
           iconType="key"
           onClick={() => setShowFlyout(true)}
-          data-test-subj="createAPIKeyButton"
+          data-test-subj="createApiKeyButton"
         >
           <FormattedMessage
             id="xpack.searchHomepage.apiKeyForm.createButton"
