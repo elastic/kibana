@@ -60,8 +60,7 @@ import type { InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
 import { handleSystemColorModeChange } from './handle_system_colormode_change';
 import { AppMenuBar } from './ui/project/app_menu';
-import { createChromeUiStore } from './ui_store/chrome_ui_store';
-import { useChromeUiState } from './ui_store';
+import { createChromeStore, useChromeState } from './ui_store';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
 const SNAPSHOT_REGEX = /-snapshot/i;
@@ -530,8 +529,8 @@ export class ChromeService {
 
     const getLegacyHeaderComponentForFixedLayout = () => {
       const HeaderComponent = () => {
-        const isVisible = useChromeUiState((state) => state.isVisible);
-        const chromeStyle = useChromeUiState((state) => state.chromeStyle);
+        const isVisible = useChromeState((state) => state.isVisible);
+        const chromeStyle = useChromeState((state) => state.chromeStyle);
 
         if (!isVisible) {
           return (
@@ -580,7 +579,7 @@ export class ChromeService {
       });
     };
 
-    const store = createChromeUiStore({
+    const store = createChromeStore({
       badge$,
       breadcrumbs$,
       breadcrumbsAppendExtensions$,

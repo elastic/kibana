@@ -9,34 +9,31 @@
 
 import React, { createContext, ReactNode, useContext } from 'react';
 import { useStore } from 'zustand';
-import type { ChromeUiStore, ChromeUiState } from './chrome_ui_store';
+import type { ChromeState, ChromeStore } from './chrome_store';
 
 // Create the context
-const ChromeUiStoreContext = createContext<ChromeUiStore | undefined>(undefined);
+const ChromeUiStoreContext = createContext<ChromeStore | undefined>(undefined);
 
-interface ChromeUiStoreProviderProps {
+interface ChromeStoreProviderProps {
   children: ReactNode;
-  store: ChromeUiStore;
+  store: ChromeStore;
 }
 
 // Provider component
-export const ChromeUiStoreProvider: React.FC<ChromeUiStoreProviderProps> = ({
-  children,
-  store,
-}) => {
+export const ChromeUiStoreProvider: React.FC<ChromeStoreProviderProps> = ({ children, store }) => {
   return <ChromeUiStoreContext.Provider value={store}>{children}</ChromeUiStoreContext.Provider>;
 };
 
 // Hook to use the store
-export function useChromeUiStore(): ChromeUiStore {
+export function useChromeStore(): ChromeStore {
   const context = useContext(ChromeUiStoreContext);
   if (!context) {
-    throw new Error('useChromeUiStore must be used within a ChromeUiStoreProvider');
+    throw new Error('useChromeStore must be used within a ChromeStoreProvider');
   }
   return context;
 }
 
-export function useChromeUiState<U>(selector: (state: ChromeUiState) => U): U {
-  const store = useChromeUiStore();
+export function useChromeState<U>(selector: (state: ChromeState) => U): U {
+  const store = useChromeStore();
   return useStore(store, selector);
 }

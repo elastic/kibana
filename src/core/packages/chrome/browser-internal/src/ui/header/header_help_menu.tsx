@@ -31,7 +31,7 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { css } from '@emotion/react';
 import { HeaderExtension } from './header_extension';
 import { isModifiedOrPrevented } from './nav_link';
-import { useChromeUiState } from '../../ui_store';
+import { useChromeState } from '../../ui_store';
 
 const buildDefaultContentLinks = ({
   kibanaDocLink,
@@ -81,12 +81,12 @@ export const HeaderHelpMenu: React.FC<Props> = (props) => {
 
   const { euiTheme } = useEuiTheme();
 
-  const helpExtension = useChromeUiState((state) => state.helpExtension);
-  const helpSupportUrl = useChromeUiState((state) => state.helpSupportUrl);
-  const globalHelpExtensionMenuLinks = useChromeUiState(
+  const helpExtension = useChromeState((state) => state.helpExtension);
+  const helpSupportUrl = useChromeState((state) => state.helpSupportUrl);
+  const globalHelpExtensionMenuLinks = useChromeState(
     (state) => state.globalHelpExtensionMenuLinks
   );
-  let defaultContentLinks = useChromeUiState((state) => state.helpMenuLinks);
+  let defaultContentLinks = useChromeState((state) => state.helpMenuLinks);
   if (!defaultContentLinks || defaultContentLinks.length === 0)
     defaultContentLinks = buildDefaultContentLinks({
       kibanaDocLink,

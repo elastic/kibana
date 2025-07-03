@@ -22,11 +22,11 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
-import { createUiStoreFromObservables, ObservableStore } from './ui_store';
+import { createStoreFromObservables, ObservableStore } from './create_store';
 
-export type ChromeUiStore = ObservableStore<ChromeUiState>;
+export type ChromeStore = ObservableStore<ChromeState>;
 
-export interface ChromeUiState {
+export interface ChromeState {
   badge: ChromeBadge | undefined;
   breadcrumbs: ChromeBreadcrumb[];
   breadcrumbsAppendExtensions: ChromeBreadcrumbsAppendExtension[];
@@ -54,7 +54,7 @@ export interface ChromeUiState {
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type ChromeUiStoreObservableInput = {
+export type ChromeStoreObservableInput = {
   badge$: Observable<ChromeBadge | undefined>;
   breadcrumbs$: BehaviorSubject<ChromeBreadcrumb[]>;
   breadcrumbsAppendExtensions$: BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>;
@@ -81,9 +81,9 @@ export type ChromeUiStoreObservableInput = {
   homeHref$: Observable<string | undefined>;
 };
 
-export function createChromeUiStore(observables: ChromeUiStoreObservableInput): ChromeUiStore {
-  const store = createUiStoreFromObservables(observables, {
-    mapper: (state): ChromeUiState => ({
+export function createChromeStore(observables: ChromeStoreObservableInput): ChromeStore {
+  const store = createStoreFromObservables(observables, {
+    mapper: (state): ChromeState => ({
       badge: state.badge$,
       breadcrumbs: state.breadcrumbs$,
       breadcrumbsAppendExtensions: state.breadcrumbsAppendExtensions$,

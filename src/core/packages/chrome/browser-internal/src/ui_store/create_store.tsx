@@ -74,17 +74,13 @@ export interface ObservableStore<S> extends StoreApi<S> {
   destroy: () => void;
 }
 
-export interface ObservableStore<S> extends StoreApi<S> {
-  destroy: () => void;
-}
-
-interface CreateUiStoreOptions<Streams extends ObsMap, Mapped> {
+interface CreateStoreOptions<Streams extends ObsMap, Mapped> {
   mapper?: (state: Combined<Streams>) => Mapped;
 }
 
-export const createUiStoreFromObservables = <Streams extends ObsMap, Mapped = Combined<Streams>>(
+export const createStoreFromObservables = <Streams extends ObsMap, Mapped = Combined<Streams>>(
   streams: Streams,
-  options?: CreateUiStoreOptions<Streams, Mapped>
+  options?: CreateStoreOptions<Streams, Mapped>
 ): ObservableStore<Mapped> => {
   const { mapper } = options || {};
   const getInitialState = () => {

@@ -22,11 +22,11 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { Observable } from 'rxjs';
 
-import { ChromeUiStore } from './ui_store/chrome_ui_store';
+import { ChromeStore } from './ui_store';
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
-  getUiStore: () => ChromeUiStore;
+  getUiStore: () => ChromeStore;
 
   /**
    * Used only by the rendering service to render the header UI

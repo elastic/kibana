@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
 import classNames from 'classnames';
 
-import { useChromeUiState } from '../ui_store';
+import { useChromeState } from '../ui_store';
 
 export interface LoadingIndicatorProps {
   showAsBar?: boolean;
@@ -28,7 +28,7 @@ export const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
   maxAmount,
   valueAmount,
 }) => {
-  const isLoading = useChromeUiState((state) => state.loadingCount > 0);
+  const isLoading = useChromeState((state) => state.loadingCount > 0);
   console.log('LoadingIndicator rendered with isLoading:', isLoading);
   const [visible, setVisible] = useState(false);
   const timerRef = useRef<any>();

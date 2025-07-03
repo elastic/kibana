@@ -7,8 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  useChromeUiState,
-  useChromeUiStore,
-  ChromeUiStoreProvider,
-} from './chrome_ui_store_provider';
+export { useChromeStore, useChromeState, ChromeUiStoreProvider } from './chrome_store_provider';
+export { createChromeStore, type ChromeStore, type ChromeState } from './chrome_store';

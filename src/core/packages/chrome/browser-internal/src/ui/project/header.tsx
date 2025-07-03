@@ -33,7 +33,7 @@ import { ScreenReaderRouteAnnouncements, SkipToMainContent } from '../header/scr
 import { AppMenuBar } from './app_menu';
 import { ProjectNavigation } from './navigation';
 import { BreadcrumbsWithExtensionsWrapper } from '../header/breadcrumbs_with_extensions';
-import { useChromeUiState } from '../../ui_store';
+import { useChromeState } from '../../ui_store';
 
 const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
   logo: {
@@ -119,9 +119,9 @@ type LogoProps = Pick<Props, 'application' | 'prependBasePath'> & {
 
 const Logo = ({ prependBasePath, application, logoCss }: LogoProps) => {
   // TODO: add debounce to isLoading to avoid flickering
-  const isLoading = useChromeUiState((state) => state.loadingCount > 0);
-  const homeHref = useChromeUiState((state) => state.homeHref);
-  const customBranding = useChromeUiState((state) => state.customBranding);
+  const isLoading = useChromeState((state) => state.loadingCount > 0);
+  const homeHref = useChromeState((state) => state.homeHref);
+  const customBranding = useChromeState((state) => state.customBranding);
   const { logo } = customBranding ?? {};
 
   let fullHref: string | undefined;
@@ -202,11 +202,11 @@ export const ProjectHeader = ({
 }: Props) => {
   const { euiTheme } = useEuiTheme();
 
-  const navControlsCenter = useChromeUiState((state) => state.navControlsCenter);
-  const navControlsLeft = useChromeUiState((state) => state.navControlsLeft);
-  const navControlsRight = useChromeUiState((state) => state.navControlsRight);
-  const projectBreadcrumbs = useChromeUiState((state) => state.projectBreadcrumbs) ?? [];
-  const isSideNavCollapsed = useChromeUiState((state) => state.isSideNavCollapsed);
+  const navControlsCenter = useChromeState((state) => state.navControlsCenter);
+  const navControlsLeft = useChromeState((state) => state.navControlsLeft);
+  const navControlsRight = useChromeState((state) => state.navControlsRight);
+  const projectBreadcrumbs = useChromeState((state) => state.projectBreadcrumbs) ?? [];
+  const isSideNavCollapsed = useChromeState((state) => state.isSideNavCollapsed);
 
   const headerCss = getHeaderCss(euiTheme);
   const { logo: logoCss } = headerCss;

@@ -14,7 +14,7 @@ import {
   ChromeLayoutConfigProvider,
   SimpleDebugOverlay,
 } from '@kbn/core-chrome-layout-components';
-import { useChromeUiState } from '@kbn/core-chrome-browser-internal/src/ui_store';
+import { useChromeState } from '@kbn/core-chrome-browser-internal/src/ui_store';
 import { GridLayoutGlobalStyles } from './grid_global_app_style';
 import type {
   LayoutService,
@@ -79,10 +79,10 @@ export class GridLayout implements LayoutService {
     const projectAppMenu = chrome.getProjectAppMenuComponent();
 
     return React.memo(() => {
-      const chromeVisible = useChromeUiState((state) => state.isVisible);
-      const hasHeaderBanner = useChromeUiState((state) => !!state.headerBanner);
-      const chromeStyle = useChromeUiState((state) => state.chromeStyle);
-      const hasAppMenu = useChromeUiState((state) => !!state.currentActionMenu);
+      const chromeVisible = useChromeState((state) => state.isVisible);
+      const hasHeaderBanner = useChromeState((state) => !!state.headerBanner);
+      const chromeStyle = useChromeState((state) => state.chromeStyle);
+      const hasAppMenu = useChromeState((state) => !!state.currentActionMenu);
 
       const layoutConfig = layoutConfigs[chromeStyle];
 
