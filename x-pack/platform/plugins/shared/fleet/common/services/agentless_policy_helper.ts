@@ -138,7 +138,7 @@ export function validateDeploymentModesForInputs(
     if (input.enabled && !isInputAllowedForDeploymentMode(input, deploymentMode, packageInfo)) {
       throw new PackagePolicyValidationError(
         `Input ${input.type}${
-          packageInfo && ` in ${packageInfo.name}`
+          packageInfo?.name ? ` in ${packageInfo.name}` : ''
         } is not allowed for deployment mode '${deploymentMode}'`
       );
     }

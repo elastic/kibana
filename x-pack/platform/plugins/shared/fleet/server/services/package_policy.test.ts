@@ -217,20 +217,25 @@ jest.mock('./secrets', () => ({
 
 type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
 
-const mockAgentPolicyGet = (spaceIds: string[] = ['default']) => {
+const mockAgentPolicyGet = (spaceIds: string[] = ['default'], additionalProps?: any) => {
+  const basePolicy = {
+    name: 'Test Agent Policy',
+    namespace: 'test',
+    status: 'active',
+    is_managed: false,
+    updated_at: new Date().toISOString(),
+    updated_by: 'test',
+    revision: 1,
+    is_protected: false,
+    space_ids: spaceIds,
+    ...additionalProps,
+  };
+
   mockAgentPolicyService.get.mockImplementation(
     (_soClient: SavedObjectsClientContract, id: string, _force = false, _options) => {
       return Promise.resolve({
         id,
-        name: 'Test Agent Policy',
-        namespace: 'test',
-        status: 'active',
-        is_managed: false,
-        updated_at: new Date().toISOString(),
-        updated_by: 'test',
-        revision: 1,
-        is_protected: false,
-        space_ids: spaceIds,
+        ...basePolicy,
       });
     }
   );
@@ -240,15 +245,7 @@ const mockAgentPolicyGet = (spaceIds: string[] = ['default']) => {
       return Promise.resolve(
         ids.map((id) => ({
           id,
-          name: 'Test Agent Policy',
-          namespace: 'test',
-          status: 'active',
-          is_managed: false,
-          updated_at: new Date().toISOString(),
-          updated_by: 'test',
-          revision: 1,
-          is_protected: false,
-          space_ids: spaceIds,
+          ...basePolicy,
         }))
       );
     }
@@ -352,6 +349,48 @@ describe('Package policy service', () => {
       ).rejects.toThrowError(
         /Reusable integration policies cannot be used with agent policies belonging to multiple spaces./
       );
+    });
+
+    it('should throw validation error for agentless deployment mode with disallowed inputs', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'test-package-policy',
+        attributes: {},
+        references: [],
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      // Mock an agentless agent policy
+      mockAgentPolicyGet(undefined, { supports_agentless: true });
+
+      await expect(
+        packagePolicyService.create(
+          soClient,
+          esClient,
+          {
+            name: 'Test Package Policy',
+            namespace: 'test',
+            enabled: true,
+            policy_id: 'test',
+            policy_ids: ['test'],
+            inputs: [
+              {
+                type: 'tcp', // tcp input is in the blocklist for agentless
+                enabled: true,
+                streams: [],
+              },
+            ],
+            package: {
+              name: 'test',
+              title: 'Test',
+              version: '0.0.1',
+            },
+          },
+          { id: 'test-package-policy', skipUniqueNameVerification: true }
+        )
+      ).rejects.toThrowError(/Input tcp is not allowed for deployment mode 'agentless'/);
     });
   });
 
@@ -2143,6 +2182,55 @@ describe('Package policy service', () => {
           expect(call[2]).toContain(`test-agent-policy-${idx + 1}`);
           expect(call[3]).toMatchObject({ removeProtection: false });
         });
+      });
+
+      it('should throw validation error for agentless deployment mode with disallowed inputs', async () => {
+        const savedObjectsClient = createSavedObjectClientMock();
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        // Mock existing package policy
+        savedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            {
+              id: 'test',
+              type: 'abcd',
+              references: [],
+              version: 'test',
+              attributes: createPackagePolicyMock(),
+            },
+          ],
+        });
+
+        // Mock agentless agent policy
+        mockAgentPolicyGet(undefined, { supports_agentless: true });
+
+        await expect(
+          packagePolicyService.update(
+            savedObjectsClient,
+            elasticsearchClient,
+            'the-package-policy-id',
+            {
+              name: 'test-policy',
+              description: '',
+              namespace: 'default',
+              enabled: true,
+              policy_id: 'test',
+              policy_ids: ['test'],
+              inputs: [
+                {
+                  type: 'tcp', // tcp input is in the blocklist for agentless
+                  enabled: true,
+                  streams: [],
+                },
+              ],
+              package: {
+                name: 'test',
+                title: 'Test',
+                version: '0.0.1',
+              },
+            }
+          )
+        ).rejects.toThrowError(/Input tcp is not allowed for deployment mode 'agentless'/);
       });
     });
   });
@@ -5550,67 +5638,6 @@ describe('Package policy service', () => {
                 },
               },
             ],
-          },
-        ],
-        vars: {
-          paths: {
-            value: ['/var/log/apache2/access.log*'],
-            type: 'text',
-          },
-        },
-      });
-    });
-
-    it('should disable inputs if supports_agentless == true if inputs are not allowed', async () => {
-      const newPolicy = {
-        name: 'apache-1',
-        inputs: [
-          { type: 'logfile', enabled: false },
-          { type: 'tcp', enabled: true },
-        ],
-        package: { name: 'apache', version: '0.3.3' },
-        policy_id: '1',
-        policy_ids: ['1'],
-        supports_agentless: true,
-      } as NewPackagePolicy;
-      const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
-        createSavedObjectClientMock(),
-        newPolicy
-      );
-      expect(result).toEqual({
-        name: 'apache-1',
-        namespace: '',
-        description: '',
-        output_id: undefined,
-        package: {
-          name: 'apache',
-          title: 'Apache',
-          version: '1.0.0',
-          experimental_data_stream_features: undefined,
-        },
-        enabled: true,
-        policy_id: '1',
-        policy_ids: ['1'],
-        supports_agentless: true,
-        inputs: [
-          {
-            enabled: false,
-            type: 'logfile',
-            policy_template: 'log',
-            streams: [
-              {
-                enabled: false,
-                data_stream: {
-                  type: 'logs',
-                  dataset: 'apache.access',
-                },
-              },
-            ],
-          },
-          {
-            enabled: false,
-            type: 'tcp',
-            streams: undefined,
           },
         ],
         vars: {

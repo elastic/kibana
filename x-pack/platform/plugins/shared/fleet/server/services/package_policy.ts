@@ -1217,23 +1217,21 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
-    if ((packagePolicyUpdate.policy_ids?.length ?? 0) > 1) {
-      for (const policyId of packagePolicyUpdate.policy_ids) {
-        const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
-        if ((agentPolicy?.space_ids?.length ?? 0) > 1) {
-          throw new FleetError(
-            'Reusable integration policies cannot be used with agent policies belonging to multiple spaces.'
-          );
-        }
-
-        validateDeploymentModesForInputs(
-          packagePolicy.inputs,
-          agentPolicy?.supports_agentless || packagePolicy.supports_agentless
-            ? 'agentless'
-            : 'default',
-          pkgInfo
+    for (const policyId of packagePolicyUpdate.policy_ids) {
+      const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
+      if ((agentPolicy?.space_ids?.length ?? 0) > 1) {
+        throw new FleetError(
+          'Reusable integration policies cannot be used with agent policies belonging to multiple spaces.'
         );
       }
+
+      validateDeploymentModesForInputs(
+        packagePolicy.inputs,
+        agentPolicy?.supports_agentless || packagePolicy.supports_agentless
+          ? 'agentless'
+          : 'default',
+        pkgInfo
+      );
     }
 
     // Handle component template/mappings updates for experimental features, e.g. synthetic source
