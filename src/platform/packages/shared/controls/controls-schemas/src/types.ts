@@ -19,7 +19,7 @@ import { controlStateSchema, controlWidthSchema } from './control_state_schema';
 export type ControlsGroupState = TypeOf<typeof controlsGroupStateSchema>;
 
 export type ControlsLabelPosition = TypeOf<typeof controlsLabelPositionSchema>;
-export type ControlsChaining = TypeOf<typeof controlsChainingSchema>;
+export type ControlsChainingSystem = TypeOf<typeof controlsChainingSchema>;
 export type ControlsIgnoreParentSettings = TypeOf<typeof ignoreParentSettingsSchema>;
 
 export type ControlWidth = TypeOf<typeof controlWidthSchema>;

@@ -9,4 +9,9 @@
 
 export { controlsGroupStateSchema } from './src/controls_group_state_schema';
 
-export type { ControlsGroupState } from './src/types';
+export type {
+  ControlsGroupState,
+  ControlsLabelPosition,
+  ControlsChainingSystem,
+  ControlsIgnoreParentSettings,
+} from './src/types';

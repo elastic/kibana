@@ -31,7 +31,7 @@ export const controlWidthSchema = schema.oneOf(
 export const controlStateSchema = schema.object(
   {
     type: schema.string({ meta: { description: 'The type of the control panel.' } }),
-    controlConfig: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+    controlConfig: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     id: schema.maybe(
       schema.string({
         meta: { description: 'The unique ID of the control.' },
