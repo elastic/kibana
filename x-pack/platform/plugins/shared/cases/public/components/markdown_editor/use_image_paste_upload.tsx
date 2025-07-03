@@ -11,6 +11,7 @@ import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_
 import { useFilesContext } from '@kbn/shared-ux-file-context';
 import type { DoneNotification, FileState } from '@kbn/shared-ux-file-upload/src/upload_state';
 import { createUploadState, type UploadState } from '@kbn/shared-ux-file-upload/src/upload_state';
+import { type FileKindBase } from '@kbn/files-plugin/common/types';
 import { useUploadDone } from '../files/use_upload_done';
 import type { MarkdownEditorRef } from './editor';
 
@@ -22,8 +23,19 @@ interface UseImagePasteUploadArgs {
   fileKindId: string;
 }
 
-function getUploadPlaceholderCopy(filename: string) {
-  return `<!-- uploading "${filename}" -->`;
+function getUploadPlaceholderCopy(filename: string, extension?: string) {
+  return `<!-- uploading "${filename}${extension ? `.${extension}` : ''}" -->`;
+}
+
+function generateMarkdownLink(
+  filename: string,
+  id: string,
+  kind: FileKindBase,
+  extension?: string
+) {
+  return `![${filename}${extension ? `.${extension}` : ''}](/api/files/files/${
+    kind.id
+  }/${id}/blob)`;
 }
 
 export function useImagePasteUpload({
@@ -60,18 +72,18 @@ export function useImagePasteUpload({
   const replacePlaceholder = useCallback(
     (file: DoneNotification) => {
       if (!textarea) return;
+
       const newText = textarea.value.replace(
-        getUploadPlaceholderCopy(file.fileJSON.name),
-        `![${file.fileJSON.name}](/api/files/files/${kind.id}/${file.id}/blob)`
+        getUploadPlaceholderCopy(file.fileJSON.name, file.fileJSON.extension),
+        generateMarkdownLink(file.fileJSON.name, file.id, kind, file.fileJSON.extension)
       );
       field.setValue(newText);
     },
-    [textarea, field, kind.id]
+    [textarea, field, kind]
   );
 
   const onDone = useUploadDone({
     caseId,
-    owner,
     onSuccess: () => {
       setUploadingFile(null);
       setPlaceholderInserted(false);
@@ -115,12 +127,12 @@ export function useImagePasteUpload({
       uploadingFile === null ||
       placeholderInserted ||
       !caseId ||
-      !uploadingFile.fileJSON
+      !uploadingFile.file
     )
       return;
 
     const { selectionStart, selectionEnd } = textarea;
-    const placeholder = getUploadPlaceholderCopy(uploadingFile.fileJSON.name);
+    const placeholder = getUploadPlaceholderCopy(uploadingFile.file.name);
     const before = field.value.slice(0, selectionStart);
     const after = field.value.slice(selectionEnd);
     field.setValue(before + placeholder + after);
