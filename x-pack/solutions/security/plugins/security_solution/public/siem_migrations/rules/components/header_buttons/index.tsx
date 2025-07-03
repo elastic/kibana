@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import * as i18n from './translations';
 import type { RuleMigrationStats } from '../../types';
@@ -65,6 +66,18 @@ export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
             selectedOptions={selectedMigrationOption}
             singleSelection={{ asPlainText: true }}
             isClearable={false}
+            fullWidth={true}
+            inputPopoverProps={{
+              css: css`
+                width: 400px;
+                & .euiComboBox__inputWrap {
+                  width: 400px;
+                  & div {
+                    width: 400px;
+                  }
+                }
+              `,
+            }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

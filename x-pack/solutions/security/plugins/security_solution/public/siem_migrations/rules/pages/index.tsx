@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { RouteComponentProps } from 'react-router-dom';
 import type { RelatedIntegration } from '../../../../common/api/detection_engine';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
@@ -144,6 +145,9 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
             </EuiTitle>
           }
           border
+          childSectionCss={css`
+            min-width: 400px;
+          `}
         >
           <HeaderButtons
             ruleMigrationsStats={ruleMigrationsStats}
