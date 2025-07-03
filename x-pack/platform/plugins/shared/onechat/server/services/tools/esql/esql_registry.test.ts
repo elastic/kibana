@@ -51,12 +51,7 @@ describe('EsqlToolRegistry', () => {
         name: 'test-tool',
         description: 'A test tool',
         query: 'FROM my_cases | WHERE case_id == ?case_id',
-        params: {
-          test: {
-            type: 'keyword',
-            description: 'test param description',
-          },
-        },
+        params: { case_id: { type: 'keyword', description: 'Case ID' } },
         meta: {
           providerId: 'esql',
           tags: ['salesforce'],
@@ -85,12 +80,7 @@ describe('EsqlToolRegistry', () => {
         name: 'test-tool',
         description: 'A test tool',
         query: 'FROM my_cases | WHERE case_id == ?case_id',
-        params: {
-          test: {
-            type: 'keyword',
-            description: 'test param description',
-          },
-        },
+        params: { case_id: { type: 'keyword', description: 'Case ID' } },
         meta: {
           providerId: 'esql',
           tags: ['salesforce'],
@@ -148,12 +138,7 @@ describe('EsqlToolRegistry', () => {
           name: 'test-tool-1',
           description: 'A test tool',
           query: 'FROM my_cases | WHERE case_id == ?case_id',
-          params: {
-            test: {
-              type: 'keyword',
-              description: 'test param description',
-            },
-          },
+          params: { case_id: { type: 'keyword', description: 'Case ID' } },
           meta: {
             providerId: 'esql',
             tags: ['salesforce'],
@@ -166,12 +151,7 @@ describe('EsqlToolRegistry', () => {
           name: 'test-tool-2',
           description: 'A test tool',
           query: 'FROM my_cases | WHERE case_id == ?case_id',
-          params: {
-            test: {
-              type: 'keyword',
-              description: 'test param description',
-            },
-          },
+          params: { case_id: { type: 'keyword', description: 'Case ID' } },
           meta: {
             providerId: 'esql',
             tags: ['salesforce'],
@@ -249,7 +229,7 @@ describe('EsqlToolClient', () => {
         name: 'test-tool',
         description: 'A test tool',
         query: 'FROM my_cases | WHERE case_id == ?case_id',
-        params: {},
+        params: { case_id: { type: 'keyword', description: 'Case ID' } },
         meta: {
           providerId: 'esql',
           tags: ['test'],
@@ -286,7 +266,7 @@ describe('EsqlToolClient', () => {
         name: 'existing-tool',
         description: 'A test tool',
         query: 'FROM my_cases | WHERE case_id == ?case_id',
-        params: {},
+        params: { case_id: { type: 'keyword', description: 'Case ID' } },
         meta: {
           providerId: 'esql',
           tags: [],
@@ -318,7 +298,7 @@ describe('EsqlToolClient', () => {
         name: 'test-tool',
         description: 'A test tool',
         query: 'FROM my_cases | WHERE case_id == ?case_id',
-        params: {},
+        params: { case_id: { type: 'keyword', description: 'Case ID' } },
         meta: {
           providerId: 'esql',
           tags: [],
@@ -354,7 +334,7 @@ describe('EsqlToolClient', () => {
           name: 'tool-1',
           description: 'Tool 1',
           query: 'FROM my_cases | WHERE case_id == ?case_id',
-          params: {},
+          params: { case_id: { type: 'keyword', description: 'Case ID' } },
           meta: { providerId: 'esql', tags: [] },
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -364,7 +344,7 @@ describe('EsqlToolClient', () => {
           name: 'tool-2',
           description: 'Tool 2',
           query: 'FROM my_cases | WHERE case_id == ?case_id',
-          params: {},
+          params: { case_id: { type: 'keyword', description: 'Case ID' } },
           meta: { providerId: 'esql', tags: [] },
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -396,7 +376,7 @@ describe('EsqlToolClient', () => {
         name: 'existing-tool',
         description: 'Original description',
         query: 'FROM my_cases | WHERE case_id == ?case_id',
-        params: {},
+        params: { case_id: { type: 'keyword', description: 'Case ID' } },
         meta: { providerId: 'esql', tags: ['original'] },
         created_at: '2024-01-01T00:00:00.000Z',
         updated_at: '2024-01-01T00:00:00.000Z',
@@ -441,7 +421,7 @@ describe('EsqlToolClient', () => {
         name: 'test-tool',
         description: 'A test tool',
         query: 'FROM my_cases | WHERE case_id == ?case_id',
-        params: {},
+        params: { case_id: { type: 'keyword', description: 'Case ID' } },
         meta: { providerId: 'esql', tags: [] },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
