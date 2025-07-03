@@ -17,7 +17,6 @@ import { SPACES } from '../../common/lib/spaces';
 import { getAllTestSuiteFactory } from '../../common/suites/get_all.agnostic';
 
 export default function getAllSpacesTestSuite(context: FtrProviderContext) {
-  // @ts-expect-error getAllTestSuiteFactory expects only DeploymentAgnosticFtrProviderContext
   const { getAllTest, expectRbacForbidden } = getAllTestSuiteFactory(context);
 
   describe('get all', function () {
