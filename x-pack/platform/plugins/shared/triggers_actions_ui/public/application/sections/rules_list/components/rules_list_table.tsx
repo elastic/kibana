@@ -171,6 +171,20 @@ export function convertRulesToTableItems(opts: ConvertRulesToTableItemsOpts): Ru
   });
 }
 
+const LAST_RUN_CONTENT = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastRunTitleTooltip',
+  {
+    defaultMessage: 'Start time of the last run.',
+  }
+);
+
+const SNOOZE_RULE_NOTIFICATIONS = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.notifyTooltip',
+  {
+    defaultMessage: 'Snooze notifications for a rule.',
+  }
+);
+
 export const RulesListTable = (props: RulesListTableProps) => {
   const {
     rulesListKey,
@@ -430,16 +444,12 @@ export const RulesListTable = (props: RulesListTableProps) => {
             &nbsp;
             <EuiIconTip
               data-test-subj="rulesTableCell-lastExecutionDateTooltip"
-              content={i18n.translate(
-                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastRunTitleTooltip',
-                {
-                  defaultMessage: 'Start time of the last run.',
-                }
-              )}
+              content={LAST_RUN_CONTENT}
               size="s"
               color="subdued"
               type="questionInCircle"
               className="eui-alignTop"
+              aria-label={LAST_RUN_CONTENT}
             />
           </span>
         ),
@@ -482,16 +492,12 @@ export const RulesListTable = (props: RulesListTableProps) => {
             &nbsp;
             <EuiIconTip
               data-test-subj="rulesTableCell-notifyTooltip"
-              content={i18n.translate(
-                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.notifyTooltip',
-                {
-                  defaultMessage: 'Snooze notifications for a rule.',
-                }
-              )}
+              content={SNOOZE_RULE_NOTIFICATIONS}
               size="s"
               color="subdued"
               type="questionInCircle"
               className="eui-alignTop"
+              aria-label={SNOOZE_RULE_NOTIFICATIONS}
             />
           </span>
         ),
