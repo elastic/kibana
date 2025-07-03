@@ -15,9 +15,7 @@ import {
   SnapshotFrom,
 } from 'xstate5';
 import { Observable, filter, map, switchMap, timeout, catchError, throwError } from 'rxjs';
-import { MappingRuntimeField, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { isRunningResponse } from '@kbn/data-plugin/common';
-import { IEsSearchResponse } from '@kbn/search-types';
 import {
   Condition,
   SampleDocument,
@@ -26,13 +24,25 @@ import {
   getConditionFields,
   isAlwaysCondition,
 } from '@kbn/streams-schema';
+import { isNumber } from 'lodash';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { TimefilterHook } from '@kbn/data-plugin/public/query/timefilter/use_timefilter';
 import { i18n } from '@kbn/i18n';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { getPercentageFormatter } from '../../../../../util/formatters';
 import { emptyEqualsToAlways } from '../../../../../util/condition';
 
-// Types
+export interface RoutingSamplesMachineDeps {
+  data: DataPublicPluginStart;
+  timeState$: TimefilterHook['timeState$'];
+}
+
+export type RoutingSamplesActorRef = ActorRefFrom<typeof routingSamplesMachine>;
+export type RoutingSamplesActorSnapshot = SnapshotFrom<typeof routingSamplesMachine>;
+
+// Shared interfaces
+
 export interface RoutingSamplesInput {
   condition?: Condition;
   definition: Streams.WiredStream.GetResponse;
@@ -49,23 +59,16 @@ export interface RoutingSamplesContext {
 
 export type RoutingSamplesEvent =
   | { type: 'routingSamples.refresh' }
-  | { type: 'routingSamples.retry' }
   | { type: 'routingSamples.updateCondition'; condition?: Condition };
 
-export type RoutingSamplesActorRef = ActorRefFrom<typeof routingSamplesMachine>;
-export type RoutingSamplesActorSnapshot = SnapshotFrom<typeof routingSamplesMachine>;
-
-// Shared interfaces
-interface SearchParams {
-  condition?: Condition;
+interface SearchParams extends RoutingSamplesInput {
   start: number;
   end: number;
-  definition: Streams.WiredStream.GetResponse;
 }
 
 interface CollectorParams {
   data: DataPublicPluginStart;
-  searchParams: Pick<SearchParams, 'condition' | 'definition'>;
+  input: RoutingSamplesInput;
 }
 
 // Helper functions
@@ -109,7 +112,7 @@ export const routingSamplesMachine = setup({
     conditionUpdateDebounceTime: 500,
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QCcD2BXALgSwHZQGUBDAWwAcAbOAYjSz0NMrgDpkwAzd2ACwG0ADAF1EoMqljYcqXKJAAPRAGYAHCpYBGAGwAWNQFYl+gJwB2U1oBMAGhABPRPsvrTK-To0rVAlZdUBff1s6HHxicipYWgxQxgjWdDIIIkwwAHkyaVxYQREkEHFJLLlFBFVjFi1jYwFjJS0VHQEteq1bBwRLLVMWYxVTY08dGt9GrUDgmIZw5lgWDjBMAGMeBhYIVCX0EjBcTDmKVCIIBmoN3DAWPAA3VABrS6XUCiolzAARTe3d-dy5Qqk2BkJUQGg0lgELHqSghWg0wwESmM7UQEPUjR0+hMzVM+nMSgmIBC0yYkXmixWaw2Wx2ewORxO+GoYGQaGQLEoKQ4qGQJBYTxeYDenxpPxywn+EkBwPypTBEKhLVh8JqSJRZScLAG5g0Sg0WP0Aks+sJxLCpNYC2Wq3w6y+tP2LBZbOi9HN8Tm7EwyDsf3yAOKstB4J0LER+nBlj0pma+ja9lRcahOkxuOGDQE7lNU3ds3J1qp9p+AGEMHSWIdjqdzpcbvdHs9Xh8i3TS+g9n6xFLA6A5frISnBpZqhYNAJweqseoBDOVFpaoaVBoLNm3XE81bKbbqd89m3y5XGVBmayeRyKFyeXyBU2Rbv9vvMJ2Ct2gbIgwgwYaWIPwSO4eONgJggWhJjOtS6OYKaGqYq6xDMZKbjaUB2qKe5lo6zo8q68EWp6iw+s+AZviCn4aIMLDGjocLDpiNROOq876Cwho+PiKgzqmgRBCAuCoBAcByGa66RJKRQkR+ShNJougGEYZgWEBHQALRYr0mYwlY1FGDGOhwSSHr5luUBidK769oguhKD+wyePCsJzko6p6ixxjUU0ljDq4qhxvpuaIRSyGofe8D+q+MoWSBFG-kuOgOS06pghUtTUTimbGFGuJ+SJlqBYWaGOoeDCmT2CiIKYSI2YMsXxU5wGwr0VT6I0-ZRhl4w8cJCG5QW24to6sDoEsSxwKFXbiRFZWflJkKgZ5zUzuYnnxh0DUmKmeq+LGWgdZMa7dXMSH5SFTqnsgJUSZFurSXNlgLQIS1dOqzg9DUKYceROhKAM2UHUZQU7g6j5jS+E3mVNVQaFVdlxc0jnqtR6h3Q9oHGFYViZr9eH-cdQMYfSVb4Bdk2lBVFQxfZcMJcBcI9POd0QqorjNFjhlHX1BXAywg3DaNxPg3KTQ9F45GqO5pieaYk5qbiPiWLioEWHirMbnlHP3lzWHnWFYOkfCD0sCLdRjDoEvy4xEtQm5+oee9tTcf4QA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QCcD2BXALgSwHZQGUBDAWwAcAbOAYjSz0NMrgDpkwAzd2ACwG0ADAF1EoMqljYcqXKJAAPRADYAjCwDsAJiUCBSgJwqAHAGYVAViXqlAGhABPRABZLLc9aUmr6rSpMBffzs6HHxicipYWgxQxgjWdDIIIkwwAGEZCClsGUERJBBxSWlZAsUEL3MWIxUVJ2N9ARV9cxVbB2cTExYdXU16vyNzIydA4JiGcOZYFggwACMMXABjBgzcLJLqeVhMFLAWIg5U5AAKZczsmQBVJP2AEQWl5bAAFWwSMABKaPowpkisye6BWa0uJTyciKV1KoHKJnUVTq6hMTicAjM6IEljsjgQnm6mi0NRM+nq5j0+jGIBCkwBrA4YEwyx4DFmqGW6E+uEwMwoqCIWXw1AgMgOeAAbqgANYHC4UKjLTD3DlcsA82CQgrQkpycrmExGFhOKxGAyIymafS4xD6O0sO0Y7HqCwYlTU2n-eIzRnM1n4dmc7m8lj8wUMahgZBoZAsSgpDioZAkFjyxXK1XBzXCKESGF6xAG-QsPzuQxE-RKE02hBGdRG8zmJx2pxGTReTzqD0TL3TFi+lls0VB9WYDIgkNhoVQEViliSmVy1AKsBKlUjjXjnlasR53VlQtoh3qASNJ31EbWjoIPwqdRuUwmPpafp+bt-OJ9gf+qCBtU8rdJwFadI2jJM4woBMkxTNNVwzDdeUAndCj3HJYQUQ8qk8Iw22MLo-HUK88RUTQBE0Y1zErAR1CcDxdHMQIghAXBUDmeACk9T9IlzYo0ILBAsMNUxhhwusTRUGtNCMAQS10AR0TvTRtBcd9YimQE5kWEFVnwdZNj47VUJkfj0WLZsVGomjaKaPQa0sGS2jLEZsUbRtVLpb1+yZQd8B4-MDwE7psOE0SxNUGsT26RtzOaC9K00dze0Bb8h0zUd2N3XjjICizyJRFp9FMQihn0JSIsMFhsWbA1DSJQiqSYzj1IZbyfz-LNQ2Ahg-P3OFEFdDRSUoorCsosrryMfR70aVtRpafCGMansuJav1UoQmZRVwMAeoMvrayaB1SMRA1NAsk0TBrSajXrCxrFPWp9BMBKlo-ZqfVa9b-zHJZeV27L9ostRgpMEScJo8Lr1qDFjS8JSDWk9xnsSlaPrWgNh2+wC+S63zDKy9DyjqYsQbBsKa0emSntUIlaZcFoUferz0d-THg2x9ltv+wnEGk7oyIsO8alIswJKhs7yOpto2wNJGXsCIA */
   id: 'routingSamples',
   context: ({ input }) => ({
     condition: input.condition,
@@ -165,10 +168,10 @@ export const routingSamplesMachine = setup({
                   ],
                 },
                 onDone: {
-                  target: 'success',
+                  target: 'done',
                 },
                 onError: {
-                  target: 'error',
+                  target: 'done',
                   actions: [
                     {
                       type: 'storeDocumentsError',
@@ -178,15 +181,8 @@ export const routingSamplesMachine = setup({
                 },
               },
             },
-            success: {
+            done: {
               type: 'final',
-            },
-            error: {
-              on: {
-                'routingSamples.retry': {
-                  target: 'loading',
-                },
-              },
             },
           },
         },
@@ -211,10 +207,10 @@ export const routingSamplesMachine = setup({
                   ],
                 },
                 onDone: {
-                  target: 'success',
+                  target: 'done',
                 },
                 onError: {
-                  target: 'error',
+                  target: 'done',
                   actions: [
                     {
                       type: 'storeDocumentCountsError',
@@ -224,13 +220,8 @@ export const routingSamplesMachine = setup({
                 },
               },
             },
-            success: {
+            done: {
               type: 'final',
-            },
-            error: {
-              on: {
-                'routingSamples.retry': 'loading',
-              },
             },
           },
         },
@@ -238,11 +229,6 @@ export const routingSamplesMachine = setup({
     },
   },
 });
-
-export interface RoutingSamplesMachineDeps {
-  data: DataPublicPluginStart;
-  timeState$: TimefilterHook['timeState$'];
-}
 
 export const createRoutingSamplesMachineImplementations = ({
   data,
@@ -258,7 +244,7 @@ export const createRoutingSamplesMachineImplementations = ({
 export function createDocumentsCollectorActor({ data }: Pick<RoutingSamplesMachineDeps, 'data'>) {
   return fromObservable<SampleDocument[], Pick<SearchParams, 'condition' | 'definition'>>(
     ({ input }) => {
-      return collectDocuments({ data, searchParams: input });
+      return collectDocuments({ data, input });
     }
   );
 }
@@ -268,7 +254,7 @@ export function createDocumentsCountCollectorActor({
 }: Pick<RoutingSamplesMachineDeps, 'data'>) {
   return fromObservable<string | undefined, Pick<SearchParams, 'condition' | 'definition'>>(
     ({ input }) => {
-      return collectDocumentCounts({ data, searchParams: input });
+      return collectDocumentCounts({ data, input });
     }
   );
 }
@@ -279,9 +265,6 @@ function createTimeUpdatesActor({ timeState$ }: Pick<RoutingSamplesMachineDeps, 
   );
 }
 
-/**
- * Creates a timestamp range query object for Elasticsearch
- */
 const createTimestampRangeQuery = (start: number, end: number) => ({
   range: {
     '@timestamp': {
@@ -313,25 +296,18 @@ function getRuntimeMappings(
 ): MappingRuntimeFields {
   if (!condition) return {};
 
-  const wiredMappedFields =
-    'wired' in definition.stream.ingest ? definition.stream.ingest.wired.fields : {};
-  const mappedFields = Object.keys(wiredMappedFields).concat(
-    Object.keys(definition.inherited_fields)
-  );
+  const mappedFields = Object.keys({
+    ...definition.inherited_fields,
+    ...definition.stream.ingest.wired.fields,
+  });
 
   return Object.fromEntries(
     getConditionFields(condition)
       .filter((field) => !mappedFields.includes(field.name))
-      .map((field) => [
-        field.name,
-        { type: field.type === 'string' ? 'keyword' : 'double' } as MappingRuntimeField,
-      ])
+      .map((field) => [field.name, { type: field.type === 'string' ? 'keyword' : 'double' }])
   );
 }
 
-/**
- * Processes condition to handle empty equals to always conversion
- */
 function processCondition(condition?: Condition): Condition | undefined {
   if (!condition) return undefined;
   const convertedCondition = emptyEqualsToAlways(condition);
@@ -346,7 +322,8 @@ function handleTimeoutError(error: Error) {
       () =>
         new Error(
           i18n.translate('xpack.streams.routingSamples.documentsSearchTimeoutErrorMessage', {
-            defaultMessage: 'Documents search timed out after 10 seconds.',
+            defaultMessage:
+              'Documents search timed out after 10 seconds. Refresh the preview or try simplifying the routing condition.',
           })
         )
     );
@@ -354,16 +331,6 @@ function handleTimeoutError(error: Error) {
   return throwError(() => error);
 }
 
-/**
- * Extracts documents from search result
- */
-function extractDocumentsFromResult(result: IEsSearchResponse): SampleDocument[] {
-  return result.rawResponse.hits.hits.map((hit) => hit._source);
-}
-
-/**
- * Builds search parameters for documents query
- */
 function buildDocumentsSearchParams({ condition, start, end, definition }: SearchParams) {
   const finalCondition = processCondition(condition);
   const runtimeMappings = getRuntimeMappings(definition, finalCondition);
@@ -371,7 +338,6 @@ function buildDocumentsSearchParams({ condition, start, end, definition }: Searc
   return {
     index: definition.stream.name,
     body: {
-      runtime_mappings: runtimeMappings,
       query: {
         bool: {
           must: [
@@ -380,17 +346,15 @@ function buildDocumentsSearchParams({ condition, start, end, definition }: Searc
           ],
         },
       },
+      runtime_mappings: runtimeMappings,
       size: SAMPLES_SIZE,
-      sort: [{ '@timestamp': { order: 'desc' as const } }],
+      sort: [{ '@timestamp': { order: 'desc' } }],
       terminate_after: SAMPLES_SIZE,
       track_total_hits: false,
     },
   };
 }
 
-/**
- * Builds search parameters for document count query
- */
 function buildDocumentCountSearchParams({ start, end, definition }: SearchParams) {
   return {
     index: definition.stream.name,
@@ -402,9 +366,6 @@ function buildDocumentCountSearchParams({ start, end, definition }: SearchParams
   };
 }
 
-/**
- * Builds search parameters for document count query
- */
 function buildDocumentCountProbabilitySearchParams({
   condition,
   definition,
@@ -420,9 +381,7 @@ function buildDocumentCountProbabilitySearchParams({
   return {
     index: definition.stream.name,
     body: {
-      runtime_mappings: runtimeMappings,
       query: createTimestampRangeQuery(start, end),
-      size: 0,
       aggs: {
         sample: {
           random_sampler: {
@@ -435,6 +394,10 @@ function buildDocumentCountProbabilitySearchParams({
           },
         },
       },
+      runtime_mappings: runtimeMappings,
+      size: 0,
+      _source: false,
+      track_total_hits: false,
     },
   };
 }
@@ -451,22 +414,18 @@ function calculateProbability(docCount?: number): number {
   return probability <= 0.5 ? probability : 1;
 }
 
-/**
- * Collects sample documents using Elasticsearch search
- */
-function collectDocuments({ data, searchParams }: CollectorParams): Observable<SampleDocument[]> {
+function collectDocuments({ data, input }: CollectorParams): Observable<SampleDocument[]> {
   const abortController = new AbortController();
 
   const { start, end } = getAbsoluteTimestamps(data);
-  const params = buildDocumentsSearchParams({ ...searchParams, start, end });
+  const params = buildDocumentsSearchParams({ ...input, start, end });
 
   return new Observable((observer) => {
     const subscription = data.search
       .search({ params }, { abortSignal: abortController.signal })
       .pipe(
         timeout(SEARCH_TIMEOUT_MS),
-        // filter((result) => Boolean(result.rawResponse.hits.hits)),
-        map(extractDocumentsFromResult),
+        map((result) => result.rawResponse.hits.hits.map((hit) => hit._source)),
         catchError(handleTimeoutError)
       )
       .subscribe(observer);
@@ -478,17 +437,14 @@ function collectDocuments({ data, searchParams }: CollectorParams): Observable<S
   });
 }
 
-/**
- * Collects document counts with sampling for percentage calculation
- */
-function collectDocumentCounts({
-  data,
-  searchParams,
-}: CollectorParams): Observable<string | undefined> {
+const percentageFormatter = getPercentageFormatter({ precision: 2 });
+
+function collectDocumentCounts({ data, input }: CollectorParams): Observable<string | undefined> {
   const abortController = new AbortController();
 
   const { start, end } = getAbsoluteTimestamps(data);
-  const params = buildDocumentCountSearchParams({ ...searchParams, start, end });
+  const searchParams = { ...input, start, end };
+  const params = buildDocumentCountSearchParams(searchParams);
 
   return new Observable((observer) => {
     const subscription = data.search
@@ -498,19 +454,15 @@ function collectDocumentCounts({
         timeout(SEARCH_TIMEOUT_MS),
         switchMap((countResult) => {
           const docCount =
-            countResult.rawResponse.hits.total &&
-            typeof countResult.rawResponse.hits.total !== 'number' &&
-            'value' in countResult.rawResponse.hits.total
-              ? countResult.rawResponse.hits.total.value
-              : countResult.rawResponse.hits.total;
+            !countResult.rawResponse.hits.total || isNumber(countResult.rawResponse.hits.total)
+              ? countResult.rawResponse.hits.total
+              : countResult.rawResponse.hits.total.value;
 
           return data.search
             .search(
               {
                 params: buildDocumentCountProbabilitySearchParams({
                   ...searchParams,
-                  start,
-                  end,
                   docCount,
                 }),
               },
@@ -520,7 +472,10 @@ function collectDocumentCounts({
               filter((result) => !isRunningResponse(result)),
               timeout(SEARCH_TIMEOUT_MS),
               map((result) => {
+                // Aggregations don't return partial results so we just wait until the end
                 if (result.rawResponse.aggregations) {
+                  // We need to divide this by the sampling / probability factor:
+                  // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-random-sampler-aggregation.html#random-sampler-special-cases
                   const sampleAgg = result.rawResponse.aggregations.sample as {
                     doc_count: number;
                     probability: number;
@@ -528,8 +483,7 @@ function collectDocumentCounts({
                   };
                   const randomSampleDocCount = sampleAgg.doc_count / sampleAgg.probability;
                   const matchingDocCount = sampleAgg.matching_docs.doc_count;
-                  const percentage = (100 * matchingDocCount) / randomSampleDocCount;
-                  return percentage.toFixed(2);
+                  return percentageFormatter.format(matchingDocCount / randomSampleDocCount);
                 }
                 return undefined;
               }),

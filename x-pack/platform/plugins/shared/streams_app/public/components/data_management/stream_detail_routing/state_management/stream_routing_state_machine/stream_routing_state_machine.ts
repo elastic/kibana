@@ -165,14 +165,10 @@ export const streamRoutingMachine = setup({
           invoke: {
             id: 'routingSamplesMachine',
             src: 'routingSamplesMachine',
-            input: ({ context }) => {
-              const currentRoutingRule = selectCurrentRule(context);
-
-              return {
-                definition: context.definition,
-                condition: currentRoutingRule.if,
-              };
-            },
+            input: ({ context }) => ({
+              definition: context.definition,
+              condition: selectCurrentRule(context).if,
+            }),
           },
           states: {
             changing: {
@@ -185,6 +181,7 @@ export const streamRoutingMachine = setup({
                   actions: enqueueActions(({ enqueue, event }) => {
                     enqueue({ type: 'patchRule', params: { routingRule: event.routingRule } });
 
+                    // Trigger samples collection only on condition change
                     if (event.routingRule.if) {
                       enqueue.sendTo('routingSamplesMachine', {
                         type: 'routingSamples.updateCondition',

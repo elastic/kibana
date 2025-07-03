@@ -39,8 +39,7 @@ export const PreviewMatches = ({
   if (error) {
     return (
       <EuiText size="xs" textAlign="center">
-        {`${matchText}: `}
-        {errorText}
+        {`${matchText}: ${errorText}`}
       </EuiText>
     );
   }
@@ -48,8 +47,7 @@ export const PreviewMatches = ({
   if (approximateMatchingPercentage) {
     return (
       <EuiText size="xs" textAlign="center">
-        {`${matchText}: `}
-        {`${approximateMatchingPercentage}%`}
+        {`${matchText}: ${approximateMatchingPercentage}`}
         <InfoTooltip />
       </EuiText>
     );
