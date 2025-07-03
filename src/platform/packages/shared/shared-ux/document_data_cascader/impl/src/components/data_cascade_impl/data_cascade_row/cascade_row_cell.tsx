@@ -63,7 +63,10 @@ export function CascadeRowCell<G extends GroupNode, L extends LeafNode>({
   }, [fetchCascadeRowGroupLeafData, isLeafNode, isPendingRowLeafDataFetch, leafData, row]);
 
   return (
-    <EuiFlexGroup direction="column" css={{ padding: `0 ${8 * row.depth}px` }}>
+    <EuiFlexGroup
+      direction="column"
+      css={({ euiTheme }) => ({ padding: `0 calc(${euiTheme.size.s} * ${row.depth})` })}
+    >
       <EuiFlexItem>
         <EuiFlexGroup direction="row">
           <EuiFlexItem grow={4}>
