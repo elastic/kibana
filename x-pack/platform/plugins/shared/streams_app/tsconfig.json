@@ -62,6 +62,7 @@
     "@kbn/discover-utils",
     "@kbn/discover-shared-plugin",
     "@kbn/server-route-repository-client",
+    "@kbn/management-settings-ids",
     "@kbn/logging",
     "@kbn/core-analytics-browser",
     "@kbn/charts-plugin",
@@ -72,6 +73,5 @@
     "@kbn/saved-objects-tagging-plugin",
     "@kbn/config-schema",
     "@kbn/scout",
-    "@kbn/management-settings-ids",
   ]
 }
