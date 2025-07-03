@@ -20,55 +20,46 @@ describe('CommandRegistry', () => {
   });
 
   describe('register', () => {
-    it('should register a command handler', () => {
+    it('registers a command handler and delegates methods', () => {
       const handler = new RunscriptCommandHandler();
       registry.register(handler);
-
-      // Test registration by checking if methods work for the registered command
       expect(registry.getEmptyStringArguments('runscript')).toEqual(['ScriptName', 'CloudFile']);
     });
 
-    it('should register multiple command handlers', () => {
+    it('registers multiple command handlers and delegates to each', () => {
       const runscriptHandler = new RunscriptCommandHandler();
       const mockHandler = new (class extends BaseCommandHandler {
         readonly name = 'other';
       })();
-
       registry.register(runscriptHandler);
       registry.register(mockHandler);
-
-      // Test both handlers are registered by checking their functionality
       expect(registry.getEmptyStringArguments('runscript')).toEqual(['ScriptName', 'CloudFile']);
       expect(registry.getEmptyStringArguments('other')).toEqual([]);
     });
   });
 
   describe('getEmptyStringArguments', () => {
-    it('should return empty array for unregistered commands', () => {
+    it('returns [] for unregistered commands', () => {
       expect(registry.getEmptyStringArguments('unknown')).toEqual([]);
-      expect(registry.getEmptyStringArguments('upload')).toEqual([]); // No handler needed
+      expect(registry.getEmptyStringArguments('upload')).toEqual([]);
     });
 
-    it('should return correct empty string arguments for registered commands', () => {
+    it('returns correct empty string arguments for registered commands', () => {
       registry.register(new RunscriptCommandHandler());
-
       expect(registry.getEmptyStringArguments('runscript')).toEqual(['ScriptName', 'CloudFile']);
-      expect(registry.getEmptyStringArguments('upload')).toEqual([]); // No handler, uses default
+      expect(registry.getEmptyStringArguments('upload')).toEqual([]);
     });
 
-    it('should handle upload command correctly without handler', () => {
-      // Upload command doesn't need a handler - uses default boolean flag behavior
+    it('handles upload command correctly without handler', () => {
+      // Upload command uses default boolean flag behavior, not empty string arguments
       const emptyStringArgs = registry.getEmptyStringArguments('upload');
       expect(emptyStringArgs).toEqual([]);
-
-      // This means --file with no value gets boolean true, which file selectors can detect
       expect(emptyStringArgs.includes('file')).toBe(false);
     });
   });
 
-  describe('command handler methods', () => {
+  describe('delegation to registered handlers', () => {
     let mockHandler: CommandHandler;
-
     beforeEach(() => {
       mockHandler = {
         name: 'mock',
@@ -79,7 +70,7 @@ describe('CommandRegistry', () => {
       };
     });
 
-    it('should call initializeArgState on registered handler', () => {
+    it('calls initializeArgState on registered handler', () => {
       registry.register(mockHandler);
       const parsedInput = {
         name: 'mock',
@@ -87,27 +78,23 @@ describe('CommandRegistry', () => {
         hasArg: jest.fn(),
       } as unknown as ParsedCommandInterface;
       const enteredCommand = {} as EnteredCommand;
-
       registry.initializeArgState(parsedInput, enteredCommand);
-
       expect(mockHandler.initializeArgState).toHaveBeenCalledWith(parsedInput, enteredCommand);
     });
 
-    it('should call reconstructCommandText on registered handler', () => {
+    it('calls reconstructCommandText on registered handler', () => {
       registry.register(mockHandler);
       const parsedInput = {
         name: 'mock',
         args: {},
         hasArg: jest.fn(),
       } as unknown as ParsedCommandInterface;
-
       const result = registry.reconstructCommandText(parsedInput);
-
       expect(result).toBe('mock command');
       expect(mockHandler.reconstructCommandText).toHaveBeenCalledWith(parsedInput);
     });
 
-    it('should call syncState on registered handler', () => {
+    it('calls syncState on registered handler', () => {
       registry.register(mockHandler);
       const parsedInput = {
         name: 'mock',
@@ -115,23 +102,24 @@ describe('CommandRegistry', () => {
         hasArg: jest.fn(),
       } as unknown as ParsedCommandInterface;
       const enteredCommand = {} as EnteredCommand;
-
       registry.syncState(parsedInput, enteredCommand);
-
       expect(mockHandler.syncState).toHaveBeenCalledWith(parsedInput, enteredCommand);
     });
+  });
 
-    it('should not throw when calling methods on unregistered commands', () => {
+  describe('fallback/default behavior for unregistered commands', () => {
+    it('returns default values and does not throw for unregistered commands', () => {
       const parsedInput = {
         name: 'unknown',
         args: {},
         hasArg: jest.fn(),
       } as unknown as ParsedCommandInterface;
       const enteredCommand = {} as EnteredCommand;
-
+      // Should not throw and should do nothing for void methods
       expect(() => registry.initializeArgState(parsedInput, enteredCommand)).not.toThrow();
       expect(() => registry.syncState(parsedInput, enteredCommand)).not.toThrow();
-      expect(registry.reconstructCommandText(parsedInput)).toBeUndefined();
+      // Should return default object for reconstructCommandText
+      expect(registry.reconstructCommandText(parsedInput)).toEqual({ parsedInput });
     });
   });
 });
