@@ -8,21 +8,33 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiText, EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
+import { TimeUnit } from '@kbn/apm-types-shared';
+import { asAbsoluteDateTime } from '../../utils/formatters/datetime';
 
 interface TimestampProps {
   timestamp: number;
+  absoluteTimeType?: 'tooltip' | 'inline';
+  timeUnit?: TimeUnit;
 }
 
-export function Timestamp({ timestamp }: TimestampProps) {
+export function Timestamp({
+  timestamp,
+  absoluteTimeType = 'inline',
+  timeUnit = 'milliseconds',
+}: TimestampProps) {
   const momentTime = moment(timestamp);
   const relativeTime = momentTime.fromNow();
-  const absoluteTime = momentTime.format('MMM D, YYYY @ HH:mm:ss');
+  const absoluteTime = asAbsoluteDateTime(timestamp, timeUnit);
 
-  return (
+  return absoluteTimeType ? (
     <EuiText size="xs" data-test-subj="unifiedDocViewerObservabilityTracesTimestamp">
       {absoluteTime} ({relativeTime})
     </EuiText>
+  ) : (
+    <EuiToolTip content={absoluteTime}>
+      <>{relativeTime}</>
+    </EuiToolTip>
   );
 }

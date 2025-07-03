@@ -11,13 +11,14 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import moment from 'moment';
 import { Timestamp } from '.';
+import { asAbsoluteDateTime } from '../../utils/formatters/datetime';
 
 const timestamp = 1617549061000;
 
 describe('Timestamp', () => {
   it('should render both absolute and relative time correctly', () => {
     render(<Timestamp timestamp={timestamp} />);
-    const absoluteTime = moment(timestamp).format('MMM D, YYYY @ HH:mm:ss');
+    const absoluteTime = asAbsoluteDateTime(timestamp);
     const relativeTime = moment(timestamp).fromNow();
 
     expect(screen.queryByTestId('unifiedDocViewerObservabilityTracesTimestamp')?.innerHTML).toEqual(
@@ -28,7 +29,7 @@ describe('Timestamp', () => {
   it('should display the relative time correctly for a recent timestamp', () => {
     const recentTimestamp = moment().subtract(10, 'minutes').valueOf();
     render(<Timestamp timestamp={recentTimestamp} />);
-    const absoluteTime = moment(recentTimestamp).format('MMM D, YYYY @ HH:mm:ss');
+    const absoluteTime = asAbsoluteDateTime(recentTimestamp);
     const relativeTime = moment(recentTimestamp).fromNow();
 
     expect(screen.queryByTestId('unifiedDocViewerObservabilityTracesTimestamp')?.innerHTML).toEqual(
