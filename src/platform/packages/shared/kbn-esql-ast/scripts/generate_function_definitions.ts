@@ -333,7 +333,7 @@ import { type FunctionDefinition, FunctionDefinitionTypes } from '../types';
 ${
   functionsType === FunctionDefinitionTypes.SCALAR
     ? `import type { ESQLFunction } from '../../types';
-import { isLiteral } from '../../ast/helpers';;`
+import { isLiteral } from '../../ast/is';;`
     : ''
 }
 ${

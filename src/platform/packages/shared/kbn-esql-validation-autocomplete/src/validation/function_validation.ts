@@ -15,11 +15,11 @@ import {
   isIdentifier,
   UNSUPPORTED_COMMANDS_BEFORE_MATCH,
   UNSUPPORTED_COMMANDS_BEFORE_QSTR,
+  isList,
 } from '@kbn/esql-ast';
 import { getMessageFromId, errors } from '@kbn/esql-ast/src/definitions/utils';
 import { FunctionParameter, FunctionDefinitionTypes } from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
-import { isList } from '@kbn/esql-ast/src/ast/helpers';
 import { getColumnForASTNode } from '@kbn/esql-ast/src/definitions/utils';
 import {
   isLiteralItem,

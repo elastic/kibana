@@ -30,7 +30,7 @@ import {
   getOperatorsSuggestionsAfterNot,
   getSuggestionsToRightOfOperatorExpression,
 } from './operators';
-import { isColumn, isFunctionExpression, isLiteral, isTimeInterval } from '../../ast/helpers';
+import { isColumn, isFunctionExpression, isLiteral, isTimeInterval } from '../../ast/is';
 import { Walker } from '../../walker';
 
 export const shouldBeQuotedText = (

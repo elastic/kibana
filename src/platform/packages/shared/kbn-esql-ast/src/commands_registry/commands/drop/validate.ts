@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { isColumn } from '../../../ast/helpers';
+import { isColumn } from '../../../ast/is';
 import type { ESQLColumn, ESQLCommand, ESQLMessage } from '../../../types';
 
 export const validate = (command: ESQLCommand): ESQLMessage[] => {

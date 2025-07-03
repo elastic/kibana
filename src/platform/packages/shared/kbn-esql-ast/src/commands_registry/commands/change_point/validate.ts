@@ -8,9 +8,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
-import { isColumn } from '../../../ast/helpers';
+import { isColumn, isOptionNode } from '../../../ast/is';
 import { isNumericType } from '../../../definitions/types';
-import { isOptionNode } from '../../../ast/util';
 import type { ICommandContext } from '../../types';
 
 export const validate = (

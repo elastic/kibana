@@ -15,7 +15,7 @@ import type {
   ESQLIdentifier,
   ESQLAst,
 } from '../../../types';
-import { isBinaryExpression, isIdentifier, isSource } from '../../../ast/helpers';
+import { isBinaryExpression, isIdentifier, isSource } from '../../../ast/is';
 import type { ICommandContext } from '../../types';
 import { errors } from '../../../definitions/utils/errors';
 

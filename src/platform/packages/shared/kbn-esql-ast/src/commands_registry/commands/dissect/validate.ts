@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { getMessageFromId } from '../../../definitions/utils/errors';
-import { isOptionNode } from '../../../ast/util';
-import { isLiteral, isInlineCast } from '../../../ast/helpers';
+import { isLiteral, isInlineCast, isOptionNode } from '../../../ast/is';
 import type {
   ESQLColumn,
   ESQLCommand,

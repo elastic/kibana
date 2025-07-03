@@ -8,7 +8,7 @@
  */
 import uniqBy from 'lodash/uniqBy';
 import type { ESQLCommand, ESQLFunction, ESQLAstBaseItem } from '../../../types';
-import { isFunctionExpression } from '../../../ast/helpers';
+import { isFunctionExpression } from '../../../ast/is';
 import type { ESQLFieldWithMetadata } from '../../types';
 import { ICommandContext } from '../../types';
 

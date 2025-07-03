@@ -15,7 +15,7 @@ import {
   getLastNonWhitespaceChar,
   handleFragment,
 } from '../../../definitions/utils/autocomplete';
-import { isColumn } from '../../../ast/helpers';
+import { isColumn } from '../../../ast/is';
 
 export async function autocomplete(
   query: string,

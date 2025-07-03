@@ -12,7 +12,7 @@ import { walk } from '../../../walker';
 import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../types';
 import { ICommandContext } from '../../types';
 import { FieldType } from '../../../definitions/types';
-import { isColumn } from '../../../ast/helpers';
+import { isColumn } from '../../../ast/is';
 
 function transformMapToESQLFields(
   inputMap: Map<string, ESQLUserDefinedColumn[]>

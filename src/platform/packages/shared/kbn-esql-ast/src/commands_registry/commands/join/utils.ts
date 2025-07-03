@@ -23,7 +23,7 @@ import {
 } from '../../types';
 import { JoinCommandPosition, JoinPosition, JoinStaticPosition } from './types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import { isColumn } from '../../../ast/helpers';
+import { isColumn } from '../../../ast/is';
 
 const REGEX =
   /^(?<type>\w+((?<after_type>\s+((?<mnemonic>(JOIN|JOI|JO|J)((?<after_mnemonic>\s+((?<index>\S+((?<after_index>\s+(?<as>(AS|A))?(?<after_as>\s+(((?<alias>\S+)?(?<after_alias>\s+)?)?))?((?<on>(ON|O)((?<after_on>\s+(?<cond>[^\s])?)?))?))?))?))?))?))?))?/i;

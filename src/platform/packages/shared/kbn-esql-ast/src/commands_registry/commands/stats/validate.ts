@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommand, ESQLMessage, ESQLFunction } from '../../../types';
-import { isFunctionExpression, isWhereExpression } from '../../../ast/helpers';
+import { isFunctionExpression, isWhereExpression } from '../../../ast/is';
 import { isAssignment, checkAggExistence, checkFunctionContent } from './utils';
 
 export const validate = (command: ESQLCommand): ESQLMessage[] => {

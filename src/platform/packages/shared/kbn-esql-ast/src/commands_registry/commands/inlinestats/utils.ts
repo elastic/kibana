@@ -16,8 +16,8 @@ import {
   isWhereExpression,
   isParamLiteral,
   isLiteral,
-} from '../../../ast/helpers';
-import { isOptionNode } from '../../../ast/util';
+  isOptionNode,
+} from '../../../ast/is';
 import { Walker } from '../../../walker';
 import {
   findPreviousWord,

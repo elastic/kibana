@@ -24,7 +24,7 @@ import {
   ICommandCallbacks,
 } from '../../types';
 import { EDITOR_MARKER } from '../../../parser/constants';
-import { isColumn, isFunctionExpression, isIdentifier, isSource } from '../../../ast/helpers';
+import { isColumn, isFunctionExpression, isIdentifier, isSource } from '../../../ast/is';
 
 function isAssignment(arg: ESQLAstItem): arg is ESQLFunction {
   return isFunctionExpression(arg) && arg.name === '=';

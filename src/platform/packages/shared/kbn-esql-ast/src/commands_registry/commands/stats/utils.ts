@@ -15,9 +15,9 @@ import {
   isFieldExpression,
   isWhereExpression,
   isParamLiteral,
+  isOptionNode,
   isLiteral,
-} from '../../../ast/helpers';
-import { isOptionNode } from '../../../ast/util';
+} from '../../../ast/is';
 import { Walker } from '../../../walker';
 import {
   findPreviousWord,

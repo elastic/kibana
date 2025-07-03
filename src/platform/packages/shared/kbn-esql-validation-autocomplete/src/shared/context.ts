@@ -11,6 +11,7 @@ import {
   ESQLCommandOption,
   Walker,
   isIdentifier,
+  isList,
   type ESQLAst,
   type ESQLAstItem,
   type ESQLCommand,
@@ -20,7 +21,6 @@ import {
 } from '@kbn/esql-ast';
 import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
 import { pipePrecedesCurrentWord } from '@kbn/esql-ast/src/definitions/utils';
-import { isList } from '@kbn/esql-ast/src/ast/helpers';
 import { ESQLAstExpression } from '@kbn/esql-ast/src/types';
 import { isColumnItem, isSourceItem, getFunctionDefinition, isOptionItem, within } from './helpers';
 

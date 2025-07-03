@@ -27,6 +27,7 @@ import {
   FunctionParameterType,
   FunctionDefinitionTypes,
   FunctionParameter,
+  isList,
 } from '@kbn/esql-ast';
 import { comparisonFunctions } from '@kbn/esql-ast/src/definitions/all_operators';
 import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
@@ -50,7 +51,6 @@ import {
   ItemKind,
 } from '@kbn/esql-ast/src/commands_registry/types';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
-import { isList } from '@kbn/esql-ast/src/ast/helpers';
 import type { EditorContext } from './types';
 import {
   getFunctionDefinition,

@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLAst, ESQLCommand, ESQLMessage, ESQLCommandOption } from '../../../types';
-import { isColumn } from '../../../ast/helpers';
-import { isOptionNode } from '../../../ast/util';
+import { isColumn, isOptionNode } from '../../../ast/is';
 import type { ICommandContext } from '../../types';
 import { METADATA_FIELDS } from '../../options/metadata';
 import { getMessageFromId } from '../../../definitions/utils';

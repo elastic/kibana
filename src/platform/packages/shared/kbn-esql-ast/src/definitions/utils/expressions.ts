@@ -13,7 +13,7 @@ import {
   isColumn,
   isParamLiteral,
   isFunctionExpression,
-} from '../../ast/helpers';
+} from '../../ast/is';
 import type { ESQLAstItem, ESQLFunction } from '../../types';
 import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../commands_registry/types';
 import type { SupportedDataType, FunctionDefinition } from '../types';
