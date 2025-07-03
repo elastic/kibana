@@ -47,6 +47,5 @@
     "@kbn/es",
     "@kbn/cypress-test-helper",
     "@kbn/fleet-plugin",
-    "@kbn/repo-info",
   ]
 }
