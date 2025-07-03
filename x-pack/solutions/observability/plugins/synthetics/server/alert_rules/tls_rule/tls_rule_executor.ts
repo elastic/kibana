@@ -15,7 +15,10 @@ import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls
 import moment from 'moment';
 import { isEmpty } from 'lodash';
 import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
-import { syntheticsMonitorAttributes } from '../../../common/types/saved_objects';
+import {
+  legacyMonitorAttributes,
+  syntheticsMonitorAttributes,
+} from '../../../common/types/saved_objects';
 import { TLSRuleInspect } from '../../../common/runtime_types/alert_rules/common';
 import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 import { FINAL_SUMMARY_FILTER } from '../../../common/constants/client_defaults';
@@ -26,7 +29,6 @@ import { DYNAMIC_SETTINGS_DEFAULTS, SYNTHETICS_INDEX_PATTERN } from '../../../co
 import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
 import {
   CertResult,
-  ConfigKey,
   EncryptedSyntheticsMonitorAttributes,
   Ping,
 } from '../../../common/runtime_types';
@@ -81,9 +83,10 @@ export class TLSRuleExecutor {
   }
 
   async getMonitors() {
-    const HTTP_OR_TCP = `${syntheticsMonitorAttributes}.${ConfigKey.MONITOR_TYPE}: http or ${syntheticsMonitorAttributes}.${ConfigKey.MONITOR_TYPE}: tcp`;
-
-    const baseFilter = `${syntheticsMonitorAttributes}.${AlertConfigKey.TLS_ENABLED}: true and (${HTTP_OR_TCP})`;
+    const httpTcpFilter = parseArrayFilters({
+      monitorTypes: ['http', 'tcp'],
+    });
+    const baseFilter = `(${syntheticsMonitorAttributes}.${AlertConfigKey.TLS_ENABLED}: true or ${legacyMonitorAttributes}.${AlertConfigKey.TLS_ENABLED}: true) and (${httpTcpFilter})`;
 
     const configIds = await queryFilterMonitors({
       spaceId: this.spaceId,

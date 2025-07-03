@@ -63,7 +63,7 @@ describe('tlsRuleExecutor', () => {
   const monitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
 
   const commonFilter =
-    'synthetics-monitor-multi-space.attributes.alert.tls.enabled: true and (synthetics-monitor-multi-space.attributes.type: http or synthetics-monitor-multi-space.attributes.type: tcp)';
+    '(synthetics-monitor-multi-space.attributes.alert.tls.enabled: true or synthetics-monitor.attributes.alert.tls.enabled: true) and ((synthetics-monitor-multi-space.attributes.type:("http" OR "tcp") OR synthetics-monitor.attributes.type:("http" OR "tcp")))';
 
   const getTLSRuleExecutorParams = (
     ruleParams: TLSRuleParams = {}

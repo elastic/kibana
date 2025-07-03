@@ -89,7 +89,7 @@ interface Filters {
 
 export const getMonitorFilters = async (
   context: RouteContext<Record<string, any>, OverviewStatusQuery>,
-  attributesList?: string[]
+  attributesList: string[] = [syntheticsMonitorAttributes, legacyMonitorAttributes]
 ) => {
   const {
     tags,
@@ -114,8 +114,7 @@ export const getMonitorFilters = async (
         monitorQueryIds,
         locations,
       },
-      useLogicalAndFor,
-      attributesList
+      { useLogicalAndFor, attributesList }
     ),
     locationIds: locations,
   };
@@ -133,39 +132,58 @@ export const parseArrayFilters = (
     locations,
     journeyIds,
   }: Filters & { journeyIds?: string[] },
-  useLogicalAndFor: MonitorsQuery['useLogicalAndFor'] = [],
-  attributesList: string[] = [syntheticsMonitorAttributes, legacyMonitorAttributes]
+  {
+    useLogicalAndFor,
+    attributesList: attributes,
+  }: { useLogicalAndFor?: MonitorsQuery['useLogicalAndFor']; attributesList: string[] } = {
+    useLogicalAndFor: [],
+    attributesList: [syntheticsMonitorAttributes, legacyMonitorAttributes],
+  }
 ) => {
-  // Helper to generate OR between attributes for a single field
-  const orAcrossAttributes = (
-    opts: Omit<Parameters<typeof getSavedObjectKqlFilter>[0], 'attributes'>
-  ) => {
-    const filters = attributesList
-      .map((attributes) => getSavedObjectKqlFilter({ ...opts, attributes }))
-      .filter(Boolean);
-    if (filters.length === 0) return '';
-    if (filters.length === 1) return filters[0];
-    return `(${filters.join(' OR ')})`;
-  };
-
   return [
     filter,
-    orAcrossAttributes({
+    getSavedObjectKqlFilter({
       field: 'tags',
       values: tags,
-      operator: useLogicalAndFor.includes('tags') ? 'AND' : 'OR',
+      operator: useLogicalAndFor?.includes('tags') ? 'AND' : 'OR',
+      attributes,
     }),
-    orAcrossAttributes({ field: 'project_id', values: projects }),
-    orAcrossAttributes({ field: 'type', values: monitorTypes }),
-    orAcrossAttributes({
+    getSavedObjectKqlFilter({
+      field: 'project_id',
+      values: projects,
+      attributes,
+    }),
+    getSavedObjectKqlFilter({
+      field: 'type',
+      values: monitorTypes,
+      attributes,
+    }),
+    getSavedObjectKqlFilter({
       field: 'locations.id',
       values: locations,
-      operator: useLogicalAndFor.includes('locations') ? 'AND' : 'OR',
+      operator: useLogicalAndFor?.includes('locations') ? 'AND' : 'OR',
+      attributes,
     }),
-    orAcrossAttributes({ field: 'schedule.number', values: schedules }),
-    orAcrossAttributes({ field: 'id', values: monitorQueryIds }),
-    orAcrossAttributes({ field: 'config_id', values: configIds }),
-    orAcrossAttributes({ field: ConfigKey.JOURNEY_ID, values: journeyIds }),
+    getSavedObjectKqlFilter({
+      field: 'schedule.number',
+      values: schedules,
+      attributes,
+    }),
+    getSavedObjectKqlFilter({
+      field: 'id',
+      values: monitorQueryIds,
+      attributes,
+    }),
+    getSavedObjectKqlFilter({
+      field: 'config_id',
+      values: configIds,
+      attributes,
+    }),
+    getSavedObjectKqlFilter({
+      field: ConfigKey.JOURNEY_ID,
+      values: journeyIds,
+      attributes,
+    }),
   ]
     .filter((f) => !!f)
     .join(' AND ');
@@ -182,8 +200,8 @@ export const getSavedObjectKqlFilter = ({
   values?: string | string[];
   operator?: string;
   searchAtRoot?: boolean;
-  attributes?: string;
-}) => {
+  attributes?: string | string[];
+}): string | undefined => {
   if (values === 'All' || (Array.isArray(values) && values?.includes('All'))) {
     return undefined;
   }
@@ -191,6 +209,25 @@ export const getSavedObjectKqlFilter = ({
   if (isEmpty(values) || !values) {
     return '';
   }
+
+  // If attributes is an array, generate OR across all attributes
+  if (Array.isArray(attributes)) {
+    const filters: string[] = attributes
+      .map((attr) =>
+        getSavedObjectKqlFilter({
+          field,
+          values,
+          operator,
+          searchAtRoot,
+          attributes: attr,
+        })
+      )
+      .filter(Boolean) as string[];
+    if (filters.length === 0) return '';
+    if (filters.length === 1) return filters[0];
+    return `(${filters.join(' OR ')})`;
+  }
+
   let fieldKey = '';
   if (searchAtRoot) {
     fieldKey = `${field}`;

@@ -6,7 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { syntheticsMonitorAttributes } from '../../../common/types/saved_objects';
+import {
+  legacyMonitorAttributes,
+  syntheticsMonitorAttributes,
+} from '../../../common/types/saved_objects';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -35,7 +38,7 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
     const queryParams = request.query;
 
     const monitors = await monitorConfigRepository.getAll({
-      filter: `${syntheticsMonitorAttributes}.${ConfigKey.ENABLED}: true`,
+      filter: `${syntheticsMonitorAttributes}.${ConfigKey.ENABLED}: true or ${legacyMonitorAttributes}.${ConfigKey.ENABLED}: true`,
     });
 
     if (monitors.length === 0) {

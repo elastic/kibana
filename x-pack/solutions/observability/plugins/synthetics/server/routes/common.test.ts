@@ -10,46 +10,34 @@ import { getSavedObjectKqlFilter } from './common';
 
 describe('common utils', () => {
   it('tests parseArrayFilters', () => {
-    const filters = parseArrayFilters(
-      {
-        configIds: ['1 4', '2 6', '5'],
-      },
-      undefined,
-      ['synthetics-monitor-multi-space.attributes', 'legacy-monitor.attributes']
-    );
+    const filters = parseArrayFilters({
+      configIds: ['1 4', '2 6', '5'],
+    });
     expect(filters).toMatchInlineSnapshot(
-      `"(synthetics-monitor-multi-space.attributes.config_id:(\\"1 4\\" OR \\"2 6\\" OR \\"5\\") OR legacy-monitor.attributes.config_id:(\\"1 4\\" OR \\"2 6\\" OR \\"5\\"))"`
+      `"(synthetics-monitor-multi-space.attributes.config_id:(\\"1 4\\" OR \\"2 6\\" OR \\"5\\") OR synthetics-monitor.attributes.config_id:(\\"1 4\\" OR \\"2 6\\" OR \\"5\\"))"`
     );
   });
   it('tests parseArrayFilters with tags and configIds', () => {
-    const filters = parseArrayFilters(
-      {
-        configIds: ['1', '2'],
-        tags: ['tag1', 'tag2'],
-      },
-      undefined,
-      ['synthetics-monitor-multi-space.attributes', 'legacy-monitor.attributes']
-    );
+    const filters = parseArrayFilters({
+      configIds: ['1', '2'],
+      tags: ['tag1', 'tag2'],
+    });
     expect(filters).toMatchInlineSnapshot(
-      `"(synthetics-monitor-multi-space.attributes.tags:(\\"tag1\\" OR \\"tag2\\") OR legacy-monitor.attributes.tags:(\\"tag1\\" OR \\"tag2\\")) AND (synthetics-monitor-multi-space.attributes.config_id:(\\"1\\" OR \\"2\\") OR legacy-monitor.attributes.config_id:(\\"1\\" OR \\"2\\"))"`
+      `"(synthetics-monitor-multi-space.attributes.tags:(\\"tag1\\" OR \\"tag2\\") OR synthetics-monitor.attributes.tags:(\\"tag1\\" OR \\"tag2\\")) AND (synthetics-monitor-multi-space.attributes.config_id:(\\"1\\" OR \\"2\\") OR synthetics-monitor.attributes.config_id:(\\"1\\" OR \\"2\\"))"`
     );
   });
   it('tests parseArrayFilters with all options', () => {
-    const filters = parseArrayFilters(
-      {
-        configIds: ['1', '2'],
-        tags: ['tag1', 'tag2'],
-        locations: ['loc1', 'loc2'],
-        monitorTypes: ['type1', 'type2'],
-        projects: ['project1', 'project2'],
-        monitorQueryIds: ['query1', 'query2'],
-        schedules: ['schedule1', 'schedule2'],
-      },
-      undefined,
-      ['synthetics-monitor-multi-space.attributes', 'legacy-monitor.attributes']
-    );
+    const filters = parseArrayFilters({
+      configIds: ['1', '2'],
+      tags: ['tag1', 'tag2'],
+      locations: ['loc1', 'loc2'],
+      monitorTypes: ['type1', 'type2'],
+      projects: ['project1', 'project2'],
+      monitorQueryIds: ['query1', 'query2'],
+      schedules: ['schedule1', 'schedule2'],
+    });
     expect(filters).toMatchInlineSnapshot(
-      `"(synthetics-monitor-multi-space.attributes.tags:(\\"tag1\\" OR \\"tag2\\") OR legacy-monitor.attributes.tags:(\\"tag1\\" OR \\"tag2\\")) AND (synthetics-monitor-multi-space.attributes.project_id:(\\"project1\\" OR \\"project2\\") OR legacy-monitor.attributes.project_id:(\\"project1\\" OR \\"project2\\")) AND (synthetics-monitor-multi-space.attributes.type:(\\"type1\\" OR \\"type2\\") OR legacy-monitor.attributes.type:(\\"type1\\" OR \\"type2\\")) AND (synthetics-monitor-multi-space.attributes.locations.id:(\\"loc1\\" OR \\"loc2\\") OR legacy-monitor.attributes.locations.id:(\\"loc1\\" OR \\"loc2\\")) AND (synthetics-monitor-multi-space.attributes.schedule.number:(\\"schedule1\\" OR \\"schedule2\\") OR legacy-monitor.attributes.schedule.number:(\\"schedule1\\" OR \\"schedule2\\")) AND (synthetics-monitor-multi-space.attributes.id:(\\"query1\\" OR \\"query2\\") OR legacy-monitor.attributes.id:(\\"query1\\" OR \\"query2\\")) AND (synthetics-monitor-multi-space.attributes.config_id:(\\"1\\" OR \\"2\\") OR legacy-monitor.attributes.config_id:(\\"1\\" OR \\"2\\"))"`
+      `"(synthetics-monitor-multi-space.attributes.tags:(\\"tag1\\" OR \\"tag2\\") OR synthetics-monitor.attributes.tags:(\\"tag1\\" OR \\"tag2\\")) AND (synthetics-monitor-multi-space.attributes.project_id:(\\"project1\\" OR \\"project2\\") OR synthetics-monitor.attributes.project_id:(\\"project1\\" OR \\"project2\\")) AND (synthetics-monitor-multi-space.attributes.type:(\\"type1\\" OR \\"type2\\") OR synthetics-monitor.attributes.type:(\\"type1\\" OR \\"type2\\")) AND (synthetics-monitor-multi-space.attributes.locations.id:(\\"loc1\\" OR \\"loc2\\") OR synthetics-monitor.attributes.locations.id:(\\"loc1\\" OR \\"loc2\\")) AND (synthetics-monitor-multi-space.attributes.schedule.number:(\\"schedule1\\" OR \\"schedule2\\") OR synthetics-monitor.attributes.schedule.number:(\\"schedule1\\" OR \\"schedule2\\")) AND (synthetics-monitor-multi-space.attributes.id:(\\"query1\\" OR \\"query2\\") OR synthetics-monitor.attributes.id:(\\"query1\\" OR \\"query2\\")) AND (synthetics-monitor-multi-space.attributes.config_id:(\\"1\\" OR \\"2\\") OR synthetics-monitor.attributes.config_id:(\\"1\\" OR \\"2\\"))"`
     );
   });
 });
