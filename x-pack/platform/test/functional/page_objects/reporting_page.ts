@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import fs from 'fs';
 import path from 'path';
 import type SuperTest from 'supertest';
-import { format as formatUrl } from 'url';
 import { promisify } from 'util';
 
 import { INTERNAL_ROUTES, REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
@@ -20,7 +19,6 @@ const mkdirAsync = promisify(fs.mkdir);
 
 export class ReportingPageObject extends FtrService {
   private readonly browser = this.ctx.getService('browser');
-  private readonly config = this.ctx.getService('config');
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
   private readonly security = this.ctx.getService('security');
