@@ -118,6 +118,7 @@
     "@kbn/unified-metrics-grid",
     "@kbn/grouping",
     "@kbn/core-notifications-browser",
+    "@kbn/shared-ux-document-data-cascade",
   ],
   "exclude": ["target/**/*"]
 }

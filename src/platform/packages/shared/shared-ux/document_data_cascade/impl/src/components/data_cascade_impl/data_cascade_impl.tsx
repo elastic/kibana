@@ -112,6 +112,8 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   // The scrollable element for your list
   const scrollElementRef = React.useRef(null);
   const virtualizerItemSizeCacheRef = React.useRef<Map<number, number>>(new Map());
+  const activeStickyIndexRef = useRef<number | null>(null);
+  const activeStickyRenderSlotRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     dispatch({
@@ -244,9 +246,6 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   const headerColumns = table.getHeaderGroups()[0].headers;
   const { rows } = table.getRowModel();
 
-  const activeStickyIndexRef = useRef<number | null>(null);
-  const activeStickyRenderSlotRef = useRef<HTMLDivElement | null>(null);
-
   /**
    * @description range extractor, used to inform virtualizer about our rendering needs in relation to marking specific rows as sticky rows.
    * see {@link https://tanstack.com/virtual/latest/docs/api/virtualizer#rangeextractor} for more details
@@ -317,14 +316,15 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
               >
                 <EuiFlexGroup direction="column" gutterSize="none">
                   <EuiFlexItem
-                    css={({ euiTheme }) => ({
-                      ...((rowVirtualizer.scrollOffset ?? 0) >
+                    css={({ euiTheme }) =>
+                      (rowVirtualizer.scrollOffset ?? 0) >
+                      // apply border on scrolling a quarter of the first row height
                       (virtualizerItemSizeCacheRef.current.get(0) ?? 0) / 4
                         ? {
                             borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
                           }
-                        : {}),
-                    })}
+                        : {}
+                    }
                   >
                     {headerColumns.map((header) => {
                       return (

@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/document_data_cascader/impl'],
+  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/document_data_cascade/impl'],
 };
