@@ -7,14 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// This file replaces scss core/public/_mixins.scss
-
 import { css } from '@emotion/react';
 
-// The `--kbnAppHeadersOffset` CSS variable is automatically updated by
-// styles/rendering/_base.scss, based on whether the Kibana chrome has a
-// header banner, app menu, and is visible or hidden
+// The `--kbn-application--content-height` CSS variable is automatically updated by chrome's layout system
+// to reflect the height of the application container, minus any fixed headers or footers.
 export const kbnFullBodyHeightCss = (additionalOffset = '0px') =>
   css({
-    height: `calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)) - ${additionalOffset})`,
+    height: `calc(var(--kbn-application--content-height) - ${additionalOffset})`,
   });
