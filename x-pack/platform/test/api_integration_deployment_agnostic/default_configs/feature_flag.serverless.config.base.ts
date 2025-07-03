@@ -82,7 +82,7 @@ export function createServerlessFeatureFlagTestConfig<T extends DeploymentAgnost
     const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
     const svlSharedConfig = await readConfigFile(
-      require.resolve('@kbn/test-suites-serverless/shared/config.base')
+      require.resolve('../../serverless/config.base.ts')
     );
 
     return {

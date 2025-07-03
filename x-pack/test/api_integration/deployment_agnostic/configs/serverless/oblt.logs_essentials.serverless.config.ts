@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createServerlessTestConfig } from '../../default_configs/serverless.config.base';
+import { createServerlessTestConfig } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/serverless.config.base';
 
 export default createServerlessTestConfig({
   serverlessProject: 'oblt',
