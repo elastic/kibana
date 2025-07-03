@@ -36,7 +36,7 @@ const FORK_AVAILABLE_COMMANDS = [
   'rename',
   'sample',
   'join',
-  // 'enrich', // not suggesting enrich for now, there are client side validation issues
+  'enrich',
 ];
 
 export async function suggest(

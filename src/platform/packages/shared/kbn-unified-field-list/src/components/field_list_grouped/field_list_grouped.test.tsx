@@ -13,6 +13,7 @@ import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/
 import { EuiText, EuiLoadingSpinner, EuiThemeProvider } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ReactWrapper } from 'enzyme';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -25,6 +26,8 @@ import { useGroupedFields, type GroupedFieldsParams } from '../../hooks/use_grou
 import { screen, within } from '@testing-library/react';
 import { render } from '@elastic/eui/lib/test/rtl';
 import userEvent from '@testing-library/user-event';
+
+const DESCRIPTION_ID = 'fieldListGrouped__ariaDescription';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -79,7 +82,7 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
     hookParams: Omit<GroupedFieldsParams<DataViewField>, 'services'>;
   }
 
-  function mountWithRTL({ listProps, hookParams }: WrapperProps) {
+  async function mountWithRTL({ listProps, hookParams }: WrapperProps) {
     const Wrapper: React.FC<WrapperProps> = (props) => {
       const {
         fieldListFiltersProps,
@@ -97,7 +100,13 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       );
     };
 
-    render(<Wrapper hookParams={hookParams} listProps={listProps} />);
+    await act(async () => {
+      render(
+        <I18nProvider>
+          <Wrapper hookParams={hookParams} listProps={listProps} />
+        </I18nProvider>
+      );
+    });
   }
 
   const mountComponent = async (component: React.ReactElement) =>
@@ -350,7 +359,8 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       dataViewId: dataView.id!,
       allFields: manyFields,
     };
-    const wrapper = await mountGroupedList({
+
+    await mountWithRTL({
       listProps: {
         ...defaultProps,
         fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
@@ -358,52 +368,27 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       hookParams,
     });
 
-    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+    expect(screen.getByTestId(DESCRIPTION_ID)).toHaveTextContent(
       '25 available fields. 112 unmapped fields. 3 meta fields.'
     );
 
-    await act(async () => {
-      await wrapper
-        .find('[data-test-subj="fieldListFiltersFieldSearch"]')
-        .last()
-        .simulate('change', {
-          target: { value: '@' },
-        });
-      await wrapper.update();
-    });
+    await userEvent.type(screen.getByTestId('fieldListFiltersFieldSearch'), '@');
 
-    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+    expect(screen.getByTestId(DESCRIPTION_ID)).toHaveTextContent(
       '2 available fields. 8 unmapped fields. 0 meta fields.'
     );
 
-    await act(async () => {
-      await wrapper
-        .find('[data-test-subj="fieldListFiltersFieldSearch"]')
-        .last()
-        .simulate('change', {
-          target: { value: '_' },
-        });
-      await wrapper.update();
-    });
+    await userEvent.clear(screen.getByTestId('fieldListFiltersFieldSearch'));
+    await userEvent.type(screen.getByTestId('fieldListFiltersFieldSearch'), '_');
 
-    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+    expect(screen.getByTestId(DESCRIPTION_ID)).toHaveTextContent(
       '3 available fields. 24 unmapped fields. 3 meta fields.'
     );
 
-    await act(async () => {
-      await wrapper
-        .find('[data-test-subj="fieldListFiltersFieldTypeFilterToggle"]')
-        .last()
-        .simulate('click');
-      await wrapper.update();
-    });
+    await userEvent.click(screen.getByTestId('fieldListFiltersFieldTypeFilterToggle'));
+    await userEvent.click(screen.getByTestId('typeFilter-date'));
 
-    await act(async () => {
-      await wrapper.find('button[data-test-subj="typeFilter-date"]').first().simulate('click');
-      await wrapper.update();
-    });
-
-    expect(wrapper.find(`#${defaultProps.screenReaderDescriptionId}`).first().text()).toBe(
+    expect(screen.getByTestId(DESCRIPTION_ID)).toHaveTextContent(
       '1 available field. 4 unmapped fields. 0 meta fields.'
     );
   }, 10000);
@@ -495,7 +480,7 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
 
   describe('Skip Link Functionality', () => {
     it('renders the skip link when there is a next section', async () => {
-      mountWithRTL({
+      await mountWithRTL({
         listProps: {
           ...defaultProps,
           fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
@@ -517,7 +502,7 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
     });
 
     it('does not render a skip link in the last section', async () => {
-      mountWithRTL({
+      await mountWithRTL({
         listProps: {
           ...defaultProps,
           fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
@@ -542,7 +527,7 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
     it('sets focus on the next section when skip link is clicked', async () => {
       const user = userEvent.setup();
 
-      mountWithRTL({
+      await mountWithRTL({
         listProps: {
           ...defaultProps,
           fieldsExistenceStatus: ExistenceFetchStatus.succeeded,

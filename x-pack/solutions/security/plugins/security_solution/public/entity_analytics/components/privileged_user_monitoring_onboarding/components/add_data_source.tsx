@@ -93,7 +93,7 @@ export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
             description={
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.addDataSource.file.description"
-                defaultMessage="Import a list of privileged users from a CSV, TXT, or TSV file"
+                defaultMessage="Import a list of privileged users from a CSV file"
               />
             }
             onClick={showImportFileModal}

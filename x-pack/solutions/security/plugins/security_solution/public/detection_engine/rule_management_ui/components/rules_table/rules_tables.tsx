@@ -50,6 +50,7 @@ import { BulkEditDeleteAlertSuppressionConfirmation } from './bulk_actions/bulk_
 import { BulkActionEditTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { BulkFillRuleGapsModal } from '../../../rule_gaps/components/bulk_fill_rule_gaps';
 import { useBulkFillRuleGapsConfirmation } from '../../../rule_gaps/components/bulk_fill_rule_gaps/use_bulk_fill_rule_gaps_confirmation';
+import { BulkFillRuleGapsRuleLimitErrorModal } from './bulk_actions/bulk_schedule_gap_fills_rule_limit_error_modal';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -143,6 +144,12 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     hideManualRuleRunLimitError,
   ] = useBoolState();
 
+  const [
+    isBulkFillRuleGapsRuleLimitErrorVisible,
+    showBulkFillRuleGapsRuleLimitError,
+    hideBulkFillRuleGapsRuleLimitError,
+  ] = useBoolState();
+
   const {
     bulkEditActionType,
     isBulkEditFlyoutVisible,
@@ -161,6 +168,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     showManualRuleRunConfirmation,
     showBulkFillRuleGapsConfirmation,
     showManualRuleRunLimitError,
+    showBulkFillRuleGapsRuleLimitError,
     completeBulkEditForm,
     executeBulkActionsDryRun,
   });
@@ -316,6 +324,9 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       )}
       {isManualRuleRunLimitErrorVisible && (
         <BulkManualRuleRunLimitErrorModal onClose={hideManualRuleRunLimitError} />
+      )}
+      {isBulkFillRuleGapsRuleLimitErrorVisible && (
+        <BulkFillRuleGapsRuleLimitErrorModal onClose={hideBulkFillRuleGapsRuleLimitError} />
       )}
       {isBulkActionConfirmationVisible && bulkAction && (
         <BulkActionDryRunConfirmation

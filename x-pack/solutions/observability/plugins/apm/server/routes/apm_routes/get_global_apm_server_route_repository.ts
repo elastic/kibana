@@ -42,7 +42,6 @@ import { suggestionsRouteRepository } from '../suggestions/route';
 import { timeRangeMetadataRoute } from '../time_range_metadata/route';
 import { traceRouteRepository } from '../traces/route';
 import { transactionRouteRepository } from '../transactions/route';
-import { servicesEntitiesRoutesRepository } from '../entities/services/routes';
 import { spanLatencyDistributionRouteRepository } from '../span_latency_distribution/route';
 
 function getTypedGlobalApmServerRouteRepository() {
@@ -56,7 +55,6 @@ function getTypedGlobalApmServerRouteRepository() {
     ...observabilityOverviewRouteRepository,
     ...serviceMapRouteRepository,
     ...serviceRouteRepository,
-    ...servicesEntitiesRoutesRepository,
     ...serviceGroupRouteRepository,
     ...suggestionsRouteRepository,
     ...traceRouteRepository,

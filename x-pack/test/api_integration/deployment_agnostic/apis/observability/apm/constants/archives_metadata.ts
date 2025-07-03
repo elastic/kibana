@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import archivesMetadata from '@kbn/test-suites-xpack-observability/apm_api_integration/common/fixtures/es_archiver/archives_metadata';
+import archivesMetadata from '../../../../../../apm_api_integration/common/fixtures/es_archiver/archives_metadata';
 
 export default archivesMetadata;
