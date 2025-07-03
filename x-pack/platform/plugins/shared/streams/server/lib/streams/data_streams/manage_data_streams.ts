@@ -11,7 +11,6 @@ import {
   IngestStreamLifecycleDSL,
   IngestStreamLifecycleDisabled,
   IngestStreamLifecycleILM,
-  isDisabledLifecycle,
   isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
@@ -140,6 +139,10 @@ export async function updateDataStreamsLifecycle({
 }) {
   try {
     if (isIlmLifecycle(lifecycle)) {
+      await retryTransientEsErrors(() => esClient.indices.deleteDataLifecycle({ name: names }), {
+        logger,
+      });
+
       await putDataStreamsSettings({ esClient, names, logger, lifecycle });
     } else if (isDslLifecycle(lifecycle)) {
       await retryTransientEsErrors(
@@ -158,8 +161,6 @@ export async function updateDataStreamsLifecycle({
     } else if (isInheritLifecycle(lifecycle)) {
       // inheriting a lifecycle here means falling back to the template configuration
       // so we need to update streams individually.
-      // for DSL we need to reapply the retention on the data stream, otherwise we
-      // just need to reset any overrides previously set for the template to take over
       await Promise.all(
         names.map(async (name) => {
           const templateLifecycle = await getTemplateLifecycle({ esClient, name, logger });
@@ -172,7 +173,7 @@ export async function updateDataStreamsLifecycle({
                 }),
               { logger }
             );
-          } else if (isDisabledLifecycle(templateLifecycle)) {
+          } else {
             await retryTransientEsErrors(() => esClient.indices.deleteDataLifecycle({ name }), {
               logger,
             });
