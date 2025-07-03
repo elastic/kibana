@@ -8,15 +8,15 @@
  */
 import type { ESQLCommand } from '../../../types';
 import { pipeCompleteItem, commaCompleteItem } from '../../utils/complete_items';
-import { specialIndicesToSuggestions } from '../../../definitions/sources_helpers';
+import { specialIndicesToSuggestions } from '../../../definitions/utils/sources';
 import {
   getSourcesFromCommands,
   additionalSourcesSuggestions,
-} from '../../../definitions/sources_helpers';
+} from '../../../definitions/utils/sources';
 import { metadataSuggestion, getMetadataSuggestions } from '../../options/metadata';
-import { withinQuotes } from '../../../definitions/autocomplete_helpers';
+import { withinQuotes } from '../../../definitions/utils/autocomplete';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
-import { getOverlapRange, isRestartingExpression } from '../../../definitions/shared';
+import { getOverlapRange, isRestartingExpression } from '../../../definitions/utils/shared';
 
 export async function autocomplete(
   query: string,

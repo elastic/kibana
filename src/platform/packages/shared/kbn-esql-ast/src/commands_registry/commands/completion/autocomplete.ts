@@ -20,7 +20,7 @@ import {
   findFinalWord,
   handleFragment,
   columnExists,
-} from '../../../definitions/autocomplete_helpers';
+} from '../../../definitions/utils/autocomplete';
 import {
   type ISuggestionItem,
   Location,
@@ -29,8 +29,8 @@ import {
 } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND, ESQL_VARIABLES_PREFIX } from '../../constants';
 import { EDITOR_MARKER } from '../../../parser/constants';
-import { getExpressionType, isExpressionComplete } from '../../../definitions/expressions_helpers';
-import { getFunctionDefinition } from '../../../definitions/functions_helpers';
+import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
+import { getFunctionDefinition } from '../../../definitions/utils/functions';
 
 export enum CompletionPosition {
   AFTER_COMPLETION = 'after_completion',

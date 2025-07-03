@@ -12,7 +12,7 @@ import {
   pipeCompleteItem,
   getCommandAutocompleteDefinitions,
 } from '../../utils/complete_items';
-import { pipePrecedesCurrentWord } from '../../../definitions/shared';
+import { pipePrecedesCurrentWord } from '../../../definitions/utils/shared';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { esqlCommandRegistry } from '../..';

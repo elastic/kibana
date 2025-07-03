@@ -12,7 +12,7 @@ import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '.
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { pipeCompleteItem, commaCompleteItem } from '../../utils/complete_items';
 import { getFullCommandMnemonics, getPosition, suggestFields } from './utils';
-import { specialIndicesToSuggestions } from '../../../definitions/sources_helpers';
+import { specialIndicesToSuggestions } from '../../../definitions/utils/sources';
 import { esqlCommandRegistry } from '../..';
 
 export async function autocomplete(

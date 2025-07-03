@@ -13,7 +13,7 @@
  * on the generated definitions provided by Elasticsearch.
  */
 
-import { FunctionDefinition } from './types';
+import { FunctionDefinition } from '../types';
 let testFunctions: FunctionDefinition[] = [];
 
 export const setTestFunctions = (functions: FunctionDefinition[]) => {

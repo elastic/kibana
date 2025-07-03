@@ -6,15 +6,17 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { getSafeInsertText, TRIGGER_SUGGESTION_COMMAND, timeUnitsToSuggest } from '@kbn/esql-ast';
 import {
+  TRIGGER_SUGGESTION_COMMAND,
+  timeUnitsToSuggest,
   fieldTypes,
   FieldType,
   SupportedDataType,
   FunctionParameterType,
   FunctionReturnType,
   FunctionDefinitionTypes,
-} from '@kbn/esql-ast/src/definitions/types';
+} from '@kbn/esql-ast';
+import { getSafeInsertText } from '@kbn/esql-ast/src/definitions/utils';
 import {
   Location,
   ESQLFieldWithMetadata,

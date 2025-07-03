@@ -8,7 +8,7 @@
  */
 
 import { ESQLAst, ESQLAstItem, ESQLCommand, ESQLFunction } from '@kbn/esql-ast';
-import { getExpressionType } from '@kbn/esql-ast/src/definitions/expressions_helpers';
+import { getExpressionType } from '@kbn/esql-ast/src/definitions/utils';
 import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
 import { Visitor } from '@kbn/esql-ast/src/visitor';
 import type {

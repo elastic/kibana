@@ -8,7 +8,7 @@
  */
 
 import { ESQLLiteral } from '@kbn/esql-ast/src/types';
-import { FunctionParameterType } from '@kbn/esql-ast/src/definitions/types';
+import { FunctionParameterType } from '@kbn/esql-ast';
 
 /**
  * Compares two types, taking into account literal types

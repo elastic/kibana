@@ -18,10 +18,9 @@ import {
   parse,
   walk,
   esqlCommandRegistry,
+  ErrorTypes,
 } from '@kbn/esql-ast';
-import { getMessageFromId, errors } from '@kbn/esql-ast/src/definitions/errors';
-import { sourceExists } from '@kbn/esql-ast/src/definitions/sources_helpers';
-import { ErrorTypes } from '@kbn/esql-ast/src/definitions/types';
+import { getMessageFromId, errors, sourceExists } from '@kbn/esql-ast/src/definitions/utils';
 import type { ESQLIdentifier } from '@kbn/esql-ast/src/types';
 import type {
   ESQLFieldWithMetadata,

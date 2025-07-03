@@ -12,12 +12,12 @@ import {
   getSourcesFromCommands,
   getSourceSuggestions,
   additionalSourcesSuggestions,
-} from '../../../definitions/sources_helpers';
+} from '../../../definitions/utils/sources';
 import { metadataSuggestion, getMetadataSuggestions } from '../../options/metadata';
 import { getRecommendedQueriesSuggestions } from '../../options/recommended_queries';
-import { withinQuotes } from '../../../definitions/autocomplete_helpers';
+import { withinQuotes } from '../../../definitions/utils/autocomplete';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
-import { getOverlapRange, isRestartingExpression } from '../../../definitions/shared';
+import { getOverlapRange, isRestartingExpression } from '../../../definitions/utils/shared';
 
 export async function autocomplete(
   query: string,

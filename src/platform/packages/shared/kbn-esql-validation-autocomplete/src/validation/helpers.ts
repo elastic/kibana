@@ -17,12 +17,12 @@ import {
   type ESQLSingleAstItem,
   type ESQLSource,
   type ESQLCommand,
+  type FunctionDefinition,
   Walker,
 } from '@kbn/esql-ast';
 import { mutate, synth } from '@kbn/esql-ast';
-import { getMessageFromId } from '@kbn/esql-ast/src/definitions/errors';
+import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
 import { ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
-import { FunctionDefinition } from '@kbn/esql-ast/src/definitions/types';
 
 import { getAllArrayTypes, getAllArrayValues } from '../shared/helpers';
 import type { ReferenceMaps } from './types';

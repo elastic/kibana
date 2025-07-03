@@ -6,10 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { parse } from '../parser';
-import { SupportedDataType, FunctionDefinitionTypes } from './types';
-import { Location } from '../commands_registry/types';
-import { buildPartialMatcher, getExpressionType } from './expressions_helpers';
+import { parse } from '../../parser';
+import { SupportedDataType, FunctionDefinitionTypes } from '../types';
+import { Location } from '../../commands_registry/types';
+import { buildPartialMatcher, getExpressionType } from './expressions';
 import { setTestFunctions } from './test_functions';
 
 describe('buildPartialMatcher', () => {

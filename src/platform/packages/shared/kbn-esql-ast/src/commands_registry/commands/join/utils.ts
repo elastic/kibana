@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { handleFragment, columnExists } from '../../../definitions/autocomplete_helpers';
-import { unescapeColumnName } from '../../../definitions/shared';
+import { handleFragment, columnExists } from '../../../definitions/utils/autocomplete';
+import { unescapeColumnName } from '../../../definitions/utils/shared';
 import * as mutate from '../../../mutate';
 import { LeafPrinter } from '../../../pretty_print/leaf_printer';
 import { pipeCompleteItem, commaCompleteItem } from '../../utils/complete_items';
-import { buildFieldsDefinitionsWithMetadata } from '../../../definitions/functions_helpers';
+import { buildFieldsDefinitionsWithMetadata } from '../../../definitions/utils/functions';
 import { ICommand } from '../../registry';
 import { ESQLAstJoinCommand, ESQLCommand, ESQLCommandOption } from '../../../types';
 import {

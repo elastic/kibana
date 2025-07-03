@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { ESQLAst, ESQLAstCompletionCommand, ESQLCommand, ESQLMessage } from '../../../types';
 import type { ICommandContext } from '../../types';
-import { getExpressionType } from '../../../definitions/expressions_helpers';
+import { getExpressionType } from '../../../definitions/utils/expressions';
 
 const supportedPromptTypes = ['text', 'keyword', 'unknown', 'param'];
 

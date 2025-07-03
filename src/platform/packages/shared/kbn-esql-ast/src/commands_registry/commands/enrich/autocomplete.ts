@@ -12,8 +12,8 @@ import {
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
 } from '../../utils/complete_items';
-import { findFinalWord, findPreviousWord } from '../../../definitions/autocomplete_helpers';
-import { unescapeColumnName } from '../../../definitions/shared';
+import { findFinalWord, findPreviousWord } from '../../../definitions/utils/autocomplete';
+import { unescapeColumnName } from '../../../definitions/utils/shared';
 import {
   type ISuggestionItem,
   type ICommandContext,
@@ -33,8 +33,8 @@ import {
   buildPoliciesDefinitions,
 } from './util';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import { getOperatorSuggestions } from '../../../definitions/operators_helpers';
-import { buildFieldsDefinitions } from '../../../definitions/functions_helpers';
+import { getOperatorSuggestions } from '../../../definitions/utils/operators';
+import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
 
 export async function autocomplete(
   query: string,

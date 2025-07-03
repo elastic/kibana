@@ -19,9 +19,6 @@ import {
   type ESQLTimeInterval,
   esqlCommandRegistry,
   timeUnits,
-  getFunctionSignatures,
-} from '@kbn/esql-ast';
-import {
   type FieldType,
   type FunctionParameterType,
   type ArrayType,
@@ -29,17 +26,17 @@ import {
   FunctionDefinitionTypes,
   type FunctionParameter,
   type FunctionReturnType,
-} from '@kbn/esql-ast/src/definitions/types';
+} from '@kbn/esql-ast';
 import type {
   ESQLFieldWithMetadata,
   ESQLUserDefinedColumn,
 } from '@kbn/esql-ast/src/commands_registry/types';
-import { getColumnForASTNode } from '@kbn/esql-ast/src/definitions/shared';
+import { getColumnForASTNode, getFunctionSignatures } from '@kbn/esql-ast/src/definitions/utils';
 import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
 import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
-import { getExpressionType } from '@kbn/esql-ast/src/definitions/expressions_helpers';
+import { getExpressionType } from '@kbn/esql-ast/src/definitions/utils';
 import {
   ESQLIdentifier,
   ESQLInlineCast,

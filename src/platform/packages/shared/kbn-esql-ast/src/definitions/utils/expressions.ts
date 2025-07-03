@@ -13,12 +13,12 @@ import {
   isColumn,
   isParamLiteral,
   isFunctionExpression,
-} from '../ast/helpers';
-import type { ESQLAstItem, ESQLFunction } from '../types';
-import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../commands_registry/types';
-import type { SupportedDataType, FunctionDefinition } from './types';
-import { lastItem } from '../visitor/utils';
-import { getFunctionDefinition } from './functions_helpers';
+} from '../../ast/helpers';
+import type { ESQLAstItem, ESQLFunction } from '../../types';
+import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../commands_registry/types';
+import type { SupportedDataType, FunctionDefinition } from '../types';
+import { lastItem } from '../../visitor/utils';
+import { getFunctionDefinition } from './functions';
 import { getColumnForASTNode, isParamExpressionType } from './shared';
 
 /**

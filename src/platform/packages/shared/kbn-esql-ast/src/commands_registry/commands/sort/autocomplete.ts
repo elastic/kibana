@@ -15,7 +15,7 @@ import {
   getFieldsOrFunctionsSuggestions,
   pushItUpInTheList,
   columnExists,
-} from '../../../definitions/autocomplete_helpers';
+} from '../../../definitions/utils/autocomplete';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { getSortPos, sortModifierSuggestions } from './utils';
 

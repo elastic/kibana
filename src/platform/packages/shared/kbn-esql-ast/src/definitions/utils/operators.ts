@@ -6,10 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { TRIGGER_SUGGESTION_COMMAND } from '../commands_registry/constants';
-import type { GetColumnsByTypeFn, ISuggestionItem, Location } from '../commands_registry/types';
-import { listCompleteItem } from '../commands_registry/utils/complete_items';
-import { getFieldsOrFunctionsSuggestions } from './autocomplete_helpers';
+import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
+import type { GetColumnsByTypeFn, ISuggestionItem, Location } from '../../commands_registry/types';
+import { listCompleteItem } from '../../commands_registry/utils/complete_items';
+import { getFieldsOrFunctionsSuggestions } from './autocomplete';
 import {
   type FunctionFilterPredicates,
   type FunctionParameterType,
@@ -19,15 +19,15 @@ import {
   FunctionDefinitionTypes,
   isParameterType,
   isReturnType,
-} from './types';
-import { operatorsDefinitions } from './all_operators';
+} from '../types';
+import { operatorsDefinitions } from '../all_operators';
 import {
   filterFunctionDefinitions,
   checkFunctionInvocationComplete,
   getFunctionDefinition,
-} from './functions_helpers';
+} from './functions';
 import { removeFinalUnknownIdentiferArg, getOverlapRange } from './shared';
-import { ESQLAstItem, ESQLFunction } from '../types';
+import { ESQLAstItem, ESQLFunction } from '../../types';
 
 export function getOperatorSuggestion(fn: FunctionDefinition): ISuggestionItem {
   const hasArgs = fn.signatures.some(({ params }) => params.length > 1);

@@ -9,7 +9,7 @@
 
 import { joinIndices, timeseriesIndices } from './mocks';
 
-import { specialIndicesToSuggestions, shouldBeQuotedSource, sourceExists } from './sources_helpers';
+import { specialIndicesToSuggestions, shouldBeQuotedSource, sourceExists } from './sources';
 
 describe('specialIndicesToSuggestions()', () => {
   test('converts join indices to suggestions', () => {

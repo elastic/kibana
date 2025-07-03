@@ -16,12 +16,12 @@ import {
   type ESQLCommand,
   type ESQLFunction,
   type ESQLSingleAstItem,
+  FunctionDefinitionTypes,
 } from '@kbn/esql-ast';
 import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
-import { pipePrecedesCurrentWord } from '@kbn/esql-ast/src/definitions/shared';
+import { pipePrecedesCurrentWord } from '@kbn/esql-ast/src/definitions/utils';
 import { isList } from '@kbn/esql-ast/src/ast/helpers';
 import { ESQLAstExpression } from '@kbn/esql-ast/src/types';
-import { FunctionDefinitionTypes } from '@kbn/esql-ast/src/definitions/types';
 import { isColumnItem, isSourceItem, getFunctionDefinition, isOptionItem, within } from './helpers';
 
 function findCommand(ast: ESQLAst, offset: number) {

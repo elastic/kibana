@@ -10,7 +10,7 @@ import { ESQLVariableType } from '@kbn/esql-types';
 import { ICommandCallbacks, Location } from '../../types';
 import type { ESQLCommand, ESQLCommandOption, ESQLColumn, ESQLFunction } from '../../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
-import { getFunctionSuggestions } from '../../../definitions/functions_helpers';
+import { getFunctionSuggestions } from '../../../definitions/utils/functions';
 import {
   pipeCompleteItem,
   byCompleteItem,
@@ -25,8 +25,8 @@ import {
   handleFragment,
   getControlSuggestionIfSupported,
   suggestForExpression,
-} from '../../../definitions/autocomplete_helpers';
-import { isExpressionComplete, getExpressionType } from '../../../definitions/expressions_helpers';
+} from '../../../definitions/utils/autocomplete';
+import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
 import { TRIGGER_SUGGESTION_COMMAND, ESQL_VARIABLES_PREFIX } from '../../constants';
 import { getPosition, isMarkerNode } from './utils';
 

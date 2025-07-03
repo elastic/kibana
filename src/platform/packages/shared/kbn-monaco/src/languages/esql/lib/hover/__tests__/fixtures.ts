@@ -8,7 +8,7 @@
  */
 
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
-import { FieldType } from '@kbn/esql-ast/src/definitions/types';
+import { FieldType } from '@kbn/esql-ast';
 import { monaco } from '../../../../../monaco_imports';
 import { HoverMonacoModel } from '../hover';
 

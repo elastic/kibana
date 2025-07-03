@@ -25,11 +25,11 @@ import {
 } from '../../../ast/helpers';
 import { isOptionNode } from '../../../ast/util';
 import { Walker } from '../../../walker';
-import { findPreviousWord, getLastNonWhitespaceChar } from '../../../definitions/autocomplete_helpers';
+import { findPreviousWord, getLastNonWhitespaceChar } from '../../../definitions/utils/autocomplete';
 import { ISuggestionItem } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { EDITOR_MARKER } from '../../../parser/constants';
-import { getFunctionDefinition } from '../../../definitions/functions_helpers';
+import { getFunctionDefinition } from '../../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../../definitions/types';
 
 export function isMarkerNode(node: ESQLAstItem | undefined): boolean {

@@ -11,7 +11,7 @@ import type { ESQLCommand } from '../../../types';
 import { pipeCompleteItem } from '../../utils/complete_items';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import { buildConstantsDefinitions } from '../../../definitions/literals_helpers';
+import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../../ast/helpers';
 
 export async function autocomplete(

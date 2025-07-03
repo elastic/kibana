@@ -8,13 +8,13 @@
  */
 import { IndexAutocompleteItem } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import type { ESQLCommand, ESQLSource } from '../types';
-import type { ISuggestionItem, ESQLSourceResult } from '../commands_registry/types';
-import { handleFragment } from './autocomplete_helpers';
-import { pipeCompleteItem, commaCompleteItem } from '../commands_registry/utils/complete_items';
-import { EDITOR_MARKER } from '../parser/constants';
-import { TRIGGER_SUGGESTION_COMMAND } from '../commands_registry/constants';
-import { metadataSuggestion } from '../commands_registry/options/metadata';
+import type { ESQLCommand, ESQLSource } from '../../types';
+import type { ISuggestionItem, ESQLSourceResult } from '../../commands_registry/types';
+import { handleFragment } from './autocomplete';
+import { pipeCompleteItem, commaCompleteItem } from '../../commands_registry/utils/complete_items';
+import { EDITOR_MARKER } from '../../parser/constants';
+import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
+import { metadataSuggestion } from '../../commands_registry/options/metadata';
 
 function hasWildcard(name: string) {
   return /\*/.test(name);

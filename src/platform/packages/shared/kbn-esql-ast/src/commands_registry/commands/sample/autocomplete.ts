@@ -9,7 +9,7 @@
 import type { ESQLCommand } from '../../../types';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { pipeCompleteItem } from '../../utils/complete_items';
-import { buildConstantsDefinitions } from '../../../definitions/literals_helpers';
+import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 
 export async function autocomplete(
   query: string,

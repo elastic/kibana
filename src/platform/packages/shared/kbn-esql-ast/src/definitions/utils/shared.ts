@@ -6,16 +6,16 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { ESQLColumn, ESQLIdentifier } from '../types';
+import { ESQLColumn, ESQLIdentifier } from '../../types';
 import type {
   ESQLFieldWithMetadata,
   ESQLUserDefinedColumn,
   ICommandContext,
-} from '../commands_registry/types';
-import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK } from '../parser/constants';
-import { getLastNonWhitespaceChar } from './autocomplete_helpers';
-import type { ESQLAstItem } from '../types';
-import type { SupportedDataType } from './types';
+} from '../../commands_registry/types';
+import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK } from '../../parser/constants';
+import { getLastNonWhitespaceChar } from './autocomplete';
+import type { ESQLAstItem } from '../../types';
+import type { SupportedDataType } from '../types';
 /**
  * In several cases we don't want to count the last arg if it is
  * of type unknown.

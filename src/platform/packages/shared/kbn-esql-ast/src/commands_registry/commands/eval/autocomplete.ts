@@ -12,8 +12,8 @@ import {
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
 } from '../../utils/complete_items';
-import { suggestForExpression, getExpressionPosition } from '../../../definitions/autocomplete_helpers';
-import { isExpressionComplete, getExpressionType } from '../../../definitions/expressions_helpers';
+import { suggestForExpression, getExpressionPosition } from '../../../definitions/utils/autocomplete';
+import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
 import {
   type ISuggestionItem,
   type ICommandContext,

@@ -16,8 +16,8 @@ import type {
   ESQLMessage,
   ESQLSource,
   ESQLIdentifier,
-} from '../types';
-import type { ErrorTypes, ErrorValues } from './types';
+} from '../../types';
+import type { ErrorTypes, ErrorValues } from '../types';
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({
   messageId,

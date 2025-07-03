@@ -18,31 +18,29 @@ import {
   Walker,
   esqlCommandRegistry,
   getCommandAutocompleteDefinitions,
-  getSuggestionsToRightOfOperatorExpression,
-  getFieldsOrFunctionsSuggestions,
-  getControlSuggestionIfSupported,
-  buildFieldsDefinitionsWithMetadata,
-  getFunctionSuggestions,
   commaCompleteItem,
   listCompleteItem,
   allStarConstant,
   FULL_TEXT_SEARCH_FUNCTIONS,
   ESQL_VARIABLES_PREFIX,
-  pushItUpInTheList,
-} from '@kbn/esql-ast';
-import { comparisonFunctions } from '@kbn/esql-ast/src/definitions/all_operators';
-import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
-import {
   isNumericType,
   FunctionParameterType,
   FunctionDefinitionTypes,
   FunctionParameter,
-} from '@kbn/esql-ast/src/definitions/types';
+} from '@kbn/esql-ast';
+import { comparisonFunctions } from '@kbn/esql-ast/src/definitions/all_operators';
+import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
 import {
   getDateLiterals,
   getCompatibleLiterals,
-} from '@kbn/esql-ast/src/definitions/literals_helpers';
-import { getExpressionType } from '@kbn/esql-ast/src/definitions/expressions_helpers';
+  getFieldsOrFunctionsSuggestions,
+  getControlSuggestionIfSupported,
+  pushItUpInTheList,
+  getSuggestionsToRightOfOperatorExpression,
+  buildFieldsDefinitionsWithMetadata,
+  getFunctionSuggestions,
+  getExpressionType,
+} from '@kbn/esql-ast/src/definitions/utils';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import {
   ESQLUserDefinedColumn,

@@ -15,7 +15,7 @@ import {
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
 } from '../../utils/complete_items';
-import { columnExists } from '../../../definitions/autocomplete_helpers';
+import { columnExists } from '../../../definitions/utils/autocomplete';
 
 export async function autocomplete(
   query: string,

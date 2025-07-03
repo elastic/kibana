@@ -15,15 +15,13 @@ import {
   ESQLAstQueryExpression,
   BasicPrettyPrinter,
   TIME_SYSTEM_PARAMS,
-} from '@kbn/esql-ast';
-import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
-import { getColumnForASTNode } from '@kbn/esql-ast/src/definitions/shared';
-import {
   type SupportedDataType,
   type FunctionReturnType,
   FunctionDefinitionTypes,
   FunctionDefinition,
-} from '@kbn/esql-ast/src/definitions/types';
+} from '@kbn/esql-ast';
+import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
+import { getColumnForASTNode } from '@kbn/esql-ast/src/definitions/utils';
 import {
   ESQLUserDefinedColumn,
   ESQLFieldWithMetadata,

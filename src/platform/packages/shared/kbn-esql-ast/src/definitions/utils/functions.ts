@@ -15,16 +15,16 @@ import {
   type FunctionParameterType,
   FunctionDefinitionTypes,
   type SupportedDataType,
-} from './types';
-import { operatorsDefinitions } from './all_operators';
-import { aggFunctionDefinitions } from './generated/aggregation_functions';
-import { groupingFunctionDefinitions } from './generated/grouping_functions';
-import { scalarFunctionDefinitions } from './generated/scalar_functions';
-import { ESQLFieldWithMetadata, ISuggestionItem } from '../commands_registry/types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../commands_registry/constants';
-import { buildFunctionDocumentation } from './documentation_util';
-import { getSafeInsertText, getControlSuggestion } from './autocomplete_helpers';
-import { ESQLAstItem, ESQLFunction } from '../types';
+} from '../types';
+import { operatorsDefinitions } from '../all_operators';
+import { aggFunctionDefinitions } from '../generated/aggregation_functions';
+import { groupingFunctionDefinitions } from '../generated/grouping_functions';
+import { scalarFunctionDefinitions } from '../generated/scalar_functions';
+import { ESQLFieldWithMetadata, ISuggestionItem } from '../../commands_registry/types';
+import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
+import { buildFunctionDocumentation } from './documentation';
+import { getSafeInsertText, getControlSuggestion } from './autocomplete';
+import { ESQLAstItem, ESQLFunction } from '../../types';
 import { removeFinalUnknownIdentiferArg, isParamExpressionType } from './shared';
 import { getTestFunctions } from './test_functions';
 

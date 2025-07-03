@@ -16,10 +16,7 @@ import {
   isESQLNamedParamLiteral,
 } from '@kbn/esql-ast/src/types';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
-import {
-  getFunctionSignatures,
-  getFunctionDefinition,
-} from '@kbn/esql-ast/src/definitions/functions_helpers';
+import { getFunctionSignatures, getFunctionDefinition } from '@kbn/esql-ast/src/definitions/utils';
 import { collectUserDefinedColumns, type ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
 import { getFieldsByTypeRetriever } from '@kbn/esql-validation-autocomplete/src/autocomplete/autocomplete';
 import {
