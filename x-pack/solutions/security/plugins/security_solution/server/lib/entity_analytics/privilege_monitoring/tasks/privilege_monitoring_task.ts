@@ -85,9 +85,7 @@ export const registerPrivilegeMonitoringTask = ({
       namespace,
     });
 
-    const apiKey = await apiKeyManager.getApiKey();
-
-    const client = apiKey ? apiKeyManager.getClientFromApiKey(apiKey) : undefined;
+    const client = await apiKeyManager.getClient();
 
     if (!client) {
       logger.error('[Privilege Monitoring] Unable to create Elasticsearch client from API key.');

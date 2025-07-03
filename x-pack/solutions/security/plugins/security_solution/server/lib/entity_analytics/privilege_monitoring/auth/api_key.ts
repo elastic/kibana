@@ -33,10 +33,14 @@ export interface ApiKeyManagerDependencies {
 export const getApiKeyManager = (deps: ApiKeyManagerDependencies) => {
   return {
     generate: () => generate(deps),
-    getApiKey: () => getApiKey(deps),
-    getClientFromApiKey: (apiKey: PrivilegeMonitoringAPIKey) => getClientFromApiKey(deps, apiKey),
+    getClient: () => getClient(deps),
     getRequestFromApiKey,
   };
+};
+
+const getClient = async (deps: ApiKeyManagerDependencies) => {
+  const apiKey = await getApiKey(deps);
+  return apiKey ? getClientFromApiKey(deps, apiKey) : undefined;
 };
 
 const generate = async (deps: ApiKeyManagerDependencies) => {
@@ -110,7 +114,7 @@ const getClientFromApiKey = (
   };
 };
 
-export const generateAPIKey = async (
+const generateAPIKey = async (
   req: KibanaRequest,
   deps: ApiKeyManagerDependencies
 ): Promise<PrivilegeMonitoringAPIKey | undefined> => {
