@@ -25162,15 +25162,7 @@ openai@^4.72.0, openai@^4.77.0:
     formdata-node "^4.3.2"
     node-fetch "^2.6.7"
 
-openapi-sampler@^1.5.0:
-  version "1.5.1"
-  resolved "https://registry.yarnpkg.com/openapi-sampler/-/openapi-sampler-1.5.1.tgz#2b0145179abb0d75eaf50c82b86ef044d22bd671"
-  integrity sha512-tIWIrZUKNAsbqf3bd9U1oH6JEXo8LNYuDlXw26By67EygpjT+ArFnsxxyTMjFWRfbqo5ozkvgSQDK69Gd8CddA==
-  dependencies:
-    "@types/json-schema" "^7.0.7"
-    json-pointer "0.6.2"
-
-openapi-sampler@^1.6.1:
+openapi-sampler@^1.5.0, openapi-sampler@^1.6.1:
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/openapi-sampler/-/openapi-sampler-1.6.1.tgz#fa1839cd372d1789e12cd3cce46b0511d3f5c79e"
   integrity sha512-s1cIatOqrrhSj2tmJ4abFYZQK6l5v+V4toO5q1Pa0DyN8mtyqy2I+Qrj5W9vOELEtybIMQs/TBZGVO/DtTFK8w==
