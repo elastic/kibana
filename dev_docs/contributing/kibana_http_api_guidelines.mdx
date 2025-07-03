@@ -7,12 +7,8 @@ date: 2025-07-02
 tags: ['kibana', 'contributor', 'dev', 'http', 'api', 'rest', 'design']
 ---
 
-Kibana's public HTTP APIs are the foundation for developers, partners, and customers to build powerful automations and integrations with Kibana.
-
-These guidelines provide a set of best practices for designing HTTP APIs that are consistent, predictable, and easy to use. Whether you're building new APIs or enhancing existing ones, following these guidelines will help ensure that your APIs provide a great user experience.
-
 <DocCallOut title="Some APIs need to be Terraform-friendly">
-  As an extension to the guidance in this document refer to the [Guidelines for Terraform friendly HTTP APIs](/kibana-dev-docs/contributing/http-api-tf-guidelines) if you would like to support an Infrastructure-as-Code (IaC) use case.
+  As an extension to the guidance in this document refer to the <DocLink id="kibHttpApiTfGuidelines" text="Guidelines for Terraform friendly HTTP APIs" /> if you would like to support an Infrastructure-as-Code (IaC) use case.
 </DocCallOut>
 
 ## Design principles
@@ -28,7 +24,7 @@ Consistency is key to a great API-user experience. APIs should be consistent in 
 
 This principle is embodied in the rest of this document, so read on for examples!
 
-### Optimize for a great API-user experience
+### Make a great API-user experience
 
 Create a great _API_ user experience, as opposed to optimizing a single API for _UI_ use cases as well. Front-ends have very different needs and constraints from public HTTP API clients. Our public HTTP APIs should be primitives that are simple to use and compose.
 
@@ -82,36 +78,154 @@ Getting your HTTP APIs into a stable state is a process based on feedback from a
   Linus Torvalds famously said of Kernel development: "WE DO NOT BREAK USERSPACE!" (along with some other expletives). We should adopt this kind of rigor and empathy when working with our _public_ HTTP APIs and always proiritise finding ways to avoid breaking our APIs.
 </DocCallOut>
 
-## Structure
-
-## Versioning
-
-## Conventions
-
-### Pluralization
-
-Prefer pluralization over singularization in HTTP API paths when referring to collections. For example:
-
-✅ DO
-```
-GET /api/resources             # List resources
-GET /api/resources/{id}        # Get a single resource
-DELETE /api/resources/{id}     # Delete a resource
-PUT /api/resources/{id}        # Update a resource
-POST /api/resources            # Create a resource
-```
-
-❌ DO NOT
-```
-GET /api/resource             # List resources
-GET /api/resource/{id}        # Get a single resource
-DELETE /api/resource/{id}     # Delete a resource
-PUT /api/resource/{id}        # Update a resource
-POST /api/resource            # Create a resource
-```
-
-### Internal vs Public APIs
+## Internal vs Public APIs
 
 Public HTTP APIs are those that are exposed to users and are used by plugins and external tools. They are the backbone of our public HTTP APIs and are the focus of this document.
 
-## API Conventions
+Internal HTTP APIs are those that are used by Kibana's own code, like the UI. By default, when you register a new HTTP API it will be classified as `internal`. For example, this API is internal:
+
+```typescript
+router.get({ path: '/api/foos' ... }, async () => {...})
+```
+
+You can make an HTTP API public by changing the `access` setting to `public`:
+
+```typescript
+router.get({ path: '/api/foos', options: { access: 'public' } }, async () => {...})
+```
+
+Again, see the principle regarding [commitment](#commitment) before making APIs public!
+
+## Structure
+
+The following are a quick reference for how to structure your HTTP APIs.
+
+### Path
+
+**Use snake case**
+
+`/api/my_api` ✅
+
+`/api/my-api`, `/api/myApi` ❌
+
+**For public APIs, prefix with `/api`**
+
+`/api/my_api` ✅
+
+`/my_api` ❌
+
+**Pluralize collection names**
+
+`PUT /api/resources/{id}` ✅
+
+`PUT /api/resource/{id}` ❌
+
+### Methods
+
+**GET does not accept a body**
+
+`GET /api/resources/{id}` ✅
+
+`GET /api/resources/{id} { body: { params } }` ❌
+
+**POST is for creating a resource**
+
+Sometimes `POST` can be used for an action against a resource or for actions like `GET` but with a body.
+
+**PUT or PATCH are for updating a resource**
+
+`PATCH` is typically used for partial updates and should not result in something being created, while `PUT` might create a resource.
+
+**DELETE is for deleting a resource**
+
+Delete can return a simple response:
+
+```
+DELETE /api/resources/{id}
+# -> { "ok": true }
+```
+
+### Path parameters
+
+**Should use snake case**
+
+`/api/my_api/{my_id}` ✅
+
+`/api/my_api/{myId}` ❌
+
+### Query parameters
+
+**Should use snake case**
+
+`/api/my_api?snake_case=true` ✅
+
+`/api/my_api?snakeCase=false` ❌
+
+### Bodies
+
+**Should contain camelCase keys**
+
+While this diverges from the path, in JavaScript the convention to use `camelCase`
+in our request and response bodies provides a better developer experience while
+maintaining a solid API user experience.
+
+**Use JSON**
+
+This applies to both requests and responses, unless there is a good justification to return or support different response media types.
+
+**Resource shapes should be consistent**
+
+`GET`, `PUT`, `POST` should return the same shape of data for the same resource.
+
+### Headers
+
+**Should not be used to specify behaviour**
+
+Outside of exceptional cases, you should always use the parameters, query parameters or body of the request to specify behaviour.
+
+### Response codes
+
+**Should always be used as close as possible to their semantic meaning**
+
+See the [MDN docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status).
+
+### Pagination
+
+**Request**
+
+`GET /api/resources?page=1&size=10`
+
+**Response**
+
+```json
+{
+  "items": [...],
+  "total": 100,
+  "page": 1,
+  "size": 10
+}
+```
+
+### Errors
+
+### Special data formats
+
+**Dates**
+
+**Durations**
+
+## Versioning
+
+Kibana's public HTTP APIs are versioned with the entire Elastic organization using data-based versioning. The date indicates the last breaking change. For example: version `2023-10-31` is saying "the last breaking change was at the end of October 2023".
+
+<DocCallOut title="New public date versions will be very sparse" color="warning">
+  Do not build your public HTTP APIs with the idea you will be able to change them quickly using versions! Due to the MASSIVE surface area, new date string versions are not introduced lightly and must go through rigorous review and justification.
+</DocCallOut>
+
+<DocCallOut title="What about Kibana public APIs that are not explicitly versioned?">
+  You may see some routes using `router.get` instead of `router.versioned.get`. Routes registered in the former fashion are assumed to be part of the oldest, `2023-10-31` API surface area and will be included as-is in future version surface areas as well, unless they are explicitly versioned. This is to prevent the need for a wide-spread refactor.
+</DocCallOut>
+
+Kibana's internal HTTP APIs can be versioned too, but for a very different purpose! With serverless, we continually roll out code changes _without_ asking browsers to refresh. That means, for a time, browser clients might expect old internal API behavior. It is up to route authors and UI developers to consider how to handle breaking changes of internal routes. Note: you are free to version internal APIs at will to mitigate any unfortunate browser client breakages!
+
+Please see the tutorial on <DocLink id="kibDevTutorialVersioningHTTPAPIs" text="versioning HTTP APIs" /> for more details.
