@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Cloud plugin config product_tier For Kibana Solution "chat" throws when any other product tier is provided 1`] = `"[serverless.product_tier]: a value wasn't expected to be present"`;
+
+exports[`Cloud plugin config product_tier For Kibana Solution "observability" throws when any other product tier is provided 1`] = `
+"[serverless.product_tier]: types that failed validation:
+- [serverless.product_tier.0]: expected value to equal [complete]
+- [serverless.product_tier.1]: expected value to equal [logs_essentials]"
+`;
+
+exports[`Cloud plugin config product_tier For Kibana Solution "search" throws when any other product tier is provided 1`] = `"[serverless.product_tier]: a value wasn't expected to be present"`;
+
+exports[`Cloud plugin config product_tier For Kibana Solution "security" throws when any other product tier is provided 1`] = `
+"[serverless.product_tier]: types that failed validation:
+- [serverless.product_tier.0]: expected value to equal [complete]
+- [serverless.product_tier.1]: expected value to equal [essentials]
+- [serverless.product_tier.2]: expected value to equal [search_ai_lake]"
+`;

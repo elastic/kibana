@@ -9,7 +9,7 @@ import React, { FC, PropsWithChildren } from 'react';
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
-import { KibanaSolution } from '@kbn/projects-solutions-groups';
+import type { KibanaProductTier, KibanaSolution } from '@kbn/projects-solutions-groups';
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
@@ -44,6 +44,7 @@ export interface CloudConfigType {
     project_id: string;
     project_name?: string;
     project_type?: KibanaSolution;
+    product_tier?: KibanaProductTier;
     orchestrator_target?: string;
   };
 }
@@ -117,6 +118,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
         projectId: this.config.serverless?.project_id,
         projectName: this.config.serverless?.project_name,
         projectType: this.config.serverless?.project_type,
+        productTier: this.config.serverless?.product_tier,
         orchestratorTarget: this.config.serverless?.orchestrator_target,
       },
       registerCloudService: (contextProvider) => {
@@ -176,6 +178,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
         projectId: this.config.serverless?.project_id,
         projectName: this.config.serverless?.project_name,
         projectType: this.config.serverless?.project_type,
+        productTier: this.config.serverless?.product_tier,
       },
       performanceUrl,
       usersAndRolesUrl,

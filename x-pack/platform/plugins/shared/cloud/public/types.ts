@@ -6,7 +6,7 @@
  */
 
 import type { SolutionId } from '@kbn/core-chrome-browser';
-import { KibanaSolution } from '@kbn/projects-solutions-groups';
+import type { KibanaProductTier, KibanaSolution } from '@kbn/projects-solutions-groups';
 import type { FC, PropsWithChildren } from 'react';
 
 export interface CloudStart {
@@ -90,6 +90,11 @@ export interface CloudStart {
      * Will always be present if `isServerlessEnabled` is `true`
      */
     projectType?: KibanaSolution;
+    /**
+     * The serverless product tier.
+     * Only present if the current project type has product tiers defined.
+     */
+    productTier?: KibanaProductTier;
   };
 }
 
@@ -219,6 +224,11 @@ export interface CloudSetup {
      * Will always be present if `isServerlessEnabled` is `true`
      */
     projectType?: KibanaSolution;
+    /**
+     * The serverless product tier.
+     * Only present if the current project type has product tiers defined.
+     */
+    productTier?: KibanaProductTier;
     /**
      * The serverless orchestrator target. The potential values are `canary` or `non-canary`
      * Will always be present if `isServerlessEnabled` is `true`
