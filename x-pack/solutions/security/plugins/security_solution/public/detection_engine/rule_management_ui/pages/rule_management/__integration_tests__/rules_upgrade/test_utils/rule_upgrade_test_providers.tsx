@@ -81,7 +81,7 @@ export function RuleUpgradeTestProviders({ children }: PropsWithChildren<{}>): J
                     <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
                       <QueryClientProvider client={queryClient}>
                         <MockDiscoverInTimelineContext>
-                          <EuiProvider highContrastMode={false}>{children}</EuiProvider>
+                          <EuiProvider>{children}</EuiProvider>
                         </MockDiscoverInTimelineContext>
                       </QueryClientProvider>
                     </ThemeProvider>
