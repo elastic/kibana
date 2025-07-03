@@ -29,19 +29,6 @@ import {
 export function PreviewPanel() {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
 
-  // useEffect(() => {
-  //   const subscription = timeState$.subscribe({
-  //     next: ({ kind }) => {
-  //       if (kind === 'override') {
-  //         refresh();
-  //       }
-  //     },
-  //   });
-  //   return () => {
-  //     subscription.unsubscribe();
-  //   };
-  // }, [timeState$, refresh]);
-
   let content;
 
   if (routingSnapshot.matches({ ready: 'idle' })) {
@@ -161,9 +148,7 @@ const RuleCreationPanel = () => {
         })}
       />
     );
-  }
-
-  if (documentsError) {
+  } else if (documentsError) {
     content = (
       <EuiEmptyPrompt
         icon={<AssetImage type="noResults" />}
@@ -179,9 +164,7 @@ const RuleCreationPanel = () => {
         body={documentsError.message}
       />
     );
-  }
-
-  if (!hasDocuments) {
+  } else if (!hasDocuments) {
     content = (
       <EuiEmptyPrompt
         icon={<AssetImage type="noResults" />}
@@ -195,9 +178,7 @@ const RuleCreationPanel = () => {
         }
       />
     );
-  }
-
-  if (hasDocuments) {
+  } else if (hasDocuments) {
     content = (
       <EuiFlexItem grow>
         <EuiFlexGroup direction="column">

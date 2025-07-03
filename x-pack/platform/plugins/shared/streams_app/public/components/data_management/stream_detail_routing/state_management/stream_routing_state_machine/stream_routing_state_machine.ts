@@ -355,7 +355,7 @@ export const createStreamRoutingMachineImplementations = ({
   streamsRepositoryClient,
   core,
   data,
-  timeStateSubject$,
+  timeState$,
   forkSuccessNofitier,
 }: StreamRoutingServiceDependencies): MachineImplementationsFrom<typeof streamRoutingMachine> => ({
   actors: {
@@ -365,7 +365,7 @@ export const createStreamRoutingMachineImplementations = ({
     routingSamplesMachine: routingSamplesMachine.provide(
       createRoutingSamplesMachineImplementations({
         data,
-        timeStateSubject$,
+        timeState$,
       })
     ),
   },

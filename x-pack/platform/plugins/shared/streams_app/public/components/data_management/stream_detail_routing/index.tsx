@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -19,7 +19,6 @@ import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CoreStart } from '@kbn/core/public';
-import { BehaviorSubject } from 'rxjs';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
@@ -49,20 +48,7 @@ export function StreamDetailRouting(props: StreamDetailRoutingProps) {
     streams: { streamsRepositoryClient },
   } = dependencies.start;
 
-  const timefilterHook = useTimefilter();
-
-  const [timeStateSubject$] = useState(() => new BehaviorSubject(timefilterHook.timeState));
-
-  useEffect(() => {
-    const subscription = timefilterHook.timeState$.subscribe((value) => {
-      if (value.kind === 'override') {
-        timeStateSubject$.next(value.timeState);
-      }
-    });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [timeStateSubject$, timefilterHook.timeState$]);
+  const { timeState$ } = useTimefilter();
 
   return (
     <StreamRoutingContextProvider
@@ -70,7 +56,7 @@ export function StreamDetailRouting(props: StreamDetailRoutingProps) {
       refreshDefinition={props.refreshDefinition}
       core={core}
       data={data}
-      timeStateSubject$={timeStateSubject$}
+      timeState$={timeState$}
       streamsRepositoryClient={streamsRepositoryClient}
       forkSuccessNofitier={createForkSuccessNofitier({ core, router })}
     >

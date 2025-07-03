@@ -15,7 +15,6 @@ import {
   SnapshotFrom,
 } from 'xstate5';
 import { Observable, filter, map, switchMap, timeout, catchError, throwError } from 'rxjs';
-import { isEmpty } from 'lodash';
 import { MappingRuntimeField, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { IEsSearchResponse } from '@kbn/search-types';
@@ -29,8 +28,8 @@ import {
 } from '@kbn/streams-schema';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { TimeState } from '@kbn/es-query';
-import { BehaviorSubject } from 'rxjs';
+import { TimefilterHook } from '@kbn/data-plugin/public/query/timefilter/use_timefilter';
+import { i18n } from '@kbn/i18n';
 import { emptyEqualsToAlways } from '../../../../../util/condition';
 
 // Types
@@ -66,7 +65,6 @@ interface SearchParams {
 
 interface CollectorParams {
   data: DataPublicPluginStart;
-  timeStateSubject$: BehaviorSubject<TimeState>;
   searchParams: Pick<SearchParams, 'condition' | 'definition'>;
 }
 
@@ -243,47 +241,41 @@ export const routingSamplesMachine = setup({
 
 export interface RoutingSamplesMachineDeps {
   data: DataPublicPluginStart;
-  timeStateSubject$: BehaviorSubject<TimeState>;
+  timeState$: TimefilterHook['timeState$'];
 }
 
 export const createRoutingSamplesMachineImplementations = ({
   data,
-  timeStateSubject$,
+  timeState$,
 }: RoutingSamplesMachineDeps): MachineImplementationsFrom<typeof routingSamplesMachine> => ({
   actors: {
-    collectDocuments: createDocumentsCollectorActor({ data, timeStateSubject$ }),
-    collectDocumentsCount: createDocumentsCountCollectorActor({ data, timeStateSubject$ }),
-    subscribeTimeUpdates: createTimeUpdatesActor({ timeStateSubject$ }),
+    collectDocuments: createDocumentsCollectorActor({ data }),
+    collectDocumentsCount: createDocumentsCountCollectorActor({ data }),
+    subscribeTimeUpdates: createTimeUpdatesActor({ timeState$ }),
   },
 });
 
-export function createDocumentsCollectorActor({
-  data,
-  timeStateSubject$,
-}: Pick<RoutingSamplesMachineDeps, 'data' | 'timeStateSubject$'>) {
+export function createDocumentsCollectorActor({ data }: Pick<RoutingSamplesMachineDeps, 'data'>) {
   return fromObservable<SampleDocument[], Pick<SearchParams, 'condition' | 'definition'>>(
     ({ input }) => {
-      return collectDocuments({ data, timeStateSubject$, searchParams: input });
+      return collectDocuments({ data, searchParams: input });
     }
   );
 }
 
 export function createDocumentsCountCollectorActor({
   data,
-  timeStateSubject$,
-}: Pick<RoutingSamplesMachineDeps, 'data' | 'timeStateSubject$'>) {
+}: Pick<RoutingSamplesMachineDeps, 'data'>) {
   return fromObservable<string | undefined, Pick<SearchParams, 'condition' | 'definition'>>(
     ({ input }) => {
-      return collectDocumentCounts({ data, timeStateSubject$, searchParams: input });
+      return collectDocumentCounts({ data, searchParams: input });
     }
   );
 }
 
-function createTimeUpdatesActor({
-  timeStateSubject$,
-}: Pick<RoutingSamplesMachineDeps, 'timeStateSubject$'>) {
+function createTimeUpdatesActor({ timeState$ }: Pick<RoutingSamplesMachineDeps, 'timeState$'>) {
   return fromEventObservable(() =>
-    timeStateSubject$.pipe(map(() => ({ type: 'routingSamples.refresh' })))
+    timeState$.pipe(map(() => ({ type: 'routingSamples.refresh' })))
   );
 }
 
@@ -299,6 +291,15 @@ const createTimestampRangeQuery = (start: number, end: number) => ({
     },
   },
 });
+
+const getAbsoluteTimestamps = (data: DataPublicPluginStart) => {
+  const time = data.query.timefilter.timefilter.getAbsoluteTime();
+
+  return {
+    start: new Date(time.from).getTime(),
+    end: new Date(time.to).getTime(),
+  };
+};
 
 /**
  * Create runtime mappings for fields that aren't mapped.
@@ -341,7 +342,14 @@ function processCondition(condition?: Condition): Condition | undefined {
 
 function handleTimeoutError(error: Error) {
   if (error.name === 'TimeoutError') {
-    return throwError(() => new Error('Document count search timed out after 10 seconds'));
+    return throwError(
+      () =>
+        new Error(
+          i18n.translate('xpack.streams.routingSamples.documentsSearchTimeoutErrorMessage', {
+            defaultMessage: 'Documents search timed out after 10 seconds.',
+          })
+        )
+    );
   }
   return throwError(() => error);
 }
@@ -446,13 +454,10 @@ function calculateProbability(docCount?: number): number {
 /**
  * Collects sample documents using Elasticsearch search
  */
-function collectDocuments({
-  data,
-  timeStateSubject$,
-  searchParams,
-}: CollectorParams): Observable<SampleDocument[]> {
+function collectDocuments({ data, searchParams }: CollectorParams): Observable<SampleDocument[]> {
   const abortController = new AbortController();
-  const { start, end } = timeStateSubject$.getValue();
+
+  const { start, end } = getAbsoluteTimestamps(data);
   const params = buildDocumentsSearchParams({ ...searchParams, start, end });
 
   return new Observable((observer) => {
@@ -460,11 +465,7 @@ function collectDocuments({
       .search({ params }, { abortSignal: abortController.signal })
       .pipe(
         timeout(SEARCH_TIMEOUT_MS),
-        filter(
-          (result) =>
-            (isRunningResponse(result) && isEmpty(result.rawResponse.hits?.hits)) ||
-            !isEmpty(result.rawResponse.hits?.hits)
-        ),
+        // filter((result) => Boolean(result.rawResponse.hits.hits)),
         map(extractDocumentsFromResult),
         catchError(handleTimeoutError)
       )
@@ -482,11 +483,11 @@ function collectDocuments({
  */
 function collectDocumentCounts({
   data,
-  timeStateSubject$,
   searchParams,
 }: CollectorParams): Observable<string | undefined> {
   const abortController = new AbortController();
-  const { start, end } = timeStateSubject$.getValue();
+
+  const { start, end } = getAbsoluteTimestamps(data);
   const params = buildDocumentCountSearchParams({ ...searchParams, start, end });
 
   return new Observable((observer) => {
@@ -519,7 +520,7 @@ function collectDocumentCounts({
               filter((result) => !isRunningResponse(result)),
               timeout(SEARCH_TIMEOUT_MS),
               map((result) => {
-                if (result.rawResponse?.aggregations) {
+                if (result.rawResponse.aggregations) {
                   const sampleAgg = result.rawResponse.aggregations.sample as {
                     doc_count: number;
                     probability: number;
