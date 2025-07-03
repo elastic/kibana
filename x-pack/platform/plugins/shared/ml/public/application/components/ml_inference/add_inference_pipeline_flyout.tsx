@@ -15,6 +15,7 @@ import {
   EuiFlyoutFooter,
   EuiSpacer,
   EuiTitle,
+  EuiFocusTrap,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -105,91 +106,93 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
 
   return (
     <EuiFlyout onClose={onClose} size="l" data-test-subj="mlTrainedModelsInferencePipelineFlyout">
-      <EuiFlyoutHeader>
-        <EuiTitle size="m">
-          <h3>
-            {i18n.translate(
-              'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.title',
-              {
-                defaultMessage: 'Deploy analytics model',
-              }
-            )}
-          </h3>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <AddInferencePipelineHorizontalSteps
-          step={step}
-          setStep={setStep}
-          isDetailsStepValid={pipelineNameError === undefined && targetFieldError === undefined}
-          isConfigureProcessorStepValid={hasUnsavedChanges === false}
-          hasProcessorStep
-          pipelineCreated={formState.pipelineCreated}
-        />
-        <EuiSpacer size="m" />
-        {step === ADD_INFERENCE_PIPELINE_STEPS.DETAILS && (
-          <PipelineDetails
-            handlePipelineConfigUpdate={handleConfigUpdate}
-            pipelineName={formState.pipelineName}
-            pipelineNameError={pipelineNameError}
-            pipelineDescription={formState.pipelineDescription}
-            modelId={model.model_id}
-            targetField={formState.targetField}
-            targetFieldError={targetFieldError}
-          />
-        )}
-        {step === ADD_INFERENCE_PIPELINE_STEPS.CONFIGURE_PROCESSOR && model && (
-          <ProcessorConfiguration
-            condition={formState.condition}
-            fieldMap={formState.fieldMap}
-            handleAdvancedConfigUpdate={handleConfigUpdate}
-            inferenceConfig={formState.inferenceConfig}
-            modelInferenceConfig={model.inference_config}
-            modelInputFields={model.input ?? []}
-            modelType={modelType as InferenceModelTypes}
-            setHasUnsavedChanges={setHasUnsavedChanges}
-            tag={formState.tag}
-          />
-        )}
-        {step === ADD_INFERENCE_PIPELINE_STEPS.ON_FAILURE && (
-          <OnFailureConfiguration
-            ignoreFailure={formState.ignoreFailure}
-            takeActionOnFailure={formState.takeActionOnFailure}
-            handleAdvancedConfigUpdate={handleConfigUpdate}
-            onFailure={formState.onFailure}
-          />
-        )}
-        {step === ADD_INFERENCE_PIPELINE_STEPS.TEST && (
-          <TestPipeline
-            sourceIndex={sourceIndex}
-            state={formState}
-            mode={TEST_PIPELINE_MODE.STEP}
-          />
-        )}
-        {step === ADD_INFERENCE_PIPELINE_STEPS.CREATE && (
-          <ReviewAndCreatePipeline
-            inferencePipeline={getPipelineConfig(formState)}
-            modelType={modelType}
-            pipelineName={formState.pipelineName}
+      <EuiFocusTrap>
+        <EuiFlyoutHeader>
+          <EuiTitle size="m">
+            <h3>
+              {i18n.translate(
+                'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.title',
+                {
+                  defaultMessage: 'Deploy analytics model',
+                }
+              )}
+            </h3>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <AddInferencePipelineHorizontalSteps
+            step={step}
+            setStep={setStep}
+            isDetailsStepValid={pipelineNameError === undefined && targetFieldError === undefined}
+            isConfigureProcessorStepValid={hasUnsavedChanges === false}
+            hasProcessorStep
             pipelineCreated={formState.pipelineCreated}
-            pipelineError={formState.pipelineError}
-            sourceIndex={sourceIndex}
           />
-        )}
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter className="mlTrainedModelsInferencePipelineFlyoutFooter">
-        <AddInferencePipelineFooter
-          onClose={onClose}
-          onCreate={createPipeline}
-          step={step}
-          setStep={setStep}
-          isDetailsStepValid={pipelineNameError === undefined && targetFieldError === undefined}
-          isConfigureProcessorStepValid={hasUnsavedChanges === false}
-          pipelineCreated={formState.pipelineCreated}
-          creatingPipeline={formState.creatingPipeline}
-          hasProcessorStep
-        />
-      </EuiFlyoutFooter>
+          <EuiSpacer size="m" />
+          {step === ADD_INFERENCE_PIPELINE_STEPS.DETAILS && (
+            <PipelineDetails
+              handlePipelineConfigUpdate={handleConfigUpdate}
+              pipelineName={formState.pipelineName}
+              pipelineNameError={pipelineNameError}
+              pipelineDescription={formState.pipelineDescription}
+              modelId={model.model_id}
+              targetField={formState.targetField}
+              targetFieldError={targetFieldError}
+            />
+          )}
+          {step === ADD_INFERENCE_PIPELINE_STEPS.CONFIGURE_PROCESSOR && model && (
+            <ProcessorConfiguration
+              condition={formState.condition}
+              fieldMap={formState.fieldMap}
+              handleAdvancedConfigUpdate={handleConfigUpdate}
+              inferenceConfig={formState.inferenceConfig}
+              modelInferenceConfig={model.inference_config}
+              modelInputFields={model.input ?? []}
+              modelType={modelType as InferenceModelTypes}
+              setHasUnsavedChanges={setHasUnsavedChanges}
+              tag={formState.tag}
+            />
+          )}
+          {step === ADD_INFERENCE_PIPELINE_STEPS.ON_FAILURE && (
+            <OnFailureConfiguration
+              ignoreFailure={formState.ignoreFailure}
+              takeActionOnFailure={formState.takeActionOnFailure}
+              handleAdvancedConfigUpdate={handleConfigUpdate}
+              onFailure={formState.onFailure}
+            />
+          )}
+          {step === ADD_INFERENCE_PIPELINE_STEPS.TEST && (
+            <TestPipeline
+              sourceIndex={sourceIndex}
+              state={formState}
+              mode={TEST_PIPELINE_MODE.STEP}
+            />
+          )}
+          {step === ADD_INFERENCE_PIPELINE_STEPS.CREATE && (
+            <ReviewAndCreatePipeline
+              inferencePipeline={getPipelineConfig(formState)}
+              modelType={modelType}
+              pipelineName={formState.pipelineName}
+              pipelineCreated={formState.pipelineCreated}
+              pipelineError={formState.pipelineError}
+              sourceIndex={sourceIndex}
+            />
+          )}
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter className="mlTrainedModelsInferencePipelineFlyoutFooter">
+          <AddInferencePipelineFooter
+            onClose={onClose}
+            onCreate={createPipeline}
+            step={step}
+            setStep={setStep}
+            isDetailsStepValid={pipelineNameError === undefined && targetFieldError === undefined}
+            isConfigureProcessorStepValid={hasUnsavedChanges === false}
+            pipelineCreated={formState.pipelineCreated}
+            creatingPipeline={formState.creatingPipeline}
+            hasProcessorStep
+          />
+        </EuiFlyoutFooter>
+      </EuiFocusTrap>
     </EuiFlyout>
   );
 };
