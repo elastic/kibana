@@ -27,16 +27,14 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       'xpack.observabilityAiAssistantManagement.settingsPage.simulatedFunctionCallingDescription',
       {
         defaultMessage:
-          '<em>[technical preview]</em> Simulated function calling does not need API support for functions or tools, but it may decrease performance. It is currently always enabled for connectors that do not have API support for Native function calling, regardless of this setting.',
-        values: {
-          em: (chunks) => `<em>${chunks}</em>`,
-        },
+          'Simulated function calling does not need API support for functions or tools, but it may decrease performance. It is currently always enabled for connectors that do not have API support for Native function calling, regardless of this setting.',
       }
     ),
     schema: schema.boolean(),
     type: 'boolean',
     requiresPageReload: true,
     solution: 'oblt',
+    technicalPreview: true,
   },
   [aiAssistantSearchConnectorIndexPattern]: {
     category: ['observability'],

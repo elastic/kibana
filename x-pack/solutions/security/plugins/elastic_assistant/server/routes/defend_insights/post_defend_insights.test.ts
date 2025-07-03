@@ -120,12 +120,14 @@ describe('postDefendInsightsRoute', () => {
     tools.context.licensing.license = insufficientLicense;
     jest.spyOn(insufficientLicense, 'hasAtLeast').mockReturnValue(false);
 
-    await expect(
-      server.inject(
-        postDefendInsightsRequest(mockRequestBody),
-        requestContextMock.convertContext(tools.context)
-      )
-    ).rejects.toThrowError('Encountered unexpected call to response.forbidden');
+    const response = await server.inject(
+      postDefendInsightsRequest(mockRequestBody),
+      requestContextMock.convertContext(tools.context)
+    );
+    expect(response.status).toEqual(403);
+    expect(response.body).toEqual({
+      message: 'Your license does not support Defend Workflows. Please upgrade your license.',
+    });
   });
 
   it('should handle successful request', async () => {
