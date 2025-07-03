@@ -10,7 +10,11 @@
 import { ReactElement } from 'react';
 
 import { UiCounterMetricType } from '@kbn/analytics';
-import { DeprecationSettings, UiSettingsSolutions } from '@kbn/core-ui-settings-common';
+import {
+  DeprecationSettings,
+  TechnicalPreviewSettings,
+  UiSettingsSolutions,
+} from '@kbn/core-ui-settings-common';
 
 import { KnownTypeToValue, SettingType } from './setting_type';
 
@@ -93,6 +97,11 @@ export interface FieldDefinition<
    * @see {@link UiSettingsSolutions}
    */
   solutionViews?: UiSettingsSolutions;
+  /**
+   * Technical preview information for the field
+   * @see {@link TechnicalPreviewSettings}
+   */
+  technicalPreview?: TechnicalPreviewSettings;
 }
 
 /**
