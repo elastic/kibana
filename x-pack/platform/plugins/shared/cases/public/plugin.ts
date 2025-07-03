@@ -12,7 +12,7 @@ import { createBrowserHistory } from 'history';
 
 import { KibanaServices } from './common/lib/kibana';
 import type { CasesUiConfigType } from '../common/ui/types';
-import { APP_ID, APP_PATH } from '../common/constants';
+import { APP_ID, APP_PATH, CASE_PAGE_VIEW_EVENT_TYPE } from '../common/constants';
 import { APP_TITLE, APP_DESC } from './common/translations';
 import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { useCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
@@ -116,6 +116,19 @@ export class CasesUiPlugin
     }
 
     registerSystemActions(plugins.triggersActionsUi);
+
+    core.analytics.registerEventType({
+      eventType: CASE_PAGE_VIEW_EVENT_TYPE,
+      schema: {
+        owner: {
+          type: 'keyword',
+          _meta: {
+            description: 'The solution ID (owner) that rendered the Cases page',
+            optional: false,
+          },
+        },
+      },
+    });
 
     return {
       attachmentFramework: {
