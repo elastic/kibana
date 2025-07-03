@@ -39,12 +39,27 @@ export const KIBANA_SOLUTIONS = [
  */
 export type KibanaSolution = (typeof KIBANA_SOLUTIONS)[number];
 
+export const KIBANA_OBSERVABILITY_COMPLETE_TIER = 'complete' as const;
+export const KIBANA_OBSERVABILITY_LOGS_ESSENTIALS_TIER = 'logs_essentials' as const;
+export const KIBANA_SECURITY_COMPLETE_TIER = 'complete' as const;
+export const KIBANA_SECURITY_ESSENTIALS_TIER = 'essentials' as const;
+export const KIBANA_SECURITY_SEARCH_AI_LAKE_TIER = 'search_ai_lake' as const;
+
 /**
  * Possible product tiers for Kibana solutions.
  */
 export const KIBANA_PRODUCT_TIERS = {
-  [KIBANA_OBSERVABILITY_SOLUTION]: [] as const,
-  [KIBANA_SECURITY_SOLUTION]: [] as const,
+  [KIBANA_OBSERVABILITY_SOLUTION]: [
+    KIBANA_OBSERVABILITY_COMPLETE_TIER,
+    KIBANA_OBSERVABILITY_LOGS_ESSENTIALS_TIER,
+  ] as const,
+  [KIBANA_SECURITY_SOLUTION]: [
+    KIBANA_SECURITY_COMPLETE_TIER,
+    KIBANA_SECURITY_ESSENTIALS_TIER,
+    KIBANA_SECURITY_SEARCH_AI_LAKE_TIER,
+  ] as const,
   [KIBANA_SEARCH_SOLUTION]: [] as const,
   [KIBANA_CHAT_SOLUTION]: [] as const,
 } as const;
+
+export type KibanaProductTier = (typeof KIBANA_PRODUCT_TIERS)[KibanaSolution][number];
