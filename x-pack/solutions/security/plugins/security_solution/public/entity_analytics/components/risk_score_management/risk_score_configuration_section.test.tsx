@@ -10,13 +10,13 @@ import { RiskScoreConfigurationSection } from './risk_score_configuration_sectio
 import { shallow, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiSuperDatePicker, EuiSwitch } from '@elastic/eui';
-import * as i18n from '../translations';
-import { useAppToasts } from '../../common/hooks/use_app_toasts';
-import { useConfigureSORiskEngineMutation } from '../api/hooks/use_configure_risk_engine_saved_object';
+import * as i18n from '../../translations';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { useConfigureSORiskEngineMutation } from '../../api/hooks/use_configure_risk_engine_saved_object';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../../common/hooks/use_app_toasts');
-jest.mock('../api/hooks/use_configure_risk_engine_saved_object');
+jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/hooks/use_app_toasts');
+jest.mock('../../api/hooks/use_configure_risk_engine_saved_object');
 
 describe('RiskScoreConfigurationSection', () => {
   const mockConfigureSO = useConfigureSORiskEngineMutation as jest.Mock;

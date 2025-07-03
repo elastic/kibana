@@ -18,15 +18,15 @@ import {
   EuiCallOut,
   EuiAccordion,
 } from '@elastic/eui';
-import type { RiskEngineStatus } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
-import { RiskEngineStatusEnum } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
-import * as i18n from '../translations';
-import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
-import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mutation';
-import { useEnableRiskEngineMutation } from '../api/hooks/use_enable_risk_engine_mutation';
-import { useDisableRiskEngineMutation } from '../api/hooks/use_disable_risk_engine_mutation';
-import { useAppToasts } from '../../common/hooks/use_app_toasts';
-import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
+import type { RiskEngineStatus } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
+import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
+import * as i18n from '../../translations';
+import { useRiskEngineStatus } from '../../api/hooks/use_risk_engine_status';
+import { useInitRiskEngineMutation } from '../../api/hooks/use_init_risk_engine_mutation';
+import { useEnableRiskEngineMutation } from '../../api/hooks/use_enable_risk_engine_mutation';
+import { useDisableRiskEngineMutation } from '../../api/hooks/use_disable_risk_engine_mutation';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import type { RiskEngineMissingPrivilegesResponse } from '../../hooks/use_missing_risk_engine_privileges';
 
 const MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING = '50px';
 const toastOptions = {

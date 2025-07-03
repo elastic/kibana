@@ -1,0 +1,133 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useEntityAnalyticsRoutes } from '../../../api/api';
+import { useConfigureSORiskEngineMutation } from '../../../api/hooks/use_configure_risk_engine_saved_object';
+import * as i18n from '../../../translations';
+
+export interface RiskScoreConfigurationState {
+  includeClosedAlerts: boolean;
+  range: {
+    start: string;
+    end: string;
+  };
+}
+
+const settingsAreEqual = (
+  first?: Partial<RiskScoreConfigurationState>,
+  second?: Partial<RiskScoreConfigurationState>
+) => {
+  return (
+    first?.includeClosedAlerts === second?.includeClosedAlerts &&
+    first?.range?.start === second?.range?.start &&
+    first?.range?.end === second?.range?.end
+  );
+};
+
+const riskEngineSettingsWithDefaults = (
+  riskEngineSettings?: Partial<RiskScoreConfigurationState>
+) => ({
+  includeClosedAlerts: riskEngineSettings?.includeClosedAlerts ?? false,
+  range: {
+    start: riskEngineSettings?.range?.start ?? 'now-30d',
+    end: riskEngineSettings?.range?.end ?? 'now',
+  },
+});
+
+export const useConfigurableRiskEngineSettings = () => {
+  const { addSuccess } = useAppToasts();
+
+  const { fetchRiskEngineSettings } = useEntityAnalyticsRoutes();
+
+  const [selectedRiskEngineSettings, setSelectedRiskEngineSettings] = useState<
+    RiskScoreConfigurationState | undefined
+  >(undefined);
+
+  const {
+    data: savedRiskEngineSettings,
+    refetch: refetchRiskEngineSettings,
+    isLoading: isLoadingRiskEngineSettings,
+    isError,
+  } = useQuery(
+    ['GET', 'FETCH_RISK_ENGINE_SETTINGS'],
+    async () => {
+      const riskEngineSettings = await fetchRiskEngineSettings();
+      setSelectedRiskEngineSettings(riskEngineSettingsWithDefaults(riskEngineSettings));
+      return riskEngineSettings;
+    },
+    { retry: false }
+  );
+
+  useEffect(() => {
+    // An error case, where we set the selection to default values, is a legitimate and expected part of this flow, particularly when a configuration has never been saved.
+    if (isError) {
+      setSelectedRiskEngineSettings(riskEngineSettingsWithDefaults());
+    }
+  }, [isError]);
+
+  const resetSelectedSettings = () => {
+    setSelectedRiskEngineSettings(riskEngineSettingsWithDefaults(savedRiskEngineSettings));
+  };
+
+  const { mutateAsync: mutateRiskEngineSettingsAsync, isLoading: isLoadingSaveSelectedSettings } =
+    useConfigureSORiskEngineMutation();
+
+  const saveSelectedSettings = async () => {
+    if (selectedRiskEngineSettings) {
+      await mutateRiskEngineSettingsAsync(
+        {
+          includeClosedAlerts: selectedRiskEngineSettings.includeClosedAlerts,
+          range: {
+            start: selectedRiskEngineSettings.range.start,
+            end: selectedRiskEngineSettings.range.end,
+          },
+        },
+        {
+          onSuccess: () => {
+            addSuccess(i18n.RISK_ENGINE_SAVED_OBJECT_CONFIGURATION_SUCCESS, {
+              toastLifeTimeMs: 5000,
+            });
+          },
+        }
+      );
+      await refetchRiskEngineSettings();
+    }
+  };
+
+  const setSelectedDateSetting = ({ start, end }: { start: string; end: string }) => {
+    setSelectedRiskEngineSettings((prevState) => {
+      if (!prevState) return undefined;
+      return { ...prevState, ...{ range: { start, end } } };
+    });
+  };
+
+  const toggleSelectedClosedAlertsSetting = () => {
+    setSelectedRiskEngineSettings((prevState) => {
+      if (!prevState) return undefined;
+      return { ...prevState, ...{ includeClosedAlerts: !prevState.includeClosedAlerts } };
+    });
+  };
+
+  const selectedSettingsMatchPersistedSettings = !isError
+    ? settingsAreEqual(selectedRiskEngineSettings, savedRiskEngineSettings)
+    : settingsAreEqual(selectedRiskEngineSettings, riskEngineSettingsWithDefaults());
+
+  return {
+    savedRiskEngineSettings,
+    selectedRiskEngineSettings,
+    selectedSettingsMatchPersistedSettings,
+    resetSelectedSettings,
+    setSelectedDateSetting,
+    toggleSelectedClosedAlertsSetting,
+    saveSelectedSettings,
+    isLoadingSaveSelectedSettings,
+    isLoadingRiskEngineSettings,
+  };
+};
