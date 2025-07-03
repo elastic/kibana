@@ -32,7 +32,7 @@ export const LogstashInstructions = () => {
 
   return (
     <CollapsibleCallout
-      iconType="iInCircle"
+      iconType="info"
       title={
         <FormattedMessage
           id="xpack.fleet.settings.logstashInstructions.calloutTitle"

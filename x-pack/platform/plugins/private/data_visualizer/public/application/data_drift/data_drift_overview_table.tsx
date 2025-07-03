@@ -172,7 +172,7 @@ export const DataDriftOverviewTable = ({
             {i18n.translate('xpack.dataVisualizer.dataDrift.pValueLabel', {
               defaultMessage: 'Similarity p-value',
             })}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
           </span>
         </EuiToolTip>
       ),

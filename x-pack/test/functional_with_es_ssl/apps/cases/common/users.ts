@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { User } from '../../../../cases_api_integration/common/lib/authentication/types';
+import { User } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/authentication/types';
 import { casesAll, casesNoDelete, casesReadDelete, casesReadAndEditSettings } from './roles';
 
 /**

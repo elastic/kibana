@@ -24,7 +24,7 @@ export const getAnalyzeCompressedIndexMappingAgent = async ({
 }: {
   createLlmInstance: CreateLlmInstance;
 }) => {
-  const llm = createLlmInstance();
+  const llm = await createLlmInstance();
   return async (state: typeof AnalyzeIndexPatternAnnotation.State) => {
     const { fieldDescriptors, input } = state;
     if (fieldDescriptors === undefined) {

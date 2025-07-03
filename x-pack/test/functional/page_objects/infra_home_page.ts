@@ -33,6 +33,8 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       // dismiss the tooltip, which won't be hidden because blur doesn't happen reliably
       await this.dismissDatePickerTooltip();
 
+      await datePickerInput.pressKeys(browser.keys.ESCAPE);
+
       await this.waitForLoading();
     },
 

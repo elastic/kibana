@@ -85,7 +85,10 @@
     "@kbn/deeplinks-security",
     "@kbn/core-application-browser",
     "@kbn/ui-theme",
-    "@kbn/ai-security-labs-content"
+    "@kbn/ai-security-labs-content",
+    "@kbn/inference-langchain",
+    "@kbn/security-solution-features",
+    "@kbn/core-http-server-mocks"
   ],
   "exclude": [
     "target/**/*",

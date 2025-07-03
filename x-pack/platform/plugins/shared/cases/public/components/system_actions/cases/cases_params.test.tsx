@@ -318,6 +318,54 @@ describe('CasesParamsFields renders', () => {
       getConfigurationByOwnerSpy.mockRestore();
     });
 
+    it('renders observability templates if the project is serverless observability', async () => {
+      useKibanaMock.mockReturnValue({
+        services: {
+          ...createStartServicesMock(),
+          // simulate a observability security project
+          cloud: { isServerlessEnabled: true, serverless: { projectType: 'observability' } },
+          data: { dataViews: {} },
+        },
+      } as unknown as ReturnType<typeof useKibana>);
+
+      const configuration = {
+        ...useGetAllCaseConfigurationsResponse.data[0],
+        templates: templatesConfigurationMock,
+      };
+      useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [configuration],
+      }));
+      const getConfigurationByOwnerSpy = jest
+        .spyOn(utils, 'getConfigurationByOwner')
+        .mockImplementation(() => configuration);
+
+      const securityOwnedRule = {
+        ...defaultProps,
+        // these two would normally produce a security owner
+        producerId: 'securitySolution',
+        featureId: 'securitySolution',
+        actionParams: {
+          subAction: 'run',
+          subActionParams: {
+            ...actionParams.subActionParams,
+            templateId: templatesConfigurationMock[1].key,
+          },
+        },
+      };
+
+      render(<CasesParamsFields {...securityOwnedRule} />);
+
+      expect(getConfigurationByOwnerSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          // the observability owner was forced
+          owner: 'observability',
+        })
+      );
+
+      getConfigurationByOwnerSpy.mockRestore();
+    });
+
     it('updates template correctly', async () => {
       useGetAllCaseConfigurationsMock.mockReturnValueOnce({
         ...useGetAllCaseConfigurationsResponse,
