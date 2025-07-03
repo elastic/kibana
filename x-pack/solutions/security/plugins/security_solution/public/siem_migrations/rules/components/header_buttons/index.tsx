@@ -53,7 +53,12 @@ export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
 
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            width: 400px;
+          `}
+        >
           <EuiTitle size="xxxs">
             <h6>{i18n.SIEM_MIGRATIONS_OPTION_TITLE}</h6>
           </EuiTitle>
@@ -66,15 +71,14 @@ export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
             selectedOptions={selectedMigrationOption}
             singleSelection={{ asPlainText: true }}
             isClearable={false}
-            fullWidth={true}
             inputPopoverProps={{
               css: css`
-                width: 400px;
                 & .euiComboBox__inputWrap div {
-                  width: 400px;
+                  inline-size: 100%;
                 }
               `,
             }}
+            fullWidth
           />
         </EuiFlexItem>
       </EuiFlexGroup>
