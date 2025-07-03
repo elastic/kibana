@@ -70,4 +70,48 @@ describe('AgentProfileServiceImpl', () => {
     expect(spy).toHaveBeenCalled();
     spy.mockRestore();
   });
+
+  it('throws createBadRequestError on create if tool selection validation fails', async () => {
+    const tools = [generateMockTool('toolA', 'prov1')];
+    mockToolsService.registry.list = jest.fn().mockResolvedValue(tools);
+    const errorMessages = ['Invalid tool', 'Another error'];
+    const spy = jest.spyOn(utils, 'validateToolSelection').mockResolvedValue(errorMessages);
+    const service = createAgentProfileService({
+      client: mockClient,
+      toolsService: mockToolsService,
+      logger: mockLogger,
+      request: mockRequest,
+    });
+    const profile = { ...baseProfile, toolSelection: [{ toolIds: ['toolA'] }] };
+    await expect(service.create(profile)).rejects.toThrow('Agent tool selection validation failed');
+    try {
+      await service.create(profile);
+    } catch (e: any) {
+      expect(e.message).toContain('Invalid tool');
+      expect(e.message).toContain('Another error');
+    }
+    spy.mockRestore();
+  });
+
+  it('throws createBadRequestError on update if tool selection validation fails', async () => {
+    const tools = [generateMockTool('toolA', 'prov1')];
+    mockToolsService.registry.list = jest.fn().mockResolvedValue(tools);
+    const errorMessages = ['Invalid tool', 'Another error'];
+    const spy = jest.spyOn(utils, 'validateToolSelection').mockResolvedValue(errorMessages);
+    const service = createAgentProfileService({
+      client: mockClient,
+      toolsService: mockToolsService,
+      logger: mockLogger,
+      request: mockRequest,
+    });
+    const profile = { ...baseProfile, toolSelection: [{ toolIds: ['toolA'] }] };
+    await expect(service.update(profile)).rejects.toThrow('Agent tool selection validation failed');
+    try {
+      await service.update(profile);
+    } catch (e: any) {
+      expect(e.message).toContain('Invalid tool');
+      expect(e.message).toContain('Another error');
+    }
+    spy.mockRestore();
+  });
 });

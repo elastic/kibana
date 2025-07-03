@@ -64,34 +64,32 @@ class AgentProfileServiceImpl implements AgentProfileService {
 
   async create(profile: AgentProfileCreateRequest): Promise<AgentProfile> {
     this.logger.debug('Creating agent profile');
-    const errors = await validateToolSelection({
-      toolRegistry: this.toolsService.registry,
-      request: this.request,
-      toolSelection: profile.toolSelection,
-    });
-    if (errors.length > 0) {
-      throw createBadRequestError(
-        `Tool selection validation failed:\n` + errors.map((e) => `- ${e}`).join('\n')
-      );
-    }
+    await this.validateAgentToolSelection(profile.toolSelection);
     return this.client.create(profile);
   }
 
   async update(profile: AgentProfileUpdateRequest): Promise<AgentProfile> {
     this.logger.debug('Updating agent profile');
     if (profile.toolSelection) {
-      const errors = await validateToolSelection({
-        toolRegistry: this.toolsService.registry,
-        request: this.request,
-        toolSelection: profile.toolSelection,
-      });
-      if (errors.length > 0) {
-        throw createBadRequestError(
-          `Tool selection validation failed:\n` + errors.map((e) => `- ${e}`).join('\n')
-        );
-      }
+      await this.validateAgentToolSelection(profile.toolSelection);
     }
     return this.client.update(profile);
+  }
+
+  // Agent tool selection validation helper
+  private async validateAgentToolSelection(
+    toolSelection: AgentProfileCreateRequest['toolSelection']
+  ) {
+    const errors = await validateToolSelection({
+      toolRegistry: this.toolsService.registry,
+      request: this.request,
+      toolSelection,
+    });
+    if (errors.length > 0) {
+      throw createBadRequestError(
+        `Agent tool selection validation failed:\n` + errors.map((e) => `- ${e}`).join('\n')
+      );
+    }
   }
 
   async list(options?: AgentProfileListOptions): Promise<AgentProfile[]> {

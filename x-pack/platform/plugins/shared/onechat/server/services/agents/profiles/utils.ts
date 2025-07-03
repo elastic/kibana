@@ -57,12 +57,12 @@ export async function validateToolSelection({
     } else {
       // Provider specified
       if (!allProviders.has(provider)) {
-        errors.push(`Provider '${provider}' does not exist or has no tools.`);
+        errors.push(`Provider '${provider}' does not exist.`);
         continue;
       }
       // Check each tool exists for the provider
       for (const toolId of toolIds) {
-        // @ts-ignore: registry API is compatible for both types
+        if (toolId === '*') continue;
         const exists = await toolRegistry.has({
           toolId: { toolId, providerId: provider },
           request,
