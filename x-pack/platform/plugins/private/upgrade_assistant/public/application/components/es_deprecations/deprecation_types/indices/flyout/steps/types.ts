@@ -14,4 +14,6 @@ export type ModalStep =
   | 'makeReadonlyRetry'
   | 'unfreeze'
   | 'unfreezeRetry'
-  | 'completed';
+  | 'completed'
+  | 'confirmDelete'
+  | 'delete';
