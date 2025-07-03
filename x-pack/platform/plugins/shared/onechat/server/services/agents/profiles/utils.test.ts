@@ -118,6 +118,17 @@ describe('validateToolSelection (unit)', () => {
     expect(errors).toHaveLength(0);
   });
 
+  it('passes for wildcard tool selection for builtIn provider (regression test)', async () => {
+    const builtInTool = generateMockTool('foo', 'builtIn');
+    const registry = makeRegistry([builtInTool]);
+    const errors = await validateToolSelection({
+      toolRegistry: registry as any,
+      request: mockRequest,
+      toolSelection: [{ provider: 'builtIn', toolIds: ['*'] }],
+    });
+    expect(errors).toHaveLength(0);
+  });
+
   it('accumulates multiple errors', async () => {
     const registry = makeRegistry([toolA1, toolA2]);
     const errors = await validateToolSelection({
