@@ -18,7 +18,7 @@ import {
   getTokenCountFromInvokeAsyncIterator,
 } from './get_token_count_from_invoke_async_iterator';
 import { getTokenCountFromBedrockInvoke } from './get_token_count_from_bedrock_invoke';
-import { ActionTypeExecutorRawResult } from '../../common';
+import type { ActionTypeExecutorRawResult } from '../../../common';
 import { getTokenCountFromOpenAIStream } from './get_token_count_from_openai_stream';
 import {
   getTokenCountFromInvokeStream,
@@ -62,7 +62,11 @@ export const getGenAiTokenTracking = async ({
   if (hasTelemetryMetadata(validatedParams.subActionParams)) {
     telemetryMetadata = validatedParams.subActionParams.telemetryMetadata;
   }
-  if (validatedParams.subAction === 'invokeAsyncIterator' && actionTypeId === '.gen-ai') {
+  if (
+    (validatedParams.subAction === 'invokeAsyncIterator' && actionTypeId === '.gen-ai') ||
+    (actionTypeId === '.inference' &&
+      validatedParams.subAction === 'unified_completion_async_iterator')
+  ) {
     try {
       const data = result.data as {
         consumerStream: Stream<ChatCompletionChunk>;
@@ -70,9 +74,14 @@ export const getGenAiTokenTracking = async ({
       };
       // the async interator is teed in the subaction response, double check that it has two streams
       if (data.tokenCountStream) {
+        const body =
+          actionTypeId === `.inference`
+            ? (validatedParams as { subActionParams: { body: InvokeAsyncIteratorBody } })
+                .subActionParams.body
+            : (validatedParams as { subActionParams: InvokeAsyncIteratorBody }).subActionParams;
         const { total, prompt, completion } = await getTokenCountFromInvokeAsyncIterator({
           streamIterable: data.tokenCountStream,
-          body: (validatedParams as { subActionParams: InvokeAsyncIteratorBody }).subActionParams,
+          body,
           logger,
         });
         return {
