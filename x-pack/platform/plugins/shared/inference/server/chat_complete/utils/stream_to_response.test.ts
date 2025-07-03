@@ -70,4 +70,59 @@ describe('streamToResponse', () => {
       streamToResponse(fromEvents(chunkEvent('chunk_1'), tokensEvent()))
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"No message event found"`);
   });
+
+  it('includes deanonymization data in the response if present', async () => {
+    // Create a message event with deanonymization data
+    const messageWithDeanonymization = {
+      ...messageEvent('Your email is jorge@gmail.com'),
+      deanonymized_input: [
+        {
+          message: {
+            role: 'user',
+            content: 'My email is jorge@gmail.com. What is my email?',
+          },
+          deanonymizations: [
+            {
+              start: 12,
+              end: 27,
+              entity: {
+                value: 'jorge@gmail.com',
+                class_name: 'EMAIL',
+                mask: 'EMAIL_6de8d9fba5c5e60ac39395fba7ebce7c2cabd915',
+              },
+            },
+          ],
+        },
+      ],
+      deanonymized_output: {
+        message: {
+          content: 'Your email is jorge@gmail.com',
+          toolCalls: [],
+          role: 'assistant',
+        },
+        deanonymizations: [
+          {
+            start: 14,
+            end: 29,
+            entity: {
+              value: 'jorge@gmail.com',
+              class_name: 'EMAIL',
+              mask: 'EMAIL_6de8d9fba5c5e60ac39395fba7ebce7c2cabd915',
+            },
+          },
+        ],
+      },
+    };
+
+    const response = await streamToResponse(
+      fromEvents(chunkEvent('chunk'), messageWithDeanonymization)
+    );
+
+    expect(response).toEqual({
+      content: 'Your email is jorge@gmail.com',
+      toolCalls: [],
+      deanonymized_input: messageWithDeanonymization.deanonymized_input,
+      deanonymized_output: messageWithDeanonymization.deanonymized_output,
+    });
+  });
 });
