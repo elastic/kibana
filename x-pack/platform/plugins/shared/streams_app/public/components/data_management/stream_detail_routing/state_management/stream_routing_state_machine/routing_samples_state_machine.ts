@@ -59,12 +59,12 @@ export type RoutingSamplesEvent =
   | { type: 'routingSamples.refresh' }
   | { type: 'routingSamples.updateCondition'; condition?: Condition };
 
-interface SearchParams extends RoutingSamplesInput {
+export interface SearchParams extends RoutingSamplesInput {
   start: number;
   end: number;
 }
 
-interface CollectorParams {
+export interface CollectorParams {
   data: DataPublicPluginStart;
   input: RoutingSamplesInput;
 }
@@ -107,6 +107,10 @@ export const routingSamplesMachine = setup({
   },
   delays: {
     conditionUpdateDebounceTime: 500,
+  },
+  guards: {
+    isValidSnapshot: (_, params: { context?: SampleDocument[] | string }) =>
+      params.context !== undefined,
   },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5QCcD2BXALgSwHZQGUBDAWwAcAbOAYjSz0NMrgDpkwAzd2ACwG0ADAF1EoMqljYcqXKJAAPRADYAjCwDsAJiUCBSgJwqAHAGYVAViXqlAGhABPRABZLLc9aUmr6rSpMBffzs6HHxicipYWgxQxgjWdDIIIkwwAGEZCClsGUERJBBxSWlZAsUEL3MWIxUVJ2N9ARV9cxVbB2cTExYdXU16vyNzIydA4JiGcOZYFggwACMMXABjBgzcLJLqeVhMFLAWIg5U5AAKZczsmQBVJP2AEQWl5bAAFWwSMABKaPowpkisye6BWa0uJTyciKV1KoHKJnUVTq6hMTicAjM6IEljsjgQnm6mi0NRM+nq5j0+jGIBCkwBrA4YEwyx4DFmqGW6E+uEwMwoqCIWXw1AgMgOeAAbqgANYHC4UKjLTD3DlcsA82CQgrQkpycrmExGFhOKxGAyIymafS4xD6O0sO0Y7HqCwYlTU2n-eIzRnM1n4dmc7m8lj8wUMahgZBoZAsSgpDioZAkFjyxXK1XBzXCKESGF6xAG-QsPzuQxE-RKE02hBGdRG8zmJx2pxGTReTzqD0TL3TFi+lls0VB9WYDIgkNhoVQEViliSmVy1AKsBKlUjjXjnlasR53VlQtoh3qASNJ31EbWjoIPwqdRuUwmPpafp+bt-OJ9gf+qCBtU8rdJwFadI2jJM4woBMkxTNNVwzDdeUAndCj3HJYQUQ8qk8Iw22MLo-HUK88RUTQBE0Y1zErAR1CcDxdHMQIghAXBUDmeACk9T9IlzYo0ILBAsMNUxhhwusTRUGtNCMAQS10AR0TvTRtBcd9YimQE5kWEFVnwdZNj47VUJkfj0WLZsVGomjaKaPQa0sGS2jLEZsUbRtVLpb1+yZQd8B4-MDwE7psOE0SxNUGsT26RtzOaC9K00dze0Bb8h0zUd2N3XjjICizyJRFp9FMQihn0JSIsMFhsWbA1DSJQiqSYzj1IZbyfz-LNQ2Ahg-P3OFEFdDRSUoorCsosrryMfR70aVtRpafCGMansuJav1UoQmZRVwMAeoMvrayaB1SMRA1NAsk0TBrSajXrCxrFPWp9BMBKlo-ZqfVa9b-zHJZeV27L9ostRgpMEScJo8Lr1qDFjS8JSDWk9xnsSlaPrWgNh2+wC+S63zDKy9DyjqYsQbBsKa0emSntUIlaZcFoUferz0d-THg2x9ltv+wnEGk7oyIsO8alIswJKhs7yOpto2wNJGXsCIA */
@@ -156,7 +160,10 @@ export const routingSamplesMachine = setup({
                   definition: context.definition,
                 }),
                 onSnapshot: {
-                  guard: ({ event }) => event.snapshot.context !== undefined,
+                  guard: {
+                    type: 'isValidSnapshot',
+                    params: ({ event }) => ({ context: event.snapshot.context }),
+                  },
                   actions: [
                     {
                       type: 'storeDocuments',
@@ -195,7 +202,10 @@ export const routingSamplesMachine = setup({
                   definition: context.definition,
                 }),
                 onSnapshot: {
-                  guard: ({ event }) => event.snapshot.context !== undefined,
+                  guard: {
+                    type: 'isValidSnapshot',
+                    params: ({ event }) => ({ context: event.snapshot.context }),
+                  },
                   actions: [
                     {
                       type: 'storeDocumentCounts',
