@@ -12,7 +12,7 @@ import { StoryObj, Meta } from '@storybook/react';
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { SelectionDropdown } from './selection_dropdown';
 import { DataCascadeProvider } from '../../data_cascade_provider';
-import { getESQLStatsGroupByColumnsFromQuery } from '../../../lib';
+import { getESQLStatsQueryMeta } from '../../../lib';
 
 /**
  * @description story for dropdown component which allows selecting options based of provided ES|QL query',
@@ -58,7 +58,7 @@ const argTypes = selectionDropdownStorybookMock.getArgumentTypes();
 export const ValidQueryScenario: StoryObj<Arguments> = {
   render: (args) => {
     return (
-      <DataCascadeProvider cascadeGroups={getESQLStatsGroupByColumnsFromQuery(args.query)}>
+      <DataCascadeProvider cascadeGroups={getESQLStatsQueryMeta(args.query).groupByFields}>
         <SelectionDropdown />
       </DataCascadeProvider>
     );

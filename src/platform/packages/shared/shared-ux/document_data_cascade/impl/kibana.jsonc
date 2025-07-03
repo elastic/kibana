@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/document-data-cascader",
+  "id": "@kbn/shared-ux-document-data-cascade",
   "owner": [
     "@elastic/appex-sharedux"
   ],

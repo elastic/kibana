@@ -16,7 +16,8 @@ import { DataCascade } from '.';
 import { getESQLStatsQueryMeta } from '../lib/parse_esql';
 
 /**
- * @description story for dropdown component which allows selecting options based of provided ES|QL query',
+ * @description story for data document cascade component which allows rendering of data in a quasi tree structure',
+ * this story emulates ES|QL scenario of doing stats on a dataset to show the data grouped by some fields.
  */
 export default {
   title: 'Data Cascade/Data Cascade',

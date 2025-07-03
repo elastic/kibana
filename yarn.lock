@@ -6303,10 +6303,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/document-data-cascader@link:src/platform/packages/shared/shared-ux/document_data_cascader/impl":
-  version "0.0.0"
-  uid ""
-
 "@kbn/dom-drag-drop@link:src/platform/packages/shared/kbn-dom-drag-drop":
   version "0.0.0"
   uid ""
@@ -8480,6 +8476,10 @@
   uid ""
 
 "@kbn/shared-ux-card-no-data@link:src/platform/packages/shared/shared-ux/card/no_data/impl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-document-data-cascade@link:src/platform/packages/shared/shared-ux/document_data_cascade/impl":
   version "0.0.0"
   uid ""
 
