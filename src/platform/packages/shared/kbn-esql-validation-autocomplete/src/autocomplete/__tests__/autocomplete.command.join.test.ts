@@ -109,7 +109,7 @@ describe('autocomplete.suggest', () => {
         const suggestions = await suggest('FROM index | LEFT JOIN new_join_index/');
 
         const createIndexCommandSuggestion = suggestions.find(
-          (s) => s.label === 'Create lookup index'
+          (s) => s.label === 'Create lookup index "new_join_index"'
         );
 
         expect(createIndexCommandSuggestion).toEqual({
@@ -121,9 +121,9 @@ describe('autocomplete.suggest', () => {
           detail: 'Click to create',
           filterText: 'new_join_index',
           kind: 'Issue',
-          label: 'Create lookup index',
+          label: 'Create lookup index "new_join_index"',
           sortText: '0-0',
-          text: '',
+          text: 'new_join_index',
         });
       });
 
