@@ -28,6 +28,7 @@ import {
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { buildPerPolicyTag } from '../../../../../../common/endpoint/service/artifacts/utils';
 
+jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/containers/source');
 jest.mock('../../../../../common/hooks/use_license', () => {

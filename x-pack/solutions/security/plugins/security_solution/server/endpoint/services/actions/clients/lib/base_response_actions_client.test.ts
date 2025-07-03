@@ -343,10 +343,20 @@ describe('ResponseActionsClientImpl base class', () => {
           input_type: 'endpoint',
           type: 'INPUT_ACTION',
         },
-        // @ts-expect-error missing `agent.policy`, which will only be present if space awareness is enabled
         agent: {
           id: ['one'],
+          policy: [
+            {
+              agentId: 'one',
+              agentPolicyId: expect.any(String),
+              elasticAgentId: 'one',
+              integrationPolicyId: expect.any(String),
+            },
+          ],
         },
+        originSpaceId: 'default',
+        tags: [],
+        meta: undefined,
         user: {
           id: 'foo',
         },
@@ -510,7 +520,19 @@ describe('ResponseActionsClientImpl base class', () => {
               input_type: 'endpoint',
               type: 'INPUT_ACTION',
             },
-            agent: { id: ['one'] },
+            agent: {
+              id: ['one'],
+              policy: [
+                {
+                  agentId: 'one',
+                  agentPolicyId: expect.any(String),
+                  elasticAgentId: 'one',
+                  integrationPolicyId: expect.any(String),
+                },
+              ],
+            },
+            originSpaceId: 'default',
+            tags: [],
             meta: { one: 1 },
             user: { id: 'foo' },
           });

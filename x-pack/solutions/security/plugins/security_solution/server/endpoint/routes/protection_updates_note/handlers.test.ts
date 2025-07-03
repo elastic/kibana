@@ -23,6 +23,7 @@ import {
 import { getProtectionUpdatesNoteHandler, postProtectionUpdatesNoteHandler } from './handlers';
 import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';
 import type { EndpointAppContext } from '../../types';
+import type { EndpointInternalFleetServicesInterfaceMocked } from '../../services/fleet/endpoint_fleet_services_factory.mocks';
 
 const mockedSOSuccessfulFindResponse = {
   total: 1,
@@ -91,6 +92,12 @@ describe('test protection updates note handler', () => {
       endpointAppContextService = new EndpointAppContextService();
       endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
+
+      const internalFleetServicesMock =
+        mockEndpointContext.service.getInternalFleetServices() as EndpointInternalFleetServicesInterfaceMocked;
+
+      internalFleetServicesMock.ensureInCurrentSpace.mockResolvedValue(undefined);
+      internalFleetServicesMock.getSoClient.mockReturnValue(mockSavedObjectClient);
     });
 
     afterEach(() => endpointAppContextService.stop());

@@ -49,6 +49,11 @@ describe('EndpointActionsClient', () => {
   beforeEach(() => {
     classConstructorOptions = endpointActionClientMock.createConstructorOptions();
     endpointActionsClient = new EndpointActionsClient(classConstructorOptions);
+
+    (
+      classConstructorOptions.endpointService.getInternalFleetServices()
+        .ensureInCurrentSpace as jest.Mock
+    ).mockResolvedValue(undefined);
   });
 
   it('should validate endpoint ids and log those that are invalid', async () => {
@@ -123,7 +128,17 @@ describe('EndpointActionsClient', () => {
           },
           agent: {
             id: ['1-2-3'],
+            policy: [
+              {
+                agentId: '1-2-3',
+                agentPolicyId: expect.any(String),
+                elasticAgentId: '1-2-3',
+                integrationPolicyId: expect.any(String),
+              },
+            ],
           },
+          originSpaceId: 'default',
+          tags: [],
           user: {
             id: 'foo',
           },
@@ -161,7 +176,17 @@ describe('EndpointActionsClient', () => {
           },
           agent: {
             id: ['1-2-3'],
+            policy: [
+              {
+                agentId: '1-2-3',
+                agentPolicyId: expect.any(String),
+                elasticAgentId: '1-2-3',
+                integrationPolicyId: expect.any(String),
+              },
+            ],
           },
+          originSpaceId: 'default',
+          tags: [],
           user: {
             id: 'foo',
           },
@@ -198,7 +223,17 @@ describe('EndpointActionsClient', () => {
           },
           agent: {
             id: ['1-2-3'],
+            policy: [
+              {
+                agentId: '1-2-3',
+                agentPolicyId: expect.any(String),
+                elasticAgentId: '1-2-3',
+                integrationPolicyId: expect.any(String),
+              },
+            ],
           },
+          originSpaceId: 'default',
+          tags: [],
           user: {
             id: 'foo',
           },
