@@ -8,6 +8,9 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   IngestStreamLifecycle,
+  IngestStreamLifecycleDSL,
+  IngestStreamLifecycleDisabled,
+  IngestStreamLifecycleILM,
   isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
@@ -153,37 +156,24 @@ export async function updateDataStreamsLifecycle({
       }
     } else if (isInheritLifecycle(lifecycle)) {
       // inheriting a lifecycle here means falling back to the template configuration
-      // so we need to update streams individually
+      // so we need to update streams individually.
+      // for DSL we need to reapply the retention on the data stream, otherwise we
+      // just need to reset any overrides previously set for the template to take over
       await Promise.all(
         names.map(async (name) => {
-          const { template } = (await retryTransientEsErrors(
-            () => esClient.indices.simulateIndexTemplate({ name }),
-            {
-              logger,
-            }
-          )) as {
-            template: IndicesSimulateTemplateTemplate & {
-              lifecycle?: { enabled: boolean; data_retention?: string };
-            };
-          };
-
-          const hasEffectiveIlm =
-            template.settings.index?.lifecycle?.name &&
-            getBoolean(template.settings.index.lifecycle.prefer_ilm);
-          const hasEffectiveDsl = !hasEffectiveIlm && getBoolean(template.lifecycle?.enabled);
-
-          if (hasEffectiveDsl) {
+          const templateLifecycle = await getTemplateLifecycle({ esClient, name, logger });
+          if (isDslLifecycle(templateLifecycle)) {
             await retryTransientEsErrors(
               () =>
                 esClient.indices.putDataLifecycle({
                   name,
-                  data_retention: template.lifecycle!.data_retention,
+                  data_retention: templateLifecycle.dsl.data_retention,
                 }),
               { logger }
             );
           }
 
-          await putDataStreamsSettings({ esClient, names, logger, lifecycle });
+          await putDataStreamsSettings({ esClient, names, logger, lifecycle: { inherit: {} } });
         })
       );
     }
@@ -220,6 +210,41 @@ async function putDataStreamsSettings({
       }),
     { logger }
   );
+}
+
+async function getTemplateLifecycle({
+  esClient,
+  name,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  name: string;
+  logger: Logger;
+}): Promise<IngestStreamLifecycleILM | IngestStreamLifecycleDSL | IngestStreamLifecycleDisabled> {
+  const { template } = (await retryTransientEsErrors(
+    () => esClient.indices.simulateIndexTemplate({ name }),
+    {
+      logger,
+    }
+  )) as {
+    template: IndicesSimulateTemplateTemplate & {
+      lifecycle?: { enabled: boolean; data_retention?: string };
+    };
+  };
+
+  const hasEffectiveIlm =
+    template.settings.index?.lifecycle?.name &&
+    getBoolean(template.settings.index.lifecycle.prefer_ilm);
+  if (hasEffectiveIlm) {
+    return { ilm: { policy: template.settings.index!.lifecycle!.name! } };
+  }
+
+  const hasEffectiveDsl = !hasEffectiveIlm && getBoolean(template.lifecycle?.enabled);
+  if (hasEffectiveDsl) {
+    return { dsl: { data_retention: template.lifecycle!.data_retention } };
+  }
+
+  return { disabled: {} };
 }
 
 function getBoolean(value: boolean | string | undefined): boolean {
