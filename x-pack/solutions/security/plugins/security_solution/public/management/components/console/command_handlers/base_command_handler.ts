@@ -6,7 +6,7 @@
  */
 
 import type { ParsedCommandInterface } from '../service/types';
-import type { EnteredCommand } from '../components/console_state/types';
+import type { ArgSelectorState, EnteredCommand } from '../components/console_state/types';
 
 /**
  * Base interface for command-specific handlers that define how different commands
@@ -50,7 +50,7 @@ export interface CommandHandler {
    */
   calculateReplacementLength?(args: {
     argChrLength: number;
-    argState: EnteredCommand['argState'];
+    argState?: ArgSelectorState;
     selectorValue: string;
     input: string;
     startSearchIndexForNextArg: number;

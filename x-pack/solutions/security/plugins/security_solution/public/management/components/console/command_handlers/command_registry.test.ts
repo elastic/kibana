@@ -9,6 +9,8 @@ import { CommandRegistry } from './command_registry';
 import { RunscriptCommandHandler } from './runscript_handler';
 import { BaseCommandHandler } from './base_command_handler';
 import type { CommandHandler } from './base_command_handler';
+import type { EnteredCommand } from '../components/console_state/types';
+import type { ParsedCommandInterface } from '../service/types';
 
 describe('CommandRegistry', () => {
   let registry: CommandRegistry;
@@ -79,10 +81,12 @@ describe('CommandRegistry', () => {
 
     it('should call initializeArgState on registered handler', () => {
       registry.register(mockHandler);
-      // @ts-expect-error: Partial mock for test purposes
-      const parsedInput = { name: 'mock', args: {}, hasArg: jest.fn() };
-      // @ts-expect-error: enteredCommand can be any shape for test
-      const enteredCommand = {};
+      const parsedInput = {
+        name: 'mock',
+        args: {},
+        hasArg: jest.fn(),
+      } as unknown as ParsedCommandInterface;
+      const enteredCommand = {} as EnteredCommand;
 
       registry.initializeArgState(parsedInput, enteredCommand);
 
@@ -91,8 +95,11 @@ describe('CommandRegistry', () => {
 
     it('should call reconstructCommandText on registered handler', () => {
       registry.register(mockHandler);
-      // @ts-expect-error: Partial mock for test purposes
-      const parsedInput = { name: 'mock', args: {}, hasArg: jest.fn() };
+      const parsedInput = {
+        name: 'mock',
+        args: {},
+        hasArg: jest.fn(),
+      } as unknown as ParsedCommandInterface;
 
       const result = registry.reconstructCommandText(parsedInput);
 
@@ -102,10 +109,12 @@ describe('CommandRegistry', () => {
 
     it('should call syncState on registered handler', () => {
       registry.register(mockHandler);
-      // @ts-expect-error: Partial mock for test purposes
-      const parsedInput = { name: 'mock', args: {}, hasArg: jest.fn() };
-      // @ts-expect-error: enteredCommand can be any shape for test
-      const enteredCommand = {};
+      const parsedInput = {
+        name: 'mock',
+        args: {},
+        hasArg: jest.fn(),
+      } as unknown as ParsedCommandInterface;
+      const enteredCommand = {} as EnteredCommand;
 
       registry.syncState(parsedInput, enteredCommand);
 
@@ -113,10 +122,12 @@ describe('CommandRegistry', () => {
     });
 
     it('should not throw when calling methods on unregistered commands', () => {
-      // @ts-expect-error: Partial mock for test purposes
-      const parsedInput = { name: 'unknown', args: {}, hasArg: jest.fn() };
-      // @ts-expect-error: enteredCommand can be any shape for test
-      const enteredCommand = {};
+      const parsedInput = {
+        name: 'unknown',
+        args: {},
+        hasArg: jest.fn(),
+      } as unknown as ParsedCommandInterface;
+      const enteredCommand = {} as EnteredCommand;
 
       expect(() => registry.initializeArgState(parsedInput, enteredCommand)).not.toThrow();
       expect(() => registry.syncState(parsedInput, enteredCommand)).not.toThrow();

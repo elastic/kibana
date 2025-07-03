@@ -7,7 +7,7 @@
 
 import type { CommandHandler } from './base_command_handler';
 import type { ParsedCommandInterface } from '../service/types';
-import type { EnteredCommand } from '../components/console_state/types';
+import type { ArgSelectorState, EnteredCommand } from '../components/console_state/types';
 
 /**
  * Registry for managing command-specific handlers. This centralizes all command-specific
@@ -73,7 +73,7 @@ export class CommandRegistry {
     commandName: string,
     args: {
       argChrLength: number;
-      argState: EnteredCommand['argState'];
+      argState?: ArgSelectorState;
       selectorValue: string;
       input: string;
       startSearchIndexForNextArg: number;

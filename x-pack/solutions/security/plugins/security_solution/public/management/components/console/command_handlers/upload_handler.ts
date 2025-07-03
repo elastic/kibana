@@ -7,7 +7,7 @@
 
 import { BaseCommandHandler } from './base_command_handler';
 import type { ParsedCommandInterface } from '../service/types';
-import type { EnteredCommand } from '../components/console_state/types';
+import type { ArgSelectorState, EnteredCommand } from '../components/console_state/types';
 
 /**
  * Command handler for the 'upload' command that handles file upload functionality.
@@ -55,14 +55,12 @@ export class UploadCommandHandler extends BaseCommandHandler {
   calculateReplacementLength({
     argChrLength,
     argState,
-    selectorValue,
     input,
     startSearchIndexForNextArg,
     charAfterArgName,
   }: {
     argChrLength: number;
-    argState: EnteredCommand['argState'];
-    selectorValue: string;
+    argState?: ArgSelectorState;
     input: string;
     startSearchIndexForNextArg: number;
     charAfterArgName: string;

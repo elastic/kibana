@@ -30,25 +30,22 @@ describe('UploadCommandHandler', () => {
 
   describe('initializeArgState', () => {
     it('should NOT initialize arg state for file selectors from parsed input', () => {
-      // @ts-expect-error - Mock object missing input and hasArgs properties
-      const parsedInput: ParsedCommandInterface = {
+      const parsedInput = {
         name: 'upload',
         args: {
           file: ['test.txt'],
           path: ['/tmp/test.txt'],
         },
         hasArg: jest.fn((argName) => argName in parsedInput.args),
-      };
+      } as unknown as ParsedCommandInterface;
 
-      const enteredCommand: EnteredCommand = {
-        // @ts-expect-error - Mock object missing required CommandDefinition properties
+      const enteredCommand = {
         commandDefinition: {},
         argsWithValueSelectors: {
-          // @ts-expect-error - Mock object missing required CommandArgDefinition properties
           file: {},
         },
         argState: {},
-      };
+      } as unknown as EnteredCommand;
 
       handler.initializeArgState(parsedInput, enteredCommand);
 
@@ -58,26 +55,23 @@ describe('UploadCommandHandler', () => {
     });
 
     it('should not overwrite existing arg state', () => {
-      // @ts-expect-error - Mock object missing input and hasArgs properties
-      const parsedInput: ParsedCommandInterface = {
+      const parsedInput = {
         name: 'upload',
         args: {
           file: ['test.txt'],
         },
         hasArg: jest.fn((argName) => argName in parsedInput.args),
-      };
+      } as unknown as ParsedCommandInterface;
 
-      const enteredCommand: EnteredCommand = {
-        // @ts-expect-error - Mock object missing required CommandDefinition properties
+      const enteredCommand = {
         commandDefinition: {},
         argsWithValueSelectors: {
-          // @ts-expect-error - Mock object missing required CommandArgDefinition properties
           file: {},
         },
         argState: {
           file: [{ value: 'existing.txt', valueText: 'existing.txt' }],
         },
-      };
+      } as unknown as EnteredCommand;
 
       handler.initializeArgState(parsedInput, enteredCommand);
 
@@ -87,19 +81,17 @@ describe('UploadCommandHandler', () => {
     });
 
     it('should handle enteredCommand without argsWithValueSelectors', () => {
-      // @ts-expect-error - Mock object missing input and hasArgs properties
-      const parsedInput: ParsedCommandInterface = {
+      const parsedInput = {
         name: 'upload',
         args: {},
         hasArg: jest.fn(),
-      };
+      } as unknown as ParsedCommandInterface;
 
-      const enteredCommand: EnteredCommand = {
-        // @ts-expect-error - Mock object missing required CommandDefinition properties
+      const enteredCommand = {
         commandDefinition: {},
         argsWithValueSelectors: undefined,
         argState: {},
-      };
+      } as unknown as EnteredCommand;
 
       expect(() => handler.initializeArgState(parsedInput, enteredCommand)).not.toThrow();
     });
@@ -107,8 +99,7 @@ describe('UploadCommandHandler', () => {
 
   describe('reconstructCommandText', () => {
     it('should reconstruct command text with arguments', () => {
-      // @ts-expect-error - Mock object missing input and hasArgs properties
-      const parsedInput: ParsedCommandInterface = {
+      const parsedInput = {
         name: 'upload',
         args: {
           file: ['test.txt'],
@@ -116,7 +107,7 @@ describe('UploadCommandHandler', () => {
           overwrite: [true],
         },
         hasArg: jest.fn(),
-      };
+      } as unknown as ParsedCommandInterface;
 
       const result = handler.reconstructCommandText(parsedInput);
 
@@ -124,15 +115,14 @@ describe('UploadCommandHandler', () => {
     });
 
     it('should handle values with spaces by adding quotes', () => {
-      // @ts-expect-error - Mock object missing input and hasArgs properties
-      const parsedInput: ParsedCommandInterface = {
+      const parsedInput = {
         name: 'upload',
         args: {
           file: ['test file.txt'],
           path: ['/tmp/test file.txt'],
         },
         hasArg: jest.fn(),
-      };
+      } as unknown as ParsedCommandInterface;
 
       const result = handler.reconstructCommandText(parsedInput);
 
@@ -140,15 +130,14 @@ describe('UploadCommandHandler', () => {
     });
 
     it('should handle empty string values with quotes', () => {
-      // @ts-expect-error - Mock object missing input and hasArgs properties
-      const parsedInput: ParsedCommandInterface = {
+      const parsedInput = {
         name: 'upload',
         args: {
           file: [''],
           description: [''],
         },
         hasArg: jest.fn(),
-      };
+      } as unknown as ParsedCommandInterface;
 
       const result = handler.reconstructCommandText(parsedInput);
 
@@ -158,26 +147,23 @@ describe('UploadCommandHandler', () => {
 
   describe('syncState', () => {
     it('should sync selector values to parsed input', () => {
-      // @ts-expect-error - Mock object missing input and hasArgs properties
-      const parsedInput: ParsedCommandInterface = {
+      const parsedInput = {
         name: 'upload',
         args: {
           file: ['old.txt'],
         },
         hasArg: jest.fn((argName) => argName in parsedInput.args),
-      };
+      } as unknown as ParsedCommandInterface;
 
-      const enteredCommand: EnteredCommand = {
-        // @ts-expect-error - Mock object missing required CommandDefinition properties
+      const enteredCommand = {
         commandDefinition: {},
         argsWithValueSelectors: {
-          // @ts-expect-error - Mock object missing required CommandArgDefinition properties
           file: {},
         },
         argState: {
           file: [{ value: 'new.txt', valueText: 'new.txt' }],
         },
-      };
+      } as unknown as EnteredCommand;
 
       handler.syncState(parsedInput, enteredCommand);
 
@@ -185,30 +171,26 @@ describe('UploadCommandHandler', () => {
     });
 
     it('should handle multiple selector values', () => {
-      // @ts-expect-error - Mock object missing input and hasArgs properties
-      const parsedInput: ParsedCommandInterface = {
+      const parsedInput = {
         name: 'upload',
         args: {
           file: ['old.txt'],
           path: ['old-path'],
         },
         hasArg: jest.fn((argName) => argName in parsedInput.args),
-      };
+      } as unknown as ParsedCommandInterface;
 
-      const enteredCommand: EnteredCommand = {
-        // @ts-expect-error - Mock object missing required CommandDefinition properties
+      const enteredCommand = {
         commandDefinition: {},
         argsWithValueSelectors: {
-          // @ts-expect-error - Mock object missing required CommandArgDefinition properties
           file: {},
-          // @ts-expect-error - Mock object missing required CommandArgDefinition properties
           path: {},
         },
         argState: {
           file: [{ value: 'new.txt', valueText: 'new.txt' }],
           path: [{ value: 'new-path', valueText: 'new-path' }],
         },
-      };
+      } as unknown as EnteredCommand;
 
       handler.syncState(parsedInput, enteredCommand);
 
@@ -217,19 +199,17 @@ describe('UploadCommandHandler', () => {
     });
 
     it('should handle enteredCommand without argsWithValueSelectors', () => {
-      // @ts-expect-error - Mock object missing input and hasArgs properties
-      const parsedInput: ParsedCommandInterface = {
+      const parsedInput = {
         name: 'upload',
         args: {},
         hasArg: jest.fn(),
-      };
+      } as unknown as ParsedCommandInterface;
 
-      const enteredCommand: EnteredCommand = {
-        // @ts-expect-error - Mock object missing required CommandDefinition properties
+      const enteredCommand = {
         commandDefinition: {},
         argsWithValueSelectors: undefined,
         argState: {},
-      };
+      } as unknown as EnteredCommand;
 
       expect(() => handler.syncState(parsedInput, enteredCommand)).not.toThrow();
     });

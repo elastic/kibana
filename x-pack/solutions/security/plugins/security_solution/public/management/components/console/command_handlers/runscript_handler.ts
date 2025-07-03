@@ -79,14 +79,12 @@ export class RunscriptCommandHandler extends BaseCommandHandler {
 
   calculateReplacementLength({
     argChrLength,
-    argState,
     selectorValue,
     input,
     startSearchIndexForNextArg,
     charAfterArgName,
   }: {
     argChrLength: number;
-    argState: EnteredCommand['argState'];
     selectorValue: string;
     input: string;
     startSearchIndexForNextArg: number;
