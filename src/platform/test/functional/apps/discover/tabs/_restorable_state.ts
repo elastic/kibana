@@ -183,6 +183,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await dataGrid.getScrollPosition()).to.eql({ scrollTop: 300, scrollLeft: 0 });
         });
         expect(await dataGrid.getCurrentPageNumber()).to.be('1');
+        await discover.waitUntilTabIsLoaded();
 
         await unifiedTabs.createNewTab();
         await discover.waitUntilTabIsLoaded();
@@ -193,6 +194,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await dataGrid.getCurrentPageNumber()).to.be('2');
         });
         await dataGrid.scrollTo(0, 500);
+        await retry.try(async () => {
+          expect(await dataGrid.getScrollPosition()).to.eql({ scrollTop: 500, scrollLeft: 0 });
+        });
+        await discover.waitUntilTabIsLoaded();
 
         await unifiedTabs.createNewTab();
         await discover.waitUntilTabIsLoaded();
@@ -212,6 +217,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           expect(await dataGrid.getCurrentPageNumber()).to.be('4');
         });
+        await dataGrid.scrollTo(0, 200);
+        await retry.try(async () => {
+          expect(await dataGrid.getScrollPosition()).to.eql({ scrollTop: 200, scrollLeft: 0 });
+        });
+        await discover.waitUntilTabIsLoaded();
 
         await unifiedTabs.selectTab(0);
         await discover.waitUntilTabIsLoaded();
@@ -237,8 +247,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedTabs.selectTab(3);
         await discover.waitUntilTabIsLoaded();
         await retry.try(async () => {
-          expect(await dataGrid.getScrollPosition()).to.eql({ scrollTop: 0, scrollLeft: 0 });
-          expect(await dataGrid.getCurrentPageNumber()).to.be('4'); // in-table search should not affect the manually selected page
+          expect(await dataGrid.getScrollPosition()).to.eql({ scrollTop: 200, scrollLeft: 0 });
+          // the activated in-table search should not affect the latest manually selected page
+          expect(await dataGrid.getCurrentPageNumber()).to.be('4');
           expect(await dataGrid.getInTableSearchTerm()).to.be(searchTerm);
         });
       });
