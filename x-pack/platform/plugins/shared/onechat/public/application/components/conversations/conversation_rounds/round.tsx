@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { css } from '@emotion/css';
-import { EuiPanel, EuiText, useEuiTheme, useEuiFontSize } from '@elastic/eui';
+import { EuiFlexGroup, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ConversationRound } from '@kbn/onechat-common';
+import React from 'react';
 import { RoundAnswer } from './round_answer';
 
 interface RoundProps {
@@ -16,44 +16,28 @@ interface RoundProps {
 }
 
 export const Round: React.FC<RoundProps> = ({ round }) => {
-  const { euiTheme } = useEuiTheme();
-
   const { input } = round;
-
-  const rootPanelClass = css`
-    margin-bottom: ${euiTheme.size.xl};
+  const { euiTheme } = useEuiTheme();
+  const userMessageContainerStyles = css`
+    width: 100%;
+    align-self: end;
+    max-inline-size: calc(${euiTheme.size.xxxxl} * 10);
+    background-color: ${euiTheme.colors.backgroundBasePrimary};
   `;
-
-  const tabContentPanelClass = css`
-    padding: ${euiTheme.size.xxl};
-  `;
-
-  const userTextContainerClass = css`
-    padding: ${euiTheme.size.xxl} ${euiTheme.size.xxl} ${euiTheme.size.xl} ${euiTheme.size.xxl};
-  `;
-
-  const userMessageTextClass = css`
-    font-weight: ${euiTheme.font.weight.regular};
-    font-size: calc(${useEuiFontSize('m').fontSize} + 4px);
-  `;
-
   return (
-    <EuiPanel
-      className={rootPanelClass}
-      borderRadius="none"
-      paddingSize="none"
-      hasShadow={false}
-      hasBorder={true}
-    >
-      <div className={userTextContainerClass}>
-        <EuiText color="subdued" size="m" className={userMessageTextClass}>
-          “{input.message}“
-        </EuiText>
-      </div>
+    <EuiFlexGroup direction="column" gutterSize="l">
+      <EuiPanel
+        css={userMessageContainerStyles}
+        paddingSize="l"
+        hasShadow={false}
+        hasBorder={false}
+      >
+        <EuiText size="s">{input.message}</EuiText>
+      </EuiPanel>
 
-      <div className={tabContentPanelClass}>
-        <RoundAnswer key={`round-answer-tab`} round={round} />
-      </div>
-    </EuiPanel>
+      <EuiPanel hasShadow={false} hasBorder={false}>
+        <RoundAnswer round={round} />
+      </EuiPanel>
+    </EuiFlexGroup>
   );
 };

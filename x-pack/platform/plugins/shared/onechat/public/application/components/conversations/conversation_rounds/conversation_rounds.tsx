@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { ConversationRound } from '@kbn/onechat-common';
+import { EuiFlexGroup } from '@elastic/eui';
 import { Round } from './round';
 
 interface ConversationRoundsProps {
@@ -15,10 +16,10 @@ interface ConversationRoundsProps {
 
 export const ConversationRounds: React.FC<ConversationRoundsProps> = ({ conversationRounds }) => {
   return (
-    <>
+    <EuiFlexGroup direction="column" gutterSize="l">
       {conversationRounds.map((round, index) => {
         return <Round key={index} round={round} />;
       })}
-    </>
+    </EuiFlexGroup>
   );
 };
