@@ -214,7 +214,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should allow bulk transfer ownership of allowed objects', async () => {
-        const { cookie: testUserCookie, profileUid } = await loginAsTestUser();
+        const { cookie: testUserCookie } = await loginAsTestUser();
         const { cookie: adminCookie } = await login(adminTestUser.username, adminTestUser.password);
         const firstCreate = await supertestWithoutAuth
           .post('/read_only_objects/create')
