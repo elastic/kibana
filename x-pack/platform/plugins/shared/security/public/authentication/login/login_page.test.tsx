@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiThemeProvider } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React from 'react';
@@ -13,7 +13,7 @@ import { of } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
-import { nextTick } from '@kbn/test-jest-helpers';
+import { nextTick, renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
 import { LoginPage } from './login_page';
@@ -61,23 +61,23 @@ describe('LoginPage', () => {
       customBrandingMock.customBranding$ = of({});
       httpMock.get.mockResolvedValue(createLoginState());
 
-      const wrapper = shallow(
+      const { container } = renderWithI18n(
         <LoginPage
           http={httpMock}
           customBranding={customBrandingMock}
           notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-        />
+        />,
+        { wrapper: EuiThemeProvider }
       );
 
       await act(async () => {
         await nextTick();
-        wrapper.update();
         resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
       });
 
-      expect(wrapper).toMatchSnapshot();
+      expect(container).toMatchSnapshot();
     });
 
     it('renders with custom branding', async () => {
@@ -85,23 +85,23 @@ describe('LoginPage', () => {
       customBrandingMock.customBranding$ = of({ logo: 'logo' });
       httpMock.get.mockResolvedValue(createLoginState());
 
-      const wrapper = shallow(
+      const { container } = renderWithI18n(
         <LoginPage
           http={httpMock}
           customBranding={customBrandingMock}
           notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-        />
+        />,
+        { wrapper: EuiThemeProvider }
       );
 
       await act(async () => {
         await nextTick();
-        wrapper.update();
         resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
       });
 
-      expect(wrapper).toMatchSnapshot();
+      expect(container).toMatchSnapshot();
     });
   });
 

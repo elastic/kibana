@@ -7,12 +7,15 @@
 
 import expect from '@kbn/expect';
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
+import os from 'os';
+import fs from 'fs';
+import path from 'path';
 import {
   deployTinyElserAndSetupKb,
   teardownTinyElserModelAndInferenceEndpoint,
 } from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/model_and_inference';
 import { clearKnowledgeBase } from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/knowledge_base';
-import { ObservabilityAIAssistantApiClient } from '../../../observability_ai_assistant_api_integration/common/observability_ai_assistant_api_client';
+import { ObservabilityAIAssistantApiClient } from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/observability_ai_assistant_api_client';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {
@@ -41,8 +44,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         body: {
           title: 'Favourite color',
           text,
-          confidence: 'high',
-          is_correction: false,
           public: false,
           labels: {},
         },
@@ -178,7 +179,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         expect(savedContent).to.eql(instruction);
       });
 
-      it('cancels editing without saving changes', async () => {
+      it('cancels editing without saving changes when the cancel button is clicked', async () => {
         // First create an instruction
         await openUserInstructionFlyout();
         const originalInstruction = 'Original instruction';
@@ -195,6 +196,122 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         await openUserInstructionFlyout();
         const savedContent = await getUserInstructionContent();
         expect(savedContent).to.eql(originalInstruction);
+      });
+    });
+
+    describe('Bulk import knowledge base entries', () => {
+      const tempDir = os.tmpdir();
+      const tempFilePath = path.join(tempDir, 'bulk_import.ndjson');
+
+      async function prepareBulkImportData() {
+        const entries = [
+          { id: '1', title: 'Testing 1', text: 'Contents of first item' },
+          { id: '2', title: 'Testing 2', text: 'Contents of second item' },
+          { id: '3', title: 'Testing 3', text: 'Contents of third item' },
+        ];
+
+        return entries;
+      }
+
+      async function getKnowledgeBaseEntryCount() {
+        await common.navigateToUrlWithBrowserHistory(
+          'management',
+          '/kibana/observabilityAiAssistantManagement',
+          'tab=knowledge_base'
+        );
+
+        const entryTitleCells = await testSubjects.findAll(ui.pages.kbManagementTab.tableTitleCell);
+        return entryTitleCells.length;
+      }
+
+      async function openBulkImportFlyout() {
+        await testSubjects.click(ui.pages.kbManagementTab.newEntryButton);
+        await testSubjects.exists(ui.pages.kbManagementTab.bulkImportEntryButton);
+        await testSubjects.click(ui.pages.kbManagementTab.bulkImportEntryButton);
+      }
+
+      async function uploadBulkImportFile(content: string) {
+        fs.writeFileSync(tempFilePath, content, 'utf8');
+
+        log.debug(`File saved to: ${tempFilePath}`);
+
+        try {
+          await common.setFileInputPath(tempFilePath);
+        } catch (error) {
+          log.debug(`Error uploading file: ${error}`);
+          throw error;
+        }
+        return tempFilePath;
+      }
+
+      before(async () => {
+        await clearKnowledgeBase(es);
+        await common.navigateToUrlWithBrowserHistory(
+          'management',
+          '/kibana/observabilityAiAssistantManagement',
+          'tab=knowledge_base'
+        );
+      });
+
+      beforeEach(async () => {
+        await clearKnowledgeBase(es);
+        await browser.refresh();
+      });
+
+      afterEach(async () => {
+        await clearKnowledgeBase(es);
+        await browser.refresh();
+        fs.unlinkSync(tempFilePath);
+      });
+
+      after(async () => {
+        await clearKnowledgeBase(es);
+      });
+
+      it('successfully imports multiple entries from a NDJSON file', async () => {
+        const initialCount = await getKnowledgeBaseEntryCount();
+        expect(initialCount).to.eql(0);
+
+        await openBulkImportFlyout();
+
+        const entries = await prepareBulkImportData();
+        await uploadBulkImportFile(entries.map((entry) => JSON.stringify(entry)).join('\n'));
+
+        await testSubjects.click(ui.pages.kbManagementTab.bulkImportSaveButton);
+
+        const toast = await testSubjects.find(ui.pages.kbManagementTab.toastTitle);
+        const toastText = await toast.getVisibleText();
+        expect(toastText).to.eql('Successfully imported ' + entries.length + ' items');
+
+        const finalCount = await getKnowledgeBaseEntryCount();
+        expect(finalCount).to.eql(entries.length);
+      });
+
+      it('displays validation errors when invalid data is imported', async () => {
+        await openBulkImportFlyout();
+        await uploadBulkImportFile("{ title: 'Invalid Entry' ");
+
+        await testSubjects.click(ui.pages.kbManagementTab.bulkImportSaveButton);
+
+        const toast = await testSubjects.find(ui.pages.kbManagementTab.toastTitle);
+        const toastText = await toast.getVisibleText();
+        expect(toastText).to.eql('Something went wrong');
+
+        const count = await getKnowledgeBaseEntryCount();
+        expect(count).to.eql(0);
+      });
+
+      it('cancels import without saving entries when the cancel button is clicked', async () => {
+        await openBulkImportFlyout();
+
+        const entries = await prepareBulkImportData();
+        await uploadBulkImportFile(JSON.stringify(entries));
+
+        await testSubjects.click(ui.pages.kbManagementTab.bulkImportCancelButton);
+
+        await testSubjects.missingOrFail(ui.pages.kbManagementTab.bulkImportFlyout);
+        const count = await getKnowledgeBaseEntryCount();
+        expect(count).to.eql(0);
       });
     });
   });

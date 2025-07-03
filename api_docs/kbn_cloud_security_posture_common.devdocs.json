@@ -1656,10 +1656,10 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
-        "id": "def-common.CDR_3RD_PARTY_RETENTION_POLICY",
+        "id": "def-common.CDR_EXTENDED_VULN_RETENTION_POLICY",
         "type": "string",
         "tags": [],
-        "label": "CDR_3RD_PARTY_RETENTION_POLICY",
+        "label": "CDR_EXTENDED_VULN_RETENTION_POLICY",
         "description": [],
         "signature": [
           "\"90d\""
@@ -1671,13 +1671,13 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
-        "id": "def-common.CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN",
+        "id": "def-common.CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS",
         "type": "string",
         "tags": [],
-        "label": "CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN",
+        "label": "CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS",
         "description": [],
         "signature": [
-          "\"logs-cloud_security_posture.findings_latest-default\""
+          "\"security_solution-cloud_security_posture.misconfiguration_latest\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/constants.ts",
         "deprecated": false,
@@ -1937,6 +1937,21 @@
           "\"indexed\" | \"indexing\" | \"unprivileged\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\" | \"waiting_for_results\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/types/status.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN",
+        "type": "string",
+        "tags": [],
+        "label": "DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN",
+        "description": [],
+        "signature": [
+          "\"logs-cloud_security_posture.findings_latest-default\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

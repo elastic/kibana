@@ -11,8 +11,8 @@ import {
   ToolCallsOf,
   ToolChoice,
   AssistantMessageOf,
+  InferenceClient,
 } from '@kbn/inference-common';
-import { InferenceClient } from '@kbn/inference-plugin/server';
 import { Logger } from '@kbn/logging';
 import { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { RulesClient } from '@kbn/alerting-plugin/server';

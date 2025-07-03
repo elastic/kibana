@@ -12,10 +12,7 @@ import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_ca
 import { getLegacyApmHref } from '../../../shared/links/apm/apm_link_hooks';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
-import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 import { InspectorHeaderLink } from './inspector_header_link';
-import { AddDataContextMenu } from './add_data_context_menu';
-import { useEntityCentricExperienceSetting } from '../../../../hooks/use_entity_centric_experience_setting';
 
 export function ApmHeaderActionMenu() {
   const { core, plugins, config } = useApmPluginContext();
@@ -25,13 +22,11 @@ export function ApmHeaderActionMenu() {
   const { capabilities } = application;
   const { featureFlags } = config;
   const canReadMlJobs = !!capabilities.ml?.canGetJobs;
-  const canCreateMlJobs = !!capabilities.ml?.canCreateJob;
   const { isAlertingAvailable, canReadAlerts, canSaveAlerts } = getAlertingCapabilities(
     plugins,
     capabilities
   );
   const canSaveApmAlerts = capabilities.apm.save && canSaveAlerts;
-  const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
 
   function apmHref(path: string) {
     return getLegacyApmHref({ basePath, path, search });
@@ -45,7 +40,7 @@ export function ApmHeaderActionMenu() {
     <EuiHeaderLinks gutterSize="xs">
       {featureFlags.storageExplorerAvailable && (
         <EuiHeaderLink
-          color="text"
+          color="primary"
           href={apmHref('/storage-explorer')}
           data-test-subj="apmStorageExplorerHeaderLink"
         >
@@ -59,7 +54,6 @@ export function ApmHeaderActionMenu() {
         </EuiHeaderLink>
       )}
 
-      {canCreateMlJobs && <AnomalyDetectionSetupLink />}
       {isAlertingAvailable && (
         <AlertingPopoverAndFlyout
           canReadAlerts={canReadAlerts}
@@ -67,23 +61,9 @@ export function ApmHeaderActionMenu() {
           canReadMlJobs={canReadMlJobs}
         />
       )}
-      {isEntityCentricExperienceEnabled ? (
-        <AddDataContextMenu />
-      ) : (
-        <EuiHeaderLink
-          color="primary"
-          href={kibanaHref('/app/apm/tutorial')}
-          iconType="indexOpen"
-          data-test-subj="apmAddDataHeaderLink"
-        >
-          {i18n.translate('xpack.apm.addDataButtonLabel', {
-            defaultMessage: 'Add data',
-          })}
-        </EuiHeaderLink>
-      )}
 
       <EuiHeaderLink
-        color="text"
+        color="primary"
         href={apmHref('/settings')}
         data-test-subj="apmSettingsHeaderLink"
       >
@@ -92,6 +72,16 @@ export function ApmHeaderActionMenu() {
         })}
       </EuiHeaderLink>
       <InspectorHeaderLink />
+
+      <EuiHeaderLink
+        color="primary"
+        href={kibanaHref('/app/apm/tutorial')}
+        data-test-subj="apmAddDataHeaderLink"
+      >
+        {i18n.translate('xpack.apm.addDataButtonLabel', {
+          defaultMessage: 'Add data',
+        })}
+      </EuiHeaderLink>
     </EuiHeaderLinks>
   );
 }

@@ -159,6 +159,17 @@ export const updateAgentlessCloudConnectorConfig = (
       targetCsp = 'azure';
     }
 
+    if (targetCsp !== 'aws') {
+      setNewAgentPolicy({
+        ...newAgentPolicy,
+        agentless: {
+          ...newAgentPolicy.agentless,
+          cloud_connectors: undefined,
+        },
+      });
+      return;
+    }
+
     if (newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled) {
       setNewAgentPolicy({
         ...newAgentPolicy,
@@ -195,6 +206,7 @@ export function useOnSubmit({
   hasFleetAddAgentsPrivileges,
   setNewAgentPolicy,
   setSelectedPolicyTab,
+  hideAgentlessSelector,
 }: {
   packageInfo?: PackageInfo;
   newAgentPolicy: NewAgentPolicy;
@@ -206,6 +218,7 @@ export function useOnSubmit({
   hasFleetAddAgentsPrivileges: boolean;
   setNewAgentPolicy: (policy: NewAgentPolicy) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
+  hideAgentlessSelector?: boolean;
 }) {
   const { notifications, docLinks } = useStartServices();
   const { spaceId } = useFleetStatus();
@@ -226,6 +239,7 @@ export function useOnSubmit({
   const [packagePolicy, setPackagePolicy] = useState<NewPackagePolicy>({
     ...DEFAULT_PACKAGE_POLICY,
   });
+  const [integration, setIntegration] = useState<string | undefined>(integrationToEnable);
 
   // Validation state
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
@@ -297,8 +311,14 @@ export function useOnSubmit({
   // Initial loading of package info
   useEffect(() => {
     async function init() {
-      if (!packageInfo || packageInfo.name === packagePolicy.package?.name) {
+      if (
+        !packageInfo ||
+        (packageInfo.name === packagePolicy.package?.name && integrationToEnable === integration)
+      ) {
         return;
+      }
+      if (integrationToEnable !== integration) {
+        setIntegration(integrationToEnable);
       }
 
       // Fetch all packagePolicies having the package name
@@ -328,6 +348,8 @@ export function useOnSubmit({
     integrationToEnable,
     isInitialized,
     packagePolicy.package?.name,
+    integration,
+    setIntegration,
   ]);
 
   useEffect(() => {
@@ -357,6 +379,7 @@ export function useOnSubmit({
     packageInfo,
     packagePolicy,
     integrationToEnable,
+    hideAgentlessSelector,
   });
   const setupTechnologyRef = useRef<SetupTechnology | undefined>(selectedSetupTechnology);
   // sync the inputs with the agentless selector change

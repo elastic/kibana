@@ -63,7 +63,7 @@ const ENTITY_TYPES: Record<EntityTypeName, EntityType> = {
   },
   MISC: {
     label: 'Miscellaneous',
-    icon: 'questionInCircle',
+    icon: 'question',
     // Amsterdam color
     colorIndex: 7,
   },
@@ -71,7 +71,7 @@ const ENTITY_TYPES: Record<EntityTypeName, EntityType> = {
 
 const UNKNOWN_ENTITY_TYPE: EntityType = {
   label: '',
-  icon: 'questionInCircle',
+  icon: 'question',
   // Amsterdam color
   colorIndex: 5,
 };

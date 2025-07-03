@@ -26,6 +26,7 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useEntityAnalyticsTypes } from '../hooks/use_enabled_entity_types';
+import { PageLoader } from '../../common/components/page_loader';
 
 const EntityAnalyticsComponent = () => {
   const [skipEmptyPrompt, setSkipEmptyPrompt] = React.useState(false);
@@ -57,6 +58,10 @@ const EntityAnalyticsComponent = () => {
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
   const showEmptyPrompt = !indicesExist && !skipEmptyPrompt;
   const entityTypes = useEntityAnalyticsTypes();
+
+  if (newDataViewPickerEnabled && status === 'pristine') {
+    return <PageLoader />;
+  }
 
   return (
     <>
@@ -107,4 +112,4 @@ const EntityAnalyticsComponent = () => {
   );
 };
 
-export const EntityAnalyticsPage = React.memo(EntityAnalyticsComponent);
+export const EntityAnalyticsPage = EntityAnalyticsComponent;

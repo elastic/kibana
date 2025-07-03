@@ -17,7 +17,6 @@ import {
   migratorInstanceMock,
   registerRoutesMock,
   typeRegistryInstanceMock,
-  applyTypeDefaultsMock,
 } from './saved_objects_service.test.mocks';
 import { BehaviorSubject, firstValueFrom, EMPTY } from 'rxjs';
 import { skip } from 'rxjs';
@@ -71,7 +70,6 @@ describe('SavedObjectsService', () => {
 
   beforeEach(() => {
     deprecationsSetup = createDeprecationRegistryProviderMock();
-    applyTypeDefaultsMock.mockReset().mockImplementation((type: unknown) => type);
   });
 
   const createCoreContext = ({
@@ -346,50 +344,21 @@ describe('SavedObjectsService', () => {
     });
 
     describe('#registerType', () => {
-      it('calls `applyTypeDefaults` with the correct parameters', async () => {
+      it('registers the type to the internal typeRegistry', async () => {
         // we mocked registerCoreObjectTypes above, so this test case only reflects direct calls to the registerType method
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());
 
-        const inputType = {
+        const type = {
           name: 'someType',
           hidden: false,
           namespaceType: 'single' as 'single',
           mappings: { properties: {} },
         };
-
-        applyTypeDefaultsMock.mockReturnValue(inputType);
-
-        setup.registerType(inputType);
-
-        expect(applyTypeDefaultsMock).toHaveBeenCalledTimes(1);
-        expect(applyTypeDefaultsMock).toHaveBeenCalledWith(inputType);
-      });
-
-      it('registers the type returned by `applyTypeDefaults` to the internal typeRegistry', async () => {
-        // we mocked registerCoreObjectTypes above, so this test case only reflects direct calls to the registerType method
-        const coreContext = createCoreContext();
-        const soService = new SavedObjectsService(coreContext);
-        const setup = await soService.setup(createSetupDeps());
-
-        const inputType = {
-          name: 'someType',
-          hidden: false,
-          namespaceType: 'single' as 'single',
-          mappings: { properties: {} },
-        };
-        const returnedType = {
-          ...inputType,
-          switchToModelVersionAt: '9.9.9',
-        };
-
-        applyTypeDefaultsMock.mockReturnValue(returnedType);
-
-        setup.registerType(inputType);
-
+        setup.registerType(type);
         expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledTimes(1);
-        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledWith(returnedType);
+        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledWith(type);
       });
     });
 

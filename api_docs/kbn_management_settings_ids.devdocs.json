@@ -39,6 +39,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE",
+        "description": [],
+        "signature": [
+          "\"aiAssistant:preferredAIAssistantType\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.AUTOCOMPLETE_USE_TIME_RANGE_ID",
         "type": "string",
         "tags": [],
@@ -1134,21 +1149,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_APM_LABS_BUTTON_ID",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_APM_LABS_BUTTON_ID",
-        "description": [],
-        "signature": [
-          "\"observability:apmLabsButton\""
-        ],
-        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_APM_PROGRESSIVE_LOADING_ID",
         "type": "string",
         "tags": [],
@@ -1164,10 +1164,10 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_APM_SERVICE_GROUP_MAX_NUMBER_OF_SERVCIE_ID",
+        "id": "def-common.OBSERVABILITY_APM_SERVICE_GROUP_MAX_NUMBER_OF_SERVICE_ID",
         "type": "string",
         "tags": [],
-        "label": "OBSERVABILITY_APM_SERVICE_GROUP_MAX_NUMBER_OF_SERVCIE_ID",
+        "label": "OBSERVABILITY_APM_SERVICE_GROUP_MAX_NUMBER_OF_SERVICE_ID",
         "description": [],
         "signature": [
           "\"observability:apmServiceGroupMaxNumberOfServices\""
@@ -1209,13 +1209,13 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE",
+        "id": "def-common.OBSERVABILITY_ENABLE_STREAMS_UI",
         "type": "string",
         "tags": [],
-        "label": "OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE",
+        "label": "OBSERVABILITY_ENABLE_STREAMS_UI",
         "description": [],
         "signature": [
-          "\"observability:entityCentricExperience\""
+          "\"observability:enableStreamsUI\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
@@ -1276,6 +1276,21 @@
         "description": [],
         "signature": [
           "\"observability:searchExcludedDataTiers\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS",
+        "description": [],
+        "signature": [
+          "\"observability:streamsEnableSignificantEvents\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
@@ -1908,21 +1923,6 @@
         "description": [],
         "signature": [
           "\"visualization:visualize:legacyHeatmapChartsLibrary\""
-        ],
-        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.VISUALIZATION_USE_LEGACY_TIME_AXIS_ID",
-        "type": "string",
-        "tags": [],
-        "label": "VISUALIZATION_USE_LEGACY_TIME_AXIS_ID",
-        "description": [],
-        "signature": [
-          "\"visualization:useLegacyTimeAxis\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,

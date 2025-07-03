@@ -31,6 +31,7 @@ import { useGetIntegrationsStats } from '../../../../../../siem_migrations/rules
 import { OnboardingCardId } from '../../../../../constants';
 import { MissingMigrationCallout } from './missing_migration_callout';
 import * as i18n from './translations';
+import { useSelectedTab } from '../../../../../../common/lib/integrations/hooks/use_selected_tab';
 
 export const DEFAULT_CHECK_COMPLETE_METADATA: IntegrationCardMetadata = {
   activeIntegrations: [],
@@ -53,9 +54,11 @@ export const SecurityMigrationIntegrations = withAvailablePackages<SecurityInteg
   }) => {
     const { isAgentRequired, activeIntegrations } = checkCompleteMetadata;
     const activeIntegrationsCount = activeIntegrations?.length ?? 0;
+    const { selectedTab, setSelectedTabId } = useSelectedTab();
     const list = useIntegrationCardList({
       integrationsList: availablePackages.filteredCards,
       activeIntegrations,
+      selectedTab,
     });
 
     // Create the integrations list using integrationStats which is already sorted by total rules
@@ -95,6 +98,8 @@ export const SecurityMigrationIntegrations = withAvailablePackages<SecurityInteg
         topCalloutRenderer={topCalloutRenderer}
         integrationList={integrationList}
         availablePackages={availablePackages}
+        selectedTab={selectedTab}
+        setSelectedTabId={setSelectedTabId}
       />
     );
   }

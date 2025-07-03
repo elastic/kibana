@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import React, { FC, PropsWithChildren, useMemo } from 'react';
 import { EuiForm, EuiSpacer } from '@elastic/eui';
 import { FormProvider } from 'react-hook-form';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { FormMonitorType, SyntheticsMonitor } from '../types';
 import { getDefaultFormFields, formatDefaultFormValues } from './defaults';
 import { ActionBar } from './submit';
 import { Disclaimer } from './disclaimer';
+import { ClientPluginsStart } from '../../../../../plugin';
+const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 export const MonitorForm: FC<
   PropsWithChildren<{
@@ -31,6 +35,14 @@ export const MonitorForm: FC<
     shouldFocusError: false,
   });
 
+  const { spaces: spacesApi } = useKibana<ClientPluginsStart>().services;
+
+  const ContextWrapper = useMemo(
+    () =>
+      spacesApi ? spacesApi.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
+    [spacesApi]
+  );
+
   /* React hook form doesn't seem to register a field
    * as dirty until validation unless dirtyFields is subscribed to */
   const {
@@ -38,17 +50,19 @@ export const MonitorForm: FC<
   } = methods;
 
   return (
-    <FormProvider {...methods}>
-      <EuiForm
-        isInvalid={Boolean(isSubmitted && Object.keys(errors).length)}
-        component="form"
-        noValidate
-      >
-        {children}
-        <EuiSpacer />
-        <ActionBar readOnly={readOnly} canUsePublicLocations={canUsePublicLocations} />
-      </EuiForm>
-      <Disclaimer />
-    </FormProvider>
+    <ContextWrapper>
+      <FormProvider {...methods}>
+        <EuiForm
+          isInvalid={Boolean(isSubmitted && Object.keys(errors).length)}
+          component="form"
+          noValidate
+        >
+          {children}
+          <EuiSpacer />
+          <ActionBar readOnly={readOnly} canUsePublicLocations={canUsePublicLocations} />
+        </EuiForm>
+        <Disclaimer />
+      </FormProvider>
+    </ContextWrapper>
   );
 };

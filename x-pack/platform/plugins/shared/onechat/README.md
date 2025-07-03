@@ -17,7 +17,9 @@ The onechat plugin exposes APIs to interact with onechat primitives.
 
 The main primitives are:
 
-- tools
+- [tools](#tools)
+
+Additionally, the plugin implements [MCP server](#mcp-server) that exposes onechat tools.
 
 ## Tools
 
@@ -218,4 +220,84 @@ try {
     throw new Error(`run ${e.meta.runId} failed because tool was not found`);
   }
 }
+```
+
+## MCP Server
+
+The MCP server provides a standardized interface for external MCP clients to access onechat tools.
+
+
+### Running with Claude Desktop
+
+To enable the MCP server, add the following to your Kibana config:
+
+```yaml
+uiSettings.overrides:
+  onechat:mcpServer:enabled: true
+```
+
+Configure Claude Desktop by adding this to its configuration:
+
+```json
+{
+  "mcpServers": {
+    "elastic": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "http://localhost:5601/api/mcp",
+        "--header",
+        "Authorization: ApiKey ${API_KEY}"
+      ],
+      "env": {
+        "API_KEY": "..."
+      }
+    }
+  }
+}
+```
+
+## ES|QL Based Tools
+
+The ES|QL Tool API enables users to build custom ES|QL-powered tools that the LLM can execute against any index. Here's how to create your first ES|QL tool using a POST request in Kibana DevTools:
+
+```json
+POST kbn://api/chat/tools/esql
+{
+  "id": "case_by_id",
+  "description": "Find a custom case by id.",
+  "query": "FROM my_cases | WHERE case_id == ?case_id | KEEP title, description | LIMIT 1",
+  "params": {
+    "case_id": {
+      "type": "keyword",
+      "description": "The id of the case to retrieve"
+    }
+  },
+  "meta": {
+    "tags": ["salesforce"]
+  }
+}
+```
+
+To enable the API, add the following to your Kibana config 
+
+```yaml
+uiSettings.overrides:
+  onechat:esqlToolApi:enabled: true
+```
+
+## Chat UI
+To enable the Chat UI located at `/app/chat/`, add the following to your Kibana config:
+
+```yaml
+uiSettings.overrides:
+  onechat:ui:enabled: true
+```
+
+### Tools UI
+To enable the Tools UI located at `/app/chat/tools`, add the following to your Kibana config:
+
+```yaml
+uiSettings.overrides:
+  onechat:tools:enabled: true
 ```

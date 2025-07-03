@@ -16,6 +16,7 @@ import { unflattenObject } from '@kbn/object-utils';
 import { euiPaletteColorBlindBehindText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { escape } from 'lodash';
+import { Subject } from 'rxjs';
 import { PATTERN_MAP } from '../constants/pattern_map';
 import { SupportedTypeConversion, FieldDefinition } from './types';
 
@@ -42,7 +43,12 @@ const CUSTOM_NAMED_CAPTURE_PATTERN_PREFIX = i18n.translate(
 );
 
 export class GrokCollection {
+  // Core patterns. Will be used for the lifetime of this collection.
   private patterns: Map<string, GrokPattern> = new Map();
+  // Custom patterns that may be expected to change on the fly (via user input in the UI etc).
+  private customPatterns: Map<string, GrokPattern> = new Map();
+  public readonly customPatternsChanged$ = new Subject<void>();
+  // Combination of core and custom patterns.
   private patternKeys: string[] = [];
   // NOTE: This doesn't subscribe to EUI_VIS_COLOR_STORE changes at the moment, whilst UI / UX is being finalised.
   private colourPalette = euiPaletteColorBlindBehindText({ rotations: 3 });
@@ -51,35 +57,55 @@ export class GrokCollection {
   // NOTE: Model as async for now with future intent to use the /_ingest/processor/grok endpoint
   public async setup() {
     Object.entries(PATTERN_MAP).forEach(([key, value]) => {
-      this.addPattern(key, String.raw`${value}`);
+      this.addPattern(key, String.raw`${value}`, this.patterns);
     });
-    this.resolvePatterns();
+    this.resolvePatterns(this.patterns);
   }
 
   public getPattern(id: string) {
-    return this.patterns.get(id);
+    // Custom patterns take precedence and overwrite core patterns.
+    if (this.customPatterns.has(id)) {
+      return this.customPatterns.get(id);
+    } else if (this.patterns.has(id)) {
+      return this.patterns.get(id);
+    }
   }
 
-  public addPattern(id: string, rawPattern: string) {
-    if (this.patterns.has(id)) {
+  public addPattern(id: string, rawPattern: string, destination: Map<string, GrokPattern>) {
+    if (destination.has(id)) {
       // eslint-disable-next-line no-console
       console.warn('Warning: pattern with ID: %s already exists', id);
     } else {
       const pattern = new GrokPattern(rawPattern, id, this);
-      this.patterns.set(id, pattern);
+      destination.set(id, pattern);
 
       return pattern;
     }
   }
 
-  public resolvePatterns() {
-    this.patterns.forEach((pattern) => {
+  public setCustomPatterns(patterns: Record<string, string>) {
+    this.customPatterns.clear();
+    Object.entries(patterns).forEach(([key, value]) => {
+      this.addPattern(key, String.raw`${value}`, this.customPatterns);
+    });
+    this.resolvePatterns(this.customPatterns);
+    this.customPatternsChanged$.next();
+  }
+
+  public resolvePatterns(source: Map<string, GrokPattern> = this.patterns) {
+    source.forEach((pattern) => {
       if (!pattern.isResolved()) {
         pattern.resolvePattern();
       }
     });
-    this.patternKeys = Array.from(this.patterns.keys());
+    this.generatePatternKeys();
   }
+
+  private generatePatternKeys = () => {
+    this.patternKeys = Array.from(this.patterns.keys()).concat(
+      Array.from(this.customPatterns.keys())
+    );
+  };
 
   // Only relevant for Monaco users.
   // Can be used with Monaco code editor to provide suggestions.

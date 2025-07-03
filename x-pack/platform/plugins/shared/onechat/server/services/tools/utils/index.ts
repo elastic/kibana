@@ -6,5 +6,5 @@
  */
 
 export { combineToolProviders } from './combine_tool_providers';
-export { toolToDescriptor, toExecutableTool, addBuiltinSystemMeta } from './tool_conversion';
-export { createInternalRegistry } from './create_internal_registry';
+export { toolToDescriptor, toExecutableTool } from './tool_conversion';
+export { createInternalRegistry, internalProviderToPublic } from './create_internal_registry';

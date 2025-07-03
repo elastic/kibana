@@ -6,7 +6,7 @@
  */
 
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { BoundInferenceClient } from '@kbn/inference-plugin/server';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 
 /**
  * Represents a model that can be used within the onechat framework (e.g. tools).

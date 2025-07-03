@@ -126,6 +126,7 @@ export const TagFilterPanel: FC<{}> = ({}) => {
             iconSide="right"
             onClick={onFilterButtonClick}
             data-test-subj="tagFilterPopoverButton"
+            isSelected={isPopoverOpen}
             hasActiveFilters={totalActiveFilters > 0}
             numActiveFilters={totalActiveFilters}
             grow

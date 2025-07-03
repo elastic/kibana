@@ -6,7 +6,11 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { DynamicSettingsAttributes } from '../runtime_types/settings';
+import { fromSettingsAttribute } from '../routes/settings/dynamic_settings';
+import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../constants/settings';
 
 export const uptimeSettingsObjectType = 'uptime-dynamic-settings';
 export const uptimeSettingsObjectId = 'uptime-dynamic-settings-singleton';
@@ -30,4 +34,49 @@ export const syntheticsSettings: SavedObjectsType = {
         defaultMessage: 'Synthetics settings',
       }),
   },
+};
+
+export const getSyntheticsDynamicSettings = async (
+  client: SavedObjectsClientContract
+): Promise<DynamicSettingsAttributes> => {
+  try {
+    const obj = await client.get<DynamicSettingsAttributes>(
+      syntheticsSettingsObjectType,
+      syntheticsSettingsObjectId
+    );
+    return fromSettingsAttribute(obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
+  } catch (getErr) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
+      // If the object doesn't exist, check to see if uptime settings exist
+      return getUptimeDynamicSettings(client);
+    }
+    throw getErr;
+  }
+};
+export const setSyntheticsDynamicSettings = async (
+  client: SavedObjectsClientContract,
+  settings: DynamicSettingsAttributes
+) => {
+  const settingsObject = await client.create<DynamicSettingsAttributes>(
+    syntheticsSettingsObjectType,
+    settings,
+    {
+      id: syntheticsSettingsObjectId,
+      overwrite: true,
+    }
+  );
+
+  return settingsObject.attributes;
+};
+
+const getUptimeDynamicSettings = async (client: SavedObjectsClientContract) => {
+  try {
+    const obj = await client.get<DynamicSettingsAttributes>(
+      uptimeSettingsObjectType,
+      uptimeSettingsObjectId
+    );
+    return obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES;
+  } catch (getErr) {
+    return DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES;
+  }
 };

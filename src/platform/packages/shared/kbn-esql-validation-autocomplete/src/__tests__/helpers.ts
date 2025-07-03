@@ -9,6 +9,8 @@
 
 import { camelCase } from 'lodash';
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
 import { ESQLFieldWithMetadata } from '../validation/types';
 import { fieldTypes } from '../definitions/types';
 import { ESQLCallbacks } from '../shared/types';
@@ -96,10 +98,33 @@ export const timeseriesIndices: IndexAutocompleteItem[] = [
   },
 ];
 
-export const editorExtensions = [
+export const editorExtensions = {
+  recommendedQueries: [
+    {
+      name: 'Logs Count by Host',
+      query: 'from logs* | STATS count(*) by host',
+    },
+  ],
+  recommendedFields: [
+    {
+      name: 'host.name',
+      pattern: 'logs*',
+    },
+    {
+      name: 'user.name',
+      pattern: 'logs*',
+    },
+    {
+      name: 'kubernetes.something.something',
+      pattern: 'logs*',
+    },
+  ],
+};
+
+export const inferenceEndpoints: InferenceEndpointAutocompleteItem[] = [
   {
-    name: 'Logs Count by Host',
-    query: 'from logs* | STATS count(*) by host',
+    inference_id: 'inference_1',
+    task_type: 'completion',
   },
 ];
 
@@ -137,9 +162,13 @@ export function getCallbackMocks(): ESQLCallbacks {
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
     getEditorExtensions: jest.fn(async (queryString: string) => {
       if (queryString.includes('logs*')) {
-        return editorExtensions;
+        return {
+          recommendedQueries: editorExtensions.recommendedQueries,
+          recommendedFields: editorExtensions.recommendedFields,
+        };
       }
-      return [];
+      return { recommendedQueries: [], recommendedFields: [] };
     }),
+    getInferenceEndpoints: jest.fn(async (taskType: InferenceTaskType) => ({ inferenceEndpoints })),
   };
 }

@@ -19,6 +19,7 @@ describe('Extensions registry utils', () => {
           { name: 'bike-hire-stations' },
           { name: 'logs-apache_error' },
           { name: 'logs-aws_s3' },
+          { name: 'remote_cluster:metrics-1' },
           { name: 'logstash-0' },
           { name: 'logstash-1' },
           { name: 'movies' },
@@ -52,8 +53,16 @@ describe('Extensions registry utils', () => {
       expect(checkSourceExistence(mockSources, 'movies')).toBe(true);
     });
 
+    test('should return true for an exact match in remote indices', () => {
+      expect(checkSourceExistence(mockSources, 'remote_cluster:metrics-1')).toBe(true);
+    });
+
     test('should return true for a wildcard match in indices (ending with *)', () => {
       expect(checkSourceExistence(mockSources, 'logs-apache*')).toBe(true);
+    });
+
+    test('should return true for a wildcard match in remote indices (ending with *)', () => {
+      expect(checkSourceExistence(mockSources, 'remote_cluster:metrics*')).toBe(true);
     });
 
     test('should return true for a wildcard match in indices (ending with -*)', () => {

@@ -16,7 +16,7 @@
     "patterns": [
       "_security/_query/api_key"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-query-api-key.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-query-api-keys",
     "availability": {
       "stack": true,
       "serverless": true

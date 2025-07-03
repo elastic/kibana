@@ -62,10 +62,6 @@ export const removeProvider = actionCreator<{
   andProviderId?: string;
 }>('REMOVE_PROVIDER');
 
-export const updateGraphEventId = actionCreator<{ id: string; graphEventId: string }>(
-  'UPDATE_TIMELINE_GRAPH_EVENT_ID'
-);
-
 export const unPinEvent = actionCreator<{ id: string; eventId: string }>('UN_PIN_EVENT');
 
 export const updateTimeline = actionCreator<{

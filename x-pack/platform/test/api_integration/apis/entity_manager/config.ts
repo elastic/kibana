@@ -41,5 +41,3 @@ export default async function createTestConfig({
 }
 
 export type CreateTestConfig = Awaited<ReturnType<typeof createTestConfig>>;
-
-export type AssetManagerServices = CreateTestConfig['services'];

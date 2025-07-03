@@ -28,7 +28,7 @@
       "_mapping",
       "{index}/_mapping"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/indices-get-mapping.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-mapping",
     "availability": {
       "stack": true,
       "serverless": true

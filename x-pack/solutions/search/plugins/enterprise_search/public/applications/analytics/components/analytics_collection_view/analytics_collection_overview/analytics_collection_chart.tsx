@@ -168,6 +168,7 @@ export const AnalyticsCollectionChart: React.FC<
             },
           }}
           yNice
+          // Defaults to multi layer time axis as of Elastic Charts v70
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Sqrt}
           curve={CurveType.CURVE_MONOTONE_X}

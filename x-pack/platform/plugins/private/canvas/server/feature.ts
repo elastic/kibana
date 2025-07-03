@@ -68,7 +68,7 @@ export function getCanvasFeature(plugins: { reporting?: ReportingStart }): Kiban
                       includeIn: 'all',
                       management: { insightsAndAlerting: ['reporting'] },
                       minimumLicense: 'gold',
-                      savedObject: { all: [], read: [] },
+                      savedObject: { all: ['scheduled_report'], read: [] },
                       api: ['generateReport'],
                       ui: ['generatePdf'],
                     },

@@ -67,6 +67,9 @@ export enum HostRiskScoreQueryId {
 export const formatRiskScore = (riskScore: number) =>
   (Math.round(riskScore * 100) / 100).toFixed(2);
 
+export const formatRiskScoreWholeNumber = (riskScore: number) =>
+  (Math.round(riskScore * 100) / 100).toFixed(0);
+
 export const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
   querySize: 1,

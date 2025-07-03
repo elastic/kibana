@@ -15,7 +15,6 @@ export type {
   ESQLAstJoinCommand,
   ESQLCommand,
   ESQLCommandOption,
-  ESQLCommandMode,
   ESQLFunction,
   ESQLTimeInterval,
   ESQLLocation,
@@ -29,31 +28,18 @@ export type {
   EditorError,
   ESQLAstNode,
   ESQLInlineCast,
-  ESQLAstRenameExpression,
   ESQLAstBaseItem,
   ESQLAstChangePointCommand,
 } from './src/types';
 
-export {
-  isColumn,
-  isDoubleLiteral,
-  isFunctionExpression,
-  isBinaryExpression,
-  isWhereExpression,
-  isFieldExpression,
-  isSource,
-  isIdentifier,
-  isIntegerLiteral,
-  isLiteral,
-  isParamLiteral,
-  isProperNode,
-} from './src/ast/helpers';
+export * from './src/ast/is';
 
 export { Builder, type AstNodeParserFields, type AstNodeTemplate } from './src/builder';
 
 export {
   createParser,
   parse,
+  Parser,
   parseErrors,
   type ParseOptions,
   type ParseResult,
@@ -75,3 +61,5 @@ export {
 export { EsqlQuery } from './src/query';
 
 export * as mutate from './src/mutate';
+
+export { singleItems, resolveItem, lastItem, firstItem } from './src/visitor/utils';

@@ -16,14 +16,6 @@ module.exports = () => ({
       plugins: [
         require.resolve('babel-plugin-add-module-exports'),
 
-        /**
-         * The static class features proposal https://github.com/tc39/proposal-static-class-features
-         * has been merged with the class fields proposal and is now stage 4.
-         * We include this here because Monaco needs this and
-         * this transform has to run before the transform class properties transform.
-         */
-        require.resolve('@babel/plugin-transform-class-static-block'),
-
         // The class properties proposal was merged with the private fields proposal
         // into the "class fields" proposal. Babel doesn't support this combined
         // proposal yet, which includes private field, so this transform is

@@ -27,10 +27,7 @@ export function useImportKnowledgeBaseEntries() {
     ServerError,
     {
       entries: Array<
-        Omit<
-          KnowledgeBaseEntry,
-          '@timestamp' | 'confidence' | 'is_correction' | 'public' | 'labels'
-        > & { title: string }
+        Omit<KnowledgeBaseEntry, '@timestamp' | 'public' | 'labels'> & { title: string }
       >;
     }
   >(

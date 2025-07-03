@@ -26,7 +26,7 @@ interface ValueSuggestionsGetFnArgs {
   boolFilter?: any[];
   signal?: AbortSignal;
   method?: ValueSuggestionsMethod;
-  querySuggestionKey?: 'rules' | 'cases' | 'alerts';
+  querySuggestionKey?: 'rules' | 'cases' | 'alerts' | 'endpoints';
 }
 
 const getAutocompleteTimefilter = ({ timefilter }: TimefilterSetup, indexPattern: DataView) => {
@@ -70,7 +70,11 @@ export const setupValueSuggestionProvider = (
       usageCollector?.trackRequest();
       let path = `/internal/kibana/suggestions/values/${index}`;
       if (querySuggestionKey) {
-        path = `/internal/${querySuggestionKey}/suggestions/values`;
+        if (querySuggestionKey === 'endpoints') {
+          path = '/internal/api/endpoint/suggestions/endpoints';
+        } else {
+          path = `/internal/${querySuggestionKey}/suggestions/values`;
+        }
       }
       return core.http
         .fetch<T>(path, {

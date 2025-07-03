@@ -41,6 +41,7 @@ import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_ap
 import type { SearchEmbeddableApi, SearchEmbeddableSerializedState } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
 import { BaseAppWrapper } from '../context_awareness';
+import { ScopedServicesProvider } from '../components/scoped_services_provider';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -73,6 +74,10 @@ export const getSearchEmbeddableFactory = ({
         solutionNavId,
       });
       const AppWrapper = getRenderAppWrapper?.(BaseAppWrapper) ?? BaseAppWrapper;
+      const scopedEbtManager = discoverServices.ebtManager.createScopedEBTManager();
+      const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager({
+        scopedEbtManager,
+      });
 
       /** Specific by-reference state */
       const savedObjectId$ = new BehaviorSubject<string | undefined>(runtimeState?.savedObjectId);
@@ -94,7 +99,7 @@ export const getSearchEmbeddableFactory = ({
         discoverServices.embeddableEnhanced?.initializeEmbeddableDynamicActions(
           uuid,
           () => titleManager.api.title$.getValue(),
-          initialState.rawState
+          initialState
         );
       const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
       const searchEmbeddable = await initializeSearchEmbeddableApi(runtimeState, {
@@ -116,6 +121,7 @@ export const getSearchEmbeddableFactory = ({
         },
         discoverServices,
         stateManager: searchEmbeddable.stateManager,
+        scopedProfilesManager,
         setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
         setBlockingError: (error: Error | undefined) => blockingError$.next(error),
       });
@@ -127,7 +133,7 @@ export const getSearchEmbeddableFactory = ({
           savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
           serializeTitles: titleManager.getLatestState,
           serializeTimeRange: timeRangeManager.getLatestState,
-          serializeDynamicActions: dynamicActionsManager?.getLatestState,
+          serializeDynamicActions: dynamicActionsManager?.serializeState,
           savedObjectId,
         });
 
@@ -313,43 +319,48 @@ export const getSearchEmbeddableFactory = ({
           return (
             <KibanaRenderContextProvider {...discoverServices.core}>
               <KibanaContextProvider services={discoverServices}>
-                <AppWrapper>
-                  {renderAsFieldStatsTable ? (
-                    <SearchEmbeddablFieldStatsTableComponent
-                      api={{
-                        ...api,
-                        fetchContext$,
-                      }}
-                      dataView={dataView!}
-                      onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
-                      stateManager={searchEmbeddable.stateManager}
-                    />
-                  ) : (
-                    <CellActionsProvider
-                      getTriggerCompatibleActions={
-                        discoverServices.uiActions.getTriggerCompatibleActions
-                      }
-                    >
-                      <SearchEmbeddableGridComponent
-                        api={{ ...api, fetchWarnings$, fetchContext$ }}
+                <ScopedServicesProvider
+                  scopedProfilesManager={scopedProfilesManager}
+                  scopedEBTManager={scopedEbtManager}
+                >
+                  <AppWrapper>
+                    {renderAsFieldStatsTable ? (
+                      <SearchEmbeddablFieldStatsTableComponent
+                        api={{
+                          ...api,
+                          fetchContext$,
+                        }}
                         dataView={dataView!}
-                        onAddFilter={
-                          isEsqlMode(savedSearch) ||
-                          runtimeState.nonPersistedDisplayOptions?.enableFilters === false
-                            ? undefined
-                            : onAddFilter
-                        }
-                        enableDocumentViewer={
-                          runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !==
-                          undefined
-                            ? runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer
-                            : true
-                        }
+                        onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
                         stateManager={searchEmbeddable.stateManager}
                       />
-                    </CellActionsProvider>
-                  )}
-                </AppWrapper>
+                    ) : (
+                      <CellActionsProvider
+                        getTriggerCompatibleActions={
+                          discoverServices.uiActions.getTriggerCompatibleActions
+                        }
+                      >
+                        <SearchEmbeddableGridComponent
+                          api={{ ...api, fetchWarnings$, fetchContext$ }}
+                          dataView={dataView!}
+                          onAddFilter={
+                            isEsqlMode(savedSearch) ||
+                            runtimeState.nonPersistedDisplayOptions?.enableFilters === false
+                              ? undefined
+                              : onAddFilter
+                          }
+                          enableDocumentViewer={
+                            runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !==
+                            undefined
+                              ? runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer
+                              : true
+                          }
+                          stateManager={searchEmbeddable.stateManager}
+                        />
+                      </CellActionsProvider>
+                    )}
+                  </AppWrapper>
+                </ScopedServicesProvider>
               </KibanaContextProvider>
             </KibanaRenderContextProvider>
           );
