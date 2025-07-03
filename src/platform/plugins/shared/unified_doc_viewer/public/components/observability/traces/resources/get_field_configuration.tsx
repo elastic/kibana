@@ -97,7 +97,7 @@ export const getCommonFieldConfiguration = ({
       title: i18n.translate('unifiedDocViewer.observability.traces.details.timestamp.title', {
         defaultMessage: 'Start time',
       }),
-      content: (value) => <Timestamp timestamp={value as number} />,
+      content: (value) => <Timestamp timestamp={value as number} size="xs" />,
       value: flattenedDoc[TIMESTAMP_FIELD],
     },
     [HTTP_RESPONSE_STATUS_CODE_FIELD]: {

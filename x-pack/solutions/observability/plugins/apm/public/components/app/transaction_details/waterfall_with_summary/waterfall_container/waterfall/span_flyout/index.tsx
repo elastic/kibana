@@ -26,7 +26,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
 import { Stacktrace, PlaintextStacktrace } from '@kbn/event-stacktrace';
-import { Duration } from '@kbn/apm-ui-shared';
+import { Duration, Timestamp } from '@kbn/apm-ui-shared';
 import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useFetcher, isPending } from '../../../../../../../hooks/use_fetcher';
@@ -36,7 +36,6 @@ import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span
 import { Summary } from '../../../../../../shared/summary';
 import { CompositeSpanDurationSummaryItem } from '../../../../../../shared/summary/composite_span_duration_summary_item';
 import { HttpInfoSummaryItem } from '../../../../../../shared/summary/http_info_summary_item';
-import { TimestampTooltip } from '../../../../../../shared/timestamp_tooltip';
 import { SyncBadge } from '../badge/sync_badge';
 import { FailureBadge } from '../failure_badge';
 import { ResponsiveFlyout } from '../responsive_flyout';
@@ -266,7 +265,7 @@ function SpanFlyoutBody({
       <EuiSpacer size="m" />
       <Summary
         items={[
-          <TimestampTooltip time={span.timestamp.us / 1000} />,
+          <Timestamp timestamp={span.timestamp.us / 1000} absoluteTimeType="tooltip" />,
           <>
             <Duration
               duration={span.span.duration.us}
