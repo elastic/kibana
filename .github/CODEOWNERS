@@ -1112,7 +1112,7 @@ x-pack/test
 x-pack/test_serverless
 x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 x-pack/platform/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
-x-pack/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
+x-pack/platform/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
 x-pack/test/functional_execution_context/plugins/alerts @elastic/kibana-core
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 x-pack/test/functional_with_es_ssl/plugins/cases @elastic/response-ops
@@ -1943,7 +1943,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/plugin_functional/test_suites/core* @elastic/kibana-core
 /src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline @elastic/kibana-core
 /x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management @elastic/kibana-core
-/x-pack/test/functional_embedded @elastic/kibana-core
+/x-pack/platform/test/functional_embedded @elastic/kibana-core
 /src/platform/test/node_roles_functional @elastic/kibana-core
 /src/platform/test/functional/page_objects/newsfeed_page.ts @elastic/kibana-core # assigned per https://github.com/elastic/kibana/pull/160210
 /src/platform/test/functional/page_objects/home_page.ts @elastic/appex-sharedux

@@ -14,7 +14,7 @@ import { pageObjects } from '../functional/page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaFunctionalConfig = await readConfigFile(
-    require.resolve('../functional/config.base.js')
+    require.resolve('../functional/config.base.ts')
   );
 
   const iframeEmbeddedPlugin = resolve(__dirname, './plugins/iframe_embedded');

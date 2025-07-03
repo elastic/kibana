@@ -5969,7 +5969,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/iframe-embedded-plugin@link:x-pack/test/functional_embedded/plugins/iframe_embedded":
+"@kbn/iframe-embedded-plugin@link:x-pack/platform/test/functional_embedded/plugins/iframe_embedded":
   version "0.0.0"
   uid ""
 
