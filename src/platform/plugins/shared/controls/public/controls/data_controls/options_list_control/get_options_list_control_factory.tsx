@@ -413,11 +413,6 @@ export const getOptionsListControlFactory = (): DataControlFactory<
               singleSelectSubscription.unsubscribe();
               validSearchStringSubscription.unsubscribe();
               hasSelectionsSubscription.unsubscribe();
-<<<<<<< HEAD
-=======
-              selectionsSubscription.unsubscribe();
-              errorsSubscription.unsubscribe();
->>>>>>> f48e8142750 ([Dashboard][Controls] Do not recommend adhoc dataviews (#225705))
             };
           }, []);
 
