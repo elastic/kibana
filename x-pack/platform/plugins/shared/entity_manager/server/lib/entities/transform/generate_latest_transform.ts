@@ -28,38 +28,9 @@ import { TRANSFORM_IGNORED_SLOW_TIERS } from './constants';
 export function generateLatestTransform(
   definition: EntityDefinition
 ): TransformPutTransformRequest {
-  const filter = {
-    bool: {
-      must: [] as QueryDslQueryContainer[],
-      must_not: [] as QueryDslQueryContainer[],
-    },
-  };
-
-  if (definition.filter) {
-    filter.bool.must.push(getElasticsearchQueryOrThrow(definition.filter));
-  }
-
-  definition.identityFields.forEach(({ field }) => {
-    filter.bool.must.push({ exists: { field } });
-  });
-
-  filter.bool.must.push({
-    range: {
-      [definition.latest.timestampField]: {
-        gte: `now-${definition.latest.lookbackPeriod}`,
-      },
-    },
-  });
-
-  filter.bool.must_not.push({
-    terms: {
-      _tier: TRANSFORM_IGNORED_SLOW_TIERS,
-    },
-  });
-
   return generateTransformPutRequest({
     definition,
-    filter,
+    filter: generateFilters(definition),
     transformId: generateLatestTransformId(definition),
     frequency: definition.latest.settings?.frequency ?? ENTITY_DEFAULT_LATEST_FREQUENCY,
     syncDelay: definition.latest.settings?.syncDelay ?? ENTITY_DEFAULT_LATEST_SYNC_DELAY,
@@ -139,3 +110,35 @@ const generateTransformPutRequest = ({
     },
   };
 };
+
+function generateFilters(definition: EntityDefinition) {
+  const filter = {
+    bool: {
+      must: [] as QueryDslQueryContainer[],
+      must_not: [] as QueryDslQueryContainer[],
+    },
+  };
+
+  if (definition.filter) {
+    filter.bool.must.push(getElasticsearchQueryOrThrow(definition.filter));
+  }
+
+  definition.identityFields.forEach(({ field }) => {
+    filter.bool.must.push({ exists: { field } });
+  });
+
+  filter.bool.must.push({
+    range: {
+      [definition.latest.timestampField]: {
+        gte: `now-${definition.latest.lookbackPeriod}`,
+      },
+    },
+  });
+
+  filter.bool.must_not.push({
+    terms: {
+      _tier: TRANSFORM_IGNORED_SLOW_TIERS,
+    },
+  });
+  return filter;
+}
