@@ -57,9 +57,6 @@ const runnerOptions = {
 };
 
 describe('transform_path_file', () => {
-  // before(() => {
-  //   chai.use(snapshots(__filename));
-  // });
 
   it('throws an error if options are missing', () => {
     expect(() => {
