@@ -88,8 +88,8 @@ describe('collapseMessages', () => {
         message: { role: MessageRole.Assistant, content: 'hi there' },
       },
     ];
-    const result = collapseMessages(messages, mockLogger);
-    expect(result).toEqual(messages);
+    const collapsedMessages = collapseMessages(messages, mockLogger);
+    expect(collapsedMessages).toEqual(messages);
   });
 
   it('should not collapse a query message if there are no messages after it', () => {
@@ -100,8 +100,8 @@ describe('collapseMessages', () => {
       },
       ...queryToolCalls,
     ];
-    const result = collapseMessages(messages, mockLogger);
-    expect(result).toEqual(messages);
+    const collapsedMessages = collapseMessages(messages, mockLogger);
+    expect(collapsedMessages).toEqual(messages);
   });
 
   describe('when collapsing an "execute_query" tool call', () => {
@@ -143,6 +143,7 @@ describe('collapseMessages', () => {
       expect(content.steps).toHaveLength(2);
       expect(content.steps[0].role).toBe('assistant');
       expect(content.steps[1].role).toBe('tool');
+      expect(content.steps[1].name).toBe('execute_query');
 
       expect(content.steps).toEqual([
         {
@@ -204,12 +205,14 @@ describe('collapseMessages', () => {
     it('should serialize the collapsed steps correctly', () => {
       const content = JSON.parse(collapsedMessages[1].message.content!);
       expect(content.steps).toHaveLength(2);
-      expect(content.steps[0].toolCalls[0].function.name).toBe('visualize_query');
+      expect(content.steps[0].role).toBe('assistant');
+      expect(content.steps[1].role).toBe('tool');
+      expect(content.steps[1].name).toBe('visualize_query');
     });
   });
 
   describe('when an unrelated tool call is present', () => {
-    let result: Message[];
+    let collapsedMessages: Message[];
     beforeEach(() => {
       const messages: Message[] = [
         ...queryToolCalls,
@@ -220,32 +223,32 @@ describe('collapseMessages', () => {
             role: MessageRole.Assistant,
             function_call: {
               name: 'some_other_function',
-              arguments: '{"user":"george"}',
+              arguments: JSON.stringify({ user: 'george' }),
               trigger: MessageRole.Assistant,
             },
             content: undefined,
           },
         },
       ];
-      result = collapseMessages(messages, mockLogger);
+      collapsedMessages = collapseMessages(messages, mockLogger);
     });
 
     it('should stop collapsing and preserve the unrelated tool call', () => {
-      expect(result).toHaveLength(3);
+      expect(collapsedMessages).toHaveLength(3);
     });
 
     it('should add "execute_query" to the "query" response', () => {
-      const queryToolResponse = result[1];
+      const queryToolResponse = collapsedMessages[1];
       expect(queryToolResponse.message.content).toContain('execute_query');
     });
 
     it('should retain the unrelated tool call as the last message', () => {
-      expect(result[2].message.function_call?.name).toEqual('some_other_function');
+      expect(collapsedMessages[2].message.function_call?.name).toEqual('some_other_function');
     });
   });
 
   describe('when there are multiple query messages', () => {
-    let result: Message[];
+    let collapsedMessages: Message[];
     beforeEach(() => {
       const messages: Message[] = [
         ...queryToolCalls,
@@ -253,21 +256,21 @@ describe('collapseMessages', () => {
         ...queryToolCalls,
         ...executeQueryToolCall,
       ];
-      result = collapseMessages(messages, mockLogger);
+      collapsedMessages = collapseMessages(messages, mockLogger);
     });
 
     it('should return four messages', () => {
-      expect(result).toHaveLength(4);
+      expect(collapsedMessages).toHaveLength(4);
     });
 
     it('should collapse the first query correctly', () => {
-      const firstQueryResponse = result[1];
+      const firstQueryResponse = collapsedMessages[1];
       const firstQueryContent = JSON.parse(firstQueryResponse.message.content!);
       expect(firstQueryContent.steps).toHaveLength(2);
     });
 
     it('should collapse the second query correctly', () => {
-      const secondQueryResponse = result[3];
+      const secondQueryResponse = collapsedMessages[3];
       const secondQueryContent = JSON.parse(secondQueryResponse.message.content!);
       expect(secondQueryContent.steps).toHaveLength(2);
     });
