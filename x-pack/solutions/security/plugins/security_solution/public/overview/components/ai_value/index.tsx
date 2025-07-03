@@ -21,13 +21,21 @@ import {
   formatThousandsDecimal,
 } from './metrics';
 
-interface Props {}
+interface Props {
+  alertsInAttacks: number;
+  attackDiscoveryCount: number;
+  totalAlerts: number;
+}
 
-export const AIValueMetrics: React.FC<Props> = (props) => {
+export const AIValueMetrics: React.FC<Props> = ({
+  alertsInAttacks,
+  attackDiscoveryCount,
+  totalAlerts,
+}) => {
   const data = {
-    totalAlerts: 24320,
-    filteredAlerts: 24081,
-    aiDetected: 120,
+    totalAlerts,
+    filteredAlerts: totalAlerts - alertsInAttacks,
+    aiDetected: attackDiscoveryCount,
     traditionalDetected: 80,
   };
 

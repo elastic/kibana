@@ -7,6 +7,15 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
+import { useAssistantContext } from '@kbn/elastic-assistant';
+import { useAlertCountQuery } from './use_alert_count_query';
+import { inputsSelectors } from '../../common/store';
+import {
+  ACKNOWLEDGED,
+  CLOSED,
+  OPEN,
+} from '../../attack_discovery/pages/results/history/search_and_filter/translations';
+import { useFindAttackDiscoveries } from '../../attack_discovery/pages/use_find_attack_discoveries';
 import { AIValueMetrics } from '../components/ai_value';
 import { APP_ID } from '../../../common';
 import { InputsModelId } from '../../common/store/inputs/constants';
@@ -19,7 +28,6 @@ import { useSourcererDataView } from '../../sourcerer/containers';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { HeaderPage } from '../../common/components/header_page';
-
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import * as i18n from './translations';
 import { NoPrivileges } from '../../common/components/no_privileges';
@@ -29,6 +37,8 @@ import { useKibana } from '../../common/lib/kibana';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
 import { PageLoader } from '../../common/components/page_loader';
+import { useGlobalTime } from '../../common/containers/use_global_time';
+import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 
 /**
  * The dashboard includes key performance metrics such as:
@@ -54,7 +64,7 @@ const AIValueComponent = () => {
     loading: oldIsSourcererLoading,
     sourcererDataView: oldSourcererDataView,
   } = useSourcererDataView();
-
+  const { from, to } = useGlobalTime();
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataView, status } = useDataView();
   const { dataViewSpec } = useDataViewSpec();
@@ -65,13 +75,51 @@ const AIValueComponent = () => {
     : oldIndicesExist;
   const isSourcererLoading = newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading;
 
+  const { http } = useKibana().services;
+  const { assistantAvailability } = useAssistantContext();
   const { signalIndexName } = useSignalIndex();
   const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const canReadCases = userCasesPermissions.read;
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
   const additionalFilters = useMemo(() => (filterQuery ? [filterQuery] : []), [filterQuery]);
+  const {
+    cancelRequest: cancelFindAttackDiscoveriesRequest,
+    data,
+    isLoading,
+    refetch: refetchFindAttackDiscoveries,
+  } = useFindAttackDiscoveries({
+    // connectorNames: selectedConnectorNames,
+    end: to,
+    // ids: filterByAlertIds.length > 0 ? filterByAlertIds : undefined,
+    http,
+    isAssistantEnabled: assistantAvailability.isAssistantEnabled,
+    // page,
+    // perPage,
+    // search: '',
+    // shared,
+    start: from,
+    status: [OPEN, ACKNOWLEDGED, CLOSED].map((s) => s.toLowerCase()),
+  });
+  const getGlobalFiltersQuerySelector = useMemo(
+    () => inputsSelectors.globalFiltersQuerySelector(),
+    []
+  );
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const query = useDeepEqualSelector(getGlobalQuerySelector);
+  const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
+  console.log('query ==>', query);
+  console.log('filters ==>', filters);
+  const { alertCount } = useAlertCountQuery({
+    to,
+    from,
+    query,
+    filters,
+    signalIndexName,
+  });
+  console.log('ad data ==>', data);
+  console.log('alert data ==>', alertCount);
   if (!canReadAlerts && !canReadCases) {
     return <NoPrivileges docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges} />;
   }
@@ -94,21 +142,16 @@ const AIValueComponent = () => {
             ) : (
               <EuiFlexGroup direction="column" data-test-subj="aiValueSections">
                 <EuiFlexItem>
-                  <EuiFlexGroup>
-                    {'Do AI Value!!!'}
-                    <EuiText>
-                      <h2>{'Your AI Security ROI'}</h2>
-                    </EuiText>
-                    <AIValueMetrics />
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-
-                <EuiFlexItem>
-                  <EuiFlexGroup>
-                    <EuiFlexItem>
-                      <EuiFlexGroup direction="column">{'Do AI Value!!!'}</EuiFlexGroup>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <EuiText>
+                    <h2>{'Your AI Security ROI'}</h2>
+                  </EuiText>
+                  {data && (
+                    <AIValueMetrics
+                      totalAlerts={alertCount}
+                      attackDiscoveryCount={data.total}
+                      alertsInAttacks={data.unique_alert_ids_count}
+                    />
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             )}
