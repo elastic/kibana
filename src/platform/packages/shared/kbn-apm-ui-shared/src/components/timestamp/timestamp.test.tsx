@@ -10,7 +10,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import moment from 'moment';
-import { Timestamp } from './timestamp';
+import { Timestamp } from '.';
 
 const timestamp = 1617549061000;
 

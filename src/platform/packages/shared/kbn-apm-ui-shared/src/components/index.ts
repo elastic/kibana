@@ -9,3 +9,4 @@
 
 export * from './duration';
 export * from './duration_distribution_chart';
+export * from './timestamp';
