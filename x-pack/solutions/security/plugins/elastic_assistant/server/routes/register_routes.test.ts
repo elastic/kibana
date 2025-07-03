@@ -52,7 +52,7 @@ import { deleteAttackDiscoverySchedulesRoute } from './attack_discovery/schedule
 import { findAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/find';
 import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/disable';
 import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/enable';
-import { ELASTICSEARCH_ELSER_INFERENCE_ID } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 jest.mock('./alert_summary/find_route');
 const findAlertSummaryRouteMock = findAlertSummaryRoute as jest.Mock;
@@ -136,7 +136,7 @@ const enableAttackDiscoverySchedulesRouteMock = enableAttackDiscoverySchedulesRo
 describe('registerRoutes', () => {
   const loggerMock = loggingSystemMock.createLogger();
   let server: ReturnType<typeof serverMock.create>;
-  const config = { elserInferenceId: ELASTICSEARCH_ELSER_INFERENCE_ID, responseTimeout: 60000 };
+  const config = { elserInferenceId: defaultInferenceEndpoints.ELSER, responseTimeout: 60000 };
 
   beforeEach(async () => {
     jest.clearAllMocks();
