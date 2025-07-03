@@ -70,7 +70,10 @@ export class ServiceManager {
     });
 
     const agents = this.services.agents.start({
+      security,
+      elasticsearch,
       getRunner,
+      toolsService: tools,
     });
 
     const runnerFactory = new RunnerFactoryImpl({
