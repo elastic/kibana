@@ -99,12 +99,8 @@ const getClient = async (deps: ApiKeyManagerDependencies) => {
     api_key: apiKey.apiKey,
   });
   const clusterClient = deps.core.elasticsearch.client.asScoped(fakeRequest);
-  const soClient = deps.core.savedObjects.getScopedClient(fakeRequest, {
-    includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, privilegeMonitoringTypeName],
-  });
   return {
     clusterClient,
-    soClient,
   };
 };
 
