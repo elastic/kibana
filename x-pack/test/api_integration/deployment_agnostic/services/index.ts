@@ -6,8 +6,8 @@
  */
 
 import { services as platformDeploymentAgnosticServices } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services';
+import { SupertestWithRoleScope } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/role_scoped_supertest';
 import { AlertingApiProvider } from './alerting_api';
-import { SupertestWithRoleScope } from './role_scoped_supertest';
 import { SloApiProvider } from './slo_api';
 import { SynthtraceProvider } from './synthtrace';
 import { ApmApiProvider } from './apm_api';

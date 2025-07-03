@@ -23,6 +23,7 @@ export const services = {
   ...deploymentAgnosticServices,
   supertestWithoutAuth: commonFunctionalServices.supertestWithoutAuth,
   samlAuth: commonFunctionalServices.samlAuth,
+  ml: apiIntegrationServices.ml,
   usageAPI: apiIntegrationServices.usageAPI,
   spaces: apiIntegrationServices.spaces,
   dataViewApi: DataViewApiProvider,
