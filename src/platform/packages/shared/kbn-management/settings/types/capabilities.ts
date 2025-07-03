@@ -10,10 +10,14 @@
 export interface SettingsCapabilities {
   spaceSettings: SettingCapability;
   globalSettings: SettingCapability;
-  solutionsFiltering: boolean;
+  filterSettings: FilterCapability;
 }
 
 interface SettingCapability {
   show: boolean;
   save: boolean;
+}
+
+interface FilterCapability {
+  bySolutionView: boolean;
 }
