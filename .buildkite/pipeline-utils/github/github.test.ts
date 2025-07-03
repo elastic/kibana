@@ -8,7 +8,6 @@
  */
 
 import { RestEndpointMethodTypes } from '@octokit/rest';
-import { expect } from 'chai';
 import { areChangesSkippable, doAnyChangesMatch } from './github';
 
 describe('github', () => {
@@ -29,7 +28,7 @@ describe('github', () => {
           getMockChangedFile('/package.json'),
         ]);
 
-        expect(match).to.eql(true);
+        expect(match).toEqual(true);
       });
 
       it('when all files match', async () => {
@@ -38,7 +37,7 @@ describe('github', () => {
           getMockChangedFile('/required/package.json'),
         ]);
 
-        expect(match).to.eql(true);
+        expect(match).toEqual(true);
       });
     });
 
@@ -46,7 +45,7 @@ describe('github', () => {
       it('when no files match with one file', async () => {
         const match = await doAnyChangesMatch(required, [getMockChangedFile('/index.js')]);
 
-        expect(match).to.eql(false);
+        expect(match).toEqual(false);
       });
 
       it('when no files match with multiple files', async () => {
@@ -55,7 +54,7 @@ describe('github', () => {
           getMockChangedFile('/package.json'),
         ]);
 
-        expect(match).to.eql(false);
+        expect(match).toEqual(false);
       });
     });
   });
@@ -71,7 +70,7 @@ describe('github', () => {
           getMockChangedFile('package.json'),
         ]);
 
-        expect(execute).to.eql(false);
+        expect(execute).toEqual(false);
       });
 
       it('when all files are non-skippable, non-required', async () => {
@@ -79,7 +78,7 @@ describe('github', () => {
           getMockChangedFile('package.json'),
         ]);
 
-        expect(execute).to.eql(false);
+        expect(execute).toEqual(false);
       });
 
       it('when a required file is present', async () => {
@@ -88,7 +87,7 @@ describe('github', () => {
           getMockChangedFile('docs/whatever.md'),
         ]);
 
-        expect(execute).to.eql(false);
+        expect(execute).toEqual(false);
       });
 
       it('when a required file is renamed', async () => {
@@ -96,7 +95,7 @@ describe('github', () => {
           getMockChangedFile('docs/skipme.md', 'docs/required.md'),
         ]);
 
-        expect(execute).to.eql(false);
+        expect(execute).toEqual(false);
       });
     });
 
@@ -107,7 +106,7 @@ describe('github', () => {
           getMockChangedFile('README.md'),
         ]);
 
-        expect(execute).to.eql(true);
+        expect(execute).toEqual(true);
       });
 
       it('when all files are skippable and no required files are passed in', async () => {
@@ -117,7 +116,7 @@ describe('github', () => {
           [getMockChangedFile('docs/index.js'), getMockChangedFile('README.md')]
         );
 
-        expect(execute).to.eql(true);
+        expect(execute).toEqual(true);
       });
 
       it('when renamed files new and old locations are skippable', async () => {
@@ -126,7 +125,7 @@ describe('github', () => {
           getMockChangedFile('README.md', 'DOCS.md'),
         ]);
 
-        expect(execute).to.eql(true);
+        expect(execute).toEqual(true);
       });
     });
   });

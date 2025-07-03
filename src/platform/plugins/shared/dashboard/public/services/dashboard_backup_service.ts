@@ -17,7 +17,6 @@ import { set } from '@kbn/safer-lodash-set';
 import { ViewMode } from '@kbn/presentation-publishing';
 import { coreServices, spacesService } from './kibana_services';
 import { DashboardState } from '../../common';
-import { DEFAULT_DASHBOARD_STATE } from '../dashboard_api/default_dashboard_state';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 const DASHBOARD_VIEWMODE_LOCAL_KEY = 'dashboardViewMode';
@@ -31,10 +30,14 @@ const getPanelsGetError = (message: string) =>
     values: { message },
   });
 
+export type DashboardBackupState = Partial<DashboardState> & {
+  viewMode?: ViewMode;
+};
+
 interface DashboardBackupServiceType {
   clearState: (id?: string) => void;
-  getState: (id: string | undefined) => Partial<DashboardState> | undefined;
-  setState: (id: string | undefined, dashboardState: Partial<DashboardState>) => void;
+  getState: (id: string | undefined) => DashboardBackupState | undefined;
+  setState: (id: string | undefined, backupState: DashboardBackupState) => void;
   getViewMode: () => ViewMode;
   storeViewMode: (viewMode: ViewMode) => void;
   getDashboardIdsWithUnsavedChanges: () => string[];
@@ -45,8 +48,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
   private activeSpaceId: string;
   private sessionStorage: Storage;
   private localStorage: Storage;
-
-  private oldDashboardsWithUnsavedChanges: string[] = [];
+  private prevDashboardIdsWithUnsavedChanges: string[] = [];
 
   constructor() {
     this.sessionStorage = new Storage(sessionStorage);
@@ -61,7 +63,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
   }
 
   public getViewMode = (): ViewMode => {
-    return this.localStorage.get(DASHBOARD_VIEWMODE_LOCAL_KEY) ?? DEFAULT_DASHBOARD_STATE.viewMode;
+    return this.localStorage.get(DASHBOARD_VIEWMODE_LOCAL_KEY) ?? 'view';
   };
 
   public storeViewMode = (viewMode: ViewMode) => {
@@ -80,12 +82,13 @@ class DashboardBackupService implements DashboardBackupServiceType {
 
   public clearState(id = DASHBOARD_PANELS_UNSAVED_ID) {
     try {
-      const dashboardStateStorage =
-        this.sessionStorage.get(DASHBOARD_STATE_SESSION_KEY)?.[this.activeSpaceId] ?? {};
-      if (dashboardStateStorage[id]) {
-        delete dashboardStateStorage[id];
+      const allSpaces = this.sessionStorage.get(DASHBOARD_STATE_SESSION_KEY) ?? {};
+      const dashboards = this.getDashboards();
+      if (dashboards[id]) {
+        delete dashboards[id];
         this.sessionStorage.set(DASHBOARD_STATE_SESSION_KEY, {
-          [this.activeSpaceId]: dashboardStateStorage,
+          ...allSpaces,
+          [this.activeSpaceId]: dashboards,
         });
       }
     } catch (e) {
@@ -101,9 +104,8 @@ class DashboardBackupService implements DashboardBackupServiceType {
 
   public getState(id = DASHBOARD_PANELS_UNSAVED_ID) {
     try {
-      return this.sessionStorage.get(DASHBOARD_STATE_SESSION_KEY)?.[this.activeSpaceId]?.[id] as
-        | Partial<DashboardState>
-        | undefined;
+      const dashboards = this.getDashboards();
+      return dashboards[id];
     } catch (e) {
       coreServices.notifications.toasts.addDanger({
         title: getPanelsGetError(e.message),
@@ -112,11 +114,11 @@ class DashboardBackupService implements DashboardBackupServiceType {
     }
   }
 
-  public setState(id = DASHBOARD_PANELS_UNSAVED_ID, newState: Partial<DashboardState>) {
+  public setState(id = DASHBOARD_PANELS_UNSAVED_ID, backupState: DashboardBackupState) {
     try {
-      const dashboardStateStorage = this.sessionStorage.get(DASHBOARD_STATE_SESSION_KEY) ?? {};
-      set(dashboardStateStorage, [this.activeSpaceId, id], newState);
-      this.sessionStorage.set(DASHBOARD_STATE_SESSION_KEY, dashboardStateStorage);
+      const allSpaces = this.sessionStorage.get(DASHBOARD_STATE_SESSION_KEY) ?? {};
+      set(allSpaces, [this.activeSpaceId, id], backupState);
+      this.sessionStorage.set(DASHBOARD_STATE_SESSION_KEY, allSpaces);
     } catch (e) {
       coreServices.notifications.toasts.addDanger({
         title: i18n.translate('dashboard.panelStorageError.setError', {
@@ -130,31 +132,22 @@ class DashboardBackupService implements DashboardBackupServiceType {
 
   public getDashboardIdsWithUnsavedChanges() {
     try {
-      const dashboardStatesInSpace =
-        this.sessionStorage.get(DASHBOARD_STATE_SESSION_KEY)?.[this.activeSpaceId] ?? {};
-      const dashboardsSet: Set<string> = new Set<string>();
+      const dashboards = this.getDashboards();
 
-      Object.keys(dashboardStatesInSpace).map((dashboardId) => {
-        if (
-          dashboardStatesInSpace[dashboardId].viewMode === 'edit' &&
-          Object.keys(dashboardStatesInSpace[dashboardId]).some(
-            (stateKey) => stateKey !== 'viewMode' && stateKey !== 'references'
-          )
-        ) {
-          dashboardsSet.add(dashboardId);
-        }
+      const dashboardIdsWithUnsavedChanges = Object.keys(dashboards).filter((dashboardId) => {
+        return hasUnsavedEdits(dashboards[dashboardId]);
       });
-      const dashboardsWithUnsavedChanges = [...dashboardsSet];
 
       /**
        * Because we are storing these unsaved dashboard IDs in React component state, we only want things to be re-rendered
        * if the **contents** change, not if the array reference changes
        */
-      if (!isEqual(this.oldDashboardsWithUnsavedChanges, dashboardsWithUnsavedChanges)) {
-        this.oldDashboardsWithUnsavedChanges = dashboardsWithUnsavedChanges;
+      if (isEqual(this.prevDashboardIdsWithUnsavedChanges, dashboardIdsWithUnsavedChanges)) {
+        return this.prevDashboardIdsWithUnsavedChanges;
       }
 
-      return this.oldDashboardsWithUnsavedChanges;
+      this.prevDashboardIdsWithUnsavedChanges = dashboardIdsWithUnsavedChanges;
+      return dashboardIdsWithUnsavedChanges;
     } catch (e) {
       coreServices.notifications.toasts.addDanger({
         title: getPanelsGetError(e.message),
@@ -165,8 +158,22 @@ class DashboardBackupService implements DashboardBackupServiceType {
   }
 
   public dashboardHasUnsavedEdits(id = DASHBOARD_PANELS_UNSAVED_ID) {
-    return this.getDashboardIdsWithUnsavedChanges().indexOf(id) !== -1;
+    const dashboards = this.getDashboards();
+    return hasUnsavedEdits(dashboards[id]);
   }
+
+  private getDashboards(): { [key: string]: DashboardBackupState } {
+    return this.sessionStorage.get(DASHBOARD_STATE_SESSION_KEY)?.[this.activeSpaceId] ?? {};
+  }
+}
+
+function hasUnsavedEdits(backupState?: DashboardBackupState) {
+  return backupState
+    ? backupState.viewMode === 'edit' &&
+        Object.keys(backupState).some(
+          (stateKey) => stateKey !== 'viewMode' && stateKey !== 'references'
+        )
+    : false;
 }
 
 let dashboardBackupService: DashboardBackupService;

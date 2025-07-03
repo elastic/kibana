@@ -11,13 +11,13 @@ import {
   ESQLCommandOption,
   Walker,
   isIdentifier,
+  isList,
   type ESQLAst,
   type ESQLAstItem,
   type ESQLCommand,
   type ESQLFunction,
   type ESQLSingleAstItem,
 } from '@kbn/esql-ast';
-import { isList } from '@kbn/esql-ast/src/ast/helpers';
 import { ESQLAstExpression } from '@kbn/esql-ast/src/types';
 import { FunctionDefinitionTypes } from '../definitions/types';
 import { EDITOR_MARKER } from './constants';

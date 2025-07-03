@@ -49,7 +49,7 @@ import type {
   VisitorOutput,
 } from './types';
 import { Builder } from '../builder';
-import { isProperNode } from '../ast/helpers';
+import { isProperNode } from '../ast/is';
 
 export class VisitorContext<
   Methods extends VisitorMethods = VisitorMethods,

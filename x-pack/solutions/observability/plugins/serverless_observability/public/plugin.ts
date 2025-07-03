@@ -46,6 +46,7 @@ export class ServerlessObservabilityPlugin
         return createNavigationTree({
           streamsAvailable: status === 'enabled',
           overviewAvailable: core.pricing.isFeatureAvailable('observability:complete_overview'),
+          isCasesAvailable: Boolean(setupDeps.cases),
         });
       })
     );

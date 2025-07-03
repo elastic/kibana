@@ -14,3 +14,5 @@ export type AgentProfileCreateRequest = Omit<AgentProfile, 'createdAt' | 'update
 
 export type AgentProfileUpdateRequest = Pick<AgentProfile, 'id'> &
   Partial<Pick<AgentProfile, 'name' | 'description' | 'customInstructions' | 'toolSelection'>>;
+
+export type AgentProfileDeleteRequest = Pick<AgentProfile, 'id'>;

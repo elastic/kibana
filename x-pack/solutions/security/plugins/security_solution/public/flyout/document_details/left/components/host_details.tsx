@@ -390,6 +390,8 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
               refetch={refetch}
               inspect={inspect}
               deleteQuery={deleteQuery}
+              scopeId={scopeId}
+              isFlyoutOpen={true}
             />
           )}
         </AnomalyTableProvider>

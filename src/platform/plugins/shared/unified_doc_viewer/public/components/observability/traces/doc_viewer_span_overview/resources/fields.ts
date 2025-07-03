@@ -28,3 +28,5 @@ export const spanFields = [
 ];
 
 export const spanTraceFields = [TRACE_ID_FIELD, TRANSACTION_NAME_FIELD];
+
+export const allSpanFields = [...spanFields, ...spanTraceFields];

@@ -811,7 +811,7 @@
         "label": "UnifiedDataTable",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<InternalUnifiedDataTableProps & ",
+          "React.ForwardRefExoticComponent<InternalUnifiedDataTableProps & Pick<",
           {
             "pluginId": "@kbn/restorable-state",
             "scope": "public",
@@ -827,7 +827,7 @@
             "section": "def-public.UnifiedDataTableRestorableState",
             "text": "UnifiedDataTableRestorableState"
           },
-          "> & React.RefAttributes<",
+          ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<",
           {
             "pluginId": "@kbn/restorable-state",
             "scope": "public",
@@ -1716,7 +1716,7 @@
         "label": "UnifiedDataTableProps",
         "description": [],
         "signature": [
-          "InternalUnifiedDataTableProps & ",
+          "InternalUnifiedDataTableProps & Pick<",
           {
             "pluginId": "@kbn/restorable-state",
             "scope": "public",
@@ -1732,7 +1732,7 @@
             "section": "def-public.UnifiedDataTableRestorableState",
             "text": "UnifiedDataTableRestorableState"
           },
-          "> & React.RefAttributes<",
+          ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<",
           {
             "pluginId": "@kbn/restorable-state",
             "scope": "public",

@@ -22,6 +22,7 @@ test('ScheduledReport should return correctly formatted outputs', () => {
     kibanaId: 'instance-uuid',
     kibanaName: 'kibana',
     queueTimeout: 120000,
+    spaceId: 'a-space',
     scheduledReport: {
       id: 'report-so-id-111',
       attributes: {
@@ -81,6 +82,7 @@ test('ScheduledReport should return correctly formatted outputs', () => {
       version: '8.0.0',
     },
     scheduled_report_id: 'report-so-id-111',
+    space_id: 'a-space',
     status: 'processing',
     started_at: expect.any(String),
     process_expiration: expect.any(String),
@@ -103,6 +105,7 @@ test('ScheduledReport should return correctly formatted outputs', () => {
     status: 'processing',
     attempts: 1,
     started_at: expect.any(String),
+    space_id: 'a-space',
     migration_version: '7.14.0',
     output: {},
     queue_time_ms: expect.any(Number),
@@ -140,6 +143,7 @@ test('ScheduledReport should throw an error if report payload is malformed', () 
         references: [],
         type: 'scheduled-report',
       },
+      spaceId: 'another-space',
     });
   };
   expect(createInstance).toThrowErrorMatchingInlineSnapshot(
@@ -154,6 +158,7 @@ test('ScheduledReport should throw an error if scheduled_report saved object is 
       kibanaId: 'instance-uuid',
       kibanaName: 'kibana',
       queueTimeout: 120000,
+      spaceId: 'another-space',
       // @ts-expect-error - missing id
       scheduledReport: {
         attributes: {

@@ -44,5 +44,6 @@
     "@kbn/datemath",
     "@kbn/alerts-ui-shared",
     "@kbn/deeplinks-security",
+    "@kbn/inference-common",
   ]
 }

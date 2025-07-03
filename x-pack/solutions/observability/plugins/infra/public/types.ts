@@ -84,7 +84,7 @@ export interface InfraClientSetupDeps {
 }
 
 export interface InfraClientStartDeps {
-  cases: CasesPublicStart;
+  cases?: CasesPublicStart;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;

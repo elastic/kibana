@@ -8,7 +8,6 @@
  */
 
 import React, {
-  memo,
   useCallback,
   useState,
   forwardRef,
@@ -91,7 +90,7 @@ const InternalUnifiedFieldListSidebarContainer: React.FC<
 };
 
 const UnifiedFieldListSidebarContainerWithRestorableState = withRestorableState(
-  memo(InternalUnifiedFieldListSidebarContainer)
+  InternalUnifiedFieldListSidebarContainer
 );
 
 type UnifiedFieldListSidebarContainerPropsWithRestorableState = ComponentProps<

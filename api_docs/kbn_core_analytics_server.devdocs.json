@@ -620,42 +620,6 @@
                 "path": "src/core/packages/root/server-internal/src/events/kibana_started.ts"
               },
               {
-                "plugin": "@kbn/cloud",
-                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
-              },
-              {
-                "plugin": "@kbn/cloud",
-                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
-              },
-              {
-                "plugin": "@kbn/cloud",
-                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
-              },
-              {
-                "plugin": "@kbn/cloud",
-                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
-              },
-              {
-                "plugin": "@kbn/cloud",
-                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
-              },
-              {
-                "plugin": "@kbn/cloud",
-                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
-              },
-              {
-                "plugin": "@kbn/cloud",
-                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
-              },
-              {
-                "plugin": "@kbn/cloud",
-                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
-              },
-              {
-                "plugin": "@kbn/cloud",
-                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
-              },
-              {
                 "plugin": "@kbn/shared-ux-chrome-navigation",
                 "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/analytics/event_tracker.ts"
               },
@@ -826,6 +790,42 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/lib/telemetry/sender.ts"
+              },
+              {
+                "plugin": "@kbn/cloud",
+                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
+              },
+              {
+                "plugin": "@kbn/cloud",
+                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
+              },
+              {
+                "plugin": "@kbn/cloud",
+                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
+              },
+              {
+                "plugin": "@kbn/cloud",
+                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
+              },
+              {
+                "plugin": "@kbn/cloud",
+                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
+              },
+              {
+                "plugin": "@kbn/cloud",
+                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
+              },
+              {
+                "plugin": "@kbn/cloud",
+                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
+              },
+              {
+                "plugin": "@kbn/cloud",
+                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
+              },
+              {
+                "plugin": "@kbn/cloud",
+                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
               },
               {
                 "plugin": "observabilityAIAssistant",

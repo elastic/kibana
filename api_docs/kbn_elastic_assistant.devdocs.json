@@ -1646,6 +1646,47 @@
           },
           {
             "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.AssistantTelemetry.reportAssistantStarterPrompt",
+            "type": "Function",
+            "tags": [],
+            "label": "reportAssistantStarterPrompt",
+            "description": [],
+            "signature": [
+              "(params: { promptTitle: string; }) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/elastic-assistant",
+                "id": "def-public.AssistantTelemetry.reportAssistantStarterPrompt.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/elastic-assistant",
+                    "id": "def-public.AssistantTelemetry.reportAssistantStarterPrompt.$1.promptTitle",
+                    "type": "string",
+                    "tags": [],
+                    "label": "promptTitle",
+                    "description": [],
+                    "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
             "id": "def-public.AssistantTelemetry.reportAssistantSettingToggled",
             "type": "Function",
             "tags": [],

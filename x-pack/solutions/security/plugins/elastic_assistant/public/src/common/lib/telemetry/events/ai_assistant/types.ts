@@ -11,6 +11,7 @@ export enum AssistantEventTypes {
   AssistantInvoked = 'Assistant Invoked',
   AssistantMessageSent = 'Assistant Message Sent',
   AssistantQuickPrompt = 'Assistant Quick Prompt',
+  AssistantStarterPrompt = 'Assistant Starter Prompt',
   AssistantSettingToggled = 'Assistant Setting Toggled',
 }
 
@@ -30,6 +31,10 @@ export interface ReportAssistantQuickPromptParams {
   promptTitle: string;
 }
 
+export interface ReportAssistantStarterPromptParams {
+  promptTitle: string;
+}
+
 export interface ReportAssistantSettingToggledParams {
   alertsCountUpdated?: boolean;
   assistantStreamingEnabled?: boolean;
@@ -39,6 +44,7 @@ export interface AssistantTelemetryEventsMap {
   [AssistantEventTypes.AssistantInvoked]: ReportAssistantInvokedParams;
   [AssistantEventTypes.AssistantMessageSent]: ReportAssistantMessageSentParams;
   [AssistantEventTypes.AssistantQuickPrompt]: ReportAssistantQuickPromptParams;
+  [AssistantEventTypes.AssistantStarterPrompt]: ReportAssistantStarterPromptParams;
   [AssistantEventTypes.AssistantSettingToggled]: ReportAssistantSettingToggledParams;
 }
 

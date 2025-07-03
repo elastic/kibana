@@ -42,7 +42,7 @@ export const runChatAgent: RunChatAgentFn = async (
     nextInput,
     previousRounds: conversation,
   });
-  const agentGraph = await createAgentGraph({
+  const agentGraph = createAgentGraph({
     logger,
     chatModel: model.chatModel,
     tools: langchainTools,
@@ -73,8 +73,11 @@ export const runChatAgent: RunChatAgentFn = async (
     shareReplay()
   );
 
-  events$.subscribe((event) => {
-    events.emit(event);
+  events$.subscribe({
+    next: (event) => events.emit(event),
+    error: () => {
+      // error will be handled by function return, we just need to trap here
+    },
   });
 
   const round = await extractRound(events$);

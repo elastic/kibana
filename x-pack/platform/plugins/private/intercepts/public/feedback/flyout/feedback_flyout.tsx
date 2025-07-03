@@ -68,7 +68,7 @@ export const FeedbackFlyout = ({ closeFlyout, getCurrentUser, getLicense }: Prop
     margin-right: -${euiTheme.size.l};
   `;
 
-  const Seperator = () => <span css={seperatorCss} />;
+  const Seperator = () => <span css={seperatorCss} aria-hidden="true" />;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="feedbackFlyout" css={flyoutCss}>

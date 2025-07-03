@@ -97,6 +97,7 @@ export function SloManagementTable() {
       description: i18n.translate('xpack.slo.item.actions.clone', {
         defaultMessage: 'Clone',
       }),
+      enabled: () => !!permissions?.hasAllWriteRequested,
       'data-test-subj': 'sloActionsClone',
       onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'clone' }),
     },
@@ -299,7 +300,7 @@ export function SloManagementTable() {
         pagination={pagination}
         onChange={onTableChange}
         loading={isLoading}
-        selection={selection}
+        selection={permissions?.hasAllWriteRequested ? selection : undefined}
       />
     </EuiPanel>
   );

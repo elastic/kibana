@@ -16,6 +16,7 @@ import {
   EuiTextColor,
   EuiToolTip,
   useResizeObserver,
+  euiFontSize,
   type UseEuiTheme,
 } from '@elastic/eui';
 import React, { Fragment, useCallback, useState } from 'react';
@@ -200,8 +201,11 @@ export const TableFieldValue = ({
 };
 
 const componentStyles = {
-  docViewerValue: ({ euiTheme }: UseEuiTheme) =>
-    css({
+  docViewerValue: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+    const { fontSize } = euiFontSize(themeContext, 's');
+
+    return css({
       wordBreak: 'break-all',
       wordWrap: 'break-word',
       whiteSpace: 'pre-wrap',
@@ -209,9 +213,10 @@ const componentStyles = {
       verticalAlign: 'top',
 
       '.euiDataGridRowCell__popover &': {
-        fontSize: euiTheme.font.scale.s,
+        fontSize,
       },
-    }),
+    });
+  },
   docViewerValueHighlighted: ({ euiTheme }: UseEuiTheme) =>
     css({
       fontWeight: euiTheme.font.weight.bold,
