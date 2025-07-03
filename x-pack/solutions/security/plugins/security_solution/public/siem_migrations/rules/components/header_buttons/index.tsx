@@ -70,11 +70,8 @@ export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
             inputPopoverProps={{
               css: css`
                 width: 400px;
-                & .euiComboBox__inputWrap {
+                & .euiComboBox__inputWrap div {
                   width: 400px;
-                  & div {
-                    width: 400px;
-                  }
                 }
               `,
             }}
