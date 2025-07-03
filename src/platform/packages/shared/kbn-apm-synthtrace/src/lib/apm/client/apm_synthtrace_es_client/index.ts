@@ -10,6 +10,7 @@
 import { Client, estypes } from '@elastic/elasticsearch';
 import { ApmFields, ApmOtelFields, ApmSynthtracePipelines } from '@kbn/apm-synthtrace-client';
 import { ValuesType } from 'utility-types';
+import { PipelineOptions } from '../../../../cli/utils/get_clients';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../../../shared/base_client';
 import { Logger } from '../../../utils/create_logger';
 import { apmPipeline } from './apm_pipeline';
@@ -26,27 +27,28 @@ export enum ComponentTemplateName {
   TracesApmSampled = 'traces-apm.sampled@custom',
 }
 
-interface Pipeline {
-  includeSerialization?: boolean;
+interface ApmPipelineOptions extends PipelineOptions {
   versionOverride?: string;
 }
 
 export interface ApmSynthtraceEsClientOptions extends Omit<SynthtraceEsClientOptions, 'pipeline'> {
-  version: string;
+  version?: string;
 }
 
 export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields | ApmOtelFields> {
-  public readonly version: string;
-
   constructor(
-    options: { client: Client; logger: Logger; pipeline?: Pipeline } & ApmSynthtraceEsClientOptions
+    private readonly options: {
+      client: Client;
+      logger: Logger;
+    } & ApmSynthtraceEsClientOptions &
+      PipelineOptions
   ) {
     super({
       ...options,
       pipeline: apmPipeline(
         options.logger,
-        options.pipeline?.versionOverride ?? options.version,
-        options.pipeline?.includeSerialization
+        options.version ?? 'latest',
+        options.includePipelineSerialization
       ),
     });
     this.dataStreams = [
@@ -57,7 +59,32 @@ export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields | ApmOte
       'traces-*.otel*',
       'logs-*.otel*',
     ];
-    this.version = options.version;
+  }
+
+  async initializePackage() {
+    if (!this.fleetClient) {
+      throw new Error(
+        'ApmSynthtraceEsClient requires a FleetClient to be initialized. Please provide a valid Kibana client.'
+      );
+    }
+
+    const latestVersion = await this.fleetClient.fetchLatestPackageVersion('apm');
+    await this.fleetClient.installPackage('apm', latestVersion);
+
+    if (latestVersion !== this.options.version) {
+      this.setPipeline(
+        apmPipeline(this.options.logger, latestVersion, this.options.includePipelineSerialization)
+      );
+    }
+  }
+
+  async uninstallPackage() {
+    if (!this.fleetClient) {
+      throw new Error(
+        'ApmSynthtraceEsClient requires a FleetClient to be initialized. Please provide a valid Kibana client.'
+      );
+    }
+    await this.fleetClient.uninstallPackage('apm');
   }
 
   async updateComponentTemplate(
@@ -88,27 +115,24 @@ export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields | ApmOte
 
   resolvePipelineType(
     pipeline: ApmSynthtracePipelines,
-    options: {
-      includeSerialization?: boolean;
-      versionOverride?: string;
-    } = { includeSerialization: true }
+    options: ApmPipelineOptions = { includePipelineSerialization: true }
   ) {
     switch (pipeline) {
       case 'otel': {
-        return otelToApmPipeline(this.logger, options.includeSerialization);
+        return otelToApmPipeline(this.logger, options.includePipelineSerialization);
       }
       case 'apmToOtel': {
         return apmToOtelPipeline(
           this.logger,
-          options.versionOverride ?? this.version,
-          options.includeSerialization
+          options.versionOverride ?? this.options.version ?? 'latest',
+          options.includePipelineSerialization
         );
       }
       default: {
         return apmPipeline(
           this.logger,
-          options.versionOverride ?? this.version,
-          options.includeSerialization
+          options.versionOverride ?? this.options.version ?? 'latest',
+          options.includePipelineSerialization
         );
       }
     }

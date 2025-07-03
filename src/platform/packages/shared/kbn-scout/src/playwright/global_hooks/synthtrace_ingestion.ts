@@ -19,6 +19,12 @@ import type {
   SynthtraceGenerator,
 } from '@kbn/apm-synthtrace-client';
 import {
+  LogLevel,
+  SynthtraceClientTypes,
+  createLogger,
+  getSynthtraceClients,
+} from '@kbn/apm-synthtrace';
+import {
   getLogger,
   createScoutConfig,
   measurePerformanceAsync,
@@ -27,10 +33,6 @@ import {
   EsClient,
 } from '../../common';
 import { ScoutTestOptions } from '../types';
-import {
-  getApmSynthtraceEsClient,
-  getInfraSynthtraceEsClient,
-} from '../../common/services/synthtrace';
 
 export type SynthtraceEvents<T extends Fields> = SynthtraceGenerator<T> | Array<Serializable<T>>;
 
@@ -39,26 +41,44 @@ interface SynthtraceIngestionData {
   infra: Array<SynthtraceEvents<InfraDocument>>;
 }
 
-const getSynthtraceClient = (
-  key: keyof SynthtraceIngestionData,
+const INGESTION_CLIENT_MAP: Record<string, SynthtraceClientTypes> = {
+  apm: 'apmEsClient',
+  infra: 'infraEsClient',
+};
+
+const getSynthtraceClient = async (
+  key: SynthtraceClientTypes,
   esClient: EsClient,
   kbnUrl: string,
   auth: { username: string; password: string },
   log: ScoutLogger
 ) => {
-  switch (key) {
-    case 'apm':
-      const kibanaUrl = new URL(kbnUrl);
-      const kibanaUrlWithAuth = Url.format({
-        protocol: kibanaUrl.protocol,
-        hostname: kibanaUrl.hostname,
-        port: kibanaUrl.port,
-        auth: `${auth.username}:${auth.password}`,
-      });
-      return getApmSynthtraceEsClient(esClient, kibanaUrlWithAuth, log);
-    case 'infra':
-      return getInfraSynthtraceEsClient(esClient, kbnUrl, auth, log);
-  }
+  const kibanaUrl = new URL(kbnUrl);
+  const kibanaUrlWithAuth = Url.format({
+    protocol: kibanaUrl.protocol,
+    hostname: kibanaUrl.hostname,
+    port: kibanaUrl.port,
+    auth: `${auth.username}:${auth.password}`,
+  });
+
+  const logger = createLogger(LogLevel.info);
+
+  const clients = await getSynthtraceClients({
+    logger,
+    options: {
+      client: esClient,
+      kibana: {
+        target: kibanaUrlWithAuth,
+      },
+      logger,
+      refreshAfterIndex: true,
+      includePipelineSerialization: false,
+    },
+    skipBootstrap: false,
+    synthClients: key,
+  });
+
+  return clients[key];
 };
 
 /**
@@ -90,7 +110,13 @@ export async function ingestSynthtraceDataHook(config: FullConfig, data: Synthtr
     for (const key of Object.keys(data)) {
       const typedKey = key as keyof SynthtraceIngestionData;
       if (data[typedKey].length > 0) {
-        const client = await getSynthtraceClient(typedKey, esClient, kbnUrl, scoutConfig.auth, log);
+        const client = await getSynthtraceClient(
+          INGESTION_CLIENT_MAP[key],
+          esClient,
+          kbnUrl,
+          scoutConfig.auth,
+          log
+        );
 
         log.debug(`[setup] ingesting ${key} synthtrace data`);
 

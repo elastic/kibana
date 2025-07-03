@@ -18,12 +18,8 @@ import type {
 } from '@kbn/apm-synthtrace-client';
 import Url from 'url';
 import type { SynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/shared/base_client';
-import {
-  getApmSynthtraceEsClient,
-  getInfraSynthtraceEsClient,
-  getLogsSynthtraceEsClient,
-} from '../../../common/services/synthtrace';
-import { coreWorkerFixtures } from './core_fixtures';
+import { getSynthtraceClient } from '../../../common/services/synthtrace';
+import { KibanaUrl, ScoutTestConfig, coreWorkerFixtures } from './core_fixtures';
 
 interface SynthtraceFixtureEsClient<TFields extends Fields> {
   index: (events: SynthtraceGenerator<TFields>) => Promise<void>;
@@ -49,23 +45,24 @@ const useSynthtraceClient = async <TFields extends Fields>(
   await use({ index, clean });
 };
 
+const buildUrlWithAuth = (kbnUrl: KibanaUrl, config: ScoutTestConfig) => {
+  const { username, password } = config.auth;
+  const kibanaUrl = new URL(kbnUrl.get());
+  return Url.format({
+    protocol: kibanaUrl.protocol,
+    hostname: kibanaUrl.hostname,
+    port: kibanaUrl.port,
+    auth: `${username}:${password}`,
+  });
+};
+
 export const synthtraceFixture = coreWorkerFixtures.extend<{}, SynthtraceFixture>({
   apmSynthtraceEsClient: [
     async ({ esClient, config, kbnUrl, log }, use) => {
-      const { username, password } = config.auth;
-      const kibanaUrl = new URL(kbnUrl.get());
-      const kibanaUrlWithAuth = Url.format({
-        protocol: kibanaUrl.protocol,
-        hostname: kibanaUrl.hostname,
-        port: kibanaUrl.port,
-        auth: `${username}:${password}`,
-      });
-
-      const apmSynthtraceEsClient = await getApmSynthtraceEsClient(
+      const apmSynthtraceEsClient = await getSynthtraceClient('apmEsClient', {
         esClient,
-        kibanaUrlWithAuth,
-        log
-      );
+        kbnUrl: buildUrlWithAuth(kbnUrl, config),
+      });
 
       await useSynthtraceClient<ApmFields>(apmSynthtraceEsClient, use);
     },
@@ -73,12 +70,10 @@ export const synthtraceFixture = coreWorkerFixtures.extend<{}, SynthtraceFixture
   ],
   infraSynthtraceEsClient: [
     async ({ esClient, config, kbnUrl, log }, use) => {
-      const infraSynthtraceEsClient = await getInfraSynthtraceEsClient(
+      const infraSynthtraceEsClient = await getSynthtraceClient('infraEsClient', {
         esClient,
-        kbnUrl.get(),
-        config.auth,
-        log
-      );
+        kbnUrl: buildUrlWithAuth(kbnUrl, config),
+      });
 
       await useSynthtraceClient<InfraDocument>(infraSynthtraceEsClient, use);
     },
@@ -86,7 +81,9 @@ export const synthtraceFixture = coreWorkerFixtures.extend<{}, SynthtraceFixture
   ],
   logsSynthtraceEsClient: [
     async ({ esClient, log }, use) => {
-      const logsSynthtraceEsClient = await getLogsSynthtraceEsClient(esClient, log);
+      const logsSynthtraceEsClient = await getSynthtraceClient('logsEsClient', {
+        esClient,
+      });
 
       await useSynthtraceClient<LogDocument>(logsSynthtraceEsClient, use);
     },

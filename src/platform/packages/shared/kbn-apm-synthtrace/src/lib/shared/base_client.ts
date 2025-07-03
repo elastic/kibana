@@ -20,10 +20,13 @@ import { isGeneratorObject } from 'util/types';
 import { Logger } from '../utils/create_logger';
 import { sequential } from '../utils/stream_utils';
 import { KibanaClient } from './base_kibana_client';
+import { getKibanaClient } from '../../cli/utils/get_kibana_client';
+import { FleetClient } from './fleet_client';
 
 export interface SynthtraceEsClientOptions {
   client: Client;
-  kibana?: KibanaClient;
+  kibana?: { target: string; username?: string; password?: string; logger?: Logger } | KibanaClient;
+  fleetClient?: FleetClient;
   logger: Logger;
   concurrency?: number;
   refreshAfterIndex?: boolean;
@@ -34,7 +37,8 @@ type MaybeArray<T> = T | T[];
 
 export class SynthtraceEsClient<TFields extends Fields> {
   protected readonly client: Client;
-  protected readonly kibana?: KibanaClient;
+  protected readonly kibanaClient?: KibanaClient;
+  protected readonly fleetClient?: FleetClient;
   protected readonly logger: Logger;
 
   private readonly concurrency: number;
@@ -46,11 +50,34 @@ export class SynthtraceEsClient<TFields extends Fields> {
 
   constructor(options: SynthtraceEsClientOptions) {
     this.client = options.client;
-    this.kibana = options.kibana;
     this.logger = options.logger;
     this.concurrency = options.concurrency ?? 1;
     this.refreshAfterIndex = options.refreshAfterIndex ?? false;
     this.pipelineCallback = options.pipeline;
+
+    this.kibanaClient = this.initKibanaClient(options.kibana);
+    if (this.kibanaClient) {
+      this.fleetClient = new FleetClient(this.kibanaClient, this.logger);
+    }
+  }
+
+  private initKibanaClient(input?: KibanaClient | { target: string }): KibanaClient | undefined {
+    if (!input) {
+      return undefined;
+    }
+
+    if (isKibanaClientConfig(input)) {
+      return getKibanaClient({ target: input.target, logger: this.logger });
+    }
+
+    return input;
+  }
+
+  protected get kibana(): KibanaClient {
+    if (!this.kibanaClient) {
+      throw new Error('Kibana client is not initialized');
+    }
+    return this.kibanaClient;
   }
 
   async clean() {
@@ -190,4 +217,10 @@ export class SynthtraceEsClient<TFields extends Fields> {
   getAllIndices() {
     return this.dataStreams.concat(this.indices);
   }
+}
+
+function isKibanaClientConfig(
+  input: KibanaClient | { target: string }
+): input is { target: string } {
+  return typeof input === 'object' && 'target' in input;
 }

@@ -10,7 +10,7 @@
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { setIdGeneratorStrategy } from '@kbn/apm-synthtrace-client';
 import { createLogger } from '../../lib/utils/create_logger';
-import { getClients } from './get_clients';
+import { getSynthtraceClients } from './get_clients';
 import { getKibanaClient } from './get_kibana_client';
 import { getServiceUrls } from './get_service_urls';
 import { RunOptions } from './parse_run_cli_flags';
@@ -37,7 +37,7 @@ export async function bootstrap({
     requestTimeout: 30_000,
   });
 
-  const clients = await getClients({
+  const clients = await getSynthtraceClients({
     logger,
     packageVersion: runOptions['assume-package-version'],
     options: {

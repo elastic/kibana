@@ -8,95 +8,40 @@
  */
 
 import {
-  ApmSynthtraceEsClient,
-  ApmSynthtraceKibanaClient,
-  InfraSynthtraceEsClient,
-  InfraSynthtraceKibanaClient,
   LogLevel,
-  LogsSynthtraceEsClient,
+  SynthtraceClientTypes,
   createLogger,
+  getSynthtraceClients,
 } from '@kbn/apm-synthtrace';
-import { ScoutLogger } from './logger';
-import { EsClient } from '../../types';
+import { Client } from '@elastic/elasticsearch';
 
-let apmSynthtraceEsClientInstance: ApmSynthtraceEsClient | undefined;
-let infraSynthtraceEsClientInstance: InfraSynthtraceEsClient | undefined;
-let logsSynthtraceEsClientInstance: LogsSynthtraceEsClient | undefined;
+export interface SynthtraceClientOptions {
+  kbnUrl?: string;
+
+  esClient: Client;
+}
+
 const logger = createLogger(LogLevel.info);
 
-export async function getApmSynthtraceEsClient(
-  esClient: EsClient,
-  target: string,
-  log: ScoutLogger
+export async function getSynthtraceClient(
+  type: SynthtraceClientTypes,
+  { esClient, kbnUrl }: SynthtraceClientOptions
 ) {
-  if (!apmSynthtraceEsClientInstance) {
-    const apmSynthtraceKibanaClient = new ApmSynthtraceKibanaClient({
-      logger,
-      target,
-    });
-
-    const version = await apmSynthtraceKibanaClient.fetchLatestApmPackageVersion();
-    await apmSynthtraceKibanaClient.installApmPackage(version);
-    apmSynthtraceEsClientInstance = new ApmSynthtraceEsClient({
+  const client = await getSynthtraceClients({
+    options: {
       client: esClient,
+      kibana: kbnUrl
+        ? {
+            target: kbnUrl,
+          }
+        : undefined,
       logger,
       refreshAfterIndex: true,
-      version,
-      pipeline: {
-        includeSerialization: false,
-      },
-    });
+      includePipelineSerialization: false,
+    },
+    synthClients: type,
+    skipBootstrap: false,
+  });
 
-    log.serviceLoaded('apmSynthtraceClient');
-  }
-
-  return apmSynthtraceEsClientInstance;
-}
-
-export async function getInfraSynthtraceEsClient(
-  esClient: EsClient,
-  kbnUrl: string,
-  auth: { username: string; password: string },
-  log: ScoutLogger
-) {
-  if (!infraSynthtraceEsClientInstance) {
-    const infraSynthtraceKibanaClient = new InfraSynthtraceKibanaClient({
-      logger,
-      target: kbnUrl,
-      username: auth.username,
-      password: auth.password,
-    });
-
-    const version = await infraSynthtraceKibanaClient.fetchLatestSystemPackageVersion();
-    await infraSynthtraceKibanaClient.installSystemPackage(version);
-    infraSynthtraceEsClientInstance = new InfraSynthtraceEsClient({
-      client: esClient,
-      logger,
-      refreshAfterIndex: true,
-      pipeline: {
-        includeSerialization: false,
-      },
-    });
-
-    log.serviceLoaded('infraSynthtraceClient');
-  }
-
-  return infraSynthtraceEsClientInstance;
-}
-
-export async function getLogsSynthtraceEsClient(esClient: EsClient, log: ScoutLogger) {
-  if (!logsSynthtraceEsClientInstance) {
-    logsSynthtraceEsClientInstance = new LogsSynthtraceEsClient({
-      client: esClient,
-      logger,
-      refreshAfterIndex: true,
-      pipeline: {
-        includeSerialization: false,
-      },
-    });
-
-    log.serviceLoaded('logsSynthtraceClient');
-  }
-
-  return logsSynthtraceEsClientInstance;
+  return client[type];
 }

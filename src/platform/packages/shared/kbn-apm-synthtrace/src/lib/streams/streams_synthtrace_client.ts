@@ -31,7 +31,7 @@ export class StreamsSynthtraceClient extends SynthtraceEsClient<StreamsDocument>
     streamName: string,
     request: { stream: { name: string }; if: Condition }
   ): Promise<{ acknowledged: true }> {
-    return this.kibana!.fetch(`/api/streams/${streamName}/_fork`, {
+    return this.kibana.fetch(`/api/streams/${streamName}/_fork`, {
       method: 'POST',
       headers: {
         ...internalKibanaHeaders(),
@@ -44,7 +44,7 @@ export class StreamsSynthtraceClient extends SynthtraceEsClient<StreamsDocument>
     streamName: string,
     request: Streams.all.UpsertRequest
   ): Promise<{ acknowledged: true; result: 'created' | 'updated' }> {
-    return this.kibana!.fetch(`/api/streams/${streamName}`, {
+    return this.kibana.fetch(`/api/streams/${streamName}`, {
       method: 'PUT',
       headers: {
         ...internalKibanaHeaders(),
@@ -63,7 +63,7 @@ export class StreamsSynthtraceClient extends SynthtraceEsClient<StreamsDocument>
   }
 
   async disable() {
-    await this.kibana!.fetch('/api/streams/_disable', {
+    await this.kibana.fetch('/api/streams/_disable', {
       method: 'POST',
       timeout: 5 * 60 * 1000,
       headers: {

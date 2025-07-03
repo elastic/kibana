@@ -7,73 +7,109 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Required } from 'utility-types';
 import { Client } from '@elastic/elasticsearch';
+import { castArray } from 'lodash';
 import { ApmSynthtraceEsClient } from '../../lib/apm/client/apm_synthtrace_es_client';
-import { ApmSynthtraceKibanaClient } from '../../lib/apm/client/apm_synthtrace_kibana_client';
 import { InfraSynthtraceEsClient } from '../../lib/infra/infra_synthtrace_es_client';
 import { LogsSynthtraceEsClient } from '../../lib/logs/logs_synthtrace_es_client';
 import { SynthtraceEsClientOptions } from '../../lib/shared/base_client';
 import { StreamsSynthtraceClient } from '../../lib/streams/streams_synthtrace_client';
 import { SyntheticsSynthtraceEsClient } from '../../lib/synthetics/synthetics_synthtrace_es_client';
-import { Logger } from '../../lib/utils/create_logger';
 
-export interface SynthtraceClients {
+export interface PipelineOptions {
+  includePipelineSerialization?: boolean;
+}
+
+type DefaultSynthtraceClients = [
+  'apmEsClient',
+  'infraEsClient',
+  'logsEsClient',
+  'syntheticsEsClient',
+  'streamsClient'
+];
+
+interface SynthtraceClientInstanceMap {
   apmEsClient: ApmSynthtraceEsClient;
   infraEsClient: InfraSynthtraceEsClient;
   logsEsClient: LogsSynthtraceEsClient;
-  streamsClient: StreamsSynthtraceClient;
   syntheticsEsClient: SyntheticsSynthtraceEsClient;
+  streamsClient: StreamsSynthtraceClient;
+}
+
+export type SynthtraceClientTypes = DefaultSynthtraceClients[number];
+
+export interface SynthtraceClients extends SynthtraceClientInstanceMap {
   esClient: Client;
 }
 
-export async function getClients({
-  logger,
-  options,
-  packageVersion,
-  skipBootstrap,
-}: {
-  logger: Logger;
-  options: Required<Omit<SynthtraceEsClientOptions, 'pipeline'>, 'kibana'>;
+interface GetClientsOptions<K extends SynthtraceClientTypes = SynthtraceClientTypes> {
+  options: Omit<SynthtraceEsClientOptions, 'pipeline'> & PipelineOptions;
   packageVersion?: string;
   skipBootstrap?: boolean;
-}): Promise<SynthtraceClients> {
-  const apmKibanaClient = new ApmSynthtraceKibanaClient({
-    logger,
-    kibanaClient: options.kibana,
-  });
+  synthClients?: K | K[];
+}
 
-  let version = packageVersion;
+export type GetClientsReturn<K extends SynthtraceClientTypes = SynthtraceClientTypes> = Pick<
+  SynthtraceClientInstanceMap,
+  K
+> & {
+  esClient: Client;
+};
 
-  if (!version) {
-    version = await apmKibanaClient.fetchLatestApmPackageVersion();
-    if (!skipBootstrap) {
-      await apmKibanaClient.installApmPackage(version);
-    }
-  } else if (version === 'latest') {
-    version = await apmKibanaClient.fetchLatestApmPackageVersion();
-  }
+export async function getSynthtraceClients<
+  const K extends SynthtraceClientTypes = SynthtraceClientTypes
+>(opts: GetClientsOptions<K>): Promise<GetClientsReturn<K>> {
+  const {
+    options,
+    packageVersion,
+    skipBootstrap = false,
+    synthClients = [
+      'apmEsClient',
+      'infraEsClient',
+      'logsEsClient',
+      'syntheticsEsClient',
+      'streamsClient',
+    ],
+  } = opts;
 
-  logger.debug(`Using package version: ${version}`);
+  const version = packageVersion;
 
-  const apmEsClient = new ApmSynthtraceEsClient({
-    ...options,
-    version,
-  });
-
-  const logsEsClient = new LogsSynthtraceEsClient(options);
-  const infraEsClient = new InfraSynthtraceEsClient(options);
-
-  const syntheticsEsClient = new SyntheticsSynthtraceEsClient(options);
-
-  const streamsClient = new StreamsSynthtraceClient(options);
-
-  return {
-    apmEsClient,
-    infraEsClient,
-    logsEsClient,
-    streamsClient,
-    syntheticsEsClient,
+  const result = {
     esClient: options.client,
+  } as GetClientsReturn<K>;
+
+  const factories: Record<
+    SynthtraceClientTypes,
+    () => Promise<SynthtraceClientInstanceMap[SynthtraceClientTypes]>
+  > = {
+    apmEsClient: async () => {
+      const client = new ApmSynthtraceEsClient({ ...options, version });
+      if (!skipBootstrap) {
+        await client.initializePackage();
+      }
+      return client;
+    },
+    infraEsClient: async () => {
+      const client = new InfraSynthtraceEsClient(options);
+      if (!skipBootstrap) {
+        await client.initializePackage();
+      }
+      return client;
+    },
+    logsEsClient: async () => Promise.resolve(new LogsSynthtraceEsClient(options)),
+    syntheticsEsClient: async () => Promise.resolve(new SyntheticsSynthtraceEsClient(options)),
+    streamsClient: async () => {
+      if (!options.kibana) {
+        throw new Error('Kibana client is required for StreamsSynthtraceClient');
+      }
+
+      return Promise.resolve(new StreamsSynthtraceClient({ ...options, kibana: options.kibana }));
+    },
   };
+
+  for (const key of castArray(synthClients)) {
+    const initClient = factories[key];
+    (result as any)[key] = await initClient();
+  }
+  return result;
 }

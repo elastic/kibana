@@ -28,9 +28,6 @@ import {
   generateHostData,
   generateLogsDataForHosts,
 } from './helpers';
-import { getApmSynthtraceEsClient } from '../../../common/utils/synthtrace/apm_es_client';
-import { getInfraSynthtraceEsClient } from '../../../common/utils/synthtrace/infra_es_client';
-import { getLogsSynthtraceEsClient } from '../../../common/utils/synthtrace/logs_es_client';
 
 const START_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
 const END_DATE = moment.utc(DATES.metricsAndLogs.hosts.max);
@@ -201,12 +198,11 @@ const SYNTH_HOSTS = [
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
-  const esClient = getService('es');
   const find = getService('find');
   const observability = getService('observability');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const apmSynthtraceKibanaClient = getService('apmSynthtraceKibanaClient');
+  const synthtraceClient = getService('synthtraceClient');
 
   const pageObjects = getPageObjects([
     'assetDetails',
@@ -243,13 +239,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     let synthtraceApmClient: ApmSynthtraceEsClient;
 
     before(async () => {
-      synthEsInfraClient = await getInfraSynthtraceEsClient(esClient);
-      syntEsLogsClient = await getLogsSynthtraceEsClient(esClient);
-      const version = (await apmSynthtraceKibanaClient.installApmPackage()).version;
-      synthtraceApmClient = await getApmSynthtraceEsClient({
-        client: esClient,
-        packageVersion: version,
-      });
+      const { infraEsClient, logsEsClient, apmEsClient } = await synthtraceClient.getClients([
+        'infraEsClient',
+        'logsEsClient',
+        'apmEsClient',
+      ]);
+
+      synthEsInfraClient = infraEsClient;
+      syntEsLogsClient = logsEsClient;
+      synthtraceApmClient = apmEsClient;
 
       return Promise.all([
         synthtraceApmClient.clean(),
@@ -260,7 +258,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     after(async () => {
       return Promise.all([
-        apmSynthtraceKibanaClient.uninstallApmPackage(),
+        synthtraceApmClient.uninstallPackage(),
         synthtraceApmClient.clean(),
         synthEsInfraClient.clean(),
         syntEsLogsClient.clean(),

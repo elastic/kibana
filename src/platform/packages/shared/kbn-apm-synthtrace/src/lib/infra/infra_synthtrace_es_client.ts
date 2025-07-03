@@ -14,24 +14,24 @@ import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_cl
 import { getDedotTransform } from '../shared/get_dedot_transform';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 import { Logger } from '../utils/create_logger';
+import { PipelineOptions } from '../../cli/utils/get_clients';
 
 export type InfraSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
-
-interface Pipeline {
-  includeSerialization?: boolean;
-}
 
 export class InfraSynthtraceEsClient extends SynthtraceEsClient<InfraDocument> {
   constructor(
     private readonly options: {
       client: Client;
       logger: Logger;
-      pipeline?: Pipeline;
-    } & InfraSynthtraceEsClientOptions
+      pipeline?: PipelineOptions;
+    } & InfraSynthtraceEsClientOptions &
+      PipelineOptions
   ) {
     super({
       ...options,
-      pipeline: infraPipeline({ includeSerialization: options.pipeline?.includeSerialization }),
+      pipeline: infraPipeline({
+        includePipelineSerialization: options.includePipelineSerialization,
+      }),
     });
     this.dataStreams = [
       'metrics-system*',
@@ -41,14 +41,21 @@ export class InfraSynthtraceEsClient extends SynthtraceEsClient<InfraDocument> {
     ];
   }
 
-  clone(): this {
-    return new InfraSynthtraceEsClient(this.options) as this;
+  async initializePackage() {
+    if (!this.fleetClient) {
+      throw new Error(
+        'InfraSynthtraceEsClient requires a FleetClient to be initialized. Please provide a valid Kibana client.'
+      );
+    }
+
+    const latestVersion = await this.fleetClient.fetchLatestPackageVersion('system');
+    await this.fleetClient.installPackage('system', latestVersion);
   }
 }
 
-function infraPipeline({ includeSerialization = true }: Pipeline) {
+function infraPipeline({ includePipelineSerialization = true }: PipelineOptions) {
   return (base: Readable) => {
-    const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
+    const serializationTransform = includePipelineSerialization ? [getSerializeTransform()] : [];
 
     return pipeline(
       base,
