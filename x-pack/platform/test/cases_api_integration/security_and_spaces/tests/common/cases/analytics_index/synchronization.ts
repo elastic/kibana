@@ -11,7 +11,7 @@ import {
   CaseStatuses,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import { OBSERVABLE_TYPE_IPV4, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
 import {
   runActivitySynchronizationTask,
   runAttachmentsSynchronizationTask,
@@ -19,7 +19,6 @@ import {
   runCommentsSynchronizationTask,
 } from '../../../../../common/lib/api/analytics';
 import {
-  addObservable,
   createCase,
   createConfiguration,
   createComment,
@@ -31,7 +30,6 @@ import {
   updateCase,
   deleteCases,
   deleteAllCaseAnalyticsItems,
-  deleteAllCaseAnalyticsIndices,
 } from '../../../../../common/lib/api';
 import {
   getPostCaseRequest,
@@ -59,10 +57,6 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    after(async () => {
-      await deleteAllCaseAnalyticsIndices(esClient);
-    });
-
     it('should sync the cases index', async () => {
       await createConfiguration(
         supertest,
@@ -82,7 +76,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const postCaseRequest = getPostCaseRequest({
         category: 'foobar',
-        assignees: [{ uid: 'mscott@theoffice.com' }],
         customFields: [
           {
             key: 'test_custom_field',
@@ -93,18 +86,6 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const caseToBackfill = await createCase(supertest, postCaseRequest, 200);
-
-      await addObservable({
-        supertest,
-        caseId: caseToBackfill.id,
-        params: {
-          observable: {
-            value: '127.0.0.1',
-            typeKey: OBSERVABLE_TYPE_IPV4.key,
-            description: 'observable description',
-          },
-        },
-      });
 
       await runCasesSynchronizationTask(supertest);
 
