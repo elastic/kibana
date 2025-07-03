@@ -169,6 +169,7 @@ describe('autocomplete.suggest', () => {
 
           test('lookup join after command name', async () => {
             await assertSuggestions('FROM a | FORK (LOOKUP JOIN /)', [
+              '', // Empty Create lookup index command at the top
               'join_index ',
               'join_index_with_alias ',
               'lookup_index ',
