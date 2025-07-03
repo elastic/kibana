@@ -40,7 +40,6 @@ export interface DashboardState extends DashboardSettings {
   filters: Filter[];
   timeRange?: TimeRange;
   refreshInterval?: RefreshInterval;
-  viewMode: ViewMode;
   panels: DashboardAttributes['panels'];
 
   /**
@@ -61,6 +60,8 @@ export type DashboardLocatorParams = Partial<
     controlGroupInput?: DashboardState['controlGroupInput'] & SerializableRecord;
 
     references?: DashboardState['references'] & SerializableRecord;
+
+    viewMode?: ViewMode;
 
     /**
      * If provided, the dashboard with this id will be loaded. If not given, new, unsaved dashboard will be loaded.
