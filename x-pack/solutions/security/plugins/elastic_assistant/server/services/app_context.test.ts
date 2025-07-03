@@ -35,6 +35,14 @@ describe('AppContextService', () => {
     isSupported: jest.fn(),
     getTool: jest.fn(),
   };
+  const toolThree: AssistantTool = {
+    id: 'tool-three',
+    name: 'ToolThree',
+    description: 'Description 3',
+    sourceRegister: 'Source3',
+    isSupported: jest.fn(),
+    getTool: jest.fn(),
+  };
 
   beforeEach(() => {
     appContextService.stop();
@@ -97,6 +105,17 @@ describe('AppContextService', () => {
 
       expect(appContextService.getRegisteredTools(pluginName).length).toEqual(1);
     });
+  });
+
+  it('get tools for multiple plugins', () => {
+    const pluginName1 = 'pluginName1';
+    const pluginName2 = 'pluginName2';
+
+    appContextService.start(mockAppContext);
+    appContextService.registerTools(pluginName2, [toolOne, toolThree]);
+    appContextService.registerTools(pluginName1, [toolOne]);
+
+    expect(appContextService.getRegisteredTools([pluginName1, pluginName2]).length).toEqual(2);
   });
 
   describe('registering features', () => {
