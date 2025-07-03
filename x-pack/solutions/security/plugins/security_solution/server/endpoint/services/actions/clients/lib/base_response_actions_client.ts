@@ -892,12 +892,6 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     if (!this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled) {
       return;
     }
-
-    console.log(
-      'sending telemetry action creation:: ',
-      this.agentType,
-      JSON.stringify(actionRequest)
-    );
     this.options.endpointService
       .getTelemetryService()
       .reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
@@ -933,18 +927,6 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       return;
     }
     for (const response of responseList) {
-      console.log(
-        'sending telemetry for action response:: ',
-        response.EndpointActions.completed_at,
-        JSON.stringify({
-          responseActions: {
-            actionId: response.EndpointActions.action_id,
-            agentType: this.agentType,
-            actionStatus: response.error ? 'failed' : 'successful',
-            command: response.EndpointActions.data.command,
-          },
-        })
-      );
       this.options.endpointService
         .getTelemetryService()
         .reportEvent(ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT.eventType, {
