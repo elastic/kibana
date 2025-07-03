@@ -10,7 +10,7 @@ import { TestProviders } from '../../common/mock';
 import { useBrowserFields } from './use_browser_fields';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../constants';
 import { useDataView } from './use_data_view';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 
 jest.mock('./use_data_view', () => ({
   useDataView: jest.fn(),
@@ -19,17 +19,24 @@ jest.mock('./use_data_view', () => ({
 describe('useBrowserFields', () => {
   beforeAll(() => {
     jest.mocked(useDataView).mockReturnValue({
-      dataView: {
-        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-        fields: [
-          {
-            spec: {
-              type: 'date',
+      dataView: new DataView({
+        spec: {
+          id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+          title: 'security-solution-data-view',
+          fields: {
+            '@timestamp': {
               name: '@timestamp',
+              type: 'date',
+              esTypes: ['date'],
+              aggregatable: true,
+              searchable: true,
+              scripted: false,
             },
           },
-        ],
-      } as DataView,
+        },
+        // @ts-expect-error: DataView constructor expects more, but this is enough for our test
+        fieldFormats: { getDefaultInstance: () => ({}) },
+      }),
       status: 'ready',
     });
   });
@@ -44,7 +51,14 @@ describe('useBrowserFields', () => {
         "base": Object {
           "fields": Object {
             "@timestamp": Object {
+              "aggregatable": true,
+              "esTypes": Array [
+                "date",
+              ],
               "name": "@timestamp",
+              "scripted": false,
+              "searchable": true,
+              "shortDotsEnable": false,
               "type": "date",
             },
           },
