@@ -84,8 +84,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(kibanaSection?.sectionLinks).to.eql([
           'dataViews',
           'filesManagement',
-          'objects',
           'aiAssistantManagementSelection',
+          'objects',
           'tags',
           'spaces',
           'settings',

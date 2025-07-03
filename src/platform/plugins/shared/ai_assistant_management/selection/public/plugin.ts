@@ -121,11 +121,7 @@ export class AIAssistantManagementPlugin
   ): Observable<AIAssistantType> {
     if (this.buildFlavor === 'serverless') {
       if (!this.config.serverlessUiSettingsKey) {
-        throw new Error(
-          i18n.translate('aiAssistantManagementSelection.serverlessUiSettingsKeyMissingError', {
-            defaultMessage: 'The serverless UI settings key is not configured.',
-          })
-        );
+        return new BehaviorSubject(AIAssistantType.Never);
       }
       const preferredAIAssistantType: AIAssistantType = coreStart.uiSettings.get(
         this.config.serverlessUiSettingsKey
