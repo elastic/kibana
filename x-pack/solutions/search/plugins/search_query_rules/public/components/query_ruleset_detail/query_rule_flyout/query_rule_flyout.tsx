@@ -253,9 +253,9 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               />
             </EuiPanel>
           </EuiFlexItem>
-          <EuiFlexItem grow>
+          <EuiFlexItem grow css={QueryRuleFlyoutPanel(euiTheme)}>
             <EuiPanel
-              hasBorder={true}
+              hasBorder={false}
               hasShadow={false}
               paddingSize="l"
               borderRadius="none"
