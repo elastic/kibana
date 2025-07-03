@@ -47,6 +47,10 @@ export interface UXHasDataResponse extends HasDataResponse {
   indices?: string;
 }
 
+export interface SyntheticsHasDataResponse extends HasDataResponse {
+  indices: string;
+}
+
 export interface APMHasDataResponse {
   hasData: boolean;
   indices: ApmIndicesConfig;
@@ -76,7 +80,7 @@ export type HasData<T extends ObservabilityFetchDataPlugins> = (
 
 export type ObservabilityFetchDataPlugins = Exclude<
   ObservabilityApp,
-  'observability-overview' | 'fleet' | 'synthetics' | 'uptime'
+  'observability-overview' | 'fleet' | 'synthetics'
 >;
 
 export interface DataHandler<
@@ -124,6 +128,18 @@ export interface MetricsFetchDataResponse extends FetchDataResponse {
   series: MetricsFetchDataSeries[];
 }
 
+export interface UptimeFetchDataResponse extends FetchDataResponse {
+  stats: {
+    monitors: Stat;
+    up: Stat;
+    down: Stat;
+  };
+  series: {
+    up: Series;
+    down: Series;
+  };
+}
+
 export interface ApmFetchDataResponse extends FetchDataResponse {
   stats: {
     services: Stat;
@@ -144,6 +160,7 @@ export interface ObservabilityFetchDataResponse {
   apm: ApmFetchDataResponse;
   infra_metrics: MetricsFetchDataResponse;
   infra_logs: LogsFetchDataResponse;
+  uptime: UptimeFetchDataResponse;
   ux: UxFetchDataResponse;
   universal_profiling: UniversalProfilingDataResponse;
 }
@@ -152,6 +169,7 @@ export interface ObservabilityHasDataResponse {
   apm: APMHasDataResponse;
   infra_metrics: InfraMetricsHasDataResponse;
   infra_logs: InfraLogsHasDataResponse;
+  uptime: SyntheticsHasDataResponse;
   ux: UXHasDataResponse;
   universal_profiling: UniversalProfilingHasDataResponse;
 }

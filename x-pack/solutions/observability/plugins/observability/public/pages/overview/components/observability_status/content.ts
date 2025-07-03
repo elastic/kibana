@@ -94,6 +94,26 @@ export const getContent = (
       showInServerless: true,
     },
     {
+      id: 'uptime',
+      title: i18n.translate('xpack.observability.statusVisualization.uptime.title', {
+        defaultMessage: 'Uptime',
+      }),
+      description: i18n.translate('xpack.observability.statusVisualization.uptime.description', {
+        defaultMessage: 'Proactively monitor the availability and functionality of user journeys.',
+      }),
+      addTitle: i18n.translate('xpack.observability.statusVisualization.uptime.link', {
+        defaultMessage: 'Add monitors',
+      }),
+      addLink: http.basePath.prepend('/app/home#/tutorial/uptimeMonitors'),
+      learnMoreLink: docLinks.links.observability.monitorUptimeSynthetics,
+      goToAppTitle: i18n.translate('xpack.observability.statusVisualization.uptime.goToAppTitle', {
+        defaultMessage: 'Show monitors ',
+      }),
+      goToAppLink: http.basePath.prepend('/app/uptime'),
+      weight: 4,
+      showInServerless: false,
+    },
+    {
       id: 'ux',
       title: i18n.translate('xpack.observability.statusVisualization.ux.title', {
         defaultMessage: 'User Experience',

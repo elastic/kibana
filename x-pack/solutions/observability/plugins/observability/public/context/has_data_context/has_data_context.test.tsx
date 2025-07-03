@@ -36,6 +36,7 @@ function unregisterAll() {
   unregisterDataHandler({ appName: 'apm' });
   unregisterDataHandler({ appName: 'infra_logs' });
   unregisterDataHandler({ appName: 'infra_metrics' });
+  unregisterDataHandler({ appName: 'uptime' });
   unregisterDataHandler({ appName: 'ux' });
 }
 
@@ -69,6 +70,7 @@ describe('HasDataContextProvider', () => {
         expect(result.current).toEqual({
           hasDataMap: {
             apm: { hasData: undefined, status: 'success' },
+            uptime: { hasData: undefined, status: 'success' },
             infra_logs: { hasData: undefined, status: 'success' },
             infra_metrics: { hasData: undefined, status: 'success' },
             ux: { hasData: undefined, status: 'success' },
@@ -95,6 +97,10 @@ describe('HasDataContextProvider', () => {
           },
           { appName: 'infra_metrics', hasData: async () => ({ hasData: false }) },
           {
+            appName: 'uptime',
+            hasData: async () => ({ hasData: false }),
+          },
+          {
             appName: 'ux',
             hasData: async () => ({ hasData: false }),
           },
@@ -120,6 +126,10 @@ describe('HasDataContextProvider', () => {
           expect(result.current).toEqual({
             hasDataMap: {
               apm: { hasData: false, status: 'success' },
+              uptime: {
+                hasData: false,
+                status: 'success',
+              },
               infra_logs: { hasData: false, indices: 'test-index', status: 'success' },
               infra_metrics: { hasData: false, status: 'success' },
               ux: {
@@ -151,6 +161,10 @@ describe('HasDataContextProvider', () => {
             hasData: async () => ({ hasData: false, indices: 'metric-*' }),
           },
           {
+            appName: 'uptime',
+            hasData: async () => ({ hasData: false, indices: 'heartbeat-*, synthetics-*' }),
+          },
+          {
             appName: 'ux',
             hasData: async () => ({ hasData: false, serviceName: undefined, indices: 'apm-*' }),
           },
@@ -173,6 +187,11 @@ describe('HasDataContextProvider', () => {
           expect(result.current).toEqual({
             hasDataMap: {
               apm: { hasData: true, status: 'success' },
+              uptime: {
+                hasData: false,
+                indices: 'heartbeat-*, synthetics-*',
+                status: 'success',
+              },
               infra_logs: { hasData: false, indices: 'test-index', status: 'success' },
               infra_metrics: { hasData: false, indices: 'metric-*', status: 'success' },
               ux: {
@@ -205,6 +224,10 @@ describe('HasDataContextProvider', () => {
             hasData: async () => ({ hasData: true, indices: 'metric-*' }),
           },
           {
+            appName: 'uptime',
+            hasData: async () => ({ hasData: true, indices: 'heartbeat-*, synthetics-*' }),
+          },
+          {
             appName: 'ux',
             hasData: async () => ({ hasData: true, serviceName: 'ux', indices: 'apm-*' }),
           },
@@ -228,6 +251,11 @@ describe('HasDataContextProvider', () => {
             hasDataMap: {
               apm: {
                 hasData: true,
+                status: 'success',
+              },
+              uptime: {
+                hasData: true,
+                indices: 'heartbeat-*, synthetics-*',
                 status: 'success',
               },
               infra_logs: { hasData: true, indices: 'test-index', status: 'success' },
@@ -276,6 +304,7 @@ describe('HasDataContextProvider', () => {
             expect(result.current).toEqual({
               hasDataMap: {
                 apm: { hasData: true, indices: sampleAPMIndices, status: 'success' },
+                uptime: { hasData: undefined, status: 'success' },
                 infra_logs: { hasData: undefined, status: 'success' },
                 infra_metrics: { hasData: undefined, status: 'success' },
                 ux: { hasData: undefined, status: 'success' },
@@ -323,6 +352,7 @@ describe('HasDataContextProvider', () => {
                   indices: sampleAPMIndices,
                   status: 'success',
                 },
+                uptime: { hasData: undefined, status: 'success' },
                 infra_logs: { hasData: undefined, status: 'success' },
                 infra_metrics: { hasData: undefined, status: 'success' },
                 ux: { hasData: undefined, status: 'success' },
@@ -357,6 +387,10 @@ describe('HasDataContextProvider', () => {
             hasData: async () => ({ hasData: true, indices: 'metric-*' }),
           },
           {
+            appName: 'uptime',
+            hasData: async () => ({ hasData: true, indices: 'heartbeat-*, synthetics-*' }),
+          },
+          {
             appName: 'ux',
             hasData: async () => ({ hasData: true, serviceName: 'ux', indices: 'apm-*' }),
           },
@@ -379,6 +413,11 @@ describe('HasDataContextProvider', () => {
           expect(result.current).toEqual({
             hasDataMap: {
               apm: { hasData: undefined, status: 'failure' },
+              uptime: {
+                hasData: true,
+                indices: 'heartbeat-*, synthetics-*',
+                status: 'success',
+              },
               infra_logs: { hasData: true, indices: 'test-index', status: 'success' },
               infra_metrics: { hasData: true, indices: 'metric-*', status: 'success' },
               ux: {
@@ -421,6 +460,12 @@ describe('HasDataContextProvider', () => {
             },
           },
           {
+            appName: 'uptime',
+            hasData: async () => {
+              throw new Error('BOOMMMMM');
+            },
+          },
+          {
             appName: 'ux',
             hasData: async () => {
               throw new Error('BOOMMMMM');
@@ -445,6 +490,7 @@ describe('HasDataContextProvider', () => {
           expect(result.current).toEqual({
             hasDataMap: {
               apm: { hasData: undefined, status: 'failure' },
+              uptime: { hasData: undefined, status: 'failure' },
               infra_logs: { hasData: undefined, status: 'failure' },
               infra_metrics: { hasData: undefined, status: 'failure' },
               ux: { hasData: undefined, status: 'failure' },
@@ -489,6 +535,7 @@ describe('HasDataContextProvider', () => {
         expect(result.current).toEqual({
           hasDataMap: {
             apm: { hasData: undefined, status: 'success' },
+            uptime: { hasData: undefined, status: 'success' },
             infra_logs: { hasData: undefined, status: 'success' },
             infra_metrics: { hasData: undefined, status: 'success' },
             ux: { hasData: undefined, status: 'success' },

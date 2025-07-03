@@ -186,7 +186,93 @@ describe('registerDataHandler', () => {
       expect(hasData?.hasData).toBeTruthy();
     });
   });
+  describe('Uptime', () => {
+    registerDataHandler({
+      appName: 'uptime',
+      fetchData: async () => {
+        return {
+          title: 'uptime',
+          appLink: '/uptime',
+          stats: {
+            monitors: {
+              label: 'Monitors',
+              type: 'number',
+              value: 1,
+            },
+            up: {
+              label: 'Up',
+              type: 'number',
+              value: 1,
+            },
+            down: {
+              label: 'Down',
+              type: 'number',
+              value: 1,
+            },
+          },
+          series: {
+            down: {
+              label: 'Down',
+              coordinates: [{ x: 1 }],
+            },
+            up: {
+              label: 'Up',
+              coordinates: [{ x: 1 }],
+            },
+          },
+        };
+      },
+      hasData: async () => ({ hasData: true, indices: 'heartbeat-*,synthetics-*' }),
+    });
 
+    it('registered data handler', () => {
+      const dataHandler = getDataHandler('uptime');
+      expect(dataHandler?.fetchData).toBeDefined();
+      expect(dataHandler?.hasData).toBeDefined();
+    });
+
+    it('returns data when fetchData is called', async () => {
+      const dataHandler = getDataHandler('uptime');
+      const response = await dataHandler?.fetchData(params);
+      expect(response).toEqual({
+        title: 'uptime',
+        appLink: '/uptime',
+        stats: {
+          monitors: {
+            label: 'Monitors',
+            type: 'number',
+            value: 1,
+          },
+          up: {
+            label: 'Up',
+            type: 'number',
+            value: 1,
+          },
+          down: {
+            label: 'Down',
+            type: 'number',
+            value: 1,
+          },
+        },
+        series: {
+          down: {
+            label: 'Down',
+            coordinates: [{ x: 1 }],
+          },
+          up: {
+            label: 'Up',
+            coordinates: [{ x: 1 }],
+          },
+        },
+      });
+    });
+
+    it('returns true when hasData is called', async () => {
+      const dataHandler = getDataHandler('apm');
+      const hasData = await dataHandler?.hasData();
+      expect(hasData).toBeTruthy();
+    });
+  });
   describe('Ux', () => {
     registerDataHandler({
       appName: 'ux',
