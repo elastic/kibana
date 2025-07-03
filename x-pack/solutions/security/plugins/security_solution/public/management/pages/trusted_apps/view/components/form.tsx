@@ -17,6 +17,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
+  EuiIcon,
   EuiSuperSelect,
   EuiTextArea,
   EuiText,
@@ -76,6 +77,8 @@ import {
   NAME_LABEL,
   POLICY_SELECT_DESCRIPTION,
   SELECT_OS_LABEL,
+  USING_ADVANCED_MODE,
+  USING_ADVANCED_MODE_DESCRIPTION,
 } from '../translations';
 import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
 import type { LogicalConditionBuilderProps } from './logical_condition';
@@ -281,10 +284,12 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     >({});
     const [hasFormChanged, setHasFormChanged] = useState(false);
     const showAssignmentSection = useCanAssignArtifactPerPolicy(item, mode, hasFormChanged);
+    const isFormAdvancedMode: boolean = useMemo(() => isAdvancedModeEnabled(item), [item]);
+    const { getTagsUpdatedBy } = useGetUpdatedTags(item);
     const [basicFormConditions, setBasicFormConditions] =
-      useState<ArtifactFormComponentProps['item']['entries']>(item.entries);
+      useState<ArtifactFormComponentProps['item']['entries']>(!isFormAdvancedMode ? item.entries : []);
     const [advancedFormConditions, setAdvancedFormConditions] =
-      useState<ArtifactFormComponentProps['item']['entries']>(item.entries);
+      useState<ArtifactFormComponentProps['item']['entries']>(isFormAdvancedMode ? item.entries : []);
 
     // Combine related state into a single object to reduce re-renders
     const [conditionsState, setConditionsState] = useState({
@@ -321,9 +326,6 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       ENDPOINT_FIELDS_SEARCH_STRATEGY
     );
 
-    const isFormAdvancedMode: boolean = useMemo(() => isAdvancedModeEnabled(item), [item]);
-    const { getTagsUpdatedBy } = useGetUpdatedTags(item);
-
     const selectedFormType = useMemo(() => {
       return isFormAdvancedMode ? 'advancedMode' : 'basicMode';
     }, [isFormAdvancedMode]);
@@ -355,13 +357,6 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       (updatedFormValues: ArtifactFormComponentProps['item']) => {
         const updatedValidationResult: ValidationResult = validateValues(updatedFormValues);
         setValidationResult(updatedValidationResult);
-
-        // this check is not correct yet --- its late
-        if (isAdvancedModeEnabled(updatedFormValues)) {
-          setAdvancedFormConditions(updatedFormValues.entries);
-        } else {
-          setBasicFormConditions(updatedFormValues.entries);
-        }
 
         onChange({
           item: updatedFormValues,
@@ -420,6 +415,14 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
 
     const handleAdvancedModeChange = useCallback(
       (selectedId: string) => {
+        // save current form to relevant state before switching
+        const currentItem = itemRef.current;
+        if (selectedId === "advancedMode") {
+          setBasicFormConditions(currentItem.entries);
+        } else {
+          setAdvancedFormConditions(currentItem.entries);
+        }
+
         const nextItem: ArtifactFormComponentProps['item'] = {
           ...item,
           entries: selectedId === 'advancedMode' ? advancedFormConditions : basicFormConditions,
@@ -747,6 +750,20 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="warningFilled" size="s" color="warning" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s" color="warning">
+              {USING_ADVANCED_MODE}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiText size="s" color="warning">
+          {USING_ADVANCED_MODE_DESCRIPTION}
+        </EuiText>
         <EuiSpacer size="m" />
         <EuiFormRow
           label={SELECT_OS_LABEL}
