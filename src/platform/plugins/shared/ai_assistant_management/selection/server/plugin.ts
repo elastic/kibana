@@ -17,6 +17,7 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import type { BuildFlavor } from '@kbn/config';
 import type { AIAssistantManagementSelectionConfig } from './config';
 import type {
   AIAssistantManagementSelectionPluginServerDependenciesSetup,
@@ -35,16 +36,15 @@ import { classicSetting } from './src/settings/classic_setting';
 import { observabilitySolutionSetting } from './src/settings/observability_setting';
 import { securitySolutionSetting } from './src/settings/security_setting';
 import { searchSolutionSetting } from './src/settings/search_setting';
-import type { BuildFlavor } from '@kbn/config';
 
 export class AIAssistantManagementSelectionPlugin
   implements
-  Plugin<
-    AIAssistantManagementSelectionPluginServerSetup,
-    AIAssistantManagementSelectionPluginServerStart,
-    AIAssistantManagementSelectionPluginServerDependenciesSetup,
-    AIAssistantManagementSelectionPluginServerDependenciesStart
-  >
+    Plugin<
+      AIAssistantManagementSelectionPluginServerSetup,
+      AIAssistantManagementSelectionPluginServerStart,
+      AIAssistantManagementSelectionPluginServerDependenciesSetup,
+      AIAssistantManagementSelectionPluginServerDependenciesStart
+    >
 {
   private readonly config: AIAssistantManagementSelectionConfig;
   private readonly buildFlavor: BuildFlavor;
@@ -87,7 +87,6 @@ export class AIAssistantManagementSelectionPlugin
         },
       });
     }
-
 
     core.capabilities.registerProvider(() => {
       return {
@@ -157,5 +156,5 @@ export class AIAssistantManagementSelectionPlugin
     return {};
   }
 
-  public stop() { }
+  public stop() {}
 }

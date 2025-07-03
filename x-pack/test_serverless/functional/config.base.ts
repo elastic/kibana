@@ -42,13 +42,19 @@ export function createTestConfig<TServices extends {} = typeof services>(
           `--serverless=${options.serverlessProject}`,
           ...(options.kbnServerArgs ?? []),
           ...(options.serverlessProject === 'oblt'
-            ? ['--aiAssistantManagementSelection.serverlessUiSettingsKey=aiAssistant:preferredAIAssistantType:oblt']
+            ? [
+                '--aiAssistantManagementSelection.serverlessUiSettingsKey=aiAssistant:preferredAIAssistantType:oblt',
+              ]
             : []),
           ...(options.serverlessProject === 'es'
-            ? ['--aiAssistantManagementSelection.serverlessUiSettingsKey=aiAssistant:preferredAIAssistantType:es']
+            ? [
+                '--aiAssistantManagementSelection.serverlessUiSettingsKey=aiAssistant:preferredAIAssistantType:es',
+              ]
             : []),
           ...(options.serverlessProject === 'security'
-            ? ['--aiAssistantManagementSelection.serverlessUiSettingsKey=aiAssistant:preferredAIAssistantType:security']
+            ? [
+                '--aiAssistantManagementSelection.serverlessUiSettingsKey=aiAssistant:preferredAIAssistantType:security',
+              ]
             : []),
         ],
       },
