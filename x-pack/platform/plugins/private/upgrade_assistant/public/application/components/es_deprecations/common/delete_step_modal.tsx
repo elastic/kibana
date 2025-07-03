@@ -102,10 +102,10 @@ export const DeleteModal = ({ closeModal, targetName, deleteIndex, type }: Props
     },
   };
 
-  const [value, setValue] = useState<string>('');
+  const [inputValue, setInputValue] = useState<string>('');
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(e.target.value);
+    setInputValue(e.target.value);
   };
 
   return (
@@ -126,7 +126,7 @@ export const DeleteModal = ({ closeModal, targetName, deleteIndex, type }: Props
         <EuiFormRow label="Type the word 'delete' to confirm" fullWidth={true}>
           <EuiFieldText
             name="delete"
-            value={value}
+            value={inputValue}
             onChange={onChange}
             fullWidth={true}
             data-test-subj="deleteIndexInput"
@@ -137,7 +137,7 @@ export const DeleteModal = ({ closeModal, targetName, deleteIndex, type }: Props
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiButtonEmpty
             onClick={() => {
-              setValue('');
+              setInputValue('');
               closeModal();
             }}
             color="primary"
@@ -151,10 +151,10 @@ export const DeleteModal = ({ closeModal, targetName, deleteIndex, type }: Props
           <EuiButton
             fill
             onClick={() => {
-              setValue('');
+              setInputValue('');
               deleteIndex();
             }}
-            disabled={value.toLowerCase() !== 'delete'}
+            disabled={inputValue.toLowerCase() !== 'delete'}
             data-test-subj="startDeleteButton"
             color="danger"
           >
