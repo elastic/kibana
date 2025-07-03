@@ -53,7 +53,35 @@ export const bulkOverwriteTransformedDocuments =
     | RequestEntityTooLargeException,
     'bulk_index_succeeded'
   > =>
-  () => {
+  async () => {
+    const [operation] = operations;
+    let id: any;
+    let doc: any;
+    if (operation) {
+      console.log('OVERWRITING OPERATION', operation);
+      if (Array.isArray(operation)) {
+        const [op, d] = operation;
+        id = op.index!._id;
+        doc = d.sample_a;
+      }
+      if (doc) {
+        console.log('SIMULATING CONCURRENT WRITE BEFORE BULK INDEX! setting keyword to "gonna be lost!" and "test" boolean to false');
+        console.log('DOC CURRENTLY LOOKS LIKE', await client.get({ index, id }));
+        console.log('PARTIAL UPDATE RESULT', await client.update({
+          refresh: true,
+          index,
+          id,
+          doc: {
+            sample_a: {
+              ...doc,
+              keyword: 'gonna be lost!',
+              test: false, // bool gonna be switched back
+            },
+          },
+        }));
+        console.log('DOC NOW LOOKS LIKE', await client.get({ id, index }));
+      }
+    }
     return client
       .bulk({
         // Because we only add aliases in the MARK_VERSION_INDEX_READY step we
@@ -71,7 +99,12 @@ export const bulkOverwriteTransformedDocuments =
         // we need to unwrap the existing BulkIndexOperationTuple's
         operations: operations.flat(),
       })
-      .then((res) => {
+      .then(async (res) => {
+        if (id) {
+          console.log('POST transforms', await client.get({ id, index }));
+        } else {
+          console.log('NO OVERWRITE');
+        }
         // Filter out version_conflict_engine_exception since these just mean
         // that another instance already updated these documents
         const errors: estypes.ErrorCause[] = (res.items ?? [])
