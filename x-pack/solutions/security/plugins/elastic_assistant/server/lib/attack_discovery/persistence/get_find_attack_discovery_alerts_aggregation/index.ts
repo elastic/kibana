@@ -32,8 +32,8 @@ export const getFindAttackDiscoveryAlertsAggregation = (): Record<
     },
   },
   unique_alert_ids_count: {
-    sum_bucket: {
-      buckets_path: 'alert_ids>_count',
+    cardinality: {
+      field: 'kibana.alert.attack_discovery.alert_ids',
     },
   },
 });

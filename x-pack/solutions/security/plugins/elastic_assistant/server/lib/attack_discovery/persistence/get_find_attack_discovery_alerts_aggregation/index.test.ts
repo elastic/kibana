@@ -28,11 +28,11 @@ describe('getFindAttackDiscoveryAlertsAggregation', () => {
     });
   });
 
-  it('returns the expected unique_alert_ids_count sum_bucket aggregation the with correct buckets_path', () => {
+  it('returns the expected unique_alert_ids_count cardinality aggregation', () => {
     const result = getFindAttackDiscoveryAlertsAggregation();
     expect(result.unique_alert_ids_count).toEqual({
-      sum_bucket: {
-        buckets_path: 'alert_ids>_count',
+      cardinality: {
+        field: 'kibana.alert.attack_discovery.alert_ids',
       },
     });
   });
