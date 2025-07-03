@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect((await find.allByCssSelector('.mapTocEntry')).length).to.be(4);
   }
 
-  describe('bwc short urls', () => {
+  describe('bwc urls', () => {
     let baseUrl: string;
     before(async () => {
       await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
@@ -73,22 +73,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    // 8.14 before the Embeddable refactor
-    it('should load dashboard with 8.14 state', async () => {
-      await browser.navigateTo(baseUrl + '/goto/url_to_8_14_dashboard');
-      await assertDashboardRendered();
+    describe('legacy urls', () => {
+      it('should forward legacy dashboard urls', async () => {
+        await browser.navigateTo(
+          baseUrl + '/app/kibana#/dashboard/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b'
+        );
+        await header.waitUntilLoadingHasFinished();
+        await dashboard.waitForRenderComplete();
+        const panels = await dashboard.getDashboardPanels();
+        expect(panels.length).to.be(12);
+      });
     });
 
-    // 8.18 after the embeddable refactor and before Serialized state only
-    it('should load dashboard with 8.18 state', async () => {
-      await browser.navigateTo(baseUrl + '/goto/url_to_8_18_dashboard');
-      await assertDashboardRendered();
-    });
+    describe('short urls', () => {
+      // 8.14 before the Embeddable refactor
+      it('should load dashboard with 8.14 state', async () => {
+        await browser.navigateTo(baseUrl + '/goto/url_to_8_14_dashboard');
+        await assertDashboardRendered();
+      });
 
-    // 8.18 after the embeddable refactor and after Serialized state only
-    it('should load dashboard with 8.19 state', async () => {
-      await browser.navigateTo(baseUrl + '/goto/url_to_8_19_dashboard');
-      await assertDashboardRendered();
+      // 8.18 after the embeddable refactor and before Serialized state only
+      it('should load dashboard with 8.18 state', async () => {
+        await browser.navigateTo(baseUrl + '/goto/url_to_8_18_dashboard');
+        await assertDashboardRendered();
+      });
+
+      // 8.18 after the embeddable refactor and after Serialized state only
+      it('should load dashboard with 8.19 state', async () => {
+        await browser.navigateTo(baseUrl + '/goto/url_to_8_19_dashboard');
+        await assertDashboardRendered();
+      });
     });
   });
 }
