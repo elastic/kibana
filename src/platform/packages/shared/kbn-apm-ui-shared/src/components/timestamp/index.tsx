@@ -10,26 +10,28 @@
 import React from 'react';
 import { EuiText, EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
-import { TimeUnit } from '@kbn/apm-types-shared';
-import { asAbsoluteDateTime } from '../../utils/formatters/datetime';
+import { EuiInlineEditTextSizes } from '@elastic/eui/src/components/inline_edit/inline_edit_text';
+import { TimeUnit, asAbsoluteDateTime } from '../../utils/formatters/datetime';
 
 interface TimestampProps {
   timestamp: number;
   absoluteTimeType?: 'tooltip' | 'inline';
   timeUnit?: TimeUnit;
+  size?: EuiInlineEditTextSizes;
 }
 
 export function Timestamp({
   timestamp,
   absoluteTimeType = 'inline',
   timeUnit = 'milliseconds',
+  size = 's',
 }: TimestampProps) {
   const momentTime = moment(timestamp);
   const relativeTime = momentTime.fromNow();
   const absoluteTime = asAbsoluteDateTime(timestamp, timeUnit);
 
-  return absoluteTimeType ? (
-    <EuiText size="xs" data-test-subj="unifiedDocViewerObservabilityTracesTimestamp">
+  return absoluteTimeType === 'inline' ? (
+    <EuiText size={size} data-test-subj="unifiedDocViewerObservabilityTracesTimestamp">
       {absoluteTime} ({relativeTime})
     </EuiText>
   ) : (
