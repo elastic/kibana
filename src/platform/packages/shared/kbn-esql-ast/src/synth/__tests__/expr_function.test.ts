@@ -111,7 +111,7 @@ describe('can generate various expression types', () => {
     ['assignment expression', 'bytes_transform = ROUND(total_bytes / 1000000.0, 1)'],
     [
       'assignment with time intervals',
-      'key = CASE(timestamp < (t - 1 hour) AND timestamp > (t - 2 hour), "Last hour", "Other")',
+      'key = CASE(timestamp < t - 1 hour AND timestamp > t - 2 hour, "Last hour", "Other")',
     ],
     [
       'assignment with casts',
