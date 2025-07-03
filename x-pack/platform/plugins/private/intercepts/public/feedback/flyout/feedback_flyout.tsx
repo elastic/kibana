@@ -8,6 +8,8 @@
 import React, { type ChangeEvent, useState, useEffect, useCallback } from 'react';
 import type { CoreAuthenticationService } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FeedbackFlyoutBody, FeedbackFlyoutFooter, FeedbackFlyoutHeader } from '.';
 import { FEEDBACK_TYPE } from '../constants';
 
@@ -18,6 +20,7 @@ interface Props {
 }
 
 export const FeedbackFlyout = ({ closeFlyout, getCurrentUser, getLicense }: Props) => {
+  const { euiTheme } = useEuiTheme();
   const [feedbackType, setFeedbackType] = useState(FEEDBACK_TYPE.FEATURE_REQUEST);
   const [feedbackText, setFeedbackText] = useState('');
   const [userEmail, setUserEmail] = useState('');
@@ -55,9 +58,22 @@ export const FeedbackFlyout = ({ closeFlyout, getCurrentUser, getLicense }: Prop
     // TODO
   };
 
+  const flyoutCss = css`
+    padding: ${euiTheme.size.l};
+  `;
+
+  const seperatorCss = css`
+    border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+    margin-left: -${euiTheme.size.l};
+    margin-right: -${euiTheme.size.l};
+  `;
+
+  const Seperator = () => <span css={seperatorCss} />;
+
   return (
-    <>
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="feedbackFlyout" css={flyoutCss}>
       <FeedbackFlyoutHeader closeFlyout={closeFlyout} />
+      <Seperator />
       <FeedbackFlyoutBody
         feedbackType={feedbackType}
         feedbackText={feedbackText}
@@ -67,10 +83,11 @@ export const FeedbackFlyout = ({ closeFlyout, getCurrentUser, getLicense }: Prop
         handleChangeEmail={handleChangeEmail}
         getLicense={getLicense}
       />
+      <Seperator />
       <FeedbackFlyoutFooter
         isSendFeedbackButtonDisabled={isSendFeedbackButtonDisabled}
         submitFeedback={submitFeedback}
       />
-    </>
+    </EuiFlexGroup>
   );
 };
