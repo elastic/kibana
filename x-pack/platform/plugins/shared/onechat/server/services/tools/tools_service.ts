@@ -7,7 +7,11 @@
 
 import { builtinToolProviderId, esqlToolProviderId } from '@kbn/onechat-common';
 import type { Runner, RegisteredTool } from '@kbn/onechat-server';
-import { createBuiltinToolRegistry, type BuiltinToolRegistry } from './builtin_registry';
+import {
+  createBuiltinToolRegistry,
+  registerBuiltinTools,
+  type BuiltinToolRegistry,
+} from './builtin';
 import type { ToolsServiceSetup, ToolsServiceStart, RegisteredToolProviderWithId } from './types';
 import { createInternalRegistry } from './utils';
 import { EsqlToolRegistry } from './esql/esql_registry';
@@ -27,6 +31,8 @@ export class ToolsService {
   }
 
   setup(): ToolsServiceSetup {
+    registerBuiltinTools({ registry: this.builtinRegistry });
+
     return {
       register: (reg) => this.register(reg),
       registerProvider: (providerId, provider) => {
@@ -50,6 +56,7 @@ export class ToolsService {
       registry,
     };
   }
+
   private register(toolRegistration: RegisteredTool<any, any>) {
     this.builtinRegistry.register(toolRegistration);
   }
