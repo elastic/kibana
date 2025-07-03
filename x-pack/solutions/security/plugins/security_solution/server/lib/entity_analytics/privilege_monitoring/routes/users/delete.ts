@@ -11,8 +11,13 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { DeletePrivMonUserRequestParams } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/delete.gen';
 import type { DeletePrivMonUserResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/delete.gen';
-import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
+import {
+  API_VERSIONS,
+  APP_ID,
+  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+} from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
+import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 
 export const deleteUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
@@ -36,6 +41,11 @@ export const deleteUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
       },
       async (context, request, response): Promise<IKibanaResponse<DeletePrivMonUserResponse>> => {
         const siemResponse = buildSiemResponse(response);
+
+        await assertAdvancedSettingsEnabled(
+          await context.core,
+          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+        );
 
         try {
           const secSol = await context.securitySolution;

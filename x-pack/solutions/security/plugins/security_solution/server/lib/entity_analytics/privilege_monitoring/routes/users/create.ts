@@ -11,8 +11,13 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { CreatePrivMonUserRequestBody } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/create.gen';
 import type { CreatePrivMonUserResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/create.gen';
-import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
+import {
+  API_VERSIONS,
+  APP_ID,
+  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+} from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
+import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 
 export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
@@ -36,6 +41,11 @@ export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
       },
       async (context, request, response): Promise<IKibanaResponse<CreatePrivMonUserResponse>> => {
         const siemResponse = buildSiemResponse(response);
+
+        await assertAdvancedSettingsEnabled(
+          await context.core,
+          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+        );
 
         try {
           const secSol = await context.securitySolution;

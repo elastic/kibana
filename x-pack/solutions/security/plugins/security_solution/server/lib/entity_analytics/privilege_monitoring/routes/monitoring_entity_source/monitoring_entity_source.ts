@@ -12,9 +12,14 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 
 import type { MonitoringEntitySourceResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
-import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
+import {
+  API_VERSIONS,
+  APP_ID,
+  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+} from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { MonitoringEntitySourceDescriptor } from '../../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
+import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 
 export const monitoringEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -46,6 +51,11 @@ export const monitoringEntitySourceRoute = (
         response
       ): Promise<IKibanaResponse<MonitoringEntitySourceResponse>> => {
         const siemResponse = buildSiemResponse(response);
+
+        await assertAdvancedSettingsEnabled(
+          await context.core,
+          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+        );
 
         try {
           const secSol = await context.securitySolution;
