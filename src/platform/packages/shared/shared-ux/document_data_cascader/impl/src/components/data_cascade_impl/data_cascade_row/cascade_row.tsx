@@ -22,8 +22,8 @@ import type { VirtualItem } from '@tanstack/react-virtual';
 import { type GroupNode } from '../../data_cascade_provider';
 
 export interface CascadeRowProps<T> {
-  innerRef: React.LegacyRef<HTMLLIElement>;
   isActiveSticky: boolean;
+  innerRef: React.LegacyRef<HTMLLIElement>;
   populateGroupNodeDataFn: (args: { row: Row<T> }) => Promise<void>;
   rowInstance: Row<T>;
   /**
@@ -35,8 +35,8 @@ export interface CascadeRowProps<T> {
 }
 
 export function CascadeRow<G extends GroupNode>({
-  innerRef,
   isActiveSticky,
+  innerRef,
   populateGroupNodeDataFn,
   rowInstance,
   virtualRow,
@@ -70,32 +70,32 @@ export function CascadeRow<G extends GroupNode>({
       data-row-type={rowInstance.depth === 0 ? 'root' : 'sub-group'}
       ref={innerRef}
       style={virtualRowStyle}
+      {...(isActiveSticky ? { 'data-active-sticky': true } : {})}
       css={{
         display: 'flex',
         position: 'absolute',
-        zIndex: isActiveSticky ? euiTheme.levels.header : 'unset',
-        willChange: isActiveSticky ? 'transform, top' : 'unset',
         width: '100%',
         padding: euiTheme.size.s,
         backgroundColor: euiTheme.colors.backgroundBaseSubdued,
         borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
         borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-        ...(!rowInstance.parentId
-          ? {
-              borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-            }
-          : {
-              paddingTop: 0,
-              paddingBottom: 0,
-            }),
-        '&[data-row-type="root"]:first-of-type': {
+        '&[data-row-type="sub-group"]': {
+          paddingTop: 0,
+          paddingBottom: 0,
+        },
+        '&[data-row-type="root"]:not([data-active-sticky])': {
+          borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+        },
+        '&[data-row-type="root"]:first-of-type:not([data-active-sticky])': {
           borderTopLeftRadius: euiTheme.border.radius.small,
           borderTopRightRadius: euiTheme.border.radius.small,
         },
-        '&[data-row-type="root"]:last-of-type': {
-          borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+        '&[data-row-type="root"]:last-of-type:not([data-active-sticky])': {
           borderBottomLeftRadius: euiTheme.border.radius.small,
           borderBottomRightRadius: euiTheme.border.radius.small,
+        },
+        '&[data-row-type="root"]:last-of-type': {
+          borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
         },
       }}
     >
