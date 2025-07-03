@@ -8,10 +8,16 @@
  */
 
 import { ESQLProperNode } from '../types';
+import { Reducer } from './reducer';
 
 export class ReducerNodeContext {
   constructor(
+    protected readonly reducer: Reducer<any, any>,
     public readonly node: ESQLProperNode,
     public readonly parent: ReducerNodeContext | undefined
   ) {}
+
+  public abort(): void {
+    this.reducer.abort();
+  }
 }
