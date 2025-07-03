@@ -2230,7 +2230,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('shard failures', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/224699
+    describe.skip('shard failures', () => {
       const config = getService('config');
       const isServerless = config.get('serverless');
       const dataPathBuilder = new EsArchivePathBuilder(isServerless);

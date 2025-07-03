@@ -44,3 +44,4 @@ fi
 
 # Clear the cache after installation
 rm -rf ./.yarn-local-mirror
+yarn cache clean
