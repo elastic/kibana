@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ComponentProps, useCallback, useEffect, useRef, useLayoutEffect, useState } from 'react';
+import React, { type ComponentProps, useCallback, useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   useReactTable,
@@ -244,6 +245,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   const { rows } = table.getRowModel();
 
   const activeStickyIndexRef = useRef<number | null>(null);
+  const activeStickyRenderSlotRef = useRef<HTMLDivElement | null>(null);
 
   /**
    * @description range extractor, used to inform virtualizer about our rendering needs in relation to marking specific rows as sticky rows.
@@ -260,8 +262,13 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
       const rangeStartRow = rows[range.startIndex];
 
       // TODO: get buy in to make all item parents sticky, right now we only select the top most parent as sticky
-      activeStickyIndexRef.current = rangeStartRow.subRows?.length && rangeStartRow.getIsExpanded() ? rangeStartRow.index : rangeStartRow.getParentRows()[0]?.index ?? null;
-      const next = new Set([activeStickyIndexRef.current, ...defaultRangeExtractor(range)].filter(Boolean));
+      activeStickyIndexRef.current =
+        rangeStartRow.subRows?.length && rangeStartRow.getIsExpanded()
+          ? rangeStartRow.index
+          : rangeStartRow.getParentRows()[0]?.index ?? null;
+      const next = new Set(
+        [activeStickyIndexRef.current, ...defaultRangeExtractor(range)].filter(Boolean)
+      );
       return Array.from(next).sort((a, b) => a - b);
     },
     [rows, stickyGroupRoot]
@@ -300,9 +307,6 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                   willChange: 'transform',
                   zIndex: euiTheme.levels.header,
                   background: euiTheme.colors.backgroundBaseSubdued,
-                  ...((rowVirtualizer.scrollOffset ?? 0) > (virtualizerItemSizeCacheRef.current.get(0) ?? 0) / 4 ? {
-                    borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-                  }: {})
                 })}
                 style={{
                   top: -(virtualizedRowComputedTranslateValue.current.get(0) ?? 0),
@@ -311,13 +315,37 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                   }px,  0)`,
                 }}
               >
-                {headerColumns.map((header) => {
-                  return (
-                    <React.Fragment key={header.id}>
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                    </React.Fragment>
-                  );
-                })}
+                <EuiFlexGroup direction="column" gutterSize="none">
+                  <EuiFlexItem
+                    css={({ euiTheme }) => ({
+                      ...((rowVirtualizer.scrollOffset ?? 0) >
+                      (virtualizerItemSizeCacheRef.current.get(0) ?? 0) / 4
+                        ? {
+                            borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+                          }
+                        : {}),
+                    })}
+                  >
+                    {headerColumns.map((header) => {
+                      return (
+                        <React.Fragment key={header.id}>
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+                        </React.Fragment>
+                      );
+                    })}
+                  </EuiFlexItem>
+                  <React.Fragment>
+                    {activeStickyIndexRef.current !== null && stickyGroupRoot && (
+                      <EuiFlexItem
+                        ref={activeStickyRenderSlotRef}
+                        css={({ euiTheme }) => ({
+                          position: 'relative',
+                          margin: `0 ${euiTheme.size.s}`,
+                        })}
+                      />
+                    )}
+                  </React.Fragment>
+                </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem>
                 <div
@@ -333,40 +361,47 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                       .map(function buildCascadeRows(virtualItem, renderIndex) {
                         const row = rows[virtualItem.index];
 
-                        const isActiveSticky = stickyGroupRoot && activeStickyIndexRef.current === virtualItem.index;
+                        // CONSIDERATION: maybe use the sticky index as a marker for accessibility announcements
+                        const isActiveSticky =
+                          stickyGroupRoot && activeStickyIndexRef.current === virtualItem.index;
 
                         virtualizedRowComputedTranslateValue.current.set(
                           renderIndex,
-                          // since the sticky index renders out of the document flow, we need to offset the start position with it's size
-                          isActiveSticky 
-                            ? virtualItem.start -
-                                (virtualizerItemSizeCacheRef.current.get(
-                                  activeStickyIndexRef.current!
-                                ) ?? 0)
-                            : virtualItem.start
+                          virtualItem.start
                         );
 
-                        return (
+                        const rowToRender = (
                           <CascadeRow<G>
-                            key={virtualItem.key}
-                            isActiveSticky={isActiveSticky}
                             innerRef={rowVirtualizer.measureElement}
+                            isActiveSticky={isActiveSticky}
                             populateGroupNodeDataFn={fetchGroupNodeData}
                             rowInstance={row}
                             rowGapSize={size}
                             virtualRow={virtualItem}
-                            virtualRowStyle={{
-                              ...(isActiveSticky ? {
-                                transition: 'transform 0s linear',
-                                transform: `translateY(${rowVirtualizer.scrollOffset! - virtualizedRowComputedTranslateValue.current.get(renderIndex)}px)`,
-                                top: virtualizedRowComputedTranslateValue.current.get(renderIndex) ?? 0,
-                              }: {
-                                transform: `translateY(${
-                                  virtualizedRowComputedTranslateValue.current.get(renderIndex) ?? 0
-                                }px)`,
-                              }),
-                            }}
+                            virtualRowStyle={
+                              !isActiveSticky
+                                ? {
+                                    transform: `translateY(${
+                                      virtualizedRowComputedTranslateValue.current.get(
+                                        renderIndex
+                                      ) ?? 0
+                                    }px)`,
+                                  }
+                                : {}
+                            }
                           />
+                        );
+
+                        return (
+                          <React.Fragment>
+                            {isActiveSticky && activeStickyRenderSlotRef.current
+                              ? ReactDOM.createPortal(
+                                  rowToRender,
+                                  activeStickyRenderSlotRef.current,
+                                  row.id
+                                )
+                              : rowToRender}
+                          </React.Fragment>
                         );
                       })}
                   </ul>
