@@ -21,33 +21,33 @@ export const KeyInsightsPanel: React.FC<{ spaceId: string; sourcerDataView: Data
   sourcerDataView,
 }) => {
   return (
-    <EuiFlexGroup wrap gutterSize="l" responsive={false}>
-      <EuiFlexItem>
+    <EuiFlexGroup wrap gutterSize="s">
+      <EuiFlexItem grow={false}>
         <EuiPanel hasBorder>
           <ActivePrivilegedUsersTile spaceId={spaceId} sourcerDataView={sourcerDataView} />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiPanel hasBorder>
           <AlertsTriggeredTile spaceId={spaceId} />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiPanel hasBorder>
           <AnomaliesDetectedTile spaceId={spaceId} />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiPanel hasBorder>
           <GrantedRightsTile spaceId={spaceId} sourcerDataView={sourcerDataView} />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiPanel hasBorder>
           <AccountSwitchesTile spaceId={spaceId} sourcerDataView={sourcerDataView} />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiPanel hasBorder>
           <AuthenticationsTile spaceId={spaceId} sourcerDataView={sourcerDataView} />
         </EuiPanel>
