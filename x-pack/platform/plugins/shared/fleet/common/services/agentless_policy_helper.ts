@@ -98,6 +98,12 @@ export function isInputAllowedForDeploymentMode(
   deploymentMode: 'default' | 'agentless',
   packageInfo?: PackageInfo
 ): boolean {
+  // Always allow system package for monitoring, if this is not excluded it will be blocked
+  // by the following code because it contains `logfile` input which is in the blocklist.
+  if (packageInfo?.name === 'system') {
+    return true;
+  }
+
   // Find the registry input definition for this input type and policy template
   const registryInput = extractRegistryInputsForDeploymentMode(packageInfo).find(
     (rInput) =>
@@ -131,7 +137,9 @@ export function validateDeploymentModesForInputs(
   inputs.forEach((input) => {
     if (input.enabled && !isInputAllowedForDeploymentMode(input, deploymentMode, packageInfo)) {
       throw new PackagePolicyValidationError(
-        `Input ${input.type} is not allowed for deployment mode '${deploymentMode}'`
+        `Input ${input.type}${
+          packageInfo && ` in ${packageInfo.name}`
+        } is not allowed for deployment mode '${deploymentMode}'`
       );
     }
   });

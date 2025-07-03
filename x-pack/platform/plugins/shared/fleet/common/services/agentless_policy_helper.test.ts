@@ -428,6 +428,68 @@ describe('agentless_policy_helper', () => {
         isInputAllowedForDeploymentMode(input, 'default', packageInfoWithoutDeploymentModes)
       ).toBe(true);
     });
+
+    it('should always allow system package inputs regardless of blocklist or deployment_modes', () => {
+      const systemPackageInfo = {
+        name: 'system',
+        version: '1.0.0',
+        owner: { github: 'elastic' },
+        policy_templates: [
+          {
+            name: 'system',
+            title: 'System',
+            description: '',
+            inputs: [
+              { type: 'filelog' }, // This would normally be blocked by agentless blocklist
+              { type: 'system/metrics' },
+            ],
+          },
+        ] as RegistryPolicyTemplate[],
+      } as any;
+
+      const winlogInput = { type: 'winlog', policy_template: 'system' };
+      const metricsInput = { type: 'system/metrics', policy_template: 'system' };
+
+      // System package should always be allowed for any deployment mode
+      expect(isInputAllowedForDeploymentMode(winlogInput, 'agentless', systemPackageInfo)).toBe(
+        true
+      );
+      expect(isInputAllowedForDeploymentMode(winlogInput, 'default', systemPackageInfo)).toBe(true);
+      expect(isInputAllowedForDeploymentMode(metricsInput, 'agentless', systemPackageInfo)).toBe(
+        true
+      );
+      expect(isInputAllowedForDeploymentMode(metricsInput, 'default', systemPackageInfo)).toBe(
+        true
+      );
+    });
+
+    it('should allow system package inputs even when they specify deployment_modes that would exclude the mode', () => {
+      const systemPackageInfoWithDeploymentModes = {
+        name: 'system',
+        version: '1.0.0',
+        owner: { github: 'elastic' },
+        policy_templates: [
+          {
+            name: 'system',
+            title: 'System',
+            description: '',
+            inputs: [
+              { type: 'system/metrics', deployment_modes: ['default'] }, // Only allows default
+            ],
+          },
+        ] as RegistryPolicyTemplate[],
+      } as any;
+
+      const input = { type: 'system/metrics', policy_template: 'system' };
+
+      // System package should override deployment_modes restrictions
+      expect(
+        isInputAllowedForDeploymentMode(input, 'agentless', systemPackageInfoWithDeploymentModes)
+      ).toBe(true);
+      expect(
+        isInputAllowedForDeploymentMode(input, 'default', systemPackageInfoWithDeploymentModes)
+      ).toBe(true);
+    });
   });
 
   describe('validateDeploymentModesForInputs', () => {
@@ -463,7 +525,7 @@ describe('agentless_policy_helper', () => {
       const inputs = [{ type: 'metrics', enabled: true, policy_template: 'template1' }];
 
       expect(() => validateDeploymentModesForInputs(inputs, 'agentless', packageInfo)).toThrow(
-        "Input metrics is not allowed for deployment mode 'agentless'"
+        "Input metrics in test-package is not allowed for deployment mode 'agentless'"
       );
     });
 
