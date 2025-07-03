@@ -16,6 +16,5 @@ if [ "$GITHUB_PR_BRANCH" = "feature/213293/renovate-helper-scripts" ] && ! is_pr
   echo "Adding deploy label to main chainguard PR"
   git config --global user.name kibanamachine
   git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
-  # gh pr edit "${GITHUB_PR_NUMBER}" --add-label "ci:cloud-deploy"
   gh api "repos/elastic/kibana/issues/${GITHUB_PR_NUMBER}/labels" --method POST -f "labels[]=ci:cloud-deploy"
 fi
