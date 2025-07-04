@@ -87,7 +87,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // should reset the profiles when navigating away from Discover
         await testSubjects.click('logo');
-        await discover.leaveWithoutSaving();
         await retry.waitFor('home page to open', async () => {
           return (await testSubjects.getVisibleText('euiBreadcrumb')) === 'Home';
         });
