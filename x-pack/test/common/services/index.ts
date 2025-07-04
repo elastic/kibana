@@ -10,7 +10,7 @@ import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { InfraLogViewsServiceProvider } from './infra_log_views';
 import { SpacesServiceProvider } from './spaces';
 import { SearchSecureService } from './search_secure';
-import { SynthtraceClientProvider } from './synthtrace_client';
+import { SynthtraceClientProvider } from './synthtrace';
 
 export const services = {
   ...commonFunctionalServices,
@@ -18,5 +18,5 @@ export const services = {
   supertest: kibanaApiIntegrationServices.supertest,
   spaces: SpacesServiceProvider,
   secureSearch: SearchSecureService,
-  synthtraceClient: SynthtraceClientProvider,
+  synthtrace: SynthtraceClientProvider,
 };

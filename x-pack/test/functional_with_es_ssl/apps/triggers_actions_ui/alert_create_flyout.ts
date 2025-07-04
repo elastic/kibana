@@ -22,8 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const rules = getService('rules');
   const toasts = getService('toasts');
-  const esClient = getService('es');
-  const synthtraceClient = getService('synthtraceClient');
+  const synthtraceClient = getService('synthtrace');
   const filterBar = getService('filterBar');
   const esArchiver = getService('esArchiver');
 

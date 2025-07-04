@@ -17,13 +17,13 @@ import type {
   LogDocument,
 } from '@kbn/apm-synthtrace-client';
 import Url from 'url';
-import type { SynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/shared/base_client';
+import type { SynthtraceEsClientBase } from '@kbn/apm-synthtrace/src/lib/shared/base_client';
 import { getSynthtraceClient } from '../../../common/services/synthtrace';
 import { KibanaUrl, ScoutTestConfig, coreWorkerFixtures } from './core_fixtures';
 
 interface SynthtraceFixtureEsClient<TFields extends Fields> {
   index: (events: SynthtraceGenerator<TFields>) => Promise<void>;
-  clean: SynthtraceEsClient<TFields>['clean'];
+  clean: SynthtraceEsClientBase<TFields>['clean'];
 }
 
 export interface SynthtraceFixture {
@@ -34,7 +34,7 @@ export interface SynthtraceFixture {
 }
 
 const useSynthtraceClient = async <TFields extends Fields>(
-  client: SynthtraceEsClient<TFields>,
+  client: SynthtraceEsClientBase<TFields>,
   use: (client: SynthtraceFixtureEsClient<TFields>) => Promise<void>
 ) => {
   const index = async (events: SynthtraceGenerator<TFields>) =>
@@ -62,6 +62,7 @@ export const synthtraceFixture = coreWorkerFixtures.extend<{}, SynthtraceFixture
       const apmSynthtraceEsClient = await getSynthtraceClient('apmEsClient', {
         esClient,
         kbnUrl: buildUrlWithAuth(kbnUrl, config),
+        log,
       });
 
       await useSynthtraceClient<ApmFields>(apmSynthtraceEsClient, use);
@@ -73,6 +74,7 @@ export const synthtraceFixture = coreWorkerFixtures.extend<{}, SynthtraceFixture
       const infraSynthtraceEsClient = await getSynthtraceClient('infraEsClient', {
         esClient,
         kbnUrl: buildUrlWithAuth(kbnUrl, config),
+        log,
       });
 
       await useSynthtraceClient<InfraDocument>(infraSynthtraceEsClient, use);
@@ -83,6 +85,7 @@ export const synthtraceFixture = coreWorkerFixtures.extend<{}, SynthtraceFixture
     async ({ esClient, log }, use) => {
       const logsSynthtraceEsClient = await getSynthtraceClient('logsEsClient', {
         esClient,
+        log,
       });
 
       await useSynthtraceClient<LogDocument>(logsSynthtraceEsClient, use);

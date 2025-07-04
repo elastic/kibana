@@ -13,8 +13,8 @@ import { bootstrap } from './bootstrap';
 import { getScenario } from './get_scenario';
 import { RunOptions } from './parse_run_cli_flags';
 import { StreamManager } from './stream_manager';
-import { SynthtraceEsClient } from '../../lib/shared/base_client';
-import { SynthtraceClients } from './get_clients';
+import { SynthtraceEsClientBase } from '../../lib/shared/base_client';
+import { SynthtraceClients } from './clients_manager';
 import { startPerformanceLogger } from './performance_logger';
 import { runWorker } from './workers/run_worker';
 import { logMessage } from './workers/log_message';
@@ -36,7 +36,7 @@ export async function startLiveDataUpload({
   const { logger, clients } = await bootstrap(runOptions);
 
   Object.entries(clients).forEach(([key, client]) => {
-    if (client instanceof SynthtraceEsClient) {
+    if (client instanceof SynthtraceEsClientBase) {
       clientsPerIndices.set(client.getAllIndices().join(','), key);
     }
   });
@@ -89,7 +89,7 @@ export async function startLiveDataUpload({
         const clientName = clientsPerIndices.get(indices);
         const client = clientName && clients[clientName as keyof SynthtraceClients];
 
-        if (client instanceof SynthtraceEsClient) {
+        if (client instanceof SynthtraceEsClientBase) {
           await client.refresh();
         }
       })

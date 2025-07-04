@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import url, { UrlObject } from 'url';
-import {
-  LogLevel,
-  SynthtraceClientTypes,
-  createLogger,
-  getSynthtraceClients,
-} from '@kbn/apm-synthtrace';
+import { UrlObject } from 'url';
+import { format } from 'url';
+import { LogLevel, createLogger, SynthtraceClientsManager } from '@kbn/apm-synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 export function SynthtraceProvider({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -19,31 +15,40 @@ export function SynthtraceProvider({ getService }: DeploymentAgnosticFtrProvider
   const config = getService('config');
   const servers = config.get('servers');
   const kibanaServer = servers.kibana as UrlObject;
+  const kibanaServerUrl = format(kibanaServer);
 
   const logger = createLogger(LogLevel.info);
 
-  const getClientsFn = (synthtraceClients: SynthtraceClientTypes[]) =>
-    getSynthtraceClients({
-      options: {
-        logger,
-        client,
-        kibana: {
-          target: url.format(url.format(kibanaServer).slice(0, -1)),
-        },
-        refreshAfterIndex: true,
-        includePipelineSerialization: false,
-      },
-      synthClients: synthtraceClients,
-    });
+  const clientManager = new SynthtraceClientsManager({
+    client,
+    logger,
+    refreshAfterIndex: true,
+    includePipelineSerialization: false,
+  });
 
   return {
-    async createLogsSynthtraceEsClient() {
-      const { logsEsClient } = await getClientsFn(['logsEsClient']);
+    createLogsSynthtraceEsClient() {
+      const { logsEsClient } = clientManager.getClients({
+        clients: ['logsEsClient'],
+      });
 
       return logsEsClient;
     },
     async createApmSynthtraceEsClient() {
-      const { apmEsClient } = await getClientsFn(['apmEsClient']);
+      const { apmEsClient } = clientManager.getClients({
+        clients: ['apmEsClient'],
+        kibana: {
+          target: kibanaServerUrl,
+        },
+      });
+
+      await clientManager.initFleetPackageForClient({
+        clients: {
+          apmEsClient,
+        },
+      });
+
+      await apmEsClient.initializePackage();
 
       return apmEsClient;
     },

@@ -10,17 +10,29 @@
 import { Client } from '@elastic/elasticsearch';
 import { ESDocumentWithOperation, InfraDocument } from '@kbn/apm-synthtrace-client';
 import { pipeline, Readable, Transform } from 'stream';
-import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
+import {
+  SynthtraceEsClientBase,
+  SynthtraceEsClient,
+  SynthtraceEsClientOptions,
+} from '../shared/base_client';
 import { getDedotTransform } from '../shared/get_dedot_transform';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 import { Logger } from '../utils/create_logger';
-import { PipelineOptions } from '../../cli/utils/get_clients';
+import { PipelineOptions } from '../../cli/utils/clients_manager';
+import { PackageManagement } from '../shared/types';
 
 export type InfraSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
-export class InfraSynthtraceEsClient extends SynthtraceEsClient<InfraDocument> {
+export interface InfraSynthtraceEsClient
+  extends SynthtraceEsClient<InfraDocument>,
+    PackageManagement {}
+
+export class InfraSynthtraceEsClientImpl
+  extends SynthtraceEsClientBase<InfraDocument>
+  implements InfraSynthtraceEsClient
+{
   constructor(
-    private readonly options: {
+    options: {
       client: Client;
       logger: Logger;
       pipeline?: PipelineOptions;
@@ -41,15 +53,33 @@ export class InfraSynthtraceEsClient extends SynthtraceEsClient<InfraDocument> {
     ];
   }
 
-  async initializePackage() {
+  async initializePackage(opts?: { version?: string; skipBootstrap?: boolean }) {
     if (!this.fleetClient) {
       throw new Error(
         'InfraSynthtraceEsClient requires a FleetClient to be initialized. Please provide a valid Kibana client.'
       );
     }
 
-    const latestVersion = await this.fleetClient.fetchLatestPackageVersion('system');
-    await this.fleetClient.installPackage('system', latestVersion);
+    if (opts?.skipBootstrap) {
+      return;
+    }
+
+    const version = opts?.version;
+
+    if (!version) {
+      const latestVersion = await this.fleetClient.fetchLatestPackageVersion('system');
+      await this.fleetClient.installPackage('system', latestVersion);
+    } else if (version === 'latest') {
+      await this.fleetClient.installPackage('system', version);
+    }
+  }
+  async uninstallPackage() {
+    if (!this.fleetClient) {
+      throw new Error(
+        'InfraSynthtraceEsClient requires a FleetClient to be initialized. Please provide a valid Kibana client.'
+      );
+    }
+    await this.fleetClient.uninstallPackage('apm');
   }
 }
 

@@ -9,7 +9,7 @@ import {
   ApmSynthtraceEsClient,
   InfraSynthtraceEsClient,
   LogsSynthtraceEsClient,
-  getSynthtraceClients,
+  SynthtraceClientsManager,
 } from '@kbn/apm-synthtrace';
 import { ToolingLog } from '@kbn/tooling-log';
 import { extendToolingLog } from '@kbn/apm-synthtrace';
@@ -32,17 +32,24 @@ export async function setupSynthtrace({
 }): Promise<SynthtraceEsClients> {
   const logger = extendToolingLog(log);
 
-  const { apmEsClient, infraEsClient, logsEsClient } = await getSynthtraceClients({
-    options: {
-      logger,
-      client,
-      kibana: {
-        target,
-      },
-      refreshAfterIndex: true,
-      includePipelineSerialization: false,
+  const clientManager = new SynthtraceClientsManager({
+    client,
+    logger,
+    refreshAfterIndex: true,
+    includePipelineSerialization: false,
+  });
+
+  const { apmEsClient, infraEsClient, logsEsClient } = clientManager.getClients({
+    clients: ['apmEsClient', 'infraEsClient', 'logsEsClient'],
+    kibana: {
+      target,
     },
-    synthClients: ['apmEsClient', 'infraEsClient', 'logsEsClient'],
+  });
+
+  clientManager.installFleetPackageForClient({
+    clients: {
+      apmEsClient,
+    },
   });
 
   return {

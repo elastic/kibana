@@ -22,7 +22,7 @@ import {
   LogLevel,
   SynthtraceClientTypes,
   createLogger,
-  getSynthtraceClients,
+  SynthtraceClientsManager,
 } from '@kbn/apm-synthtrace';
 import {
   getLogger,
@@ -47,7 +47,7 @@ const INGESTION_CLIENT_MAP: Record<string, SynthtraceClientTypes> = {
 };
 
 const getSynthtraceClient = async (
-  key: SynthtraceClientTypes,
+  synthClient: SynthtraceClientTypes,
   esClient: EsClient,
   kbnUrl: string,
   auth: { username: string; password: string },
@@ -63,22 +63,21 @@ const getSynthtraceClient = async (
 
   const logger = createLogger(LogLevel.info);
 
-  const clients = await getSynthtraceClients({
+  const clientManager = new SynthtraceClientsManager({
+    client: esClient,
     logger,
-    options: {
-      client: esClient,
-      kibana: {
-        target: kibanaUrlWithAuth,
-      },
-      logger,
-      refreshAfterIndex: true,
-      includePipelineSerialization: false,
-    },
-    skipBootstrap: false,
-    synthClients: key,
+    refreshAfterIndex: true,
+    includePipelineSerialization: false,
   });
 
-  return clients[key];
+  const clients = clientManager.getClients({
+    clients: [synthClient],
+    kibana: {
+      target: kibanaUrlWithAuth,
+    },
+  });
+
+  return clients[synthClient];
 };
 
 /**

@@ -239,15 +239,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     let synthtraceApmClient: ApmSynthtraceEsClient;
 
     before(async () => {
-      const { infraEsClient, logsEsClient, apmEsClient } = await synthtraceClient.getClients([
+      const clients = await synthtraceClient.getClients([
         'infraEsClient',
         'logsEsClient',
         'apmEsClient',
       ]);
 
-      synthEsInfraClient = infraEsClient;
-      syntEsLogsClient = logsEsClient;
-      synthtraceApmClient = apmEsClient;
+      synthEsInfraClient = clients.infraEsClient;
+      syntEsLogsClient = clients.logsEsClient;
+      synthtraceApmClient = clients.apmEsClient;
 
       return Promise.all([
         synthtraceApmClient.clean(),

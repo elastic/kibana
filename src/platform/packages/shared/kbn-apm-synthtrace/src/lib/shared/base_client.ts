@@ -35,7 +35,18 @@ export interface SynthtraceEsClientOptions {
 
 type MaybeArray<T> = T | T[];
 
-export class SynthtraceEsClient<TFields extends Fields> {
+export interface SynthtraceEsClient<TFields extends Fields> {
+  index(
+    streamOrGenerator: MaybeArray<Readable | SynthtraceGenerator<TFields>>,
+    pipelineCallback?: (base: Readable) => NodeJS.WritableStream
+  ): Promise<void>;
+  clean(): Promise<void>;
+  refresh(): ReturnType<Client['indices']['refresh']>;
+  setPipeline(cb: (base: Readable) => NodeJS.WritableStream): void;
+  getAllIndices(): string[];
+}
+
+export class SynthtraceEsClientBase<TFields extends Fields> implements SynthtraceEsClient<TFields> {
   protected readonly client: Client;
   protected readonly kibanaClient?: KibanaClient;
   protected readonly fleetClient?: FleetClient;

@@ -15,15 +15,15 @@ export {
 } from './src/lib/utils/create_logger';
 
 export {
-  getSynthtraceClients,
+  SynthtraceClientsManager,
   type SynthtraceClientTypes,
   type GetClientsReturn,
-} from './src/cli/utils/get_clients';
-export { ApmSynthtraceEsClient } from './src/lib/apm/client/apm_synthtrace_es_client';
-export { InfraSynthtraceEsClient } from './src/lib/infra/infra_synthtrace_es_client';
-export { MonitoringSynthtraceEsClient } from './src/lib/monitoring/monitoring_synthtrace_es_client';
-export { LogsSynthtraceEsClient } from './src/lib/logs/logs_synthtrace_es_client';
-export { SyntheticsSynthtraceEsClient } from './src/lib/synthetics/synthetics_synthtrace_es_client';
+} from './src/cli/utils/clients_manager';
+export type { ApmSynthtraceEsClient } from './src/lib/apm/client/apm_synthtrace_es_client';
+export type { InfraSynthtraceEsClient } from './src/lib/infra/infra_synthtrace_es_client';
+export type { MonitoringSynthtraceEsClient } from './src/lib/monitoring/monitoring_synthtrace_es_client';
+export type { LogsSynthtraceEsClient } from './src/lib/logs/logs_synthtrace_es_client';
+export type { SyntheticsSynthtraceEsClient } from './src/lib/synthetics/synthetics_synthtrace_es_client';
 export {
   addObserverVersionTransform,
   deleteSummaryFieldTransform,

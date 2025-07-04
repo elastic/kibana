@@ -10,14 +10,23 @@
 import { Client } from '@elastic/elasticsearch';
 import { ESDocumentWithOperation, MonitoringDocument } from '@kbn/apm-synthtrace-client';
 import { pipeline, Readable, Transform } from 'stream';
-import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
+import {
+  SynthtraceEsClientBase,
+  SynthtraceEsClient,
+  SynthtraceEsClientOptions,
+} from '../shared/base_client';
 import { getDedotTransform } from '../shared/get_dedot_transform';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 import { Logger } from '../utils/create_logger';
 
 export type MonitoringSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
-export class MonitoringSynthtraceEsClient extends SynthtraceEsClient<MonitoringDocument> {
+export type MonitoringSynthtraceEsClient = SynthtraceEsClient<MonitoringDocument>;
+
+export class MonitoringSynthtraceEsClientImpl
+  extends SynthtraceEsClientBase<MonitoringDocument>
+  implements MonitoringSynthtraceEsClient
+{
   constructor(options: { client: Client; logger: Logger } & MonitoringSynthtraceEsClientOptions) {
     super({
       ...options,

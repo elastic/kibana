@@ -13,7 +13,7 @@ import { PassThrough, Readable, Writable, finished } from 'stream';
 import { Fields } from '@kbn/apm-synthtrace-client';
 import { isGeneratorObject } from 'util/types';
 import { Worker, parentPort } from 'worker_threads';
-import { SynthtraceEsClient } from '../../lib/shared/base_client';
+import { SynthtraceEsClientBase } from '../../lib/shared/base_client';
 import { SynthGenerator } from '../../lib/utils/with_client';
 import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 
@@ -49,7 +49,7 @@ function attach(logger: ToolingLog, cb: () => Promise<void>) {
 const asyncNoop = async () => {};
 
 export class StreamManager {
-  private readonly clientStreams: Map<SynthtraceEsClient<Fields>, PassThrough> = new Map();
+  private readonly clientStreams: Map<SynthtraceEsClientBase<Fields>, PassThrough> = new Map();
   private readonly trackedGeneratorStreams: Writable[] = [];
   public readonly trackedWorkers: Worker[] = [];
 
@@ -94,7 +94,7 @@ export class StreamManager {
    * received from the generator into that stream.
    */
   async index(
-    client: SynthtraceEsClient<Fields>,
+    client: SynthtraceEsClientBase<Fields>,
     generator: SynthGenerator<Fields>
   ): Promise<void> {
     const clientStream = this.createOrReuseClientStream(client);
@@ -139,7 +139,7 @@ export class StreamManager {
     });
   }
 
-  private createOrReuseClientStream(client: SynthtraceEsClient<Fields>) {
+  private createOrReuseClientStream(client: SynthtraceEsClientBase<Fields>) {
     let stream: PassThrough;
 
     if (this.clientStreams.has(client)) {

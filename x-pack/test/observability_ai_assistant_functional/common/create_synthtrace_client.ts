@@ -8,9 +8,11 @@
 import { InheritedFtrProviderContext } from '../ftr_provider_context';
 
 export async function getApmSynthtraceEsClient(context: InheritedFtrProviderContext) {
-  const synthtraceClient = context.getService('synthtraceClient');
+  const synthtraceClient = context.getService('synthtrace');
 
   const { apmEsClient } = await synthtraceClient.getClients(['apmEsClient']);
+
+  await apmEsClient.initializePackage();
 
   return apmEsClient;
 }

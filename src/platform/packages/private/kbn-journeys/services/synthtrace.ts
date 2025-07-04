@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SynthtraceClientTypes, getSynthtraceClients } from '@kbn/apm-synthtrace';
+import { SynthtraceClientTypes, SynthtraceClientsManager } from '@kbn/apm-synthtrace';
 import { ToolingLog } from '@kbn/tooling-log';
 import { type Logger, extendToolingLog } from '@kbn/apm-synthtrace';
 import { Auth, Es } from '.';
@@ -21,28 +21,29 @@ export interface SynthtraceClientOptions {
 }
 
 export async function getSynthtraceClient(
-  type: SynthtraceClientTypes,
+  synthClient: SynthtraceClientTypes,
   options: SynthtraceClientOptions
 ) {
   const { log, es, auth, kbnUrl } = options;
   const logger: Logger = extendToolingLog(log);
 
-  const client = await getSynthtraceClients({
+  const clientManager = new SynthtraceClientsManager({
+    client: es,
     logger,
-    options: {
-      client: es,
-      kibana: {
-        target: kbnUrl.get(),
-        username: auth.getUsername(),
-        password: auth.getPassword(),
-      },
-      logger,
-      refreshAfterIndex: true,
-      includePipelineSerialization: false,
-    },
-    synthClients: type,
-    skipBootstrap: false,
+    refreshAfterIndex: true,
+    includePipelineSerialization: false,
   });
 
-  return client[type];
+  const clients = clientManager.getClients({
+    clients: [synthClient],
+    kibana: {
+      target: kbnUrl.get(),
+      username: auth.getUsername(),
+      password: auth.getPassword(),
+    },
+  });
+
+  clientManager.installFleetPackageForClient({ clients });
+
+  return clients[synthClient];
 }

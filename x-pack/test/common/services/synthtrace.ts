@@ -10,8 +10,9 @@ import { kbnTestConfig } from '@kbn/test';
 import {
   createLogger,
   LogLevel,
-  getSynthtraceClients,
+  SynthtraceClientsManager,
   SynthtraceClientTypes,
+  GetClientsReturn,
 } from '@kbn/apm-synthtrace';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -36,21 +37,26 @@ export function SynthtraceClientProvider({ getService }: FtrProviderContext) {
   const password = kbnTestConfig.getUrlParts().password || 'changeme';
 
   return {
-    async getClients(synthtraceClients: SynthtraceClientTypes[]) {
-      return getSynthtraceClients({
-        options: {
-          logger,
-          client: esClient,
-          kibana: {
-            target,
-            username,
-            password,
-          },
-          refreshAfterIndex: true,
-          includePipelineSerialization: false,
-        },
-        synthClients: synthtraceClients,
+    getClients<TClient extends SynthtraceClientTypes>(
+      synthtraceClients: TClient[]
+    ): GetClientsReturn<TClient> {
+      const clientManager = new SynthtraceClientsManager({
+        client: esClient,
+        logger,
+        refreshAfterIndex: true,
+        includePipelineSerialization: false,
       });
+
+      const clients = clientManager.getClients({
+        clients: synthtraceClients,
+        kibana: {
+          target,
+          username,
+          password,
+        },
+      });
+
+      return clients;
     },
   };
 }

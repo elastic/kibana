@@ -1,0 +1,138 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { Client } from '@elastic/elasticsearch';
+import { castArray } from 'lodash';
+import {
+  ApmSynthtraceEsClient,
+  ApmSynthtraceEsClientImpl,
+} from '../../lib/apm/client/apm_synthtrace_es_client';
+import {
+  InfraSynthtraceEsClient,
+  InfraSynthtraceEsClientImpl,
+} from '../../lib/infra/infra_synthtrace_es_client';
+import {
+  LogsSynthtraceEsClient,
+  LogsSynthtraceEsClientImpl,
+} from '../../lib/logs/logs_synthtrace_es_client';
+import { SynthtraceEsClientOptions } from '../../lib/shared/base_client';
+import {
+  SyntheticsSynthtraceEsClient,
+  SyntheticsSynthtraceEsClientImpl,
+} from '../../lib/synthetics/synthetics_synthtrace_es_client';
+import {
+  StreamsSynthtraceClientImpl,
+  StreamsSynthtraceClient,
+} from '../../lib/streams/streams_synthtrace_client';
+import { PackageManagement } from '../../lib/shared/types';
+
+export interface PipelineOptions {
+  includePipelineSerialization?: boolean;
+}
+
+type DefaultSynthtraceClients = [
+  'apmEsClient',
+  'infraEsClient',
+  'logsEsClient',
+  'syntheticsEsClient',
+  'streamsClient'
+];
+
+export interface SynthtraceClients {
+  apmEsClient: ApmSynthtraceEsClient;
+  infraEsClient: InfraSynthtraceEsClient;
+  logsEsClient: LogsSynthtraceEsClient;
+  syntheticsEsClient: SyntheticsSynthtraceEsClient;
+  streamsClient: StreamsSynthtraceClient;
+}
+
+export type ClientsWithFleetPackage = {
+  [K in keyof SynthtraceClients]: SynthtraceClients[K] extends PackageManagement
+    ? Record<K, SynthtraceClients[K]>
+    : never;
+}[keyof SynthtraceClients];
+
+export type SynthtraceClientTypes = DefaultSynthtraceClients[number];
+export type GetClientsReturn<K extends SynthtraceClientTypes = SynthtraceClientTypes> = Pick<
+  SynthtraceClients,
+  K
+> & {
+  esClient: Client;
+};
+
+export class SynthtraceClientsManager {
+  constructor(
+    private readonly options: Omit<
+      SynthtraceEsClientOptions,
+      'pipeline' | 'fleetClient' | 'kibana'
+    > &
+      PipelineOptions
+  ) {}
+  getClients<const TClient extends SynthtraceClientTypes = SynthtraceClientTypes>(
+    opts?: {
+      clients?: TClient[];
+      packageVersion?: string;
+    } & Pick<SynthtraceEsClientOptions, 'kibana'>
+  ): GetClientsReturn<TClient> {
+    const { kibana, packageVersion } = opts ?? {};
+    const result = {
+      esClient: this.options.client,
+    } as GetClientsReturn<TClient>;
+
+    const factories: Record<SynthtraceClientTypes, () => SynthtraceClients[SynthtraceClientTypes]> =
+      {
+        apmEsClient: () =>
+          new ApmSynthtraceEsClientImpl({
+            ...this.options,
+            version: packageVersion,
+            kibana,
+          }),
+        infraEsClient: () => new InfraSynthtraceEsClientImpl({ ...this.options, kibana }),
+        logsEsClient: () => new LogsSynthtraceEsClientImpl({ ...this.options, kibana }),
+        syntheticsEsClient: () => new SyntheticsSynthtraceEsClientImpl({ ...this.options, kibana }),
+        streamsClient: () => {
+          if (!kibana) {
+            throw new Error('Kibana client is required for StreamsSynthtraceClient');
+          }
+
+          return new StreamsSynthtraceClientImpl({ ...this.options, kibana });
+        },
+      };
+
+    for (const key of opts?.clients
+      ? castArray(opts.clients)
+      : (Object.keys(factories) as SynthtraceClientTypes[])) {
+      const initClient = factories[key];
+      (result as any)[key] = initClient();
+    }
+
+    return result;
+  }
+
+  async initFleetPackageForClient(opts: {
+    clients: ClientsWithFleetPackage;
+    version?: string;
+    skipBootstrap?: boolean;
+  }) {
+    const { clients, version, skipBootstrap } = opts;
+    if (!clients) {
+      throw new Error('No clients have been initialized. Call getClients() first.');
+    }
+
+    for (const synthtraceClient of Object.values(clients)) {
+      if (this.isClientWithPackageManangement(synthtraceClient)) {
+        await synthtraceClient.initializePackage({ version, skipBootstrap });
+      }
+    }
+  }
+
+  private isClientWithPackageManangement(client: unknown): client is PackageManagement {
+    return 'initializePackage' in (client as PackageManagement);
+  }
+}

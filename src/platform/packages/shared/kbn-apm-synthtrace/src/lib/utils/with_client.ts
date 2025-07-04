@@ -9,7 +9,7 @@
 
 import { Fields, SynthtraceGenerator } from '@kbn/apm-synthtrace-client';
 import { Readable } from 'stream';
-import { SynthtraceEsClient } from '../shared/base_client';
+import { SynthtraceEsClientBase } from '../shared/base_client';
 
 export type SynthGenerator<TFields extends Fields> =
   | SynthtraceGenerator<TFields>
@@ -17,7 +17,7 @@ export type SynthGenerator<TFields extends Fields> =
   | Readable;
 
 export const withClient = <TFields extends Fields>(
-  client: SynthtraceEsClient<TFields>,
+  client: SynthtraceEsClientBase<TFields>,
   generator: SynthGenerator<TFields>
 ) => {
   return {

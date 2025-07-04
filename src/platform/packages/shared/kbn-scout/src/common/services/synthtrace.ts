@@ -11,37 +11,42 @@ import {
   LogLevel,
   SynthtraceClientTypes,
   createLogger,
-  getSynthtraceClients,
+  SynthtraceClientsManager,
 } from '@kbn/apm-synthtrace';
 import { Client } from '@elastic/elasticsearch';
+import { ScoutLogger } from './logger';
 
 export interface SynthtraceClientOptions {
   kbnUrl?: string;
 
   esClient: Client;
+
+  log: ScoutLogger;
 }
 
 const logger = createLogger(LogLevel.info);
 
 export async function getSynthtraceClient(
-  type: SynthtraceClientTypes,
-  { esClient, kbnUrl }: SynthtraceClientOptions
+  synthClient: SynthtraceClientTypes,
+  { esClient, kbnUrl, log }: SynthtraceClientOptions
 ) {
-  const client = await getSynthtraceClients({
-    options: {
-      client: esClient,
-      kibana: kbnUrl
-        ? {
-            target: kbnUrl,
-          }
-        : undefined,
-      logger,
-      refreshAfterIndex: true,
-      includePipelineSerialization: false,
-    },
-    synthClients: type,
-    skipBootstrap: false,
+  const clientManager = new SynthtraceClientsManager({
+    client: esClient,
+    logger,
+    refreshAfterIndex: true,
+    includePipelineSerialization: false,
   });
 
-  return client[type];
+  const client = clientManager.getClients({
+    clients: [synthClient],
+    kibana: kbnUrl
+      ? {
+          target: kbnUrl,
+        }
+      : undefined,
+  });
+
+  log.serviceLoaded(synthClient);
+
+  return client[synthClient];
 }
