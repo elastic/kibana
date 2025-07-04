@@ -43,6 +43,7 @@ describe('RuleEnabledSwitch', () => {
       index: 0,
       updatedAt: new Date('2020-08-20T19:23:38Z'),
       revision: 0,
+      autoRecoverAlerts: true,
     },
     onRuleChanged: jest.fn(),
   };
@@ -88,6 +89,7 @@ describe('RuleEnabledSwitch', () => {
             index: 0,
             updatedAt: new Date('2020-08-20T19:23:38Z'),
             revision: 0,
+            autoRecoverAlerts: true,
           },
         }}
       />
