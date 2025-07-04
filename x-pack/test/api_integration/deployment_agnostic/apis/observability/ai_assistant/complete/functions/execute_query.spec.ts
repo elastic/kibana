@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { last } from 'lodash';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
-import { EsqlResponse } from '@elastic/elasticsearch/lib/helpers';
+import { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import { LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
 import { chatComplete } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
@@ -170,13 +170,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
-      describe('The fourth request - Executing the ES|QL query', () => {
-        it('contains the `execute_query` tool call request', () => {
+      describe('The fourth request - executing the ES|QL query', () => {
+        it('should not contain the `execute_query` tool call request', () => {
           const hasToolCall = fourthRequestBody.messages.some(
             // @ts-expect-error
             (message) => message.tool_calls?.[0]?.function?.name === 'execute_query'
           );
-          expect(hasToolCall).to.be(true);
+          expect(hasToolCall).to.be(false);
         });
 
         it('emits a messageAdded event with the `execute_query` tool response', () => {
@@ -186,28 +186,168 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(event?.message.message.content).to.contain('simple log message');
         });
 
-        describe('the `execute_query` tool call response', () => {
-          let toolCallResponse: { columns: EsqlResponse['columns']; rows: EsqlResponse['values'] };
-          before(async () => {
-            toolCallResponse = JSON.parse(last(fourthRequestBody.messages)?.content as string);
+        describe('tool call collapsing', () => {
+          it('collapses the `execute_query` tool call into the `query` tool response', () => {
+            const content = JSON.parse(last(fourthRequestBody.messages)?.content as string);
+            expect(content.steps).to.have.length(2);
+
+            const [toolRequest, toolResponse] = content.steps;
+
+            // visualize_query tool request (sent by the LLM)
+            expect(toolRequest.role).to.be('assistant');
+            expect(toolRequest.toolCalls[0].function.name).to.be('execute_query');
+
+            // visualize_query tool response (sent by AI Assistant)
+            expect(toolResponse.role).to.be('tool');
+            expect(toolResponse.name).to.be('execute_query');
           });
 
-          it('has the correct columns', () => {
-            expect(toolCallResponse.columns.map(({ name }) => name)).to.eql([
-              'message',
-              '@timestamp',
-            ]);
+          it('contains the `execute_query` tool call request', () => {
+            const toolCallRequest = JSON.parse(last(fourthRequestBody.messages)?.content as string)
+              .steps[0].toolCalls[0];
+            expect(toolCallRequest.function.name).to.be('execute_query');
+            expect(toolCallRequest.function.arguments.query).to.contain(
+              'FROM logs-apache.access-default'
+            );
           });
 
-          it('has the correct number of rows', () => {
-            expect(toolCallResponse.rows.length).to.be(10);
-          });
+          describe('the `execute_query` response', () => {
+            let toolCallResponse: {
+              columns: EsqlToRecords<any>['columns'];
+              rows: EsqlToRecords<any>['records'];
+            };
 
-          it('has the right log message', () => {
-            expect(toolCallResponse.rows[0][0]).to.be('simple log message');
+            before(async () => {
+              toolCallResponse = JSON.parse(last(fourthRequestBody.messages)?.content as string)
+                .steps[1].response;
+            });
+
+            it('has the correct columns', () => {
+              expect(toolCallResponse.columns.map(({ name }) => name)).to.eql([
+                'message',
+                '@timestamp',
+              ]);
+            });
+
+            it('has the correct number of rows', () => {
+              expect(toolCallResponse.rows.length).to.be(10);
+            });
+
+            it('has the right log message', () => {
+              expect(toolCallResponse.rows[0][0]).to.be('simple log message');
+            });
           });
         });
       });
     });
   });
 }
+
+// query tool call
+// [
+//   {
+//     "role": "assistant",
+//     "content": "",
+//     "tool_calls": [
+//       {
+//         "function": {
+//           "name": "query",
+//           "arguments": "{}"
+//         },
+//         "id": "5af197",
+//         "type": "function"
+//       }
+//     ]
+//   },
+//   {
+//     "role": "tool",
+//     "content": "{\"steps\":[{\"role\":\"assistant\",\"content\":\"\",\"toolCalls\":[{\"function\":{\"name\":\"execute_query\",\"arguments\":{\"query\":\"FROM logs-apache.access-default\\n            | KEEP message\\n            | SORT @timestamp DESC\\n            | LIMIT 10\"}},\"toolCallId\":\"ce4275\"}]},{\"name\":\"execute_query\",\"role\":\"tool\",\"response\":{\"columns\":[{\"id\":\"message\",\"name\":\"message\",\"meta\":{\"type\":\"string\"}},{\"id\":\"@timestamp\",\"name\":\"@timestamp\",\"meta\":{\"type\":\"date\"}}],\"rows\":[[\"simple log message\",\"2025-07-03T21:43:04.898Z\"],[\"simple log message\",\"2025-07-03T21:42:04.898Z\"],[\"simple log message\",\"2025-07-03T21:41:04.898Z\"],[\"simple log message\",\"2025-07-03T21:40:04.898Z\"],[\"simple log message\",\"2025-07-03T21:39:04.898Z\"],[\"simple log message\",\"2025-07-03T21:38:04.898Z\"],[\"simple log message\",\"2025-07-03T21:37:04.898Z\"],[\"simple log message\",\"2025-07-03T21:36:04.898Z\"],[\"simple log message\",\"2025-07-03T21:35:04.898Z\"],[\"simple log message\",\"2025-07-03T21:34:04.898Z\"]]},\"toolCallId\":\"ce4275\"}]}",
+//     "tool_call_id": "5af197"
+//   }
+// ]
+
+// deserialized content of the query tool call
+// {
+//     "steps": [
+//         {
+//             "role": "assistant",
+//             "content": "",
+//             "toolCalls": [
+//                 {
+//                     "function": {
+//                         "name": "execute_query",
+//                         "arguments": {
+//                             "query": "FROM logs-apache.access-default\n            | KEEP message\n            | SORT @timestamp DESC\n            | LIMIT 10"
+//                         }
+//                     },
+//                     "toolCallId": "ce4275"
+//                 }
+//             ]
+//         },
+//         {
+//             "name": "execute_query",
+//             "role": "tool",
+//             "response": {
+//                 "columns": [
+//                     {
+//                         "id": "message",
+//                         "name": "message",
+//                         "meta": {
+//                             "type": "string"
+//                         }
+//                     },
+//                     {
+//                         "id": "@timestamp",
+//                         "name": "@timestamp",
+//                         "meta": {
+//                             "type": "date"
+//                         }
+//                     }
+//                 ],
+//                 "rows": [
+//                     [
+//                         "simple log message",
+//                         "2025-07-03T21:43:04.898Z"
+//                     ],
+//                     [
+//                         "simple log message",
+//                         "2025-07-03T21:42:04.898Z"
+//                     ],
+//                     [
+//                         "simple log message",
+//                         "2025-07-03T21:41:04.898Z"
+//                     ],
+//                     [
+//                         "simple log message",
+//                         "2025-07-03T21:40:04.898Z"
+//                     ],
+//                     [
+//                         "simple log message",
+//                         "2025-07-03T21:39:04.898Z"
+//                     ],
+//                     [
+//                         "simple log message",
+//                         "2025-07-03T21:38:04.898Z"
+//                     ],
+//                     [
+//                         "simple log message",
+//                         "2025-07-03T21:37:04.898Z"
+//                     ],
+//                     [
+//                         "simple log message",
+//                         "2025-07-03T21:36:04.898Z"
+//                     ],
+//                     [
+//                         "simple log message",
+//                         "2025-07-03T21:35:04.898Z"
+//                     ],
+//                     [
+//                         "simple log message",
+//                         "2025-07-03T21:34:04.898Z"
+//                     ]
+//                 ]
+//             },
+//             "toolCallId": "ce4275"
+//         }
+//     ]
+// }
