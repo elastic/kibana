@@ -171,8 +171,6 @@ export class IndicesMetadataService {
   ): Promise<TaskInstance | null> {
     this.logger.debug('About to schedule task', { task: TASK_ID } as LogMeta);
 
-    taskManager.removeIfExists(TASK_ID).catch(() => {});
-
     try {
       const taskInstance = await taskManager.ensureScheduled({
         id: TASK_ID,
