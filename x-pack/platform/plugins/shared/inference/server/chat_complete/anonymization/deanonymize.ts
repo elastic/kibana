@@ -27,7 +27,7 @@ export function deanonymize<TMessage extends Message>(
 
       while (index !== -1) {
         const start = index;
-        const end = start + entity.value.length;
+        const end = start + entity.mask.length;
 
         deanonymizations.push({ start, end, entity });
 

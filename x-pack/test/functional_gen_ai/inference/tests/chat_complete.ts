@@ -180,7 +180,7 @@ export const chatCompleteSuite = (
         });
         after(async () => {
           await setAdvancedSettings(supertest, {
-            [aiAssistantAnonymizationSettings]: [],
+            [aiAssistantAnonymizationSettings]: JSON.stringify({ rules: [] }),
           });
         });
         it('returns a chat completion message with deanonymization data', async () => {

@@ -66,7 +66,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await observabilityAIAssistantAPIClient.deleteActionConnector({ actionId: connectorId });
       await clearConversations(es);
       await setAdvancedSettings(supertest, {
-        [aiAssistantAnonymizationSettings]: [],
+        [aiAssistantAnonymizationSettings]: JSON.stringify({ rules: [] }),
       });
     });
 

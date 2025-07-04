@@ -151,21 +151,15 @@ export function ChatTimeline({
   } = useKibana();
 
   const { anonymizationEnabled } = useMemo(() => {
-    try {
-      // the response is JSON but will be a string while the setting is hidden temporarily (unregistered)
-      const anonymizationRulesSettingsStr = uiSettings?.get<string>(
-        aiAssistantAnonymizationSettings
-      );
-      const settings = anonymizationRulesSettingsStr
-        ? (JSON.parse(anonymizationRulesSettingsStr) as AnonymizationSettings)
-        : undefined;
+    // the response is JSON but will be a string while the setting is hidden temporarily (unregistered)
+    const anonymizationRulesSettingsStr = uiSettings?.get<string>(aiAssistantAnonymizationSettings);
+    const settings = anonymizationRulesSettingsStr
+      ? (JSON.parse(anonymizationRulesSettingsStr) as AnonymizationSettings)
+      : undefined;
 
-      return {
-        anonymizationEnabled: settings && settings.rules.some((rule) => rule.enabled),
-      };
-    } catch (e) {
-      return { anonymizationEnabled: false };
-    }
+    return {
+      anonymizationEnabled: settings && settings.rules.some((rule) => rule.enabled),
+    };
   }, [uiSettings]);
   const { euiTheme } = useEuiTheme();
 

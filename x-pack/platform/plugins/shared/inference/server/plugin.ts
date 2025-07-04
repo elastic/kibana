@@ -61,13 +61,11 @@ export class InferencePlugin
   }
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
-    const createAnonymizationRulesPromise = (request: KibanaRequest) => {
-      return (async () => {
-        const soClient = core.savedObjects.getScopedClient(request);
-        const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
-        const settingsStr = await uiSettingsClient.get<string>(aiAssistantAnonymizationSettings);
-        return (JSON.parse(settingsStr) as AnonymizationSettings).rules;
-      })();
+    const createAnonymizationRulesPromise = async (request: KibanaRequest) => {
+      const soClient = core.savedObjects.getScopedClient(request);
+      const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
+      const settingsStr = await uiSettingsClient.get<string>(aiAssistantAnonymizationSettings);
+      return (JSON.parse(settingsStr) as AnonymizationSettings).rules;
     };
     return {
       getClient: <T extends InferenceClientCreateOptions>(options: T) => {
