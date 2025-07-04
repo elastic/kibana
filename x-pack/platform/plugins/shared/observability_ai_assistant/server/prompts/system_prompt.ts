@@ -15,6 +15,7 @@ import {
   GET_APM_DOWNSTREAM_DEPENDENCIES_FUNCTION_NAME,
   GET_DATASET_INFO_FUNCTION_NAME,
   QUERY_FUNCTION_NAME,
+  RETRIEVE_ELASTIC_DOC_FUNCTION_NAME,
   SUMMARIZE_FUNCTION_NAME,
 } from '..';
 
@@ -23,11 +24,13 @@ export function getObservabilitySystemPrompt({
   isServerless = false,
   isKnowledgeBaseReady = false,
   isObservabilityDeployment = false,
+  isProductDocsAvailable = false,
 }: {
   availableFunctionNames: string[];
   isServerless?: boolean;
   isKnowledgeBaseReady: boolean;
   isObservabilityDeployment: boolean;
+  isProductDocsAvailable?: boolean;
 }) {
   const isFunctionAvailable = (fn: string) => availableFunctionNames.includes(fn);
 
@@ -49,7 +52,7 @@ export function getObservabilitySystemPrompt({
       availableFunctionNames.length
         ? `You have access to a set of tools to interact with the Elastic environment${
             isKnowledgeBaseReady ? ' and the knowledge base' : ''
-          }.`
+          }${isProductDocsAvailable ? ' and the product documentation' : ''}.`
         : ''
     }
   `)
@@ -196,13 +199,13 @@ export function getObservabilitySystemPrompt({
       );
     }
 
-    // usage.push(
-    //   `**Elastic Stack Questions:** For general questions about Elastic Stack products or features, ${
-    //     isFunctionAvailable('retrieve_elastic_doc')
-    //       ? ` ideally use the dedicated 'retrieve_elastic_doc' tool. If not,`
-    //       : ' answer based on your knowledge but state that the official Elastic documentation is the definitive source.'
-    //   }`
-    // );
+    usage.push(
+      `**Elastic Stack Questions:** For general questions about Elastic Stack products or features, ${
+        isFunctionAvailable(RETRIEVE_ELASTIC_DOC_FUNCTION_NAME) && isProductDocsAvailable
+          ? `ideally use the dedicated \`${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME}\` tool. Consider that the documentation returned by this tool is always more up to date and accurate than any own internal knowledge you might have.`
+          : 'answer based on your knowledge but state that the official Elastic documentation is the definitive source.'
+      }`
+    );
 
     if (isKnowledgeBaseReady && isFunctionAvailable(SUMMARIZE_FUNCTION_NAME)) {
       usage.push(

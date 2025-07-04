@@ -9,6 +9,7 @@ import type { FromSchema } from 'json-schema-to-ts';
 import { Observable } from 'rxjs';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { ChatEvent } from '../../common/conversation_complete';
+import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import type {
   CompatibleJSONSchema,
   FunctionDefinition,
@@ -88,4 +89,5 @@ export type RegistrationCallback = ({}: {
   client: ObservabilityAIAssistantClient;
   functions: ChatFunctionClient;
   scopes: AssistantScope[];
+  pluginsStart: ObservabilityAIAssistantPluginStartDependencies;
 }) => Promise<void>;

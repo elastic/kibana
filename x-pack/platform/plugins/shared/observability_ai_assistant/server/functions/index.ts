@@ -17,7 +17,7 @@ import { getObservabilitySystemPrompt } from '../prompts/system_prompt';
 
 export type FunctionRegistrationParameters = Omit<
   Parameters<RegistrationCallback>[0],
-  'registerContext' | 'hasFunction'
+  'registerContext' | 'hasFunction' | 'pluginsStart'
 >;
 
 export const registerFunctions: RegistrationCallback = async ({
@@ -26,6 +26,7 @@ export const registerFunctions: RegistrationCallback = async ({
   resources,
   signal,
   scopes,
+  pluginsStart,
 }) => {
   const registrationParameters: FunctionRegistrationParameters = {
     client,
@@ -43,6 +44,10 @@ export const registerFunctions: RegistrationCallback = async ({
   const { kbState } = await client.getKnowledgeBaseStatus();
   const isKnowledgeBaseReady = kbState === KnowledgeBaseState.READY;
 
+  // determine if product documentation is installed
+  const llmTasks = pluginsStart?.llmTasks;
+  const isProductDocsAvailable = llmTasks ? await llmTasks.retrieveDocumentationAvailable() : false;
+
   if (isObservabilityDeployment || isGenericDeployment) {
     functions.registerInstruction(({ availableFunctionNames }) =>
       getObservabilitySystemPrompt({
@@ -50,6 +55,7 @@ export const registerFunctions: RegistrationCallback = async ({
         isServerless,
         isKnowledgeBaseReady,
         isObservabilityDeployment,
+        isProductDocsAvailable,
       })
     );
   }

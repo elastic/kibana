@@ -6,7 +6,10 @@
  */
 
 import { DocumentationProduct } from '@kbn/product-doc-common';
-import { RETRIEVE_ELASTIC_DOC_FUNCTION_NAME, getInferenceIdFromWriteIndex } from '@kbn/observability-ai-assistant-plugin/server';
+import {
+  RETRIEVE_ELASTIC_DOC_FUNCTION_NAME,
+  getInferenceIdFromWriteIndex,
+} from '@kbn/observability-ai-assistant-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { FunctionRegistrationParameters } from '.';
 
@@ -16,16 +19,6 @@ export async function registerDocumentationFunction({
   pluginsStart: { llmTasks },
 }: FunctionRegistrationParameters) {
   const isProductDocAvailable = (await llmTasks.retrieveDocumentationAvailable()) ?? false;
-
-  if (isProductDocAvailable) {
-    functions.registerInstruction(({ availableFunctionNames }) => {
-      return availableFunctionNames.includes(RETRIEVE_ELASTIC_DOC_FUNCTION_NAME)
-        ? `When asked questions about the Elastic stack or products, You should use the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering,
-      to retrieve documentation related to the question. Consider that the documentation returned by the function
-      is always more up to date and accurate than any own internal knowledge you might have.`
-        : undefined;
-    });
-  }
 
   functions.registerFunction(
     {
