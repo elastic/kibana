@@ -11,6 +11,8 @@ tags: ['kibana', 'contributor', 'dev', 'http', 'api', 'rest', 'design']
   As an extension to the guidance in this document refer to the <DocLink id="kibHttpApiTfGuidelines" text="Guidelines for Terraform friendly HTTP APIs" /> if you would like to support an Infrastructure-as-Code (IaC) use case.
 </DocCallOut>
 
+[Click here](#structure-and-conventions) to skip to the structure and conventions guides.
+
 ## Design principles
 
 ### Consistency
@@ -66,9 +68,18 @@ GET /resource_bs?page=1
 
 Public HTTP APIs are long-term commitments that we make to users. We must be committed to maintaining them and ensuring they continue to work as expected (for at least 18 months).
 
-Use the means available: first release new public HTTP APIs as `Technical Preview` or `Beta` to derisk any aspects of the API design you are uncertain about. In this way you can get real-world feedback before declaring an API generally available or stable. If you can find an internal use-case to dog-food an unreleased HTTP API, even better!
+Use the means available: first release new public HTTP APIs as `Technical Preview` or `Beta` to derisk any aspects of the API design you are uncertain about.
 
 Getting your HTTP APIs into a stable state is a process based on feedback from actual users.
+
+#### Breaking changes to HTTP APIs include
+
+ - Rename or delete an API
+ - Rename or delete a path, query or body parameter
+ - Modifying the type of a property (including expanding to a union type!)
+ - Set an existing property as required
+ - Add or delete a security requirement
+ - In some cases, changing a default
 
 <DocCallOut title="Do not break clients!">
   A public HTTP API should never cause a client to break. Not without a long (18 month) deprecation period and a ready alternative.
@@ -96,7 +107,7 @@ router.get({ path: '/api/foos', options: { access: 'public' } }, async () => {..
 
 Again, see the principle regarding [commitment](#commitment) before making APIs public!
 
-## Structure
+## Structure and conventions
 
 The following are a quick reference for how to structure your HTTP APIs.
 
@@ -138,12 +149,16 @@ Sometimes `POST` can be used for an action against a resource or for actions lik
 
 **DELETE is for deleting a resource**
 
-Delete can return a simple response:
+Delete can return a simple response instead of the full resource:
 
 ```
 DELETE /api/resources/{id}
-# -> { "ok": true }
+# -> 200 { "ok": true }
 ```
+
+**Stick to simple methods**
+
+`GET`, `POST`, `PUT`, `PATCH`, `DELETE` should cover almost all cases. If you are considering `HEAD` or some other method make sure you have a good justification for your HTTP API.
 
 ### Path parameters
 
@@ -153,6 +168,12 @@ DELETE /api/resources/{id}
 
 `/api/my_api/{myId}` ❌
 
+**BEWARE: path parameters should not expect values of unknown length**
+
+Accepting very long strings in path parameters can cause issues for HTTP servers that limit the byte length of certain parts of requests.
+
+Use a body parameter for long strings instead and consider using validation to limit a path param's length.
+
 ### Query parameters
 
 **Should use snake case**
@@ -160,6 +181,12 @@ DELETE /api/resources/{id}
 `/api/my_api?snake_case=true` ✅
 
 `/api/my_api?snakeCase=false` ❌
+
+**BEWARE: query parameters should not expect values of unknown length**
+
+Accepting very long strings in query parameters can cause issues for HTTP servers that limit the byte length of certain parts of requests.
+
+Use a body parameter for long strings instead and consider using validation to limit a query param's length.
 
 ### Bodies
 
@@ -171,11 +198,45 @@ maintaining a solid API user experience.
 
 **Use JSON**
 
-This applies to both requests and responses, unless there is a good justification to return or support different response media types.
+Both requests and responses should be `application/json`, unless there is a good justification to use a different media type like when you're serving a file to a client.
 
 **Resource shapes should be consistent**
 
 `GET`, `PUT`, `POST` should return the same shape of data for the same resource.
+
+`GET /api/my_resources/{id}` <br />
+=> <br />
+`{ "id": "1", "name": "My resource" }`<br /><br />
+
+`POST /api/my_resources/{id} { "id": "1", "name": "My resource" }`<br />
+=> <br />
+`{ "id": "1", "name": "My resource" }`<br /><br />
+
+`GET /api/my_resources` <br />
+=> <br />
+`{ items: [{ "id": "1", "name": "My resource" }], page: 1, size: 10, total: 100 }`
+
+### Defaults
+
+**Should be used to promote ease of use**
+
+Carefully choose which values may be set as a sane default. If you are unsure rather ask the API caller to make an informed decision, see the [documentation section](#documentation).
+
+**Should not be changed lightly**
+
+Changing the value of a default may, in some cases, have a devastating result similar to a breaking change.
+
+### Validation
+
+**Runtime validation should be as narrow as feasible**
+
+`schema.object({ id: schema.string({ minLength: 32, maxLength: 32 }) })` ✅
+
+`schema.object({ id: schema.string() })` ❌
+
+**It is easier to relax requirements than tighten them**
+
+If you are in doubt, rather go with stricter validation. Make a requirement more lax if needed is never a breaking change!
 
 ### Headers
 
@@ -208,11 +269,30 @@ See the [MDN docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/S
 
 ### Errors
 
+```
+4xx or 5xx status code
+{
+  code?: "A machine-friendly code for interpreting this error",
+  ok: false,
+  message: "A human-friendly explanation about what went wrong and how to fix it"
+}
+```
+
 ### Special data formats
 
 **Dates**
+Use [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) in UTC. This is the default representation in Node.js.
 
 **Durations**
+Can be specified in the [Elasticsearch date math](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/common-options#date-math) format, for ex. `1m` for 1 minute if you want your duration to be relative to `now` where the full expression would be `now-1m`.
+
+Alternatively, use 2 numbers in milliseconds or [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date strings.
+
+## Documentation
+
+**Public HTTP APIs must have reference documentation**
+
+See our current reference documentation (here)[https://www.elastic.co/docs/api/doc/kibana/]. This is compiled from our OpenAPI spec. See <DocLink id="kibDevTutorialGeneratingOASForHTTPAPIs" text="this tutorial" /> about the code-first approach to generating OpenAPI spec available in Kibana.
 
 ## Versioning
 
