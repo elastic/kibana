@@ -47,14 +47,14 @@ describe('uiSettings', () => {
 
   beforeEach(() => {
     const coreContext = mockCoreContext.create({
-      "env": {
+      env: {
         ...createTestEnv(),
         packageInfo: {
           ...createTestPackageInfo(),
           buildFlavor: 'serverless',
-        } as unknown as PackageInfo
-      }
-    })
+        } as unknown as PackageInfo,
+      },
+    });
     coreContext.configService.atPath.mockReturnValue(new BehaviorSubject({ overrides }));
     const httpSetup = httpServiceMock.createInternalSetupContract();
     const savedObjectsSetup = savedObjectsServiceMock.createInternalSetupContract();
