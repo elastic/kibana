@@ -17,7 +17,7 @@ import { useSpaceId } from '../../../../../../common/hooks/use_space_id';
 import { useVisualizationResponse } from '../../../../../../common/components/visualization_actions/use_visualization_response';
 
 const LENS_VISUALIZATION_HEIGHT = 150;
-const LENS_VISUALIZATION_MIN_WIDTH = 220;
+const LENS_VISUALIZATION_MIN_WIDTH = 190;
 
 interface KeyInsightsTileProps {
   title: ReactElement;
