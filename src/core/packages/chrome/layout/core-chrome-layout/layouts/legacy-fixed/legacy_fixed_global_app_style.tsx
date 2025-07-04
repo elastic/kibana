@@ -91,6 +91,9 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
         var(--kbnHeaderOffsetWithBanner) + var(--kbnProjectHeaderAppActionMenuHeight)
       );
     }
+
+    // forward compatibility with new grid layout variables,
+    --kbn-application--top-bar-height: var(--kbnProjectHeaderAppActionMenuHeight);
   }
 
   .kbnBody--chromeHidden {
