@@ -21,7 +21,6 @@ const TYPE_PRIORITY = [
   'scaled_float',
   'date',
   'keyword',
-  'text',
 ] as const;
 
 // List of sortable types in Elasticsearch (TYPE_PRIORITY plus 'boolean')
