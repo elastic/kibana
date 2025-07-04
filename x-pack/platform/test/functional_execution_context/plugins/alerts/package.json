@@ -6,8 +6,8 @@
     "templateVersion": "1.0.0"
   },
   "scripts": {
-    "kbn": "node ../../../../../../scripts/kbn.js",
-    "build": "rm -rf './target' && ../../../../../../node_modules/.bin/tsc"
+    "kbn": "node ../../../../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && ../../../../../../../node_modules/.bin/tsc"
   },
   "license": "Elastic License 2.0"
 }
