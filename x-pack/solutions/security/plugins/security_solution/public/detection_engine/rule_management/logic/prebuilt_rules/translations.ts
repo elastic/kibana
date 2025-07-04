@@ -16,7 +16,7 @@ export const RULE_INSTALLATION_FAILED = i18n.translate(
 
 export const INSTALL_RULE_SUCCESS = (succeeded: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.prebuiltRules.toast.installRuleSuccess', {
-    defaultMessage: '{succeeded, plural, one {# rule} other {# rules}} installed successfully.',
+    defaultMessage: '{succeeded, plural, one {# rule} other {# rules}} installed successfully',
     values: { succeeded },
   });
 
@@ -29,7 +29,7 @@ export const INSTALL_RULE_SKIPPED = (skipped: number) =>
 
 export const INSTALL_RULE_FAILED = (failed: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.prebuiltRules.toast.installRuleFailed', {
-    defaultMessage: '{failed, plural, one {# rule} other {# rules}} failed to install.',
+    defaultMessage: '{failed, plural, one {# rule} other {# rules}} failed to install',
     values: { failed },
   });
 
@@ -42,7 +42,7 @@ export const RULE_UPGRADE_FAILED = i18n.translate(
 
 export const UPGRADE_RULE_SUCCESS = (succeeded: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.prebuiltRules.toast.upgradeRuleSuccess', {
-    defaultMessage: '{succeeded, plural, one {# rule} other {# rules}} updated successfully.',
+    defaultMessage: '{succeeded, plural, one {# rule} other {# rules}} updated successfully',
     values: { succeeded },
   });
 
@@ -55,6 +55,6 @@ export const UPGRADE_RULE_SKIPPED = (skipped: number) =>
 
 export const UPGRADE_RULE_FAILED = (failed: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.prebuiltRules.toast.upgradeRuleFailed', {
-    defaultMessage: '{failed, plural, one {# rule} other {# rules}} failed to update.',
+    defaultMessage: '{failed, plural, one {# rule} other {# rules}} failed to update',
     values: { failed },
   });
