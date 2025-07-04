@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import fs from 'fs';
 import path from 'path';
 import type SuperTest from 'supertest';
@@ -89,17 +89,20 @@ export class ReportingPageObject extends FtrService {
     `);
   }
 
-  async getResponse(fullUrl: string): Promise<SuperTest.Response> {
-    this.log.debug(`getResponse for ${fullUrl}`);
-    const parsedUrl = new URL(fullUrl);
-    const urlWithoutBase = `${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`;
-    const res = await this.security.testUserSupertest.get(urlWithoutBase);
+  async getResponse(url: string, isFullUrl: boolean = true): Promise<SuperTest.Response> {
+    this.log.debug(`getResponse for ${url}`);
+    let urlToUse = url;
+    if (isFullUrl) {
+      const parsedUrl = new URL(url);
+      urlToUse = `${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`;
+    }
+    const res = await this.security.testUserSupertest.get(urlToUse);
     return res ?? '';
   }
 
   async getReportInfo(jobId: string) {
     this.log.debug(`getReportInfo for ${jobId}`);
-    const response = await this.getResponse(INTERNAL_ROUTES.JOBS.INFO_PREFIX + `/${jobId}`);
+    const response = await this.getResponse(INTERNAL_ROUTES.JOBS.INFO_PREFIX + `/${jobId}`, false);
     return response.body;
   }
 
