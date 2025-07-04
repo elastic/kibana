@@ -46,8 +46,8 @@ export const createTextChunkEvent = (
   return {
     type: ChatAgentEventType.messageChunk,
     data: {
-      messageId: chunk.id ?? defaultMessageId,
-      textChunk: extractTextContent(chunk),
+      message_id: chunk.id ?? defaultMessageId,
+      text_chunk: extractTextContent(chunk),
     },
   };
 };
@@ -59,8 +59,8 @@ export const createMessageEvent = (
   return {
     type: ChatAgentEventType.messageComplete,
     data: {
-      messageId,
-      messageContent: content,
+      message_id: messageId,
+      message_content: content,
     },
   };
 };

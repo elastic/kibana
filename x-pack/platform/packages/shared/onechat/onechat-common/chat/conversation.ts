@@ -35,7 +35,7 @@ export interface AssistantResponse {
 }
 
 export enum ConversationRoundStepType {
-  toolCall = 'toolCall',
+  toolCall = 'tool_call',
   reasoning = 'reasoning',
 }
 
@@ -52,11 +52,11 @@ export interface ToolCallWithResult {
   /**
    * Id of the tool call, as returned by the LLM
    */
-  toolCallId: string;
+  tool_call_id: string;
   /**
    * Structured identifier of the tool.
    */
-  toolId: StructuredToolIdentifier;
+  tool_id: StructuredToolIdentifier;
   /**
    * Arguments the tool was called with.
    */
@@ -110,11 +110,11 @@ export type ConversationRoundStep = ToolCallStep | ReasoningStep;
  */
 export interface ConversationRound {
   /** The user input that initiated the round */
-  userInput: RoundInput;
+  input: RoundInput;
   /** List of intermediate steps before the end result, such as tool calls */
   steps: ConversationRoundStep[];
   /** The final response from the assistant */
-  assistantResponse: AssistantResponse;
+  response: AssistantResponse;
 }
 
 export interface Conversation {
