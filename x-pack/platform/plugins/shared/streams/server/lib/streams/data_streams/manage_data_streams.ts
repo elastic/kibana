@@ -166,7 +166,18 @@ export async function updateDataStreamsLifecycle({
       // for ILM or disabled we only have to unset any overrides
       await Promise.all(
         names.map(async (name) => {
-          const templateLifecycle = await getTemplateLifecycle({ esClient, name, logger });
+          const { template } = (await retryTransientEsErrors(
+            () => esClient.indices.simulateIndexTemplate({ name }),
+            {
+              logger,
+            }
+          )) as {
+            template: IndicesSimulateTemplateTemplate & {
+              lifecycle?: { enabled: boolean; data_retention?: string };
+            };
+          };
+
+          const templateLifecycle = await getTemplateLifecycle(template);
           if (isDslLifecycle(templateLifecycle)) {
             await retryTransientEsErrors(
               () =>
@@ -221,47 +232,35 @@ async function putDataStreamsSettings({
   );
 }
 
-async function getTemplateLifecycle({
-  esClient,
-  name,
-  logger,
-}: {
-  esClient: ElasticsearchClient;
-  name: string;
-  logger: Logger;
-}): Promise<IngestStreamLifecycleILM | IngestStreamLifecycleDSL | IngestStreamLifecycleDisabled> {
-  const { template } = (await retryTransientEsErrors(
-    () => esClient.indices.simulateIndexTemplate({ name }),
-    {
-      logger,
+export function getTemplateLifecycle(
+  template: IndicesSimulateTemplateTemplate & {
+    lifecycle?: { enabled: boolean; data_retention?: string };
+  }
+): IngestStreamLifecycleILM | IngestStreamLifecycleDSL | IngestStreamLifecycleDisabled {
+  const getBoolean = (value: boolean | string | undefined): boolean => {
+    if (typeof value === 'boolean') {
+      return value;
     }
-  )) as {
-    template: IndicesSimulateTemplateTemplate & {
-      lifecycle?: { enabled: boolean; data_retention?: string };
-    };
+    if (typeof value === 'string') {
+      return value === 'true';
+    }
+    return false;
   };
 
-  const hasEffectiveIlm =
-    template.settings.index?.lifecycle?.name &&
-    getBoolean(template.settings.index.lifecycle.prefer_ilm);
-  if (hasEffectiveIlm) {
-    return { ilm: { policy: template.settings.index!.lifecycle!.name! } };
-  }
-
-  const hasEffectiveDsl = !hasEffectiveIlm && getBoolean(template.lifecycle?.enabled);
+  const hasEffectiveDsl =
+    getBoolean(template.lifecycle?.enabled) &&
+    !(
+      getBoolean(template.settings.index?.lifecycle?.prefer_ilm) &&
+      template.settings.index?.lifecycle?.name
+    );
   if (hasEffectiveDsl) {
     return { dsl: { data_retention: template.lifecycle!.data_retention } };
   }
 
-  return { disabled: {} };
-}
+  if (template.settings.index?.lifecycle?.name) {
+    // if dsl is not enabled, ilm will be effective regardless of the prefer_ilm setting
+    return { ilm: { policy: template.settings.index.lifecycle.name } };
+  }
 
-function getBoolean(value: boolean | string | undefined): boolean {
-  if (typeof value === 'boolean') {
-    return value;
-  }
-  if (typeof value === 'string') {
-    return value === 'true';
-  }
-  return false;
+  return { disabled: {} };
 }
