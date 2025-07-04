@@ -21,7 +21,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackFunctionalTestsConfig = await readConfigFile(
-      require.resolve('../../functional/config.base.js')
+      require.resolve('../../functional/config.base.ts')
     );
 
     return {
@@ -50,7 +50,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--plugin-path=${path.resolve(__dirname, 'plugins/foo_plugin')}`,
           `--plugin-path=${path.resolve(
             __dirname,
-            '../../security_api_integration/plugins/features_provider'
+            '../../../../test/security_api_integration/plugins/features_provider'
           )}`,
         ],
       },
