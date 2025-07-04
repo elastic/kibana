@@ -89,6 +89,12 @@ export default ({ getService }: FtrProviderContext) => {
               alerts: 4,
               notifications_enabled: 1,
             },
+            query_custom: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
+              enabled: 1,
+              alerts: 4,
+              notifications_enabled: 1,
+            },
             custom_total: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
               enabled: 1,
@@ -116,6 +122,11 @@ export default ({ getService }: FtrProviderContext) => {
               disabled: 1,
               legacy_notifications_disabled: 1,
             },
+            query_custom: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query_custom,
+              disabled: 1,
+              legacy_notifications_disabled: 1,
+            },
             custom_total: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
               disabled: 1,
@@ -139,6 +150,12 @@ export default ({ getService }: FtrProviderContext) => {
           const expected: RulesTypeUsage = {
             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
             query: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
+              alerts: 4,
+              enabled: 1,
+              legacy_notifications_enabled: 1,
+            },
+            query_custom: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.query,
               alerts: 4,
               enabled: 1,
@@ -172,6 +189,11 @@ export default ({ getService }: FtrProviderContext) => {
               disabled: 1,
               legacy_notifications_disabled: 1,
             },
+            eql_custom: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql_custom,
+              disabled: 1,
+              legacy_notifications_disabled: 1,
+            },
             custom_total: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
               disabled: 1,
@@ -196,6 +218,12 @@ export default ({ getService }: FtrProviderContext) => {
             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
             eql: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql,
+              alerts: 4,
+              enabled: 1,
+              legacy_notifications_enabled: 1,
+            },
+            eql_custom: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.eql_custom,
               alerts: 4,
               enabled: 1,
               legacy_notifications_enabled: 1,
@@ -234,6 +262,11 @@ export default ({ getService }: FtrProviderContext) => {
               disabled: 1,
               legacy_notifications_disabled: 1,
             },
+            threshold_custom: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threshold_custom,
+              disabled: 1,
+              legacy_notifications_disabled: 1,
+            },
             custom_total: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
               disabled: 1,
@@ -268,6 +301,12 @@ export default ({ getService }: FtrProviderContext) => {
               enabled: 1,
               legacy_notifications_enabled: 1,
             },
+            threshold_custom: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threshold_custom,
+              alerts: 4,
+              enabled: 1,
+              legacy_notifications_enabled: 1,
+            },
             custom_total: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
               alerts: 4,
@@ -297,6 +336,12 @@ export default ({ getService }: FtrProviderContext) => {
               disabled: 1,
               legacy_notifications_disabled: 1,
             },
+            machine_learning_custom: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage
+                .machine_learning_custom,
+              disabled: 1,
+              legacy_notifications_disabled: 1,
+            },
             custom_total: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total,
               disabled: 1,
@@ -319,6 +364,12 @@ export default ({ getService }: FtrProviderContext) => {
             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
             machine_learning: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.machine_learning,
+              enabled: 1,
+              legacy_notifications_enabled: 1,
+            },
+            machine_learning_custom: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage
+                .machine_learning_custom,
               enabled: 1,
               legacy_notifications_enabled: 1,
             },
@@ -346,6 +397,12 @@ export default ({ getService }: FtrProviderContext) => {
             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
             threat_match: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threat_match,
+              disabled: 1,
+              legacy_notifications_disabled: 1,
+            },
+            threat_match_custom: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage
+                .threat_match_custom,
               disabled: 1,
               legacy_notifications_disabled: 1,
             },
@@ -388,6 +445,13 @@ export default ({ getService }: FtrProviderContext) => {
             ...getInitialDetectionMetrics().detection_rules.detection_rule_usage,
             threat_match: {
               ...getInitialDetectionMetrics().detection_rules.detection_rule_usage.threat_match,
+              alerts: 4,
+              enabled: 1,
+              legacy_notifications_enabled: 1,
+            },
+            threat_match_custom: {
+              ...getInitialDetectionMetrics().detection_rules.detection_rule_usage
+                .threat_match_custom,
               alerts: 4,
               enabled: 1,
               legacy_notifications_enabled: 1,

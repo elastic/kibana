@@ -23,6 +23,17 @@ export const updateRuleUsage = (
         detectionRuleMetric,
       }),
     };
+
+    if (!detectionRuleMetric.elastic_rule) {
+      updatedUsage = {
+        ...updatedUsage,
+        query_custom: updateQueryUsage({
+          ruleType: 'query_custom',
+          usage,
+          detectionRuleMetric,
+        }),
+      };
+    }
   } else if (detectionRuleMetric.rule_type === 'threshold') {
     updatedUsage = {
       ...usage,
@@ -32,6 +43,17 @@ export const updateRuleUsage = (
         detectionRuleMetric,
       }),
     };
+
+    if (!detectionRuleMetric.elastic_rule) {
+      updatedUsage = {
+        ...updatedUsage,
+        threshold_custom: updateQueryUsage({
+          ruleType: 'threshold_custom',
+          usage,
+          detectionRuleMetric,
+        }),
+      };
+    }
   } else if (detectionRuleMetric.rule_type === 'eql') {
     updatedUsage = {
       ...usage,
@@ -41,6 +63,17 @@ export const updateRuleUsage = (
         detectionRuleMetric,
       }),
     };
+
+    if (!detectionRuleMetric.elastic_rule) {
+      updatedUsage = {
+        ...updatedUsage,
+        eql_custom: updateQueryUsage({
+          ruleType: 'eql_custom',
+          usage,
+          detectionRuleMetric,
+        }),
+      };
+    }
   } else if (detectionRuleMetric.rule_type === 'machine_learning') {
     updatedUsage = {
       ...usage,
@@ -50,6 +83,17 @@ export const updateRuleUsage = (
         detectionRuleMetric,
       }),
     };
+
+    if (!detectionRuleMetric.elastic_rule) {
+      updatedUsage = {
+        ...updatedUsage,
+        machine_learning_custom: updateQueryUsage({
+          ruleType: 'machine_learning_custom',
+          usage,
+          detectionRuleMetric,
+        }),
+      };
+    }
   } else if (detectionRuleMetric.rule_type === 'threat_match') {
     updatedUsage = {
       ...usage,
@@ -59,6 +103,17 @@ export const updateRuleUsage = (
         detectionRuleMetric,
       }),
     };
+
+    if (!detectionRuleMetric.elastic_rule) {
+      updatedUsage = {
+        ...updatedUsage,
+        threat_match_custom: updateQueryUsage({
+          ruleType: 'threat_match_custom',
+          usage,
+          detectionRuleMetric,
+        }),
+      };
+    }
   } else if (detectionRuleMetric.rule_type === 'new_terms') {
     updatedUsage = {
       ...usage,
@@ -68,6 +123,17 @@ export const updateRuleUsage = (
         detectionRuleMetric,
       }),
     };
+
+    if (!detectionRuleMetric.elastic_rule) {
+      updatedUsage = {
+        ...updatedUsage,
+        new_terms_custom: updateQueryUsage({
+          ruleType: 'new_terms_custom',
+          usage,
+          detectionRuleMetric,
+        }),
+      };
+    }
   } else if (detectionRuleMetric.rule_type === 'esql') {
     updatedUsage = {
       ...usage,
@@ -77,6 +143,17 @@ export const updateRuleUsage = (
         detectionRuleMetric,
       }),
     };
+
+    if (!detectionRuleMetric.elastic_rule) {
+      updatedUsage = {
+        ...updatedUsage,
+        esql_custom: updateQueryUsage({
+          ruleType: 'esql_custom',
+          usage,
+          detectionRuleMetric,
+        }),
+      };
+    }
   }
 
   if (detectionRuleMetric.elastic_rule) {
