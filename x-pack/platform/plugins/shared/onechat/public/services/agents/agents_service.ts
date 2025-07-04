@@ -19,6 +19,6 @@ export class AgentService {
    * List the agents that can be used for the chat api.
    */
   async list() {
-    return await this.http.get<ListAgentsResponse>('/api/chat/agents');
+    return await this.http.get<ListAgentsResponse>('/internal/chat/agents');
   }
 }
