@@ -44,12 +44,12 @@ export const listMonitoringEntitySourceRoute = (
       ): Promise<IKibanaResponse<MonitoringEntitySourceResponse[]>> => {
         const siemResponse = buildSiemResponse(response);
 
-        await assertAdvancedSettingsEnabled(
-          await context.core,
-          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-        );
-
         try {
+          await assertAdvancedSettingsEnabled(
+            await context.core,
+            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+          );
+
           const secSol = await context.securitySolution;
           const client = secSol.getMonitoringEntitySourceDataClient();
           const body = await client.list();

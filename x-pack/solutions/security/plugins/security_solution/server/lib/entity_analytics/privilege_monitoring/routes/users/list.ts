@@ -41,13 +41,12 @@ export const listUsersRoute = (router: EntityAnalyticsRoutesDeps['router'], logg
       },
       async (context, request, response): Promise<IKibanaResponse<ListPrivMonUsersResponse>> => {
         const siemResponse = buildSiemResponse(response);
-
-        await assertAdvancedSettingsEnabled(
-          await context.core,
-          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-        );
-
         try {
+          await assertAdvancedSettingsEnabled(
+            await context.core,
+            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+          );
+
           const secSol = await context.securitySolution;
           const body = await secSol.getPrivilegeMonitoringDataClient().listUsers(request.query.kql);
           return response.ok({ body });

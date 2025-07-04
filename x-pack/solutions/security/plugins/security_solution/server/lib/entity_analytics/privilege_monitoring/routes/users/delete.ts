@@ -42,12 +42,11 @@ export const deleteUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
       async (context, request, response): Promise<IKibanaResponse<DeletePrivMonUserResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
-        await assertAdvancedSettingsEnabled(
-          await context.core,
-          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-        );
-
         try {
+          await assertAdvancedSettingsEnabled(
+            await context.core,
+            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+          );
           const secSol = await context.securitySolution;
           await secSol.getPrivilegeMonitoringDataClient().deleteUser(request.params.id);
           return response.ok({ body: { aknowledged: true } });

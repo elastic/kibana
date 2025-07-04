@@ -42,12 +42,11 @@ export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
       async (context, request, response): Promise<IKibanaResponse<CreatePrivMonUserResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
-        await assertAdvancedSettingsEnabled(
-          await context.core,
-          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-        );
-
         try {
+          await assertAdvancedSettingsEnabled(
+            await context.core,
+            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+          );
           const secSol = await context.securitySolution;
           const body = await secSol
             .getPrivilegeMonitoringDataClient()

@@ -61,17 +61,17 @@ export const uploadUsersCSVRoute = (
         request,
         response
       ): Promise<IKibanaResponse<PrivmonBulkUploadUsersCSVResponse>> => {
-        await assertAdvancedSettingsEnabled(
-          await context.core,
-          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-        );
-
         const { errorRetries, maxBulkRequestBodySizeBytes } =
           config.entityAnalytics.monitoring.privileges.users.csvUpload;
 
         const siemResponse = buildSiemResponse(response);
 
         try {
+          await assertAdvancedSettingsEnabled(
+            await context.core,
+            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+          );
+
           await checkAndInitPrivilegedMonitoringResources(context, logger);
 
           const secSol = await context.securitySolution;
