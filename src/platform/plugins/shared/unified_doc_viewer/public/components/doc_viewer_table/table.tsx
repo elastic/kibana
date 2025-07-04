@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
