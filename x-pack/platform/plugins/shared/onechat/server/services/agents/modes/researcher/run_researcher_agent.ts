@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { from, filter, shareReplay } from 'rxjs';
+import { allToolsSelection } from '@kbn/onechat-common';
 import { AgentHandlerContext } from '@kbn/onechat-server';
 import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
 import {
@@ -42,7 +43,7 @@ export const runResearcherAgent: RunResearcherAgentFn = async (
   {
     nextInput,
     conversation = [],
-    toolSelection = [{ toolIds: ['*'] }],
+    toolSelection = allToolsSelection,
     customInstructions,
     runId = uuidv4(),
     agentId,
