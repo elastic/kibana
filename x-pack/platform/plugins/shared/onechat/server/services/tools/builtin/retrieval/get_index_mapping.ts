@@ -23,7 +23,10 @@ export const getIndexMappingsTool = (): RegisteredTool<
     description: 'Retrieve mappings for the specified index or indices.',
     schema: getIndexMappingsSchema,
     handler: async ({ indices }, { esClient }) => {
-      return getIndexMappings({ indices, esClient: esClient.asCurrentUser });
+      const result = await getIndexMappings({ indices, esClient: esClient.asCurrentUser });
+      return {
+        result,
+      };
     },
     meta: {
       tags: [BuiltinTags.retrieval],

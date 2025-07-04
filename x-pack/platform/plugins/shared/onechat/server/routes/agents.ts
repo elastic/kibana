@@ -18,7 +18,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
 
   router.get(
     {
-      path: '/api/chat/agents',
+      path: '/internal/chat/agents',
       validate: {
         query: schema.object({
           type: schema.string({ defaultValue: AgentType.conversational }),

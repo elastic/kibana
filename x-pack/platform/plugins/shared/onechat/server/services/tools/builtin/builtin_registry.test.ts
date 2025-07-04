@@ -26,7 +26,9 @@ describe('BuiltinToolRegistry', () => {
         id: 'test-tool',
         description: 'A test tool',
         schema: z.object({}),
-        handler: async () => 'test',
+        handler: async () => ({
+          result: 'test',
+        }),
       };
 
       registry.register(mockTool);
@@ -40,7 +42,9 @@ describe('BuiltinToolRegistry', () => {
         id: 'test-tool',
         description: 'A test tool',
         schema: z.object({}),
-        handler: async () => 'test',
+        handler: async () => ({
+          result: 'test',
+        }),
       };
 
       registry.register(mockTool);
@@ -53,7 +57,9 @@ describe('BuiltinToolRegistry', () => {
         id: 'test-tool',
         description: 'A test tool',
         schema: z.object({}),
-        handler: async () => 'test',
+        handler: async () => ({
+          result: 'test',
+        }),
       };
 
       registry.register(mockTool);
@@ -68,7 +74,9 @@ describe('BuiltinToolRegistry', () => {
         id: 'test-tool',
         description: 'A test tool',
         schema: z.object({}),
-        handler: async () => 'test',
+        handler: async () => ({
+          result: 'test',
+        }),
       };
 
       registry.register(mockTool);
@@ -81,7 +89,9 @@ describe('BuiltinToolRegistry', () => {
         id: 'test-tool',
         description: 'A test tool',
         schema: z.object({}),
-        handler: async () => 'test',
+        handler: async () => ({
+          result: 'test',
+        }),
       };
 
       registry.register(mockTool);
@@ -97,14 +107,18 @@ describe('BuiltinToolRegistry', () => {
         id: 'test-tool-1',
         description: 'A test tool',
         schema: z.object({}),
-        handler: async () => 'test1',
+        handler: async () => ({
+          result: 'test1',
+        }),
       };
 
       const mockTool2: RegisteredTool = {
         id: 'test-tool-2',
         description: 'Another test tool',
         schema: z.object({}),
-        handler: async () => 'test2',
+        handler: async () => ({
+          result: 'test2',
+        }),
       };
 
       registry.register(mockTool1);

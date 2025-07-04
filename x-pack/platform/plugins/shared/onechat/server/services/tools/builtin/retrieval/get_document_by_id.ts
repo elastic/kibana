@@ -24,7 +24,10 @@ export const getDocumentByIdTool = (): RegisteredTool<
     description: 'Retrieve the full content (source) of a document based on its ID and index name.',
     schema: getDocumentByIdSchema,
     handler: async ({ id, index }, { esClient }) => {
-      return getDocumentById({ id, index, esClient: esClient.asCurrentUser });
+      const result = await getDocumentById({ id, index, esClient: esClient.asCurrentUser });
+      return {
+        result,
+      };
     },
     meta: {
       tags: [BuiltinTags.retrieval],

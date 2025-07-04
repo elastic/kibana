@@ -42,7 +42,16 @@ export const indexExplorerTool = (): RegisteredTool<
     schema: indexExplorerSchema,
     handler: async ({ query, indexPattern = '*', limit = 1 }, { esClient, modelProvider }) => {
       const model = await modelProvider.getDefaultModel();
-      return indexExplorer({ query, indexPattern, limit, esClient: esClient.asCurrentUser, model });
+      const result = await indexExplorer({
+        query,
+        indexPattern,
+        limit,
+        esClient: esClient.asCurrentUser,
+        model,
+      });
+      return {
+        result,
+      };
     },
     meta: {
       tags: [BuiltinTags.retrieval],

@@ -14,6 +14,21 @@ import type { Logger } from '@kbn/core/server';
 import { InferenceChatModel } from '@kbn/inference-langchain';
 import { getActPrompt } from './prompts';
 
+const StateAnnotation = Annotation.Root({
+  // inputs
+  initialMessages: Annotation<BaseMessageLike[]>({
+    reducer: messagesStateReducer,
+    default: () => [],
+  }),
+  // outputs
+  addedMessages: Annotation<BaseMessage[]>({
+    reducer: messagesStateReducer,
+    default: () => [],
+  }),
+});
+
+export type StateType = typeof StateAnnotation.State;
+
 export const createAgentGraph = ({
   chatModel,
   tools,
@@ -26,26 +41,13 @@ export const createAgentGraph = ({
   noPrompt?: boolean;
   logger: Logger;
 }) => {
-  const StateAnnotation = Annotation.Root({
-    // inputs
-    initialMessages: Annotation<BaseMessageLike[]>({
-      reducer: messagesStateReducer,
-      default: () => [],
-    }),
-    // outputs
-    addedMessages: Annotation<BaseMessage[]>({
-      reducer: messagesStateReducer,
-      default: () => [],
-    }),
-  });
-
   const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(tools);
 
   const model = chatModel.bindTools(tools).withConfig({
     tags: ['onechat-agent'],
   });
 
-  const callModel = async (state: typeof StateAnnotation.State) => {
+  const callModel = async (state: StateType) => {
     const response = await model.invoke(
       noPrompt
         ? [...state.initialMessages, ...state.addedMessages]
@@ -59,7 +61,7 @@ export const createAgentGraph = ({
     };
   };
 
-  const shouldContinue = async (state: typeof StateAnnotation.State) => {
+  const shouldContinue = async (state: StateType) => {
     const messages = state.addedMessages;
     const lastMessage: AIMessage = messages[messages.length - 1];
     if (lastMessage && lastMessage.tool_calls?.length) {
@@ -68,7 +70,7 @@ export const createAgentGraph = ({
     return '__end__';
   };
 
-  const toolHandler = async (state: typeof StateAnnotation.State) => {
+  const toolHandler = async (state: StateType) => {
     const toolNodeResult = await toolNode.invoke(state.addedMessages);
     return {
       addedMessages: [...toolNodeResult],
