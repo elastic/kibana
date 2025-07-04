@@ -14,8 +14,11 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { CoreSetup } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { createAppContextStartContractMock } from '../mocks';
+import * as Registry from '../services/epm/registry';
 
+import { createAppContextStartContractMock, createMockPackageService } from '../mocks';
+
+import type { PackageClient } from '../services';
 import { appContextService } from '../services';
 
 import {
@@ -25,6 +28,9 @@ import {
 } from './auto_install_content_packages_task';
 
 jest.mock('../services');
+jest.mock('../services/epm/registry');
+
+const MockRegistry = jest.mocked(Registry);
 
 const MOCK_TASK_INSTANCE = {
   id: `${TYPE}:${VERSION}`,
@@ -48,11 +54,18 @@ describe('AutoInstallContentPackagesTask', () => {
   let mockTask: AutoInstallContentPackagesTask;
   let mockCore: CoreSetup;
   let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
+  let packageClientMock: jest.Mocked<PackageClient>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockContract = createAppContextStartContractMock();
     appContextService.start(mockContract);
-    mockCore = coreSetupMock();
+    mockCore = coreSetupMock({
+      pluginStartContract: {
+        packageService: createMockPackageService(),
+      },
+    });
+    packageClientMock = ((await mockCore.getStartServices())[2] as any).packageService
+      .asInternalUser;
     mockTaskManagerSetup = tmSetupMock();
     mockTask = new AutoInstallContentPackagesTask({
       core: mockCore,
@@ -98,7 +111,24 @@ describe('AutoInstallContentPackagesTask', () => {
     beforeEach(async () => {
       const [{ elasticsearch }] = await mockCore.getStartServices();
       esClient = elasticsearch.client.asInternalUser as ElasticsearchClientMock;
-      esClient.deleteByQuery.mockResolvedValue({ deleted: 10 });
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [],
+          total: { value: 1, relation: 'eq' },
+        },
+      } as any);
+      jest
+        .spyOn(appContextService, 'getExperimentalFeatures')
+        .mockReturnValue({ enableAutoInstallContentPackages: true } as any);
+      MockRegistry.fetchList.mockResolvedValue([
+        {
+          name: 'kubernetes_otel',
+          version: '1.1.0',
+          discovery: {
+            fields: [{ name: 'data_stream.dataset', value: 'system.cpu' }],
+          },
+        } as any,
+      ]);
     });
 
     afterEach(() => {
@@ -110,6 +140,17 @@ describe('AutoInstallContentPackagesTask', () => {
 
       expect(esClient.deleteByQuery).not.toHaveBeenCalled();
       expect(result).toEqual(getDeleteTaskRunResult());
+    });
+
+    it('should install content packages', async () => {
+      packageClientMock.getInstallation.mockResolvedValue(undefined);
+
+      await runTask();
+
+      expect(packageClientMock.installPackage).toHaveBeenCalledWith({
+        pkgName: 'kubernetes_otel',
+        pkgVersion: '1.1.0',
+      });
     });
   });
 });

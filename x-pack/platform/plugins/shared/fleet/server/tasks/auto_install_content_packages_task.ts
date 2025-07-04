@@ -36,6 +36,7 @@ const TITLE = 'Fleet Auto Install Content Packages Task';
 const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '1m'; // TODO 10m
 const TIMEOUT = '1m';
+const CONTENT_PACKAGES_CACHE_TTL = 1000 * 60 * 60; // 1 hour
 
 interface AutoInstallContentPackagesTaskConfig {
   taskInterval?: string;
@@ -64,6 +65,8 @@ export class AutoInstallContentPackagesTask {
   private wasStarted: boolean = false;
   private abortController?: AbortController;
   private taskInterval: string;
+  private discoveryMap?: DiscoveryMap;
+  private discoveryMapLastFetched: number = 0;
 
   constructor(setupContract: AutoInstallContentPackagesTaskSetupContract) {
     const { core, taskManager, logFactory, config } = setupContract;
@@ -154,10 +157,18 @@ export class AutoInstallContentPackagesTask {
     const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
 
     try {
-      // TODO cache?
-      const discoveryMap = await this.getContentPackagesDiscoveryMap();
+      if (
+        !this.discoveryMap ||
+        this.discoveryMapLastFetched < Date.now() - CONTENT_PACKAGES_CACHE_TTL
+      ) {
+        this.discoveryMapLastFetched = Date.now();
+        this.logger.debug(
+          `[AutoInstallContentPackagesTask] Fetching content packages to get discovery fields`
+        );
+        this.discoveryMap = await this.getContentPackagesDiscoveryMap();
+      }
 
-      const packagesToInstall = await this.getPackagesToInstall(esClient, discoveryMap);
+      const packagesToInstall = await this.getPackagesToInstall(esClient, this.discoveryMap);
 
       await this.installPackages(soClient, packageClient, packagesToInstall);
 
@@ -182,7 +193,6 @@ export class AutoInstallContentPackagesTask {
       packagesToInstall,
       async ({ name, version }) => {
         const installation = await packageClient.getInstallation(name, savedObjectsClient);
-        // console.log(installation);
 
         if (installation?.install_status === 'installed' && installation.version === version) {
           this.logger.debug(
@@ -190,14 +200,17 @@ export class AutoInstallContentPackagesTask {
           );
           return;
         }
-        // TODO retry?
 
-        // TODO stream-based installation?
-        // const installResult =
-        await packageClient.installPackage({
-          pkgName: name,
-          pkgVersion: version,
-        });
+        try {
+          await packageClient.installPackage({
+            pkgName: name,
+            pkgVersion: version,
+          });
+        } catch (error) {
+          this.logger.warn(
+            `[AutoInstallContentPackagesTask] Error installing package ${name}@${version}: ${error.message}`
+          );
+        }
       },
       { concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS }
     );
@@ -263,7 +276,7 @@ export class AutoInstallContentPackagesTask {
       return true;
     }
     // TODO remove, for testing
-    return true;
+    // return true;
     return false;
   }
 
@@ -273,22 +286,20 @@ export class AutoInstallContentPackagesTask {
     const discoveryMap: DiscoveryMap = {};
     const registryItems = await Registry.fetchList({ prerelease, type });
 
-    // TODO only data_stream.dataset fields with value
-
     registryItems.forEach((item) => {
       // TODO remove, for testing
-      if (item.name === 'kubernetes_otel') {
-        item.discovery = {
-          fields: [
-            { name: 'event.dataset', value: 'system.cpu' },
-            { name: 'event.dataset', value: 'system.memory' },
-            { name: 'test.field' },
-          ],
-        };
-      }
+      // if (item.name === 'kubernetes_otel') {
+      //   item.discovery = {
+      //     fields: [
+      //       { name: 'data_stream.dataset', value: 'system.cpu' },
+      //       { name: 'data_stream.dataset' },
+      //       { name: 'test.field', value: 'test.value' },
+      //     ],
+      //   };
+      // }
       if (item.discovery?.fields) {
         item.discovery.fields.forEach((field: DiscoveryField) => {
-          if (field.name && field.value) {
+          if (field.name === 'data_stream.dataset' && field.value) {
             const mapKey = `${field.name}:${field.value}`;
             if (!discoveryMap[mapKey]) {
               discoveryMap[mapKey] = {
