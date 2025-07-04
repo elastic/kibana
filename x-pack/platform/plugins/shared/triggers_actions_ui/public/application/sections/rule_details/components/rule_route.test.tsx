@@ -7,26 +7,28 @@
 
 import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { shallow } from 'enzyme';
+import { render, waitFor } from '@testing-library/react';
 import { ToastsApi } from '@kbn/core/public';
 import { RuleRoute, getRuleSummary } from './rule_route';
 import { Rule, RuleSummary, RuleType } from '../../../../types';
-import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 jest.mock('../../../../common/lib/kibana');
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 const fake2MinutesAgo = new Date('2020-02-09T23:13:41.941Z');
 
 describe('rules_summary_route', () => {
-  it('render a loader while fetching data', () => {
+  it('render a loader while fetching data', async () => {
     const rule = mockRule();
     const ruleType = mockRuleType();
 
-    expect(
-      shallow(
-        <RuleRoute readOnly={false} rule={rule} ruleType={ruleType} {...mockApis()} />
-      ).containsMatchingElement(<CenterJustifiedSpinner />)
-    ).toBeTruthy();
+    const renderResult = render(
+      <RuleRoute readOnly={false} rule={rule} ruleType={ruleType} {...mockApis()} />
+    );
+    
+    await waitFor(() => {
+      // Wait for the component to be rendered
+      expect(renderResult.container.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+    });
   });
 });
 
