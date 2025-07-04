@@ -258,7 +258,8 @@ export function getTemplateLifecycle(
   }
 
   if (template.settings.index?.lifecycle?.name) {
-    // if dsl is not enabled, ilm will be effective regardless of the prefer_ilm setting
+    // if dsl is not enabled and a policy is set, the ilm will be effective
+    // regardless of the prefer_ilm setting
     return { ilm: { policy: template.settings.index.lifecycle.name } };
   }
 
