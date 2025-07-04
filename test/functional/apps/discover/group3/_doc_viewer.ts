@@ -501,6 +501,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-2`);
         });
 
+        it('should not navigate between documents with arrow keys when the tabs are focused', async () => {
+          await dataGrid.clickRowToggle({ defaultTabId: false });
+          await discover.isShowingDocViewer();
+          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-0`);
+          await browser.pressKeys(browser.keys.ARROW_RIGHT);
+          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
+          await testSubjects.click('docViewerTab-doc_view_source');
+          await browser.pressKeys(browser.keys.ARROW_RIGHT);
+          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
+        });
+
+        it('should not navigate between documents with arrow keys when resizable button is focused', async () => {
+          await dataGrid.clickRowToggle({ defaultTabId: false });
+          await discover.isShowingDocViewer();
+          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-0`);
+          await browser.pressKeys(browser.keys.ARROW_RIGHT);
+          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
+          await testSubjects.click('euiResizableButton');
+          await browser.pressKeys(browser.keys.ARROW_RIGHT);
+          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
+        });
+
         it('should close the flyout with the escape key', async () => {
           await dataGrid.clickRowToggle({ defaultTabId: false });
           expect(await discover.isShowingDocViewer()).to.be(true);
