@@ -222,7 +222,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     const experimentalFeatures = config.experimentalFeatures;
 
     initSavedObjects(core.savedObjects);
-    initEncryptedSavedObjects({ core, plugins, logger: this.logger });
+    initEncryptedSavedObjects({
+      encryptedSavedObjects: plugins.encryptedSavedObjects,
+      logger: this.logger,
+    });
 
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
     productFeaturesService.init(plugins.features);
