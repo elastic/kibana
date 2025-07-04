@@ -8,6 +8,8 @@
 import { scalarFunctionDefinitions } from '@kbn/esql-validation-autocomplete/src/definitions/generated/scalar_functions';
 import { groupingFunctionDefinitions } from '@kbn/esql-validation-autocomplete/src/definitions/generated/grouping_functions';
 import { aggFunctionDefinitions } from '@kbn/esql-validation-autocomplete/src/definitions/generated/aggregation_functions';
+import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-validation-autocomplete/src/definitions/generated/time_series_agg_functions';
+
 import type { FunctionDefinition } from '@kbn/esql-validation-autocomplete';
 import { memoize } from 'lodash';
 
@@ -105,6 +107,7 @@ const getFunctionDefinitionMap = memoize(() => {
   const allFunctionDefinitions = [
     ...scalarFunctionDefinitions,
     ...aggFunctionDefinitions,
+    ...timeSeriesAggFunctionDefinitions,
     ...groupingFunctionDefinitions,
   ];
   allFunctionDefinitions.forEach((definition) => {
