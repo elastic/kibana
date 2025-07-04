@@ -62,18 +62,18 @@ export const FeedbackFlyout = ({ closeFlyout, getCurrentUser, getLicense }: Prop
     padding: ${euiTheme.size.l};
   `;
 
-  const seperatorCss = css`
+  const dividerCss = css`
     border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
     margin-left: -${euiTheme.size.l};
     margin-right: -${euiTheme.size.l};
   `;
 
-  const Seperator = () => <span css={seperatorCss} aria-hidden="true" />;
+  const Divider = () => <span css={dividerCss} aria-hidden="true" />;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="feedbackFlyout" css={flyoutCss}>
       <FeedbackFlyoutHeader closeFlyout={closeFlyout} />
-      <Seperator />
+      <Divider />
       <FeedbackFlyoutBody
         feedbackType={feedbackType}
         feedbackText={feedbackText}
@@ -83,7 +83,7 @@ export const FeedbackFlyout = ({ closeFlyout, getCurrentUser, getLicense }: Prop
         handleChangeEmail={handleChangeEmail}
         getLicense={getLicense}
       />
-      <Seperator />
+      <Divider />
       <FeedbackFlyoutFooter
         isSendFeedbackButtonDisabled={isSendFeedbackButtonDisabled}
         submitFeedback={submitFeedback}
