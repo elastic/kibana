@@ -261,10 +261,7 @@ export function getTemplateLifecycle(
     if (typeof value === 'boolean') {
       return value;
     }
-    if (typeof value === 'string') {
-      return value === 'true';
-    }
-    return false;
+    return value === 'true';
   };
 
   const hasEffectiveDsl =
