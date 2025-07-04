@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/src/core/packages/http/rate-limiter-internal'],
+  roots: ['<rootDir>/src/core/packages/http/rate-limiter-server-internal'],
 };

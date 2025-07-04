@@ -45,7 +45,7 @@ import type {
   PrebootRequestHandlerContext,
 } from '@kbn/core-http-request-handler-context-server';
 import { RenderingService } from '@kbn/core-rendering-server-internal';
-import { HttpRateLimiterService } from '@kbn/core-http-rate-limiter-internal';
+import { HttpRateLimiterService } from '@kbn/core-http-rate-limiter-server-internal';
 import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
 import type {
   InternalCorePreboot,
