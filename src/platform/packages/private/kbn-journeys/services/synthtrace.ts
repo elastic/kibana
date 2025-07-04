@@ -20,12 +20,24 @@ export interface SynthtraceClientOptions {
   log: ToolingLog;
 }
 
+export type SynthtraceDataType = 'infra' | 'apm';
+
+const synthtraceClientMapping: Record<SynthtraceDataType, SynthtraceClientTypes> = {
+  infra: 'infraEsClient',
+  apm: 'apmEsClient',
+};
+
 export async function getSynthtraceClient(
-  synthClient: SynthtraceClientTypes,
+  synthClient: SynthtraceDataType,
   options: SynthtraceClientOptions
 ) {
   const { log, es, auth, kbnUrl } = options;
   const logger: Logger = extendToolingLog(log);
+
+  const clientType = synthtraceClientMapping[synthClient];
+  if (!clientType) {
+    throw new Error(`Unsupported synthtrace client type: ${synthClient}`);
+  }
 
   const clientManager = new SynthtraceClientsManager({
     client: es,
@@ -35,7 +47,7 @@ export async function getSynthtraceClient(
   });
 
   const clients = clientManager.getClients({
-    clients: [synthClient],
+    clients: [clientType],
     kibana: {
       target: kbnUrl.get(),
       username: auth.getUsername(),
@@ -43,7 +55,7 @@ export async function getSynthtraceClient(
     },
   });
 
-  clientManager.installFleetPackageForClient({ clients });
+  clientManager.initFleetPackageForClient({ clients, skipBootstrap: false });
 
-  return clients[synthClient];
+  return clients[clientType];
 }

@@ -202,7 +202,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const observability = getService('observability');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const synthtraceClient = getService('synthtraceClient');
+  const synthtraceClient = getService('synthtrace');
 
   const pageObjects = getPageObjects([
     'assetDetails',
@@ -244,6 +244,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         'logsEsClient',
         'apmEsClient',
       ]);
+
+      await synthtraceApmClient.initializePackage({ skipBootstrap: false });
 
       synthEsInfraClient = clients.infraEsClient;
       syntEsLogsClient = clients.logsEsClient;

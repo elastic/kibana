@@ -18,7 +18,6 @@ export function LogSynthtraceEsClientProvider({ getService }: FtrProviderContext
     client: esClient,
     logger: createLogger(LogLevel.info),
     refreshAfterIndex: true,
-    includePipelineSerialization: false,
   });
 
   const { logsEsClient } = clientManager.getClients({

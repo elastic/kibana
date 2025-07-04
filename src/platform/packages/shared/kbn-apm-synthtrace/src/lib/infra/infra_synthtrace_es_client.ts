@@ -60,18 +60,19 @@ export class InfraSynthtraceEsClientImpl
       );
     }
 
-    if (opts?.skipBootstrap) {
+    const { version, skipBootstrap = true } = opts ?? {};
+
+    if (skipBootstrap) {
       return;
     }
 
-    const version = opts?.version;
-
-    if (!version) {
-      const latestVersion = await this.fleetClient.fetchLatestPackageVersion('system');
+    let latestVersion = version;
+    if (!latestVersion || latestVersion === 'latest') {
+      latestVersion = await this.fleetClient.fetchLatestPackageVersion('system');
       await this.fleetClient.installPackage('system', latestVersion);
-    } else if (version === 'latest') {
-      await this.fleetClient.installPackage('system', version);
     }
+
+    return latestVersion;
   }
   async uninstallPackage() {
     if (!this.fleetClient) {

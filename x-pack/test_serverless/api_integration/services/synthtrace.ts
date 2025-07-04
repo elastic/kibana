@@ -5,36 +5,23 @@
  * 2.0.
  */
 
-import url from 'url';
-import { kbnTestConfig } from '@kbn/test';
+import { format, UrlObject } from 'url';
 import {
-  createLogger,
-  LogLevel,
   SynthtraceClientsManager,
   SynthtraceClientTypes,
   GetClientsReturn,
+  createLogger,
+  LogLevel,
 } from '@kbn/apm-synthtrace';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-const getKibanaServerUrlWithAuth = () => {
-  const kibanaServerUrl = url.format(kbnTestConfig.getUrlParts() as url.UrlObject);
-  const kibanaServerUrlWithAuth = url
-    .format({
-      ...url.parse(kibanaServerUrl),
-      auth: `elastic:${kbnTestConfig.getUrlParts().password}`,
-    })
-    .slice(0, -1);
-  return kibanaServerUrlWithAuth;
-};
-
 export function SynthtraceClientProvider({ getService }: FtrProviderContext) {
   const esClient = getService('es');
+  const config = getService('config');
 
-  const kibanaServerUrlWithAuth = getKibanaServerUrlWithAuth();
-  const target = kibanaServerUrlWithAuth;
-  const logger = createLogger(LogLevel.debug);
-  const username = 'elastic';
-  const password = kbnTestConfig.getUrlParts().password || 'changeme';
+  const servers = config.get('servers');
+  const kibanaServer = servers.kibana as UrlObject;
+  const kibanaServerUrlWithAuth = format(kibanaServer).slice(0, -1);
 
   return {
     getClients<TClient extends SynthtraceClientTypes>(
@@ -42,7 +29,7 @@ export function SynthtraceClientProvider({ getService }: FtrProviderContext) {
     ): GetClientsReturn<TClient> {
       const clientManager = new SynthtraceClientsManager({
         client: esClient,
-        logger,
+        logger: createLogger(LogLevel.info),
         refreshAfterIndex: true,
         includePipelineSerialization: false,
       });
@@ -50,14 +37,9 @@ export function SynthtraceClientProvider({ getService }: FtrProviderContext) {
       const clients = clientManager.getClients({
         clients: synthtraceClients,
         kibana: {
-          target,
-          username,
-          password,
+          target: kibanaServerUrlWithAuth,
+          logger: createLogger(LogLevel.debug),
         },
-      });
-
-      clientManager.initFleetPackageForClient({
-        clients,
       });
 
       return clients;

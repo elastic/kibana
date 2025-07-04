@@ -61,7 +61,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   ]);
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const synthtraceClient = getService('synthtraceClient');
+  const synthtraceClient = getService('synthtrace');
 
   const returnTo = async (path: string, timeout = 2000) =>
     retry.waitForWithTimeout('returned to inventory', timeout, async () => {

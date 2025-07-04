@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client } from '@elastic/elasticsearch';
 import { castArray } from 'lodash';
 import {
   ApmSynthtraceEsClient,
@@ -52,19 +51,15 @@ export interface SynthtraceClients {
   streamsClient: StreamsSynthtraceClient;
 }
 
-export type ClientsWithFleetPackage = {
-  [K in keyof SynthtraceClients]: SynthtraceClients[K] extends PackageManagement
-    ? Record<K, SynthtraceClients[K]>
-    : never;
+export type SynthtraceClientsWithFleetPackage = {
+  [K in keyof SynthtraceClients]: SynthtraceClients[K] extends PackageManagement ? K : never;
 }[keyof SynthtraceClients];
 
 export type SynthtraceClientTypes = DefaultSynthtraceClients[number];
 export type GetClientsReturn<K extends SynthtraceClientTypes = SynthtraceClientTypes> = Pick<
   SynthtraceClients,
   K
-> & {
-  esClient: Client;
-};
+>;
 
 export class SynthtraceClientsManager {
   constructor(
@@ -81,9 +76,6 @@ export class SynthtraceClientsManager {
     } & Pick<SynthtraceEsClientOptions, 'kibana'>
   ): GetClientsReturn<TClient> {
     const { kibana, packageVersion } = opts ?? {};
-    const result = {
-      esClient: this.options.client,
-    } as GetClientsReturn<TClient>;
 
     const factories: Record<SynthtraceClientTypes, () => SynthtraceClients[SynthtraceClientTypes]> =
       {
@@ -105,18 +97,26 @@ export class SynthtraceClientsManager {
         },
       };
 
-    for (const key of opts?.clients
+    const clientsToInitialize = opts?.clients
       ? castArray(opts.clients)
-      : (Object.keys(factories) as SynthtraceClientTypes[])) {
-      const initClient = factories[key];
-      (result as any)[key] = initClient();
-    }
+      : (Object.keys(factories) as SynthtraceClientTypes[]);
 
-    return result;
+    return clientsToInitialize.reduce((acc, key) => {
+      const initFn = factories[key];
+      if (!initFn) {
+        throw new Error(`Client factory for ${key} is not defined`);
+      }
+
+      (acc as any)[key] = initFn();
+
+      return acc;
+    }, {} as GetClientsReturn<TClient>);
   }
 
-  async initFleetPackageForClient(opts: {
-    clients: ClientsWithFleetPackage;
+  async initFleetPackageForClient<
+    TClient extends SynthtraceClientTypes = SynthtraceClientsWithFleetPackage
+  >(opts: {
+    clients: Partial<GetClientsReturn<TClient>>;
     version?: string;
     skipBootstrap?: boolean;
   }) {

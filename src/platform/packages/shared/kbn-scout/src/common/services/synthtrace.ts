@@ -37,7 +37,7 @@ export async function getSynthtraceClient(
     includePipelineSerialization: false,
   });
 
-  const client = clientManager.getClients({
+  const clients = clientManager.getClients({
     clients: [synthClient],
     kibana: kbnUrl
       ? {
@@ -46,7 +46,9 @@ export async function getSynthtraceClient(
       : undefined,
   });
 
+  clientManager.initFleetPackageForClient({ clients });
+
   log.serviceLoaded(synthClient);
 
-  return client[synthClient];
+  return clients[synthClient];
 }

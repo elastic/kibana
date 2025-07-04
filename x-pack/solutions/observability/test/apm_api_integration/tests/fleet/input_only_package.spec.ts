@@ -72,7 +72,12 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
     api_key: string;
   }) {
     const esClient = createEsClientWithApiKey({ id, apiKey });
-    return apmSynthtraceEsClient.getClient({ esClient });
+
+    await apmSynthtraceEsClient.initializePackage({ skipBootstrap: true });
+
+    apmSynthtraceEsClient.setEsClient(esClient);
+
+    return apmSynthtraceEsClient;
   }
 
   // FLAKY: https://github.com/elastic/kibana/issues/177384
@@ -95,8 +100,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
 
       async function cleanAll() {
         try {
-          const apmEsClient = await apmSynthtraceEsClient.getClient();
-          await apmEsClient.clean();
+          await apmSynthtraceEsClient.clean();
           await es.security.invalidateApiKey({ name: API_KEY_NAME });
           await deleteAgentPolicyAndPackagePolicyByName({
             bettertest,

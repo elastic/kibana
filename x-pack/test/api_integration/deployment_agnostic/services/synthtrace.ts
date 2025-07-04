@@ -48,8 +48,6 @@ export function SynthtraceProvider({ getService }: DeploymentAgnosticFtrProvider
         },
       });
 
-      await apmEsClient.initializePackage();
-
       return apmEsClient;
     },
   };

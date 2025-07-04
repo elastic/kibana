@@ -95,11 +95,13 @@ export class ApmSynthtraceEsClientImpl
       );
     }
 
-    let latestVersion = opts?.version ?? this.version;
+    const { version = this.version, skipBootstrap = true } = opts ?? {};
+
+    let latestVersion = version;
 
     if (!latestVersion) {
       latestVersion = await this.fleetClient.fetchLatestPackageVersion('apm');
-      if (!opts?.skipBootstrap) {
+      if (!skipBootstrap) {
         await this.fleetClient.installPackage('apm', latestVersion);
       }
     } else if (latestVersion === 'latest') {
@@ -112,6 +114,8 @@ export class ApmSynthtraceEsClientImpl
     this.setPipeline(
       apmPipeline(this.options.logger, this.options.includePipelineSerialization, latestVersion)
     );
+
+    return latestVersion;
   }
 
   async uninstallPackage() {

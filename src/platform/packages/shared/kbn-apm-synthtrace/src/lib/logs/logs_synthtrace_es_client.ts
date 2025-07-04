@@ -60,7 +60,10 @@ export interface LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> 
   deleteCustomPipeline(id: string): Promise<void>;
 }
 
-export class LogsSynthtraceEsClientImpl extends SynthtraceEsClientBase<LogDocument> {
+export class LogsSynthtraceEsClientImpl
+  extends SynthtraceEsClientBase<LogDocument>
+  implements LogsSynthtraceEsClient
+{
   constructor(
     options: { client: Client; logger: Logger; pipeline?: Pipeline } & LogsSynthtraceEsClientOptions
   ) {

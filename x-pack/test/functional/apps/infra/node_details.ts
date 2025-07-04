@@ -77,10 +77,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
-  const esClient = getService('es');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const synthtraceClient = getService('synthtraceClient');
+  const synthtraceClient = getService('synthtrace');
 
   const pageObjects = getPageObjects([
     'assetDetails',

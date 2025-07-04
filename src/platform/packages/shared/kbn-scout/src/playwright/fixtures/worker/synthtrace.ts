@@ -17,13 +17,13 @@ import type {
   LogDocument,
 } from '@kbn/apm-synthtrace-client';
 import Url from 'url';
-import type { SynthtraceEsClientBase } from '@kbn/apm-synthtrace/src/lib/shared/base_client';
+import type { SynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/shared/base_client';
 import { getSynthtraceClient } from '../../../common/services/synthtrace';
 import { KibanaUrl, ScoutTestConfig, coreWorkerFixtures } from './core_fixtures';
 
 interface SynthtraceFixtureEsClient<TFields extends Fields> {
   index: (events: SynthtraceGenerator<TFields>) => Promise<void>;
-  clean: SynthtraceEsClientBase<TFields>['clean'];
+  clean: SynthtraceEsClient<TFields>['clean'];
 }
 
 export interface SynthtraceFixture {
@@ -34,7 +34,7 @@ export interface SynthtraceFixture {
 }
 
 const useSynthtraceClient = async <TFields extends Fields>(
-  client: SynthtraceEsClientBase<TFields>,
+  client: SynthtraceEsClient<TFields>,
   use: (client: SynthtraceFixtureEsClient<TFields>) => Promise<void>
 ) => {
   const index = async (events: SynthtraceGenerator<TFields>) =>

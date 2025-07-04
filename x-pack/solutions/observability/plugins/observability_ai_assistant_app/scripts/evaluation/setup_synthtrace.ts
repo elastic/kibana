@@ -36,7 +36,6 @@ export async function setupSynthtrace({
     client,
     logger,
     refreshAfterIndex: true,
-    includePipelineSerialization: false,
   });
 
   const { apmEsClient, infraEsClient, logsEsClient } = clientManager.getClients({
@@ -46,10 +45,11 @@ export async function setupSynthtrace({
     },
   });
 
-  clientManager.installFleetPackageForClient({
+  clientManager.initFleetPackageForClient({
     clients: {
       apmEsClient,
     },
+    skipBootstrap: false,
   });
 
   return {

@@ -21,7 +21,6 @@ export {
 } from './src/cli/utils/clients_manager';
 export type { ApmSynthtraceEsClient } from './src/lib/apm/client/apm_synthtrace_es_client';
 export type { InfraSynthtraceEsClient } from './src/lib/infra/infra_synthtrace_es_client';
-export type { MonitoringSynthtraceEsClient } from './src/lib/monitoring/monitoring_synthtrace_es_client';
 export type { LogsSynthtraceEsClient } from './src/lib/logs/logs_synthtrace_es_client';
 export type { SyntheticsSynthtraceEsClient } from './src/lib/synthetics/synthetics_synthtrace_es_client';
 export {

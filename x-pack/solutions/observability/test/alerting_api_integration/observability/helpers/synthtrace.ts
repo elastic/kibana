@@ -6,7 +6,12 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { SynthtraceClientsManager, createLogger, LogLevel } from '@kbn/apm-synthtrace';
+import {
+  SynthtraceClientsManager,
+  createLogger,
+  LogLevel,
+  ApmSynthtraceEsClient,
+} from '@kbn/apm-synthtrace';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 
 export const getSynthtraceClient = async ({
@@ -20,7 +25,6 @@ export const getSynthtraceClient = async ({
     client: esClient,
     logger: createLogger(LogLevel.info),
     refreshAfterIndex: true,
-    includePipelineSerialization: false,
   });
 
   const { apmEsClient } = clientManager.getClients({

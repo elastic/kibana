@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { ApmSynthtraceKibanaClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
+import { createLogger, LogLevel, SynthtraceClientsManager } from '@kbn/apm-synthtrace';
 import Url from 'url';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
 import type { FtrProviderContext } from '../common/ftr_provider_context';
 
 export async function cypressTestRunner({ getService }: FtrProviderContext) {
   const config = getService('config');
+  const es = getService('es');
 
   const username = config.get('servers.elasticsearch.username');
   const password = config.get('servers.elasticsearch.password');
@@ -37,14 +38,21 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
   });
 
   const esRequestTimeout = config.get('timeouts.esRequestTimeout');
-  const kibanaClient = new ApmSynthtraceKibanaClient({
+
+  const clientsManager = new SynthtraceClientsManager({
+    client: es,
     logger: createLogger(LogLevel.info),
-    target: kibanaUrl,
   });
 
-  const packageVersion = await kibanaClient.fetchLatestApmPackageVersion();
+  const { apmEsClient } = clientsManager.getClients({
+    clients: ['apmEsClient'],
+    kibana: {
+      target: kibanaUrl,
+      logger: createLogger(LogLevel.info),
+    },
+  });
 
-  await kibanaClient.installApmPackage(packageVersion);
+  const packageVersion = apmEsClient.initializePackage();
 
   const kibanaUrlWithoutAuth = Url.format({
     protocol: config.get('servers.kibana.protocol'),

@@ -8,6 +8,9 @@
  */
 
 export interface PackageManagement {
-  initializePackage(opts?: { version?: string; skipBootstrap?: boolean }): Promise<void>;
+  initializePackage(opts?: {
+    version?: string;
+    skipBootstrap?: boolean;
+  }): Promise<string | undefined>;
   uninstallPackage(): Promise<void>;
 }

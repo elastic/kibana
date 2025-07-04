@@ -13,7 +13,6 @@ export function LogsSynthtraceProvider(context: FtrProviderContext) {
     client: context.getService('es'),
     logger: createLogger(LogLevel.info),
     refreshAfterIndex: true,
-    includePipelineSerialization: false,
   });
 
   const { logsEsClient } = clientManager.getClients({

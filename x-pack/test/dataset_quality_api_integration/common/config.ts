@@ -133,7 +133,7 @@ export function createTestConfig(
         datasetQualityFtrConfig: () => config,
         registry: RegistryProvider,
         logSynthtraceEsClient: (context: InheritedFtrProviderContext) => {
-          const synthtraceClient = context.getService('synthtraceClient');
+          const synthtraceClient = context.getService('synthtrace');
 
           const { logsEsClient } = synthtraceClient.getClients(['logsEsClient']);
 
@@ -141,7 +141,7 @@ export function createTestConfig(
         },
 
         syntheticsSynthtraceEsClient: (context: InheritedFtrProviderContext) => {
-          const synthtraceClient = context.getService('synthtraceClient');
+          const synthtraceClient = context.getService('synthtrace');
 
           const { syntheticsEsClient } = synthtraceClient.getClients(['syntheticsEsClient']);
 

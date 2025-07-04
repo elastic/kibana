@@ -10,7 +10,10 @@
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { pick, range, sum } from 'lodash';
 import { Readable } from 'stream';
-import { ApmSynthtraceEsClient } from '../lib/apm/client/apm_synthtrace_es_client';
+import {
+  ApmSynthtraceEsClient,
+  ApmSynthtraceEsClientImpl,
+} from '../lib/apm/client/apm_synthtrace_es_client';
 import { ToolingLog } from '@kbn/tooling-log';
 
 describe('Synthtrace ES Client indexer', () => {
@@ -49,9 +52,9 @@ describe('Synthtrace ES Client indexer', () => {
           },
         },
       },
-    } as unknown as ConstructorParameters<typeof ApmSynthtraceEsClient>[0];
+    } as unknown as ConstructorParameters<typeof ApmSynthtraceEsClientImpl>[0];
 
-    apmEsClient = new ApmSynthtraceEsClient(opts);
+    apmEsClient = new ApmSynthtraceEsClientImpl(opts);
   });
 
   it('indexes documents', async () => {
