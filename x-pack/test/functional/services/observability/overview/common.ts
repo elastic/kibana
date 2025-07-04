@@ -88,6 +88,12 @@ export function ObservabilityOverviewCommonProvider({
     });
   };
 
+  const waitForOverviewNoDataPrompt = async () => {
+    await retry.waitFor('no data prompt to appear', async () => {
+      return await testSubjects.exists('obltOverviewNoDataPrompt');
+    });
+  };
+
   const getAlertsTableNoDataOrFail = async () => {
     return await testSubjects.existOrFail(ALERTS_TABLE_NO_DATA_SELECTOR);
   };
@@ -98,5 +104,6 @@ export function ObservabilityOverviewCommonProvider({
     navigateToOverviewPageWithoutAlerts,
     navigateToOverviewPage,
     openAlertsSectionAndWaitToAppear,
+    waitForOverviewNoDataPrompt,
   };
 }

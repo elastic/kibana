@@ -273,6 +273,7 @@ export function OverviewPage() {
       ) : (
         <EuiEmptyPrompt
           iconType="logoObservability"
+          data-test-subj="obltOverviewNoDataPrompt"
           title={
             <h2>
               {i18n.translate('xpack.observability.overview.emptyState.title', {

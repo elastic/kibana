@@ -19,28 +19,24 @@ export default ({ getService }: FtrProviderContext) => {
     const observability = getService('observability');
     const retry = getService('retry');
 
-    before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-    });
-
-    after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
-    });
-
-    describe('Without alerts', function () {
+    describe('Without data', function () {
       it('navigate and open alerts section', async () => {
         await observability.overview.common.navigateToOverviewPageWithoutAlerts();
-        await observability.overview.common.openAlertsSectionAndWaitToAppear();
-      });
-
-      it('should show no data message', async () => {
-        await retry.try(async () => {
-          await observability.overview.common.getAlertsTableNoDataOrFail();
-        });
+        await observability.overview.common.waitForOverviewNoDataPrompt();
       });
     });
 
-    describe('With alerts', function () {
+    describe('With data', function () {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      });
+
       it('navigate and open alerts section', async () => {
         await observability.overview.common.navigateToOverviewPageWithAlerts();
         await observability.overview.common.openAlertsSectionAndWaitToAppear();
