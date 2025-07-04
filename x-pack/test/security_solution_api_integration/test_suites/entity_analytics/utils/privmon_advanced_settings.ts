@@ -9,18 +9,9 @@ import { ENABLE_PRIVILEGED_USER_MONITORING_SETTING } from '@kbn/security-solutio
 import { KbnClient } from '@kbn/test';
 
 export const enablePrivmonSetting = async (kibanaServer: KbnClient) => {
-  console.log(
-    `Enabling Privileged User Monitoring advanced setting: ${ENABLE_PRIVILEGED_USER_MONITORING_SETTING}`
-  );
   await kibanaServer.uiSettings.update({
     [ENABLE_PRIVILEGED_USER_MONITORING_SETTING]: true,
   });
-
-  const setting = await kibanaServer.uiSettings.get(ENABLE_PRIVILEGED_USER_MONITORING_SETTING);
-
-  console.log(
-    `Privileged User Monitoring advanced setting enabled: ${ENABLE_PRIVILEGED_USER_MONITORING_SETTING} = ${setting}`
-  );
 };
 
 export const disablePrivmonSetting = async (kibanaServer: KbnClient) => {
