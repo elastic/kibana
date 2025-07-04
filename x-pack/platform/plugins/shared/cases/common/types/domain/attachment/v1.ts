@@ -58,6 +58,7 @@ export const UserCommentAttachmentPayloadRt = rt.strict({
   comment: rt.string,
   type: rt.literal(AttachmentType.user),
   owner: rt.string,
+  is_assistant: rt.union([rt.boolean, rt.undefined, rt.null]),
 });
 
 const UserCommentAttachmentAttributesRt = rt.intersection([

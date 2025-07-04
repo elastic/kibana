@@ -72,3 +72,7 @@ export const MAX_SELECTED_ASSIGNEES = (limit: number) =>
       "You've selected the maximum number of {count, plural, one {# assignee} other {# assignees}}",
     values: { count: limit },
   });
+
+export const ASSISTANT = i18n.translate('xpack.cases.assistant.title', {
+  defaultMessage: 'Assistant',
+});

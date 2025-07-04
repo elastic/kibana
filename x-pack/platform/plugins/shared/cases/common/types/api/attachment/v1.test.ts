@@ -60,7 +60,7 @@ describe('Attachments', () => {
 
       expect(query).toStrictEqual({
         _tag: 'Right',
-        right: defaultRequest,
+        right: { ...defaultRequest, is_assistant: undefined },
       });
     });
 
@@ -69,9 +69,24 @@ describe('Attachments', () => {
 
       expect(query).toStrictEqual({
         _tag: 'Right',
-        right: defaultRequest,
+        right: { ...defaultRequest, is_assistant: undefined },
       });
     });
+
+    test.each([undefined, null, true, false])(
+      'has expected attributes in request when `is_assistant` is %s',
+      (isAssistant) => {
+        const query = AttachmentRequestRt.decode({
+          ...defaultRequest,
+          is_assistant: isAssistant,
+        });
+
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: { ...defaultRequest, is_assistant: isAssistant },
+        });
+      }
+    );
 
     describe('errors', () => {
       describe('commentType: user', () => {
@@ -185,6 +200,7 @@ describe('Attachments', () => {
           pushed_by: null,
           updated_at: null,
           updated_by: null,
+          is_assistant: null,
           id: 'basic-comment-id',
           version: 'WzQ3LDFc',
         },
@@ -256,6 +272,7 @@ describe('Attachments', () => {
         comment: 'Solve this fast!',
         type: AttachmentType.user,
         owner: 'cases',
+        is_assistant: undefined,
       },
     ];
 
@@ -278,6 +295,26 @@ describe('Attachments', () => {
         right: defaultRequest,
       });
     });
+
+    test.each([undefined, null, true, false])(
+      'has expected attributes in request when `is_assistant` is %s',
+      (isAssistant) => {
+        const defaultBulkRequest = [
+          {
+            comment: 'Solve this fast!',
+            type: AttachmentType.user,
+            owner: 'cases',
+            is_assistant: isAssistant,
+          },
+        ];
+        const query = BulkCreateAttachmentsRequestRt.decode(defaultBulkRequest);
+
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: defaultBulkRequest,
+        });
+      }
+    );
 
     describe('errors', () => {
       it(`throws error when attachments are more than ${MAX_BULK_CREATE_ATTACHMENTS}`, () => {
@@ -340,6 +377,7 @@ describe('Attachments', () => {
           pushed_by: null,
           updated_at: null,
           updated_by: null,
+          is_assistant: null,
         },
       ],
       errors: [

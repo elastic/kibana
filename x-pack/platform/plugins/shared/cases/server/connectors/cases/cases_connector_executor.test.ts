@@ -3507,6 +3507,7 @@ describe('CasesConnectorExecutor', () => {
             attachments: [
               {
                 comment: 'comment-1',
+                is_assistant: false,
                 owner: 'securitySolution',
                 type: 'user',
               },

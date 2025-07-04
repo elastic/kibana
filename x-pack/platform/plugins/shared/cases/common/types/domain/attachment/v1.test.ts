@@ -142,7 +142,7 @@ describe('Attachments', () => {
 
       expect(query).toStrictEqual({
         _tag: 'Right',
-        right: defaultRequest,
+        right: { ...defaultRequest, is_assistant: undefined },
       });
     });
 
@@ -151,9 +151,24 @@ describe('Attachments', () => {
 
       expect(query).toStrictEqual({
         _tag: 'Right',
-        right: defaultRequest,
+        right: { ...defaultRequest, is_assistant: undefined },
       });
     });
+
+    test.each([undefined, null, true, false])(
+      'has expected attributes in request when `is_assistant` is %s',
+      (isAssistant) => {
+        const query = UserCommentAttachmentPayloadRt.decode({
+          ...defaultRequest,
+          is_assistant: isAssistant,
+        });
+
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: { ...defaultRequest, is_assistant: isAssistant },
+        });
+      }
+    );
   });
 
   describe('AlertAttachmentPayloadRt', () => {
@@ -399,6 +414,7 @@ describe('Attachments', () => {
       pushed_by: null,
       updated_at: null,
       updated_by: null,
+      is_assistant: null,
     };
     it('has expected attributes in request', () => {
       const query = AttachmentRt.decode(defaultRequest);
@@ -436,6 +452,7 @@ describe('Attachments', () => {
       pushed_by: null,
       updated_at: null,
       updated_by: null,
+      is_assistant: null,
     };
     it('has expected attributes in request', () => {
       const query = UserCommentAttachmentRt.decode(defaultRequest);

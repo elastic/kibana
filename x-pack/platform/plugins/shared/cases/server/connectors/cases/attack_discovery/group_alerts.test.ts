@@ -37,8 +37,9 @@ describe('groupAttackDiscoveryAlerts', () => {
       attack_discovery: '012479c7-bcb6-4945-a6cf-65e40931a156',
     });
     expect(
-      groups[0].comments?.[0].startsWith('## Coordinated credential access across hosts')
+      groups[0].comments?.[0].comment.startsWith('## Coordinated credential access across hosts')
     ).toBeTruthy();
+    expect(groups[0].comments?.[0].isAssistant).toBeTruthy();
     expect(groups[0].title).toEqual('Coordinated credential access across hosts');
   });
 
@@ -80,8 +81,9 @@ describe('groupAttackDiscoveryAlerts', () => {
       attack_discovery: '012479c7-bcb6-4945-a6cf-65e40931a156',
     });
     expect(
-      groups[0].comments?.[0].startsWith('## Coordinated credential access across hosts')
+      groups[0].comments?.[0].comment.startsWith('## Coordinated credential access across hosts')
     ).toBeTruthy();
+    expect(groups[0].comments?.[0].isAssistant).toBeTruthy();
     expect(groups[0].title).toEqual('Coordinated credential access across hosts');
 
     expect(groups[1].alerts).toEqual([
@@ -89,7 +91,8 @@ describe('groupAttackDiscoveryAlerts', () => {
       { _id: 'id2', _index: '.alerts-security.alerts-default' },
     ]);
     expect(groups[1].grouping).toEqual({ attack_discovery: 'another-id' });
-    expect(groups[1].comments?.[0].startsWith('## Another attack')).toBeTruthy();
+    expect(groups[1].comments?.[0].comment.startsWith('## Another attack')).toBeTruthy();
+    expect(groups[0].comments?.[0].isAssistant).toBeTruthy();
     expect(groups[1].title).toEqual('Another attack');
   });
 

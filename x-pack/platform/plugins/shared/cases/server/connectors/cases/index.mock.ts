@@ -93,7 +93,7 @@ export const groupedAlerts = [
       { _id: 'alert-id-1', _index: 'alert-index-1' },
       { _id: 'alert-id-2', _index: 'alert-index-1' },
     ],
-    comments: ['comment-1'],
+    comments: [{ comment: 'comment-1', isAssistant: false }],
     grouping: { field_name_1: 'field_value_1' },
     title: 'custom-title',
   },
@@ -102,7 +102,10 @@ export const groupedAlerts = [
       { _id: 'alert-id-3', _index: 'alert-index-2' },
       { _id: 'alert-id-4', _index: 'alert-index-2' },
     ],
-    comments: ['comment-2', 'comment-3'],
+    comments: [
+      { comment: 'comment-2', isAssistant: false },
+      { comment: 'comment-3', isAssistant: true },
+    ],
     grouping: { field_name_2: 'field_value_2' },
   },
   {

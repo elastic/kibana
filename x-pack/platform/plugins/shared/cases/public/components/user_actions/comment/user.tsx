@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 
+import { AssistantAvatar } from '@kbn/ai-assistant-icon';
 import type { UserCommentAttachment } from '../../../../common/types/domain';
 import { UserActionTimestamp } from '../timestamp';
 import type { SnakeToCamelCase } from '../../../../common/types';
@@ -22,6 +23,7 @@ import { HoverableAvatarResolver } from '../../user_profiles/hoverable_avatar_re
 import { UserCommentPropertyActions } from '../property_actions/user_comment_property_actions';
 import { getMarkdownEditorStorageKey } from '../../markdown_editor/utils';
 import * as i18n from './translations';
+import { HoverableAssistantResolver } from '../../user_profiles/hoverable_assistant_resolver';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
@@ -90,67 +92,79 @@ export const createUserAttachmentUserActionBuilder = ({
   handleSaveComment,
   handleManageQuote,
   handleDeleteComment,
-}: BuilderArgs): ReturnType<UserActionBuilder> => ({
-  build: () => [
-    {
-      username: (
-        <HoverableUsernameResolver user={attachment.createdBy} userProfiles={userProfiles} />
-      ),
-      'data-test-subj': `comment-create-action-${attachment.id}`,
-      timestamp: (
-        <UserActionTimestamp createdAt={attachment.createdAt} updatedAt={attachment.updatedAt} />
-      ),
-      className: classNames('userAction__comment', {
-        outlined,
-        isEdit,
-        draftFooter:
-          !isEdit &&
-          !isLoading &&
-          hasDraftComment(appId, caseId, attachment.id, attachment.comment),
-      }),
-      css: createCommentActionCss(euiTheme),
-      children: (
-        <>
-          <UserActionMarkdown
-            key={isEdit ? attachment.id : undefined}
-            ref={(element) => (commentRefs.current[attachment.id] = element)}
-            id={attachment.id}
-            content={attachment.comment}
-            isEditable={isEdit}
-            caseId={caseId}
-            onChangeEditable={handleManageMarkdownEditId}
-            onSaveContent={handleSaveComment.bind(null, {
-              id: attachment.id,
-              version: attachment.version,
-            })}
-          />
-          {!isEdit &&
-          !isLoading &&
-          hasDraftComment(appId, caseId, attachment.id, attachment.comment) ? (
-            <EuiText css={getCommentFooterCss(euiTheme)}>
-              <EuiText color="subdued" size="xs" data-test-subj="user-action-comment-unsaved-draft">
-                {i18n.UNSAVED_DRAFT_COMMENT}
+}: BuilderArgs): ReturnType<UserActionBuilder> => {
+  const username = attachment.isAssistant ? (
+    <HoverableAssistantResolver />
+  ) : (
+    <HoverableUsernameResolver user={attachment.createdBy} userProfiles={userProfiles} />
+  );
+  const timelineAvatar = attachment.isAssistant ? (
+    <AssistantAvatar name="machine" size="m" color="subdued" />
+  ) : (
+    <HoverableAvatarResolver user={attachment.createdBy} userProfiles={userProfiles} />
+  );
+  return {
+    build: () => [
+      {
+        username,
+        'data-test-subj': `comment-create-action-${attachment.id}`,
+        timestamp: (
+          <UserActionTimestamp createdAt={attachment.createdAt} updatedAt={attachment.updatedAt} />
+        ),
+        className: classNames('userAction__comment', {
+          outlined,
+          isEdit,
+          draftFooter:
+            !isEdit &&
+            !isLoading &&
+            hasDraftComment(appId, caseId, attachment.id, attachment.comment),
+        }),
+        css: createCommentActionCss(euiTheme),
+        children: (
+          <>
+            <UserActionMarkdown
+              key={isEdit ? attachment.id : undefined}
+              ref={(element) => (commentRefs.current[attachment.id] = element)}
+              id={attachment.id}
+              content={attachment.comment}
+              isEditable={isEdit}
+              caseId={caseId}
+              onChangeEditable={handleManageMarkdownEditId}
+              onSaveContent={handleSaveComment.bind(null, {
+                id: attachment.id,
+                version: attachment.version,
+              })}
+            />
+            {!isEdit &&
+            !isLoading &&
+            hasDraftComment(appId, caseId, attachment.id, attachment.comment) ? (
+              <EuiText css={getCommentFooterCss(euiTheme)}>
+                <EuiText
+                  color="subdued"
+                  size="xs"
+                  data-test-subj="user-action-comment-unsaved-draft"
+                >
+                  {i18n.UNSAVED_DRAFT_COMMENT}
+                </EuiText>
               </EuiText>
-            </EuiText>
-          ) : (
-            ''
-          )}
-        </>
-      ),
-      timelineAvatar: (
-        <HoverableAvatarResolver user={attachment.createdBy} userProfiles={userProfiles} />
-      ),
-      actions: (
-        <UserActionContentToolbar id={attachment.id}>
-          <UserCommentPropertyActions
-            isLoading={isLoading}
-            commentContent={attachment.comment}
-            onEdit={() => handleManageMarkdownEditId(attachment.id)}
-            onDelete={() => handleDeleteComment(attachment.id, i18n.DELETE_COMMENT_SUCCESS_TITLE)}
-            onQuote={() => handleManageQuote(attachment.comment)}
-          />
-        </UserActionContentToolbar>
-      ),
-    },
-  ],
-});
+            ) : (
+              ''
+            )}
+          </>
+        ),
+        timelineAvatar,
+        actions: (
+          <UserActionContentToolbar id={attachment.id}>
+            <UserCommentPropertyActions
+              isLoading={isLoading}
+              commentContent={attachment.comment}
+              onEdit={() => handleManageMarkdownEditId(attachment.id)}
+              onDelete={() => handleDeleteComment(attachment.id, i18n.DELETE_COMMENT_SUCCESS_TITLE)}
+              onQuote={() => handleManageQuote(attachment.comment)}
+            />
+          </UserActionContentToolbar>
+        ),
+      },
+    ],
+  };
+};

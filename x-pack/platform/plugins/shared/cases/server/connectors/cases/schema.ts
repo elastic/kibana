@@ -35,6 +35,11 @@ const RuleSchema = schema.object({
   ruleUrl: schema.nullable(schema.string()),
 });
 
+const CommentSchema = schema.object({
+  comment: schema.string(),
+  isAssistant: schema.boolean(),
+});
+
 const ReopenClosedCasesSchema = schema.boolean({ defaultValue: false });
 const TimeWindowSchema = schema.string({
   defaultValue: '7d',
@@ -72,7 +77,7 @@ const TimeWindowSchema = schema.string({
 
 export const CasesGroupedAlertsSchema = schema.object({
   alerts: schema.arrayOf(AlertSchema, { maxSize: MAX_ALERTS_PER_CASE }),
-  comments: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_DOCS_PER_PAGE / 2 })),
+  comments: schema.maybe(schema.arrayOf(CommentSchema, { maxSize: MAX_DOCS_PER_PAGE / 2 })),
   grouping: schema.recordOf(schema.string(), schema.any()),
   title: schema.maybe(schema.string({ maxLength: MAX_TITLE_LENGTH })),
 });

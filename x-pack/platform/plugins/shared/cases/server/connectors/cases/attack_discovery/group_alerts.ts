@@ -40,21 +40,24 @@ export const groupAttackDiscoveryAlerts = (alerts: CaseAlert[]): CasesGroupedAle
 
     const caseTitle = attackDiscovery.title.slice(0, MAX_TITLE_LENGTH);
     const caseComments = [
-      getAttackDiscoveryMarkdown({
-        attackDiscovery: {
-          id: attackDiscoveryId,
-          alertIds,
-          detailsMarkdown: attackDiscovery.details_markdown,
-          entitySummaryMarkdown: attackDiscovery.entity_summary_markdown,
-          mitreAttackTactics: attackDiscovery.mitre_attack_tactics,
-          summaryMarkdown: attackDiscovery.summary_markdown,
-          title: caseTitle,
-        },
-        replacements: attackDiscovery.replacements?.reduce((acc: Record<string, string>, r) => {
-          acc[r.uuid] = r.value;
-          return acc;
-        }, {}),
-      }),
+      {
+        isAssistant: true,
+        comment: getAttackDiscoveryMarkdown({
+          attackDiscovery: {
+            id: attackDiscoveryId,
+            alertIds,
+            detailsMarkdown: attackDiscovery.details_markdown,
+            entitySummaryMarkdown: attackDiscovery.entity_summary_markdown,
+            mitreAttackTactics: attackDiscovery.mitre_attack_tactics,
+            summaryMarkdown: attackDiscovery.summary_markdown,
+            title: caseTitle,
+          },
+          replacements: attackDiscovery.replacements?.reduce((acc: Record<string, string>, r) => {
+            acc[r.uuid] = r.value;
+            return acc;
+          }, {}),
+        }),
+      },
     ].slice(0, MAX_DOCS_PER_PAGE / 2);
 
     /**

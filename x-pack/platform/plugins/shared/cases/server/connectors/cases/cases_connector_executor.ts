@@ -1144,10 +1144,11 @@ export class CasesConnectorExecutor {
     const bulkCreateAlertsRequest: BulkCreateAlertsReq[] = casesUnderAlertLimit.map(
       ({ theCase, alerts, comments }) => {
         const extraComments: UserCommentAttachmentPayload[] =
-          comments?.map((comment) => ({
+          comments?.map(({ comment, isAssistant }) => ({
             type: AttachmentType.user,
             comment,
             owner: theCase.owner,
+            is_assistant: isAssistant,
           })) ?? [];
         return {
           caseId: theCase.id,

@@ -123,7 +123,7 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping = (
   expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
     caseId: 'mock-id-1',
     attachments: [
-      { comment: 'comment-1', owner: 'securitySolution', type: 'user' },
+      { comment: 'comment-1', is_assistant: false, owner: 'securitySolution', type: 'user' },
       {
         alertId: ['alert-id-1', 'alert-id-2'],
         index: ['alert-index-1', 'alert-index-1'],
@@ -137,8 +137,8 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping = (
   expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
     caseId: 'mock-id-2',
     attachments: [
-      { comment: 'comment-2', owner: 'securitySolution', type: 'user' },
-      { comment: 'comment-3', owner: 'securitySolution', type: 'user' },
+      { comment: 'comment-2', is_assistant: false, owner: 'securitySolution', type: 'user' },
+      { comment: 'comment-3', is_assistant: true, owner: 'securitySolution', type: 'user' },
       {
         alertId: ['alert-id-3', 'alert-id-4'],
         index: ['alert-index-2', 'alert-index-2'],
