@@ -149,6 +149,7 @@ import { UpgradeAgentlessDeploymentsTask } from './tasks/upgrade_agentless_deplo
 import { SyncIntegrationsTask } from './tasks/sync_integrations/sync_integrations_task';
 import { AutomaticAgentUpgradeTask } from './tasks/automatic_agent_upgrade_task';
 import { registerPackagesBulkOperationTask } from './tasks/packages_bulk_operations';
+import { AutoInstallContentPackagesTask } from './tasks/auto_install_content_packages_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -202,6 +203,7 @@ export interface FleetAppContext {
   deleteUnenrolledAgentsTask: DeleteUnenrolledAgentsTask;
   updateAgentlessDeploymentsTask: UpgradeAgentlessDeploymentsTask;
   automaticAgentUpgradeTask: AutomaticAgentUpgradeTask;
+  autoInstallContentPackagesTask: AutoInstallContentPackagesTask;
   taskManagerStart?: TaskManagerStartContract;
   fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
   syncIntegrationsTask: SyncIntegrationsTask;
@@ -310,6 +312,7 @@ export class FleetPlugin
   private updateAgentlessDeploymentsTask?: UpgradeAgentlessDeploymentsTask;
   private syncIntegrationsTask?: SyncIntegrationsTask;
   private automaticAgentUpgradeTask?: AutomaticAgentUpgradeTask;
+  private autoInstallContentPackagesTask?: AutoInstallContentPackagesTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -680,6 +683,14 @@ export class FleetPlugin
         retryDelays: config.autoUpgrades?.retryDelays,
       },
     });
+    this.autoInstallContentPackagesTask = new AutoInstallContentPackagesTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+      config: {
+        taskInterval: config.autoInstallContentPackages?.taskInterval,
+      },
+    });
     this.lockManagerService = new LockManagerService(core, this.initializerContext.logger.get());
 
     // Register fields metadata extractors
@@ -734,6 +745,7 @@ export class FleetPlugin
       fetchUsage: this.fetchUsage,
       syncIntegrationsTask: this.syncIntegrationsTask!,
       lockManagerService: this.lockManagerService,
+      autoInstallContentPackagesTask: this.autoInstallContentPackagesTask!,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
@@ -752,6 +764,9 @@ export class FleetPlugin
       ?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser)
       .catch(() => {});
     this.syncIntegrationsTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+    this.autoInstallContentPackagesTask
+      ?.start({ taskManager: plugins.taskManager })
+      .catch(() => {});
 
     const logger = appContextService.getLogger();
 
