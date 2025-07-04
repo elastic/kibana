@@ -409,10 +409,6 @@ export class IndexUpdateService {
     return this._indexName$.getValue();
   }
 
-  public getPendingFieldsToBeSaved(): string[] {
-    return this._pendingColumnsToBeSaved$.getValue().map((col) => col.name);
-  }
-
   // Add a new index
   public addDoc(doc: Record<string, any>) {
     this.actions$.next({ type: 'add', payload: { value: doc } });
