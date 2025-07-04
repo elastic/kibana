@@ -1,6 +1,8 @@
 [[timelion]]
 === Timelion
 
+IMPORTANT: **Timelion** was deprecated in version 7.10.
+
 To use *Timelion*, you define a graph by chaining functions together, using the *Timelion*-specific syntax. 
 The syntax enables some features that classical point series charts don't offer, such as pulling data from different indices or data sources into one graph.
 
@@ -92,20 +94,15 @@ Set up Metricbeat, then create the dashboard.
 
 . On the *Dashboards* page, click *Create dashboard*.
 
-[float]
-==== Open and set up Timelion
-
-Open *Timelion* and change the time range. 
-
-. On the dashboard, click *All types > Aggregation based*, then select *Timelion*.
-
-. Make sure the <<set-time-filter,time filter>> is *Last 7 days*.
+You can only add Timelion visualizations to a dashboard if they're already saved in the **Visualize Library**, using the **Add from library** option.
 
 [float]
 [[timelion-tutorial-create-time-series-visualizations]]
 ==== Create a time series visualization
 
-To compare the real-time percentage of CPU time spent in user space to the results offset by one hour, create a time series visualization.
+. Go to the **Visualize Library** and select **Create visualization**.
+. In the **Legacy** tab, select **Aggregation-based**, then **Timelion**.
+. Make sure the <<set-time-filter,time filter>> is *Last 7 days*.
 
 [float]
 [[define-the-functions]]
