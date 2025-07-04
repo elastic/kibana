@@ -9,7 +9,6 @@ import {
   Message,
   ChatCompletionEvent,
   MessageRole,
-  AnonymizationEntity,
   AnonymizationOutput,
 } from '@kbn/inference-common';
 import {
@@ -25,11 +24,6 @@ export function deanonymizeMessage(
   if (!anonymization.anonymizations.length) {
     return identity;
   }
-  const anonymizationEntityLookup: Record<string, AnonymizationEntity> = {};
-
-  anonymization.anonymizations.forEach((item) => {
-    anonymizationEntityLookup[item.entity.mask] = item.entity;
-  });
 
   return (source$) => {
     return source$.pipe(
@@ -48,11 +42,11 @@ export function deanonymizeMessage(
           const {
             message: { content, toolCalls },
             deanonymizations,
-          } = deanonymize(message, anonymizationEntityLookup);
+          } = deanonymize(message, anonymization.anonymizations);
 
           // Create deanonymized input messages metadata
           const deanonymizedInput = anonymization.messages.map((msg) => {
-            const deanonymization = deanonymize(msg, anonymizationEntityLookup);
+            const deanonymization = deanonymize(msg, anonymization.anonymizations);
             return {
               message: deanonymization.message,
               deanonymizations: deanonymization.deanonymizations,

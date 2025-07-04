@@ -5,44 +5,37 @@
  * 2.0.
  */
 
-import { Message, AnonymizationEntity, Deanonymization } from '@kbn/inference-common';
+import { Message, Deanonymization, Anonymization } from '@kbn/inference-common';
 import { getAnonymizableMessageParts } from './get_anonymizable_message_parts';
 
 export function deanonymize<TMessage extends Message>(
   message: TMessage,
-  masksLookup: Record<string, AnonymizationEntity>
+  anonymizations: Anonymization[]
 ): { message: TMessage; deanonymizations: Deanonymization[] } {
-  const masks = Object.keys(masksLookup);
+  // reverse order of anonymizations when unmasking, this ensures
+  // doubly masked parts are unmasked appropriately. e.g.:
+  // a => b => c should be unmasked as c => b => a. if you start
+  // with a, you won't find a match, only c will be unmasked to b.
+  const reversedAnonymizations = anonymizations.concat().reverse();
 
   function replace(content: string) {
+    let next = content;
     const deanonymizations: Deanonymization[] = [];
-    let next = '';
-    let outputPos = 0; // Track position in output text
 
-    for (let i = 0; i < content.length; i++) {
-      const slice = content.slice(i);
+    reversedAnonymizations.forEach(({ entity }) => {
+      let index = next.indexOf(entity.mask);
 
-      const foundMask = masks.find((mask) => slice.startsWith(mask));
-
-      if (foundMask) {
-        const entity = masksLookup[foundMask];
-        const start = outputPos;
+      while (index !== -1) {
+        const start = index;
         const end = start + entity.value.length;
 
-        deanonymizations.push({
-          start,
-          end,
-          entity,
-        });
-        next += entity.value;
-        outputPos += entity.value.length;
-        i = i + foundMask.length - 1; // Advance by mask length, -1 because loop will increment
-        continue;
-      }
+        deanonymizations.push({ start, end, entity });
 
-      next += content.slice(i, i + 1);
-      outputPos++;
-    }
+        next = next.slice(0, start) + entity.value + next.slice(start, end);
+
+        index = next.indexOf(entity.mask, end);
+      }
+    });
 
     return {
       deanonymizations,

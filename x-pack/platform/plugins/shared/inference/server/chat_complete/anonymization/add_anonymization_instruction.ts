@@ -6,6 +6,7 @@
  */
 
 import { AnonymizationRule, RegexAnonymizationRule } from '@kbn/inference-common';
+import dedent from 'dedent';
 
 /**
  * Builds a human‑readable instruction that tells the LLM why hash‑like
@@ -27,9 +28,15 @@ export function addAnonymizationInstruction(system: string, rules: Anonymization
 
   const exampleTokens = [...nerClasses, ...regexClasses].map((c) => `\`${c}_abc123\``).join(', ');
 
-  return `${system}\n\nSome entities in this conversation have been anonymized using placeholder tokens (e.g., ${exampleTokens}).
-These represent named entities such as people (PER), locations (LOC), organizations (ORG), and miscellaneous types (MISC)${
-    regexClasses.length ? `, as well as custom types like ${regexClasses.join(', ')}.` : '.'
-  }
-Do not attempt to infer their meaning, type, or real‑world identity. Refer to them exactly as they appear unless explicitly resolved or described.`;
+  return dedent(
+    `${system}
+    
+    ### Anonymization
+    
+    Some entities in this conversation have been anonymized using placeholder tokens (e.g., ${exampleTokens}).
+    These represent named entities such as people (PER), locations (LOC), organizations (ORG), and miscellaneous types (MISC)${
+      regexClasses.length ? `, as well as custom types like ${regexClasses.join(', ')}.` : '.'
+    }
+    Do not attempt to infer their meaning, type, or real‑world identity. Refer to them exactly as they appear unless explicitly resolved or described.`
+  );
 }

@@ -31,10 +31,10 @@ export async function anonymizeMessages({
     };
   }
 
-  const toAnonymize = messages.map(messageToAnonymizationRecords);
-  if (system) {
-    toAnonymize.push({ system });
-  }
+  const toAnonymize = [
+    ...(system ? [{ system }] : []),
+    ...messages.map(messageToAnonymizationRecords),
+  ];
 
   const { records, anonymizations } = await anonymizeRecords({
     input: toAnonymize,
