@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -28,8 +27,8 @@ import {
   FieldPicker,
   FieldOption,
   type QueryInputServices,
+  type FieldOptionValue,
 } from '@kbn/visualization-ui-components';
-import type { FieldOptionValue } from '@kbn/visualization-ui-components';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import moment from 'moment';
@@ -47,6 +46,7 @@ import {
   defaultAnnotationRangeColor,
   defaultRangeAnnotationLabel,
   toLineAnnotationColor,
+  useAvailableFields,
 } from './helpers';
 import { annotationsIconSet } from './icon_set';
 import { sanitizeProperties } from './helpers';
@@ -103,6 +103,8 @@ const AnnotationEditorControls = ({
       lineWidth: currentAnnotation.lineWidth,
     };
   }, [currentAnnotation, isRange]);
+
+  const availableFields = useAvailableFields(dataView, currentAnnotation);
 
   return (
     <>
@@ -169,9 +171,8 @@ const AnnotationEditorControls = ({
                   timeField:
                     (dataView.timeFieldName ||
                       // fallback to the first avaiable date field in the dataView
-                      dataView.fields
-                        .filter(isFieldLensCompatible)
-                        .find(({ type: fieldType }) => fieldType === 'date')?.displayName) ??
+                      availableFields.find(({ type: fieldType }) => fieldType === 'date')
+                        ?.displayName) ??
                     '',
                   key: { type: 'point_in_time' },
                   ...additionalRangeResets,
@@ -234,9 +235,8 @@ const AnnotationEditorControls = ({
                 if (textDecorationSelected !== 'field') {
                   return null;
                 }
-                const options = dataView.fields
-                  .filter(isFieldLensCompatible)
-                  .filter(({ displayName, type }) => displayName && type !== 'document')
+                const options = availableFields
+                  .filter(({ displayName, type, name }) => displayName && type !== 'document')
                   .map(
                     (field) =>
                       ({
@@ -373,6 +373,7 @@ const AnnotationEditorControls = ({
               currentConfig={currentAnnotation}
               setConfig={update}
               dataView={dataView}
+              availableFields={availableFields}
             />
           </EuiFormRow>
         </DimensionEditorSection>

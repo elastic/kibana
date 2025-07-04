@@ -51,6 +51,7 @@ export interface IndexPatternServiceAPI {
     notUsedPatterns?: string[];
     cache: IndexPatternMap;
     onIndexPatternRefresh?: () => void;
+    usedFields?: string[];
   }) => Promise<IndexPatternMap>;
 
   /**

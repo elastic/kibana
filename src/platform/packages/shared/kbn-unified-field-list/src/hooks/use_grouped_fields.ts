@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { type CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { type DataViewsContract } from '@kbn/data-views-plugin/public';
+import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { type UseNewFieldsParams, useNewFields } from './use_new_fields';
 import {
   type FieldListGroups,
@@ -61,6 +62,23 @@ export interface GroupedFieldsResult<T extends FieldListItem> {
   hasNewFields: boolean;
 }
 
+export function createFilterCriteriaForDataViewFilters<T extends FieldListItem = DataViewField>(
+  dataView: DataView | null,
+  selectedFields: T[] | undefined
+) {
+  const sortedSelectedFieldsLookup = new Set(selectedFields?.map((field) => field.name) || []);
+
+  const sourceFiltersValues = dataView?.getSourceFiltering?.()?.excludes;
+  const filterFieldsBasedOnDataViewAndSelection = (fieldName: string) => {
+    if (sourceFiltersValues) {
+      const filter = fieldWildcardFilter(sourceFiltersValues, dataView.metaFields);
+      return filter(fieldName) && !sortedSelectedFieldsLookup.has(fieldName); // don't filter out a field which was present in hits (ex. for selected fields)
+    }
+    return true;
+  };
+  return filterFieldsBasedOnDataViewAndSelection;
+}
+
 export function useGroupedFields<T extends FieldListItem = DataViewField>({
   dataViewId,
   allFields,
@@ -93,6 +111,11 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     ? fieldsExistenceReader.hasFieldData
     : hasFieldDataByDefault;
 
+  const filterCriteriaForDataViewFilters = useMemo(
+    () => createFilterCriteriaForDataViewFilters(dataView, sortedSelectedFields),
+    [dataView, sortedSelectedFields]
+  );
+
   useEffect(() => {
     const getDataView = async () => {
       if (dataViewId) {
@@ -111,12 +134,19 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     // if field existence information changed, reload the data view too
   }, [dataViewId, services.dataViews, setDataView, hasFieldDataHandler]);
 
-  const { allFieldsModified, hasNewFields } = useNewFields<T>({
+  const { allFieldsModified: allFieldsModifiedPreFilter, hasNewFields } = useNewFields<T>({
     dataView,
     allFields,
     getNewFieldsBySpec,
     fieldsExistenceReader,
   });
+
+  const allFieldsModified: T[] | null = useMemo(() => {
+    return (
+      allFieldsModifiedPreFilter?.filter((field) => filterCriteriaForDataViewFilters(field.name)) ??
+      null
+    );
+  }, [allFieldsModifiedPreFilter, filterCriteriaForDataViewFilters]);
 
   // important when switching from a known dataViewId to no data view (like in text-based queries)
   useEffect(() => {
