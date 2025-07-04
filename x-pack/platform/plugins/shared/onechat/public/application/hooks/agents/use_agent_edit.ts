@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AgentProfile, ToolSelection } from '@kbn/onechat-common';
 import { useOnechatServices } from '../use_onechat_service';
 import { useOnechatAgentById } from './use_agent_by_id';
+import { useOnechatTools } from '../use_tools';
 import { queryKeys } from '../../query_keys';
 
 export interface AgentEditState {
@@ -37,12 +38,12 @@ export function useAgentEdit({
   onSaveSuccess: (agent: AgentProfile) => void;
   onSaveError: (err: Error) => void;
 }) {
-  const { agentProfilesService, toolsService } = useOnechatServices();
+  const { agentProfilesService } = useOnechatServices();
   const queryClient = useQueryClient();
   const [state, setState] = useState<AgentEditState>(emptyState());
-  const [tools, setTools] = useState<any[]>([]);
-  const [toolsLoading, setToolsLoading] = useState(true);
-  const [toolsError, setToolsError] = useState<Error | null>(null);
+
+  // Use the tools hook instead of manual fetching
+  const { tools, isLoading: toolsLoading, error: toolsError } = useOnechatTools();
 
   const { agent, isLoading: agentLoading, error: agentError } = useOnechatAgentById(agentId || '');
 
@@ -94,21 +95,6 @@ export function useAgentEdit({
     }
   }, [agentId, agent]);
 
-  // Fetch all available tools
-  useEffect(() => {
-    setToolsLoading(true);
-    toolsService
-      .list()
-      .then((res) => {
-        setTools(res.tools || []);
-        setToolsLoading(false);
-      })
-      .catch((err) => {
-        setToolsError(err);
-        setToolsLoading(false);
-      });
-  }, [toolsService]);
-
   const submit = useCallback(
     (data: AgentEditState) => {
       if (agentId) {
@@ -121,13 +107,14 @@ export function useAgentEdit({
     [agentId, createMutation, updateMutation]
   );
 
+  const isLoading = agentId ? agentLoading || toolsLoading : false;
+
   return {
     state,
-    isLoading: agentId ? agentLoading : false,
+    isLoading,
     isSubmitting: createMutation.isLoading || updateMutation.isLoading,
     submit,
     tools,
-    toolsLoading,
-    toolsError: toolsError || agentError,
+    error: toolsError || agentError,
   };
 }

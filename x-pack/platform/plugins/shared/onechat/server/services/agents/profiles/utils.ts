@@ -12,7 +12,7 @@ import type { InternalToolRegistry } from '../../tools/types';
 
 // - Must start and end with letter or digit
 // - Can contain letters, digits, hyphens, underscores
-const idRegexp = /^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$/g;
+const idRegexp = /^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$/;
 
 export const ensureValidId = (id: string) => {
   if (!idRegexp.test(id)) {

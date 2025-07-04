@@ -12,10 +12,10 @@ import { AgentForm } from './agent_form';
 import { labels } from '../../../utils/i18n';
 
 interface EditAgentProps {
-  id: string;
+  agentId: string;
 }
 
-export const EditAgent: React.FC<EditAgentProps> = ({ id }) => {
+export const EditAgent: React.FC<EditAgentProps> = ({ agentId }) => {
   return (
     <KibanaPageTemplate>
       <KibanaPageTemplate.Header
@@ -25,7 +25,7 @@ export const EditAgent: React.FC<EditAgentProps> = ({ id }) => {
         })}
       />
       <KibanaPageTemplate.Section>
-        <AgentForm mode={'edit'} />
+        <AgentForm mode={'edit'} agentId={agentId} />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );

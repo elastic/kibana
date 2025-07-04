@@ -7,14 +7,13 @@
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { AgentProfile } from '@kbn/onechat-common';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
 import { EditAgent } from '../components/agents/edit/edit_agent';
 
 export const OnechatAgentsEdit = () => {
-  const { id } = useParams<Pick<AgentProfile, 'id'>>();
+  const { agentId } = useParams<{ agentId: string }>();
   useBreadcrumb([
     {
       text: labels.chat.title,
@@ -25,8 +24,8 @@ export const OnechatAgentsEdit = () => {
       path: appPaths.agents.list,
     },
     {
-      text: id,
+      text: agentId,
     },
   ]);
-  return <EditAgent id={id} />;
+  return <EditAgent agentId={agentId} />;
 };
