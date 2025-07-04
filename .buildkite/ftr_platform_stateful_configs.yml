@@ -188,7 +188,7 @@ enabled:
   - x-pack/test/functional_basic/apps/transform/feature_controls/config.ts
   - x-pack/test/functional_cors/config.ts
   - x-pack/test/functional_embedded/config.ts
-  - x-pack/test/functional_execution_context/config.ts
+  - x-pack/platform/test/functional_execution_context/config.ts
   - x-pack/test/functional_with_es_ssl/apps/cases/group1/config.ts
   - x-pack/test/functional_with_es_ssl/apps/cases/group2/config.ts
   - x-pack/test/functional_with_es_ssl/apps/cases/basic/config.ts
