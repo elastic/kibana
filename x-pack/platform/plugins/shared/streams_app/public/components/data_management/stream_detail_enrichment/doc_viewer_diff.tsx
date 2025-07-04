@@ -19,6 +19,18 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { DEFAULT_MARGIN_BOTTOM, getTabContentAvailableHeight } from './get_height';
 
+export const DocViewerContext = React.createContext<{
+  originalSample?: Record<string, unknown>;
+}>({});
+
+export const useDocViewerContext = () => {
+  const context = React.useContext(DocViewerContext);
+  if (!context) {
+    throw new Error('DocViewerContext must be used within a DocViewerContext.Provider');
+  }
+  return context;
+};
+
 function orderObjectKeys(obj: unknown): unknown {
   if (Array.isArray(obj)) {
     return obj.map(orderObjectKeys);
@@ -45,19 +57,17 @@ export const docViewDiff = {
   component: JsonDiffViewer,
 };
 
-function JsonDiffViewer({
-  hit,
-  decreaseAvailableHeightBy,
-  additionalDocViewerProps,
-}: DocViewRenderProps) {
+function JsonDiffViewer({ hit, decreaseAvailableHeightBy }: DocViewRenderProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const euiTheme = useEuiTheme();
   const [editorHeight, setEditorHeight] = useState<number>(0);
 
-  const originalSample = additionalDocViewerProps?.originalSample as Record<string, unknown>;
+  const { originalSample } = useDocViewerContext();
 
   const originalValue = useMemo(
-    () => JSON.stringify(orderObjectKeys(flattenObjectNestedLast(originalSample)), null, 2),
+    () =>
+      originalSample &&
+      JSON.stringify(orderObjectKeys(flattenObjectNestedLast(originalSample)), null, 2),
     [originalSample]
   );
   const newValue = useMemo(
@@ -79,7 +89,7 @@ function JsonDiffViewer({
 
   useLayoutEffect(() => {
     if (!wrapperRef.current) return;
-    const oldModel = monaco.editor.createModel(originalValue, XJsonLang.ID);
+    const oldModel = monaco.editor.createModel(originalValue || '', XJsonLang.ID);
     const newModel = monaco.editor.createModel(newValue, XJsonLang.ID);
     if (!editorRef.current) {
       editorRef.current = monaco.editor.createDiffEditor(wrapperRef.current, {
@@ -95,10 +105,21 @@ function JsonDiffViewer({
       minimap: { enabled: false },
       overviewRulerBorder: false,
       readOnly: true,
-      scrollbar: { alwaysConsumeMouseWheel: false },
+      scrollbar: {
+        alwaysConsumeMouseWheel: false,
+
+        useShadows: false,
+      },
       scrollBeyondLastLine: false,
       wordWrap: 'on',
       wrappingIndent: 'indent',
+      renderLineHighlight: 'none',
+      matchBrackets: 'never',
+      fontFamily: 'Roboto Mono',
+      lineHeight: 21,
+      contextmenu: false,
+      // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
+      'bracketPairColorization.enabled': false,
     };
     editorRef.current.updateOptions({
       ...commonOptions,

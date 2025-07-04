@@ -42,7 +42,7 @@ import { selectDraftProcessor } from './state_management/stream_enrichment_state
 import { WithUIAttributes } from './types';
 import { AssetImage } from '../../asset_image';
 import { docViewJson } from './doc_viewer_json';
-import { docViewDiff } from './doc_viewer_diff';
+import { DocViewerContext, docViewDiff } from './doc_viewer_diff';
 import { DataTableRecordWithIndex, PreviewFlyout } from './preview_flyout';
 
 export const FLYOUT_WIDTH_KEY = 'streamsEnrichment:flyoutWidth';
@@ -356,12 +356,6 @@ const OutcomePreviewTable = () => {
     }
   }, [currentDoc, hits]);
 
-  const additionalDocViewerProps = useMemo(() => {
-    return {
-      originalSample: originalSamples && currentDoc ? originalSamples[currentDoc.index] : undefined,
-    };
-  }, [currentDoc, originalSamples]);
-
   const onRowSelected = useCallback(
     (rowIndex: number) => {
       if (currentDoc && hits[rowIndex] === currentDoc) {
@@ -374,14 +368,19 @@ const OutcomePreviewTable = () => {
     [currentDoc, hits]
   );
 
+  const originalSample = useMemo(
+    () => (originalSamples && currentDoc ? originalSamples[currentDoc.index] : undefined),
+    [currentDoc, originalSamples]
+  );
+
   useEffect(() => {
-    if (additionalDocViewerProps.originalSample) {
+    if (originalSample) {
       // If the original sample is available, enable the diff tab - otherwise disable it
       docViewsRegistry.enableById('doc_view_diff');
     } else {
       docViewsRegistry.disableById('doc_view_diff');
     }
-  }, [additionalDocViewerProps.originalSample, docViewsRegistry]);
+  }, [originalSample, docViewsRegistry]);
 
   if (isEmpty(previewDocuments)) {
     return (
@@ -443,7 +442,9 @@ const OutcomePreviewTable = () => {
             : undefined
         }
       />
-      <PreviewFlyout currentDoc={currentDoc} hits={hits} setExpandedDoc={setExpandedDoc} />
+      <DocViewerContext.Provider value={{ originalSample }}>
+        <PreviewFlyout currentDoc={currentDoc} hits={hits} setExpandedDoc={setExpandedDoc} />
+      </DocViewerContext.Provider>
     </>
   );
 };
