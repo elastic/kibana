@@ -154,15 +154,15 @@ export const createResourceFields = ({
   const availableResourceFields = getAvailableFields(resourceDoc);
 
   return availableResourceFields.map((name) => {
+    const property = dataView.getFieldByName(name);
     const value = formatFieldValue(
       resourceDoc[name],
       row.raw,
       fieldFormats,
       dataView,
-      dataView.getFieldByName(name),
+      property,
       'html'
     );
-    const property = dataView.fields.getByName(name);
 
     return {
       name,
