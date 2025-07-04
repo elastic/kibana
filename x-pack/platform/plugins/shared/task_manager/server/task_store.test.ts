@@ -136,6 +136,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
+        getIsSecurityEnabled: () => true,
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -246,6 +247,70 @@ describe('TaskStore', () => {
       expect(attributes.state).toEqual('{}');
     });
 
+    test('schedule a task without API key if request is provided but security disabled', async () => {
+      store = new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        canEncryptSavedObjects: true,
+        getIsSecurityEnabled: () => false,
+      });
+
+      store.registerEncryptedSavedObjectsClient(esoClient);
+
+      const task = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+
+      const request = httpServerMock.createKibanaRequest();
+
+      savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
+        id: 'testid',
+        type,
+        attributes,
+        references: [],
+        version: '123',
+      }));
+
+      await store.schedule(task as TaskInstance, { request });
+
+      expect(savedObjectsClient.create).toHaveBeenCalledWith(
+        'task',
+        {
+          attempts: 0,
+          params: '{"hello":"world"}',
+          retryAt: null,
+          runAt: '2019-02-12T21:01:22.479Z',
+          scheduledAt: '2019-02-12T21:01:22.479Z',
+          startedAt: null,
+          state: '{"foo":"bar"}',
+          status: 'idle',
+          taskType: 'report',
+          traceparent: 'apmTraceparent',
+          partition: 225,
+        },
+        {
+          id: 'id',
+          refresh: false,
+        }
+      );
+    });
+
     test('schedule a task with API key if request is provided', async () => {
       const task = {
         id: 'id',
@@ -347,6 +412,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: false,
+        getIsSecurityEnabled: () => true,
       });
 
       const task = {
@@ -473,6 +539,7 @@ describe('TaskStore', () => {
         },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
+        getIsSecurityEnabled: () => true,
       });
     });
 
@@ -609,6 +676,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
+        getIsSecurityEnabled: () => true,
       });
 
       esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
@@ -794,6 +862,7 @@ describe('TaskStore', () => {
         },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
+        getIsSecurityEnabled: () => true,
       });
     });
 
@@ -926,6 +995,7 @@ describe('TaskStore', () => {
         },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
+        getIsSecurityEnabled: () => true,
       });
     });
 
@@ -1124,6 +1194,7 @@ describe('TaskStore', () => {
         },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
+        getIsSecurityEnabled: () => true,
       });
     });
 
@@ -1351,6 +1422,7 @@ describe('TaskStore', () => {
         },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
+        getIsSecurityEnabled: () => true,
       });
     });
 
@@ -1901,6 +1973,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
+        getIsSecurityEnabled: () => true,
       });
 
       esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
@@ -2021,6 +2094,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
+        getIsSecurityEnabled: () => true,
       });
 
       esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
@@ -2091,6 +2165,7 @@ describe('TaskStore', () => {
         },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
+        getIsSecurityEnabled: () => true,
       });
     });
 
@@ -2156,6 +2231,7 @@ describe('TaskStore', () => {
         },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
+        getIsSecurityEnabled: () => true,
       });
     });
 
@@ -2256,6 +2332,7 @@ describe('TaskStore', () => {
             },
             savedObjectsService: coreStart.savedObjects,
             security: coreStart.security,
+            getIsSecurityEnabled: () => true,
           });
 
           expect(await store.getLifecycle(task.id)).toEqual(status);
@@ -2283,6 +2360,7 @@ describe('TaskStore', () => {
         },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
+        getIsSecurityEnabled: () => true,
       });
 
       expect(await store.getLifecycle(randomId())).toEqual(TaskLifecycleResult.NotFound);
@@ -2308,6 +2386,7 @@ describe('TaskStore', () => {
         },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
+        getIsSecurityEnabled: () => true,
       });
 
       return expect(store.getLifecycle(randomId())).rejects.toThrow('Bad Request');
@@ -2335,6 +2414,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
+        getIsSecurityEnabled: () => true,
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -2602,6 +2682,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: false,
+        getIsSecurityEnabled: () => true,
       });
 
       const task1 = {
@@ -2616,6 +2697,127 @@ describe('TaskStore', () => {
       await expect(store.bulkSchedule([task1 as TaskInstance], { request })).rejects.toThrow(
         'Unable to schedule task(s) with API keys because the Encrypted Saved Objects plugin has not been registered or is missing encryption key.'
       );
+    });
+
+    test('bulk schedule tasks without API key if request is provided but security disabled', async () => {
+      store = new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        canEncryptSavedObjects: true,
+        getIsSecurityEnabled: () => false,
+      });
+
+      store.registerEncryptedSavedObjectsClient(esoClient);
+
+      const task1 = {
+        id: 'task1',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+      };
+
+      const task2 = {
+        id: 'task2',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+      };
+
+      const request = httpServerMock.createKibanaRequest();
+
+      savedObjectsClient.bulkCreate.mockImplementation(async () => ({
+        saved_objects: [
+          {
+            id: 'task1',
+            type: 'test',
+            attributes: {
+              attempts: 0,
+              params: '{"hello":"world"}',
+              retryAt: null,
+              runAt: '2019-02-12T21:01:22.479Z',
+              scheduledAt: '2019-02-12T21:01:22.479Z',
+              startedAt: null,
+              state: '{"foo":"bar"}',
+              stateVersion: 1,
+              status: 'idle',
+              taskType: 'report',
+              traceparent: 'apmTraceparent',
+              partition: 225,
+            },
+            references: [],
+            version: '123',
+          },
+          {
+            id: 'task2',
+            type: 'test',
+            attributes: {
+              attempts: 0,
+              params: '{"hello":"world"}',
+              retryAt: null,
+              runAt: '2019-02-12T21:01:22.479Z',
+              scheduledAt: '2019-02-12T21:01:22.479Z',
+              startedAt: null,
+              state: '{"foo":"bar"}',
+              stateVersion: 1,
+              status: 'idle',
+              taskType: 'report',
+              traceparent: 'apmTraceparent',
+              partition: 225,
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      }));
+
+      const result = await store.bulkSchedule([task1, task2], { request });
+
+      expect(result).toEqual([
+        {
+          id: 'task1',
+          attempts: 0,
+          params: { hello: 'world' },
+          retryAt: null,
+          runAt: mockedDate,
+          scheduledAt: mockedDate,
+          startedAt: null,
+          state: { foo: 'bar' },
+          stateVersion: 1,
+          status: 'idle',
+          taskType: 'report',
+          traceparent: 'apmTraceparent',
+          partition: 225,
+          version: '123',
+        },
+        {
+          id: 'task2',
+          attempts: 0,
+          params: { hello: 'world' },
+          retryAt: null,
+          runAt: mockedDate,
+          scheduledAt: mockedDate,
+          startedAt: null,
+          state: { foo: 'bar' },
+          stateVersion: 1,
+          status: 'idle',
+          taskType: 'report',
+          traceparent: 'apmTraceparent',
+          partition: 225,
+          version: '123',
+        },
+      ]);
     });
 
     test('errors if API key could not be created', async () => {
@@ -2768,6 +2970,7 @@ describe('TaskStore', () => {
         },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
+        getIsSecurityEnabled: () => true,
       });
 
       savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
@@ -2818,6 +3021,7 @@ describe('TaskStore', () => {
         },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
+        getIsSecurityEnabled: () => true,
       });
 
       savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
@@ -2869,6 +3073,7 @@ describe('TaskStore', () => {
         },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
+        getIsSecurityEnabled: () => true,
       });
     });
     test('should pass requestTimeout', async () => {
@@ -2908,6 +3113,7 @@ describe('TaskStore', () => {
         },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
+        getIsSecurityEnabled: () => true,
       });
     });
 
@@ -3028,6 +3234,7 @@ describe('TaskStore', () => {
         },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
+        getIsSecurityEnabled: () => true,
       });
     });
 
