@@ -582,8 +582,6 @@ const getLastDoc = (
 };
 
 /**
- * Computing how a simulation document differs from the sample document is not enough
- * to determine if the processor fails on some.
  * To improve tracking down the errors and the fields detection to the individual processor,
  * this function computes the detected fields and the errors for each processor.
  */
