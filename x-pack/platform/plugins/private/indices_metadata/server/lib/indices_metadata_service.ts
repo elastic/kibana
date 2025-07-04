@@ -33,7 +33,7 @@ import {
 
 const TASK_TYPE = 'IndicesMetadata:IndicesMetadataTask';
 const TASK_ID = 'indices-metadata:indices-metadata-task:1.0.0';
-const INTERVAL = '1m';
+const INTERVAL = '24h';
 
 export class IndicesMetadataService {
   private readonly logger: Logger;
@@ -59,7 +59,7 @@ export class IndicesMetadataService {
       .catch((error) => {
         this.logger.error('Failed to schedule Indices Metadata Task', { error });
       })
-      .finally(() => {
+      .then(() => {
         this.logger.debug('Indices Metadata Task scheduled');
       });
   }
@@ -125,9 +125,7 @@ export class IndicesMetadataService {
   }
 
   private publishDatastreamsStats(stats: DataStream[]): number {
-    const events: DataStreams = {
-      items: stats,
-    };
+    const events: DataStreams = { items: stats };
     this.sender().reportEBT(DATA_STREAM_EVENT, events);
     this.logger.debug('Data streams events sent', { count: events.items.length } as LogMeta);
     return events.items.length;
@@ -173,9 +171,7 @@ export class IndicesMetadataService {
       const taskInstance = await taskManager.ensureScheduled({
         id: TASK_ID,
         taskType: TASK_TYPE,
-        schedule: {
-          interval: INTERVAL,
-        },
+        schedule: { interval: INTERVAL },
         params: {},
         state: {},
         scope: ['uptime'],

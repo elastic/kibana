@@ -66,7 +66,7 @@ export class IndicesMetadataPlugin {
           error,
         });
       })
-      .finally(() => {
+      .then(() => {
         this.logger.debug('Indices metadata service started');
       });
   }
