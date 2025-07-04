@@ -46,14 +46,12 @@ export function RetentionMetadata({
   lifecycleActions,
   openEditModal,
   stats,
-  isLoadingStats,
   statsError,
 }: {
   definition: Streams.ingest.all.GetResponse;
   lifecycleActions: Array<{ name: string; action: LifecycleEditAction }>;
   openEditModal: (action: LifecycleEditAction) => void;
   stats?: DataStreamStats;
-  isLoadingStats: boolean;
   statsError?: Error;
 }) {
   const { euiTheme } = useEuiTheme();
@@ -203,13 +201,7 @@ export function RetentionMetadata({
             hasPrivileges={definition.privileges.monitor}
             title="lastUpdated"
           >
-            {statsError ? (
-              '-'
-            ) : isLoadingStats || !stats ? (
-              <EuiLoadingSpinner size="s" />
-            ) : (
-              dateFormatter.convert(stats.lastActivity)
-            )}
+            {statsError || !stats?.lastActivity ? '-' : dateFormatter.convert(stats.lastActivity)}
           </PrivilegesWarningIconWrapper>
         }
       />
@@ -227,15 +219,7 @@ export function RetentionMetadata({
             hasPrivileges={definition.privileges.monitor}
             title="ingestionRate"
           >
-            {statsError ? (
-              '-'
-            ) : isLoadingStats || !stats ? (
-              <EuiLoadingSpinner size="s" />
-            ) : stats.bytesPerDay ? (
-              formatIngestionRate(stats.bytesPerDay)
-            ) : (
-              '-'
-            )}
+            {statsError ? '-' : stats?.bytesPerDay ? formatIngestionRate(stats.bytesPerDay) : '-'}
           </PrivilegesWarningIconWrapper>
         }
       />

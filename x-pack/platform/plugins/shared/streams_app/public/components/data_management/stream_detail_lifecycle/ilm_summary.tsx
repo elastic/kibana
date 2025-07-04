@@ -33,13 +33,16 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { orderIlmPhases, parseDurationInSeconds } from './helpers';
 import { IlmLink } from './ilm_link';
 import { useIlmPhasesColorAndDescription } from './hooks/use_ilm_phases_color_and_description';
+import { DataStreamStats } from './hooks/use_data_stream_stats';
 
 export function IlmSummary({
   definition,
   lifecycle,
+  stats,
 }: {
   definition: Streams.ingest.all.GetResponse;
   lifecycle: IngestStreamLifecycleILM;
+  stats?: DataStreamStats;
 }) {
   const {
     dependencies: {
@@ -56,7 +59,7 @@ export function IlmSummary({
         signal,
       });
     },
-    [streamsRepositoryClient, definition]
+    [streamsRepositoryClient, definition, stats]
   );
 
   const phasesWithGrow = useMemo(() => {
@@ -85,13 +88,16 @@ export function IlmSummary({
       <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
-            <EuiText>
-              <h5>
-                {i18n.translate('xpack.streams.streamDetailLifecycle.policySummary', {
-                  defaultMessage: 'Policy summary',
-                })}
-              </h5>
-            </EuiText>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiText>
+                <h5>
+                  {i18n.translate('xpack.streams.streamDetailLifecycle.policySummary', {
+                    defaultMessage: 'Policy summary',
+                  })}
+                </h5>
+              </EuiText>
+              {loading ? <EuiLoadingSpinner size="s" /> : null}
+            </EuiFlexGroup>
             <EuiTextColor color="subdued">
               {i18n.translate('xpack.streams.streamDetailLifecycle.policySummaryInfo', {
                 defaultMessage: 'Phases and details of the lifecycle applied to this stream',
@@ -106,11 +112,7 @@ export function IlmSummary({
       </EuiPanel>
 
       <EuiPanel grow={true} hasShadow={false} hasBorder={false} paddingSize="s">
-        {error ? (
-          '-'
-        ) : loading || !phasesWithGrow ? (
-          <EuiLoadingSpinner />
-        ) : (
+        {error || !phasesWithGrow ? null : (
           <EuiFlexGroup direction="row" gutterSize="none" responsive={false}>
             {phasesWithGrow.map((phase, index) => (
               <EuiFlexItem
