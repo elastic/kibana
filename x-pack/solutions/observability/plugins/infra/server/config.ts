@@ -48,7 +48,7 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
       }),
       logsUIEnabled: offeringBasedSchema({
         traditional: schema.boolean({ defaultValue: true }),
-        serverless: schema.boolean({ defaultValue: false }),
+        serverless: schema.boolean({ defaultValue: true }),
       }),
       metricsExplorerEnabled: offeringBasedSchema({
         traditional: schema.boolean({ defaultValue: true }),

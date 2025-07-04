@@ -47,7 +47,7 @@ import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import {
   PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING,
   generateUserIndexMappings,
-} from './indices';
+} from './elasticsearch/indices';
 import {
   POST_EXCLUDE_INDICES,
   PRE_EXCLUDE_INDICES,
@@ -73,6 +73,10 @@ import {
   PrivilegeMonitoringEngineDescriptorClient,
   MonitoringEntitySourceDescriptorClient,
 } from './saved_objects';
+import {
+  PRIVMON_EVENT_INGEST_PIPELINE_ID,
+  eventIngestPipeline,
+} from './elasticsearch/pipelines/event_ingested';
 
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
@@ -133,6 +137,9 @@ export class PrivilegeMonitoringDataClient {
       `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
     );
     try {
+      this.log('debug', 'Creating privilege user monitoring event.ingested pipeline');
+      await this.esClient.ingest.putPipeline(eventIngestPipeline);
+
       await this.createOrUpdateIndex().catch((e) => {
         if (e.meta.body.error.type === 'resource_already_exists_exception') {
           this.opts.logger.info('Privilege monitoring index already exists');
@@ -194,6 +201,7 @@ export class PrivilegeMonitoringDataClient {
   }
 
   public async createOrUpdateIndex() {
+    this.log('info', `Creating or updating index: ${this.getIndex()}`);
     await createOrUpdateIndex({
       esClient: this.internalUserClient,
       logger: this.opts.logger,
@@ -203,6 +211,7 @@ export class PrivilegeMonitoringDataClient {
         settings: {
           hidden: true,
           mode: 'lookup',
+          default_pipeline: PRIVMON_EVENT_INGEST_PIPELINE_ID,
         },
       },
     });
@@ -238,7 +247,7 @@ export class PrivilegeMonitoringDataClient {
     const { indices, fields } = await this.esClient.fieldCaps({
       index: [query ? `*${query}*` : '*', ...PRE_EXCLUDE_INDICES],
       types: ['keyword'],
-      fields: ['user.name.keyword'], // search for indices with field 'user.name.keyword' of type 'keyword'
+      fields: ['user.name'],
       include_unmapped: true,
       ignore_unavailable: true,
       allow_no_indices: true,
@@ -247,7 +256,7 @@ export class PrivilegeMonitoringDataClient {
       filters: '-parent',
     });
 
-    const indicesWithUserName = fields['user.name.keyword']?.keyword?.indices ?? indices;
+    const indicesWithUserName = fields['user.name']?.keyword?.indices ?? indices;
 
     if (!Array.isArray(indicesWithUserName) || indicesWithUserName.length === 0) {
       return [];
@@ -709,7 +718,7 @@ export class PrivilegeMonitoringDataClient {
       index: indexName,
       size: batchSize,
       _source: ['user.name'],
-      sort: [{ 'user.name.keyword': 'asc' }],
+      sort: [{ 'user.name': 'asc' }],
       search_after: searchAfter,
       query,
     });
