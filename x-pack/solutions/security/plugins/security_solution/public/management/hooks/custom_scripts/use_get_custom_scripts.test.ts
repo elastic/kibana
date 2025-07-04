@@ -94,7 +94,9 @@ describe('useGetCustomScripts', () => {
     // Simulate error thrown in queryFn
     try {
       await queryFn();
-    } catch (e) {}
+    } catch (e) {
+      /* empty */
+    }
     expect(mockNotifications.toasts.danger).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'Forbidden',
@@ -104,7 +106,9 @@ describe('useGetCustomScripts', () => {
     // Call again, should not show another toast
     try {
       await queryFn();
-    } catch (e) {}
+    } catch (e) {
+      /* empty */
+    }
     expect(mockNotifications.toasts.danger).toHaveBeenCalledTimes(1);
   });
 

@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'React';
 import type { UseQueryResult, UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
-import { useRef } from 'react';
+import React, { useRef } from 'react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { EuiText } from '@elastic/eui';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
