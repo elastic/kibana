@@ -130,6 +130,12 @@ export interface AlertWithLegacyFormats {
   ecsAlert: any;
 }
 
+export interface AlertsTableOnLoadedProps {
+  alerts: Alert[];
+  columns: EuiDataGridColumn[];
+  totalAlertsCount: number;
+}
+
 export interface AlertsTableProps<AC extends AdditionalContext = AdditionalContext>
   extends PublicAlertsDataGridProps {
   /**
@@ -169,7 +175,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
   /**
    * Callback fired when the alerts have been first loaded
    */
-  onLoaded?: (alerts: Alert[], columns: EuiDataGridColumn[]) => void;
+  onLoaded?: (props: AlertsTableOnLoadedProps) => void;
   /**
    * Any runtime mappings to be applied to the alerts search request
    */
