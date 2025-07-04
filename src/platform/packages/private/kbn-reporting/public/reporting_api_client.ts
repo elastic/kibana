@@ -167,9 +167,12 @@ export class ReportingAPIClient implements IReportingAPI {
     return new Job(report);
   }
 
-  public async getScheduledReportInfo(id: string) {
+  public async getScheduledReportInfo(id: string, page: string = '0', perPage: string = '50') {
     const { data: reportList = [] }: { data: ScheduledReportApiJSON[] } = await this.http.get(
-      `${INTERNAL_ROUTES.SCHEDULED.LIST}`
+      `${INTERNAL_ROUTES.SCHEDULED.LIST}`,
+      {
+        query: { page, size: perPage },
+      }
     );
 
     const report = reportList.find((item) => item.id === id);
