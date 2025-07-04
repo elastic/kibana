@@ -20,7 +20,6 @@ import { GisPageObject } from '@kbn/test-suites-xpack-platform/functional/page_o
 import { LensPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/lens_page';
 import { UpgradeAssistantFlyoutObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/upgrade_assistant_page';
 import { UserProfilePageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/user_profile_page';
-import { SnapshotRestorePageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/snapshot_restore_page';
 import { ApiKeysPageProvider } from './api_keys_page';
 import { AssetDetailsProvider } from './asset_details';
 import { BannersPageObject } from './banners_page';
