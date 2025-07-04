@@ -31,14 +31,21 @@ describe('CustomScriptSelector', () => {
   const mockCommand: Command = {
     input: 'runscript --ScriptName=""',
     inputDisplay: 'runscript --ScriptName=""',
-    args: { name: 'runscript', hasArg: () => false, args: {} } as any,
+    args: {
+      name: 'runscript',
+      args: {},
+      input: 'runscript --ScriptName=""',
+      hasArg: () => true,
+      hasArgs: true,
+    },
     commandDefinition: {
       name: 'runscript',
       about: 'Execute a script',
+      RenderComponent: () => null, // Mock component - not used in these tests
       meta: {
         agentType: 'microsoft_defender_endpoint' as const,
       },
-    } as any,
+    },
   };
 
   const defaultProps: CommandArgumentValueSelectorProps<string, { isPopoverOpen: boolean }> = {
@@ -188,7 +195,7 @@ describe('CustomScriptSelector', () => {
         },
       },
     };
-    
+
     await renderAndWaitForComponent(
       <CustomScriptSelector {...defaultProps} command={crowdstrikeCommand} />
     );
