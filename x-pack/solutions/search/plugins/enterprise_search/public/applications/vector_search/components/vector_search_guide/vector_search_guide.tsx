@@ -71,6 +71,7 @@ export const VectorSearchGuide: React.FC = () => {
 
   return (
     <EnterpriseSearchVectorSearchPageTemplate
+      data-test-subj="vectorSearchGuidePage"
       restrictWidth
       pageHeader={{
         description: (

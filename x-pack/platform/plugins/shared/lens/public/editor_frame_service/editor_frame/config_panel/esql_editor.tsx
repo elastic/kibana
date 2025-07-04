@@ -20,16 +20,17 @@ import { BehaviorSubject } from 'rxjs';
 import { useCurrentAttributes } from '../../../app_plugin/shared/edit_on_the_fly/use_current_attributes';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
 import type { Simplify } from '../../../types';
-import { onActiveDataChange, useLensDispatch } from '../../../state_management';
+import { onActiveDataChange, useLensDispatch, useLensSelector } from '../../../state_management';
 import {
   ESQLDataGridAttrs,
   getSuggestions,
 } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
 import { useESQLVariables } from '../../../app_plugin/shared/edit_on_the_fly/use_esql_variables';
-import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
+import { MAX_NUM_OF_COLUMNS } from '../../../datasources/form_based/esql_layer/utils';
 import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
 import type { LayerPanelProps } from './types';
 import { ESQLDataGridAccordion } from '../../../app_plugin/shared/edit_on_the_fly/esql_data_grid_accordion';
+import { useInitializeChart } from './use_initialize_chart';
 
 export type ESQLEditorProps = Simplify<
   {
@@ -84,6 +85,8 @@ export function ESQLEditor({
   const [query, setQuery] = useState<AggregateQuery | Query>(
     attributes?.state.query || { esql: '' }
   );
+  const { visualization } = useLensSelector((state) => state.lens);
+
   const [errors, setErrors] = useState<Error[]>([]);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
@@ -91,6 +94,7 @@ export function ESQLEditor({
   const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(undefined);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
   const [isESQLResultsAccordionOpen, setIsESQLResultsAccordionOpen] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const currentAttributes = useCurrentAttributes({
     textBasedMode: isTextBasedLanguage,
@@ -174,29 +178,17 @@ export function ESQLEditor({
     ]
   );
 
-  useEffect(() => {
-    const abortController = new AbortController();
-    const initializeChart = async () => {
-      if (isTextBasedLanguage && isOfAggregateQueryType(query) && !dataGridAttrs) {
-        try {
-          await runQuery(query, abortController, Boolean(attributes?.state.needsRefresh));
-        } catch (e) {
-          setErrors([e]);
-          prevQuery.current = query;
-        }
-      }
-    };
-    initializeChart();
-  }, [
-    adHocDataViews,
-    runQuery,
-    esqlVariables,
-    query,
-    data,
-    dataGridAttrs,
-    attributes?.state.needsRefresh,
+  useInitializeChart({
     isTextBasedLanguage,
-  ]);
+    query,
+    dataGridAttrs,
+    isInitialized,
+    currentAttributes,
+    runQuery,
+    prevQueryRef: prevQuery,
+    setErrors,
+    setIsInitialized,
+  });
 
   // Early exit if it's not in TextBased mode
   if (!isTextBasedLanguage || !canEditTextBasedQuery || !isOfAggregateQueryType(query)) {
@@ -224,7 +216,7 @@ export function ESQLEditor({
         <ESQLDataGridAccordion
           dataGridAttrs={dataGridAttrs}
           isAccordionOpen={isESQLResultsAccordionOpen}
-          isTableView={attributes?.visualizationType !== 'lnsDatatable'}
+          isTableView={visualization.activeId !== 'lnsDatatable'}
           setIsAccordionOpen={setIsESQLResultsAccordionOpen}
           query={query}
           onAccordionToggleCb={(status) => {

@@ -13,7 +13,7 @@ export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
   datasourceStates: DatasourceStates,
   datasourceMap: DatasourceMap,
   indexPatterns: DataViewsState['indexPatterns']
-) {
+): DatasourceLayers {
   const datasourceLayers: DatasourceLayers = {};
   Object.keys(datasourceMap)
     .filter((id) => datasourceStates[id] && !datasourceStates[id].isLoading)

@@ -235,6 +235,13 @@ describe('getFieldSpecs', () => {
         searchable: true,
         type: 'date',
       },
+      {
+        aggregatable: true,
+        esTypes: ['boolean'],
+        name: 'hidden',
+        searchable: true,
+        type: 'boolean',
+      },
     ]);
   });
 
@@ -401,6 +408,13 @@ describe('getFieldSpecs', () => {
           name: 'ingest-agent-policies.updated_by',
           searchable: true,
           type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['boolean'],
+          name: 'ingest-agent-policies.supports_agentless',
+          searchable: true,
+          type: 'boolean',
         },
       ]
     );

@@ -342,7 +342,11 @@ async function isPreconfiguredOutputDifferentFromCurrent(
         existingOutput.secrets?.service_token
       )) ||
       isDifferent(existingOutput.kibana_url, preconfiguredOutput.kibana_url) ||
-      isDifferent(existingOutput.sync_integrations, preconfiguredOutput.sync_integrations);
+      isDifferent(existingOutput.sync_integrations, preconfiguredOutput.sync_integrations) ||
+      isDifferent(
+        existingOutput.sync_uninstalled_integrations,
+        preconfiguredOutput.sync_uninstalled_integrations
+      );
 
     return serviceTokenIsDifferent;
   };

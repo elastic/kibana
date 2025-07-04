@@ -15,6 +15,7 @@ import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { ServerlessProjectType } from '@kbn/es';
 import path from 'path';
 import { DeploymentAgnosticCommonServices, services } from '../services';
+import { LOCAL_PRODUCT_DOC_PATH } from './common_paths';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   serverlessProject: ServerlessProjectType;
@@ -24,6 +25,7 @@ interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   testFiles: string[];
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
+  tier?: 'oblt_logs_essentials';
 }
 
 // include settings from elasticsearch controller
@@ -101,7 +103,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           port: dockerRegistryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 2 * 1000, // 2 minutes
+          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
         },
       }),
       esTestCluster: {
@@ -113,6 +115,12 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
             ? ['xpack.security.authc.native_roles.enabled=true']
             : []),
           ...esServerArgsFromController[options.serverlessProject],
+          ...(options.tier && options.tier === 'oblt_logs_essentials'
+            ? [
+                'serverless.project_type=observability',
+                'serverless.observability.tier=logs_essentials',
+              ]
+            : []),
         ],
       },
       kbnTestServer: {
@@ -121,11 +129,26 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           ...kbnServerArgsFromController[options.serverlessProject],
           `--serverless=${options.serverlessProject}`,
-          // defined in MKI control plane. Necessary for Synthetics app testing
-          '--xpack.uptime.service.password=test',
-          '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
-          '--xpack.uptime.service.devUrl=mockDevUrl',
-          '--xpack.uptime.service.manifestUrl=mockDevUrl',
+          ...(options.serverlessProject === 'oblt'
+            ? [
+                // defined in MKI control plane. Necessary for Synthetics app testing
+                '--xpack.uptime.service.password=test',
+                '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+                '--xpack.uptime.service.devUrl=mockDevUrl',
+                '--xpack.uptime.service.manifestUrl=mockDevUrl',
+                `--xpack.productDocBase.artifactRepositoryUrl=file:///${LOCAL_PRODUCT_DOC_PATH}`,
+              ]
+            : []),
+          ...(dockerRegistryPort
+            ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+            : []),
+          ...(options.tier && options.tier === 'oblt_logs_essentials'
+            ? [
+                `--pricing.tiers.products=${JSON.stringify([
+                  { name: 'observability', tier: 'logs_essentials' },
+                ])}`,
+              ]
+            : []),
         ],
       },
       testFiles: options.testFiles,

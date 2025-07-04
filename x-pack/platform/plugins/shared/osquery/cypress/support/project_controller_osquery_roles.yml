@@ -1,5 +1,8 @@
 # add more functionalities just for ESS environment
 soc_manager:
+  indices:
+    - names: [ '.items-default*', '.lists-default*' ]
+      privileges: [ 'manage', 'read', 'write' ]
   applications:
     - application: "kibana-.kibana"
       privileges:

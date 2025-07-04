@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { makeCheck } from '../../../common/utils/uptime/helper/make_checks';
+import { getSha256 } from '../../../common/utils/uptime/helper/make_tls';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { makeCheck } from '../../../api_integration/apis/uptime/rest/helper/make_checks';
-import { getSha256 } from '../../../api_integration/apis/uptime/rest/helper/make_tls';
 import { UPTIME_HEARTBEAT_DATA } from './overview';
 
 const BLANK_INDEX_PATH = 'x-pack/test/functional/es_archives/uptime/blank';

@@ -18,6 +18,7 @@ const mockApiConfig = {
   connectorId: 'connector-id',
   actionTypeId: '.bedrock',
   model: 'model',
+  name: 'Test Bedrock',
   provider: OpenAiProviderType.OpenAi,
 };
 const basicAttackDiscoveryScheduleMock = {

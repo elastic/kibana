@@ -8,7 +8,7 @@ import React from 'react';
 
 import type { Datum, PartialTheme } from '@elastic/charts';
 import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
-
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import {
   EuiFlexItem,
   euiPaletteColorBlindBehindText,
@@ -49,6 +49,7 @@ export function SunburstChart({
   fetchStatus: FETCH_STATUS;
   chartWidth: number;
 }) {
+  const chartBaseTheme = useElasticChartsTheme();
   const colors = euiPaletteColorBlindBehindText({ sortBy: 'natural' });
   const isDataAvailable = data && data.length > 0;
   const isLoading = fetchStatus === FETCH_STATUS.LOADING;
@@ -88,7 +89,7 @@ export function SunburstChart({
       >
         {isDataAvailable ? (
           <Chart>
-            <Settings theme={theme} locale={i18n.getLocale()} />
+            <Settings theme={theme} locale={i18n.getLocale()} baseTheme={chartBaseTheme} />
             <Partition
               id={chartKey}
               data={data}

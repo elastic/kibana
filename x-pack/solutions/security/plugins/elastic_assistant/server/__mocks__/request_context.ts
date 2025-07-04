@@ -7,6 +7,7 @@
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import { MockedKeys } from '@kbn/utility-types-jest';
 import { AwaitedProperties } from '@kbn/utility-types';
@@ -37,6 +38,7 @@ import { AttackDiscoveryScheduleDataClient } from '../lib/attack_discovery/sched
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
   const license = licensingMock.createLicenseMock();
+  const eventLogger = eventLoggerMock.create();
 
   return {
     core,
@@ -54,13 +56,14 @@ export const createMockClients = () => {
       getAttackDiscoverySchedulingDataClient: attackDiscoveryScheduleDataClientMock.create(),
       getDefendInsightsDataClient: dataClientMock.create(),
       getAIAssistantAnonymizationFieldsDataClient: dataClientMock.create(),
+      getAlertSummaryDataClient: dataClientMock.create(),
       getSpaceId: jest.fn(),
       getCurrentUser: jest.fn(),
       inference: jest.fn(),
       llmTasks: jest.fn(),
       savedObjectsClient: core.savedObjects.client,
     },
-
+    eventLogger,
     licensing: {
       ...licensingMock.createRequestHandlerContext({ license }),
       license,
@@ -74,7 +77,7 @@ export const createMockClients = () => {
 type MockClients = ReturnType<typeof createMockClients>;
 
 export type ElasticAssistantRequestHandlerContextMock = MockedKeys<
-  AwaitedProperties<Omit<ElasticAssistantRequestHandlerContext, 'resolve'>>
+  AwaitedProperties<ElasticAssistantRequestHandlerContext>
 > & {
   core: MockClients['core'];
 };
@@ -91,6 +94,7 @@ const createRequestContextMock = (
     core: clients.core,
     elasticAssistant: createElasticAssistantRequestContextMock(clients),
     licensing: licensingMock.createRequestHandlerContext({ license }),
+    resolve: jest.fn(),
   };
 };
 
@@ -107,6 +111,8 @@ const createElasticAssistantRequestContextMock = (
 ): jest.Mocked<ElasticAssistantApiRequestHandlerContext> => {
   return {
     actions: clients.elasticAssistant.actions as unknown as ActionsPluginStart,
+    eventLogger: clients.eventLogger,
+    eventLogIndex: '.kibana-event-log-*',
     getRegisteredFeatures: jest.fn((pluginName: string) => defaultAssistantFeatures),
     getRegisteredTools: jest.fn(),
     logger: clients.elasticAssistant.logger,
@@ -126,6 +132,10 @@ const createElasticAssistantRequestContextMock = (
       (() => Promise<AIAssistantDataClient | null>),
     getAIAssistantPromptsDataClient: jest.fn(
       () => clients.elasticAssistant.getAIAssistantPromptsDataClient
+    ) as unknown as jest.MockInstance<Promise<AIAssistantDataClient | null>, [], unknown> &
+      (() => Promise<AIAssistantDataClient | null>),
+    getAlertSummaryDataClient: jest.fn(
+      () => clients.elasticAssistant.getAlertSummaryDataClient
     ) as unknown as jest.MockInstance<Promise<AIAssistantDataClient | null>, [], unknown> &
       (() => Promise<AIAssistantDataClient | null>),
     getAttackDiscoveryDataClient: jest.fn(
@@ -162,6 +172,7 @@ const createElasticAssistantRequestContextMock = (
     core: clients.core,
     savedObjectsClient: clients.elasticAssistant.savedObjectsClient,
     telemetry: clients.elasticAssistant.telemetry,
+    checkPrivileges: jest.fn(),
   };
 };
 

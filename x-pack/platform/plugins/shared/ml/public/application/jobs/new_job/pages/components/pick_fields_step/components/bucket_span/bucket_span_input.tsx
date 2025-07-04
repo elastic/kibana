@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFieldText } from '@elastic/eui';
 
 interface Props {
@@ -15,19 +14,24 @@ interface Props {
   setBucketSpan: (bs: string) => void;
   isInvalid: boolean;
   disabled: boolean;
+  titleId: string;
 }
 
-export const BucketSpanInput: FC<Props> = ({ bucketSpan, setBucketSpan, isInvalid, disabled }) => {
+export const BucketSpanInput: FC<Props> = ({
+  bucketSpan,
+  setBucketSpan,
+  isInvalid,
+  disabled,
+  titleId,
+}) => {
   return (
     <EuiFieldText
       disabled={disabled}
-      placeholder={i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.bucketSpan.placeholder', {
-        defaultMessage: 'Bucket span',
-      })}
       value={bucketSpan}
       onChange={(e) => setBucketSpan(e.target.value)}
       isInvalid={isInvalid}
       data-test-subj="mlJobWizardInputBucketSpan"
+      aria-labelledby={titleId}
     />
   );
 };

@@ -19,8 +19,10 @@ export const transformBackfillParamToAdHocRun = (
   actions: DenormalizedAction[],
   spaceId: string
 ): AdHocRunSO => {
-  const schedule = calculateSchedule(param.start, rule.schedule.interval, param.end);
+  const schedule = calculateSchedule(rule.schedule.interval, param.ranges);
   const shouldRunActions = param.runActions !== undefined ? param.runActions : true;
+  const start = param.ranges[0].start;
+  const end = param.ranges[param.ranges.length - 1].end;
 
   return {
     apiKeyId: Buffer.from(rule.apiKey!, 'base64').toString().split(':')[0],
@@ -28,7 +30,7 @@ export const transformBackfillParamToAdHocRun = (
     createdAt: new Date().toISOString(),
     duration: rule.schedule.interval,
     enabled: true,
-    end: param.end ? param.end : schedule && schedule.length > 0 ? schedule[0].runAt : undefined,
+    end,
     rule: {
       name: rule.name,
       tags: rule.tags,
@@ -47,7 +49,7 @@ export const transformBackfillParamToAdHocRun = (
       revision: rule.revision,
     },
     spaceId,
-    start: param.start,
+    start,
     status: adHocRunStatus.PENDING,
     schedule,
   };

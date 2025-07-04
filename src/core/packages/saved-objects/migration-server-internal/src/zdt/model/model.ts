@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/Either';
 import type { State, AllActionStates } from '../state';
 import type { ResponseType } from '../next';
 import { delayRetryState, resetRetryState } from '../../model/retry_state';
@@ -57,7 +57,7 @@ export const model = (
   response: ResponseType<AllActionStates>,
   context: MigratorContext
 ): State => {
-  if (Either.isLeft<unknown, unknown>(response)) {
+  if (Either.isLeft<unknown>(response)) {
     if (isTypeof(response.left, 'retryable_es_client_error')) {
       return delayRetryState(current, response.left.message, context.maxRetryAttempts);
     }

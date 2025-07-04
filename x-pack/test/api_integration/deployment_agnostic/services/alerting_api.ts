@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AggregationsAggregate,
+  QueryDslQueryContainer,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
 import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
@@ -14,6 +18,7 @@ import type { TryWithRetriesOptions } from '@kbn/ftr-common-functional-services'
 import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
+import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 export interface SloBurnRateRuleParams {
@@ -258,6 +263,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       consumer,
       notifyWhen,
       enabled = true,
+      expectedStatusCode = 200,
     }: {
       roleAuthc: RoleCredentials;
       ruleTypeId: string;
@@ -269,6 +275,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       schedule?: { interval: string };
       notifyWhen?: string;
       enabled?: boolean;
+      expectedStatusCode?: number;
     }) {
       const { body } = await supertestWithoutAuth
         .post(`/api/alerting/rule`)
@@ -287,7 +294,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
           actions,
           ...(notifyWhen ? { notify_when: notifyWhen, throttle: '5m' } : {}),
         })
-        .expect(200);
+        .expect(expectedStatusCode);
       return body;
     },
 
@@ -921,13 +928,15 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       expectedStatus,
       roleAuthc,
       spaceId,
+      timeout = retryTimeout,
     }: {
       ruleId: string;
       expectedStatus: string;
       roleAuthc: RoleCredentials;
       spaceId?: string;
+      timeout?: number;
     }) {
-      return await retry.tryForTime(retryTimeout, async () => {
+      return await retry.tryForTime(timeout, async () => {
         const response = await supertestWithoutAuth
           .get(`${spaceId ? '/s/' + spaceId : ''}/api/alerting/rule/${ruleId}`)
           .set(roleAuthc.apiKeyHeader)
@@ -983,9 +992,11 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
     async waitForAlertInIndex<T>({
       indexName,
       ruleId,
+      filters = [],
     }: {
       indexName: string;
       ruleId: string;
+      filters?: QueryDslQueryContainer[];
     }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
       if (!ruleId) {
         throw new Error(`'ruleId' is undefined`);
@@ -994,8 +1005,15 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         const response = await es.search<T>({
           index: indexName,
           query: {
-            term: {
-              'kibana.alert.rule.uuid': ruleId,
+            bool: {
+              filter: [
+                {
+                  term: {
+                    'kibana.alert.rule.uuid': ruleId,
+                  },
+                },
+                ...filters,
+              ],
             },
           },
         });
@@ -1053,7 +1071,8 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         | ApmRuleParamsType['apm.anomaly']
         | ApmRuleParamsType['apm.error_rate']
         | ApmRuleParamsType['apm.transaction_duration']
-        | ApmRuleParamsType['apm.transaction_error_rate'];
+        | ApmRuleParamsType['apm.transaction_error_rate']
+        | StatusRuleParams;
       actions?: any[];
       tags?: any[];
       schedule?: { interval: string };

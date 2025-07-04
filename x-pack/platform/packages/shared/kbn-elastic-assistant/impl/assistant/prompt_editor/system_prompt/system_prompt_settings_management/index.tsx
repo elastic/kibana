@@ -113,7 +113,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
     async (param?: { callback?: () => void }) => {
       const { success, conversationUpdates } = await saveSystemPromptSettings();
       if (success) {
-        await saveConversationsSettings(conversationUpdates);
+        await saveConversationsSettings({ bulkActions: conversationUpdates });
         await refetchPrompts();
         await refetchSystemPromptConversations();
         toasts?.addSuccess({

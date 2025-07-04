@@ -27,22 +27,21 @@ import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { format as formatUrl, parse as parseUrl } from 'url';
 import { AnonymousAccessState } from '../../../../common';
 
-import type { IShareContext, ShareContextObjectTypeConfig } from '../../context';
+import type { IShareContext } from '../../context';
+import type { EmbedShareConfig, EmbedShareUIConfig } from '../../../types';
 
 type EmbedProps = Pick<
   IShareContext,
   | 'shareableUrlLocatorParams'
   | 'shareableUrlForSavedObject'
   | 'shareableUrl'
-  | 'embedUrlParamExtensions'
   | 'objectType'
   | 'isDirty'
   | 'allowShortUrl'
-  | 'anonymousAccess'
-  | 'urlService'
-> & {
-  objectConfig?: ShareContextObjectTypeConfig;
-};
+> &
+  EmbedShareConfig['config'] & {
+    objectConfig?: EmbedShareUIConfig;
+  };
 
 interface UrlParams {
   [extensionName: string]: {
@@ -51,7 +50,6 @@ interface UrlParams {
 }
 
 export const EmbedContent = ({
-  embedUrlParamExtensions: urlParamExtensions,
   shareableUrlForSavedObject,
   shareableUrl,
   shareableUrlLocatorParams,
@@ -59,7 +57,7 @@ export const EmbedContent = ({
   objectConfig = {},
   isDirty,
   allowShortUrl,
-  urlService,
+  shortUrlService,
   anonymousAccess,
 }: EmbedProps) => {
   const urlParamsRef = useRef<UrlParams | undefined>(undefined);
@@ -73,7 +71,11 @@ export const EmbedContent = ({
   const [showPublicUrlSwitch, setShowPublicUrlSwitch] = useState(false);
   const copiedTextToolTipCleanupIdRef = useRef<ReturnType<typeof setTimeout>>();
 
-  const { draftModeCallOut: DraftModeCallout, computeAnonymousCapabilities } = objectConfig;
+  const {
+    draftModeCallOut: DraftModeCallout,
+    computeAnonymousCapabilities,
+    embedUrlParamExtensions: urlParamExtensions,
+  } = objectConfig;
 
   useEffect(() => {
     if (computeAnonymousCapabilities && anonymousAccess) {
@@ -172,15 +174,13 @@ export const EmbedContent = ({
   }, [shareableUrlForSavedObject, snapshotUrl, updateUrlParams]);
 
   const createShortUrl = useCallback(async () => {
-    const shortUrlService = urlService.shortUrls.get(null);
-
     if (shareableUrlLocatorParams) {
       const shortUrl = await shortUrlService.createWithLocator(shareableUrlLocatorParams);
       return shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
     } else {
       return (await shortUrlService.createFromLongUrl(snapshotUrl)).url;
     }
-  }, [shareableUrlLocatorParams, snapshotUrl, urlService.shortUrls]);
+  }, [shareableUrlLocatorParams, snapshotUrl, shortUrlService]);
 
   const addUrlAnonymousAccessParameters = useCallback(
     (tempUrl: string): string => {
@@ -282,7 +282,7 @@ export const EmbedContent = ({
               />
             }
           >
-            <EuiIcon type="questionInCircle" />
+            <EuiIcon type="question" />
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>

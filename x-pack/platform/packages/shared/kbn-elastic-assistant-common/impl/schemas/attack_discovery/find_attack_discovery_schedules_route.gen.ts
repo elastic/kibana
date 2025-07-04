@@ -16,14 +16,26 @@
 
 import { z } from '@kbn/zod';
 
+import { NonEmptyString } from '../common_attributes.gen';
 import { AttackDiscoverySchedule } from './schedules.gen';
+
+export type FindAttackDiscoverySchedulesRequestQuery = z.infer<
+  typeof FindAttackDiscoverySchedulesRequestQuery
+>;
+export const FindAttackDiscoverySchedulesRequestQuery = z.object({
+  page: z.coerce.number().optional(),
+  perPage: z.coerce.number().optional(),
+  sortField: NonEmptyString.optional(),
+  sortDirection: z.enum(['asc', 'desc']).optional(),
+});
+export type FindAttackDiscoverySchedulesRequestQueryInput = z.input<
+  typeof FindAttackDiscoverySchedulesRequestQuery
+>;
 
 export type FindAttackDiscoverySchedulesResponse = z.infer<
   typeof FindAttackDiscoverySchedulesResponse
 >;
 export const FindAttackDiscoverySchedulesResponse = z.object({
-  page: z.number(),
-  perPage: z.number(),
   total: z.number(),
   data: z.array(AttackDiscoverySchedule),
 });

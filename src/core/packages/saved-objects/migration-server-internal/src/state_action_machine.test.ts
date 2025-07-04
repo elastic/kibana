@@ -8,7 +8,7 @@
  */
 
 import { stateActionMachine } from './state_action_machine';
-import * as E from 'fp-ts/lib/Either';
+import * as E from 'fp-ts/Either';
 
 describe('state action machine', () => {
   const state = { controlState: 'INIT', count: 1 };

@@ -7,9 +7,11 @@
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
+  RuleObjectId,
   RuleResponse,
   RuleSignatureId,
   RuleTagArray,
+  RuleVersion,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { findRules } from '../../../rule_management/logic/search/find_rules';
@@ -21,7 +23,6 @@ import type {
   SortOrder,
 } from '../../../../../../common/api/detection_engine';
 import { MAX_PREBUILT_RULES_COUNT } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
-import type { RuleVersionSpecifier } from '../rule_versions/rule_version_specifier';
 
 interface FetchAllInstalledRulesArgs {
   page?: number;
@@ -49,15 +50,20 @@ interface FetchInstalledRulesByIdsArgs {
   sortOrder?: SortOrder;
 }
 
+interface RuleSummary {
+  id: RuleObjectId;
+  rule_id: RuleSignatureId;
+  version: RuleVersion;
+  tags: RuleTagArray;
+}
+
 export interface IPrebuiltRuleObjectsClient {
   fetchInstalledRulesByIds(args: FetchInstalledRulesByIdsArgs): Promise<RuleResponse[]>;
   fetchInstalledRules(args?: FetchAllInstalledRulesArgs): Promise<RuleResponse[]>;
   fetchInstalledRuleVersionsByIds(
     args: FetchInstalledRuleVersionsByIdsArgs
-  ): Promise<Array<RuleVersionSpecifier & { tags: RuleTagArray }>>;
-  fetchInstalledRuleVersions(
-    args?: FetchAllInstalledRuleVersionsArgs
-  ): Promise<Array<RuleVersionSpecifier & { tags: RuleTagArray }>>;
+  ): Promise<RuleSummary[]>;
+  fetchInstalledRuleVersions(args?: FetchAllInstalledRuleVersionsArgs): Promise<RuleSummary[]>;
 }
 
 export const createPrebuiltRuleObjectsClient = (
@@ -125,6 +131,7 @@ export const createPrebuiltRuleObjectsClient = (
             fields: ['params.ruleId', 'params.version', 'tags'],
           });
           return rulesData.data.map((rule) => ({
+            id: rule.id,
             rule_id: rule.params.ruleId,
             version: rule.params.version,
             tags: rule.tags,
@@ -151,6 +158,7 @@ export const createPrebuiltRuleObjectsClient = (
           fields: ['params.ruleId', 'params.version', 'tags'],
         });
         return rulesData.data.map((rule) => ({
+          id: rule.id,
           rule_id: rule.params.ruleId,
           version: rule.params.version,
           tags: rule.tags,

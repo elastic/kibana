@@ -11,11 +11,11 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 import {
   API_VERSIONS,
+  ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
   EnableAttackDiscoverySchedulesRequestParams,
   EnableAttackDiscoverySchedulesResponse,
 } from '@kbn/elastic-assistant-common';
 import { buildResponse } from '../../../lib/build_response';
-import { ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE } from '../../../../common/constants';
 import { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { performChecks } from '../../helpers';
 import { isFeatureAvailable } from './utils/is_feature_available';

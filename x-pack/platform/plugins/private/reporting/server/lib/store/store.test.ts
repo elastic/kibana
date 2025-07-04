@@ -60,6 +60,53 @@ describe('ReportingStore', () => {
       });
     });
 
+    it('uses report status if set', async () => {
+      const store = new ReportingStore(mockCore, mockLogger);
+      const mockReport = new Report({
+        _index: '.reporting-mock',
+        attempts: 0,
+        created_by: 'username1',
+        jobtype: 'unknowntype',
+        status: 'processing',
+        payload: {},
+        meta: {},
+      } as any);
+      await expect(store.addReport(mockReport)).resolves.toMatchObject({
+        _primary_term: undefined,
+        _seq_no: undefined,
+        attempts: 0,
+        completed_at: undefined,
+        created_by: 'username1',
+        jobtype: 'unknowntype',
+        payload: {},
+        meta: {},
+        status: 'processing',
+      });
+    });
+
+    it('defaults to pending status if not set', async () => {
+      const store = new ReportingStore(mockCore, mockLogger);
+      const mockReport = new Report({
+        _index: '.reporting-mock',
+        attempts: 0,
+        created_by: 'username1',
+        jobtype: 'unknowntype',
+        payload: {},
+        meta: {},
+      } as any);
+      await expect(store.addReport(mockReport)).resolves.toMatchObject({
+        _primary_term: undefined,
+        _seq_no: undefined,
+        attempts: 0,
+        completed_at: undefined,
+        created_by: 'username1',
+        jobtype: 'unknowntype',
+        payload: {},
+        meta: {},
+        status: 'pending',
+      });
+    });
+
     it('throws if options has invalid indexInterval', async () => {
       const reportingConfig = {
         index: '.reporting-test',
@@ -181,6 +228,8 @@ describe('ReportingStore', () => {
         },
         "process_expiration": undefined,
         "queue_time_ms": undefined,
+        "scheduled_report_id": undefined,
+        "space_id": undefined,
         "started_at": undefined,
         "status": "pending",
         "timeout": 30000,
@@ -349,6 +398,48 @@ describe('ReportingStore', () => {
         ],
       }
     `);
+  });
+
+  it('setReportWarning sets the status of a saved report to warning', async () => {
+    const store = new ReportingStore(mockCore, mockLogger);
+    const report = new SavedReport({
+      _id: 'id-of-processing',
+      _index: '.reporting-test-index-12345',
+      _seq_no: 42,
+      _primary_term: 10002,
+      jobtype: 'test-report',
+      created_by: 'created_by_test_string',
+      max_attempts: 50,
+      payload: {
+        title: 'test report',
+        headers: 'rp_test_headers',
+        objectType: 'testOt',
+        browserTimezone: 'ABC',
+        version: '7.14.0',
+      },
+      timeout: 30000,
+    });
+
+    await store.setReportWarning(report, {
+      output: { warnings: ['warning1'] },
+      warning: 'warning2',
+    } as any);
+
+    const [[updateCall]] = mockEsClient.update.mock.calls;
+
+    const response = (updateCall as estypes.UpdateRequest)?.doc as Report;
+    expect(response.migration_version).toBe(`7.14.0`);
+    expect(response.status).toBe(`completed_with_warnings`);
+    expect(response.output).toMatchInlineSnapshot(`
+      Object {
+        "warnings": Array [
+          "warning1",
+          "warning2",
+        ],
+      }
+    `);
+    expect(updateCall.if_seq_no).toBe(42);
+    expect(updateCall.if_primary_term).toBe(10002);
   });
 
   describe('start', () => {

@@ -48,7 +48,7 @@ describe('BidirectionalIntegrationsBanner', () => {
     const docLink = renderResult.getByTestId('bidirectionalIntegrationDocLink');
 
     expect(docLink).toBeInTheDocument();
-    expect(docLink.getAttribute('href')).toContain('third-party-actions.html');
+    expect(docLink.getAttribute('href')).toContain('third-party-response-actions');
   });
 
   it('should remove the callout when the dismiss button is clicked', async () => {

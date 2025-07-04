@@ -5,8 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { css } from '@emotion/react';
-import { type EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import { useKibana } from '../../common/lib/kibana';
@@ -18,6 +17,7 @@ interface AssetInventorySearchBarProps {
   setQuery(v: Partial<AssetsURLQuery>): void;
   placeholder?: string;
   query: AssetsURLQuery;
+  isLoading: boolean;
 }
 
 export const AssetInventorySearchBar = ({
@@ -29,6 +29,7 @@ export const AssetInventorySearchBar = ({
       defaultMessage: 'Filter your data using KQL syntax',
     }
   ),
+  isLoading,
 }: AssetInventorySearchBarProps) => {
   const { dataView } = useDataViewContext();
   const { euiTheme } = useEuiTheme();
@@ -40,29 +41,23 @@ export const AssetInventorySearchBar = ({
 
   return (
     <FiltersGlobal>
-      <div css={getContainerStyle(euiTheme)}>
+      <div css={{ borderBottom: euiTheme.border.thin }}>
         <SearchBar
           appName="Asset Inventory"
-          showFilterBar={false}
+          showFilterBar={true}
           showQueryInput={true}
           showDatePicker={false}
           indexPatterns={[dataView]}
           onQuerySubmit={setQuery}
-          onFiltersUpdated={(filters: Filter[]) => setQuery({ filters })}
+          onFiltersUpdated={(newFilters: Filter[]) => setQuery({ filters: newFilters })}
           placeholder={placeholder}
           query={{
             query: query?.query?.query || '',
             language: query?.query?.language || 'kuery',
           }}
-          filters={query?.filters || []}
+          isLoading={isLoading}
         />
       </div>
     </FiltersGlobal>
   );
 };
-
-const getContainerStyle = (theme: EuiThemeComputed) => css`
-  border-bottom: ${theme.border.thin};
-  background-color: ${theme.colors.backgroundBaseSubdued};
-  padding: ${theme.size.base};
-`;

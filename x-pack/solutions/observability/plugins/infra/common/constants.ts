@@ -31,11 +31,23 @@ export type InfraFeatureId = typeof METRICS_FEATURE_ID | typeof LOGS_FEATURE_ID;
 export const TIMESTAMP_FIELD = '@timestamp';
 export const TIEBREAKER_FIELD = '_doc';
 
+// processes
+export const TOP_N = 10;
+export const MANDATORY_PROCESS_FIELDS = [
+  'system.process.cpu.total.pct',
+  'system.process.memory.rss.pct',
+  'system.process.cpu.start_time',
+  'system.process.state',
+  'user.name',
+  'process.pid',
+  'process.command_line',
+];
+export const PROCESS_COMMANDLINE_FIELD = 'process.command_line';
+
 // system
 export const HOST_NAME_FIELD = 'host.name';
 export const CONTAINER_ID_FIELD = 'container.id';
 export const KUBERNETES_POD_UID_FIELD = 'kubernetes.pod.uid';
-export const PROCESS_COMMANDLINE_FIELD = 'process.command_line';
 export const EVENT_MODULE = 'event.module';
 export const METRICSET_MODULE = 'metricset.module';
 export const METRICSET_NAME = 'metricset.name';

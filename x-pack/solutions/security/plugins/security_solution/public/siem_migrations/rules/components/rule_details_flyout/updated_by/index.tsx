@@ -11,19 +11,19 @@ import { EuiText } from '@elastic/eui';
 
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { useBulkGetUserProfiles } from '../../../../../common/components/user_profiles/use_bulk_get_user_profiles';
-import type { RuleMigration } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 
 import * as i18n from './translations';
 
 interface UpdatedByLabelProps {
-  ruleMigration: RuleMigration;
+  migrationRule: RuleMigrationRule;
 }
 
 export const UpdatedByLabel: React.FC<UpdatedByLabelProps> = React.memo(
-  ({ ruleMigration }: UpdatedByLabelProps) => {
+  ({ migrationRule }: UpdatedByLabelProps) => {
     const userProfileId = useMemo(
-      () => new Set([ruleMigration.updated_by ?? ruleMigration.created_by]),
-      [ruleMigration.created_by, ruleMigration.updated_by]
+      () => new Set([migrationRule.updated_by ?? migrationRule.created_by]),
+      [migrationRule.created_by, migrationRule.updated_by]
     );
     const { isLoading: isLoadingUserProfiles, data: userProfiles } = useBulkGetUserProfiles({
       uids: userProfileId,
@@ -35,7 +35,7 @@ export const UpdatedByLabel: React.FC<UpdatedByLabelProps> = React.memo(
 
     const userProfile = userProfiles[0];
     const updatedBy = userProfile.user.full_name ?? userProfile.user.username;
-    const updatedAt = ruleMigration.updated_at ?? ruleMigration['@timestamp'];
+    const updatedAt = migrationRule.updated_at ?? migrationRule['@timestamp'];
     return (
       <EuiText size="xs">
         <FormattedMessage

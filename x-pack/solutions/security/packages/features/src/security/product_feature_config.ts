@@ -111,6 +111,10 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
     },
   },
 
+  [ProductFeatureSecurityKey.endpointHostIsolation]: {
+    subFeatureIds: [SecuritySubFeatureId.hostIsolation],
+  },
+
   [ProductFeatureSecurityKey.endpointHostManagement]: {
     subFeatureIds: [SecuritySubFeatureId.endpointList],
   },
@@ -121,16 +125,6 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
 
   // Adds no additional kibana feature controls
   [ProductFeatureSecurityKey.endpointPolicyProtections]: {},
-
-  [ProductFeatureSecurityKey.endpointArtifactManagement]: {
-    subFeatureIds: [
-      SecuritySubFeatureId.hostIsolationExceptionsBasic,
-      SecuritySubFeatureId.trustedApplications,
-      SecuritySubFeatureId.blocklist,
-      SecuritySubFeatureId.eventFilters,
-      SecuritySubFeatureId.globalArtifactManagement,
-    ],
-  },
 
   // Endpoint Complete Tier:
   // Allows access to create/update HIEs

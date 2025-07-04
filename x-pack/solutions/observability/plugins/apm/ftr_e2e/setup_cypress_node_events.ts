@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ApmSynthtracePipelines } from '@kbn/apm-synthtrace';
 import { ApmSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
 // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
 import { initPlugin } from '@frsource/cypress-plugin-visual-regression-diff/plugins';
 import { Readable } from 'stream';
+import type { ApmSynthtracePipelines } from '@kbn/apm-synthtrace-client';
 
 export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
   const logger = createLogger(LogLevel.info);
@@ -44,11 +44,10 @@ export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.Plugin
       events: Array<Record<string, any>>;
       pipeline: ApmSynthtracePipelines;
     }) {
-      synthtraceEsClient.pipeline(
-        synthtraceEsClient.getPipeline(pipeline, { includeSerialization: false })
+      await synthtraceEsClient.index(
+        Readable.from(events),
+        synthtraceEsClient.resolvePipelineType(pipeline, { includeSerialization: false })
       );
-
-      await synthtraceEsClient.index(Readable.from(events));
       return null;
     },
     async 'synthtrace:clean'() {

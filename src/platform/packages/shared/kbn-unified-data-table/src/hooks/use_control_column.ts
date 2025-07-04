@@ -22,7 +22,7 @@ export const useControlColumn = ({
   const { expanded, getRowByIndex } = useContext(UnifiedDataTableContext);
   const record = useMemo(() => getRowByIndex(rowIndex), [getRowByIndex, rowIndex]);
   const { euiTheme } = useEuiTheme();
-  const { backgroundBasePrimary: anchorColor } = euiTheme.colors;
+  const { backgroundBaseWarning: anchorColor } = euiTheme.colors;
 
   useEffect(() => {
     if (record?.isAnchor) {

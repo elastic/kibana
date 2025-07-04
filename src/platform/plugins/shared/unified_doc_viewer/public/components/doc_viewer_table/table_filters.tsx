@@ -24,10 +24,6 @@ import { FieldRow } from './field_row';
 export const LOCAL_STORAGE_KEY_SEARCH_TERM = 'discover:searchText';
 export const LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES = 'unifiedDocViewer:selectedFieldTypes';
 
-const searchPlaceholder = i18n.translate('unifiedDocViewer.docView.table.searchPlaceHolder', {
-  defaultMessage: 'Search field names or values',
-});
-
 export enum TermMatch {
   name = 'name',
   value = 'value',
@@ -67,8 +63,12 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
   return (
     <EuiFieldSearch
       data-test-subj="unifiedDocViewerFieldsSearchInput"
-      aria-label={searchPlaceholder}
-      placeholder={searchPlaceholder}
+      aria-label={i18n.translate('unifiedDocViewer.docView.table.searchAriaLabel', {
+        defaultMessage: 'Field name or value',
+      })}
+      placeholder={i18n.translate('unifiedDocViewer.docView.table.searchPlaceHolder', {
+        defaultMessage: 'Search field names or values',
+      })}
       fullWidth
       compressed
       value={searchTerm}
@@ -120,8 +120,14 @@ export interface UseTableFiltersReturn extends TableFiltersCommonProps {
   onFindSearchTermMatch: (row: FieldRow, term: string) => TermMatch | null;
 }
 
-export const useTableFilters = (storage: Storage): UseTableFiltersReturn => {
-  const [searchTerm, setSearchTerm] = useState(storage.get(LOCAL_STORAGE_KEY_SEARCH_TERM) || '');
+export const useTableFilters = ({
+  storage,
+  storageKey,
+}: {
+  storage: Storage;
+  storageKey: string;
+}): UseTableFiltersReturn => {
+  const [searchTerm, setSearchTerm] = useState(storage.get(storageKey) || '');
   const [selectedFieldTypes, setSelectedFieldTypes] = useState<FieldTypeKnown[]>(
     getStoredFieldTypes(storage)
   );

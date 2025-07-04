@@ -317,7 +317,7 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [
             {
               error: {
-                message: 'rule_id: "rule-1" already exists',
+                message: 'Rule with this rule_id already exists',
                 status_code: 409,
               },
               rule_id: 'rule-1',
@@ -448,7 +448,7 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [
             {
               error: {
-                message: 'rule_id: "existing-rule" already exists',
+                message: 'Rule with this rule_id already exists',
                 status_code: 409,
               },
               rule_id: 'existing-rule',
@@ -493,14 +493,14 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [
             {
               error: {
-                message: 'rule_id: "existing-rule-1" already exists',
+                message: 'Rule with this rule_id already exists',
                 status_code: 409,
               },
               rule_id: 'existing-rule-1',
             },
             {
               error: {
-                message: 'rule_id: "existing-rule-2" already exists',
+                message: 'Rule with this rule_id already exists',
                 status_code: 409,
               },
               rule_id: 'existing-rule-2',

@@ -53,6 +53,7 @@ const StatusRuleConditionSchema = schema.object({
     NumberOfChecksSchema,
   ]),
   includeRetests: schema.maybe(schema.boolean()),
+  alertOnNoData: schema.maybe(schema.boolean()),
 });
 
 export const syntheticsMonitorStatusRuleParamsSchema = schema.object(

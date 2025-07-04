@@ -11,12 +11,15 @@ import { EuiBasicTable, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIconTip } f
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useAuthz, useLink } from '../../../../hooks';
+import { licenseService, useAuthz, useLink, useStartServices } from '../../../../hooks';
 import type { Output } from '../../../../types';
 
 import { OutputHealth } from '../edit_output_flyout/output_health';
 
+import { ExperimentalFeaturesService } from '../../../../services';
+
 import { DefaultBadges } from './badges';
+import { IntegrationSyncStatus } from './integration_sync_status';
 
 export interface OutputsTableProps {
   outputs: Output[];
@@ -53,6 +56,10 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
 }) => {
   const authz = useAuthz();
   const { getHref } = useLink();
+  const { enableSyncIntegrationsOnRemote } = ExperimentalFeaturesService.get();
+  const { cloud } = useStartServices();
+  const enableSyncIntegrations =
+    enableSyncIntegrationsOnRemote && licenseService.isEnterprise() && !cloud?.isServerlessEnabled;
 
   const columns = useMemo((): Array<EuiBasicTableColumn<Output>> => {
     return [
@@ -117,6 +124,16 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
           defaultMessage: 'Status',
         }),
       },
+      ...(enableSyncIntegrations
+        ? [
+            {
+              render: (output: Output) => <IntegrationSyncStatus output={output} />,
+              name: i18n.translate('xpack.fleet.settings.outputsTable.integrationSyncColumnTitle', {
+                defaultMessage: 'Integration syncing',
+              }),
+            },
+          ]
+        : []),
       {
         render: (output: Output) => <DefaultBadges output={output} />,
         width: '200px',
@@ -166,7 +183,7 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
         }),
       },
     ];
-  }, [deleteOutput, getHref, authz.fleet.allSettings]);
+  }, [deleteOutput, getHref, authz.fleet.allSettings, enableSyncIntegrations]);
 
   return <EuiBasicTable columns={columns} items={outputs} data-test-subj="settingsOutputsTable" />;
 };

@@ -156,8 +156,8 @@ describe('SLO Details Page', () => {
       data: historicalSummaryData,
     });
     useFetchActiveAlertsMock.mockReturnValue({ isLoading: false, data: new ActiveAlerts() });
-    useDeleteSloMock.mockReturnValue({ mutateAsync: mockDelete });
-    useDeleteSloInstanceMock.mockReturnValue({ mutateAsync: mockDeleteInstance });
+    useDeleteSloMock.mockReturnValue({ mutate: mockDelete });
+    useDeleteSloInstanceMock.mockReturnValue({ mutate: mockDeleteInstance });
     jest
       .spyOn(Router, 'useLocation')
       .mockReturnValue({ pathname: '/slos/1234', search: '', state: '', hash: '' });

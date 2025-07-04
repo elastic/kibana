@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, FakeRawRequest } from '@kbn/core/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
 
 import { PluginSetupContract as ActionsSetup } from '@kbn/actions-plugin/server';
 import { AlertingServerSetup } from '@kbn/alerting-plugin/server';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -140,22 +138,8 @@ export class TriggersActionsUiExamplePlugin
     taskManager.registerTaskDefinitions({
       taskWithApiKey: {
         title: 'taskWithApiKey',
-        createTaskRunner: ({ taskInstance }) => ({
+        createTaskRunner: ({ taskInstance, fakeRequest }) => ({
           run: async () => {
-            const services = await core.getStartServices();
-            const fakeRawRequest: FakeRawRequest = {
-              headers: {
-                authorization: `ApiKey ${taskInstance?.apiKey}`,
-              },
-              path: '/',
-            };
-
-            const path = addSpaceIdToPath('/', taskInstance.userScope?.spaceId || 'default');
-
-            // Fake request from the API key
-            const fakeRequest = kibanaRequestFactory(fakeRawRequest);
-            services[0].http.basePath.set(fakeRequest, path);
-
             return {
               state: {},
             };

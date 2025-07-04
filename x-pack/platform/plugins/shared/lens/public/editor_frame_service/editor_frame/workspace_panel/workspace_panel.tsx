@@ -6,10 +6,10 @@
  */
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toExpression } from '@kbn/interpreter';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { i18n } from '@kbn/i18n';
 import {
@@ -17,7 +17,6 @@ import {
   EuiButtonEmpty,
   EuiLink,
   EuiTextColor,
-  transparentize,
   useEuiTheme,
   EuiSpacer,
   type UseEuiTheme,
@@ -37,6 +36,7 @@ import { useDragDropContext, DragDropIdentifier, Droppable } from '@kbn/dom-drag
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ChartSizeSpec, isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { css } from '@emotion/react';
+import chroma from 'chroma-js';
 import { getSuccessfulRequestTimings } from '../../../report_performance_metric_util';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import { getSearchWarningMessages } from '../../../utils';
@@ -497,10 +497,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     }
   }, [suggestionForDraggedField, dispatchLens]);
 
-  const IS_DARK_THEME: boolean = useObservable(core.theme.theme$, {
-    darkMode: false,
-    name: 'amsterdam',
-  }).darkMode;
+  const isDarkMode = useKibanaIsDarkMode();
+
+  const shadowAlpha20 = chroma(euiTheme.colors.shadow).alpha(0.2).css();
 
   const renderDragDropPrompt = () => {
     if (chartSizeSpec) {
@@ -514,9 +513,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
             aria-hidden={true}
             css={[
               css`
-                filter: drop-shadow(0 6px 12px ${transparentize(euiTheme.colors.shadow, 0.2)})
-                  drop-shadow(0 4px 4px ${transparentize(euiTheme.colors.shadow, 0.2)})
-                  drop-shadow(0 2px 2px ${transparentize(euiTheme.colors.shadow, 0.2)});
+                filter: drop-shadow(0 6px 12px ${shadowAlpha20})
+                  drop-shadow(0 4px 4px ${shadowAlpha20}) drop-shadow(0 2px 2px ${shadowAlpha20});
               `,
               promptIllustrationStyle,
             ]}
@@ -580,7 +578,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           <img
             aria-hidden={true}
             css={promptIllustrationStyle}
-            src={IS_DARK_THEME ? applyChangesIllustrationDark : applyChangesIllustrationLight}
+            src={isDarkMode ? applyChangesIllustrationDark : applyChangesIllustrationLight}
             alt={applyChangesString}
           />
           <h2>

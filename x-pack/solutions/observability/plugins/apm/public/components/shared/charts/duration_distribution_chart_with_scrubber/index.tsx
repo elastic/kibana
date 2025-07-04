@@ -135,7 +135,7 @@ export function DurationDistributionChartWithScrubber({
             ) : (
               <>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="iInCircle" title={emptySelectionText} size="s" />
+                  <EuiIcon type="info" title={emptySelectionText} size="s" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs">{emptySelectionText}</EuiText>

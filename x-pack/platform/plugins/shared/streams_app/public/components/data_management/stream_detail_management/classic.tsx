@@ -6,14 +6,16 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { UnwiredStreamGetResponse } from '@kbn/streams-schema';
-import { EuiCallOut, EuiFlexGroup } from '@elastic/eui';
+import { Streams } from '@kbn/streams-schema';
+import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../redirect_to';
 import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { ManagementTabs, Wrapper } from './wrapper';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { UnmanagedElasticsearchAssets } from './unmanaged_elasticsearch_assets';
+import { StreamsAppPageTemplate } from '../../streams_app_page_template';
+import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
 
 const classicStreamManagementSubTabs = ['enrich', 'advanced', 'lifecycle'] as const;
 
@@ -27,7 +29,7 @@ export function ClassicStreamDetailManagement({
   definition,
   refreshDefinition,
 }: {
-  definition: UnwiredStreamGetResponse;
+  definition: Streams.UnwiredStream.GetResponse;
   refreshDefinition: () => void;
 }) {
   const {
@@ -36,43 +38,73 @@ export function ClassicStreamDetailManagement({
 
   if (!definition.data_stream_exists) {
     return (
-      <EuiFlexGroup direction="column">
-        <EuiCallOut
-          title={i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.title', {
-            defaultMessage: 'Data stream missing',
-          })}
-          color="danger"
-          iconType="error"
-        >
-          <p>
-            {i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.description', {
-              defaultMessage:
-                'The underlying Elasticsearch data stream for this classic stream is missing. Recreate the data stream to restore the stream by sending data before using the management features.',
+      <>
+        <StreamsAppPageTemplate.Header
+          bottomBorder="extended"
+          pageTitle={
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              {i18n.translate('xpack.streams.entityDetailViewWithoutParams.manageStreamTitle', {
+                defaultMessage: 'Manage stream {streamId}',
+                values: { streamId: key },
+              })}
+              <EuiBadgeGroup gutterSize="s">
+                {Streams.UnwiredStream.Definition.is(definition.stream) && <ClassicStreamBadge />}
+                <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+              </EuiBadgeGroup>
+            </EuiFlexGroup>
+          }
+        />
+        <StreamsAppPageTemplate.Body>
+          <EuiCallOut
+            title={i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.title', {
+              defaultMessage: 'Data stream missing',
             })}
-          </p>
-        </EuiCallOut>
-      </EuiFlexGroup>
+            color="danger"
+            iconType="error"
+          >
+            <p>
+              {i18n.translate(
+                'xpack.streams.unmanagedStreamOverview.missingDatastream.description',
+                {
+                  defaultMessage:
+                    'The underlying Elasticsearch data stream for this classic stream is missing. Recreate the data stream to restore the stream by sending data before using the management features.',
+                }
+              )}
+            </p>
+          </EuiCallOut>
+        </StreamsAppPageTemplate.Body>
+      </>
     );
   }
 
   const tabs: ManagementTabs = {};
 
   if (definition.data_stream_exists) {
-    tabs.enrich = {
-      content: (
-        <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: i18n.translate('xpack.streams.streamDetailView.enrichmentTab', {
-        defaultMessage: 'Extract field',
-      }),
-    };
-
     tabs.lifecycle = {
       content: (
         <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
       ),
-      label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-        defaultMessage: 'Data retention',
+      label: (
+        <EuiToolTip
+          content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
+            defaultMessage:
+              'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
+          })}
+        >
+          <span>
+            {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+              defaultMessage: 'Data retention',
+            })}
+          </span>
+        </EuiToolTip>
+      ),
+    };
+    tabs.enrich = {
+      content: (
+        <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
+        defaultMessage: 'Processing',
       }),
     };
   }
@@ -85,9 +117,20 @@ export function ClassicStreamDetailManagement({
           refreshDefinition={refreshDefinition}
         />
       ),
-      label: i18n.translate('xpack.streams.streamDetailView.advancedTab', {
-        defaultMessage: 'Advanced',
-      }),
+      label: (
+        <EuiToolTip
+          content={i18n.translate('xpack.streams.managementTab.advanced.tooltip', {
+            defaultMessage:
+              'View technical details about this classic stream’s underlying index setup',
+          })}
+        >
+          <span>
+            {i18n.translate('xpack.streams.streamDetailView.advancedTab', {
+              defaultMessage: 'Advanced',
+            })}
+          </span>
+        </EuiToolTip>
+      ),
     };
   }
 

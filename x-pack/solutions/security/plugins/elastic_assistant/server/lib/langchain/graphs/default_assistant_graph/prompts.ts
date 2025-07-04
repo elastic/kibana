@@ -29,17 +29,15 @@ const formatPromptStructured = (prompt: string, additionalPrompt?: string) =>
   ]);
 
 export const formatPrompt = ({
-  isOpenAI,
   llmType,
   prompt,
   additionalPrompt,
 }: {
-  isOpenAI: boolean;
   llmType: string | undefined;
   prompt: string;
   additionalPrompt?: string;
 }) => {
-  if (isOpenAI || llmType === 'inference' || (llmType && TOOL_CALLING_LLM_TYPES.has(llmType))) {
+  if (llmType && TOOL_CALLING_LLM_TYPES.has(llmType)) {
     return formatPromptToolcalling(prompt, additionalPrompt);
   }
   return formatPromptStructured(prompt, additionalPrompt);

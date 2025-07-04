@@ -38,6 +38,7 @@ import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 import {
@@ -87,6 +88,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   lens: LensPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   share?: SharePluginStart;
+  contentManagement?: ContentManagementPublicStart;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
@@ -118,12 +120,15 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
 
 export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) => {
   const {
-    actions: { validateEmailAddresses },
+    actions: { validateEmailAddresses, enabledEmailServices },
     application: { navigateToApp },
+    isServerless,
   } = useKibana().services;
 
   return (
-    <ConnectorProvider value={{ services: { validateEmailAddresses } }}>
+    <ConnectorProvider
+      value={{ services: { validateEmailAddresses, enabledEmailServices }, isServerless }}
+    >
       <Routes>
         <Route
           exact

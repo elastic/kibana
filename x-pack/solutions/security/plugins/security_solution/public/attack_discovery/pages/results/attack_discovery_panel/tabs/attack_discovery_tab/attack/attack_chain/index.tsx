@@ -33,7 +33,7 @@ const AttackChainComponent: React.FC<Props> = ({ attackDiscovery }) => {
       `}
       paddingSize="l"
     >
-      <EuiFlexGroup gutterSize="none">
+      <EuiFlexGroup gutterSize="none" responsive={false} wrap={false}>
         {tacticMetadata.map((tactic, i) => (
           <EuiFlexItem grow={false} key={tactic.name}>
             <Tactic detected={tactic.detected} tactic={tactic.name} />

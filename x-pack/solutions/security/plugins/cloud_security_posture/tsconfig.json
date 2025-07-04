@@ -58,7 +58,6 @@
     "@kbn/grouping",
     "@kbn/alerting-plugin",
     "@kbn/code-editor",
-    "@kbn/code-editor-mock",
     "@kbn/search-types",
     "@kbn/react-kibana-mount",
     "@kbn/spaces-plugin",
@@ -67,6 +66,8 @@
     "@kbn/analytics",
     "@kbn/management-settings-ids",
     "@kbn/expandable-flyout",
+    "@kbn/code-editor-mock",
+    "@kbn/core-saved-objects-utils-server",
   ],
   "exclude": ["target/**/*"]
 }

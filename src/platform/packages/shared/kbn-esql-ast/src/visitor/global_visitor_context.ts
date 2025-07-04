@@ -11,15 +11,18 @@ import * as contexts from './contexts';
 import type {
   ESQLAstChangePointCommand,
   ESQLAstCommand,
+  ESQLAstCompletionCommand,
   ESQLAstJoinCommand,
   ESQLAstQueryExpression,
-  ESQLAstRenameExpression,
+  ESQLAstRerankCommand,
   ESQLColumn,
   ESQLFunction,
   ESQLIdentifier,
   ESQLInlineCast,
   ESQLList,
   ESQLLiteral,
+  ESQLMap,
+  ESQLMapEntry,
   ESQLOrderExpression,
   ESQLSource,
   ESQLTimeInterval,
@@ -49,10 +52,16 @@ export class GlobalVisitorContext<
     public data: Data
   ) {}
 
-  public assertMethodExists<K extends keyof types.VisitorMethods>(name: K) {
-    if (!this.methods[name]) {
-      throw new Error(`${name}() method is not defined`);
+  public assertMethodExists<K extends keyof types.VisitorMethods>(name: K | K[]) {
+    if (!Array.isArray(name)) {
+      name = [name];
     }
+
+    for (const n of name) {
+      if (this.methods[n]) return;
+    }
+
+    throw new Error(`${name}() method is not defined`);
   }
 
   private visitWithSpecificContext<
@@ -104,11 +113,10 @@ export class GlobalVisitorContext<
         if (!this.methods.visitRowCommand) break;
         return this.visitRowCommand(parent, commandNode, input as any);
       }
-      // TODO: uncomment this when the command is implemented
-      // case 'ts': {
-      //   if (!this.methods.visitTimeseriesCommand) break;
-      //   return this.visitTimeseriesCommand(parent, commandNode, input as any);
-      // }
+      case 'ts': {
+        if (!this.methods.visitTimeseriesCommand) break;
+        return this.visitTimeseriesCommand(parent, commandNode, input as any);
+      }
       case 'show': {
         if (!this.methods.visitShowCommand) break;
         return this.visitShowCommand(parent, commandNode, input as any);
@@ -173,6 +181,10 @@ export class GlobalVisitorContext<
         if (!this.methods.visitJoinCommand) break;
         return this.visitJoinCommand(parent, commandNode as ESQLAstJoinCommand, input as any);
       }
+      case 'rerank': {
+        if (!this.methods.visitRerankCommand) break;
+        return this.visitRerankCommand(parent, commandNode as ESQLAstRerankCommand, input as any);
+      }
       case 'change_point': {
         if (!this.methods.visitChangePointCommand) break;
         return this.visitChangePointCommand(
@@ -184,6 +196,22 @@ export class GlobalVisitorContext<
       case 'fork': {
         if (!this.methods.visitForkCommand) break;
         return this.visitForkCommand(parent, commandNode, input as any);
+      }
+      case 'completion': {
+        if (!this.methods.visitCompletionCommand) break;
+        return this.visitCompletionCommand(
+          parent,
+          commandNode as ESQLAstCompletionCommand,
+          input as any
+        );
+      }
+      case 'sample': {
+        if (!this.methods.visitSampleCommand) break;
+        return this.visitSampleCommand(parent, commandNode, input as any);
+      }
+      case 'rrf': {
+        if (!this.methods.visitRrfCommand) break;
+        return this.visitRrfCommand(parent, commandNode, input as any);
       }
     }
     return this.visitCommandGeneric(parent, commandNode, input as any);
@@ -378,6 +406,15 @@ export class GlobalVisitorContext<
     return this.visitWithSpecificContext('visitJoinCommand', context, input);
   }
 
+  public visitRerankCommand(
+    parent: contexts.VisitorContext | null,
+    node: ESQLAstRerankCommand,
+    input: types.VisitorInput<Methods, 'visitRerankCommand'>
+  ): types.VisitorOutput<Methods, 'visitRerankCommand'> {
+    const context = new contexts.RerankCommandVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitRerankCommand', context, input);
+  }
+
   public visitChangePointCommand(
     parent: contexts.VisitorContext | null,
     node: ESQLAstChangePointCommand,
@@ -394,6 +431,33 @@ export class GlobalVisitorContext<
   ): types.VisitorOutput<Methods, 'visitForkCommand'> {
     const context = new contexts.ForkCommandVisitorContext(this, node, parent);
     return this.visitWithSpecificContext('visitForkCommand', context, input);
+  }
+
+  public visitCompletionCommand(
+    parent: contexts.VisitorContext | null,
+    node: ESQLAstCompletionCommand,
+    input: types.VisitorInput<Methods, 'visitCompletionCommand'>
+  ): types.VisitorOutput<Methods, 'visitCompletionCommand'> {
+    const context = new contexts.CompletionCommandVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitCompletionCommand', context, input);
+  }
+
+  public visitSampleCommand(
+    parent: contexts.VisitorContext | null,
+    node: ESQLAstCommand,
+    input: types.VisitorInput<Methods, 'visitSampleCommand'>
+  ): types.VisitorOutput<Methods, 'visitSampleCommand'> {
+    const context = new contexts.ForkCommandVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitSampleCommand', context, input);
+  }
+
+  public visitRrfCommand(
+    parent: contexts.VisitorContext | null,
+    node: ESQLAstCommand,
+    input: types.VisitorInput<Methods, 'visitRrfCommand'>
+  ): types.VisitorOutput<Methods, 'visitRrfCommand'> {
+    const context = new contexts.RrfCommandVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitRrfCommand', context, input);
   }
 
   // #endregion
@@ -458,17 +522,13 @@ export class GlobalVisitorContext<
         if (!this.methods.visitIdentifierExpression) break;
         return this.visitIdentifierExpression(parent, expressionNode, input as any);
       }
-      case 'option': {
-        switch (expressionNode.name) {
-          case 'as': {
-            if (!this.methods.visitRenameExpression) break;
-            return this.visitRenameExpression(
-              parent,
-              expressionNode as ESQLAstRenameExpression,
-              input as any
-            );
-          }
-        }
+      case 'map': {
+        if (!this.methods.visitMapExpression) break;
+        return this.visitMapExpression(parent, expressionNode, input as any);
+      }
+      case 'map-entry': {
+        if (!this.methods.visitMapEntryExpression) break;
+        return this.visitMapEntryExpression(parent, expressionNode, input as any);
       }
       case 'query': {
         if (!this.methods.visitQuery || expressionNode.type !== 'query') break;
@@ -550,15 +610,6 @@ export class GlobalVisitorContext<
     return this.visitWithSpecificContext('visitInlineCastExpression', context, input);
   }
 
-  public visitRenameExpression(
-    parent: contexts.VisitorContext | null,
-    node: ESQLAstRenameExpression,
-    input: types.VisitorInput<Methods, 'visitRenameExpression'>
-  ): types.VisitorOutput<Methods, 'visitRenameExpression'> {
-    const context = new contexts.RenameExpressionVisitorContext(this, node, parent);
-    return this.visitWithSpecificContext('visitRenameExpression', context, input);
-  }
-
   public visitOrderExpression(
     parent: contexts.VisitorContext | null,
     node: ESQLOrderExpression,
@@ -575,6 +626,24 @@ export class GlobalVisitorContext<
   ): types.VisitorOutput<Methods, 'visitIdentifierExpression'> {
     const context = new contexts.IdentifierExpressionVisitorContext(this, node, parent);
     return this.visitWithSpecificContext('visitIdentifierExpression', context, input);
+  }
+
+  public visitMapExpression(
+    parent: contexts.VisitorContext | null,
+    node: ESQLMap,
+    input: types.VisitorInput<Methods, 'visitMapExpression'>
+  ): types.VisitorOutput<Methods, 'visitMapExpression'> {
+    const context = new contexts.MapExpressionVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitMapExpression', context, input);
+  }
+
+  public visitMapEntryExpression(
+    parent: contexts.VisitorContext | null,
+    node: ESQLMapEntry,
+    input: types.VisitorInput<Methods, 'visitMapEntryExpression'>
+  ): types.VisitorOutput<Methods, 'visitMapEntryExpression'> {
+    const context = new contexts.MapEntryExpressionVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitMapEntryExpression', context, input);
   }
 }
 

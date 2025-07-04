@@ -8,6 +8,7 @@
 import type { CoreStart } from '@kbn/core/server';
 import type { LoggerFactory } from '@kbn/core/server';
 import type { WorkChatAppPluginStartDependencies } from '../types';
+import type { WorkChatAppConfig } from '../config';
 import type { InternalServices } from './types';
 import { IntegrationsServiceImpl } from './integrations/integrations_service';
 import { ConversationServiceImpl } from './conversations';
@@ -18,21 +19,23 @@ import { IntegrationRegistry } from './integrations';
 
 interface CreateServicesParams {
   core: CoreStart;
-  logger: LoggerFactory;
+  config: WorkChatAppConfig;
+  loggerFactory: LoggerFactory;
   pluginsDependencies: WorkChatAppPluginStartDependencies;
   integrationRegistry: IntegrationRegistry;
 }
 
 export function createServices({
   core,
-  logger,
+  config,
+  loggerFactory,
   pluginsDependencies,
   integrationRegistry,
 }: CreateServicesParams): InternalServices {
   integrationRegistry.blockRegistration();
 
   const integrationsService = new IntegrationsServiceImpl({
-    logger: logger.get('services.integrations'),
+    logger: loggerFactory.get('services.integrations'),
     elasticsearch: core.elasticsearch,
     registry: integrationRegistry,
     savedObjects: core.savedObjects,
@@ -42,25 +45,26 @@ export function createServices({
   const conversationService = new ConversationServiceImpl({
     savedObjects: core.savedObjects,
     security: core.security,
-    logger: logger.get('services.conversations'),
+    logger: loggerFactory.get('services.conversations'),
   });
 
   const agentService = new AgentServiceImpl({
     savedObjects: core.savedObjects,
     security: core.security,
-    logger: logger.get('services.agent'),
+    logger: loggerFactory.get('services.agent'),
   });
 
   const agentFactory = new AgentFactory({
     inference: pluginsDependencies.inference,
-    logger: logger.get('services.agentFactory'),
+    tracingConfig: config.tracing,
+    logger: loggerFactory.get('services.agentFactory'),
     agentService,
     integrationsService,
   });
 
   const chatService = new ChatService({
     inference: pluginsDependencies.inference,
-    logger: logger.get('services.chat'),
+    logger: loggerFactory.get('services.chat'),
     agentFactory,
     conversationService,
   });

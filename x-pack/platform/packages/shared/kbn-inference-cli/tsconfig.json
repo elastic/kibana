@@ -19,5 +19,12 @@
     "@kbn/sse-utils-client",
     "@kbn/tooling-log",
     "@kbn/kibana-api-cli",
+    "@kbn/dev-cli-runner",
+    "@kbn/inference-langchain",
+    "@kbn/repo-info",
+    "@kbn/core",
+    "@kbn/telemetry",
+    "@kbn/inference-tracing",
+    "@kbn/logging",
   ]
 }

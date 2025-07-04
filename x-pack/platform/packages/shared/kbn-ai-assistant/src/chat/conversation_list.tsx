@@ -185,12 +185,7 @@ export function ConversationList({
                     currentUser,
                   }),
                   onClick: () => {
-                    confirmDeleteCallback(
-                      i18n.translate('xpack.aiAssistant.flyout.confirmDeleteCheckboxLabel', {
-                        defaultMessage: 'Delete "{title}"',
-                        values: { title: conversation.label },
-                      })
-                    ).then((confirmed) => {
+                    confirmDeleteCallback().then((confirmed) => {
                       if (!confirmed) return;
                       deleteConversation(conversation.id).then(() => {
                         if (conversation.id === selectedConversationId) {

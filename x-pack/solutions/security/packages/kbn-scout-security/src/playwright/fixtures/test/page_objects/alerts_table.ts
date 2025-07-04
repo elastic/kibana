@@ -10,16 +10,14 @@ import { ScoutPage, Locator, expect } from '@kbn/scout';
 const PAGE_URL = 'security/alerts';
 
 export class AlertsTablePage {
-  public detectionsAlertsContainer: Locator;
+  public detectionsAlertsWrapper: Locator;
   public alertRow: Locator;
-  public alertsTableBody: Locator;
+  public alertsTable: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.detectionsAlertsContainer = this.page.testSubj.locator('detectionsAlertsPage');
+    this.detectionsAlertsWrapper = this.page.testSubj.locator('detectionsAlertsPage');
     this.alertRow = this.page.locator('div.euiDataGridRow');
-    this.alertsTableBody = this.page.testSubj
-      .locator('alertsTable')
-      .locator(`[data-test-subj='euiDataGridBody']`);
+    this.alertsTable = this.page.testSubj.locator('alertsTableIsLoaded'); // Search for loaded Alerts table
   }
 
   async navigate() {
@@ -27,7 +25,7 @@ export class AlertsTablePage {
   }
 
   async expandAlertDetailsFlyout(ruleName: string) {
-    await this.alertsTableBody.waitFor({ state: 'visible' });
+    await this.alertsTable.waitFor({ state: 'visible' });
     // Filter alert by unique rule name
     const row = this.alertRow.filter({ hasText: ruleName });
     await expect(
@@ -36,5 +34,10 @@ export class AlertsTablePage {
     ).toBeVisible();
 
     return row.locator(`[data-test-subj='expand-event']`).click();
+  }
+
+  async waitForDetectionsAlertsWrapper() {
+    // Increased timeout to 20 seconds because this page sometimes takes longer to load
+    return this.detectionsAlertsWrapper.waitFor({ state: 'visible', timeout: 20_000 });
   }
 }

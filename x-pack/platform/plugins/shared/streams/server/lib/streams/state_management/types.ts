@@ -6,14 +6,15 @@
  */
 
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import type { StreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
+import { LockManagerService } from '@kbn/lock-manager';
 import type { AssetClient } from '../assets/asset_client';
 import type { StreamsClient } from '../client';
 import type { StreamsStorageClient } from '../service';
 
 interface StreamUpsertChange {
   type: 'upsert';
-  definition: StreamDefinition;
+  definition: Streams.all.Definition;
 }
 
 interface StreamDeleteChange {
@@ -25,6 +26,7 @@ export type StreamChange = StreamUpsertChange | StreamDeleteChange;
 
 export interface StateDependencies {
   logger: Logger;
+  lockManager: LockManagerService;
   streamsClient: StreamsClient;
   storageClient: StreamsStorageClient;
   scopedClusterClient: IScopedClusterClient;

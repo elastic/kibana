@@ -7,7 +7,7 @@
 import type { RawRule } from '../../../types';
 import type { RuleDomain } from '../types';
 import { getMappedParams } from '../../../rules_client/common';
-import type { DenormalizedAction } from '../../../rules_client';
+import type { DenormalizedAction, DenormalizedArtifacts } from '../../../rules_client';
 
 interface TransformRuleToEsParams {
   legacyId: RawRule['legacyId'];
@@ -17,10 +17,12 @@ interface TransformRuleToEsParams {
 
 export const transformRuleDomainToRuleAttributes = ({
   actionsWithRefs,
+  artifactsWithRefs,
   rule,
   params,
 }: {
   actionsWithRefs: DenormalizedAction[];
+  artifactsWithRefs: DenormalizedArtifacts;
   rule: Omit<RuleDomain, 'actions' | 'params' | 'systemActions'>;
   params: TransformRuleToEsParams;
 }): RawRule => {
@@ -81,5 +83,6 @@ export const transformRuleDomainToRuleAttributes = ({
     ...(rule.running !== undefined ? { running: rule.running } : {}),
     ...(rule.alertDelay !== undefined ? { alertDelay: rule.alertDelay } : {}),
     ...(rule.flapping !== undefined ? { flapping: rule.flapping } : {}),
+    artifacts: artifactsWithRefs,
   } as RawRule;
 };

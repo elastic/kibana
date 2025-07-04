@@ -10,7 +10,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
-import { v4 as uuidv4 } from 'uuid';
 import {
   getESQLAdHocDataview,
   getESQLQueryColumns,
@@ -18,9 +17,8 @@ import {
   getInitialESQLQuery,
 } from '@kbn/esql-utils';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { LensSerializedState } from '@kbn/lens-plugin/public';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
-
 import {
   coreServices,
   dataService,
@@ -32,10 +30,6 @@ import {
 } from '../../services/kibana_services';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
-
-function generateId() {
-  return uuidv4();
-}
 
 export const DashboardAppNoDataPage = ({
   onDataViewCreated,
@@ -100,27 +94,26 @@ export const DashboardAppNoDataPage = ({
         if (chartSuggestions?.length) {
           const [suggestion] = chartSuggestions;
 
-          const attrs = getLensAttributesFromSuggestion({
-            filters: [],
-            query: {
-              esql: esqlQuery,
-            },
-            suggestion,
-            dataView,
-          }) as TypedLensByValueInput['attributes'];
-
-          const lensEmbeddableInput = {
-            attributes: attrs,
-            id: generateId(),
-          };
-
-          await embeddableService.getStateTransfer().navigateToWithEmbeddablePackage('dashboards', {
-            state: {
-              type: 'lens',
-              input: lensEmbeddableInput,
-            },
-            path: '#/create',
-          });
+          await embeddableService
+            .getStateTransfer()
+            .navigateToWithEmbeddablePackage<LensSerializedState>('dashboards', {
+              state: {
+                type: 'lens',
+                serializedState: {
+                  rawState: {
+                    attributes: getLensAttributesFromSuggestion({
+                      filters: [],
+                      query: {
+                        esql: esqlQuery,
+                      },
+                      suggestion,
+                      dataView,
+                    }),
+                  },
+                },
+              },
+              path: '#/create',
+            });
         }
       } catch (error) {
         if (error.name !== 'AbortError') {

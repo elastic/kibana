@@ -215,4 +215,19 @@ describe('correctCommonEsqlMistakes', () => {
       | STATS success_rate = AVG(successful)`,
     });
   });
+
+  it('escapes special characters in column names', () => {
+    expectQuery({
+      input: `FROM "custom-test"
+| STATS
+    count = COUNT(*),
+    min = MIN("Total Bytes"),
+    max = MAX("Total Bytes"),
+    avg = AVG("Total Bytes"),
+    sum = SUM("Total Bytes")
+`,
+      expectedOutput: `FROM "custom-test"
+| STATS count = COUNT(*), min = MIN(\`Total Bytes\`), max = MAX(\`Total Bytes\`), avg = AVG(\`Total Bytes\`), sum = SUM(\`Total Bytes\`)`,
+    });
+  });
 });

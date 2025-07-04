@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { asUnwiredStreamGetResponse } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -48,6 +48,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(classicStream).to.eql({
         name: TEST_STREAM_NAME,
+        description: '',
         ingest: {
           lifecycle: { inherit: {} },
           processing: [],
@@ -66,6 +67,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             dashboards: [],
             queries: [],
             stream: {
+              description: '',
               ingest: {
                 lifecycle: { inherit: {} },
                 processing: [
@@ -96,7 +98,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(getResponse.status).to.eql(200);
 
-      const body = asUnwiredStreamGetResponse(getResponse.body);
+      const body = getResponse.body;
+      Streams.UnwiredStream.GetResponse.asserts(body);
 
       const {
         dashboards,
@@ -111,6 +114,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(stream).to.eql({
         name: TEST_STREAM_NAME,
+        description: '',
         ingest: {
           lifecycle: { inherit: {} },
           processing: [
@@ -166,6 +170,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             queries: [],
             dashboards: [],
             stream: {
+              description: '',
               ingest: {
                 lifecycle: { inherit: {} },
                 processing: [],
@@ -251,6 +256,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           dashboards: [],
           queries: [],
           stream: {
+            description: '',
             ingest: {
               lifecycle: { inherit: {} },
               processing: [
@@ -294,6 +300,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           dashboards: [],
           queries: [],
           stream: {
+            description: '',
             ingest: {
               lifecycle: { inherit: {} },
               processing: [
@@ -415,6 +422,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               queries: [],
               dashboards: [],
               stream: {
+                description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: [
@@ -479,6 +487,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               dashboards: [],
               queries: [],
               stream: {
+                description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: [],
@@ -565,14 +574,33 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(getDetailsResponse.status).to.eql(404);
       });
 
-      after(async () => {
-        await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
+      it('should still return the stream on public listing API', async () => {
+        const getResponse = await apiClient.fetch('GET /api/streams 2023-10-31');
+        expect(getResponse.status).to.eql(200);
+        const classicStream = getResponse.body.streams.find(
+          (stream) => stream.name === ORPHANED_STREAM_NAME
+        );
+        expect(Streams.UnwiredStream.Definition.is(classicStream!)).to.be(true);
+      });
+
+      it('should still return the stream on internal listing API', async () => {
+        const getResponse = await apiClient.fetch('GET /internal/streams');
+        expect(getResponse.status).to.eql(200);
+        const classicStream = getResponse.body.streams.find(
+          (stream) => stream.stream.name === ORPHANED_STREAM_NAME
+        );
+        expect(Streams.UnwiredStream.Definition.is(classicStream!.stream)).to.be(true);
+      });
+
+      it('should allow deleting', async () => {
+        const response = await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
           params: {
             path: {
               name: ORPHANED_STREAM_NAME,
             },
           },
         });
+        expect(response.status).to.eql(200);
       });
     });
   });
