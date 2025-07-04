@@ -532,7 +532,7 @@ describe('CrowdstrikeActionsClient class', () => {
       await crowdstrikeActionsClient.runscript(
         createCrowdstrikeRunscrtiptOptions({
           actionId: '123-456-789',
-          endpoint_ids: ['1-2-3-cs-agent'],
+          endpoint_ids: ['1-2-3'],
           comment: 'test runscript comment',
           parameters: {
             raw: 'echo "Hello World"',
@@ -545,7 +545,7 @@ describe('CrowdstrikeActionsClient class', () => {
           subAction: SUB_ACTION.EXECUTE_ADMIN_RTR,
           subActionParams: {
             command: 'runscript --Raw=```echo "Hello World"```',
-            endpoint_ids: ['1-2-3-cs-agent'],
+            endpoint_ids: ['1-2-3'],
             actionParameters: {
               comment:
                 'Action triggered from Elastic Security by user [foo] for action [runscript (action id: 123-456-789)]: test runscript comment',
@@ -578,7 +578,19 @@ describe('CrowdstrikeActionsClient class', () => {
             input_type: 'crowdstrike',
             type: 'INPUT_ACTION',
           },
-          agent: { id: ['1-2-3'] },
+          agent: {
+            id: ['1-2-3'],
+            policy: [
+              {
+                agentId: '1-2-3',
+                agentPolicyId: expect.any(String),
+                elasticAgentId: 'fleet-agent-id-123',
+                integrationPolicyId: expect.any(String),
+              },
+            ],
+          },
+          originSpaceId: 'default',
+          tags: [],
           meta: {
             hostName: 'Crowdstrike-1460',
           },
@@ -668,7 +680,6 @@ describe('CrowdstrikeActionsClient class', () => {
         await crowdstrikeActionsClient.runscript(
           createCrowdstrikeRunscrtiptOptions({
             actionId: '123-abc-678',
-            endpoint_ids: ['1-2-3-cs-agent'],
             comment: 'test runscript comment',
             parameters: {
               raw: 'echo "Hello World"',
@@ -695,7 +706,7 @@ describe('CrowdstrikeActionsClient class', () => {
           data: {
             combined: {
               resources: {
-                '1-2-3-cs-agent': {
+                '1-2-3': {
                   stdout: '',
                   stderr: '',
                   errors: [
@@ -714,7 +725,7 @@ describe('CrowdstrikeActionsClient class', () => {
         await crowdstrikeActionsClient.runscript(
           createCrowdstrikeRunscrtiptOptions({
             actionId: '456-pqr-789',
-            endpoint_ids: ['1-2-3-cs-agent'],
+            endpoint_ids: ['1-2-3'],
             parameters: {
               raw: 'echo "Hello World"',
             },
