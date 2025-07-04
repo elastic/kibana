@@ -8,7 +8,7 @@ tags: ['kibana', 'contributor', 'dev', 'http', 'api', 'rest', 'design']
 ---
 
 <DocCallOut title="Some APIs need to be Terraform-friendly">
-  As an extension to the guidance in this document refer to the <DocLink id="kibHttpApiTfGuidelines" text="Guidelines for Terraform friendly HTTP APIs" /> if you would like to support an Infrastructure-as-Code (IaC) use case.
+  For additional guidance, refer to the <DocLink id="kibHttpApiTfGuidelines" text="Guidelines for Terraform friendly HTTP APIs" /> if you would like to support an Infrastructure-as-Code (IaC) use case.
 </DocCallOut>
 
 [Click here](#structure-and-conventions) to skip to the structure and conventions guides.
@@ -17,7 +17,7 @@ tags: ['kibana', 'contributor', 'dev', 'http', 'api', 'rest', 'design']
 
 ### Consistency
 
-Consistency is key to a great API-user experience. APIs should be consistent in their naming, structure, and behavior. Consistency may be domain-specific: it's always best to follow an established pattern. If no pattern exists, consider creating one paying close attention to:
+Consistency is key to a great API-user experience. APIs should be consistent in their naming, structure, and behavior. Follow established patterns when available. If no pattern exists, consider creating one paying close attention to:
 
 1. **Consistent naming**: Use the same suffix for IDs (e.g., `space_id`, `dashboard_id`, etc.).
 2. **Consistent structure**: Use the same structure for referencing resources in requests and responses in all related APIs.
@@ -66,9 +66,9 @@ GET /api/resource_bs?page=1
 
 ### Commitment
 
-Public HTTP APIs are long-term commitments that we make to users. We must be committed to maintaining them and ensuring they continue to work as expected (for at least 18 months).
+Public HTTP APIs are 18+ month commitments to users. We must maintain them and ensure they work as expected.
 
-Use the means available: first release new public HTTP APIs as `Technical Preview` or `Beta` to derisk any aspects of the API design you are uncertain about.
+First release new public HTTP APIs as `Technical Preview` or `Beta` to derisk any aspects of the API design you are uncertain about.
 
 Getting your HTTP APIs into a stable state is a process based on feedback from actual users.
 
@@ -232,7 +232,7 @@ Both requests and responses should be `application/json`, unless there is a good
 
 **Should be used to promote ease of use**
 
-Carefully choose which values may be set as a sane default. If you are unsure rather ask the API caller to make an informed decision, see the [documentation section](#documentation).
+Choose sensible defaults. When uncertain, ask API callers to make informed decisions based on [documentation](#documentation).
 
 **Should not be changed lightly**
 
@@ -283,7 +283,7 @@ See the [MDN docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/S
 
 `GET /api/resources?pit_id=abc&search_after="valueA.valueB"&size=10`
 
-Where `valueA` and `valueB` are joined sort values identifying the last hit. See [ES docs](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/paginate-search-results#search-after). Note: you may not need to support cursor based pagination if your resource will not be in excess of 1000 instances.
+Where `valueA` and `valueB` identify the last hit. See [ES docs](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/paginate-search-results#search-after). Note: cursor pagination is only needed for resources exceeding 1000 instances.
 
 **Cursor based response**
 
@@ -299,7 +299,8 @@ Where `valueA` and `valueB` are joined sort values identifying the last hit. See
 
 **Pagination requires sorting**
 
-Carefully decide a default for sorting resources. It is possible to accept a custom set of additional values for sorting, but this may not be needed. Adding this later is a non breaking change!
+Carefully decide a default for sorting resources. It is possible to accept a custom
+set of additional values for sorting, but this may not be needed. Adding this later is a non breaking change!
 
 Specify sorting in the query parameters like:
 
@@ -353,7 +354,7 @@ Please [follow the advice](https://github.com/elastic/observability-dev/blob/mai
 
 **Save the event loop!**
 
-Node.js is a single-threaded, non-cooperative, event loop based runtime. In practice this means the event loop is a precious, shared resource that [we should seek to keep unblocked](https://github.com/elastic/kibana/blob/9edce03a0510c32c1d210e0f3d1bea46c3b71143/src/core/packages/saved-objects/migration-server-internal/src/core/migrate_raw_docs.ts#L160-L175). The same goes for memory. Consider techniques for keeping _stable memory pressure_ in your HTTP APIs like chunking loading objects into memory from Elasticsearch instead of gathering everything all at once.
+When you anticipate CPU or memory intensive operations consider that Node.js uses a single-threaded event loop. Keep this shared resource [unblocked](https://github.com/elastic/kibana/blob/9edce03a0510c32c1d210e0f3d1bea46c3b71143/src/core/packages/saved-objects/migration-server-internal/src/core/migrate_raw_docs.ts#L160-L175) and maintain stable memory pressure by chunking data loads from Elasticsearch rather than loading everything at once.
 
 ### Special data formats
 
@@ -374,6 +375,12 @@ See our current reference documentation [here](https://www.elastic.co/docs/api/d
 See <DocLink id="kibDevTutorialGeneratingOASForHTTPAPIs" text="this tutorial" /> about the code-first approach to generating OpenAPI spec available in Kibana.
 
 ## Versioning
+
+```bash
+# An example request to a versioned API
+curl -v -uelastic:changeme 'http://localhost:5601/api/synthetics/monitors' \
+  -H 'elastic-api-version: 2023-10-31'
+```
 
 Kibana's public HTTP APIs are versioned with the entire Elastic organization using data-based versioning. The date indicates the last breaking change. For example: version `2023-10-31` is saying "the last breaking change was at the end of October 2023".
 
