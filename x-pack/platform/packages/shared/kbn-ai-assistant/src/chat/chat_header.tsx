@@ -120,6 +120,28 @@ export function ChatHeader({
     false
   );
 
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+
+  useEffect(() => {
+    // Check if the AI Assistant flyout is open
+    const checkFlyoutContext = () => {
+      const aiAssistantFlyout = document.querySelector('[data-test-subj="aiAssistantChatFlyout"]');
+      if (aiAssistantFlyout) {
+        setIsFlyoutOpen(true);
+      } else {
+        setIsFlyoutOpen(false);
+      }
+    };
+
+    checkFlyoutContext();
+
+    // Set up a mutation observer to detect when flyouts are added/removed
+    const observer = new MutationObserver(checkFlyoutContext);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <EuiPanel
       borderRadius="none"
@@ -281,11 +303,10 @@ export function ChatHeader({
               ) : null}
 
               <EuiFlexItem grow={false}>
-                {!!elasticManagedLlm && !tourCalloutDismissed ? (
-                  <ElasticLlmTourCallout
-                    zIndex={isConversationApp ? 999 : undefined}
-                    dismissTour={() => setTourCalloutDismissed(true)}
-                  >
+                {!!elasticManagedLlm &&
+                !tourCalloutDismissed &&
+                !(isConversationApp && isFlyoutOpen) ? (
+                  <ElasticLlmTourCallout dismissTour={() => setTourCalloutDismissed(true)}>
                     <ChatActionsMenu connectors={connectors} disabled={licenseInvalid} />
                   </ElasticLlmTourCallout>
                 ) : (
