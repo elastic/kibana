@@ -7,7 +7,7 @@
 
 import { unzip } from 'zlib';
 import { promisify } from 'util';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import {
   ENDPOINT_ARTIFACT_LIST_IDS,
@@ -221,7 +221,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     for (const testData of getArtifactsListTestsData()) {
       // FLAKY: https://github.com/elastic/kibana/issues/219465
-      describe.skip(`When on the ${testData.title} entries list`, function () {
+      describe(`When on the ${testData.title} entries list`, function () {
         beforeEach(async () => {
           policyInfo = await policyTestResources.createPolicy();
           await removeAllArtifacts();
