@@ -112,11 +112,12 @@ export const updateAlertStatusByIds = async ({
   signalIds,
   status,
   signal,
+  reason,
 }: UpdateAlertStatusByIdsProps): Promise<estypes.UpdateByQueryResponse> =>
   KibanaServices.get().http.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
     version: '2023-10-31',
     method: 'POST',
-    body: JSON.stringify({ status, signal_ids: signalIds }),
+    body: JSON.stringify({ status, signal_ids: signalIds, reason }),
     signal,
   });
 

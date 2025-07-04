@@ -17,6 +17,7 @@
 import { z } from '@kbn/zod';
 import { isNonEmptyString } from '@kbn/zod-helpers';
 
+import { AlertClosingReasonSchema } from '../../../../constants';
 import { AlertStatus } from '../../../model/alert.gen';
 
 export type SetAlertsStatusByIds = z.infer<typeof SetAlertsStatusByIds>;
@@ -26,6 +27,7 @@ export const SetAlertsStatusByIds = z.object({
    */
   signal_ids: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
   status: AlertStatus,
+  reason: AlertClosingReasonSchema.optional(),
 });
 
 export type SetAlertsStatusByQuery = z.infer<typeof SetAlertsStatusByQuery>;
@@ -33,6 +35,7 @@ export const SetAlertsStatusByQuery = z.object({
   query: z.object({}).catchall(z.unknown()),
   status: AlertStatus,
   conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
+  reason: AlertClosingReasonSchema.optional(),
 });
 
 export type SetAlertsStatusRequestBody = z.infer<typeof SetAlertsStatusRequestBody>;

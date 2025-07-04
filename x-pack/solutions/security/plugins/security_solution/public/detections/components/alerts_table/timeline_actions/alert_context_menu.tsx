@@ -174,7 +174,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick } =
     useEventFilterModal();
 
-  const { actionItems: statusActionItems } = useAlertsActions({
+  const { actionItems: statusActionItems, panels: statusActionPanels } = useAlertsActions({
     alertStatus,
     eventId: ecsRowData?._id,
     scopeId,
@@ -266,8 +266,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       },
       ...alertTagsPanels,
       ...alertAssigneesPanels,
+      ...statusActionPanels,
     ],
-    [alertTagsPanels, alertAssigneesPanels, items]
+    [items, alertTagsPanels, alertAssigneesPanels, statusActionPanels]
   );
 
   const button = useMemo(() => {

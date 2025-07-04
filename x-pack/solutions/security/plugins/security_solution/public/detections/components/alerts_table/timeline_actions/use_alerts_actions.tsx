@@ -71,9 +71,9 @@ export const useAlertsActions = ({
     };
   }, [alertStatus, eventIds, localSetEventsLoading, onStatusUpdate, setEventsDeleted]);
 
-  const actionItems = useBulkActionItems(actionItemArgs);
+  const { items: actionItems, panels } = useBulkActionItems(actionItemArgs);
 
   return useMemo(() => {
-    return { actionItems: hasIndexWrite ? actionItems : [] };
-  }, [actionItems, hasIndexWrite]);
+    return { actionItems: hasIndexWrite ? actionItems : [], panels: hasIndexWrite ? panels : [] };
+  }, [actionItems, hasIndexWrite, panels]);
 };
