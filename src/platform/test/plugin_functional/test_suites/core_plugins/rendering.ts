@@ -381,7 +381,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observabilityAiAssistantManagement.visibilityEnabled (boolean?)',
         'share.new_version.enabled (boolean?)',
         'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?|security?)',
-        'aiAssistantManagementSelection.serverlessUiSettingsKey (string?|null)',
+        'aiAssistantManagementSelection.serverlessUiSettingsKey (aiAssistant:preferredAIAssistantType?|aiAssistant:preferredAIAssistantType:oblt?|aiAssistant:preferredAIAssistantType:security?)',
         /**
          * Rule form V2 feature flags
          */

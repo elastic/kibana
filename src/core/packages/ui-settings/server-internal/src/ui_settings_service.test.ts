@@ -23,6 +23,8 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { uiSettingsType, uiSettingsGlobalType } from './saved_objects';
 import { UiSettingsDefaultsClient } from './clients/ui_settings_defaults_client';
+import { createTestEnv, createTestPackageInfo } from '@kbn/config-mocks';
+import { PackageInfo } from '@kbn/config';
 
 const overrides = {
   overrideBaz: 'baz',
@@ -44,7 +46,15 @@ describe('uiSettings', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
-    const coreContext = mockCoreContext.create();
+    const coreContext = mockCoreContext.create({
+      "env": {
+        ...createTestEnv(),
+        packageInfo: {
+          ...createTestPackageInfo(),
+          buildFlavor: 'serverless',
+        } as unknown as PackageInfo
+      }
+    })
     coreContext.configService.atPath.mockReturnValue(new BehaviorSubject({ overrides }));
     const httpSetup = httpServiceMock.createInternalSetupContract();
     const savedObjectsSetup = savedObjectsServiceMock.createInternalSetupContract();

@@ -16,7 +16,7 @@ import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_ke
 describe('AI Assistant Management Selection Plugin', () => {
   describe('serverless', () => {
     it('uses serverlessUiSettingsKey to get the correct value from uiSettings', async () => {
-      const serverlessUiSettingsKey = 'aiAssistant:preferredAIAssistantType:es';
+      const serverlessUiSettingsKey = 'aiAssistant:preferredAIAssistantType:oblt';
       const plugin = new AIAssistantManagementPlugin({
         config: {
           get: jest.fn(() => ({
@@ -32,7 +32,7 @@ describe('AI Assistant Management Selection Plugin', () => {
 
       const result = plugin.start(coreStart);
 
-      expect(coreStart.uiSettings.get).toHaveBeenCalledWith(serverlessUiSettingsKey);
+      expect(coreStart.uiSettings.get).toHaveBeenCalledWith(serverlessUiSettingsKey, AIAssistantType.Never);
       const aiAssistantType = await firstValueFrom(result.aiAssistantType$);
       expect(aiAssistantType).toBe(AIAssistantType.Observability);
     });
