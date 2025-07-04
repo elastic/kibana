@@ -103,7 +103,7 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
           data: { round },
         } = events.find(isRoundCompleteEvent)!;
         const {
-          data: { conversationId: convId },
+          data: { conversation_id: convId },
         } = events.find(
           (e): e is ConversationUpdatedEvent | ConversationCreatedEvent =>
             isConversationUpdatedEvent(e) || isConversationCreatedEvent(e)
@@ -112,7 +112,7 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
           body: {
             conversation_id: convId,
             steps: round.steps,
-            response: round.assistantResponse,
+            response: round.response,
           },
         });
       })
