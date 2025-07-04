@@ -33,6 +33,7 @@ import {
   CHARTS_TO_BE_DEPRECATED,
   isSplitChart as isSplitChartFn,
 } from '../utils/split_chart_warning_helpers';
+import { visualizeStyle } from '../../vis.styles';
 
 interface VisualizeEditorCommonProps {
   visInstance?: VisualizeEditorVisInstance;
@@ -198,7 +199,11 @@ export const VisualizeEditorCommon = ({
           </h1>
         </EuiScreenReaderOnly>
       )}
-      <div className={isChromeVisible ? 'visEditor__content' : 'visualize'} ref={visEditorRef} />
+      <div
+        className={isChromeVisible ? 'visEditor__content' : 'visualize'}
+        ref={visEditorRef}
+        css={!isChromeVisible && visualizeStyle}
+      />
     </div>
   );
 };

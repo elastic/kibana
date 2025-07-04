@@ -15,6 +15,7 @@ import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { css } from '@emotion/react';
+import { visContainerStyle } from '@kbn/visualizations-plugin/public';
 import { TimeseriesLoading } from './timeseries_loading';
 import { TimeseriesVisTypes } from './vis_types';
 import type { FetchedIndexPattern, PanelData, TimeseriesVisData } from '../../../common/types';
@@ -186,7 +187,7 @@ function TimeseriesVisualization({
       <EuiFlexItem>
         <Suspense
           fallback={
-            <div className="visChart__spinner">
+            <div className="visChart__spinner" css={visContainerStyle}>
               <EuiLoadingChart size="l" />
             </div>
           }
