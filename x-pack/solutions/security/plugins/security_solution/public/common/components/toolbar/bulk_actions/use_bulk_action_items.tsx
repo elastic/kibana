@@ -6,6 +6,7 @@
  */
 
 import { useMemo, useCallback } from 'react';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
 import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
 import type {
@@ -21,6 +22,10 @@ import { APM_USER_INTERACTIONS } from '../../../lib/apm/constants';
 import type { AlertWorkflowStatus } from '../../../types';
 import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './types';
 import { useAlertCloseInfoModal } from '../../../../detections/hooks/use_alert_close_info_modal';
+import type { AlertClosingReason } from '../../../../../common/constants';
+import { AlertClosingReasonValues } from '../../../../../common/constants';
+
+const ALERT_CLOSING_REASON_PANEL_ID = 'ALERT_CLOSING_REASON_PANEL_ID';
 
 export interface BulkActionsProps {
   eventIds: string[];
@@ -100,7 +105,7 @@ export const useBulkActionItems = ({
   );
 
   const onClickUpdate = useCallback(
-    async (status: AlertWorkflowStatus) => {
+    async (status: AlertWorkflowStatus, reason?: AlertClosingReason) => {
       if (status === 'closed' && !(await promptAlertCloseConfirmation())) {
         return;
       }
@@ -119,6 +124,7 @@ export const useBulkActionItems = ({
           status,
           query: query && JSON.parse(query),
           signalIds: eventIds,
+          reason,
         });
 
         // TODO: Only delete those that were successfully updated from updatedRules
@@ -170,7 +176,7 @@ export const useBulkActionItems = ({
         actionItems.push({
           key: 'close',
           'data-test-subj': 'close-alert-status',
-          onClick: () => onClickUpdate(FILTER_CLOSED as AlertWorkflowStatus),
+          panel: ALERT_CLOSING_REASON_PANEL_ID,
           name: i18n.BULK_ACTION_CLOSE_SELECTED,
         });
       }
@@ -194,5 +200,43 @@ export const useBulkActionItems = ({
     return [...actionItems, ...additionalItems];
   }, [currentStatus, customBulkActions, eventIds, onClickUpdate, query, showAlertStatusActions]);
 
-  return items;
+  const panels = useMemo(
+    () =>
+      [
+        {
+          id: ALERT_CLOSING_REASON_PANEL_ID,
+          title: 'Choose one option to mark closed as',
+          items: [
+            { name: 'None', onClick: () => onClickUpdate(FILTER_CLOSED as AlertWorkflowStatus) },
+            {
+              name: 'False positive',
+              onClick: () =>
+                onClickUpdate(
+                  FILTER_CLOSED as AlertWorkflowStatus,
+                  AlertClosingReasonValues.FALSE_POSITIVE
+                ),
+            },
+            {
+              name: 'Duplicate',
+              onClick: () =>
+                onClickUpdate(
+                  FILTER_CLOSED as AlertWorkflowStatus,
+                  AlertClosingReasonValues.DUPLICATE
+                ),
+            },
+            {
+              name: 'Investigation required',
+              onClick: () =>
+                onClickUpdate(
+                  FILTER_CLOSED as AlertWorkflowStatus,
+                  AlertClosingReasonValues.INVESTIGATION_REQUIRED
+                ),
+            },
+          ],
+        },
+      ] as EuiContextMenuPanelDescriptor[],
+    [onClickUpdate]
+  );
+
+  return { items, panels };
 };
