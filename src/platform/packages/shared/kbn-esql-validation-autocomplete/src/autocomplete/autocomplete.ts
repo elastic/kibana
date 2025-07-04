@@ -83,6 +83,7 @@ import {
   GetPolicyMetadataFn,
   getLocationFromCommandOrOptionName,
   FunctionParameterType,
+  Location,
 } from '../definitions/types';
 import { comparisonFunctions } from '../definitions/all_operators';
 import {
@@ -618,9 +619,16 @@ async function getFunctionArgsSuggestions(
 
     // Functions
     if (typesToSuggestNext.every((d) => !d.fieldsOnly)) {
+      let location = getLocationFromCommandOrOptionName(option?.name ?? command.name);
+      // If the user is working with timeseries data, we want to suggest
+      // functions that are relevant to the timeseries context.
+      const isTSSourceCommand = commands.find((c) => c.name === 'ts') !== undefined;
+      if (isTSSourceCommand && isAggFunctionUsedAlready(command, finalCommandArgIndex)) {
+        location = Location.STATS_TIMESERIES;
+      }
       suggestions.push(
         ...getFunctionSuggestions({
-          location: getLocationFromCommandOrOptionName(option?.name ?? command.name),
+          location,
           returnTypes: canBeBooleanCondition
             ? ['any']
             : (ensureKeywordAndText(

@@ -13,6 +13,7 @@ import { ESQLVariableType, type ESQLControlVariable, type RecommendedField } fro
 import { SuggestionRawDefinition } from './types';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
+import { timeSeriesAggFunctionDefinitions } from '../definitions/generated/time_series_agg_functions';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnitsToSuggest } from '../definitions/literals';
@@ -46,7 +47,8 @@ const allFunctions = memoize(
     aggFunctionDefinitions
       .concat(scalarFunctionDefinitions)
       .concat(groupingFunctionDefinitions)
-      .concat(getTestFunctions()),
+      .concat(getTestFunctions())
+      .concat(timeSeriesAggFunctionDefinitions),
   () => getTestFunctions()
 );
 
@@ -81,6 +83,10 @@ export function getFunctionSuggestion(fn: FunctionDefinition): SuggestionRawDefi
   if (fn.customParametersSnippet) {
     text = `${fn.name.toUpperCase()}(${fn.customParametersSnippet})`;
   }
+  let functionsPriority = fn.type === FunctionDefinitionTypes.AGG ? 'A' : 'C';
+  if (fn.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
+    functionsPriority = '1A';
+  }
   return {
     label: fn.name.toUpperCase(),
     text,
@@ -90,8 +96,8 @@ export function getFunctionSuggestion(fn: FunctionDefinition): SuggestionRawDefi
     documentation: {
       value: buildFunctionDocumentation(fullSignatures, fn.examples),
     },
-    // agg functgions have priority over everything else
-    sortText: fn.type === FunctionDefinitionTypes.AGG ? '1A' : 'C',
+    // time_series_agg functions have priority over everything else
+    sortText: functionsPriority,
     // trigger a suggestion follow up on selection
     command: TRIGGER_SUGGESTION_COMMAND,
   };

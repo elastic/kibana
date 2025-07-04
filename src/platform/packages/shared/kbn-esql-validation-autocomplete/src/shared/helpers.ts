@@ -32,6 +32,7 @@ import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_help
 import { operatorsDefinitions } from '../definitions/all_operators';
 import { commandDefinitions } from '../definitions/commands';
 import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
+import { timeSeriesAggFunctionDefinitions } from '../definitions/generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
@@ -125,6 +126,7 @@ function buildFunctionLookup() {
       .concat(
         scalarFunctionDefinitions,
         aggFunctionDefinitions,
+        timeSeriesAggFunctionDefinitions,
         groupingFunctionDefinitions,
         getTestFunctions()
       )

@@ -146,6 +146,7 @@ export enum FunctionDefinitionTypes {
   SCALAR = 'scalar',
   OPERATOR = 'operator',
   GROUPING = 'grouping',
+  TIME_SERIES_AGG = 'time_series_agg',
 }
 
 /**
@@ -189,6 +190,11 @@ export enum Location {
    * In a per-agg filter
    */
   STATS_WHERE = 'stats_where',
+
+  /**
+   * WHEN TS is used as a source command, inner STATS functions
+   */
+  STATS_TIMESERIES = 'stats_timeseries',
 
   /**
    * Top-level ENRICH command
