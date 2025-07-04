@@ -47,7 +47,7 @@ import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import {
   PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING,
   generateUserIndexMappings,
-} from './indices';
+} from './elasticsearch/indices';
 import {
   POST_EXCLUDE_INDICES,
   PRE_EXCLUDE_INDICES,
@@ -74,6 +74,10 @@ import {
   PrivilegeMonitoringEngineDescriptorClient,
   MonitoringEntitySourceDescriptorClient,
 } from './saved_objects';
+import {
+  PRIVMON_EVENT_INGEST_PIPELINE_ID,
+  eventIngestPipeline,
+} from './elasticsearch/pipelines/event_ingested';
 
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
@@ -134,6 +138,9 @@ export class PrivilegeMonitoringDataClient {
       `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
     );
     try {
+      this.log('debug', 'Creating privilege user monitoring event.ingested pipeline');
+      await this.esClient.ingest.putPipeline(eventIngestPipeline);
+
       await this.createOrUpdateIndex().catch((e) => {
         if (e.meta.body.error.type === 'resource_already_exists_exception') {
           this.opts.logger.info('Privilege monitoring index already exists');
@@ -157,8 +164,6 @@ export class PrivilegeMonitoringDataClient {
       this.opts.telemetry?.reportEvent(PRIVMON_ENGINE_INITIALIZATION_EVENT.eventType, {
         duration,
       });
-      // sync all index users from monitoring sources
-      await this.plainIndexSync();
     } catch (e) {
       this.log('error', `Error initializing privilege monitoring engine: ${e}`);
       this.audit(
@@ -195,6 +200,7 @@ export class PrivilegeMonitoringDataClient {
   }
 
   public async createOrUpdateIndex() {
+    this.log('info', `Creating or updating index: ${this.getIndex()}`);
     await createOrUpdateIndex({
       esClient: this.internalUserClient,
       logger: this.opts.logger,
@@ -204,6 +210,7 @@ export class PrivilegeMonitoringDataClient {
         settings: {
           hidden: true,
           mode: 'lookup',
+          default_pipeline: PRIVMON_EVENT_INGEST_PIPELINE_ID,
         },
       },
     });
@@ -529,6 +536,8 @@ export class PrivilegeMonitoringDataClient {
         indexName,
         existingUserId: existingUserMap.get(username),
       }));
+
+      if (usersToWrite.length === 0) return batchUsernames;
 
       const ops = this.buildBulkOperationsForUsers(usersToWrite, this.getIndex());
       this.log('debug', `Executing bulk operations for ${usersToWrite.length} users`);
