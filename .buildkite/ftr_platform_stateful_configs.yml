@@ -245,10 +245,16 @@ enabled:
   - x-pack/test/functional/apps/remote_clusters/config.ts
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
   - x-pack/test/functional/apps/rollup_job/config.ts
+<<<<<<< HEAD
   - x-pack/test/functional/apps/saved_objects_management/config.ts
   - x-pack/test/functional/apps/saved_query_management/config.ts
+=======
+  - x-pack/platform/test/functional/apps/saved_objects_management/config.ts
+  - x-pack/platform/test/functional/apps/saved_query_management/config.ts
+  - x-pack/platform/test/functional/apps/saved_query_management/config.v2.ts
+>>>>>>> 917281648db ([ska][x-pack] Move saved_objects_management, saved_query_management and snapshot_restore to platform)
   - x-pack/platform/test/functional/apps/security/config.ts
-  - x-pack/test/functional/apps/snapshot_restore/config.ts
+  - x-pack/platform/test/functional/apps/snapshot_restore/config.ts
   - x-pack/platform/test/functional/apps/spaces/config.ts
   - x-pack/test/functional/apps/status_page/config.ts
   - x-pack/test/functional/apps/transform/creation/index_pattern/config.ts
