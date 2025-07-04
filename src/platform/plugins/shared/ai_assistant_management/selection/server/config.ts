@@ -10,6 +10,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 import { AIAssistantType } from '../common/ai_assistant_type';
+import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -21,6 +22,14 @@ const configSchema = schema.object({
     ],
     { defaultValue: AIAssistantType.Default }
   ),
+  serverlessUiSettingsKey: schema.oneOf(
+    [
+      schema.literal(PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY),
+      schema.literal(OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY),
+      schema.literal(SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY),
+    ],
+    { defaultValue: PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY }
+  ),
 });
 
 export type AIAssistantManagementSelectionConfig = TypeOf<typeof configSchema>;
@@ -29,5 +38,6 @@ export const config: PluginConfigDescriptor<AIAssistantManagementSelectionConfig
   schema: configSchema,
   exposeToBrowser: {
     preferredAIAssistantType: true,
+    serverlessUiSettingsKey: true,
   },
 };

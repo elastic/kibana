@@ -26,7 +26,11 @@ import type {
   AIAssistantManagementSelectionPluginServerStart,
 } from './types';
 import { AIAssistantType } from '../common/ai_assistant_type';
-import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
+import { OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
+import { BuildFlavor } from '@kbn/config';
+import { classicSetting } from './src/settings/classic_setting';
+import { observabilitySolutionSetting } from './src/settings/observability_setting';
+import { securitySolutionSetting } from './src/settings/security_setting';
 
 export class AIAssistantManagementSelectionPlugin
   implements
@@ -38,58 +42,39 @@ export class AIAssistantManagementSelectionPlugin
     >
 {
   private readonly config: AIAssistantManagementSelectionConfig;
+  private readonly buildFlavor: BuildFlavor;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
+    this.buildFlavor = initializerContext.env.packageInfo.buildFlavor;
   }
 
   public setup(
     core: CoreSetup,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
-    core.uiSettings.register({
-      [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-        name: i18n.translate('aiAssistantManagementSelection.preferredAIAssistantTypeSettingName', {
-          defaultMessage: 'AI Assistant for Observability and Search visibility',
-        }),
-        category: [DEFAULT_APP_CATEGORIES.observability.id],
-        value: this.config.preferredAIAssistantType,
-        description: i18n.translate(
-          'aiAssistantManagementSelection.preferredAIAssistantTypeSettingDescription',
-          {
-            defaultMessage:
-              'Whether to show the AI Assistant menu item in Observability and Search, everywhere, or nowhere.',
-          }
-        ),
-        schema: schema.oneOf(
-          [
-            schema.literal(AIAssistantType.Default),
-            schema.literal(AIAssistantType.Observability),
-            schema.literal(AIAssistantType.Never),
-          ],
-          { defaultValue: this.config.preferredAIAssistantType }
-        ),
-        options: [AIAssistantType.Default, AIAssistantType.Observability, AIAssistantType.Never],
-        type: 'select',
-        optionLabels: {
-          [AIAssistantType.Default]: i18n.translate(
-            'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueDefault',
-            { defaultMessage: 'Observability and Search only (default)' }
-          ),
-          [AIAssistantType.Observability]: i18n.translate(
-            'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueObservability',
-            { defaultMessage: 'Everywhere' }
-          ),
-          [AIAssistantType.Never]: i18n.translate(
-            'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueNever',
-            { defaultMessage: 'Nowhere' }
-          ),
+    if (this.buildFlavor === 'serverless') {
+      core.uiSettings.register({
+        [OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+          ...observabilitySolutionSetting,
+          value: AIAssistantType.Observability,
         },
-        requiresPageReload: true,
-        solution: 'oblt',
-        technicalPreview: true,
-      },
-    });
+      });
+
+      core.uiSettings.register({
+        [SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+          ...securitySolutionSetting,
+          value: AIAssistantType.Security,
+        },
+      });
+    } else {
+      core.uiSettings.register({
+        [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+          ...classicSetting,
+          value: this.config.preferredAIAssistantType,
+        },
+      });
+    }
 
     core.capabilities.registerProvider(() => {
       return {

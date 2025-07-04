@@ -170,6 +170,8 @@ export interface UsageStats {
   'observability:apmEnableTransactionProfiling': boolean;
   'devTools:enablePersistentConsole': boolean;
   'aiAssistant:preferredAIAssistantType': string;
+  'aiAssistant:preferredAIAssistantType:oblt': string;
+  'aiAssistant:preferredAIAssistantType:security': string;
   'securitySolution:excludedDataTiersForRuleExecution': string[];
   'securitySolution:maxUnassociatedNotes': number;
   'observability:searchExcludedDataTiers': string[];

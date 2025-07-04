@@ -18,7 +18,7 @@ import { AIAssistantType } from '../common/ai_assistant_type';
 import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AIAssistantManagementSelectionPluginPublicSetup {}
+export interface AIAssistantManagementSelectionPluginPublicSetup { }
 
 export interface AIAssistantManagementSelectionPluginPublicStart {
   aiAssistantType$: Observable<AIAssistantType>;
@@ -31,23 +31,27 @@ export interface SetupDependencies {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StartDependencies {}
+export interface StartDependencies { }
 
 export class AIAssistantManagementPlugin
   implements
-    Plugin<
-      AIAssistantManagementSelectionPluginPublicSetup,
-      AIAssistantManagementSelectionPluginPublicStart,
-      SetupDependencies,
-      StartDependencies
-    >
+  Plugin<
+    AIAssistantManagementSelectionPluginPublicSetup,
+    AIAssistantManagementSelectionPluginPublicStart,
+    SetupDependencies,
+    StartDependencies
+  >
 {
   private readonly kibanaBranch: string;
   private readonly buildFlavor: BuildFlavor;
+  private readonly config: {
+    serverlessUiSettingsKey?: string;
+  };
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
     this.buildFlavor = this.initializerContext.env.packageInfo.buildFlavor;
+    this.config = initializerContext.config.get();
   }
 
   public setup(
@@ -96,15 +100,28 @@ export class AIAssistantManagementPlugin
     return {};
   }
 
-  public start(coreStart: CoreStart) {
-    const preferredAIAssistantType: AIAssistantType = coreStart.uiSettings.get(
-      PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
-    );
-
-    const aiAssistantType$ = new BehaviorSubject(preferredAIAssistantType);
-
+  public start(coreStart: CoreStart,) {
     return {
-      aiAssistantType$: aiAssistantType$.asObservable(),
+      aiAssistantType$: this.getAiAssistantType$(coreStart),
     };
+  }
+
+  private getAiAssistantType$(
+    coreStart: CoreStart,
+  ): Observable<AIAssistantType> {
+    if (this.buildFlavor === 'serverless') {
+      if (!this.config.serverlessUiSettingsKey) {
+        return new BehaviorSubject(AIAssistantType.Never);
+      }
+      const preferredAIAssistantType: AIAssistantType = coreStart.uiSettings.get(
+        this.config.serverlessUiSettingsKey
+      );
+
+      return new BehaviorSubject(preferredAIAssistantType).asObservable();
+    }
+
+    return new BehaviorSubject(
+      coreStart.uiSettings.get(PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY)
+    ).asObservable();
   }
 }
