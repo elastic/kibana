@@ -9,6 +9,7 @@ import React from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { filter, firstValueFrom } from 'rxjs';
 import { FeedbackButton } from './feedback';
 import { InterceptPrompter } from './prompter';
 import type { ServerConfigSchema } from '../common/config';
@@ -50,16 +51,22 @@ export class InterceptPublicPlugin implements Plugin {
       targetDomElement: this.interceptsTargetDomElement,
     });
 
-    core.chrome.navControls.registerRight({
-      order: 1002,
-      mount: toMountPoint(
-        <FeedbackButton
-          core={core}
-          isServerless={this.isServerless}
-          getLicense={licensing.getLicense}
-        />,
-        core.rendering
-      ),
+    firstValueFrom(
+      core.analytics.telemetryCounter$.pipe(filter((counter) => counter.type === 'succeeded'))
+    ).then((isNotAdblocked) => {
+      if (isNotAdblocked) {
+        core.chrome.navControls.registerRight({
+          order: 1002,
+          mount: toMountPoint(
+            <FeedbackButton
+              core={core}
+              isServerless={this.isServerless}
+              getLicense={licensing.getLicense}
+            />,
+            core.rendering
+          ),
+        });
+      }
     });
 
     return {
