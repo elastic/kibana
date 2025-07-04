@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await ml.testExecution.logTestStep(`${testData.suiteTitle} navigates to ML`);
-      await ml.navigation.navigateToDataVisualizerFromAppsMenu({ navigatesFromDiscover: true });
+      await ml.navigation.navigateToDataVisualizerFromAppsMenu();
 
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} loads the saved search selection page`

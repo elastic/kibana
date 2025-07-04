@@ -9,13 +9,12 @@ import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, header, timePicker, navigationalSearch, discover } = getPageObjects([
+  const { visualize, lens, header, timePicker, navigationalSearch } = getPageObjects([
     'visualize',
     'lens',
     'header',
     'timePicker',
     'navigationalSearch',
-    'discover',
   ]);
   const browser = getService('browser');
   const retry = getService('retry');

@@ -219,21 +219,10 @@ export class UnifiedFieldListPageObject extends FtrService {
     // wrap visualize button click in retry to ensure button is clicked and retry if button click is not registered
     await this.retry.try(async () => {
       await this.testSubjects.click(visualizeButtonTestSubject);
-      // When clicking visualize it's possible that the user is prompted to save the current Discover state since the page
-      // is about to be left.
-      await this.leaveWithoutSaving();
       await this.testSubjects.waitForDeleted(visualizeButtonTestSubject);
       await this.testSubjects.missingOrFail(visualizeButtonTestSubject);
     });
     await this.header.waitUntilLoadingHasFinished();
-  }
-
-  private async leaveWithoutSaving() {
-    const hasUnsavedChangesModal = await this.testSubjects.exists('appLeaveConfirmModal');
-    if (hasUnsavedChangesModal) {
-      const button = await this.find.byButtonText('Confirm');
-      await button.click();
-    }
   }
 
   public async expectFieldListItemVisualize(field: string) {
