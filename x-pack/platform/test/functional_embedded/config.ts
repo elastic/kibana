@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import Url from 'url';
-import Path from 'path';
+import Fs from 'fs';
+import { resolve } from 'path';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import type { FtrConfigProviderContext } from '@kbn/test';
-import { kbnTestConfig } from '@kbn/test';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from '../functional/page_objects';
-
-const pluginPort = process.env.TEST_CORS_SERVER_PORT
-  ? parseInt(process.env.TEST_CORS_SERVER_PORT, 10)
-  : 5699;
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaFunctionalConfig = await readConfigFile(
-    require.resolve('../functional/config.base.js')
+    require.resolve('../functional/config.base.ts')
   );
 
-  const corsTestPlugin = Path.resolve(__dirname, './plugins/kibana_cors_test');
+  const iframeEmbeddedPlugin = resolve(__dirname, './plugins/iframe_embedded');
 
   const servers = {
     ...kibanaFunctionalConfig.get('servers'),
@@ -30,15 +26,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     kibana: {
       ...kibanaFunctionalConfig.get('servers.kibana'),
+      protocol: 'https',
+      certificateAuthorities: [Fs.readFileSync(CA_CERT_PATH)],
     },
   };
-
-  const { protocol, hostname } = kbnTestConfig.getUrlParts();
-  const originUrl = Url.format({
-    protocol,
-    hostname,
-    port: pluginPort,
-  });
 
   return {
     testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
@@ -46,8 +37,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     servers,
     services: kibanaFunctionalConfig.get('services'),
     pageObjects,
+    browser: {
+      acceptInsecureCerts: true,
+    },
     junit: {
-      reportName: 'Kibana CORS with X-Pack Security',
+      reportName: 'Kibana Embedded in iframe with X-Pack Security',
     },
 
     esTestCluster: kibanaFunctionalConfig.get('esTestCluster'),
@@ -59,11 +53,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...kibanaFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...kibanaFunctionalConfig.get('kbnTestServer.serverArgs'),
-        `--plugin-path=${corsTestPlugin}`,
-        `--test.cors.port=${pluginPort}`,
-        '--server.cors.enabled=true',
-        '--server.cors.allowCredentials=true',
-        `--server.cors.allowOrigin=["${originUrl}"]`,
+        `--plugin-path=${iframeEmbeddedPlugin}`,
+        '--server.ssl.enabled=true',
+        `--server.ssl.key=${KBN_KEY_PATH}`,
+        `--server.ssl.certificate=${KBN_CERT_PATH}`,
+        `--server.ssl.certificateAuthorities=${CA_CERT_PATH}`,
+
+        '--xpack.security.sameSiteCookies=None',
+        '--xpack.security.secureCookies=true',
       ],
     },
   };
