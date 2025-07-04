@@ -162,7 +162,7 @@ enabled:
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_no_public_base_url.ts
   - x-pack/platform/test/cases_api_integration/spaces_only/config.ts
   - x-pack/test/disable_ems/config.ts
-  - x-pack/test/examples/config.ts
+  - x-pack/platform/test/examples/config.ts
   - x-pack/test/fleet_api_integration/config.agent.ts
   - x-pack/test/fleet_api_integration/config.agent_policy.ts
   - x-pack/test/fleet_api_integration/config.epm.ts
@@ -181,8 +181,8 @@ enabled:
   - x-pack/test/functional_basic/apps/transform/creation/runtime_mappings_saved_search/config.ts
   - x-pack/test/functional_basic/apps/transform/permissions/config.ts
   - x-pack/test/functional_basic/apps/transform/feature_controls/config.ts
-  - x-pack/test/functional_cors/config.ts
-  - x-pack/test/functional_embedded/config.ts
+  - x-pack/platform/test/functional_cors/config.ts
+  - x-pack/platform/test/functional_embedded/config.ts
   - x-pack/test/functional_execution_context/config.ts
   - x-pack/test/functional_with_es_ssl/apps/cases/group1/config.ts
   - x-pack/test/functional_with_es_ssl/apps/cases/group2/config.ts
