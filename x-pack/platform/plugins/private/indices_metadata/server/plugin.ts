@@ -59,15 +59,10 @@ export class IndicesMetadataPlugin {
       receiver: this.receiver,
     };
 
-    this.indicesMetadataService
-      .start(serviceStart)
-      .catch((error) => {
-        this.logger.error('Failed to start indices metadata service', {
-          error,
-        });
-      })
-      .then(() => {
-        this.logger.debug('Indices metadata service started');
+    this.indicesMetadataService.start(serviceStart).catch((error) => {
+      this.logger.error('Failed to start indices metadata service', {
+        error,
       });
+    });
   }
 }
