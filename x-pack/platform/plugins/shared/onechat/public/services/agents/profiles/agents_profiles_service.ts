@@ -30,10 +30,8 @@ export class AgentProfilesService {
   /**
    * List all agent profiles
    */
-  async list(options?: AgentProfileListOptions): Promise<ListAgentsResponse> {
-    const res = await this.http.get<{ agentProfiles: ListAgentsResponse }>(
-      '/api/chat/agents/profiles'
-    );
+  async list(options?: AgentProfileListOptions): Promise<AgentProfile[]> {
+    const res = await this.http.get<ListAgentsResponse>('/api/chat/agents/profiles');
     return res.agentProfiles;
   }
 
