@@ -31,11 +31,11 @@ import * as Registry from '../services/epm/registry';
 import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS } from '../constants';
 
 export const TYPE = 'fleet:auto-install-content-packages-task';
-export const VERSION = '0.0.3'; // TODO 1.0.0
+export const VERSION = '1.0.0';
 const TITLE = 'Fleet Auto Install Content Packages Task';
 const SCOPE = ['fleet'];
-const DEFAULT_INTERVAL = '1m'; // TODO 10m
-const TIMEOUT = '1m';
+const DEFAULT_INTERVAL = '10m';
+const TIMEOUT = '5m';
 const CONTENT_PACKAGES_CACHE_TTL = 1000 * 60 * 60; // 1 hour
 
 interface AutoInstallContentPackagesTaskConfig {
@@ -275,8 +275,6 @@ export class AutoInstallContentPackagesTask {
     if ((discoveryMatches.hits.total as SearchTotalHits).value > 0) {
       return true;
     }
-    // TODO remove, for testing
-    // return true;
     return false;
   }
 
@@ -287,16 +285,6 @@ export class AutoInstallContentPackagesTask {
     const registryItems = await Registry.fetchList({ prerelease, type });
 
     registryItems.forEach((item) => {
-      // TODO remove, for testing
-      // if (item.name === 'kubernetes_otel') {
-      //   item.discovery = {
-      //     fields: [
-      //       { name: 'data_stream.dataset', value: 'system.cpu' },
-      //       { name: 'data_stream.dataset' },
-      //       { name: 'test.field', value: 'test.value' },
-      //     ],
-      //   };
-      // }
       if (item.discovery?.fields) {
         item.discovery.fields.forEach((field: DiscoveryField) => {
           if (field.name === 'data_stream.dataset' && field.value) {
@@ -312,7 +300,6 @@ export class AutoInstallContentPackagesTask {
         });
       }
     });
-    // console.log(JSON.stringify(discoveryMap, null, 2));
     return discoveryMap;
   }
 }
