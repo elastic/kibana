@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { collapseMessages } from './convert_messages_for_inference';
+import { collapseInternalToolCalls } from './convert_messages_for_inference';
 import { Message, MessageRole } from './types';
 
 const mockLogger = {
@@ -72,7 +72,7 @@ const executeQueryToolCall: Message[] = [
   },
 ];
 
-describe('collapseMessages', () => {
+describe('collapseInternalToolCalls', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -88,7 +88,7 @@ describe('collapseMessages', () => {
         message: { role: MessageRole.Assistant, content: 'hi there' },
       },
     ];
-    const collapsedMessages = collapseMessages(messages, mockLogger);
+    const collapsedMessages = collapseInternalToolCalls(messages, mockLogger);
     expect(collapsedMessages).toEqual(messages);
   });
 
@@ -100,7 +100,7 @@ describe('collapseMessages', () => {
       },
       ...queryToolCalls,
     ];
-    const collapsedMessages = collapseMessages(messages, mockLogger);
+    const collapsedMessages = collapseInternalToolCalls(messages, mockLogger);
     expect(collapsedMessages).toEqual(messages);
   });
 
@@ -108,7 +108,7 @@ describe('collapseMessages', () => {
     let collapsedMessages: Message[];
     beforeEach(() => {
       const messages: Message[] = [...queryToolCalls, ...executeQueryToolCall];
-      collapsedMessages = collapseMessages(messages, mockLogger);
+      collapsedMessages = collapseInternalToolCalls(messages, mockLogger);
     });
 
     it('should collapse the "execute_query" tool call into the "query" tool response', () => {
@@ -195,7 +195,7 @@ describe('collapseMessages', () => {
         },
       ];
       const messages: Message[] = [...queryToolCalls, ...visualizeQueryToolCall];
-      collapsedMessages = collapseMessages(messages, mockLogger);
+      collapsedMessages = collapseInternalToolCalls(messages, mockLogger);
     });
 
     it('should collapse "visualize_query" into the "query" response', () => {
@@ -230,7 +230,7 @@ describe('collapseMessages', () => {
           },
         },
       ];
-      collapsedMessages = collapseMessages(messages, mockLogger);
+      collapsedMessages = collapseInternalToolCalls(messages, mockLogger);
     });
 
     it('should stop collapsing and preserve the unrelated tool call', () => {

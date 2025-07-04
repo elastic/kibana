@@ -27,7 +27,7 @@ function safeJsonParse(jsonString: string | undefined, logger: Pick<Logger, 'err
   }
 }
 
-export function collapseMessages(messages: Message[], logger: Pick<Logger, 'error'>) {
+export function collapseInternalToolCalls(messages: Message[], logger: Pick<Logger, 'error'>) {
   const collapsed: Message[] = [];
 
   for (let i = 0; i < messages.length; i++) {
@@ -69,7 +69,7 @@ export function convertMessagesForInference(
 ): InferenceMessage[] {
   const inferenceMessages: InferenceMessage[] = [];
 
-  const collapsedMessages: Message[] = collapseMessages(messages, logger);
+  const collapsedMessages: Message[] = collapseInternalToolCalls(messages, logger);
 
   collapsedMessages.forEach((message, idx) => {
     if (message.message.role === MessageRole.Assistant) {
