@@ -61,7 +61,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
     const subActionParams = {
       system: systemMessage,
       messages: converseMessages,
-      tools: bedRockTools,
+      tools: bedRockTools?.length ? bedRockTools : undefined,
       toolChoice: toolChoiceToConverse(toolChoice),
       temperature,
       model: modelName,

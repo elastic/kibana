@@ -7,6 +7,7 @@
 
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
+import { trace } from '@opentelemetry/api';
 import aws from 'aws4';
 import { BedrockRuntimeClient } from '@aws-sdk/client-bedrock-runtime';
 import type { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
@@ -589,6 +590,9 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     const requestBody = JSON.stringify(request);
 
     const signed = this.signRequest(requestBody, path, true);
+
+    const parentSpan = trace.getActiveSpan();
+    parentSpan?.setAttribute('bedrock.raw_request', requestBody);
 
     const response = await this.request(
       {
