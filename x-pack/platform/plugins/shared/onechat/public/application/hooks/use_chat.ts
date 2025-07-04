@@ -50,7 +50,7 @@ export const useChat = ({ conversationId, agentId, connectorId, onError }: UseCh
       setStatus('loading');
 
       const events$ = chatService.chat({
-        nextMessage,
+        input: nextMessage,
         conversationId,
         agentId,
         connectorId,
