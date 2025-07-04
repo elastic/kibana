@@ -71,6 +71,10 @@ function options(y: yargs.Argv) {
       demandOption: true,
       default: process.env.KIBANA_EMBEDDING_CLUSTER_PASSWORD,
     })
+    .option('inferenceId', {
+      describe: 'The inference id to use for the artifacts',
+      string: true,
+    })
     .locale('en');
 }
 
@@ -89,6 +93,7 @@ export function runScript() {
         embeddingClusterUrl: argv.embeddingClusterUrl!,
         embeddingClusterUsername: argv.embeddingClusterUsername!,
         embeddingClusterPassword: argv.embeddingClusterPassword!,
+        inferenceId: argv.inferenceId,
       };
 
       return buildArtifacts(taskConfig);

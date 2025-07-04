@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  DEFAULT_APP_CATEGORIES,
+} from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../common';
 
@@ -38,7 +44,11 @@ export class SearchHomepagePlugin
     };
 
     core.application.register({
-      ...result.app,
+      id: PLUGIN_ID,
+      appRoute: '/app/elasticsearch/home',
+      title: i18n.translate('xpack.searchHomepage.appTitle', { defaultMessage: 'Home' }),
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      euiIconType: 'logoElasticsearch',
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
@@ -50,6 +60,8 @@ export class SearchHomepagePlugin
 
         return renderApp(coreStart, startDeps, element, queryClient);
       },
+      order: 0,
+      visibleIn: ['globalSearch', 'sideNav'],
     });
 
     return result;

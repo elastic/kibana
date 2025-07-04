@@ -73,6 +73,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
+import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -135,7 +136,7 @@ export interface ObservabilityPublicPluginsSetup {
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
-  cases: CasesPublicStart;
+  cases?: CasesPublicStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
   dashboard: DashboardStart;
@@ -144,12 +145,13 @@ export interface ObservabilityPublicPluginsStart {
   dataViewEditor: DataViewEditorStart;
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
-  exploratoryView: ExploratoryViewPublicStart;
+  exploratoryView?: ExploratoryViewPublicStart;
   fieldFormats: FieldFormatsStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   licenseManagement?: LicenseManagementUIPluginSetup;
+  logsDataAccess: LogsDataAccessPluginStart;
   navigation: NavigationPublicPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
@@ -409,7 +411,7 @@ export class Plugin
                 }));
 
               const casesLink: NavigationEntry[] = otherLinks
-                .filter((link) => link.id === 'cases')
+                .filter((link) => link.id === 'cases' && pluginsStart.cases)
                 .map((link) => ({
                   app: observabilityAppId,
                   label: link.title,

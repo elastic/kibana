@@ -1080,7 +1080,13 @@
           "; } & { esArchiver: ",
           "EsArchiverFixture",
           "; } & ",
-          "SynthtraceFixture",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SynthtraceFixture",
+            "text": "SynthtraceFixture"
+          },
           " & { apiServices: ",
           {
             "pluginId": "@kbn/scout",
@@ -1350,7 +1356,13 @@
           "; } & { uiSettings: ",
           "UiSettingsFixture",
           "; } & ",
-          "SynthtraceFixture",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SynthtraceFixture",
+            "text": "SynthtraceFixture"
+          },
           " & { apiServices: ",
           {
             "pluginId": "@kbn/scout",
@@ -5893,6 +5905,20 @@
             "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/page_objects/index.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.ObltPageObjects.observabilityNavigation",
+            "type": "Object",
+            "tags": [],
+            "label": "observabilityNavigation",
+            "description": [],
+            "signature": [
+              "ObservabilityNavigation"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/page_objects/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6450,6 +6476,108 @@
             "label": "[VALID_CONFIG_MARKER]",
             "description": [],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-oblt",
+        "id": "def-common.SynthtraceFixture",
+        "type": "Interface",
+        "tags": [],
+        "label": "SynthtraceFixture",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/synthtrace.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.SynthtraceFixture.apmSynthtraceEsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "apmSynthtraceEsClient",
+            "description": [],
+            "signature": [
+              "SynthtraceFixtureEsClient<",
+              {
+                "pluginId": "@kbn/apm-synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnApmSynthtraceClientPluginApi",
+                "section": "def-common.ApmFields",
+                "text": "ApmFields"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/synthtrace.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.SynthtraceFixture.infraSynthtraceEsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "infraSynthtraceEsClient",
+            "description": [],
+            "signature": [
+              "SynthtraceFixtureEsClient<",
+              {
+                "pluginId": "@kbn/apm-synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnApmSynthtraceClientPluginApi",
+                "section": "def-common.InfraDocument",
+                "text": "InfraDocument"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/synthtrace.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.SynthtraceFixture.logsSynthtraceEsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "logsSynthtraceEsClient",
+            "description": [],
+            "signature": [
+              "SynthtraceFixtureEsClient<",
+              {
+                "pluginId": "@kbn/apm-synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnApmSynthtraceClientPluginApi",
+                "section": "def-common.LogDocument",
+                "text": "LogDocument"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/synthtrace.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.SynthtraceFixture.otelSynthtraceEsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "otelSynthtraceEsClient",
+            "description": [],
+            "signature": [
+              "SynthtraceFixtureEsClient<",
+              {
+                "pluginId": "@kbn/apm-synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnApmSynthtraceClientPluginApi",
+                "section": "def-common.ApmOtelFields",
+                "text": "ApmOtelFields"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/synthtrace.ts",
             "deprecated": false,
             "trackAdoption": false
           }

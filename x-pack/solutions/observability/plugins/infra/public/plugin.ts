@@ -187,30 +187,28 @@ export class Plugin implements InfraClientPluginClass {
       createLogThresholdRuleType(core, pluginsSetup.share.url)
     );
 
-    if (this.config.featureFlags.logsUIEnabled) {
-      core.application.register({
-        id: 'logs',
-        title: i18n.translate('xpack.infra.logs.pluginTitle', {
-          defaultMessage: 'Logs',
-        }),
-        euiIconType: 'logoObservability',
-        order: 8100,
-        appRoute: '/app/logs',
-        deepLinks: Object.values(logRoutes),
-        category: DEFAULT_APP_CATEGORIES.observability,
-        mount: async (params: AppMountParameters) => {
-          // mount callback should not use setup dependencies, get start dependencies instead
-          const [coreStart, plugins, pluginStart] = await core.getStartServices();
+    core.application.register({
+      id: 'logs',
+      title: i18n.translate('xpack.infra.logs.pluginTitle', {
+        defaultMessage: 'Logs',
+      }),
+      euiIconType: 'logoObservability',
+      order: 8100,
+      appRoute: '/app/logs',
+      deepLinks: Object.values(logRoutes),
+      category: DEFAULT_APP_CATEGORIES.observability,
+      mount: async (params: AppMountParameters) => {
+        // mount callback should not use setup dependencies, get start dependencies instead
+        const [coreStart, plugins, pluginStart] = await core.getStartServices();
 
-          const isLogsExplorerAccessible = await firstValueFrom(
-            getLogsExplorerAccessible$(coreStart.application)
-          );
+        const isLogsExplorerAccessible = await firstValueFrom(
+          getLogsExplorerAccessible$(coreStart.application)
+        );
 
-          const { renderApp } = await import('./apps/logs_app');
-          return renderApp(coreStart, plugins, pluginStart, isLogsExplorerAccessible, params);
-        },
-      });
-    }
+        const { renderApp } = await import('./apps/logs_app');
+        return renderApp(coreStart, plugins, pluginStart, isLogsExplorerAccessible, params);
+      },
+    });
 
     // !! Need to be kept in sync with the routes in x-pack/solutions/observability/plugins/infra/public/pages/metrics/index.tsx
     const getInfraDeepLinks = ({
@@ -337,8 +335,6 @@ const getLogsNavigationEntries = ({
   routes: LogsAppRoutes;
 }) => {
   const entries: NavigationEntry[] = [];
-
-  if (!config.featureFlags.logsUIEnabled) return entries;
 
   if (isLogsExplorerAccessible) {
     entries.push({
