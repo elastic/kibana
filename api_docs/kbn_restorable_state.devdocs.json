@@ -11,7 +11,7 @@
         "label": "createRestorableStateProvider",
         "description": [],
         "signature": [
-          "<TState extends object>() => { withRestorableState: <TProps extends object>(Component: React.ComponentType<TProps>) => React.ForwardRefExoticComponent<React.PropsWithoutRef<TProps & ",
+          "<TState extends object>() => { withRestorableState: <TComponent extends React.ComponentType<any>>(Component: TComponent) => React.ForwardRefExoticComponent<React.PropsWithoutRef<React.CustomComponentPropsWithRef<TComponent> & Pick<",
           {
             "pluginId": "@kbn/restorable-state",
             "scope": "public",
@@ -19,7 +19,7 @@
             "section": "def-public.RestorableStateProviderProps",
             "text": "RestorableStateProviderProps"
           },
-          "<TState>> & React.RefAttributes<",
+          "<TState>, \"initialState\" | \"onInitialStateChange\">> & React.RefAttributes<",
           {
             "pluginId": "@kbn/restorable-state",
             "scope": "public",
