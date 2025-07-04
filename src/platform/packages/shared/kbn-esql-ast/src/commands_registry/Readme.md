@@ -124,3 +124,4 @@ if (retrievedCommand) {
   console.log('Retrieved Command:', retrievedCommand.name);
   console.log('Command Description:', retrievedCommand.metadata.description);
 }
+```

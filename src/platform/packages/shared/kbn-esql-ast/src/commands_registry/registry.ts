@@ -59,7 +59,7 @@ export interface ICommandMethods<TContext = any> {
   ) => ESQLFieldWithMetadata[];
 }
 
-interface ICommandMetadata {
+export interface ICommandMetadata {
   preview?: boolean; // Optional property to indicate if the command is in preview mode
   description: string; // Optional property for a brief description of the command
   declaration: string; // The pattern for declaring this command statement. Displayed in the autocomplete.
