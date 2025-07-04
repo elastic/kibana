@@ -6,12 +6,15 @@
  */
 
 import React from 'react';
-import { OnechatAgents } from '../components/agents/list/agents';
+import { useParams } from 'react-router-dom';
+import { AgentProfile } from '@kbn/onechat-common';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
+import { EditAgent } from '../components/agents/edit/edit_agent';
 
-export const OnechatAgentsPage = () => {
+export const OnechatAgentsEdit = () => {
+  const { id } = useParams<Pick<AgentProfile, 'id'>>();
   useBreadcrumb([
     {
       text: labels.chat.title,
@@ -21,6 +24,9 @@ export const OnechatAgentsPage = () => {
       text: labels.agents.title,
       path: appPaths.agents.list,
     },
+    {
+      text: id,
+    },
   ]);
-  return <OnechatAgents />;
+  return <EditAgent id={id} />;
 };

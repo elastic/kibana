@@ -15,6 +15,8 @@ import {
   ONECHAT_AGENT_API_UI_SETTING_ID,
 } from '../../common/constants';
 import { OnechatAgentsPage } from './pages/agents';
+import { OnechatAgentsCreate } from './pages/agent_create';
+import { OnechatAgentsEdit } from './pages/agent_edit';
 
 export const OnechatRoutes: React.FC<{}> = () => {
   const isToolsPageEnabled = useUiSetting<boolean>(ONECHAT_TOOLS_UI_SETTING_ID, false);
@@ -27,6 +29,17 @@ export const OnechatRoutes: React.FC<{}> = () => {
       {isToolsPageEnabled && (
         <Route path="/tools">
           <OnechatToolsPage />
+        </Route>
+      )}
+
+      {isAgentPageEnabled && (
+        <Route path="/agents/new">
+          <OnechatAgentsCreate />
+        </Route>
+      )}
+      {isAgentPageEnabled && (
+        <Route path="/agents/:agentId">
+          <OnechatAgentsEdit />
         </Route>
       )}
       {isAgentPageEnabled && (

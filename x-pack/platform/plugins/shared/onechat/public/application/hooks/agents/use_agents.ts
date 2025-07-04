@@ -6,8 +6,8 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { useOnechatServices } from './use_onechat_service';
-import { queryKeys } from '../query_keys';
+import { useOnechatServices } from '../use_onechat_service';
+import { queryKeys } from '../../query_keys';
 
 export const useOnechatAgents = () => {
   const { agentProfilesService } = useOnechatServices();
