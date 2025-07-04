@@ -505,11 +505,11 @@ Volatile fields create a challenging choice: include them (causing constant conf
 
 Including and separating them makes it easier for the TF provider to specifically ignore sets of fields (marking them as [readonly](https://registry.terraform.io/providers/elastic/elasticstack/latest/docs/resources/kibana_alerting_rule#read-only)) but needs to be built into the client generator.
 
-### Keep fields isomorphic
+### Do not change field types
 
 **Changing field types break terraform**
 
-Terraform expects fields to maintain the same data type throughout a resource's lifecycle. When a field that was once a string suddenly becomes an array or object, it forces breaking changes that disrupt existing user configurations.
+When a field that was once a string suddenly becomes an array or object, it forces breaking changes that disrupt existing user configurations.
 
 This is exactly what happened when Elasticsearch APIs [changed field types](https://github.com/elastic/terraform-provider-elasticstack/issues/926):
 
@@ -529,7 +529,7 @@ Another example is when the Kibana SLO API changed `group_by` from `string` to `
 
 Changing a field to make it more lenient might look harmless on the surface but means that the API will return values clients don't expect.
 
-**Design for consistency**
+**Supporting multiple types**
 
 If your API needs to support multiple data types for the same logical concept, consider these approaches:
 
@@ -550,7 +550,7 @@ If your API needs to support multiple data types for the same logical concept, c
 
 **When you have to support flexible types**
 
-If polymorphic behavior is unavoidable, JSON strings provide a workaround—but use them sparingly:
+If poorly defined structure or types are unavoidable, JSON strings provide a workaround—but use them sparingly:
 
 ```terraform
 resource "elasticstack_elasticsearch_index" "example" {
